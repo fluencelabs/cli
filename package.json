@@ -1,0 +1,31 @@
+{
+  "name": "fluence-cli",
+  "version": "0.0.1",
+  "description": "A CLI to use Fluence network",
+  "main": "src/cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "fluence-cli": "bin/fluence-cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fluencelabs/fluence-cli.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fluencelabs/fluence-cli/issues"
+  },
+  "homepage": "https://github.com/fluencelabs/fluence-cli#readme",
+  "dependencies": {
+    "arg": "^4.1.3",
+    "esm": "^3.2.25",
+    "inquirer": "^7.3.3",
+    "fluence": "0.7.6"
+  }
+}

@@ -1,0 +1,105 @@
+#!/usr/bin/env node
+
+const arg = require('arg');
+const fluence = require('fluence');
+const seed = require('fluence/dist/seed')
+const Fluence = fluence.default;
+
+require = require('esm')(module /*, options*/);
+cli(process.argv);
+
+function parseArgumentsIntoOptions(rawArgs) {
+    const args = arg(
+        {
+            '--host': String,
+            '--port': Number,
+            '--peer': String,
+            '--pkey': String,
+            '--name': String,
+            '--path': String
+        },
+        {
+            argv: rawArgs.slice(2),
+        }
+    );
+    return {
+        host: args['--host'] || "127.0.0.1",
+        port: args['--port'] || "8080",
+        peer: args['--peer'] || undefined,
+        pkey: args['--pkey'] || "",
+        command: args._[0],
+        // runInstall: args['--install'] || false,
+    };
+}
+
+async function cli(args) {
+
+    let options = parseArgumentsIntoOptions(args);
+
+    let conn = await connection(options);
+
+    switch (options.command) {
+        case "help":
+            break;
+        case "modules":
+            break;
+        case "interfaces":
+            break;
+        case "blueprints":
+            break;
+        case "interface":
+            break;
+        case "add_blueprint":
+            break;
+        case "add_module":
+            break;
+        case "create_service":
+            break;
+    }
+
+    let modules = await conn.getAvailableModules()
+
+    console.log(options);
+    console.log(modules);
+}
+
+async function addModule(conn, base64, name, peer) {
+    return conn.addModule(base64, name, 100, [], undefined, [], peer);
+}
+
+async function createService(conn, blueprint, peer) {
+    return conn.createService(peer, blueprint)
+}
+
+async function addBlueprint(conn, name, dependencies, peer) {
+    return conn.addBlueprint(peer, name, dependencies)
+}
+
+async function getInterface(conn, serviceId, peer) {
+    return conn.getInterface(serviceId, peer)
+}
+
+async function getInterfaces(conn, peer) {
+    return conn.getActiveInterfaces(peer)
+}
+
+async function getBlueprints(conn, peer) {
+    return conn.getAvailableBlueprints(peer)
+}
+
+async function getModules(conn, peer) {
+    return conn.getAvailableModules(peer)
+}
+
+async function connection(options) {
+    let peerId;
+    if (options.pkey) {
+        peerId = await seed.seedToPeerId(pkey)
+    } else {
+        peerId = await Fluence.generatePeerId();
+    }
+
+    let multiaddr = `/ip4/${options.host}/tcp/${options.port}/ws/p2p/${options.peer}`;
+
+    return await Fluence.connect(multiaddr, peerId);
+}
