@@ -37,5 +37,7 @@ export default class AddModule extends Command {
     if (result) {
       this.log(JSON.stringify("Module is added successfully."))
     }
+
+    await conn.disconnect();
   }
 }

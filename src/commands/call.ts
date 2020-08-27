@@ -37,6 +37,8 @@ fluence call --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjK
 
     let result = await conn.callService(flags.targetPeer, flags.service, flags.module, callArgs, flags.fname)
 
-    this.log(JSON.stringify(result, undefined, 2))
+    this.log(JSON.stringify(result, undefined, 2));
+
+    await conn.disconnect();
   }
 }

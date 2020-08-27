@@ -29,6 +29,8 @@ export default class Blueprints extends Command {
 
     let interfaces = await conn.getAvailableBlueprints(flags.targetPeer)
 
-    this.log(JSON.stringify(interfaces, undefined, 2))
+    this.log(JSON.stringify(interfaces, undefined, 2));
+
+    await conn.disconnect();
   }
 }

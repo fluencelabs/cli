@@ -29,6 +29,8 @@ export default class Modules extends Command {
 
     let modulesList = await conn.getAvailableModules(flags.targetPeer)
 
-    this.log(JSON.stringify(modulesList, undefined, 2))
+    this.log(JSON.stringify(modulesList, undefined, 2));
+
+    await conn.disconnect();
   }
 }

@@ -30,5 +30,7 @@ export default class Interfaces extends Command {
     let interfaces = await conn.getActiveInterfaces(flags.targetPeer)
 
     this.log(JSON.stringify(interfaces, undefined, 2));
+
+    await conn.disconnect();
   }
 }

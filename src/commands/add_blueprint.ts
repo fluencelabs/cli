@@ -34,5 +34,7 @@ export default class AddBlueprint extends Command {
     if (result) {
       this.log(JSON.stringify("Blueprint is added successfully."))
     }
+
+    await conn.disconnect();
   }
 }

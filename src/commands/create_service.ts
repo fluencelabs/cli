@@ -33,5 +33,7 @@ export default class CreateService extends Command {
     if (result) {
       this.log(JSON.stringify(`Service is created successfully. Service id: ${result}`))
     }
+
+    await conn.disconnect();
   }
 }
