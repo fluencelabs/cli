@@ -28,7 +28,7 @@ export default class AddModule extends Command {
   async run() {
     const {flags} = this.parse(AddModule)
 
-    let conn = await getConnection(flags.host, flags.port, flags.peer, flags.secretKey);
+    let conn = await getConnection(flags);
 
     const contents = fs.readFileSync(flags.path, {encoding: 'base64'});
 

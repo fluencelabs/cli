@@ -26,7 +26,7 @@ export default class CreateService extends Command {
   async run() {
     const {flags} = this.parse(CreateService)
 
-    let conn = await getConnection(flags.host, flags.port, flags.peer, flags.secretKey);
+    let conn = await getConnection(flags);
 
     let result = await conn.createService(flags.blueprint, flags.targetPeer)
 

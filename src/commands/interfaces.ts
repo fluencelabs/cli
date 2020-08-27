@@ -25,7 +25,7 @@ export default class Interfaces extends Command {
   async run() {
     const {flags} = this.parse(Interfaces)
 
-    let conn = await getConnection(flags.host, flags.port, flags.peer, flags.secretKey);
+    let conn = await getConnection(flags);
 
     let interfaces = await conn.getActiveInterfaces(flags.targetPeer)
 

@@ -25,7 +25,7 @@ export default class Modules extends Command {
   async run() {
     const {flags} = this.parse(Modules)
 
-    let conn = await getConnection(flags.host, flags.port, flags.peer, flags.secretKey);
+    let conn = await getConnection(flags);
 
     let modulesList = await conn.getAvailableModules(flags.targetPeer)
 

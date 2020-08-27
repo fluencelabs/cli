@@ -27,7 +27,7 @@ export default class AddBlueprint extends Command {
   async run() {
     const {flags} = this.parse(AddBlueprint)
 
-    let conn = await getConnection(flags.host, flags.port, flags.peer, flags.secretKey);
+    let conn = await getConnection(flags);
 
     let result = await conn.addBlueprint(flags.name, flags.deps, flags.targetPeer)
 

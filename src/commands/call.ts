@@ -31,7 +31,7 @@ fluence call --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjK
   async run() {
     const {flags} = this.parse(Call)
 
-    let conn = await getConnection(flags.host, flags.port, flags.peer, flags.secretKey);
+    let conn = await getConnection(flags);
 
     let callArgs = JSON.parse(flags.args)
 

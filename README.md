@@ -51,6 +51,7 @@ OPTIONS
   -d, --deps=deps              (required) List of blueprint dependencies
   -h, --help                   show CLI help
   -h, --host=host              [default: 127.0.0.1] Host to connect to
+  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
   -n, --name=name              (required) A name of a blueprint
   -p, --port=port              [default: 9100] Port to connect to
 
@@ -82,6 +83,7 @@ OPTIONS
   -a, --path=path              (required) A path to a WASM module
   -h, --help                   show CLI help
   -h, --host=host              [default: 127.0.0.1] Host to connect to
+  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
   -n, --name=name              (required) A name of a module
   -p, --port=port              [default: 9100] Port to connect to
 
@@ -112,6 +114,7 @@ OPTIONS
   -P, --peer=peer              (required) Host to connect to
   -h, --help                   show CLI help
   -h, --host=host              [default: 127.0.0.1] Host to connect to
+  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
   -p, --port=port              [default: 9100] Port to connect to
 
   -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
@@ -139,22 +142,25 @@ USAGE
 
 OPTIONS
   -P, --peer=peer              (required) Host to connect to
+  -S, --service=service        (required) Id of a service
   -a, --args=args              (required) Arguments
   -f, --fname=fname            Name of a function
   -h, --help                   show CLI help
   -h, --host=host              [default: 127.0.0.1] Host to connect to
+  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
   -m, --module=module          (required) Id of a module
   -p, --port=port              [default: 9100] Port to connect to
 
   -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
                                specified
 
-  -s, --service=service        (required) Id of a service
-
   -t, --targetPeer=targetPeer  (required) Host to connect to
 
 EXAMPLE
   $ fluence call
+  fluence call --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -t 
+  12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -S b9ec12ba-c69f-4cf3-991a-7590aec7b662 -m 
+  811deb12-a9ab-4cba-b219-9b48ce7dd5ce -a "[\"123\"]" -f greeting
   [
      '..',
      '..'
@@ -176,6 +182,7 @@ OPTIONS
   -b, --blueprint=blueprint    (required) A blueprint to create a service
   -h, --help                   show CLI help
   -h, --host=host              [default: 127.0.0.1] Host to connect to
+  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
   -p, --port=port              [default: 9100] Port to connect to
 
   -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
@@ -222,6 +229,7 @@ OPTIONS
   -P, --peer=peer              (required) Host to connect to
   -h, --help                   show CLI help
   -h, --host=host              [default: 127.0.0.1] Host to connect to
+  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
   -p, --port=port              [default: 9100] Port to connect to
 
   -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
@@ -251,6 +259,7 @@ OPTIONS
   -P, --peer=peer              (required) Host to connect to
   -h, --help                   show CLI help
   -h, --host=host              [default: 127.0.0.1] Host to connect to
+  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
   -p, --port=port              [default: 9100] Port to connect to
 
   -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not

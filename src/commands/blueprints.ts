@@ -25,7 +25,7 @@ export default class Blueprints extends Command {
   async run() {
     const {flags} = this.parse(Blueprints)
 
-    let conn = await getConnection(flags.host, flags.port, flags.peer, flags.secretKey);
+    let conn = await getConnection(flags);
 
     let interfaces = await conn.getAvailableBlueprints(flags.targetPeer)
 
