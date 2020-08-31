@@ -7,12 +7,11 @@ export default class Call extends Command {
   static description = 'Call a service.'
 
   static examples = [
-    `$ fluence call
-fluence call --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -t 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -S b9ec12ba-c69f-4cf3-991a-7590aec7b662 -m 811deb12-a9ab-4cba-b219-9b48ce7dd5ce -a "[\\"123\\"]" -f greeting
-[
-  '..',
-  '..'
-]
+    `$ fluence call --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -t 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -S b9ec12ba-c69f-4cf3-991a-7590aec7b662 -m 811deb12-a9ab-4cba-b219-9b48ce7dd5ce -a "[\\"John Smith\\"]" -f greeting
+{
+  "result": "Hi, John Smith"
+}
+
 `,
   ]
 

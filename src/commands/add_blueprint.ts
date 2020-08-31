@@ -7,11 +7,8 @@ export default class AddBlueprint extends Command {
   static description = 'Add a blueprint to a node.'
 
   static examples = [
-    `$ fluence add_blueprint
-[
-  '..',
-  '..'
-]
+    `$ fluence add_blueprint --name test123 --deps 811deb12-a9ab-4cba-b219-9b48ce7dd5ce 3a28ca64-d653-4266-acfc-560b9f352750 --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM
+Blueprint is added successfully."
 `,
   ]
 

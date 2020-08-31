@@ -7,11 +7,14 @@ export default class Modules extends Command {
   static description = 'Get a list of modules from a node.'
 
   static examples = [
-    `$ fluence modules
+    `$ fluence modules --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM
 [
-  '..',
-  '..'
+  "dd0b2987-c5fa-468f-bf0a-55ff35a01c29",
+  "80ebdb30-7927-4bbe-a2ca-e469e3f32d40",
+  "24b47793-2706-41fc-91b2-675ff38ebda0",
+  "3a28ca64-d653-4266-acfc-560b9f352750"
 ]
+
 `,
   ]
 

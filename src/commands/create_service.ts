@@ -4,14 +4,11 @@ import {getConnection} from "../connection";
 
 
 export default class CreateService extends Command {
-  static description = 'Create a service by a blueprint.'
+  static description = 'Create a service by a blueprint. Returns a service id.'
 
   static examples = [
-    `$ fluence create_service
-[
-  '..',
-  '..'
-]
+    `$ fluence create_service --blueprint fc231465-5292-4983-94a0-3bc1d7652153 --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM
+24b47793-2706-41fc-91b2-675ff38ebda0
 `,
   ]
 

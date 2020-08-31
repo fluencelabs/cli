@@ -8,11 +8,8 @@ export default class AddModule extends Command {
   static description = 'Add a module to a node.'
 
   static examples = [
-    `$ fluence add_module
-[
-  '..',
-  '..'
-]
+    `$ fluence add_module -n module_name -a file_path --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM
+Module is added successfully.
 `,
   ]
 
