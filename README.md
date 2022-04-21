@@ -3,12 +3,6 @@ fluence-cli
 
 CLI to work with Fluence network
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
-[![Version](https://img.shields.io/npm/v/fluence-cli.svg)](https://npmjs.org/package/fluence-cli)
-[![CircleCI](https://circleci.com/gh/fluencelabs/fluence-cli/tree/master.svg?style=shield)](https://circleci.com/gh/fluencelabs/fluence-cli/tree/master)
-[![Downloads/week](https://img.shields.io/npm/dw/fluence-cli.svg)](https://npmjs.org/package/fluence-cli)
-[![License](https://img.shields.io/npm/l/fluence-cli.svg)](https://github.com/fluencelabs/fluence-cli/blob/master/package.json)
-
 <!-- toc -->
 * [Usage](#usage)
 * [Commands](#commands)
