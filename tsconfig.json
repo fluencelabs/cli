@@ -3,15 +3,11 @@
     "declaration": true,
     "importHelpers": true,
     "module": "commonjs",
-    "outDir": "lib",
+    "outDir": "dist",
     "rootDir": "src",
     "strict": true,
-    "target": "esnext",
-    "esModuleInterop": true
+    "target": "es2019"
   },
-  "exclude": [
-    "node_modules"
-  ],
   "include": [
     "src/**/*"
   ]

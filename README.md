@@ -19,8 +19,8 @@ CLI to work with Fluence network
 $ npm install -g fluence-cli
 $ fluence COMMAND
 running command...
-$ fluence (-v|--version|version)
-fluence-cli/0.0.1 linux-x64 node-v12.13.1
+$ fluence (--version)
+fluence-cli/0.0.0 linux-x64 node-v16.14.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
@@ -29,251 +29,264 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`fluence add_blueprint`](#fluence-add_blueprint)
-* [`fluence add_module`](#fluence-add_module)
-* [`fluence blueprints`](#fluence-blueprints)
-* [`fluence call`](#fluence-call)
-* [`fluence create_service`](#fluence-create_service)
 * [`fluence help [COMMAND]`](#fluence-help-command)
-* [`fluence interfaces`](#fluence-interfaces)
-* [`fluence modules`](#fluence-modules)
-
-## `fluence add_blueprint`
-
-Add a blueprint to a node.
-
-```
-USAGE
-  $ fluence add_blueprint
-
-OPTIONS
-  -P, --peer=peer              (required) Host to connect to
-  -d, --deps=deps              (required) List of blueprint dependencies
-  -h, --help                   show CLI help
-  -h, --host=host              [default: 127.0.0.1] Host to connect to
-  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
-  -n, --name=name              (required) A name of a blueprint
-  -p, --port=port              [default: 9100] Port to connect to
-
-  -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
-                               specified
-
-  -t, --targetPeer=targetPeer  Host to connect to
-
-EXAMPLE
-  $ fluence add_blueprint
-  [
-     '..',
-     '..'
-  ]
-```
-
-_See code: [src/commands/add_blueprint.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.1/src/commands/add_blueprint.ts)_
-
-## `fluence add_module`
-
-Add a module to a node.
-
-```
-USAGE
-  $ fluence add_module
-
-OPTIONS
-  -P, --peer=peer              (required) Host to connect to
-  -a, --path=path              (required) A path to a WASM module
-  -h, --help                   show CLI help
-  -h, --host=host              [default: 127.0.0.1] Host to connect to
-  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
-  -n, --name=name              (required) A name of a module
-  -p, --port=port              [default: 9100] Port to connect to
-
-  -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
-                               specified
-
-  -t, --targetPeer=targetPeer  Host to connect to
-
-EXAMPLE
-  $ fluence add_module
-  [
-     '..',
-     '..'
-  ]
-```
-
-_See code: [src/commands/add_module.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.1/src/commands/add_module.ts)_
-
-## `fluence blueprints`
-
-Get a list of blueprints from a node.
-
-```
-USAGE
-  $ fluence blueprints
-
-OPTIONS
-  -P, --peer=peer              (required) Host to connect to
-  -h, --help                   show CLI help
-  -h, --host=host              [default: 127.0.0.1] Host to connect to
-  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
-  -p, --port=port              [default: 9100] Port to connect to
-
-  -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
-                               specified
-
-  -t, --targetPeer=targetPeer  Host to connect to
-
-EXAMPLE
-  $ fluence blueprints
-  [
-     '..',
-     '..'
-  ]
-```
-
-_See code: [src/commands/blueprints.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.1/src/commands/blueprints.ts)_
-
-## `fluence call`
-
-Call a service.
-
-```
-USAGE
-  $ fluence call
-
-OPTIONS
-  -P, --peer=peer              (required) Host to connect to
-  -S, --service=service        (required) Id of a service
-  -a, --args=args              (required) Arguments
-  -f, --fname=fname            Name of a function
-  -h, --help                   show CLI help
-  -h, --host=host              [default: 127.0.0.1] Host to connect to
-  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
-  -m, --module=module          (required) Id of a module
-  -p, --port=port              [default: 9100] Port to connect to
-
-  -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
-                               specified
-
-  -t, --targetPeer=targetPeer  (required) Host to connect to
-
-EXAMPLE
-  $ fluence call
-  fluence call --host 134.209.186.43 --port 9100 --peer 12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -t 
-  12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM -S b9ec12ba-c69f-4cf3-991a-7590aec7b662 -m 
-  811deb12-a9ab-4cba-b219-9b48ce7dd5ce -a "[\"123\"]" -f greeting
-  [
-     '..',
-     '..'
-  ]
-```
-
-_See code: [src/commands/call.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.1/src/commands/call.ts)_
-
-## `fluence create_service`
-
-Create a service by a blueprint.
-
-```
-USAGE
-  $ fluence create_service
-
-OPTIONS
-  -P, --peer=peer              (required) Host to connect to
-  -b, --blueprint=blueprint    (required) A blueprint to create a service
-  -h, --help                   show CLI help
-  -h, --host=host              [default: 127.0.0.1] Host to connect to
-  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
-  -p, --port=port              [default: 9100] Port to connect to
-
-  -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
-                               specified
-
-  -t, --targetPeer=targetPeer  Host to connect to
-
-EXAMPLE
-  $ fluence create_service
-  [
-     '..',
-     '..'
-  ]
-```
-
-_See code: [src/commands/create_service.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.1/src/commands/create_service.ts)_
+* [`fluence plugins`](#fluence-plugins)
+* [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
+* [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
+* [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin-1)
+* [`fluence plugins:link PLUGIN`](#fluence-pluginslink-plugin)
+* [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin)
+* [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
+* [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
+* [`fluence plugins update`](#fluence-plugins-update)
 
 ## `fluence help [COMMAND]`
 
-display help for fluence
+Display help for fluence.
 
 ```
 USAGE
-  $ fluence help [COMMAND]
+  $ fluence help [COMMAND] [-n]
 
 ARGUMENTS
-  COMMAND  command to show help for
+  COMMAND  Command to show help for.
 
-OPTIONS
-  --all  see all commands in CLI
+FLAGS
+  -n, --nested-commands  Include all nested commands in the output.
+
+DESCRIPTION
+  Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.0/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `fluence interfaces`
+## `fluence plugins`
 
-Get a list of interfaces from a node.
-
-```
-USAGE
-  $ fluence interfaces
-
-OPTIONS
-  -P, --peer=peer              (required) Host to connect to
-  -h, --help                   show CLI help
-  -h, --host=host              [default: 127.0.0.1] Host to connect to
-  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
-  -p, --port=port              [default: 9100] Port to connect to
-
-  -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
-                               specified
-
-  -t, --targetPeer=targetPeer  Host to connect to
-
-EXAMPLE
-  $ fluence interfaces
-  [
-     '..',
-     '..'
-  ]
-```
-
-_See code: [src/commands/interfaces.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.1/src/commands/interfaces.ts)_
-
-## `fluence modules`
-
-Get a list of modules from a node.
+List installed plugins.
 
 ```
 USAGE
-  $ fluence modules
+  $ fluence plugins [--core]
 
-OPTIONS
-  -P, --peer=peer              (required) Host to connect to
-  -h, --help                   show CLI help
-  -h, --host=host              [default: 127.0.0.1] Host to connect to
-  -l, --logLevel=logLevel      [default: info] 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
-  -p, --port=port              [default: 9100] Port to connect to
+FLAGS
+  --core  Show core plugins.
 
-  -s, --secretKey=secretKey    Client's secret key. A new one will be generated and printed if this flag is not
-                               specified
+DESCRIPTION
+  List installed plugins.
 
-  -t, --targetPeer=targetPeer  Host to connect to
-
-EXAMPLE
-  $ fluence modules
-  [
-     '..',
-     '..'
-  ]
+EXAMPLES
+  $ fluence plugins
 ```
 
-_See code: [src/commands/modules.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.1/src/commands/modules.ts)_
+_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.0.11/src/commands/plugins/index.ts)_
+
+## `fluence plugins:install PLUGIN...`
+
+Installs a plugin into the CLI.
+
+```
+USAGE
+  $ fluence plugins:install PLUGIN...
+
+ARGUMENTS
+  PLUGIN  Plugin to install.
+
+FLAGS
+  -f, --force    Run yarn install with force flag.
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Installs a plugin into the CLI.
+
+  Can be installed from npm or a git url.
+
+  Installation of a user-installed plugin will override a core plugin.
+
+  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
+  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
+  the CLI without the need to patch and update the whole CLI.
+
+ALIASES
+  $ fluence plugins add
+
+EXAMPLES
+  $ fluence plugins:install myplugin 
+
+  $ fluence plugins:install https://github.com/someuser/someplugin
+
+  $ fluence plugins:install someuser/someplugin
+```
+
+## `fluence plugins:inspect PLUGIN...`
+
+Displays installation properties of a plugin.
+
+```
+USAGE
+  $ fluence plugins:inspect PLUGIN...
+
+ARGUMENTS
+  PLUGIN  [default: .] Plugin to inspect.
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Displays installation properties of a plugin.
+
+EXAMPLES
+  $ fluence plugins:inspect myplugin
+```
+
+## `fluence plugins:install PLUGIN...`
+
+Installs a plugin into the CLI.
+
+```
+USAGE
+  $ fluence plugins:install PLUGIN...
+
+ARGUMENTS
+  PLUGIN  Plugin to install.
+
+FLAGS
+  -f, --force    Run yarn install with force flag.
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Installs a plugin into the CLI.
+
+  Can be installed from npm or a git url.
+
+  Installation of a user-installed plugin will override a core plugin.
+
+  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
+  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
+  the CLI without the need to patch and update the whole CLI.
+
+ALIASES
+  $ fluence plugins add
+
+EXAMPLES
+  $ fluence plugins:install myplugin 
+
+  $ fluence plugins:install https://github.com/someuser/someplugin
+
+  $ fluence plugins:install someuser/someplugin
+```
+
+## `fluence plugins:link PLUGIN`
+
+Links a plugin into the CLI for development.
+
+```
+USAGE
+  $ fluence plugins:link PLUGIN
+
+ARGUMENTS
+  PATH  [default: .] path to plugin
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Links a plugin into the CLI for development.
+
+  Installation of a linked plugin will override a user-installed or core plugin.
+
+  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
+  command will override the user-installed or core plugin implementation. This is useful for development work.
+
+EXAMPLES
+  $ fluence plugins:link myplugin
+```
+
+## `fluence plugins:uninstall PLUGIN...`
+
+Removes a plugin from the CLI.
+
+```
+USAGE
+  $ fluence plugins:uninstall PLUGIN...
+
+ARGUMENTS
+  PLUGIN  plugin to uninstall
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Removes a plugin from the CLI.
+
+ALIASES
+  $ fluence plugins unlink
+  $ fluence plugins remove
+```
+
+## `fluence plugins:uninstall PLUGIN...`
+
+Removes a plugin from the CLI.
+
+```
+USAGE
+  $ fluence plugins:uninstall PLUGIN...
+
+ARGUMENTS
+  PLUGIN  plugin to uninstall
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Removes a plugin from the CLI.
+
+ALIASES
+  $ fluence plugins unlink
+  $ fluence plugins remove
+```
+
+## `fluence plugins:uninstall PLUGIN...`
+
+Removes a plugin from the CLI.
+
+```
+USAGE
+  $ fluence plugins:uninstall PLUGIN...
+
+ARGUMENTS
+  PLUGIN  plugin to uninstall
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Removes a plugin from the CLI.
+
+ALIASES
+  $ fluence plugins unlink
+  $ fluence plugins remove
+```
+
+## `fluence plugins update`
+
+Update installed plugins.
+
+```
+USAGE
+  $ fluence plugins update [-h] [-v]
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Update installed plugins.
+```
 <!-- commandsstop -->
