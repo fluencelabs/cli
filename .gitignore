@@ -2,8 +2,11 @@
 *-error.log
 /.nyc_output
 /dist
-/lib
+/.fluence
+/artifacts
 /tmp
+/--fix
 /yarn.lock
 node_modules
 oclif.manifest.json
+.eslintcache

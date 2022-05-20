@@ -14,4 +14,16 @@
  * limitations under the License.
  */
 
-export { run } from "@oclif/core";
+/**
+ * Can be used in switch statements to guaranty they are exhaustive
+ * @param _value never
+ * @param message ?string
+ *
+ * @returns never
+ */
+export default function assertExhaustive(
+  _value: never,
+  message = "Reached unexpected case in exhaustive switch"
+): never {
+  throw new Error(message);
+}

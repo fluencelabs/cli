@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export { run } from "@oclif/core";
+export const unparseFlags = (
+  flags: Record<string, string | undefined>
+): string =>
+  Object.entries(flags)
+    .map(([flag, flagValue]): string =>
+      flagValue === undefined ? "" : ` \\\n--${flag} '${flagValue}'`
+    )
+    .join("");

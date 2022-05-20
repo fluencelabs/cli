@@ -3,10 +3,20 @@ fluence-cli
 
 CLI to work with Fluence network
 
+Table of contents:
 <!-- toc -->
+* [Prerequisites](#prerequisites)
+* [Contributing](#contributing)
 * [Usage](#usage)
 * [Commands](#commands)
 <!-- tocstop -->
+# Prerequisites
+
+- [Node.js >=16.0.0](https://nodejs.org/)
+
+# Contributing
+
+If you are using nvm and want to commit using VSCode - place `.huskyrc` file to your Home directory
 # Usage
 <!-- usage -->
 ```sh-session
@@ -14,7 +24,7 @@ $ npm install -g fluence-cli
 $ fluence COMMAND
 running command...
 $ fluence (--version)
-fluence-cli/0.0.0 linux-x64 node-v16.14.0
+fluence-cli/0.0.2 linux-x64 node-v16.14.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
@@ -23,7 +33,10 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence deploy`](#fluence-deploy)
 * [`fluence help [COMMAND]`](#fluence-help-command)
+* [`fluence init [PROJECT_NAME]`](#fluence-init-project_name)
 * [`fluence plugins`](#fluence-plugins)
 * [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
 * [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
@@ -33,6 +46,60 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
+* [`fluence remove`](#fluence-remove)
+* [`fluence run`](#fluence-run)
+* [`fluence update [CHANNEL]`](#fluence-update-channel)
+
+## `fluence autocomplete [SHELL]`
+
+display autocomplete installation instructions
+
+```
+USAGE
+  $ fluence autocomplete [SHELL] [-r]
+
+ARGUMENTS
+  SHELL  shell type
+
+FLAGS
+  -r, --refresh-cache  Refresh cache (ignores displaying instructions)
+
+DESCRIPTION
+  display autocomplete installation instructions
+
+EXAMPLES
+  $ fluence autocomplete
+
+  $ fluence autocomplete bash
+
+  $ fluence autocomplete zsh
+
+  $ fluence autocomplete --refresh-cache
+```
+
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
+
+## `fluence deploy`
+
+Deploy service to the remote peer
+
+```
+USAGE
+  $ fluence deploy [-c <value>] [--timeout <value>] [-k <value>]
+
+FLAGS
+  -c, --config=<value>         Deployment config name
+  -k, --key-pair-name=<value>  Key pair name
+  --timeout=<value>            Deployment and remove timeout
+
+DESCRIPTION
+  Deploy service to the remote peer
+
+EXAMPLES
+  $ fluence deploy
+```
+
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -54,6 +121,26 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
+## `fluence init [PROJECT_NAME]`
+
+Initialize fluence project
+
+```
+USAGE
+  $ fluence init [PROJECT_NAME]
+
+ARGUMENTS
+  PROJECT_NAME  project name
+
+DESCRIPTION
+  Initialize fluence project
+
+EXAMPLES
+  $ fluence init
+```
+
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/init.ts)_
+
 ## `fluence plugins`
 
 List installed plugins.
@@ -72,7 +159,7 @@ EXAMPLES
   $ fluence plugins
 ```
 
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.0.11/src/commands/plugins/index.ts)_
+_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.1.0/src/commands/plugins/index.ts)_
 
 ## `fluence plugins:install PLUGIN...`
 
@@ -283,4 +370,86 @@ FLAGS
 DESCRIPTION
   Update installed plugins.
 ```
+
+## `fluence remove`
+
+Remove previously deployed
+
+```
+USAGE
+  $ fluence remove [--name <value>] [--timeout <value>]
+
+FLAGS
+  --name=<value>     Name of the deployment
+  --timeout=<value>  Remove timeout
+
+DESCRIPTION
+  Remove previously deployed
+
+EXAMPLES
+  $ fluence remove
+```
+
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/remove.ts)_
+
+## `fluence run`
+
+Run aqua
+
+```
+USAGE
+  $ fluence run [--on <value>] [--aqua <value>] [-f <value>] [--via <value>] [--timeout <value>]
+
+FLAGS
+  -f, --func=<value>  Relay node MultiAddress
+  --aqua=<value>      Path to an aqua file or to a directory that contains your aqua files
+  --on=<value>        PeerId of the peer where you want to run the function
+  --timeout=<value>   Run timeout
+  --via=<value>       Relay node MultiAddress
+
+DESCRIPTION
+  Run aqua
+
+EXAMPLES
+  $ fluence run
+```
+
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/run.ts)_
+
+## `fluence update [CHANNEL]`
+
+update the fluence CLI
+
+```
+USAGE
+  $ fluence update [CHANNEL] [-a] [-v <value> | -i] [--force]
+
+FLAGS
+  -a, --available        Install a specific version.
+  -i, --interactive      Interactively select version to install. This is ignored if a channel is provided.
+  -v, --version=<value>  Install a specific version.
+  --force                Force a re-download of the requested version.
+
+DESCRIPTION
+  update the fluence CLI
+
+EXAMPLES
+  Update to the stable channel:
+
+    $ fluence update stable
+
+  Update to a specific version:
+
+    $ fluence update --version 1.0.0
+
+  Interactively select version:
+
+    $ fluence update --interactive
+
+  See available versions:
+
+    $ fluence update --available
+```
+
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.0.0/src/commands/update.ts)_
 <!-- commandsstop -->
