@@ -16,6 +16,7 @@
 
 import fsPromises from "node:fs/promises";
 import path from "node:path";
+import assert from "node:assert";
 
 import { Command, Flags } from "@oclif/core";
 
@@ -34,7 +35,7 @@ import {
 } from "../lib/configs/projectConfig";
 import { ensureFluenceProjectDir } from "../lib/getFluenceDir";
 import { getRandomAddr, getRandomPeerId } from "../lib/multiaddr";
-import { confirm } from "../lib/prompt";
+import { confirm, list } from "../lib/prompt";
 import type {
   Deployed,
   DeployedConfig,
@@ -48,26 +49,28 @@ import {
   removePreviouslyDeployed,
 } from "./remove";
 
+const CONFIG_NAME = "CONFIG_NAME";
+
 export default class Deploy extends Command {
   static override description = "Deploy service to the remote peer";
 
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
   static override flags = {
-    config: Flags.string({
-      char: "c",
-      description: "Deployment config name",
-    }),
     timeout: Flags.string({
       description: "Deployment and remove timeout",
     }),
     ...KEY_PAIR_FLAG,
   };
 
+  static override args = [
+    { name: CONFIG_NAME, description: "Deployment config name" },
+  ];
+
   async run(): Promise<void> {
     const fluenceProjectDir = await ensureFluenceProjectDir(this);
 
-    const { flags } = await this.parse(Deploy);
+    const { flags, args } = await this.parse(Deploy);
 
     const keyPair = await getKeyPairFromFlags(flags, this);
 
@@ -75,65 +78,17 @@ export default class Deploy extends Command {
       this.error(keyPair.message);
     }
 
-    const projectConfigResult = await getProjectConfig(fluenceProjectDir);
-
-    if (projectConfigResult instanceof Error) {
-      this.error(projectConfigResult.message);
-    }
-
-    const [projectConfig, updateProjectConfig] = projectConfigResult;
-
-    const distPath = path.join(process.cwd(), ARTIFACTS_DIR_NAME);
-
-    if (flags.config !== undefined) {
-      await deployByName({
-        projectConfig,
-        deploymentConfigName: flags.config,
-        deployArgs: {
-          timeout: flags.timeout,
-          fluenceProjectDir,
-          keyPair,
-          distPath,
-          commandObj: this,
-        },
-      });
-      return;
-    }
-
-    const [defaultDeploymentConfig] = projectConfig.deploymentConfigs ?? [];
-
-    if (defaultDeploymentConfig === undefined) {
-      const defaultDeploymentConfig = await generateDefaultDeploymentConfig(
-        this,
-        fluenceProjectDir,
-        distPath
-      );
-
-      await updateProjectConfig(
-        (config): ProjectConfig => ({
-          ...config,
-          deploymentConfigs: [defaultDeploymentConfig],
-        })
-      );
-
-      await deploy({
-        deploymentConfig: defaultDeploymentConfig,
-        keyPair,
-        distPath,
-        fluenceProjectDir,
-        commandObj: this,
-        timeout: flags.timeout,
-      });
-
-      return;
-    }
+    const deploymentConfig = await getDeploymentConfig(
+      args[CONFIG_NAME],
+      fluenceProjectDir,
+      this
+    );
 
     await deploy({
-      deploymentConfig: defaultDeploymentConfig,
-      keyPair,
-      distPath,
-      fluenceProjectDir,
+      deploymentConfig,
       commandObj: this,
+      fluenceProjectDir,
+      keyPair,
       timeout: flags.timeout,
     });
   }
@@ -382,18 +337,17 @@ const updateDeployedConfig = async ({
 const deploy = async ({
   deploymentConfig,
   keyPair,
-  distPath,
   fluenceProjectDir,
   commandObj,
   timeout,
 }: {
   deploymentConfig: DeploymentConfig;
   keyPair: ConfigKeyPair;
-  distPath: string;
   fluenceProjectDir: string;
   timeout: string | undefined;
   commandObj: CommandObj;
 }): Promise<void> => {
+  const distPath = path.join(process.cwd(), ARTIFACTS_DIR_NAME);
   const aquaCli = new AquaCLI(commandObj);
   const addr = getRandomAddr(deploymentConfig.knownRelays);
 
@@ -446,29 +400,66 @@ const deploy = async ({
   });
 };
 
-const deployByName = async ({
-  projectConfig,
-  deploymentConfigName,
-  deployArgs,
-}: {
-  projectConfig: Readonly<ProjectConfig>;
-  deploymentConfigName: string;
-  deployArgs: Readonly<Omit<Parameters<typeof deploy>[0], "deploymentConfig">>;
-}): Promise<void> => {
-  const deploymentConfig = projectConfig.deploymentConfigs.find(
-    (deploymentConfig): boolean =>
-      deploymentConfig.name === deploymentConfigName
-  );
+const getDeploymentConfig = async (
+  deploymentConfigName: string | undefined,
+  fluenceProjectDir: string,
+  commandObj: CommandObj
+): Promise<DeploymentConfig> => {
+  const projectConfigResult = await getProjectConfig(fluenceProjectDir);
 
-  if (deploymentConfig === undefined) {
-    deployArgs.commandObj.error(
-      `Can't deploy '${deploymentConfigName}': no such deployment config found in ${deployArgs.fluenceProjectDir}`
-    );
-    return;
+  if (projectConfigResult instanceof Error) {
+    commandObj.error(projectConfigResult.message);
   }
 
-  await deploy({
-    deploymentConfig,
-    ...deployArgs,
-  });
+  const [projectConfig, updateProjectConfig] = projectConfigResult;
+
+  const distPath = path.join(process.cwd(), ARTIFACTS_DIR_NAME);
+
+  if (deploymentConfigName !== undefined) {
+    const maybeDeploymentConfig = projectConfig.deploymentConfigs.find(
+      (deploymentConfig): boolean =>
+        deploymentConfig.name === deploymentConfigName
+    );
+
+    if (maybeDeploymentConfig !== undefined) {
+      return maybeDeploymentConfig;
+    }
+
+    commandObj.warn(`There is no '${deploymentConfigName}' deployment config`);
+
+    const validDeploymentConfigName = await list({
+      message: "Select a valid deployment config",
+      choices: projectConfig.deploymentConfigs.map(({ name }): string => name),
+    });
+
+    const deploymentConfig = projectConfig.deploymentConfigs.find(
+      (deploymentConfig): boolean =>
+        deploymentConfig.name === validDeploymentConfigName
+    );
+
+    assert(deploymentConfig !== undefined);
+
+    return deploymentConfig;
+  }
+
+  const [defaultDeploymentConfig] = projectConfig.deploymentConfigs ?? [];
+
+  if (defaultDeploymentConfig === undefined) {
+    const defaultDeploymentConfig = await generateDefaultDeploymentConfig(
+      commandObj,
+      fluenceProjectDir,
+      distPath
+    );
+
+    await updateProjectConfig(
+      (config): ProjectConfig => ({
+        ...config,
+        deploymentConfigs: [defaultDeploymentConfig],
+      })
+    );
+
+    return defaultDeploymentConfig;
+  }
+
+  return defaultDeploymentConfig;
 };

@@ -63,7 +63,7 @@ export default class Remove extends Command {
     ];
 
     if (choices.length === 0) {
-      this.error("There no deployments to remove");
+      this.error("There are no deployments to remove");
     }
 
     const firstChoice = choices[0];

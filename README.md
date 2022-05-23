@@ -34,7 +34,7 @@ USAGE
 # Commands
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
-* [`fluence deploy`](#fluence-deploy)
+* [`fluence deploy [CONFIG_NAME]`](#fluence-deploy-config_name)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PROJECT_NAME]`](#fluence-init-project_name)
 * [`fluence plugins`](#fluence-plugins)
@@ -79,16 +79,18 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
-## `fluence deploy`
+## `fluence deploy [CONFIG_NAME]`
 
 Deploy service to the remote peer
 
 ```
 USAGE
-  $ fluence deploy [-c <value>] [--timeout <value>] [-k <value>]
+  $ fluence deploy [CONFIG_NAME] [--timeout <value>] [-k <value>]
+
+ARGUMENTS
+  CONFIG_NAME  Deployment config name
 
 FLAGS
-  -c, --config=<value>         Deployment config name
   -k, --key-pair-name=<value>  Key pair name
   --timeout=<value>            Deployment and remove timeout
 
@@ -123,17 +125,17 @@ _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.1
 
 ## `fluence init [PROJECT_NAME]`
 
-Initialize fluence project
+Initialize fluence project in the current directory
 
 ```
 USAGE
   $ fluence init [PROJECT_NAME]
 
 ARGUMENTS
-  PROJECT_NAME  project name
+  PROJECT_NAME  Project name
 
 DESCRIPTION
-  Initialize fluence project
+  Initialize fluence project in the current directory
 
 EXAMPLES
   $ fluence init

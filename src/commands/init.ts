@@ -38,11 +38,12 @@ import { input } from "../lib/prompt";
 const PROJECT_NAME = "PROJECT_NAME";
 
 export default class Init extends Command {
-  static override description = "Initialize fluence project";
+  static override description =
+    "Initialize fluence project in the current directory";
 
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
-  static override args = [{ name: PROJECT_NAME, description: "project name" }];
+  static override args = [{ name: PROJECT_NAME, description: "Project name" }];
 
   async run(): Promise<void> {
     const { args } = await this.parse(Init);
@@ -199,7 +200,7 @@ export const init = async (
     await getProjectConfig(fluenceDirPath);
     commandObj.log(
       color.magentaBright(
-        "\n*** Fluence project successfully initialized! ***\n"
+        `\nFluence project successfully initialized at ${fluenceDirPath}\n`
       )
     );
     return fluenceDirPath;
