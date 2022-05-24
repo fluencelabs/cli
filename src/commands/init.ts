@@ -34,8 +34,9 @@ import {
 } from "../lib/const";
 import { getProjectConfig } from "../lib/configs/projectConfig";
 import { input } from "../lib/prompt";
+import { usage } from "../lib/helpers/usage";
 
-const PROJECT_NAME = "PROJECT_NAME";
+const PROJECT_NAME = "project-name";
 
 export default class Init extends Command {
   static override description =
@@ -43,7 +44,10 @@ export default class Init extends Command {
 
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
+  // TODO DXJ-31: add "--path" optional flag to set path of the project
   static override args = [{ name: PROJECT_NAME, description: "Project name" }];
+
+  static override usage: string = usage(this);
 
   async run(): Promise<void> {
     const { args } = await this.parse(Init);

@@ -19,31 +19,39 @@ import { Command, Flags } from "@oclif/core";
 import { AquaCLI } from "../lib/aquaCli";
 import { getRandomAddr } from "../lib/multiaddr";
 import { input } from "../lib/prompt";
+import { usage } from "../lib/helpers/usage";
 
 export default class Run extends Command {
-  static override description = "Run aqua";
+  static override description = "Run aqua script";
 
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
   static override flags = {
     on: Flags.string({
       description: "PeerId of the peer where you want to run the function",
+      helpValue: "<peer_id>",
     }),
     aqua: Flags.string({
       description:
         "Path to an aqua file or to a directory that contains your aqua files",
+      helpValue: "<path>",
     }),
     func: Flags.string({
       char: "f",
-      description: "Relay node MultiAddress",
+      description: "Function call",
+      helpValue: "<function-call>",
     }),
-    via: Flags.string({
+    relay: Flags.string({
       description: "Relay node MultiAddress",
+      helpValue: "<multiaddr>",
     }),
     timeout: Flags.string({
       description: "Run timeout",
+      helpValue: "<milliseconds>",
     }),
   };
+
+  static override usage: string = usage(this);
 
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
@@ -66,17 +74,17 @@ export default class Run extends Command {
       flags.func ??
       (await input({ message: "Enter a function that you want to run" }));
 
-    const via = flags.via ?? getRandomAddr();
+    const relay = flags.relay ?? getRandomAddr();
 
     const aquaCli = new AquaCLI(this);
 
     const result = await aquaCli.run(
       {
         command: "run",
-        flags: { addr: via, func, input: aqua, on, timeout: flags.timeout },
+        flags: { addr: relay, func, input: aqua, on, timeout: flags.timeout },
       },
       "Running",
-      { function: func, on, via }
+      { function: func, on, relay }
     );
 
     this.log(result);

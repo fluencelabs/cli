@@ -17,10 +17,12 @@
 import { exec } from "node:child_process";
 
 import { CliUx } from "@oclif/core";
-import { color } from "@oclif/color";
 
 import { isDevelopment } from "./helpers/isDevelopment";
 
+/**
+ * Execution timeout in milliseconds
+ */
 const EXECUTION_TIMEOUT = 90_000;
 
 export const execPromise = (
@@ -31,16 +33,14 @@ export const execPromise = (
   CliUx.ux.action.start(`${message}\n`);
 
   return new Promise<string>((res, rej): void => {
-    const commandToDisplay = isDevelopment()
+    const commandToDisplay = isDevelopment
       ? command
       : command.replace(
           /([\S\s]*--sk ').*('[\S\s]*)/,
           "$1<SECRET_KEY_IS_HIDDEN>$2"
         );
 
-    const failedCommandText = `${color.red(
-      "\nFAILED EXECUTING COMMAND:"
-    )}\n${commandToDisplay}\n`;
+    const failedCommandText = `Debug info:\n${commandToDisplay}\n`;
 
     const execTimeout = setTimeout((): void => {
       CliUx.ux.action.stop();
@@ -58,7 +58,7 @@ export const execPromise = (
       if (error !== null) {
         rej(
           new Error(
-            `\n${failedCommandText}\n\nCommand execution resulted in error:\n\n${stderr}`
+            `\nCommand execution resulted in error:\n\n${stderr}\n\n${failedCommandText}\n\n`
           )
         );
         return;

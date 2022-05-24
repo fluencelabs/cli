@@ -27,23 +27,28 @@ import type { UpdateConfig } from "../lib/configs/ensureConfig";
 import type { CommandObj } from "../lib/const";
 import { ensureFluenceProjectDir } from "../lib/getFluenceDir";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
+import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
 import { getRandomAddr } from "../lib/multiaddr";
 import { checkboxes, list } from "../lib/prompt";
 
 export default class Remove extends Command {
-  static override description = "Remove previously deployed";
+  static override description = "Remove previously deployed config";
 
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
   static override flags = {
     name: Flags.string({
-      description: "Name of the deployment",
+      description: "Name of the deployment config",
+      helpValue: "<name>",
     }),
     timeout: Flags.string({
       description: "Remove timeout",
+      helpValue: "<milliseconds>",
     }),
   };
+
+  static override usage: string = usage(this);
 
   async run(): Promise<void> {
     const { flags } = await this.parse(Remove);

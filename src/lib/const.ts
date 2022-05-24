@@ -56,6 +56,7 @@ export const KEY_PAIR_FLAG = {
   [KEY_PAIR_NAME_FLAG]: Flags.string({
     char: "k",
     description: "Key pair name",
+    helpValue: "<name>",
   }),
 } as const;
 

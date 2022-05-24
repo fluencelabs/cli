@@ -1,42 +1,52 @@
-fluence-cli
-===========
+# fluence-cli
 
 CLI to work with Fluence network
 
 Table of contents:
+
 <!-- toc -->
+* [fluence-cli](#fluence-cli)
 * [Prerequisites](#prerequisites)
 * [Contributing](#contributing)
 * [Usage](#usage)
 * [Commands](#commands)
 <!-- tocstop -->
+
 # Prerequisites
 
 - [Node.js >=16.0.0](https://nodejs.org/)
 
 # Contributing
 
+To run cli in development mode use: `./bin/dev`
+
+To run cli in production mode run `npm run build` first, then use: `./bin/run`
+
 If you are using nvm and want to commit using VSCode - place `.huskyrc` file to your Home directory
+
 # Usage
+
 <!-- usage -->
 ```sh-session
-$ npm install -g fluence-cli
+$ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
 $ fluence (--version)
-fluence-cli/0.0.2 linux-x64 node-v16.14.0
+@fluencelabs/cli/0.0.2 linux-x64 node-v16.14.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
 ...
 ```
 <!-- usagestop -->
+
 # Commands
+
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
-* [`fluence deploy [CONFIG_NAME]`](#fluence-deploy-config_name)
+* [`fluence deploy [config-name] [--timeout <milliseconds>] [-k <name>]`](#fluence-deploy-config-name---timeout-milliseconds--k-name)
 * [`fluence help [COMMAND]`](#fluence-help-command)
-* [`fluence init [PROJECT_NAME]`](#fluence-init-project_name)
+* [`fluence init [project-name]`](#fluence-init-project-name)
 * [`fluence plugins`](#fluence-plugins)
 * [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
 * [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
@@ -46,8 +56,8 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
-* [`fluence remove`](#fluence-remove)
-* [`fluence run`](#fluence-run)
+* [`fluence remove [--name <name>] [--timeout <milliseconds>]`](#fluence-remove---name-name---timeout-milliseconds)
+* [`fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]`](#fluence-run---on-peer_id---aqua-path--f-function-call---relay-multiaddr---timeout-milliseconds)
 * [`fluence update [CHANNEL]`](#fluence-update-channel)
 
 ## `fluence autocomplete [SHELL]`
@@ -79,20 +89,20 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
-## `fluence deploy [CONFIG_NAME]`
+## `fluence deploy [config-name] [--timeout <milliseconds>] [-k <name>]`
 
 Deploy service to the remote peer
 
 ```
 USAGE
-  $ fluence deploy [CONFIG_NAME] [--timeout <value>] [-k <value>]
+  $ fluence deploy [config-name] [--timeout <milliseconds>] [-k <name>]
 
 ARGUMENTS
-  CONFIG_NAME  Deployment config name
+  CONFIG-NAME  Deployment config name
 
 FLAGS
-  -k, --key-pair-name=<value>  Key pair name
-  --timeout=<value>            Deployment and remove timeout
+  -k, --key-pair-name=<name>  Key pair name
+  --timeout=<milliseconds>    Deployment and remove timeout
 
 DESCRIPTION
   Deploy service to the remote peer
@@ -123,16 +133,16 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `fluence init [PROJECT_NAME]`
+## `fluence init [project-name]`
 
 Initialize fluence project in the current directory
 
 ```
 USAGE
-  $ fluence init [PROJECT_NAME]
+  $ fluence init [project-name]
 
 ARGUMENTS
-  PROJECT_NAME  Project name
+  PROJECT-NAME  Project name
 
 DESCRIPTION
   Initialize fluence project in the current directory
@@ -373,20 +383,20 @@ DESCRIPTION
   Update installed plugins.
 ```
 
-## `fluence remove`
+## `fluence remove [--name <name>] [--timeout <milliseconds>]`
 
-Remove previously deployed
+Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--name <value>] [--timeout <value>]
+  $ fluence remove [--name <name>] [--timeout <milliseconds>]
 
 FLAGS
-  --name=<value>     Name of the deployment
-  --timeout=<value>  Remove timeout
+  --name=<name>             Name of the deployment config
+  --timeout=<milliseconds>  Remove timeout
 
 DESCRIPTION
-  Remove previously deployed
+  Remove previously deployed config
 
 EXAMPLES
   $ fluence remove
@@ -394,23 +404,23 @@ EXAMPLES
 
 _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/remove.ts)_
 
-## `fluence run`
+## `fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]`
 
-Run aqua
+Run aqua script
 
 ```
 USAGE
-  $ fluence run [--on <value>] [--aqua <value>] [-f <value>] [--via <value>] [--timeout <value>]
+  $ fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]
 
 FLAGS
-  -f, --func=<value>  Relay node MultiAddress
-  --aqua=<value>      Path to an aqua file or to a directory that contains your aqua files
-  --on=<value>        PeerId of the peer where you want to run the function
-  --timeout=<value>   Run timeout
-  --via=<value>       Relay node MultiAddress
+  -f, --func=<function-call>  Function call
+  --aqua=<path>               Path to an aqua file or to a directory that contains your aqua files
+  --on=<peer_id>              PeerId of the peer where you want to run the function
+  --relay=<multiaddr>         Relay node MultiAddress
+  --timeout=<milliseconds>    Run timeout
 
 DESCRIPTION
-  Run aqua
+  Run aqua script
 
 EXAMPLES
   $ fluence run
