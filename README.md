@@ -1,11 +1,11 @@
-# fluence-cli
+Fluence CLI
+===
 
-CLI to work with Fluence network
+A tool that makes working with Fluence network more convenient
 
-Table of contents:
+## Table of contents:
 
 <!-- toc -->
-* [fluence-cli](#fluence-cli)
 * [Prerequisites](#prerequisites)
 * [Contributing](#contributing)
 * [Usage](#usage)
