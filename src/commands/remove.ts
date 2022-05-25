@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -24,13 +25,13 @@ import {
   getDeployedConfig,
 } from "../lib/configs/deployedConfig";
 import type { UpdateConfig } from "../lib/configs/ensureConfig";
-import type { CommandObj } from "../lib/const";
+import { CommandObj, NAME_ARG } from "../lib/const";
 import { ensureFluenceProjectDir } from "../lib/getFluenceDir";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
 import { getRandomAddr } from "../lib/multiaddr";
-import { checkboxes, list } from "../lib/prompt";
+import { checkboxes, confirm, list } from "../lib/prompt";
 
 export default class Remove extends Command {
   static override description = "Remove previously deployed config";
@@ -38,49 +39,24 @@ export default class Remove extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
   static override flags = {
-    name: Flags.string({
-      description: "Name of the deployment config",
-      helpValue: "<name>",
-    }),
     timeout: Flags.string({
       description: "Remove timeout",
       helpValue: "<milliseconds>",
     }),
   };
 
+  static override args = [
+    { name: NAME_ARG, description: "Deployment config name" },
+  ];
+
   static override usage: string = usage(this);
 
   async run(): Promise<void> {
-    const { flags } = await this.parse(Remove);
+    const { flags, args } = await this.parse(Remove);
 
     const fluenceProjectDir = await ensureFluenceProjectDir(this);
 
-    const deployedConfigResult = await getDeployedConfig(fluenceProjectDir);
-
-    if (deployedConfigResult instanceof Error) {
-      return this.error(deployedConfigResult.message);
-    }
-
-    const [deployedConfig] = deployedConfigResult;
-
-    const choices = [
-      ...new Set(deployedConfig.deployed.map(({ name }): string => name)),
-    ];
-
-    if (choices.length === 0) {
-      this.error("There are no deployments to remove");
-    }
-
-    const firstChoice = choices[0];
-
-    const name =
-      flags.name ??
-      (choices.length === 1 && firstChoice !== undefined
-        ? firstChoice
-        : await list({
-            message: "Enter a name of the deployment",
-            choices,
-          }));
+    const name = await ensureName(args[NAME_ARG], this, fluenceProjectDir);
 
     await removePreviouslyDeployed({
       name,
@@ -91,6 +67,59 @@ export default class Remove extends Command {
     });
   }
 }
+
+const ensureName = async (
+  nameFromArgs: string | undefined,
+  commandObj: CommandObj,
+  fluenceProjectDir: string
+): Promise<string> => {
+  const deployedConfigResult = await getDeployedConfig(fluenceProjectDir);
+
+  if (deployedConfigResult instanceof Error) {
+    return commandObj.error(deployedConfigResult.message);
+  }
+
+  const [deployedConfig] = deployedConfigResult;
+
+  const choices = [
+    ...new Set(deployedConfig.deployed.map(({ name }): string => name)),
+  ];
+
+  if (choices.length === 0) {
+    commandObj.error("There are no deployments to remove");
+  }
+
+  const namesPromptOptions = {
+    message: "Select the name of the deployment config you want to remove",
+    choices,
+  };
+
+  if (typeof nameFromArgs === "string") {
+    if (choices.includes(nameFromArgs)) {
+      return nameFromArgs;
+    }
+
+    commandObj.warn(`No config ${color.yellow(nameFromArgs)} found`);
+  }
+
+  const firstChoice = choices[0];
+
+  if (choices.length === 1 && firstChoice !== undefined) {
+    const doRemove = await confirm({
+      message: `Remove previously deployed config ${color.yellow(
+        firstChoice
+      )}?`,
+    });
+
+    if (doRemove) {
+      return firstChoice;
+    }
+
+    commandObj.error(`You didn't deploy any other configs`);
+  }
+
+  return list(namesPromptOptions);
+};
 
 export const getPreviouslyDeployedConfig = async ({
   name,

@@ -44,9 +44,9 @@ USAGE
 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
-* [`fluence deploy [config-name] [--timeout <milliseconds>] [-k <name>]`](#fluence-deploy-config-name---timeout-milliseconds--k-name)
+* [`fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>]`](#fluence-deploy-name---timeout-milliseconds--k-name)
 * [`fluence help [COMMAND]`](#fluence-help-command)
-* [`fluence init [project-name]`](#fluence-init-project-name)
+* [`fluence init [NAME]`](#fluence-init-name)
 * [`fluence plugins`](#fluence-plugins)
 * [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
 * [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
@@ -56,7 +56,7 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
-* [`fluence remove [--name <name>] [--timeout <milliseconds>]`](#fluence-remove---name-name---timeout-milliseconds)
+* [`fluence remove [NAME] [--timeout <milliseconds>]`](#fluence-remove-name---timeout-milliseconds)
 * [`fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]`](#fluence-run---on-peer_id---aqua-path--f-function-call---relay-multiaddr---timeout-milliseconds)
 * [`fluence update [CHANNEL]`](#fluence-update-channel)
 
@@ -89,16 +89,16 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
-## `fluence deploy [config-name] [--timeout <milliseconds>] [-k <name>]`
+## `fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>]`
 
 Deploy service to the remote peer
 
 ```
 USAGE
-  $ fluence deploy [config-name] [--timeout <milliseconds>] [-k <name>]
+  $ fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>]
 
 ARGUMENTS
-  CONFIG-NAME  Deployment config name
+  NAME  Deployment config name
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -133,16 +133,16 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `fluence init [project-name]`
+## `fluence init [NAME]`
 
 Initialize fluence project in the current directory
 
 ```
 USAGE
-  $ fluence init [project-name]
+  $ fluence init [NAME]
 
 ARGUMENTS
-  PROJECT-NAME  Project name
+  NAME  Project name
 
 DESCRIPTION
   Initialize fluence project in the current directory
@@ -383,16 +383,18 @@ DESCRIPTION
   Update installed plugins.
 ```
 
-## `fluence remove [--name <name>] [--timeout <milliseconds>]`
+## `fluence remove [NAME] [--timeout <milliseconds>]`
 
 Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--name <name>] [--timeout <milliseconds>]
+  $ fluence remove [NAME] [--timeout <milliseconds>]
+
+ARGUMENTS
+  NAME  Deployment config name
 
 FLAGS
-  --name=<name>             Name of the deployment config
   --timeout=<milliseconds>  Remove timeout
 
 DESCRIPTION

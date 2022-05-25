@@ -60,6 +60,8 @@ export const KEY_PAIR_FLAG = {
   }),
 } as const;
 
+export const NAME_ARG = "NAME";
+
 export type Dependency = {
   name: string;
   version: string;

@@ -16,6 +16,8 @@
 
 import path from "node:path";
 
+import color from "@oclif/color";
+
 import { getMaybeProjectSecretsConfig } from "../configs/projectSecretsConfig";
 import { getUserSecretsConfig } from "../configs/userSecretsConfig";
 import { getFluenceProjectDir, getUserFluenceDir } from "../getFluenceDir";
@@ -64,10 +66,10 @@ const getUserKeyPair = async (
     }
 
     return new Error(
-      `No '${defaultSecretKeyName}' in ${path.join(
+      `No ${color.yellow(defaultSecretKeyName)} in ${path.join(
         fluenceDirPath,
         SECRETS_FILE_NAME
-      )}. '${defaultSecretKeyName}' was configured in ${path.join(
+      )}. ${color.yellow(defaultSecretKeyName)} was configured in ${path.join(
         fluenceDirPath,
         CONFIG_FILE_NAME
       )} (${DEFAULT_KEY_PAIR_NAME_PROPERTY}: ${defaultSecretKeyName})`
@@ -82,7 +84,7 @@ const getUserKeyPair = async (
     return secret;
   }
 
-  const problemMessage = `No key-pair '${keyPairName}' found`;
+  const problemMessage = `No key-pair ${color.yellow(keyPairName)} found`;
 
   if (isUsedForValidation) {
     return new Error(problemMessage);
@@ -144,10 +146,10 @@ export const getKeyPair = async (
     }
 
     return new Error(
-      `No '${defaultSecretKeyName}' in ${path.join(
+      `No ${color.yellow(defaultSecretKeyName)} in ${path.join(
         fluenceProjectDir,
         SECRETS_FILE_NAME
-      )}. '${defaultSecretKeyName}' was configured in ${path.join(
+      )}. ${color.yellow(defaultSecretKeyName)} was configured in ${path.join(
         fluenceProjectDir,
         CONFIG_FILE_NAME
       )} (${DEFAULT_KEY_PAIR_NAME_PROPERTY}: ${defaultSecretKeyName})`

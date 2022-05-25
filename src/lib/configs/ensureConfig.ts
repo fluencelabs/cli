@@ -20,6 +20,7 @@ import path from "node:path";
 import type { ValidateFunction } from "ajv";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
+import color from "@oclif/color";
 
 import { FS_OPTIONS, SCHEMAS_DIR_NAME } from "../const";
 
@@ -84,11 +85,9 @@ const getUpdateConfig = <T>(
 
     if (!validateConfig(config)) {
       throw new Error(
-        `Couldn't save config '${configPath}'. Errors: ${JSON.stringify(
-          validateConfig.errors,
-          null,
-          2
-        )}`
+        `Couldn't save config ${color.yellow(
+          configPath
+        )}. Errors: ${JSON.stringify(validateConfig.errors, null, 2)}`
       );
     }
 
@@ -123,7 +122,7 @@ export const getConfig = async <T extends { version: number }>(
 
   if (!validateConfig(config)) {
     return new Error(
-      `Invalid config at '${configPath}'. Errors: ${JSON.stringify(
+      `Invalid config at ${color.yellow(configPath)}. Errors: ${JSON.stringify(
         validateConfig.errors,
         null,
         2
@@ -145,11 +144,9 @@ export const getConfig = async <T extends { version: number }>(
 
   if (!validateConfig(newConfig)) {
     return new Error(
-      `Couldn't migrate config '${configPath}'. Errors: ${JSON.stringify(
-        validateConfig.errors,
-        null,
-        2
-      )}`
+      `Couldn't migrate config ${color.yellow(
+        configPath
+      )}. Errors: ${JSON.stringify(validateConfig.errors, null, 2)}`
     );
   }
 

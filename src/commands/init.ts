@@ -31,12 +31,11 @@ import {
   VSCODE_DIR_NAME,
   GITIGNORE_FILE_NAME,
   GIT_IGNORE_CONTENT,
+  NAME_ARG,
 } from "../lib/const";
 import { getProjectConfig } from "../lib/configs/projectConfig";
 import { input } from "../lib/prompt";
 import { usage } from "../lib/helpers/usage";
-
-const PROJECT_NAME = "project-name";
 
 export default class Init extends Command {
   static override description =
@@ -45,13 +44,13 @@ export default class Init extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
   // TODO DXJ-31: add "--path" optional flag to set path of the project
-  static override args = [{ name: PROJECT_NAME, description: "Project name" }];
+  static override args = [{ name: NAME_ARG, description: "Project name" }];
 
   static override usage: string = usage(this);
 
   async run(): Promise<void> {
     const { args } = await this.parse(Init);
-    await init(this, args[PROJECT_NAME]);
+    await init(this, args[NAME_ARG]);
   }
 }
 
@@ -59,7 +58,7 @@ const validateProjectName = async (name: string): Promise<string | true> => {
   const projectPath = path.join(process.cwd(), name);
   try {
     await fsPromises.access(projectPath);
-    return `file or directory '${name}' already exists`;
+    return `file or directory ${color.yellow(name)} already exists`;
   } catch {
     return true;
   }

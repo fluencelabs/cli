@@ -19,6 +19,7 @@ import path from "node:path";
 import assert from "node:assert";
 
 import { Command, Flags } from "@oclif/core";
+import color from "@oclif/color";
 
 import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
 import {
@@ -26,6 +27,7 @@ import {
   DEPLOYMENT_CONFIG_FILE_NAME,
   ARTIFACTS_DIR_NAME,
   KEY_PAIR_FLAG,
+  NAME_ARG,
 } from "../lib/const";
 import { AquaCLI, AquaCliInput } from "../lib/aquaCli";
 import {
@@ -50,8 +52,6 @@ import {
   removePreviouslyDeployed,
 } from "./remove";
 
-const CONFIG_NAME = "config-name";
-
 export default class Deploy extends Command {
   static override description = "Deploy service to the remote peer";
 
@@ -66,7 +66,7 @@ export default class Deploy extends Command {
   };
 
   static override args = [
-    { name: CONFIG_NAME, description: "Deployment config name" },
+    { name: NAME_ARG, description: "Deployment config name" },
   ];
 
   static override usage: string = usage(this);
@@ -83,7 +83,7 @@ export default class Deploy extends Command {
     }
 
     const deploymentConfig = await getDeploymentConfig(
-      args[CONFIG_NAME],
+      args[NAME_ARG],
       fluenceProjectDir,
       this
     );
@@ -365,7 +365,7 @@ const deploy = async ({
   }
 
   commandObj.warn(
-    `Config '${deploymentConfig.name}' was already deployed before`
+    `Config ${color.yellow(deploymentConfig.name)} was already deployed before`
   );
   const doRemove = await confirm({
     message: `Do you want to remove previously deployed services?`,
@@ -415,7 +415,9 @@ const getDeploymentConfig = async (
       return maybeDeploymentConfig;
     }
 
-    commandObj.warn(`There is no '${deploymentConfigName}' deployment config`);
+    commandObj.warn(
+      `There is no ${color.yellow(deploymentConfigName)} deployment config`
+    );
 
     const validDeploymentConfigName = await list({
       message: "Select a valid deployment config",

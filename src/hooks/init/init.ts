@@ -18,9 +18,7 @@ import type { Hook } from "@oclif/core";
 import platform from "platform";
 
 // eslint-disable-next-line @typescript-eslint/require-await
-const hook: Hook<"init"> = async function (options): Promise<void> {
-  console.log(111, options);
-
+const hook: Hook<"init"> = async function (): Promise<void> {
   const { version } = platform;
 
   if (version === undefined) {
