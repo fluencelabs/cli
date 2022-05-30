@@ -24,6 +24,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { ajv } from "../ajv";
 import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME } from "../const";
+import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
 
 const ensureSchema = async (
@@ -68,13 +69,15 @@ const migrateConfig = async <
   configPath,
   validateLatestConfig,
   config,
+  validate,
 }: {
   configString: string;
   migrations: Migrations<Config>;
   configPath: string;
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
-}): Promise<LatestConfig> => {
+  validate: undefined | ((config: LatestConfig) => ValidationResult);
+}): Promise<{ validConfig: LatestConfig; validConfigString: string }> => {
   const migratedConfig = migrations
     .slice(config.version)
     .reduce((config, migration): Config => migration(config), config);
@@ -84,19 +87,69 @@ const migrateConfig = async <
     parse(configString),
     migratedConfig
   );
-  const parsedMigratedConfig: unknown = parse(migratedConfigString);
+  const latestConfig: unknown = parse(migratedConfigString);
 
-  if (!validateLatestConfig(parsedMigratedConfig)) {
+  if (!validateLatestConfig(latestConfig)) {
     throw new Error(
       `Couldn't migrate config ${color.yellow(
         configPath
       )}. Errors: ${JSON.stringify(validateLatestConfig.errors, null, 2)}`
     );
   }
+  const maybeValidationError = validate !== undefined && validate(latestConfig);
+
+  if (typeof maybeValidationError === "string") {
+    // eslint-disable-next-line unicorn/prefer-type-error
+    throw new Error(
+      `Invalid config ${color.yellow(
+        configPath
+      )} after successful migration. Config after migration looks like this:\n\n${migratedConfigString}\n\nErrors: ${maybeValidationError}`
+    );
+  }
   if (configString !== migratedConfigString) {
     await fsPromises.writeFile(configPath, migratedConfigString, FS_OPTIONS);
   }
-  return parsedMigratedConfig;
+  return {
+    validConfig: latestConfig,
+    validConfigString: migratedConfigString,
+  };
+};
+
+const ensureValidConfig = <
+  Config extends BaseConfig,
+  LatestConfig extends BaseConfig
+>({
+  configPath,
+  validateLatestConfig,
+  config,
+  validate,
+}: {
+  configPath: string;
+  validateLatestConfig: ValidateFunction<LatestConfig>;
+  config: Config;
+  validate: undefined | ((config: LatestConfig) => ValidationResult);
+}): LatestConfig => {
+  if (!validateLatestConfig(config)) {
+    throw new Error(
+      `Invalid config ${color.yellow(configPath)}. Errors: ${JSON.stringify(
+        validateLatestConfig.errors,
+        null,
+        2
+      )}`
+    );
+  }
+  const maybeValidationError = validate !== undefined && validate(config);
+
+  if (typeof maybeValidationError === "string") {
+    // eslint-disable-next-line unicorn/prefer-type-error
+    throw new Error(
+      `Invalid config ${color.yellow(
+        configPath
+      )}. Errors: ${maybeValidationError}`
+    );
+  }
+
+  return config;
 };
 
 export type InitializedReadonlyConfig<LatestConfig> = Readonly<LatestConfig> & {
@@ -128,6 +181,7 @@ export type InitConfigOptions<
   name: string;
   getPath: GetConfigPath;
   getDefault: GetDefaultConfig<LatestConfig>;
+  validate?: (config: LatestConfig) => ValidationResult;
 };
 
 type InitFunction<LatestConfig> = (
@@ -158,6 +212,7 @@ export const initReadonlyConfig =
       name,
       getPath,
       getDefault: getDefaultConfig,
+      validate,
     } = options;
 
     const configDirPath = configPathOverride ?? (await getPath(commandObj));
@@ -196,27 +251,33 @@ export const initReadonlyConfig =
 
     const validateLatestConfig = ajv.compile<LatestConfig>(latestConfigSchema);
 
-    const migratedConfig = await migrateConfig({
-      config,
-      configPath,
-      configString,
-      migrations,
-      validateLatestConfig,
-    });
-
-    const migratedConfigString = yamlDiffPatch(
-      configString,
-      config,
-      migratedConfig
-    );
+    const { validConfig, validConfigString } =
+      config.version < migrations.length
+        ? await migrateConfig({
+            config,
+            configPath,
+            configString,
+            migrations,
+            validateLatestConfig,
+            validate,
+          })
+        : {
+            validConfig: ensureValidConfig({
+              config,
+              configPath,
+              validateLatestConfig,
+              validate,
+            }),
+            validConfigString: configString,
+          };
 
     return {
-      ...migratedConfig,
+      ...validConfig,
       $getPath(): string {
         return configPath;
       },
       $getConfigString(): string {
-        return migratedConfigString;
+        return validConfigString;
       },
       $validateLatest: validateLatestConfig,
     };
@@ -234,12 +295,11 @@ export const initConfig =
   ): Promise<InitializedConfig<LatestConfig>> => {
     const configDirPath =
       configPathOverride ?? (await options.getPath(commandObj));
-
     const configPath = getConfigPath(configDirPath, options.name);
 
     if (initializedConfigs.has(configPath)) {
       throw new Error(
-        `Config ${configPath} was already initialized. Please initialize each config only once`
+        `Config ${configPath} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`
       );
     }
     initializedConfigs.add(configPath);

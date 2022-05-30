@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { SECRETS_FILE_NAME } from "../../const";
+import {
+  validateHasDefault,
+  validateMultiple,
+  validateUnique,
+  ValidationResult,
+} from "../../helpers/validations";
 import {
   ConfigKeyPair,
   configKeyPairSchema,
@@ -34,7 +41,7 @@ import {
 type ConfigV0 = {
   version: 0;
   keyPairs: Array<ConfigKeyPair>;
-  defaultKeyPair?: ConfigKeyPair;
+  defaultKeyPairName?: string;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -45,17 +52,37 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       type: "array",
       items: configKeyPairSchema,
     },
-    defaultKeyPair: { ...configKeyPairSchema, nullable: true },
+    defaultKeyPairName: { type: "string", nullable: true },
   },
   required: ["version", "keyPairs"],
 };
 
-const getDefaultConfig: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
+const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
   version: 0,
   keyPairs: [],
 });
 
 const migrations: Migrations<Config> = [];
+
+const validate = (config: LatestConfig): ValidationResult =>
+  validateMultiple(
+    validateUnique(
+      config.keyPairs,
+      ({ name }): string => name,
+      (name): string =>
+        `There are multiple key-pairs with the same name ${color.yellow(name)}`
+    ),
+    typeof config.defaultKeyPairName === "string"
+      ? validateHasDefault(
+          config.keyPairs,
+          config.defaultKeyPairName,
+          ({ name }): string => name,
+          `Default key-pair ${color.yellow(
+            config.defaultKeyPairName
+          )} not found`
+        )
+      : true
+  );
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
@@ -67,7 +94,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: SECRETS_FILE_NAME,
   getPath: getProjectDotFluenceDir,
-  getDefault: getDefaultConfig,
+  getDefault,
+  validate,
 };
 
 export const initProjectSecretsConfig = initConfig(initConfigOptions);

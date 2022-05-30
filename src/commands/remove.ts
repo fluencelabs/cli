@@ -31,7 +31,7 @@ import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
 import { getRelayAddr } from "../lib/multiaddr";
 import { ensureProjectDotFluenceDir } from "../lib/pathsGetters/getFluenceDir";
-import { checkboxes, list } from "../lib/prompt";
+import { list } from "../lib/prompt";
 
 export default class Remove extends Command {
   static override description = "Remove previously deployed config";
@@ -55,15 +55,15 @@ export default class Remove extends Command {
 
     const deployedConfig = await initDeployedConfig(this);
 
-    const name = await ensureName({
+    const deployedConfigToRemove = await ensurePreviouslyDeployedConfig({
       nameFromArgs,
       commandObj: this,
       deployedConfig,
     });
 
-    await removePreviouslyDeployedConfigByName({
+    await removePreviouslyDeployedConfig({
       deployedConfig,
-      name,
+      deployedConfigToRemove,
       commandObj: this,
       timeout: flags.timeout,
     });
@@ -75,7 +75,7 @@ export default class Remove extends Command {
  * @param param0 { nameFromArgs: string | undefined; deployedConfig: DeployedConfig; commandObj: CommandObj;}
  * @returns Promise<string>
  */
-const ensureName = async ({
+const ensurePreviouslyDeployedConfig = async ({
   nameFromArgs,
   deployedConfig,
   commandObj,
@@ -83,143 +83,110 @@ const ensureName = async ({
   nameFromArgs: string | undefined;
   deployedConfig: DeployedConfig;
   commandObj: CommandObj;
-}): Promise<string> => {
-  const previouslyDeployedConfigs = [
-    ...new Set(deployedConfig.deployed.map(({ name }): string => name)),
-  ];
+}): Promise<Deployed> => {
+  const previouslyDeployedConfig =
+    nameFromArgs === undefined
+      ? undefined
+      : deployedConfig.deployed.find(
+          ({ name }): boolean => name === nameFromArgs
+        );
+
+  if (previouslyDeployedConfig !== undefined) {
+    return previouslyDeployedConfig;
+  }
 
   if (typeof nameFromArgs === "string") {
-    if (previouslyDeployedConfigs.includes(nameFromArgs)) {
-      // return back the name if there are config/configs with this name
-      return nameFromArgs;
-    }
-
     commandObj.warn(`No config ${color.yellow(nameFromArgs)} found`);
   }
 
   // prompt user for a valid name
   return list({
     message: "Select the name of the deployment config you want to remove",
-    choices: previouslyDeployedConfigs.map(
-      (name): { name: string; value: string } => ({
-        name,
-        value: name,
+    choices: deployedConfig.deployed.map(
+      (value): { name: string; value: Deployed } => ({
+        name: value.name,
+        value,
       })
     ),
     oneChoiceMessage: (name): string =>
-      `Do you want to remove ${color.yellow(name)}`,
-    onNoChoices: (): never => commandObj.error("There is nothing to remove"),
+      `Do you want to remove previously deployed stuff from ${color.yellow(
+        name
+      )} config`,
+    onNoChoices: (): never =>
+      commandObj.error("You need a config to remove in order to continue"),
   });
 };
 
-export const filterPreviouslyDeployedConfigsByName = (
-  deployedConfig: DeployedConfig,
-  name: string
-): Array<Deployed> =>
-  deployedConfig.deployed.filter((deployed): boolean => deployed.name === name);
-
 /**
- * Prompts user to select timestamps of the stuff he wants to remove,
- * gets key-pairs for stuff that user selected for removal
- * removes each service from the configs
+ * Gets key-pair for stuff that user selected for removal
+ * removes each service from the config
  * removes each successfully removed service from the config and commits it to disk
  * @param param0 { name: string; commandObj: CommandObj; timeout: string | undefined; deployedConfig: DeployedConfig;}
  * @returns Promise<void>
  */
-export const removePreviouslyDeployedConfigByName = async ({
-  name,
+export const removePreviouslyDeployedConfig = async ({
   commandObj,
   timeout,
   deployedConfig,
+  deployedConfigToRemove,
 }: Readonly<{
-  name: string;
   commandObj: CommandObj;
   timeout: string | undefined;
   deployedConfig: DeployedConfig;
+  deployedConfigToRemove: Deployed;
 }>): Promise<void> => {
   const aquaCli = new AquaCLI(commandObj);
 
-  const previouslyDeployedConfigs = filterPreviouslyDeployedConfigsByName(
-    deployedConfig,
-    name
-  );
+  const successfullyRemovedServices: Array<string> = [];
 
-  const previouslyDeployedConfigsToRemove = await checkboxes({
-    message: "Select timestamps of the stuff you want to remove",
-    onNoChoices: (): never => {
-      throw new Error("There is nothing to remove");
-    },
-    oneChoiceMessage: (timeStamp): string =>
-      `Do you want to remove stuff that was deployed on ${color.yellow(
-        timeStamp
-      )}`,
-    choices: previouslyDeployedConfigs.map(
-      (value): { name: string; value: Deployed } => ({
-        name: value.timestamp,
-        value,
+  const { keyPairName, timestamp, services } = deployedConfigToRemove;
+  const keyPair = await getKeyPair({ commandObj, keyPairName });
+
+  if (keyPair instanceof Error) {
+    commandObj.warn(
+      getMessageWithKeyValuePairs(`${keyPair.message}. From config`, {
+        "deployed at": timestamp,
       })
-    ),
-  });
+    );
+    return;
+  }
 
-  const successfullyRemoved: Record<string, Array<string>> = {};
+  for (const { serviceId, peerId, name, blueprintId } of services) {
+    const addr = getRelayAddr(peerId, deployedConfigToRemove.knownRelays);
 
-  for (const previouslyDeployedConfig of previouslyDeployedConfigsToRemove) {
-    const { keyPairName, timestamp, services } = previouslyDeployedConfig;
-    // eslint-disable-next-line no-await-in-loop
-    const keyPair = await getKeyPair({ commandObj, keyPairName });
-
-    if (keyPair instanceof Error) {
-      commandObj.warn(
-        getMessageWithKeyValuePairs(`${keyPair.message}. From config`, {
-          "deployed at": timestamp,
-        })
-      );
-      continue;
-    }
-
-    for (const { serviceId, peerId, name, blueprintId } of services) {
-      const addr = getRelayAddr(peerId, previouslyDeployedConfig.knownRelays);
-
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await aquaCli.run(
-          {
-            command: "remote remove_service",
-            flags: {
-              addr,
-              id: serviceId,
-              sk: keyPair.secretKey,
-              on: peerId,
-              timeout,
-            },
-          },
-          `Removing service`,
-          {
-            name,
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await aquaCli.run(
+        {
+          command: "remote remove_service",
+          flags: {
+            addr,
             id: serviceId,
-            blueprintId,
-            relay: addr,
-            "deployed on": peerId,
-            "deployed at": timestamp,
-          }
-        );
+            sk: keyPair.secretKey,
+            on: peerId,
+            timeout,
+          },
+        },
+        `Removing service`,
+        {
+          name,
+          id: serviceId,
+          blueprintId,
+          relay: addr,
+          "deployed on": peerId,
+          "deployed at": timestamp,
+        }
+      );
 
-        successfullyRemoved[timestamp] = [
-          ...(successfullyRemoved[timestamp] ?? []),
-          serviceId,
-        ];
-      } catch (error) {
-        commandObj.warn(`When removing service\n${String(error)}`);
-      }
+      successfullyRemovedServices.push(serviceId);
+    } catch (error) {
+      commandObj.warn(`When removing service\n${String(error)}`);
     }
   }
 
   deployedConfig.deployed = deployedConfig.deployed.reduce<Array<Deployed>>(
     (acc, deployed): Array<Deployed> => {
-      const successfullyRemovedServices =
-        successfullyRemoved[deployed.timestamp];
-
-      if (deployed.name === name && successfullyRemovedServices !== undefined) {
+      if (deployed.name === deployedConfigToRemove.name) {
         deployed.services = deployed.services.filter(
           ({ serviceId }): boolean =>
             !successfullyRemovedServices.includes(serviceId)
@@ -236,4 +203,10 @@ export const removePreviouslyDeployedConfigByName = async ({
   );
 
   await deployedConfig.$commit();
+
+  if (successfullyRemovedServices.length !== services.length) {
+    throw new Error(
+      "Not all services were successful removed. Please make sure to remove them in order to continue"
+    );
+  }
 };

@@ -118,10 +118,6 @@
     ],
     "rules": {
       "no-plusplus": "error",
-      "brace-style": "off",
-      "padding-line-between-statements": "off",
-      "lines-between-class-members": "off",
-      "padded-blocks": "off",
       "operator-assignment": [
         "error",
         "never"
@@ -136,18 +132,12 @@
         "error",
         "always"
       ],
-      "indent": "off",
-      "arrow-parens": "off",
-      "quotes": "off",
-      "comma-dangle": "off",
-      "semi": "off",
       "unicorn/filename-case": [
         "error",
         {
           "case": "camelCase"
         }
       ],
-      "operator-linebreak": "off",
       "@typescript-eslint/explicit-function-return-type": [
         "warn",
         {
@@ -182,8 +172,6 @@
           "assertionStyle": "never"
         }
       ],
-      "unicorn/no-array-reduce": "off",
-      "unicorn/consistent-destructuring": "off",
       "import/order": [
         "error",
         {
@@ -198,7 +186,19 @@
       "license-header/header": [
         "error",
         "./resources/license-header.js"
-      ]
+      ],
+      "brace-style": "off",
+      "padding-line-between-statements": "off",
+      "lines-between-class-members": "off",
+      "padded-blocks": "off",
+      "indent": "off",
+      "arrow-parens": "off",
+      "quotes": "off",
+      "comma-dangle": "off",
+      "semi": "off",
+      "operator-linebreak": "off",
+      "unicorn/no-array-reduce": "off",
+      "unicorn/consistent-destructuring": "off"
     },
     "overrides": [
       {

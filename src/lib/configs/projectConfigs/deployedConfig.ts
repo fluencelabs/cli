@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { DEPLOYED_FILE_NAME } from "../../const";
+import { validateUnique, ValidationResult } from "../../helpers/validations";
 import { getProjectDotFluenceDir } from "../../pathsGetters/getProjectDotFluenceDir";
 import {
   GetDefaultConfig,
@@ -92,12 +94,20 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version"],
 };
 
-const getDefaultConfig: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
+const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
   version: 0,
   deployed: [],
 });
 
 const migrations: Migrations<Config> = [];
+
+const validate = (config: LatestConfig): ValidationResult =>
+  validateUnique(
+    config.deployed,
+    ({ name }): string => name,
+    (name): string =>
+      `There are multiple configs with the same name ${color.yellow(name)}`
+  );
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
@@ -109,7 +119,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: DEPLOYED_FILE_NAME,
   getPath: getProjectDotFluenceDir,
-  getDefault: getDefaultConfig,
+  getDefault,
+  validate,
 };
 
 export const initDeployedConfig = initConfig(initConfigOptions);

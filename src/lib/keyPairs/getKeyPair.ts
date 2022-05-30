@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
@@ -37,11 +38,12 @@ const getUserKeyPair = async ({
 }: GetUserKeyPairOptions): Promise<ConfigKeyPair | Error> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
 
-  if (
-    keyPairName === undefined ||
-    keyPairName === userSecretsConfig.defaultKeyPair.name
-  ) {
-    return userSecretsConfig.defaultKeyPair;
+  if (keyPairName === undefined) {
+    const defaultKeyPair = userSecretsConfig.keyPairs.find(
+      ({ name }): boolean => name === userSecretsConfig.defaultKeyPairName
+    );
+    assert(defaultKeyPair !== undefined);
+    return defaultKeyPair;
   }
 
   const keyPair = userSecretsConfig.keyPairs.find(
@@ -56,13 +58,12 @@ const getUserKeyPair = async ({
 
   return list({
     message: "Select existing key-pair name",
-    choices: [
-      userSecretsConfig.defaultKeyPair,
-      ...userSecretsConfig.keyPairs,
-    ].map((value): { value: ConfigKeyPair; name: string } => ({
-      value,
-      name: value.name,
-    })),
+    choices: userSecretsConfig.keyPairs.map(
+      (value): { value: ConfigKeyPair; name: string } => ({
+        value,
+        name: value.name,
+      })
+    ),
     oneChoiceMessage: (name): string => `Do you want to use ${name} key-pair`,
     onNoChoices: (): never =>
       commandObj.error(
@@ -84,11 +85,10 @@ const getProjectKeyPair = async ({
     commandObj
   );
 
-  if (
-    keyPairName === undefined ||
-    keyPairName === projectSecretsConfig.defaultKeyPair?.name
-  ) {
-    return projectSecretsConfig.defaultKeyPair;
+  if (keyPairName === undefined) {
+    return projectSecretsConfig.keyPairs.find(
+      ({ name }): boolean => name === projectSecretsConfig.defaultKeyPairName
+    );
   }
 
   return projectSecretsConfig.keyPairs.find(

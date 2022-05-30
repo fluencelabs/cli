@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
@@ -41,12 +42,9 @@ import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
 import { getRelayAddr } from "../lib/multiaddr";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { ensureProjectDotFluenceDir } from "../lib/pathsGetters/getFluenceDir";
-import { list } from "../lib/prompt";
+import { confirm, list } from "../lib/prompt";
 
-import {
-  filterPreviouslyDeployedConfigsByName,
-  removePreviouslyDeployedConfigByName,
-} from "./remove";
+import { removePreviouslyDeployedConfig } from "./remove";
 
 export default class Deploy extends Command {
   static override description = "Deploy service to the remote peer";
@@ -72,8 +70,35 @@ export default class Deploy extends Command {
     if (keyPair instanceof Error) {
       this.error(keyPair.message);
     }
+    const nameArg: unknown = args[NAME_ARG];
+    assert(nameArg === undefined || typeof nameArg === "string");
 
-    const deploymentConfig = await ensureDeploymentConfig(args[NAME_ARG], this);
+    const deploymentConfig = await ensureDeploymentConfig(nameArg, this);
+    const deployedConfig = await initDeployedConfig(this);
+
+    const deployedConfigToRemove = deployedConfig.deployed.find(
+      (deployed): boolean => deployed.name === deploymentConfig.name
+    );
+    if (deployedConfigToRemove !== undefined) {
+      // Prompt user to remove previously deployed stuff if this
+      // config was already deployed before
+      const doRemove = await confirm({
+        message: `Do you want to remove previously deployed stuff from ${color.yellow(
+          deployedConfigToRemove.name
+        )} config`,
+      });
+
+      if (!doRemove) {
+        this.error("You have to confirm in order to continue");
+      }
+
+      await removePreviouslyDeployedConfig({
+        deployedConfig,
+        deployedConfigToRemove,
+        commandObj: this,
+        timeout: flags.timeout,
+      });
+    }
 
     const newDeployed = await deploy({
       deploymentConfig,
@@ -81,31 +106,6 @@ export default class Deploy extends Command {
       keyPair,
       timeout: flags.timeout,
     });
-
-    // Prompt user to remove previously deployed stuff if this
-    // config was already deployed before
-
-    const deployedConfig = await initDeployedConfig(this);
-
-    const previouslyDeployedConfigs = filterPreviouslyDeployedConfigsByName(
-      deployedConfig,
-      deploymentConfig.name
-    );
-
-    if (previouslyDeployedConfigs.length > 0) {
-      this.warn(
-        `Config ${color.yellow(
-          deploymentConfig.name
-        )} was already deployed previously`
-      );
-
-      await removePreviouslyDeployedConfigByName({
-        deployedConfig,
-        name: deploymentConfig.name,
-        commandObj: this,
-        timeout: flags.timeout,
-      });
-    }
 
     deployedConfig.deployed.push(newDeployed);
     return deployedConfig.$commit();
@@ -324,11 +324,12 @@ const ensureDeploymentConfig = async (
   const projectConfig = await initReadonlyProjectConfig(commandObj);
 
   // Return default config
-  if (
-    deploymentConfigName === undefined ||
-    deploymentConfigName === projectConfig.defaultDeploymentConfig.name
-  ) {
-    return projectConfig.defaultDeploymentConfig;
+  if (deploymentConfigName === undefined) {
+    const defaultConfig = projectConfig.deploymentConfigs.find(
+      ({ name }): boolean => name === projectConfig.defaultDeploymentConfigName
+    );
+    assert(defaultConfig !== undefined);
+    return defaultConfig;
   }
 
   // Try to find config by name
@@ -348,13 +349,12 @@ const ensureDeploymentConfig = async (
   // Prompt user to choose valid config
   return list({
     message: "Select one of the existing deployment configs",
-    choices: [
-      projectConfig.defaultDeploymentConfig,
-      ...projectConfig.deploymentConfigs,
-    ].map((value): { value: DeploymentConfig; name: string } => ({
-      value,
-      name: value.name,
-    })),
+    choices: projectConfig.deploymentConfigs.map(
+      (value): { value: DeploymentConfig; name: string } => ({
+        value,
+        name: value.name,
+      })
+    ),
     oneChoiceMessage: (name): string =>
       `Maybe you want to deploy ${color.yellow(name)}?`,
     onNoChoices: (): never => {

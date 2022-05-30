@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { AUTO_GENERATED, SECRETS_FILE_NAME } from "../../const";
+import {
+  validateHasDefault,
+  validateMultiple,
+  validateUnique,
+  ValidationResult,
+} from "../../helpers/validations";
 import {
   ConfigKeyPair,
   configKeyPairSchema,
@@ -35,31 +42,47 @@ import {
 type ConfigV0 = {
   version: 0;
   keyPairs: Array<ConfigKeyPair>;
-  defaultKeyPair: ConfigKeyPair;
+  defaultKeyPairName: string;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
     version: { type: "number", enum: [0] },
-    defaultKeyPair: configKeyPairSchema,
+    defaultKeyPairName: { type: "string" },
     keyPairs: {
       type: "array",
       items: configKeyPairSchema,
     },
   },
-  required: ["version", "keyPairs"],
+  required: ["version", "keyPairs", "defaultKeyPairName"],
 };
 
-const getDefaultConfig: GetDefaultConfig<
+const getDefault: GetDefaultConfig<
   LatestConfig
 > = async (): Promise<LatestConfig> => ({
   version: 0,
-  keyPairs: [],
-  defaultKeyPair: await generateKeyPair(AUTO_GENERATED),
+  keyPairs: [await generateKeyPair(AUTO_GENERATED)],
+  defaultKeyPairName: AUTO_GENERATED,
 });
 
 const migrations: Migrations<Config> = [];
+
+const validate = (config: LatestConfig): ValidationResult =>
+  validateMultiple(
+    validateUnique(
+      config.keyPairs,
+      ({ name }): string => name,
+      (name): string =>
+        `There are multiple key-pairs with the same name ${color.yellow(name)}`
+    ),
+    validateHasDefault(
+      config.keyPairs,
+      config.defaultKeyPairName,
+      ({ name }): string => name,
+      `Default key-pair ${color.yellow(config.defaultKeyPairName)} not found`
+    )
+  );
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
@@ -71,7 +94,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: SECRETS_FILE_NAME,
   getPath: ensureUserFluenceDir,
-  getDefault: getDefaultConfig,
+  getDefault,
+  validate,
 };
 
 export const initUserSecretsConfig = initConfig(initConfigOptions);

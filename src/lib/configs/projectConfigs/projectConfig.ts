@@ -16,9 +16,16 @@
 
 import fsPromises from "node:fs/promises";
 
+import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { AUTO_GENERATED, CONFIG_FILE_NAME } from "../../const";
+import {
+  validateHasDefault,
+  validateMultiple,
+  validateUnique,
+  ValidationResult,
+} from "../../helpers/validations";
 import { getRandomRelayId } from "../../multiaddr";
 import { getArtifactsPath } from "../../pathsGetters/getArtifactsPath";
 import { getProjectDotFluenceDir } from "../../pathsGetters/getProjectDotFluenceDir";
@@ -67,7 +74,7 @@ const deploymentConfigSchemaV0: JSONSchemaType<DeploymentConfigV0> = {
 
 type ConfigV0 = {
   version: 0;
-  defaultDeploymentConfig: DeploymentConfigV0;
+  defaultDeploymentConfigName: string;
   deploymentConfigs: Array<DeploymentConfigV0>;
 };
 
@@ -75,7 +82,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
     version: { type: "number", enum: [0] },
-    defaultDeploymentConfig: deploymentConfigSchemaV0,
+    defaultDeploymentConfigName: { type: "string" },
     deploymentConfigs: {
       type: "array",
       items: deploymentConfigSchemaV0,
@@ -118,15 +125,33 @@ const generateDefaultDeploymentConfig =
     };
   };
 
-const getDefaultConfig: GetDefaultConfig<
+const getDefault: GetDefaultConfig<
   LatestConfig
 > = async (): Promise<LatestConfig> => ({
   version: 0,
-  defaultDeploymentConfig: await generateDefaultDeploymentConfig(),
-  deploymentConfigs: [],
+  defaultDeploymentConfigName: AUTO_GENERATED,
+  deploymentConfigs: [await generateDefaultDeploymentConfig()],
 });
 
 const migrations: Migrations<Config> = [];
+
+const validate = (config: LatestConfig): ValidationResult =>
+  validateMultiple(
+    validateUnique(
+      config.deploymentConfigs,
+      ({ name }): string => name,
+      (name): string =>
+        `There are multiple configs with the same name ${color.yellow(name)}`
+    ),
+    validateHasDefault(
+      config.deploymentConfigs,
+      config.defaultDeploymentConfigName,
+      ({ name }): string => name,
+      `Default config ${color.yellow(
+        config.defaultDeploymentConfigName
+      )} not found`
+    )
+  );
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
@@ -138,7 +163,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: CONFIG_FILE_NAME,
   getPath: getProjectDotFluenceDir,
-  getDefault: getDefaultConfig,
+  getDefault,
+  validate,
 };
 
 export const initProjectConfig = initConfig(initConfigOptions);
