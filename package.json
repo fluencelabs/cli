@@ -118,6 +118,10 @@
     ],
     "rules": {
       "no-plusplus": "error",
+      "brace-style": "off",
+      "padding-line-between-statements": "off",
+      "lines-between-class-members": "off",
+      "padded-blocks": "off",
       "operator-assignment": [
         "error",
         "never"
@@ -145,7 +149,7 @@
       ],
       "operator-linebreak": "off",
       "@typescript-eslint/explicit-function-return-type": [
-        "error",
+        "warn",
         {
           "allowExpressions": false,
           "allowTypedFunctionExpressions": false,
@@ -183,7 +187,11 @@
       "import/order": [
         "error",
         {
-          "newlines-between": "always"
+          "newlines-between": "always",
+          "alphabetize": {
+            "order": "asc",
+            "caseInsensitive": true
+          }
         }
       ],
       "unused-imports/no-unused-imports": "error",

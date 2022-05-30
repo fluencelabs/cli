@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import path from "node:path";
 import fsPromises from "node:fs/promises";
+import path from "node:path";
 
-import { Command } from "@oclif/core";
-import Ajv, { JSONSchemaType } from "ajv";
 import { color } from "@oclif/color";
+import { Command } from "@oclif/core";
+import type { JSONSchemaType } from "ajv";
 
+import { ajv } from "../lib/ajv";
+import { initReadonlyProjectConfig } from "../lib/configs/projectConfigs/projectConfig";
 import {
   CommandObj,
   ARTIFACTS_DIR_NAME,
@@ -33,21 +35,16 @@ import {
   GIT_IGNORE_CONTENT,
   NAME_ARG,
 } from "../lib/const";
-import { getProjectConfig } from "../lib/configs/projectConfig";
-import { input } from "../lib/prompt";
 import { usage } from "../lib/helpers/usage";
+import { input } from "../lib/prompt";
 
 export default class Init extends Command {
   static override description =
     "Initialize fluence project in the current directory";
-
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-
   // TODO DXJ-31: add "--path" optional flag to set path of the project
   static override args = [{ name: NAME_ARG, description: "Project name" }];
-
   static override usage: string = usage(this);
-
   async run(): Promise<void> {
     const { args } = await this.parse(Init);
     await init(this, args[NAME_ARG]);
@@ -69,7 +66,6 @@ const ensureNameIsValid = async (
   commandObj: CommandObj
 ): Promise<string> => {
   const validOrWarning = await validateProjectName(name);
-
   if (validOrWarning === true) {
     return name;
   }
@@ -96,24 +92,18 @@ const getProjectPath = async (
   return path.join(process.cwd(), validName);
 };
 
-const ajv = new Ajv({ useDefaults: true });
-
 type ExtensionsJson = {
   recommendations: Array<string>;
 };
-
 const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
   type: "object",
   properties: {
-    recommendations: { type: "array", items: { type: "string" }, default: [] },
+    recommendations: { type: "array", items: { type: "string" } },
   },
   required: ["recommendations"],
 };
-
 const validateExtensionsJson = ajv.compile(extensionsJsonSchema);
-
 const YAML_EXTENSION = "redhat.vscode-yaml";
-
 const extensionsConfig: ExtensionsJson = {
   recommendations: [YAML_EXTENSION],
 };
@@ -187,23 +177,24 @@ export const init = async (
   const projectPath = await getProjectPath(projectName, commandObj);
 
   try {
+    const fluenceDirPath = path.join(projectPath, FLUENCE_DIR_NAME);
+    await fsPromises.mkdir(fluenceDirPath, { recursive: true });
+
+    await initReadonlyProjectConfig(commandObj, fluenceDirPath);
+
     const srcDirPath = path.join(projectPath, SRC_DIR_NAME);
     await fsPromises.mkdir(srcDirPath, { recursive: true });
 
     const distDirPath = path.join(projectPath, ARTIFACTS_DIR_NAME);
     await fsPromises.mkdir(distDirPath, { recursive: true });
 
-    const fluenceDirPath = path.join(projectPath, FLUENCE_DIR_NAME);
-    await fsPromises.mkdir(fluenceDirPath, { recursive: true });
-
     await ensureRecommendedExtensions(projectPath);
 
     await addGitIgnore(projectPath);
 
-    await getProjectConfig(fluenceDirPath);
     commandObj.log(
       color.magentaBright(
-        `\nFluence project successfully initialized at ${fluenceDirPath}\n`
+        `\nFluence project successfully initialized at ${projectPath}\n`
       )
     );
     return fluenceDirPath;

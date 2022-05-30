@@ -15,28 +15,25 @@
  */
 
 import fsPromises from "node:fs/promises";
-import path from "node:path";
 import os from "node:os";
+import path from "node:path";
 
-import { init } from "../commands/init";
+import { init } from "../../commands/init";
+import { CommandObj, FLUENCE_DIR_NAME } from "../const";
+import { confirm } from "../prompt";
 
-import { CommandObj, FLUENCE_DIR_NAME } from "./const";
-import { confirm } from "./prompt";
+import { getProjectDotFluenceDir } from "./getProjectDotFluenceDir";
 
-export const isProjectFluenceDir = (
-  fluenceDirPath: string,
-  commandObj: CommandObj
-): boolean => {
-  if (commandObj.config.windows) {
-    return commandObj.config.configDir !== fluenceDirPath;
-  }
-
-  return path.join(os.homedir(), FLUENCE_DIR_NAME) !== fluenceDirPath;
-};
-
-const ensureFluenceProject = async (
+export const ensureProjectDotFluenceDir = async (
   commandObj: CommandObj
 ): Promise<string> => {
+  const projectDotFluenceDir = getProjectDotFluenceDir();
+
+  try {
+    await fsPromises.access(projectDotFluenceDir);
+    return projectDotFluenceDir;
+  } catch {}
+
   commandObj.warn("Not a fluence project");
 
   const doInit = await confirm({
@@ -44,37 +41,15 @@ const ensureFluenceProject = async (
   });
 
   if (!doInit) {
-    commandObj.error("Can't deploy: no fluence project to deploy");
+    commandObj.error(
+      "Initialized fluence project is required in order to continue"
+    );
   }
 
   return init(commandObj);
 };
 
-export const getFluenceProjectDir = async (): Promise<string | null> => {
-  const fluenceDirPathInCurrentDirectory = path.join(
-    process.cwd(),
-    FLUENCE_DIR_NAME
-  );
-  try {
-    await fsPromises.access(fluenceDirPathInCurrentDirectory);
-    return fluenceDirPathInCurrentDirectory;
-  } catch {
-    return null;
-  }
-};
-
-export const ensureFluenceProjectDir = async (
-  commandObj: CommandObj
-): Promise<string> => {
-  const fluenceProjectDir = await getFluenceProjectDir();
-  if (fluenceProjectDir === null) {
-    return ensureFluenceProject(commandObj);
-  }
-
-  return fluenceProjectDir;
-};
-
-export const getUserFluenceDir = async (
+export const ensureUserFluenceDir = async (
   commandObj: CommandObj
 ): Promise<string> => {
   if (commandObj.config.windows) {

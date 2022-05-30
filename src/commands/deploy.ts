@@ -14,49 +14,43 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
 import path from "node:path";
-import assert from "node:assert";
 
-import { Command, Flags } from "@oclif/core";
 import color from "@oclif/color";
+import { Command, Flags } from "@oclif/core";
 
-import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
+import { AquaCLI } from "../lib/aquaCli";
+import {
+  Deployed,
+  DeployedServiceConfig,
+  initDeployedConfig,
+} from "../lib/configs/projectConfigs/deployedConfig";
+import {
+  DeploymentConfig,
+  initReadonlyProjectConfig,
+} from "../lib/configs/projectConfigs/projectConfig";
 import {
   CommandObj,
   DEPLOYMENT_CONFIG_FILE_NAME,
-  ARTIFACTS_DIR_NAME,
   KEY_PAIR_FLAG,
   NAME_ARG,
 } from "../lib/const";
-import { AquaCLI, AquaCliInput } from "../lib/aquaCli";
-import {
-  ProjectConfig,
-  DeploymentConfig,
-  getProjectConfig,
-} from "../lib/configs/projectConfig";
-import { ensureFluenceProjectDir } from "../lib/getFluenceDir";
-import { getRandomAddr, getRandomPeerId } from "../lib/multiaddr";
-import { confirm, list } from "../lib/prompt";
-import type {
-  Deployed,
-  DeployedConfig,
-  DeployedServiceConfig,
-} from "../lib/configs/deployedConfig";
-import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
-import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
+import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
+import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
+import { getRelayAddr } from "../lib/multiaddr";
+import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
+import { ensureProjectDotFluenceDir } from "../lib/pathsGetters/getFluenceDir";
+import { list } from "../lib/prompt";
 
 import {
-  getPreviouslyDeployedConfig,
-  removePreviouslyDeployed,
+  filterPreviouslyDeployedConfigsByName,
+  removePreviouslyDeployedConfigByName,
 } from "./remove";
 
 export default class Deploy extends Command {
   static override description = "Deploy service to the remote peer";
-
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-
   static override flags = {
     timeout: Flags.string({
       description: "Deployment and remove timeout",
@@ -64,71 +58,59 @@ export default class Deploy extends Command {
     }),
     ...KEY_PAIR_FLAG,
   };
-
   static override args = [
     { name: NAME_ARG, description: "Deployment config name" },
   ];
-
   static override usage: string = usage(this);
 
   async run(): Promise<void> {
-    const fluenceProjectDir = await ensureFluenceProjectDir(this);
+    await ensureProjectDotFluenceDir(this);
 
     const { flags, args } = await this.parse(Deploy);
 
     const keyPair = await getKeyPairFromFlags(flags, this);
-
     if (keyPair instanceof Error) {
       this.error(keyPair.message);
     }
 
-    const deploymentConfig = await getDeploymentConfig(
-      args[NAME_ARG],
-      fluenceProjectDir,
-      this
-    );
+    const deploymentConfig = await ensureDeploymentConfig(args[NAME_ARG], this);
 
-    await deploy({
+    const newDeployed = await deploy({
       deploymentConfig,
       commandObj: this,
-      fluenceProjectDir,
       keyPair,
       timeout: flags.timeout,
     });
+
+    // Prompt user to remove previously deployed stuff if this
+    // config was already deployed before
+
+    const deployedConfig = await initDeployedConfig(this);
+
+    const previouslyDeployedConfigs = filterPreviouslyDeployedConfigsByName(
+      deployedConfig,
+      deploymentConfig.name
+    );
+
+    if (previouslyDeployedConfigs.length > 0) {
+      this.warn(
+        `Config ${color.yellow(
+          deploymentConfig.name
+        )} was already deployed previously`
+      );
+
+      await removePreviouslyDeployedConfigByName({
+        deployedConfig,
+        name: deploymentConfig.name,
+        commandObj: this,
+        timeout: flags.timeout,
+      });
+    }
+
+    deployedConfig.deployed.push(newDeployed);
+    return deployedConfig.$commit();
   }
 }
-
-const generateDefaultDeploymentConfig = async (
-  commandObj: CommandObj,
-  artifactsPath: string
-): Promise<DeploymentConfig> => {
-  const peerId = getRandomPeerId();
-
-  try {
-    await fsPromises.access(artifactsPath);
-  } catch {
-    commandObj.error(
-      `Nothing to deploy: There is no ${artifactsPath} directory`
-    );
-  }
-
-  const services = (
-    await fsPromises.readdir(artifactsPath, { withFileTypes: true })
-  )
-    .filter((dirent): boolean => dirent.isDirectory())
-    .map(({ name }): DeploymentConfig["services"][0] => ({ name, peerId }));
-
-  if (services.length === 0) {
-    commandObj.error(
-      `Nothing to deploy: There are no services in the ${artifactsPath} directory`
-    );
-  }
-
-  return {
-    name: "auto-generated",
-    services,
-  };
-};
 
 type DeployServiceOptions = Readonly<{
   name: string;
@@ -142,7 +124,6 @@ type DeployServiceOptions = Readonly<{
 
 /**
  * Deploy by first uploading .wasm files and configs, possibly creating a new blueprint
- *
  * @param param0 DeployServiceOptions
  * @returns Promise<Error | DeployedServiceConfig>
  */
@@ -155,54 +136,48 @@ const deployService = async ({
   aquaCli,
   timeout,
 }: DeployServiceOptions): Promise<Error | DeployedServiceConfig> => {
-  const aquaCliArgs: AquaCliInput = {
-    command: "remote deploy_service",
-    flags: {
-      "config-path": path.join(
-        artifactsPath,
-        name,
-        DEPLOYMENT_CONFIG_FILE_NAME
-      ),
-      service: name,
-      addr,
-      sk: secretKey,
-      on: peerId,
-      timeout,
-    },
-  } as const;
-
-  const infoKeyValuePairs = { name, on: peerId, relay: addr };
-
   let result: string;
   try {
     result = await aquaCli.run(
-      aquaCliArgs,
+      {
+        command: "remote deploy_service",
+        flags: {
+          "config-path": path.join(
+            artifactsPath,
+            name,
+            DEPLOYMENT_CONFIG_FILE_NAME
+          ),
+          service: name,
+          addr,
+          sk: secretKey,
+          on: peerId,
+          timeout,
+        },
+      },
       "Deploying service",
-      infoKeyValuePairs
+      { name, on: peerId, relay: addr }
     );
   } catch (error) {
-    const deploymentErrorMessage = getMessageWithKeyValuePairs(
-      "\nWasn't able to deploy service",
-      infoKeyValuePairs
-    );
-
-    return new Error(`${deploymentErrorMessage}\n${String(error)}`);
+    return new Error(`Wasn't able to deploy service\n${String(error)}`);
   }
 
   const [, blueprintId] = /Blueprint id:\n(.*)/.exec(result) ?? [];
   const [, serviceId] = /And your service id is:\n"(.*)"/.exec(result) ?? [];
   if (blueprintId === undefined || serviceId === undefined) {
     return new Error(
-      getMessageWithKeyValuePairs(
-        `Deployment process finished without errors but not able to parse serviceId or blueprintId from aqua cli output:\n\n${result}`,
-        infoKeyValuePairs
-      )
+      `Deployment finished without errors but not able to parse serviceId or blueprintId from aqua cli output:\n\n${result}`
     );
   }
 
   return { blueprintId, serviceId, peerId, name };
 };
 
+/**
+ * Deploy a service and then deploy zero or more services using the blueprint
+ * id of the first service that was deployed
+ * @param param0 Readonly<{ deployServiceOptions: DeployServiceOptions; count: number;}>
+ * @returns Promise<Array<Error | DeployedServiceConfig>>
+ */
 const deployServices = async ({
   count,
   deployServiceOptions,
@@ -224,18 +199,7 @@ const deployServices = async ({
 
   let servicesToDeployCount = count - 1;
 
-  const infoKeyValuePairs = {
-    name,
-    blueprintId,
-    on: peerId,
-    relay: addr,
-  };
-
-  const deploymentErrorMessage = getMessageWithKeyValuePairs(
-    "Wasn't able to deploy service",
-    infoKeyValuePairs
-  );
-
+  // deploy by blueprintId 'servicesToDeployCount' number of times
   while (servicesToDeployCount > 0) {
     let result: string;
     try {
@@ -252,11 +216,16 @@ const deployServices = async ({
           },
         },
         "Deploying service",
-        infoKeyValuePairs
+        {
+          name,
+          blueprintId,
+          on: peerId,
+          relay: addr,
+        }
       );
     } catch (error) {
       deployedServiceConfigs.push(
-        new Error(`${deploymentErrorMessage}\n${String(error)}`)
+        new Error(`Wasn't able to deploy service\n${String(error)}`)
       );
       continue;
     }
@@ -266,10 +235,7 @@ const deployServices = async ({
     if (serviceId === undefined) {
       deployedServiceConfigs.push(
         new Error(
-          getMessageWithKeyValuePairs(
-            `Deployment process finished without errors but not able to parse serviceId from aqua cli output:\n\n${result}`,
-            infoKeyValuePairs
-          )
+          `Deployment finished without errors but not able to parse serviceId from aqua cli output:\n\n${result}`
         )
       );
       continue;
@@ -285,172 +251,114 @@ const deployServices = async ({
 const deploy = async ({
   deploymentConfig,
   keyPair,
-  fluenceProjectDir,
   commandObj,
   timeout,
 }: {
   deploymentConfig: DeploymentConfig;
   keyPair: ConfigKeyPair;
-  fluenceProjectDir: string;
   timeout: string | undefined;
   commandObj: CommandObj;
-}): Promise<DeployedConfig> => {
-  const artifactsPath = path.join(process.cwd(), ARTIFACTS_DIR_NAME);
+}): Promise<Deployed> => {
+  const artifactsPath = getArtifactsPath();
   const aquaCli = new AquaCLI(commandObj);
-  const addr = getRandomAddr(deploymentConfig.knownRelays);
-
-  const failedDeploys: Error[] = [];
-  const successfulDeploys: DeployedServiceConfig[] = [];
+  const successfullyDeployedServices: DeployedServiceConfig[] = [];
+  const cwd = process.cwd();
 
   for (const { name, peerId, count = 1 } of deploymentConfig.services) {
-    const deployServiceOptions = {
-      name,
-      peerId,
-      artifactsPath,
-      secretKey: keyPair.secretKey,
-      aquaCli,
-      timeout,
-      addr,
-    };
+    process.chdir(path.join(artifactsPath, name));
+    const addr = getRelayAddr(peerId, deploymentConfig.knownRelays);
     // eslint-disable-next-line no-await-in-loop
     const results = await deployServices({
       count,
-      deployServiceOptions,
+      deployServiceOptions: {
+        name,
+        peerId,
+        artifactsPath,
+        secretKey: keyPair.secretKey,
+        aquaCli,
+        timeout,
+        addr,
+      },
     });
 
     for (const result of results) {
       if (result instanceof Error) {
-        failedDeploys.push(result);
+        commandObj.warn(result.message);
         continue;
       }
 
-      successfulDeploys.push(result);
+      successfullyDeployedServices.push(result);
     }
   }
 
-  for (const error of failedDeploys) {
-    commandObj.warn(error.message);
-  }
+  process.chdir(cwd);
 
-  if (successfulDeploys.length === 0) {
+  if (successfullyDeployedServices.length === 0) {
     commandObj.error("No services were deployed successfully");
   }
 
   const newDeployed: Deployed = {
     name: deploymentConfig.name,
-    services: successfulDeploys,
+    services: successfullyDeployedServices,
     keyPairName: keyPair.name,
     timestamp: new Date().toISOString(),
   };
 
-  if (deploymentConfig.knownRelays !== undefined) {
+  if (Array.isArray(deploymentConfig.knownRelays)) {
     newDeployed.knownRelays = deploymentConfig.knownRelays;
   }
 
-  const { previouslyDeployedConfigs, updateDeployedConfig } =
-    await getPreviouslyDeployedConfig({
-      name: deploymentConfig.name,
-      fluenceProjectDir,
-      commandObj,
-      newDeployed,
-    });
+  return newDeployed;
+};
 
-  if (previouslyDeployedConfigs.length === 0) {
-    return updateDeployedConfig(
-      (deployedConfig): DeployedConfig => ({
-        ...deployedConfig,
-        deployed: [...deployedConfig.deployed, newDeployed],
-      })
-    );
+/**
+ * Ensures valid deployment config
+ * @param deploymentConfigName string | undefined
+ * @param commandObj CommandObj
+ * @returns Promise<DeploymentConfig>
+ */
+const ensureDeploymentConfig = async (
+  deploymentConfigName: string | undefined,
+  commandObj: CommandObj
+): Promise<DeploymentConfig> => {
+  const projectConfig = await initReadonlyProjectConfig(commandObj);
+
+  // Return default config
+  if (
+    deploymentConfigName === undefined ||
+    deploymentConfigName === projectConfig.defaultDeploymentConfig.name
+  ) {
+    return projectConfig.defaultDeploymentConfig;
+  }
+
+  // Try to find config by name
+  const maybeDeploymentConfig = projectConfig.deploymentConfigs.find(
+    (deploymentConfig): boolean =>
+      deploymentConfig.name === deploymentConfigName
+  );
+
+  if (maybeDeploymentConfig !== undefined) {
+    return maybeDeploymentConfig;
   }
 
   commandObj.warn(
-    `Config ${color.yellow(deploymentConfig.name)} was already deployed before`
+    `There is no ${color.yellow(deploymentConfigName)} deployment config`
   );
-  const doRemove = await confirm({
-    message: `Do you want to remove previously deployed services?`,
+
+  // Prompt user to choose valid config
+  return list({
+    message: "Select one of the existing deployment configs",
+    choices: [
+      projectConfig.defaultDeploymentConfig,
+      ...projectConfig.deploymentConfigs,
+    ].map((value): { value: DeploymentConfig; name: string } => ({
+      value,
+      name: value.name,
+    })),
+    oneChoiceMessage: (name): string =>
+      `Maybe you want to deploy ${color.yellow(name)}?`,
+    onNoChoices: (): never => {
+      commandObj.error("There are no other deployment configs");
+    },
   });
-
-  if (!doRemove) {
-    return updateDeployedConfig(
-      (deployedConfig): DeployedConfig => ({
-        ...deployedConfig,
-        deployed: [...deployedConfig.deployed, newDeployed],
-      })
-    );
-  }
-
-  return removePreviouslyDeployed({
-    aquaCli,
-    commandObj,
-    fluenceProjectDir,
-    name: deploymentConfig.name,
-    timeout,
-    newDeployed,
-  });
-};
-
-const getDeploymentConfig = async (
-  deploymentConfigName: string | undefined,
-  fluenceProjectDir: string,
-  commandObj: CommandObj
-): Promise<DeploymentConfig> => {
-  const projectConfigResult = await getProjectConfig(fluenceProjectDir);
-
-  if (projectConfigResult instanceof Error) {
-    commandObj.error(projectConfigResult.message);
-  }
-
-  const [projectConfig, updateProjectConfig] = projectConfigResult;
-
-  const artifactsPath = path.join(process.cwd(), ARTIFACTS_DIR_NAME);
-
-  if (deploymentConfigName !== undefined) {
-    const maybeDeploymentConfig = projectConfig.deploymentConfigs.find(
-      (deploymentConfig): boolean =>
-        deploymentConfig.name === deploymentConfigName
-    );
-
-    if (maybeDeploymentConfig !== undefined) {
-      return maybeDeploymentConfig;
-    }
-
-    commandObj.warn(
-      `There is no ${color.yellow(deploymentConfigName)} deployment config`
-    );
-
-    const validDeploymentConfigName = await list({
-      message: "Select a valid deployment config",
-      choices: projectConfig.deploymentConfigs.map(({ name }): string => name),
-    });
-
-    const deploymentConfig = projectConfig.deploymentConfigs.find(
-      (deploymentConfig): boolean =>
-        deploymentConfig.name === validDeploymentConfigName
-    );
-
-    assert(deploymentConfig !== undefined);
-
-    return deploymentConfig;
-  }
-
-  const [defaultDeploymentConfig] = projectConfig.deploymentConfigs ?? [];
-
-  if (defaultDeploymentConfig === undefined) {
-    const defaultDeploymentConfig = await generateDefaultDeploymentConfig(
-      commandObj,
-      artifactsPath
-    );
-
-    await updateProjectConfig(
-      (config): ProjectConfig => ({
-        ...config,
-        deploymentConfigs: [defaultDeploymentConfig],
-      })
-    );
-
-    return defaultDeploymentConfig;
-  }
-
-  return defaultDeploymentConfig;
 };

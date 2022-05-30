@@ -47,10 +47,9 @@ export const YAML_FORMAT: [
   },
 ];
 
-export const DEFAULT_KEY_PAIR_NAME = "initial";
-export const DEFAULT_KEY_PAIR_NAME_PROPERTY = "defaultKeyPairName";
-
 export const KEY_PAIR_NAME_FLAG = "key-pair-name";
+
+export const AUTO_GENERATED = "auto-generated";
 
 export const KEY_PAIR_FLAG = {
   [KEY_PAIR_NAME_FLAG]: Flags.string({
@@ -71,7 +70,7 @@ export type Dependency = {
 export const DEPENDENCIES: Record<"aqua", Dependency> = {
   aqua: {
     name: "@fluencelabs/aqua",
-    version: "0.7.2-312",
+    version: "0.7.2-314",
     bin: "aqua",
   },
 } as const;

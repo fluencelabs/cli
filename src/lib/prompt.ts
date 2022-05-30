@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import Ajv, { JSONSchemaType } from "ajv";
+import assert from "node:assert";
+
+import type { JSONSchemaType, ValidateFunction } from "ajv";
 import inquirer, { DistinctQuestion, QuestionMap } from "inquirer";
 
-const NAME = "NAME";
+import { ajv } from "./ajv";
 
-const ajv = new Ajv();
+const NAME = "NAME";
 
 const validateBooleanPrompt = ajv.compile({
   type: "object",
@@ -52,7 +54,7 @@ const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 
 const prompt = async <T, U extends { [NAME]: T }>(
   type: keyof QuestionMap<U>,
-  validate: (result: unknown) => result is U,
+  validate: ValidateFunction<{ NAME: T }>,
   question: DistinctQuestion
 ): Promise<T> => {
   const result: unknown = await inquirer.prompt([
@@ -74,14 +76,81 @@ export const input = (
   question: DistinctQuestion & { message: string }
 ): Promise<string> => prompt("input", validateStringPrompt, question);
 
-export const list = (
-  question: DistinctQuestion & { choices: Array<string>; message: string }
-): Promise<string> => prompt("list", validateStringPrompt, question);
-
-export const checkboxes = (
-  question: DistinctQuestion & {
-    choices: Array<{ name: string; checked?: boolean; disabled?: boolean }>;
-    message: string;
+export const list = async <T, U>({
+  choices,
+  message, // this is shown in case there are 2 or more items in a list
+  oneChoiceMessage, // use confirm for list of one item
+  onNoChoices, // do something if list is empty
+}: {
+  choices: Array<{ value: T; name: string }>;
+  message: string;
+  oneChoiceMessage: (choice: string) => string;
+  onNoChoices: () => U;
+}): Promise<T | U> => {
+  if (choices.length === 0) {
+    return onNoChoices();
   }
-): Promise<Array<string>> =>
-  prompt("checkbox", validateArrayOfStringsPrompt, question);
+
+  const firstChoice = choices[0];
+  if (choices.length === 1 && firstChoice !== undefined) {
+    const doConfirm = await confirm({
+      message: oneChoiceMessage(firstChoice.name),
+    });
+    if (doConfirm) {
+      return firstChoice.value;
+    }
+    return onNoChoices();
+  }
+
+  const stringChoice = await prompt("list", validateStringPrompt, {
+    message,
+    choices: choices.map(({ name }): string => name),
+  });
+
+  const choice = choices.find(({ name }): boolean => name === stringChoice);
+
+  assert(choice !== undefined);
+
+  return choice.value;
+};
+
+export const checkboxes = async <T, U>({
+  choices,
+  message, // this is shown in case there are 2 or more items in a list
+  oneChoiceMessage, // use confirm for list of one item
+  onNoChoices, // do something if list is empty
+}: {
+  choices: Array<{
+    value: T;
+    name: string;
+    checked?: boolean;
+    disabled?: boolean;
+  }>;
+  message: string;
+  oneChoiceMessage: (choice: string) => string;
+  onNoChoices: () => U;
+}): Promise<Array<T> | U> => {
+  if (choices.length === 0) {
+    return onNoChoices();
+  }
+
+  const firstChoice = choices[0];
+  if (choices.length === 1 && firstChoice !== undefined) {
+    const doConfirm = await confirm({
+      message: oneChoiceMessage(firstChoice.name),
+    });
+    if (doConfirm) {
+      return [firstChoice.value];
+    }
+    return [];
+  }
+
+  const stringChoices = await prompt("checkbox", validateArrayOfStringsPrompt, {
+    message,
+    choices: choices.map(({ name }): string => name),
+  });
+
+  return choices
+    .filter(({ name }): boolean => stringChoices.includes(name))
+    .map(({ value }): T => value);
+};

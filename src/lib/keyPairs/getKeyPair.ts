@@ -14,157 +14,102 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
 
-import { getMaybeProjectSecretsConfig } from "../configs/projectSecretsConfig";
-import { getUserSecretsConfig } from "../configs/userSecretsConfig";
-import { getFluenceProjectDir, getUserFluenceDir } from "../getFluenceDir";
-import {
-  CommandObj,
-  CONFIG_FILE_NAME,
-  DEFAULT_KEY_PAIR_NAME_PROPERTY,
-  KEY_PAIR_NAME_FLAG,
-  SECRETS_FILE_NAME,
-} from "../const";
-import { getUserConfig } from "../configs/userConfig";
-import { getProjectConfig } from "../configs/projectConfig";
+import { initReadonlyProjectSecretsConfig } from "../configs/projectConfigs/projectSecretsConfig";
+import { initReadonlyUserSecretsConfig } from "../configs/userConfigs/userSecretsConfig";
+import { CommandObj, KEY_PAIR_NAME_FLAG } from "../const";
+import { getProjectDotFluenceDir } from "../pathsGetters/getProjectDotFluenceDir";
 import { list } from "../prompt";
 
 import type { ConfigKeyPair } from "./generateKeyPair";
 
-const getUserKeyPair = async (
-  commandObj: CommandObj,
-  keyPairName: string | undefined,
-  isUsedForValidation = false
-): Promise<ConfigKeyPair | Error> => {
-  const fluenceDirPath = await getUserFluenceDir(commandObj);
-  const userConfigResult = await getUserConfig(fluenceDirPath);
+type GetUserKeyPairOptions = {
+  commandObj: CommandObj;
+  keyPairName?: string | undefined;
+};
 
-  if (userConfigResult instanceof Error) {
-    return userConfigResult;
+const getUserKeyPair = async ({
+  commandObj,
+  keyPairName,
+}: GetUserKeyPairOptions): Promise<ConfigKeyPair | Error> => {
+  const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
+
+  if (
+    keyPairName === undefined ||
+    keyPairName === userSecretsConfig.defaultKeyPair.name
+  ) {
+    return userSecretsConfig.defaultKeyPair;
   }
 
-  const [userConfig] = userConfigResult;
-
-  const userSecretsConfigResult = await getUserSecretsConfig(fluenceDirPath);
-
-  if (userSecretsConfigResult instanceof Error) {
-    return userSecretsConfigResult;
-  }
-
-  const [userSecretsConfig] = userSecretsConfigResult;
-
-  if (keyPairName === undefined) {
-    const defaultSecretKeyName = userConfig[DEFAULT_KEY_PAIR_NAME_PROPERTY];
-    const defaultSecret = userSecretsConfig.secrets.find(
-      ({ name }): boolean => name === defaultSecretKeyName
-    );
-    if (defaultSecret !== undefined) {
-      return defaultSecret;
-    }
-
-    return new Error(
-      `No ${color.yellow(defaultSecretKeyName)} in ${path.join(
-        fluenceDirPath,
-        SECRETS_FILE_NAME
-      )}. ${color.yellow(defaultSecretKeyName)} was configured in ${path.join(
-        fluenceDirPath,
-        CONFIG_FILE_NAME
-      )} (${DEFAULT_KEY_PAIR_NAME_PROPERTY}: ${defaultSecretKeyName})`
-    );
-  }
-
-  const secret = userSecretsConfig.secrets.find(
+  const keyPair = userSecretsConfig.keyPairs.find(
     ({ name }): boolean => name === keyPairName
-  );
-
-  if (secret !== undefined) {
-    return secret;
-  }
-
-  const problemMessage = `No key-pair ${color.yellow(keyPairName)} found`;
-
-  if (isUsedForValidation) {
-    return new Error(problemMessage);
-  }
-
-  commandObj.warn(problemMessage);
-  const existingKeyPairName = await list({
-    message: "Select existing key-pair name:",
-    choices: Object.keys(userSecretsConfig.secrets),
-  });
-
-  const keyPair = userSecretsConfig.secrets.find(
-    ({ name }): boolean => name === existingKeyPairName
   );
 
   if (keyPair !== undefined) {
     return keyPair;
   }
 
-  throw new Error("Unexpected error: can't get keypair");
+  commandObj.warn(`No user key-pair ${color.yellow(keyPairName)} found`);
+
+  return list({
+    message: "Select existing key-pair name",
+    choices: [
+      userSecretsConfig.defaultKeyPair,
+      ...userSecretsConfig.keyPairs,
+    ].map((value): { value: ConfigKeyPair; name: string } => ({
+      value,
+      name: value.name,
+    })),
+    oneChoiceMessage: (name): string => `Do you want to use ${name} key-pair`,
+    onNoChoices: (): never =>
+      commandObj.error(
+        "There are no other key-pairs. You need a key-pair to continue"
+      ),
+  });
+};
+
+type GetKeyPairOptions = {
+  commandObj: CommandObj;
+  keyPairName: string | undefined;
+};
+
+const getProjectKeyPair = async ({
+  commandObj,
+  keyPairName,
+}: GetKeyPairOptions): Promise<ConfigKeyPair | undefined> => {
+  const projectSecretsConfig = await initReadonlyProjectSecretsConfig(
+    commandObj
+  );
+
+  if (
+    keyPairName === undefined ||
+    keyPairName === projectSecretsConfig.defaultKeyPair?.name
+  ) {
+    return projectSecretsConfig.defaultKeyPair;
+  }
+
+  return projectSecretsConfig.keyPairs.find(
+    ({ name }): boolean => name === keyPairName
+  );
 };
 
 export const getKeyPair = async (
-  commandObj: CommandObj,
-  keyPairName?: string
+  options: GetKeyPairOptions
 ): Promise<ConfigKeyPair | Error> => {
-  const fluenceProjectDir = await getFluenceProjectDir();
+  const projectDotFluenceDir = getProjectDotFluenceDir();
 
-  if (fluenceProjectDir === null) {
-    return getUserKeyPair(commandObj, keyPairName);
-  }
-
-  const projectConfigResult = await getProjectConfig(fluenceProjectDir);
-
-  if (projectConfigResult instanceof Error) {
-    return projectConfigResult;
-  }
-
-  const [projectConfig] = projectConfigResult;
-
-  const projectSecretsConfigResult = await getMaybeProjectSecretsConfig(
-    fluenceProjectDir
-  );
-
-  if (projectSecretsConfigResult instanceof Error) {
-    return projectSecretsConfigResult;
-  }
-
-  const [projectSecretsConfig] = projectSecretsConfigResult;
-
-  const defaultSecretKeyName = projectConfig[DEFAULT_KEY_PAIR_NAME_PROPERTY];
-  if (keyPairName === undefined && defaultSecretKeyName !== undefined) {
-    const defaultSecret = projectSecretsConfig?.secrets.find(
-      ({ name }): boolean => name === defaultSecretKeyName
-    );
-
-    if (defaultSecret !== undefined) {
-      return defaultSecret;
+  try {
+    await fsPromises.access(projectDotFluenceDir);
+    const projectKeyPair = await getProjectKeyPair(options);
+    if (projectKeyPair !== undefined) {
+      return projectKeyPair;
     }
+  } catch {}
 
-    return new Error(
-      `No ${color.yellow(defaultSecretKeyName)} in ${path.join(
-        fluenceProjectDir,
-        SECRETS_FILE_NAME
-      )}. ${color.yellow(defaultSecretKeyName)} was configured in ${path.join(
-        fluenceProjectDir,
-        CONFIG_FILE_NAME
-      )} (${DEFAULT_KEY_PAIR_NAME_PROPERTY}: ${defaultSecretKeyName})`
-    );
-  }
-
-  const keyPair = projectSecretsConfig?.secrets.find(
-    ({ name }): boolean => name === keyPairName
-  );
-
-  if (keyPair !== undefined) {
-    return keyPair;
-  }
-
-  return getUserKeyPair(commandObj, keyPairName);
+  return getUserKeyPair(options);
 };
 
 export const getKeyPairFromFlags = async (
@@ -174,4 +119,4 @@ export const getKeyPairFromFlags = async (
     [KEY_PAIR_NAME_FLAG]: string | undefined;
   },
   commandObj: CommandObj
-): Promise<ConfigKeyPair | Error> => getKeyPair(commandObj, keyPairName);
+): Promise<ConfigKeyPair | Error> => getKeyPair({ commandObj, keyPairName });

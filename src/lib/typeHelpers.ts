@@ -16,24 +16,30 @@
 
 import { AssertionError } from "node:assert";
 
-export const isObject = (obj: unknown): obj is Record<string, unknown> =>
-  obj !== null && typeof obj === "object";
+export type Mutable<Type> = {
+  -readonly [Key in keyof Type]: Type[Key];
+};
+
+export const isObject = (
+  unknown: unknown
+): unknown is Record<string, unknown> =>
+  unknown !== null && typeof unknown === "object";
 
 export const hasKey = <K extends string>(
   key: K,
-  obj: unknown
-): obj is Record<K, unknown> => isObject(obj) && key in obj;
+  unknown: unknown
+): unknown is Record<K, unknown> => isObject(unknown) && key in unknown;
 
 export const assertHasKey: <K extends string>(
   key: K,
-  obj: unknown,
+  unknown: unknown,
   message: string
-) => asserts obj is Record<K, unknown> = <K extends string>(
+) => asserts unknown is Record<K, unknown> = <K extends string>(
   key: K,
-  obj: unknown,
+  unknown: unknown,
   message: string
-): asserts obj is Record<K, unknown> => {
-  if (hasKey(key, obj)) {
+): asserts unknown is Record<K, unknown> => {
+  if (hasKey(key, unknown)) {
     throw new AssertionError({ message });
   }
 };

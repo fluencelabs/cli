@@ -17,9 +17,9 @@
 import { Command, Flags } from "@oclif/core";
 
 import { AquaCLI } from "../lib/aquaCli";
-import { getRandomAddr } from "../lib/multiaddr";
-import { input } from "../lib/prompt";
 import { usage } from "../lib/helpers/usage";
+import { getRelayAddr } from "../lib/multiaddr";
+import { input } from "../lib/prompt";
 
 export default class Run extends Command {
   static override description = "Run aqua script";
@@ -74,7 +74,7 @@ export default class Run extends Command {
       flags.func ??
       (await input({ message: "Enter a function that you want to run" }));
 
-    const relay = flags.relay ?? getRandomAddr();
+    const relay = flags.relay ?? getRelayAddr();
 
     const aquaCli = new AquaCLI(this);
 

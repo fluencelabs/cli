@@ -14,41 +14,42 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
+
 import { krasnodar, testNet } from "@fluencelabs/fluence-network-environment";
 
 const defaultEnvs = [...krasnodar, ...testNet];
 export const defaultAddr = defaultEnvs.map(
   ({ multiaddr }): string => multiaddr
 );
-const defaultPeerIds = defaultEnvs.map(({ peerId }): string => peerId);
+const defaultRelayIds = defaultEnvs.map(({ peerId }): string => peerId);
 
-export const getRandomAddr = (knownRelays?: Array<string>): string => {
+export const getRelayAddr = (
+  peerId?: string,
+  knownRelays?: Array<string>
+): string => {
   const addresses = knownRelays ?? defaultAddr;
+  if (typeof peerId === "string") {
+    const maybeAddr = addresses.find((addr): boolean => addr.includes(peerId));
+    if (typeof maybeAddr === "string") {
+      return maybeAddr;
+    }
+  }
+
   const largestIndex = addresses.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
-  const randomAddr = addresses[randomIndex];
-
-  if (randomAddr === undefined) {
-    throw new Error(
-      "Error getting random addr: this error should be impossible"
-    );
-  }
-
-  return randomAddr;
+  const randomRelayAddr = addresses[randomIndex];
+  assert(randomRelayAddr !== undefined);
+  return randomRelayAddr;
 };
 
-export const getRandomPeerId = (): string => {
-  const largestIndex = defaultPeerIds.length - 1;
+export const getRandomRelayId = (): string => {
+  const largestIndex = defaultRelayIds.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
-  const randomPeerId = defaultPeerIds[randomIndex];
+  const randomRelayId = defaultRelayIds[randomIndex];
+  assert(randomRelayId !== undefined);
 
-  if (randomPeerId === undefined) {
-    throw new Error(
-      "Error getting random peer id: this error should be impossible"
-    );
-  }
-
-  return randomPeerId;
+  return randomRelayId;
 };

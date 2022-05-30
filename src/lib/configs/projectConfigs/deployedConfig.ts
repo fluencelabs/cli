@@ -14,34 +14,39 @@
  * limitations under the License.
  */
 
-import Ajv, { JSONSchemaType } from "ajv";
+import type { JSONSchemaType } from "ajv";
 
-import { DEPLOYED_FILE_NAME } from "../const";
+import { DEPLOYED_FILE_NAME } from "../../const";
+import { getProjectDotFluenceDir } from "../../pathsGetters/getProjectDotFluenceDir";
+import {
+  GetDefaultConfig,
+  initConfig,
+  InitConfigOptions,
+  InitializedConfig,
+  initReadonlyConfig,
+  Migrations,
+} from "../initConfig";
 
-import { UpdateConfig, getConfig } from "./ensureConfig";
-
-const ajv = new Ajv();
-
-type DeployedServiceConfig0 = {
+type DeployedServiceConfigV0 = {
   name: string;
   peerId: string;
   serviceId: string;
   blueprintId: string;
 };
 
-export type DeployedServiceConfig = DeployedServiceConfig0;
+export type DeployedServiceConfig = DeployedServiceConfigV0;
 
-type Deployed0 = {
+type DeployedV0 = {
   name: string;
-  services: Array<DeployedServiceConfig0>;
+  services: Array<DeployedServiceConfigV0>;
   keyPairName: string;
   timestamp: string;
   knownRelays?: Array<string>;
 };
 
-export type Deployed = Deployed0;
+export type Deployed = DeployedV0;
 
-const deploymentConfigSchema0: JSONSchemaType<Deployed0> = {
+const deploymentConfigSchemaV0: JSONSchemaType<DeployedV0> = {
   type: "object",
   properties: {
     name: { type: "string" },
@@ -69,48 +74,43 @@ const deploymentConfigSchema0: JSONSchemaType<Deployed0> = {
   required: ["name", "services", "keyPairName", "timestamp"],
 };
 
-type Config0 = {
+type ConfigV0 = {
   version: 0;
-  deployed: Array<Deployed0>;
+  deployed: Array<DeployedV0>;
 };
 
-export type DeployedConfig = Config0;
-
-type Configs = Config0;
-
-const getDefaultConfig = (): DeployedConfig => ({
-  version: 0,
-  deployed: [],
-});
-
-const configSchema0: JSONSchemaType<Config0> = {
+const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
     version: { type: "number", enum: [0] },
     deployed: {
       type: "array",
-      items: deploymentConfigSchema0,
+      items: deploymentConfigSchemaV0,
       nullable: true,
     },
   },
   required: ["version"],
 };
 
-const configSchema: JSONSchemaType<Configs> = {
-  oneOf: [configSchema0],
-} as const;
+const getDefaultConfig: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
+  version: 0,
+  deployed: [],
+});
 
-const validateConfig = ajv.compile(configSchema);
+const migrations: Migrations<Config> = [];
 
-const migrations: Array<(config: Configs) => Configs> = [];
+type Config = ConfigV0;
+type LatestConfig = ConfigV0;
+export type DeployedConfig = InitializedConfig<LatestConfig>;
 
-export const getDeployedConfig = async (
-  configDir: string
-): Promise<[DeployedConfig, UpdateConfig<DeployedConfig>] | Error> =>
-  getConfig({
-    configDir,
-    configName: DEPLOYED_FILE_NAME,
-    migrations,
-    validateConfig,
-    getDefaultConfig,
-  });
+const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
+  allSchemas: [configSchemaV0],
+  latestSchema: configSchemaV0,
+  migrations,
+  name: DEPLOYED_FILE_NAME,
+  getPath: getProjectDotFluenceDir,
+  getDefault: getDefaultConfig,
+};
+
+export const initDeployedConfig = initConfig(initConfigOptions);
+export const initReadonlyDeployedConfig = initReadonlyConfig(initConfigOptions);

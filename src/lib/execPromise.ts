@@ -27,10 +27,12 @@ const EXECUTION_TIMEOUT = 90_000;
 
 export const execPromise = (
   command: string,
-  message: string,
+  message?: string,
   timeout?: number
 ): Promise<string> => {
-  CliUx.ux.action.start(`${message}\n`);
+  if (typeof message === "string") {
+    CliUx.ux.action.start(`${message}\n`);
+  }
 
   return new Promise<string>((res, rej): void => {
     const commandToDisplay = isDevelopment
@@ -43,22 +45,27 @@ export const execPromise = (
     const failedCommandText = `Debug info:\n${commandToDisplay}\n`;
 
     const execTimeout = setTimeout((): void => {
-      CliUx.ux.action.stop();
+      if (typeof message === "string") {
+        CliUx.ux.action.stop();
+      }
+      childProcess.kill();
       rej(
         new Error(
-          `${failedCommandText}Execution timed out: command didn't yield any result in ${EXECUTION_TIMEOUT}ms`
+          `Execution timed out: command didn't yield any result in ${EXECUTION_TIMEOUT}ms\n${failedCommandText}`
         )
       );
     }, timeout ?? EXECUTION_TIMEOUT);
 
-    exec(command, (error, stdout, stderr): void => {
+    const childProcess = exec(command, (error, stdout, stderr): void => {
       clearTimeout(execTimeout);
-      CliUx.ux.action.stop();
+      if (typeof message === "string") {
+        CliUx.ux.action.stop();
+      }
 
       if (error !== null) {
         rej(
           new Error(
-            `\nCommand execution resulted in error:\n\n${stderr}\n\n${failedCommandText}\n\n`
+            `Command execution failed:\n\n${stderr}\n\n${failedCommandText}\n`
           )
         );
         return;

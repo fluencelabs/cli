@@ -14,200 +14,162 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
+
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { AquaCLI } from "../lib/aquaCli";
 import {
   Deployed,
   DeployedConfig,
-  getDeployedConfig,
-} from "../lib/configs/deployedConfig";
-import type { UpdateConfig } from "../lib/configs/ensureConfig";
+  initDeployedConfig,
+} from "../lib/configs/projectConfigs/deployedConfig";
 import { CommandObj, NAME_ARG } from "../lib/const";
-import { ensureFluenceProjectDir } from "../lib/getFluenceDir";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
-import { getRandomAddr } from "../lib/multiaddr";
-import { checkboxes, confirm, list } from "../lib/prompt";
+import { getRelayAddr } from "../lib/multiaddr";
+import { ensureProjectDotFluenceDir } from "../lib/pathsGetters/getFluenceDir";
+import { checkboxes, list } from "../lib/prompt";
 
 export default class Remove extends Command {
   static override description = "Remove previously deployed config";
-
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-
   static override flags = {
     timeout: Flags.string({
       description: "Remove timeout",
       helpValue: "<milliseconds>",
     }),
   };
-
   static override args = [
     { name: NAME_ARG, description: "Deployment config name" },
   ];
-
   static override usage: string = usage(this);
-
   async run(): Promise<void> {
+    await ensureProjectDotFluenceDir(this);
+
     const { flags, args } = await this.parse(Remove);
+    const nameFromArgs: unknown = args[NAME_ARG];
+    assert(nameFromArgs === undefined || typeof nameFromArgs === "string");
 
-    const fluenceProjectDir = await ensureFluenceProjectDir(this);
+    const deployedConfig = await initDeployedConfig(this);
 
-    const name = await ensureName(args[NAME_ARG], this, fluenceProjectDir);
+    const name = await ensureName({
+      nameFromArgs,
+      commandObj: this,
+      deployedConfig,
+    });
 
-    await removePreviouslyDeployed({
+    await removePreviouslyDeployedConfigByName({
+      deployedConfig,
       name,
       commandObj: this,
-      aquaCli: new AquaCLI(this),
-      fluenceProjectDir,
       timeout: flags.timeout,
     });
   }
 }
 
-const ensureName = async (
-  nameFromArgs: string | undefined,
-  commandObj: CommandObj,
-  fluenceProjectDir: string
-): Promise<string> => {
-  const deployedConfigResult = await getDeployedConfig(fluenceProjectDir);
-
-  if (deployedConfigResult instanceof Error) {
-    return commandObj.error(deployedConfigResult.message);
-  }
-
-  const [deployedConfig] = deployedConfigResult;
-
-  const choices = [
+/**
+ * Ensures valid config name is returned
+ * @param param0 { nameFromArgs: string | undefined; deployedConfig: DeployedConfig; commandObj: CommandObj;}
+ * @returns Promise<string>
+ */
+const ensureName = async ({
+  nameFromArgs,
+  deployedConfig,
+  commandObj,
+}: {
+  nameFromArgs: string | undefined;
+  deployedConfig: DeployedConfig;
+  commandObj: CommandObj;
+}): Promise<string> => {
+  const previouslyDeployedConfigs = [
     ...new Set(deployedConfig.deployed.map(({ name }): string => name)),
   ];
 
-  if (choices.length === 0) {
-    commandObj.error("There are no deployments to remove");
-  }
-
-  const namesPromptOptions = {
-    message: "Select the name of the deployment config you want to remove",
-    choices,
-  };
-
   if (typeof nameFromArgs === "string") {
-    if (choices.includes(nameFromArgs)) {
+    if (previouslyDeployedConfigs.includes(nameFromArgs)) {
+      // return back the name if there are config/configs with this name
       return nameFromArgs;
     }
 
     commandObj.warn(`No config ${color.yellow(nameFromArgs)} found`);
   }
 
-  const firstChoice = choices[0];
-
-  if (choices.length === 1 && firstChoice !== undefined) {
-    const doRemove = await confirm({
-      message: `Remove previously deployed config ${color.yellow(
-        firstChoice
-      )}?`,
-    });
-
-    if (doRemove) {
-      return firstChoice;
-    }
-
-    commandObj.error(`You didn't deploy any other configs`);
-  }
-
-  return list(namesPromptOptions);
-};
-
-export const getPreviouslyDeployedConfig = async ({
-  name,
-  fluenceProjectDir,
-  commandObj,
-  newDeployed,
-}: {
-  name: string;
-  fluenceProjectDir: string;
-  commandObj: CommandObj;
-  newDeployed?: Deployed;
-}): Promise<{
-  previouslyDeployedConfigs: Array<Deployed>;
-  updateDeployedConfig: UpdateConfig<DeployedConfig>;
-}> => {
-  const deployedConfigResult = await getDeployedConfig(fluenceProjectDir);
-
-  if (deployedConfigResult instanceof Error) {
-    if (newDeployed !== undefined) {
-      commandObj.warn(
-        `Deployed services information will not be saved: ${yamlDiffPatch(
-          "{}",
-          {},
-          newDeployed
-        )}`
-      );
-    }
-
-    return commandObj.error(deployedConfigResult.message);
-  }
-
-  const [deployedConfig, updateDeployedConfig] = deployedConfigResult;
-
-  return {
-    previouslyDeployedConfigs: deployedConfig.deployed.filter(
-      (deployedConfig): boolean => deployedConfig.name === name
+  // prompt user for a valid name
+  return list({
+    message: "Select the name of the deployment config you want to remove",
+    choices: previouslyDeployedConfigs.map(
+      (name): { name: string; value: string } => ({
+        name,
+        value: name,
+      })
     ),
-    updateDeployedConfig,
-  };
+    oneChoiceMessage: (name): string =>
+      `Do you want to remove ${color.yellow(name)}`,
+    onNoChoices: (): never => commandObj.error("There is nothing to remove"),
+  });
 };
 
-export const removePreviouslyDeployed = async ({
+export const filterPreviouslyDeployedConfigsByName = (
+  deployedConfig: DeployedConfig,
+  name: string
+): Array<Deployed> =>
+  deployedConfig.deployed.filter((deployed): boolean => deployed.name === name);
+
+/**
+ * Prompts user to select timestamps of the stuff he wants to remove,
+ * gets key-pairs for stuff that user selected for removal
+ * removes each service from the configs
+ * removes each successfully removed service from the config and commits it to disk
+ * @param param0 { name: string; commandObj: CommandObj; timeout: string | undefined; deployedConfig: DeployedConfig;}
+ * @returns Promise<void>
+ */
+export const removePreviouslyDeployedConfigByName = async ({
   name,
-  fluenceProjectDir,
   commandObj,
-  aquaCli,
   timeout,
-  newDeployed,
+  deployedConfig,
 }: Readonly<{
   name: string;
-  fluenceProjectDir: string;
   commandObj: CommandObj;
-  aquaCli: AquaCLI;
   timeout: string | undefined;
-  newDeployed?: Deployed;
-}>): Promise<DeployedConfig> => {
-  const { previouslyDeployedConfigs, updateDeployedConfig } =
-    await getPreviouslyDeployedConfig({ name, fluenceProjectDir, commandObj });
+  deployedConfig: DeployedConfig;
+}>): Promise<void> => {
+  const aquaCli = new AquaCLI(commandObj);
 
-  const deployedToRemove =
-    previouslyDeployedConfigs.length === 1
-      ? previouslyDeployedConfigs.map(({ timestamp }): string => timestamp)
-      : await checkboxes({
-          message: "Select timestamps of deployments you want to remove",
-          choices: previouslyDeployedConfigs.map(
-            ({
-              timestamp,
-            }): Parameters<typeof checkboxes>[0]["choices"][0] => ({
-              name: timestamp,
-            })
-          ),
-        });
-
-  const successfullyRemovedServices: Map<string, Array<string>> = new Map();
-  const removalErrors: string[] = [];
-
-  const previouslyDeployedItemsToRemove = previouslyDeployedConfigs.filter(
-    ({ timestamp }): boolean => deployedToRemove.includes(timestamp)
+  const previouslyDeployedConfigs = filterPreviouslyDeployedConfigsByName(
+    deployedConfig,
+    name
   );
 
-  for (const previouslyDeployedItemToRemove of previouslyDeployedItemsToRemove) {
-    const addr = getRandomAddr(previouslyDeployedItemToRemove.knownRelays);
-    const { keyPairName, timestamp, services } = previouslyDeployedItemToRemove;
+  const previouslyDeployedConfigsToRemove = await checkboxes({
+    message: "Select timestamps of the stuff you want to remove",
+    onNoChoices: (): never => {
+      throw new Error("There is nothing to remove");
+    },
+    oneChoiceMessage: (timeStamp): string =>
+      `Do you want to remove stuff that was deployed on ${color.yellow(
+        timeStamp
+      )}`,
+    choices: previouslyDeployedConfigs.map(
+      (value): { name: string; value: Deployed } => ({
+        name: value.timestamp,
+        value,
+      })
+    ),
+  });
+
+  const successfullyRemoved: Record<string, Array<string>> = {};
+
+  for (const previouslyDeployedConfig of previouslyDeployedConfigsToRemove) {
+    const { keyPairName, timestamp, services } = previouslyDeployedConfig;
     // eslint-disable-next-line no-await-in-loop
-    const keyPair = await getKeyPair(commandObj, keyPairName);
+    const keyPair = await getKeyPair({ commandObj, keyPairName });
 
     if (keyPair instanceof Error) {
-      removalErrors.push(
+      commandObj.warn(
         getMessageWithKeyValuePairs(`${keyPair.message}. From config`, {
           "deployed at": timestamp,
         })
@@ -215,17 +177,8 @@ export const removePreviouslyDeployed = async ({
       continue;
     }
 
-    for (const previouslyDeployedServiceToRemove of services) {
-      const { serviceId, peerId, name, blueprintId } =
-        previouslyDeployedServiceToRemove;
-
-      const infoKeyValuePairs = {
-        name,
-        id: serviceId,
-        blueprintId,
-        "deployed on": peerId,
-        "deployed at": timestamp,
-      };
+    for (const { serviceId, peerId, name, blueprintId } of services) {
+      const addr = getRelayAddr(peerId, previouslyDeployedConfig.knownRelays);
 
       try {
         // eslint-disable-next-line no-await-in-loop
@@ -241,51 +194,46 @@ export const removePreviouslyDeployed = async ({
             },
           },
           `Removing service`,
-          infoKeyValuePairs
+          {
+            name,
+            id: serviceId,
+            blueprintId,
+            relay: addr,
+            "deployed on": peerId,
+            "deployed at": timestamp,
+          }
         );
-        successfullyRemovedServices.set(timestamp, [
-          ...(successfullyRemovedServices.get(timestamp) ?? []),
+
+        successfullyRemoved[timestamp] = [
+          ...(successfullyRemoved[timestamp] ?? []),
           serviceId,
-        ]);
+        ];
       } catch (error) {
-        removalErrors.push(
-          getMessageWithKeyValuePairs(
-            `${String(error)}\n when removing service`,
-            infoKeyValuePairs
-          )
-        );
+        commandObj.warn(`When removing service\n${String(error)}`);
       }
     }
   }
 
-  for (const error of removalErrors) {
-    commandObj.warn(error);
-  }
+  deployedConfig.deployed = deployedConfig.deployed.reduce<Array<Deployed>>(
+    (acc, deployed): Array<Deployed> => {
+      const successfullyRemovedServices =
+        successfullyRemoved[deployed.timestamp];
 
-  return updateDeployedConfig((deployedConfig): DeployedConfig => {
-    const deployedArray = [];
-
-    for (const deployed of deployedConfig.deployed) {
-      const removedTimestamps = successfullyRemovedServices.get(
-        deployed.timestamp
-      );
-
-      if (removedTimestamps !== undefined) {
+      if (deployed.name === name && successfullyRemovedServices !== undefined) {
         deployed.services = deployed.services.filter(
-          ({ serviceId }): boolean => !removedTimestamps.includes(serviceId)
+          ({ serviceId }): boolean =>
+            !successfullyRemovedServices.includes(serviceId)
         );
       }
 
       if (deployed.services.length > 0) {
-        deployedArray.push(deployed);
+        acc.push(deployed);
       }
-    }
 
-    deployedConfig.deployed = deployedArray;
-    if (newDeployed !== undefined) {
-      deployedConfig.deployed.push(newDeployed);
-    }
+      return acc;
+    },
+    []
+  );
 
-    return deployedConfig;
-  });
+  await deployedConfig.$commit();
 };

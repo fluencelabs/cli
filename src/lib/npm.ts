@@ -17,9 +17,9 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { getUserFluenceDir } from "./getFluenceDir";
 import type { CommandObj, Dependency } from "./const";
 import { execPromise } from "./execPromise";
+import { ensureUserFluenceDir } from "./pathsGetters/getFluenceDir";
 
 const npmInstall = async (
   name: string,
@@ -29,16 +29,10 @@ const npmInstall = async (
 ): Promise<string> =>
   execPromise(`npm i ${name}@${version} -g --prefix=${npmPath}`, message);
 
-export const getNpmPath = async (commandObj: CommandObj): Promise<string> => {
-  const userFluenceDir = await getUserFluenceDir(commandObj);
+export const ensureNpmDir = async (commandObj: CommandObj): Promise<string> => {
+  const userFluenceDir = await ensureUserFluenceDir(commandObj);
   const npmPath = path.join(userFluenceDir, "npm");
-
-  try {
-    await fsPromises.access(npmPath);
-  } catch {
-    await fsPromises.mkdir(npmPath, { recursive: true });
-  }
-
+  await fsPromises.mkdir(npmPath, { recursive: true });
   return npmPath;
 };
 
@@ -47,14 +41,18 @@ export const ensureNpmDependency = async (
   commandObj: CommandObj,
   message: string
 ): Promise<string> => {
-  const npmPath = await getNpmPath(commandObj);
+  const npmDirPath = await ensureNpmDir(commandObj);
 
-  const dependencyPath = path.join(npmPath, "bin", bin);
+  const dependencyPath = path.join(npmDirPath, "bin", bin);
 
   try {
     await fsPromises.access(dependencyPath);
+    const result = await execPromise(`${dependencyPath} -v`);
+    if (!result.includes(version)) {
+      throw new Error("Outdated");
+    }
   } catch {
-    await npmInstall(name, version, npmPath, message);
+    await npmInstall(name, version, npmDirPath, message);
   }
 
   return dependencyPath;

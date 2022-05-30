@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { execPromise } from "./execPromise";
-import { ensureNpmDependency } from "./npm";
-import { unparseFlags } from "./helpers/unparseFlags";
 import { CommandObj, DEPENDENCIES } from "./const";
+import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
+import { unparseFlags } from "./helpers/unparseFlags";
+import { ensureNpmDependency } from "./npm";
 
 type Flags<T extends string> = Record<T, string>;
 type OptionalFlags<T extends string> = Partial<Record<T, string | undefined>>;
@@ -49,7 +49,7 @@ export class AquaCLI {
     this.#aquaCliPathPromise = ensureNpmDependency(
       DEPENDENCIES.aqua,
       commandObj,
-      "Downloading the latest version of Aqua CLI"
+      "Downloading the latest version of Aqua CLI, may take a while"
     );
   }
 
