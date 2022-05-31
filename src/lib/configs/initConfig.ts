@@ -77,7 +77,7 @@ const migrateConfig = async <
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
   validate: undefined | ((config: LatestConfig) => ValidationResult);
-}): Promise<{ validConfig: LatestConfig; validConfigString: string }> => {
+}): Promise<{ latestConfig: LatestConfig; configString: string }> => {
   const migratedConfig = migrations
     .slice(config.version)
     .reduce((config, migration): Config => migration(config), config);
@@ -110,12 +110,12 @@ const migrateConfig = async <
     await fsPromises.writeFile(configPath, migratedConfigString, FS_OPTIONS);
   }
   return {
-    validConfig: latestConfig,
-    validConfigString: migratedConfigString,
+    latestConfig: latestConfig,
+    configString: migratedConfigString,
   };
 };
 
-const ensureValidConfig = <
+const ensureConfigIsValidLatest = <
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >({
@@ -230,7 +230,7 @@ export const initReadonlyConfig =
       validateAllConfigVersions.schema
     );
 
-    const configString = await ensureConfigString(
+    let configString = await ensureConfigString(
       configPath,
       schemaFileName,
       getDefaultConfig
@@ -251,33 +251,32 @@ export const initReadonlyConfig =
 
     const validateLatestConfig = ajv.compile<LatestConfig>(latestConfigSchema);
 
-    const { validConfig, validConfigString } =
-      config.version < migrations.length
-        ? await migrateConfig({
-            config,
-            configPath,
-            configString,
-            migrations,
-            validateLatestConfig,
-            validate,
-          })
-        : {
-            validConfig: ensureValidConfig({
-              config,
-              configPath,
-              validateLatestConfig,
-              validate,
-            }),
-            validConfigString: configString,
-          };
+    let latestConfig: LatestConfig;
+    if (config.version < migrations.length) {
+      ({ latestConfig, configString } = await migrateConfig({
+        config,
+        configPath,
+        configString,
+        migrations,
+        validateLatestConfig,
+        validate,
+      }));
+    } else {
+      latestConfig = ensureConfigIsValidLatest({
+        config,
+        configPath,
+        validateLatestConfig,
+        validate,
+      });
+    }
 
     return {
-      ...validConfig,
+      ...latestConfig,
       $getPath(): string {
         return configPath;
       },
       $getConfigString(): string {
-        return validConfigString;
+        return configString;
       },
       $validateLatest: validateLatestConfig,
     };
