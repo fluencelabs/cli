@@ -27,10 +27,9 @@
     "mocha-test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test": "npm run mocha-test",
     "posttest": "npm run lint",
-    "version": "oclif readme && git add README.md",
     "prepare": "husky install",
     "check": "npm run build && npm run mocha-test",
-    "pre-commit": "npm run check"
+    "pre-commit": "oclif readme && git add README.md"
   },
   "dependencies": {
     "@fluencelabs/fluence": "^0.23.0",

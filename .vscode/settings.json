@@ -1,4 +1,11 @@
 {
-  "cSpell.words": ["fluence", "Fluence", "oclif"],
-  "aquaSettings.imports": ["/home/shams/.fluence/aqua", "../artifacts"]
+  "cSpell.words": [
+    "fluence",
+    "Fluence",
+    "oclif"
+  ],
+  "aquaSettings.imports": [
+    "/home/shams/.fluence/aqua",
+    "/home/shams/Projects/work/fluence-cli/artifacts"
+  ]
 }

@@ -59,7 +59,7 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
 * [`fluence remove [NAME] [--timeout <milliseconds>]`](#fluence-remove-name---timeout-milliseconds)
-* [`fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]`](#fluence-run---on-peer_id---aqua-path--f-function-call---relay-multiaddr---timeout-milliseconds)
+* [`fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>] [--data <json>] [--data-path <path>] [--import <path>]`](#fluence-run---on-peer_id---aqua-path--f-function-call---relay-multiaddr---timeout-milliseconds---data-json---data-path-path---import-path)
 * [`fluence update [CHANNEL]`](#fluence-update-channel)
 
 ## `fluence autocomplete [SHELL]`
@@ -408,17 +408,23 @@ EXAMPLES
 
 _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/remove.ts)_
 
-## `fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]`
+## `fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>] [--data <json>] [--data-path <path>] [--import <path>]`
 
 Run aqua script
 
 ```
 USAGE
   $ fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]
+    [--data <json>] [--data-path <path>] [--import <path>]
 
 FLAGS
   -f, --func=<function-call>  Function call
   --aqua=<path>               Path to an aqua file or to a directory that contains your aqua files
+  --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
+                              argument names
+  --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
+                              using these argument names
+  --import=<path>             Path to the directory to import from. May be used several times
   --on=<peer_id>              PeerId of the peer where you want to run the function
   --relay=<multiaddr>         Relay node MultiAddress
   --timeout=<milliseconds>    Run timeout

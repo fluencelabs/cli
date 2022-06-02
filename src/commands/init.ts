@@ -40,6 +40,7 @@ import {
   DEFAULT_SRC_AQUA_FILE_NAME,
 } from "../lib/const";
 import { usage } from "../lib/helpers/usage";
+import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { input } from "../lib/prompt";
 
@@ -172,7 +173,7 @@ const getSettingsConfig = async (
   const settingsConfig = {
     "aquaSettings.imports": [
       await ensureAppServicesAquaFile(commandObj),
-      path.join("..", ARTIFACTS_DIR_NAME),
+      getArtifactsPath(),
     ],
   };
 
