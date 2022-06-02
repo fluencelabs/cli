@@ -14,4 +14,17 @@
  * limitations under the License.
  */
 
-export { run } from "@oclif/core";
+import { color } from "@oclif/color";
+
+export const getMessageWithKeyValuePairs = (
+  message: string,
+  keyValuePairs?: Record<string, string>
+): string =>
+  `${color.yellow(message)}:${
+    keyValuePairs === undefined
+      ? ""
+      : Object.entries(keyValuePairs).reduce(
+          (acc, [k, v]): string => `${acc}\n  ${k}: ${v}`,
+          ""
+        )
+  }`;

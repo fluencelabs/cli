@@ -14,4 +14,21 @@
  * limitations under the License.
  */
 
-export { run } from "@oclif/core";
+import fsPromises from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+
+import { CommandObj, FLUENCE_DIR_NAME } from "../const";
+
+export const ensureUserFluenceDir = async (
+  commandObj: CommandObj
+): Promise<string> => {
+  if (commandObj.config.windows) {
+    await fsPromises.mkdir(commandObj.config.configDir, { recursive: true });
+    return commandObj.config.configDir;
+  }
+
+  const fluenceDir = path.join(os.homedir(), FLUENCE_DIR_NAME);
+  await fsPromises.mkdir(fluenceDir, { recursive: true });
+  return fluenceDir;
+};

@@ -14,4 +14,18 @@
  * limitations under the License.
  */
 
-export { run } from "@oclif/core";
+import fsPromises from "node:fs/promises";
+import path from "node:path";
+
+import { DEFAULT_AQUA_DIR_NAME, CommandObj } from "../const";
+
+import { ensureUserFluenceDir } from "./ensureUserFluenceDir";
+
+export const ensureDefaultAquaPath = async (
+  commandObj: CommandObj
+): Promise<string> => {
+  const userFluenceDir = await ensureUserFluenceDir(commandObj);
+  const defaultAquaPath = path.join(userFluenceDir, DEFAULT_AQUA_DIR_NAME);
+  await fsPromises.mkdir(defaultAquaPath, { recursive: true });
+  return defaultAquaPath;
+};

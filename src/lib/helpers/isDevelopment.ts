@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { run } from "@oclif/core";
+export const isDevelopment = process.env["NODE_ENV"] === "development";

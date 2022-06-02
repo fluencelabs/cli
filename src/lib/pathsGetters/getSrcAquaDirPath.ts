@@ -14,4 +14,12 @@
  * limitations under the License.
  */
 
-export { run } from "@oclif/core";
+import path from "node:path";
+
+import { AQUA_DIR_NAME, SRC_DIR_NAME } from "../const";
+
+import { getProjectRootDir } from "./getProjectRootDir";
+
+export const getSrcAquaDirPath = (): string => {
+  return path.join(getProjectRootDir(), SRC_DIR_NAME, AQUA_DIR_NAME);
+};
