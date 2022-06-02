@@ -19,7 +19,7 @@ import path from "node:path";
 
 import type { CommandObj, Dependency } from "./const";
 import { execPromise } from "./execPromise";
-import { ensureUserFluenceDir } from "./pathsGetters/getFluenceDir";
+import { ensureUserFluenceDir } from "./pathsGetters/ensureUserFluenceDir";
 
 const npmInstall = async (
   name: string,

@@ -17,21 +17,15 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { ARTIFACTS_DIR_NAME } from "../const";
+import { DEFAULT_AQUA_DIR_NAME, CommandObj } from "../const";
 
-import { getProjectRootDir } from "./getProjectRootDir";
+import { ensureUserFluenceDir } from "./ensureUserFluenceDir";
 
-export const getArtifactsPath = (): string => {
-  return path.join(getProjectRootDir(), ARTIFACTS_DIR_NAME);
-};
-
-export const getMaybeArtifactsPath = async (): Promise<string | undefined> => {
-  const artifactsPath = getArtifactsPath();
-  try {
-    await fsPromises.access(artifactsPath);
-  } catch {
-    return;
-  }
-
-  return artifactsPath;
+export const ensureDefaultAquaPath = async (
+  commandObj: CommandObj
+): Promise<string> => {
+  const userFluenceDir = await ensureUserFluenceDir(commandObj);
+  const defaultAquaPath = path.join(userFluenceDir, DEFAULT_AQUA_DIR_NAME);
+  await fsPromises.mkdir(defaultAquaPath, { recursive: true });
+  return defaultAquaPath;
 };

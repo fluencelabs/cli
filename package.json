@@ -30,7 +30,7 @@
     "version": "oclif readme && git add README.md",
     "prepare": "husky install",
     "check": "npm run build && npm run mocha-test",
-    "pre-commit": "npm run check && npm run version"
+    "pre-commit": "npm run check"
   },
   "dependencies": {
     "@fluencelabs/fluence": "^0.23.0",
@@ -198,7 +198,8 @@
       "semi": "off",
       "operator-linebreak": "off",
       "unicorn/no-array-reduce": "off",
-      "unicorn/consistent-destructuring": "off"
+      "unicorn/consistent-destructuring": "off",
+      "unicorn/no-useless-undefined": "off"
     },
     "overrides": [
       {

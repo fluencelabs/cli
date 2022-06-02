@@ -2,7 +2,6 @@
 *-error.log
 /.nyc_output
 /dist
-/.fluence
 /artifacts
 /tmp
 /--fix
@@ -10,3 +9,7 @@
 node_modules
 oclif.manifest.json
 .eslintcache
+/schemas
+/fluence.yaml
+.fluence
+/src/aqua

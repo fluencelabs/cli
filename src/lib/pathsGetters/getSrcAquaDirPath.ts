@@ -16,9 +16,10 @@
 
 import path from "node:path";
 
-import { FLUENCE_DIR_NAME } from "../const";
+import { AQUA_DIR_NAME, SRC_DIR_NAME } from "../const";
 
 import { getProjectRootDir } from "./getProjectRootDir";
 
-export const getProjectDotFluenceDir = (): string =>
-  path.join(getProjectRootDir(), FLUENCE_DIR_NAME);
+export const getSrcAquaDirPath = (): string => {
+  return path.join(getProjectRootDir(), SRC_DIR_NAME, AQUA_DIR_NAME);
+};

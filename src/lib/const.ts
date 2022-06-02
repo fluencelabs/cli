@@ -17,20 +17,29 @@
 import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
+export const AQUA_EXT = "aqua";
+
 export const FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const ARTIFACTS_DIR_NAME = "artifacts";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
+export const AQUA_DIR_NAME = "aqua";
+export const DEFAULT_AQUA_DIR_NAME = "aqua";
 
-export const CONFIG_FILE_NAME = "config";
+export const APP_PROTOTYPE_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
-export const DEPLOYED_FILE_NAME = "deployed";
+export const APP_FILE_NAME = "app";
+
+export const APP_SERVICES_AQUA_FILE_NAME = `app.services.${AQUA_EXT}`;
+export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
+export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
 
 export const GITIGNORE_FILE_NAME = ".gitignore";
 export const PACKAGE_JSON_FILE_NAME = "package.json";
 export const EXTENSIONS_JSON_FILE_NAME = "extensions.json";
+export const SETTINGS_JSON_FILE_NAME = "settings.json";
 export const DEPLOYMENT_CONFIG_FILE_NAME = "deploy.json";
 
 export const FS_OPTIONS = {
@@ -81,9 +90,18 @@ export const GIT_IGNORE_CONTENT = `# recommended by Fluence Labs:
 .idea
 .DS_Store
 .vscode
-.fluence/secrets.json
+.fluence
+/schemas
 **/node_modules
 Cargo.lock
 **/target/
 **/artifacts/*.wasm
 .repl_history`;
+
+export const APP_SERVICES_AQUA = `data DeployedService:
+  serviceId: string
+  peerId: string
+  blueprintId: string
+  name: string
+
+alias App : []DeployedService`;

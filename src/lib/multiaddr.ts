@@ -24,22 +24,20 @@ export const defaultAddr = defaultEnvs.map(
 );
 const defaultRelayIds = defaultEnvs.map(({ peerId }): string => peerId);
 
-export const getRelayAddr = (
-  peerId?: string,
-  knownRelays?: Array<string>
-): string => {
-  const addresses = knownRelays ?? defaultAddr;
+export const getRelayAddr = (peerId?: string): string => {
   if (typeof peerId === "string") {
-    const maybeAddr = addresses.find((addr): boolean => addr.includes(peerId));
+    const maybeAddr = defaultAddr.find((addr): boolean =>
+      addr.includes(peerId)
+    );
     if (typeof maybeAddr === "string") {
       return maybeAddr;
     }
   }
 
-  const largestIndex = addresses.length - 1;
+  const largestIndex = defaultAddr.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
-  const randomRelayAddr = addresses[randomIndex];
+  const randomRelayAddr = defaultAddr[randomIndex];
   assert(randomRelayAddr !== undefined);
   return randomRelayAddr;
 };

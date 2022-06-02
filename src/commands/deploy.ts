@@ -17,19 +17,18 @@
 import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
 import { AquaCLI } from "../lib/aquaCli";
 import {
-  Deployed,
   DeployedServiceConfig,
-  initDeployedConfig,
-} from "../lib/configs/projectConfigs/deployedConfig";
+  initAppConfig,
+  initNewReadonlyAppConfig,
+} from "../lib/configs/project/app";
 import {
-  DeploymentConfig,
-  initReadonlyProjectConfig,
-} from "../lib/configs/projectConfigs/projectConfig";
+  FluenceConfigReadonly,
+  initReadonlyFluenceConfig,
+} from "../lib/configs/project/fluence";
 import {
   CommandObj,
   DEPLOYMENT_CONFIG_FILE_NAME,
@@ -39,12 +38,11 @@ import {
 import { usage } from "../lib/helpers/usage";
 import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
 import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
-import { getRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayId, getRelayAddr } from "../lib/multiaddr";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
-import { ensureProjectDotFluenceDir } from "../lib/pathsGetters/getFluenceDir";
-import { confirm, list } from "../lib/prompt";
+import { confirm, input } from "../lib/prompt";
 
-import { removePreviouslyDeployedConfig } from "./remove";
+import { removeApp } from "./remove";
 
 export default class Deploy extends Command {
   static override description = "Deploy service to the remote peer";
@@ -62,9 +60,28 @@ export default class Deploy extends Command {
   static override usage: string = usage(this);
 
   async run(): Promise<void> {
-    await ensureProjectDotFluenceDir(this);
-
     const { flags, args } = await this.parse(Deploy);
+
+    const deployedConfig = await initAppConfig(this);
+
+    if (deployedConfig !== null) {
+      // Prompt user to remove previously deployed app if
+      // it was already deployed before
+      const doRemove = await confirm({
+        message:
+          "Currently you need to remove your app to deploy again. Do you want to remove?",
+      });
+
+      if (!doRemove) {
+        this.error("You have to confirm in order to continue");
+      }
+
+      await removeApp({
+        appConfig: deployedConfig,
+        commandObj: this,
+        timeout: flags.timeout,
+      });
+    }
 
     const keyPair = await getKeyPairFromFlags(flags, this);
     if (keyPair instanceof Error) {
@@ -73,42 +90,14 @@ export default class Deploy extends Command {
     const nameArg: unknown = args[NAME_ARG];
     assert(nameArg === undefined || typeof nameArg === "string");
 
-    const deploymentConfig = await ensureDeploymentConfig(nameArg, this);
-    const deployedConfig = await initDeployedConfig(this);
+    const fluenceConfig = await initReadonlyFluenceConfig(this);
 
-    const deployedConfigToRemove = deployedConfig.deployed.find(
-      (deployed): boolean => deployed.name === deploymentConfig.name
-    );
-    if (deployedConfigToRemove !== undefined) {
-      // Prompt user to remove previously deployed stuff if this
-      // config was already deployed before
-      const doRemove = await confirm({
-        message: `Do you want to remove previously deployed stuff from ${color.yellow(
-          deployedConfigToRemove.name
-        )} config`,
-      });
-
-      if (!doRemove) {
-        this.error("You have to confirm in order to continue");
-      }
-
-      await removePreviouslyDeployedConfig({
-        deployedConfig,
-        deployedConfigToRemove,
-        commandObj: this,
-        timeout: flags.timeout,
-      });
-    }
-
-    const newDeployed = await deploy({
-      deploymentConfig,
+    await deploy({
+      fluenceConfig,
       commandObj: this,
       keyPair,
       timeout: flags.timeout,
     });
-
-    deployedConfig.deployed.push(newDeployed);
-    return deployedConfig.$commit();
   }
 }
 
@@ -249,33 +238,39 @@ const deployServices = async ({
 };
 
 const deploy = async ({
-  deploymentConfig,
+  fluenceConfig,
   keyPair,
   commandObj,
   timeout,
 }: {
-  deploymentConfig: DeploymentConfig;
+  fluenceConfig: FluenceConfigReadonly;
   keyPair: ConfigKeyPair;
   timeout: string | undefined;
   commandObj: CommandObj;
-}): Promise<Deployed> => {
+}): Promise<void> => {
   const artifactsPath = getArtifactsPath();
   const aquaCli = new AquaCLI(commandObj);
   const successfullyDeployedServices: DeployedServiceConfig[] = [];
   const cwd = process.cwd();
+  const peerId = (await confirm({
+    message: "Do you want to enter peerId to deploy on?",
+    default: false,
+  }))
+    ? await input({ message: "Enter peerId to deploy on" })
+    : getRandomRelayId();
+  const addr = getRelayAddr(peerId);
 
-  for (const { name, peerId, count = 1 } of deploymentConfig.services) {
+  for (const { name, count = 1 } of fluenceConfig.services) {
     process.chdir(path.join(artifactsPath, name));
-    const addr = getRelayAddr(peerId, deploymentConfig.knownRelays);
     // eslint-disable-next-line no-await-in-loop
     const results = await deployServices({
       count,
       deployServiceOptions: {
         name,
-        peerId,
         artifactsPath,
         secretKey: keyPair.secretKey,
         aquaCli,
+        peerId,
         timeout,
         addr,
       },
@@ -297,68 +292,13 @@ const deploy = async ({
     commandObj.error("No services were deployed successfully");
   }
 
-  const newDeployed: Deployed = {
-    name: deploymentConfig.name,
-    services: successfullyDeployedServices,
-    keyPairName: keyPair.name,
-    timestamp: new Date().toISOString(),
-  };
-
-  if (Array.isArray(deploymentConfig.knownRelays)) {
-    newDeployed.knownRelays = deploymentConfig.knownRelays;
-  }
-
-  return newDeployed;
-};
-
-/**
- * Ensures valid deployment config
- * @param deploymentConfigName string | undefined
- * @param commandObj CommandObj
- * @returns Promise<DeploymentConfig>
- */
-const ensureDeploymentConfig = async (
-  deploymentConfigName: string | undefined,
-  commandObj: CommandObj
-): Promise<DeploymentConfig> => {
-  const projectConfig = await initReadonlyProjectConfig(commandObj);
-
-  // Return default config
-  if (deploymentConfigName === undefined) {
-    const defaultConfig = projectConfig.deploymentConfigs.find(
-      ({ name }): boolean => name === projectConfig.defaultDeploymentConfigName
-    );
-    assert(defaultConfig !== undefined);
-    return defaultConfig;
-  }
-
-  // Try to find config by name
-  const maybeDeploymentConfig = projectConfig.deploymentConfigs.find(
-    (deploymentConfig): boolean =>
-      deploymentConfig.name === deploymentConfigName
-  );
-
-  if (maybeDeploymentConfig !== undefined) {
-    return maybeDeploymentConfig;
-  }
-
-  commandObj.warn(
-    `There is no ${color.yellow(deploymentConfigName)} deployment config`
-  );
-
-  // Prompt user to choose valid config
-  return list({
-    message: "Select one of the existing deployment configs",
-    choices: projectConfig.deploymentConfigs.map(
-      (value): { value: DeploymentConfig; name: string } => ({
-        value,
-        name: value.name,
-      })
-    ),
-    oneChoiceMessage: (name): string =>
-      `Maybe you want to deploy ${color.yellow(name)}?`,
-    onNoChoices: (): never => {
-      commandObj.error("There are no other deployment configs");
+  await initNewReadonlyAppConfig(
+    {
+      version: 0,
+      services: successfullyDeployedServices,
+      keyPairName: keyPair.name,
+      timestamp: new Date().toISOString(),
     },
-  });
+    commandObj
+  );
 };

@@ -15,23 +15,25 @@
  */
 
 import fsPromises from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 
 import { init } from "../../commands/init";
 import { CommandObj, FLUENCE_DIR_NAME } from "../const";
 import { confirm } from "../prompt";
 
-import { getProjectDotFluenceDir } from "./getProjectDotFluenceDir";
+import { getProjectRootDir } from "./getProjectRootDir";
 
-export const ensureProjectDotFluenceDir = async (
+export const getProjectFluenceDirPath = (): string =>
+  path.join(getProjectRootDir(), FLUENCE_DIR_NAME);
+
+export const ensureProjectFluenceDirPath = async (
   commandObj: CommandObj
 ): Promise<string> => {
-  const projectDotFluenceDir = getProjectDotFluenceDir();
+  const projectFluenceDirPath = getProjectFluenceDirPath();
 
   try {
-    await fsPromises.access(projectDotFluenceDir);
-    return projectDotFluenceDir;
+    await fsPromises.access(projectFluenceDirPath);
+    return projectFluenceDirPath;
   } catch {}
 
   commandObj.warn("Not a fluence project");
@@ -46,18 +48,7 @@ export const ensureProjectDotFluenceDir = async (
     );
   }
 
-  return init(commandObj);
-};
+  await init(commandObj);
 
-export const ensureUserFluenceDir = async (
-  commandObj: CommandObj
-): Promise<string> => {
-  if (commandObj.config.windows) {
-    await fsPromises.mkdir(commandObj.config.configDir, { recursive: true });
-    return commandObj.config.configDir;
-  }
-
-  const fluenceDir = path.join(os.homedir(), FLUENCE_DIR_NAME);
-  await fsPromises.mkdir(fluenceDir, { recursive: true });
-  return fluenceDir;
+  return getProjectFluenceDirPath();
 };

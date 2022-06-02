@@ -76,23 +76,37 @@ export const input = (
   question: DistinctQuestion & { message: string }
 ): Promise<string> => prompt("input", validateStringPrompt, question);
 
-export const list = async <T, U>({
+type ListOptions<T, U> = {
+  choices: T;
+  message: string;
+  oneChoiceMessage: (choice: string) => string;
+  onNoChoices: () => U;
+};
+
+export async function list<T, U>(
+  options: ListOptions<Array<{ value: T; name: string }>, U>
+): Promise<T | U>;
+export async function list<T extends string, U>(
+  options: ListOptions<Array<T>, U>
+): Promise<T | U>;
+export async function list<T, U>({
   choices,
   message, // this is shown in case there are 2 or more items in a list
   oneChoiceMessage, // use confirm for list of one item
   onNoChoices, // do something if list is empty
-}: {
-  choices: Array<{ value: T; name: string }>;
-  message: string;
-  oneChoiceMessage: (choice: string) => string;
-  onNoChoices: () => U;
-}): Promise<T | U> => {
+}: ListOptions<
+  T extends string ? Array<T> : Array<{ value: T; name: string }>,
+  U
+>): Promise<T | U> {
   if (choices.length === 0) {
     return onNoChoices();
   }
 
-  const firstChoice = choices[0];
-  if (choices.length === 1 && firstChoice !== undefined) {
+  const choicesToUse = choices.map((choice): { name: string; value: T } =>
+    typeof choice === "string" ? { name: choice, value: choice } : choice
+  );
+  const firstChoice = choicesToUse[0];
+  if (choicesToUse.length === 1 && firstChoice !== undefined) {
     const doConfirm = await confirm({
       message: oneChoiceMessage(firstChoice.name),
     });
@@ -104,15 +118,17 @@ export const list = async <T, U>({
 
   const stringChoice = await prompt("list", validateStringPrompt, {
     message,
-    choices: choices.map(({ name }): string => name),
+    choices: choicesToUse,
   });
 
-  const choice = choices.find(({ name }): boolean => name === stringChoice);
+  const choice = choicesToUse.find(
+    (choice): boolean => choice.name === stringChoice
+  );
 
   assert(choice !== undefined);
 
   return choice.value;
-};
+}
 
 export const checkboxes = async <T, U>({
   choices,

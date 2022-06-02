@@ -22,7 +22,8 @@ import { Command } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../lib/ajv";
-import { initReadonlyProjectConfig } from "../lib/configs/projectConfigs/projectConfig";
+import { ensureAppServicesAquaFile } from "../lib/aqua/ensureAppServicesAquaFile";
+import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
   CommandObj,
   ARTIFACTS_DIR_NAME,
@@ -34,8 +35,12 @@ import {
   GITIGNORE_FILE_NAME,
   GIT_IGNORE_CONTENT,
   NAME_ARG,
+  AQUA_DIR_NAME,
+  SETTINGS_JSON_FILE_NAME,
+  DEFAULT_SRC_AQUA_FILE_NAME,
 } from "../lib/const";
 import { usage } from "../lib/helpers/usage";
+import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { input } from "../lib/prompt";
 
 export default class Init extends Command {
@@ -103,9 +108,8 @@ const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
   required: ["recommendations"],
 };
 const validateExtensionsJson = ajv.compile(extensionsJsonSchema);
-const YAML_EXTENSION = "redhat.vscode-yaml";
 const extensionsConfig: ExtensionsJson = {
-  recommendations: [YAML_EXTENSION],
+  recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua-syntax-highlight"],
 };
 
 const ensureRecommendedExtensions = async (
@@ -137,11 +141,12 @@ const ensureRecommendedExtensions = async (
     return;
   }
 
-  if (
-    validateExtensionsJson(parsedFileContent) &&
-    !parsedFileContent.recommendations.includes(YAML_EXTENSION)
-  ) {
-    parsedFileContent.recommendations.push(YAML_EXTENSION);
+  if (validateExtensionsJson(parsedFileContent)) {
+    for (const recommendation of extensionsConfig.recommendations) {
+      if (!parsedFileContent.recommendations.includes(recommendation)) {
+        parsedFileContent.recommendations.push(recommendation);
+      }
+    }
     await fsPromises.writeFile(
       extensionsJsonPath,
       JSON.stringify(parsedFileContent, null, 2),
@@ -150,7 +155,73 @@ const ensureRecommendedExtensions = async (
   }
 };
 
-const addGitIgnore = async (projectPath: string): Promise<void> => {
+type SettingsJson = {
+  "aquaSettings.imports": Array<string>;
+};
+const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
+  type: "object",
+  properties: {
+    "aquaSettings.imports": { type: "array", items: { type: "string" } },
+  },
+  required: ["aquaSettings.imports"],
+};
+const validateSettingsJson = ajv.compile(settingsJsonSchema);
+const getSettingsConfig = async (
+  commandObj: CommandObj
+): Promise<SettingsJson> => {
+  const settingsConfig = {
+    "aquaSettings.imports": [
+      await ensureAppServicesAquaFile(commandObj),
+      path.join("..", ARTIFACTS_DIR_NAME),
+    ],
+  };
+
+  return settingsConfig;
+};
+
+const ensureRecommendedSettings = async (
+  projectPath: string,
+  commandObj: CommandObj
+): Promise<void> => {
+  const vscodeDirPath = path.join(projectPath, VSCODE_DIR_NAME);
+  await fsPromises.mkdir(vscodeDirPath, { recursive: true });
+  const settingsJsonPath = path.join(vscodeDirPath, SETTINGS_JSON_FILE_NAME);
+
+  let fileContent: string;
+  try {
+    fileContent = await fsPromises.readFile(settingsJsonPath, FS_OPTIONS);
+  } catch {
+    await fsPromises.writeFile(
+      settingsJsonPath,
+      JSON.stringify(await getSettingsConfig(commandObj), null, 2),
+      FS_OPTIONS
+    );
+    return;
+  }
+
+  let parsedFileContent: unknown;
+  try {
+    parsedFileContent = JSON.parse(fileContent);
+  } catch {
+    return;
+  }
+
+  if (validateSettingsJson(parsedFileContent)) {
+    const settingsConfig = await getSettingsConfig(commandObj);
+    for (const importItem of settingsConfig["aquaSettings.imports"]) {
+      if (!parsedFileContent["aquaSettings.imports"].includes(importItem)) {
+        parsedFileContent["aquaSettings.imports"].push(importItem);
+      }
+    }
+    await fsPromises.writeFile(
+      settingsJsonPath,
+      JSON.stringify(parsedFileContent, null, 2),
+      FS_OPTIONS
+    );
+  }
+};
+
+const ensureGitIgnore = async (projectPath: string): Promise<void> => {
   let gitIgnoreContent: string;
   const gitIgnorePath = path.join(projectPath, GITIGNORE_FILE_NAME);
   try {
@@ -173,31 +244,41 @@ const addGitIgnore = async (projectPath: string): Promise<void> => {
 export const init = async (
   commandObj: CommandObj,
   projectName?: string
-): Promise<string> => {
+): Promise<void> => {
   const projectPath = await getProjectPath(projectName, commandObj);
 
   try {
     const fluenceDirPath = path.join(projectPath, FLUENCE_DIR_NAME);
     await fsPromises.mkdir(fluenceDirPath, { recursive: true });
+    process.chdir(projectPath);
 
-    await initReadonlyProjectConfig(commandObj, fluenceDirPath);
+    await initReadonlyFluenceConfig(commandObj, projectPath);
 
-    const srcDirPath = path.join(projectPath, SRC_DIR_NAME);
-    await fsPromises.mkdir(srcDirPath, { recursive: true });
+    const aquaDirPath = path.join(projectPath, SRC_DIR_NAME, AQUA_DIR_NAME);
+    await fsPromises.mkdir(aquaDirPath, { recursive: true });
+    const defaultSrcAquaFilePath = path.join(
+      getSrcAquaDirPath(),
+      DEFAULT_SRC_AQUA_FILE_NAME
+    );
+    try {
+      await fsPromises.access(defaultSrcAquaFilePath);
+    } catch {
+      await fsPromises.writeFile(defaultSrcAquaFilePath, "");
+    }
 
-    const distDirPath = path.join(projectPath, ARTIFACTS_DIR_NAME);
-    await fsPromises.mkdir(distDirPath, { recursive: true });
+    const artifactsDirPath = path.join(projectPath, ARTIFACTS_DIR_NAME);
+    await fsPromises.mkdir(artifactsDirPath, { recursive: true });
 
     await ensureRecommendedExtensions(projectPath);
-
-    await addGitIgnore(projectPath);
+    await ensureRecommendedSettings(projectPath, commandObj);
+    await ensureGitIgnore(projectPath);
+    await ensureAppServicesAquaFile(commandObj);
 
     commandObj.log(
       color.magentaBright(
         `\nFluence project successfully initialized at ${projectPath}\n`
       )
     );
-    return fluenceDirPath;
   } catch (error) {
     commandObj.error(String(error));
   }

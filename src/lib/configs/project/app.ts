@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
-import { DEPLOYED_FILE_NAME } from "../../const";
-import { validateUnique, ValidationResult } from "../../helpers/validations";
-import { getProjectDotFluenceDir } from "../../pathsGetters/getProjectDotFluenceDir";
+import { APP_FILE_NAME, CommandObj } from "../../const";
+import { ensureProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
-  GetDefaultConfig,
   initConfig,
   InitConfigOptions,
   InitializedConfig,
+  InitializedReadonlyConfig,
   initReadonlyConfig,
   Migrations,
 } from "../initConfig";
@@ -38,20 +36,18 @@ type DeployedServiceConfigV0 = {
 
 export type DeployedServiceConfig = DeployedServiceConfigV0;
 
-type DeployedV0 = {
-  name: string;
+type ConfigV0 = {
+  version: 0;
   services: Array<DeployedServiceConfigV0>;
   keyPairName: string;
   timestamp: string;
   knownRelays?: Array<string>;
 };
 
-export type Deployed = DeployedV0;
-
-const deploymentConfigSchemaV0: JSONSchemaType<DeployedV0> = {
+const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
-    name: { type: "string" },
+    version: { type: "number", enum: [0] },
     services: {
       type: "array",
       items: {
@@ -73,55 +69,33 @@ const deploymentConfigSchemaV0: JSONSchemaType<DeployedV0> = {
       items: { type: "string" },
     },
   },
-  required: ["name", "services", "keyPairName", "timestamp"],
+  required: ["version", "services", "keyPairName", "timestamp"],
 };
-
-type ConfigV0 = {
-  version: 0;
-  deployed: Array<DeployedV0>;
-};
-
-const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  type: "object",
-  properties: {
-    version: { type: "number", enum: [0] },
-    deployed: {
-      type: "array",
-      items: deploymentConfigSchemaV0,
-      nullable: true,
-    },
-  },
-  required: ["version"],
-};
-
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
-  version: 0,
-  deployed: [],
-});
 
 const migrations: Migrations<Config> = [];
 
-const validate = (config: LatestConfig): ValidationResult =>
-  validateUnique(
-    config.deployed,
-    ({ name }): string => name,
-    (name): string =>
-      `There are multiple configs with the same name ${color.yellow(name)}`
-  );
-
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
-export type DeployedConfig = InitializedConfig<LatestConfig>;
+export type AppConfig = InitializedConfig<LatestConfig>;
+export type AppConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: DEPLOYED_FILE_NAME,
-  getPath: getProjectDotFluenceDir,
-  getDefault,
-  validate,
+  name: APP_FILE_NAME,
+  getPath: ensureProjectFluenceDirPath,
 };
 
-export const initDeployedConfig = initConfig(initConfigOptions);
-export const initReadonlyDeployedConfig = initReadonlyConfig(initConfigOptions);
+export const initAppConfig = initConfig(initConfigOptions);
+export const initReadonlyAppConfig = initReadonlyConfig(initConfigOptions);
+export const initNewAppConfig = (
+  config: LatestConfig,
+  commandObj: CommandObj
+): Promise<AppConfig> =>
+  initConfig(initConfigOptions, (): LatestConfig => config)(commandObj);
+export const initNewReadonlyAppConfig = (
+  config: LatestConfig,
+  commandObj: CommandObj
+): Promise<AppConfigReadonly> =>
+  initReadonlyConfig(initConfigOptions, (): LatestConfig => config)(commandObj);

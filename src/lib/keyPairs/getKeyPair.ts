@@ -19,10 +19,10 @@ import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
 
-import { initReadonlyProjectSecretsConfig } from "../configs/projectConfigs/projectSecretsConfig";
-import { initReadonlyUserSecretsConfig } from "../configs/userConfigs/userSecretsConfig";
+import { initReadonlyProjectSecretsConfig } from "../configs/project/projectSecrets";
+import { initReadonlyUserSecretsConfig } from "../configs/user/userSecrets";
 import { CommandObj, KEY_PAIR_NAME_FLAG } from "../const";
-import { getProjectDotFluenceDir } from "../pathsGetters/getProjectDotFluenceDir";
+import { getProjectFluenceDirPath } from "../pathsGetters/getProjectFluenceDirPath";
 import { list } from "../prompt";
 
 import type { ConfigKeyPair } from "./generateKeyPair";
@@ -99,10 +99,10 @@ const getProjectKeyPair = async ({
 export const getKeyPair = async (
   options: GetKeyPairOptions
 ): Promise<ConfigKeyPair | Error> => {
-  const projectDotFluenceDir = getProjectDotFluenceDir();
+  const projectFluenceDirPath = getProjectFluenceDirPath();
 
   try {
-    await fsPromises.access(projectDotFluenceDir);
+    await fsPromises.access(projectFluenceDirPath);
     const projectKeyPair = await getProjectKeyPair(options);
     if (projectKeyPair !== undefined) {
       return projectKeyPair;

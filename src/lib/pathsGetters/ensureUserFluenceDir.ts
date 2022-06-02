@@ -15,23 +15,20 @@
  */
 
 import fsPromises from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
-import { ARTIFACTS_DIR_NAME } from "../const";
+import { CommandObj, FLUENCE_DIR_NAME } from "../const";
 
-import { getProjectRootDir } from "./getProjectRootDir";
-
-export const getArtifactsPath = (): string => {
-  return path.join(getProjectRootDir(), ARTIFACTS_DIR_NAME);
-};
-
-export const getMaybeArtifactsPath = async (): Promise<string | undefined> => {
-  const artifactsPath = getArtifactsPath();
-  try {
-    await fsPromises.access(artifactsPath);
-  } catch {
-    return;
+export const ensureUserFluenceDir = async (
+  commandObj: CommandObj
+): Promise<string> => {
+  if (commandObj.config.windows) {
+    await fsPromises.mkdir(commandObj.config.configDir, { recursive: true });
+    return commandObj.config.configDir;
   }
 
-  return artifactsPath;
+  const fluenceDir = path.join(os.homedir(), FLUENCE_DIR_NAME);
+  await fsPromises.mkdir(fluenceDir, { recursive: true });
+  return fluenceDir;
 };

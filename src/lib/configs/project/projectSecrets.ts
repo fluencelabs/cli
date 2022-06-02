@@ -28,12 +28,13 @@ import {
   ConfigKeyPair,
   configKeyPairSchema,
 } from "../../keyPairs/generateKeyPair";
-import { getProjectDotFluenceDir } from "../../pathsGetters/getProjectDotFluenceDir";
+import { ensureProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
   GetDefaultConfig,
   initConfig,
   InitConfigOptions,
   InitializedConfig,
+  InitializedReadonlyConfig,
   initReadonlyConfig,
   Migrations,
 } from "../initConfig";
@@ -87,17 +88,23 @@ const validate = (config: LatestConfig): ValidationResult =>
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
 export type ProjectSecretsConfig = InitializedConfig<LatestConfig>;
+export type ProjectSecretsConfigReadonly =
+  InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
   name: SECRETS_FILE_NAME,
-  getPath: getProjectDotFluenceDir,
-  getDefault,
+  getPath: ensureProjectFluenceDirPath,
   validate,
 };
 
-export const initProjectSecretsConfig = initConfig(initConfigOptions);
-export const initReadonlyProjectSecretsConfig =
-  initReadonlyConfig(initConfigOptions);
+export const initProjectSecretsConfig = initConfig(
+  initConfigOptions,
+  getDefault
+);
+export const initReadonlyProjectSecretsConfig = initReadonlyConfig(
+  initConfigOptions,
+  getDefault
+);

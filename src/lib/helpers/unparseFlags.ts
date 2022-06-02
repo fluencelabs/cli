@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+const unparseFlag = (flagName: string, flagValue: string | undefined): string =>
+  flagValue === undefined ? "" : ` \\\n--${flagName} '${flagValue}'`;
+
 export const unparseFlags = (
-  flags: Record<string, string | undefined>
+  flags: Record<string, string | undefined | Array<string | undefined>>
 ): string =>
   Object.entries(flags)
-    .map(([flag, flagValue]): string =>
-      flagValue === undefined ? "" : ` \\\n--${flag} '${flagValue}'`
+    .flatMap(
+      ([flagName, flagValue]): Array<string> =>
+        Array.isArray(flagValue)
+          ? flagValue.map((value): string => unparseFlag(flagName, value))
+          : [unparseFlag(flagName, flagValue)]
     )
     .join("");

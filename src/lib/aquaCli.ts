@@ -20,8 +20,10 @@ import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePai
 import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureNpmDependency } from "./npm";
 
-type Flags<T extends string> = Record<T, string>;
-type OptionalFlags<T extends string> = Partial<Record<T, string | undefined>>;
+type Flags<T extends string> = Record<T, string | Array<string | undefined>>;
+type OptionalFlags<T extends string> = Partial<
+  Record<T, string | undefined | Array<string | undefined>>
+>;
 
 export type AquaCliInput =
   | {
@@ -39,7 +41,8 @@ export type AquaCliInput =
     }
   | {
       command: "run";
-      flags: Flags<"addr" | "input" | "func"> & OptionalFlags<"on" | "timeout">;
+      flags: Flags<"addr" | "input" | "func"> &
+        OptionalFlags<"on" | "timeout" | "data" | "import">;
     };
 
 export class AquaCLI {

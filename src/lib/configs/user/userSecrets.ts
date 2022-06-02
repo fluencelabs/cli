@@ -29,12 +29,13 @@ import {
   configKeyPairSchema,
   generateKeyPair,
 } from "../../keyPairs/generateKeyPair";
-import { ensureUserFluenceDir } from "../../pathsGetters/getFluenceDir";
+import { ensureUserFluenceDir } from "../../pathsGetters/ensureUserFluenceDir";
 import {
   GetDefaultConfig,
   initConfig,
   InitConfigOptions,
   InitializedConfig,
+  InitializedReadonlyConfig,
   initReadonlyConfig,
   Migrations,
 } from "../initConfig";
@@ -87,6 +88,7 @@ const validate = (config: LatestConfig): ValidationResult =>
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
 export type UserSecretsConfig = InitializedConfig<LatestConfig>;
+export type UserSecretsConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
@@ -94,10 +96,11 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: SECRETS_FILE_NAME,
   getPath: ensureUserFluenceDir,
-  getDefault,
   validate,
 };
 
-export const initUserSecretsConfig = initConfig(initConfigOptions);
-export const initReadonlyUserSecretsConfig =
-  initReadonlyConfig(initConfigOptions);
+export const initUserSecretsConfig = initConfig(initConfigOptions, getDefault);
+export const initReadonlyUserSecretsConfig = initReadonlyConfig(
+  initConfigOptions,
+  getDefault
+);

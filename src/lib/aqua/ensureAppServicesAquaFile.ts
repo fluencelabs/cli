@@ -17,21 +17,23 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { ARTIFACTS_DIR_NAME } from "../const";
+import {
+  APP_SERVICES_AQUA,
+  APP_SERVICES_AQUA_FILE_NAME,
+  CommandObj,
+  FS_OPTIONS,
+} from "../const";
+import { ensureDefaultAquaPath } from "../pathsGetters/ensureDefaultAquaDir";
 
-import { getProjectRootDir } from "./getProjectRootDir";
-
-export const getArtifactsPath = (): string => {
-  return path.join(getProjectRootDir(), ARTIFACTS_DIR_NAME);
-};
-
-export const getMaybeArtifactsPath = async (): Promise<string | undefined> => {
-  const artifactsPath = getArtifactsPath();
-  try {
-    await fsPromises.access(artifactsPath);
-  } catch {
-    return;
-  }
-
-  return artifactsPath;
+export const ensureAppServicesAquaFile = async (
+  commandObj: CommandObj
+): Promise<string> => {
+  const aquaPath = await ensureDefaultAquaPath(commandObj);
+  const appServicesFilePath = path.join(aquaPath, APP_SERVICES_AQUA_FILE_NAME);
+  await fsPromises.writeFile(
+    appServicesFilePath,
+    APP_SERVICES_AQUA,
+    FS_OPTIONS
+  );
+  return aquaPath;
 };
