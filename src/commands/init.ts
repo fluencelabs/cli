@@ -110,7 +110,7 @@ const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
 };
 const validateExtensionsJson = ajv.compile(extensionsJsonSchema);
 const extensionsConfig: ExtensionsJson = {
-  recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua-syntax-highlight"],
+  recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
 };
 
 const ensureRecommendedExtensions = async (
@@ -129,7 +129,7 @@ const ensureRecommendedExtensions = async (
   } catch {
     await fsPromises.writeFile(
       extensionsJsonPath,
-      JSON.stringify(extensionsConfig, null, 2),
+      JSON.stringify(extensionsConfig, null, 2) + "\n",
       FS_OPTIONS
     );
     return;
@@ -150,7 +150,7 @@ const ensureRecommendedExtensions = async (
     }
     await fsPromises.writeFile(
       extensionsJsonPath,
-      JSON.stringify(parsedFileContent, null, 2),
+      JSON.stringify(parsedFileContent, null, 2) + "\n",
       FS_OPTIONS
     );
   }
@@ -194,7 +194,7 @@ const ensureRecommendedSettings = async (
   } catch {
     await fsPromises.writeFile(
       settingsJsonPath,
-      JSON.stringify(await getSettingsConfig(commandObj), null, 2),
+      JSON.stringify(await getSettingsConfig(commandObj), null, 2) + "\n",
       FS_OPTIONS
     );
     return;
@@ -216,7 +216,7 @@ const ensureRecommendedSettings = async (
     }
     await fsPromises.writeFile(
       settingsJsonPath,
-      JSON.stringify(parsedFileContent, null, 2),
+      JSON.stringify(parsedFileContent, null, 2) + "\n",
       FS_OPTIONS
     );
   }
@@ -234,7 +234,10 @@ const ensureGitIgnore = async (projectPath: string): Promise<void> => {
     const missingGitIgnoreEntries = GIT_IGNORE_CONTENT.split("\n")
       .filter((entry): boolean => !currentGitIgnoreEntries.has(entry))
       .join("\n");
-    gitIgnoreContent = `${currentGitIgnore}\n${missingGitIgnoreEntries}`;
+    gitIgnoreContent =
+      missingGitIgnoreEntries === ""
+        ? currentGitIgnore
+        : `${currentGitIgnore}\n# recommended by Fluence Labs:\n${missingGitIgnoreEntries}\n`;
   } catch {
     gitIgnoreContent = GIT_IGNORE_CONTENT;
   }

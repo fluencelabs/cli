@@ -45,23 +45,22 @@ export type AquaCliInput =
         OptionalFlags<"on" | "timeout" | "data" | "import">;
     };
 
-export class AquaCLI {
-  #aquaCliPathPromise: Promise<string>;
-
-  constructor(commandObj: CommandObj) {
-    this.#aquaCliPathPromise = ensureNpmDependency(
-      DEPENDENCIES.aqua,
-      commandObj,
-      "Downloading the latest version of Aqua CLI, may take a while"
-    );
-  }
-
-  async run(
+export type AquaCLI = {
+  (
     aquaCliInput: AquaCliInput,
     message: string,
     keyValuePairs?: Record<string, string>
-  ): Promise<string> {
-    const aquaCliPath = await this.#aquaCliPathPromise;
+  ): Promise<string>;
+};
+
+export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
+  const aquaCliPath = await ensureNpmDependency(
+    DEPENDENCIES.aqua,
+    commandObj,
+    "Downloading Aqua CLI, may take a while"
+  );
+
+  return async (aquaCliInput, message, keyValuePairs): Promise<string> => {
     const { command, flags } = aquaCliInput;
 
     const timeoutNumber = Number(flags.timeout);
@@ -71,5 +70,5 @@ export class AquaCLI {
       getMessageWithKeyValuePairs(message, keyValuePairs),
       Number.isNaN(timeoutNumber) ? undefined : timeoutNumber
     );
-  }
-}
+  };
+};

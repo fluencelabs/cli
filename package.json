@@ -22,13 +22,14 @@
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
+    "lint-fix": "eslint . --ext .ts --cache --fix",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest && oclif readme",
     "mocha-test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "test": "npm run mocha-test",
     "posttest": "npm run lint",
     "prepare": "husky install",
-    "check": "npm run build && npm run mocha-test",
+    "check": "npm run build && npm run lint-fix && npm run mocha-test",
     "pre-commit": "oclif readme && git add README.md"
   },
   "dependencies": {
@@ -224,8 +225,7 @@
   ],
   "lint-staged": {
     "*.ts": [
-      "prettier --write",
-      "eslint --cache --fix"
+      "prettier --write"
     ]
   },
   "directories": {

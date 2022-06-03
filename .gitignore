@@ -13,3 +13,9 @@ oclif.manifest.json
 /fluence.yaml
 .fluence
 /src/aqua
+.idea
+.DS_Store
+**/node_modules
+Cargo.lock
+**/target/
+.repl_history

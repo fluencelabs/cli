@@ -36,7 +36,7 @@ const ensureSchema = async (
   await fsPromises.mkdir(schemaDir, { recursive: true });
   await fsPromises.writeFile(
     path.join(schemaDir, schemaFileName),
-    JSON.stringify(schema, null, 2),
+    JSON.stringify(schema, null, 2) + "\n",
     FS_OPTIONS
   );
 };
@@ -71,7 +71,11 @@ async function getConfigString<LatestConfig extends BaseConfig>(
       {},
       await getDefaultConfig(commandObj)
     );
-    await fsPromises.writeFile(configPath, defaultConfigString, FS_OPTIONS);
+    await fsPromises.writeFile(
+      configPath,
+      defaultConfigString + "\n",
+      FS_OPTIONS
+    );
     return defaultConfigString;
   }
 }
@@ -131,7 +135,11 @@ const migrateConfig = async <
     );
   }
   if (configString !== migratedConfigString) {
-    await fsPromises.writeFile(configPath, migratedConfigString, FS_OPTIONS);
+    await fsPromises.writeFile(
+      configPath,
+      migratedConfigString + "\n",
+      FS_OPTIONS
+    );
   }
   return {
     latestConfig: latestConfig,
@@ -417,7 +425,11 @@ export function initConfig<
 
         if (configString !== newConfigString) {
           configString = newConfigString;
-          await fsPromises.writeFile(configPath, configString, FS_OPTIONS);
+          await fsPromises.writeFile(
+            configPath,
+            configString + "\n",
+            FS_OPTIONS
+          );
         }
       },
       $getConfigString(): string {

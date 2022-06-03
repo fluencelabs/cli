@@ -86,16 +86,13 @@ export const DEPENDENCIES: Record<"aqua", Dependency> = {
 
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
-export const GIT_IGNORE_CONTENT = `# recommended by Fluence Labs:
-.idea
+export const GIT_IGNORE_CONTENT = `.idea
 .DS_Store
-.vscode
 .fluence
 /schemas
 **/node_modules
 Cargo.lock
 **/target/
-**/artifacts/*.wasm
 .repl_history`;
 
 export const APP_SERVICES_AQUA = `data DeployedService:
@@ -104,4 +101,5 @@ export const APP_SERVICES_AQUA = `data DeployedService:
   blueprintId: string
   name: string
 
-alias App : []DeployedService`;
+alias App : []DeployedService
+`;
