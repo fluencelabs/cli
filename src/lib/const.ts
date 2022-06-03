@@ -101,4 +101,5 @@ export const APP_SERVICES_AQUA = `data DeployedService:
   blueprintId: string
   name: string
 
-alias App : []DeployedService`;
+alias App : []DeployedService
+`;

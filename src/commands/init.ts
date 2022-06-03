@@ -129,7 +129,7 @@ const ensureRecommendedExtensions = async (
   } catch {
     await fsPromises.writeFile(
       extensionsJsonPath,
-      JSON.stringify(extensionsConfig, null, 2),
+      JSON.stringify(extensionsConfig, null, 2) + "\n",
       FS_OPTIONS
     );
     return;
@@ -150,7 +150,7 @@ const ensureRecommendedExtensions = async (
     }
     await fsPromises.writeFile(
       extensionsJsonPath,
-      JSON.stringify(parsedFileContent, null, 2),
+      JSON.stringify(parsedFileContent, null, 2) + "\n",
       FS_OPTIONS
     );
   }
@@ -194,7 +194,7 @@ const ensureRecommendedSettings = async (
   } catch {
     await fsPromises.writeFile(
       settingsJsonPath,
-      JSON.stringify(await getSettingsConfig(commandObj), null, 2),
+      JSON.stringify(await getSettingsConfig(commandObj), null, 2) + "\n",
       FS_OPTIONS
     );
     return;
@@ -216,7 +216,7 @@ const ensureRecommendedSettings = async (
     }
     await fsPromises.writeFile(
       settingsJsonPath,
-      JSON.stringify(parsedFileContent, null, 2),
+      JSON.stringify(parsedFileContent, null, 2) + "\n",
       FS_OPTIONS
     );
   }
