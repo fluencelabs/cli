@@ -19,7 +19,7 @@ import path from "node:path";
 
 import { Command, Flags } from "@oclif/core";
 
-import { AquaCLI } from "../lib/aquaCli";
+import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
   DeployedServiceConfig,
   initAppConfig,
@@ -107,7 +107,7 @@ type DeployServiceOptions = Readonly<{
   artifactsPath: string;
   addr: string;
   secretKey: string;
-  aquaCli: Readonly<AquaCLI>;
+  aquaCli: AquaCLI;
   timeout: string | undefined;
 }>;
 
@@ -127,7 +127,7 @@ const deployService = async ({
 }: DeployServiceOptions): Promise<Error | DeployedServiceConfig> => {
   let result: string;
   try {
-    result = await aquaCli.run(
+    result = await aquaCli(
       {
         command: "remote deploy_service",
         flags: {
@@ -193,7 +193,7 @@ const deployServices = async ({
     let result: string;
     try {
       // eslint-disable-next-line no-await-in-loop
-      result = await aquaCli.run(
+      result = await aquaCli(
         {
           command: "remote create_service",
           flags: {
@@ -249,8 +249,6 @@ const deploy = async ({
   commandObj: CommandObj;
 }): Promise<void> => {
   const artifactsPath = getArtifactsPath();
-  const aquaCli = new AquaCLI(commandObj);
-  const successfullyDeployedServices: DeployedServiceConfig[] = [];
   const cwd = process.cwd();
   const peerId = (await confirm({
     message: "Do you want to enter peerId to deploy on?",
@@ -260,6 +258,8 @@ const deploy = async ({
     : getRandomRelayId();
   const addr = getRelayAddr(peerId);
 
+  const aquaCli = await initAquaCli(commandObj);
+  const successfullyDeployedServices: DeployedServiceConfig[] = [];
   for (const { name, count = 1 } of fluenceConfig.services) {
     process.chdir(path.join(artifactsPath, name));
     // eslint-disable-next-line no-await-in-loop

@@ -19,7 +19,7 @@ import fsPromises from "node:fs/promises";
 
 import { Command, Flags } from "@oclif/core";
 
-import { AquaCLI } from "../lib/aquaCli";
+import { initAquaCli } from "../lib/aquaCli";
 import {
   AppConfig,
   DeployedServiceConfig,
@@ -70,7 +70,8 @@ export default class Remove extends Command {
 /**
  * Gets key-pair for stuff that user selected for removal
  * removes each service from the config
- * removes each successfully removed service from the config and commits it to disk
+ * if all services removed successfully - it deletes app.yaml
+ * otherwise it commits not removed services and throws an error
  * @param param0 { name: string; commandObj: CommandObj; timeout: string | undefined; deployedConfig: DeployedConfig;}
  * @returns Promise<void>
  */
@@ -83,8 +84,6 @@ export const removeApp = async ({
   timeout: string | undefined;
   appConfig: AppConfig;
 }>): Promise<void> => {
-  const aquaCli = new AquaCLI(commandObj);
-
   const { keyPairName, timestamp, services } = appConfig;
   const keyPair = await getKeyPair({ commandObj, keyPairName });
 
@@ -97,15 +96,15 @@ export const removeApp = async ({
     return;
   }
 
+  const aquaCli = await initAquaCli(commandObj);
   const notRemovedServices: DeployedServiceConfig[] = [];
-
-  for (const [index, service] of services.entries()) {
+  for (const service of services) {
     const { serviceId, peerId, name, blueprintId } = service;
     const addr = getRelayAddr(peerId);
 
     try {
       // eslint-disable-next-line no-await-in-loop
-      await aquaCli.run(
+      await aquaCli(
         {
           command: "remote remove_service",
           flags: {
@@ -126,7 +125,6 @@ export const removeApp = async ({
           "deployed at": timestamp,
         }
       );
-      appConfig.services.splice(index, 1);
     } catch (error) {
       commandObj.warn(`When removing service\n${String(error)}`);
       notRemovedServices.push(service);

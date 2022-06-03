@@ -110,7 +110,7 @@ const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
 };
 const validateExtensionsJson = ajv.compile(extensionsJsonSchema);
 const extensionsConfig: ExtensionsJson = {
-  recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua-syntax-highlight"],
+  recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
 };
 
 const ensureRecommendedExtensions = async (
@@ -234,7 +234,10 @@ const ensureGitIgnore = async (projectPath: string): Promise<void> => {
     const missingGitIgnoreEntries = GIT_IGNORE_CONTENT.split("\n")
       .filter((entry): boolean => !currentGitIgnoreEntries.has(entry))
       .join("\n");
-    gitIgnoreContent = `${currentGitIgnore}\n${missingGitIgnoreEntries}`;
+    gitIgnoreContent =
+      missingGitIgnoreEntries === ""
+        ? currentGitIgnore
+        : `${currentGitIgnore}\n# recommended by Fluence Labs:\n${missingGitIgnoreEntries}\n`;
   } catch {
     gitIgnoreContent = GIT_IGNORE_CONTENT;
   }

@@ -22,7 +22,7 @@ import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../lib/ajv";
 import { ensureAppServicesAquaFile } from "../lib/aqua/ensureAppServicesAquaFile";
-import { AquaCLI } from "../lib/aquaCli";
+import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
 import { CommandObj, FS_OPTIONS } from "../lib/const";
 import { usage } from "../lib/helpers/usage";
@@ -92,7 +92,6 @@ export default class Run extends Command {
 
     const relay = flags.relay ?? getRelayAddr(on);
 
-    const aquaCli = new AquaCLI(this);
     const data = await getRunData(flags, this);
     const imports = [
       flags.import,
@@ -100,7 +99,8 @@ export default class Run extends Command {
       await getMaybeArtifactsPath(),
     ];
 
-    const result = await aquaCli.run(
+    const aquaCli = await initAquaCli(this);
+    const result = await aquaCli(
       {
         command: "run",
         flags: {
