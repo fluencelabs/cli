@@ -18,23 +18,26 @@ import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
+import { Separator } from "inquirer";
 
 import { initReadonlyProjectSecretsConfig } from "../configs/project/projectSecrets";
 import { initReadonlyUserSecretsConfig } from "../configs/user/userSecrets";
 import { CommandObj, KEY_PAIR_NAME_FLAG } from "../const";
 import { getProjectFluenceDirPath } from "../pathsGetters/getProjectFluenceDirPath";
-import { list } from "../prompt";
+import { list, Choices } from "../prompt";
 
 import type { ConfigKeyPair } from "./generateKeyPair";
 
 type GetUserKeyPairOptions = {
   commandObj: CommandObj;
+  isInteractive: boolean;
   keyPairName?: string | undefined;
 };
 
 const getUserKeyPair = async ({
   commandObj,
   keyPairName,
+  isInteractive,
 }: GetUserKeyPairOptions): Promise<ConfigKeyPair | Error> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
 
@@ -54,26 +57,57 @@ const getUserKeyPair = async ({
     return keyPair;
   }
 
-  commandObj.warn(`No user key-pair ${color.yellow(keyPairName)} found`);
+  const noUserKeyPairMessage = `No key-pair ${color.yellow(keyPairName)} found`;
+
+  if (!isInteractive) {
+    commandObj.error(noUserKeyPairMessage);
+  }
+  commandObj.warn(noUserKeyPairMessage);
+
+  const readonlyProjectSecretsConfig = await initReadonlyProjectSecretsConfig(
+    commandObj
+  );
+
+  const options: Choices<ConfigKeyPair> = [];
+
+  const projectKeyPairOptions = readonlyProjectSecretsConfig.keyPairs.map(
+    (value): { value: ConfigKeyPair; name: string } => ({
+      value,
+      name: value.name,
+    })
+  );
+
+  const userKeyPairOptions = userSecretsConfig.keyPairs.map(
+    (value): { value: ConfigKeyPair; name: string } => ({
+      value,
+      name: value.name,
+    })
+  );
+
+  if (projectKeyPairOptions.length > 0) {
+    options.push(new Separator("Project key-pairs:"), ...projectKeyPairOptions);
+  }
+
+  if (userKeyPairOptions.length > 0) {
+    options.push(new Separator("User key-pairs:"), ...userKeyPairOptions);
+  }
 
   return list({
     message: "Select existing key-pair name",
-    choices: userSecretsConfig.keyPairs.map(
-      (value): { value: ConfigKeyPair; name: string } => ({
-        value,
-        name: value.name,
-      })
-    ),
-    oneChoiceMessage: (name): string => `Do you want to use ${name} key-pair`,
+    options,
+    oneChoiceMessage: (name): string =>
+      `Do you want to use ${color.yellow(name)}`,
     onNoChoices: (): never =>
       commandObj.error(
         "There are no other key-pairs. You need a key-pair to continue"
       ),
+    isInteractive,
   });
 };
 
 type GetKeyPairOptions = {
   commandObj: CommandObj;
+  isInteractive: boolean;
   keyPairName: string | undefined;
 };
 
@@ -118,5 +152,7 @@ export const getKeyPairFromFlags = async (
   }: {
     [KEY_PAIR_NAME_FLAG]: string | undefined;
   },
-  commandObj: CommandObj
-): Promise<ConfigKeyPair | Error> => getKeyPair({ commandObj, keyPairName });
+  commandObj: CommandObj,
+  isInteractive: boolean
+): Promise<ConfigKeyPair | Error> =>
+  getKeyPair({ commandObj, keyPairName, isInteractive });

@@ -32,14 +32,18 @@ import {
 import {
   CommandObj,
   DEPLOYMENT_CONFIG_FILE_NAME,
+  FORCE_FLAG_NAME,
   KEY_PAIR_FLAG,
   NAME_ARG,
+  NO_INPUT_FLAG,
 } from "../lib/const";
+import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
 import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
-import { getRandomRelayId, getRelayAddr } from "../lib/multiaddr";
+import { getRelayId, getRelayAddr } from "../lib/multiaddr";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
+import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { confirm, input } from "../lib/prompt";
 
 import { removeApp } from "./remove";
@@ -53,6 +57,18 @@ export default class Deploy extends Command {
       helpValue: "<milliseconds>",
     }),
     ...KEY_PAIR_FLAG,
+    ...NO_INPUT_FLAG,
+    [FORCE_FLAG_NAME]: Flags.boolean({
+      description: "Force removing of previously deployed app",
+    }),
+    on: Flags.string({
+      description: "PeerId of the peer where you want to deploy",
+      helpValue: "<peer_id>",
+    }),
+    relay: Flags.string({
+      description: "Relay node MultiAddress",
+      helpValue: "<multiaddr>",
+    }),
   };
   static override args = [
     { name: NAME_ARG, description: "Deployment config name" },
@@ -61,16 +77,22 @@ export default class Deploy extends Command {
 
   async run(): Promise<void> {
     const { flags, args } = await this.parse(Deploy);
+    const isInteractive = getIsInteractive(flags);
+    await ensureProjectFluenceDirPath(this, isInteractive);
 
     const deployedConfig = await initAppConfig(this);
 
     if (deployedConfig !== null) {
       // Prompt user to remove previously deployed app if
       // it was already deployed before
-      const doRemove = await confirm({
-        message:
-          "Currently you need to remove your app to deploy again. Do you want to remove?",
-      });
+      const doRemove =
+        flags[FORCE_FLAG_NAME] ||
+        (await confirm({
+          message:
+            "Currently you need to remove your app to deploy again. Do you want to remove?",
+          isInteractive,
+          flagName: FORCE_FLAG_NAME,
+        }));
 
       if (!doRemove) {
         this.error("You have to confirm in order to continue");
@@ -80,10 +102,11 @@ export default class Deploy extends Command {
         appConfig: deployedConfig,
         commandObj: this,
         timeout: flags.timeout,
+        isInteractive,
       });
     }
 
-    const keyPair = await getKeyPairFromFlags(flags, this);
+    const keyPair = await getKeyPairFromFlags(flags, this, isInteractive);
     if (keyPair instanceof Error) {
       this.error(keyPair.message);
     }
@@ -97,6 +120,9 @@ export default class Deploy extends Command {
       commandObj: this,
       keyPair,
       timeout: flags.timeout,
+      isInteractive,
+      relay: flags.relay,
+      on: flags.on,
     });
   }
 }
@@ -237,26 +263,54 @@ const deployServices = async ({
   return deployedServiceConfigs;
 };
 
+const getPeerId = async ({
+  relay,
+  isInteractive,
+}: {
+  relay: string | undefined;
+  isInteractive: boolean;
+}): Promise<string> => {
+  if (typeof relay === "string") {
+    return getRelayId(relay);
+  }
+
+  if (
+    isInteractive &&
+    (await confirm({
+      message: "Do you want to enter peerId to deploy on?",
+      default: false,
+      isInteractive,
+    }))
+  ) {
+    return input({ message: "Enter peerId to deploy on", isInteractive });
+  }
+
+  return getRelayId();
+};
+
+type DeployOptions = {
+  fluenceConfig: FluenceConfigReadonly;
+  keyPair: ConfigKeyPair;
+  timeout: string | undefined;
+  commandObj: CommandObj;
+  isInteractive: boolean;
+  relay: string | undefined;
+  on: string | undefined;
+};
+
 const deploy = async ({
   fluenceConfig,
   keyPair,
   commandObj,
   timeout,
-}: {
-  fluenceConfig: FluenceConfigReadonly;
-  keyPair: ConfigKeyPair;
-  timeout: string | undefined;
-  commandObj: CommandObj;
-}): Promise<void> => {
+  isInteractive,
+  relay,
+  on,
+}: DeployOptions): Promise<void> => {
   const artifactsPath = getArtifactsPath();
   const cwd = process.cwd();
-  const peerId = (await confirm({
-    message: "Do you want to enter peerId to deploy on?",
-    default: false,
-  }))
-    ? await input({ message: "Enter peerId to deploy on" })
-    : getRandomRelayId();
-  const addr = getRelayAddr(peerId);
+  const peerId = on ?? (await getPeerId({ relay, isInteractive }));
+  const addr = relay ?? getRelayAddr(peerId);
 
   const aquaCli = await initAquaCli(commandObj);
   const successfullyDeployedServices: DeployedServiceConfig[] = [];

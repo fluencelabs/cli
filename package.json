@@ -220,9 +220,7 @@
     "/dist"
   ],
   "lint-staged": {
-    "*.ts": [
-      "prettier --write"
-    ]
+    "*.ts": "prettier --write"
   },
   "directories": {
     "test": "test"

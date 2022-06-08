@@ -38,7 +38,9 @@ import {
   AQUA_DIR_NAME,
   SETTINGS_JSON_FILE_NAME,
   DEFAULT_SRC_AQUA_FILE_NAME,
+  NO_INPUT_FLAG,
 } from "../lib/const";
+import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
@@ -49,11 +51,15 @@ export default class Init extends Command {
     "Initialize fluence project in the current directory";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   // TODO DXJ-31: add "--path" optional flag to set path of the project
+  static override flags = {
+    ...NO_INPUT_FLAG,
+  };
   static override args = [{ name: NAME_ARG, description: "Project name" }];
   static override usage: string = usage(this);
   async run(): Promise<void> {
-    const { args } = await this.parse(Init);
-    await init(this, args[NAME_ARG]);
+    const { args, flags } = await this.parse(Init);
+    const isInteractive = getIsInteractive(flags);
+    await init(this, isInteractive, args[NAME_ARG]);
   }
 }
 
@@ -69,18 +75,23 @@ const validateProjectName = async (name: string): Promise<string | true> => {
 
 const ensureNameIsValid = async (
   name: string,
-  commandObj: CommandObj
+  commandObj: CommandObj,
+  isInteractive: boolean
 ): Promise<string> => {
   const validOrWarning = await validateProjectName(name);
   if (validOrWarning === true) {
     return name;
   }
 
+  if (!isInteractive) {
+    commandObj.error(validOrWarning);
+  }
   commandObj.warn(validOrWarning);
 
   const projectName = await input({
-    message: "Enter project name:",
+    message: "Enter a valid project name:",
     validate: validateProjectName,
+    isInteractive,
   });
 
   return projectName;
@@ -88,13 +99,14 @@ const ensureNameIsValid = async (
 
 const getProjectPath = async (
   name: string | undefined,
-  commandObj: CommandObj
+  commandObj: CommandObj,
+  isInteractive: boolean
 ): Promise<string> => {
   if (name === undefined) {
     return process.cwd();
   }
 
-  const validName = await ensureNameIsValid(name, commandObj);
+  const validName = await ensureNameIsValid(name, commandObj, isInteractive);
   return path.join(process.cwd(), validName);
 };
 
@@ -247,9 +259,14 @@ const ensureGitIgnore = async (projectPath: string): Promise<void> => {
 
 export const init = async (
   commandObj: CommandObj,
+  isInteractive: boolean,
   projectName?: string
 ): Promise<void> => {
-  const projectPath = await getProjectPath(projectName, commandObj);
+  const projectPath = await getProjectPath(
+    projectName,
+    commandObj,
+    isInteractive
+  );
 
   try {
     const fluenceDirPath = path.join(projectPath, FLUENCE_DIR_NAME);

@@ -25,11 +25,13 @@ import {
   DeployedServiceConfig,
   initAppConfig,
 } from "../lib/configs/project/app";
-import { CommandObj, NAME_ARG } from "../lib/const";
+import { CommandObj, NAME_ARG, NO_INPUT_FLAG } from "../lib/const";
+import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
 import { getRelayAddr } from "../lib/multiaddr";
+import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { confirm } from "../lib/prompt";
 
 export default class Remove extends Command {
@@ -40,6 +42,7 @@ export default class Remove extends Command {
       description: "Remove timeout",
       helpValue: "<milliseconds>",
     }),
+    ...NO_INPUT_FLAG,
   };
   static override args = [
     { name: NAME_ARG, description: "Deployment config name" },
@@ -47,22 +50,32 @@ export default class Remove extends Command {
   static override usage: string = usage(this);
   async run(): Promise<void> {
     const { flags, args } = await this.parse(Remove);
+    const isInteractive = getIsInteractive(flags);
+    await ensureProjectFluenceDirPath(this, isInteractive);
     const nameFromArgs: unknown = args[NAME_ARG];
     assert(nameFromArgs === undefined || typeof nameFromArgs === "string");
 
     const appConfig = await initAppConfig(this);
 
-    if (
-      appConfig === null ||
-      !(await confirm({ message: "Are you sure you want to remove your app?" }))
-    ) {
+    if (appConfig === null) {
       this.error("There is nothing to remove");
+    }
+
+    if (
+      isInteractive &&
+      !(await confirm({
+        message: "Are you sure you want to remove your app?",
+        isInteractive,
+      }))
+    ) {
+      this.error("Aborted");
     }
 
     await removeApp({
       appConfig,
       commandObj: this,
       timeout: flags.timeout,
+      isInteractive,
     });
   }
 }
@@ -79,13 +92,15 @@ export const removeApp = async ({
   commandObj,
   timeout,
   appConfig,
+  isInteractive,
 }: Readonly<{
   commandObj: CommandObj;
   timeout: string | undefined;
   appConfig: AppConfig;
+  isInteractive: boolean;
 }>): Promise<void> => {
   const { keyPairName, timestamp, services } = appConfig;
-  const keyPair = await getKeyPair({ commandObj, keyPairName });
+  const keyPair = await getKeyPair({ commandObj, keyPairName, isInteractive });
 
   if (keyPair instanceof Error) {
     commandObj.warn(

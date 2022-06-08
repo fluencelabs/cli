@@ -18,7 +18,7 @@ import { exec } from "node:child_process";
 
 import { CliUx } from "@oclif/core";
 
-import { isDevelopment } from "./helpers/isDevelopment";
+import { IS_DEVELOPMENT } from "./const";
 
 /**
  * Execution timeout in milliseconds
@@ -35,7 +35,7 @@ export const execPromise = (
   }
 
   return new Promise<string>((res, rej): void => {
-    const commandToDisplay = isDevelopment
+    const commandToDisplay = IS_DEVELOPMENT
       ? command
       : command.replace(
           /([\S\s]*--sk ').*('[\S\s]*)/,

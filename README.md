@@ -46,9 +46,9 @@ USAGE
 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
-* [`fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>]`](#fluence-deploy-name---timeout-milliseconds--k-name)
+* [`fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>] [--no-input] [--force] [--on <peer_id>] [--relay <multiaddr>]`](#fluence-deploy-name---timeout-milliseconds--k-name---no-input---force---on-peer_id---relay-multiaddr)
 * [`fluence help [COMMAND]`](#fluence-help-command)
-* [`fluence init [NAME]`](#fluence-init-name)
+* [`fluence init [NAME] [--no-input]`](#fluence-init-name---no-input)
 * [`fluence plugins`](#fluence-plugins)
 * [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
 * [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
@@ -58,8 +58,8 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
-* [`fluence remove [NAME] [--timeout <milliseconds>]`](#fluence-remove-name---timeout-milliseconds)
-* [`fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>] [--data <json>] [--data-path <path>] [--import <path>]`](#fluence-run---on-peer_id---aqua-path--f-function-call---relay-multiaddr---timeout-milliseconds---data-json---data-path-path---import-path)
+* [`fluence remove [NAME] [--timeout <milliseconds>] [--no-input]`](#fluence-remove-name---timeout-milliseconds---no-input)
+* [`fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>] [--data <json>] [--data-path <path>] [--import <path>] [--no-input]`](#fluence-run---on-peer_id---aqua-path--f-function-call---relay-multiaddr---timeout-milliseconds---data-json---data-path-path---import-path---no-input)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -90,19 +90,24 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
-## `fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>]`
+## `fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>] [--no-input] [--force] [--on <peer_id>] [--relay <multiaddr>]`
 
 Deploy service to the remote peer
 
 ```
 USAGE
-  $ fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>]
+  $ fluence deploy [NAME] [--timeout <milliseconds>] [-k <name>] [--no-input] [--force] [--on <peer_id>] [--relay
+    <multiaddr>]
 
 ARGUMENTS
   NAME  Deployment config name
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
+  --force                     Force removing of previously deployed app
+  --no-input                  Don't interactively ask for any input from the user
+  --on=<peer_id>              PeerId of the peer where you want to deploy
+  --relay=<multiaddr>         Relay node MultiAddress
   --timeout=<milliseconds>    Deployment and remove timeout
 
 DESCRIPTION
@@ -134,16 +139,19 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `fluence init [NAME]`
+## `fluence init [NAME] [--no-input]`
 
 Initialize fluence project in the current directory
 
 ```
 USAGE
-  $ fluence init [NAME]
+  $ fluence init [NAME] [--no-input]
 
 ARGUMENTS
   NAME  Project name
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
   Initialize fluence project in the current directory
@@ -384,18 +392,19 @@ DESCRIPTION
   Update installed plugins.
 ```
 
-## `fluence remove [NAME] [--timeout <milliseconds>]`
+## `fluence remove [NAME] [--timeout <milliseconds>] [--no-input]`
 
 Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [NAME] [--timeout <milliseconds>]
+  $ fluence remove [NAME] [--timeout <milliseconds>] [--no-input]
 
 ARGUMENTS
   NAME  Deployment config name
 
 FLAGS
+  --no-input                Don't interactively ask for any input from the user
   --timeout=<milliseconds>  Remove timeout
 
 DESCRIPTION
@@ -407,14 +416,14 @@ EXAMPLES
 
 _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/remove.ts)_
 
-## `fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>] [--data <json>] [--data-path <path>] [--import <path>]`
+## `fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>] [--data <json>] [--data-path <path>] [--import <path>] [--no-input]`
 
 Run aqua script
 
 ```
 USAGE
   $ fluence run [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--relay <multiaddr>] [--timeout <milliseconds>]
-    [--data <json>] [--data-path <path>] [--import <path>]
+    [--data <json>] [--data-path <path>] [--import <path>] [--no-input]
 
 FLAGS
   -f, --func=<function-call>  Function call
@@ -424,6 +433,7 @@ FLAGS
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
                               using these argument names
   --import=<path>             Path to the directory to import from. May be used several times
+  --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of the peer where you want to run the function
   --relay=<multiaddr>         Relay node MultiAddress
   --timeout=<milliseconds>    Run timeout
