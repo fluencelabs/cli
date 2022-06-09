@@ -68,6 +68,16 @@ export const KEY_PAIR_FLAG = {
   }),
 } as const;
 
+export const NO_INPUT_FLAG_NAME = "no-input";
+
+export const NO_INPUT_FLAG = {
+  [NO_INPUT_FLAG_NAME]: Flags.boolean({
+    description: "Don't interactively ask for any input from the user",
+  }),
+};
+
+export const FORCE_FLAG_NAME = "force";
+
 export const NAME_ARG = "NAME";
 
 export type Dependency = {
@@ -103,3 +113,6 @@ export const APP_SERVICES_AQUA = `data DeployedService:
 
 alias App : []DeployedService
 `;
+
+export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
+export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";

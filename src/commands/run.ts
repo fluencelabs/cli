@@ -24,12 +24,17 @@ import { ajv } from "../lib/ajv";
 import { ensureAppServicesAquaFile } from "../lib/aqua/ensureAppServicesAquaFile";
 import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
-import { CommandObj, FS_OPTIONS } from "../lib/const";
+import { CommandObj, FS_OPTIONS, NO_INPUT_FLAG } from "../lib/const";
+import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
-import { getRandomRelayId, getRelayAddr } from "../lib/multiaddr";
+import { getRelayId, getRelayAddr } from "../lib/multiaddr";
 import { getMaybeArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { confirm, input, list } from "../lib/prompt";
+
+const FUNC_FLAG_NAME = "func";
+const AQUA_FLAG_NAME = "aqua";
+const ON_FLAG_NAME = "on";
 
 export default class Run extends Command {
   static override description = "Run aqua script";
@@ -37,16 +42,16 @@ export default class Run extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
   static override flags = {
-    on: Flags.string({
+    [ON_FLAG_NAME]: Flags.string({
       description: "PeerId of the peer where you want to run the function",
       helpValue: "<peer_id>",
     }),
-    aqua: Flags.string({
+    [AQUA_FLAG_NAME]: Flags.string({
       description:
         "Path to an aqua file or to a directory that contains your aqua files",
       helpValue: "<path>",
     }),
-    func: Flags.string({
+    [FUNC_FLAG_NAME]: Flags.string({
       char: "f",
       description: "Function call",
       helpValue: "<function-call>",
@@ -74,20 +79,24 @@ export default class Run extends Command {
         "Path to the directory to import from. May be used several times",
       helpValue: "<path>",
     }),
+    ...NO_INPUT_FLAG,
   };
 
   static override usage: string = usage(this);
 
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
+    const isInteractive = getIsInteractive(flags);
 
-    const on = await ensurePeerId(flags.on, this);
-    const aqua = await ensureAquaPath(flags.aqua);
+    const on = await ensurePeerId(flags.on, this, isInteractive);
+    const aqua = await ensureAquaPath(flags[AQUA_FLAG_NAME], isInteractive);
 
     const func =
-      flags.func ??
+      flags[FUNC_FLAG_NAME] ??
       (await input({
-        message: "Enter a function call that you want to execute",
+        message: `Enter a function call that you want to execute`,
+        isInteractive,
+        flagName: FUNC_FLAG_NAME,
       }));
 
     const relay = flags.relay ?? getRelayAddr(on);
@@ -123,7 +132,8 @@ export default class Run extends Command {
 
 const ensurePeerId = async (
   onFromArgs: string | undefined,
-  commandObj: CommandObj
+  commandObj: CommandObj,
+  isInteractive: boolean
 ): Promise<string> => {
   if (typeof onFromArgs === "string") {
     return onFromArgs;
@@ -134,40 +144,42 @@ const ensurePeerId = async (
     ...new Set((appConfig?.services ?? []).map(({ peerId }): string => peerId)),
   ];
   const firstPeerId = peerIdsFromDeployed[0];
-  const peerIdFromDeployed =
-    peerIdsFromDeployed.length === 1 && firstPeerId !== undefined
-      ? firstPeerId
-      : null;
-
-  if (typeof peerIdFromDeployed === "string") {
-    return peerIdFromDeployed;
+  if (peerIdsFromDeployed.length === 1 && firstPeerId !== undefined) {
+    return firstPeerId;
   }
 
-  const choices =
+  const options =
     peerIdsFromDeployed.length > 1 &&
     (await confirm({
       message:
         "Do you want to select one of the peers from your app to run the function?",
+      isInteractive,
+      flagName: ON_FLAG_NAME,
     }))
       ? peerIdsFromDeployed
-      : [getRandomRelayId()];
+      : [getRelayId()];
 
   return list({
     message: "Select peerId of the peer where you want to run the function",
-    choices,
+    options,
     onNoChoices: (): Promise<string> =>
       input({
         message: "Enter peerId of the peer where you want to run your function",
+        isInteractive,
+        flagName: ON_FLAG_NAME,
       }),
     oneChoiceMessage: (peerId): string =>
       `Do you want to run your function on a random peer ${color.yellow(
         peerId
       )}`,
+    isInteractive,
+    flagName: ON_FLAG_NAME,
   });
 };
 
 const ensureAquaPath = async (
-  aquaPathFromArgs: string | undefined
+  aquaPathFromArgs: string | undefined,
+  isInteractive: boolean
 ): Promise<string> => {
   if (typeof aquaPathFromArgs === "string") {
     return aquaPathFromArgs;
@@ -181,6 +193,8 @@ const ensureAquaPath = async (
     return input({
       message:
         "Enter a path to an aqua file or to a directory that contains your aqua files",
+      isInteractive,
+      flagName: AQUA_FLAG_NAME,
     });
   }
 };

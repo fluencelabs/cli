@@ -20,11 +20,11 @@ export const getMessageWithKeyValuePairs = (
   message: string,
   keyValuePairs?: Record<string, string>
 ): string =>
-  `${color.yellow(message)}:${
+  `${color.yellow(message)}${
     keyValuePairs === undefined
       ? ""
       : Object.entries(keyValuePairs).reduce(
           (acc, [k, v]): string => `${acc}\n  ${k}: ${v}`,
-          ""
+          ":"
         )
   }`;

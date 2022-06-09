@@ -42,7 +42,15 @@ export const getRelayAddr = (peerId?: string): string => {
   return randomRelayAddr;
 };
 
-export const getRandomRelayId = (): string => {
+export const getRelayId = (relayAddr?: string | undefined): string => {
+  if (typeof relayAddr === "string") {
+    const maybePeerId = defaultRelayIds.find((peerId): boolean =>
+      relayAddr.includes(peerId)
+    );
+    if (typeof maybePeerId === "string") {
+      return maybePeerId;
+    }
+  }
   const largestIndex = defaultRelayIds.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 

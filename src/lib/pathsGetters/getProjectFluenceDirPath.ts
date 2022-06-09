@@ -27,7 +27,8 @@ export const getProjectFluenceDirPath = (): string =>
   path.join(getProjectRootDir(), FLUENCE_DIR_NAME);
 
 export const ensureProjectFluenceDirPath = async (
-  commandObj: CommandObj
+  commandObj: CommandObj,
+  isInteractive: boolean
 ): Promise<string> => {
   const projectFluenceDirPath = getProjectFluenceDirPath();
 
@@ -36,10 +37,17 @@ export const ensureProjectFluenceDirPath = async (
     return projectFluenceDirPath;
   } catch {}
 
-  commandObj.warn("Not a fluence project");
+  const errorMessage = "Not a fluence project";
+
+  if (!isInteractive) {
+    commandObj.error(errorMessage);
+  }
+
+  commandObj.warn(errorMessage);
 
   const doInit = await confirm({
     message: `Do you want to init fluence project in the current directory (${process.cwd()})`,
+    isInteractive,
   });
 
   if (!doInit) {
@@ -48,7 +56,7 @@ export const ensureProjectFluenceDirPath = async (
     );
   }
 
-  await init(commandObj);
+  await init(commandObj, isInteractive);
 
   return getProjectFluenceDirPath();
 };

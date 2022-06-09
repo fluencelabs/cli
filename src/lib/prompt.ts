@@ -16,10 +16,12 @@
 
 import assert from "node:assert";
 
+import color from "@oclif/color";
 import type { JSONSchemaType, ValidateFunction } from "ajv";
-import inquirer, { DistinctQuestion, QuestionMap } from "inquirer";
+import inquirer, { DistinctQuestion, Separator } from "inquirer";
 
 import { ajv } from "./ajv";
+import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const";
 
 const NAME = "NAME";
 
@@ -52,121 +54,248 @@ const arrayOfStringsSchema: JSONSchemaType<{ [NAME]: Array<string> }> = {
 
 const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 
-const prompt = async <T, U extends { [NAME]: T }>(
-  type: keyof QuestionMap<U>,
-  validate: ValidateFunction<{ NAME: T }>,
-  question: DistinctQuestion
-): Promise<T> => {
-  const result: unknown = await inquirer.prompt([
-    { ...question, type, name: NAME },
-  ]);
+type PromptOptions<T, U> = DistinctQuestion<U> & {
+  validateType: ValidateFunction<{ NAME: T }>;
+  isInteractive: boolean;
+  flagName: string | undefined;
+};
 
-  if (validate(result)) {
+const prompt = async <T, U extends { [NAME]: T }>({
+  validateType,
+  isInteractive,
+  flagName,
+  ...question
+}: PromptOptions<T, U>): Promise<T> => {
+  const promptMessageWarning =
+    typeof question.message === "string"
+      ? `\nPrompt message is: ${color.yellow(question.message)}`
+      : "";
+
+  const flagAdvice =
+    flagName === undefined
+      ? ""
+      : `\nTry using ${color.yellow(
+          `--${flagName}`
+        )} flag and make sure you use it correctly.`;
+
+  const advice = `${promptMessageWarning}${flagAdvice}`;
+
+  if (!IS_TTY) {
+    throw new Error(`Cannot prompt in non-interactive mode1.${advice}`);
+  }
+
+  if (!isInteractive) {
+    throw new Error(
+      `Can't prompt when ${color.yellow(
+        `--${NO_INPUT_FLAG_NAME}`
+      )} is set.${advice}`
+    );
+  }
+
+  const result: unknown = await inquirer.prompt([{ ...question, name: NAME }]);
+
+  if (validateType(result)) {
     return result[NAME];
   }
 
   throw new Error("Prompt error");
 };
 
-export const confirm = (
-  question: DistinctQuestion & { message: string }
-): Promise<boolean> => prompt("confirm", validateBooleanPrompt, question);
-
-export const input = (
-  question: DistinctQuestion & { message: string }
-): Promise<string> => prompt("input", validateStringPrompt, question);
-
-type ListOptions<T, U> = {
-  choices: T;
+type ConfirmOptions = DistinctQuestion & {
+  isInteractive: boolean;
   message: string;
-  oneChoiceMessage: (choice: string) => string;
-  onNoChoices: () => U;
+  flagName?: string | undefined;
 };
 
-export async function list<T, U>(
-  options: ListOptions<Array<{ value: T; name: string }>, U>
-): Promise<T | U>;
-export async function list<T extends string, U>(
-  options: ListOptions<Array<T>, U>
-): Promise<T | U>;
-export async function list<T, U>({
-  choices,
-  message, // this is shown in case there are 2 or more items in a list
-  oneChoiceMessage, // use confirm for list of one item
-  onNoChoices, // do something if list is empty
-}: ListOptions<
-  T extends string ? Array<T> : Array<{ value: T; name: string }>,
-  U
->): Promise<T | U> {
-  if (choices.length === 0) {
-    return onNoChoices();
-  }
-
-  const choicesToUse = choices.map((choice): { name: string; value: T } =>
-    typeof choice === "string" ? { name: choice, value: choice } : choice
-  );
-  const firstChoice = choicesToUse[0];
-  if (choicesToUse.length === 1 && firstChoice !== undefined) {
-    const doConfirm = await confirm({
-      message: oneChoiceMessage(firstChoice.name),
-    });
-    if (doConfirm) {
-      return firstChoice.value;
-    }
-    return onNoChoices();
-  }
-
-  const stringChoice = await prompt("list", validateStringPrompt, {
-    message,
-    choices: choicesToUse,
+export const confirm = ({
+  isInteractive,
+  flagName,
+  ...question
+}: ConfirmOptions): Promise<boolean> =>
+  prompt({
+    ...question,
+    type: "confirm",
+    validateType: validateBooleanPrompt,
+    isInteractive,
+    flagName,
   });
 
-  const choice = choicesToUse.find(
-    (choice): boolean => choice.name === stringChoice
-  );
+type InputOptions = DistinctQuestion & {
+  isInteractive: boolean;
+  message: string;
+  flagName?: string | undefined;
+};
 
-  assert(choice !== undefined);
+export const input = ({
+  isInteractive,
+  flagName,
+  ...question
+}: InputOptions): Promise<string> =>
+  prompt({
+    ...question,
+    type: "input",
+    validateType: validateStringPrompt,
+    isInteractive,
+    flagName,
+  });
 
-  return choice.value;
-}
+type SeparatorObj = InstanceType<typeof Separator>;
 
-export const checkboxes = async <T, U>({
-  choices,
-  message, // this is shown in case there are 2 or more items in a list
-  oneChoiceMessage, // use confirm for list of one item
-  onNoChoices, // do something if list is empty
-}: {
-  choices: Array<{
-    value: T;
-    name: string;
-    checked?: boolean;
-    disabled?: boolean;
-  }>;
+export type Choices<T> = T extends string
+  ? Array<T | SeparatorObj>
+  : Array<{ value: T; name: string } | SeparatorObj>;
+
+type ListOptions<T, U> = DistinctQuestion & {
+  options: Choices<T>;
   message: string;
   oneChoiceMessage: (choice: string) => string;
   onNoChoices: () => U;
-}): Promise<Array<T> | U> => {
-  if (choices.length === 0) {
-    return onNoChoices();
+  isInteractive: boolean;
+  flagName?: string | undefined;
+};
+
+const handleList = async <T, U>(
+  listOptions: Omit<ListOptions<T, U>, keyof DistinctQuestion>
+): Promise<{
+  choices: Array<{ value: T; name: string } | SeparatorObj>;
+  result?: T | U;
+}> => {
+  const { options, oneChoiceMessage, onNoChoices, isInteractive, flagName } =
+    listOptions;
+
+  const choices = options.map(
+    (choice): { name: string; value: T } | SeparatorObj =>
+      choice instanceof Separator || typeof choice !== "string"
+        ? choice
+        : { name: choice, value: choice }
+  );
+
+  if (
+    choices.filter((choice): boolean => !(choice instanceof Separator))
+      .length === 0
+  ) {
+    return {
+      result: onNoChoices(),
+      choices,
+    };
   }
 
   const firstChoice = choices[0];
-  if (choices.length === 1 && firstChoice !== undefined) {
+  if (
+    choices.length === 1 &&
+    firstChoice !== undefined &&
+    !(firstChoice instanceof Separator)
+  ) {
     const doConfirm = await confirm({
       message: oneChoiceMessage(firstChoice.name),
+      isInteractive,
+      flagName,
     });
     if (doConfirm) {
-      return [firstChoice.value];
+      return {
+        result: firstChoice.value,
+        choices,
+      };
     }
-    return [];
+    return {
+      result: onNoChoices(),
+      choices,
+    };
   }
 
-  const stringChoices = await prompt("checkbox", validateArrayOfStringsPrompt, {
-    message,
-    choices: choices.map(({ name }): string => name),
+  return {
+    choices,
+  };
+};
+
+export const list = async <T, U>(
+  listOptions: ListOptions<T, U>
+): Promise<T | U> => {
+  const {
+    options,
+    oneChoiceMessage,
+    onNoChoices,
+    isInteractive,
+    flagName,
+    ...question
+  } = listOptions;
+
+  const { choices, result } = await handleList({
+    options,
+    oneChoiceMessage,
+    onNoChoices,
+    isInteractive,
+    flagName,
   });
 
-  return choices
-    .filter(({ name }): boolean => stringChoices.includes(name))
-    .map(({ value }): T => value);
+  if (result !== undefined) {
+    return result;
+  }
+
+  const stringChoice = await prompt({
+    ...question,
+    type: "list",
+    validateType: validateStringPrompt,
+    choices: choices.map((choice): string | SeparatorObj =>
+      choice instanceof Separator ? choice : choice.name
+    ),
+    isInteractive,
+    flagName,
+  });
+
+  const choice = choices.find(
+    (choice): boolean =>
+      !(choice instanceof Separator) && choice.name === stringChoice
+  );
+
+  assert(choice !== undefined);
+  assert(!(choice instanceof Separator));
+
+  return choice.value;
+};
+
+export const checkboxes = async <T, U>(
+  listOptions: ListOptions<T, U>
+): Promise<Array<T | U>> => {
+  const {
+    options,
+    oneChoiceMessage, // used for confirm in case the list contains only one item
+    onNoChoices, // do something if list is empty
+    isInteractive,
+    flagName,
+    ...question
+  } = listOptions;
+
+  const { choices, result } = await handleList({
+    options,
+    oneChoiceMessage,
+    onNoChoices,
+    isInteractive,
+    flagName,
+  });
+
+  if (result !== undefined) {
+    return [result];
+  }
+
+  const stringChoices = await prompt({
+    ...question,
+    type: "checkbox",
+    validateType: validateArrayOfStringsPrompt,
+    choices: choices.map((choice): string | SeparatorObj =>
+      choice instanceof Separator ? choice : choice.name
+    ),
+    isInteractive,
+    flagName,
+  });
+
+  const results: T[] = [];
+
+  for (const choice of choices) {
+    if (!(choice instanceof Separator) && stringChoices.includes(choice.name)) {
+      results.push(choice.value);
+    }
+  }
+
+  return results;
 };

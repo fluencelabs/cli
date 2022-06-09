@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export const isDevelopment = process.env["NODE_ENV"] === "development";
+import { IS_TTY, NO_INPUT_FLAG_NAME } from "../const";
+
+export const getIsInteractive = (flags: {
+  [NO_INPUT_FLAG_NAME]: boolean;
+}): boolean => IS_TTY && !flags[NO_INPUT_FLAG_NAME];

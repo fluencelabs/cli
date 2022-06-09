@@ -28,7 +28,7 @@ import {
   ConfigKeyPair,
   configKeyPairSchema,
 } from "../../keyPairs/generateKeyPair";
-import { ensureProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
+import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
   GetDefaultConfig,
   initConfig,
@@ -96,7 +96,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: SECRETS_FILE_NAME,
-  getPath: ensureProjectFluenceDirPath,
+  getPath: getProjectFluenceDirPath,
   validate,
 };
 
