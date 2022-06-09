@@ -22,7 +22,7 @@ import { Separator } from "inquirer";
 
 import { initReadonlyProjectSecretsConfig } from "../configs/project/projectSecrets";
 import { initReadonlyUserSecretsConfig } from "../configs/user/userSecrets";
-import { CommandObj, KEY_PAIR_NAME_FLAG } from "../const";
+import { CommandObj, KEY_PAIR_FLAG_NAME } from "../const";
 import { getProjectFluenceDirPath } from "../pathsGetters/getProjectFluenceDirPath";
 import { list, Choices } from "../prompt";
 
@@ -148,9 +148,9 @@ export const getKeyPair = async (
 
 export const getKeyPairFromFlags = async (
   {
-    [KEY_PAIR_NAME_FLAG]: keyPairName,
+    [KEY_PAIR_FLAG_NAME]: keyPairName,
   }: {
-    [KEY_PAIR_NAME_FLAG]: string | undefined;
+    [KEY_PAIR_FLAG_NAME]: string | undefined;
   },
   commandObj: CommandObj,
   isInteractive: boolean

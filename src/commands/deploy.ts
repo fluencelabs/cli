@@ -17,6 +17,7 @@
 import assert from "node:assert";
 import path from "node:path";
 
+import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
@@ -25,17 +26,17 @@ import {
   initAppConfig,
   initNewReadonlyAppConfig,
 } from "../lib/configs/project/app";
+import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
-  FluenceConfigReadonly,
-  initReadonlyFluenceConfig,
-} from "../lib/configs/project/fluence";
-import {
+  ARTIFACTS_DIR_NAME,
   CommandObj,
   DEPLOYMENT_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
   FORCE_FLAG_NAME,
   KEY_PAIR_FLAG,
   NAME_ARG,
   NO_INPUT_FLAG,
+  TIMEOUT_FLAG,
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
@@ -44,7 +45,7 @@ import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
 import { getRelayId, getRelayAddr } from "../lib/multiaddr";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
-import { confirm, input } from "../lib/prompt";
+import { confirm } from "../lib/prompt";
 
 import { removeApp } from "./remove";
 
@@ -52,15 +53,6 @@ export default class Deploy extends Command {
   static override description = "Deploy service to the remote peer";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    timeout: Flags.string({
-      description: "Deployment and remove timeout",
-      helpValue: "<milliseconds>",
-    }),
-    ...KEY_PAIR_FLAG,
-    ...NO_INPUT_FLAG,
-    [FORCE_FLAG_NAME]: Flags.boolean({
-      description: "Force removing of previously deployed app",
-    }),
     on: Flags.string({
       description: "PeerId of the peer where you want to deploy",
       helpValue: "<peer_id>",
@@ -69,6 +61,12 @@ export default class Deploy extends Command {
       description: "Relay node MultiAddress",
       helpValue: "<multiaddr>",
     }),
+    [FORCE_FLAG_NAME]: Flags.boolean({
+      description: "Force removing of previously deployed app",
+    }),
+    ...TIMEOUT_FLAG,
+    ...KEY_PAIR_FLAG,
+    ...NO_INPUT_FLAG,
   };
   static override args = [
     { name: NAME_ARG, description: "Deployment config name" },
@@ -113,14 +111,10 @@ export default class Deploy extends Command {
     const nameArg: unknown = args[NAME_ARG];
     assert(nameArg === undefined || typeof nameArg === "string");
 
-    const fluenceConfig = await initReadonlyFluenceConfig(this);
-
     await deploy({
-      fluenceConfig,
       commandObj: this,
       keyPair,
       timeout: flags.timeout,
-      isInteractive,
       relay: flags.relay,
       on: flags.on,
     });
@@ -263,54 +257,54 @@ const deployServices = async ({
   return deployedServiceConfigs;
 };
 
-const getPeerId = async ({
-  relay,
-  isInteractive,
-}: {
-  relay: string | undefined;
-  isInteractive: boolean;
-}): Promise<string> => {
-  if (typeof relay === "string") {
-    return getRelayId(relay);
-  }
+const getInfoForRandomPeerId = (randomPeerId: string): string =>
+  `Random peer ${color.yellow(randomPeerId)} selected for deployment`;
 
-  if (
-    isInteractive &&
-    (await confirm({
-      message: "Do you want to enter peerId to deploy on?",
-      default: false,
-      isInteractive,
-    }))
-  ) {
-    return input({ message: "Enter peerId to deploy on", isInteractive });
-  }
-
-  return getRelayId();
-};
+const getInfoForRandomRelayId = (randomPeerId: string): string =>
+  `Random relay ${color.yellow(randomPeerId)} selected for deployment`;
 
 type DeployOptions = {
-  fluenceConfig: FluenceConfigReadonly;
   keyPair: ConfigKeyPair;
   timeout: string | undefined;
   commandObj: CommandObj;
-  isInteractive: boolean;
   relay: string | undefined;
   on: string | undefined;
 };
 
 const deploy = async ({
-  fluenceConfig,
   keyPair,
   commandObj,
   timeout,
-  isInteractive,
   relay,
   on,
 }: DeployOptions): Promise<void> => {
+  const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
+  if (fluenceConfig.services.length === 0) {
+    commandObj.error(
+      `No services to deploy. Add services you want to deploy to ${color.yellow(
+        ARTIFACTS_DIR_NAME
+      )} directory (${getArtifactsPath()}) and also list them in ${color.yellow(
+        `${FLUENCE_CONFIG_FILE_NAME}.yaml`
+      )} (${fluenceConfig.$getPath()})`
+    );
+  }
   const artifactsPath = getArtifactsPath();
   const cwd = process.cwd();
-  const peerId = on ?? (await getPeerId({ relay, isInteractive }));
-  const addr = relay ?? getRelayAddr(peerId);
+  const peerId =
+    on ??
+    getRelayId({
+      relayAddr: relay,
+      commandObj,
+      getInfoForRandom: getInfoForRandomPeerId,
+    });
+
+  const addr =
+    relay ??
+    getRelayAddr({
+      peerId,
+      commandObj,
+      getInfoForRandom: getInfoForRandomRelayId,
+    });
 
   const aquaCli = await initAquaCli(commandObj);
   const successfullyDeployedServices: DeployedServiceConfig[] = [];

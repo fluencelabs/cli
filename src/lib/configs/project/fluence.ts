@@ -18,7 +18,7 @@ import fsPromises from "node:fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
-import { APP_PROTOTYPE_FILE_NAME } from "../../const";
+import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
 import { getArtifactsPath } from "../../pathsGetters/getArtifactsPath";
 import { getProjectRootDir } from "../../pathsGetters/getProjectRootDir";
 import {
@@ -90,7 +90,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: APP_PROTOTYPE_FILE_NAME,
+  name: FLUENCE_CONFIG_FILE_NAME,
   getPath: getProjectRootDir,
 };
 

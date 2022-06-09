@@ -24,7 +24,12 @@ import { ajv } from "../lib/ajv";
 import { ensureAppServicesAquaFile } from "../lib/aqua/ensureAppServicesAquaFile";
 import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
-import { CommandObj, FS_OPTIONS, NO_INPUT_FLAG } from "../lib/const";
+import {
+  CommandObj,
+  FS_OPTIONS,
+  NO_INPUT_FLAG,
+  TIMEOUT_FLAG,
+} from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getRelayId, getRelayAddr } from "../lib/multiaddr";
@@ -42,27 +47,9 @@ export default class Run extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
 
   static override flags = {
-    [ON_FLAG_NAME]: Flags.string({
-      description: "PeerId of the peer where you want to run the function",
-      helpValue: "<peer_id>",
-    }),
-    [AQUA_FLAG_NAME]: Flags.string({
-      description:
-        "Path to an aqua file or to a directory that contains your aqua files",
-      helpValue: "<path>",
-    }),
-    [FUNC_FLAG_NAME]: Flags.string({
-      char: "f",
-      description: "Function call",
-      helpValue: "<function-call>",
-    }),
     relay: Flags.string({
       description: "Relay node MultiAddress",
       helpValue: "<multiaddr>",
-    }),
-    timeout: Flags.string({
-      description: "Run timeout",
-      helpValue: "<milliseconds>",
     }),
     data: Flags.string({
       description:
@@ -79,6 +66,21 @@ export default class Run extends Command {
         "Path to the directory to import from. May be used several times",
       helpValue: "<path>",
     }),
+    [ON_FLAG_NAME]: Flags.string({
+      description: "PeerId of the peer where you want to run the function",
+      helpValue: "<peer_id>",
+    }),
+    [AQUA_FLAG_NAME]: Flags.string({
+      description:
+        "Path to an aqua file or to a directory that contains your aqua files",
+      helpValue: "<path>",
+    }),
+    [FUNC_FLAG_NAME]: Flags.string({
+      char: "f",
+      description: "Function call",
+      helpValue: "<function-call>",
+    }),
+    ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
   };
 
@@ -99,7 +101,14 @@ export default class Run extends Command {
         flagName: FUNC_FLAG_NAME,
       }));
 
-    const relay = flags.relay ?? getRelayAddr(on);
+    const relay =
+      flags.relay ??
+      getRelayAddr({
+        peerId: on,
+        commandObj: this,
+        getInfoForRandom: (relay): string =>
+          `Random relay ${color.yellow(relay)} selected for connection`,
+      });
 
     const data = await getRunData(flags, this);
     const imports = [
@@ -157,7 +166,15 @@ const ensurePeerId = async (
       flagName: ON_FLAG_NAME,
     }))
       ? peerIdsFromDeployed
-      : [getRelayId()];
+      : [
+          getRelayId({
+            commandObj,
+            getInfoForRandom: (peerId): string =>
+              `Random peer ${color.yellow(
+                peerId
+              )} to run your function selected`,
+          }),
+        ];
 
   return list({
     message: "Select peerId of the peer where you want to run the function",

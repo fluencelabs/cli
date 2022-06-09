@@ -14,8 +14,4 @@
  * limitations under the License.
  */
 
-export const getProjectRootDir = (): string => {
-  /* TODO: DXJ-36: make it possible to run project commands deep inside the project,
-  not only in the currrent working directory */
-  return process.cwd();
-};
+export const getProjectRootDir = (): string => process.cwd();
