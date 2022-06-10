@@ -56,7 +56,7 @@ export const ensureProjectFluenceDirPath = async (
     );
   }
 
-  await init(commandObj, isInteractive);
+  await init({ commandObj, isInteractive });
 
   return getProjectFluenceDirPath();
 };

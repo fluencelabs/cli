@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
@@ -26,12 +25,7 @@ import {
   DeployedServiceConfig,
   initAppConfig,
 } from "../lib/configs/project/app";
-import {
-  CommandObj,
-  NAME_ARG,
-  NO_INPUT_FLAG,
-  TIMEOUT_FLAG,
-} from "../lib/const";
+import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
@@ -47,16 +41,11 @@ export default class Remove extends Command {
     ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
   };
-  static override args = [
-    { name: NAME_ARG, description: "Deployment config name" },
-  ];
   static override usage: string = usage(this);
   async run(): Promise<void> {
-    const { flags, args } = await this.parse(Remove);
+    const { flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);
     await ensureProjectFluenceDirPath(this, isInteractive);
-    const nameFromArgs: unknown = args[NAME_ARG];
-    assert(nameFromArgs === undefined || typeof nameFromArgs === "string");
 
     const appConfig = await initAppConfig(this);
 

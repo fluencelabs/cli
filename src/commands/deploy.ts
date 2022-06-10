@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
@@ -34,7 +33,6 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FORCE_FLAG_NAME,
   KEY_PAIR_FLAG,
-  NAME_ARG,
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
 } from "../lib/const";
@@ -68,13 +66,10 @@ export default class Deploy extends Command {
     ...KEY_PAIR_FLAG,
     ...NO_INPUT_FLAG,
   };
-  static override args = [
-    { name: NAME_ARG, description: "Deployment config name" },
-  ];
   static override usage: string = usage(this);
 
   async run(): Promise<void> {
-    const { flags, args } = await this.parse(Deploy);
+    const { flags } = await this.parse(Deploy);
     const isInteractive = getIsInteractive(flags);
     await ensureProjectFluenceDirPath(this, isInteractive);
 
@@ -108,8 +103,6 @@ export default class Deploy extends Command {
     if (keyPair instanceof Error) {
       this.error(keyPair.message);
     }
-    const nameArg: unknown = args[NAME_ARG];
-    assert(nameArg === undefined || typeof nameArg === "string");
 
     await deploy({
       commandObj: this,
