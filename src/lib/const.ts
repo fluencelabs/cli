@@ -28,7 +28,7 @@ export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
 export const DEFAULT_AQUA_DIR_NAME = "aqua";
 
-export const APP_PROTOTYPE_FILE_NAME = "fluence";
+export const FLUENCE_CONFIG_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
 export const APP_FILE_NAME = "app";
 
@@ -56,12 +56,11 @@ export const YAML_FORMAT: [
   },
 ];
 
-export const KEY_PAIR_NAME_FLAG = "key-pair-name";
-
 export const AUTO_GENERATED = "auto-generated";
 
+export const KEY_PAIR_FLAG_NAME = "key-pair-name";
 export const KEY_PAIR_FLAG = {
-  [KEY_PAIR_NAME_FLAG]: Flags.string({
+  [KEY_PAIR_FLAG_NAME]: Flags.string({
     char: "k",
     description: "Key pair name",
     helpValue: "<name>",
@@ -69,12 +68,19 @@ export const KEY_PAIR_FLAG = {
 } as const;
 
 export const NO_INPUT_FLAG_NAME = "no-input";
-
 export const NO_INPUT_FLAG = {
   [NO_INPUT_FLAG_NAME]: Flags.boolean({
     description: "Don't interactively ask for any input from the user",
   }),
-};
+} as const;
+
+export const TIMEOUT_FLAG_NAME = "timeout";
+export const TIMEOUT_FLAG = {
+  [TIMEOUT_FLAG_NAME]: Flags.string({
+    description: "Timeout used for command execution",
+    helpValue: "<milliseconds>",
+  }),
+} as const;
 
 export const FORCE_FLAG_NAME = "force";
 

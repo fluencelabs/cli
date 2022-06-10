@@ -17,7 +17,8 @@
 import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
-import { Command, Flags } from "@oclif/core";
+import color from "@oclif/color";
+import { Command } from "@oclif/core";
 
 import { initAquaCli } from "../lib/aquaCli";
 import {
@@ -25,7 +26,12 @@ import {
   DeployedServiceConfig,
   initAppConfig,
 } from "../lib/configs/project/app";
-import { CommandObj, NAME_ARG, NO_INPUT_FLAG } from "../lib/const";
+import {
+  CommandObj,
+  NAME_ARG,
+  NO_INPUT_FLAG,
+  TIMEOUT_FLAG,
+} from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
@@ -38,10 +44,7 @@ export default class Remove extends Command {
   static override description = "Remove previously deployed config";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    timeout: Flags.string({
-      description: "Remove timeout",
-      helpValue: "<milliseconds>",
-    }),
+    ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
   };
   static override args = [
@@ -115,7 +118,12 @@ export const removeApp = async ({
   const notRemovedServices: DeployedServiceConfig[] = [];
   for (const service of services) {
     const { serviceId, peerId, name, blueprintId } = service;
-    const addr = getRelayAddr(peerId);
+    const addr = getRelayAddr({
+      peerId,
+      commandObj,
+      getInfoForRandom: (relay): string =>
+        `Random relay ${color.yellow(relay)} selected for connection`,
+    });
 
     try {
       // eslint-disable-next-line no-await-in-loop

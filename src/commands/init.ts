@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
@@ -59,7 +60,9 @@ export default class Init extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Init);
     const isInteractive = getIsInteractive(flags);
-    await init(this, isInteractive, args[NAME_ARG]);
+    const projectName: unknown = args[NAME_ARG];
+    assert(projectName === undefined || typeof projectName === "string");
+    await init(this, isInteractive, projectName);
   }
 }
 
