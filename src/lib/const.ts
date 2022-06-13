@@ -84,8 +84,6 @@ export const TIMEOUT_FLAG = {
 
 export const FORCE_FLAG_NAME = "force";
 
-export const NAME_ARG = "NAME";
-
 export type Dependency = {
   name: string;
   version: string;
