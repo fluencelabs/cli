@@ -30,11 +30,11 @@ Don't name arguments or flags with names that contain underscore symbols, becaus
 
 <!-- usage -->
 ```sh-session
-$ npm install -g @fluencelabs/cli
+$ npm install -location=global @fluencelabs/cli
 $ fluence COMMAND
 running command...
-$ fluence (--version)
-@fluencelabs/cli/0.0.2 linux-x64 node-v16.14.0
+$ fluence --version
+@fluencelabs/cli/0.1.3 darwin-x64 node-v16.15.1
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
