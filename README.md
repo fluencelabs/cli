@@ -8,7 +8,6 @@ A tool that makes working with Fluence network more convenient
 <!-- toc -->
 * [Prerequisites](#prerequisites)
 * [Currently supported workflow example](#currently-supported-workflow-example)
-* [yaml-language-server: $schema=.fluence/schemas/fluence.json](#yaml-language-server-schemafluenceschemasfluencejson)
 * [Contributing](#contributing)
 * [Usage](#usage)
 * [Commands](#commands)
@@ -46,8 +45,6 @@ A lot of what is described next will be improved and automated in the future (e.
 7. Add name of your service to the `fluence.yaml` config. Example of `fluence.yaml`:
 
 ```yaml
-# yaml-language-server: $schema=.fluence/schemas/fluence.json
-
 version: 0
 services:
   - name: adder
