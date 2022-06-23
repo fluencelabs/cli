@@ -24,6 +24,7 @@ import {
   DeployedServiceConfig,
   initAppConfig,
   initNewReadonlyAppConfig,
+  Services,
 } from "../lib/configs/project/app";
 import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
@@ -36,6 +37,7 @@ import {
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
 } from "../lib/const";
+import { updateDeployedAppAqua } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
@@ -171,33 +173,36 @@ const deployService = async ({
     );
   }
 
-  return { blueprintId, serviceId, peerId, name };
+  return { blueprintId, serviceId, peerId };
 };
 
 /**
  * Deploy a service and then deploy zero or more services using the blueprint
  * id of the first service that was deployed
- * @param param0 Readonly<{ deployServiceOptions: DeployServiceOptions; count: number;}>
- * @returns Promise<Array<Error | DeployedServiceConfig>>
+ * @param param0 Readonly<{ deployServiceOptions: DeployServiceOptions; count: number; commandObj: CommandObj;}>
+ * @returns Promise<DeployedServiceConfig[] | null>
  */
 const deployServices = async ({
   count,
   deployServiceOptions,
+  commandObj,
 }: Readonly<{
   deployServiceOptions: DeployServiceOptions;
   count: number;
-}>): Promise<Array<Error | DeployedServiceConfig>> => {
+  commandObj: CommandObj;
+}>): Promise<DeployedServiceConfig[] | null> => {
   const result = await deployService(deployServiceOptions);
 
-  if (result instanceof Error || count === 1) {
-    return [result];
+  if (result instanceof Error) {
+    commandObj.warn(result.message);
+    return null;
   }
 
   const { blueprintId } = result;
   const { secretKey, peerId, addr, aquaCli, name, timeout } =
     deployServiceOptions;
 
-  const deployedServiceConfigs: Array<DeployedServiceConfig | Error> = [result];
+  const services = [result];
 
   let servicesToDeployCount = count - 1;
 
@@ -226,28 +231,24 @@ const deployServices = async ({
         }
       );
     } catch (error) {
-      deployedServiceConfigs.push(
-        new Error(`Wasn't able to deploy service\n${String(error)}`)
-      );
+      commandObj.warn(`Wasn't able to deploy service\n${String(error)}`);
       continue;
     }
 
     const [, serviceId] = /"(.*)"/.exec(result) ?? [];
 
     if (serviceId === undefined) {
-      deployedServiceConfigs.push(
-        new Error(
-          `Deployment finished without errors but not able to parse serviceId from aqua cli output:\n\n${result}`
-        )
+      commandObj.warn(
+        `Deployment finished without errors but not able to parse serviceId from aqua cli output:\n\n${result}`
       );
       continue;
     }
 
-    deployedServiceConfigs.push({ blueprintId, serviceId, peerId, name });
+    services.push({ blueprintId, serviceId, peerId });
     servicesToDeployCount = servicesToDeployCount - 1;
   }
 
-  return deployedServiceConfigs;
+  return services;
 };
 
 const getInfoForRandomPeerId = (randomPeerId: string): string =>
@@ -300,11 +301,11 @@ const deploy = async ({
     });
 
   const aquaCli = await initAquaCli(commandObj);
-  const successfullyDeployedServices: DeployedServiceConfig[] = [];
+  const successfullyDeployedServices: Services = {};
   for (const { name, count = 1 } of fluenceConfig.services) {
     process.chdir(path.join(artifactsPath, name));
     // eslint-disable-next-line no-await-in-loop
-    const results = await deployServices({
+    const services = await deployServices({
       count,
       deployServiceOptions: {
         name,
@@ -315,27 +316,22 @@ const deploy = async ({
         timeout,
         addr,
       },
+      commandObj,
     });
-
-    for (const result of results) {
-      if (result instanceof Error) {
-        commandObj.warn(result.message);
-        continue;
-      }
-
-      successfullyDeployedServices.push(result);
+    if (services !== null) {
+      successfullyDeployedServices[name] = services;
     }
   }
 
   process.chdir(cwd);
 
-  if (successfullyDeployedServices.length === 0) {
+  if (Object.keys(successfullyDeployedServices).length === 0) {
     commandObj.error("No services were deployed successfully");
   }
-
+  await updateDeployedAppAqua(successfullyDeployedServices);
   await initNewReadonlyAppConfig(
     {
-      version: 0,
+      version: 1,
       services: successfullyDeployedServices,
       keyPairName: keyPair.name,
       timestamp: new Date().toISOString(),

@@ -9,7 +9,6 @@
 node_modules
 oclif.manifest.json
 .eslintcache
-/schemas
 /fluence.yaml
 .fluence
 /src/aqua

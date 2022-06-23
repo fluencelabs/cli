@@ -31,11 +31,11 @@ import {
 import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
   GetDefaultConfig,
-  initConfig,
+  getConfigInitFunction,
   InitConfigOptions,
   InitializedConfig,
   InitializedReadonlyConfig,
-  initReadonlyConfig,
+  getReadonlyConfigInitFunction,
   Migrations,
 } from "../initConfig";
 
@@ -100,11 +100,11 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   validate,
 };
 
-export const initProjectSecretsConfig = initConfig(
+export const initProjectSecretsConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault
 );
-export const initReadonlyProjectSecretsConfig = initReadonlyConfig(
+export const initReadonlyProjectSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );

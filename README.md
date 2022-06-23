@@ -7,6 +7,8 @@ A tool that makes working with Fluence network more convenient
 
 <!-- toc -->
 * [Prerequisites](#prerequisites)
+* [Currently supported workflow example](#currently-supported-workflow-example)
+* [yaml-language-server: $schema=.fluence/schemas/fluence.json](#yaml-language-server-schemafluenceschemasfluencejson)
 * [Contributing](#contributing)
 * [Usage](#usage)
 * [Commands](#commands)
@@ -15,6 +17,67 @@ A tool that makes working with Fluence network more convenient
 # Prerequisites
 
 - [Node.js >=16.0.0](https://nodejs.org/)
+
+# Currently supported workflow example
+
+A lot of what is described next will be improved and automated in the future (e.g. development and building of marine services, key-management etc.) Currently Fluence CLI is a convenience wrapper around Aqua CLI
+
+1. Use `fluence init` to initialize new project
+2. Write your own service using rust or use an example service from [examples repository](https://github.com/fluencelabs/examples)
+3. Use [marine](https://doc.fluence.dev/marine-book/) to build `.wasm` service modules
+4. Create a directory with the name of your service in `artifacts` directory (e.g. if your service name is `adder` - create `artifacts/adder` directory)
+5. Put `.wasm` files into `artifacts/adder` directory
+6. Create `artifacts/adder/deploy.json` file. You can find examples of such files in [examples repository](https://github.com/fluencelabs/examples), where they are usually called `deployment_cfg.json`. The name of the directory and the name of the service in `deploy.json` must match. Example of `artifacts/adder/deploy.json`:
+
+```json
+{
+  "adder": {
+    "modules": [
+      {
+        "name": "adder",
+        "path": "adder.wasm",
+        "logger_enabled": [true]
+      }
+    ]
+  }
+}
+```
+
+7. Add name of your service to the `fluence.yaml` config. Example of `fluence.yaml`:
+
+```yaml
+# yaml-language-server: $schema=.fluence/schemas/fluence.json
+
+version: 0
+services:
+  - name: adder
+    count: 2 # Optional. Number of services to deploy
+```
+
+8. Execute `fluence deploy` to deploy the application you described in `fluence.yaml`. Random peer will be selected for deployment of all of your services (can be overridden using `--on` or `--relay` flags)
+User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag)
+You can also add project-level secret key to your project `.fluence/secrets.yaml` manually (key-pair management coming soon)
+
+9. Write some aqua in `src/aqua/main.aqua`. Example `src/aqua/main.aqua`:
+```aqua
+import App from "deployed.app.aqua"
+
+service AddOne:
+    add_one: u64 -> u64
+
+func add_one(value: u64) -> u64:
+    serviceIds <- App.serviceIds()
+    on serviceIds.adder.peerId:
+        AddOne serviceIds.adder.serviceId
+        res <- AddOne.add_one(value)
+    <- res
+```
+
+10. Execute `fluence run -f 'add_one(1)'`.
+Function with this name will be searched inside the `src/aqua` (can be overridden with `--aqua` flag) directory and then it will be executed on the peer that was used for deployment  when you executed `fluence deploy` (can be overridden with `--on` or `--relay` flag). `"deployed.app.aqua"` file is located at `.fluence/aqua`. `App.serviceIds()` method returns ids of the previously deployed services that you can utilize in your aqua code (this info is stored at `.fluence/app.yaml`) 
+
+11. Remove the previously deployed fluence application using `fluence remove`
+
 
 # Contributing
 
@@ -46,9 +109,9 @@ USAGE
 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
-* [`fluence deploy [NAME] [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy-name---on-peer_id---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
+* [`fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---on-peer_id---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
 * [`fluence help [COMMAND]`](#fluence-help-command)
-* [`fluence init [NAME] [--no-input]`](#fluence-init-name---no-input)
+* [`fluence init [PATH] [--no-input]`](#fluence-init-path---no-input)
 * [`fluence plugins`](#fluence-plugins)
 * [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
 * [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
@@ -58,7 +121,7 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
-* [`fluence remove [NAME] [--timeout <milliseconds>] [--no-input]`](#fluence-remove-name---timeout-milliseconds---no-input)
+* [`fluence remove [--timeout <milliseconds>] [--no-input]`](#fluence-remove---timeout-milliseconds---no-input)
 * [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---on-peer_id---aqua-path--f-function-call---timeout-milliseconds---no-input)
 
 ## `fluence autocomplete [SHELL]`
@@ -90,17 +153,13 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
-## `fluence deploy [NAME] [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
+## `fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
 
 Deploy service to the remote peer
 
 ```
 USAGE
-  $ fluence deploy [NAME] [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>]
-    [--no-input]
-
-ARGUMENTS
-  NAME  Deployment config name
+  $ fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -139,22 +198,22 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `fluence init [NAME] [--no-input]`
+## `fluence init [PATH] [--no-input]`
 
-Initialize fluence project in the current directory
+Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [NAME] [--no-input]
+  $ fluence init [PATH] [--no-input]
 
 ARGUMENTS
-  NAME  Project name
+  PATH  Project path
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Initialize fluence project in the current directory
+  Initialize fluence project
 
 EXAMPLES
   $ fluence init
@@ -392,16 +451,13 @@ DESCRIPTION
   Update installed plugins.
 ```
 
-## `fluence remove [NAME] [--timeout <milliseconds>] [--no-input]`
+## `fluence remove [--timeout <milliseconds>] [--no-input]`
 
 Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [NAME] [--timeout <milliseconds>] [--no-input]
-
-ARGUMENTS
-  NAME  Deployment config name
+  $ fluence remove [--timeout <milliseconds>] [--no-input]
 
 FLAGS
   --no-input                Don't interactively ask for any input from the user

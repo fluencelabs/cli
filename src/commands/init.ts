@@ -23,7 +23,6 @@ import { Command } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../lib/ajv";
-import { ensureAppServicesAquaFile } from "../lib/aqua/ensureAppServicesAquaFile";
 import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
   CommandObj,
@@ -43,10 +42,11 @@ import {
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
+import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { input } from "../lib/prompt";
 
-export const NAME_OR_PATH = "NAME-OR-PATH";
+export const PATH = "PATH";
 
 export default class Init extends Command {
   static override description = "Initialize fluence project";
@@ -56,20 +56,20 @@ export default class Init extends Command {
   };
   static override args = [
     {
-      name: NAME_OR_PATH,
-      description: "New project directory name or path",
+      name: PATH,
+      description: "Project path",
     },
   ];
   static override usage: string = usage(this);
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Init);
     const isInteractive = getIsInteractive(flags);
-    const nameOrPath: unknown = args[NAME_OR_PATH];
-    assert(nameOrPath === undefined || typeof nameOrPath === "string");
+    const projectPath: unknown = args[PATH];
+    assert(projectPath === undefined || typeof projectPath === "string");
     await init({
       commandObj: this,
       isInteractive,
-      nameOrPath,
+      projectPath,
     });
   }
 }
@@ -143,22 +143,12 @@ const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
   required: ["aquaSettings.imports"],
 };
 const validateSettingsJson = ajv.compile(settingsJsonSchema);
-const getSettingsConfig = async (
-  commandObj: CommandObj
-): Promise<SettingsJson> => {
-  const settingsConfig = {
-    "aquaSettings.imports": [
-      await ensureAppServicesAquaFile(commandObj),
-      getArtifactsPath(),
-    ],
-  };
-
-  return settingsConfig;
-};
+const getSettingsConfig = (): SettingsJson => ({
+  "aquaSettings.imports": [getDefaultAquaPath(), getArtifactsPath()],
+});
 
 const ensureRecommendedSettings = async (
-  projectPath: string,
-  commandObj: CommandObj
+  projectPath: string
 ): Promise<void> => {
   const vscodeDirPath = path.join(projectPath, VSCODE_DIR_NAME);
   await fsPromises.mkdir(vscodeDirPath, { recursive: true });
@@ -170,7 +160,7 @@ const ensureRecommendedSettings = async (
   } catch {
     await fsPromises.writeFile(
       settingsJsonPath,
-      JSON.stringify(await getSettingsConfig(commandObj), null, 2) + "\n",
+      JSON.stringify(getSettingsConfig(), null, 2) + "\n",
       FS_OPTIONS
     );
     return;
@@ -184,7 +174,7 @@ const ensureRecommendedSettings = async (
   }
 
   if (validateSettingsJson(parsedFileContent)) {
-    const settingsConfig = await getSettingsConfig(commandObj);
+    const settingsConfig = getSettingsConfig();
     for (const importItem of settingsConfig["aquaSettings.imports"]) {
       if (!parsedFileContent["aquaSettings.imports"].includes(importItem)) {
         parsedFileContent["aquaSettings.imports"].push(importItem);
@@ -224,33 +214,41 @@ const ensureGitIgnore = async (projectPath: string): Promise<void> => {
 type InitOptions = {
   commandObj: CommandObj;
   isInteractive: boolean;
-  nameOrPath?: string | undefined;
+  projectPath?: string | undefined;
 };
 
 export const init = async (options: InitOptions): Promise<void> => {
-  const { commandObj, isInteractive, nameOrPath } = options;
+  const { commandObj, isInteractive, projectPath } = options;
 
-  const projectPath =
-    nameOrPath === undefined && !isInteractive
+  const resolvedProjectPath =
+    projectPath === undefined && !isInteractive
       ? process.cwd()
       : path.resolve(
-          nameOrPath ??
+          projectPath ??
             (await input({
               message:
-                "Enter project name or path or press enter to init in the current directory:",
+                "Enter project path or press enter to init in the current directory:",
               isInteractive,
             }))
         );
 
   try {
-    const fluenceDirPath = path.join(projectPath, FLUENCE_DIR_NAME);
-    await fsPromises.mkdir(fluenceDirPath, { recursive: true });
-    process.chdir(projectPath);
+    const aquaDefaultDirPath = path.join(
+      resolvedProjectPath,
+      FLUENCE_DIR_NAME,
+      AQUA_DIR_NAME
+    );
+    await fsPromises.mkdir(aquaDefaultDirPath, { recursive: true });
+    process.chdir(resolvedProjectPath);
 
-    await initReadonlyFluenceConfig(commandObj, projectPath);
+    await initReadonlyFluenceConfig(commandObj);
 
-    const aquaDirPath = path.join(projectPath, SRC_DIR_NAME, AQUA_DIR_NAME);
-    await fsPromises.mkdir(aquaDirPath, { recursive: true });
+    const aquaSrcDirPath = path.join(
+      resolvedProjectPath,
+      SRC_DIR_NAME,
+      AQUA_DIR_NAME
+    );
+    await fsPromises.mkdir(aquaSrcDirPath, { recursive: true });
     const defaultSrcAquaFilePath = path.join(
       getSrcAquaDirPath(),
       DEFAULT_SRC_AQUA_FILE_NAME
@@ -261,17 +259,16 @@ export const init = async (options: InitOptions): Promise<void> => {
       await fsPromises.writeFile(defaultSrcAquaFilePath, "");
     }
 
-    const artifactsDirPath = path.join(projectPath, ARTIFACTS_DIR_NAME);
+    const artifactsDirPath = path.join(resolvedProjectPath, ARTIFACTS_DIR_NAME);
     await fsPromises.mkdir(artifactsDirPath, { recursive: true });
 
-    await ensureRecommendedExtensions(projectPath);
-    await ensureRecommendedSettings(projectPath, commandObj);
-    await ensureGitIgnore(projectPath);
-    await ensureAppServicesAquaFile(commandObj);
+    await ensureRecommendedExtensions(resolvedProjectPath);
+    await ensureRecommendedSettings(resolvedProjectPath);
+    await ensureGitIgnore(resolvedProjectPath);
 
     commandObj.log(
       color.magentaBright(
-        `\nFluence project successfully initialized at ${projectPath}\n`
+        `\nFluence project successfully initialized at ${resolvedProjectPath}\n`
       )
     );
   } catch (error) {

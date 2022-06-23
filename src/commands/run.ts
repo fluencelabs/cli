@@ -21,7 +21,6 @@ import { Command, Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../lib/ajv";
-import { ensureAppServicesAquaFile } from "../lib/aqua/ensureAppServicesAquaFile";
 import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
 import {
@@ -34,6 +33,7 @@ import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getRelayId, getRelayAddr } from "../lib/multiaddr";
 import { getMaybeArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
+import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { confirm, input, list } from "../lib/prompt";
 
@@ -113,7 +113,7 @@ export default class Run extends Command {
     const data = await getRunData(flags, this);
     const imports = [
       flags.import,
-      await ensureAppServicesAquaFile(this),
+      getDefaultAquaPath(),
       await getMaybeArtifactsPath(),
     ];
 
@@ -150,7 +150,12 @@ const ensurePeerId = async (
   const appConfig = await initReadonlyAppConfig(commandObj);
 
   const peerIdsFromDeployed = [
-    ...new Set((appConfig?.services ?? []).map(({ peerId }): string => peerId)),
+    ...new Set(
+      Object.values(appConfig?.services ?? {}).flatMap(
+        (deployedServiceConfig): Array<string> =>
+          deployedServiceConfig.map(({ peerId }): string => peerId)
+      )
+    ),
   ];
   const firstPeerId = peerIdsFromDeployed[0];
   if (peerIdsFromDeployed.length === 1 && firstPeerId !== undefined) {

@@ -27,38 +27,41 @@ import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME } from "../const";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
 
-const ensureSchema = async (
-  configDirPath: string,
-  schemaFileName: string,
-  schema: AnySchema
-): Promise<void> => {
-  const schemaDir = path.join(configDirPath, SCHEMAS_DIR_NAME);
+const ensureSchema = async ({
+  name,
+  configDirPath,
+  getSchemaDirPath,
+  commandObj,
+  schema,
+}: {
+  name: string;
+  configDirPath: string;
+  getSchemaDirPath: GetPath | undefined;
+  commandObj: CommandObj;
+  schema: AnySchema;
+}): Promise<string> => {
+  const schemaDir = path.join(
+    getSchemaDirPath === undefined
+      ? configDirPath
+      : await getSchemaDirPath(commandObj),
+    SCHEMAS_DIR_NAME
+  );
   await fsPromises.mkdir(schemaDir, { recursive: true });
+  const schemaPath = path.join(schemaDir, `${name}.json`);
   await fsPromises.writeFile(
-    path.join(schemaDir, schemaFileName),
+    path.join(schemaDir, `${name}.json`),
     JSON.stringify(schema, null, 2) + "\n",
     FS_OPTIONS
   );
+  return path.relative(configDirPath, schemaPath);
 };
 
-async function getConfigString(
+const getConfigString = async <LatestConfig extends BaseConfig>(
   configPath: string,
-  schemaFileName: string,
+  schemaRelativePath: string,
   commandObj: CommandObj,
-  getDefaultConfig?: undefined
-): Promise<string | null>;
-async function getConfigString<LatestConfig extends BaseConfig>(
-  configPath: string,
-  schemaFileName: string,
-  commandObj: CommandObj,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
-): Promise<string>;
-async function getConfigString<LatestConfig extends BaseConfig>(
-  configPath: string,
-  schemaFileName: string,
-  commandObj: CommandObj,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig> | undefined
-): Promise<string | null> {
+  getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined
+): Promise<string | null> => {
   try {
     const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
     return fileContent;
@@ -67,7 +70,7 @@ async function getConfigString<LatestConfig extends BaseConfig>(
       return null;
     }
     const defaultConfigString = yamlDiffPatch(
-      `# yaml-language-server: $schema=./${SCHEMAS_DIR_NAME}/${schemaFileName}`,
+      `# yaml-language-server: $schema=${schemaRelativePath}`,
       {},
       await getDefaultConfig(commandObj)
     );
@@ -78,7 +81,7 @@ async function getConfigString<LatestConfig extends BaseConfig>(
     );
     return defaultConfigString;
   }
-}
+};
 
 type MigrateConfigOptions<
   Config extends BaseConfig,
@@ -200,11 +203,11 @@ export type InitializedConfig<LatestConfig> = Mutable<
   $commit(): Promise<void>;
 };
 type BaseConfig = { version: number };
-export type Migrations<T> = Array<(config: T) => T>;
+export type Migrations<Config> = Array<(config: Config) => Config>;
 export type GetDefaultConfig<LatestConfig> = (
   commandObj: CommandObj
 ) => LatestConfig | Promise<LatestConfig>;
-type GetConfigPath = (commandObj: CommandObj) => string | Promise<string>;
+type GetPath = (commandObj: CommandObj) => string | Promise<string>;
 
 export type InitConfigOptions<
   Config extends BaseConfig,
@@ -214,48 +217,45 @@ export type InitConfigOptions<
   latestSchema: JSONSchemaType<LatestConfig>;
   migrations: Migrations<Config>;
   name: string;
-  getPath: GetConfigPath;
+  getPath: GetPath;
+  getSchemaDirPath?: GetPath;
   validate?: (config: LatestConfig) => ValidationResult;
 };
 
 type InitFunction<LatestConfig> = (
-  commandObj: CommandObj,
-  configPathOverride?: string
+  commandObj: CommandObj
 ) => Promise<InitializedConfig<LatestConfig> | null>;
 
 type InitFunctionWithDefault<LatestConfig> = (
-  commandObj: CommandObj,
-  configPathOverride?: string
+  commandObj: CommandObj
 ) => Promise<InitializedConfig<LatestConfig>>;
 
 type InitReadonlyFunction<LatestConfig> = (
-  commandObj: CommandObj,
-  configPathOverride?: string
+  commandObj: CommandObj
 ) => Promise<InitializedReadonlyConfig<LatestConfig> | null>;
 
 type InitReadonlyFunctionWithDefault<LatestConfig> = (
-  commandObj: CommandObj,
-  configPathOverride?: string
+  commandObj: CommandObj
 ) => Promise<InitializedReadonlyConfig<LatestConfig>>;
 
 const getConfigPath = (configDirPath: string, name: string): string =>
   path.join(configDirPath, `${name}.yaml`);
 
-export function initReadonlyConfig<
+export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
   getDefaultConfig?: undefined
 ): InitReadonlyFunction<LatestConfig>;
-export function initReadonlyConfig<
+export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitReadonlyFunctionWithDefault<LatestConfig>;
-export function initReadonlyConfig<
+export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >(
@@ -263,30 +263,36 @@ export function initReadonlyConfig<
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitReadonlyFunction<LatestConfig> {
   return async (
-    commandObj: CommandObj,
-    configPathOverride?: string
+    commandObj: CommandObj
   ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
-    const { allSchemas, latestSchema, migrations, name, getPath, validate } =
-      options;
+    const {
+      allSchemas,
+      latestSchema,
+      migrations,
+      name,
+      getPath,
+      validate,
+      getSchemaDirPath,
+    } = options;
 
-    const configDirPath = configPathOverride ?? (await getPath(commandObj));
+    const configDirPath = await getPath(commandObj);
     const configPath = getConfigPath(configDirPath, name);
 
     const validateAllConfigVersions = ajv.compile<Config>({
       oneOf: allSchemas,
     });
 
-    const schemaFileName = `${path.parse(configPath).name}.json`;
-
-    await ensureSchema(
+    const schemaRelativePath = await ensureSchema({
+      name,
       configDirPath,
-      schemaFileName,
-      validateAllConfigVersions.schema
-    );
+      getSchemaDirPath,
+      commandObj,
+      schema: validateAllConfigVersions.schema,
+    });
 
     const maybeConfigString = await getConfigString(
       configPath,
-      schemaFileName,
+      schemaRelativePath,
       commandObj,
       getDefaultConfig
     );
@@ -344,21 +350,21 @@ export function initReadonlyConfig<
 
 const initializedConfigs = new Set<string>();
 
-export function initConfig<
+export function getConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: undefined
+  getDefaultConfig?: never
 ): InitFunction<LatestConfig>;
-export function initConfig<
+export function getConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
+  getDefaultConfig: GetDefaultConfig<LatestConfig>
 ): InitFunctionWithDefault<LatestConfig>;
-export function initConfig<
+export function getConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >(
@@ -366,11 +372,9 @@ export function initConfig<
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitFunction<LatestConfig> {
   return async (
-    commandObj: CommandObj,
-    configPathOverride?: string
+    commandObj: CommandObj
   ): Promise<InitializedConfig<LatestConfig> | null> => {
-    const configDirPath =
-      configPathOverride ?? (await options.getPath(commandObj));
+    const configDirPath = await options.getPath(commandObj);
     const configPath = getConfigPath(configDirPath, options.name);
 
     if (initializedConfigs.has(configPath)) {
@@ -380,10 +384,10 @@ export function initConfig<
     }
     initializedConfigs.add(configPath);
 
-    const maybeInitializedReadonlyConfig = await initReadonlyConfig(
+    const maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
       options,
       getDefaultConfig
-    )(commandObj, configPathOverride);
+    )(commandObj);
     if (maybeInitializedReadonlyConfig === null) {
       return null;
     }

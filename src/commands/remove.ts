@@ -20,17 +20,15 @@ import color from "@oclif/color";
 import { Command } from "@oclif/core";
 
 import { initAquaCli } from "../lib/aquaCli";
-import {
-  AppConfig,
-  DeployedServiceConfig,
-  initAppConfig,
-} from "../lib/configs/project/app";
+import { AppConfig, initAppConfig, Services } from "../lib/configs/project/app";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
+import { updateDeployedAppAqua } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
 import { getRelayAddr } from "../lib/multiaddr";
+import { getDeployedAppAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { confirm } from "../lib/prompt";
 
@@ -104,51 +102,61 @@ export const removeApp = async ({
   }
 
   const aquaCli = await initAquaCli(commandObj);
-  const notRemovedServices: DeployedServiceConfig[] = [];
-  for (const service of services) {
-    const { serviceId, peerId, name, blueprintId } = service;
-    const addr = getRelayAddr({
-      peerId,
-      commandObj,
-      getInfoForRandom: (relay): string =>
-        `Random relay ${color.yellow(relay)} selected for connection`,
-    });
+  const notRemovedServices: Services = {};
+  for (const [name, servicesByName] of Object.entries(services)) {
+    const notRemovedServicesByName = [];
 
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      await aquaCli(
-        {
-          command: "remote remove_service",
-          flags: {
-            addr,
-            id: serviceId,
-            sk: keyPair.secretKey,
-            on: peerId,
-            timeout,
+    for (const service of servicesByName) {
+      const { serviceId, peerId, blueprintId } = service;
+      const addr = getRelayAddr({
+        peerId,
+        commandObj,
+        getInfoForRandom: (relay): string =>
+          `Random relay ${color.yellow(relay)} selected for connection`,
+      });
+
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await aquaCli(
+          {
+            command: "remote remove_service",
+            flags: {
+              addr,
+              id: serviceId,
+              sk: keyPair.secretKey,
+              on: peerId,
+              timeout,
+            },
           },
-        },
-        `Removing service`,
-        {
-          name,
-          id: serviceId,
-          blueprintId,
-          relay: addr,
-          "deployed on": peerId,
-          "deployed at": timestamp,
-        }
-      );
-    } catch (error) {
-      commandObj.warn(`When removing service\n${String(error)}`);
-      notRemovedServices.push(service);
+          `Removing service`,
+          {
+            name,
+            id: serviceId,
+            blueprintId,
+            relay: addr,
+            "deployed on": peerId,
+            "deployed at": timestamp,
+          }
+        );
+      } catch (error) {
+        commandObj.warn(`When removing service\n${String(error)}`);
+        notRemovedServicesByName.push(service);
+      }
+    }
+
+    if (notRemovedServicesByName.length > 0) {
+      notRemovedServices[name] = notRemovedServicesByName;
     }
   }
 
-  appConfig.services = notRemovedServices;
-
-  if (appConfig.services.length === 0) {
+  if (Object.keys(notRemovedServices).length === 0) {
+    await fsPromises.unlink(getDeployedAppAquaPath());
     return fsPromises.unlink(appConfig.$getPath());
   }
 
+  await updateDeployedAppAqua(notRemovedServices);
+
+  appConfig.services = notRemovedServices;
   await appConfig.$commit();
   commandObj.error(
     "Not all services were successful removed. Please make sure to remove all of them in order to continue"

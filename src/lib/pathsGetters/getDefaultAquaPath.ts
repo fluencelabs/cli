@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { DEFAULT_AQUA_DIR_NAME, CommandObj } from "../const";
+import { DEPLOYED_APP_AQUA_FILE_NAME, AQUA_DIR_NAME } from "../const";
 
-import { ensureUserFluenceDir } from "./ensureUserFluenceDir";
+import { getProjectFluenceDirPath } from "./getProjectFluenceDirPath";
 
-export const ensureDefaultAquaPath = async (
-  commandObj: CommandObj
-): Promise<string> => {
-  const userFluenceDir = await ensureUserFluenceDir(commandObj);
-  const defaultAquaPath = path.join(userFluenceDir, DEFAULT_AQUA_DIR_NAME);
-  await fsPromises.mkdir(defaultAquaPath, { recursive: true });
-  return defaultAquaPath;
+export const getDefaultAquaPath = (): string => {
+  const projectFluenceDir = getProjectFluenceDirPath();
+  return path.join(projectFluenceDir, AQUA_DIR_NAME);
 };
+
+export const getDeployedAppAquaPath = (): string =>
+  path.join(getDefaultAquaPath(), DEPLOYED_APP_AQUA_FILE_NAME);

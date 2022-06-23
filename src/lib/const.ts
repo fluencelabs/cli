@@ -26,13 +26,12 @@ export const ARTIFACTS_DIR_NAME = "artifacts";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
-export const DEFAULT_AQUA_DIR_NAME = "aqua";
 
 export const FLUENCE_CONFIG_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
 export const APP_FILE_NAME = "app";
 
-export const APP_SERVICES_AQUA_FILE_NAME = `app.services.${AQUA_EXT}`;
+export const DEPLOYED_APP_AQUA_FILE_NAME = `deployed.app.${AQUA_EXT}`;
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
 
@@ -103,20 +102,10 @@ export type CommandObj = Readonly<InstanceType<typeof Command>>;
 export const GIT_IGNORE_CONTENT = `.idea
 .DS_Store
 .fluence
-/schemas
 **/node_modules
 Cargo.lock
 **/target/
 .repl_history`;
-
-export const APP_SERVICES_AQUA = `data DeployedService:
-  serviceId: string
-  peerId: string
-  blueprintId: string
-  name: string
-
-alias App : []DeployedService
-`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
