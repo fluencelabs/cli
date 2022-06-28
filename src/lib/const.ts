@@ -106,6 +106,7 @@ export const GIT_IGNORE_CONTENT = `.idea
 **/node_modules
 Cargo.lock
 **/target/
+.vscode/settings.json
 .repl_history`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
