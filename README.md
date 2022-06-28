@@ -124,7 +124,7 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
 * [`fluence remove [--timeout <milliseconds>] [--no-input]`](#fluence-remove---timeout-milliseconds---no-input)
-* [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [--aqua-path <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id---aqua-path-path--f-function-call---timeout-milliseconds---no-input)
+* [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id--i-path--f-function-call---timeout-milliseconds---no-input)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -474,18 +474,18 @@ EXAMPLES
 
 _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.1.4/dist/commands/remove.ts)_
 
-## `fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [--aqua-path <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`
+## `fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`
 
 Run aqua script
 
 ```
 USAGE
   $ fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>]
-    [--on <peer_id>] [--aqua-path <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]
+    [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]
 
 FLAGS
   -f, --func=<function-call>  Function call
-  --aqua-path=<path>          Path to the aqua file or to the directory that contains aqua files
+  -i, --input=<path>          Path to the aqua file or to the directory that contains aqua files
   --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
                               argument names
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
