@@ -42,7 +42,7 @@ export type AquaCliInput =
   | {
       command: "run";
       flags: Flags<"addr" | "input" | "func"> &
-        OptionalFlags<"on" | "timeout" | "data" | "import">;
+        OptionalFlags<"on" | "timeout" | "data" | "import" | "json-service">;
     };
 
 export type AquaCLI = {
@@ -53,14 +53,20 @@ export type AquaCLI = {
   ): Promise<string>;
 };
 
-export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
-  const aquaCliPath = await ensureNpmDependency(
-    DEPENDENCIES.aqua,
+export const initAquaCli = async (
+  commandObj: CommandObj,
+  isInteractive: boolean
+): Promise<AquaCLI> => {
+  const aquaCliPath = await ensureNpmDependency({
+    dependency: DEPENDENCIES.aqua,
     commandObj,
-    "Downloading Aqua CLI, may take a while"
-  );
+    confirmMessage:
+      "Aqua CLI dependency needs to be updated. Do you want to continue?",
+    installMessage: "Downloading Aqua CLI, may take a while",
+    isInteractive,
+  });
 
-  return async (aquaCliInput, message, keyValuePairs): Promise<string> => {
+  return (aquaCliInput, message, keyValuePairs): Promise<string> => {
     const { command, flags } = aquaCliInput;
 
     const timeoutNumber = Number(flags.timeout);

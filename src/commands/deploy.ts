@@ -42,7 +42,7 @@ import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
 import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
-import { getRelayId, getRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { confirm } from "../lib/prompt";
@@ -112,6 +112,7 @@ export default class Deploy extends Command {
       timeout: flags.timeout,
       relay: flags.relay,
       on: flags.on,
+      isInteractive,
     });
   }
 }
@@ -251,18 +252,13 @@ const deployServices = async ({
   return services;
 };
 
-const getInfoForRandomPeerId = (randomPeerId: string): string =>
-  `Random peer ${color.yellow(randomPeerId)} selected for deployment`;
-
-const getInfoForRandomRelayId = (randomPeerId: string): string =>
-  `Random relay ${color.yellow(randomPeerId)} selected for deployment`;
-
 type DeployOptions = {
   keyPair: ConfigKeyPair;
   timeout: string | undefined;
   commandObj: CommandObj;
   relay: string | undefined;
   on: string | undefined;
+  isInteractive: boolean;
 };
 
 const deploy = async ({
@@ -271,6 +267,7 @@ const deploy = async ({
   timeout,
   relay,
   on,
+  isInteractive,
 }: DeployOptions): Promise<void> => {
   const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
   if (fluenceConfig.services.length === 0) {
@@ -284,23 +281,15 @@ const deploy = async ({
   }
   const artifactsPath = getArtifactsPath();
   const cwd = process.cwd();
-  const peerId =
-    on ??
-    getRelayId({
-      relayAddr: relay,
-      commandObj,
-      getInfoForRandom: getInfoForRandomPeerId,
-    });
+  const addr = relay ?? getRandomRelayAddr();
+  const peerId = on ?? getRandomRelayId();
+  if (on === undefined) {
+    commandObj.log(
+      `Random peer ${color.yellow(peerId)} selected for deployment`
+    );
+  }
 
-  const addr =
-    relay ??
-    getRelayAddr({
-      peerId,
-      commandObj,
-      getInfoForRandom: getInfoForRandomRelayId,
-    });
-
-  const aquaCli = await initAquaCli(commandObj);
+  const aquaCli = await initAquaCli(commandObj, isInteractive);
   const successfullyDeployedServices: Services = {};
   for (const { name, count = 1 } of fluenceConfig.services) {
     process.chdir(path.join(artifactsPath, name));

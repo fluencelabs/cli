@@ -35,7 +35,7 @@ A lot of what is described next will be improved and automated in the future (e.
       {
         "name": "adder",
         "path": "adder.wasm",
-        "logger_enabled": [true]
+        "logger_enabled": true
       }
     ]
   }
@@ -51,27 +51,32 @@ services:
     count: 2 # Optional. Number of services to deploy
 ```
 
-8. Execute `fluence deploy` to deploy the application you described in `fluence.yaml`. Random peer will be selected for deployment of all of your services (can be overridden using `--on` or `--relay` flags)
+8. Execute `fluence deploy` to deploy the application you described in `fluence.yaml`. Random peer will be selected for deployment of all of your services (can be overridden using `--on` flag)
 User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag)
 You can also add project-level secret key to your project `.fluence/secrets.yaml` manually (key-pair management coming soon)
 
 9. Write some aqua in `src/aqua/main.aqua`. Example `src/aqua/main.aqua`:
 ```aqua
+module Main
+
 import App from "deployed.app.aqua"
+
+export App, add_one
 
 service AddOne:
     add_one: u64 -> u64
 
 func add_one(value: u64) -> u64:
     serviceIds <- App.serviceIds()
-    on serviceIds.adder.peerId:
-        AddOne serviceIds.adder.serviceId
+
+    on serviceIds.adder!.peerId:
+        AddOne serviceIds.adder!.serviceId
         res <- AddOne.add_one(value)
     <- res
 ```
 
 10. Execute `fluence run -f 'add_one(1)'`.
-Function with this name will be searched inside the `src/aqua` (can be overridden with `--aqua` flag) directory and then it will be executed on the peer that was used for deployment  when you executed `fluence deploy` (can be overridden with `--on` or `--relay` flag). `"deployed.app.aqua"` file is located at `.fluence/aqua`. `App.serviceIds()` method returns ids of the previously deployed services that you can utilize in your aqua code (this info is stored at `.fluence/app.yaml`) 
+Function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--aqua` flag) and then it will be executed on the peer that was used for deployment  when you executed `fluence deploy` (can be overridden with `--on` flag). `"deployed.app.aqua"` file is located at `.fluence/aqua`. `App.serviceIds()` method returns ids of the previously deployed services that you can utilize in your aqua code (this info is stored at `.fluence/app.yaml`) 
 
 11. Remove the previously deployed fluence application using `fluence remove`
 
@@ -94,7 +99,7 @@ $ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
 $ fluence (--version)
-@fluencelabs/cli/0.0.2 linux-x64 node-v16.14.0
+@fluencelabs/cli/0.1.4 linux-x64 node-v16.14.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
@@ -119,7 +124,7 @@ USAGE
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
 * [`fluence remove [--timeout <milliseconds>] [--no-input]`](#fluence-remove---timeout-milliseconds---no-input)
-* [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---on-peer_id---aqua-path--f-function-call---timeout-milliseconds---no-input)
+* [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [--aqua-path <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id---aqua-path-path--f-function-call---timeout-milliseconds---no-input)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -173,7 +178,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.1.4/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -216,7 +221,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.1.4/dist/commands/init.ts)_
 
 ## `fluence plugins`
 
@@ -467,25 +472,26 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.1.4/dist/commands/remove.ts)_
 
-## `fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--on <peer_id>] [--aqua <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`
+## `fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [--aqua-path <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`
 
 Run aqua script
 
 ```
 USAGE
-  $ fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--on <peer_id>] [--aqua
-    <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]
+  $ fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>]
+    [--on <peer_id>] [--aqua-path <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]
 
 FLAGS
   -f, --func=<function-call>  Function call
-  --aqua=<path>               Path to an aqua file or to a directory that contains your aqua files
+  --aqua-path=<path>          Path to the aqua file or to the directory that contains aqua files
   --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
                               argument names
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
                               using these argument names
   --import=<path>             Path to the directory to import from. May be used several times
+  --json-service=<path>       Path to a file that contains a JSON formatted service
   --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of the peer where you want to run the function
   --relay=<multiaddr>         Relay node MultiAddress
@@ -498,5 +504,5 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.2/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.1.4/dist/commands/run.ts)_
 <!-- commandsstop -->

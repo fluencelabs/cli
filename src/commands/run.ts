@@ -15,6 +15,7 @@
  */
 
 import fsPromises from "node:fs/promises";
+import path from "node:path";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
@@ -28,17 +29,20 @@ import {
   FS_OPTIONS,
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
+  TMP_DIR_NAME,
 } from "../lib/const";
+import { getAppJson } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
-import { getRelayId, getRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
 import { getMaybeArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
-import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
+import { getProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
+import { getSrcMainAquaPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { confirm, input, list } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
-const AQUA_FLAG_NAME = "aqua";
+const AQUA_PATH_FLAG_NAME = "aqua-path";
 const ON_FLAG_NAME = "on";
 
 export default class Run extends Command {
@@ -66,13 +70,17 @@ export default class Run extends Command {
         "Path to the directory to import from. May be used several times",
       helpValue: "<path>",
     }),
+    "json-service": Flags.string({
+      description: "Path to a file that contains a JSON formatted service",
+      helpValue: "<path>",
+    }),
     [ON_FLAG_NAME]: Flags.string({
       description: "PeerId of the peer where you want to run the function",
       helpValue: "<peer_id>",
     }),
-    [AQUA_FLAG_NAME]: Flags.string({
+    [AQUA_PATH_FLAG_NAME]: Flags.string({
       description:
-        "Path to an aqua file or to a directory that contains your aqua files",
+        "Path to the aqua file or to the directory that contains aqua files",
       helpValue: "<path>",
     }),
     [FUNC_FLAG_NAME]: Flags.string({
@@ -91,7 +99,10 @@ export default class Run extends Command {
     const isInteractive = getIsInteractive(flags);
 
     const on = await ensurePeerId(flags.on, this, isInteractive);
-    const aqua = await ensureAquaPath(flags[AQUA_FLAG_NAME], isInteractive);
+    const aqua = await ensureAquaPath(
+      flags[AQUA_PATH_FLAG_NAME],
+      isInteractive
+    );
 
     const func =
       flags[FUNC_FLAG_NAME] ??
@@ -101,14 +112,7 @@ export default class Run extends Command {
         flagName: FUNC_FLAG_NAME,
       }));
 
-    const relay =
-      flags.relay ??
-      getRelayAddr({
-        peerId: on,
-        commandObj: this,
-        getInfoForRandom: (relay): string =>
-          `Random relay ${color.yellow(relay)} selected for connection`,
-      });
+    const relay = flags.relay ?? getRandomRelayAddr();
 
     const data = await getRunData(flags, this);
     const imports = [
@@ -117,23 +121,42 @@ export default class Run extends Command {
       await getMaybeArtifactsPath(),
     ];
 
-    const aquaCli = await initAquaCli(this);
-    const result = await aquaCli(
-      {
-        command: "run",
-        flags: {
-          addr: relay,
-          func,
-          input: aqua,
-          on,
-          timeout: flags.timeout,
-          import: imports,
-          ...data,
+    const appConfig = await initReadonlyAppConfig(this);
+    const tmpDirPath = path.join(getProjectFluenceDirPath(), TMP_DIR_NAME);
+    await fsPromises.mkdir(tmpDirPath, { recursive: true });
+    const appJsonServicePath = path.join(tmpDirPath, "app-service.json");
+    if (appConfig !== null) {
+      await fsPromises.writeFile(
+        appJsonServicePath,
+        getAppJson(appConfig.services),
+        FS_OPTIONS
+      );
+    }
+    let result: string;
+    const aquaCli = await initAquaCli(this, isInteractive);
+    try {
+      result = await aquaCli(
+        {
+          command: "run",
+          flags: {
+            addr: relay,
+            func,
+            input: aqua,
+            on,
+            timeout: flags.timeout,
+            import: imports,
+            "json-service": appJsonServicePath,
+            ...data,
+          },
         },
-      },
-      "Running",
-      { function: func, on, relay }
-    );
+        "Running",
+        { function: func, on, relay }
+      );
+    } finally {
+      if (appConfig !== null) {
+        await fsPromises.unlink(appJsonServicePath);
+      }
+    }
 
     this.log(`\n${color.yellow("Result:")}\n\n${result}`);
   }
@@ -171,15 +194,7 @@ const ensurePeerId = async (
       flagName: ON_FLAG_NAME,
     }))
       ? peerIdsFromDeployed
-      : [
-          getRelayId({
-            commandObj,
-            getInfoForRandom: (peerId): string =>
-              `Random peer ${color.yellow(
-                peerId
-              )} to run your function selected`,
-          }),
-        ];
+      : [getRandomRelayId()];
 
   return list({
     message: "Select peerId of the peer where you want to run the function",
@@ -208,15 +223,15 @@ const ensureAquaPath = async (
   }
 
   try {
-    const srcAquaDirPath = getSrcAquaDirPath();
-    await fsPromises.access(srcAquaDirPath);
-    return srcAquaDirPath;
+    const srcMainAquaPath = getSrcMainAquaPath();
+    await fsPromises.access(srcMainAquaPath);
+    return srcMainAquaPath;
   } catch {
     return input({
       message:
-        "Enter a path to an aqua file or to a directory that contains your aqua files",
+        "Enter path to the aqua file or to the directory that contains your aqua files",
       isInteractive,
-      flagName: AQUA_FLAG_NAME,
+      flagName: AQUA_PATH_FLAG_NAME,
     });
   }
 };
@@ -233,9 +248,7 @@ const getRunData = async (
   flags: { data: string | undefined; "data-path": string | undefined },
   commandObj: CommandObj
 ): Promise<{ data: string } | Record<string, never>> => {
-  const appConfig = await initReadonlyAppConfig(commandObj);
-  const runData: RunData =
-    appConfig === null ? {} : { app: appConfig.services };
+  const runData: RunData = {};
   const { data, "data-path": dataPath } = flags;
 
   if (typeof dataPath === "string") {

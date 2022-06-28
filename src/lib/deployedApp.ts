@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
 import camelcase from "camelcase";
@@ -36,46 +35,42 @@ type ServiceJsonObj = Record<
 const getServicesJsonObj = (services: Services): ServiceJsonObj =>
   Object.entries(services).reduce<ServiceJsonObj>(
     (acc, [name, services]): ServiceJsonObj => {
-      const firstService = services[0];
-      assert(firstService !== undefined);
-      acc[camelcase(name)] = firstService;
-      if (services.length > 1) {
-        acc[`${camelcase(name)}Services`] = services;
-      }
+      acc[camelcase(name)] = services;
       return acc;
     },
     {}
   );
 
 export const getAppJson = (services: Services): string =>
-  JSON.stringify({
-    name: APP,
-    serviceId: APP,
-    functions: [
-      {
-        name: SERVICE_IDS,
-        result: getServicesJsonObj(services),
-      },
-    ],
-  });
+  JSON.stringify(
+    {
+      name: APP,
+      serviceId: APP,
+      functions: [
+        {
+          name: SERVICE_IDS,
+          result: getServicesJsonObj(services),
+        },
+      ],
+    },
+    null,
+    2
+  );
 
 export const updateDeployedAppAqua = async (
   services: Services
 ): Promise<void> => {
   const appServicesFilePath = getDeployedAppAquaPath();
-  const appServicesAqua = `data ${SERVICE_IDS_ITEM}:
+  const appServicesAqua = `export App
+
+data ${SERVICE_IDS_ITEM}:
   blueprintId: string
   peerId: string
   serviceId: string
 
 data ${SERVICE_IDS_LIST}:
-${Object.entries(getServicesJsonObj(services))
-  .map(
-    ([name, serviceOrServices]): string =>
-      `  ${name}: ${
-        Array.isArray(serviceOrServices) ? "[]" : ""
-      }${SERVICE_IDS_ITEM}\n`
-  )
+${Object.keys(getServicesJsonObj(services))
+  .map((name): string => `  ${name}: []${SERVICE_IDS_ITEM}\n`)
   .join("")}
 service ${APP}("${APP}"):
   ${SERVICE_IDS}: -> ${SERVICE_IDS_LIST}

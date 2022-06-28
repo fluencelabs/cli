@@ -16,7 +16,6 @@
 
 import fsPromises from "node:fs/promises";
 
-import color from "@oclif/color";
 import { Command } from "@oclif/core";
 
 import { initAquaCli } from "../lib/aquaCli";
@@ -27,7 +26,7 @@ import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
-import { getRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayAddr } from "../lib/multiaddr";
 import { getDeployedAppAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { confirm } from "../lib/prompt";
@@ -101,20 +100,15 @@ export const removeApp = async ({
     return;
   }
 
-  const aquaCli = await initAquaCli(commandObj);
+  const aquaCli = await initAquaCli(commandObj, isInteractive);
   const notRemovedServices: Services = {};
+  const addr = getRandomRelayAddr();
+
   for (const [name, servicesByName] of Object.entries(services)) {
     const notRemovedServicesByName = [];
 
     for (const service of servicesByName) {
       const { serviceId, peerId, blueprintId } = service;
-      const addr = getRelayAddr({
-        peerId,
-        commandObj,
-        getInfoForRandom: (relay): string =>
-          `Random relay ${color.yellow(relay)} selected for connection`,
-      });
-
       try {
         // eslint-disable-next-line no-await-in-loop
         await aquaCli(

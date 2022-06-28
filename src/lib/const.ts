@@ -23,6 +23,7 @@ export const FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const ARTIFACTS_DIR_NAME = "artifacts";
+export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
@@ -92,7 +93,7 @@ export type Dependency = {
 export const DEPENDENCIES: Record<"aqua", Dependency> = {
   aqua: {
     name: "@fluencelabs/aqua",
-    version: "0.7.2-314",
+    version: "0.7.4-322",
     bin: "aqua",
   },
 } as const;

@@ -16,67 +16,26 @@
 
 import assert from "node:assert";
 
-import { krasnodar, testNet } from "@fluencelabs/fluence-network-environment";
+import { krasnodar } from "@fluencelabs/fluence-network-environment";
 
-import type { CommandObj } from "./const";
+export const defaultAddr = krasnodar.map(({ multiaddr }): string => multiaddr);
+const defaultRelayIds = krasnodar.map(({ peerId }): string => peerId);
 
-const defaultEnvs = [...krasnodar, ...testNet];
-export const defaultAddr = defaultEnvs.map(
-  ({ multiaddr }): string => multiaddr
-);
-const defaultRelayIds = defaultEnvs.map(({ peerId }): string => peerId);
-
-export const getRelayAddr = ({
-  peerId,
-  commandObj,
-  getInfoForRandom,
-}: {
-  peerId?: string | undefined;
-  commandObj: CommandObj;
-  getInfoForRandom: (randomRelayAddr: string) => string;
-}): string => {
-  if (typeof peerId === "string") {
-    const maybeAddr = defaultAddr.find((addr): boolean =>
-      addr.includes(peerId)
-    );
-    if (typeof maybeAddr === "string") {
-      return maybeAddr;
-    }
-  }
-
+export const getRandomRelayAddr = (): string => {
   const largestIndex = defaultAddr.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
   const randomRelayAddr = defaultAddr[randomIndex];
   assert(randomRelayAddr !== undefined);
-  commandObj.log(getInfoForRandom(randomRelayAddr));
   return randomRelayAddr;
 };
 
-export const getRelayId = ({
-  relayAddr,
-  commandObj,
-  getInfoForRandom,
-}: {
-  relayAddr?: string | undefined;
-  commandObj: CommandObj;
-  getInfoForRandom: (randomRelayId: string) => string;
-}): string => {
-  if (typeof relayAddr === "string") {
-    const maybePeerId = defaultRelayIds.find((peerId): boolean =>
-      relayAddr.includes(peerId)
-    );
-    if (typeof maybePeerId === "string") {
-      return maybePeerId;
-    }
-  }
-
+export const getRandomRelayId = (): string => {
   const largestIndex = defaultRelayIds.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
   const randomRelayId = defaultRelayIds[randomIndex];
   assert(randomRelayId !== undefined);
-  commandObj.log(getInfoForRandom(randomRelayId));
 
   return randomRelayId;
 };

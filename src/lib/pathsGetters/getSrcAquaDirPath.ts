@@ -16,10 +16,18 @@
 
 import path from "node:path";
 
-import { AQUA_DIR_NAME, SRC_DIR_NAME } from "../const";
+import {
+  AQUA_DIR_NAME,
+  DEFAULT_SRC_AQUA_FILE_NAME,
+  SRC_DIR_NAME,
+} from "../const";
 
 import { getProjectRootDir } from "./getProjectRootDir";
 
 export const getSrcAquaDirPath = (): string => {
   return path.join(getProjectRootDir(), SRC_DIR_NAME, AQUA_DIR_NAME);
+};
+
+export const getSrcMainAquaPath = (): string => {
+  return path.join(getSrcAquaDirPath(), DEFAULT_SRC_AQUA_FILE_NAME);
 };
