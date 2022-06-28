@@ -42,7 +42,7 @@ import { getSrcMainAquaPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { confirm, input, list } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
-const AQUA_PATH_FLAG_NAME = "aqua-path";
+const INPUT_FLAG_NAME = "input";
 const ON_FLAG_NAME = "on";
 
 export default class Run extends Command {
@@ -78,10 +78,11 @@ export default class Run extends Command {
       description: "PeerId of the peer where you want to run the function",
       helpValue: "<peer_id>",
     }),
-    [AQUA_PATH_FLAG_NAME]: Flags.string({
+    [INPUT_FLAG_NAME]: Flags.string({
       description:
         "Path to the aqua file or to the directory that contains aqua files",
       helpValue: "<path>",
+      char: "i",
     }),
     [FUNC_FLAG_NAME]: Flags.string({
       char: "f",
@@ -99,10 +100,7 @@ export default class Run extends Command {
     const isInteractive = getIsInteractive(flags);
 
     const on = await ensurePeerId(flags.on, this, isInteractive);
-    const aqua = await ensureAquaPath(
-      flags[AQUA_PATH_FLAG_NAME],
-      isInteractive
-    );
+    const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME], isInteractive);
 
     const func =
       flags[FUNC_FLAG_NAME] ??
@@ -231,7 +229,7 @@ const ensureAquaPath = async (
       message:
         "Enter path to the aqua file or to the directory that contains your aqua files",
       isInteractive,
-      flagName: AQUA_PATH_FLAG_NAME,
+      flagName: INPUT_FLAG_NAME,
     });
   }
 };
