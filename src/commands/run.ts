@@ -68,7 +68,7 @@ export default class Run extends Command {
     }),
     import: Flags.string({
       description:
-        "Path to the directory to import from. May be used several times",
+        "Path to a directory to import from. May be used several times",
       helpValue: "<path>",
     }),
     "json-service": Flags.string({
@@ -76,12 +76,12 @@ export default class Run extends Command {
       helpValue: "<path>",
     }),
     [ON_FLAG_NAME]: Flags.string({
-      description: "PeerId of the peer where you want to run the function",
+      description: "PeerId of a peer where you want to run the function",
       helpValue: "<peer_id>",
     }),
     [INPUT_FLAG_NAME]: Flags.string({
       description:
-        "Path to the aqua file or to the directory that contains aqua files",
+        "Path to an aqua file or to a directory that contains aqua files",
       helpValue: "<path>",
       char: "i",
     }),
@@ -199,7 +199,8 @@ const ensurePeerId = async (
     options,
     onNoChoices: (): Promise<string> =>
       input({
-        message: "Enter peerId of the peer where you want to run your function",
+        message:
+          "Enter a peerId of the peer where you want to run your function",
         isInteractive,
         flagName: ON_FLAG_NAME,
       }),
@@ -227,7 +228,7 @@ const ensureAquaPath = async (
   } catch {
     return input({
       message:
-        "Enter path to the aqua file or to the directory that contains your aqua files",
+        "Enter a path to an aqua file or to a directory that contains aqua files",
       isInteractive,
       flagName: INPUT_FLAG_NAME,
     });

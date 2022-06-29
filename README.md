@@ -485,15 +485,15 @@ USAGE
 
 FLAGS
   -f, --func=<function-call>  Function call
-  -i, --input=<path>          Path to the aqua file or to the directory that contains aqua files
+  -i, --input=<path>          Path to an aqua file or to a directory that contains aqua files
   --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
                               argument names
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
                               using these argument names
-  --import=<path>             Path to the directory to import from. May be used several times
+  --import=<path>             Path to a directory to import from. May be used several times
   --json-service=<path>       Path to a file that contains a JSON formatted service
   --no-input                  Don't interactively ask for any input from the user
-  --on=<peer_id>              PeerId of the peer where you want to run the function
+  --on=<peer_id>              PeerId of a peer where you want to run the function
   --relay=<multiaddr>         Relay node MultiAddress
   --timeout=<milliseconds>    Timeout used for command execution
 
