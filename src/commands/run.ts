@@ -15,7 +15,6 @@
  */
 
 import fsPromises from "node:fs/promises";
-import path from "node:path";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
@@ -29,7 +28,6 @@ import {
   FS_OPTIONS,
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
-  TMP_DIR_NAME,
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
@@ -37,8 +35,11 @@ import { usage } from "../lib/helpers/usage";
 import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
 import { getMaybeArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
-import { getProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { getSrcMainAquaPath } from "../lib/pathsGetters/getSrcAquaDirPath";
+import {
+  getAppServiceJsonPath,
+  getTmpPath,
+} from "../lib/pathsGetters/getTmpPath";
 import { confirm, input, list } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
@@ -120,9 +121,8 @@ export default class Run extends Command {
     ];
 
     const appConfig = await initReadonlyAppConfig(this);
-    const tmpDirPath = path.join(getProjectFluenceDirPath(), TMP_DIR_NAME);
-    await fsPromises.mkdir(tmpDirPath, { recursive: true });
-    const appJsonServicePath = path.join(tmpDirPath, "app-service.json");
+    await fsPromises.mkdir(getTmpPath(), { recursive: true });
+    const appJsonServicePath = getAppServiceJsonPath();
     if (appConfig !== null) {
       await fsPromises.writeFile(
         appJsonServicePath,

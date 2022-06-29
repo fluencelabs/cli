@@ -21,7 +21,7 @@ import { Command } from "@oclif/core";
 import { initAquaCli } from "../lib/aquaCli";
 import { AppConfig, initAppConfig, Services } from "../lib/configs/project/app";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
-import { updateDeployedAppAqua } from "../lib/deployedApp";
+import { updateDeployedAppAqua, updateTS } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
@@ -29,6 +29,10 @@ import { getKeyPair } from "../lib/keyPairs/getKeyPair";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import { getDeployedAppAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
+import {
+  getAppTsPath,
+  getDeployedAppTsPath,
+} from "../lib/pathsGetters/getTsPath";
 import { confirm } from "../lib/prompt";
 
 export default class Remove extends Command {
@@ -144,11 +148,19 @@ export const removeApp = async ({
   }
 
   if (Object.keys(notRemovedServices).length === 0) {
-    await fsPromises.unlink(getDeployedAppAquaPath());
-    return fsPromises.unlink(appConfig.$getPath());
+    await Promise.allSettled(
+      [
+        getDeployedAppAquaPath(),
+        getAppTsPath(),
+        getDeployedAppTsPath(),
+        appConfig.$getPath(),
+      ].map((path): Promise<void> => fsPromises.unlink(path))
+    );
+    return;
   }
 
   await updateDeployedAppAqua(notRemovedServices);
+  await updateTS(notRemovedServices, aquaCli);
 
   appConfig.services = notRemovedServices;
   await appConfig.$commit();

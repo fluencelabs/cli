@@ -18,6 +18,8 @@ import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
 export const AQUA_EXT = "aqua";
+export const TS_EXT = "ts";
+export const JSON_EXT = "json";
 
 export const FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
@@ -27,20 +29,28 @@ export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
+export const TS_DIR_NAME = "ts";
 
 export const FLUENCE_CONFIG_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
 export const APP_FILE_NAME = "app";
 
-export const DEPLOYED_APP_AQUA_FILE_NAME = `deployed.app.${AQUA_EXT}`;
+const DEPLOYED_APP_FILE_NAME = "deployed.app";
+
+export const DEPLOYED_APP_AQUA_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${AQUA_EXT}`;
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
 
 export const GITIGNORE_FILE_NAME = ".gitignore";
-export const PACKAGE_JSON_FILE_NAME = "package.json";
-export const EXTENSIONS_JSON_FILE_NAME = "extensions.json";
-export const SETTINGS_JSON_FILE_NAME = "settings.json";
-export const DEPLOYMENT_CONFIG_FILE_NAME = "deploy.json";
+
+export const PACKAGE_JSON_FILE_NAME = `package.${JSON_EXT}`;
+export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
+export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
+export const DEPLOYMENT_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
+export const APP_SERVICE_JSON_FILE_NAME = `app-service.${JSON_EXT}`;
+
+export const APP_TS_FILE_NAME = `app.${TS_EXT}`;
+export const DEPLOYED_APP_TS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${TS_EXT}`;
 
 export const FS_OPTIONS = {
   encoding: "utf8",

@@ -37,7 +37,7 @@ import {
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
 } from "../lib/const";
-import { updateDeployedAppAqua } from "../lib/deployedApp";
+import { updateDeployedAppAqua, updateTS } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
@@ -318,6 +318,7 @@ const deploy = async ({
     commandObj.error("No services were deployed successfully");
   }
   await updateDeployedAppAqua(successfullyDeployedServices);
+  await updateTS(successfullyDeployedServices, aquaCli);
   await initNewReadonlyAppConfig(
     {
       version: 1,

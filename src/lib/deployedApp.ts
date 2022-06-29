@@ -18,9 +18,11 @@ import fsPromises from "node:fs/promises";
 
 import camelcase from "camelcase";
 
+import type { AquaCLI } from "./aquaCli";
 import type { DeployedServiceConfig, Services } from "./configs/project/app";
 import { FS_OPTIONS } from "./const";
 import { getDeployedAppAquaPath } from "./pathsGetters/getDefaultAquaPath";
+import { getAppTsPath, getTsPath } from "./pathsGetters/getTsPath";
 
 const APP = "App";
 const SERVICE_IDS = "serviceIds";
@@ -56,6 +58,55 @@ export const getAppJson = (services: Services): string =>
     null,
     2
   );
+
+export const updateTS = async (
+  successfullyDeployedServices: Services,
+  aquaCli: AquaCLI
+): Promise<void> => {
+  const tsDirPath = getTsPath();
+  await fsPromises.mkdir(tsDirPath, { recursive: true });
+  await aquaCli(
+    { flags: { input: getDeployedAppAquaPath(), output: tsDirPath } },
+    "Compiling aqua for deployed app"
+  );
+
+  const appContent = `import { FluencePeer } from "@fluencelabs/fluence";
+import { registerApp as registerAppService } from "./deployed.app";
+
+const service = {
+  serviceIds: () => (${JSON.stringify(
+    getServicesJsonObj(successfullyDeployedServices),
+    null,
+    2
+  )}),
+};
+
+export function registerApp(): void;
+export function registerApp(serviceId: string): void;
+export function registerApp(peer: FluencePeer): void;
+export function registerApp(peer: FluencePeer, serviceId: string): void;
+export function registerApp(
+  serviceIdOrPeer?: string | FluencePeer,
+  maybeServiceId?: string
+): void {
+  if (serviceIdOrPeer === undefined) {
+    return registerAppService(service);
+  }
+
+  if (typeof serviceIdOrPeer === "string") {
+    return registerAppService(serviceIdOrPeer, service);
+  }
+
+  if (maybeServiceId === undefined) {
+    return registerAppService(serviceIdOrPeer, service);
+  }
+
+  return registerAppService(serviceIdOrPeer, maybeServiceId, service);
+}
+`;
+
+  await fsPromises.writeFile(getAppTsPath(), appContent, FS_OPTIONS);
+};
 
 export const updateDeployedAppAqua = async (
   services: Services

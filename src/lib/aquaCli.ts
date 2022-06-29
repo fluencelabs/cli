@@ -43,6 +43,10 @@ export type AquaCliInput =
       command: "run";
       flags: Flags<"addr" | "input" | "func"> &
         OptionalFlags<"on" | "timeout" | "data" | "import" | "json-service">;
+    }
+  | {
+      command?: never;
+      flags: Flags<"input" | "output"> & { timeout?: never };
     };
 
 export type AquaCLI = {
@@ -72,7 +76,7 @@ export const initAquaCli = async (
     const timeoutNumber = Number(flags.timeout);
 
     return execPromise(
-      `${aquaCliPath} ${command}${unparseFlags(flags)}`,
+      `${aquaCliPath} ${command ?? ""}${unparseFlags(flags)}`,
       getMessageWithKeyValuePairs(message, keyValuePairs),
       Number.isNaN(timeoutNumber) ? undefined : timeoutNumber
     );
