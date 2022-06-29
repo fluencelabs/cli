@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-const unparseFlag = (
-  flagName: string,
-  flagValue: string | true | undefined
-): string => {
-  if (flagValue === undefined) {
-    return "";
-  }
+import path from "node:path";
 
-  return ` \\\n--${flagName}${flagValue === true ? "" : ` '${flagValue}'`}`;
+import {
+  APP_JS_FILE_NAME,
+  DEPLOYED_APP_JS_FILE_NAME,
+  JS_DIR_NAME,
+} from "../const";
+
+import { getProjectFluenceDirPath } from "./getProjectFluenceDirPath";
+
+export const getJsPath = (): string => {
+  const projectFluenceDir = getProjectFluenceDirPath();
+  return path.join(projectFluenceDir, JS_DIR_NAME);
 };
 
-export const unparseFlags = (
-  flags: Record<string, string | true | undefined | Array<string | undefined>>
-): string =>
-  Object.entries(flags)
-    .flatMap(
-      ([flagName, flagValue]): Array<string> =>
-        Array.isArray(flagValue)
-          ? flagValue.map((value): string => unparseFlag(flagName, value))
-          : [unparseFlag(flagName, flagValue)]
-    )
-    .join("");
+export const getAppJsPath = (): string =>
+  path.join(getJsPath(), APP_JS_FILE_NAME);
+
+export const getDeployedAppJsPath = (): string =>
+  path.join(getJsPath(), DEPLOYED_APP_JS_FILE_NAME);

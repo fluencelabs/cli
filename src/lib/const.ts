@@ -19,6 +19,7 @@ import type { stringify } from "yaml";
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
+export const JS_EXT = "js";
 export const JSON_EXT = "json";
 
 export const FLUENCE_DIR_NAME = ".fluence";
@@ -30,6 +31,7 @@ export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
 export const TS_DIR_NAME = "ts";
+export const JS_DIR_NAME = "js";
 
 export const FLUENCE_CONFIG_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
@@ -50,7 +52,9 @@ export const DEPLOYMENT_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
 export const APP_SERVICE_JSON_FILE_NAME = `app-service.${JSON_EXT}`;
 
 export const APP_TS_FILE_NAME = `app.${TS_EXT}`;
+export const APP_JS_FILE_NAME = `app.${JS_EXT}`;
 export const DEPLOYED_APP_TS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${TS_EXT}`;
+export const DEPLOYED_APP_JS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${JS_EXT}`;
 
 export const FS_OPTIONS = {
   encoding: "utf8",

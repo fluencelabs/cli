@@ -28,6 +28,10 @@ import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import { getDeployedAppAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
+import {
+  getAppJsPath,
+  getDeployedAppJsPath,
+} from "../lib/pathsGetters/getJsPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import {
   getAppTsPath,
@@ -152,7 +156,9 @@ export const removeApp = async ({
       [
         getDeployedAppAquaPath(),
         getAppTsPath(),
+        getAppJsPath(),
         getDeployedAppTsPath(),
+        getDeployedAppJsPath(),
         appConfig.$getPath(),
       ].map((path): Promise<void> => fsPromises.unlink(path))
     );

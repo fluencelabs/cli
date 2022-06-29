@@ -37,7 +37,7 @@ import {
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
 } from "../lib/const";
-import { updateDeployedAppAqua, updateTS } from "../lib/deployedApp";
+import { updateDeployedAppAqua, updateJS, updateTS } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
@@ -60,6 +60,9 @@ export default class Deploy extends Command {
     relay: Flags.string({
       description: "Relay node MultiAddress",
       helpValue: "<multiaddr>",
+    }),
+    js: Flags.boolean({
+      description: "Generate js bindings instead of ts",
     }),
     [FORCE_FLAG_NAME]: Flags.boolean({
       description: "Force removing of previously deployed app",
@@ -112,6 +115,7 @@ export default class Deploy extends Command {
       timeout: flags.timeout,
       relay: flags.relay,
       on: flags.on,
+      hasJsOutput: flags.js === true,
       isInteractive,
     });
   }
@@ -258,6 +262,7 @@ type DeployOptions = {
   commandObj: CommandObj;
   relay: string | undefined;
   on: string | undefined;
+  hasJsOutput: boolean;
   isInteractive: boolean;
 };
 
@@ -267,6 +272,7 @@ const deploy = async ({
   timeout,
   relay,
   on,
+  hasJsOutput,
   isInteractive,
 }: DeployOptions): Promise<void> => {
   const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
@@ -318,7 +324,9 @@ const deploy = async ({
     commandObj.error("No services were deployed successfully");
   }
   await updateDeployedAppAqua(successfullyDeployedServices);
-  await updateTS(successfullyDeployedServices, aquaCli);
+  await (hasJsOutput
+    ? updateJS(successfullyDeployedServices, aquaCli)
+    : updateTS(successfullyDeployedServices, aquaCli));
   await initNewReadonlyAppConfig(
     {
       version: 1,
