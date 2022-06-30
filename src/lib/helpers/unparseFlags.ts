@@ -16,9 +16,9 @@
 
 const unparseFlag = (
   flagName: string,
-  flagValue: string | true | undefined
+  flagValue: string | boolean | undefined
 ): string => {
-  if (flagValue === undefined) {
+  if (flagValue === undefined || flagValue === false) {
     return "";
   }
 
@@ -26,7 +26,10 @@ const unparseFlag = (
 };
 
 export const unparseFlags = (
-  flags: Record<string, string | true | undefined | Array<string | undefined>>
+  flags: Record<
+    string,
+    string | boolean | undefined | Array<string | undefined>
+  >
 ): string =>
   Object.entries(flags)
     .flatMap(

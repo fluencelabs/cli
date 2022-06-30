@@ -114,7 +114,7 @@ USAGE
 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
-* [`fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--js] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---on-peer_id---relay-multiaddr---js---force---timeout-milliseconds--k-name---no-input)
+* [`fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---on-peer_id---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH] [--no-input]`](#fluence-init-path---no-input)
 * [`fluence plugins`](#fluence-plugins)
@@ -158,19 +158,17 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
-## `fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--js] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
+## `fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
 
 Deploy service to the remote peer
 
 ```
 USAGE
-  $ fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--js] [--force] [--timeout <milliseconds>] [-k <name>]
-    [--no-input]
+  $ fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   --force                     Force removing of previously deployed app
-  --js                        Generate js bindings instead of ts
   --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of the peer where you want to deploy
   --relay=<multiaddr>         Relay node MultiAddress
@@ -495,7 +493,7 @@ FLAGS
                               argument names
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
                               using these argument names
-  --import=<path>             Path to a directory to import from. May be used several times
+  --import=<path>...          Path to a directory to import from. May be used several times
   --json-service=<path>       Path to a file that contains a JSON formatted service
   --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of a peer where you want to run the function

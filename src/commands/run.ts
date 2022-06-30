@@ -61,7 +61,7 @@ export default class Run extends Command {
         "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<json>",
     }),
-    "data-path": Flags.string({
+    "data-path": Flags.file({
       description:
         "Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<path>",
@@ -70,8 +70,9 @@ export default class Run extends Command {
       description:
         "Path to a directory to import from. May be used several times",
       helpValue: "<path>",
+      multiple: true,
     }),
-    "json-service": Flags.string({
+    "json-service": Flags.file({
       description: "Path to a file that contains a JSON formatted service",
       helpValue: "<path>",
     }),
@@ -115,7 +116,7 @@ export default class Run extends Command {
 
     const data = await getRunData(flags, this);
     const imports = [
-      flags.import,
+      ...(flags.import ?? []),
       getDefaultAquaPath(),
       await getMaybeArtifactsPath(),
     ];

@@ -22,10 +22,10 @@ import { ensureNpmDependency } from "./npm";
 
 type Flags<T extends string> = Record<
   T,
-  string | true | Array<string | undefined>
+  string | boolean | Array<string | undefined>
 >;
 type OptionalFlags<T extends string> = Partial<
-  Record<T, string | true | undefined | Array<string | undefined>>
+  Record<T, string | boolean | undefined | Array<string | undefined>>
 >;
 
 export type AquaCliInput =
@@ -56,7 +56,7 @@ export type AquaCliInput =
 export type AquaCLI = {
   (
     aquaCliInput: AquaCliInput,
-    message: string,
+    message?: string | undefined,
     keyValuePairs?: Record<string, string>
   ): Promise<string>;
 };

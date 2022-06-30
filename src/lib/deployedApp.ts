@@ -16,6 +16,8 @@
 
 import fsPromises from "node:fs/promises";
 
+import color from "@oclif/color";
+import { CliUx } from "@oclif/core";
 import camelcase from "camelcase";
 
 import type { AquaCLI } from "./aquaCli";
@@ -60,24 +62,36 @@ export const getAppJson = (services: Services): string =>
     2
   );
 
-const getAppContent = (
-  successfullyDeployedServices: Services,
-  isJs = false
-): string => `${
-  isJs ? "" : 'import { FluencePeer } from "@fluencelabs/fluence";'
-}
+const generateRegisterAppTSorJS = async ({
+  deployedServices,
+  aquaCli,
+  isJS,
+}: GenerateRegisterAppOptions & {
+  isJS: boolean;
+}): Promise<void> => {
+  await aquaCli({
+    flags: {
+      input: getDeployedAppAquaPath(),
+      output: isJS ? getJsPath() : getTsPath(),
+      js: isJS,
+    },
+  });
+
+  const appContent = `${
+    isJS ? "" : 'import { FluencePeer } from "@fluencelabs/fluence";'
+  }
 import { registerApp as registerAppService } from "./deployed.app";
 
 const service = {
   serviceIds: () => (${JSON.stringify(
-    getServicesJsonObj(successfullyDeployedServices),
+    getServicesJsonObj(deployedServices),
     null,
     2
   )}),
 };
 
 ${
-  isJs
+  isJS
     ? "export function registerApp(serviceIdOrPeer, maybeServiceId)"
     : `export function registerApp(): void;
 export function registerApp(serviceId: string): void;
@@ -105,42 +119,25 @@ export function registerApp(
 }
 `;
 
-export const updateTS = async (
-  successfullyDeployedServices: Services,
-  aquaCli: AquaCLI
-): Promise<void> => {
-  const tsDirPath = getTsPath();
-  await fsPromises.mkdir(tsDirPath, { recursive: true });
-  await aquaCli(
-    { flags: { input: getDeployedAppAquaPath(), output: tsDirPath } },
-    "Compiling aqua to typescript for deployed app"
-  );
-
   await fsPromises.writeFile(
-    getAppTsPath(),
-    getAppContent(successfullyDeployedServices),
+    isJS ? getAppJsPath() : getAppTsPath(),
+    appContent,
     FS_OPTIONS
   );
 };
 
-export const updateJS = async (
-  successfullyDeployedServices: Services,
-  aquaCli: AquaCLI
-): Promise<void> => {
-  const jsDirPath = getJsPath();
-  await fsPromises.mkdir(jsDirPath, { recursive: true });
-  await aquaCli(
-    {
-      flags: { input: getDeployedAppAquaPath(), output: jsDirPath, js: true },
-    },
-    "Compiling aqua to javascript for deployed app"
-  );
+type GenerateRegisterAppOptions = {
+  deployedServices: Services;
+  aquaCli: AquaCLI;
+};
 
-  await fsPromises.writeFile(
-    getAppJsPath(),
-    getAppContent(successfullyDeployedServices, true),
-    FS_OPTIONS
-  );
+export const generateRegisterApp = async (
+  options: GenerateRegisterAppOptions
+): Promise<void> => {
+  CliUx.ux.action.start(`Compiling ${color.yellow(getDeployedAppAquaPath())}`);
+  await generateRegisterAppTSorJS({ ...options, isJS: true });
+  await generateRegisterAppTSorJS({ ...options, isJS: false });
+  CliUx.ux.action.stop();
 };
 
 export const updateDeployedAppAqua = async (

@@ -21,7 +21,7 @@ import { Command } from "@oclif/core";
 import { initAquaCli } from "../lib/aquaCli";
 import { AppConfig, initAppConfig, Services } from "../lib/configs/project/app";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
-import { updateDeployedAppAqua, updateTS } from "../lib/deployedApp";
+import { updateDeployedAppAqua, generateRegisterApp } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
@@ -166,7 +166,10 @@ export const removeApp = async ({
   }
 
   await updateDeployedAppAqua(notRemovedServices);
-  await updateTS(notRemovedServices, aquaCli);
+  await generateRegisterApp({
+    deployedServices: notRemovedServices,
+    aquaCli,
+  });
 
   appConfig.services = notRemovedServices;
   await appConfig.$commit();
