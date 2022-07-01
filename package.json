@@ -33,7 +33,6 @@
     "pre-commit": "oclif readme && git add README.md"
   },
   "dependencies": {
-    "@fluencelabs/aqua": "^0.7.3-318",
     "@fluencelabs/fluence": "^0.23.0",
     "@fluencelabs/fluence-network-environment": "^1.0.13",
     "@oclif/color": "^1.0.1",

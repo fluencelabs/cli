@@ -76,7 +76,7 @@ func add_one(value: u64) -> u64:
 ```
 
 10. Execute `fluence run -f 'add_one(1)'`.
-Function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and then it will be executed on the peer that was used for deployment  when you executed `fluence deploy` (can be overridden with `--on` flag). `"deployed.app.aqua"` file is located at `.fluence/aqua`. `App.serviceIds()` method returns ids of the previously deployed services that you can utilize in your aqua code (this info is stored at `.fluence/app.yaml`) 
+Function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and then it will be executed on the peer that was used for deployment  when you executed `fluence deploy` (can be overridden with `--on` flag). `"deployed.app.aqua"` file is located at `.fluence/aqua`. `App.serviceIds()` method returns ids of the previously deployed services that you can utilize in your aqua code (this info is stored at `.fluence/app.yaml`). Alternatively, if you are js developer - import generated `registerApp` function from `.fluence/ts/app.ts` or `.fluence/js/app.js` and execute it after `Fluence.run()` in your js application in order to give access to deployed services ids to your aqua code and run `add_one(1)` in your js code.
 
 11. Remove the previously deployed fluence application using `fluence remove`
 
