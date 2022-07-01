@@ -16,23 +16,11 @@
 
 import { color } from "@oclif/color";
 
-export function getMessageWithKeyValuePairs(
-  message?: string,
+export const getMessageWithKeyValuePairs = (
+  message: string,
   keyValuePairs?: Record<string, string>
-): string;
-export function getMessageWithKeyValuePairs(
-  message?: undefined,
-  keyValuePairs?: Record<string, string>
-): undefined;
-export function getMessageWithKeyValuePairs(
-  message?: string | undefined,
-  keyValuePairs?: Record<string, string>
-): string | undefined {
-  if (message === undefined) {
-    return undefined;
-  }
-
-  return `${color.yellow(message)}${
+): string =>
+  `${color.yellow(message)}${
     keyValuePairs === undefined
       ? ""
       : Object.entries(keyValuePairs).reduce(
@@ -40,4 +28,3 @@ export function getMessageWithKeyValuePairs(
           ":"
         )
   }`;
-}

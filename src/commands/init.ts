@@ -218,13 +218,13 @@ type InitOptions = {
 };
 
 export const init = async (options: InitOptions): Promise<void> => {
-  const { commandObj, isInteractive, projectPath } = options;
+  const { commandObj, isInteractive } = options;
 
-  const resolvedProjectPath =
-    projectPath === undefined && !isInteractive
+  const projectPath =
+    options.projectPath === undefined && !isInteractive
       ? process.cwd()
       : path.resolve(
-          projectPath ??
+          options.projectPath ??
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory:",
@@ -234,20 +234,16 @@ export const init = async (options: InitOptions): Promise<void> => {
 
   try {
     const aquaDefaultDirPath = path.join(
-      resolvedProjectPath,
+      projectPath,
       FLUENCE_DIR_NAME,
       AQUA_DIR_NAME
     );
     await fsPromises.mkdir(aquaDefaultDirPath, { recursive: true });
-    process.chdir(resolvedProjectPath);
+    process.chdir(projectPath);
 
     await initReadonlyFluenceConfig(commandObj);
 
-    const aquaSrcDirPath = path.join(
-      resolvedProjectPath,
-      SRC_DIR_NAME,
-      AQUA_DIR_NAME
-    );
+    const aquaSrcDirPath = path.join(projectPath, SRC_DIR_NAME, AQUA_DIR_NAME);
     await fsPromises.mkdir(aquaSrcDirPath, { recursive: true });
     const defaultSrcAquaFilePath = path.join(
       getSrcAquaDirPath(),
@@ -259,16 +255,16 @@ export const init = async (options: InitOptions): Promise<void> => {
       await fsPromises.writeFile(defaultSrcAquaFilePath, "");
     }
 
-    const artifactsDirPath = path.join(resolvedProjectPath, ARTIFACTS_DIR_NAME);
+    const artifactsDirPath = path.join(projectPath, ARTIFACTS_DIR_NAME);
     await fsPromises.mkdir(artifactsDirPath, { recursive: true });
 
-    await ensureRecommendedExtensions(resolvedProjectPath);
-    await ensureRecommendedSettings(resolvedProjectPath);
-    await ensureGitIgnore(resolvedProjectPath);
+    await ensureRecommendedExtensions(projectPath);
+    await ensureRecommendedSettings(projectPath);
+    await ensureGitIgnore(projectPath);
 
     commandObj.log(
       color.magentaBright(
-        `\nFluence project successfully initialized at ${resolvedProjectPath}\n`
+        `\nFluence project successfully initialized at ${projectPath}\n`
       )
     );
   } catch (error) {

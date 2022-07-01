@@ -81,7 +81,9 @@ export const initAquaCli = async (
 
     return execPromise(
       `${aquaCliPath} ${command ?? ""}${unparseFlags(flags)}`,
-      getMessageWithKeyValuePairs(message, keyValuePairs),
+      message === undefined
+        ? undefined
+        : getMessageWithKeyValuePairs(message, keyValuePairs),
       Number.isNaN(timeoutNumber) ? undefined : timeoutNumber
     );
   };
