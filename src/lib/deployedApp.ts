@@ -77,9 +77,9 @@ const generateRegisterAppTSorJS = async ({
     },
   });
 
-  const appContent = `${
-    isJS ? "" : 'import { FluencePeer } from "@fluencelabs/fluence";'
-  }
+  const appContent =
+    // Codegeneration:
+    `${isJS ? "" : 'import { FluencePeer } from "@fluencelabs/fluence";'}
 import { registerApp as registerAppService } from "./deployed.app";
 
 const service = {
@@ -144,7 +144,9 @@ export const updateDeployedAppAqua = async (
   services: Services
 ): Promise<void> => {
   const appServicesFilePath = getDeployedAppAquaPath();
-  const appServicesAqua = `export App
+  const appServicesAqua =
+    // Codegeneration:
+    `export App
 
 data ${SERVICE_IDS_ITEM}:
   blueprintId: string
