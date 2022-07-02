@@ -21,7 +21,6 @@ import { Command, Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../lib/ajv";
-import { ensureAppServicesAquaFile } from "../lib/aqua/ensureAppServicesAquaFile";
 import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
 import {
@@ -30,15 +29,21 @@ import {
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
 } from "../lib/const";
+import { getAppJson } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
-import { getRelayId, getRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
 import { getMaybeArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
-import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
+import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
+import { getSrcMainAquaPath } from "../lib/pathsGetters/getSrcAquaDirPath";
+import {
+  getAppServiceJsonPath,
+  getTmpPath,
+} from "../lib/pathsGetters/getTmpPath";
 import { confirm, input, list } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
-const AQUA_FLAG_NAME = "aqua";
+const INPUT_FLAG_NAME = "input";
 const ON_FLAG_NAME = "on";
 
 export default class Run extends Command {
@@ -56,24 +61,30 @@ export default class Run extends Command {
         "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<json>",
     }),
-    "data-path": Flags.string({
+    "data-path": Flags.file({
       description:
         "Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<path>",
     }),
     import: Flags.string({
       description:
-        "Path to the directory to import from. May be used several times",
+        "Path to a directory to import from. May be used several times",
+      helpValue: "<path>",
+      multiple: true,
+    }),
+    "json-service": Flags.file({
+      description: "Path to a file that contains a JSON formatted service",
       helpValue: "<path>",
     }),
     [ON_FLAG_NAME]: Flags.string({
-      description: "PeerId of the peer where you want to run the function",
+      description: "PeerId of a peer where you want to run the function",
       helpValue: "<peer_id>",
     }),
-    [AQUA_FLAG_NAME]: Flags.string({
+    [INPUT_FLAG_NAME]: Flags.string({
       description:
-        "Path to an aqua file or to a directory that contains your aqua files",
+        "Path to an aqua file or to a directory that contains aqua files",
       helpValue: "<path>",
+      char: "i",
     }),
     [FUNC_FLAG_NAME]: Flags.string({
       char: "f",
@@ -91,7 +102,7 @@ export default class Run extends Command {
     const isInteractive = getIsInteractive(flags);
 
     const on = await ensurePeerId(flags.on, this, isInteractive);
-    const aqua = await ensureAquaPath(flags[AQUA_FLAG_NAME], isInteractive);
+    const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME], isInteractive);
 
     const func =
       flags[FUNC_FLAG_NAME] ??
@@ -101,39 +112,50 @@ export default class Run extends Command {
         flagName: FUNC_FLAG_NAME,
       }));
 
-    const relay =
-      flags.relay ??
-      getRelayAddr({
-        peerId: on,
-        commandObj: this,
-        getInfoForRandom: (relay): string =>
-          `Random relay ${color.yellow(relay)} selected for connection`,
-      });
+    const relay = flags.relay ?? getRandomRelayAddr();
 
     const data = await getRunData(flags, this);
     const imports = [
-      flags.import,
-      await ensureAppServicesAquaFile(this),
+      ...(flags.import ?? []),
+      getDefaultAquaPath(),
       await getMaybeArtifactsPath(),
     ];
 
-    const aquaCli = await initAquaCli(this);
-    const result = await aquaCli(
-      {
-        command: "run",
-        flags: {
-          addr: relay,
-          func,
-          input: aqua,
-          on,
-          timeout: flags.timeout,
-          import: imports,
-          ...data,
+    const appConfig = await initReadonlyAppConfig(this);
+    await fsPromises.mkdir(getTmpPath(), { recursive: true });
+    const appJsonServicePath = getAppServiceJsonPath();
+    if (appConfig !== null) {
+      await fsPromises.writeFile(
+        appJsonServicePath,
+        getAppJson(appConfig.services),
+        FS_OPTIONS
+      );
+    }
+    let result: string;
+    const aquaCli = await initAquaCli(this, isInteractive);
+    try {
+      result = await aquaCli(
+        {
+          command: "run",
+          flags: {
+            addr: relay,
+            func,
+            input: aqua,
+            on,
+            timeout: flags.timeout,
+            import: imports,
+            "json-service": appJsonServicePath,
+            ...data,
+          },
         },
-      },
-      "Running",
-      { function: func, on, relay }
-    );
+        "Running",
+        { function: func, on, relay }
+      );
+    } finally {
+      if (appConfig !== null) {
+        await fsPromises.unlink(appJsonServicePath);
+      }
+    }
 
     this.log(`\n${color.yellow("Result:")}\n\n${result}`);
   }
@@ -150,7 +172,12 @@ const ensurePeerId = async (
   const appConfig = await initReadonlyAppConfig(commandObj);
 
   const peerIdsFromDeployed = [
-    ...new Set((appConfig?.services ?? []).map(({ peerId }): string => peerId)),
+    ...new Set(
+      Object.values(appConfig?.services ?? {}).flatMap(
+        (deployedServiceConfig): Array<string> =>
+          deployedServiceConfig.map(({ peerId }): string => peerId)
+      )
+    ),
   ];
   const firstPeerId = peerIdsFromDeployed[0];
   if (peerIdsFromDeployed.length === 1 && firstPeerId !== undefined) {
@@ -166,22 +193,15 @@ const ensurePeerId = async (
       flagName: ON_FLAG_NAME,
     }))
       ? peerIdsFromDeployed
-      : [
-          getRelayId({
-            commandObj,
-            getInfoForRandom: (peerId): string =>
-              `Random peer ${color.yellow(
-                peerId
-              )} to run your function selected`,
-          }),
-        ];
+      : [getRandomRelayId()];
 
   return list({
     message: "Select peerId of the peer where you want to run the function",
     options,
     onNoChoices: (): Promise<string> =>
       input({
-        message: "Enter peerId of the peer where you want to run your function",
+        message:
+          "Enter a peerId of the peer where you want to run your function",
         isInteractive,
         flagName: ON_FLAG_NAME,
       }),
@@ -203,15 +223,15 @@ const ensureAquaPath = async (
   }
 
   try {
-    const srcAquaDirPath = getSrcAquaDirPath();
-    await fsPromises.access(srcAquaDirPath);
-    return srcAquaDirPath;
+    const srcMainAquaPath = getSrcMainAquaPath();
+    await fsPromises.access(srcMainAquaPath);
+    return srcMainAquaPath;
   } catch {
     return input({
       message:
-        "Enter a path to an aqua file or to a directory that contains your aqua files",
+        "Enter a path to an aqua file or to a directory that contains aqua files",
       isInteractive,
-      flagName: AQUA_FLAG_NAME,
+      flagName: INPUT_FLAG_NAME,
     });
   }
 };
@@ -228,9 +248,7 @@ const getRunData = async (
   flags: { data: string | undefined; "data-path": string | undefined },
   commandObj: CommandObj
 ): Promise<{ data: string } | Record<string, never>> => {
-  const appConfig = await initReadonlyAppConfig(commandObj);
-  const runData: RunData =
-    appConfig === null ? {} : { app: appConfig.services };
+  const runData: RunData = {};
   const { data, "data-path": dataPath } = flags;
 
   if (typeof dataPath === "string") {

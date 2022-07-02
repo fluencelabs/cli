@@ -16,18 +16,21 @@
 
 import fsPromises from "node:fs/promises";
 
+import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
+import { validateUnique, ValidationResult } from "../../helpers/validations";
 import { getArtifactsPath } from "../../pathsGetters/getArtifactsPath";
+import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import { getProjectRootDir } from "../../pathsGetters/getProjectRootDir";
 import {
   GetDefaultConfig,
-  initConfig,
+  getConfigInitFunction,
   InitConfigOptions,
   InitializedConfig,
   InitializedReadonlyConfig,
-  initReadonlyConfig,
+  getReadonlyConfigInitFunction,
   Migrations,
 } from "../initConfig";
 
@@ -81,6 +84,14 @@ const getDefault: GetDefaultConfig<
 
 const migrations: Migrations<Config> = [];
 
+const validate = (config: LatestConfig): ValidationResult =>
+  validateUnique(
+    config.services,
+    ({ name }): string => name,
+    (name): string =>
+      `There are multiple services with the same name ${color.yellow(name)}`
+  );
+
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
@@ -92,10 +103,15 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getPath: getProjectRootDir,
+  getSchemaDirPath: (): string => getProjectFluenceDirPath(),
+  validate,
 };
 
-export const initFluenceConfig = initConfig(initConfigOptions, getDefault);
-export const initReadonlyFluenceConfig = initReadonlyConfig(
+export const initFluenceConfig = getConfigInitFunction(
+  initConfigOptions,
+  getDefault
+);
+export const initReadonlyFluenceConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );

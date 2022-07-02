@@ -9,7 +9,6 @@
 node_modules
 oclif.manifest.json
 .eslintcache
-/schemas
 /fluence.yaml
 .fluence
 /src/aqua
@@ -19,3 +18,4 @@ oclif.manifest.json
 Cargo.lock
 **/target/
 .repl_history
+.vscode/settings.json

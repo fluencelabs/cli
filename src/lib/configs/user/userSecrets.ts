@@ -32,11 +32,11 @@ import {
 import { ensureUserFluenceDir } from "../../pathsGetters/ensureUserFluenceDir";
 import {
   GetDefaultConfig,
-  initConfig,
+  getConfigInitFunction,
   InitConfigOptions,
   InitializedConfig,
   InitializedReadonlyConfig,
-  initReadonlyConfig,
+  getReadonlyConfigInitFunction,
   Migrations,
 } from "../initConfig";
 
@@ -99,8 +99,11 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   validate,
 };
 
-export const initUserSecretsConfig = initConfig(initConfigOptions, getDefault);
-export const initReadonlyUserSecretsConfig = initReadonlyConfig(
+export const initUserSecretsConfig = getConfigInitFunction(
+  initConfigOptions,
+  getDefault
+);
+export const initReadonlyUserSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );

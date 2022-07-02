@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import {
-  APP_SERVICES_AQUA,
-  APP_SERVICES_AQUA_FILE_NAME,
-  CommandObj,
-  FS_OPTIONS,
-} from "../const";
-import { ensureDefaultAquaPath } from "../pathsGetters/ensureDefaultAquaDir";
+import { APP_SERVICE_JSON_FILE_NAME, TMP_DIR_NAME } from "../const";
 
-export const ensureAppServicesAquaFile = async (
-  commandObj: CommandObj
-): Promise<string> => {
-  const aquaPath = await ensureDefaultAquaPath(commandObj);
-  const appServicesFilePath = path.join(aquaPath, APP_SERVICES_AQUA_FILE_NAME);
-  await fsPromises.writeFile(
-    appServicesFilePath,
-    APP_SERVICES_AQUA,
-    FS_OPTIONS
-  );
-  return aquaPath;
+import { getProjectFluenceDirPath } from "./getProjectFluenceDirPath";
+
+export const getTmpPath = (): string => {
+  const projectFluenceDir = getProjectFluenceDirPath();
+  return path.join(projectFluenceDir, TMP_DIR_NAME);
 };
+
+export const getAppServiceJsonPath = (): string =>
+  path.join(getTmpPath(), APP_SERVICE_JSON_FILE_NAME);

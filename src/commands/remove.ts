@@ -16,22 +16,27 @@
 
 import fsPromises from "node:fs/promises";
 
-import color from "@oclif/color";
 import { Command } from "@oclif/core";
 
 import { initAquaCli } from "../lib/aquaCli";
-import {
-  AppConfig,
-  DeployedServiceConfig,
-  initAppConfig,
-} from "../lib/configs/project/app";
+import { AppConfig, initAppConfig, Services } from "../lib/configs/project/app";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
+import { updateDeployedAppAqua, generateRegisterApp } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keyPairs/getKeyPair";
-import { getRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayAddr } from "../lib/multiaddr";
+import { getDeployedAppAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
+import {
+  getAppJsPath,
+  getDeployedAppJsPath,
+} from "../lib/pathsGetters/getJsPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
+import {
+  getAppTsPath,
+  getDeployedAppTsPath,
+} from "../lib/pathsGetters/getTsPath";
 import { confirm } from "../lib/prompt";
 
 export default class Remove extends Command {
@@ -103,52 +108,70 @@ export const removeApp = async ({
     return;
   }
 
-  const aquaCli = await initAquaCli(commandObj);
-  const notRemovedServices: DeployedServiceConfig[] = [];
-  for (const service of services) {
-    const { serviceId, peerId, name, blueprintId } = service;
-    const addr = getRelayAddr({
-      peerId,
-      commandObj,
-      getInfoForRandom: (relay): string =>
-        `Random relay ${color.yellow(relay)} selected for connection`,
-    });
+  const aquaCli = await initAquaCli(commandObj, isInteractive);
+  const notRemovedServices: Services = {};
+  const addr = getRandomRelayAddr();
 
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      await aquaCli(
-        {
-          command: "remote remove_service",
-          flags: {
-            addr,
-            id: serviceId,
-            sk: keyPair.secretKey,
-            on: peerId,
-            timeout,
+  for (const [name, servicesByName] of Object.entries(services)) {
+    const notRemovedServicesByName = [];
+
+    for (const service of servicesByName) {
+      const { serviceId, peerId, blueprintId } = service;
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await aquaCli(
+          {
+            command: "remote remove_service",
+            flags: {
+              addr,
+              id: serviceId,
+              sk: keyPair.secretKey,
+              on: peerId,
+              timeout,
+            },
           },
-        },
-        `Removing service`,
-        {
-          name,
-          id: serviceId,
-          blueprintId,
-          relay: addr,
-          "deployed on": peerId,
-          "deployed at": timestamp,
-        }
-      );
-    } catch (error) {
-      commandObj.warn(`When removing service\n${String(error)}`);
-      notRemovedServices.push(service);
+          `Removing service`,
+          {
+            name,
+            id: serviceId,
+            blueprintId,
+            relay: addr,
+            "deployed on": peerId,
+            "deployed at": timestamp,
+          }
+        );
+      } catch (error) {
+        commandObj.warn(`When removing service\n${String(error)}`);
+        notRemovedServicesByName.push(service);
+      }
+    }
+
+    if (notRemovedServicesByName.length > 0) {
+      notRemovedServices[name] = notRemovedServicesByName;
     }
   }
 
-  appConfig.services = notRemovedServices;
-
-  if (appConfig.services.length === 0) {
-    return fsPromises.unlink(appConfig.$getPath());
+  if (Object.keys(notRemovedServices).length === 0) {
+    await Promise.allSettled(
+      [
+        getDeployedAppAquaPath(),
+        getAppTsPath(),
+        getAppJsPath(),
+        getDeployedAppTsPath(),
+        getDeployedAppJsPath(),
+        appConfig.$getPath(),
+      ].map((path): Promise<void> => fsPromises.unlink(path))
+    );
+    return;
   }
 
+  await updateDeployedAppAqua(notRemovedServices);
+  await generateRegisterApp({
+    deployedServices: notRemovedServices,
+    aquaCli,
+  });
+
+  appConfig.services = notRemovedServices;
   await appConfig.$commit();
   commandObj.error(
     "Not all services were successful removed. Please make sure to remove all of them in order to continue"

@@ -24,6 +24,7 @@ import {
   DeployedServiceConfig,
   initAppConfig,
   initNewReadonlyAppConfig,
+  Services,
 } from "../lib/configs/project/app";
 import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
@@ -36,11 +37,11 @@ import {
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
 } from "../lib/const";
+import { updateDeployedAppAqua, generateRegisterApp } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
-import type { ConfigKeyPair } from "../lib/keyPairs/generateKeyPair";
 import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
-import { getRelayId, getRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
 import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { confirm } from "../lib/prompt";
@@ -104,13 +105,67 @@ export default class Deploy extends Command {
       this.error(keyPair.message);
     }
 
-    await deploy({
-      commandObj: this,
-      keyPair,
-      timeout: flags.timeout,
-      relay: flags.relay,
-      on: flags.on,
+    const fluenceConfig = await initReadonlyFluenceConfig(this);
+    if (fluenceConfig.services.length === 0) {
+      this.error(
+        `No services to deploy. Add services you want to deploy to ${color.yellow(
+          ARTIFACTS_DIR_NAME
+        )} directory (${getArtifactsPath()}) and also list them in ${color.yellow(
+          `${FLUENCE_CONFIG_FILE_NAME}.yaml`
+        )} (${fluenceConfig.$getPath()})`
+      );
+    }
+    const artifactsPath = getArtifactsPath();
+    const cwd = process.cwd();
+    const addr = flags.relay ?? getRandomRelayAddr();
+    const peerId = flags.on ?? getRandomRelayId();
+    if (flags.on === undefined) {
+      this.log(`Random peer ${color.yellow(peerId)} selected for deployment`);
+    }
+
+    const aquaCli = await initAquaCli(this, isInteractive);
+    const successfullyDeployedServices: Services = {};
+    for (const { name, count = 1 } of fluenceConfig.services) {
+      process.chdir(path.join(artifactsPath, name));
+      // eslint-disable-next-line no-await-in-loop
+      const services = await deployServices({
+        count,
+        deployServiceOptions: {
+          name,
+          artifactsPath,
+          secretKey: keyPair.secretKey,
+          aquaCli,
+          peerId,
+          timeout: flags.timeout,
+          addr,
+        },
+        commandObj: this,
+      });
+      if (services !== null) {
+        successfullyDeployedServices[name] = services;
+      }
+    }
+
+    process.chdir(cwd);
+
+    if (Object.keys(successfullyDeployedServices).length === 0) {
+      this.error("No services were deployed successfully");
+    }
+    await updateDeployedAppAqua(successfullyDeployedServices);
+    await generateRegisterApp({
+      deployedServices: successfullyDeployedServices,
+      aquaCli,
     });
+
+    await initNewReadonlyAppConfig(
+      {
+        version: 1,
+        services: successfullyDeployedServices,
+        keyPairName: keyPair.name,
+        timestamp: new Date().toISOString(),
+      },
+      this
+    );
   }
 }
 
@@ -171,33 +226,36 @@ const deployService = async ({
     );
   }
 
-  return { blueprintId, serviceId, peerId, name };
+  return { blueprintId, serviceId, peerId };
 };
 
 /**
  * Deploy a service and then deploy zero or more services using the blueprint
  * id of the first service that was deployed
- * @param param0 Readonly<{ deployServiceOptions: DeployServiceOptions; count: number;}>
- * @returns Promise<Array<Error | DeployedServiceConfig>>
+ * @param param0 Readonly<{ deployServiceOptions: DeployServiceOptions; count: number; commandObj: CommandObj;}>
+ * @returns Promise<DeployedServiceConfig[] | null>
  */
 const deployServices = async ({
   count,
   deployServiceOptions,
+  commandObj,
 }: Readonly<{
   deployServiceOptions: DeployServiceOptions;
   count: number;
-}>): Promise<Array<Error | DeployedServiceConfig>> => {
+  commandObj: CommandObj;
+}>): Promise<DeployedServiceConfig[] | null> => {
   const result = await deployService(deployServiceOptions);
 
-  if (result instanceof Error || count === 1) {
-    return [result];
+  if (result instanceof Error) {
+    commandObj.warn(result.message);
+    return null;
   }
 
   const { blueprintId } = result;
   const { secretKey, peerId, addr, aquaCli, name, timeout } =
     deployServiceOptions;
 
-  const deployedServiceConfigs: Array<DeployedServiceConfig | Error> = [result];
+  const services = [result];
 
   let servicesToDeployCount = count - 1;
 
@@ -226,120 +284,22 @@ const deployServices = async ({
         }
       );
     } catch (error) {
-      deployedServiceConfigs.push(
-        new Error(`Wasn't able to deploy service\n${String(error)}`)
-      );
+      commandObj.warn(`Wasn't able to deploy service\n${String(error)}`);
       continue;
     }
 
     const [, serviceId] = /"(.*)"/.exec(result) ?? [];
 
     if (serviceId === undefined) {
-      deployedServiceConfigs.push(
-        new Error(
-          `Deployment finished without errors but not able to parse serviceId from aqua cli output:\n\n${result}`
-        )
+      commandObj.warn(
+        `Deployment finished without errors but not able to parse serviceId from aqua cli output:\n\n${result}`
       );
       continue;
     }
 
-    deployedServiceConfigs.push({ blueprintId, serviceId, peerId, name });
+    services.push({ blueprintId, serviceId, peerId });
     servicesToDeployCount = servicesToDeployCount - 1;
   }
 
-  return deployedServiceConfigs;
-};
-
-const getInfoForRandomPeerId = (randomPeerId: string): string =>
-  `Random peer ${color.yellow(randomPeerId)} selected for deployment`;
-
-const getInfoForRandomRelayId = (randomPeerId: string): string =>
-  `Random relay ${color.yellow(randomPeerId)} selected for deployment`;
-
-type DeployOptions = {
-  keyPair: ConfigKeyPair;
-  timeout: string | undefined;
-  commandObj: CommandObj;
-  relay: string | undefined;
-  on: string | undefined;
-};
-
-const deploy = async ({
-  keyPair,
-  commandObj,
-  timeout,
-  relay,
-  on,
-}: DeployOptions): Promise<void> => {
-  const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
-  if (fluenceConfig.services.length === 0) {
-    commandObj.error(
-      `No services to deploy. Add services you want to deploy to ${color.yellow(
-        ARTIFACTS_DIR_NAME
-      )} directory (${getArtifactsPath()}) and also list them in ${color.yellow(
-        `${FLUENCE_CONFIG_FILE_NAME}.yaml`
-      )} (${fluenceConfig.$getPath()})`
-    );
-  }
-  const artifactsPath = getArtifactsPath();
-  const cwd = process.cwd();
-  const peerId =
-    on ??
-    getRelayId({
-      relayAddr: relay,
-      commandObj,
-      getInfoForRandom: getInfoForRandomPeerId,
-    });
-
-  const addr =
-    relay ??
-    getRelayAddr({
-      peerId,
-      commandObj,
-      getInfoForRandom: getInfoForRandomRelayId,
-    });
-
-  const aquaCli = await initAquaCli(commandObj);
-  const successfullyDeployedServices: DeployedServiceConfig[] = [];
-  for (const { name, count = 1 } of fluenceConfig.services) {
-    process.chdir(path.join(artifactsPath, name));
-    // eslint-disable-next-line no-await-in-loop
-    const results = await deployServices({
-      count,
-      deployServiceOptions: {
-        name,
-        artifactsPath,
-        secretKey: keyPair.secretKey,
-        aquaCli,
-        peerId,
-        timeout,
-        addr,
-      },
-    });
-
-    for (const result of results) {
-      if (result instanceof Error) {
-        commandObj.warn(result.message);
-        continue;
-      }
-
-      successfullyDeployedServices.push(result);
-    }
-  }
-
-  process.chdir(cwd);
-
-  if (successfullyDeployedServices.length === 0) {
-    commandObj.error("No services were deployed successfully");
-  }
-
-  await initNewReadonlyAppConfig(
-    {
-      version: 0,
-      services: successfullyDeployedServices,
-      keyPairName: keyPair.name,
-      timestamp: new Date().toISOString(),
-    },
-    commandObj
-  );
+  return services;
 };

@@ -17,9 +17,10 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import type { CommandObj, Dependency } from "./const";
+import { CommandObj, Dependency, NO_INPUT_FLAG_NAME } from "./const";
 import { execPromise } from "./execPromise";
 import { ensureUserFluenceDir } from "./pathsGetters/ensureUserFluenceDir";
+import { confirm } from "./prompt";
 
 const npmInstall = async (
   name: string,
@@ -36,11 +37,21 @@ export const ensureNpmDir = async (commandObj: CommandObj): Promise<string> => {
   return npmPath;
 };
 
-export const ensureNpmDependency = async (
-  { name, version, bin }: Dependency,
-  commandObj: CommandObj,
-  message: string
-): Promise<string> => {
+type EnsureNpmDependencyOptions = {
+  dependency: Dependency;
+  commandObj: CommandObj;
+  confirmMessage: string;
+  installMessage: string;
+  isInteractive: boolean;
+};
+
+export const ensureNpmDependency = async ({
+  dependency: { name, version, bin },
+  commandObj,
+  confirmMessage,
+  installMessage,
+  isInteractive,
+}: EnsureNpmDependencyOptions): Promise<string> => {
   const npmDirPath = await ensureNpmDir(commandObj);
 
   const dependencyPath = path.join(npmDirPath, "bin", bin);
@@ -52,7 +63,19 @@ export const ensureNpmDependency = async (
       throw new Error("Outdated");
     }
   } catch {
-    await npmInstall(name, version, npmDirPath, message);
+    const doInstall =
+      !isInteractive ||
+      (await confirm({
+        message: confirmMessage,
+        isInteractive,
+        flagName: NO_INPUT_FLAG_NAME,
+      }));
+
+    if (!doInstall) {
+      commandObj.error("You have to confirm in order to continue");
+    }
+
+    await npmInstall(name, version, npmDirPath, installMessage);
   }
 
   return dependencyPath;

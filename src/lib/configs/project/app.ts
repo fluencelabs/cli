@@ -16,14 +16,15 @@
 
 import type { JSONSchemaType } from "ajv";
 
+import { ajv } from "../../ajv";
 import { APP_FILE_NAME, CommandObj } from "../../const";
 import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
-  initConfig,
+  getConfigInitFunction,
   InitConfigOptions,
   InitializedConfig,
   InitializedReadonlyConfig,
-  initReadonlyConfig,
+  getReadonlyConfigInitFunction,
   Migrations,
 } from "../initConfig";
 
@@ -34,7 +35,13 @@ type DeployedServiceConfigV0 = {
   blueprintId: string;
 };
 
-export type DeployedServiceConfig = DeployedServiceConfigV0;
+type DeployedServiceConfigV1 = {
+  serviceId: string;
+  peerId: string;
+  blueprintId: string;
+};
+
+export type DeployedServiceConfig = DeployedServiceConfigV1;
 
 type ConfigV0 = {
   version: 0;
@@ -72,30 +79,120 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services", "keyPairName", "timestamp"],
 };
 
-const migrations: Migrations<Config> = [];
+export type Services = Record<string, Array<DeployedServiceConfigV1>>;
 
-type Config = ConfigV0;
-type LatestConfig = ConfigV0;
+type ConfigV1 = {
+  version: 1;
+  services: Services;
+  keyPairName: string;
+  timestamp: string;
+  knownRelays?: Array<string>;
+};
+
+const configSchemaV1: JSONSchemaType<ConfigV1> = {
+  type: "object",
+  properties: {
+    version: { type: "number", enum: [1] },
+    services: {
+      type: "object",
+      patternProperties: {
+        ".*": {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              peerId: { type: "string" },
+              serviceId: { type: "string" },
+              blueprintId: { type: "string" },
+            },
+            required: ["peerId", "serviceId", "blueprintId"],
+          },
+        },
+      },
+      required: [],
+    },
+    keyPairName: { type: "string" },
+    timestamp: { type: "string" },
+    knownRelays: {
+      type: "array",
+      nullable: true,
+      items: { type: "string" },
+    },
+  },
+  required: ["version", "services", "keyPairName", "timestamp"],
+};
+
+const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+
+const migrations: Migrations<Config> = [
+  (config: Config): ConfigV1 => {
+    if (!validateConfigSchemaV0(config)) {
+      throw new Error(
+        `Migration error. Errors: ${JSON.stringify(
+          validateConfigSchemaV0.errors
+        )}`
+      );
+    }
+
+    const { keyPairName, knownRelays, timestamp, services } = config;
+
+    const newServices: Services = {};
+    for (const { name, peerId, serviceId, blueprintId } of services) {
+      const service = {
+        peerId,
+        serviceId,
+        blueprintId,
+      };
+
+      const newServicesArr = newServices[name];
+
+      if (newServicesArr === undefined) {
+        newServices[name] = [service];
+        continue;
+      }
+
+      newServicesArr.push(service);
+    }
+
+    return {
+      version: 1,
+      keyPairName,
+      timestamp,
+      services: newServices,
+      ...(knownRelays === undefined ? {} : { knownRelays }),
+    };
+  },
+];
+
+type Config = ConfigV0 | ConfigV1;
+type LatestConfig = ConfigV1;
 export type AppConfig = InitializedConfig<LatestConfig>;
 export type AppConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
+  allSchemas: [configSchemaV0, configSchemaV1],
+  latestSchema: configSchemaV1,
   migrations,
   name: APP_FILE_NAME,
   getPath: getProjectFluenceDirPath,
 };
 
-export const initAppConfig = initConfig(initConfigOptions);
-export const initReadonlyAppConfig = initReadonlyConfig(initConfigOptions);
+export const initAppConfig = getConfigInitFunction(initConfigOptions);
+export const initReadonlyAppConfig =
+  getReadonlyConfigInitFunction(initConfigOptions);
 export const initNewAppConfig = (
   config: LatestConfig,
   commandObj: CommandObj
 ): Promise<AppConfig> =>
-  initConfig(initConfigOptions, (): LatestConfig => config)(commandObj);
+  getConfigInitFunction(
+    initConfigOptions,
+    (): LatestConfig => config
+  )(commandObj);
 export const initNewReadonlyAppConfig = (
   config: LatestConfig,
   commandObj: CommandObj
 ): Promise<AppConfigReadonly> =>
-  initReadonlyConfig(initConfigOptions, (): LatestConfig => config)(commandObj);
+  getReadonlyConfigInitFunction(
+    initConfigOptions,
+    (): LatestConfig => config
+  )(commandObj);

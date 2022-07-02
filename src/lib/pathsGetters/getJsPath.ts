@@ -17,17 +17,20 @@
 import path from "node:path";
 
 import {
-  AQUA_DIR_NAME,
-  DEFAULT_SRC_AQUA_FILE_NAME,
-  SRC_DIR_NAME,
+  APP_JS_FILE_NAME,
+  DEPLOYED_APP_JS_FILE_NAME,
+  JS_DIR_NAME,
 } from "../const";
 
-import { getProjectRootDir } from "./getProjectRootDir";
+import { getProjectFluenceDirPath } from "./getProjectFluenceDirPath";
 
-export const getSrcAquaDirPath = (): string => {
-  return path.join(getProjectRootDir(), SRC_DIR_NAME, AQUA_DIR_NAME);
+export const getJsPath = (): string => {
+  const projectFluenceDir = getProjectFluenceDirPath();
+  return path.join(projectFluenceDir, JS_DIR_NAME);
 };
 
-export const getSrcMainAquaPath = (): string => {
-  return path.join(getSrcAquaDirPath(), DEFAULT_SRC_AQUA_FILE_NAME);
-};
+export const getAppJsPath = (): string =>
+  path.join(getJsPath(), APP_JS_FILE_NAME);
+
+export const getDeployedAppJsPath = (): string =>
+  path.join(getJsPath(), DEPLOYED_APP_JS_FILE_NAME);

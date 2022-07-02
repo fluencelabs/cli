@@ -20,9 +20,12 @@ import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePai
 import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureNpmDependency } from "./npm";
 
-type Flags<T extends string> = Record<T, string | Array<string | undefined>>;
+type Flags<T extends string> = Record<
+  T,
+  string | boolean | Array<string | undefined>
+>;
 type OptionalFlags<T extends string> = Partial<
-  Record<T, string | undefined | Array<string | undefined>>
+  Record<T, string | boolean | undefined | Array<string | undefined>>
 >;
 
 export type AquaCliInput =
@@ -42,32 +45,45 @@ export type AquaCliInput =
   | {
       command: "run";
       flags: Flags<"addr" | "input" | "func"> &
-        OptionalFlags<"on" | "timeout" | "data" | "import">;
+        OptionalFlags<"on" | "timeout" | "data" | "import" | "json-service">;
+    }
+  | {
+      command?: never;
+      flags: Flags<"input" | "output"> &
+        OptionalFlags<"js"> & { timeout?: never };
     };
 
 export type AquaCLI = {
   (
     aquaCliInput: AquaCliInput,
-    message: string,
+    message?: string | undefined,
     keyValuePairs?: Record<string, string>
   ): Promise<string>;
 };
 
-export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
-  const aquaCliPath = await ensureNpmDependency(
-    DEPENDENCIES.aqua,
+export const initAquaCli = async (
+  commandObj: CommandObj,
+  isInteractive: boolean
+): Promise<AquaCLI> => {
+  const aquaCliPath = await ensureNpmDependency({
+    dependency: DEPENDENCIES.aqua,
     commandObj,
-    "Downloading Aqua CLI, may take a while"
-  );
+    confirmMessage:
+      "Aqua CLI dependency needs to be updated. Do you want to continue?",
+    installMessage: "Downloading Aqua CLI, may take a while",
+    isInteractive,
+  });
 
-  return async (aquaCliInput, message, keyValuePairs): Promise<string> => {
+  return (aquaCliInput, message, keyValuePairs): Promise<string> => {
     const { command, flags } = aquaCliInput;
 
     const timeoutNumber = Number(flags.timeout);
 
     return execPromise(
-      `${aquaCliPath} ${command}${unparseFlags(flags)}`,
-      getMessageWithKeyValuePairs(message, keyValuePairs),
+      `${aquaCliPath} ${command ?? ""}${unparseFlags(flags)}`,
+      message === undefined
+        ? undefined
+        : getMessageWithKeyValuePairs(message, keyValuePairs),
       Number.isNaN(timeoutNumber) ? undefined : timeoutNumber
     );
   };
