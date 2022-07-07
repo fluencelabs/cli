@@ -18,7 +18,6 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
-import replaceHomedir from "replace-homedir";
 
 import {
   AQUA_NPM_DEPENDENCY,
@@ -27,6 +26,7 @@ import {
 } from "./configs/user/dependency";
 import { AQUA_RECOMMENDED_VERSION, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
+import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import { ensureUserFluenceDir } from "./pathsGetters/ensureUserFluenceDir";
 
 type NPMInstallOptions = {
@@ -102,9 +102,9 @@ export const ensureNpmDependency = async ({
     await npmInstall({
       packageName,
       version,
-      message: `Installing version ${color.yellow(
+      message: `Installing ${packageName} ${color.yellow(
         version
-      )} of ${packageName} to ${replaceHomedir(npmDirPath, "~")}`,
+      )} to ${replaceHomeDir(npmDirPath)}`,
       commandObj,
     });
   }
