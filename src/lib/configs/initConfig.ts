@@ -19,6 +19,7 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
+import replaceHomedir from "replace-homedir";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -379,7 +380,10 @@ export function getConfigInitFunction<
 
     if (initializedConfigs.has(configPath)) {
       throw new Error(
-        `Config ${configPath} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`
+        `Mutable config ${replaceHomedir(
+          configPath,
+          "~"
+        )} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`
       );
     }
     initializedConfigs.add(configPath);

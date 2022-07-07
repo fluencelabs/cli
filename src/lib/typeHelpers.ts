@@ -43,3 +43,11 @@ export const assertHasKey: <K extends string>(
     throw new AssertionError({ message });
   }
 };
+
+export const getIsStringUnion =
+  <T extends string>(
+    array: ReadonlyArray<T>
+  ): ((unknown: unknown) => unknown is Array<T>[number]) =>
+  (unknown: unknown): unknown is Array<T>[number] =>
+    // eslint-disable-next-line unicorn/prefer-includes
+    array.some((v): boolean => v === unknown);

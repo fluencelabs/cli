@@ -123,7 +123,7 @@ export default class Deploy extends Command {
       this.log(`Random peer ${color.yellow(peerId)} selected for deployment`);
     }
 
-    const aquaCli = await initAquaCli(this, isInteractive);
+    const aquaCli = await initAquaCli(this);
     const successfullyDeployedServices: Services = {};
     for (const { name, count = 1 } of fluenceConfig.services) {
       process.chdir(path.join(artifactsPath, name));

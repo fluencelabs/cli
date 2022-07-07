@@ -17,18 +17,36 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { CommandObj, Dependency, NO_INPUT_FLAG_NAME } from "./const";
+import replaceHomedir from "replace-homedir";
+
+import {
+  AQUA_NPM_DEPENDENCY,
+  initReadonlyDependencyConfig,
+  NPMDependency,
+} from "./configs/user/dependency";
+import type { CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { ensureUserFluenceDir } from "./pathsGetters/ensureUserFluenceDir";
-import { confirm } from "./prompt";
 
-const npmInstall = async (
-  name: string,
-  version: string,
-  npmPath: string,
-  message: string
-): Promise<string> =>
-  execPromise(`npm i ${name}@${version} -g --prefix=${npmPath}`, message);
+type NPMInstallOptions = {
+  packageName: string;
+  version: string;
+  message: string;
+  commandObj: CommandObj;
+};
+
+const npmInstall = async ({
+  packageName,
+  version,
+  message,
+  commandObj,
+}: NPMInstallOptions): Promise<string> =>
+  execPromise(
+    `npm i ${packageName}@${version} -g --prefix ${await ensureNpmDir(
+      commandObj
+    )}`,
+    message
+  );
 
 export const ensureNpmDir = async (commandObj: CommandObj): Promise<string> => {
   const userFluenceDir = await ensureUserFluenceDir(commandObj);
@@ -37,45 +55,58 @@ export const ensureNpmDir = async (commandObj: CommandObj): Promise<string> => {
   return npmPath;
 };
 
-type EnsureNpmDependencyOptions = {
-  dependency: Dependency;
+const getVersionToUse = async (
+  recommendedVersion: string,
+  name: NPMDependency,
+  commandObj: CommandObj
+): Promise<string> => {
+  const version = (await initReadonlyDependencyConfig(commandObj)).dependency[
+    name
+  ];
+  return typeof version === "string" ? version : recommendedVersion;
+};
+
+export const npmDependencies: Record<
+  NPMDependency,
+  { recommendedVersion: string; bin: string; packageName: string }
+> = {
+  [AQUA_NPM_DEPENDENCY]: {
+    recommendedVersion: "0.7.4-322",
+    bin: "aqua",
+    packageName: "@fluencelabs/aqua",
+  },
+};
+
+type NpmDependencyOptions = {
+  name: NPMDependency;
   commandObj: CommandObj;
-  confirmMessage: string;
-  installMessage: string;
-  isInteractive: boolean;
 };
 
 export const ensureNpmDependency = async ({
-  dependency: { name, version, bin },
+  name,
   commandObj,
-  confirmMessage,
-  installMessage,
-  isInteractive,
-}: EnsureNpmDependencyOptions): Promise<string> => {
+}: NpmDependencyOptions): Promise<string> => {
+  const { bin, packageName, recommendedVersion } = npmDependencies[name];
   const npmDirPath = await ensureNpmDir(commandObj);
-
   const dependencyPath = path.join(npmDirPath, "bin", bin);
+  const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   try {
     await fsPromises.access(dependencyPath);
-    const result = await execPromise(`${dependencyPath} -v`);
+    const result = await execPromise(`${dependencyPath} --version`);
     if (!result.includes(version)) {
       throw new Error("Outdated");
     }
   } catch {
-    const doInstall =
-      !isInteractive ||
-      (await confirm({
-        message: confirmMessage,
-        isInteractive,
-        flagName: NO_INPUT_FLAG_NAME,
-      }));
-
-    if (!doInstall) {
-      commandObj.error("You have to confirm in order to continue");
-    }
-
-    await npmInstall(name, version, npmDirPath, installMessage);
+    await npmInstall({
+      packageName,
+      version,
+      message: `Installing ${packageName} v${version} to ${replaceHomedir(
+        npmDirPath,
+        "~"
+      )}`,
+      commandObj,
+    });
   }
 
   return dependencyPath;

@@ -108,7 +108,7 @@ export const removeApp = async ({
     return;
   }
 
-  const aquaCli = await initAquaCli(commandObj, isInteractive);
+  const aquaCli = await initAquaCli(commandObj);
   const notRemovedServices: Services = {};
   const addr = getRandomRelayAddr();
 

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandObj, DEPENDENCIES } from "./const";
+import { AQUA_NPM_DEPENDENCY } from "./configs/user/dependency";
+import type { CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
 import { unparseFlags } from "./helpers/unparseFlags";
@@ -61,17 +62,10 @@ export type AquaCLI = {
   ): Promise<string>;
 };
 
-export const initAquaCli = async (
-  commandObj: CommandObj,
-  isInteractive: boolean
-): Promise<AquaCLI> => {
+export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
   const aquaCliPath = await ensureNpmDependency({
-    dependency: DEPENDENCIES.aqua,
+    name: AQUA_NPM_DEPENDENCY,
     commandObj,
-    confirmMessage:
-      "Aqua CLI dependency needs to be updated. Do you want to continue?",
-    installMessage: "Downloading Aqua CLI, may take a while",
-    isInteractive,
   });
 
   return (aquaCliInput, message, keyValuePairs): Promise<string> => {

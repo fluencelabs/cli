@@ -132,7 +132,7 @@ export default class Run extends Command {
       );
     }
     let result: string;
-    const aquaCli = await initAquaCli(this, isInteractive);
+    const aquaCli = await initAquaCli(this);
     try {
       result = await aquaCli(
         {
