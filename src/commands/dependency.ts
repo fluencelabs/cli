@@ -42,9 +42,9 @@ export default class Dependency extends Command {
       description: "Show current version of the dependency",
     }),
     use: Flags.string({
-      description: `Set version of the dependency that you want to use. Use keyword ${color.yellow(
+      description: `Set version of the dependency that you want to use. Use ${color.yellow(
         RECOMMENDED
-      )} if you want to use ${RECOMMENDED} version`,
+      )} keyword if you want to use ${RECOMMENDED} version`,
       helpValue: `<version | ${RECOMMENDED}>`,
     }),
     ...NO_INPUT_FLAG,

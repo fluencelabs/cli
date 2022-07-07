@@ -173,7 +173,7 @@ ARGUMENTS
 FLAGS
   -v, --version                  Show current version of the dependency
   --no-input                     Don't interactively ask for any input from the user
-  --use=<version | recommended>  Set version of the dependency that you want to use. Use keyword recommended if you want
+  --use=<version | recommended>  Set version of the dependency that you want to use. Use recommended keyword if you want
                                  to use recommended version
 
 DESCRIPTION
