@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { getProjectRootDir } from "./getProjectRootDir";
+import { getProjectFluenceDirPath } from "./getProjectFluenceDirPath";
 
-export const getArtifactsPath = (): string => {
-  return path.join(getProjectRootDir(), "artifacts");
+export const getServicesDir = (): string => {
+  return path.join(getProjectFluenceDirPath(), "services");
+};
+
+export const ensureServicesDir = async (): Promise<string> => {
+  const servicesDir = getServicesDir();
+  await fsPromises.mkdir(servicesDir, { recursive: true });
+  return servicesDir;
 };

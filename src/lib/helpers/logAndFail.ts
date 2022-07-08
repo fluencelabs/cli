@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import path from "node:path";
-
-import { getProjectRootDir } from "./getProjectRootDir";
-
-export const getArtifactsPath = (): string => {
-  return path.join(getProjectRootDir(), "artifacts");
+export const logAndFail = (...args: Parameters<typeof console.log>): void => {
+  console.log(...args);
+  throw new Error("fail");
 };
