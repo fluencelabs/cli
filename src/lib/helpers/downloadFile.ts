@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import fsPromises from "node:fs/promises";
 
-import { getProjectRootDir } from "./getProjectRootDir";
+import { CliUx } from "@oclif/core";
+import fetch from "node-fetch";
 
-export const getArtifactsPath = (): string => {
-  return path.join(getProjectRootDir(), "artifacts");
+export const downloadFile = async (
+  path: string,
+  url: string
+): Promise<string> => {
+  CliUx.ux.action.start(`Downloading ${url} to ${path}`);
+  const res = await fetch(url);
+  const buffer = await res.buffer();
+  await fsPromises.writeFile(path, buffer);
+  CliUx.ux.action.stop();
+  return path;
 };

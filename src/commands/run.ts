@@ -32,15 +32,14 @@ import {
 import { getAppJson } from "../lib/deployedApp";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
-import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
-import { getMaybeArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
+import { getRandomRelayAddr } from "../lib/multiaddr";
 import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { getSrcMainAquaPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import {
   getAppServiceJsonPath,
   getTmpPath,
 } from "../lib/pathsGetters/getTmpPath";
-import { confirm, input, list } from "../lib/prompt";
+import { input } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
@@ -101,7 +100,6 @@ export default class Run extends Command {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);
 
-    const on = await ensurePeerId(flags.on, this, isInteractive);
     const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME], isInteractive);
 
     const func =
@@ -115,11 +113,7 @@ export default class Run extends Command {
     const relay = flags.relay ?? getRandomRelayAddr();
 
     const data = await getRunData(flags, this);
-    const imports = [
-      ...(flags.import ?? []),
-      getDefaultAquaPath(),
-      await getMaybeArtifactsPath(),
-    ];
+    const imports = [...(flags.import ?? []), getDefaultAquaPath()];
 
     const appConfig = await initReadonlyAppConfig(this);
     await fsPromises.mkdir(getTmpPath(), { recursive: true });
@@ -141,7 +135,6 @@ export default class Run extends Command {
             addr: relay,
             func,
             input: aqua,
-            on,
             timeout: flags.timeout,
             import: imports,
             "json-service": appJsonServicePath,
@@ -149,7 +142,7 @@ export default class Run extends Command {
           },
         },
         "Running",
-        { function: func, on, relay }
+        { function: func, relay }
       );
     } finally {
       if (appConfig !== null) {
@@ -160,59 +153,6 @@ export default class Run extends Command {
     this.log(`\n${color.yellow("Result:")}\n\n${result}`);
   }
 }
-
-const ensurePeerId = async (
-  onFromArgs: string | undefined,
-  commandObj: CommandObj,
-  isInteractive: boolean
-): Promise<string> => {
-  if (typeof onFromArgs === "string") {
-    return onFromArgs;
-  }
-  const appConfig = await initReadonlyAppConfig(commandObj);
-
-  const peerIdsFromDeployed = [
-    ...new Set(
-      Object.values(appConfig?.services ?? {}).flatMap(
-        (deployedServiceConfig): Array<string> =>
-          deployedServiceConfig.map(({ peerId }): string => peerId)
-      )
-    ),
-  ];
-  const firstPeerId = peerIdsFromDeployed[0];
-  if (peerIdsFromDeployed.length === 1 && firstPeerId !== undefined) {
-    return firstPeerId;
-  }
-
-  const options =
-    peerIdsFromDeployed.length > 1 &&
-    (await confirm({
-      message:
-        "Do you want to select one of the peers from your app to run the function?",
-      isInteractive,
-      flagName: ON_FLAG_NAME,
-    }))
-      ? peerIdsFromDeployed
-      : [getRandomRelayId()];
-
-  return list({
-    message: "Select peerId of the peer where you want to run the function",
-    options,
-    onNoChoices: (): Promise<string> =>
-      input({
-        message:
-          "Enter a peerId of the peer where you want to run your function",
-        isInteractive,
-        flagName: ON_FLAG_NAME,
-      }),
-    oneChoiceMessage: (peerId): string =>
-      `Do you want to run your function on a random peer ${color.yellow(
-        peerId
-      )}`,
-    isInteractive,
-    flagName: ON_FLAG_NAME,
-  });
-};
 
 const ensureAquaPath = async (
   aquaPathFromArgs: string | undefined,

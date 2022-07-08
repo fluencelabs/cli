@@ -15,6 +15,7 @@
  */
 
 import fsPromises from "node:fs/promises";
+import path from "node:path";
 
 import color from "@oclif/color";
 import { CliUx } from "@oclif/core";
@@ -39,8 +40,8 @@ type ServiceJsonObj = Record<
 
 const getServicesJsonObj = (services: Services): ServiceJsonObj =>
   Object.entries(services).reduce<ServiceJsonObj>(
-    (acc, [name, services]): ServiceJsonObj => {
-      acc[camelcase(name)] = services;
+    (acc, [get, services]): ServiceJsonObj => {
+      acc[camelcase(path.basename(get))] = services;
       return acc;
     },
     {}

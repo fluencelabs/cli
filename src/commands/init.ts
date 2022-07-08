@@ -27,7 +27,6 @@ import { ajv } from "../lib/ajv";
 import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
   CommandObj,
-  ARTIFACTS_DIR_NAME,
   EXTENSIONS_JSON_FILE_NAME,
   FLUENCE_DIR_NAME,
   FS_OPTIONS,
@@ -42,7 +41,6 @@ import {
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
-import { getArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
 import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import { input } from "../lib/prompt";
@@ -145,7 +143,7 @@ const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
 };
 const validateSettingsJson = ajv.compile(settingsJsonSchema);
 const getSettingsConfig = (): SettingsJson => ({
-  "aquaSettings.imports": [getDefaultAquaPath(), getArtifactsPath()],
+  "aquaSettings.imports": [getDefaultAquaPath()],
 });
 
 const ensureRecommendedSettings = async (
@@ -255,9 +253,6 @@ export const init = async (options: InitOptions): Promise<void> => {
     } catch {
       await fsPromises.writeFile(defaultSrcAquaFilePath, "");
     }
-
-    const artifactsDirPath = path.join(projectPath, ARTIFACTS_DIR_NAME);
-    await fsPromises.mkdir(artifactsDirPath, { recursive: true });
 
     await ensureRecommendedExtensions(projectPath);
     await ensureRecommendedSettings(projectPath);

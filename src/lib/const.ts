@@ -21,11 +21,11 @@ export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
 export const JS_EXT = "js";
 export const JSON_EXT = "json";
+export const YAML_EXT = "yaml";
 
 export const FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
-export const ARTIFACTS_DIR_NAME = "artifacts";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
@@ -36,6 +36,8 @@ export const JS_DIR_NAME = "js";
 export const FLUENCE_CONFIG_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
 export const DEPENDENCY_FILE_NAME = "dependency";
+export const MODULE_FILE_NAME = "module";
+export const SERVICE_FILE_NAME = "service";
 export const APP_FILE_NAME = "app";
 
 const DEPLOYED_APP_FILE_NAME = "deployed.app";

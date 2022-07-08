@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import path from "node:path";
 
 import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
+import { ajv } from "../../ajv";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
 import { validateUnique, ValidationResult } from "../../helpers/validations";
 import { getArtifactsPath } from "../../pathsGetters/getArtifactsPath";
@@ -34,11 +35,11 @@ import {
   Migrations,
 } from "../initConfig";
 
-type Service = { name: string; count?: number };
+type ServiceV0 = { name: string; count?: number };
 
 type ConfigV0 = {
   version: 0;
-  services: Array<Service>;
+  services: Array<ServiceV0>;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -60,46 +61,101 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services"],
 };
 
-const getDefault: GetDefaultConfig<
-  LatestConfig
-> = async (): Promise<ConfigV0> => {
-  const artifactsPath = getArtifactsPath();
+type ServiceDeployV1 = { count?: number; peerId?: string };
 
-  let services: Array<Service> = [];
-  try {
-    services = (
-      await fsPromises.readdir(artifactsPath, { withFileTypes: true })
-    )
-      .filter((item): boolean => item.isDirectory())
-      .map(({ name }): ConfigV0["services"][0] => ({
-        name,
-      }));
-  } catch {}
+type ServiceV1 = { get: string; deploy: Array<ServiceDeployV1> };
 
-  return {
-    version: 0,
-    services,
-  };
+type ConfigV1 = {
+  version: 1;
+  services: Array<ServiceV1>;
 };
 
-const migrations: Migrations<Config> = [];
+const configSchemaV1: JSONSchemaType<ConfigV1> = {
+  type: "object",
+  properties: {
+    version: { type: "number", enum: [1] },
+    services: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          get: { type: "string" },
+          deploy: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              properties: {
+                count: {
+                  type: "number",
+                  minimum: 1,
+                  nullable: true,
+                },
+                peerId: {
+                  type: "string",
+                  nullable: true,
+                },
+              },
+            },
+          },
+        },
+        required: ["get"],
+      },
+    },
+  },
+  required: ["version", "services"],
+};
+
+const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
+  version: 1,
+  services: [],
+});
+
+const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+
+const migrations: Migrations<Config> = [
+  (config: Config): ConfigV1 => {
+    if (!validateConfigSchemaV0(config)) {
+      throw new Error(
+        `Migration error. Errors: ${JSON.stringify(
+          validateConfigSchemaV0.errors
+        )}`
+      );
+    }
+
+    const services = config.services.map(
+      ({ name, count = 1 }): ServiceV1 => ({
+        get: path.relative(
+          getProjectRootDir(),
+          path.join(getArtifactsPath(), name)
+        ),
+        deploy: [{ count }],
+      })
+    );
+
+    return {
+      version: 1,
+      services,
+    };
+  },
+];
 
 const validate = (config: LatestConfig): ValidationResult =>
   validateUnique(
     config.services,
-    ({ name }): string => name,
-    (name): string =>
-      `There are multiple services with the same name ${color.yellow(name)}`
+    ({ get }): string => get,
+    (get): string =>
+      `There are multiple services with the same get ${color.yellow(get)}`
   );
 
-type Config = ConfigV0;
-type LatestConfig = ConfigV0;
+type Config = ConfigV0 | ConfigV1;
+type LatestConfig = ConfigV1;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
+  allSchemas: [configSchemaV0, configSchemaV1],
+  latestSchema: configSchemaV1,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getPath: getProjectRootDir,

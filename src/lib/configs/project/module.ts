@@ -1,0 +1,78 @@
+/**
+ * Copyright 2022 Fluence Labs Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { JSONSchemaType } from "ajv";
+
+import { CommandObj, MODULE_FILE_NAME } from "../../const";
+import {
+  getConfigInitFunction,
+  InitConfigOptions,
+  InitializedConfig,
+  InitializedReadonlyConfig,
+  getReadonlyConfigInitFunction,
+  Migrations,
+} from "../initConfig";
+
+type ConfigV0 = {
+  version: 0;
+  name: string;
+  maxHeapSize?: string;
+  loggerEnabled?: boolean;
+  loggingMask?: number;
+  mappedDirs?: Record<string, string>;
+  envs?: Record<string, string>;
+  mountedBinaries?: Record<string, string>;
+};
+
+const configSchemaV0: JSONSchemaType<ConfigV0> = {
+  type: "object",
+  properties: {
+    version: { type: "number", enum: [0] },
+    name: { type: "string" },
+    maxHeapSize: { type: "string", nullable: true },
+    loggerEnabled: { type: "boolean", nullable: true },
+    loggingMask: { type: "number", nullable: true },
+    mappedDirs: { type: "object", nullable: true, required: [] },
+    envs: { type: "object", nullable: true, required: [] },
+    mountedBinaries: { type: "object", nullable: true, required: [] },
+  },
+  required: ["version", "name"],
+};
+
+const migrations: Migrations<Config> = [];
+
+type Config = ConfigV0;
+type LatestConfig = ConfigV0;
+export type AppConfig = InitializedConfig<LatestConfig>;
+export type AppConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
+
+const getInitConfigOptions = (
+  configPath: string
+): InitConfigOptions<Config, LatestConfig> => ({
+  allSchemas: [configSchemaV0],
+  latestSchema: configSchemaV0,
+  migrations,
+  name: MODULE_FILE_NAME,
+  getPath: (): string => configPath,
+});
+
+export const initModuleConfig = (configPath: string, commandObj: CommandObj) =>
+  getConfigInitFunction(getInitConfigOptions(configPath))(commandObj);
+export const initReadonlyModuleConfig = (
+  configPath: string,
+  commandObj: CommandObj
+) =>
+  getReadonlyConfigInitFunction(getInitConfigOptions(configPath))(commandObj);

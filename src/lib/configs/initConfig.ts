@@ -24,7 +24,7 @@ import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { ajv } from "../ajv";
-import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME } from "../const";
+import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
 
@@ -240,7 +240,7 @@ type InitReadonlyFunctionWithDefault<LatestConfig> = (
 ) => Promise<InitializedReadonlyConfig<LatestConfig>>;
 
 const getConfigPath = (configDirPath: string, name: string): string =>
-  path.join(configDirPath, `${name}.yaml`);
+  path.join(configDirPath, `${name}.${YAML_EXT}`);
 
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
