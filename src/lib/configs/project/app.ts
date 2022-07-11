@@ -18,6 +18,7 @@ import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajv";
 import { APP_FILE_NAME, CommandObj } from "../../const";
+import { NETWORKS, Relays } from "../../multiaddr";
 import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
   getConfigInitFunction,
@@ -87,6 +88,7 @@ type ConfigV1 = {
   keyPairName: string;
   timestamp: string;
   knownRelays?: Array<string>;
+  relays?: Relays;
 };
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = {
@@ -117,6 +119,14 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       type: "array",
       nullable: true,
       items: { type: "string" },
+    },
+    relays: {
+      type: ["string", "array"],
+      oneOf: [
+        { type: "string", enum: NETWORKS },
+        { type: "array", items: { type: "string" } },
+      ],
+      nullable: true,
     },
   },
   required: ["version", "services", "keyPairName", "timestamp"],

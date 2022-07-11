@@ -19,12 +19,12 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
-import replaceHomedir from "replace-homedir";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { ajv } from "../ajv";
 import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const";
+import { replaceHomeDir } from "../helpers/replaceHomeDir";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
 
@@ -283,12 +283,14 @@ export function getReadonlyConfigInitFunction<
       oneOf: allSchemas,
     });
 
+    const validateLatestConfig = ajv.compile<LatestConfig>(latestSchema);
+
     const schemaRelativePath = await ensureSchema({
       name,
       configDirPath,
       getSchemaDirPath,
       commandObj,
-      schema: validateAllConfigVersions.schema,
+      schema: validateLatestConfig.schema,
     });
 
     const maybeConfigString = await getConfigString(
@@ -314,8 +316,6 @@ export function getReadonlyConfigInitFunction<
         )}`
       );
     }
-
-    const validateLatestConfig = ajv.compile<LatestConfig>(latestSchema);
 
     let latestConfig: LatestConfig;
     if (config.version < migrations.length) {
@@ -380,9 +380,8 @@ export function getConfigInitFunction<
 
     if (initializedConfigs.has(configPath)) {
       throw new Error(
-        `Mutable config ${replaceHomedir(
-          configPath,
-          "~"
+        `Mutable config ${replaceHomeDir(
+          configPath
         )} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`
       );
     }

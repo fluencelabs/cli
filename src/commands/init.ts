@@ -21,7 +21,6 @@ import path from "node:path";
 import { color } from "@oclif/color";
 import { Command } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
-import replaceHomedir from "replace-homedir";
 
 import { ajv } from "../lib/ajv";
 import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
@@ -40,6 +39,7 @@ import {
   NO_INPUT_FLAG,
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { usage } from "../lib/helpers/usage";
 import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
@@ -260,9 +260,8 @@ export const init = async (options: InitOptions): Promise<void> => {
 
     commandObj.log(
       color.magentaBright(
-        `\nFluence project successfully initialized at ${replaceHomedir(
-          projectPath,
-          "~"
+        `\nFluence project successfully initialized at ${replaceHomeDir(
+          projectPath
         )}\n`
       )
     );
