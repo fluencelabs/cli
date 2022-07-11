@@ -17,6 +17,7 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
+import color from "@oclif/color";
 import replaceHomedir from "replace-homedir";
 
 import {
@@ -101,10 +102,9 @@ export const ensureNpmDependency = async ({
     await npmInstall({
       packageName,
       version,
-      message: `Installing ${packageName} v${version} to ${replaceHomedir(
-        npmDirPath,
-        "~"
-      )}`,
+      message: `Installing version ${color.yellow(
+        version
+      )} of ${packageName} to ${replaceHomedir(npmDirPath, "~")}`,
       commandObj,
     });
   }

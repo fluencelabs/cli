@@ -17,6 +17,7 @@
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
+import { initAquaCli } from "../lib/aquaCli";
 import {
   AQUA_NPM_DEPENDENCY,
   dependencyList,
@@ -32,6 +33,8 @@ import { confirm, input, list } from "../lib/prompt";
 
 const NAME = "NAME";
 const RECOMMENDED = "recommended";
+const VERSION_FLAG_NAME = "version";
+const USE_FLAG_NAME = "use";
 
 export default class Dependency extends Command {
   static override description = `Manage dependencies stored inside ${FLUENCE_DIR_NAME} directory of the current user`;
@@ -40,12 +43,14 @@ export default class Dependency extends Command {
     version: Flags.boolean({
       char: "v",
       description: "Show current version of the dependency",
+      exclusive: [USE_FLAG_NAME],
     }),
     use: Flags.string({
       description: `Set version of the dependency that you want to use. Use ${color.yellow(
         RECOMMENDED
       )} keyword if you want to use ${RECOMMENDED} version`,
       helpValue: `<version | ${RECOMMENDED}>`,
+      exclusive: [VERSION_FLAG_NAME],
     }),
     ...NO_INPUT_FLAG,
   };
@@ -89,7 +94,7 @@ export default class Dependency extends Command {
         isInteractive,
         message: "Select dependency",
         oneChoiceMessage: (name): string =>
-          `Do you want to select ${color.yellow(name)} dependency`,
+          `Do you want to manage ${color.yellow(name)}`,
         onNoChoices: (): void =>
           this.error("You have to select dependency to manage"),
         options: [...dependencyList],
@@ -105,22 +110,13 @@ export default class Dependency extends Command {
 
     const handleVersion = async (): Promise<void> => {
       const result =
-        (await initReadonlyDependencyConfig(this)).dependency.aqua ??
+        (await initReadonlyDependencyConfig(this)).dependency[dependencyName] ??
         recommendedVersion;
 
-      if (result.includes(recommendedVersion)) {
-        this.log(
-          `Currently used ${color.yellow(
-            packageName
-          )} version is ${color.yellow(RECOMMENDED)} (${recommendedVersion})`
-        );
-        return;
-      }
-
       this.log(
-        `Currently used ${color.yellow(packageName)} version is ${color.yellow(
-          result
-        )}`
+        `Using version ${color.yellow(result)}${
+          result.includes(recommendedVersion) ? ` (${RECOMMENDED})` : ""
+        } of ${packageName}`
       );
     };
 
@@ -132,29 +128,18 @@ export default class Dependency extends Command {
       const dependencyConfig = await initDependencyConfig(this);
       if (version === RECOMMENDED) {
         delete dependencyConfig.dependency[dependencyName];
-        await dependencyConfig.$commit();
-        this.log(
-          `Using ${color.yellow(RECOMMENDED)} version of ${color.yellow(
-            packageName
-          )} (${recommendedVersion})`
-        );
-        return;
+      } else {
+        dependencyConfig.dependency[dependencyName] = version;
       }
 
-      dependencyConfig.dependency[dependencyName] = version;
       await dependencyConfig.$commit();
-      this.log(
-        `Using ${color.yellow(packageName)} version ${color.yellow(version)}`
-      );
+      await initAquaCli(this);
+      await handleVersion();
     };
 
     if (typeof flags.use === "string") {
       return handleUse(flags.use);
     }
-
-    const enterMsg = `Enter version of ${color.yellow(
-      name
-    )} that you want to use`;
 
     return (
       await list({
@@ -167,17 +152,19 @@ export default class Dependency extends Command {
         options: [
           {
             value: handleVersion,
-            name: `Get ${color.yellow(name)} currently used version`,
+            name: `Print version of ${color.yellow(name)}`,
           },
           {
             value: async (): Promise<void> =>
               handleUse(
                 await input({
                   isInteractive,
-                  message: enterMsg,
+                  message: `Enter version of ${color.yellow(
+                    name
+                  )} that you want to use`,
                 })
               ),
-            name: enterMsg,
+            name: `Set version of ${color.yellow(name)} that you want to use`,
           },
         ],
       })
