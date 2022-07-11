@@ -54,7 +54,7 @@ import { getHashOfString } from "../lib/helpers/getHashOfString";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
-import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
+import { getRandomRelayId, getRandomRelayAddr, Relays } from "../lib/multiaddr";
 import { ensureModulesDir } from "../lib/pathsGetters/getModulesDir";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
 import { ensureServicesDir } from "../lib/pathsGetters/getServicesDir";
@@ -116,7 +116,10 @@ export default class Deploy extends Command {
     }
 
     const fluenceConfig = await initReadonlyFluenceConfig(this);
-    if (fluenceConfig.services.length === 0) {
+    if (
+      fluenceConfig.services === undefined ||
+      fluenceConfig.services.length === 0
+    ) {
       this.error(
         `Use ${color.yellow(
           "fluence service add"
@@ -125,7 +128,7 @@ export default class Deploy extends Command {
         )} (${fluenceConfig.$getPath()})`
       );
     }
-    const addr = flags.relay ?? getRandomRelayAddr();
+    const addr = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
 
     const aquaCli = await initAquaCli(this);
     const successfullyDeployedServices: Services = {};
@@ -138,10 +141,16 @@ export default class Deploy extends Command {
       }
 
       for (const { count = 1, peerId } of deploy) {
+        const resolvedPeerId =
+          fluenceConfig.peerIds === undefined
+            ? peerId
+            : fluenceConfig.peerIds.find(({ name }): boolean => name === peerId)
+                ?.id ?? peerId;
         // eslint-disable-next-line no-await-in-loop
         const res = await deployServices({
           count,
-          peerId,
+          peerId: resolvedPeerId,
+          relays: fluenceConfig.relays,
           deployServiceOptions: {
             get: pathToDownloadedService ?? get,
             secretKey: keyPair.secretKey,
@@ -404,17 +413,19 @@ const deployServices = async ({
   count,
   deployServiceOptions,
   commandObj,
+  relays,
   peerId: peerIdFromConfig,
 }: Readonly<{
   deployServiceOptions: DeployServiceOptions;
   peerId: string | undefined;
   count: number;
   commandObj: CommandObj;
+  relays: Relays;
 }>): Promise<{
   deployedServiceConfigs: Array<DeployedServiceConfig>;
   name: string;
 } | null> => {
-  const peerId = peerIdFromConfig ?? getRandomRelayId();
+  const peerId = peerIdFromConfig ?? getRandomRelayId(relays);
   const result = await deployService({
     ...deployServiceOptions,
     peerId,
@@ -436,7 +447,7 @@ const deployServices = async ({
 
   // deploy by blueprintId 'servicesToDeployCount' number of times
   while (servicesToDeployCount > 0) {
-    const peerId = peerIdFromConfig ?? getRandomRelayId();
+    const peerId = peerIdFromConfig ?? getRandomRelayId(relays);
     let result: string;
     try {
       // eslint-disable-next-line no-await-in-loop

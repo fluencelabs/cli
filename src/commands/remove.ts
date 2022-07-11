@@ -96,7 +96,7 @@ export const removeApp = async ({
   appConfig: AppConfig;
   isInteractive: boolean;
 }>): Promise<void> => {
-  const { keyPairName, timestamp, services } = appConfig;
+  const { keyPairName, timestamp, services, relays } = appConfig;
   const keyPair = await getKeyPair({ commandObj, keyPairName, isInteractive });
 
   if (keyPair instanceof Error) {
@@ -110,7 +110,7 @@ export const removeApp = async ({
 
   const aquaCli = await initAquaCli(commandObj);
   const notRemovedServices: Services = {};
-  const addr = getRandomRelayAddr();
+  const addr = getRandomRelayAddr(relays);
 
   for (const [name, servicesByName] of Object.entries(services)) {
     const notRemovedServicesByName = [];

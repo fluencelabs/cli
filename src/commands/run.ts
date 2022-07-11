@@ -110,12 +110,12 @@ export default class Run extends Command {
         flagName: FUNC_FLAG_NAME,
       }));
 
-    const relay = flags.relay ?? getRandomRelayAddr();
+    const appConfig = await initReadonlyAppConfig(this);
+    const relay = flags.relay ?? getRandomRelayAddr(appConfig?.relays);
 
     const data = await getRunData(flags, this);
     const imports = [...(flags.import ?? []), getDefaultAquaPath()];
 
-    const appConfig = await initReadonlyAppConfig(this);
     await fsPromises.mkdir(getTmpPath(), { recursive: true });
     const appJsonServicePath = getAppServiceJsonPath();
     if (appConfig !== null) {

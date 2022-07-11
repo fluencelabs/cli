@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-import Ajv from "ajv";
+import replaceHomedir from "replace-homedir";
 
-export const ajv = new Ajv({ allowUnionTypes: true });
+export const replaceHomeDir = (path: string): string =>
+  replaceHomedir(path, "~");

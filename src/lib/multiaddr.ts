@@ -16,25 +16,63 @@
 
 import assert from "node:assert";
 
-import { krasnodar } from "@fluencelabs/fluence-network-environment";
+import {
+  krasnodar,
+  stage,
+  testNet,
+  Node,
+} from "@fluencelabs/fluence-network-environment";
 
-export const defaultAddr = krasnodar.map(({ multiaddr }): string => multiaddr);
-const defaultRelayIds = krasnodar.map(({ peerId }): string => peerId);
+export const NETWORKS = ["kras", "stage", "testnet"] as const;
+export type Network = typeof NETWORKS[number];
+export type Relays = Network | Array<string> | undefined;
 
-export const getRandomRelayAddr = (): string => {
-  const largestIndex = defaultAddr.length - 1;
+const getAddrs = (nodes: Array<Node>): Array<string> =>
+  nodes.map(({ multiaddr }): string => multiaddr);
+
+const ADDR_MAP: Record<Network, Array<string>> = {
+  kras: getAddrs(krasnodar),
+  stage: getAddrs(stage),
+  testnet: getAddrs(testNet),
+};
+
+const resolveAddrs = (relays: Relays): Array<string> => {
+  if (relays === undefined) {
+    return ADDR_MAP.kras;
+  }
+
+  if (Array.isArray(relays)) {
+    return relays;
+  }
+
+  return ADDR_MAP[relays];
+};
+
+export const getRandomRelayAddr = (relays: Relays): string => {
+  const addrs = resolveAddrs(relays);
+  const largestIndex = addrs.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
-  const randomRelayAddr = defaultAddr[randomIndex];
+  const randomRelayAddr = addrs[randomIndex];
   assert(randomRelayAddr !== undefined);
   return randomRelayAddr;
 };
 
-export const getRandomRelayId = (): string => {
-  const largestIndex = defaultRelayIds.length - 1;
+const getIds = (nodes: Array<string>): Array<string> =>
+  nodes.map((addr): string => {
+    const addrParts = addr.split("/");
+    const id = addrParts[addrParts.length - 1];
+    assert(typeof id === "string");
+    return id;
+  });
+
+export const getRandomRelayId = (relays: Relays): string => {
+  const addrs = resolveAddrs(relays);
+  const ids = getIds(addrs);
+  const largestIndex = ids.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
-  const randomRelayId = defaultRelayIds[randomIndex];
+  const randomRelayId = ids[randomIndex];
   assert(randomRelayId !== undefined);
 
   return randomRelayId;

@@ -22,6 +22,7 @@ import type { JSONSchemaType } from "ajv";
 import { ajv } from "../../ajv";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
 import { validateUnique, ValidationResult } from "../../helpers/validations";
+import { NETWORKS, Relays } from "../../multiaddr";
 import { getArtifactsPath } from "../../pathsGetters/getArtifactsPath";
 import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import { getProjectRootDir } from "../../pathsGetters/getProjectRootDir";
@@ -67,7 +68,9 @@ type ServiceV1 = { get: string; deploy: Array<ServiceDeployV1> };
 
 type ConfigV1 = {
   version: 1;
-  services: Array<ServiceV1>;
+  services?: Array<ServiceV1>;
+  relays?: Relays;
+  peerIds?: Array<{ name: string; id: string }>;
 };
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = {
@@ -99,16 +102,36 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
             },
           },
         },
-        required: ["get"],
+        required: ["get", "deploy"],
+      },
+      nullable: true,
+    },
+    relays: {
+      type: ["string", "array"],
+      oneOf: [
+        { type: "string", enum: NETWORKS },
+        { type: "array", items: { type: "string" } },
+      ],
+      nullable: true,
+    },
+    peerIds: {
+      type: "array",
+      nullable: true,
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          id: { type: "string" },
+        },
+        required: ["name", "id"],
       },
     },
   },
-  required: ["version", "services"],
+  required: ["version"],
 };
 
 const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
   version: 1,
-  services: [],
 });
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
@@ -141,6 +164,7 @@ const migrations: Migrations<Config> = [
 ];
 
 const validate = (config: LatestConfig): ValidationResult =>
+  config.services === undefined ||
   validateUnique(
     config.services,
     ({ get }): string => get,

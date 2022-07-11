@@ -22,6 +22,7 @@ import { Command } from "@oclif/core";
 import { initFluenceConfig } from "../../lib/configs/project/fluence";
 import { NO_INPUT_FLAG } from "../../lib/const";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { usage } from "../../lib/helpers/usage";
 import { ensureProjectFluenceDirPath } from "../../lib/pathsGetters/getProjectFluenceDirPath";
 
@@ -46,14 +47,26 @@ export default class Add extends Command {
     await ensureProjectFluenceDirPath(this, isInteractive);
     assert(typeof args[SERVICE] === "string");
     const fluenceConfig = await initFluenceConfig(this);
+    if (fluenceConfig.services === undefined) {
+      fluenceConfig.services = [];
+    }
+    if (
+      fluenceConfig.services.some(({ get }): boolean => get === args[SERVICE])
+    ) {
+      this.error(
+        `You already have ${color.yellow(args[SERVICE])}\nin ${color.yellow(
+          replaceHomeDir(fluenceConfig.$getPath())
+        )}`
+      );
+    }
     fluenceConfig.services.push({
       get: args[SERVICE],
       deploy: [{ count: 1 }],
     });
     await fluenceConfig.$commit();
     this.log(
-      `Addded ${color.yellow(args[SERVICE])}\nto ${color.yellow(
-        fluenceConfig.$getPath()
+      `Added ${color.yellow(args[SERVICE])}\nto ${color.yellow(
+        replaceHomeDir(fluenceConfig.$getPath())
       )}`
     );
   }
