@@ -17,6 +17,8 @@
 import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
+export const AQUA_RECOMMENDED_VERSION = "0.7.4-329";
+
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
 export const JS_EXT = "js";

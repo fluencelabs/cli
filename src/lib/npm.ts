@@ -25,7 +25,7 @@ import {
   initReadonlyDependencyConfig,
   NPMDependency,
 } from "./configs/user/dependency";
-import type { CommandObj } from "./const";
+import { AQUA_RECOMMENDED_VERSION, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { ensureUserFluenceDir } from "./pathsGetters/ensureUserFluenceDir";
 
@@ -72,7 +72,7 @@ export const npmDependencies: Record<
   { recommendedVersion: string; bin: string; packageName: string }
 > = {
   [AQUA_NPM_DEPENDENCY]: {
-    recommendedVersion: "0.7.4-322",
+    recommendedVersion: AQUA_RECOMMENDED_VERSION,
     bin: "aqua",
     packageName: "@fluencelabs/aqua",
   },
