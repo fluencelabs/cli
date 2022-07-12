@@ -84,9 +84,9 @@ export default class Deploy extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureProjectFluenceDirPath(this, isInteractive);
 
-    const deployedConfig = await initAppConfig(this);
+    const appConfig = await initAppConfig(this);
 
-    if (deployedConfig !== null) {
+    if (appConfig !== null) {
       // Prompt user to remove previously deployed app if
       // it was already deployed before
       const doRemove =
@@ -103,7 +103,7 @@ export default class Deploy extends Command {
       }
 
       await removeApp({
-        appConfig: deployedConfig,
+        appConfig,
         commandObj: this,
         timeout: flags.timeout,
         isInteractive,
@@ -182,6 +182,7 @@ export default class Deploy extends Command {
         services: successfullyDeployedServices,
         keyPairName: keyPair.name,
         timestamp: new Date().toISOString(),
+        relays: fluenceConfig.relays,
       },
       this
     );

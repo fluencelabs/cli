@@ -115,7 +115,7 @@ If you want README.md file to be correctly generated please don't forget to run 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]`](#fluence-dependency-name--v---use-version--recommended---no-input)
-* [`fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---on-peer_id---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
+* [`fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH] [--no-input]`](#fluence-init-path---no-input)
 * [`fluence plugins`](#fluence-plugins)
@@ -129,6 +129,7 @@ If you want README.md file to be correctly generated please don't forget to run 
 * [`fluence plugins update`](#fluence-plugins-update)
 * [`fluence remove [--timeout <milliseconds>] [--no-input]`](#fluence-remove---timeout-milliseconds---no-input)
 * [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id--i-path--f-function-call---timeout-milliseconds---no-input)
+* [`fluence add [SERVICE] [--no-input]`](#fluence-add-service---no-input)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -185,19 +186,18 @@ EXAMPLES
 
 _See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/dependency.ts)_
 
-## `fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
+## `fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
 
 Deploy service to the remote peer
 
 ```
 USAGE
-  $ fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]
+  $ fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   --force                     Force removing of previously deployed app
   --no-input                  Don't interactively ask for any input from the user
-  --on=<peer_id>              PeerId of the peer where you want to deploy
   --relay=<multiaddr>         Relay node MultiAddress
   --timeout=<milliseconds>    Timeout used for command execution
 
@@ -535,4 +535,25 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
+
+## `fluence add [SERVICE] [--no-input]`
+
+Initialize fluence project
+
+```
+USAGE
+  $ fluence add [SERVICE] [--no-input]
+
+ARGUMENTS
+  SERVICE  Relative path to a service or url to .tar.gz archive
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Initialize fluence project
+
+EXAMPLES
+  $ fluence service add
+```
 <!-- commandsstop -->
