@@ -30,16 +30,47 @@ export const hasKey = <K extends string>(
   unknown: unknown
 ): unknown is Record<K, unknown> => isObject(unknown) && key in unknown;
 
-export const assertHasKey: <K extends string>(
+/**
+ * Asserts unknown value is an object that has the key
+ * @example
+ * const unknown: unknown = { a: 1 }
+ * assertHasKey('a', unknown, 'unknown must have "a" key')
+ * unknown // Record<'a', unknown>
+ * @example
+ * const unknown: unknown = { a: 1 }
+ * assertHasKey('b', unknown, 'unknown must have "b" key')
+ * // throws AssertionError({ message: 'unknown must have "b" key' })
+ * @param key K extends string
+ * @param unknown unknown
+ * @param message string
+ * @returns void
+ */
+export function assertHasKey<K extends string>(
   key: K,
   unknown: unknown,
   message: string
-) => asserts unknown is Record<K, unknown> = <K extends string>(
-  key: K,
-  unknown: unknown,
-  message: string
-): asserts unknown is Record<K, unknown> => {
+): asserts unknown is Record<K, unknown> {
   if (hasKey(key, unknown)) {
     throw new AssertionError({ message });
   }
-};
+}
+
+/**
+ * Returns a type guard (https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates)
+ * that you can use to find out if unknown is a string union
+ * @example
+ * const isABC = getIsStringUnion(['a', 'b', 'c'])
+ *
+ * if (isABC(unknown)) {
+ *   unknown // 'a' | 'b' | 'c'
+ * }
+ * @param array ReadonlyArray\<T extends string\>
+ * @returns (unknown: unknown) => unknown is Array\<T\>[number]
+ */
+export function getIsStringUnion<T extends string>(
+  array: ReadonlyArray<T>
+): (unknown: unknown) => unknown is Array<T>[number] {
+  return (unknown: unknown): unknown is Array<T>[number] =>
+    // eslint-disable-next-line unicorn/prefer-includes
+    array.some((v): boolean => v === unknown);
+}

@@ -21,6 +21,7 @@ import path from "node:path";
 import { color } from "@oclif/color";
 import { Command } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
+import replaceHomedir from "replace-homedir";
 
 import { ajv } from "../lib/ajv";
 import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
@@ -264,7 +265,10 @@ export const init = async (options: InitOptions): Promise<void> => {
 
     commandObj.log(
       color.magentaBright(
-        `\nFluence project successfully initialized at ${projectPath}\n`
+        `\nFluence project successfully initialized at ${replaceHomedir(
+          projectPath,
+          "~"
+        )}\n`
       )
     );
   } catch (error) {

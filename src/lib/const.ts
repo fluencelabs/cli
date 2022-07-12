@@ -17,6 +17,8 @@
 import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
+export const AQUA_RECOMMENDED_VERSION = "0.7.4-329";
+
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
 export const JS_EXT = "js";
@@ -35,6 +37,7 @@ export const JS_DIR_NAME = "js";
 
 export const FLUENCE_CONFIG_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
+export const DEPENDENCY_FILE_NAME = "dependency";
 export const APP_FILE_NAME = "app";
 
 const DEPLOYED_APP_FILE_NAME = "deployed.app";
@@ -97,20 +100,6 @@ export const TIMEOUT_FLAG = {
 } as const;
 
 export const FORCE_FLAG_NAME = "force";
-
-export type Dependency = {
-  name: string;
-  version: string;
-  bin: string;
-};
-
-export const DEPENDENCIES: Record<"aqua", Dependency> = {
-  aqua: {
-    name: "@fluencelabs/aqua",
-    version: "0.7.4-322",
-    bin: "aqua",
-  },
-} as const;
 
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 

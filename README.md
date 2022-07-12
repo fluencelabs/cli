@@ -114,6 +114,7 @@ USAGE
 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]`](#fluence-dependency-name--v---use-version--recommended---no-input)
 * [`fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---on-peer_id---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH] [--no-input]`](#fluence-init-path---no-input)
@@ -157,6 +158,32 @@ EXAMPLES
 ```
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
+
+## `fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]`
+
+Manage dependencies stored inside .fluence directory of the current user
+
+```
+USAGE
+  $ fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]
+
+ARGUMENTS
+  NAME  Dependency name. Currently the only dependency is aqua
+
+FLAGS
+  -v, --version                  Show current version of the dependency
+  --no-input                     Don't interactively ask for any input from the user
+  --use=<version | recommended>  Set version of the dependency that you want to use. Use recommended keyword if you want
+                                 to use recommended version
+
+DESCRIPTION
+  Manage dependencies stored inside .fluence directory of the current user
+
+EXAMPLES
+  $ fluence dependency
+```
+
+_See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/dependency.ts)_
 
 ## `fluence deploy [--on <peer_id>] [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
 

@@ -46,6 +46,7 @@
     "camelcase": "^5.2.0",
     "inquirer": "^8.2.4",
     "platform": "^1.3.6",
+    "replace-homedir": "^2.0.0",
     "yaml": "^2.1.1",
     "yaml-diff-patch": "^1.2.0"
   },
@@ -87,7 +88,6 @@
       "@oclif/plugin-autocomplete"
     ],
     "topicSeparator": " ",
-    "topics": {},
     "hooks": {
       "init": "./src/hooks/init/init"
     }
