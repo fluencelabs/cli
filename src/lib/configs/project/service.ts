@@ -43,7 +43,7 @@ const moduleSchema: JSONSchemaType<ModuleV0> = {
     maxHeapSize: { type: "string", nullable: true },
     loggerEnabled: { type: "boolean", nullable: true },
     loggingMask: { type: "number", nullable: true },
-    mappedDirs: { type: "object", nullable: true, required: [] },
+    volumes: { type: "object", nullable: true, required: [] },
     preopenedFiles: {
       type: "array",
       nullable: true,

@@ -321,7 +321,7 @@ const processServiceModules = async (
             name,
             loggerEnabled,
             loggingMask,
-            mappedDirs,
+            volumes,
             envs,
             maxHeapSize,
             mountedBinaries,
@@ -341,18 +341,15 @@ const processServiceModules = async (
           if (typeof maxHeapSize === "string") {
             jsonModuleConfig.max_heap_size = maxHeapSize;
           }
-          if (mappedDirs !== undefined) {
-            jsonModuleConfig.mapped_dirs = Object.entries(mappedDirs);
+          if (volumes !== undefined) {
+            jsonModuleConfig.mapped_dirs = Object.entries(volumes);
             jsonModuleConfig.preopened_files = [
-              ...new Set(Object.values(mappedDirs)),
+              ...new Set(Object.values(volumes)),
             ];
           }
           if (preopenedFiles !== undefined) {
             jsonModuleConfig.preopened_files = [
-              ...new Set([
-                ...Object.values(mappedDirs ?? {}),
-                ...preopenedFiles,
-              ]),
+              ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
             ];
           }
           if (envs !== undefined) {

@@ -114,7 +114,10 @@ If you want README.md file to be correctly generated please don't forget to run 
 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]`](#fluence-dependency-name--v---use-version--recommended---no-input)
+* [`fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
 * [`fluence help [COMMAND]`](#fluence-help-command)
+* [`fluence init [PATH] [--no-input]`](#fluence-init-path---no-input)
 * [`fluence plugins`](#fluence-plugins)
 * [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
 * [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
@@ -124,6 +127,9 @@ If you want README.md file to be correctly generated please don't forget to run 
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
+* [`fluence remove [--timeout <milliseconds>] [--no-input]`](#fluence-remove---timeout-milliseconds---no-input)
+* [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id--i-path--f-function-call---timeout-milliseconds---no-input)
+* [`fluence add [SERVICE] [--no-input]`](#fluence-add-service---no-input)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -154,6 +160,56 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
+## `fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]`
+
+Manage dependencies stored inside .fluence directory of the current user
+
+```
+USAGE
+  $ fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]
+
+ARGUMENTS
+  NAME  Dependency name. Currently the only dependency is aqua
+
+FLAGS
+  -v, --version                  Show current version of the dependency
+  --no-input                     Don't interactively ask for any input from the user
+  --use=<version | recommended>  Set version of the dependency that you want to use. Use recommended keyword if you want
+                                 to use recommended version
+
+DESCRIPTION
+  Manage dependencies stored inside .fluence directory of the current user
+
+EXAMPLES
+  $ fluence dependency
+```
+
+_See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/dependency.ts)_
+
+## `fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
+
+Deploy service to the remote peer
+
+```
+USAGE
+  $ fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]
+
+FLAGS
+  -k, --key-pair-name=<name>  Key pair name
+  --force                     Force removing of previously deployed app
+  --no-input                  Don't interactively ask for any input from the user
+  --relay=<multiaddr>         Relay node MultiAddress
+  --timeout=<milliseconds>    Timeout used for command execution
+
+DESCRIPTION
+  Deploy service to the remote peer
+
+EXAMPLES
+  $ fluence deploy
+```
+
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/deploy.ts)_
+
 ## `fluence help [COMMAND]`
 
 Display help for fluence.
@@ -173,6 +229,29 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
+
+## `fluence init [PATH] [--no-input]`
+
+Initialize fluence project
+
+```
+USAGE
+  $ fluence init [PATH] [--no-input]
+
+ARGUMENTS
+  PATH  Project path
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Initialize fluence project
+
+EXAMPLES
+  $ fluence init
+```
+
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/init.ts)_
 
 ## `fluence plugins`
 
@@ -402,5 +481,79 @@ FLAGS
 
 DESCRIPTION
   Update installed plugins.
+```
+
+## `fluence remove [--timeout <milliseconds>] [--no-input]`
+
+Remove previously deployed config
+
+```
+USAGE
+  $ fluence remove [--timeout <milliseconds>] [--no-input]
+
+FLAGS
+  --no-input                Don't interactively ask for any input from the user
+  --timeout=<milliseconds>  Timeout used for command execution
+
+DESCRIPTION
+  Remove previously deployed config
+
+EXAMPLES
+  $ fluence remove
+```
+
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/remove.ts)_
+
+## `fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`
+
+Run aqua script
+
+```
+USAGE
+  $ fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>]
+    [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]
+
+FLAGS
+  -f, --func=<function-call>  Function call
+  -i, --input=<path>          Path to an aqua file or to a directory that contains aqua files
+  --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
+                              argument names
+  --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
+                              using these argument names
+  --import=<path>...          Path to a directory to import from. May be used several times
+  --json-service=<path>       Path to a file that contains a JSON formatted service
+  --no-input                  Don't interactively ask for any input from the user
+  --on=<peer_id>              PeerId of a peer where you want to run the function
+  --relay=<multiaddr>         Relay node MultiAddress
+  --timeout=<milliseconds>    Timeout used for command execution
+
+DESCRIPTION
+  Run aqua script
+
+EXAMPLES
+  $ fluence run
+```
+
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
+
+## `fluence add [SERVICE] [--no-input]`
+
+Initialize fluence project
+
+```
+USAGE
+  $ fluence add [SERVICE] [--no-input]
+
+ARGUMENTS
+  SERVICE  Relative path to a service or url to .tar.gz archive
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Initialize fluence project
+
+EXAMPLES
+  $ fluence service add
 ```
 <!-- commandsstop -->

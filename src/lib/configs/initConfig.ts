@@ -90,7 +90,7 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
       `${schemaPathComment}\n\n${
         examples === undefined
           ? ""
-          : `EXAMPLES:\n${examples}`
+          : `EXAMPLES:${examples}`
               .split("\n")
               .map((ex): string => `# ${ex}`)
               .join("\n")

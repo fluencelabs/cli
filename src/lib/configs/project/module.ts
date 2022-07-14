@@ -33,7 +33,7 @@ export type ConfigV0 = {
   maxHeapSize?: string;
   loggerEnabled?: boolean;
   loggingMask?: number;
-  mappedDirs?: Record<string, string>;
+  volumes?: Record<string, string>;
   preopenedFiles?: Array<string>;
   envs?: Record<string, string>;
   mountedBinaries?: Record<string, string>;
@@ -47,7 +47,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     maxHeapSize: { type: "string", nullable: true },
     loggerEnabled: { type: "boolean", nullable: true },
     loggingMask: { type: "number", nullable: true },
-    mappedDirs: { type: "object", nullable: true, required: [] },
+    volumes: { type: "object", nullable: true, required: [] },
     preopenedFiles: {
       type: "array",
       items: { type: "string" },

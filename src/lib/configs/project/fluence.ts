@@ -130,7 +130,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
                     maxHeapSize: { type: "string", nullable: true },
                     loggerEnabled: { type: "boolean", nullable: true },
                     loggingMask: { type: "number", nullable: true },
-                    mappedDirs: {
+                    volumes: {
                       type: "object",
                       nullable: true,
                       required: [],
@@ -238,9 +238,8 @@ services:
         facade:
           get: ./relative/path # Override facade module. Optional.
 peerIds: # A map of named peerIds. Optional.
-  MY_PEER: 12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv
-relays: testnet # Array of relays or keywords: kras, testnet, stage. Default: kras
-`;
+  MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
+relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras`;
 
 export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0, configSchemaV1],
