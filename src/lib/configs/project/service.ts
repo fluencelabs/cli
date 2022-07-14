@@ -44,17 +44,23 @@ const moduleSchema: JSONSchemaType<ModuleV0> = {
     loggerEnabled: { type: "boolean", nullable: true },
     loggingMask: { type: "number", nullable: true },
     mappedDirs: { type: "object", nullable: true, required: [] },
+    preopenedFiles: {
+      type: "array",
+      nullable: true,
+      items: { type: "string" },
+    },
     envs: { type: "object", nullable: true, required: [] },
     mountedBinaries: { type: "object", nullable: true, required: [] },
   },
   required: ["get"],
 };
 
+export const FACADE_MODULE_NAME = "facade";
+
 export type ConfigV0 = {
   version: 0;
   name: string;
-  facade: ModuleV0;
-  modules?: Record<string, ModuleV0>;
+  modules: { [FACADE_MODULE_NAME]: ModuleV0 } & Record<string, ModuleV0>;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -62,15 +68,16 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   properties: {
     version: { type: "number", enum: [0] },
     name: { type: "string" },
-    facade: moduleSchema,
     modules: {
       type: "object",
       additionalProperties: moduleSchema,
-      nullable: true,
-      required: [],
+      properties: {
+        [FACADE_MODULE_NAME]: moduleSchema,
+      },
+      required: [FACADE_MODULE_NAME],
     },
   },
-  required: ["version", "facade", "name"],
+  required: ["version", "modules", "name"],
 };
 
 const migrations: Migrations<Config> = [];

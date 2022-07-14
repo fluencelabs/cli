@@ -34,6 +34,7 @@ export type ConfigV0 = {
   loggerEnabled?: boolean;
   loggingMask?: number;
   mappedDirs?: Record<string, string>;
+  preopenedFiles?: Array<string>;
   envs?: Record<string, string>;
   mountedBinaries?: Record<string, string>;
 };
@@ -47,6 +48,11 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     loggerEnabled: { type: "boolean", nullable: true },
     loggingMask: { type: "number", nullable: true },
     mappedDirs: { type: "object", nullable: true, required: [] },
+    preopenedFiles: {
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+    },
     envs: { type: "object", nullable: true, required: [] },
     mountedBinaries: { type: "object", nullable: true, required: [] },
   },

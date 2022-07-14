@@ -63,25 +63,26 @@ const getConfigString = async <LatestConfig extends BaseConfig>(
   commandObj: CommandObj,
   getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined
 ): Promise<string | null> => {
+  const pathCommentStart = "# yaml-language-server: $schema=";
+  const pathComment = `${pathCommentStart}${schemaRelativePath}`;
+  let configString: string;
   try {
     const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
-    return fileContent;
+    configString = fileContent.startsWith(pathCommentStart)
+      ? [pathComment, ...fileContent.split("\n").slice(1)].join("\n")
+      : `${pathComment}\n${fileContent}`;
   } catch {
     if (getDefaultConfig === undefined) {
       return null;
     }
-    const defaultConfigString = yamlDiffPatch(
-      `# yaml-language-server: $schema=${schemaRelativePath}`,
+    configString = yamlDiffPatch(
+      pathComment,
       {},
       await getDefaultConfig(commandObj)
     );
-    await fsPromises.writeFile(
-      configPath,
-      defaultConfigString + "\n",
-      FS_OPTIONS
-    );
-    return defaultConfigString;
   }
+  await fsPromises.writeFile(configPath, configString + "\n", FS_OPTIONS);
+  return configString;
 };
 
 type MigrateConfigOptions<

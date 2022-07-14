@@ -70,7 +70,6 @@ export type AppConfigModule = Partial<ServiceModuleConfig>;
 
 export type Overrides = {
   name?: string;
-  facade?: AppConfigModule;
   modules?: Record<string, AppConfigModule>;
 };
 
@@ -84,7 +83,7 @@ type ConfigV1 = {
   version: 1;
   services?: Array<ServiceV1>;
   relays?: Relays;
-  peerIds?: Array<{ name: string; id: string }>;
+  peerIds?: Record<string, string>;
 };
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = {
@@ -119,25 +118,6 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
             type: "object",
             properties: {
               name: { type: "string", nullable: true },
-              facade: {
-                type: "object",
-                properties: {
-                  get: { type: "string", nullable: true },
-                  name: { type: "string", nullable: true },
-                  maxHeapSize: { type: "string", nullable: true },
-                  loggerEnabled: { type: "boolean", nullable: true },
-                  loggingMask: { type: "number", nullable: true },
-                  mappedDirs: { type: "object", nullable: true, required: [] },
-                  envs: { type: "object", nullable: true, required: [] },
-                  mountedBinaries: {
-                    type: "object",
-                    nullable: true,
-                    required: [],
-                  },
-                },
-                required: [],
-                nullable: true,
-              },
               modules: {
                 type: "object",
                 additionalProperties: {
@@ -152,6 +132,11 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
                       type: "object",
                       nullable: true,
                       required: [],
+                    },
+                    preopenedFiles: {
+                      type: "array",
+                      nullable: true,
+                      items: { type: "string" },
                     },
                     envs: { type: "object", nullable: true, required: [] },
                     mountedBinaries: {
@@ -184,16 +169,10 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       nullable: true,
     },
     peerIds: {
-      type: "array",
+      type: "object",
       nullable: true,
-      items: {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          id: { type: "string" },
-        },
-        required: ["name", "id"],
-      },
+      required: [],
+      additionalProperties: { type: "string" },
     },
   },
   required: ["version"],

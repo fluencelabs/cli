@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
@@ -21,6 +22,7 @@ import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 import camelcase from "camelcase";
 import decompress from "decompress";
+import filenamify from "filenamify";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
@@ -35,6 +37,7 @@ import {
 } from "../lib/configs/project/fluence";
 import { initReadonlyModuleConfig } from "../lib/configs/project/module";
 import {
+  FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
   Module,
 } from "../lib/configs/project/service";
@@ -146,11 +149,7 @@ export default class Deploy extends Command {
       }
 
       for (const { count = 1, peerId } of deploy) {
-        const resolvedPeerId =
-          fluenceConfig.peerIds === undefined
-            ? peerId
-            : fluenceConfig.peerIds.find(({ name }): boolean => name === peerId)
-                ?.id ?? peerId;
+        const resolvedPeerId = fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId;
         // eslint-disable-next-line no-await-in-loop
         const res = await deployServices({
           count,
@@ -203,16 +202,6 @@ const resolveFluenceConfigOverrides = (
     return undefined;
   }
   const resolvedOverrides = { ...overrides };
-  if (
-    typeof resolvedOverrides.facade?.get === "string" &&
-    !isUrl(resolvedOverrides.facade.get)
-  ) {
-    resolvedOverrides.facade = {
-      ...resolvedOverrides.facade,
-      get: path.resolve(projectRootDir, resolvedOverrides.facade.get),
-    };
-  }
-
   const { modules } = resolvedOverrides;
 
   if (modules !== undefined) {
@@ -241,11 +230,22 @@ const isUrl = (unknown: string): boolean =>
 
 const ARCHIVE_FILE = "archive.tar.gz";
 
+const getHashPath = async (
+  uniqueString: string,
+  dir: string
+): Promise<string> => {
+  const cleanString = uniqueString.replace(".tar.gz?raw=true", "");
+  const fileName = filenamify(
+    cleanString.split(cleanString.includes("/") ? "/" : "\\").slice(-1)[0] ?? ""
+  );
+  return path.join(dir, `${fileName}_${await getHashOfString(uniqueString)}`);
+};
+
 const downloadAndDecompress = async (
   get: string,
   dir: string
 ): Promise<string> => {
-  const dirPath = path.join(dir, await getHashOfString(get));
+  const dirPath = await getHashPath(get, dir);
   await fsPromises.mkdir(dirPath, { recursive: true });
   const archivePath = path.join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
@@ -320,6 +320,7 @@ const processServiceModules = async (
             envs,
             maxHeapSize,
             mountedBinaries,
+            preopenedFiles,
           } = { ...moduleConfig, ...overrides };
 
           const jsonModuleConfig: JSONModuleConf = {
@@ -337,7 +338,17 @@ const processServiceModules = async (
           }
           if (mappedDirs !== undefined) {
             jsonModuleConfig.mapped_dirs = Object.entries(mappedDirs);
-            jsonModuleConfig.preopened_files = Object.values(mappedDirs);
+            jsonModuleConfig.preopened_files = [
+              ...new Set(Object.values(mappedDirs)),
+            ];
+          }
+          if (preopenedFiles !== undefined) {
+            jsonModuleConfig.preopened_files = [
+              ...new Set([
+                ...Object.values(mappedDirs ?? {}),
+                ...preopenedFiles,
+              ]),
+            ];
           }
           if (envs !== undefined) {
             jsonModuleConfig.envs = Object.entries(envs);
@@ -399,22 +410,30 @@ const deployService = async ({
       );
     }
 
-    serviceName = serviceConfig.name;
+    serviceName = overrides?.name ?? serviceConfig.name;
     const servicesDirPath = await ensureServicesDir();
     const configDirPath = resolvedServicePath.includes(servicesDirPath)
       ? resolvedServicePath
-      : path.join(servicesDirPath, await getHashOfString(resolvedServicePath));
+      : await getHashPath(resolvedServicePath, servicesDirPath);
     await fsPromises.mkdir(configDirPath, { recursive: true });
     configPath = path.join(configDirPath, DEPLOYMENT_CONFIG_FILE_NAME);
     const overriddenModules = Object.entries(serviceConfig.modules ?? {}).map(
-      ([name, mod]): Module => ({ ...mod, ...overrides?.modules?.[name] })
+      ([name, mod]): { name: string; mod: Module } => ({
+        name,
+        mod: { ...mod, ...overrides?.modules?.[name] },
+      })
     );
-    const overriddenFacadeModule = {
-      ...serviceConfig.facade,
-      ...overrides?.facade,
-    };
+    const overriddenFacadeModule = overriddenModules.find(
+      ({ name }): boolean => name === FACADE_MODULE_NAME
+    );
+    assert(overriddenFacadeModule !== undefined);
     const jsonModuleConfigs = await processServiceModules(
-      [...overriddenModules, overriddenFacadeModule],
+      [
+        ...overriddenModules
+          .filter(({ name }): boolean => name !== FACADE_MODULE_NAME)
+          .map(({ mod }): Module => mod),
+        overriddenFacadeModule.mod,
+      ],
       resolvedServicePath,
       commandObj
     );
