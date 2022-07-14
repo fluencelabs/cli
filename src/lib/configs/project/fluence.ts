@@ -36,6 +36,8 @@ import {
   Migrations,
 } from "../initConfig";
 
+import type { ModuleV0 as ServiceModuleConfig } from "./service";
+
 type ServiceV0 = { name: string; count?: number };
 
 type ConfigV0 = {
@@ -64,7 +66,19 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 
 type ServiceDeployV1 = { count?: number; peerId?: string };
 
-type ServiceV1 = { get: string; deploy: Array<ServiceDeployV1> };
+export type AppConfigModule = Partial<ServiceModuleConfig>;
+
+export type Overrides = {
+  name?: string;
+  facade?: AppConfigModule;
+  modules?: Record<string, AppConfigModule>;
+};
+
+type ServiceV1 = {
+  get: string;
+  deploy: Array<ServiceDeployV1>;
+  overrides?: Overrides;
+};
 
 type ConfigV1 = {
   version: 1;
@@ -100,6 +114,61 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
                 },
               },
             },
+          },
+          overrides: {
+            type: "object",
+            properties: {
+              name: { type: "string", nullable: true },
+              facade: {
+                type: "object",
+                properties: {
+                  get: { type: "string", nullable: true },
+                  name: { type: "string", nullable: true },
+                  maxHeapSize: { type: "string", nullable: true },
+                  loggerEnabled: { type: "boolean", nullable: true },
+                  loggingMask: { type: "number", nullable: true },
+                  mappedDirs: { type: "object", nullable: true, required: [] },
+                  envs: { type: "object", nullable: true, required: [] },
+                  mountedBinaries: {
+                    type: "object",
+                    nullable: true,
+                    required: [],
+                  },
+                },
+                required: [],
+                nullable: true,
+              },
+              modules: {
+                type: "object",
+                additionalProperties: {
+                  type: "object",
+                  properties: {
+                    get: { type: "string", nullable: true },
+                    name: { type: "string", nullable: true },
+                    maxHeapSize: { type: "string", nullable: true },
+                    loggerEnabled: { type: "boolean", nullable: true },
+                    loggingMask: { type: "number", nullable: true },
+                    mappedDirs: {
+                      type: "object",
+                      nullable: true,
+                      required: [],
+                    },
+                    envs: { type: "object", nullable: true, required: [] },
+                    mountedBinaries: {
+                      type: "object",
+                      nullable: true,
+                      required: [],
+                    },
+                  },
+                  required: [],
+                  nullable: true,
+                },
+                nullable: true,
+                required: [],
+              },
+            },
+            required: [],
+            nullable: true,
           },
         },
         required: ["get", "deploy"],

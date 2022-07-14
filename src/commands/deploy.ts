@@ -29,7 +29,10 @@ import {
   initNewReadonlyAppConfig,
   Services,
 } from "../lib/configs/project/app";
-import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
+import {
+  initReadonlyFluenceConfig,
+  Overrides,
+} from "../lib/configs/project/fluence";
 import { initReadonlyModuleConfig } from "../lib/configs/project/module";
 import {
   initReadonlyServiceConfig,
@@ -57,6 +60,7 @@ import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
 import { getRandomRelayId, getRandomRelayAddr, Relays } from "../lib/multiaddr";
 import { ensureModulesDir } from "../lib/pathsGetters/getModulesDir";
 import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
+import { getProjectRootDir } from "../lib/pathsGetters/getProjectRootDir";
 import { ensureServicesDir } from "../lib/pathsGetters/getServicesDir";
 import { confirm } from "../lib/prompt";
 
@@ -132,12 +136,13 @@ export default class Deploy extends Command {
 
     const aquaCli = await initAquaCli(this);
     const successfullyDeployedServices: Services = {};
-    for (const { get, deploy } of fluenceConfig.services) {
-      let pathToDownloadedService: string | undefined;
-      if (get.startsWith("http")) {
+    for (const { get, deploy, overrides } of fluenceConfig.services) {
+      const resolvedOverrides = resolveFluenceConfigOverrides(overrides);
+      let pathToService = get;
+      if (isUrl(get)) {
         // TODO: remove await inside loop
         // eslint-disable-next-line no-await-in-loop
-        pathToDownloadedService = await downloadService(get);
+        pathToService = await downloadService(get);
       }
 
       for (const { count = 1, peerId } of deploy) {
@@ -152,7 +157,8 @@ export default class Deploy extends Command {
           peerId: resolvedPeerId,
           relays: fluenceConfig.relays,
           deployServiceOptions: {
-            get: pathToDownloadedService ?? get,
+            pathToService,
+            overrides: resolvedOverrides,
             secretKey: keyPair.secretKey,
             aquaCli,
             timeout: flags.timeout,
@@ -189,6 +195,50 @@ export default class Deploy extends Command {
   }
 }
 
+const resolveFluenceConfigOverrides = (
+  overrides: Overrides | undefined
+): Overrides | undefined => {
+  const projectRootDir = getProjectRootDir();
+  if (overrides === undefined) {
+    return undefined;
+  }
+  const resolvedOverrides = { ...overrides };
+  if (
+    typeof resolvedOverrides.facade?.get === "string" &&
+    !isUrl(resolvedOverrides.facade.get)
+  ) {
+    resolvedOverrides.facade = {
+      ...resolvedOverrides.facade,
+      get: path.resolve(projectRootDir, resolvedOverrides.facade.get),
+    };
+  }
+
+  const { modules } = resolvedOverrides;
+
+  if (modules !== undefined) {
+    resolvedOverrides.modules = Object.entries(modules).reduce<typeof modules>(
+      (acc, [name, mod]): typeof modules => {
+        if (mod.get === undefined || isUrl(mod.get)) {
+          acc[name] = mod;
+          return acc;
+        }
+
+        acc[name] = {
+          ...mod,
+          get: path.resolve(projectRootDir, mod.get),
+        };
+        return acc;
+      },
+      {}
+    );
+  }
+
+  return resolvedOverrides;
+};
+
+const isUrl = (unknown: string): boolean =>
+  unknown.startsWith("http://") || unknown.startsWith("https://");
+
 const ARCHIVE_FILE = "archive.tar.gz";
 
 const downloadAndDecompress = async (
@@ -203,8 +253,13 @@ const downloadAndDecompress = async (
   return dirPath;
 };
 
-const downloadModule = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureModulesDir());
+const downloadModule = async ({
+  get,
+  ...overrides
+}: Module): Promise<Omit<Module, "get"> & { dirPath: string }> => ({
+  dirPath: await downloadAndDecompress(get, await ensureModulesDir()),
+  ...overrides,
+});
 
 const downloadService = async (get: string): Promise<string> =>
   downloadAndDecompress(get, await ensureServicesDir());
@@ -224,31 +279,37 @@ type JSONModuleConf = {
 
 const processServiceModules = async (
   modules: Module[],
-  resolvedModulePath: string,
+  resolvedServicePath: string,
   commandObj: CommandObj
 ): Promise<JSONModuleConf[]> => {
-  const moduleDirPaths = await Promise.all(
+  const resolvedModules = await Promise.all(
     modules.map(
-      ({ get }): Promise<string> =>
-        get.startsWith("http")
-          ? downloadModule(get)
-          : Promise.resolve(path.join(resolvedModulePath, get))
+      ({
+        get,
+        ...overrides
+      }): Promise<Omit<Module, "get"> & { dirPath: string }> =>
+        isUrl(get)
+          ? downloadModule({ get, ...overrides })
+          : Promise.resolve({
+              dirPath: path.resolve(resolvedServicePath, get),
+              ...overrides,
+            })
     )
   );
   return Promise.all(
-    moduleDirPaths.map(
-      (moduleDirPath): Promise<JSONModuleConf> =>
+    resolvedModules.map(
+      ({ dirPath, ...overrides }): Promise<JSONModuleConf> =>
         (async (): Promise<JSONModuleConf> => {
           const moduleConfigFileName = `${MODULE_FILE_NAME}.${YAML_EXT}`;
           const moduleConfig = await initReadonlyModuleConfig(
-            moduleDirPath,
+            dirPath,
             commandObj
           );
           if (moduleConfig === null) {
             commandObj.error(
-              `Module ${color.yellow(
-                path.resolve(moduleDirPath)
-              )} must contain ${color.yellow(moduleConfigFileName)}`
+              `Module ${color.yellow(dirPath)} must contain ${color.yellow(
+                moduleConfigFileName
+              )}`
             );
           }
           const {
@@ -259,10 +320,11 @@ const processServiceModules = async (
             envs,
             maxHeapSize,
             mountedBinaries,
-          } = moduleConfig;
+          } = { ...moduleConfig, ...overrides };
+
           const jsonModuleConfig: JSONModuleConf = {
             name,
-            path: path.join(moduleDirPath, `${name}.wasm`),
+            path: path.join(dirPath, `${name}.wasm`),
           };
           if (loggerEnabled === true) {
             jsonModuleConfig.logger_enabled = true;
@@ -291,11 +353,12 @@ const processServiceModules = async (
 /* eslint-enable camelcase */
 
 type DeployServiceOptions = Readonly<{
-  get: string;
+  pathToService: string;
   addr: string;
   secretKey: string;
   aquaCli: AquaCLI;
   timeout: string | undefined;
+  overrides: Overrides | undefined;
 }>;
 
 /**
@@ -304,27 +367,28 @@ type DeployServiceOptions = Readonly<{
  * @returns Promise<Error | DeployedServiceConfig>
  */
 const deployService = async ({
-  get,
+  pathToService,
   addr,
   secretKey,
   aquaCli,
   timeout,
   peerId,
   commandObj,
+  overrides,
 }: DeployServiceOptions & { peerId: string; commandObj: CommandObj }): Promise<
   Error | { deployedServiceConfig: DeployedServiceConfig; name: string }
 > => {
   let hasDeployJSON = false;
-  let configPath = path.join(get, DEPLOYMENT_CONFIG_FILE_NAME);
+  let configPath = path.join(pathToService, DEPLOYMENT_CONFIG_FILE_NAME);
   try {
     await fsPromises.access(configPath);
     hasDeployJSON = true;
   } catch {}
-  const resolvedModulePath = path.resolve(get);
-  let serviceName = path.basename(resolvedModulePath);
+  const resolvedServicePath = path.resolve(pathToService);
+  let serviceName = path.basename(resolvedServicePath);
   if (!hasDeployJSON) {
     const serviceConfig = await initReadonlyServiceConfig(
-      resolvedModulePath,
+      resolvedServicePath,
       commandObj
     );
     if (serviceConfig === null) {
@@ -337,14 +401,21 @@ const deployService = async ({
 
     serviceName = serviceConfig.name;
     const servicesDirPath = await ensureServicesDir();
-    const configDirPath = resolvedModulePath.includes(servicesDirPath)
-      ? resolvedModulePath
-      : path.join(servicesDirPath, await getHashOfString(resolvedModulePath));
+    const configDirPath = resolvedServicePath.includes(servicesDirPath)
+      ? resolvedServicePath
+      : path.join(servicesDirPath, await getHashOfString(resolvedServicePath));
     await fsPromises.mkdir(configDirPath, { recursive: true });
     configPath = path.join(configDirPath, DEPLOYMENT_CONFIG_FILE_NAME);
+    const overriddenModules = Object.entries(serviceConfig.modules ?? {}).map(
+      ([name, mod]): Module => ({ ...mod, ...overrides?.modules?.[name] })
+    );
+    const overriddenFacadeModule = {
+      ...serviceConfig.facade,
+      ...overrides?.facade,
+    };
     const jsonModuleConfigs = await processServiceModules(
-      [...(serviceConfig.modules ?? []), serviceConfig.facade],
-      resolvedModulePath,
+      [...overriddenModules, overriddenFacadeModule],
+      resolvedServicePath,
       commandObj
     );
     await fsPromises.writeFile(
@@ -365,7 +436,7 @@ const deployService = async ({
   let result: string;
   const projectRootDir = process.cwd();
   try {
-    process.chdir(get);
+    process.chdir(pathToService);
     result = await aquaCli(
       {
         command: "remote deploy_service",
@@ -379,7 +450,7 @@ const deployService = async ({
         },
       },
       "Deploying service",
-      { get, on: peerId, relay: addr }
+      { pathToService, on: peerId, relay: addr }
     );
   } catch (error) {
     return new Error(`Wasn't able to deploy service\n${String(error)}`);
@@ -439,7 +510,7 @@ const deployServices = async ({
   }
 
   const { deployedServiceConfig, name } = result;
-  const { secretKey, addr, aquaCli, get, timeout } = deployServiceOptions;
+  const { secretKey, addr, aquaCli, timeout } = deployServiceOptions;
   const { blueprintId } = deployedServiceConfig;
 
   const services = [deployedServiceConfig];
@@ -465,7 +536,6 @@ const deployServices = async ({
         },
         "Deploying service",
         {
-          get,
           blueprintId,
           on: peerId,
           relay: addr,

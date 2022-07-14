@@ -102,9 +102,9 @@ export const ensureNpmDependency = async ({
     await npmInstall({
       packageName,
       version,
-      message: `Installing ${packageName} ${color.yellow(
+      message: `Installing version ${color.yellow(
         version
-      )} to ${replaceHomeDir(npmDirPath)}`,
+      )} of ${packageName} to ${replaceHomeDir(npmDirPath)}`,
       commandObj,
     });
   }

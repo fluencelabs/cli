@@ -17,6 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 import { CommandObj, MODULE_FILE_NAME } from "../../const";
+import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -26,7 +27,7 @@ import {
   Migrations,
 } from "../initConfig";
 
-type ConfigV0 = {
+export type ConfigV0 = {
   version: 0;
   name: string;
   maxHeapSize?: string;
@@ -66,13 +67,17 @@ const getInitConfigOptions = (
   latestSchema: configSchemaV0,
   migrations,
   name: MODULE_FILE_NAME,
+  getSchemaDirPath: (): string => getProjectFluenceDirPath(),
   getPath: (): string => configPath,
 });
 
-export const initModuleConfig = (configPath: string, commandObj: CommandObj) =>
+export const initModuleConfig = (
+  configPath: string,
+  commandObj: CommandObj
+): Promise<InitializedConfig<LatestConfig> | null> =>
   getConfigInitFunction(getInitConfigOptions(configPath))(commandObj);
 export const initReadonlyModuleConfig = (
   configPath: string,
   commandObj: CommandObj
-) =>
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
   getReadonlyConfigInitFunction(getInitConfigOptions(configPath))(commandObj);

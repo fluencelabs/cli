@@ -17,6 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 import { CommandObj, SERVICE_FILE_NAME } from "../../const";
+import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -26,9 +27,11 @@ import {
   Migrations,
 } from "../initConfig";
 
-type ModuleV0 = {
+import type { ConfigV0 as ModuleConfig } from "./module";
+
+export type ModuleV0 = {
   get: string;
-};
+} & Partial<Omit<ModuleConfig, "version">>;
 
 export type Module = ModuleV0;
 
@@ -36,15 +39,22 @@ const moduleSchema: JSONSchemaType<ModuleV0> = {
   type: "object",
   properties: {
     get: { type: "string" },
+    name: { type: "string", nullable: true },
+    maxHeapSize: { type: "string", nullable: true },
+    loggerEnabled: { type: "boolean", nullable: true },
+    loggingMask: { type: "number", nullable: true },
+    mappedDirs: { type: "object", nullable: true, required: [] },
+    envs: { type: "object", nullable: true, required: [] },
+    mountedBinaries: { type: "object", nullable: true, required: [] },
   },
   required: ["get"],
 };
 
-type ConfigV0 = {
+export type ConfigV0 = {
   version: 0;
   name: string;
   facade: ModuleV0;
-  modules?: Array<ModuleV0>;
+  modules?: Record<string, ModuleV0>;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -54,9 +64,10 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     name: { type: "string" },
     facade: moduleSchema,
     modules: {
-      type: "array",
-      items: moduleSchema,
+      type: "object",
+      additionalProperties: moduleSchema,
       nullable: true,
+      required: [],
     },
   },
   required: ["version", "facade", "name"],
@@ -76,13 +87,17 @@ const getInitConfigOptions = (
   latestSchema: configSchemaV0,
   migrations,
   name: SERVICE_FILE_NAME,
+  getSchemaDirPath: (): string => getProjectFluenceDirPath(),
   getPath: (): string => configPath,
 });
 
-export const initServiceConfig = (configPath: string, commandObj: CommandObj) =>
+export const initServiceConfig = (
+  configPath: string,
+  commandObj: CommandObj
+): Promise<InitializedConfig<LatestConfig> | null> =>
   getConfigInitFunction(getInitConfigOptions(configPath))(commandObj);
 export const initReadonlyServiceConfig = (
   configPath: string,
   commandObj: CommandObj
-) =>
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
   getReadonlyConfigInitFunction(getInitConfigOptions(configPath))(commandObj);
