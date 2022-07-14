@@ -24,11 +24,8 @@ import {
   validateUnique,
   ValidationResult,
 } from "../../helpers/validations";
-import {
-  ConfigKeyPair,
-  configKeyPairSchema,
-} from "../../keyPairs/generateKeyPair";
-import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
+import { ConfigKeyPair, configKeyPairSchema } from "../../keypairs";
+import { ensureProjectFluenceDirPath } from "../../paths";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -96,7 +93,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: SECRETS_FILE_NAME,
-  getPath: getProjectFluenceDirPath,
+  getPath: ensureProjectFluenceDirPath,
   validate,
 };
 

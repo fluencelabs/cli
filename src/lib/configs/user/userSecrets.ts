@@ -28,8 +28,8 @@ import {
   ConfigKeyPair,
   configKeyPairSchema,
   generateKeyPair,
-} from "../../keyPairs/generateKeyPair";
-import { ensureUserFluenceDir } from "../../pathsGetters/ensureUserFluenceDir";
+} from "../../keypairs";
+import { ensureUserFluenceDir } from "../../paths";
 import {
   GetDefaultConfig,
   getConfigInitFunction,

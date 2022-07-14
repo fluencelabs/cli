@@ -26,6 +26,7 @@ export const JSON_EXT = "json";
 export const YAML_EXT = "yaml";
 
 export const FLUENCE_DIR_NAME = ".fluence";
+export const ARTIFACTS_DIR_NAME = "artifacts";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const TMP_DIR_NAME = "tmp";
@@ -34,6 +35,8 @@ export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
 export const TS_DIR_NAME = "ts";
 export const JS_DIR_NAME = "js";
+export const MODULES_DIR_NAME = "modules";
+export const SERVICES_DIR_NAME = "services";
 
 export const FLUENCE_CONFIG_FILE_NAME = "fluence";
 export const SECRETS_FILE_NAME = "secrets";
@@ -105,7 +108,7 @@ export const FORCE_FLAG_NAME = "force";
 
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
-export const GIT_IGNORE_CONTENT = `.idea
+export const RECOMMENDED_GIT_IGNORE_CONTENT = `.idea
 .DS_Store
 .fluence
 **/node_modules

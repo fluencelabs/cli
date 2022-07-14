@@ -28,19 +28,21 @@ import { replaceHomeDir } from "../helpers/replaceHomeDir";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
 
+type SchemaOptions = {
+  name: string;
+  configDirPath: string;
+  getSchemaDirPath: GetPath | undefined;
+  commandObj: CommandObj;
+  schema: AnySchema;
+};
+
 const ensureSchema = async ({
   name,
   configDirPath,
   getSchemaDirPath,
   commandObj,
   schema,
-}: {
-  name: string;
-  configDirPath: string;
-  getSchemaDirPath: GetPath | undefined;
-  commandObj: CommandObj;
-  schema: AnySchema;
-}): Promise<string> => {
+}: SchemaOptions): Promise<string> => {
   const schemaDir = path.join(
     getSchemaDirPath === undefined
       ? configDirPath
@@ -57,26 +59,42 @@ const ensureSchema = async ({
   return path.relative(configDirPath, schemaPath);
 };
 
-const getConfigString = async <LatestConfig extends BaseConfig>(
-  configPath: string,
-  schemaRelativePath: string,
-  commandObj: CommandObj,
-  getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined
-): Promise<string | null> => {
-  const pathCommentStart = "# yaml-language-server: $schema=";
-  const pathComment = `${pathCommentStart}${schemaRelativePath}`;
+type GetConfigString<LatestConfig> = {
+  configPath: string;
+  schemaRelativePath: string;
+  commandObj: CommandObj;
+  getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined;
+  examples: string | undefined;
+};
+
+const getConfigString = async <LatestConfig extends BaseConfig>({
+  configPath,
+  schemaRelativePath,
+  commandObj,
+  getDefaultConfig,
+  examples,
+}: GetConfigString<LatestConfig>): Promise<string | null> => {
+  const schemaPathCommentStart = "# yaml-language-server: $schema=";
+  const schemaPathComment = `${schemaPathCommentStart}${schemaRelativePath}`;
   let configString: string;
   try {
     const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
-    configString = fileContent.startsWith(pathCommentStart)
-      ? [pathComment, ...fileContent.split("\n").slice(1)].join("\n")
-      : `${pathComment}\n${fileContent}`;
+    configString = fileContent.startsWith(schemaPathCommentStart)
+      ? [schemaPathComment, ...fileContent.split("\n").slice(1)].join("\n")
+      : `${schemaPathComment}\n${fileContent}`;
   } catch {
     if (getDefaultConfig === undefined) {
       return null;
     }
     configString = yamlDiffPatch(
-      pathComment,
+      `${schemaPathComment}\n\n${
+        examples === undefined
+          ? ""
+          : `EXAMPLES:\n${examples}`
+              .split("\n")
+              .map((ex): string => `# ${ex}`)
+              .join("\n")
+      }\n`,
       {},
       await getDefaultConfig(commandObj)
     );
@@ -111,9 +129,11 @@ const migrateConfig = async <
   latestConfig: LatestConfig;
   configString: string;
 }> => {
-  const migratedConfig = migrations
-    .slice(config.version)
-    .reduce((config, migration): Config => migration(config), config);
+  let migratedConfig = config;
+  for (const migration of migrations.slice(config.version)) {
+    // eslint-disable-next-line no-await-in-loop
+    migratedConfig = await migration(migratedConfig);
+  }
 
   const migratedConfigString = yamlDiffPatch(
     configString,
@@ -205,7 +225,9 @@ export type InitializedConfig<LatestConfig> = Mutable<
   $commit(): Promise<void>;
 };
 type BaseConfig = { version: number };
-export type Migrations<Config> = Array<(config: Config) => Config>;
+export type Migrations<Config> = Array<
+  (config: Config) => Config | Promise<Config>
+>;
 export type GetDefaultConfig<LatestConfig> = (
   commandObj: CommandObj
 ) => LatestConfig | Promise<LatestConfig>;
@@ -222,6 +244,7 @@ export type InitConfigOptions<
   getPath: GetPath;
   getSchemaDirPath?: GetPath;
   validate?: (config: LatestConfig) => ValidationResult;
+  examples?: string;
 };
 
 type InitFunction<LatestConfig> = (
@@ -275,6 +298,7 @@ export function getReadonlyConfigInitFunction<
       getPath,
       validate,
       getSchemaDirPath,
+      examples,
     } = options;
 
     const configDirPath = await getPath(commandObj);
@@ -294,12 +318,13 @@ export function getReadonlyConfigInitFunction<
       schema: validateLatestConfig.schema,
     });
 
-    const maybeConfigString = await getConfigString(
+    const maybeConfigString = await getConfigString({
       configPath,
       schemaRelativePath,
       commandObj,
-      getDefaultConfig
-    );
+      getDefaultConfig,
+      examples,
+    });
     if (maybeConfigString === null) {
       return null;
     }

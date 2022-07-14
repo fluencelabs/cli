@@ -21,22 +21,23 @@ import { Command } from "@oclif/core";
 import { initAquaCli } from "../lib/aquaCli";
 import { AppConfig, initAppConfig, Services } from "../lib/configs/project/app";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
-import { updateDeployedAppAqua, generateRegisterApp } from "../lib/deployedApp";
+import {
+  generateDeployedAppAqua,
+  generateRegisterApp,
+} from "../lib/deployedApp";
+import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { usage } from "../lib/helpers/usage";
-import { getKeyPair } from "../lib/keyPairs/getKeyPair";
+import { getKeyPair } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
-import { getDeployedAppAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
 import {
-  getAppJsPath,
-  getDeployedAppJsPath,
-} from "../lib/pathsGetters/getJsPath";
-import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
-import {
-  getAppTsPath,
-  getDeployedAppTsPath,
-} from "../lib/pathsGetters/getTsPath";
+  ensureAppJsPath,
+  ensureAppTsPath,
+  ensureDeployedAppAquaPath,
+  ensureDeployedAppJsPath,
+  ensureDeployedAppTsPath,
+} from "../lib/paths";
 import { confirm } from "../lib/prompt";
 
 export default class Remove extends Command {
@@ -50,7 +51,7 @@ export default class Remove extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);
-    await ensureProjectFluenceDirPath(this, isInteractive);
+    await ensureFluenceProject(this, isInteractive);
 
     const appConfig = await initAppConfig(this);
 
@@ -152,20 +153,22 @@ export const removeApp = async ({
   }
 
   if (Object.keys(notRemovedServices).length === 0) {
+    const pathsToRemove = await Promise.all([
+      ensureDeployedAppAquaPath(),
+      ensureAppTsPath(),
+      ensureAppJsPath(),
+      ensureDeployedAppTsPath(),
+      ensureDeployedAppJsPath(),
+      Promise.resolve(appConfig.$getPath()),
+    ]);
+
     await Promise.allSettled(
-      [
-        getDeployedAppAquaPath(),
-        getAppTsPath(),
-        getAppJsPath(),
-        getDeployedAppTsPath(),
-        getDeployedAppJsPath(),
-        appConfig.$getPath(),
-      ].map((path): Promise<void> => fsPromises.unlink(path))
+      pathsToRemove.map((path): Promise<void> => fsPromises.unlink(path))
     );
     return;
   }
 
-  await updateDeployedAppAqua(notRemovedServices);
+  await generateDeployedAppAqua(notRemovedServices);
   await generateRegisterApp({
     deployedServices: notRemovedServices,
     aquaCli,

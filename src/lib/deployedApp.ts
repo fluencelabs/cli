@@ -24,9 +24,13 @@ import camelcase from "camelcase";
 import type { AquaCLI } from "./aquaCli";
 import type { DeployedServiceConfig, Services } from "./configs/project/app";
 import { FS_OPTIONS } from "./const";
-import { getDeployedAppAquaPath } from "./pathsGetters/getDefaultAquaPath";
-import { getAppJsPath, getJsPath } from "./pathsGetters/getJsPath";
-import { getAppTsPath, getTsPath } from "./pathsGetters/getTsPath";
+import {
+  ensureAppJsPath,
+  ensureAppTsPath,
+  ensureDeployedAppAquaPath,
+  ensureJsPath,
+  ensureTsPath,
+} from "./paths";
 
 const APP = "App";
 const SERVICE_IDS = "serviceIds";
@@ -72,8 +76,8 @@ const generateRegisterAppTSorJS = async ({
 }): Promise<void> => {
   await aquaCli({
     flags: {
-      input: getDeployedAppAquaPath(),
-      output: isJS ? getJsPath() : getTsPath(),
+      input: await ensureDeployedAppAquaPath(),
+      output: await (isJS ? ensureJsPath() : ensureTsPath()),
       js: isJS,
     },
   });
@@ -121,7 +125,7 @@ export function registerApp(
 `;
 
   await fsPromises.writeFile(
-    isJS ? getAppJsPath() : getAppTsPath(),
+    await (isJS ? ensureAppJsPath() : ensureAppTsPath()),
     appContent,
     FS_OPTIONS
   );
@@ -135,16 +139,18 @@ type GenerateRegisterAppOptions = {
 export const generateRegisterApp = async (
   options: GenerateRegisterAppOptions
 ): Promise<void> => {
-  CliUx.ux.action.start(`Compiling ${color.yellow(getDeployedAppAquaPath())}`);
+  CliUx.ux.action.start(
+    `Compiling ${color.yellow(await ensureDeployedAppAquaPath())}`
+  );
   await generateRegisterAppTSorJS({ ...options, isJS: true });
   await generateRegisterAppTSorJS({ ...options, isJS: false });
   CliUx.ux.action.stop();
 };
 
-export const updateDeployedAppAqua = async (
+export const generateDeployedAppAqua = async (
   services: Services
 ): Promise<void> => {
-  const appServicesFilePath = getDeployedAppAquaPath();
+  const appServicesFilePath = await ensureDeployedAppAquaPath();
   const appServicesAqua =
     // Codegeneration:
     `export App

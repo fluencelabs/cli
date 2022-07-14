@@ -19,7 +19,7 @@ import type { JSONSchemaType } from "ajv";
 import { ajv } from "../../ajv";
 import { APP_FILE_NAME, CommandObj } from "../../const";
 import { NETWORKS, Relays } from "../../multiaddr";
-import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
+import { ensureProjectFluenceDirPath } from "../../paths";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -184,7 +184,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV1,
   migrations,
   name: APP_FILE_NAME,
-  getPath: getProjectFluenceDirPath,
+  getPath: ensureProjectFluenceDirPath,
 };
 
 export const initAppConfig = getConfigInitFunction(initConfigOptions);

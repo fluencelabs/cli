@@ -54,17 +54,22 @@ import {
   TIMEOUT_FLAG,
   YAML_EXT,
 } from "../lib/const";
-import { updateDeployedAppAqua, generateRegisterApp } from "../lib/deployedApp";
+import {
+  generateDeployedAppAqua,
+  generateRegisterApp,
+} from "../lib/deployedApp";
 import { downloadFile } from "../lib/helpers/downloadFile";
+import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getHashOfString } from "../lib/helpers/getHashOfString";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
-import { getKeyPairFromFlags } from "../lib/keyPairs/getKeyPair";
+import { getKeyPairFromFlags } from "../lib/keypairs";
 import { getRandomRelayId, getRandomRelayAddr, Relays } from "../lib/multiaddr";
-import { ensureModulesDir } from "../lib/pathsGetters/getModulesDir";
-import { ensureProjectFluenceDirPath } from "../lib/pathsGetters/getProjectFluenceDirPath";
-import { getProjectRootDir } from "../lib/pathsGetters/getProjectRootDir";
-import { ensureServicesDir } from "../lib/pathsGetters/getServicesDir";
+import {
+  ensureModulesDir,
+  ensureServicesDir,
+  getProjectRootDir,
+} from "../lib/paths";
 import { confirm } from "../lib/prompt";
 
 import { removeApp } from "./remove";
@@ -89,7 +94,7 @@ export default class Deploy extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Deploy);
     const isInteractive = getIsInteractive(flags);
-    await ensureProjectFluenceDirPath(this, isInteractive);
+    await ensureFluenceProject(this, isInteractive);
 
     const appConfig = await initAppConfig(this);
 
@@ -175,7 +180,7 @@ export default class Deploy extends Command {
     if (Object.keys(successfullyDeployedServices).length === 0) {
       this.error("No services were deployed successfully");
     }
-    await updateDeployedAppAqua(successfullyDeployedServices);
+    await generateDeployedAppAqua(successfullyDeployedServices);
     await generateRegisterApp({
       deployedServices: successfullyDeployedServices,
       aquaCli,

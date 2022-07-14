@@ -23,9 +23,11 @@ import { ajv } from "../../ajv";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
 import { validateUnique, ValidationResult } from "../../helpers/validations";
 import { NETWORKS, Relays } from "../../multiaddr";
-import { getArtifactsPath } from "../../pathsGetters/getArtifactsPath";
-import { getProjectFluenceDirPath } from "../../pathsGetters/getProjectFluenceDirPath";
-import { getProjectRootDir } from "../../pathsGetters/getProjectRootDir";
+import {
+  ensureArtifactsPath,
+  ensureProjectFluenceDirPath,
+  getProjectRootDir,
+} from "../../paths";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -185,7 +187,7 @@ const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 
 const migrations: Migrations<Config> = [
-  (config: Config): ConfigV1 => {
+  async (config: Config): Promise<ConfigV1> => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
         `Migration error. Errors: ${JSON.stringify(
@@ -194,12 +196,11 @@ const migrations: Migrations<Config> = [
       );
     }
 
+    const artifactsPath = await ensureArtifactsPath();
+
     const services = config.services.map(
       ({ name, count = 1 }): ServiceV1 => ({
-        get: path.relative(
-          getProjectRootDir(),
-          path.join(getArtifactsPath(), name)
-        ),
+        get: path.relative(getProjectRootDir(), path.join(artifactsPath, name)),
         deploy: [{ count }],
       })
     );
@@ -225,14 +226,31 @@ type LatestConfig = ConfigV1;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
+const examples = `
+services:
+  - get: ./relative/path # URL or relative path
+    deploy:
+      - peerId: MY_PEER # Peer id or peer id name to deploy on. Default: Random peer id is selected for each deploy
+        count: 1 # How many times to deploy. Default: 1
+    overrides: # Override any values from the service.yaml. Optional
+      name: someName # Override name. Name is used when accessing deployed service ids. Optional.
+      modules:
+        facade:
+          get: ./relative/path # Override facade module. Optional.
+peerIds: # A map of named peerIds. Optional.
+  MY_PEER: 12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv
+relays: testnet # Array of relays or keywords: kras, testnet, stage. Default: kras
+`;
+
+export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0, configSchemaV1],
   latestSchema: configSchemaV1,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getPath: getProjectRootDir,
-  getSchemaDirPath: (): string => getProjectFluenceDirPath(),
+  getSchemaDirPath: ensureProjectFluenceDirPath,
   validate,
+  examples,
 };
 
 export const initFluenceConfig = getConfigInitFunction(

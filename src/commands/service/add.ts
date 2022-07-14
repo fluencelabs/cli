@@ -21,10 +21,10 @@ import { Command } from "@oclif/core";
 
 import { initFluenceConfig } from "../../lib/configs/project/fluence";
 import { NO_INPUT_FLAG } from "../../lib/const";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { usage } from "../../lib/helpers/usage";
-import { ensureProjectFluenceDirPath } from "../../lib/pathsGetters/getProjectFluenceDirPath";
 
 export const SERVICE = "SERVICE";
 
@@ -44,7 +44,8 @@ export default class Add extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Add);
     const isInteractive = getIsInteractive(flags);
-    await ensureProjectFluenceDirPath(this, isInteractive);
+    await ensureFluenceProject(this, isInteractive);
+
     assert(typeof args[SERVICE] === "string");
     const fluenceConfig = await initFluenceConfig(this);
     if (fluenceConfig.services === undefined) {

@@ -26,23 +26,20 @@ import { ajv } from "../lib/ajv";
 import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
   CommandObj,
-  EXTENSIONS_JSON_FILE_NAME,
-  FLUENCE_DIR_NAME,
   FS_OPTIONS,
-  SRC_DIR_NAME,
-  VSCODE_DIR_NAME,
-  GITIGNORE_FILE_NAME,
-  GIT_IGNORE_CONTENT,
-  AQUA_DIR_NAME,
-  SETTINGS_JSON_FILE_NAME,
-  DEFAULT_SRC_AQUA_FILE_NAME,
+  RECOMMENDED_GIT_IGNORE_CONTENT,
   NO_INPUT_FLAG,
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { usage } from "../lib/helpers/usage";
-import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
-import { getSrcAquaDirPath } from "../lib/pathsGetters/getSrcAquaDirPath";
+import {
+  ensureDefaultAquaPath,
+  ensureExtensionsJsonPath,
+  ensureSettingsJsonPath,
+  ensureSrcMainAquaPath,
+  getGitignorePath,
+} from "../lib/paths";
 import { input } from "../lib/prompt";
 
 export const PATH = "PATH";
@@ -73,40 +70,36 @@ export default class Init extends Command {
   }
 }
 
+const RECOMMENDATIONS = "recommendations";
+
 type ExtensionsJson = {
-  recommendations: Array<string>;
+  [RECOMMENDATIONS]?: Array<string>;
 };
 const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
   type: "object",
   properties: {
-    recommendations: { type: "array", items: { type: "string" } },
+    [RECOMMENDATIONS]: {
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+    },
   },
-  required: ["recommendations"],
+  required: [],
 };
 const validateExtensionsJson = ajv.compile(extensionsJsonSchema);
 const extensionsConfig: ExtensionsJson = {
-  recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
+  [RECOMMENDATIONS]: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
 };
 
-const ensureRecommendedExtensions = async (
-  projectPath: string
-): Promise<void> => {
-  const vscodeDirPath = path.join(projectPath, VSCODE_DIR_NAME);
-  await fsPromises.mkdir(vscodeDirPath, { recursive: true });
-  const extensionsJsonPath = path.join(
-    vscodeDirPath,
-    EXTENSIONS_JSON_FILE_NAME
-  );
+const ensureRecommendedExtensions = async (): Promise<void> => {
+  const extensionsJsonPath = await ensureExtensionsJsonPath();
 
   let fileContent: string;
   try {
     fileContent = await fsPromises.readFile(extensionsJsonPath, FS_OPTIONS);
   } catch {
-    await fsPromises.writeFile(
-      extensionsJsonPath,
-      JSON.stringify(extensionsConfig, null, 2) + "\n",
-      FS_OPTIONS
-    );
+    fileContent = JSON.stringify({});
+    await fsPromises.writeFile(extensionsJsonPath, fileContent, FS_OPTIONS);
     return;
   }
 
@@ -118,11 +111,12 @@ const ensureRecommendedExtensions = async (
   }
 
   if (validateExtensionsJson(parsedFileContent)) {
-    for (const recommendation of extensionsConfig.recommendations) {
-      if (!parsedFileContent.recommendations.includes(recommendation)) {
-        parsedFileContent.recommendations.push(recommendation);
-      }
-    }
+    parsedFileContent[RECOMMENDATIONS] = [
+      ...new Set([
+        ...(parsedFileContent[RECOMMENDATIONS] ?? []),
+        ...(extensionsConfig[RECOMMENDATIONS] ?? []),
+      ]),
+    ];
     await fsPromises.writeFile(
       extensionsJsonPath,
       JSON.stringify(parsedFileContent, null, 2) + "\n",
@@ -131,37 +125,36 @@ const ensureRecommendedExtensions = async (
   }
 };
 
+const AQUA_SETTINGS_IMPORTS = "aquaSettings.imports";
+
 type SettingsJson = {
-  "aquaSettings.imports": Array<string>;
+  [AQUA_SETTINGS_IMPORTS]?: Array<string>;
 };
 const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
   type: "object",
   properties: {
-    "aquaSettings.imports": { type: "array", items: { type: "string" } },
+    [AQUA_SETTINGS_IMPORTS]: {
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+    },
   },
-  required: ["aquaSettings.imports"],
+  required: [],
 };
 const validateSettingsJson = ajv.compile(settingsJsonSchema);
-const getSettingsConfig = (): SettingsJson => ({
-  "aquaSettings.imports": [getDefaultAquaPath()],
+const initSettingsConfig = async (): Promise<SettingsJson> => ({
+  [AQUA_SETTINGS_IMPORTS]: [await ensureDefaultAquaPath()],
 });
 
-const ensureRecommendedSettings = async (
-  projectPath: string
-): Promise<void> => {
-  const vscodeDirPath = path.join(projectPath, VSCODE_DIR_NAME);
-  await fsPromises.mkdir(vscodeDirPath, { recursive: true });
-  const settingsJsonPath = path.join(vscodeDirPath, SETTINGS_JSON_FILE_NAME);
+const ensureRecommendedSettings = async (): Promise<void> => {
+  const settingsJsonPath = await ensureSettingsJsonPath();
 
   let fileContent: string;
   try {
     fileContent = await fsPromises.readFile(settingsJsonPath, FS_OPTIONS);
   } catch {
-    await fsPromises.writeFile(
-      settingsJsonPath,
-      JSON.stringify(getSettingsConfig(), null, 2) + "\n",
-      FS_OPTIONS
-    );
+    fileContent = JSON.stringify({});
+    await fsPromises.writeFile(settingsJsonPath, fileContent, FS_OPTIONS);
     return;
   }
 
@@ -173,12 +166,12 @@ const ensureRecommendedSettings = async (
   }
 
   if (validateSettingsJson(parsedFileContent)) {
-    const settingsConfig = getSettingsConfig();
-    for (const importItem of settingsConfig["aquaSettings.imports"]) {
-      if (!parsedFileContent["aquaSettings.imports"].includes(importItem)) {
-        parsedFileContent["aquaSettings.imports"].push(importItem);
-      }
-    }
+    parsedFileContent[AQUA_SETTINGS_IMPORTS] = [
+      ...new Set([
+        ...(parsedFileContent[AQUA_SETTINGS_IMPORTS] ?? []),
+        ...((await initSettingsConfig())[AQUA_SETTINGS_IMPORTS] ?? []),
+      ]),
+    ];
     await fsPromises.writeFile(
       settingsJsonPath,
       JSON.stringify(parsedFileContent, null, 2) + "\n",
@@ -187,27 +180,29 @@ const ensureRecommendedSettings = async (
   }
 };
 
-const ensureGitIgnore = async (projectPath: string): Promise<void> => {
-  let gitIgnoreContent: string;
-  const gitIgnorePath = path.join(projectPath, GITIGNORE_FILE_NAME);
+const ensureGitIgnore = async (): Promise<void> => {
+  const gitIgnorePath = getGitignorePath();
+  let newGitIgnoreContent: string;
   try {
-    const currentGitIgnore = await fsPromises.readFile(
+    const currentGitIgnoreContent = await fsPromises.readFile(
       gitIgnorePath,
       FS_OPTIONS
     );
-    const currentGitIgnoreEntries = new Set(currentGitIgnore.split("\n"));
-    const missingGitIgnoreEntries = GIT_IGNORE_CONTENT.split("\n")
+    const currentGitIgnoreEntries = new Set(
+      currentGitIgnoreContent.split("\n")
+    );
+    const missingGitIgnoreEntries = RECOMMENDED_GIT_IGNORE_CONTENT.split("\n")
       .filter((entry): boolean => !currentGitIgnoreEntries.has(entry))
       .join("\n");
-    gitIgnoreContent =
+    newGitIgnoreContent =
       missingGitIgnoreEntries === ""
-        ? currentGitIgnore
-        : `${currentGitIgnore}\n# recommended by Fluence Labs:\n${missingGitIgnoreEntries}\n`;
+        ? currentGitIgnoreContent
+        : `${currentGitIgnoreContent}\n# recommended by Fluence Labs:\n${missingGitIgnoreEntries}\n`;
   } catch {
-    gitIgnoreContent = GIT_IGNORE_CONTENT;
+    newGitIgnoreContent = RECOMMENDED_GIT_IGNORE_CONTENT;
   }
 
-  return fsPromises.writeFile(gitIgnorePath, gitIgnoreContent, FS_OPTIONS);
+  return fsPromises.writeFile(gitIgnorePath, newGitIgnoreContent, FS_OPTIONS);
 };
 
 type InitOptions = {
@@ -232,31 +227,21 @@ export const init = async (options: InitOptions): Promise<void> => {
         );
 
   try {
-    const aquaDefaultDirPath = path.join(
-      projectPath,
-      FLUENCE_DIR_NAME,
-      AQUA_DIR_NAME
-    );
-    await fsPromises.mkdir(aquaDefaultDirPath, { recursive: true });
+    await fsPromises.mkdir(projectPath, { recursive: true });
     process.chdir(projectPath);
 
     await initReadonlyFluenceConfig(commandObj);
 
-    const aquaSrcDirPath = path.join(projectPath, SRC_DIR_NAME, AQUA_DIR_NAME);
-    await fsPromises.mkdir(aquaSrcDirPath, { recursive: true });
-    const defaultSrcAquaFilePath = path.join(
-      getSrcAquaDirPath(),
-      DEFAULT_SRC_AQUA_FILE_NAME
-    );
+    const srcMainAquaPath = await ensureSrcMainAquaPath();
     try {
-      await fsPromises.access(defaultSrcAquaFilePath);
+      await fsPromises.access(srcMainAquaPath);
     } catch {
-      await fsPromises.writeFile(defaultSrcAquaFilePath, "");
+      await fsPromises.writeFile(srcMainAquaPath, "");
     }
 
-    await ensureRecommendedExtensions(projectPath);
-    await ensureRecommendedSettings(projectPath);
-    await ensureGitIgnore(projectPath);
+    await ensureRecommendedExtensions();
+    await ensureRecommendedSettings();
+    await ensureGitIgnore();
 
     commandObj.log(
       color.magentaBright(

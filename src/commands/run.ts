@@ -30,15 +30,15 @@ import {
   TIMEOUT_FLAG,
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
+import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getRandomRelayAddr } from "../lib/multiaddr";
-import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
-import { getSrcMainAquaPath } from "../lib/pathsGetters/getSrcAquaDirPath";
 import {
-  getAppServiceJsonPath,
-  getTmpPath,
-} from "../lib/pathsGetters/getTmpPath";
+  ensureAppServiceJsonPath,
+  ensureDefaultAquaPath,
+  ensureSrcMainAquaPath,
+} from "../lib/paths";
 import { input } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
@@ -99,8 +99,9 @@ export default class Run extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);
+    await ensureFluenceProject(this, isInteractive);
 
-    const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME], isInteractive);
+    const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME]);
 
     const func =
       flags[FUNC_FLAG_NAME] ??
@@ -114,10 +115,12 @@ export default class Run extends Command {
     const relay = flags.relay ?? getRandomRelayAddr(appConfig?.relays);
 
     const data = await getRunData(flags, this);
-    const imports = [...(flags.import ?? []), getDefaultAquaPath()];
+    const imports: Array<string> = [
+      ...(flags.import ?? []),
+      await ensureDefaultAquaPath(),
+    ];
 
-    await fsPromises.mkdir(getTmpPath(), { recursive: true });
-    const appJsonServicePath = getAppServiceJsonPath();
+    const appJsonServicePath = await ensureAppServiceJsonPath();
     if (appConfig !== null) {
       await fsPromises.writeFile(
         appJsonServicePath,
@@ -155,25 +158,13 @@ export default class Run extends Command {
 }
 
 const ensureAquaPath = async (
-  aquaPathFromArgs: string | undefined,
-  isInteractive: boolean
+  aquaPathFromArgs: string | undefined
 ): Promise<string> => {
   if (typeof aquaPathFromArgs === "string") {
     return aquaPathFromArgs;
   }
 
-  try {
-    const srcMainAquaPath = getSrcMainAquaPath();
-    await fsPromises.access(srcMainAquaPath);
-    return srcMainAquaPath;
-  } catch {
-    return input({
-      message:
-        "Enter a path to an aqua file or to a directory that contains aqua files",
-      isInteractive,
-      flagName: INPUT_FLAG_NAME,
-    });
-  }
+  return ensureSrcMainAquaPath();
 };
 
 type RunData = Record<string, unknown>;

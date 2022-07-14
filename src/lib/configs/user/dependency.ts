@@ -17,7 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 import { DEPENDENCY_FILE_NAME } from "../../const";
-import { ensureUserFluenceDir } from "../../pathsGetters/ensureUserFluenceDir";
+import { ensureUserFluenceDir } from "../../paths";
 import { getIsStringUnion } from "../../typeHelpers";
 import {
   GetDefaultConfig,

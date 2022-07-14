@@ -27,7 +27,7 @@ import {
 import { AQUA_RECOMMENDED_VERSION, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
-import { ensureUserFluenceDir } from "./pathsGetters/ensureUserFluenceDir";
+import { ensureUserFluenceDir } from "./paths";
 
 type NPMInstallOptions = {
   packageName: string;

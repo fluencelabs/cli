@@ -17,16 +17,16 @@
 import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
+import { KeyPair } from "@fluencelabs/fluence";
 import color from "@oclif/color";
+import type { JSONSchemaType } from "ajv";
 import { Separator } from "inquirer";
 
-import { initReadonlyProjectSecretsConfig } from "../configs/project/projectSecrets";
-import { initReadonlyUserSecretsConfig } from "../configs/user/userSecrets";
-import { CommandObj, KEY_PAIR_FLAG_NAME } from "../const";
-import { getProjectFluenceDirPath } from "../pathsGetters/getProjectFluenceDirPath";
-import { list, Choices } from "../prompt";
-
-import type { ConfigKeyPair } from "./generateKeyPair";
+import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets";
+import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
+import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
+import { ensureProjectFluenceDirPath } from "./paths";
+import { list, Choices } from "./prompt";
 
 type GetUserKeyPairOptions = {
   commandObj: CommandObj;
@@ -133,7 +133,7 @@ const getProjectKeyPair = async ({
 export const getKeyPair = async (
   options: GetKeyPairOptions
 ): Promise<ConfigKeyPair | Error> => {
-  const projectFluenceDirPath = getProjectFluenceDirPath();
+  const projectFluenceDirPath = await ensureProjectFluenceDirPath();
 
   try {
     await fsPromises.access(projectFluenceDirPath);
@@ -156,3 +156,33 @@ export const getKeyPairFromFlags = async (
   isInteractive: boolean
 ): Promise<ConfigKeyPair | Error> =>
   getKeyPair({ commandObj, keyPairName, isInteractive });
+
+export type ConfigKeyPair = {
+  peerId: string;
+  secretKey: string;
+  publicKey: string;
+  name: string;
+};
+
+export const configKeyPairSchema: JSONSchemaType<ConfigKeyPair> = {
+  type: "object",
+  properties: {
+    peerId: { type: "string" },
+    secretKey: { type: "string" },
+    publicKey: { type: "string" },
+    name: { type: "string" },
+  },
+  required: ["peerId", "secretKey", "publicKey", "name"],
+};
+
+export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
+  const keyPair = await KeyPair.randomEd25519();
+  return {
+    peerId: keyPair.Libp2pPeerId.toB58String(),
+    secretKey: Buffer.from(keyPair.toEd25519PrivateKey()).toString("base64"),
+    publicKey: Buffer.from(keyPair.Libp2pPeerId.pubKey.bytes).toString(
+      "base64"
+    ),
+    name,
+  };
+};
