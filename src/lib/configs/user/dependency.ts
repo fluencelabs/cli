@@ -16,7 +16,7 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { DEPENDENCY_FILE_NAME } from "../../const";
+import { DEPENDENCY_CONFIG_FILE_NAME } from "../../const";
 import { ensureUserFluenceDir } from "../../paths";
 import { getIsStringUnion } from "../../typeHelpers";
 import {
@@ -76,8 +76,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: DEPENDENCY_FILE_NAME,
-  getPath: ensureUserFluenceDir,
+  name: DEPENDENCY_CONFIG_FILE_NAME,
+  getConfigDirPath: ensureUserFluenceDir,
 };
 
 export const initDependencyConfig = getConfigInitFunction(

@@ -16,18 +16,12 @@
 
 import path from "node:path";
 
-import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajv";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
-import { validateUnique, ValidationResult } from "../../helpers/validations";
 import { NETWORKS, Relays } from "../../multiaddr";
-import {
-  ensureArtifactsPath,
-  ensureProjectFluenceDirPath,
-  getProjectRootDir,
-} from "../../paths";
+import { ensureProjectFluenceDirPath, getProjectRootDir } from "../../paths";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -66,24 +60,22 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services"],
 };
 
-type ServiceDeployV1 = { count?: number; peerId?: string };
-
-export type AppConfigModule = Partial<ServiceModuleConfig>;
-
-export type Overrides = {
-  name?: string;
-  modules?: Record<string, AppConfigModule>;
+export type OverrideModules = Record<string, FluenceConfigModule>;
+export type ServiceDeployV1 = {
+  count?: number;
+  peerId?: string;
+  overrideModules?: OverrideModules;
 };
+export type FluenceConfigModule = Partial<ServiceModuleConfig>;
 
 type ServiceV1 = {
   get: string;
-  deploy: Array<ServiceDeployV1>;
-  overrides?: Overrides;
+  deploy: Record<string, ServiceDeployV1>;
 };
 
 type ConfigV1 = {
   version: 1;
-  services?: Array<ServiceV1>;
+  services?: Record<string, ServiceV1>;
   relays?: Relays;
   peerIds?: Record<string, string>;
 };
@@ -93,15 +85,14 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
   properties: {
     version: { type: "number", enum: [1] },
     services: {
-      type: "array",
-      items: {
+      type: "object",
+      additionalProperties: {
         type: "object",
         properties: {
           get: { type: "string" },
           deploy: {
-            type: "array",
-            minItems: 1,
-            items: {
+            type: "object",
+            additionalProperties: {
               type: "object",
               properties: {
                 count: {
@@ -113,53 +104,52 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
                   type: "string",
                   nullable: true,
                 },
-              },
-            },
-          },
-          overrides: {
-            type: "object",
-            properties: {
-              name: { type: "string", nullable: true },
-              modules: {
-                type: "object",
-                additionalProperties: {
+                overrideModules: {
                   type: "object",
-                  properties: {
-                    get: { type: "string", nullable: true },
-                    name: { type: "string", nullable: true },
-                    maxHeapSize: { type: "string", nullable: true },
-                    loggerEnabled: { type: "boolean", nullable: true },
-                    loggingMask: { type: "number", nullable: true },
-                    volumes: {
-                      type: "object",
-                      nullable: true,
-                      required: [],
+                  additionalProperties: {
+                    type: "object",
+                    properties: {
+                      get: { type: "string", nullable: true },
+                      name: { type: "string", nullable: true },
+                      maxHeapSize: { type: "string", nullable: true },
+                      loggerEnabled: { type: "boolean", nullable: true },
+                      loggingMask: { type: "number", nullable: true },
+                      volumes: {
+                        type: "object",
+                        nullable: true,
+                        required: [],
+                      },
+                      preopenedFiles: {
+                        type: "array",
+                        nullable: true,
+                        items: { type: "string" },
+                      },
+                      envs: {
+                        type: "object",
+                        nullable: true,
+                        required: [],
+                      },
+                      mountedBinaries: {
+                        type: "object",
+                        nullable: true,
+                        required: [],
+                      },
                     },
-                    preopenedFiles: {
-                      type: "array",
-                      nullable: true,
-                      items: { type: "string" },
-                    },
-                    envs: { type: "object", nullable: true, required: [] },
-                    mountedBinaries: {
-                      type: "object",
-                      nullable: true,
-                      required: [],
-                    },
+                    required: [],
+                    nullable: true,
                   },
-                  required: [],
                   nullable: true,
+                  required: [],
                 },
-                nullable: true,
-                required: [],
               },
+              required: [],
             },
             required: [],
-            nullable: true,
           },
         },
         required: ["get", "deploy"],
       },
+      required: [],
       nullable: true,
     },
     relays: {
@@ -187,7 +177,7 @@ const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 
 const migrations: Migrations<Config> = [
-  async (config: Config): Promise<ConfigV1> => {
+  (config: Config): ConfigV1 => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
         `Migration error. Errors: ${JSON.stringify(
@@ -196,13 +186,18 @@ const migrations: Migrations<Config> = [
       );
     }
 
-    const artifactsPath = await ensureArtifactsPath();
-
-    const services = config.services.map(
-      ({ name, count = 1 }): ServiceV1 => ({
-        get: path.relative(getProjectRootDir(), path.join(artifactsPath, name)),
-        deploy: [{ count }],
-      })
+    const services = config.services.reduce<Record<string, ServiceV1>>(
+      (acc, { name, count = 1 }, i): Record<string, ServiceV1> => ({
+        ...acc,
+        [`random_${i}`]: {
+          get: path.relative(
+            getProjectRootDir(),
+            path.join(getProjectRootDir(), "artifacts", name)
+          ),
+          deploy: { default: { count } },
+        },
+      }),
+      {}
     );
 
     return {
@@ -212,15 +207,6 @@ const migrations: Migrations<Config> = [
   },
 ];
 
-const validate = (config: LatestConfig): ValidationResult =>
-  config.services === undefined ||
-  validateUnique(
-    config.services,
-    ({ get }): string => get,
-    (get): string =>
-      `There are multiple services with the same get ${color.yellow(get)}`
-  );
-
 type Config = ConfigV0 | ConfigV1;
 type LatestConfig = ConfigV1;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
@@ -228,15 +214,18 @@ export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const examples = `
 services:
-  - get: ./relative/path # URL or relative path
+  someService: # Service name in camelCase
+    get: ./relative/path # URL or relative path
     deploy:
-      - peerId: MY_PEER # Peer id or peer id name to deploy on. Default: Random peer id is selected for each deploy
+      default: # Deployment name in camelCase
+        # You can access deployment in aqua like this:
+        # services <- App.services()
+        # on services.someService.default!.peerId:
+        peerId: MY_PEER # Peer id or peer id name to deploy on. Default: Random peer id is selected for each deploy
         count: 1 # How many times to deploy. Default: 1
-    overrides: # Override any values from the service.yaml. Optional
-      name: someName # Override name. Name is used when accessing deployed service ids. Optional.
-      modules:
-        facade:
-          get: ./relative/path # Override facade module. Optional.
+        overrideModules: # Override modules from service.yaml
+          facade:
+            get: ./relative/path # Override facade module
 peerIds: # A map of named peerIds. Optional.
   MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
 relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras`;
@@ -246,9 +235,8 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV1,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
-  getPath: getProjectRootDir,
+  getConfigDirPath: getProjectRootDir,
   getSchemaDirPath: ensureProjectFluenceDirPath,
-  validate,
   examples,
 };
 

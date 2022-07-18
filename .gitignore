@@ -2,7 +2,6 @@
 *-error.log
 /.nyc_output
 /dist
-/artifacts
 /tmp
 /--fix
 /yarn.lock

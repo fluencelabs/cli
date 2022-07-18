@@ -23,7 +23,7 @@ import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { ajv } from "../ajv";
-import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const";
+import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME } from "../const";
 import { replaceHomeDir } from "../helpers/replaceHomeDir";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
@@ -80,7 +80,9 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
   try {
     const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
     configString = fileContent.startsWith(schemaPathCommentStart)
-      ? [schemaPathComment, ...fileContent.split("\n").slice(1)].join("\n")
+      ? `${[schemaPathComment, ...fileContent.split("\n").slice(1)]
+          .join("\n")
+          .trim()}\n`
       : `${schemaPathComment}\n${fileContent}`;
   } catch {
     if (getDefaultConfig === undefined) {
@@ -112,7 +114,7 @@ type MigrateConfigOptions<
   configPath: string;
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
-  validate: undefined | ((config: LatestConfig) => ValidationResult);
+  validate: undefined | ConfigValidateFunction<LatestConfig>;
 };
 
 const migrateConfig = async <
@@ -149,7 +151,8 @@ const migrateConfig = async <
       )}. Errors: ${JSON.stringify(validateLatestConfig.errors, null, 2)}`
     );
   }
-  const maybeValidationError = validate !== undefined && validate(latestConfig);
+  const maybeValidationError =
+    validate !== undefined && (await validate(latestConfig, configPath));
 
   if (typeof maybeValidationError === "string") {
     // eslint-disable-next-line unicorn/prefer-type-error
@@ -179,10 +182,10 @@ type EnsureConfigOptions<
   configPath: string;
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
-  validate: undefined | ((config: LatestConfig) => ValidationResult);
+  validate: undefined | ConfigValidateFunction<LatestConfig>;
 };
 
-const ensureConfigIsValidLatest = <
+const ensureConfigIsValidLatest = async <
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >({
@@ -190,7 +193,7 @@ const ensureConfigIsValidLatest = <
   validateLatestConfig,
   config,
   validate,
-}: EnsureConfigOptions<Config, LatestConfig>): LatestConfig => {
+}: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     throw new Error(
       `Invalid config ${color.yellow(configPath)}. Errors: ${JSON.stringify(
@@ -200,7 +203,8 @@ const ensureConfigIsValidLatest = <
       )}`
     );
   }
-  const maybeValidationError = validate !== undefined && validate(config);
+  const maybeValidationError =
+    validate !== undefined && (await validate(config, configPath));
 
   if (typeof maybeValidationError === "string") {
     // eslint-disable-next-line unicorn/prefer-type-error
@@ -233,6 +237,11 @@ export type GetDefaultConfig<LatestConfig> = (
 ) => LatestConfig | Promise<LatestConfig>;
 type GetPath = (commandObj: CommandObj) => string | Promise<string>;
 
+export type ConfigValidateFunction<LatestConfig> = (
+  config: LatestConfig,
+  configPath: string
+) => ValidationResult | Promise<ValidationResult>;
+
 export type InitConfigOptions<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
@@ -241,9 +250,9 @@ export type InitConfigOptions<
   latestSchema: JSONSchemaType<LatestConfig>;
   migrations: Migrations<Config>;
   name: string;
-  getPath: GetPath;
+  getConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
-  validate?: (config: LatestConfig) => ValidationResult;
+  validate?: ConfigValidateFunction<LatestConfig>;
   examples?: string;
 };
 
@@ -263,8 +272,8 @@ type InitReadonlyFunctionWithDefault<LatestConfig> = (
   commandObj: CommandObj
 ) => Promise<InitializedReadonlyConfig<LatestConfig>>;
 
-const getConfigPath = (configDirPath: string, name: string): string =>
-  path.join(configDirPath, `${name}.${YAML_EXT}`);
+export const getConfigPath = (configDirPath: string, name: string): string =>
+  path.join(configDirPath, name);
 
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
@@ -295,13 +304,13 @@ export function getReadonlyConfigInitFunction<
       latestSchema,
       migrations,
       name,
-      getPath,
+      getConfigDirPath,
       validate,
       getSchemaDirPath,
       examples,
     } = options;
 
-    const configDirPath = await getPath(commandObj);
+    const configDirPath = await getConfigDirPath(commandObj);
     const configPath = getConfigPath(configDirPath, name);
 
     const validateAllConfigVersions = ajv.compile<Config>({
@@ -354,7 +363,7 @@ export function getReadonlyConfigInitFunction<
         validate,
       }));
     } else {
-      latestConfig = ensureConfigIsValidLatest({
+      latestConfig = await ensureConfigIsValidLatest({
         config,
         configPath,
         validateLatestConfig,
@@ -401,8 +410,10 @@ export function getConfigInitFunction<
   return async (
     commandObj: CommandObj
   ): Promise<InitializedConfig<LatestConfig> | null> => {
-    const configDirPath = await options.getPath(commandObj);
-    const configPath = getConfigPath(configDirPath, options.name);
+    const configPath = getConfigPath(
+      await options.getConfigDirPath(commandObj),
+      options.name
+    );
 
     if (initializedConfigs.has(configPath)) {
       throw new Error(

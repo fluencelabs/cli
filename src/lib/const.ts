@@ -24,9 +24,9 @@ export const TS_EXT = "ts";
 export const JS_EXT = "js";
 export const JSON_EXT = "json";
 export const YAML_EXT = "yaml";
+export const WASM_EXT = "wasm";
 
 export const FLUENCE_DIR_NAME = ".fluence";
-export const ARTIFACTS_DIR_NAME = "artifacts";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const TMP_DIR_NAME = "tmp";
@@ -38,12 +38,12 @@ export const JS_DIR_NAME = "js";
 export const MODULES_DIR_NAME = "modules";
 export const SERVICES_DIR_NAME = "services";
 
-export const FLUENCE_CONFIG_FILE_NAME = "fluence";
-export const SECRETS_FILE_NAME = "secrets";
-export const DEPENDENCY_FILE_NAME = "dependency";
-export const MODULE_FILE_NAME = "module";
-export const SERVICE_FILE_NAME = "service";
-export const APP_FILE_NAME = "app";
+export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
+export const SECRETS_CONFIG_FILE_NAME = `secrets.${YAML_EXT}`;
+export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
+export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
+export const APP_CONFIG_FILE_NAME = `app.${YAML_EXT}`;
+export const DEPENDENCY_CONFIG_FILE_NAME = `dependency.${YAML_EXT}`;
 
 const DEPLOYED_APP_FILE_NAME = "deployed.app";
 
@@ -56,7 +56,7 @@ export const GITIGNORE_FILE_NAME = ".gitignore";
 export const PACKAGE_JSON_FILE_NAME = `package.${JSON_EXT}`;
 export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
 export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
-export const DEPLOYMENT_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
+export const DEPLOY_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
 export const APP_SERVICE_JSON_FILE_NAME = `app-service.${JSON_EXT}`;
 
 export const APP_TS_FILE_NAME = `app.${TS_EXT}`;
@@ -79,6 +79,7 @@ export const YAML_FORMAT: [
 ];
 
 export const AUTO_GENERATED = "auto-generated";
+export const DEFAULT_DEPLOY_NAME = "default";
 
 export const KEY_PAIR_FLAG_NAME = "key-pair-name";
 export const KEY_PAIR_FLAG = {

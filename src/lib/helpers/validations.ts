@@ -50,3 +50,6 @@ export const validateMultiple = (
 
     return `${acc === true ? "" : acc}\n\n${result}`;
   }, true);
+
+export const isUrl = (unknown: string): boolean =>
+  unknown.startsWith("http://") || unknown.startsWith("https://");

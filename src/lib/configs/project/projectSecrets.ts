@@ -17,7 +17,7 @@
 import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
-import { SECRETS_FILE_NAME } from "../../const";
+import { SECRETS_CONFIG_FILE_NAME } from "../../const";
 import {
   validateHasDefault,
   validateMultiple,
@@ -92,8 +92,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: SECRETS_FILE_NAME,
-  getPath: ensureProjectFluenceDirPath,
+  name: SECRETS_CONFIG_FILE_NAME,
+  getConfigDirPath: ensureProjectFluenceDirPath,
   validate,
 };
 

@@ -23,12 +23,12 @@ import {
   APP_SERVICE_JSON_FILE_NAME,
   APP_TS_FILE_NAME,
   AQUA_DIR_NAME,
-  ARTIFACTS_DIR_NAME,
   CommandObj,
   DEFAULT_SRC_AQUA_FILE_NAME,
   DEPLOYED_APP_AQUA_FILE_NAME,
   DEPLOYED_APP_JS_FILE_NAME,
   DEPLOYED_APP_TS_FILE_NAME,
+  DEPLOY_CONFIG_FILE_NAME,
   EXTENSIONS_JSON_FILE_NAME,
   FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
@@ -59,34 +59,29 @@ export const ensureUserFluenceDir = async (
 export const ensureProjectFluenceDirPath = (): Promise<string> =>
   ensureDir(path.join(getProjectRootDir(), FLUENCE_DIR_NAME));
 
-// artifacts dir not needed anymore but I leave it for now because it was used in the demo
-// on the community call
-export const ensureArtifactsPath = (): Promise<string> =>
-  ensureDir(path.join(getProjectRootDir(), ARTIFACTS_DIR_NAME));
-
 export const ensureDefaultAquaPath = async (): Promise<string> =>
   ensureDir(path.join(await ensureProjectFluenceDirPath(), AQUA_DIR_NAME));
 
 export const ensureDeployedAppAquaPath = async (): Promise<string> =>
   path.join(await ensureDefaultAquaPath(), DEPLOYED_APP_AQUA_FILE_NAME);
 
-export const ensureJsPath = async (): Promise<string> =>
+export const ensureJSPath = async (): Promise<string> =>
   ensureDir(path.join(await ensureProjectFluenceDirPath(), JS_DIR_NAME));
 
-export const ensureAppJsPath = async (): Promise<string> =>
-  path.join(await ensureJsPath(), APP_JS_FILE_NAME);
+export const ensureAppJSPath = async (): Promise<string> =>
+  path.join(await ensureJSPath(), APP_JS_FILE_NAME);
 
-export const ensureDeployedAppJsPath = async (): Promise<string> =>
-  path.join(await ensureJsPath(), DEPLOYED_APP_JS_FILE_NAME);
+export const ensureDeployedAppJSPath = async (): Promise<string> =>
+  path.join(await ensureJSPath(), DEPLOYED_APP_JS_FILE_NAME);
 
-export const ensureTsPath = async (): Promise<string> =>
+export const ensureTSPath = async (): Promise<string> =>
   ensureDir(path.join(await ensureProjectFluenceDirPath(), TS_DIR_NAME));
 
-export const ensureAppTsPath = async (): Promise<string> =>
-  path.join(await ensureJsPath(), APP_TS_FILE_NAME);
+export const ensureAppTSPath = async (): Promise<string> =>
+  path.join(await ensureTSPath(), APP_TS_FILE_NAME);
 
-export const ensureDeployedAppTsPath = async (): Promise<string> =>
-  path.join(await ensureJsPath(), DEPLOYED_APP_TS_FILE_NAME);
+export const ensureDeployedAppTSPath = async (): Promise<string> =>
+  path.join(await ensureTSPath(), DEPLOYED_APP_TS_FILE_NAME);
 
 export const ensureModulesDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureProjectFluenceDirPath(), MODULES_DIR_NAME));
@@ -103,8 +98,11 @@ export const ensureSrcMainAquaPath = async (): Promise<string> =>
 export const ensureTmpPath = async (): Promise<string> =>
   ensureDir(path.join(await ensureProjectFluenceDirPath(), TMP_DIR_NAME));
 
-export const ensureAppServiceJsonPath = async (): Promise<string> =>
+export const ensureTmpAppServiceJsonPath = async (): Promise<string> =>
   path.join(await ensureTmpPath(), APP_SERVICE_JSON_FILE_NAME);
+
+export const ensureTmpDeployJsonPath = async (): Promise<string> =>
+  path.join(await ensureTmpPath(), DEPLOY_CONFIG_FILE_NAME);
 
 export const ensureVSCodeDir = (): Promise<string> =>
   ensureDir(path.join(getProjectRootDir(), VSCODE_DIR_NAME));

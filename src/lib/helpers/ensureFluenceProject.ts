@@ -18,8 +18,8 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import { init } from "../../commands/init";
-import { initConfigOptions } from "../configs/project/fluence";
-import { CommandObj, YAML_EXT } from "../const";
+import { initConfigOptions as fluenceConfigInitOptions } from "../configs/project/fluence";
+import { CommandObj, FLUENCE_CONFIG_FILE_NAME } from "../const";
 import { confirm } from "../prompt";
 
 export const ensureFluenceProject = async (
@@ -27,8 +27,8 @@ export const ensureFluenceProject = async (
   isInteractive: boolean
 ): Promise<void> => {
   const projectFluencePath = path.join(
-    await initConfigOptions.getPath(commandObj),
-    `${initConfigOptions.name}.${YAML_EXT}`
+    await fluenceConfigInitOptions.getConfigDirPath(commandObj),
+    FLUENCE_CONFIG_FILE_NAME
   );
 
   try {

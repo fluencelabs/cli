@@ -16,7 +16,7 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { CommandObj, MODULE_FILE_NAME } from "../../const";
+import { CommandObj, MODULE_CONFIG_FILE_NAME } from "../../const";
 import { ensureProjectFluenceDirPath } from "../../paths";
 import {
   getConfigInitFunction,
@@ -63,8 +63,8 @@ const migrations: Migrations<Config> = [];
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
-export type AppConfig = InitializedConfig<LatestConfig>;
-export type AppConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
+export type ModuleConfig = InitializedConfig<LatestConfig>;
+export type ModuleConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const getInitConfigOptions = (
   configPath: string
@@ -72,9 +72,9 @@ const getInitConfigOptions = (
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: MODULE_FILE_NAME,
+  name: MODULE_CONFIG_FILE_NAME,
   getSchemaDirPath: ensureProjectFluenceDirPath,
-  getPath: (): string => configPath,
+  getConfigDirPath: (): string => configPath,
 });
 
 export const initModuleConfig = (

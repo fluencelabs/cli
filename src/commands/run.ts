@@ -35,7 +35,7 @@ import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
-  ensureAppServiceJsonPath,
+  ensureTmpAppServiceJsonPath,
   ensureDefaultAquaPath,
   ensureSrcMainAquaPath,
 } from "../lib/paths";
@@ -44,18 +44,17 @@ import { input } from "../lib/prompt";
 const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
 const ON_FLAG_NAME = "on";
+const DATA_FLAG_NAME = "data";
 
 export default class Run extends Command {
   static override description = "Run aqua script";
-
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-
   static override flags = {
     relay: Flags.string({
-      description: "Relay node MultiAddress",
+      description: "Relay node multiaddr",
       helpValue: "<multiaddr>",
     }),
-    data: Flags.string({
+    [DATA_FLAG_NAME]: Flags.string({
       description:
         "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<json>",
@@ -93,9 +92,7 @@ export default class Run extends Command {
     ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
   };
-
   static override usage: string = usage(this);
-
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);
@@ -120,7 +117,7 @@ export default class Run extends Command {
       await ensureDefaultAquaPath(),
     ];
 
-    const appJsonServicePath = await ensureAppServiceJsonPath();
+    const appJsonServicePath = await ensureTmpAppServiceJsonPath();
     if (appConfig !== null) {
       await fsPromises.writeFile(
         appJsonServicePath,
@@ -217,11 +214,11 @@ const getRunData = async (
     try {
       parsedData = JSON.parse(data);
     } catch {
-      commandObj.error("Unable to parse --data");
+      commandObj.error(`Unable to parse --${DATA_FLAG_NAME}`);
     }
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid --data: ${JSON.stringify(validateRunData.errors)}`
+        `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(validateRunData.errors)}`
       );
     }
     for (const key in parsedData) {

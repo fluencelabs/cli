@@ -17,82 +17,60 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
-import camelcase from "camelcase";
+import { Command } from "@oclif/core";
 
 import { initFluenceConfig } from "../../lib/configs/project/fluence";
-import {
-  DEFAULT_DEPLOY_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
-  NO_INPUT_FLAG,
-} from "../../lib/const";
+import { FLUENCE_CONFIG_FILE_NAME, NO_INPUT_FLAG } from "../../lib/const";
 import { stringToServiceName } from "../../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { usage } from "../../lib/helpers/usage";
 
 const SERVICE = "SERVICE";
-const NAME_FLAG_NAME = "name";
 
-export default class Add extends Command {
-  static override description = `Add service to ${color.yellow(
+export default class Remove extends Command {
+  static override description = `Remove service from ${color.yellow(
     FLUENCE_CONFIG_FILE_NAME
   )}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,
-    [NAME_FLAG_NAME]: Flags.string({
-      description: "Unique service name",
-      helpValue: "<name>",
-    }),
   };
   static override args = [
     {
       name: SERVICE,
-      description: "Relative path to a service or url to .tar.gz archive",
+      description:
+        "Service name, relative path to a service or url to .tar.gz archive",
     },
   ];
   static override usage: string = usage(this);
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Add);
+    const { args, flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
 
     assert(typeof args[SERVICE] === "string");
     const fluenceConfig = await initFluenceConfig(this);
     if (fluenceConfig.services === undefined) {
-      fluenceConfig.services = {};
-    }
-    const serviceName =
-      flags[NAME_FLAG_NAME] ?? stringToServiceName(args[SERVICE]);
-    if (camelcase(serviceName) !== serviceName) {
-      this.error("Service name must be in camelCase");
-    }
-    if (serviceName in fluenceConfig.services) {
       this.error(
-        `You already have ${color.yellow(serviceName)} in ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )}. Provide a unique name for the new service using ${color.yellow(
-          `--${NAME_FLAG_NAME}`
-        )} flag or edit the existing service in ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )} manually`
+        `There are no services in ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
       );
     }
-    fluenceConfig.services = {
-      ...fluenceConfig.services,
-      [serviceName]: {
-        get: args[SERVICE],
-        deploy: {
-          [DEFAULT_DEPLOY_NAME]: {
-            count: 1,
-          },
-        },
-      },
-    };
+    const serviceName = stringToServiceName(args[SERVICE]);
+    if (!(serviceName in fluenceConfig.services)) {
+      this.error(
+        `There is no service ${color.yellow(serviceName)} in ${color.yellow(
+          FLUENCE_CONFIG_FILE_NAME
+        )}`
+      );
+    }
+    delete fluenceConfig.services[serviceName];
+    if (Object.keys(fluenceConfig.services).length === 0) {
+      delete fluenceConfig.services;
+    }
     await fluenceConfig.$commit();
     this.log(
-      `Added ${color.yellow(serviceName)} to ${color.yellow(
+      `Removed ${color.yellow(serviceName)} from ${color.yellow(
         FLUENCE_CONFIG_FILE_NAME
       )}`
     );

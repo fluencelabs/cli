@@ -37,41 +37,23 @@ USAGE
 
 A lot of what is described next will be improved and automated in the future (e.g. development and building of marine services, key-management etc.) Currently Fluence CLI is a convenience wrapper around Aqua CLI
 
-1. Use `fluence init` to initialize new project
-2. Write your own service using rust or use an example service from [examples repository](https://github.com/fluencelabs/examples)
-3. Use [marine](https://doc.fluence.dev/marine-book/) to build `.wasm` service modules
-4. Create a directory with the name of your service in `artifacts` directory (e.g. if your service name is `adder` - create `artifacts/adder` directory)
-5. Put `.wasm` files into `artifacts/adder` directory
-6. Create `artifacts/adder/deploy.json` file. You can find examples of such files in [examples repository](https://github.com/fluencelabs/examples), where they are usually called `deployment_cfg.json`. The name of the directory and the name of the service in `deploy.json` must match. Example of `artifacts/adder/deploy.json`:
-
-```json
-{
-  "adder": {
-    "modules": [
-      {
-        "name": "adder",
-        "path": "adder.wasm",
-        "logger_enabled": true
-      }
-    ]
-  }
-}
-```
-
-7. Add name of your service to the `fluence.yaml` config. Example of `fluence.yaml`:
+1. Run `fluence init` to initialize new project
+2. Run `fluence service add 'https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true'`. Config `fluence.yaml` in the root of the project directory will be updated to look like this:
 
 ```yaml
-version: 0
+version: 1
 services:
-  - name: adder
-    count: 2 # Optional. Number of services to deploy
+  adder:
+    get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true
+    deploy:
+      default:
+        count: 1
 ```
+You can edit it if you want to deploy on specific network, specific peerId, specific number of times or if you want to override service configuration
 
-8. Execute `fluence deploy` to deploy the application you described in `fluence.yaml`. Random peer will be selected for deployment of all of your services (can be overridden using `--on` flag)
-User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag)
-You can also add project-level secret key to your project `.fluence/secrets.yaml` manually (key-pair management coming soon)
+3. Run `fluence deploy` to deploy the application you described in `fluence.yaml`. User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag). You can also add project-level secret key to your project `.fluence/secrets.yaml` manually (key-pair management coming soon)
 
-9. Write some aqua in `src/aqua/main.aqua`. Example `src/aqua/main.aqua`:
+4. Write some aqua in `src/aqua/main.aqua`. Example `src/aqua/main.aqua`:
 ```aqua
 module Main
 
@@ -83,18 +65,19 @@ service AddOne:
     add_one: u64 -> u64
 
 func add_one(value: u64) -> u64:
-    serviceIds <- App.serviceIds()
+    services <- App.services()
 
-    on serviceIds.adder!.peerId:
-        AddOne serviceIds.adder!.serviceId
+    on services.adder.default!.peerId:
+        AddOne services.adder.default!.serviceId
         res <- AddOne.add_one(value)
     <- res
 ```
+`"deployed.app.aqua"` file is located at `.fluence/aqua/deployed.app.aqua`. `App.services()` method returns ids of the previously deployed services that you can use in your aqua code (this info is stored at `.fluence/app.yaml`.
 
-10. Execute `fluence run -f 'add_one(1)'`.
-Function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and then it will be executed on the peer that was used for deployment  when you executed `fluence deploy` (can be overridden with `--on` flag). `"deployed.app.aqua"` file is located at `.fluence/aqua`. `App.serviceIds()` method returns ids of the previously deployed services that you can utilize in your aqua code (this info is stored at `.fluence/app.yaml`). Alternatively, if you are js developer - import generated `registerApp` function from `.fluence/ts/app.ts` or `.fluence/js/app.js` and execute it after `Fluence.run()` in your js application in order to give access to deployed services ids to your aqua code. Then compile `src/aqua/main.aqua` using Aqua CLI. Import and run `add_one(1)` in your js code.
+5. Run `fluence run -f 'add_one(1)'`. (function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and executed). 
+Alternatively, if you are js developer - import generated `registerApp` function from `.fluence/ts/app.ts` or `.fluence/js/app.js` and execute it after `Fluence.run()` in your js application in order to give access to deployed services ids to your aqua code. Then compile `src/aqua/main.aqua` using Aqua CLI. Import and run `add_one(1)` in your js code.
 
-11. Remove the previously deployed fluence application using `fluence remove`
+6. Run `fluence remove` to remove the previously deployed fluence application 
 
 
 # Contributing
@@ -127,9 +110,9 @@ If you want README.md file to be correctly generated please don't forget to run 
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
 * [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
 * [`fluence plugins update`](#fluence-plugins-update)
-* [`fluence remove [--timeout <milliseconds>] [--no-input]`](#fluence-remove---timeout-milliseconds---no-input)
+* [`fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]`](#fluence-remove---relay-multiaddr---timeout-milliseconds---no-input)
 * [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id--i-path--f-function-call---timeout-milliseconds---no-input)
-* [`fluence add [SERVICE] [--no-input]`](#fluence-add-service---no-input)
+* [`fluence add [SERVICE] [--no-input] [--name <name>]`](#fluence-add-service---no-input---name-name)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -188,7 +171,7 @@ _See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-
 
 ## `fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
 
-Deploy service to the remote peer
+Deploy application, described in fluence.yaml
 
 ```
 USAGE
@@ -198,11 +181,11 @@ FLAGS
   -k, --key-pair-name=<name>  Key pair name
   --force                     Force removing of previously deployed app
   --no-input                  Don't interactively ask for any input from the user
-  --relay=<multiaddr>         Relay node MultiAddress
+  --relay=<multiaddr>         Relay node multiaddr
   --timeout=<milliseconds>    Timeout used for command execution
 
 DESCRIPTION
-  Deploy service to the remote peer
+  Deploy application, described in fluence.yaml
 
 EXAMPLES
   $ fluence deploy
@@ -483,16 +466,17 @@ DESCRIPTION
   Update installed plugins.
 ```
 
-## `fluence remove [--timeout <milliseconds>] [--no-input]`
+## `fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]`
 
 Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--timeout <milliseconds>] [--no-input]
+  $ fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]
 
 FLAGS
   --no-input                Don't interactively ask for any input from the user
+  --relay=<multiaddr>       Relay node multiaddr
   --timeout=<milliseconds>  Timeout used for command execution
 
 DESCRIPTION
@@ -524,7 +508,7 @@ FLAGS
   --json-service=<path>       Path to a file that contains a JSON formatted service
   --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of a peer where you want to run the function
-  --relay=<multiaddr>         Relay node MultiAddress
+  --relay=<multiaddr>         Relay node multiaddr
   --timeout=<milliseconds>    Timeout used for command execution
 
 DESCRIPTION
@@ -536,19 +520,20 @@ EXAMPLES
 
 _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
 
-## `fluence add [SERVICE] [--no-input]`
+## `fluence add [SERVICE] [--no-input] [--name <name>]`
 
 Initialize fluence project
 
 ```
 USAGE
-  $ fluence add [SERVICE] [--no-input]
+  $ fluence add [SERVICE] [--no-input] [--name <name>]
 
 ARGUMENTS
   SERVICE  Relative path to a service or url to .tar.gz archive
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --name=<name>  Unique service name
+  --no-input     Don't interactively ask for any input from the user
 
 DESCRIPTION
   Initialize fluence project

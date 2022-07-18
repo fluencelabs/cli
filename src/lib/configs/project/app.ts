@@ -17,7 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajv";
-import { APP_FILE_NAME, CommandObj } from "../../const";
+import { APP_CONFIG_FILE_NAME, CommandObj } from "../../const";
 import { NETWORKS, Relays } from "../../multiaddr";
 import { ensureProjectFluenceDirPath } from "../../paths";
 import {
@@ -80,11 +80,11 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services", "keyPairName", "timestamp"],
 };
 
-export type Services = Record<string, Array<DeployedServiceConfigV1>>;
+type ServicesV1 = Record<string, Array<DeployedServiceConfigV1>>;
 
 type ConfigV1 = {
   version: 1;
-  services: Services;
+  services: ServicesV1;
   keyPairName: string;
   timestamp: string;
   knownRelays?: Array<string>;
@@ -132,7 +132,59 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
   required: ["version", "services", "keyPairName", "timestamp"],
 };
 
+export type ServicesV2 = Record<
+  string,
+  Record<string, Array<DeployedServiceConfigV1>>
+>;
+
+type ConfigV2 = {
+  version: 2;
+  services: ServicesV2;
+  keyPairName: string;
+  timestamp: string;
+  relays?: Relays;
+};
+
+const configSchemaV2: JSONSchemaType<ConfigV2> = {
+  type: "object",
+  properties: {
+    version: { type: "number", enum: [2] },
+    services: {
+      type: "object",
+      additionalProperties: {
+        type: "object",
+        additionalProperties: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              peerId: { type: "string" },
+              serviceId: { type: "string" },
+              blueprintId: { type: "string" },
+            },
+            required: ["peerId", "serviceId", "blueprintId"],
+          },
+        },
+        required: [],
+      },
+      required: [],
+    },
+    keyPairName: { type: "string" },
+    timestamp: { type: "string" },
+    relays: {
+      type: ["string", "array"],
+      oneOf: [
+        { type: "string", enum: NETWORKS },
+        { type: "array", items: { type: "string" } },
+      ],
+      nullable: true,
+    },
+  },
+  required: ["version", "services", "keyPairName", "timestamp"],
+};
+
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 
 const migrations: Migrations<Config> = [
   (config: Config): ConfigV1 => {
@@ -146,7 +198,7 @@ const migrations: Migrations<Config> = [
 
     const { keyPairName, knownRelays, timestamp, services } = config;
 
-    const newServices: Services = {};
+    const newServices: ServicesV1 = {};
     for (const { name, peerId, serviceId, blueprintId } of services) {
       const service = {
         peerId,
@@ -172,19 +224,50 @@ const migrations: Migrations<Config> = [
       ...(knownRelays === undefined ? {} : { knownRelays }),
     };
   },
+  (config: Config): ConfigV2 => {
+    if (!validateConfigSchemaV1(config)) {
+      throw new Error(
+        `Migration error. Errors: ${JSON.stringify(
+          validateConfigSchemaV0.errors
+        )}`
+      );
+    }
+
+    const {
+      keyPairName,
+      knownRelays,
+      timestamp,
+      services,
+      relays: relaysFromConfig,
+    } = config;
+    const relays =
+      typeof relaysFromConfig === "string"
+        ? relaysFromConfig
+        : [...(relaysFromConfig ?? []), ...(knownRelays ?? [])];
+
+    return {
+      version: 2,
+      keyPairName,
+      timestamp,
+      services: {
+        default: services,
+      },
+      ...(typeof relays === "string" || relays.length > 0 ? { relays } : {}),
+    };
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1;
-type LatestConfig = ConfigV1;
+type Config = ConfigV0 | ConfigV1 | ConfigV2;
+type LatestConfig = ConfigV2;
 export type AppConfig = InitializedConfig<LatestConfig>;
 export type AppConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0, configSchemaV1],
-  latestSchema: configSchemaV1,
+  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
+  latestSchema: configSchemaV2,
   migrations,
-  name: APP_FILE_NAME,
-  getPath: ensureProjectFluenceDirPath,
+  name: APP_CONFIG_FILE_NAME,
+  getConfigDirPath: ensureProjectFluenceDirPath,
 };
 
 export const initAppConfig = getConfigInitFunction(initConfigOptions);

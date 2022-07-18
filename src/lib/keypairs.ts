@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert";
-import fsPromises from "node:fs/promises";
 
 import { KeyPair } from "@fluencelabs/fluence";
 import color from "@oclif/color";
@@ -25,7 +24,6 @@ import { Separator } from "inquirer";
 import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets";
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
 import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
-import { ensureProjectFluenceDirPath } from "./paths";
 import { list, Choices } from "./prompt";
 
 type GetUserKeyPairOptions = {
@@ -38,7 +36,7 @@ const getUserKeyPair = async ({
   commandObj,
   keyPairName,
   isInteractive,
-}: GetUserKeyPairOptions): Promise<ConfigKeyPair | Error> => {
+}: GetUserKeyPairOptions): Promise<ConfigKeyPair> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
 
   if (keyPairName === undefined) {
@@ -132,19 +130,8 @@ const getProjectKeyPair = async ({
 
 export const getKeyPair = async (
   options: GetKeyPairOptions
-): Promise<ConfigKeyPair | Error> => {
-  const projectFluenceDirPath = await ensureProjectFluenceDirPath();
-
-  try {
-    await fsPromises.access(projectFluenceDirPath);
-    const projectKeyPair = await getProjectKeyPair(options);
-    if (projectKeyPair !== undefined) {
-      return projectKeyPair;
-    }
-  } catch {}
-
-  return getUserKeyPair(options);
-};
+): Promise<ConfigKeyPair> =>
+  (await getProjectKeyPair(options)) ?? getUserKeyPair(options);
 
 export const getKeyPairFromFlags = async (
   {

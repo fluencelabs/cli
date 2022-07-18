@@ -16,17 +16,30 @@
 
 import fsPromises from "node:fs/promises";
 
-import { CliUx } from "@oclif/core";
+import color from "@oclif/color";
+import camelcase from "camelcase";
+import filenamify from "filenamify";
 import fetch from "node-fetch";
 
 export const downloadFile = async (
   path: string,
   url: string
 ): Promise<string> => {
-  CliUx.ux.action.start(`Downloading ${url} to ${path}`);
   const res = await fetch(url);
+  if (res.status === 404) {
+    throw new Error(`Failed when downloading ${color.yellow(url)}`);
+  }
   const buffer = await res.buffer();
   await fsPromises.writeFile(path, buffer);
-  CliUx.ux.action.stop();
   return path;
+};
+
+export const stringToServiceName = (string: string): string => {
+  const cleanString = string.replace(".tar.gz?raw=true", "");
+  return camelcase(
+    filenamify(
+      cleanString.split(cleanString.includes("/") ? "/" : "\\").slice(-1)[0] ??
+        ""
+    )
+  );
 };
