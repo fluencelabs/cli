@@ -112,8 +112,8 @@ If you want README.md file to be correctly generated please don't forget to run 
 * [`fluence plugins update`](#fluence-plugins-update)
 * [`fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]`](#fluence-remove---relay-multiaddr---timeout-milliseconds---no-input)
 * [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id--i-path--f-function-call---timeout-milliseconds---no-input)
-* [`fluence add [SERVICE] [--no-input] [--name <name>]`](#fluence-add-service---no-input---name-name)
-* [`fluence remove [SERVICE] [--no-input]`](#fluence-remove-service---no-input)
+* [`fluence add [PATH | URL] [--no-input] [--name <name>]`](#fluence-add-path--url---no-input---name-name)
+* [`fluence remove [SERVICE_NAME | PATH | URL] [--no-input]`](#fluence-remove-service_name--path--url---no-input)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -521,16 +521,16 @@ EXAMPLES
 
 _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
 
-## `fluence add [SERVICE] [--no-input] [--name <name>]`
+## `fluence add [PATH | URL] [--no-input] [--name <name>]`
 
 Add service to fluence.yaml
 
 ```
 USAGE
-  $ fluence add [SERVICE] [--no-input] [--name <name>]
+  $ fluence add [PATH | URL] [--no-input] [--name <name>]
 
 ARGUMENTS
-  SERVICE  Relative path to a service or url to .tar.gz archive
+  PATH | URL  Relative path to a service or url to .tar.gz archive
 
 FLAGS
   --name=<name>  Unique service name
@@ -543,16 +543,16 @@ EXAMPLES
   $ fluence service add
 ```
 
-## `fluence remove [SERVICE] [--no-input]`
+## `fluence remove [SERVICE_NAME | PATH | URL] [--no-input]`
 
 Remove service from fluence.yaml
 
 ```
 USAGE
-  $ fluence remove [SERVICE] [--no-input]
+  $ fluence remove [SERVICE_NAME | PATH | URL] [--no-input]
 
 ARGUMENTS
-  SERVICE  Service name, relative path to a service or url to .tar.gz archive
+  SERVICE_NAME | PATH | URL  Service name, relative path to a service or url to .tar.gz archive
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user

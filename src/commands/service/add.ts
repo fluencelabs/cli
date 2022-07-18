@@ -31,7 +31,7 @@ import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { usage } from "../../lib/helpers/usage";
 
-const SERVICE = "SERVICE";
+const SERVICE_ARG = "PATH | URL";
 const NAME_FLAG_NAME = "name";
 
 export default class Add extends Command {
@@ -48,7 +48,7 @@ export default class Add extends Command {
   };
   static override args = [
     {
-      name: SERVICE,
+      name: SERVICE_ARG,
       description: "Relative path to a service or url to .tar.gz archive",
     },
   ];
@@ -58,13 +58,13 @@ export default class Add extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
 
-    assert(typeof args[SERVICE] === "string");
+    assert(typeof args[SERVICE_ARG] === "string");
     const fluenceConfig = await initFluenceConfig(this);
     if (fluenceConfig.services === undefined) {
       fluenceConfig.services = {};
     }
     const serviceName =
-      flags[NAME_FLAG_NAME] ?? stringToServiceName(args[SERVICE]);
+      flags[NAME_FLAG_NAME] ?? stringToServiceName(args[SERVICE_ARG]);
     if (camelcase(serviceName) !== serviceName) {
       this.error("Service name must be in camelCase");
     }
@@ -82,7 +82,7 @@ export default class Add extends Command {
     fluenceConfig.services = {
       ...fluenceConfig.services,
       [serviceName]: {
-        get: args[SERVICE],
+        get: args[SERVICE_ARG],
         deploy: {
           [DEFAULT_DEPLOY_NAME]: {
             count: 1,

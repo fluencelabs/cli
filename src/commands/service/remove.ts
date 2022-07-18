@@ -26,7 +26,7 @@ import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { usage } from "../../lib/helpers/usage";
 
-const SERVICE = "SERVICE";
+const SERVICE_ARG = "SERVICE_NAME | PATH | URL";
 
 export default class Remove extends Command {
   static override description = `Remove service from ${color.yellow(
@@ -38,7 +38,7 @@ export default class Remove extends Command {
   };
   static override args = [
     {
-      name: SERVICE,
+      name: SERVICE_ARG,
       description:
         "Service name, relative path to a service or url to .tar.gz archive",
     },
@@ -49,14 +49,14 @@ export default class Remove extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
 
-    assert(typeof args[SERVICE] === "string");
+    assert(typeof args[SERVICE_ARG] === "string");
     const fluenceConfig = await initFluenceConfig(this);
     if (fluenceConfig.services === undefined) {
       this.error(
         `There are no services in ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
       );
     }
-    const serviceName = stringToServiceName(args[SERVICE]);
+    const serviceName = stringToServiceName(args[SERVICE_ARG]);
     if (!(serviceName in fluenceConfig.services)) {
       this.error(
         `There is no service ${color.yellow(serviceName)} in ${color.yellow(
