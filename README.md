@@ -113,6 +113,7 @@ If you want README.md file to be correctly generated please don't forget to run 
 * [`fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]`](#fluence-remove---relay-multiaddr---timeout-milliseconds---no-input)
 * [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id--i-path--f-function-call---timeout-milliseconds---no-input)
 * [`fluence add [SERVICE] [--no-input] [--name <name>]`](#fluence-add-service---no-input---name-name)
+* [`fluence remove [SERVICE] [--no-input]`](#fluence-remove-service---no-input)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -522,7 +523,7 @@ _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blo
 
 ## `fluence add [SERVICE] [--no-input] [--name <name>]`
 
-Initialize fluence project
+Add service to fluence.yaml
 
 ```
 USAGE
@@ -536,9 +537,30 @@ FLAGS
   --no-input     Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Initialize fluence project
+  Add service to fluence.yaml
 
 EXAMPLES
   $ fluence service add
+```
+
+## `fluence remove [SERVICE] [--no-input]`
+
+Remove service from fluence.yaml
+
+```
+USAGE
+  $ fluence remove [SERVICE] [--no-input]
+
+ARGUMENTS
+  SERVICE  Service name, relative path to a service or url to .tar.gz archive
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Remove service from fluence.yaml
+
+EXAMPLES
+  $ fluence service remove
 ```
 <!-- commandsstop -->
