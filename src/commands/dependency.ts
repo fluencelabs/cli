@@ -110,8 +110,9 @@ export default class Dependency extends Command {
 
     const handleVersion = async (): Promise<void> => {
       const result =
-        (await initReadonlyDependencyConfig(this)).dependency[dependencyName] ??
-        recommendedVersion;
+        (await initReadonlyDependencyConfig(this)).dependency?.[
+          dependencyName
+        ] ?? recommendedVersion;
 
       this.log(
         `Using version ${color.yellow(result)}${
@@ -126,14 +127,33 @@ export default class Dependency extends Command {
 
     const handleUse = async (version: string): Promise<void> => {
       const dependencyConfig = await initDependencyConfig(this);
-      if (version === RECOMMENDED) {
+      if (dependencyConfig.dependency === undefined) {
+        if (version !== RECOMMENDED) {
+          dependencyConfig.dependency = {
+            [dependencyName]: version,
+          };
+        }
+      } else if (version === RECOMMENDED) {
         delete dependencyConfig.dependency[dependencyName];
+        if (Object.keys(dependencyConfig.dependency).length === 0) {
+          delete dependencyConfig.dependency;
+        }
       } else {
         dependencyConfig.dependency[dependencyName] = version;
       }
 
+      switch (dependencyName) {
+        case "aqua": {
+          await initAquaCli(this);
+          break;
+        }
+        default: {
+          const _exhaustiveCheck: never = dependencyName;
+          return _exhaustiveCheck;
+        }
+      }
+
       await dependencyConfig.$commit();
-      await initAquaCli(this);
       await handleVersion();
     };
 

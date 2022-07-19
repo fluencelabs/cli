@@ -17,7 +17,7 @@
 import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
-export const AQUA_RECOMMENDED_VERSION = "0.7.4-329";
+export const AQUA_RECOMMENDED_VERSION = "0.7.4-332";
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
@@ -37,6 +37,7 @@ export const TS_DIR_NAME = "ts";
 export const JS_DIR_NAME = "js";
 export const MODULES_DIR_NAME = "modules";
 export const SERVICES_DIR_NAME = "services";
+export const NPM_DIR_NAME = "npm";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
 export const SECRETS_CONFIG_FILE_NAME = `secrets.${YAML_EXT}`;

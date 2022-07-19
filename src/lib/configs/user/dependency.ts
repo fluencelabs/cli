@@ -42,7 +42,7 @@ export const isDependency = getIsStringUnion(npmDependencyList);
 
 type ConfigV0 = {
   version: 0;
-  dependency: DependencyMap;
+  dependency?: DependencyMap;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -55,14 +55,14 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
         [AQUA_NPM_DEPENDENCY]: { type: "string", nullable: true },
       },
       required: [],
+      nullable: true,
     },
   },
-  required: ["version", "dependency"],
+  required: ["version"],
 };
 
 const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
   version: 0,
-  dependency: {},
 });
 
 const migrations: Migrations<Config> = [];

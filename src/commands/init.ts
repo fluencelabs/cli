@@ -34,10 +34,10 @@ import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { usage } from "../lib/helpers/usage";
 import {
-  ensureDefaultAquaPath,
-  ensureExtensionsJsonPath,
-  ensureSettingsJsonPath,
-  ensureSrcMainAquaPath,
+  ensureFluenceAquaDir,
+  ensureVSCodeExtensionsJsonPath,
+  ensureVSCodeSettingsJsonPath,
+  ensureSrcAquaMainPath,
   getGitignorePath,
 } from "../lib/paths";
 import { input } from "../lib/prompt";
@@ -92,7 +92,7 @@ const extensionsConfig: ExtensionsJson = {
 };
 
 const ensureRecommendedExtensions = async (): Promise<void> => {
-  const extensionsJsonPath = await ensureExtensionsJsonPath();
+  const extensionsJsonPath = await ensureVSCodeExtensionsJsonPath();
 
   let fileContent: string;
   try {
@@ -143,11 +143,11 @@ const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
 };
 const validateSettingsJson = ajv.compile(settingsJsonSchema);
 const initSettingsConfig = async (): Promise<SettingsJson> => ({
-  [AQUA_SETTINGS_IMPORTS]: [await ensureDefaultAquaPath()],
+  [AQUA_SETTINGS_IMPORTS]: [await ensureFluenceAquaDir()],
 });
 
 const ensureRecommendedSettings = async (): Promise<void> => {
-  const settingsJsonPath = await ensureSettingsJsonPath();
+  const settingsJsonPath = await ensureVSCodeSettingsJsonPath();
 
   let fileContent: string;
   try {
@@ -232,7 +232,7 @@ export const init = async (options: InitOptions): Promise<void> => {
 
     await initReadonlyFluenceConfig(commandObj);
 
-    const srcMainAquaPath = await ensureSrcMainAquaPath();
+    const srcMainAquaPath = await ensureSrcAquaMainPath();
     try {
       await fsPromises.access(srcMainAquaPath);
     } catch {

@@ -35,9 +35,9 @@ import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { usage } from "../lib/helpers/usage";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
-  ensureTmpAppServiceJsonPath,
-  ensureDefaultAquaPath,
-  ensureSrcMainAquaPath,
+  ensureFluenceTmpAppServiceJsonPath,
+  ensureFluenceAquaDir,
+  ensureSrcAquaMainPath,
 } from "../lib/paths";
 import { input } from "../lib/prompt";
 
@@ -114,10 +114,10 @@ export default class Run extends Command {
     const data = await getRunData(flags, this);
     const imports: Array<string> = [
       ...(flags.import ?? []),
-      await ensureDefaultAquaPath(),
+      await ensureFluenceAquaDir(),
     ];
 
-    const appJsonServicePath = await ensureTmpAppServiceJsonPath();
+    const appJsonServicePath = await ensureFluenceTmpAppServiceJsonPath();
     if (appConfig !== null) {
       await fsPromises.writeFile(
         appJsonServicePath,
@@ -161,7 +161,7 @@ const ensureAquaPath = async (
     return aquaPathFromArgs;
   }
 
-  return ensureSrcMainAquaPath();
+  return ensureSrcAquaMainPath();
 };
 
 type RunData = Record<string, unknown>;

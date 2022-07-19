@@ -24,11 +24,11 @@ import type { AquaCLI } from "./aquaCli";
 import type { ServicesV2 } from "./configs/project/app";
 import { FS_OPTIONS } from "./const";
 import {
-  ensureAppJSPath,
-  ensureAppTSPath,
-  ensureDeployedAppAquaPath,
-  ensureJSPath,
-  ensureTSPath,
+  ensureFluenceJSAppPath,
+  ensureFluenceTSAppPath,
+  ensureFluenceAquaDeployedAppPath,
+  ensureFluenceJSDir,
+  ensureFluenceTSDir,
 } from "./paths";
 
 const APP = "App";
@@ -61,8 +61,8 @@ const generateRegisterAppTSorJS = async ({
 }): Promise<void> => {
   await aquaCli({
     flags: {
-      input: await ensureDeployedAppAquaPath(),
-      output: await (isJS ? ensureJSPath() : ensureTSPath()),
+      input: await ensureFluenceAquaDeployedAppPath(),
+      output: await (isJS ? ensureFluenceJSDir() : ensureFluenceTSDir()),
       js: isJS,
     },
   });
@@ -106,7 +106,7 @@ export function registerApp(
 `;
 
   await fsPromises.writeFile(
-    await (isJS ? ensureAppJSPath() : ensureAppTSPath()),
+    await (isJS ? ensureFluenceJSAppPath() : ensureFluenceTSAppPath()),
     appContent,
     FS_OPTIONS
   );
@@ -121,7 +121,7 @@ export const generateRegisterApp = async (
   options: GenerateRegisterAppOptions
 ): Promise<void> => {
   CliUx.ux.action.start(
-    `Compiling ${color.yellow(await ensureDeployedAppAquaPath())}`
+    `Compiling ${color.yellow(await ensureFluenceAquaDeployedAppPath())}`
   );
   await generateRegisterAppTSorJS({ ...options, isJS: true });
   await generateRegisterAppTSorJS({ ...options, isJS: false });
@@ -134,7 +134,7 @@ const getDeploysDataName = (serviceName: string): string =>
 export const generateDeployedAppAqua = async (
   services: ServicesV2
 ): Promise<void> => {
-  const appServicesFilePath = await ensureDeployedAppAquaPath();
+  const appServicesFilePath = await ensureFluenceAquaDeployedAppPath();
   const appServicesAqua =
     // Codegeneration:
     `export App

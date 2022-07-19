@@ -21,7 +21,7 @@ import type { JSONSchemaType } from "ajv";
 import { ajv } from "../../ajv";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
 import { NETWORKS, Relays } from "../../multiaddr";
-import { ensureProjectFluenceDirPath, getProjectRootDir } from "../../paths";
+import { ensureFluenceDir, getProjectRootDir } from "../../paths";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -236,7 +236,7 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigDirPath: getProjectRootDir,
-  getSchemaDirPath: ensureProjectFluenceDirPath,
+  getSchemaDirPath: ensureFluenceDir,
   examples,
 };
 

@@ -35,11 +35,11 @@ import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
-  ensureAppJSPath,
-  ensureAppTSPath,
-  ensureDeployedAppAquaPath,
-  ensureDeployedAppJSPath,
-  ensureDeployedAppTSPath,
+  ensureFluenceJSAppPath,
+  ensureFluenceTSAppPath,
+  ensureFluenceAquaDeployedAppPath,
+  ensureFluenceJSDeployedAppPath,
+  ensureFluenceTSDeployedAppPath,
 } from "../lib/paths";
 import { confirm } from "../lib/prompt";
 
@@ -158,11 +158,11 @@ export const removeApp = async ({
 
   if (Object.keys(notRemovedServices).length === 0) {
     const pathsToRemove = await Promise.all([
-      ensureDeployedAppAquaPath(),
-      ensureAppTSPath(),
-      ensureAppJSPath(),
-      ensureDeployedAppTSPath(),
-      ensureDeployedAppJSPath(),
+      ensureFluenceAquaDeployedAppPath(),
+      ensureFluenceTSAppPath(),
+      ensureFluenceJSAppPath(),
+      ensureFluenceTSDeployedAppPath(),
+      ensureFluenceJSDeployedAppPath(),
       Promise.resolve(appConfig.$getPath()),
     ]);
 

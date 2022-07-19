@@ -72,9 +72,9 @@ import { isUrl } from "../lib/helpers/validations";
 import { getKeyPairFromFlags } from "../lib/keypairs";
 import { getRandomRelayAddr, getRandomRelayId } from "../lib/multiaddr";
 import {
-  ensureModulesDir,
-  ensureServicesDir,
-  ensureTmpDeployJsonPath,
+  ensureFluenceModulesDir,
+  ensureFluenceServicesDir,
+  ensureFluenceTmpDeployJsonPath,
 } from "../lib/paths";
 import { confirm } from "../lib/prompt";
 
@@ -139,7 +139,7 @@ export default class Deploy extends Command {
       fluenceConfig,
     });
     const aquaCli = await initAquaCli(this);
-    const tmpDeployJSONPath = await ensureTmpDeployJsonPath();
+    const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
     const successfullyDeployedServices: ServicesV2 = {};
     for (const {
       count,
@@ -425,10 +425,10 @@ const downloadAndDecompress = async (
 };
 
 const downloadModule = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureModulesDir());
+  downloadAndDecompress(get, await ensureFluenceModulesDir());
 
 const downloadService = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureServicesDir());
+  downloadAndDecompress(get, await ensureFluenceServicesDir());
 
 /* eslint-disable camelcase */
 type JSONModuleConf = {

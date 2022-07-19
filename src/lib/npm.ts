@@ -27,7 +27,7 @@ import {
 import { AQUA_RECOMMENDED_VERSION, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
-import { ensureUserFluenceDir } from "./paths";
+import { ensureUserFluenceNpmDir } from "./paths";
 
 type NPMInstallOptions = {
   packageName: string;
@@ -43,27 +43,19 @@ const npmInstall = async ({
   commandObj,
 }: NPMInstallOptions): Promise<string> =>
   execPromise(
-    `npm i ${packageName}@${version} -g --prefix ${await ensureNpmDir(
+    `npm i ${packageName}@${version} -g --prefix ${await ensureUserFluenceNpmDir(
       commandObj
     )}`,
     message
   );
-
-export const ensureNpmDir = async (commandObj: CommandObj): Promise<string> => {
-  const userFluenceDir = await ensureUserFluenceDir(commandObj);
-  const npmPath = path.join(userFluenceDir, "npm");
-  await fsPromises.mkdir(npmPath, { recursive: true });
-  return npmPath;
-};
 
 const getVersionToUse = async (
   recommendedVersion: string,
   name: NPMDependency,
   commandObj: CommandObj
 ): Promise<string> => {
-  const version = (await initReadonlyDependencyConfig(commandObj)).dependency[
-    name
-  ];
+  const version = (await initReadonlyDependencyConfig(commandObj))
+    ?.dependency?.[name];
   return typeof version === "string" ? version : recommendedVersion;
 };
 
@@ -88,7 +80,7 @@ export const ensureNpmDependency = async ({
   commandObj,
 }: NpmDependencyOptions): Promise<string> => {
   const { bin, packageName, recommendedVersion } = npmDependencies[name];
-  const npmDirPath = await ensureNpmDir(commandObj);
+  const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
   const dependencyPath = path.join(npmDirPath, "bin", bin);
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
