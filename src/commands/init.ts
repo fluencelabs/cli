@@ -245,7 +245,7 @@ export const init = async (options: InitOptions): Promise<void> => {
 
     commandObj.log(
       color.magentaBright(
-        `\nFluence project successfully initialized at ${replaceHomeDir(
+        `\nSuccessfully initialized Fluence project template at ${replaceHomeDir(
           projectPath
         )}\n`
       )

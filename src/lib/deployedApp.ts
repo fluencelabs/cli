@@ -23,6 +23,7 @@ import camelcase from "camelcase";
 import type { AquaCLI } from "./aquaCli";
 import type { ServicesV2 } from "./configs/project/app";
 import { FS_OPTIONS } from "./const";
+import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import {
   ensureFluenceJSAppPath,
   ensureFluenceTSAppPath,
@@ -121,7 +122,9 @@ export const generateRegisterApp = async (
   options: GenerateRegisterAppOptions
 ): Promise<void> => {
   CliUx.ux.action.start(
-    `Compiling ${color.yellow(await ensureFluenceAquaDeployedAppPath())}`
+    `Compiling ${color.yellow(
+      replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
+    )}`
   );
   await generateRegisterAppTSorJS({ ...options, isJS: true });
   await generateRegisterAppTSorJS({ ...options, isJS: false });

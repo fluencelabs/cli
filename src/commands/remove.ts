@@ -16,6 +16,7 @@
 
 import fsPromises from "node:fs/promises";
 
+import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
 import { initAquaCli } from "../lib/aquaCli";
@@ -31,6 +32,7 @@ import {
 } from "../lib/deployedApp";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
@@ -63,13 +65,17 @@ export default class Remove extends Command {
     const appConfig = await initAppConfig(this);
 
     if (appConfig === null) {
-      this.error("There is nothing to remove");
+      this.error(
+        "Seems like project is not currently deployed. Nothing to remove"
+      );
     }
 
     if (
       isInteractive && // when isInteractive is false - removeApp without asking
       !(await confirm({
-        message: "Are you sure you want to remove your app?",
+        message: `Are you sure you want to remove app described in ${color.yellow(
+          replaceHomeDir(appConfig.$getPath())
+        )}?`,
         isInteractive,
       }))
     ) {
@@ -107,7 +113,12 @@ export const removeApp = async ({
   isInteractive: boolean;
   relay: string | undefined;
 }>): Promise<void> => {
-  const { keyPairName, timestamp, services, relays } = appConfig;
+  commandObj.log(
+    `Going to remove app described in ${color.yellow(
+      replaceHomeDir(appConfig.$getPath())
+    )}`
+  );
+  const { keyPairName, services, relays } = appConfig;
   const keyPair = await getKeyPair({ commandObj, keyPairName, isInteractive });
   const aquaCli = await initAquaCli(commandObj);
   const notRemovedServices: ServicesV2 = {};
@@ -117,7 +128,7 @@ export const removeApp = async ({
     const notRemovedServicesByName: typeof servicesByName = {};
     for (const [deployName, services] of Object.entries(servicesByName)) {
       for (const service of services) {
-        const { serviceId, peerId, blueprintId } = service;
+        const { serviceId, peerId } = service;
         try {
           // eslint-disable-next-line no-await-in-loop
           await aquaCli(
@@ -131,14 +142,9 @@ export const removeApp = async ({
                 timeout,
               },
             },
-            `Removing service`,
+            "Removing",
             {
-              name: serviceName,
-              id: serviceId,
-              blueprintId,
-              relay: addr,
-              "deployed on": peerId,
-              "deployed at": timestamp,
+              service: `${serviceName}.${deployName}.${serviceId}`,
             }
           );
         } catch (error) {

@@ -67,6 +67,7 @@ import { downloadFile, stringToServiceName } from "../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getHashOfString } from "../lib/helpers/getHashOfString";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { usage } from "../lib/helpers/usage";
 import { isUrl } from "../lib/helpers/validations";
 import { getKeyPairFromFlags } from "../lib/keypairs";
@@ -109,14 +110,15 @@ export default class Deploy extends Command {
       const doRemove =
         flags[FORCE_FLAG_NAME] ||
         (await confirm({
-          message:
-            "Currently you need to remove your app to deploy again. Do you want to remove?",
+          message: `Previously deployed app described in ${color.yellow(
+            replaceHomeDir(appConfig.$getPath())
+          )} needs to be removed to continue. Do you want to remove?`,
           isInteractive,
           flagName: FORCE_FLAG_NAME,
         }));
 
       if (!doRemove) {
-        this.error("You have to confirm in order to continue");
+        this.error("You have to confirm to continue");
       }
 
       await removeApp({
@@ -138,6 +140,11 @@ export default class Deploy extends Command {
       commandObj: this,
       fluenceConfig,
     });
+    this.log(
+      `Going to deploy project described in ${color.yellow(
+        replaceHomeDir(fluenceConfig.$getPath())
+      )}`
+    );
     const aquaCli = await initAquaCli(this);
     const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
     const successfullyDeployedServices: ServicesV2 = {};
@@ -553,8 +560,8 @@ const deployService = async ({
           timeout,
         },
       },
-      "Deploying service",
-      { serviceName, deployName, on: peerId, relay }
+      "Deploying",
+      { service: `${serviceName}.${deployName}`, on: peerId }
     );
   } catch (error) {
     commandObj.warn(`Wasn't able to deploy service\n${String(error)}`);
