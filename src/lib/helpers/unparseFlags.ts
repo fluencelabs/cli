@@ -16,19 +16,21 @@
 
 const unparseFlag = (
   flagName: string,
-  flagValue: string | boolean | undefined
+  flagValue: string | number | boolean | undefined
 ): string => {
   if (flagValue === undefined || flagValue === false) {
     return "";
   }
 
-  return ` \\\n--${flagName}${flagValue === true ? "" : ` '${flagValue}'`}`;
+  return ` \\\n-${flagName.length > 1 ? "-" : ""}${flagName}${
+    flagValue === true ? "" : ` '${flagValue}'`
+  }`;
 };
 
 export const unparseFlags = (
   flags: Record<
     string,
-    string | boolean | undefined | Array<string | undefined>
+    string | number | boolean | undefined | Array<string | undefined>
   >
 ): string =>
   Object.entries(flags)

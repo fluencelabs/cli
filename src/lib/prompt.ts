@@ -141,7 +141,7 @@ export const input = ({
 
 type SeparatorObj = InstanceType<typeof Separator>;
 
-export type Choices<T> = T extends string
+export type Choices<T> = [T] extends [string]
   ? Array<T | SeparatorObj>
   : Array<{ value: T; name: string } | SeparatorObj>;
 

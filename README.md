@@ -153,13 +153,15 @@ USAGE
   $ fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]
 
 ARGUMENTS
-  NAME  Dependency name. Currently the only dependency is aqua
+  NAME  Dependency name. One of: aqua, marine, mrepl, cargo-generate. If you omit NAME argument and include --use
+        recommended - all dependencies will be reset to recommended versions
 
 FLAGS
   -v, --version                  Show current version of the dependency
   --no-input                     Don't interactively ask for any input from the user
-  --use=<version | recommended>  Set version of the dependency that you want to use. Use recommended keyword if you want
-                                 to use recommended version
+  --use=<version | recommended>  Set dependency version. Use recommended keyword to set recommended version for the
+                                 dependency. If you omit NAME argument and include --use recommended - all dependencies
+                                 will be reset to recommended versions
 
 DESCRIPTION
   Manage dependencies stored inside .fluence directory of the current user

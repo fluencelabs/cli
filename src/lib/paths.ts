@@ -23,7 +23,9 @@ import {
   APP_SERVICE_JSON_FILE_NAME,
   APP_TS_FILE_NAME,
   AQUA_DIR_NAME,
+  CARGO_DIR_NAME,
   CommandObj,
+  CRATES_TOML,
   DEFAULT_SRC_AQUA_FILE_NAME,
   DEPLOYED_APP_AQUA_FILE_NAME,
   DEPLOYED_APP_JS_FILE_NAME,
@@ -61,6 +63,16 @@ export const ensureUserFluenceNpmDir = async (
   commandObj: CommandObj
 ): Promise<string> =>
   ensureDir(path.join(await ensureUserFluenceDir(commandObj), NPM_DIR_NAME));
+
+export const ensureUserFluenceCargoDir = async (
+  commandObj: CommandObj
+): Promise<string> =>
+  ensureDir(path.join(await ensureUserFluenceDir(commandObj), CARGO_DIR_NAME));
+
+export const ensureUserFluenceCargoCratesPath = async (
+  commandObj: CommandObj
+): Promise<string> =>
+  path.join(await ensureUserFluenceCargoDir(commandObj), CRATES_TOML);
 
 // Project paths:
 

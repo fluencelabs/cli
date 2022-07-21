@@ -108,7 +108,7 @@ export const removeApp = async ({
   relay,
 }: Readonly<{
   commandObj: CommandObj;
-  timeout: string | undefined;
+  timeout: number | undefined;
   appConfig: AppConfig;
   isInteractive: boolean;
   relay: string | undefined;

@@ -513,7 +513,7 @@ type DeployServiceOptions = Readonly<{
   relay: string;
   secretKey: string;
   aquaCli: AquaCLI;
-  timeout: string | undefined;
+  timeout: number | undefined;
   serviceName: string;
   deployName: string;
   tmpDeployJSONPath: string;

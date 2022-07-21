@@ -19,12 +19,14 @@ import path from "node:path";
 
 import color from "@oclif/color";
 
+import { getVersionToUse } from "./configs/user/dependency";
 import {
   AQUA_NPM_DEPENDENCY,
-  initReadonlyDependencyConfig,
+  AQUA_RECOMMENDED_VERSION,
+  BIN_DIR_NAME,
+  CommandObj,
   NPMDependency,
-} from "./configs/user/dependency";
-import { AQUA_RECOMMENDED_VERSION, CommandObj } from "./const";
+} from "./const";
 import { execPromise } from "./execPromise";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import { ensureUserFluenceNpmDir } from "./paths";
@@ -49,16 +51,6 @@ const npmInstall = async ({
     message
   );
 
-const getVersionToUse = async (
-  recommendedVersion: string,
-  name: NPMDependency,
-  commandObj: CommandObj
-): Promise<string> => {
-  const version = (await initReadonlyDependencyConfig(commandObj))
-    ?.dependency?.[name];
-  return typeof version === "string" ? version : recommendedVersion;
-};
-
 export const npmDependencies: Record<
   NPMDependency,
   { recommendedVersion: string; bin: string; packageName: string }
@@ -81,12 +73,12 @@ export const ensureNpmDependency = async ({
 }: NpmDependencyOptions): Promise<string> => {
   const { bin, packageName, recommendedVersion } = npmDependencies[name];
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
-  const dependencyPath = path.join(npmDirPath, "bin", bin);
+  const dependencyPath = path.join(npmDirPath, BIN_DIR_NAME, bin);
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   try {
     await fsPromises.access(dependencyPath);
-    const result = await execPromise(`${dependencyPath} --version`);
+    const result = await getNpmDependencyVersion(dependencyPath);
     if (!result.includes(version)) {
       throw new Error("Outdated");
     }
@@ -99,7 +91,18 @@ export const ensureNpmDependency = async ({
       )} of ${packageName} to ${replaceHomeDir(npmDirPath)}`,
       commandObj,
     });
+    const result = await getNpmDependencyVersion(dependencyPath);
+    if (!result.includes(version)) {
+      return commandObj.error(
+        `Not able to install version ${color.yellow(
+          version
+        )} of ${packageName} to ${replaceHomeDir(npmDirPath)}`
+      );
+    }
   }
 
   return dependencyPath;
 };
+
+const getNpmDependencyVersion = (dependencyPath: string): Promise<string> =>
+  execPromise(`${dependencyPath} --version`);

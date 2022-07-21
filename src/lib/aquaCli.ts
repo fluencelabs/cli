@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import { AQUA_NPM_DEPENDENCY } from "./configs/user/dependency";
-import type { CommandObj } from "./const";
+import { AQUA_NPM_DEPENDENCY, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
 import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureNpmDependency } from "./npm";
 
+/**
+ * Execution timeout in milliseconds
+ */
+const EXECUTION_TIMEOUT = 90_000;
+
 type Flags<T extends string> = Record<
   T,
-  string | boolean | Array<string | undefined>
+  string | number | boolean | Array<string | undefined>
 >;
 type OptionalFlags<T extends string> = Partial<
-  Record<T, string | boolean | undefined | Array<string | undefined>>
+  Record<T, string | number | boolean | undefined | Array<string | undefined>>
 >;
 
 export type AquaCliInput =
@@ -78,7 +82,7 @@ export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
       message === undefined
         ? undefined
         : getMessageWithKeyValuePairs(message, keyValuePairs),
-      Number.isNaN(timeoutNumber) ? undefined : timeoutNumber
+      Number.isNaN(timeoutNumber) ? EXECUTION_TIMEOUT : timeoutNumber
     );
   };
 };

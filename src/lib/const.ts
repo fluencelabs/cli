@@ -18,6 +18,11 @@ import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
 export const AQUA_RECOMMENDED_VERSION = "0.7.4-332";
+export const MARINE_RECOMMENDED_VERSION = "0.11.0";
+export const MREPL_RECOMMENDED_VERSION = "0.16.2";
+export const CARGO_GENERATE_RECOMMENDED_VERSION = "0.15.2";
+export const RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE = "nightly-x86_64";
+export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
@@ -25,6 +30,7 @@ export const JS_EXT = "js";
 export const JSON_EXT = "json";
 export const YAML_EXT = "yaml";
 export const WASM_EXT = "wasm";
+export const TOML_EXT = "toml";
 
 export const FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
@@ -38,6 +44,8 @@ export const JS_DIR_NAME = "js";
 export const MODULES_DIR_NAME = "modules";
 export const SERVICES_DIR_NAME = "services";
 export const NPM_DIR_NAME = "npm";
+export const CARGO_DIR_NAME = "cargo";
+export const BIN_DIR_NAME = "bin";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
 export const SECRETS_CONFIG_FILE_NAME = `secrets.${YAML_EXT}`;
@@ -64,6 +72,8 @@ export const APP_TS_FILE_NAME = `app.${TS_EXT}`;
 export const APP_JS_FILE_NAME = `app.${JS_EXT}`;
 export const DEPLOYED_APP_TS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${TS_EXT}`;
 export const DEPLOYED_APP_JS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${JS_EXT}`;
+
+export const CRATES_TOML = `.crates.${TOML_EXT}`;
 
 export const FS_OPTIONS = {
   encoding: "utf8",
@@ -100,7 +110,7 @@ export const NO_INPUT_FLAG = {
 
 export const TIMEOUT_FLAG_NAME = "timeout";
 export const TIMEOUT_FLAG = {
-  [TIMEOUT_FLAG_NAME]: Flags.string({
+  [TIMEOUT_FLAG_NAME]: Flags.integer({
     description: "Timeout used for command execution",
     helpValue: "<milliseconds>",
   }),
@@ -121,3 +131,17 @@ Cargo.lock
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
+
+export const MARINE_CARGO_DEPENDENCY = "marine";
+export const MREPL_CARGO_DEPENDENCY = "mrepl";
+export const CARGO_GENERATE_CARGO_DEPENDENCY = "cargo-generate";
+export const cargoDependencyList = [
+  MARINE_CARGO_DEPENDENCY,
+  MREPL_CARGO_DEPENDENCY,
+  CARGO_GENERATE_CARGO_DEPENDENCY,
+] as const;
+export type CargoDependency = typeof cargoDependencyList[number];
+
+export const AQUA_NPM_DEPENDENCY = "aqua";
+export const npmDependencyList = [AQUA_NPM_DEPENDENCY] as const;
+export type NPMDependency = typeof npmDependencyList[number];
