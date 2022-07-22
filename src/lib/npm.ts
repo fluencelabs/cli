@@ -73,7 +73,9 @@ export const ensureNpmDependency = async ({
 }: NpmDependencyOptions): Promise<string> => {
   const { bin, packageName, recommendedVersion } = npmDependencies[name];
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
-  const dependencyPath = path.join(npmDirPath, BIN_DIR_NAME, bin);
+  const dependencyPath = commandObj.config.windows
+    ? path.join(npmDirPath, bin)
+    : path.join(npmDirPath, BIN_DIR_NAME, bin);
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   try {

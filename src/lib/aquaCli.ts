@@ -78,7 +78,7 @@ export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
     const timeoutNumber = Number(flags.timeout);
 
     return execPromise(
-      `${aquaCliPath} ${command ?? ""}${unparseFlags(flags)}`,
+      `${aquaCliPath} ${command ?? ""}${unparseFlags(flags, commandObj)}`,
       message === undefined
         ? undefined
         : getMessageWithKeyValuePairs(message, keyValuePairs),
