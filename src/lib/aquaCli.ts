@@ -19,19 +19,12 @@ import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
 import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureNpmDependency } from "./npm";
+import type { Flags, OptionalFlags } from "./typeHelpers";
 
 /**
  * Execution timeout in milliseconds
  */
-const EXECUTION_TIMEOUT = 90_000;
-
-type Flags<T extends string> = Record<
-  T,
-  string | number | boolean | Array<string | undefined>
->;
-type OptionalFlags<T extends string> = Partial<
-  Record<T, string | number | boolean | undefined | Array<string | undefined>>
->;
+const AQUA_CLI_EXECUTION_TIMEOUT = 90_000;
 
 export type AquaCliInput =
   | {
@@ -82,7 +75,7 @@ export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
       message === undefined
         ? undefined
         : getMessageWithKeyValuePairs(message, keyValuePairs),
-      Number.isNaN(timeoutNumber) ? EXECUTION_TIMEOUT : timeoutNumber
+      Number.isNaN(timeoutNumber) ? AQUA_CLI_EXECUTION_TIMEOUT : timeoutNumber
     );
   };
 };

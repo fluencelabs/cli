@@ -129,6 +129,7 @@ const hasRequiredRustTarget = async (): Promise<boolean> =>
 const cargoInstall = async ({
   packageName,
   version,
+  isNightly,
   commandObj,
   message,
 }: CargoDependencyInfo & {
@@ -138,7 +139,9 @@ const cargoInstall = async ({
 }): Promise<string> => {
   await ensureRust(commandObj);
   return execPromise(
-    `${CARGO} install ${packageName} ${unparseFlags(
+    `${CARGO}${
+      isNightly === true ? " +nightly" : ""
+    } install ${packageName} ${unparseFlags(
       {
         version,
         root: await ensureUserFluenceCargoDir(commandObj),
@@ -152,16 +155,19 @@ const cargoInstall = async ({
 type CargoDependencyInfo = {
   recommendedVersion: string;
   packageName: string;
+  isNightly?: true;
 };
 
 export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
   [MARINE_CARGO_DEPENDENCY]: {
     recommendedVersion: MARINE_RECOMMENDED_VERSION,
     packageName: MARINE_CARGO_DEPENDENCY,
+    isNightly: true,
   },
   [MREPL_CARGO_DEPENDENCY]: {
     recommendedVersion: MREPL_RECOMMENDED_VERSION,
     packageName: MREPL_CARGO_DEPENDENCY,
+    isNightly: true,
   },
   [CARGO_GENERATE_CARGO_DEPENDENCY]: {
     recommendedVersion: CARGO_GENERATE_RECOMMENDED_VERSION,
