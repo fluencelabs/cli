@@ -53,10 +53,13 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
       );
     }
 
-    const rustupInitFlags = unparseFlags({
-      quiet: true,
-      y: true,
-    });
+    const rustupInitFlags = unparseFlags(
+      {
+        quiet: true,
+        y: true,
+      },
+      commandObj
+    );
 
     await execPromise(
       `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- ${rustupInitFlags}`,
@@ -135,10 +138,13 @@ const cargoInstall = async ({
 }): Promise<string> => {
   await ensureRust(commandObj);
   return execPromise(
-    `${CARGO} install ${packageName} ${unparseFlags({
-      version,
-      root: await ensureUserFluenceCargoDir(commandObj),
-    })}`,
+    `${CARGO} install ${packageName} ${unparseFlags(
+      {
+        version,
+        root: await ensureUserFluenceCargoDir(commandObj),
+      },
+      commandObj
+    )}`,
     message
   );
 };

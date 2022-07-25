@@ -27,7 +27,7 @@ const unparseFlag = (
 
   return ` ${commandObj.config.windows ? "" : "\\\n"}-${
     flagName.length > 1 ? "-" : ""
-  }${flagName}${flagValue === true ? "" : ` ${flagValue}`}`;
+  }${flagName}${flagValue === true ? "" : ` '${flagValue}'`}`;
 };
 
 export const unparseFlags = (
