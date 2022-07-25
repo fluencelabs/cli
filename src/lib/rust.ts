@@ -130,6 +130,7 @@ const cargoInstall = async ({
   packageName,
   version,
   isNightly,
+  isGlobalDependency,
   commandObj,
   message,
 }: CargoDependencyInfo & {
@@ -144,7 +145,14 @@ const cargoInstall = async ({
     } install ${packageName} ${unparseFlags(
       {
         version,
-        root: await ensureUserFluenceCargoDir(commandObj),
+        ...(isGlobalDependency === true
+          ? {}
+          : {
+              root: await ensureUserFluenceCargoDir(
+                commandObj,
+                isGlobalDependency
+              ),
+            }),
       },
       commandObj
     )}`,
@@ -156,6 +164,7 @@ type CargoDependencyInfo = {
   recommendedVersion: string;
   packageName: string;
   isNightly?: true;
+  isGlobalDependency?: true;
 };
 
 export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
@@ -172,6 +181,7 @@ export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
   [CARGO_GENERATE_CARGO_DEPENDENCY]: {
     recommendedVersion: CARGO_GENERATE_RECOMMENDED_VERSION,
     packageName: CARGO_GENERATE_CARGO_DEPENDENCY,
+    isGlobalDependency: true,
   },
 };
 
@@ -183,9 +193,15 @@ type CargoDependencyOptions = {
 const isCorrectVersionInstalled = async ({
   name,
   commandObj,
-}: CargoDependencyOptions): Promise<boolean> => {
+  isGlobalDependency,
+}: CargoDependencyOptions & {
+  isGlobalDependency: true | undefined;
+}): Promise<boolean> => {
   const { packageName, recommendedVersion } = cargoDependencies[name];
-  const cratesTomlPath = await ensureUserFluenceCargoCratesPath(commandObj);
+  const cratesTomlPath = await ensureUserFluenceCargoCratesPath(
+    commandObj,
+    isGlobalDependency
+  );
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   try {
@@ -204,42 +220,43 @@ export const ensureCargoDependency = async ({
   commandObj,
 }: CargoDependencyOptions): Promise<string> => {
   const dependency = cargoDependencies[name];
+  const { isGlobalDependency, packageName, recommendedVersion } = dependency;
   const userFluenceCargoCratesPath = await ensureUserFluenceCargoCratesPath(
-    commandObj
+    commandObj,
+    isGlobalDependency
   );
-  if (await isCorrectVersionInstalled({ name, commandObj })) {
-    return path.join(
-      userFluenceCargoCratesPath,
-      BIN_DIR_NAME,
-      dependency.packageName
-    );
+  const dependencyPath = path.join(
+    await ensureUserFluenceCargoDir(commandObj, isGlobalDependency),
+    BIN_DIR_NAME,
+    packageName
+  );
+  if (
+    await isCorrectVersionInstalled({ name, commandObj, isGlobalDependency })
+  ) {
+    return dependencyPath;
   }
-  const version = await getVersionToUse(
-    dependency.recommendedVersion,
-    name,
-    commandObj
-  );
+  const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   await cargoInstall({
     version,
-    message: `Installing version ${color.yellow(version)} of ${
-      dependency.packageName
-    } to ${replaceHomeDir(await ensureUserFluenceCargoDir(commandObj))}`,
+    message: `Installing version ${color.yellow(
+      version
+    )} of ${packageName} to ${replaceHomeDir(
+      await ensureUserFluenceCargoDir(commandObj, isGlobalDependency)
+    )}`,
     commandObj,
     ...dependency,
   });
 
-  if (await isCorrectVersionInstalled({ name, commandObj })) {
-    return path.join(
-      userFluenceCargoCratesPath,
-      BIN_DIR_NAME,
-      dependency.packageName
-    );
+  if (
+    await isCorrectVersionInstalled({ name, commandObj, isGlobalDependency })
+  ) {
+    return dependencyPath;
   }
 
   return commandObj.error(
-    `Not able to install ${color.yellow(version)} of ${
-      dependency.packageName
-    } to ${replaceHomeDir(userFluenceCargoCratesPath)}`
+    `Not able to install ${color.yellow(
+      version
+    )} of ${packageName} to ${replaceHomeDir(userFluenceCargoCratesPath)}`
   );
 };
