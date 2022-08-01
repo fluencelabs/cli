@@ -25,6 +25,7 @@ import {
   AQUA_DIR_NAME,
   CARGO_DIR_NAME,
   CommandObj,
+  CONFIG_TOML,
   CRATES_TOML,
   DEFAULT_SRC_AQUA_FILE_NAME,
   DEPLOYED_APP_AQUA_FILE_NAME,
@@ -151,3 +152,6 @@ export const ensureFluenceTmpAppServiceJsonPath = async (): Promise<string> =>
 
 export const ensureFluenceTmpDeployJsonPath = async (): Promise<string> =>
   path.join(await ensureFluenceTmpDir(), DEPLOY_CONFIG_FILE_NAME);
+
+export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> =>
+  path.join(await ensureFluenceTmpDir(), CONFIG_TOML);

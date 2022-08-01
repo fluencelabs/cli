@@ -20,7 +20,6 @@ import path from "node:path";
 import color from "@oclif/color";
 import { CliUx, Command, Flags } from "@oclif/core";
 import camelcase from "camelcase";
-import decompress from "decompress";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
@@ -57,26 +56,25 @@ import {
   SERVICE_CONFIG_FILE_NAME,
   TIMEOUT_FLAG,
   TIMEOUT_FLAG_NAME,
-  WASM_EXT,
 } from "../lib/const";
 import {
   generateDeployedAppAqua,
   generateRegisterApp,
 } from "../lib/deployedApp";
-import { downloadFile, stringToServiceName } from "../lib/helpers/downloadFile";
+import {
+  downloadModule,
+  downloadService,
+  getModuleUrlOrAbsolutePath,
+  getModuleWasmPath,
+  isUrl,
+} from "../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
-import { getHashOfString } from "../lib/helpers/getHashOfString";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { usage } from "../lib/helpers/usage";
-import { isUrl } from "../lib/helpers/validations";
 import { getKeyPairFromFlags } from "../lib/keypairs";
+import { initMarineCli } from "../lib/marineCli";
 import { getRandomRelayAddr, getRandomRelayId } from "../lib/multiaddr";
-import {
-  ensureFluenceModulesDir,
-  ensureFluenceServicesDir,
-  ensureFluenceTmpDeployJsonPath,
-} from "../lib/paths";
+import { ensureFluenceTmpDeployJsonPath } from "../lib/paths";
 import { confirm } from "../lib/prompt";
 
 import { removeApp } from "./remove";
@@ -98,7 +96,6 @@ export default class Deploy extends Command {
     ...KEY_PAIR_FLAG,
     ...NO_INPUT_FLAG,
   };
-  static override usage: string = usage(this);
   async run(): Promise<void> {
     const { flags } = await this.parse(Deploy);
     const isInteractive = getIsInteractive(flags);
@@ -135,6 +132,9 @@ export default class Deploy extends Command {
       this.error(keyPair.message);
     }
     const fluenceConfig = await initReadonlyFluenceConfig(this);
+    if (fluenceConfig === null) {
+      this.error("You must init Fluence project first to deploy");
+    }
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
     const preparedForDeployItems = await prepareForDeploy({
       commandObj: this,
@@ -219,14 +219,11 @@ const overrideModule = (
   moduleName: string
 ): ModuleV0 => ({ ...mod, ...overrideModules?.[moduleName] });
 
-const normalizeGet = (get: string, configDirPath: string): string =>
-  isUrl(get) ? get : path.resolve(configDirPath, get);
-
 type PreparedForDeploy = Omit<DeployInfo, "modules" | "serviceDirPath"> & {
   deployJSON: DeployJSONConfig;
 };
 
-type GetDeployJSONsOptions = {
+type GetDeployJSONsArg = {
   commandObj: CommandObj;
   fluenceConfig: FluenceConfigReadonly;
 };
@@ -234,7 +231,7 @@ type GetDeployJSONsOptions = {
 const prepareForDeploy = async ({
   commandObj,
   fluenceConfig,
-}: GetDeployJSONsOptions): Promise<Array<PreparedForDeploy>> => {
+}: GetDeployJSONsArg): Promise<Array<PreparedForDeploy>> => {
   if (
     fluenceConfig.services === undefined ||
     Object.keys(fluenceConfig.services).length === 0
@@ -357,31 +354,42 @@ const prepareForDeploy = async ({
     ...new Set(
       allDeployInfos.flatMap(
         ({ modules, serviceDirPath }): Array<string> =>
-          modules.map(({ get }): string => normalizeGet(get, serviceDirPath))
+          modules.map(({ get }): string =>
+            getModuleUrlOrAbsolutePath(get, serviceDirPath)
+          )
       )
     ),
   ];
-
-  CliUx.ux.action.start("Making sure all modules are downloaded");
+  const marineCli = await initMarineCli(commandObj);
+  CliUx.ux.action.start("Making sure all modules are downloaded and built");
   const mapOfAllModuleConfigs = new Map(
     await Promise.all(
       setOfAllGets.map(
         (get): Promise<[string, ModuleConfigReadonly]> =>
-          (async (): Promise<[string, ModuleConfigReadonly]> => [
-            get,
-            (isUrl(get)
-              ? await initReadonlyModuleConfig(
-                  await downloadModule(get),
-                  commandObj
-                )
-              : await initReadonlyModuleConfig(get, commandObj)) ??
+          (async (): Promise<[string, ModuleConfigReadonly]> => {
+            const moduleConfig =
+              (isUrl(get)
+                ? await initReadonlyModuleConfig(
+                    await downloadModule(get),
+                    commandObj
+                  )
+                : await initReadonlyModuleConfig(get, commandObj)) ??
               CliUx.ux.action.stop(color.red("error")) ??
               commandObj.error(
                 `Module with get: ${color.yellow(
                   get
                 )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
-              ),
-          ])()
+              );
+
+            if (moduleConfig.type === "rust") {
+              await marineCli({
+                command: "build",
+                flags: { release: true },
+                workingDir: path.dirname(moduleConfig.$getPath()),
+              });
+            }
+            return [get, moduleConfig];
+          })()
       )
     )
   );
@@ -393,7 +401,9 @@ const prepareForDeploy = async ({
         [DEFAULT_DEPLOY_NAME]: {
           modules: modules.map(({ get, ...overrides }): JSONModuleConf => {
             const moduleConfig =
-              mapOfAllModuleConfigs.get(normalizeGet(get, serviceDirPath)) ??
+              mapOfAllModuleConfigs.get(
+                getModuleUrlOrAbsolutePath(get, serviceDirPath)
+              ) ??
               commandObj.error(
                 `Unreachable. Wasn't able to find module config for ${get}`
               );
@@ -408,34 +418,6 @@ const prepareForDeploy = async ({
     }
   );
 };
-
-const ARCHIVE_FILE = "archive.tar.gz";
-
-const getHashPath = async (get: string, dir: string): Promise<string> =>
-  path.join(dir, `${stringToServiceName(get)}_${await getHashOfString(get)}`);
-
-const downloadAndDecompress = async (
-  get: string,
-  dir: string
-): Promise<string> => {
-  const dirPath = await getHashPath(get, dir);
-  try {
-    await fsPromises.access(dirPath);
-    return dirPath;
-  } catch {}
-  await fsPromises.mkdir(dirPath, { recursive: true });
-  const archivePath = path.join(dirPath, ARCHIVE_FILE);
-  await downloadFile(archivePath, get);
-  await decompress(archivePath, dirPath);
-  await fsPromises.unlink(archivePath);
-  return dirPath;
-};
-
-const downloadModule = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureFluenceModulesDir());
-
-const downloadService = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureFluenceServicesDir());
 
 /* eslint-disable camelcase */
 type JSONModuleConf = {
@@ -475,10 +457,7 @@ const serviceModuleToJSONModuleConfig = (
 
   const jsonModuleConfig: JSONModuleConf = {
     name,
-    path: path.resolve(
-      path.dirname(moduleConfig.$getPath()),
-      `${overriddenConfig.name}.${WASM_EXT}`
-    ),
+    path: getModuleWasmPath(overriddenConfig),
   };
   if (loggerEnabled === true) {
     jsonModuleConfig.logger_enabled = true;
@@ -508,7 +487,7 @@ const serviceModuleToJSONModuleConfig = (
 };
 /* eslint-enable camelcase */
 
-type DeployServiceOptions = Readonly<{
+type DeployServiceArg = Readonly<{
   deployJSON: DeployJSONConfig;
   relay: string;
   secretKey: string;
@@ -536,7 +515,7 @@ const deployService = async ({
   tmpDeployJSONPath,
   timeout,
   commandObj,
-}: DeployServiceOptions & { peerId: string }): Promise<{
+}: DeployServiceArg & { peerId: string }): Promise<{
   deployedServiceConfig: DeployedServiceConfig;
   serviceName: string;
   deployName: string;

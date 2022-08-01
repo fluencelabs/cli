@@ -37,7 +37,6 @@ import {
   npmDependencyList,
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { usage } from "../lib/helpers/usage";
 import { ensureNpmDependency, npmDependencies } from "../lib/npm";
 import { confirm, input, list } from "../lib/prompt";
 import { cargoDependencies, ensureCargoDependency } from "../lib/rust";
@@ -80,7 +79,6 @@ export default class Dependency extends Command {
       )}. ${RESET_ALL_MESSAGE}`,
     },
   ];
-  static override usage: string = usage(this);
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Dependency);
     const isInteractive = getIsInteractive(flags);

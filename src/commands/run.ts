@@ -32,7 +32,6 @@ import {
 import { getAppJson } from "../lib/deployedApp";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { usage } from "../lib/helpers/usage";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -92,7 +91,6 @@ export default class Run extends Command {
     ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
   };
-  static override usage: string = usage(this);
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);

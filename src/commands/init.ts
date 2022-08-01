@@ -23,7 +23,7 @@ import { Command } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../lib/ajv";
-import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
+import { initNewReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
   CommandObj,
   FS_OPTIONS,
@@ -32,7 +32,6 @@ import {
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { usage } from "../lib/helpers/usage";
 import {
   ensureFluenceAquaDir,
   ensureVSCodeExtensionsJsonPath,
@@ -56,7 +55,6 @@ export default class Init extends Command {
       description: "Project path",
     },
   ];
-  static override usage: string = usage(this);
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Init);
     const isInteractive = getIsInteractive(flags);
@@ -205,13 +203,13 @@ const ensureGitIgnore = async (): Promise<void> => {
   return fsPromises.writeFile(gitIgnorePath, newGitIgnoreContent, FS_OPTIONS);
 };
 
-type InitOptions = {
+type InitArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
   projectPath?: string | undefined;
 };
 
-export const init = async (options: InitOptions): Promise<void> => {
+export const init = async (options: InitArg): Promise<void> => {
   const { commandObj, isInteractive } = options;
 
   const projectPath =
@@ -230,7 +228,7 @@ export const init = async (options: InitOptions): Promise<void> => {
     await fsPromises.mkdir(projectPath, { recursive: true });
     process.chdir(projectPath);
 
-    await initReadonlyFluenceConfig(commandObj);
+    await initNewReadonlyFluenceConfig(commandObj);
 
     const srcMainAquaPath = await ensureSrcAquaMainPath();
     try {

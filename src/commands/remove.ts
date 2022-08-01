@@ -33,7 +33,6 @@ import {
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { usage } from "../lib/helpers/usage";
 import { getKeyPair } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
@@ -56,7 +55,6 @@ export default class Remove extends Command {
     ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
   };
-  static override usage: string = usage(this);
   async run(): Promise<void> {
     const { flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);

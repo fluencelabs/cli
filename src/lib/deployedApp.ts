@@ -57,7 +57,7 @@ const generateRegisterAppTSorJS = async ({
   deployedServices,
   aquaCli,
   isJS,
-}: GenerateRegisterAppOptions & {
+}: GenerateRegisterAppArg & {
   isJS: boolean;
 }): Promise<void> => {
   await aquaCli({
@@ -113,13 +113,13 @@ export function registerApp(
   );
 };
 
-type GenerateRegisterAppOptions = {
+type GenerateRegisterAppArg = {
   deployedServices: ServicesV2;
   aquaCli: AquaCLI;
 };
 
 export const generateRegisterApp = async (
-  options: GenerateRegisterAppOptions
+  options: GenerateRegisterAppArg
 ): Promise<void> => {
   CliUx.ux.action.start(
     `Compiling ${color.yellow(

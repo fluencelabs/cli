@@ -26,7 +26,7 @@ import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
 import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
 import { list, Choices } from "./prompt";
 
-type GetUserKeyPairOptions = {
+type GetUserKeyPairArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
   keyPairName?: string | undefined;
@@ -36,7 +36,7 @@ const getUserKeyPair = async ({
   commandObj,
   keyPairName,
   isInteractive,
-}: GetUserKeyPairOptions): Promise<ConfigKeyPair> => {
+}: GetUserKeyPairArg): Promise<ConfigKeyPair> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
 
   if (keyPairName === undefined) {
@@ -103,7 +103,7 @@ const getUserKeyPair = async ({
   });
 };
 
-type GetKeyPairOptions = {
+type GetKeyPairArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
   keyPairName: string | undefined;
@@ -112,7 +112,7 @@ type GetKeyPairOptions = {
 const getProjectKeyPair = async ({
   commandObj,
   keyPairName,
-}: GetKeyPairOptions): Promise<ConfigKeyPair | undefined> => {
+}: GetKeyPairArg): Promise<ConfigKeyPair | undefined> => {
   const projectSecretsConfig = await initReadonlyProjectSecretsConfig(
     commandObj
   );
@@ -129,7 +129,7 @@ const getProjectKeyPair = async ({
 };
 
 export const getKeyPair = async (
-  options: GetKeyPairOptions
+  options: GetKeyPairArg
 ): Promise<ConfigKeyPair> =>
   (await getProjectKeyPair(options)) ?? getUserKeyPair(options);
 

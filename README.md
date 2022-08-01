@@ -15,6 +15,7 @@ A tool that makes working with Fluence network more convenient
 
 # Prerequisites
 
+- Linux or MacOS (currently have some bugs on windows)
 - [Node.js >=16.0.0](https://nodejs.org/)
 
 # Usage
@@ -35,11 +36,10 @@ USAGE
 
 # Currently supported workflow example
 
-A lot of what is described next will be improved and automated in the future (e.g. development and building of marine services, key-management etc.) Currently Fluence CLI is a convenience wrapper around Aqua CLI
+A lot of what is described next will be improved and automated in the future (key-management etc.) Currently Fluence CLI is a convenience wrapper around Aqua CLI and Marine
 
 1. Run `fluence init` to initialize new project
 2. Run `fluence service add 'https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true'`. Config `fluence.yaml` in the root of the project directory will be updated to look like this:
-
 ```yaml
 version: 1
 services:
@@ -51,9 +51,10 @@ services:
 ```
 You can edit it if you want to deploy on specific network, specific peerId, specific number of times or if you want to override service configuration
 
-3. Run `fluence deploy` to deploy the application you described in `fluence.yaml`. User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag). You can also add project-level secret key to your project `.fluence/secrets.yaml` manually (key-pair management coming soon)
-
-4. Write some aqua in `src/aqua/main.aqua`. Example `src/aqua/main.aqua`:
+3. Run `fluence service new ./src/services/newService` to generate new service template. You will be asked if you want to add the service to `fluence.yaml` - say yes.
+4. Run `fluence service repl newService` to get service into the repl
+5. Run `fluence deploy` to deploy the application you described in `fluence.yaml`. Services written in rust will be automatically built before deployment. User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag). You can also add project-level secret key to your project `.fluence/secrets.yaml` manually (key-pair management coming soon)
+6. Write some aqua in `src/aqua/main.aqua`. Example `src/aqua/main.aqua`:
 ```aqua
 module Main
 
@@ -74,10 +75,9 @@ func add_one(value: u64) -> u64:
 ```
 `"deployed.app.aqua"` file is located at `.fluence/aqua/deployed.app.aqua`. `App.services()` method returns ids of the previously deployed services that you can use in your aqua code (this info is stored at `.fluence/app.yaml`.
 
-5. Run `fluence run -f 'add_one(1)'`. (function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and executed). 
+7. Run `fluence run -f 'add_one(1)'`. (function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and executed). 
 Alternatively, if you are js developer - import generated `registerApp` function from `.fluence/ts/app.ts` or `.fluence/js/app.js` and execute it after `Fluence.run()` in your js application in order to give access to deployed services ids to your aqua code. Then compile `src/aqua/main.aqua` using Aqua CLI. Import and run `add_one(1)` in your js code.
-
-6. Run `fluence remove` to remove the previously deployed fluence application 
+8. Run `fluence remove` to remove the previously deployed fluence application 
 
 
 # Contributing
@@ -97,23 +97,19 @@ If you want README.md file to be correctly generated please don't forget to run 
 
 <!-- commands -->
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
-* [`fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]`](#fluence-dependency-name--v---use-version--recommended---no-input)
-* [`fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`](#fluence-deploy---relay-multiaddr---force---timeout-milliseconds--k-name---no-input)
+* [`fluence dependency [NAME]`](#fluence-dependency-name)
+* [`fluence deploy`](#fluence-deploy)
 * [`fluence help [COMMAND]`](#fluence-help-command)
-* [`fluence init [PATH] [--no-input]`](#fluence-init-path---no-input)
-* [`fluence plugins`](#fluence-plugins)
-* [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin)
-* [`fluence plugins:inspect PLUGIN...`](#fluence-pluginsinspect-plugin)
-* [`fluence plugins:install PLUGIN...`](#fluence-pluginsinstall-plugin-1)
-* [`fluence plugins:link PLUGIN`](#fluence-pluginslink-plugin)
-* [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin)
-* [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-1)
-* [`fluence plugins:uninstall PLUGIN...`](#fluence-pluginsuninstall-plugin-2)
-* [`fluence plugins update`](#fluence-plugins-update)
-* [`fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]`](#fluence-remove---relay-multiaddr---timeout-milliseconds---no-input)
-* [`fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`](#fluence-run---relay-multiaddr---data-json---data-path-path---import-path---json-service-path---on-peer_id--i-path--f-function-call---timeout-milliseconds---no-input)
-* [`fluence add [PATH | URL] [--no-input] [--name <name>]`](#fluence-add-path--url---no-input---name-name)
-* [`fluence remove [SERVICE_NAME | PATH | URL] [--no-input]`](#fluence-remove-service_name--path--url---no-input)
+* [`fluence init [PATH]`](#fluence-init-path)
+* [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
+* [`fluence module new [PATH]`](#fluence-module-new-path)
+* [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence remove`](#fluence-remove)
+* [`fluence run`](#fluence-run)
+* [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
+* [`fluence service new [PATH]`](#fluence-service-new-path)
+* [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
+* [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
 
 ## `fluence autocomplete [SHELL]`
 
@@ -144,13 +140,13 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
-## `fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]`
+## `fluence dependency [NAME]`
 
 Manage dependencies stored inside .fluence directory of the current user
 
 ```
 USAGE
-  $ fluence dependency [NAME] [-v] [--use <version | recommended>] [--no-input]
+  $ fluence dependency [NAME] [-v | --use <value>] [--no-input]
 
 ARGUMENTS
   NAME  Dependency name. One of: aqua, marine, mrepl, cargo-generate. If you omit NAME argument and include --use
@@ -172,13 +168,13 @@ EXAMPLES
 
 _See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/dependency.ts)_
 
-## `fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]`
+## `fluence deploy`
 
 Deploy application, described in fluence.yaml
 
 ```
 USAGE
-  $ fluence deploy [--relay <multiaddr>] [--force] [--timeout <milliseconds>] [-k <name>] [--no-input]
+  $ fluence deploy [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--no-input]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -216,7 +212,7 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `fluence init [PATH] [--no-input]`
+## `fluence init [PATH]`
 
 Initialize fluence project
 
@@ -239,243 +235,79 @@ EXAMPLES
 
 _See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/init.ts)_
 
-## `fluence plugins`
+## `fluence module add [PATH | URL]`
 
-List installed plugins.
+Add module to service.yaml
 
 ```
 USAGE
-  $ fluence plugins [--core]
+  $ fluence module add [PATH | URL] [--no-input] [--name <value>] [--service <value>]
+
+ARGUMENTS
+  PATH | URL  Path to a module or url to .tar.gz archive
 
 FLAGS
-  --core  Show core plugins.
+  --name=<name>            Unique module name
+  --no-input               Don't interactively ask for any input from the user
+  --service=<name | path>  Service name from fluence.yaml or path to the service directory
 
 DESCRIPTION
-  List installed plugins.
+  Add module to service.yaml
 
 EXAMPLES
-  $ fluence plugins
+  $ fluence module add
 ```
 
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.1.0/src/commands/plugins/index.ts)_
+## `fluence module new [PATH]`
 
-## `fluence plugins:install PLUGIN...`
-
-Installs a plugin into the CLI.
+Create new marine module template
 
 ```
 USAGE
-  $ fluence plugins:install PLUGIN...
+  $ fluence module new [PATH] [--no-input]
 
 ARGUMENTS
-  PLUGIN  Plugin to install.
+  PATH  Path to a module
 
 FLAGS
-  -f, --force    Run yarn install with force flag.
-  -h, --help     Show CLI help.
-  -v, --verbose
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Installs a plugin into the CLI.
-
-  Can be installed from npm or a git url.
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
-  the CLI without the need to patch and update the whole CLI.
-
-ALIASES
-  $ fluence plugins add
+  Create new marine module template
 
 EXAMPLES
-  $ fluence plugins:install myplugin 
-
-  $ fluence plugins:install https://github.com/someuser/someplugin
-
-  $ fluence plugins:install someuser/someplugin
+  $ fluence module new
 ```
 
-## `fluence plugins:inspect PLUGIN...`
+## `fluence module remove [NAME | PATH | URL]`
 
-Displays installation properties of a plugin.
+Remove module from service.yaml
 
 ```
 USAGE
-  $ fluence plugins:inspect PLUGIN...
+  $ fluence module remove [NAME | PATH | URL] [--no-input] [--service <value>]
 
 ARGUMENTS
-  PLUGIN  [default: .] Plugin to inspect.
+  NAME | PATH | URL  Module name from service.yaml, path to a module or url to .tar.gz archive
 
 FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
+  --no-input               Don't interactively ask for any input from the user
+  --service=<name | path>  Service name from fluence.yaml or path to the service directory
 
 DESCRIPTION
-  Displays installation properties of a plugin.
+  Remove module from service.yaml
 
 EXAMPLES
-  $ fluence plugins:inspect myplugin
+  $ fluence module remove
 ```
 
-## `fluence plugins:install PLUGIN...`
-
-Installs a plugin into the CLI.
-
-```
-USAGE
-  $ fluence plugins:install PLUGIN...
-
-ARGUMENTS
-  PLUGIN  Plugin to install.
-
-FLAGS
-  -f, --force    Run yarn install with force flag.
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Installs a plugin into the CLI.
-
-  Can be installed from npm or a git url.
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
-  the CLI without the need to patch and update the whole CLI.
-
-ALIASES
-  $ fluence plugins add
-
-EXAMPLES
-  $ fluence plugins:install myplugin 
-
-  $ fluence plugins:install https://github.com/someuser/someplugin
-
-  $ fluence plugins:install someuser/someplugin
-```
-
-## `fluence plugins:link PLUGIN`
-
-Links a plugin into the CLI for development.
-
-```
-USAGE
-  $ fluence plugins:link PLUGIN
-
-ARGUMENTS
-  PATH  [default: .] path to plugin
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Links a plugin into the CLI for development.
-
-  Installation of a linked plugin will override a user-installed or core plugin.
-
-  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
-  command will override the user-installed or core plugin implementation. This is useful for development work.
-
-EXAMPLES
-  $ fluence plugins:link myplugin
-```
-
-## `fluence plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ fluence plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ fluence plugins unlink
-  $ fluence plugins remove
-```
-
-## `fluence plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ fluence plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ fluence plugins unlink
-  $ fluence plugins remove
-```
-
-## `fluence plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ fluence plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ fluence plugins unlink
-  $ fluence plugins remove
-```
-
-## `fluence plugins update`
-
-Update installed plugins.
-
-```
-USAGE
-  $ fluence plugins update [-h] [-v]
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Update installed plugins.
-```
-
-## `fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]`
+## `fluence remove`
 
 Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--relay <multiaddr>] [--timeout <milliseconds>] [--no-input]
+  $ fluence remove [--relay <value>] [--timeout <value>] [--no-input]
 
 FLAGS
   --no-input                Don't interactively ask for any input from the user
@@ -491,14 +323,14 @@ EXAMPLES
 
 _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/remove.ts)_
 
-## `fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>] [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]`
+## `fluence run`
 
 Run aqua script
 
 ```
 USAGE
-  $ fluence run [--relay <multiaddr>] [--data <json>] [--data-path <path>] [--import <path>] [--json-service <path>]
-    [--on <peer_id>] [-i <path>] [-f <function-call>] [--timeout <milliseconds>] [--no-input]
+  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
+    [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout <value>] [--no-input]
 
 FLAGS
   -f, --func=<function-call>  Function call
@@ -523,16 +355,16 @@ EXAMPLES
 
 _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
 
-## `fluence add [PATH | URL] [--no-input] [--name <name>]`
+## `fluence service add [PATH | URL]`
 
 Add service to fluence.yaml
 
 ```
 USAGE
-  $ fluence add [PATH | URL] [--no-input] [--name <name>]
+  $ fluence service add [PATH | URL] [--no-input] [--name <value>]
 
 ARGUMENTS
-  PATH | URL  Relative path to a service or url to .tar.gz archive
+  PATH | URL  Path to a service or url to .tar.gz archive
 
 FLAGS
   --name=<name>  Unique service name
@@ -545,16 +377,38 @@ EXAMPLES
   $ fluence service add
 ```
 
-## `fluence remove [SERVICE_NAME | PATH | URL] [--no-input]`
+## `fluence service new [PATH]`
+
+Create new marine service template
+
+```
+USAGE
+  $ fluence service new [PATH] [--no-input] [--name <value>]
+
+ARGUMENTS
+  PATH  Path to a service
+
+FLAGS
+  --name=<name>  Unique service name
+  --no-input     Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Create new marine service template
+
+EXAMPLES
+  $ fluence service new
+```
+
+## `fluence service remove [NAME | PATH | URL]`
 
 Remove service from fluence.yaml
 
 ```
 USAGE
-  $ fluence remove [SERVICE_NAME | PATH | URL] [--no-input]
+  $ fluence service remove [NAME | PATH | URL] [--no-input]
 
 ARGUMENTS
-  SERVICE_NAME | PATH | URL  Service name, relative path to a service or url to .tar.gz archive
+  NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
@@ -564,5 +418,26 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence service remove
+```
+
+## `fluence service repl [NAME | PATH | URL]`
+
+Open service inside repl
+
+```
+USAGE
+  $ fluence service repl [NAME | PATH | URL] [--no-input]
+
+ARGUMENTS
+  NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Open service inside repl
+
+EXAMPLES
+  $ fluence service repl
 ```
 <!-- commandsstop -->

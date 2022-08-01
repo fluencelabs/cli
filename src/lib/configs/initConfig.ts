@@ -28,7 +28,7 @@ import { replaceHomeDir } from "../helpers/replaceHomeDir";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
 
-type SchemaOptions = {
+type SchemaArg = {
   name: string;
   configDirPath: string;
   getSchemaDirPath: GetPath | undefined;
@@ -42,7 +42,7 @@ const ensureSchema = async ({
   getSchemaDirPath,
   commandObj,
   schema,
-}: SchemaOptions): Promise<string> => {
+}: SchemaArg): Promise<string> => {
   const schemaDir = path.join(
     getSchemaDirPath === undefined
       ? configDirPath
@@ -82,7 +82,7 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
     configString = fileContent.startsWith(schemaPathCommentStart)
       ? `${[schemaPathComment, ...fileContent.split("\n").slice(1)]
           .join("\n")
-          .trim()}\n`
+          .trim()}`
       : `${schemaPathComment}\n${fileContent}`;
   } catch {
     if (getDefaultConfig === undefined) {
@@ -96,12 +96,13 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
               .split("\n")
               .map((ex): string => `# ${ex}`)
               .join("\n")
-      }\n`,
+              .trim()
+      }`,
       {},
       await getDefaultConfig(commandObj)
     );
   }
-  await fsPromises.writeFile(configPath, configString + "\n", FS_OPTIONS);
+  await fsPromises.writeFile(configPath, `${configString}\n`, FS_OPTIONS);
   return configString;
 };
 

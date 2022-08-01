@@ -110,6 +110,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
                     type: "object",
                     properties: {
                       get: { type: "string", nullable: true },
+                      type: { type: "string", nullable: true, enum: ["rust"] },
                       name: { type: "string", nullable: true },
                       maxHeapSize: { type: "string", nullable: true },
                       loggerEnabled: { type: "boolean", nullable: true },
@@ -215,7 +216,7 @@ export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 const examples = `
 services:
   someService: # Service name in camelCase
-    get: ./relative/path # URL or relative path
+    get: ./relative/path # URL or path
     deploy:
       default: # Deployment name in camelCase
         # You can access deployment in aqua like this:
@@ -240,11 +241,14 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   examples,
 };
 
-export const initFluenceConfig = getConfigInitFunction(
+export const initNewFluenceConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault
 );
-export const initReadonlyFluenceConfig = getReadonlyConfigInitFunction(
+export const initNewReadonlyFluenceConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );
+export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
+export const initReadonlyFluenceConfig =
+  getReadonlyConfigInitFunction(initConfigOptions);

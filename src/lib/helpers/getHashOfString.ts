@@ -13,23 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import crypto from "node:crypto";
-
-export const getHashOfString = (str: string): Promise<string> => {
-  const md5Hash = crypto.createHash("md5");
-  return new Promise((resolve): void => {
-    md5Hash.on("readable", (): void => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const data = md5Hash.read();
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-      if (data) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        resolve(data.toString("hex"));
-      }
-    });
-
-    md5Hash.write(str);
-    md5Hash.end();
-  });
-};

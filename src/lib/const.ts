@@ -18,8 +18,8 @@ import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
 export const AQUA_RECOMMENDED_VERSION = "0.7.4-332";
-export const MARINE_RECOMMENDED_VERSION = "0.11.0";
-export const MREPL_RECOMMENDED_VERSION = "0.16.2";
+export const MARINE_RECOMMENDED_VERSION = "0.12.1";
+export const MREPL_RECOMMENDED_VERSION = "0.18.0";
 export const CARGO_GENERATE_RECOMMENDED_VERSION = "0.15.2";
 export const RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE = "nightly-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
@@ -74,6 +74,7 @@ export const DEPLOYED_APP_TS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${TS_EXT}`;
 export const DEPLOYED_APP_JS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${JS_EXT}`;
 
 export const CRATES_TOML = `.crates.${TOML_EXT}`;
+export const CONFIG_TOML = `Config.${TOML_EXT}`;
 
 export const FS_OPTIONS = {
   encoding: "utf8",

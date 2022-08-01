@@ -123,7 +123,7 @@ const hasRequiredRustToolchain = async (): Promise<boolean> =>
 
 const hasRequiredRustTarget = async (): Promise<boolean> =>
   (await execPromise(`${RUSTUP} target list`)).includes(
-    RUST_WASM32_WASI_TARGET
+    `${RUST_WASM32_WASI_TARGET} (installed)`
   );
 
 const cargoInstall = async ({
@@ -137,9 +137,8 @@ const cargoInstall = async ({
   version: string;
   commandObj: CommandObj;
   message: string;
-}): Promise<string> => {
-  await ensureRust(commandObj);
-  return execPromise(
+}): Promise<string> =>
+  execPromise(
     `${CARGO}${
       isNightly === true ? " +nightly" : ""
     } install ${packageName} ${unparseFlags(
@@ -158,7 +157,6 @@ const cargoInstall = async ({
     )}`,
     message
   );
-};
 
 type CargoDependencyInfo = {
   recommendedVersion: string;
@@ -185,7 +183,7 @@ export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
   },
 };
 
-type CargoDependencyOptions = {
+type CargoDependencyArg = {
   name: CargoDependency;
   commandObj: CommandObj;
 };
@@ -194,7 +192,7 @@ const isCorrectVersionInstalled = async ({
   name,
   commandObj,
   isGlobalDependency,
-}: CargoDependencyOptions & {
+}: CargoDependencyArg & {
   isGlobalDependency: true | undefined;
 }): Promise<boolean> => {
   const { packageName, recommendedVersion } = cargoDependencies[name];
@@ -218,7 +216,8 @@ const isCorrectVersionInstalled = async ({
 export const ensureCargoDependency = async ({
   name,
   commandObj,
-}: CargoDependencyOptions): Promise<string> => {
+}: CargoDependencyArg): Promise<string> => {
+  await ensureRust(commandObj);
   const dependency = cargoDependencies[name];
   const { isGlobalDependency, packageName, recommendedVersion } = dependency;
   const userFluenceCargoCratesPath = await ensureUserFluenceCargoCratesPath(

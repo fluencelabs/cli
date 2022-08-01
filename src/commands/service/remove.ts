@@ -21,12 +21,11 @@ import { Command } from "@oclif/core";
 
 import { initFluenceConfig } from "../../lib/configs/project/fluence";
 import { FLUENCE_CONFIG_FILE_NAME, NO_INPUT_FLAG } from "../../lib/const";
-import { stringToServiceName } from "../../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
-import { usage } from "../../lib/helpers/usage";
+import { input } from "../../lib/prompt";
 
-const SERVICE_ARG = "SERVICE_NAME | PATH | URL";
+const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class Remove extends Command {
   static override description = `Remove service from ${color.yellow(
@@ -38,39 +37,64 @@ export default class Remove extends Command {
   };
   static override args = [
     {
-      name: SERVICE_ARG,
-      description:
-        "Service name, relative path to a service or url to .tar.gz archive",
+      name: NAME_OR_PATH_OR_URL,
+      description: `Service name from ${color.yellow(
+        FLUENCE_CONFIG_FILE_NAME
+      )}, path to a service or url to .tar.gz archive`,
     },
   ];
-  static override usage: string = usage(this);
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
-
-    assert(typeof args[SERVICE_ARG] === "string");
+    const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
+    assert(
+      typeof nameOrPathOrUrlFromArgs === "string" ||
+        typeof nameOrPathOrUrlFromArgs === "undefined"
+    );
+    const nameOrPathOrUrl =
+      nameOrPathOrUrlFromArgs ??
+      (await input({
+        isInteractive,
+        message: `Enter service name from ${color.yellow(
+          FLUENCE_CONFIG_FILE_NAME
+        )}, path to a service or url to .tar.gz archive`,
+      }));
     const fluenceConfig = await initFluenceConfig(this);
+    if (fluenceConfig === null) {
+      this.error("You must init Fluence project first to remove services");
+    }
     if (fluenceConfig.services === undefined) {
       this.error(
         `There are no services in ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
       );
     }
-    const serviceName = stringToServiceName(args[SERVICE_ARG]);
-    if (!(serviceName in fluenceConfig.services)) {
+    if (nameOrPathOrUrl in fluenceConfig.services) {
+      delete fluenceConfig.services[nameOrPathOrUrl];
+    } else if (
+      Object.values(fluenceConfig.services).some(
+        ({ get }): boolean => get === nameOrPathOrUrl
+      )
+    ) {
+      const [serviceName] =
+        Object.entries(fluenceConfig.services).find(
+          ([, { get }]): boolean => get === nameOrPathOrUrl
+        ) ?? [];
+      assert(typeof serviceName === "string");
+      delete fluenceConfig.services[serviceName];
+    } else {
       this.error(
-        `There is no service ${color.yellow(serviceName)} in ${color.yellow(
+        `There is no service ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )}`
       );
     }
-    delete fluenceConfig.services[serviceName];
     if (Object.keys(fluenceConfig.services).length === 0) {
       delete fluenceConfig.services;
     }
     await fluenceConfig.$commit();
     this.log(
-      `Removed ${color.yellow(serviceName)} from ${color.yellow(
+      `Removed service ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
         FLUENCE_CONFIG_FILE_NAME
       )}`
     );

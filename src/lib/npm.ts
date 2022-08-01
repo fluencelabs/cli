@@ -31,7 +31,7 @@ import { execPromise } from "./execPromise";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import { ensureUserFluenceNpmDir } from "./paths";
 
-type NPMInstallOptions = {
+type NPMInstallArg = {
   packageName: string;
   version: string;
   message: string;
@@ -43,7 +43,7 @@ const npmInstall = async ({
   version,
   message,
   commandObj,
-}: NPMInstallOptions): Promise<string> =>
+}: NPMInstallArg): Promise<string> =>
   execPromise(
     `npm i ${packageName}@${version} -g --prefix ${await ensureUserFluenceNpmDir(
       commandObj
@@ -62,7 +62,7 @@ export const npmDependencies: Record<
   },
 };
 
-type NpmDependencyOptions = {
+type NpmDependencyArg = {
   name: NPMDependency;
   commandObj: CommandObj;
 };
@@ -70,7 +70,7 @@ type NpmDependencyOptions = {
 export const ensureNpmDependency = async ({
   name,
   commandObj,
-}: NpmDependencyOptions): Promise<string> => {
+}: NpmDependencyArg): Promise<string> => {
   const { bin, packageName, recommendedVersion } = npmDependencies[name];
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
   const dependencyPath = commandObj.config.windows
