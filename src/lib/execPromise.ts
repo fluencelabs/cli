@@ -59,7 +59,9 @@ export const execPromise = (
       }, timeout);
 
     const childProcess = exec(command, (error, stdout, stderr): void => {
-      execTimeout !== false && clearTimeout(execTimeout);
+      if (execTimeout !== false) {
+        clearTimeout(execTimeout);
+      }
 
       if (error !== null) {
         if (typeof message === "string") {

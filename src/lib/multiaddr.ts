@@ -22,6 +22,7 @@ import {
   testNet,
   Node,
 } from "@fluencelabs/fluence-network-environment";
+import { Multiaddr } from "multiaddr";
 
 export const NETWORKS = ["kras", "stage", "testnet"] as const;
 export type Network = typeof NETWORKS[number];
@@ -60,9 +61,8 @@ export const getRandomRelayAddr = (relays: Relays): string => {
 
 const getIds = (nodes: Array<string>): Array<string> =>
   nodes.map((addr): string => {
-    const addrParts = addr.split("/");
-    const id = addrParts[addrParts.length - 1];
-    assert(typeof id === "string");
+    const id = new Multiaddr(addr).getPeerId();
+    assert(id !== null);
     return id;
   });
 

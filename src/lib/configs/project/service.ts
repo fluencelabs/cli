@@ -111,7 +111,9 @@ modules:
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
+
 export type ServiceConfig = InitializedConfig<LatestConfig>;
+
 export type ServiceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const getInitConfigOptions = (
@@ -131,6 +133,7 @@ export const initServiceConfig = (
   commandObj: CommandObj
 ): Promise<InitializedConfig<LatestConfig> | null> =>
   getConfigInitFunction(getInitConfigOptions(configDirPath))(commandObj);
+
 export const initReadonlyServiceConfig = (
   configDirPath: string,
   commandObj: CommandObj
@@ -138,6 +141,7 @@ export const initReadonlyServiceConfig = (
   getReadonlyConfigInitFunction(getInitConfigOptions(configDirPath))(
     commandObj
   );
+
 const getDefault: (
   relativePathToFacade: string
 ) => GetDefaultConfig<LatestConfig> =
@@ -150,6 +154,7 @@ const getDefault: (
       },
     },
   });
+
 export const initNewReadonlyServiceConfig = (
   configPath: string,
   commandObj: CommandObj,
