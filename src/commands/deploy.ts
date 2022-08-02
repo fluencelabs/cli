@@ -100,6 +100,22 @@ export default class Deploy extends Command {
     const { flags } = await this.parse(Deploy);
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
+
+    const keyPair = await getKeyPairFromFlags(flags, this, isInteractive);
+    if (keyPair instanceof Error) {
+      this.error(keyPair.message);
+    }
+    const fluenceConfig = await initReadonlyFluenceConfig(this);
+    if (fluenceConfig === null) {
+      this.error("You must init Fluence project first to deploy");
+    }
+    const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
+    const preparedForDeployItems = await prepareForDeploy({
+      commandObj: this,
+      fluenceConfig,
+    });
+    const aquaCli = await initAquaCli(this);
+    const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
     const appConfig = await initAppConfig(this);
     if (appConfig !== null) {
       // Prompt user to remove previously deployed app if
@@ -127,31 +143,16 @@ export default class Deploy extends Command {
       });
     }
 
-    const keyPair = await getKeyPairFromFlags(flags, this, isInteractive);
-    if (keyPair instanceof Error) {
-      this.error(keyPair.message);
-    }
-    const fluenceConfig = await initReadonlyFluenceConfig(this);
-    if (fluenceConfig === null) {
-      this.error("You must init Fluence project first to deploy");
-    }
-    const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
-    const preparedForDeployItems = await prepareForDeploy({
-      commandObj: this,
-      fluenceConfig,
-    });
+    const successfullyDeployedServices: ServicesV2 = {};
     this.log(
       `Going to deploy project described in ${color.yellow(
         replaceHomeDir(fluenceConfig.$getPath())
       )}`
     );
-    const aquaCli = await initAquaCli(this);
-    const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
-    const successfullyDeployedServices: ServicesV2 = {};
     for (const {
       count,
       deployJSON,
-      deployName,
+      deployId,
       peerId = getRandomRelayId(fluenceConfig.relays),
       serviceName,
     } of preparedForDeployItems) {
@@ -161,7 +162,7 @@ export default class Deploy extends Command {
           deployJSON,
           peerId,
           serviceName,
-          deployName,
+          deployId,
           relay,
           secretKey: keyPair.secretKey,
           aquaCli,
@@ -170,11 +171,11 @@ export default class Deploy extends Command {
           commandObj: this,
         });
         if (res !== null) {
-          const { deployedServiceConfig, deployName, serviceName } = res;
+          const { deployedServiceConfig, deployId, serviceName } = res;
           const successfullyDeployedServicesByName =
             successfullyDeployedServices[serviceName] ?? {};
-          successfullyDeployedServicesByName[deployName] = [
-            ...(successfullyDeployedServicesByName[deployName] ?? []),
+          successfullyDeployedServicesByName[deployId] = [
+            ...(successfullyDeployedServicesByName[deployId] ?? []),
             deployedServiceConfig,
           ];
           successfullyDeployedServices[serviceName] =
@@ -207,7 +208,7 @@ export default class Deploy extends Command {
 type DeployInfo = {
   serviceName: string;
   serviceDirPath: string;
-  deployName: string;
+  deployId: string;
   count: number;
   peerId: string | undefined;
   modules: Array<ModuleV0>;
@@ -248,7 +249,8 @@ const prepareForDeploy = async ({
   type ServicePathPromises = Promise<{
     serviceName: string;
     serviceDirPath: string;
-    deploy: Record<string, ServiceDeployV1>;
+    get: string;
+    deploy: Array<ServiceDeployV1>;
   }>;
 
   CliUx.ux.action.start("Making sure all services are downloaded");
@@ -263,6 +265,7 @@ const prepareForDeploy = async ({
                   `Service name ${color.yellow(serviceName)} not in camelCase`
                 ),
           deploy,
+          get,
           serviceDirPath: isUrl(get)
             ? await downloadService(get)
             : path.resolve(get),
@@ -275,21 +278,27 @@ const prepareForDeploy = async ({
     serviceName: string;
     serviceConfig: ServiceConfigReadonly;
     serviceDirPath: string;
-    deploy: Record<string, ServiceDeployV1>;
+    deploy: Array<ServiceDeployV1>;
   }>;
 
   const serviceConfigs = await Promise.all(
     servicePaths.map(
-      ({ serviceName, serviceDirPath, deploy }): ServiceConfigPromises =>
+      ({ serviceName, serviceDirPath, deploy, get }): ServiceConfigPromises =>
         (async (): ServiceConfigPromises => ({
           serviceName,
           deploy,
           serviceConfig:
             (await initReadonlyServiceConfig(serviceDirPath, commandObj)) ??
             commandObj.error(
-              `Service ${color.yellow(serviceName)} doesn't have ${color.yellow(
+              `Service ${color.yellow(serviceName)} must have ${color.yellow(
                 SERVICE_CONFIG_FILE_NAME
-              )}`
+              )}. ${
+                isUrl(get)
+                  ? `Not able to find it after downloading and decompressing ${color.yellow(
+                      get
+                    )}`
+                  : `Not able to find it at ${color.yellow(get)}`
+              }`
             ),
           serviceDirPath,
         }))()
@@ -303,15 +312,15 @@ const prepareForDeploy = async ({
       serviceConfig,
       serviceDirPath,
     }): Array<DeployInfo> =>
-      Object.entries(deploy).map(
-        ([deployName, { count = 1, peerId, overrideModules }]): DeployInfo => ({
+      deploy.map(
+        ({ deployId, count = 1, peerId, overrideModules }): DeployInfo => ({
           serviceName,
           serviceDirPath,
-          deployName:
-            camelcase(deployName) === deployName
-              ? deployName
+          deployId:
+            camelcase(deployId) === deployId
+              ? deployId
               : commandObj.error(
-                  `Deploy name ${color.yellow(deployName)} not in camelCase`
+                  `DeployId ${color.yellow(deployId)} not in camelCase`
                 ),
           count,
           peerId: fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId,
@@ -327,8 +336,8 @@ const prepareForDeploy = async ({
                   FLUENCE_CONFIG_FILE_NAME
                 )} has service ${color.yellow(
                   serviceName
-                )} with deploy ${color.yellow(
-                  deployName
+                )} with deployId ${color.yellow(
+                  deployId
                 )} that has moduleOverrides for modules that don't exist in the service ${color.yellow(
                   serviceDirPath
                 )}. Please make sure ${color.yellow(
@@ -494,7 +503,7 @@ type DeployServiceArg = Readonly<{
   aquaCli: AquaCLI;
   timeout: number | undefined;
   serviceName: string;
-  deployName: string;
+  deployId: string;
   tmpDeployJSONPath: string;
   commandObj: CommandObj;
 }>;
@@ -508,7 +517,7 @@ const deployService = async ({
   deployJSON,
   peerId,
   serviceName,
-  deployName,
+  deployId,
   relay,
   secretKey,
   aquaCli,
@@ -518,7 +527,7 @@ const deployService = async ({
 }: DeployServiceArg & { peerId: string }): Promise<{
   deployedServiceConfig: DeployedServiceConfig;
   serviceName: string;
-  deployName: string;
+  deployId: string;
 } | null> => {
   await fsPromises.writeFile(
     tmpDeployJSONPath,
@@ -540,7 +549,7 @@ const deployService = async ({
         },
       },
       "Deploying",
-      { service: `${serviceName}.${deployName}`, on: peerId }
+      { service: serviceName, deployId, on: peerId }
     );
   } catch (error) {
     commandObj.warn(`Wasn't able to deploy service\n${String(error)}`);
@@ -559,7 +568,7 @@ const deployService = async ({
   return {
     deployedServiceConfig: { blueprintId, serviceId, peerId },
     serviceName,
-    deployName,
+    deployId,
   };
 };
 

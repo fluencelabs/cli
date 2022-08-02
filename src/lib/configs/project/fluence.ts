@@ -16,6 +16,7 @@
 
 import path from "node:path";
 
+import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajv";
@@ -30,6 +31,7 @@ import {
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
+  ConfigValidateFunction,
 } from "../initConfig";
 
 import type { ModuleV0 as ServiceModuleConfig } from "./service";
@@ -62,6 +64,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 
 export type OverrideModules = Record<string, FluenceConfigModule>;
 export type ServiceDeployV1 = {
+  deployId: string;
   count?: number;
   peerId?: string;
   overrideModules?: OverrideModules;
@@ -70,7 +73,7 @@ export type FluenceConfigModule = Partial<ServiceModuleConfig>;
 
 type ServiceV1 = {
   get: string;
-  deploy: Record<string, ServiceDeployV1>;
+  deploy: Array<ServiceDeployV1>;
 };
 
 type ConfigV1 = {
@@ -91,10 +94,13 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
         properties: {
           get: { type: "string" },
           deploy: {
-            type: "object",
-            additionalProperties: {
+            type: "array",
+            items: {
               type: "object",
               properties: {
+                deployId: {
+                  type: "string",
+                },
                 count: {
                   type: "number",
                   minimum: 1,
@@ -143,9 +149,8 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
                   required: [],
                 },
               },
-              required: [],
+              required: ["deployId"],
             },
-            required: [],
           },
         },
         required: ["get", "deploy"],
@@ -190,12 +195,14 @@ const migrations: Migrations<Config> = [
     const services = config.services.reduce<Record<string, ServiceV1>>(
       (acc, { name, count = 1 }, i): Record<string, ServiceV1> => ({
         ...acc,
-        [`random_${i}`]: {
+        [name]: {
           get: path.relative(
             getProjectRootDir(),
             path.join(getProjectRootDir(), "artifacts", name)
           ),
-          deploy: { default: { count } },
+          deploy: [
+            { deployId: `default_${i}`, ...(count > 1 ? { count } : {}) },
+          ],
         },
       }),
       {}
@@ -216,20 +223,54 @@ export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 const examples = `
 services:
   someService: # Service name in camelCase
-    get: ./relative/path # URL or path
+    get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true # URL or path
     deploy:
-      default: # Deployment name in camelCase
-        # You can access deployment in aqua like this:
+      - deployId: default # Deployment id in camelCase
+        # You can access deployment info in aqua like this:
         # services <- App.services()
         # on services.someService.default!.peerId:
         peerId: MY_PEER # Peer id or peer id name to deploy on. Default: Random peer id is selected for each deploy
         count: 1 # How many times to deploy. Default: 1
-        overrideModules: # Override modules from service.yaml
-          facade:
-            get: ./relative/path # Override facade module
+        # overrideModules: # Override modules from service.yaml
+        #   facade:
+        #     get: ./relative/path # Override facade module
 peerIds: # A map of named peerIds. Optional.
   MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
 relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras`;
+
+const validate: ConfigValidateFunction<LatestConfig> = (
+  config
+): ReturnType<ConfigValidateFunction<LatestConfig>> => {
+  if (config.services === undefined) {
+    return true;
+  }
+  const notUnique: Array<{
+    serviceName: string;
+    notUniqueDeployIds: Set<string>;
+  }> = [];
+  for (const [serviceName, { deploy }] of Object.entries(config.services)) {
+    const deployIds = new Set<string>();
+    const notUniqueDeployIds = new Set<string>();
+    for (const { deployId } of deploy) {
+      if (deployIds.has(deployId)) {
+        notUniqueDeployIds.add(deployId);
+      }
+      deployIds.add(deployId);
+    }
+    if (notUniqueDeployIds.size > 0) {
+      notUnique.push({ serviceName, notUniqueDeployIds });
+    }
+  }
+  if (notUnique.length > 0) {
+    return `Deploy ids must be unique. Not unique deploy ids found:\n${notUnique
+      .map(
+        ({ serviceName, notUniqueDeployIds }): string =>
+          `${color.yellow(serviceName)}: ${[...notUniqueDeployIds].join(", ")}`
+      )
+      .join("\n")}`;
+  }
+  return true;
+};
 
 export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0, configSchemaV1],
@@ -239,6 +280,7 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   getConfigDirPath: getProjectRootDir,
   getSchemaDirPath: ensureFluenceDir,
   examples,
+  validate,
 };
 
 export const initNewFluenceConfig = getConfigInitFunction(

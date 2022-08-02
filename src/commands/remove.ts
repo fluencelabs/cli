@@ -124,7 +124,7 @@ export const removeApp = async ({
 
   for (const [serviceName, servicesByName] of Object.entries(services)) {
     const notRemovedServicesByName: typeof servicesByName = {};
-    for (const [deployName, services] of Object.entries(servicesByName)) {
+    for (const [deployId, services] of Object.entries(servicesByName)) {
       for (const service of services) {
         const { serviceId, peerId } = service;
         try {
@@ -142,13 +142,15 @@ export const removeApp = async ({
             },
             "Removing",
             {
-              service: `${serviceName}.${deployName}.${serviceId}`,
+              service: serviceName,
+              deployId,
+              serviceId,
             }
           );
         } catch (error) {
           commandObj.warn(`When removing service\n${String(error)}`);
-          notRemovedServicesByName[deployName] = [
-            ...(notRemovedServicesByName[deployName] ?? []),
+          notRemovedServicesByName[deployId] = [
+            ...(notRemovedServicesByName[deployId] ?? []),
             service,
           ];
         }

@@ -117,11 +117,11 @@ export const addService = async ({
     ...fluenceConfig.services,
     [serviceName]: {
       get: pathOrUrlFromArgs,
-      deploy: {
-        [DEFAULT_DEPLOY_NAME]: {
-          count: 1,
+      deploy: [
+        {
+          deployId: DEFAULT_DEPLOY_NAME,
         },
-      },
+      ],
     },
   };
   await fluenceConfig.$commit();
