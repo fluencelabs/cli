@@ -86,7 +86,7 @@ const prompt = async <T, U extends { [NAME]: T }>({
 
   if (!isInteractive) {
     throw new Error(
-      `Can't prompt when ${color.yellow(
+      `Can't prompt when in non-interactive mode or when ${color.yellow(
         `--${NO_INPUT_FLAG_NAME}`
       )} is set.${advice}`
     );
@@ -101,7 +101,7 @@ const prompt = async <T, U extends { [NAME]: T }>({
   throw new Error("Prompt error");
 };
 
-type ConfirmOptions = DistinctQuestion & {
+type ConfirmArg = DistinctQuestion & {
   isInteractive: boolean;
   message: string;
   flagName?: string | undefined;
@@ -111,7 +111,7 @@ export const confirm = ({
   isInteractive,
   flagName,
   ...question
-}: ConfirmOptions): Promise<boolean> =>
+}: ConfirmArg): Promise<boolean> =>
   prompt({
     ...question,
     type: "confirm",
@@ -120,7 +120,7 @@ export const confirm = ({
     flagName,
   });
 
-type InputOptions = DistinctQuestion & {
+type InputArg = DistinctQuestion & {
   isInteractive: boolean;
   message: string;
   flagName?: string | undefined;
@@ -130,7 +130,7 @@ export const input = ({
   isInteractive,
   flagName,
   ...question
-}: InputOptions): Promise<string> =>
+}: InputArg): Promise<string> =>
   prompt({
     ...question,
     type: "input",
@@ -141,7 +141,7 @@ export const input = ({
 
 type SeparatorObj = InstanceType<typeof Separator>;
 
-export type Choices<T> = T extends string
+export type Choices<T> = [T] extends [string]
   ? Array<T | SeparatorObj>
   : Array<{ value: T; name: string } | SeparatorObj>;
 

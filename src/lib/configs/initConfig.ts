@@ -19,14 +19,22 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
-import replaceHomedir from "replace-homedir";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { ajv } from "../ajv";
 import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME } from "../const";
+import { replaceHomeDir } from "../helpers/replaceHomeDir";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
+
+type SchemaArg = {
+  name: string;
+  configDirPath: string;
+  getSchemaDirPath: GetPath | undefined;
+  commandObj: CommandObj;
+  schema: AnySchema;
+};
 
 const ensureSchema = async ({
   name,
@@ -34,13 +42,7 @@ const ensureSchema = async ({
   getSchemaDirPath,
   commandObj,
   schema,
-}: {
-  name: string;
-  configDirPath: string;
-  getSchemaDirPath: GetPath | undefined;
-  commandObj: CommandObj;
-  schema: AnySchema;
-}): Promise<string> => {
+}: SchemaArg): Promise<string> => {
   const schemaDir = path.join(
     getSchemaDirPath === undefined
       ? configDirPath
@@ -57,31 +59,51 @@ const ensureSchema = async ({
   return path.relative(configDirPath, schemaPath);
 };
 
-const getConfigString = async <LatestConfig extends BaseConfig>(
-  configPath: string,
-  schemaRelativePath: string,
-  commandObj: CommandObj,
-  getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined
-): Promise<string | null> => {
+type GetConfigString<LatestConfig> = {
+  configPath: string;
+  schemaRelativePath: string;
+  commandObj: CommandObj;
+  getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined;
+  examples: string | undefined;
+};
+
+const getConfigString = async <LatestConfig extends BaseConfig>({
+  configPath,
+  schemaRelativePath,
+  commandObj,
+  getDefaultConfig,
+  examples,
+}: GetConfigString<LatestConfig>): Promise<string | null> => {
+  const schemaPathCommentStart = "# yaml-language-server: $schema=";
+  const schemaPathComment = `${schemaPathCommentStart}${schemaRelativePath}`;
+  let configString: string;
   try {
     const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
-    return fileContent;
+    configString = fileContent.startsWith(schemaPathCommentStart)
+      ? `${[schemaPathComment, ...fileContent.split("\n").slice(1)]
+          .join("\n")
+          .trim()}`
+      : `${schemaPathComment}\n${fileContent}`;
   } catch {
     if (getDefaultConfig === undefined) {
       return null;
     }
-    const defaultConfigString = yamlDiffPatch(
-      `# yaml-language-server: $schema=${schemaRelativePath}`,
+    configString = yamlDiffPatch(
+      `${schemaPathComment}\n\n${
+        examples === undefined
+          ? ""
+          : `EXAMPLES:${examples}`
+              .split("\n")
+              .map((ex): string => `# ${ex}`)
+              .join("\n")
+              .trim()
+      }`,
       {},
       await getDefaultConfig(commandObj)
     );
-    await fsPromises.writeFile(
-      configPath,
-      defaultConfigString + "\n",
-      FS_OPTIONS
-    );
-    return defaultConfigString;
   }
+  await fsPromises.writeFile(configPath, `${configString}\n`, FS_OPTIONS);
+  return configString;
 };
 
 type MigrateConfigOptions<
@@ -93,7 +115,7 @@ type MigrateConfigOptions<
   configPath: string;
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
-  validate: undefined | ((config: LatestConfig) => ValidationResult);
+  validate: undefined | ConfigValidateFunction<LatestConfig>;
 };
 
 const migrateConfig = async <
@@ -110,9 +132,11 @@ const migrateConfig = async <
   latestConfig: LatestConfig;
   configString: string;
 }> => {
-  const migratedConfig = migrations
-    .slice(config.version)
-    .reduce((config, migration): Config => migration(config), config);
+  let migratedConfig = config;
+  for (const migration of migrations.slice(config.version)) {
+    // eslint-disable-next-line no-await-in-loop
+    migratedConfig = await migration(migratedConfig);
+  }
 
   const migratedConfigString = yamlDiffPatch(
     configString,
@@ -128,7 +152,8 @@ const migrateConfig = async <
       )}. Errors: ${JSON.stringify(validateLatestConfig.errors, null, 2)}`
     );
   }
-  const maybeValidationError = validate !== undefined && validate(latestConfig);
+  const maybeValidationError =
+    validate !== undefined && (await validate(latestConfig, configPath));
 
   if (typeof maybeValidationError === "string") {
     // eslint-disable-next-line unicorn/prefer-type-error
@@ -158,10 +183,10 @@ type EnsureConfigOptions<
   configPath: string;
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
-  validate: undefined | ((config: LatestConfig) => ValidationResult);
+  validate: undefined | ConfigValidateFunction<LatestConfig>;
 };
 
-const ensureConfigIsValidLatest = <
+const ensureConfigIsValidLatest = async <
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
 >({
@@ -169,7 +194,7 @@ const ensureConfigIsValidLatest = <
   validateLatestConfig,
   config,
   validate,
-}: EnsureConfigOptions<Config, LatestConfig>): LatestConfig => {
+}: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     throw new Error(
       `Invalid config ${color.yellow(configPath)}. Errors: ${JSON.stringify(
@@ -179,7 +204,8 @@ const ensureConfigIsValidLatest = <
       )}`
     );
   }
-  const maybeValidationError = validate !== undefined && validate(config);
+  const maybeValidationError =
+    validate !== undefined && (await validate(config, configPath));
 
   if (typeof maybeValidationError === "string") {
     // eslint-disable-next-line unicorn/prefer-type-error
@@ -204,11 +230,18 @@ export type InitializedConfig<LatestConfig> = Mutable<
   $commit(): Promise<void>;
 };
 type BaseConfig = { version: number };
-export type Migrations<Config> = Array<(config: Config) => Config>;
+export type Migrations<Config> = Array<
+  (config: Config) => Config | Promise<Config>
+>;
 export type GetDefaultConfig<LatestConfig> = (
   commandObj: CommandObj
 ) => LatestConfig | Promise<LatestConfig>;
 type GetPath = (commandObj: CommandObj) => string | Promise<string>;
+
+export type ConfigValidateFunction<LatestConfig> = (
+  config: LatestConfig,
+  configPath: string
+) => ValidationResult | Promise<ValidationResult>;
 
 export type InitConfigOptions<
   Config extends BaseConfig,
@@ -218,9 +251,10 @@ export type InitConfigOptions<
   latestSchema: JSONSchemaType<LatestConfig>;
   migrations: Migrations<Config>;
   name: string;
-  getPath: GetPath;
+  getConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
-  validate?: (config: LatestConfig) => ValidationResult;
+  validate?: ConfigValidateFunction<LatestConfig>;
+  examples?: string;
 };
 
 type InitFunction<LatestConfig> = (
@@ -239,8 +273,8 @@ type InitReadonlyFunctionWithDefault<LatestConfig> = (
   commandObj: CommandObj
 ) => Promise<InitializedReadonlyConfig<LatestConfig>>;
 
-const getConfigPath = (configDirPath: string, name: string): string =>
-  path.join(configDirPath, `${name}.yaml`);
+export const getConfigPath = (configDirPath: string, name: string): string =>
+  path.join(configDirPath, name);
 
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
@@ -271,32 +305,36 @@ export function getReadonlyConfigInitFunction<
       latestSchema,
       migrations,
       name,
-      getPath,
+      getConfigDirPath,
       validate,
       getSchemaDirPath,
+      examples,
     } = options;
 
-    const configDirPath = await getPath(commandObj);
+    const configDirPath = await getConfigDirPath(commandObj);
     const configPath = getConfigPath(configDirPath, name);
 
     const validateAllConfigVersions = ajv.compile<Config>({
       oneOf: allSchemas,
     });
 
+    const validateLatestConfig = ajv.compile<LatestConfig>(latestSchema);
+
     const schemaRelativePath = await ensureSchema({
       name,
       configDirPath,
       getSchemaDirPath,
       commandObj,
-      schema: validateAllConfigVersions.schema,
+      schema: validateLatestConfig.schema,
     });
 
-    const maybeConfigString = await getConfigString(
+    const maybeConfigString = await getConfigString({
       configPath,
       schemaRelativePath,
       commandObj,
-      getDefaultConfig
-    );
+      getDefaultConfig,
+      examples,
+    });
     if (maybeConfigString === null) {
       return null;
     }
@@ -315,8 +353,6 @@ export function getReadonlyConfigInitFunction<
       );
     }
 
-    const validateLatestConfig = ajv.compile<LatestConfig>(latestSchema);
-
     let latestConfig: LatestConfig;
     if (config.version < migrations.length) {
       ({ latestConfig, configString } = await migrateConfig({
@@ -328,7 +364,7 @@ export function getReadonlyConfigInitFunction<
         validate,
       }));
     } else {
-      latestConfig = ensureConfigIsValidLatest({
+      latestConfig = await ensureConfigIsValidLatest({
         config,
         configPath,
         validateLatestConfig,
@@ -375,14 +411,15 @@ export function getConfigInitFunction<
   return async (
     commandObj: CommandObj
   ): Promise<InitializedConfig<LatestConfig> | null> => {
-    const configDirPath = await options.getPath(commandObj);
-    const configPath = getConfigPath(configDirPath, options.name);
+    const configPath = getConfigPath(
+      await options.getConfigDirPath(commandObj),
+      options.name
+    );
 
     if (initializedConfigs.has(configPath)) {
       throw new Error(
-        `Mutable config ${replaceHomedir(
-          configPath,
-          "~"
+        `Mutable config ${replaceHomeDir(
+          configPath
         )} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`
       );
     }

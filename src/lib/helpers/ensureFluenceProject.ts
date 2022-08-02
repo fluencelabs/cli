@@ -18,23 +18,22 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import { init } from "../../commands/init";
-import { CommandObj, FLUENCE_DIR_NAME } from "../const";
+import { initConfigOptions as fluenceConfigInitOptions } from "../configs/project/fluence";
+import { CommandObj, FLUENCE_CONFIG_FILE_NAME } from "../const";
 import { confirm } from "../prompt";
 
-import { getProjectRootDir } from "./getProjectRootDir";
-
-export const getProjectFluenceDirPath = (): string =>
-  path.join(getProjectRootDir(), FLUENCE_DIR_NAME);
-
-export const ensureProjectFluenceDirPath = async (
+export const ensureFluenceProject = async (
   commandObj: CommandObj,
   isInteractive: boolean
-): Promise<string> => {
-  const projectFluenceDirPath = getProjectFluenceDirPath();
+): Promise<void> => {
+  const projectFluencePath = path.join(
+    await fluenceConfigInitOptions.getConfigDirPath(commandObj),
+    FLUENCE_CONFIG_FILE_NAME
+  );
 
   try {
-    await fsPromises.access(projectFluenceDirPath);
-    return projectFluenceDirPath;
+    await fsPromises.access(projectFluencePath);
+    return;
   } catch {}
 
   const errorMessage = "Not a fluence project";
@@ -56,7 +55,5 @@ export const ensureProjectFluenceDirPath = async (
     );
   }
 
-  await init({ commandObj, isInteractive });
-
-  return getProjectFluenceDirPath();
+  return init({ commandObj, isInteractive });
 };

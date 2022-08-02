@@ -20,6 +20,15 @@ export type Mutable<Type> = {
   -readonly [Key in keyof Type]: Type[Key];
 };
 
+export type Flags<T extends string> = Record<
+  T,
+  string | number | boolean | Array<string | undefined>
+>;
+
+export type OptionalFlags<T extends string> = Partial<
+  Record<T, string | number | boolean | undefined | Array<string | undefined>>
+>;
+
 export const isObject = (
   unknown: unknown
 ): unknown is Record<string, unknown> =>

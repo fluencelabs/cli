@@ -21,32 +21,23 @@ import { CliUx } from "@oclif/core";
 import camelcase from "camelcase";
 
 import type { AquaCLI } from "./aquaCli";
-import type { DeployedServiceConfig, Services } from "./configs/project/app";
+import type { ServicesV2 } from "./configs/project/app";
 import { FS_OPTIONS } from "./const";
-import { getDeployedAppAquaPath } from "./pathsGetters/getDefaultAquaPath";
-import { getAppJsPath, getJsPath } from "./pathsGetters/getJsPath";
-import { getAppTsPath, getTsPath } from "./pathsGetters/getTsPath";
+import { replaceHomeDir } from "./helpers/replaceHomeDir";
+import {
+  ensureFluenceJSAppPath,
+  ensureFluenceTSAppPath,
+  ensureFluenceAquaDeployedAppPath,
+  ensureFluenceJSDir,
+  ensureFluenceTSDir,
+} from "./paths";
 
 const APP = "App";
-const SERVICE_IDS = "serviceIds";
+const SERVICE_IDS = "services";
 const SERVICE_IDS_ITEM = "ServiceIdsItem";
-const SERVICE_IDS_LIST = "ServiceIdsList";
+const SERVICES = "Services";
 
-type ServiceJsonObj = Record<
-  string,
-  DeployedServiceConfig | Array<DeployedServiceConfig>
->;
-
-const getServicesJsonObj = (services: Services): ServiceJsonObj =>
-  Object.entries(services).reduce<ServiceJsonObj>(
-    (acc, [name, services]): ServiceJsonObj => {
-      acc[camelcase(name)] = services;
-      return acc;
-    },
-    {}
-  );
-
-export const getAppJson = (services: Services): string =>
+export const getAppJson = (services: ServicesV2): string =>
   JSON.stringify(
     {
       name: APP,
@@ -54,7 +45,7 @@ export const getAppJson = (services: Services): string =>
       functions: [
         {
           name: SERVICE_IDS,
-          result: getServicesJsonObj(services),
+          result: services,
         },
       ],
     },
@@ -66,13 +57,13 @@ const generateRegisterAppTSorJS = async ({
   deployedServices,
   aquaCli,
   isJS,
-}: GenerateRegisterAppOptions & {
+}: GenerateRegisterAppArg & {
   isJS: boolean;
 }): Promise<void> => {
   await aquaCli({
     flags: {
-      input: getDeployedAppAquaPath(),
-      output: isJS ? getJsPath() : getTsPath(),
+      input: await ensureFluenceAquaDeployedAppPath(),
+      output: await (isJS ? ensureFluenceJSDir() : ensureFluenceTSDir()),
       js: isJS,
     },
   });
@@ -83,11 +74,7 @@ const generateRegisterAppTSorJS = async ({
 import { registerApp as registerAppService } from "./deployed.app";
 
 const service = {
-  serviceIds: () => (${JSON.stringify(
-    getServicesJsonObj(deployedServices),
-    null,
-    2
-  )}),
+  ${SERVICE_IDS}: () => (${JSON.stringify(deployedServices, null, 2)}),
 };
 
 ${
@@ -120,30 +107,37 @@ export function registerApp(
 `;
 
   await fsPromises.writeFile(
-    isJS ? getAppJsPath() : getAppTsPath(),
+    await (isJS ? ensureFluenceJSAppPath() : ensureFluenceTSAppPath()),
     appContent,
     FS_OPTIONS
   );
 };
 
-type GenerateRegisterAppOptions = {
-  deployedServices: Services;
+type GenerateRegisterAppArg = {
+  deployedServices: ServicesV2;
   aquaCli: AquaCLI;
 };
 
 export const generateRegisterApp = async (
-  options: GenerateRegisterAppOptions
+  options: GenerateRegisterAppArg
 ): Promise<void> => {
-  CliUx.ux.action.start(`Compiling ${color.yellow(getDeployedAppAquaPath())}`);
+  CliUx.ux.action.start(
+    `Compiling ${color.yellow(
+      replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
+    )}`
+  );
   await generateRegisterAppTSorJS({ ...options, isJS: true });
   await generateRegisterAppTSorJS({ ...options, isJS: false });
   CliUx.ux.action.stop();
 };
 
-export const updateDeployedAppAqua = async (
-  services: Services
+const getDeploysDataName = (serviceName: string): string =>
+  `${camelcase(serviceName, { pascalCase: true })}Deploys`;
+
+export const generateDeployedAppAqua = async (
+  services: ServicesV2
 ): Promise<void> => {
-  const appServicesFilePath = getDeployedAppAquaPath();
+  const appServicesFilePath = await ensureFluenceAquaDeployedAppPath();
   const appServicesAqua =
     // Codegeneration:
     `export App
@@ -153,12 +147,28 @@ data ${SERVICE_IDS_ITEM}:
   peerId: string
   serviceId: string
 
-data ${SERVICE_IDS_LIST}:
-${Object.keys(getServicesJsonObj(services))
-  .map((name): string => `  ${name}: []${SERVICE_IDS_ITEM}\n`)
-  .join("")}
+${Object.entries(services)
+  .map(
+    ([serviceName, deployments]): string =>
+      `data ${getDeploysDataName(serviceName)}:\n${Object.keys(deployments)
+        .map(
+          (deployName: string): string =>
+            `  ${deployName}: []${SERVICE_IDS_ITEM}`
+        )
+        .join("\n")}`
+  )
+  .join("\n\n")}
+
+data ${SERVICES}:
+${Object.keys(services)
+  .map(
+    (serviceName): string =>
+      `  ${camelcase(serviceName)}: ${getDeploysDataName(serviceName)}`
+  )
+  .join("\n")}
+
 service ${APP}("${APP}"):
-  ${SERVICE_IDS}: -> ${SERVICE_IDS_LIST}
+  ${SERVICE_IDS}: -> ${SERVICES}
 `;
   await fsPromises.writeFile(appServicesFilePath, appServicesAqua, FS_OPTIONS);
 };

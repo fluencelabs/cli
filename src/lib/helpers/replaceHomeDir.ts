@@ -14,23 +14,7 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import replaceHomedir from "replace-homedir";
 
-import {
-  APP_TS_FILE_NAME,
-  DEPLOYED_APP_TS_FILE_NAME,
-  TS_DIR_NAME,
-} from "../const";
-
-import { getProjectFluenceDirPath } from "./getProjectFluenceDirPath";
-
-export const getTsPath = (): string => {
-  const projectFluenceDir = getProjectFluenceDirPath();
-  return path.join(projectFluenceDir, TS_DIR_NAME);
-};
-
-export const getAppTsPath = (): string =>
-  path.join(getTsPath(), APP_TS_FILE_NAME);
-
-export const getDeployedAppTsPath = (): string =>
-  path.join(getTsPath(), DEPLOYED_APP_TS_FILE_NAME);
+export const replaceHomeDir = (path: string): string =>
+  replaceHomedir(path, "~");

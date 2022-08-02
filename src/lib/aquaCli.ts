@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-import { AQUA_NPM_DEPENDENCY } from "./configs/user/dependency";
-import type { CommandObj } from "./const";
+import { AQUA_NPM_DEPENDENCY, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
 import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureNpmDependency } from "./npm";
+import type { Flags, OptionalFlags } from "./typeHelpers";
 
-type Flags<T extends string> = Record<
-  T,
-  string | boolean | Array<string | undefined>
->;
-type OptionalFlags<T extends string> = Partial<
-  Record<T, string | boolean | undefined | Array<string | undefined>>
->;
+/**
+ * Execution timeout in milliseconds
+ */
+const AQUA_CLI_EXECUTION_TIMEOUT = 90_000;
 
 export type AquaCliInput =
   | {
@@ -74,11 +71,11 @@ export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
     const timeoutNumber = Number(flags.timeout);
 
     return execPromise(
-      `${aquaCliPath} ${command ?? ""}${unparseFlags(flags)}`,
+      `${aquaCliPath} ${command ?? ""}${unparseFlags(flags, commandObj)}`,
       message === undefined
         ? undefined
         : getMessageWithKeyValuePairs(message, keyValuePairs),
-      Number.isNaN(timeoutNumber) ? undefined : timeoutNumber
+      Number.isNaN(timeoutNumber) ? AQUA_CLI_EXECUTION_TIMEOUT : timeoutNumber
     );
   };
 };

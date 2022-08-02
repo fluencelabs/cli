@@ -17,28 +17,42 @@
 import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
-export const AQUA_RECOMMENDED_VERSION = "0.7.4-329";
+export const AQUA_RECOMMENDED_VERSION = "0.7.4-332";
+export const MARINE_RECOMMENDED_VERSION = "0.12.1";
+export const MREPL_RECOMMENDED_VERSION = "0.18.0";
+export const CARGO_GENERATE_RECOMMENDED_VERSION = "0.15.2";
+export const RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE = "nightly-x86_64";
+export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
 export const JS_EXT = "js";
 export const JSON_EXT = "json";
+export const YAML_EXT = "yaml";
+export const WASM_EXT = "wasm";
+export const TOML_EXT = "toml";
 
 export const FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
-export const ARTIFACTS_DIR_NAME = "artifacts";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
 export const TS_DIR_NAME = "ts";
 export const JS_DIR_NAME = "js";
+export const MODULES_DIR_NAME = "modules";
+export const SERVICES_DIR_NAME = "services";
+export const NPM_DIR_NAME = "npm";
+export const CARGO_DIR_NAME = "cargo";
+export const BIN_DIR_NAME = "bin";
 
-export const FLUENCE_CONFIG_FILE_NAME = "fluence";
-export const SECRETS_FILE_NAME = "secrets";
-export const DEPENDENCY_FILE_NAME = "dependency";
-export const APP_FILE_NAME = "app";
+export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
+export const SECRETS_CONFIG_FILE_NAME = `secrets.${YAML_EXT}`;
+export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
+export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
+export const APP_CONFIG_FILE_NAME = `app.${YAML_EXT}`;
+export const DEPENDENCY_CONFIG_FILE_NAME = `dependency.${YAML_EXT}`;
 
 const DEPLOYED_APP_FILE_NAME = "deployed.app";
 
@@ -51,13 +65,16 @@ export const GITIGNORE_FILE_NAME = ".gitignore";
 export const PACKAGE_JSON_FILE_NAME = `package.${JSON_EXT}`;
 export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
 export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
-export const DEPLOYMENT_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
+export const DEPLOY_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
 export const APP_SERVICE_JSON_FILE_NAME = `app-service.${JSON_EXT}`;
 
 export const APP_TS_FILE_NAME = `app.${TS_EXT}`;
 export const APP_JS_FILE_NAME = `app.${JS_EXT}`;
 export const DEPLOYED_APP_TS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${TS_EXT}`;
 export const DEPLOYED_APP_JS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${JS_EXT}`;
+
+export const CRATES_TOML = `.crates.${TOML_EXT}`;
+export const CONFIG_TOML = `Config.${TOML_EXT}`;
 
 export const FS_OPTIONS = {
   encoding: "utf8",
@@ -74,6 +91,7 @@ export const YAML_FORMAT: [
 ];
 
 export const AUTO_GENERATED = "auto-generated";
+export const DEFAULT_DEPLOY_NAME = "default";
 
 export const KEY_PAIR_FLAG_NAME = "key-pair-name";
 export const KEY_PAIR_FLAG = {
@@ -93,7 +111,7 @@ export const NO_INPUT_FLAG = {
 
 export const TIMEOUT_FLAG_NAME = "timeout";
 export const TIMEOUT_FLAG = {
-  [TIMEOUT_FLAG_NAME]: Flags.string({
+  [TIMEOUT_FLAG_NAME]: Flags.integer({
     description: "Timeout used for command execution",
     helpValue: "<milliseconds>",
   }),
@@ -103,7 +121,7 @@ export const FORCE_FLAG_NAME = "force";
 
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
-export const GIT_IGNORE_CONTENT = `.idea
+export const RECOMMENDED_GIT_IGNORE_CONTENT = `.idea
 .DS_Store
 .fluence
 **/node_modules
@@ -114,3 +132,17 @@ Cargo.lock
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
+
+export const MARINE_CARGO_DEPENDENCY = "marine";
+export const MREPL_CARGO_DEPENDENCY = "mrepl";
+export const CARGO_GENERATE_CARGO_DEPENDENCY = "cargo-generate";
+export const cargoDependencyList = [
+  MARINE_CARGO_DEPENDENCY,
+  MREPL_CARGO_DEPENDENCY,
+  CARGO_GENERATE_CARGO_DEPENDENCY,
+] as const;
+export type CargoDependency = typeof cargoDependencyList[number];
+
+export const AQUA_NPM_DEPENDENCY = "aqua";
+export const npmDependencyList = [AQUA_NPM_DEPENDENCY] as const;
+export type NPMDependency = typeof npmDependencyList[number];

@@ -14,28 +14,36 @@
  * limitations under the License.
  */
 
+import type { CommandObj } from "../const";
+
 const unparseFlag = (
   flagName: string,
-  flagValue: string | boolean | undefined
+  flagValue: string | number | boolean | undefined,
+  commandObj: CommandObj
 ): string => {
   if (flagValue === undefined || flagValue === false) {
     return "";
   }
 
-  return ` \\\n--${flagName}${flagValue === true ? "" : ` '${flagValue}'`}`;
+  return ` ${commandObj.config.windows ? "" : "\\\n"}-${
+    flagName.length > 1 ? "-" : ""
+  }${flagName}${flagValue === true ? "" : ` '${flagValue}'`}`;
 };
 
 export const unparseFlags = (
   flags: Record<
     string,
-    string | boolean | undefined | Array<string | undefined>
-  >
+    string | number | boolean | undefined | Array<string | undefined>
+  >,
+  commandObj: CommandObj
 ): string =>
   Object.entries(flags)
     .flatMap(
       ([flagName, flagValue]): Array<string> =>
         Array.isArray(flagValue)
-          ? flagValue.map((value): string => unparseFlag(flagName, value))
-          : [unparseFlag(flagName, flagValue)]
+          ? flagValue.map((value): string =>
+              unparseFlag(flagName, value, commandObj)
+            )
+          : [unparseFlag(flagName, flagValue, commandObj)]
     )
     .join("");

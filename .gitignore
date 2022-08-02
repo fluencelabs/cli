@@ -2,7 +2,6 @@
 *-error.log
 /.nyc_output
 /dist
-/artifacts
 /tmp
 /--fix
 /yarn.lock
@@ -12,6 +11,7 @@ oclif.manifest.json
 /fluence.yaml
 .fluence
 /src/aqua
+/src/services
 .idea
 .DS_Store
 **/node_modules

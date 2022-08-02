@@ -21,11 +21,6 @@ import { CliUx } from "@oclif/core";
 
 import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const";
 
-/**
- * Execution timeout in milliseconds
- */
-const EXECUTION_TIMEOUT = 90_000;
-
 export const execPromise = (
   command: string,
   message?: string,
@@ -45,26 +40,28 @@ export const execPromise = (
 
     const failedCommandText = `Debug info:\n${commandToDisplay}\n`;
 
-    const executionTimeout = timeout ?? EXECUTION_TIMEOUT;
-
-    const execTimeout = setTimeout((): void => {
-      if (typeof message === "string") {
-        CliUx.ux.action.stop(color.red("Timed out"));
-      }
-      childProcess.kill();
-      rej(
-        new Error(
-          `Execution timed out: command didn't yield any result in ${color.yellow(
-            `${executionTimeout}ms`
-          )}\nIt's best to just try again or increase timeout using ${color.yellow(
-            `--${TIMEOUT_FLAG_NAME}`
-          )} flag\n${failedCommandText}`
-        )
-      );
-    }, executionTimeout);
+    const execTimeout =
+      timeout !== undefined &&
+      setTimeout((): void => {
+        if (typeof message === "string") {
+          CliUx.ux.action.stop(color.red("Timed out"));
+        }
+        childProcess.kill();
+        rej(
+          new Error(
+            `Execution timed out: command didn't yield any result in ${color.yellow(
+              `${timeout}ms`
+            )}\nIt's best to just try again or increase timeout using ${color.yellow(
+              `--${TIMEOUT_FLAG_NAME}`
+            )} flag\n${failedCommandText}`
+          )
+        );
+      }, timeout);
 
     const childProcess = exec(command, (error, stdout, stderr): void => {
-      clearTimeout(execTimeout);
+      if (execTimeout !== false) {
+        clearTimeout(execTimeout);
+      }
 
       if (error !== null) {
         if (typeof message === "string") {

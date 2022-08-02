@@ -15,20 +15,18 @@
  */
 
 import assert from "node:assert";
-import fsPromises from "node:fs/promises";
 
+import { KeyPair } from "@fluencelabs/fluence";
 import color from "@oclif/color";
+import type { JSONSchemaType } from "ajv";
 import { Separator } from "inquirer";
 
-import { initReadonlyProjectSecretsConfig } from "../configs/project/projectSecrets";
-import { initReadonlyUserSecretsConfig } from "../configs/user/userSecrets";
-import { CommandObj, KEY_PAIR_FLAG_NAME } from "../const";
-import { getProjectFluenceDirPath } from "../pathsGetters/getProjectFluenceDirPath";
-import { list, Choices } from "../prompt";
+import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets";
+import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
+import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
+import { list, Choices } from "./prompt";
 
-import type { ConfigKeyPair } from "./generateKeyPair";
-
-type GetUserKeyPairOptions = {
+type GetUserKeyPairArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
   keyPairName?: string | undefined;
@@ -38,7 +36,7 @@ const getUserKeyPair = async ({
   commandObj,
   keyPairName,
   isInteractive,
-}: GetUserKeyPairOptions): Promise<ConfigKeyPair | Error> => {
+}: GetUserKeyPairArg): Promise<ConfigKeyPair> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
 
   if (keyPairName === undefined) {
@@ -105,7 +103,7 @@ const getUserKeyPair = async ({
   });
 };
 
-type GetKeyPairOptions = {
+type GetKeyPairArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
   keyPairName: string | undefined;
@@ -114,7 +112,7 @@ type GetKeyPairOptions = {
 const getProjectKeyPair = async ({
   commandObj,
   keyPairName,
-}: GetKeyPairOptions): Promise<ConfigKeyPair | undefined> => {
+}: GetKeyPairArg): Promise<ConfigKeyPair | undefined> => {
   const projectSecretsConfig = await initReadonlyProjectSecretsConfig(
     commandObj
   );
@@ -131,20 +129,9 @@ const getProjectKeyPair = async ({
 };
 
 export const getKeyPair = async (
-  options: GetKeyPairOptions
-): Promise<ConfigKeyPair | Error> => {
-  const projectFluenceDirPath = getProjectFluenceDirPath();
-
-  try {
-    await fsPromises.access(projectFluenceDirPath);
-    const projectKeyPair = await getProjectKeyPair(options);
-    if (projectKeyPair !== undefined) {
-      return projectKeyPair;
-    }
-  } catch {}
-
-  return getUserKeyPair(options);
-};
+  options: GetKeyPairArg
+): Promise<ConfigKeyPair> =>
+  (await getProjectKeyPair(options)) ?? getUserKeyPair(options);
 
 export const getKeyPairFromFlags = async (
   {
@@ -156,3 +143,33 @@ export const getKeyPairFromFlags = async (
   isInteractive: boolean
 ): Promise<ConfigKeyPair | Error> =>
   getKeyPair({ commandObj, keyPairName, isInteractive });
+
+export type ConfigKeyPair = {
+  peerId: string;
+  secretKey: string;
+  publicKey: string;
+  name: string;
+};
+
+export const configKeyPairSchema: JSONSchemaType<ConfigKeyPair> = {
+  type: "object",
+  properties: {
+    peerId: { type: "string" },
+    secretKey: { type: "string" },
+    publicKey: { type: "string" },
+    name: { type: "string" },
+  },
+  required: ["peerId", "secretKey", "publicKey", "name"],
+};
+
+export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
+  const keyPair = await KeyPair.randomEd25519();
+  return {
+    peerId: keyPair.Libp2pPeerId.toB58String(),
+    secretKey: Buffer.from(keyPair.toEd25519PrivateKey()).toString("base64"),
+    publicKey: Buffer.from(keyPair.Libp2pPeerId.pubKey.bytes).toString(
+      "base64"
+    ),
+    name,
+  };
+};

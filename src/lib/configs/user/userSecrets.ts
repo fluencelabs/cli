@@ -17,7 +17,7 @@
 import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
-import { AUTO_GENERATED, SECRETS_FILE_NAME } from "../../const";
+import { AUTO_GENERATED, SECRETS_CONFIG_FILE_NAME } from "../../const";
 import {
   validateHasDefault,
   validateMultiple,
@@ -28,8 +28,8 @@ import {
   ConfigKeyPair,
   configKeyPairSchema,
   generateKeyPair,
-} from "../../keyPairs/generateKeyPair";
-import { ensureUserFluenceDir } from "../../pathsGetters/ensureUserFluenceDir";
+} from "../../keypairs";
+import { ensureUserFluenceDir } from "../../paths";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -94,8 +94,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: SECRETS_FILE_NAME,
-  getPath: ensureUserFluenceDir,
+  name: SECRETS_CONFIG_FILE_NAME,
+  getConfigDirPath: ensureUserFluenceDir,
   validate,
 };
 

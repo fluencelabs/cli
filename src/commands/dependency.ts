@@ -16,28 +16,45 @@
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
+import { Separator } from "inquirer";
 
-import { initAquaCli } from "../lib/aquaCli";
 import {
-  AQUA_NPM_DEPENDENCY,
   dependencyList,
+  DependencyName,
   initDependencyConfig,
   initReadonlyDependencyConfig,
   isDependency,
 } from "../lib/configs/user/dependency";
-import { FLUENCE_DIR_NAME, NO_INPUT_FLAG } from "../lib/const";
+import {
+  AQUA_NPM_DEPENDENCY,
+  cargoDependencyList,
+  CARGO_GENERATE_CARGO_DEPENDENCY,
+  CommandObj,
+  FLUENCE_DIR_NAME,
+  MARINE_CARGO_DEPENDENCY,
+  MREPL_CARGO_DEPENDENCY,
+  NO_INPUT_FLAG,
+  npmDependencyList,
+} from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { usage } from "../lib/helpers/usage";
-import { npmDependencies } from "../lib/npm";
+import { ensureNpmDependency, npmDependencies } from "../lib/npm";
 import { confirm, input, list } from "../lib/prompt";
+import { cargoDependencies, ensureCargoDependency } from "../lib/rust";
 
 const NAME = "NAME";
 const RECOMMENDED = "recommended";
 const VERSION_FLAG_NAME = "version";
 const USE_FLAG_NAME = "use";
+const RESET_ALL_MESSAGE = `If you omit ${color.yellow(
+  NAME
+)} argument and include ${color.yellow(
+  `--${USE_FLAG_NAME} ${RECOMMENDED}`
+)} - all dependencies will be reset to ${RECOMMENDED} versions`;
 
 export default class Dependency extends Command {
-  static override description = `Manage dependencies stored inside ${FLUENCE_DIR_NAME} directory of the current user`;
+  static override description = `Manage dependencies stored inside ${color.yellow(
+    FLUENCE_DIR_NAME
+  )} directory of the current user`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     version: Flags.boolean({
@@ -46,9 +63,9 @@ export default class Dependency extends Command {
       exclusive: [USE_FLAG_NAME],
     }),
     use: Flags.string({
-      description: `Set version of the dependency that you want to use. Use ${color.yellow(
+      description: `Set dependency version. Use ${color.yellow(
         RECOMMENDED
-      )} keyword if you want to use ${RECOMMENDED} version`,
+      )} keyword to set ${RECOMMENDED} version for the dependency. ${RESET_ALL_MESSAGE}`,
       helpValue: `<version | ${RECOMMENDED}>`,
       exclusive: [VERSION_FLAG_NAME],
     }),
@@ -57,39 +74,47 @@ export default class Dependency extends Command {
   static override args = [
     {
       name: NAME,
-      description: `Dependency name. Currently the only dependency is ${color.yellow(
-        AQUA_NPM_DEPENDENCY
-      )}`,
+      description: `Dependency name. One of: ${color.yellow(
+        dependencyList.join(", ")
+      )}. ${RESET_ALL_MESSAGE}`,
     },
   ];
-  static override usage: string = usage(this);
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Dependency);
     const isInteractive = getIsInteractive(flags);
     let name: unknown = args[NAME];
 
-    if (name === undefined) {
-      if (flags.use === RECOMMENDED) {
-        const resetAllDependencies = await confirm({
-          isInteractive,
-          message: `Do you want to reset all dependencies to their ${color.yellow(
-            RECOMMENDED
-          )} versions`,
-        });
-
-        if (resetAllDependencies) {
-          const dependencyConfig = await initDependencyConfig(this);
-          dependencyConfig.dependency = {};
-          await dependencyConfig.$commit();
-          this.log(
-            `Successfully reset all dependencies to their ${color.yellow(
-              RECOMMENDED
-            )} versions`
-          );
-          return;
-        }
+    if (
+      name === undefined &&
+      flags.use === RECOMMENDED &&
+      (await confirm({
+        isInteractive,
+        message: `Do you want to reset all dependencies to ${color.yellow(
+          RECOMMENDED
+        )} versions`,
+      }))
+    ) {
+      const dependencyConfig = await initDependencyConfig(this);
+      dependencyConfig.dependency = {};
+      await dependencyConfig.$commit();
+      for (const dependencyName of dependencyList) {
+        // eslint-disable-next-line no-await-in-loop
+        await ensureDependency(dependencyName, this);
       }
+      this.log(
+        `Successfully reset all dependencies to ${color.yellow(
+          RECOMMENDED
+        )} versions`
+      );
+      return;
+    }
 
+    if (
+      name === undefined ||
+      (!isDependency(name) &&
+        typeof this.warn(`Unknown dependency ${color.yellow(name)}`) ===
+          "string")
+    ) {
       name = await list({
         isInteractive,
         message: "Select dependency",
@@ -97,48 +122,42 @@ export default class Dependency extends Command {
           `Do you want to manage ${color.yellow(name)}`,
         onNoChoices: (): void =>
           this.error("You have to select dependency to manage"),
-        options: [...dependencyList],
+        options: [
+          new Separator("NPM dependencies:"),
+          ...npmDependencyList,
+          new Separator("Cargo dependencies:"),
+          ...cargoDependencyList,
+        ],
       });
     }
 
     if (!isDependency(name)) {
-      this.error(`Unknown dependency ${color.yellow(name)}`);
+      this.error("Unreachable");
     }
 
     const dependencyName = name;
-    const { recommendedVersion, packageName } = npmDependencies[dependencyName];
-
-    const handleVersion = async (): Promise<void> => {
-      const result =
-        (await initReadonlyDependencyConfig(this)).dependency[dependencyName] ??
-        recommendedVersion;
-
-      this.log(
-        `Using version ${color.yellow(result)}${
-          result.includes(recommendedVersion) ? ` (${RECOMMENDED})` : ""
-        } of ${packageName}`
-      );
-    };
+    const { recommendedVersion, packageName } = {
+      ...npmDependencies,
+      ...cargoDependencies,
+    }[dependencyName];
 
     if (flags.version === true) {
-      return handleVersion();
+      return handleVersion({
+        commandObj: this,
+        dependencyName,
+        packageName,
+        recommendedVersion,
+      });
     }
 
-    const handleUse = async (version: string): Promise<void> => {
-      const dependencyConfig = await initDependencyConfig(this);
-      if (version === RECOMMENDED) {
-        delete dependencyConfig.dependency[dependencyName];
-      } else {
-        dependencyConfig.dependency[dependencyName] = version;
-      }
-
-      await dependencyConfig.$commit();
-      await initAquaCli(this);
-      await handleVersion();
-    };
-
     if (typeof flags.use === "string") {
-      return handleUse(flags.use);
+      return handleUse({
+        commandObj: this,
+        dependencyName,
+        packageName,
+        recommendedVersion,
+        version: flags.use,
+      });
     }
 
     return (
@@ -151,23 +170,122 @@ export default class Dependency extends Command {
         onNoChoices: (): never => this.error("Unreachable"),
         options: [
           {
-            value: handleVersion,
-            name: `Print version of ${color.yellow(name)}`,
+            value: (): Promise<void> =>
+              handleVersion({
+                commandObj: this,
+                dependencyName,
+                packageName,
+                recommendedVersion,
+              }),
+            name: `Print version of ${color.yellow(dependencyName)}`,
           },
           {
             value: async (): Promise<void> =>
-              handleUse(
-                await input({
+              handleUse({
+                commandObj: this,
+                dependencyName,
+                packageName,
+                recommendedVersion,
+                version: await input({
                   isInteractive,
                   message: `Enter version of ${color.yellow(
                     name
                   )} that you want to use`,
-                })
-              ),
-            name: `Set version of ${color.yellow(name)} that you want to use`,
+                }),
+              }),
+            name: `Set version of ${color.yellow(
+              dependencyName
+            )} that you want to use`,
           },
         ],
       })
     )();
   }
 }
+
+type HandleVersionArg = {
+  recommendedVersion: string;
+  dependencyName: DependencyName;
+  packageName: string;
+  commandObj: CommandObj;
+};
+
+const handleVersion = async ({
+  recommendedVersion,
+  dependencyName,
+  packageName,
+  commandObj,
+}: HandleVersionArg): Promise<void> => {
+  const result =
+    (await initReadonlyDependencyConfig(commandObj)).dependency?.[
+      dependencyName
+    ] ?? recommendedVersion;
+
+  commandObj.log(
+    `Using version ${color.yellow(result)}${
+      result.includes(recommendedVersion) ? ` (${RECOMMENDED})` : ""
+    } of ${packageName}`
+  );
+};
+
+const ensureDependency = async (
+  dependencyName: DependencyName,
+  commandObj: CommandObj
+): Promise<void> => {
+  switch (dependencyName) {
+    case AQUA_NPM_DEPENDENCY: {
+      await ensureNpmDependency({ name: dependencyName, commandObj });
+      break;
+    }
+    case MARINE_CARGO_DEPENDENCY:
+    case MREPL_CARGO_DEPENDENCY:
+    case CARGO_GENERATE_CARGO_DEPENDENCY: {
+      await ensureCargoDependency({
+        name: dependencyName,
+        commandObj,
+      });
+      break;
+    }
+    default: {
+      const _exhaustiveCheck: never = dependencyName;
+      return _exhaustiveCheck;
+    }
+  }
+};
+
+type HandleUseArg = HandleVersionArg & {
+  version: string;
+};
+
+const handleUse = async ({
+  recommendedVersion,
+  dependencyName,
+  packageName,
+  commandObj,
+  version,
+}: HandleUseArg): Promise<void> => {
+  const dependencyConfig = await initDependencyConfig(commandObj);
+  const updatedDependencyVersionsConfig = {
+    ...dependencyConfig.dependency,
+    [dependencyName]: version === RECOMMENDED ? undefined : version,
+  };
+
+  const isConfigEmpty = Object.values(updatedDependencyVersionsConfig).every(
+    (value): boolean => value === undefined
+  );
+
+  if (isConfigEmpty) {
+    delete dependencyConfig.dependency;
+  } else {
+    dependencyConfig.dependency = updatedDependencyVersionsConfig;
+  }
+
+  await dependencyConfig.$commit();
+  await ensureDependency(dependencyName, commandObj);
+  return handleVersion({
+    commandObj,
+    dependencyName,
+    packageName,
+    recommendedVersion,
+  });
+};

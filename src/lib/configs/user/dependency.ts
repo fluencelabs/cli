@@ -16,8 +16,17 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { DEPENDENCY_FILE_NAME } from "../../const";
-import { ensureUserFluenceDir } from "../../pathsGetters/ensureUserFluenceDir";
+import {
+  AQUA_NPM_DEPENDENCY,
+  cargoDependencyList,
+  CARGO_GENERATE_CARGO_DEPENDENCY,
+  CommandObj,
+  DEPENDENCY_CONFIG_FILE_NAME,
+  MARINE_CARGO_DEPENDENCY,
+  MREPL_CARGO_DEPENDENCY,
+  npmDependencyList,
+} from "../../const";
+import { ensureUserFluenceDir } from "../../paths";
 import { getIsStringUnion } from "../../typeHelpers";
 import {
   GetDefaultConfig,
@@ -29,20 +38,28 @@ import {
   Migrations,
 } from "../initConfig";
 
-export const AQUA_NPM_DEPENDENCY = "aqua";
+export const dependencyList = [
+  ...npmDependencyList,
+  ...cargoDependencyList,
+] as const;
+export type DependencyName = typeof dependencyList[number];
+type DependencyMap = Partial<Record<DependencyName, string>>;
 
-const npmDependencyList = [AQUA_NPM_DEPENDENCY] as const;
-export type NPMDependency = typeof npmDependencyList[number];
+export const getVersionToUse = async (
+  recommendedVersion: string,
+  name: DependencyName,
+  commandObj: CommandObj
+): Promise<string> => {
+  const version = (await initReadonlyDependencyConfig(commandObj))
+    ?.dependency?.[name];
+  return typeof version === "string" ? version : recommendedVersion;
+};
 
-export const dependencyList = [...npmDependencyList] as const;
-export type Dependency = typeof dependencyList[number];
-type DependencyMap = Partial<Record<Dependency, string>>;
-
-export const isDependency = getIsStringUnion(npmDependencyList);
+export const isDependency = getIsStringUnion(dependencyList);
 
 type ConfigV0 = {
   version: 0;
-  dependency: DependencyMap;
+  dependency?: DependencyMap;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -53,16 +70,19 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       type: "object",
       properties: {
         [AQUA_NPM_DEPENDENCY]: { type: "string", nullable: true },
+        [MARINE_CARGO_DEPENDENCY]: { type: "string", nullable: true },
+        [MREPL_CARGO_DEPENDENCY]: { type: "string", nullable: true },
+        [CARGO_GENERATE_CARGO_DEPENDENCY]: { type: "string", nullable: true },
       },
       required: [],
+      nullable: true,
     },
   },
-  required: ["version", "dependency"],
+  required: ["version"],
 };
 
 const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
   version: 0,
-  dependency: {},
 });
 
 const migrations: Migrations<Config> = [];
@@ -76,8 +96,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: DEPENDENCY_FILE_NAME,
-  getPath: ensureUserFluenceDir,
+  name: DEPENDENCY_CONFIG_FILE_NAME,
+  getConfigDirPath: ensureUserFluenceDir,
 };
 
 export const initDependencyConfig = getConfigInitFunction(

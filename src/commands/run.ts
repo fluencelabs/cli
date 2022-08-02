@@ -30,33 +30,30 @@ import {
   TIMEOUT_FLAG,
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
+import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { usage } from "../lib/helpers/usage";
-import { getRandomRelayId, getRandomRelayAddr } from "../lib/multiaddr";
-import { getMaybeArtifactsPath } from "../lib/pathsGetters/getArtifactsPath";
-import { getDefaultAquaPath } from "../lib/pathsGetters/getDefaultAquaPath";
-import { getSrcMainAquaPath } from "../lib/pathsGetters/getSrcAquaDirPath";
+import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
-  getAppServiceJsonPath,
-  getTmpPath,
-} from "../lib/pathsGetters/getTmpPath";
-import { confirm, input, list } from "../lib/prompt";
+  ensureFluenceTmpAppServiceJsonPath,
+  ensureFluenceAquaDir,
+  ensureSrcAquaMainPath,
+} from "../lib/paths";
+import { input } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
 const ON_FLAG_NAME = "on";
+const DATA_FLAG_NAME = "data";
 
 export default class Run extends Command {
   static override description = "Run aqua script";
-
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-
   static override flags = {
     relay: Flags.string({
-      description: "Relay node MultiAddress",
+      description: "Relay node multiaddr",
       helpValue: "<multiaddr>",
     }),
-    data: Flags.string({
+    [DATA_FLAG_NAME]: Flags.string({
       description:
         "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<json>",
@@ -94,15 +91,12 @@ export default class Run extends Command {
     ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
   };
-
-  static override usage: string = usage(this);
-
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);
+    await ensureFluenceProject(this, isInteractive);
 
-    const on = await ensurePeerId(flags.on, this, isInteractive);
-    const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME], isInteractive);
+    const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME]);
 
     const func =
       flags[FUNC_FLAG_NAME] ??
@@ -112,18 +106,16 @@ export default class Run extends Command {
         flagName: FUNC_FLAG_NAME,
       }));
 
-    const relay = flags.relay ?? getRandomRelayAddr();
+    const appConfig = await initReadonlyAppConfig(this);
+    const relay = flags.relay ?? getRandomRelayAddr(appConfig?.relays);
 
     const data = await getRunData(flags, this);
-    const imports = [
+    const imports: Array<string> = [
       ...(flags.import ?? []),
-      getDefaultAquaPath(),
-      await getMaybeArtifactsPath(),
+      await ensureFluenceAquaDir(),
     ];
 
-    const appConfig = await initReadonlyAppConfig(this);
-    await fsPromises.mkdir(getTmpPath(), { recursive: true });
-    const appJsonServicePath = getAppServiceJsonPath();
+    const appJsonServicePath = await ensureFluenceTmpAppServiceJsonPath();
     if (appConfig !== null) {
       await fsPromises.writeFile(
         appJsonServicePath,
@@ -141,7 +133,6 @@ export default class Run extends Command {
             addr: relay,
             func,
             input: aqua,
-            on,
             timeout: flags.timeout,
             import: imports,
             "json-service": appJsonServicePath,
@@ -149,7 +140,7 @@ export default class Run extends Command {
           },
         },
         "Running",
-        { function: func, on, relay }
+        { function: func, relay }
       );
     } finally {
       if (appConfig !== null) {
@@ -161,79 +152,14 @@ export default class Run extends Command {
   }
 }
 
-const ensurePeerId = async (
-  onFromArgs: string | undefined,
-  commandObj: CommandObj,
-  isInteractive: boolean
-): Promise<string> => {
-  if (typeof onFromArgs === "string") {
-    return onFromArgs;
-  }
-  const appConfig = await initReadonlyAppConfig(commandObj);
-
-  const peerIdsFromDeployed = [
-    ...new Set(
-      Object.values(appConfig?.services ?? {}).flatMap(
-        (deployedServiceConfig): Array<string> =>
-          deployedServiceConfig.map(({ peerId }): string => peerId)
-      )
-    ),
-  ];
-  const firstPeerId = peerIdsFromDeployed[0];
-  if (peerIdsFromDeployed.length === 1 && firstPeerId !== undefined) {
-    return firstPeerId;
-  }
-
-  const options =
-    peerIdsFromDeployed.length > 1 &&
-    (await confirm({
-      message:
-        "Do you want to select one of the peers from your app to run the function?",
-      isInteractive,
-      flagName: ON_FLAG_NAME,
-    }))
-      ? peerIdsFromDeployed
-      : [getRandomRelayId()];
-
-  return list({
-    message: "Select peerId of the peer where you want to run the function",
-    options,
-    onNoChoices: (): Promise<string> =>
-      input({
-        message:
-          "Enter a peerId of the peer where you want to run your function",
-        isInteractive,
-        flagName: ON_FLAG_NAME,
-      }),
-    oneChoiceMessage: (peerId): string =>
-      `Do you want to run your function on a random peer ${color.yellow(
-        peerId
-      )}`,
-    isInteractive,
-    flagName: ON_FLAG_NAME,
-  });
-};
-
 const ensureAquaPath = async (
-  aquaPathFromArgs: string | undefined,
-  isInteractive: boolean
+  aquaPathFromArgs: string | undefined
 ): Promise<string> => {
   if (typeof aquaPathFromArgs === "string") {
     return aquaPathFromArgs;
   }
 
-  try {
-    const srcMainAquaPath = getSrcMainAquaPath();
-    await fsPromises.access(srcMainAquaPath);
-    return srcMainAquaPath;
-  } catch {
-    return input({
-      message:
-        "Enter a path to an aqua file or to a directory that contains aqua files",
-      isInteractive,
-      flagName: INPUT_FLAG_NAME,
-    });
-  }
+  return ensureSrcAquaMainPath();
 };
 
 type RunData = Record<string, unknown>;
@@ -286,11 +212,11 @@ const getRunData = async (
     try {
       parsedData = JSON.parse(data);
     } catch {
-      commandObj.error("Unable to parse --data");
+      commandObj.error(`Unable to parse --${DATA_FLAG_NAME}`);
     }
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid --data: ${JSON.stringify(validateRunData.errors)}`
+        `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(validateRunData.errors)}`
       );
     }
     for (const key in parsedData) {

@@ -14,24 +14,7 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
-import path from "node:path";
-
-import { ARTIFACTS_DIR_NAME } from "../const";
-
-import { getProjectRootDir } from "./getProjectRootDir";
-
-export const getArtifactsPath = (): string => {
-  return path.join(getProjectRootDir(), ARTIFACTS_DIR_NAME);
-};
-
-export const getMaybeArtifactsPath = async (): Promise<string | undefined> => {
-  const artifactsPath = getArtifactsPath();
-  try {
-    await fsPromises.access(artifactsPath);
-  } catch {
-    return;
-  }
-
-  return artifactsPath;
+export const logAndFail = (...args: Parameters<typeof console.log>): void => {
+  console.log(...args);
+  throw new Error("fail");
 };
