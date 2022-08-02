@@ -48,7 +48,7 @@ services:
     deploy:
       - deployId: default
 ```
-deployId can be any unique string in camelCase. It is used in aqua to access ids of deployed services as you will see in a moment.
+`deployId` can be any unique string in camelCase. It is used in aqua to access ids of deployed services as you will see in a moment.
 You can edit `fluence.yaml` manually if you want to deploy multiple times, deploy on specific network, deploy on specific peerId or if you want to override `service.yaml`
 
 3. Run `fluence service new ./src/services/newService` to generate new service template. You will be asked if you want to add the service to `fluence.yaml` - say yes.
