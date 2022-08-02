@@ -225,7 +225,7 @@ services:
   someService: # Service name in camelCase
     get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true # URL or path
     deploy:
-      - deployId: default # Deployment id in camelCase
+      - deployId: default # any unique string in camelCase. Used in aqua to access deployed service ids
         # You can access deployment info in aqua like this:
         # services <- App.services()
         # on services.someService.default!.peerId:
