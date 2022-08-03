@@ -71,10 +71,12 @@ export default class REPL extends Command {
     const { args, flags } = await this.parse(REPL);
     const isInteractive = getIsInteractive(flags);
     const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
+
     assert(
       typeof nameOrPathOrUrlFromArgs === "string" ||
         typeof nameOrPathOrUrlFromArgs === "undefined"
     );
+
     const nameOrPathOrUrl =
       nameOrPathOrUrlFromArgs ??
       (await input({
@@ -87,17 +89,20 @@ export default class REPL extends Command {
     CliUx.ux.action.start(
       "Making sure service and modules are downloaded and built"
     );
+
     const serviceModules = await ensureServiceConfig({
       commandObj: this,
       nameOrPathOrUrl,
     });
 
     const marineCli = await initMarineCli(this);
+
     const moduleConfigs = await ensureModuleConfigs({
       serviceModules,
       commandObj: this,
       marineCli,
     });
+
     CliUx.ux.action.stop();
 
     const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
@@ -129,11 +134,14 @@ const ensureServiceConfig = async ({
   nameOrPathOrUrl,
 }: EnsureServiceConfigArg): Promise<Array<ServiceModule>> => {
   const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
+
   const get =
     fluenceConfig?.services?.[nameOrPathOrUrl]?.get ?? nameOrPathOrUrl;
+
   const serviceDirPath = isUrl(get)
     ? await downloadService(get)
     : path.resolve(get);
+
   const { facade, ...otherModules } =
     (await initReadonlyServiceConfig(serviceDirPath, commandObj))?.modules ??
     CliUx.ux.action.stop(color.red("error")) ??
@@ -142,6 +150,7 @@ const ensureServiceConfig = async ({
         SERVICE_CONFIG_FILE_NAME
       )}`
     );
+
   return [...Object.values(otherModules), facade].map(
     (mod): ServiceModule => ({
       ...mod,
@@ -149,6 +158,7 @@ const ensureServiceConfig = async ({
     })
   );
 };
+
 /* eslint-disable camelcase */
 type TomlModuleConfig = {
   name: string;
@@ -180,6 +190,7 @@ const ensureModuleConfigs = ({
       ({ get, ...overrides }): Promise<TomlModuleConfig> =>
         (async (): Promise<TomlModuleConfig> => {
           const modulePath = isUrl(get) ? await downloadModule(get) : get;
+
           const moduleConfig =
             (await initReadonlyModuleConfig(modulePath, commandObj)) ??
             CliUx.ux.action.stop(color.red("error")) ??
@@ -210,26 +221,33 @@ const ensureModuleConfigs = ({
               workingDir: path.dirname(moduleConfig.$getPath()),
             });
           }
+
           const load_from = getModuleWasmPath(overridenModules);
+
           const tomlModuleConfig: TomlModuleConfig = {
             name,
             load_from,
           };
+
           if (loggerEnabled === true) {
             tomlModuleConfig.logger_enabled = true;
           }
+
           if (typeof loggingMask === "number") {
             tomlModuleConfig.logging_mask = loggingMask;
           }
+
           if (typeof maxHeapSize === "string") {
             tomlModuleConfig.max_heap_size = maxHeapSize;
           }
+
           if (volumes !== undefined) {
             tomlModuleConfig.wasi = {
               mapped_dirs: volumes,
               preopened_files: [...new Set(Object.values(volumes))],
             };
           }
+
           if (preopenedFiles !== undefined) {
             tomlModuleConfig.wasi = {
               preopened_files: [
@@ -240,12 +258,15 @@ const ensureModuleConfigs = ({
               ],
             };
           }
+
           if (envs !== undefined) {
             tomlModuleConfig.wasi = { envs };
           }
+
           if (mountedBinaries !== undefined) {
             tomlModuleConfig.mounted_binaries = mountedBinaries;
           }
+
           return tomlModuleConfig;
         })()
     )

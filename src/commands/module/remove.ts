@@ -63,10 +63,12 @@ export default class Remove extends Command {
     const { args, flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);
     const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
+
     assert(
       typeof nameOrPathOrUrlFromArgs === "string" ||
         typeof nameOrPathOrUrlFromArgs === "undefined"
     );
+
     const nameOrPathOrUrl =
       nameOrPathOrUrlFromArgs ??
       (await input({
@@ -75,7 +77,9 @@ export default class Remove extends Command {
           SERVICE_CONFIG_FILE_NAME
         )}, path to a module or url to .tar.gz archive`,
       }));
+
     assert(typeof nameOrPathOrUrl === "string");
+
     const serviceNameOrPath =
       flags.service ??
       (await input({
@@ -84,22 +88,27 @@ export default class Remove extends Command {
           FLUENCE_CONFIG_FILE_NAME
         )} or path to the service directory`,
       }));
+
     const fluenceConfig = await initFluenceConfig(this);
     let servicePath = serviceNameOrPath;
+
     if (hasKey(serviceNameOrPath, fluenceConfig?.services)) {
       const serviceGet = fluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
       servicePath = serviceGet;
     }
+
     if (isUrl(servicePath)) {
       this.error(
         `Can't modify downloaded service ${color.yellow(servicePath)}`
       );
     }
+
     const serviceConfig = await initServiceConfig(
       path.resolve(servicePath),
       this
     );
+
     if (serviceConfig === null) {
       this.error(
         `Directory ${color.yellow(servicePath)} does not contain ${color.yellow(
@@ -107,6 +116,7 @@ export default class Remove extends Command {
         )}`
       );
     }
+
     if (nameOrPathOrUrl === FACADE_MODULE_NAME) {
       this.error(
         `Each service must have a facade module, if you want to change it either override it in ${color.yellow(
@@ -124,6 +134,7 @@ export default class Remove extends Command {
         Object.entries(serviceConfig.modules).find(
           ([, { get }]): boolean => get === nameOrPathOrUrl
         ) ?? [];
+
       assert(typeof moduleName === "string");
       delete serviceConfig.modules[moduleName];
     } else {
@@ -133,7 +144,9 @@ export default class Remove extends Command {
         )}`
       );
     }
+
     await serviceConfig.$commit();
+
     this.log(
       `Removed module ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
         servicePath

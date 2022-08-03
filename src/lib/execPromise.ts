@@ -46,7 +46,9 @@ export const execPromise = (
         if (typeof message === "string") {
           CliUx.ux.action.stop(color.red("Timed out"));
         }
+
         childProcess.kill();
+
         rej(
           new Error(
             `Execution timed out: command didn't yield any result in ${color.yellow(
@@ -67,11 +69,13 @@ export const execPromise = (
         if (typeof message === "string") {
           CliUx.ux.action.stop(color.red("Failed"));
         }
+
         rej(
           new Error(
             `Command execution failed:\n\n${stderr}\n\n${failedCommandText}\n`
           )
         );
+
         return;
       }
 

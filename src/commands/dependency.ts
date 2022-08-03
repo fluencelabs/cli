@@ -45,6 +45,7 @@ const NAME = "NAME";
 const RECOMMENDED = "recommended";
 const VERSION_FLAG_NAME = "version";
 const USE_FLAG_NAME = "use";
+
 const RESET_ALL_MESSAGE = `If you omit ${color.yellow(
   NAME
 )} argument and include ${color.yellow(
@@ -97,15 +98,18 @@ export default class Dependency extends Command {
       const dependencyConfig = await initDependencyConfig(this);
       dependencyConfig.dependency = {};
       await dependencyConfig.$commit();
+
       for (const dependencyName of dependencyList) {
         // eslint-disable-next-line no-await-in-loop
         await ensureDependency(dependencyName, this);
       }
+
       this.log(
         `Successfully reset all dependencies to ${color.yellow(
           RECOMMENDED
         )} versions`
       );
+
       return;
     }
 
@@ -136,6 +140,7 @@ export default class Dependency extends Command {
     }
 
     const dependencyName = name;
+
     const { recommendedVersion, packageName } = {
       ...npmDependencies,
       ...cargoDependencies,
@@ -244,8 +249,10 @@ const ensureDependency = async (
         name: dependencyName,
         commandObj,
       });
+
       break;
     }
+
     default: {
       const _exhaustiveCheck: never = dependencyName;
       return _exhaustiveCheck;
@@ -265,6 +272,7 @@ const handleUse = async ({
   version,
 }: HandleUseArg): Promise<void> => {
   const dependencyConfig = await initDependencyConfig(commandObj);
+
   const updatedDependencyVersionsConfig = {
     ...dependencyConfig.dependency,
     [dependencyName]: version === RECOMMENDED ? undefined : version,

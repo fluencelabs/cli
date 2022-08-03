@@ -48,6 +48,7 @@ export default class New extends Command {
     const pathToModuleDir: unknown = args[PATH];
     assert(typeof pathToModuleDir === "string");
     await generateNewModule(pathToModuleDir, this);
+
     this.log(
       `Successfully generated template for new module at ${color.yellow(
         pathToModuleDir
@@ -63,10 +64,12 @@ export const generateNewModule = async (
   await fsPromises.mkdir(pathToModuleDir, { recursive: true });
   const marineCli = await initMarineCli(commandObj);
   const name = path.basename(pathToModuleDir);
+
   await marineCli({
     command: "generate",
     flags: { init: true, name },
     workingDir: pathToModuleDir,
   });
+
   await initNewReadonlyModuleConfig(pathToModuleDir, commandObj, name);
 };

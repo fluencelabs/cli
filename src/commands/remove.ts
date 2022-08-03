@@ -116,6 +116,7 @@ export const removeApp = async ({
       replaceHomeDir(appConfig.$getPath())
     )}`
   );
+
   const { keyPairName, services, relays } = appConfig;
   const keyPair = await getKeyPair({ commandObj, keyPairName, isInteractive });
   const aquaCli = await initAquaCli(commandObj);
@@ -124,9 +125,11 @@ export const removeApp = async ({
 
   for (const [serviceName, servicesByName] of Object.entries(services)) {
     const notRemovedServicesByName: typeof servicesByName = {};
+
     for (const [deployId, services] of Object.entries(servicesByName)) {
       for (const service of services) {
         const { serviceId, peerId } = service;
+
         try {
           // eslint-disable-next-line no-await-in-loop
           await aquaCli(
@@ -149,6 +152,7 @@ export const removeApp = async ({
           );
         } catch (error) {
           commandObj.warn(`When removing service\n${String(error)}`);
+
           notRemovedServicesByName[deployId] = [
             ...(notRemovedServicesByName[deployId] ?? []),
             service,
@@ -175,10 +179,12 @@ export const removeApp = async ({
     await Promise.allSettled(
       pathsToRemove.map((path): Promise<void> => fsPromises.unlink(path))
     );
+
     return;
   }
 
   await generateDeployedAppAqua(notRemovedServices);
+
   await generateRegisterApp({
     deployedServices: notRemovedServices,
     aquaCli,
@@ -186,6 +192,7 @@ export const removeApp = async ({
 
   appConfig.services = notRemovedServices;
   await appConfig.$commit();
+
   commandObj.error(
     "Not all services were successful removed. Please make sure to remove all of them in order to continue"
   );

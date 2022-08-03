@@ -73,14 +73,17 @@ export const ensureNpmDependency = async ({
 }: NpmDependencyArg): Promise<string> => {
   const { bin, packageName, recommendedVersion } = npmDependencies[name];
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
+
   const dependencyPath = commandObj.config.windows
     ? path.join(npmDirPath, bin)
     : path.join(npmDirPath, BIN_DIR_NAME, bin);
+
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   try {
     await fsPromises.access(dependencyPath);
     const result = await getNpmDependencyVersion(dependencyPath);
+
     if (!result.includes(version)) {
       throw new Error("Outdated");
     }
@@ -93,7 +96,9 @@ export const ensureNpmDependency = async ({
       )} of ${packageName} to ${replaceHomeDir(npmDirPath)}`,
       commandObj,
     });
+
     const result = await getNpmDependencyVersion(dependencyPath);
+
     if (!result.includes(version)) {
       return commandObj.error(
         `Not able to install version ${color.yellow(

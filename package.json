@@ -126,6 +126,13 @@
         "error",
         "never"
       ],
+      "curly": [
+        "error",
+        "all"
+      ],
+      "no-unused-expressions": [
+        "error"
+      ],
       "dot-notation": [
         "error",
         {
@@ -140,6 +147,54 @@
         "error",
         {
           "case": "camelCase"
+        }
+      ],
+      "padding-line-between-statements": [
+        "error",
+        {
+          "blankLine": "always",
+          "prev": "multiline-expression",
+          "next": "*"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "multiline-expression"
+        },
+        {
+          "blankLine": "always",
+          "prev": "multiline-block-like",
+          "next": "*"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "multiline-block-like"
+        },
+        {
+          "blankLine": "always",
+          "prev": "multiline-const",
+          "next": "*"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "multiline-const"
+        },
+        {
+          "blankLine": "always",
+          "prev": "multiline-let",
+          "next": "*"
+        },
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "multiline-let"
+        },
+        {
+          "blankLine": "any",
+          "prev": "case",
+          "next": "case"
         }
       ],
       "@typescript-eslint/explicit-function-return-type": [
@@ -192,7 +247,6 @@
         "./resources/license-header.js"
       ],
       "brace-style": "off",
-      "padding-line-between-statements": "off",
       "lines-between-class-members": "off",
       "padded-blocks": "off",
       "indent": "off",

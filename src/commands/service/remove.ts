@@ -48,10 +48,12 @@ export default class Remove extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
     const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
+
     assert(
       typeof nameOrPathOrUrlFromArgs === "string" ||
         typeof nameOrPathOrUrlFromArgs === "undefined"
     );
+
     const nameOrPathOrUrl =
       nameOrPathOrUrlFromArgs ??
       (await input({
@@ -60,15 +62,19 @@ export default class Remove extends Command {
           FLUENCE_CONFIG_FILE_NAME
         )}, path to a service or url to .tar.gz archive`,
       }));
+
     const fluenceConfig = await initFluenceConfig(this);
+
     if (fluenceConfig === null) {
       this.error("You must init Fluence project first to remove services");
     }
+
     if (fluenceConfig.services === undefined) {
       this.error(
         `There are no services in ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
       );
     }
+
     if (nameOrPathOrUrl in fluenceConfig.services) {
       delete fluenceConfig.services[nameOrPathOrUrl];
     } else if (
@@ -80,6 +86,7 @@ export default class Remove extends Command {
         Object.entries(fluenceConfig.services).find(
           ([, { get }]): boolean => get === nameOrPathOrUrl
         ) ?? [];
+
       assert(typeof serviceName === "string");
       delete fluenceConfig.services[serviceName];
     } else {
@@ -89,10 +96,13 @@ export default class Remove extends Command {
         )}`
       );
     }
+
     if (Object.keys(fluenceConfig.services).length === 0) {
       delete fluenceConfig.services;
     }
+
     await fluenceConfig.$commit();
+
     this.log(
       `Removed service ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
         FLUENCE_CONFIG_FILE_NAME

@@ -56,29 +56,36 @@ export default class New extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
     const servicePathFromArgs: unknown = args[PATH];
+
     assert(
       typeof servicePathFromArgs === "string" ||
         typeof servicePathFromArgs === "undefined"
     );
+
     const servicePath =
       servicePathFromArgs ??
       (await input({ isInteractive, message: "Enter service path" }));
+
     const pathToModuleDir = path.join(
       servicePath,
       "modules",
       FACADE_MODULE_NAME
     );
+
     await generateNewModule(pathToModuleDir, this);
+
     await initNewReadonlyServiceConfig(
       servicePath,
       this,
       path.relative(servicePath, pathToModuleDir)
     );
+
     this.log(
       `Successfully generated template for new service at ${color.yellow(
         servicePath
       )}`
     );
+
     if (
       isInteractive &&
       (await confirm({

@@ -64,13 +64,16 @@ export default class Add extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Add);
     const isInteractive = getIsInteractive(flags);
+
     const pathToModule: unknown =
       args[PATH_OR_URL] ??
       (await input({
         isInteractive,
         message: "Enter path to a module or url to .tar.gz archive",
       }));
+
     assert(typeof pathToModule === "string");
+
     const serviceNameOrPath =
       flags.service ??
       (await input({
@@ -79,22 +82,27 @@ export default class Add extends Command {
           FLUENCE_CONFIG_FILE_NAME
         )} or path to the service directory`,
       }));
+
     const fluenceConfig = await initFluenceConfig(this);
     let servicePath = serviceNameOrPath;
+
     if (hasKey(serviceNameOrPath, fluenceConfig?.services)) {
       const serviceGet = fluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
       servicePath = serviceGet;
     }
+
     if (isUrl(servicePath)) {
       this.error(
         `Can't modify downloaded service ${color.yellow(servicePath)}`
       );
     }
+
     const serviceConfig = await initServiceConfig(
       path.resolve(servicePath),
       this
     );
+
     if (serviceConfig === null) {
       this.error(
         `Directory ${color.yellow(servicePath)} does not contain ${color.yellow(
@@ -102,9 +110,11 @@ export default class Add extends Command {
         )}`
       );
     }
+
     const moduleName =
       flags[NAME_FLAG_NAME] ??
       stringToCamelCaseName(path.basename(pathToModule));
+
     if (camelcase(moduleName) !== moduleName) {
       this.error(
         `Module name ${color.yellow(
@@ -114,6 +124,7 @@ export default class Add extends Command {
         )} flag to specify service name`
       );
     }
+
     if (moduleName in serviceConfig.modules) {
       this.error(
         `You already have ${color.yellow(moduleName)} in ${color.yellow(
@@ -125,6 +136,7 @@ export default class Add extends Command {
         )} manually`
       );
     }
+
     serviceConfig.modules = {
       ...serviceConfig.modules,
       [moduleName]: {
@@ -136,7 +148,9 @@ export default class Add extends Command {
             ),
       },
     };
+
     await serviceConfig.$commit();
+
     this.log(
       `Added ${color.yellow(moduleName)} to ${color.yellow(
         replaceHomeDir(path.resolve(servicePath))

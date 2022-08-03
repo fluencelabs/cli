@@ -126,6 +126,7 @@ export const generateRegisterApp = async (
       replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
     )}`
   );
+
   await generateRegisterAppTSorJS({ ...options, isJS: true });
   await generateRegisterAppTSorJS({ ...options, isJS: false });
   CliUx.ux.action.stop();
@@ -138,6 +139,7 @@ export const generateDeployedAppAqua = async (
   services: ServicesV2
 ): Promise<void> => {
   const appServicesFilePath = await ensureFluenceAquaDeployedAppPath();
+
   const appServicesAqua =
     // Codegeneration:
     `export App
@@ -170,5 +172,6 @@ ${Object.keys(services)
 service ${APP}("${APP}"):
   ${SERVICE_IDS}: -> ${SERVICES}
 `;
+
   await fsPromises.writeFile(appServicesFilePath, appServicesAqua, FS_OPTIONS);
 };
