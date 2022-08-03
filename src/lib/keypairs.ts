@@ -43,6 +43,7 @@ const getUserKeyPair = async ({
     const defaultKeyPair = userSecretsConfig.keyPairs.find(
       ({ name }): boolean => name === userSecretsConfig.defaultKeyPairName
     );
+
     assert(defaultKeyPair !== undefined);
     return defaultKeyPair;
   }
@@ -60,6 +61,7 @@ const getUserKeyPair = async ({
   if (!isInteractive) {
     commandObj.error(noUserKeyPairMessage);
   }
+
   commandObj.warn(noUserKeyPairMessage);
 
   const readonlyProjectSecretsConfig = await initReadonlyProjectSecretsConfig(

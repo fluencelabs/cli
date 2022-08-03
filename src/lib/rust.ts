@@ -82,6 +82,7 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
         RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE
       )} rust toolchain`
     );
+
     if (!(await hasRequiredRustToolchain())) {
       commandObj.error(
         `Not able to install ${color.yellow(
@@ -96,6 +97,7 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
       `${RUSTUP} target add ${RUST_WASM32_WASI_TARGET}`,
       `Adding ${color.yellow(RUST_WASM32_WASI_TARGET)} rust target`
     );
+
     if (!(await hasRequiredRustTarget())) {
       commandObj.error(
         `Not able to install ${color.yellow(
@@ -196,10 +198,12 @@ const isCorrectVersionInstalled = async ({
   isGlobalDependency: true | undefined;
 }): Promise<boolean> => {
   const { packageName, recommendedVersion } = cargoDependencies[name];
+
   const cratesTomlPath = await ensureUserFluenceCargoCratesPath(
     commandObj,
     isGlobalDependency
   );
+
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   try {
@@ -207,6 +211,7 @@ const isCorrectVersionInstalled = async ({
       cratesTomlPath,
       FS_OPTIONS
     );
+
     return cratesTomlContent.includes(`${packageName} ${version}`);
   } catch {
     return false;
@@ -220,20 +225,24 @@ export const ensureCargoDependency = async ({
   await ensureRust(commandObj);
   const dependency = cargoDependencies[name];
   const { isGlobalDependency, packageName, recommendedVersion } = dependency;
+
   const userFluenceCargoCratesPath = await ensureUserFluenceCargoCratesPath(
     commandObj,
     isGlobalDependency
   );
+
   const dependencyPath = path.join(
     await ensureUserFluenceCargoDir(commandObj, isGlobalDependency),
     BIN_DIR_NAME,
     packageName
   );
+
   if (
     await isCorrectVersionInstalled({ name, commandObj, isGlobalDependency })
   ) {
     return dependencyPath;
   }
+
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   await cargoInstall({

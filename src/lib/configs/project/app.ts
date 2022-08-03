@@ -199,6 +199,7 @@ const migrations: Migrations<Config> = [
     const { keyPairName, knownRelays, timestamp, services } = config;
 
     const newServices: ServicesV1 = {};
+
     for (const { name, peerId, serviceId, blueprintId } of services) {
       const service = {
         peerId,
@@ -240,6 +241,7 @@ const migrations: Migrations<Config> = [
       services,
       relays: relaysFromConfig,
     } = config;
+
     const relays =
       typeof relaysFromConfig === "string"
         ? relaysFromConfig

@@ -102,21 +102,28 @@ export default class Deploy extends Command {
     await ensureFluenceProject(this, isInteractive);
 
     const keyPair = await getKeyPairFromFlags(flags, this, isInteractive);
+
     if (keyPair instanceof Error) {
       this.error(keyPair.message);
     }
+
     const fluenceConfig = await initReadonlyFluenceConfig(this);
+
     if (fluenceConfig === null) {
       this.error("You must init Fluence project first to deploy");
     }
+
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
+
     const preparedForDeployItems = await prepareForDeploy({
       commandObj: this,
       fluenceConfig,
     });
+
     const aquaCli = await initAquaCli(this);
     const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
     const appConfig = await initAppConfig(this);
+
     if (appConfig !== null) {
       // Prompt user to remove previously deployed app if
       // it was already deployed before
@@ -144,11 +151,13 @@ export default class Deploy extends Command {
     }
 
     const successfullyDeployedServices: ServicesV2 = {};
+
     this.log(
       `Going to deploy project described in ${color.yellow(
         replaceHomeDir(fluenceConfig.$getPath())
       )}`
     );
+
     for (const {
       count,
       deployJSON,
@@ -170,23 +179,30 @@ export default class Deploy extends Command {
           tmpDeployJSONPath,
           commandObj: this,
         });
+
         if (res !== null) {
           const { deployedServiceConfig, deployId, serviceName } = res;
+
           const successfullyDeployedServicesByName =
             successfullyDeployedServices[serviceName] ?? {};
+
           successfullyDeployedServicesByName[deployId] = [
             ...(successfullyDeployedServicesByName[deployId] ?? []),
             deployedServiceConfig,
           ];
+
           successfullyDeployedServices[serviceName] =
             successfullyDeployedServicesByName;
         }
       }
     }
+
     if (Object.keys(successfullyDeployedServices).length === 0) {
       this.error("No services were deployed successfully");
     }
+
     await generateDeployedAppAqua(successfullyDeployedServices);
+
     await generateRegisterApp({
       deployedServices: successfullyDeployedServices,
       aquaCli,
@@ -254,6 +270,7 @@ const prepareForDeploy = async ({
   }>;
 
   CliUx.ux.action.start("Making sure all services are downloaded");
+
   const servicePaths = await Promise.all(
     Object.entries(fluenceConfig.services).map(
       ([serviceName, { get, deploy }]): ServicePathPromises =>
@@ -272,6 +289,7 @@ const prepareForDeploy = async ({
         }))()
     )
   );
+
   CliUx.ux.action.stop();
 
   type ServiceConfigPromises = Promise<{
@@ -330,6 +348,7 @@ const prepareForDeploy = async ({
             ).filter(
               (moduleName): boolean => !(moduleName in serviceConfig.modules)
             );
+
             if (modulesNotFoundInServiceYaml.length > 0) {
               commandObj.error(
                 `${color.yellow(
@@ -345,8 +364,10 @@ const prepareForDeploy = async ({
                 )} spelled correctly `
               );
             }
+
             const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
               serviceConfig.modules;
+
             return [
               ...Object.entries(otherModules).map(
                 ([moduleName, mod]): ModuleV0 =>
@@ -369,8 +390,10 @@ const prepareForDeploy = async ({
       )
     ),
   ];
+
   const marineCli = await initMarineCli(commandObj);
   CliUx.ux.action.start("Making sure all modules are downloaded and built");
+
   const mapOfAllModuleConfigs = new Map(
     await Promise.all(
       setOfAllGets.map(
@@ -397,11 +420,13 @@ const prepareForDeploy = async ({
                 workingDir: path.dirname(moduleConfig.$getPath()),
               });
             }
+
             return [get, moduleConfig];
           })()
       )
     )
   );
+
   CliUx.ux.action.stop();
 
   return allDeployInfos.map(
@@ -416,10 +441,12 @@ const prepareForDeploy = async ({
               commandObj.error(
                 `Unreachable. Wasn't able to find module config for ${get}`
               );
+
             return serviceModuleToJSONModuleConfig(moduleConfig, overrides);
           }),
         },
       };
+
       return {
         ...rest,
         deployJSON,
@@ -453,6 +480,7 @@ const serviceModuleToJSONModuleConfig = (
   overrides: Omit<ModuleV0, "get">
 ): JSONModuleConf => {
   const overriddenConfig = { ...moduleConfig, ...overrides };
+
   const {
     name,
     loggerEnabled,
@@ -468,30 +496,38 @@ const serviceModuleToJSONModuleConfig = (
     name,
     path: getModuleWasmPath(overriddenConfig),
   };
+
   if (loggerEnabled === true) {
     jsonModuleConfig.logger_enabled = true;
   }
+
   if (typeof loggingMask === "number") {
     jsonModuleConfig.logging_mask = loggingMask;
   }
+
   if (typeof maxHeapSize === "string") {
     jsonModuleConfig.max_heap_size = maxHeapSize;
   }
+
   if (volumes !== undefined) {
     jsonModuleConfig.mapped_dirs = Object.entries(volumes);
     jsonModuleConfig.preopened_files = [...new Set(Object.values(volumes))];
   }
+
   if (preopenedFiles !== undefined) {
     jsonModuleConfig.preopened_files = [
       ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
     ];
   }
+
   if (envs !== undefined) {
     jsonModuleConfig.envs = Object.entries(envs);
   }
+
   if (mountedBinaries !== undefined) {
     jsonModuleConfig.mounted_binaries = Object.entries(mountedBinaries);
   }
+
   return jsonModuleConfig;
 };
 /* eslint-enable camelcase */
@@ -534,7 +570,9 @@ const deployService = async ({
     JSON.stringify(deployJSON, null, 2),
     FS_OPTIONS
   );
+
   let result: string;
+
   try {
     result = await aquaCli(
       {
@@ -558,10 +596,12 @@ const deployService = async ({
 
   const [, blueprintId] = /Blueprint id:\n(.*)/.exec(result) ?? [];
   const [, serviceId] = /And your service id is:\n"(.*)"/.exec(result) ?? [];
+
   if (blueprintId === undefined || serviceId === undefined) {
     commandObj.warn(
       `Deployment finished without errors but not able to parse serviceId or blueprintId from aqua cli output:\n\n${result}`
     );
+
     return null;
   }
 

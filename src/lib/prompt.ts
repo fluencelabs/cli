@@ -181,6 +181,7 @@ const handleList = async <T, U>(
   }
 
   const firstChoice = choices[0];
+
   if (
     choices.length === 1 &&
     firstChoice !== undefined &&
@@ -191,12 +192,14 @@ const handleList = async <T, U>(
       isInteractive,
       flagName,
     });
+
     if (doConfirm) {
       return {
         result: firstChoice.value,
         choices,
       };
     }
+
     return {
       result: onNoChoices(),
       choices,

@@ -52,6 +52,7 @@ export const getVersionToUse = async (
 ): Promise<string> => {
   const version = (await initReadonlyDependencyConfig(commandObj))
     ?.dependency?.[name];
+
   return typeof version === "string" ? version : recommendedVersion;
 };
 

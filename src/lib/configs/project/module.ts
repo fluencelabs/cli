@@ -115,6 +115,7 @@ export const initReadonlyModuleConfig = (
   commandObj: CommandObj
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
   getReadonlyConfigInitFunction(getInitConfigOptions(configPath))(commandObj);
+
 const getDefault: (name: string) => GetDefaultConfig<LatestConfig> =
   (name: string): GetDefaultConfig<LatestConfig> =>
   (): LatestConfig => ({
@@ -122,6 +123,7 @@ const getDefault: (name: string) => GetDefaultConfig<LatestConfig> =
     type: "rust",
     name,
   });
+
 export const initNewReadonlyModuleConfig = (
   configPath: string,
   commandObj: CommandObj,

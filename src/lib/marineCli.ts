@@ -52,10 +52,12 @@ export const initMarineCli = async (
     name: MARINE_CARGO_DEPENDENCY,
     commandObj,
   });
+
   await ensureCargoDependency({
     name: CARGO_GENERATE_CARGO_DEPENDENCY,
     commandObj,
   });
+
   return async ({
     command,
     flags,
@@ -64,18 +66,22 @@ export const initMarineCli = async (
     workingDir,
   }): Promise<string> => {
     const cwd = process.cwd();
+
     if (workingDir !== undefined) {
       process.chdir(workingDir);
     }
+
     const result = await execPromise(
       `${marineCliPath} ${command ?? ""}${unparseFlags(flags, commandObj)}`,
       message === undefined
         ? undefined
         : getMessageWithKeyValuePairs(message, keyValuePairs)
     );
+
     if (workingDir !== undefined) {
       process.chdir(cwd);
     }
+
     return result;
   };
 };

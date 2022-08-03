@@ -244,23 +244,29 @@ const validate: ConfigValidateFunction<LatestConfig> = (
   if (config.services === undefined) {
     return true;
   }
+
   const notUnique: Array<{
     serviceName: string;
     notUniqueDeployIds: Set<string>;
   }> = [];
+
   for (const [serviceName, { deploy }] of Object.entries(config.services)) {
     const deployIds = new Set<string>();
     const notUniqueDeployIds = new Set<string>();
+
     for (const { deployId } of deploy) {
       if (deployIds.has(deployId)) {
         notUniqueDeployIds.add(deployId);
       }
+
       deployIds.add(deployId);
     }
+
     if (notUniqueDeployIds.size > 0) {
       notUnique.push({ serviceName, notUniqueDeployIds });
     }
   }
+
   if (notUnique.length > 0) {
     return `Deploy ids must be unique. Not unique deploy ids found:\n${notUnique
       .map(
@@ -269,6 +275,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (
       )
       .join("\n")}`;
   }
+
   return true;
 };
 

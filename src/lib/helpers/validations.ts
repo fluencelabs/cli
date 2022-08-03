@@ -22,13 +22,17 @@ export const validateUnique = <T>(
   getError: (notUniqueField: string) => string
 ): ValidationResult => {
   const set = new Set();
+
   for (const item of array) {
     const field = getField(item);
+
     if (set.has(field)) {
       return getError(field);
     }
+
     set.add(field);
   }
+
   return true;
 };
 

@@ -60,6 +60,7 @@ export default class Init extends Command {
     const isInteractive = getIsInteractive(flags);
     const projectPath: unknown = args[PATH];
     assert(projectPath === undefined || typeof projectPath === "string");
+
     await init({
       commandObj: this,
       isInteractive,
@@ -73,6 +74,7 @@ const RECOMMENDATIONS = "recommendations";
 type ExtensionsJson = {
   [RECOMMENDATIONS]?: Array<string>;
 };
+
 const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
   type: "object",
   properties: {
@@ -84,7 +86,9 @@ const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
   },
   required: [],
 };
+
 const validateExtensionsJson = ajv.compile(extensionsJsonSchema);
+
 const extensionsConfig: ExtensionsJson = {
   [RECOMMENDATIONS]: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
 };
@@ -93,6 +97,7 @@ const ensureRecommendedExtensions = async (): Promise<void> => {
   const extensionsJsonPath = await ensureVSCodeExtensionsJsonPath();
 
   let fileContent: string;
+
   try {
     fileContent = await fsPromises.readFile(extensionsJsonPath, FS_OPTIONS);
   } catch {
@@ -102,6 +107,7 @@ const ensureRecommendedExtensions = async (): Promise<void> => {
   }
 
   let parsedFileContent: unknown;
+
   try {
     parsedFileContent = JSON.parse(fileContent);
   } catch {
@@ -115,6 +121,7 @@ const ensureRecommendedExtensions = async (): Promise<void> => {
         ...(extensionsConfig[RECOMMENDATIONS] ?? []),
       ]),
     ];
+
     await fsPromises.writeFile(
       extensionsJsonPath,
       JSON.stringify(parsedFileContent, null, 2) + "\n",
@@ -128,6 +135,7 @@ const AQUA_SETTINGS_IMPORTS = "aquaSettings.imports";
 type SettingsJson = {
   [AQUA_SETTINGS_IMPORTS]?: Array<string>;
 };
+
 const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
   type: "object",
   properties: {
@@ -139,7 +147,9 @@ const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
   },
   required: [],
 };
+
 const validateSettingsJson = ajv.compile(settingsJsonSchema);
+
 const initSettingsConfig = async (): Promise<SettingsJson> => ({
   [AQUA_SETTINGS_IMPORTS]: [await ensureFluenceAquaDir()],
 });
@@ -148,6 +158,7 @@ const ensureRecommendedSettings = async (): Promise<void> => {
   const settingsJsonPath = await ensureVSCodeSettingsJsonPath();
 
   let fileContent: string;
+
   try {
     fileContent = await fsPromises.readFile(settingsJsonPath, FS_OPTIONS);
   } catch {
@@ -157,6 +168,7 @@ const ensureRecommendedSettings = async (): Promise<void> => {
   }
 
   let parsedFileContent: unknown;
+
   try {
     parsedFileContent = JSON.parse(fileContent);
   } catch {
@@ -170,6 +182,7 @@ const ensureRecommendedSettings = async (): Promise<void> => {
         ...((await initSettingsConfig())[AQUA_SETTINGS_IMPORTS] ?? []),
       ]),
     ];
+
     await fsPromises.writeFile(
       settingsJsonPath,
       JSON.stringify(parsedFileContent, null, 2) + "\n",
@@ -181,17 +194,21 @@ const ensureRecommendedSettings = async (): Promise<void> => {
 const ensureGitIgnore = async (): Promise<void> => {
   const gitIgnorePath = getGitignorePath();
   let newGitIgnoreContent: string;
+
   try {
     const currentGitIgnoreContent = await fsPromises.readFile(
       gitIgnorePath,
       FS_OPTIONS
     );
+
     const currentGitIgnoreEntries = new Set(
       currentGitIgnoreContent.split("\n")
     );
+
     const missingGitIgnoreEntries = RECOMMENDED_GIT_IGNORE_CONTENT.split("\n")
       .filter((entry): boolean => !currentGitIgnoreEntries.has(entry))
       .join("\n");
+
     newGitIgnoreContent =
       missingGitIgnoreEntries === ""
         ? currentGitIgnoreContent
@@ -231,6 +248,7 @@ export const init = async (options: InitArg): Promise<void> => {
     await initNewReadonlyFluenceConfig(commandObj);
 
     const srcMainAquaPath = await ensureSrcAquaMainPath();
+
     try {
       await fsPromises.access(srcMainAquaPath);
     } catch {

@@ -33,6 +33,7 @@ export const getHashOfString = (str: string): Promise<string> => {
     md5Hash.on("readable", (): void => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data = md5Hash.read();
+
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (data) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -47,9 +48,11 @@ export const getHashOfString = (str: string): Promise<string> => {
 
 const downloadFile = async (path: string, url: string): Promise<string> => {
   const res = await fetch(url);
+
   if (res.status === 404) {
     throw new Error(`Failed when downloading ${color.yellow(url)}`);
   }
+
   const buffer = await res.buffer();
   await fsPromises.writeFile(path, buffer);
   return path;
@@ -75,10 +78,12 @@ const downloadAndDecompress = async (
   dir: string
 ): Promise<string> => {
   const dirPath = await getHashPath(get, dir);
+
   try {
     await fsPromises.access(dirPath);
     return dirPath;
   } catch {}
+
   await fsPromises.mkdir(dirPath, { recursive: true });
   const archivePath = path.join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);

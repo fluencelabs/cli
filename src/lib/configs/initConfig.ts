@@ -49,13 +49,16 @@ const ensureSchema = async ({
       : await getSchemaDirPath(commandObj),
     SCHEMAS_DIR_NAME
   );
+
   await fsPromises.mkdir(schemaDir, { recursive: true });
   const schemaPath = path.join(schemaDir, `${name}.json`);
+
   await fsPromises.writeFile(
     path.join(schemaDir, `${name}.json`),
     JSON.stringify(schema, null, 2) + "\n",
     FS_OPTIONS
   );
+
   return path.relative(configDirPath, schemaPath);
 };
 
@@ -77,8 +80,10 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
   const schemaPathCommentStart = "# yaml-language-server: $schema=";
   const schemaPathComment = `${schemaPathCommentStart}${schemaRelativePath}`;
   let configString: string;
+
   try {
     const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
+
     configString = fileContent.startsWith(schemaPathCommentStart)
       ? `${[schemaPathComment, ...fileContent.split("\n").slice(1)]
           .join("\n")
@@ -88,6 +93,7 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
     if (getDefaultConfig === undefined) {
       return null;
     }
+
     configString = yamlDiffPatch(
       `${schemaPathComment}\n\n${
         examples === undefined
@@ -102,6 +108,7 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
       await getDefaultConfig(commandObj)
     );
   }
+
   await fsPromises.writeFile(configPath, `${configString}\n`, FS_OPTIONS);
   return configString;
 };
@@ -133,6 +140,7 @@ const migrateConfig = async <
   configString: string;
 }> => {
   let migratedConfig = config;
+
   for (const migration of migrations.slice(config.version)) {
     // eslint-disable-next-line no-await-in-loop
     migratedConfig = await migration(migratedConfig);
@@ -143,6 +151,7 @@ const migrateConfig = async <
     parse(configString),
     migratedConfig
   );
+
   const latestConfig: unknown = parse(migratedConfigString);
 
   if (!validateLatestConfig(latestConfig)) {
@@ -152,6 +161,7 @@ const migrateConfig = async <
       )}. Errors: ${JSON.stringify(validateLatestConfig.errors, null, 2)}`
     );
   }
+
   const maybeValidationError =
     validate !== undefined && (await validate(latestConfig, configPath));
 
@@ -163,6 +173,7 @@ const migrateConfig = async <
       )} after successful migration. Config after migration looks like this:\n\n${migratedConfigString}\n\nErrors: ${maybeValidationError}`
     );
   }
+
   if (configString !== migratedConfigString) {
     await fsPromises.writeFile(
       configPath,
@@ -170,6 +181,7 @@ const migrateConfig = async <
       FS_OPTIONS
     );
   }
+
   return {
     latestConfig: latestConfig,
     configString: migratedConfigString,
@@ -204,6 +216,7 @@ const ensureConfigIsValidLatest = async <
       )}`
     );
   }
+
   const maybeValidationError =
     validate !== undefined && (await validate(config, configPath));
 
@@ -290,6 +303,7 @@ export function getReadonlyConfigInitFunction<
   options: InitConfigOptions<Config, LatestConfig>,
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitReadonlyFunctionWithDefault<LatestConfig>;
+
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
@@ -335,12 +349,15 @@ export function getReadonlyConfigInitFunction<
       getDefaultConfig,
       examples,
     });
+
     if (maybeConfigString === null) {
       return null;
     }
+
     let configString = maybeConfigString;
 
     const config: unknown = parse(configString);
+
     if (!validateAllConfigVersions(config)) {
       throw new Error(
         `Invalid config at ${color.yellow(
@@ -354,6 +371,7 @@ export function getReadonlyConfigInitFunction<
     }
 
     let latestConfig: LatestConfig;
+
     if (config.version < migrations.length) {
       ({ latestConfig, configString } = await migrateConfig({
         config,
@@ -401,6 +419,7 @@ export function getConfigInitFunction<
   options: InitConfigOptions<Config, LatestConfig>,
   getDefaultConfig: GetDefaultConfig<LatestConfig>
 ): InitFunctionWithDefault<LatestConfig>;
+
 export function getConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig
@@ -423,15 +442,18 @@ export function getConfigInitFunction<
         )} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`
       );
     }
+
     initializedConfigs.add(configPath);
 
     const maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
       options,
       getDefaultConfig
     )(commandObj);
+
     if (maybeInitializedReadonlyConfig === null) {
       return null;
     }
+
     const initializedReadonlyConfig = maybeInitializedReadonlyConfig;
 
     let configString = initializedReadonlyConfig.$getConfigString();
@@ -470,6 +492,7 @@ export function getConfigInitFunction<
 
         if (configString !== newConfigString) {
           configString = newConfigString;
+
           await fsPromises.writeFile(
             configPath,
             configString + "\n",

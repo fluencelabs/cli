@@ -110,12 +110,14 @@ export default class Run extends Command {
     const relay = flags.relay ?? getRandomRelayAddr(appConfig?.relays);
 
     const data = await getRunData(flags, this);
+
     const imports: Array<string> = [
       ...(flags.import ?? []),
       await ensureFluenceAquaDir(),
     ];
 
     const appJsonServicePath = await ensureFluenceTmpAppServiceJsonPath();
+
     if (appConfig !== null) {
       await fsPromises.writeFile(
         appJsonServicePath,
@@ -123,8 +125,10 @@ export default class Run extends Command {
         FS_OPTIONS
       );
     }
+
     let result: string;
     const aquaCli = await initAquaCli(this);
+
     try {
       result = await aquaCli(
         {
@@ -179,6 +183,7 @@ const getRunData = async (
 
   if (typeof dataPath === "string") {
     let data: string;
+
     try {
       data = await fsPromises.readFile(dataPath, FS_OPTIONS);
     } catch {
@@ -188,11 +193,13 @@ const getRunData = async (
     }
 
     let parsedData: unknown;
+
     try {
       parsedData = JSON.parse(data);
     } catch {
       commandObj.error(`Unable to parse ${color.yellow(dataPath)}`);
     }
+
     if (!validateRunData(parsedData)) {
       commandObj.error(
         `Invalid ${color.yellow(dataPath)}: ${JSON.stringify(
@@ -200,6 +207,7 @@ const getRunData = async (
         )}`
       );
     }
+
     for (const key in parsedData) {
       if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
         runData[key] = parsedData[key];
@@ -209,16 +217,19 @@ const getRunData = async (
 
   if (typeof data === "string") {
     let parsedData: unknown;
+
     try {
       parsedData = JSON.parse(data);
     } catch {
       commandObj.error(`Unable to parse --${DATA_FLAG_NAME}`);
     }
+
     if (!validateRunData(parsedData)) {
       commandObj.error(
         `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(validateRunData.errors)}`
       );
     }
+
     for (const key in parsedData) {
       if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
         runData[key] = parsedData[key];

@@ -58,10 +58,12 @@ export default class Add extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
     const pathOrUrlFromArgs: unknown = args[PATH_OR_URL];
+
     assert(
       typeof pathOrUrlFromArgs === "string" ||
         typeof pathOrUrlFromArgs === "undefined"
     );
+
     await addService({
       commandObj: this,
       nameFromFlags: flags[NAME_FLAG_NAME],
@@ -84,15 +86,19 @@ export const addService = async ({
   pathOrUrl: pathOrUrlFromArgs,
 }: AddServiceArg): Promise<void> => {
   const fluenceConfig = await initFluenceConfig(commandObj);
+
   if (fluenceConfig === null) {
     return commandObj.error(
       "You must init Fluence project first to add services"
     );
   }
+
   if (fluenceConfig.services === undefined) {
     fluenceConfig.services = {};
   }
+
   const serviceName = nameFromFlags ?? stringToCamelCaseName(pathOrUrlFromArgs);
+
   if (camelcase(serviceName) !== serviceName) {
     commandObj.error(
       `Service name ${color.yellow(
@@ -102,6 +108,7 @@ export const addService = async ({
       )} flag to specify service name`
     );
   }
+
   if (serviceName in fluenceConfig.services) {
     commandObj.error(
       `You already have ${color.yellow(serviceName)} in ${color.yellow(
@@ -113,6 +120,7 @@ export const addService = async ({
       )} manually`
     );
   }
+
   fluenceConfig.services = {
     ...fluenceConfig.services,
     [serviceName]: {
@@ -124,7 +132,9 @@ export const addService = async ({
       ],
     },
   };
+
   await fluenceConfig.$commit();
+
   commandObj.log(
     `Added ${color.yellow(serviceName)} to ${color.yellow(
       FLUENCE_CONFIG_FILE_NAME
