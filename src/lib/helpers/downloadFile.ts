@@ -60,12 +60,15 @@ const downloadFile = async (path: string, url: string): Promise<string> => {
 
 export const stringToCamelCaseName = (string: string): string => {
   const cleanString = string.replace(".tar.gz?raw=true", "");
-  return camelcase(
-    filenamify(
-      cleanString.split(cleanString.includes("/") ? "/" : "\\").slice(-1)[0] ??
-        ""
-    )
-  );
+  const withoutTrailingSlash = cleanString.replace(/\/$/, "");
+
+  const lastPortionOfPath =
+    withoutTrailingSlash
+      .split(withoutTrailingSlash.includes("/") ? "/" : "\\")
+      .slice(-1)[0] ?? "";
+
+  const validName = filenamify(lastPortionOfPath);
+  return camelcase(validName);
 };
 
 const ARCHIVE_FILE = "archive.tar.gz";

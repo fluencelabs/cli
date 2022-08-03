@@ -48,7 +48,17 @@ export type AquaCliInput =
   | {
       command?: never;
       flags: Flags<"input" | "output"> &
-        OptionalFlags<"js"> & { timeout?: never };
+        OptionalFlags<
+          | "js"
+          | "air"
+          | "js"
+          | "log-level"
+          | "const"
+          | "no-relay"
+          | "no-xor"
+          | "dry"
+          | "scheduled"
+        > & { timeout?: never };
     };
 
 export type AquaCLI = {
