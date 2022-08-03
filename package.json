@@ -44,7 +44,6 @@
     "@oclif/plugin-not-found": "^2.3.1",
     "ajv": "^8.11.0",
     "camelcase": "^5.2.0",
-    "chokidar": "^3.5.3",
     "decompress": "^4.2.1",
     "filenamify": "^4",
     "inquirer": "^8.2.4",
