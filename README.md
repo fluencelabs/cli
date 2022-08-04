@@ -105,6 +105,7 @@ Pull request and release process:
 # Commands
 
 <!-- commands -->
+* [`fluence aqua`](#fluence-aqua)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence dependency [NAME]`](#fluence-dependency-name)
 * [`fluence deploy`](#fluence-deploy)
@@ -119,6 +120,40 @@ Pull request and release process:
 * [`fluence service new [PATH]`](#fluence-service-new-path)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+
+## `fluence aqua`
+
+Compile aqua file or directory that contains your .aqua files
+
+```
+USAGE
+  $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js] [--log-level <value>]
+    [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled] [-w] [--no-input]
+
+FLAGS
+  -i, --input=<path>    Path to an aqua file or an input directory that contains your .aqua files
+  -o, --output=<path>   Path to the output directory. Will be created if it doesn't exists
+  -w, --watch           Watch aqua file or folder for changes and recompile
+  --air                 Generate .air file instead of .ts
+  --const=<NAME=value>  Set log level
+  --dry                 Checks if compilation is succeeded, without output
+  --import=<path>...    Path to a directory to import from. May be used several times
+  --js                  Generate .js file instead of .ts
+  --log-level=<level>   Set log level
+  --no-input            Don't interactively ask for any input from the user
+  --no-relay            Do not generate a pass through the relay node
+  --no-xor              Do not generate a wrapper that catches and displays errors
+  --scheduled           Generate air code for script storage. Without error handling wrappers and hops on relay. Will
+                        ignore other options
+
+DESCRIPTION
+  Compile aqua file or directory that contains your .aqua files
+
+EXAMPLES
+  $ fluence aqua
+```
+
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 

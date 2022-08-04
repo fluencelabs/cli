@@ -121,11 +121,10 @@ export const FORCE_FLAG_NAME = "force";
 
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
-export const RECOMMENDED_GIT_IGNORE_CONTENT = `.idea
+export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
 .fluence
 **/node_modules
-Cargo.lock
 **/target/
 .vscode/settings.json
 .repl_history`;

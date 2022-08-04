@@ -27,7 +27,7 @@ import { initNewReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import {
   CommandObj,
   FS_OPTIONS,
-  RECOMMENDED_GIT_IGNORE_CONTENT,
+  RECOMMENDED_GITIGNORE_CONTENT,
   NO_INPUT_FLAG,
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
@@ -101,8 +101,12 @@ const ensureRecommendedExtensions = async (): Promise<void> => {
   try {
     fileContent = await fsPromises.readFile(extensionsJsonPath, FS_OPTIONS);
   } catch {
-    fileContent = JSON.stringify({});
-    await fsPromises.writeFile(extensionsJsonPath, fileContent, FS_OPTIONS);
+    await fsPromises.writeFile(
+      extensionsJsonPath,
+      JSON.stringify(extensionsConfig, null, 2),
+      FS_OPTIONS
+    );
+
     return;
   }
 
@@ -162,8 +166,12 @@ const ensureRecommendedSettings = async (): Promise<void> => {
   try {
     fileContent = await fsPromises.readFile(settingsJsonPath, FS_OPTIONS);
   } catch {
-    fileContent = JSON.stringify({});
-    await fsPromises.writeFile(settingsJsonPath, fileContent, FS_OPTIONS);
+    await fsPromises.writeFile(
+      settingsJsonPath,
+      JSON.stringify(await initSettingsConfig(), null, 2),
+      FS_OPTIONS
+    );
+
     return;
   }
 
@@ -205,7 +213,7 @@ const ensureGitIgnore = async (): Promise<void> => {
       currentGitIgnoreContent.split("\n")
     );
 
-    const missingGitIgnoreEntries = RECOMMENDED_GIT_IGNORE_CONTENT.split("\n")
+    const missingGitIgnoreEntries = RECOMMENDED_GITIGNORE_CONTENT.split("\n")
       .filter((entry): boolean => !currentGitIgnoreEntries.has(entry))
       .join("\n");
 
@@ -214,7 +222,7 @@ const ensureGitIgnore = async (): Promise<void> => {
         ? currentGitIgnoreContent
         : `${currentGitIgnoreContent}\n# recommended by Fluence Labs:\n${missingGitIgnoreEntries}\n`;
   } catch {
-    newGitIgnoreContent = RECOMMENDED_GIT_IGNORE_CONTENT;
+    newGitIgnoreContent = RECOMMENDED_GITIGNORE_CONTENT;
   }
 
   return fsPromises.writeFile(gitIgnorePath, newGitIgnoreContent, FS_OPTIONS);
