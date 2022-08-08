@@ -44,6 +44,7 @@ const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
 const ON_FLAG_NAME = "on";
 const DATA_FLAG_NAME = "data";
+const JSON_SERVICE = "json-service";
 
 export default class Run extends Command {
   static override description = "Run aqua script";
@@ -69,9 +70,10 @@ export default class Run extends Command {
       helpValue: "<path>",
       multiple: true,
     }),
-    "json-service": Flags.file({
+    [JSON_SERVICE]: Flags.string({
       description: "Path to a file that contains a JSON formatted service",
       helpValue: "<path>",
+      multiple: true,
     }),
     [ON_FLAG_NAME]: Flags.string({
       description: "PeerId of a peer where you want to run the function",
@@ -139,7 +141,10 @@ export default class Run extends Command {
             input: aqua,
             timeout: flags.timeout,
             import: imports,
-            "json-service": appJsonServicePath,
+            "json-service": [
+              appJsonServicePath,
+              ...(flags[JSON_SERVICE] ?? []),
+            ],
             ...data,
           },
         },

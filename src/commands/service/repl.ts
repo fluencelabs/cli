@@ -26,6 +26,7 @@ import { CliUx, Command } from "@oclif/core";
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
 import {
+  FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
   ModuleV0 as ServiceModule,
 } from "../../lib/configs/project/service";
@@ -119,7 +120,7 @@ export default class REPL extends Command {
         commandObj: this,
       }),
       [fluenceTmpConfigTomlPath],
-      { stdio: "inherit" }
+      { stdio: "inherit", detached: true }
     );
   }
 }
@@ -142,19 +143,24 @@ const ensureServiceConfig = async ({
     ? await downloadService(get)
     : path.resolve(get);
 
-  const { facade, ...otherModules } =
-    (await initReadonlyServiceConfig(serviceDirPath, commandObj))?.modules ??
-    CliUx.ux.action.stop(color.red("error")) ??
-    commandObj.error(
+  const modules = (await initReadonlyServiceConfig(serviceDirPath, commandObj))
+    ?.modules;
+
+  if (modules === undefined) {
+    CliUx.ux.action.stop(color.red("error"));
+    return commandObj.error(
       `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
         SERVICE_CONFIG_FILE_NAME
       )}`
     );
+  }
+
+  const { [FACADE_MODULE_NAME]: facade, ...otherModules } = modules;
 
   return [...Object.values(otherModules), facade].map(
-    (mod): ServiceModule => ({
-      ...mod,
-      get: getModuleUrlOrAbsolutePath(mod.get, serviceDirPath),
+    (moduleConfig): ServiceModule => ({
+      ...moduleConfig,
+      get: getModuleUrlOrAbsolutePath(moduleConfig.get, serviceDirPath),
     })
   );
 };
@@ -200,7 +206,7 @@ const ensureModuleConfigs = ({
               )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
             );
 
-          const overridenModules = { ...moduleConfig, ...overrides };
+          const overriddenModules = { ...moduleConfig, ...overrides };
 
           const {
             name,
@@ -212,7 +218,7 @@ const ensureModuleConfigs = ({
             mountedBinaries,
             maxHeapSize,
             loggingMask,
-          } = overridenModules;
+          } = overriddenModules;
 
           if (type === "rust") {
             await marineCli({
@@ -222,7 +228,7 @@ const ensureModuleConfigs = ({
             });
           }
 
-          const load_from = getModuleWasmPath(overridenModules);
+          const load_from = getModuleWasmPath(overriddenModules);
 
           const tomlModuleConfig: TomlModuleConfig = {
             name,

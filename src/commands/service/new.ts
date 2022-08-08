@@ -20,12 +20,16 @@ import path from "node:path";
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
+import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
 import {
-  FACADE_MODULE_NAME,
-  initNewReadonlyServiceConfig,
-} from "../../lib/configs/project/service";
-import { FLUENCE_CONFIG_FILE_NAME, NO_INPUT_FLAG } from "../../lib/const";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
+  FLUENCE_CONFIG_FILE_NAME,
+  NAME_FLAG_NAME,
+  NO_INPUT_FLAG,
+} from "../../lib/const";
+import {
+  AQUA_NAME_REQUIREMENTS,
+  ensureValidAquaName,
+} from "../../lib/helpers/downloadFile";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { confirm, input } from "../../lib/prompt";
 import { generateNewModule } from "../module/new";
@@ -33,7 +37,6 @@ import { generateNewModule } from "../module/new";
 import { addService } from "./add";
 
 const PATH = "PATH";
-const NAME_FLAG_NAME = "name";
 
 export default class New extends Command {
   static override description = "Create new marine service template";
@@ -41,7 +44,7 @@ export default class New extends Command {
   static override flags = {
     ...NO_INPUT_FLAG,
     [NAME_FLAG_NAME]: Flags.string({
-      description: "Unique service name",
+      description: `Unique service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
   };
@@ -54,30 +57,28 @@ export default class New extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(New);
     const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
-    const servicePathFromArgs: unknown = args[PATH];
 
-    assert(
-      typeof servicePathFromArgs === "string" ||
-        typeof servicePathFromArgs === "undefined"
-    );
-
-    const servicePath =
-      servicePathFromArgs ??
+    const servicePath: unknown =
+      args[PATH] ??
       (await input({ isInteractive, message: "Enter service path" }));
 
-    const pathToModuleDir = path.join(
-      servicePath,
-      "modules",
-      FACADE_MODULE_NAME
-    );
+    assert(typeof servicePath === "string");
 
+    const serviceName = await ensureValidAquaName({
+      stringToValidate: flags[NAME_FLAG_NAME],
+      message: "Enter service name",
+      flagName: NAME_FLAG_NAME,
+      isInteractive,
+    });
+
+    const pathToModuleDir = path.join(servicePath, "modules", serviceName);
     await generateNewModule(pathToModuleDir, this);
 
     await initNewReadonlyServiceConfig(
       servicePath,
       this,
-      path.relative(servicePath, pathToModuleDir)
+      path.relative(servicePath, pathToModuleDir),
+      serviceName
     );
 
     this.log(
@@ -91,14 +92,15 @@ export default class New extends Command {
       (await confirm({
         isInteractive,
         message: `Do you want add ${color.yellow(
-          servicePath
+          serviceName
         )} to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}?`,
       }))
     ) {
       await addService({
         commandObj: this,
-        nameFromFlags: flags[NAME_FLAG_NAME],
+        serviceName,
         pathOrUrl: servicePath,
+        isInteractive,
       });
     }
   }

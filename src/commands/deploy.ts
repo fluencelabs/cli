@@ -19,7 +19,6 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import { CliUx, Command, Flags } from "@oclif/core";
-import camelcase from "camelcase";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
@@ -67,8 +66,10 @@ import {
   getModuleUrlOrAbsolutePath,
   getModuleWasmPath,
   isUrl,
+  validateAquaName,
 } from "../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
+import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { getKeyPairFromFlags } from "../lib/keypairs";
@@ -221,13 +222,18 @@ export default class Deploy extends Command {
   }
 }
 
+type DeployInfoModule = {
+  moduleName: string;
+  moduleConfig: ModuleV0;
+};
+
 type DeployInfo = {
   serviceName: string;
   serviceDirPath: string;
   deployId: string;
   count: number;
   peerId: string | undefined;
-  modules: Array<ModuleV0>;
+  modules: Array<DeployInfoModule>;
 };
 
 const overrideModule = (
@@ -275,12 +281,7 @@ const prepareForDeploy = async ({
     Object.entries(fluenceConfig.services).map(
       ([serviceName, { get, deploy }]): ServicePathPromises =>
         (async (): ServicePathPromises => ({
-          serviceName:
-            camelcase(serviceName) === serviceName
-              ? serviceName
-              : commandObj.error(
-                  `Service name ${color.yellow(serviceName)} not in camelCase`
-                ),
+          serviceName,
           deploy,
           get,
           serviceDirPath: isUrl(get)
@@ -331,61 +332,90 @@ const prepareForDeploy = async ({
       serviceDirPath,
     }): Array<DeployInfo> =>
       deploy.map(
-        ({ deployId, count = 1, peerId, overrideModules }): DeployInfo => ({
-          serviceName,
-          serviceDirPath,
-          deployId:
-            camelcase(deployId) === deployId
-              ? deployId
-              : commandObj.error(
-                  `DeployId ${color.yellow(deployId)} not in camelCase`
-                ),
-          count,
-          peerId: fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId,
-          modules: ((): Array<ModuleV0> => {
-            const modulesNotFoundInServiceYaml = Object.keys(
-              overrideModules ?? {}
-            ).filter(
-              (moduleName): boolean => !(moduleName in serviceConfig.modules)
+        ({ deployId, count = 1, peerId, overrideModules }): DeployInfo => {
+          const deployIdValidity = validateAquaName(deployId);
+
+          if (deployIdValidity !== true) {
+            return commandObj.error(
+              `deployId ${color.yellow(deployId)} ${deployIdValidity}`
             );
+          }
 
-            if (modulesNotFoundInServiceYaml.length > 0) {
-              commandObj.error(
-                `${color.yellow(
-                  FLUENCE_CONFIG_FILE_NAME
-                )} has service ${color.yellow(
-                  serviceName
-                )} with deployId ${color.yellow(
-                  deployId
-                )} that has moduleOverrides for modules that don't exist in the service ${color.yellow(
-                  serviceDirPath
-                )}. Please make sure ${color.yellow(
-                  modulesNotFoundInServiceYaml.join(", ")
-                )} spelled correctly `
+          return {
+            serviceName,
+            serviceDirPath,
+            deployId,
+            count,
+            peerId: fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId,
+            modules: ((): Array<DeployInfoModule> => {
+              const modulesNotFoundInServiceYaml = Object.keys(
+                overrideModules ?? {}
+              ).filter(
+                (moduleName): boolean => !(moduleName in serviceConfig.modules)
               );
-            }
 
-            const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
-              serviceConfig.modules;
+              if (modulesNotFoundInServiceYaml.length > 0) {
+                commandObj.error(
+                  `${color.yellow(
+                    FLUENCE_CONFIG_FILE_NAME
+                  )} has service ${color.yellow(
+                    serviceName
+                  )} with deployId ${color.yellow(
+                    deployId
+                  )} that has moduleOverrides for modules that don't exist in the service ${color.yellow(
+                    serviceDirPath
+                  )}. Please make sure ${color.yellow(
+                    modulesNotFoundInServiceYaml.join(", ")
+                  )} spelled correctly `
+                );
+              }
 
-            return [
-              ...Object.entries(otherModules).map(
-                ([moduleName, mod]): ModuleV0 =>
-                  overrideModule(mod, overrideModules, moduleName)
-              ),
-              overrideModule(facadeModule, overrideModules, FACADE_MODULE_NAME),
-            ];
-          })(),
-        })
+              const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
+                serviceConfig.modules;
+
+              return [
+                ...Object.entries(otherModules).map(
+                  ([moduleName, mod]): DeployInfoModule => ({
+                    moduleConfig: overrideModule(
+                      mod,
+                      overrideModules,
+                      moduleName
+                    ),
+                    moduleName,
+                  })
+                ),
+                {
+                  moduleConfig: overrideModule(
+                    facadeModule,
+                    overrideModules,
+                    FACADE_MODULE_NAME
+                  ),
+                  moduleName: FACADE_MODULE_NAME,
+                },
+              ];
+            })(),
+          };
+        }
       )
   );
 
   const setOfAllGets = [
     ...new Set(
       allDeployInfos.flatMap(
-        ({ modules, serviceDirPath }): Array<string> =>
-          modules.map(({ get }): string =>
-            getModuleUrlOrAbsolutePath(get, serviceDirPath)
+        ({
+          modules,
+          serviceDirPath,
+          serviceName,
+        }): Array<{ get: string; moduleName: string; serviceName: string }> =>
+          modules.map(
+            ({
+              moduleConfig: { get },
+              moduleName,
+            }): { get: string; moduleName: string; serviceName: string } => ({
+              get: getModuleUrlOrAbsolutePath(get, serviceDirPath),
+              moduleName,
+              serviceName,
+            })
           )
       )
     ),
@@ -397,27 +427,42 @@ const prepareForDeploy = async ({
   const mapOfAllModuleConfigs = new Map(
     await Promise.all(
       setOfAllGets.map(
-        (get): Promise<[string, ModuleConfigReadonly]> =>
+        ({
+          get,
+          moduleName,
+          serviceName,
+        }): Promise<[string, ModuleConfigReadonly]> =>
           (async (): Promise<[string, ModuleConfigReadonly]> => {
-            const moduleConfig =
-              (isUrl(get)
-                ? await initReadonlyModuleConfig(
-                    await downloadModule(get),
-                    commandObj
-                  )
-                : await initReadonlyModuleConfig(get, commandObj)) ??
-              CliUx.ux.action.stop(color.red("error")) ??
-              commandObj.error(
+            const moduleConfig = isUrl(get)
+              ? await initReadonlyModuleConfig(
+                  await downloadModule(get),
+                  commandObj
+                )
+              : await initReadonlyModuleConfig(get, commandObj);
+
+            if (moduleConfig === null) {
+              CliUx.ux.action.stop(color.red("error"));
+
+              return commandObj.error(
                 `Module with get: ${color.yellow(
                   get
                 )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
               );
+            }
 
             if (moduleConfig.type === "rust") {
               await marineCli({
                 command: "build",
                 flags: { release: true },
                 workingDir: path.dirname(moduleConfig.$getPath()),
+              });
+            }
+
+            if (moduleName === FACADE_MODULE_NAME) {
+              await generateServiceInterface({
+                pathToFacade: getModuleWasmPath(moduleConfig),
+                marineCli,
+                serviceName,
               });
             }
 
@@ -433,17 +478,21 @@ const prepareForDeploy = async ({
     ({ modules, serviceDirPath, ...rest }): PreparedForDeploy => {
       const deployJSON = {
         [DEFAULT_DEPLOY_NAME]: {
-          modules: modules.map(({ get, ...overrides }): JSONModuleConf => {
-            const moduleConfig =
-              mapOfAllModuleConfigs.get(
+          modules: modules.map(
+            ({ moduleConfig: { get, ...overrides } }): JSONModuleConf => {
+              const moduleConfig = mapOfAllModuleConfigs.get(
                 getModuleUrlOrAbsolutePath(get, serviceDirPath)
-              ) ??
-              commandObj.error(
-                `Unreachable. Wasn't able to find module config for ${get}`
               );
 
-            return serviceModuleToJSONModuleConfig(moduleConfig, overrides);
-          }),
+              if (moduleConfig === undefined) {
+                return commandObj.error(
+                  `Unreachable. Wasn't able to find module config for ${get}`
+                );
+              }
+
+              return serviceModuleToJSONModuleConfig(moduleConfig, overrides);
+            }
+          ),
         },
       };
 

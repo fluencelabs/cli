@@ -18,22 +18,27 @@ import assert from "node:assert";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
-import camelcase from "camelcase";
 
 import { initFluenceConfig } from "../../lib/configs/project/fluence";
+import { initReadonlyServiceConfig } from "../../lib/configs/project/service";
 import {
   CommandObj,
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
+  NAME_FLAG_NAME,
   NO_INPUT_FLAG,
+  SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
-import { stringToCamelCaseName } from "../../lib/helpers/downloadFile";
+import {
+  AQUA_NAME_REQUIREMENTS,
+  downloadService,
+  isUrl,
+} from "../../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { input } from "../../lib/prompt";
 
 const PATH_OR_URL = "PATH | URL";
-const NAME_FLAG_NAME = "name";
 
 export default class Add extends Command {
   static override description = `Add service to ${color.yellow(
@@ -43,7 +48,7 @@ export default class Add extends Command {
   static override flags = {
     ...NO_INPUT_FLAG,
     [NAME_FLAG_NAME]: Flags.string({
-      description: "Unique service name",
+      description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
   };
@@ -57,33 +62,48 @@ export default class Add extends Command {
     const { args, flags } = await this.parse(Add);
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
-    const pathOrUrlFromArgs: unknown = args[PATH_OR_URL];
 
-    assert(
-      typeof pathOrUrlFromArgs === "string" ||
-        typeof pathOrUrlFromArgs === "undefined"
-    );
+    const servicePathOrUrl: unknown =
+      args[PATH_OR_URL] ??
+      (await input({ isInteractive, message: "Enter service path or url" }));
+
+    assert(typeof servicePathOrUrl === "string");
+
+    const servicePath = isUrl(servicePathOrUrl)
+      ? await downloadService(servicePathOrUrl)
+      : servicePathOrUrl;
+
+    const serviceConfig = await initReadonlyServiceConfig(servicePath, this);
+
+    if (serviceConfig === null) {
+      this.error(
+        `${color.yellow(
+          SERVICE_CONFIG_FILE_NAME
+        )} not found for ${servicePathOrUrl}`
+      );
+    }
 
     await addService({
       commandObj: this,
-      nameFromFlags: flags[NAME_FLAG_NAME],
-      pathOrUrl:
-        pathOrUrlFromArgs ??
-        (await input({ isInteractive, message: "Enter service path or url" })),
+      serviceName: flags[NAME_FLAG_NAME] ?? serviceConfig.name,
+      pathOrUrl: servicePathOrUrl,
+      isInteractive,
     });
   }
 }
 
 type AddServiceArg = {
   commandObj: CommandObj;
-  nameFromFlags: string | undefined;
+  serviceName: string;
   pathOrUrl: string;
+  isInteractive: boolean;
 };
 
 export const addService = async ({
   commandObj,
-  nameFromFlags,
-  pathOrUrl: pathOrUrlFromArgs,
+  serviceName,
+  pathOrUrl,
+  isInteractive,
 }: AddServiceArg): Promise<void> => {
   const fluenceConfig = await initFluenceConfig(commandObj);
 
@@ -97,34 +117,29 @@ export const addService = async ({
     fluenceConfig.services = {};
   }
 
-  const serviceName = nameFromFlags ?? stringToCamelCaseName(pathOrUrlFromArgs);
+  const validateServiceName = (name: string): true | string =>
+    !(name in (fluenceConfig?.services ?? {})) ||
+    `You already have ${color.yellow(name)} in ${color.yellow(
+      FLUENCE_CONFIG_FILE_NAME
+    )}`;
 
-  if (camelcase(serviceName) !== serviceName) {
-    commandObj.error(
-      `Service name ${color.yellow(
-        serviceName
-      )} not in camelCase. Please use ${color.yellow(
-        `--${NAME_FLAG_NAME}`
-      )} flag to specify service name`
-    );
-  }
+  let validServiceName = serviceName;
+  const serviceNameValidity = validateServiceName(validServiceName);
 
-  if (serviceName in fluenceConfig.services) {
-    commandObj.error(
-      `You already have ${color.yellow(serviceName)} in ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )}. Provide a unique name for the new service using ${color.yellow(
-        `--${NAME_FLAG_NAME}`
-      )} flag or edit the existing service in ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )} manually`
-    );
+  if (serviceNameValidity !== true) {
+    commandObj.warn(serviceNameValidity);
+
+    validServiceName = await input({
+      isInteractive,
+      message: `Enter another name for the service (${AQUA_NAME_REQUIREMENTS})`,
+      validate: validateServiceName,
+    });
   }
 
   fluenceConfig.services = {
     ...fluenceConfig.services,
-    [serviceName]: {
-      get: pathOrUrlFromArgs,
+    [validServiceName]: {
+      get: pathOrUrl,
       deploy: [
         {
           deployId: DEFAULT_DEPLOY_NAME,

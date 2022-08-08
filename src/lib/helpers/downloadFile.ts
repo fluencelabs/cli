@@ -19,13 +19,13 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
-import camelcase from "camelcase";
 import decompress from "decompress";
 import filenamify from "filenamify";
 import fetch from "node-fetch";
 
 import { WASM_EXT } from "../const";
 import { ensureFluenceModulesDir, ensureFluenceServicesDir } from "../paths";
+import { input } from "../prompt";
 
 export const getHashOfString = (str: string): Promise<string> => {
   const md5Hash = crypto.createHash("md5");
@@ -58,29 +58,53 @@ const downloadFile = async (path: string, url: string): Promise<string> => {
   return path;
 };
 
-export const stringToCamelCaseName = (string: string): string => {
-  const cleanString = string.replace(".tar.gz?raw=true", "");
-  const withoutTrailingSlash = cleanString.replace(/\/$/, "");
+type EnsureValidAquaNameArg = {
+  stringToValidate: string | undefined;
+} & Parameters<typeof input>[0];
+
+export const AQUA_NAME_REQUIREMENTS =
+  "must start with a lowercase letter and contain only letters, numbers, and underscores";
+
+export const ensureValidAquaName = async ({
+  stringToValidate,
+  ...inputArg
+}: EnsureValidAquaNameArg): Promise<string> => {
+  if (
+    stringToValidate === undefined ||
+    validateAquaName(stringToValidate) !== true
+  ) {
+    return input({
+      ...inputArg,
+      message: `${inputArg.message} (${AQUA_NAME_REQUIREMENTS})`,
+      validate: validateAquaName,
+    });
+  }
+
+  return stringToValidate;
+};
+
+export const validateAquaName = (text: string): true | string =>
+  /^[a-z]\w*$/.test(text) || AQUA_NAME_REQUIREMENTS;
+
+const ARCHIVE_FILE = "archive.tar.gz";
+
+const downloadAndDecompress = async (
+  get: string,
+  pathStart: string
+): Promise<string> => {
+  const hash = await getHashOfString(get);
+  const cleanPrefix = get.replace(".tar.gz?raw=true", "");
+  const withoutTrailingSlash = cleanPrefix.replace(/\/$/, "");
 
   const lastPortionOfPath =
     withoutTrailingSlash
       .split(withoutTrailingSlash.includes("/") ? "/" : "\\")
       .slice(-1)[0] ?? "";
 
-  const validName = filenamify(lastPortionOfPath);
-  return camelcase(validName);
-};
+  const prefix =
+    lastPortionOfPath === "" ? "" : `${filenamify(lastPortionOfPath)}_`;
 
-const ARCHIVE_FILE = "archive.tar.gz";
-
-const getHashPath = async (get: string, dir: string): Promise<string> =>
-  path.join(dir, `${stringToCamelCaseName(get)}_${await getHashOfString(get)}`);
-
-const downloadAndDecompress = async (
-  get: string,
-  dir: string
-): Promise<string> => {
-  const dirPath = await getHashPath(get, dir);
+  const dirPath = path.join(pathStart, `${prefix}${hash}`);
 
   try {
     await fsPromises.access(dirPath);

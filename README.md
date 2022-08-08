@@ -26,7 +26,7 @@ $ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
 $ fluence (--version)
-@fluencelabs/cli/0.0.0 linux-x64 node-v16.14.0
+@fluencelabs/cli/0.2.2 linux-x64 node-v16.14.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
@@ -48,7 +48,7 @@ services:
     deploy:
       - deployId: default
 ```
-`deployId` can be any unique string in camelCase. It is used in aqua to access ids of deployed services as you will see in a moment.
+`deployId` can be any string. It must start with a lowercase letter and contain only letters, numbers, and underscores. It also must be unique service-wise. It is used in aqua to access ids of deployed services as you will see in a moment.
 You can edit `fluence.yaml` manually if you want to deploy multiple times, deploy on specific network, deploy on specific peerId or if you want to override `service.yaml`
 
 3. Run `fluence service new ./src/services/newService` to generate new service template. You will be asked if you want to add the service to `fluence.yaml` - say yes.
@@ -94,13 +94,14 @@ pre-commit runs each time before you commit. It includes prettier and generates 
 If you want README.md file to be correctly generated please don't forget to run `npm run build` before committing
 
 Pull request and release process:
-1. Run `npm run check` to make sure everything ok with the code
-2. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
-3. Push your changes
-4. Create pull request and merge your changes to `main`
-5. Switch to `main` locally and pull merged changes
-6. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
-5. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
+1. Update version in package.json
+2. Run `npm run check` to make sure everything ok with the code
+3. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
+4. Push your changes
+5. Create pull request and merge your changes to `main`
+6. Switch to `main` locally and pull merged changes
+7. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
+8. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
 
 # Commands
 
@@ -153,7 +154,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -210,7 +211,7 @@ EXAMPLES
   $ fluence dependency
 ```
 
-_See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/dependency.ts)_
+_See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/dependency.ts)_
 
 ## `fluence deploy`
 
@@ -234,7 +235,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -277,7 +278,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/init.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -291,7 +292,7 @@ ARGUMENTS
   PATH | URL  Path to a module or url to .tar.gz archive
 
 FLAGS
-  --name=<name>            Unique module name
+  --name=<name>            Override module name
   --no-input               Don't interactively ask for any input from the user
   --service=<name | path>  Service name from fluence.yaml or path to the service directory
 
@@ -365,7 +366,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/remove.ts)_
 
 ## `fluence run`
 
@@ -384,7 +385,7 @@ FLAGS
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
                               using these argument names
   --import=<path>...          Path to a directory to import from. May be used several times
-  --json-service=<path>       Path to a file that contains a JSON formatted service
+  --json-service=<path>...    Path to a file that contains a JSON formatted service
   --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of a peer where you want to run the function
   --relay=<multiaddr>         Relay node multiaddr
@@ -397,7 +398,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -411,7 +412,8 @@ ARGUMENTS
   PATH | URL  Path to a service or url to .tar.gz archive
 
 FLAGS
-  --name=<name>  Unique service name
+  --name=<name>  Override service name (must start with a lowercase letter and contain only letters, numbers, and
+                 underscores)
   --no-input     Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -433,7 +435,8 @@ ARGUMENTS
   PATH  Path to a service
 
 FLAGS
-  --name=<name>  Unique service name
+  --name=<name>  Unique service name (must start with a lowercase letter and contain only letters, numbers, and
+                 underscores)
   --no-input     Don't interactively ask for any input from the user
 
 DESCRIPTION

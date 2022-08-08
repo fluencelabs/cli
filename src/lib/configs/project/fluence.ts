@@ -222,10 +222,11 @@ export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const examples = `
 services:
-  someService: # Service name in camelCase
+  someService: # Service name. It must start with a lowercase letter and contain only letters, numbers, and underscores.
     get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true # URL or path
     deploy:
-      - deployId: default # any unique string in camelCase. Used in aqua to access deployed service ids
+      - deployId: default # must start with a lowercase letter and contain only letters, numbers, and underscores.
+        # Used in aqua to access deployed service ids
         # You can access deployment info in aqua like this:
         # services <- App.services()
         # on services.someService.default!.peerId:

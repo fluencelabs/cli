@@ -19,16 +19,17 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
-import camelcase from "camelcase";
 
 import { initFluenceConfig } from "../../lib/configs/project/fluence";
+import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
 import { initServiceConfig } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
+  MODULE_CONFIG_FILE_NAME,
   NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
-import { isUrl, stringToCamelCaseName } from "../../lib/helpers/downloadFile";
+import { downloadModule, isUrl } from "../../lib/helpers/downloadFile";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { input } from "../../lib/prompt";
@@ -45,7 +46,7 @@ export default class Add extends Command {
   static override flags = {
     ...NO_INPUT_FLAG,
     [NAME_FLAG_NAME]: Flags.string({
-      description: "Unique module name",
+      description: "Override module name",
       helpValue: "<name>",
     }),
     service: Flags.directory({
@@ -65,14 +66,28 @@ export default class Add extends Command {
     const { args, flags } = await this.parse(Add);
     const isInteractive = getIsInteractive(flags);
 
-    const pathToModule: unknown =
+    const modulePathOrUrl: unknown =
       args[PATH_OR_URL] ??
       (await input({
         isInteractive,
         message: "Enter path to a module or url to .tar.gz archive",
       }));
 
-    assert(typeof pathToModule === "string");
+    assert(typeof modulePathOrUrl === "string");
+
+    const modulePath = isUrl(modulePathOrUrl)
+      ? await downloadModule(modulePathOrUrl)
+      : modulePathOrUrl;
+
+    const moduleConfig = await initReadonlyModuleConfig(modulePath, this);
+
+    if (moduleConfig === null) {
+      this.error(
+        `${color.yellow(
+          MODULE_CONFIG_FILE_NAME
+        )} not found for ${modulePathOrUrl}`
+      );
+    }
 
     const serviceNameOrPath =
       flags.service ??
@@ -111,40 +126,33 @@ export default class Add extends Command {
       );
     }
 
-    const moduleName =
-      flags[NAME_FLAG_NAME] ??
-      stringToCamelCaseName(path.basename(pathToModule));
+    const validateModuleName = (name: string): true | string =>
+      !(name in (fluenceConfig?.services ?? {})) ||
+      `You already have ${color.yellow(name)} in ${color.yellow(
+        serviceConfig.$getPath()
+      )}`;
 
-    if (camelcase(moduleName) !== moduleName) {
-      this.error(
-        `Module name ${color.yellow(
-          moduleName
-        )} not in camelCase. Please use ${color.yellow(
-          `--${NAME_FLAG_NAME}`
-        )} flag to specify service name`
-      );
-    }
+    let validModuleName = flags[NAME_FLAG_NAME] ?? moduleConfig.name;
+    const serviceNameValidity = validateModuleName(validModuleName);
 
-    if (moduleName in serviceConfig.modules) {
-      this.error(
-        `You already have ${color.yellow(moduleName)} in ${color.yellow(
-          SERVICE_CONFIG_FILE_NAME
-        )}. Provide a unique name for the new module using ${color.yellow(
-          `--${NAME_FLAG_NAME}`
-        )} flag or edit the existing module in ${color.yellow(
-          SERVICE_CONFIG_FILE_NAME
-        )} manually`
-      );
+    if (serviceNameValidity !== true) {
+      this.warn(serviceNameValidity);
+
+      validModuleName = await input({
+        isInteractive,
+        message: `Enter another name for module`,
+        validate: validateModuleName,
+      });
     }
 
     serviceConfig.modules = {
       ...serviceConfig.modules,
-      [moduleName]: {
-        get: isUrl(pathToModule)
-          ? pathToModule
+      [validModuleName]: {
+        get: isUrl(modulePathOrUrl)
+          ? modulePathOrUrl
           : path.relative(
               path.resolve(servicePath),
-              path.resolve(pathToModule)
+              path.resolve(modulePathOrUrl)
             ),
       },
     };
@@ -152,7 +160,7 @@ export default class Add extends Command {
     await serviceConfig.$commit();
 
     this.log(
-      `Added ${color.yellow(moduleName)} to ${color.yellow(
+      `Added ${color.yellow(validModuleName)} to ${color.yellow(
         replaceHomeDir(path.resolve(servicePath))
       )}`
     );
