@@ -119,7 +119,7 @@ export default class Run extends Command {
     ];
 
     const appJsonServicePath = await ensureFluenceTmpAppServiceJsonPath();
-    const jsonServicePaths = flags[JSON_SERVICE];
+    const jsonServicePaths = flags[JSON_SERVICE] ?? [];
 
     if (appConfig !== null) {
       await fsPromises.writeFile(
