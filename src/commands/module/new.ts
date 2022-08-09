@@ -22,7 +22,13 @@ import color from "@oclif/color";
 import { Command } from "@oclif/core";
 
 import { initNewReadonlyModuleConfig } from "../../lib/configs/project/module";
-import { CommandObj, FS_OPTIONS, NO_INPUT_FLAG } from "../../lib/const";
+import {
+  CommandObj,
+  FS_OPTIONS,
+  MARINE_RS_SDK_TEMPLATE_VERSION,
+  MARINE_RS_SDK_TEST_TEMPLATE_VERSION,
+  NO_INPUT_FLAG,
+} from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 
@@ -104,8 +110,8 @@ name = "${name}"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "0.6.15"
+marine-rs-sdk = "${MARINE_RS_SDK_TEMPLATE_VERSION}"
 
 [dev-dependencies]
-marine-rs-sdk-test = "0.5.0"
+marine-rs-sdk-test = "${MARINE_RS_SDK_TEST_TEMPLATE_VERSION}"
 `;
