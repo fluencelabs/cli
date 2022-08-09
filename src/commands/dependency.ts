@@ -28,7 +28,6 @@ import {
 import {
   AQUA_NPM_DEPENDENCY,
   cargoDependencyList,
-  CARGO_GENERATE_CARGO_DEPENDENCY,
   CommandObj,
   FLUENCE_DIR_NAME,
   MARINE_CARGO_DEPENDENCY,
@@ -243,8 +242,7 @@ const ensureDependency = async (
       break;
     }
     case MARINE_CARGO_DEPENDENCY:
-    case MREPL_CARGO_DEPENDENCY:
-    case CARGO_GENERATE_CARGO_DEPENDENCY: {
+    case MREPL_CARGO_DEPENDENCY: {
       await ensureCargoDependency({
         name: dependencyName,
         commandObj,

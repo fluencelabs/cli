@@ -29,6 +29,7 @@ import {
 import {
   AQUA_NAME_REQUIREMENTS,
   ensureValidAquaName,
+  validateAquaName,
 } from "../../lib/helpers/downloadFile";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { confirm, input } from "../../lib/prompt";
@@ -65,7 +66,11 @@ export default class New extends Command {
     assert(typeof servicePath === "string");
 
     const serviceName = await ensureValidAquaName({
-      stringToValidate: flags[NAME_FLAG_NAME],
+      stringToValidate: await getServiceName({
+        isInteractive,
+        nameFromFlags: flags[NAME_FLAG_NAME],
+        servicePath,
+      }),
       message: "Enter service name",
       flagName: NAME_FLAG_NAME,
       isInteractive,
@@ -105,3 +110,53 @@ export default class New extends Command {
     }
   }
 }
+
+type GetServiceNameArg = {
+  nameFromFlags: undefined | string;
+  servicePath: string;
+  isInteractive: boolean;
+};
+
+const getServiceName = async ({
+  isInteractive,
+  nameFromFlags,
+  servicePath,
+}: GetServiceNameArg): Promise<string | undefined> => {
+  if (typeof nameFromFlags === "string") {
+    return nameFromFlags;
+  }
+
+  const withoutTrailingSlash = servicePath.replace(/\/$/, "");
+
+  const lastPortionOfPath =
+    withoutTrailingSlash
+      .split(withoutTrailingSlash.includes("/") ? "/" : "\\")
+      .slice(-1)[0] ?? "";
+
+  const cleanLastPortionOfPath = lastPortionOfPath.replace(/\W/, "");
+  const indexOfTheFirstLetter = cleanLastPortionOfPath.search(/[A-Za-z]/);
+
+  const startingFromLetter = cleanLastPortionOfPath.slice(
+    indexOfTheFirstLetter
+  );
+
+  const serviceName =
+    startingFromLetter.charAt(0).toLocaleLowerCase() +
+    startingFromLetter.slice(1);
+
+  const serviceNameValidity = validateAquaName(serviceName);
+
+  if (
+    serviceNameValidity !== true ||
+    !(await confirm({
+      isInteractive,
+      message: `Do you want to use ${color.yellow(
+        serviceName
+      )} as the name of your new service?`,
+    }))
+  ) {
+    return undefined;
+  }
+
+  return serviceName;
+};

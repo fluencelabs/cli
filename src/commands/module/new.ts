@@ -22,10 +22,15 @@ import color from "@oclif/color";
 import { Command } from "@oclif/core";
 
 import { initNewReadonlyModuleConfig } from "../../lib/configs/project/module";
-import { CommandObj, NO_INPUT_FLAG } from "../../lib/const";
+import {
+  CommandObj,
+  FS_OPTIONS,
+  MARINE_RS_SDK_TEMPLATE_VERSION,
+  MARINE_RS_SDK_TEST_TEMPLATE_VERSION,
+  NO_INPUT_FLAG,
+} from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
-import { initMarineCli } from "../../lib/marineCli";
 
 const PATH = "PATH";
 
@@ -62,14 +67,51 @@ export const generateNewModule = async (
   commandObj: CommandObj
 ): Promise<void> => {
   await fsPromises.mkdir(pathToModuleDir, { recursive: true });
-  const marineCli = await initMarineCli(commandObj);
   const name = path.basename(pathToModuleDir);
 
-  await marineCli({
-    command: "generate",
-    flags: { init: true, name },
-    workingDir: pathToModuleDir,
-  });
+  const newModuleSrcDirPath = path.join(pathToModuleDir, "src");
+  await fsPromises.mkdir(newModuleSrcDirPath, { recursive: true });
+
+  await fsPromises.writeFile(
+    path.join(newModuleSrcDirPath, "main.rs"),
+    MAIN_RS_CONTENT,
+    FS_OPTIONS
+  );
+
+  await fsPromises.writeFile(
+    path.join(pathToModuleDir, "Cargo.toml"),
+    getCargoTomlContent(name),
+    FS_OPTIONS
+  );
 
   await initNewReadonlyModuleConfig(pathToModuleDir, commandObj, name);
 };
+
+const MAIN_RS_CONTENT = `use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
+
+module_manifest!();
+
+pub fn main() {}
+
+#[marine]
+pub fn greeting(name: String) -> String {
+    format!("Hi, {}", name)
+}
+`;
+
+const getCargoTomlContent = (name: string): string => `[package]
+name = "${name}"
+version = "0.1.0"
+edition = "2018"
+
+[[bin]]
+name = "${name}"
+path = "src/main.rs"
+
+[dependencies]
+marine-rs-sdk = "${MARINE_RS_SDK_TEMPLATE_VERSION}"
+
+[dev-dependencies]
+marine-rs-sdk-test = "${MARINE_RS_SDK_TEST_TEMPLATE_VERSION}"
+`;

@@ -26,7 +26,7 @@ $ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
 $ fluence (--version)
-@fluencelabs/cli/0.2.2 linux-x64 node-v16.14.0
+@fluencelabs/cli/0.0.0 linux-x64 node-v16.14.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
@@ -154,7 +154,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -194,8 +194,8 @@ USAGE
   $ fluence dependency [NAME] [-v | --use <value>] [--no-input]
 
 ARGUMENTS
-  NAME  Dependency name. One of: aqua, marine, mrepl, cargo-generate. If you omit NAME argument and include --use
-        recommended - all dependencies will be reset to recommended versions
+  NAME  Dependency name. One of: aqua, marine, mrepl. If you omit NAME argument and include --use recommended - all
+        dependencies will be reset to recommended versions
 
 FLAGS
   -v, --version                  Show current version of the dependency
@@ -211,7 +211,7 @@ EXAMPLES
   $ fluence dependency
 ```
 
-_See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/dependency.ts)_
+_See code: [dist/commands/dependency.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/dependency.ts)_
 
 ## `fluence deploy`
 
@@ -235,7 +235,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -278,7 +278,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/init.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -366,7 +366,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/remove.ts)_
 
 ## `fluence run`
 
@@ -398,7 +398,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.2/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
