@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  CARGO_GENERATE_CARGO_DEPENDENCY,
-  CommandObj,
-  MARINE_CARGO_DEPENDENCY,
-} from "./const";
+import { CommandObj, MARINE_CARGO_DEPENDENCY } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
 import { unparseFlags } from "./helpers/unparseFlags";
@@ -27,11 +23,6 @@ import { ensureCargoDependency } from "./rust";
 import type { Flags } from "./typeHelpers";
 
 export type MarineCliInput =
-  | {
-      command: "generate";
-      flags: Flags<"init" | "name">;
-      args?: never;
-    }
   | {
       command: "aqua";
       flags?: never;
@@ -62,11 +53,6 @@ export const initMarineCli = async (
   });
 
   const projectRootDir = getProjectRootDir();
-
-  await ensureCargoDependency({
-    name: CARGO_GENERATE_CARGO_DEPENDENCY,
-    commandObj,
-  });
 
   return async ({
     command,

@@ -19,7 +19,6 @@ import type { JSONSchemaType } from "ajv";
 import {
   AQUA_NPM_DEPENDENCY,
   cargoDependencyList,
-  CARGO_GENERATE_CARGO_DEPENDENCY,
   CommandObj,
   DEPENDENCY_CONFIG_FILE_NAME,
   MARINE_CARGO_DEPENDENCY,
@@ -73,7 +72,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
         [AQUA_NPM_DEPENDENCY]: { type: "string", nullable: true },
         [MARINE_CARGO_DEPENDENCY]: { type: "string", nullable: true },
         [MREPL_CARGO_DEPENDENCY]: { type: "string", nullable: true },
-        [CARGO_GENERATE_CARGO_DEPENDENCY]: { type: "string", nullable: true },
       },
       required: [],
       nullable: true,

@@ -67,26 +67,14 @@ export const ensureUserFluenceNpmDir = async (
   ensureDir(path.join(await ensureUserFluenceDir(commandObj), NPM_DIR_NAME));
 
 export const ensureUserFluenceCargoDir = async (
-  commandObj: CommandObj,
-  isGlobalDependency: true | undefined
+  commandObj: CommandObj
 ): Promise<string> =>
-  ensureDir(
-    isGlobalDependency === true
-      ? path.join(
-          path.dirname(await ensureUserFluenceDir(commandObj)),
-          `.${CARGO_DIR_NAME}`
-        )
-      : path.join(await ensureUserFluenceDir(commandObj), CARGO_DIR_NAME)
-  );
+  ensureDir(path.join(await ensureUserFluenceDir(commandObj), CARGO_DIR_NAME));
 
 export const ensureUserFluenceCargoCratesPath = async (
-  commandObj: CommandObj,
-  isGlobalDependency: true | undefined
+  commandObj: CommandObj
 ): Promise<string> =>
-  path.join(
-    await ensureUserFluenceCargoDir(commandObj, isGlobalDependency),
-    CRATES_TOML
-  );
+  path.join(await ensureUserFluenceCargoDir(commandObj), CRATES_TOML);
 
 // Project paths:
 

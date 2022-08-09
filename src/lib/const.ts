@@ -136,11 +136,9 @@ export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
 export const MREPL_CARGO_DEPENDENCY = "mrepl";
-export const CARGO_GENERATE_CARGO_DEPENDENCY = "cargo-generate";
 export const cargoDependencyList = [
   MARINE_CARGO_DEPENDENCY,
   MREPL_CARGO_DEPENDENCY,
-  CARGO_GENERATE_CARGO_DEPENDENCY,
 ] as const;
 export type CargoDependency = typeof cargoDependencyList[number];
 

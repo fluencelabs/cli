@@ -23,8 +23,6 @@ import { getVersionToUse } from "./configs/user/dependency";
 import {
   BIN_DIR_NAME,
   CargoDependency,
-  CARGO_GENERATE_CARGO_DEPENDENCY,
-  CARGO_GENERATE_RECOMMENDED_VERSION,
   CommandObj,
   FS_OPTIONS,
   MARINE_CARGO_DEPENDENCY,
@@ -132,7 +130,6 @@ const cargoInstall = async ({
   packageName,
   version,
   isNightlyX86,
-  isGlobalDependency,
   commandObj,
   message,
 }: CargoDependencyInfo & {
@@ -146,14 +143,7 @@ const cargoInstall = async ({
     } install ${packageName} ${unparseFlags(
       {
         version,
-        ...(isGlobalDependency === true
-          ? {}
-          : {
-              root: await ensureUserFluenceCargoDir(
-                commandObj,
-                isGlobalDependency
-              ),
-            }),
+        root: await ensureUserFluenceCargoDir(commandObj),
       },
       commandObj
     )}`,
@@ -164,7 +154,6 @@ type CargoDependencyInfo = {
   recommendedVersion: string;
   packageName: string;
   isNightlyX86?: true;
-  isGlobalDependency?: true;
 };
 
 export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
@@ -178,11 +167,6 @@ export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
     packageName: MREPL_CARGO_DEPENDENCY,
     isNightlyX86: true,
   },
-  [CARGO_GENERATE_CARGO_DEPENDENCY]: {
-    recommendedVersion: CARGO_GENERATE_RECOMMENDED_VERSION,
-    packageName: CARGO_GENERATE_CARGO_DEPENDENCY,
-    isGlobalDependency: true,
-  },
 };
 
 type CargoDependencyArg = {
@@ -193,17 +177,9 @@ type CargoDependencyArg = {
 const isCorrectVersionInstalled = async ({
   name,
   commandObj,
-  isGlobalDependency,
-}: CargoDependencyArg & {
-  isGlobalDependency: true | undefined;
-}): Promise<boolean> => {
+}: CargoDependencyArg): Promise<boolean> => {
   const { packageName, recommendedVersion } = cargoDependencies[name];
-
-  const cratesTomlPath = await ensureUserFluenceCargoCratesPath(
-    commandObj,
-    isGlobalDependency
-  );
-
+  const cratesTomlPath = await ensureUserFluenceCargoCratesPath(commandObj);
   const version = await getVersionToUse(recommendedVersion, name, commandObj);
 
   try {
@@ -224,22 +200,19 @@ export const ensureCargoDependency = async ({
 }: CargoDependencyArg): Promise<string> => {
   await ensureRust(commandObj);
   const dependency = cargoDependencies[name];
-  const { isGlobalDependency, packageName, recommendedVersion } = dependency;
+  const { packageName, recommendedVersion } = dependency;
 
   const userFluenceCargoCratesPath = await ensureUserFluenceCargoCratesPath(
-    commandObj,
-    isGlobalDependency
+    commandObj
   );
 
   const dependencyPath = path.join(
-    await ensureUserFluenceCargoDir(commandObj, isGlobalDependency),
+    await ensureUserFluenceCargoDir(commandObj),
     BIN_DIR_NAME,
     packageName
   );
 
-  if (
-    await isCorrectVersionInstalled({ name, commandObj, isGlobalDependency })
-  ) {
+  if (await isCorrectVersionInstalled({ name, commandObj })) {
     return dependencyPath;
   }
 
@@ -250,15 +223,13 @@ export const ensureCargoDependency = async ({
     message: `Installing version ${color.yellow(
       version
     )} of ${packageName} to ${replaceHomeDir(
-      await ensureUserFluenceCargoDir(commandObj, isGlobalDependency)
+      await ensureUserFluenceCargoDir(commandObj)
     )}`,
     commandObj,
     ...dependency,
   });
 
-  if (
-    await isCorrectVersionInstalled({ name, commandObj, isGlobalDependency })
-  ) {
+  if (await isCorrectVersionInstalled({ name, commandObj })) {
     return dependencyPath;
   }
 
