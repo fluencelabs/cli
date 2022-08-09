@@ -23,6 +23,7 @@ import {
   APP_SERVICE_JSON_FILE_NAME,
   APP_TS_FILE_NAME,
   AQUA_DIR_NAME,
+  AQUA_SERVICES_DIR_NAME,
   CARGO_DIR_NAME,
   CommandObj,
   CONFIG_TOML,
@@ -116,6 +117,9 @@ export const ensureFluenceDir = (): Promise<string> =>
 
 export const ensureFluenceAquaDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureFluenceDir(), AQUA_DIR_NAME));
+
+export const ensureFluenceAquaServicesDir = async (): Promise<string> =>
+  ensureDir(path.join(await ensureFluenceAquaDir(), AQUA_SERVICES_DIR_NAME));
 
 export const ensureFluenceAquaDeployedAppPath = async (): Promise<string> =>
   path.join(await ensureFluenceAquaDir(), DEPLOYED_APP_AQUA_FILE_NAME);

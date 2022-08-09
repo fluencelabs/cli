@@ -17,6 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 import { CommandObj, SERVICE_CONFIG_FILE_NAME } from "../../const";
+import { validateAquaName } from "../../helpers/downloadFile";
 import { ensureFluenceDir } from "../../paths";
 import {
   getConfigInitFunction,
@@ -26,6 +27,7 @@ import {
   getReadonlyConfigInitFunction,
   Migrations,
   GetDefaultConfig,
+  ConfigValidateFunction,
 } from "../initConfig";
 
 import type { ConfigV0 as ModuleConfig } from "./module";
@@ -40,7 +42,7 @@ const moduleSchema: JSONSchemaType<ModuleV0> = {
   type: "object",
   properties: {
     get: { type: "string" },
-    type: { type: "string", nullable: true, enum: ["rust"] },
+    type: { type: "string", nullable: true, enum: ["rust", "compiled"] },
     name: { type: "string", nullable: true },
     maxHeapSize: { type: "string", nullable: true },
     loggerEnabled: { type: "boolean", nullable: true },
@@ -61,6 +63,7 @@ export const FACADE_MODULE_NAME = "facade";
 
 export type ConfigV0 = {
   version: 0;
+  name: string;
   modules: { [FACADE_MODULE_NAME]: ModuleV0 } & Record<string, ModuleV0>;
 };
 
@@ -68,6 +71,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
     version: { type: "number", enum: [0] },
+    name: { type: "string" },
     modules: {
       type: "object",
       additionalProperties: moduleSchema,
@@ -77,7 +81,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       required: [FACADE_MODULE_NAME],
     },
   },
-  required: ["version", "modules"],
+  required: ["version", "name", "modules"],
 };
 
 const migrations: Migrations<Config> = [];
@@ -113,8 +117,19 @@ type Config = ConfigV0;
 type LatestConfig = ConfigV0;
 
 export type ServiceConfig = InitializedConfig<LatestConfig>;
-
 export type ServiceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
+
+const validate: ConfigValidateFunction<LatestConfig> = (
+  config
+): ReturnType<ConfigValidateFunction<LatestConfig>> => {
+  const validity = validateAquaName(config.name);
+
+  if (validity === true) {
+    return true;
+  }
+
+  return `Invalid service name: ${validity}`;
+};
 
 const getInitConfigOptions = (
   configDirPath: string
@@ -126,6 +141,7 @@ const getInitConfigOptions = (
   getSchemaDirPath: ensureFluenceDir,
   getConfigDirPath: (): string => configDirPath,
   examples,
+  validate,
 });
 
 export const initServiceConfig = (
@@ -143,11 +159,16 @@ export const initReadonlyServiceConfig = (
   );
 
 const getDefault: (
-  relativePathToFacade: string
+  relativePathToFacade: string,
+  name: string
 ) => GetDefaultConfig<LatestConfig> =
-  (relativePathToFacade: string): GetDefaultConfig<LatestConfig> =>
+  (
+    relativePathToFacade: string,
+    name: string
+  ): GetDefaultConfig<LatestConfig> =>
   (): LatestConfig => ({
     version: 0,
+    name,
     modules: {
       [FACADE_MODULE_NAME]: {
         get: relativePathToFacade,
@@ -158,9 +179,10 @@ const getDefault: (
 export const initNewReadonlyServiceConfig = (
   configPath: string,
   commandObj: CommandObj,
-  relativePathToFacade: string
+  relativePathToFacade: string,
+  name: string
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
-    getDefault(relativePathToFacade)
+    getDefault(relativePathToFacade, name)
   )(commandObj);

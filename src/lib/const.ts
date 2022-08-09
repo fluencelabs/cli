@@ -39,6 +39,7 @@ export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
+export const AQUA_SERVICES_DIR_NAME = "services";
 export const TS_DIR_NAME = "ts";
 export const JS_DIR_NAME = "js";
 export const MODULES_DIR_NAME = "modules";
@@ -118,6 +119,7 @@ export const TIMEOUT_FLAG = {
 } as const;
 
 export const FORCE_FLAG_NAME = "force";
+export const NAME_FLAG_NAME = "name";
 
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 

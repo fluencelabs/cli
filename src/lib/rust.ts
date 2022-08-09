@@ -131,7 +131,7 @@ const hasRequiredRustTarget = async (): Promise<boolean> =>
 const cargoInstall = async ({
   packageName,
   version,
-  isNightly,
+  isNightlyX86,
   isGlobalDependency,
   commandObj,
   message,
@@ -142,7 +142,7 @@ const cargoInstall = async ({
 }): Promise<string> =>
   execPromise(
     `${CARGO}${
-      isNightly === true ? " +nightly" : ""
+      isNightlyX86 === true ? " +nightly-x86_64" : ""
     } install ${packageName} ${unparseFlags(
       {
         version,
@@ -163,7 +163,7 @@ const cargoInstall = async ({
 type CargoDependencyInfo = {
   recommendedVersion: string;
   packageName: string;
-  isNightly?: true;
+  isNightlyX86?: true;
   isGlobalDependency?: true;
 };
 
@@ -171,12 +171,12 @@ export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
   [MARINE_CARGO_DEPENDENCY]: {
     recommendedVersion: MARINE_RECOMMENDED_VERSION,
     packageName: MARINE_CARGO_DEPENDENCY,
-    isNightly: true,
+    isNightlyX86: true,
   },
   [MREPL_CARGO_DEPENDENCY]: {
     recommendedVersion: MREPL_RECOMMENDED_VERSION,
     packageName: MREPL_CARGO_DEPENDENCY,
-    isNightly: true,
+    isNightlyX86: true,
   },
   [CARGO_GENERATE_CARGO_DEPENDENCY]: {
     recommendedVersion: CARGO_GENERATE_RECOMMENDED_VERSION,

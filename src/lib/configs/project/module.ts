@@ -31,7 +31,7 @@ import {
 export type ConfigV0 = {
   version: 0;
   name: string;
-  type?: "rust";
+  type?: "rust" | "compiled";
   maxHeapSize?: string;
   loggerEnabled?: boolean;
   loggingMask?: number;
@@ -45,7 +45,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
     version: { type: "number", enum: [0] },
-    type: { type: "string", enum: ["rust"], nullable: true },
+    type: { type: "string", enum: ["rust", "compiled"], nullable: true },
     name: { type: "string" },
     maxHeapSize: { type: "string", nullable: true },
     loggerEnabled: { type: "boolean", nullable: true },

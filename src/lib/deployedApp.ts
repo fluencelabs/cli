@@ -18,11 +18,11 @@ import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
 import { CliUx } from "@oclif/core";
-import camelcase from "camelcase";
 
 import type { AquaCLI } from "./aquaCli";
 import type { ServicesV2 } from "./configs/project/app";
 import { FS_OPTIONS } from "./const";
+import { capitalize } from "./helpers/capitilize";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import {
   ensureFluenceJSAppPath,
@@ -32,19 +32,19 @@ import {
   ensureFluenceTSDir,
 } from "./paths";
 
-const APP = "App";
-const SERVICE_IDS = "services";
+const APP_SERVICE_NAME = "App";
+const SERVICES_FUNCTION_NAME = "services";
 const SERVICE_IDS_ITEM = "ServiceIdsItem";
-const SERVICES = "Services";
+const SERVICES_DATA_AQUA_TYPE = "Services";
 
 export const getAppJson = (services: ServicesV2): string =>
   JSON.stringify(
     {
-      name: APP,
-      serviceId: APP,
+      name: APP_SERVICE_NAME,
+      serviceId: APP_SERVICE_NAME,
       functions: [
         {
-          name: SERVICE_IDS,
+          name: SERVICES_FUNCTION_NAME,
           result: services,
         },
       ],
@@ -74,7 +74,11 @@ const generateRegisterAppTSorJS = async ({
 import { registerApp as registerAppService } from "./deployed.app";
 
 const service = {
-  ${SERVICE_IDS}: () => (${JSON.stringify(deployedServices, null, 2)}),
+  ${SERVICES_FUNCTION_NAME}: () => (${JSON.stringify(
+      deployedServices,
+      null,
+      2
+    )}),
 };
 
 ${
@@ -133,7 +137,7 @@ export const generateRegisterApp = async (
 };
 
 const getDeploysDataName = (serviceName: string): string =>
-  `${camelcase(serviceName, { pascalCase: true })}Deploys`;
+  `${capitalize(serviceName)}Deploys`;
 
 export const generateDeployedAppAqua = async (
   services: ServicesV2
@@ -161,16 +165,16 @@ ${Object.entries(services)
   )
   .join("\n\n")}
 
-data ${SERVICES}:
+data ${SERVICES_DATA_AQUA_TYPE}:
 ${Object.keys(services)
   .map(
     (serviceName): string =>
-      `  ${camelcase(serviceName)}: ${getDeploysDataName(serviceName)}`
+      `  ${serviceName}: ${getDeploysDataName(serviceName)}`
   )
   .join("\n")}
 
-service ${APP}("${APP}"):
-  ${SERVICE_IDS}: -> ${SERVICES}
+service ${APP_SERVICE_NAME}("${APP_SERVICE_NAME}"):
+  ${SERVICES_FUNCTION_NAME}: -> ${SERVICES_DATA_AQUA_TYPE}
 `;
 
   await fsPromises.writeFile(appServicesFilePath, appServicesAqua, FS_OPTIONS);

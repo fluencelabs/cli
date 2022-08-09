@@ -22,6 +22,7 @@ import {
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
 import { unparseFlags } from "./helpers/unparseFlags";
+import { getProjectRootDir } from "./paths";
 import { ensureCargoDependency } from "./rust";
 import type { Flags } from "./typeHelpers";
 
@@ -29,10 +30,17 @@ export type MarineCliInput =
   | {
       command: "generate";
       flags: Flags<"init" | "name">;
+      args?: never;
+    }
+  | {
+      command: "aqua";
+      flags?: never;
+      args: Array<string>;
     }
   | {
       command: "build";
       flags: Flags<"release">;
+      args?: never;
     };
 
 export type MarineCLI = {
@@ -53,6 +61,8 @@ export const initMarineCli = async (
     commandObj,
   });
 
+  const projectRootDir = getProjectRootDir();
+
   await ensureCargoDependency({
     name: CARGO_GENERATE_CARGO_DEPENDENCY,
     commandObj,
@@ -61,25 +71,26 @@ export const initMarineCli = async (
   return async ({
     command,
     flags,
+    args,
     message,
     keyValuePairs,
     workingDir,
   }): Promise<string> => {
-    const cwd = process.cwd();
-
     if (workingDir !== undefined) {
       process.chdir(workingDir);
     }
 
     const result = await execPromise(
-      `${marineCliPath} ${command ?? ""}${unparseFlags(flags, commandObj)}`,
+      `${marineCliPath} ${command ?? ""}${
+        args === undefined ? "" : ` ${args.join(" ")}`
+      } ${unparseFlags(flags ?? {}, commandObj)}`,
       message === undefined
         ? undefined
         : getMessageWithKeyValuePairs(message, keyValuePairs)
     );
 
     if (workingDir !== undefined) {
-      process.chdir(cwd);
+      process.chdir(projectRootDir);
     }
 
     return result;
