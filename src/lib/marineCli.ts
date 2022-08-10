@@ -68,7 +68,9 @@ export const initMarineCli = async (
 
     const result = await execPromise(
       `${marineCliPath} ${command ?? ""}${
-        args === undefined ? "" : ` ${args.join(" ")}`
+        args === undefined
+          ? ""
+          : ` ${args.map((arg): string => `'${arg}'`).join(" ")}`
       } ${unparseFlags(flags ?? {}, commandObj)}`,
       message === undefined
         ? undefined

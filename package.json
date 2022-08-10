@@ -43,6 +43,7 @@
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-not-found": "^2.3.1",
     "ajv": "^8.11.0",
+    "camelcase": "^5.3.1",
     "chokidar": "^3.5.3",
     "decompress": "^4.2.1",
     "filenamify": "^4.3.0",

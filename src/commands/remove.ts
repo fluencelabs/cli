@@ -19,7 +19,7 @@ import fsPromises from "node:fs/promises";
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
-import { initAquaCli } from "../lib/aquaCli";
+import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
   AppConfig,
   initAppConfig,
@@ -32,6 +32,7 @@ import {
 } from "../lib/deployedApp";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { getKeyPair } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
@@ -62,7 +63,7 @@ export default class Remove extends Command {
 
     const appConfig = await initAppConfig(this);
 
-    if (appConfig === null) {
+    if (appConfig === null || Object.keys(appConfig.services).length === 0) {
       this.error(
         "Seems like project is not currently deployed. Nothing to remove"
       );
@@ -80,37 +81,39 @@ export default class Remove extends Command {
       this.error("Aborted");
     }
 
+    const aquaCli = await initAquaCli(this);
+
     await removeApp({
       appConfig,
       commandObj: this,
       timeout: flags.timeout,
       relay: flags.relay,
       isInteractive,
+      aquaCli,
     });
   }
 }
 
-/**
- * Gets key-pair for stuff that user selected for removal
- * removes each service from the config
- * if all services removed successfully - it deletes app.yaml
- * otherwise it commits not removed services and throws an error
- * @param param0 { name: string; commandObj: CommandObj; timeout: string | undefined; deployedConfig: DeployedConfig;}
- * @returns Promise<void>
- */
-export const removeApp = async ({
-  commandObj,
-  timeout,
-  appConfig,
-  isInteractive,
-  relay,
-}: Readonly<{
-  commandObj: CommandObj;
-  timeout: number | undefined;
-  appConfig: AppConfig;
-  isInteractive: boolean;
-  relay: string | undefined;
-}>): Promise<void> => {
+export const removeApp = async (
+  removeAppArg: Readonly<{
+    commandObj: CommandObj;
+    timeout: number | undefined;
+    appConfig: AppConfig;
+    isInteractive: boolean;
+    relay: string | undefined;
+    aquaCli: AquaCLI;
+  }>
+): Promise<AppConfig> => {
+  const { commandObj, timeout, appConfig, isInteractive, relay, aquaCli } =
+    removeAppArg;
+
+  const isRemovingAll = isInteractive
+    ? await confirm({
+        isInteractive,
+        message: "Do you want to remove all services?",
+      })
+    : true;
+
   commandObj.log(
     `Going to remove app described in ${color.yellow(
       replaceHomeDir(appConfig.$getPath())
@@ -119,7 +122,6 @@ export const removeApp = async ({
 
   const { keyPairName, services, relays } = appConfig;
   const keyPair = await getKeyPair({ commandObj, keyPairName, isInteractive });
-  const aquaCli = await initAquaCli(commandObj);
   const notRemovedServices: ServicesV2 = {};
   const addr = relay ?? getRandomRelayAddr(relays);
 
@@ -129,6 +131,35 @@ export const removeApp = async ({
     for (const [deployId, services] of Object.entries(servicesByName)) {
       for (const service of services) {
         const { serviceId, peerId } = service;
+
+        const keyValuePairs = {
+          service: serviceName,
+          deployId,
+          peerId,
+          serviceId,
+        };
+
+        const handleNotRemovedService = (): void => {
+          notRemovedServicesByName[deployId] = [
+            ...(notRemovedServicesByName[deployId] ?? []),
+            service,
+          ];
+        };
+
+        if (
+          !isRemovingAll &&
+          // eslint-disable-next-line no-await-in-loop
+          !(await confirm({
+            isInteractive,
+            message: getMessageWithKeyValuePairs(
+              "Do you want to remove",
+              keyValuePairs
+            ),
+          }))
+        ) {
+          handleNotRemovedService();
+          continue;
+        }
 
         try {
           // eslint-disable-next-line no-await-in-loop
@@ -144,19 +175,11 @@ export const removeApp = async ({
               },
             },
             "Removing",
-            {
-              service: serviceName,
-              deployId,
-              serviceId,
-            }
+            keyValuePairs
           );
         } catch (error) {
           commandObj.warn(`When removing service\n${String(error)}`);
-
-          notRemovedServicesByName[deployId] = [
-            ...(notRemovedServicesByName[deployId] ?? []),
-            service,
-          ];
+          handleNotRemovedService();
         }
       }
     }
@@ -180,7 +203,10 @@ export const removeApp = async ({
       pathsToRemove.map((path): Promise<void> => fsPromises.unlink(path))
     );
 
-    return;
+    appConfig.services = {};
+    await appConfig.$commit();
+
+    return appConfig;
   }
 
   await generateDeployedAppAqua(notRemovedServices);
@@ -193,7 +219,25 @@ export const removeApp = async ({
   appConfig.services = notRemovedServices;
   await appConfig.$commit();
 
-  commandObj.error(
-    "Not all services were successful removed. Please make sure to remove all of them in order to continue"
+  commandObj.log(
+    `Not removed services:\n${JSON.stringify(notRemovedServices, null, 2)}`
   );
+
+  if (
+    isInteractive &&
+    !(await confirm({ isInteractive, message: "Do you want to continue" }))
+  ) {
+    if (
+      await confirm({
+        isInteractive,
+        message: "Do you want to go through remove process again?",
+      })
+    ) {
+      return removeApp({ ...removeAppArg, appConfig });
+    }
+
+    commandObj.error("Aborted");
+  }
+
+  return appConfig;
 };

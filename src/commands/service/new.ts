@@ -19,6 +19,7 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
+import camelcase from "camelcase";
 
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
 import {
@@ -133,30 +134,21 @@ const getServiceName = async ({
       .split(withoutTrailingSlash.includes("/") ? "/" : "\\")
       .slice(-1)[0] ?? "";
 
-  const cleanLastPortionOfPath = lastPortionOfPath.replace(/\W/, "");
-  const indexOfTheFirstLetter = cleanLastPortionOfPath.search(/[A-Za-z]/);
-
-  const startingFromLetter = cleanLastPortionOfPath.slice(
-    indexOfTheFirstLetter
-  );
-
-  const serviceName =
-    startingFromLetter.charAt(0).toLocaleLowerCase() +
-    startingFromLetter.slice(1);
-
-  const serviceNameValidity = validateAquaName(serviceName);
+  const cleanLastPortionOfPath = lastPortionOfPath.replace(/\W/g, "");
+  const camelCasedServiceName = camelcase(cleanLastPortionOfPath);
+  const serviceNameValidity = validateAquaName(camelCasedServiceName);
 
   if (
     serviceNameValidity !== true ||
     !(await confirm({
       isInteractive,
       message: `Do you want to use ${color.yellow(
-        serviceName
+        camelCasedServiceName
       )} as the name of your new service?`,
     }))
   ) {
     return undefined;
   }
 
-  return serviceName;
+  return camelCasedServiceName;
 };
