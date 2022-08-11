@@ -18,6 +18,7 @@ import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
@@ -103,22 +104,23 @@ export const removeApp = async (
     relay: string | undefined;
     aquaCli: AquaCLI;
   }>
-): Promise<AppConfig> => {
+): Promise<AppConfig | null> => {
   const { commandObj, timeout, appConfig, isInteractive, relay, aquaCli } =
     removeAppArg;
 
   const isRemovingAll = isInteractive
     ? await confirm({
         isInteractive,
-        message: "Do you want to remove all services?",
+        message: `\n\nCurrently deployed services described in ${color.yellow(
+          replaceHomeDir(appConfig.$getPath())
+        )}:\n\n${yamlDiffPatch(
+          "",
+          {},
+          appConfig.services
+        )}\n\nDo you want to remove all of them?`,
+        default: false,
       })
     : true;
-
-  commandObj.log(
-    `Going to remove app described in ${color.yellow(
-      replaceHomeDir(appConfig.$getPath())
-    )}`
-  );
 
   const { keyPairName, services, relays } = appConfig;
   const keyPair = await getKeyPair({ commandObj, keyPairName, isInteractive });
@@ -203,10 +205,7 @@ export const removeApp = async (
       pathsToRemove.map((path): Promise<void> => fsPromises.unlink(path))
     );
 
-    appConfig.services = {};
-    await appConfig.$commit();
-
-    return appConfig;
+    return null;
   }
 
   await generateDeployedAppAqua(notRemovedServices);
@@ -219,24 +218,20 @@ export const removeApp = async (
   appConfig.services = notRemovedServices;
   await appConfig.$commit();
 
-  commandObj.log(
-    `Not removed services:\n${JSON.stringify(notRemovedServices, null, 2)}`
-  );
-
   if (
-    isInteractive &&
-    !(await confirm({ isInteractive, message: "Do you want to continue" }))
+    await confirm({
+      isInteractive,
+      message: `\n\nNot removed services described in ${color.yellow(
+        replaceHomeDir(appConfig.$getPath())
+      )}:\n\n${yamlDiffPatch(
+        "",
+        {},
+        notRemovedServices
+      )}\n\nAre there any of them that you still want to remove?`,
+      default: false,
+    })
   ) {
-    if (
-      await confirm({
-        isInteractive,
-        message: "Do you want to go through remove process again?",
-      })
-    ) {
-      return removeApp({ ...removeAppArg, appConfig });
-    }
-
-    commandObj.error("Aborted");
+    return removeApp({ ...removeAppArg, appConfig });
   }
 
   return appConfig;

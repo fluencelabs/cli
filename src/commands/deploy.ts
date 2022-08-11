@@ -19,6 +19,7 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import { CliUx, Command, Flags } from "@oclif/core";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
@@ -131,11 +132,12 @@ export default class Deploy extends Command {
 
     if (
       appConfig !== null &&
+      Object.keys(appConfig.services).length > 0 &&
       (isInteractive
         ? await confirm({
             isInteractive,
             message:
-              "Do you want to remove some of the previously deployed services?",
+              "Do you want to select previously deployed services that you want to remove?",
           })
         : true)
     ) {
@@ -154,17 +156,15 @@ export default class Deploy extends Command {
     const allServices: ServicesV2 = appConfig?.services ?? {};
 
     this.log(
-      `Going to deploy project described in ${color.yellow(
+      `\nGoing to deploy services described in ${color.yellow(
         replaceHomeDir(fluenceConfig.$getPath())
-      )}`
+      )}:\n\n${yamlDiffPatch("", {}, fluenceConfig.services)}\n`
     );
 
     const doDeployAll = isInteractive
       ? await confirm({
           isInteractive,
-          message: `Do you want to deploy all of the services from ${color.yellow(
-            FLUENCE_CONFIG_FILE_NAME
-          )}?`,
+          message: "Do you want to deploy all of these services?",
         })
       : true;
 
@@ -209,7 +209,7 @@ export default class Deploy extends Command {
     }
 
     if (Object.keys(allServices).length === 0) {
-      this.error("No services were deployed successfully");
+      return;
     }
 
     await generateDeployedAppAqua(allServices);
