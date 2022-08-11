@@ -19,6 +19,7 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import { CliUx, Command, Flags } from "@oclif/core";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
@@ -71,11 +72,15 @@ import {
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { getKeyPairFromFlags } from "../lib/keypairs";
 import { initMarineCli } from "../lib/marineCli";
 import { getRandomRelayAddr, getRandomRelayId } from "../lib/multiaddr";
-import { ensureFluenceTmpDeployJsonPath } from "../lib/paths";
+import {
+  ensureFluenceAquaServicesDir,
+  ensureFluenceTmpDeployJsonPath,
+} from "../lib/paths";
 import { confirm } from "../lib/prompt";
 
 import { removeApp } from "./remove";
@@ -123,54 +128,58 @@ export default class Deploy extends Command {
 
     const aquaCli = await initAquaCli(this);
     const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
-    const appConfig = await initAppConfig(this);
+    let appConfig = await initAppConfig(this);
 
-    if (appConfig !== null) {
-      // Prompt user to remove previously deployed app if
-      // it was already deployed before
-      const doRemove =
-        flags[FORCE_FLAG_NAME] ||
-        (await confirm({
-          message: `Previously deployed app described in ${color.yellow(
-            replaceHomeDir(appConfig.$getPath())
-          )} needs to be removed to continue. Do you want to remove?`,
-          isInteractive,
-          flagName: FORCE_FLAG_NAME,
-        }));
+    if (
+      appConfig !== null &&
+      Object.keys(appConfig.services).length > 0 &&
+      (isInteractive
+        ? await confirm({
+            isInteractive,
+            message:
+              "Do you want to select previously deployed services that you want to remove?",
+          })
+        : true)
+    ) {
+      const addr = relay ?? getRandomRelayAddr(appConfig.relays);
 
-      if (!doRemove) {
-        this.error("You have to confirm to continue");
-      }
-
-      await removeApp({
+      appConfig = await removeApp({
         appConfig,
+        relay: addr,
         commandObj: this,
-        timeout: flags.timeout,
-        relay: flags.relay,
         isInteractive,
+        timeout: flags[TIMEOUT_FLAG_NAME],
+        aquaCli,
       });
     }
 
-    const successfullyDeployedServices: ServicesV2 = {};
+    const allServices: ServicesV2 = appConfig?.services ?? {};
 
     this.log(
-      `Going to deploy project described in ${color.yellow(
+      `\nGoing to deploy services described in ${color.yellow(
         replaceHomeDir(fluenceConfig.$getPath())
-      )}`
+      )}:\n\n${yamlDiffPatch("", {}, fluenceConfig.services)}\n`
     );
+
+    const doDeployAll = isInteractive
+      ? await confirm({
+          isInteractive,
+          message: "Do you want to deploy all of these services?",
+        })
+      : true;
 
     for (const {
       count,
       deployJSON,
       deployId,
-      peerId = getRandomRelayId(fluenceConfig.relays),
+      peerId,
       serviceName,
     } of preparedForDeployItems) {
       for (let i = 0; i < count; i = i + 1) {
         // eslint-disable-next-line no-await-in-loop
         const res = await deployService({
           deployJSON,
-          peerId,
+          peerId: peerId ?? getRandomRelayId(fluenceConfig.relays),
           serviceName,
           deployId,
           relay,
@@ -179,40 +188,46 @@ export default class Deploy extends Command {
           timeout: flags[TIMEOUT_FLAG_NAME],
           tmpDeployJSONPath,
           commandObj: this,
+          doDeployAll,
+          isInteractive,
         });
 
         if (res !== null) {
           const { deployedServiceConfig, deployId, serviceName } = res;
 
           const successfullyDeployedServicesByName =
-            successfullyDeployedServices[serviceName] ?? {};
+            allServices[serviceName] ?? {};
 
           successfullyDeployedServicesByName[deployId] = [
             ...(successfullyDeployedServicesByName[deployId] ?? []),
             deployedServiceConfig,
           ];
 
-          successfullyDeployedServices[serviceName] =
-            successfullyDeployedServicesByName;
+          allServices[serviceName] = successfullyDeployedServicesByName;
         }
       }
     }
 
-    if (Object.keys(successfullyDeployedServices).length === 0) {
-      this.error("No services were deployed successfully");
+    if (Object.keys(allServices).length === 0) {
+      return;
     }
 
-    await generateDeployedAppAqua(successfullyDeployedServices);
+    await generateDeployedAppAqua(allServices);
 
     await generateRegisterApp({
-      deployedServices: successfullyDeployedServices,
+      deployedServices: allServices,
       aquaCli,
     });
+
+    if (appConfig !== null) {
+      appConfig.services = allServices;
+      return appConfig.$commit();
+    }
 
     await initNewReadonlyAppConfig(
       {
         version: 2,
-        services: successfullyDeployedServices,
+        services: allServices,
         keyPairName: keyPair.name,
         timestamp: new Date().toISOString(),
         relays: fluenceConfig.relays,
@@ -422,6 +437,12 @@ const prepareForDeploy = async ({
   ];
 
   const marineCli = await initMarineCli(commandObj);
+
+  await fsPromises.rm(await ensureFluenceAquaServicesDir(), {
+    recursive: true,
+    force: true,
+  });
+
   CliUx.ux.action.start("Making sure all modules are downloaded and built");
 
   const mapOfAllModuleConfigs = new Map(
@@ -591,6 +612,8 @@ type DeployServiceArg = Readonly<{
   deployId: string;
   tmpDeployJSONPath: string;
   commandObj: CommandObj;
+  doDeployAll: boolean;
+  isInteractive: boolean;
 }>;
 
 /**
@@ -609,11 +632,28 @@ const deployService = async ({
   tmpDeployJSONPath,
   timeout,
   commandObj,
+  doDeployAll,
+  isInteractive,
 }: DeployServiceArg & { peerId: string }): Promise<{
   deployedServiceConfig: DeployedServiceConfig;
   serviceName: string;
   deployId: string;
 } | null> => {
+  const keyValuePairs = { service: serviceName, deployId, on: peerId };
+
+  if (
+    !doDeployAll &&
+    !(await confirm({
+      isInteractive,
+      message: getMessageWithKeyValuePairs(
+        "Do you want to deploy",
+        keyValuePairs
+      ),
+    }))
+  ) {
+    return null;
+  }
+
   await fsPromises.writeFile(
     tmpDeployJSONPath,
     JSON.stringify(deployJSON, null, 2),
@@ -636,7 +676,7 @@ const deployService = async ({
         },
       },
       "Deploying",
-      { service: serviceName, deployId, on: peerId }
+      keyValuePairs
     );
   } catch (error) {
     commandObj.warn(`Wasn't able to deploy service\n${String(error)}`);
