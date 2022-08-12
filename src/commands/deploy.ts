@@ -29,6 +29,8 @@ import {
   ServicesV2,
 } from "../lib/configs/project/app";
 import {
+  Distribution,
+  DISTRIBUTION_EVEN,
   FluenceConfigReadonly,
   initReadonlyFluenceConfig,
   OverrideModules,
@@ -37,6 +39,7 @@ import {
 import {
   initReadonlyModuleConfig,
   ModuleConfigReadonly,
+  MODULE_TYPE_RUST,
 } from "../lib/configs/project/module";
 import {
   FACADE_MODULE_NAME,
@@ -76,7 +79,14 @@ import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyVal
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { getKeyPairFromFlags } from "../lib/keypairs";
 import { initMarineCli } from "../lib/marineCli";
-import { getRandomRelayAddr, getRandomRelayId } from "../lib/multiaddr";
+import {
+  getEvenlyDistributedIds,
+  getEvenlyDistributedIdsFromTheList,
+  getRandomRelayAddr,
+  getRandomRelayId,
+  getRandomRelayIdFromTheList,
+  Relays,
+} from "../lib/multiaddr";
 import {
   ensureFluenceAquaServicesDir,
   ensureFluenceTmpDeployJsonPath,
@@ -169,42 +179,39 @@ export default class Deploy extends Command {
       : true;
 
     for (const {
-      count,
       deployJSON,
       deployId,
       peerId,
       serviceName,
     } of preparedForDeployItems) {
-      for (let i = 0; i < count; i = i + 1) {
-        // eslint-disable-next-line no-await-in-loop
-        const res = await deployService({
-          deployJSON,
-          peerId: peerId ?? getRandomRelayId(fluenceConfig.relays),
-          serviceName,
-          deployId,
-          relay,
-          secretKey: keyPair.secretKey,
-          aquaCli,
-          timeout: flags[TIMEOUT_FLAG_NAME],
-          tmpDeployJSONPath,
-          commandObj: this,
-          doDeployAll,
-          isInteractive,
-        });
+      // eslint-disable-next-line no-await-in-loop
+      const res = await deployService({
+        deployJSON,
+        peerId,
+        serviceName,
+        deployId,
+        relay,
+        secretKey: keyPair.secretKey,
+        aquaCli,
+        timeout: flags[TIMEOUT_FLAG_NAME],
+        tmpDeployJSONPath,
+        commandObj: this,
+        doDeployAll,
+        isInteractive,
+      });
 
-        if (res !== null) {
-          const { deployedServiceConfig, deployId, serviceName } = res;
+      if (res !== null) {
+        const { deployedServiceConfig, deployId, serviceName } = res;
 
-          const successfullyDeployedServicesByName =
-            allServices[serviceName] ?? {};
+        const successfullyDeployedServicesByName =
+          allServices[serviceName] ?? {};
 
-          successfullyDeployedServicesByName[deployId] = [
-            ...(successfullyDeployedServicesByName[deployId] ?? []),
-            deployedServiceConfig,
-          ];
+        successfullyDeployedServicesByName[deployId] = [
+          ...(successfullyDeployedServicesByName[deployId] ?? []),
+          deployedServiceConfig,
+        ];
 
-          allServices[serviceName] = successfullyDeployedServicesByName;
-        }
+        allServices[serviceName] = successfullyDeployedServicesByName;
       }
     }
 
@@ -219,12 +226,21 @@ export default class Deploy extends Command {
       aquaCli,
     });
 
+    const logResults = (configPath: string): void => {
+      this.log(
+        `\nCurrently deployed services listed in ${color.yellow(
+          replaceHomeDir(configPath ?? "")
+        )}:\n\n${yamlDiffPatch("", {}, allServices)}\n`
+      );
+    };
+
     if (appConfig !== null) {
       appConfig.services = allServices;
-      return appConfig.$commit();
+      await appConfig.$commit();
+      return logResults(appConfig.$getPath());
     }
 
-    await initNewReadonlyAppConfig(
+    const newAppConfig = await initNewReadonlyAppConfig(
       {
         version: 2,
         services: allServices,
@@ -234,6 +250,8 @@ export default class Deploy extends Command {
       },
       this
     );
+
+    logResults(newAppConfig.$getPath());
   }
 }
 
@@ -246,8 +264,7 @@ type DeployInfo = {
   serviceName: string;
   serviceDirPath: string;
   deployId: string;
-  count: number;
-  peerId: string | undefined;
+  peerId: string;
   modules: Array<DeployInfoModule>;
 };
 
@@ -346,8 +363,15 @@ const prepareForDeploy = async ({
       serviceConfig,
       serviceDirPath,
     }): Array<DeployInfo> =>
-      deploy.map(
-        ({ deployId, count = 1, peerId, overrideModules }): DeployInfo => {
+      deploy.flatMap(
+        ({
+          deployId,
+          count,
+          peerId,
+          peerIds,
+          overrideModules,
+          distribution,
+        }): Array<DeployInfo> => {
           const deployIdValidity = validateAquaName(deployId);
 
           if (deployIdValidity !== true) {
@@ -356,60 +380,31 @@ const prepareForDeploy = async ({
             );
           }
 
-          return {
-            serviceName,
-            serviceDirPath,
-            deployId,
+          return getPeerIds({
+            peerId: peerIds ?? peerId,
+            distribution,
             count,
-            peerId: fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId,
-            modules: ((): Array<DeployInfoModule> => {
-              const modulesNotFoundInServiceYaml = Object.keys(
-                overrideModules ?? {}
-              ).filter(
-                (moduleName): boolean => !(moduleName in serviceConfig.modules)
-              );
-
-              if (modulesNotFoundInServiceYaml.length > 0) {
-                commandObj.error(
-                  `${color.yellow(
-                    FLUENCE_CONFIG_FILE_NAME
-                  )} has service ${color.yellow(
-                    serviceName
-                  )} with deployId ${color.yellow(
-                    deployId
-                  )} that has moduleOverrides for modules that don't exist in the service ${color.yellow(
-                    serviceDirPath
-                  )}. Please make sure ${color.yellow(
-                    modulesNotFoundInServiceYaml.join(", ")
-                  )} spelled correctly `
-                );
-              }
-
-              const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
-                serviceConfig.modules;
-
-              return [
-                ...Object.entries(otherModules).map(
-                  ([moduleName, mod]): DeployInfoModule => ({
-                    moduleConfig: overrideModule(
-                      mod,
-                      overrideModules,
-                      moduleName
-                    ),
-                    moduleName,
-                  })
-                ),
-                {
-                  moduleConfig: overrideModule(
-                    facadeModule,
-                    overrideModules,
-                    FACADE_MODULE_NAME
-                  ),
-                  moduleName: FACADE_MODULE_NAME,
-                },
-              ];
-            })(),
-          };
+            relays: fluenceConfig.relays,
+            namedPeerIds: fluenceConfig.peerIds,
+          }).map(
+            (peerId: string): DeployInfo => ({
+              serviceName,
+              serviceDirPath,
+              deployId,
+              peerId:
+                typeof peerId === "string"
+                  ? fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId
+                  : peerId,
+              modules: getDeployInfoModules({
+                commandObj,
+                deployId,
+                overrideModules,
+                serviceConfigModules: serviceConfig.modules,
+                serviceDirPath,
+                serviceName,
+              }),
+            })
+          );
         }
       )
   );
@@ -471,7 +466,7 @@ const prepareForDeploy = async ({
               );
             }
 
-            if (moduleConfig.type === "rust") {
+            if (moduleConfig.type === MODULE_TYPE_RUST) {
               await marineCli({
                 command: "build",
                 flags: { release: true },
@@ -523,6 +518,109 @@ const prepareForDeploy = async ({
       };
     }
   );
+};
+
+type GetPeerIdsArg = {
+  peerId: undefined | string | Array<string>;
+  distribution: Distribution | undefined;
+  count: number | undefined;
+  relays: Relays;
+  namedPeerIds: Record<string, string> | undefined;
+};
+
+const getNamedPeerIdsFn =
+  (
+    namedPeerIds: Record<string, string>
+  ): ((peerIds: Array<string>) => string[]) =>
+  (peerIds: Array<string>): string[] =>
+    peerIds.map((peerId): string => namedPeerIds[peerId] ?? peerId);
+
+const getPeerIds = ({
+  peerId,
+  distribution = DISTRIBUTION_EVEN,
+  count,
+  relays,
+  namedPeerIds = {},
+}: GetPeerIdsArg): Array<string> => {
+  const getNamedPeerIds = getNamedPeerIdsFn(namedPeerIds);
+
+  if (distribution === DISTRIBUTION_EVEN) {
+    if (peerId === undefined) {
+      return getEvenlyDistributedIds(relays, count);
+    }
+
+    return getEvenlyDistributedIdsFromTheList(
+      getNamedPeerIds(typeof peerId === "string" ? [peerId] : peerId),
+      count
+    );
+  }
+
+  if (peerId === undefined) {
+    return Array.from({ length: count ?? 1 }).map((): string =>
+      getRandomRelayId(relays)
+    );
+  }
+
+  const peerIds = typeof peerId === "string" ? [peerId] : peerId;
+  return Array.from({ length: count ?? peerIds.length }).map((): string =>
+    getRandomRelayIdFromTheList(peerIds)
+  );
+};
+
+type GetDeployInfoModulesArg = {
+  commandObj: CommandObj;
+  overrideModules: OverrideModules | undefined;
+  serviceName: string;
+  deployId: string;
+  serviceDirPath: string;
+  serviceConfigModules: { facade: ModuleV0 } & Record<string, ModuleV0>;
+};
+
+const getDeployInfoModules = ({
+  commandObj,
+  overrideModules,
+  serviceName,
+  deployId,
+  serviceDirPath,
+  serviceConfigModules,
+}: GetDeployInfoModulesArg): Array<DeployInfoModule> => {
+  const modulesNotFoundInServiceYaml = Object.keys(
+    overrideModules ?? {}
+  ).filter((moduleName): boolean => !(moduleName in serviceConfigModules));
+
+  if (modulesNotFoundInServiceYaml.length > 0) {
+    commandObj.error(
+      `${color.yellow(FLUENCE_CONFIG_FILE_NAME)} has service ${color.yellow(
+        serviceName
+      )} with deployId ${color.yellow(
+        deployId
+      )} that has moduleOverrides for modules that don't exist in the service ${color.yellow(
+        serviceDirPath
+      )}. Please make sure ${color.yellow(
+        modulesNotFoundInServiceYaml.join(", ")
+      )} spelled correctly `
+    );
+  }
+
+  const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
+    serviceConfigModules;
+
+  return [
+    ...Object.entries(otherModules).map(
+      ([moduleName, mod]): DeployInfoModule => ({
+        moduleConfig: overrideModule(mod, overrideModules, moduleName),
+        moduleName,
+      })
+    ),
+    {
+      moduleConfig: overrideModule(
+        facadeModule,
+        overrideModules,
+        FACADE_MODULE_NAME
+      ),
+      moduleName: FACADE_MODULE_NAME,
+    },
+  ];
 };
 
 /* eslint-disable camelcase */

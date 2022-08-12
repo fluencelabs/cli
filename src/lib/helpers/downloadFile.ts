@@ -23,6 +23,7 @@ import decompress from "decompress";
 import filenamify from "filenamify";
 import fetch from "node-fetch";
 
+import { MODULE_TYPE_RUST } from "../configs/project/module";
 import { WASM_EXT } from "../const";
 import { ensureFluenceModulesDir, ensureFluenceServicesDir } from "../paths";
 import { input } from "../prompt";
@@ -135,7 +136,7 @@ export const getModuleWasmPath = (config: {
 }): string => {
   const fileName = `${config.name}.${WASM_EXT}`;
   const configDirName = path.dirname(config.$getPath());
-  return config.type === "rust"
+  return config.type === MODULE_TYPE_RUST
     ? path.resolve(configDirName, "target", "wasm32-wasi", "release", fileName)
     : path.resolve(configDirName, fileName);
 };

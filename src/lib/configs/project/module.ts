@@ -28,10 +28,16 @@ import {
   GetDefaultConfig,
 } from "../initConfig";
 
+export const MODULE_TYPE_RUST = "rust";
+export const MODULE_TYPE_COMPILED = "compiled";
+export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
+
+export type ModuleType = typeof MODULE_TYPES[number];
+
 export type ConfigV0 = {
   version: 0;
   name: string;
-  type?: "rust" | "compiled";
+  type?: ModuleType;
   maxHeapSize?: string;
   loggerEnabled?: boolean;
   loggingMask?: number;
@@ -45,7 +51,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
     version: { type: "number", enum: [0] },
-    type: { type: "string", enum: ["rust", "compiled"], nullable: true },
+    type: { type: "string", enum: MODULE_TYPES, nullable: true },
     name: { type: "string" },
     maxHeapSize: { type: "string", nullable: true },
     loggerEnabled: { type: "boolean", nullable: true },
@@ -120,7 +126,7 @@ const getDefault: (name: string) => GetDefaultConfig<LatestConfig> =
   (name: string): GetDefaultConfig<LatestConfig> =>
   (): LatestConfig => ({
     version: 0,
-    type: "rust",
+    type: MODULE_TYPE_RUST,
     name,
   });
 

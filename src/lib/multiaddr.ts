@@ -69,6 +69,10 @@ const getIds = (nodes: Array<string>): Array<string> =>
 export const getRandomRelayId = (relays: Relays): string => {
   const addrs = resolveAddrs(relays);
   const ids = getIds(addrs);
+  return getRandomRelayIdFromTheList(ids);
+};
+
+export const getRandomRelayIdFromTheList = (ids: Array<string>): string => {
   const largestIndex = ids.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
@@ -76,4 +80,35 @@ export const getRandomRelayId = (relays: Relays): string => {
   assert(randomRelayId !== undefined);
 
   return randomRelayId;
+};
+
+export const getEvenlyDistributedIds = (
+  relays: Relays,
+  count = 1
+): Array<string> => {
+  const addrs = resolveAddrs(relays);
+  const ids = getIds(addrs);
+  return getEvenlyDistributedIdsFromTheList(ids, count);
+};
+
+const offsets = new Map<string, number>();
+
+export const getEvenlyDistributedIdsFromTheList = (
+  ids: Array<string>,
+  count = ids.length
+): Array<string> => {
+  const result: Array<string> = [];
+  const key = JSON.stringify(ids.sort());
+  let offset = offsets.get(key) ?? 0;
+
+  for (let i = 0; i < count; i = i + 1) {
+    const id = ids[(i + offset) % ids.length];
+    assert(typeof id === "string");
+    result.push(id);
+  }
+
+  offset = (offset + count) % ids.length;
+  offsets.set(key, offset);
+
+  return result;
 };

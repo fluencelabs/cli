@@ -34,6 +34,7 @@ import {
   ConfigValidateFunction,
 } from "../initConfig";
 
+import { MODULE_TYPES } from "./module";
 import type { ModuleV0 as ServiceModuleConfig } from "./service";
 
 type ServiceV0 = { name: string; count?: number };
@@ -62,12 +63,19 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services"],
 };
 
+export const DISTRIBUTION_EVEN = "even";
+export const DISTRIBUTION_RANDOM = "random";
+export const DISTRIBUTIONS = [DISTRIBUTION_EVEN, DISTRIBUTION_RANDOM] as const;
+
 export type OverrideModules = Record<string, FluenceConfigModule>;
+export type Distribution = typeof DISTRIBUTIONS[number];
 export type ServiceDeployV1 = {
   deployId: string;
   count?: number;
   peerId?: string;
+  peerIds?: Array<string>;
   overrideModules?: OverrideModules;
+  distribution?: Distribution;
 };
 export type FluenceConfigModule = Partial<ServiceModuleConfig>;
 
@@ -110,13 +118,29 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
                   type: "string",
                   nullable: true,
                 },
+                peerIds: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                  nullable: true,
+                },
+                distribution: {
+                  type: "string",
+                  enum: DISTRIBUTIONS,
+                  nullable: true,
+                },
                 overrideModules: {
                   type: "object",
                   additionalProperties: {
                     type: "object",
                     properties: {
                       get: { type: "string", nullable: true },
-                      type: { type: "string", nullable: true, enum: ["rust"] },
+                      type: {
+                        type: "string",
+                        nullable: true,
+                        enum: MODULE_TYPES,
+                      },
                       name: { type: "string", nullable: true },
                       maxHeapSize: { type: "string", nullable: true },
                       loggerEnabled: { type: "boolean", nullable: true },
@@ -230,8 +254,12 @@ services:
         # You can access deployment info in aqua like this:
         # services <- App.services()
         # on services.someService.default!.peerId:
+        distribution: even # Deploy strategy. Can also be 'random'. Default: 'even'
         peerId: MY_PEER # Peer id or peer id name to deploy on. Default: Random peer id is selected for each deploy
-        count: 1 # How many times to deploy. Default: 1
+        peerIds: # Overrides peerId property. Can be used to deploy on multiple peers.
+          - 12D3KooWR4cv1a8tv7pps4HH6wePNaK6gf1Hww5wcCMzeWxyNw51
+          - MY_PEER
+        count: 1 # How many times to deploy. Default: 1 or if peerIds is provided - exactly the number of peerIds
         # overrideModules: # Override modules from service.yaml
         #   facade:
         #     get: ./relative/path # Override facade module
