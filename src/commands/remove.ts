@@ -118,7 +118,6 @@ export const removeApp = async (
           {},
           appConfig.services
         )}\n\nDo you want to remove all of them?`,
-        default: false,
       })
     : true;
 

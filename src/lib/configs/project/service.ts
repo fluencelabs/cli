@@ -30,7 +30,7 @@ import {
   ConfigValidateFunction,
 } from "../initConfig";
 
-import type { ConfigV0 as ModuleConfig } from "./module";
+import { ConfigV0 as ModuleConfig, MODULE_TYPES } from "./module";
 
 export type ModuleV0 = {
   get: string;
@@ -42,7 +42,7 @@ const moduleSchema: JSONSchemaType<ModuleV0> = {
   type: "object",
   properties: {
     get: { type: "string" },
-    type: { type: "string", nullable: true, enum: ["rust", "compiled"] },
+    type: { type: "string", nullable: true, enum: MODULE_TYPES },
     name: { type: "string", nullable: true },
     maxHeapSize: { type: "string", nullable: true },
     loggerEnabled: { type: "boolean", nullable: true },

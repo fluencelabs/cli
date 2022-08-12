@@ -69,6 +69,10 @@ const getIds = (nodes: Array<string>): Array<string> =>
 export const getRandomRelayId = (relays: Relays): string => {
   const addrs = resolveAddrs(relays);
   const ids = getIds(addrs);
+  return getRandomRelayIdFromTheList(ids);
+};
+
+export const getRandomRelayIdFromTheList = (ids: Array<string>): string => {
   const largestIndex = ids.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 
@@ -76,4 +80,48 @@ export const getRandomRelayId = (relays: Relays): string => {
   assert(randomRelayId !== undefined);
 
   return randomRelayId;
+};
+
+export const getEvenlyDistributedIds = (
+  relays: Relays,
+  count = 1
+): Array<string> => {
+  const addrs = resolveAddrs(relays);
+  const ids = getIds(addrs);
+  return getEvenlyDistributedIdsFromTheList(ids, count);
+};
+
+const offsets = new Map<string, number>();
+
+/**
+ *
+ * @param ids List of ids from which a new list with the same ids is created
+ * @param count Amount of the ids to return
+ * @returns evenly distributed list of ids
+ *
+ * ALERT! This function is not pure because it uses `offsets` map to store
+ * offsets for each unique collection of ids. Each time the function is executed
+ * - offset changes by the `count` number but it never becomes larger then
+ * `ids.length`. It's implemented this way because it allows to have even
+ * distribution of ids across different deploys of different services
+ */
+export const getEvenlyDistributedIdsFromTheList = (
+  ids: Array<string>,
+  count = ids.length
+): Array<string> => {
+  const result: Array<string> = [];
+  const sortedIds = ids.sort();
+  const key = JSON.stringify(sortedIds);
+  let offset = offsets.get(key) ?? 0;
+
+  for (let i = 0; i < count; i = i + 1) {
+    const id = sortedIds[(i + offset) % sortedIds.length];
+    assert(typeof id === "string");
+    result.push(id);
+  }
+
+  offset = (offset + count) % sortedIds.length;
+  offsets.set(key, offset);
+
+  return result;
 };

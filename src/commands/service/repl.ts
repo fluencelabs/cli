@@ -24,7 +24,10 @@ import color from "@oclif/color";
 import { CliUx, Command } from "@oclif/core";
 
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
-import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
+import {
+  initReadonlyModuleConfig,
+  MODULE_TYPE_RUST,
+} from "../../lib/configs/project/module";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
@@ -55,7 +58,8 @@ import { ensureCargoDependency } from "../../lib/rust";
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class REPL extends Command {
-  static override description = "Open service inside repl";
+  static override description =
+    "Open service inside repl (downloads and builds modules if necessary)";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,
@@ -113,6 +117,10 @@ export default class REPL extends Command {
       stringifyToTOML({ module: moduleConfigs }),
       FS_OPTIONS
     );
+
+    if (!isInteractive) {
+      return;
+    }
 
     spawn(
       await ensureCargoDependency({
@@ -220,7 +228,7 @@ const ensureModuleConfigs = ({
             loggingMask,
           } = overriddenModules;
 
-          if (type === "rust") {
+          if (type === MODULE_TYPE_RUST) {
             await marineCli({
               command: "build",
               flags: { release: true },

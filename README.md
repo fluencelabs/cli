@@ -469,7 +469,7 @@ EXAMPLES
 
 ## `fluence service repl [NAME | PATH | URL]`
 
-Open service inside repl
+Open service inside repl (downloads and builds modules if necessary)
 
 ```
 USAGE
@@ -482,7 +482,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Open service inside repl
+  Open service inside repl (downloads and builds modules if necessary)
 
 EXAMPLES
   $ fluence service repl
