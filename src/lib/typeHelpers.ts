@@ -49,9 +49,9 @@ export const hasKey = <K extends string>(
  * const unknown: unknown = { a: 1 }
  * assertHasKey('b', unknown, 'unknown must have "b" key')
  * // throws AssertionError({ message: 'unknown must have "b" key' })
- * @param key K extends string
- * @param unknown unknown
- * @param message string
+ * @param key any string key
+ * @param unknown any value
+ * @param message error message
  * @returns void
  */
 export function assertHasKey<K extends string>(

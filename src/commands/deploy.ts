@@ -184,6 +184,8 @@ export default class Deploy extends Command {
       peerId,
       serviceName,
     } of preparedForDeployItems) {
+      // Here we don't deploy in parallel because it often fails if run in parallel
+      // And also when user requests, we interactively ask about each deploy
       // eslint-disable-next-line no-await-in-loop
       const res = await deployService({
         deployJSON,
@@ -715,9 +717,9 @@ type DeployServiceArg = Readonly<{
 }>;
 
 /**
- * Deploy by first uploading .wasm files and configs, possibly creating a new blueprint
- * @param param0 DeployServiceOptions
- * @returns Promise<DeployedServiceConfig | null>
+ * Deploy each service using `aqua remote deploy_service`
+ * @param param0 Everything that's needed to deploy a service
+ * @returns Promise of deployed service config with service name and id
  */
 const deployService = async ({
   deployJSON,
