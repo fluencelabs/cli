@@ -98,16 +98,17 @@ export const getEvenlyDistributedIdsFromTheList = (
   count = ids.length
 ): Array<string> => {
   const result: Array<string> = [];
-  const key = JSON.stringify(ids.sort());
+  const sortedIds = ids.sort();
+  const key = JSON.stringify(sortedIds);
   let offset = offsets.get(key) ?? 0;
 
   for (let i = 0; i < count; i = i + 1) {
-    const id = ids[(i + offset) % ids.length];
+    const id = sortedIds[(i + offset) % sortedIds.length];
     assert(typeof id === "string");
     result.push(id);
   }
 
-  offset = (offset + count) % ids.length;
+  offset = (offset + count) % sortedIds.length;
   offsets.set(key, offset);
 
   return result;
