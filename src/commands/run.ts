@@ -28,10 +28,12 @@ import {
   FS_OPTIONS,
   NO_INPUT_FLAG,
   TIMEOUT_FLAG,
+  KEY_PAIR_FLAG,
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { getKeyPairFromFlags } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -92,11 +94,18 @@ export default class Run extends Command {
     }),
     ...TIMEOUT_FLAG,
     ...NO_INPUT_FLAG,
+    ...KEY_PAIR_FLAG,
   };
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
+
+    const keyPair = await getKeyPairFromFlags(flags, this, isInteractive);
+
+    if (keyPair instanceof Error) {
+      this.error(keyPair.message);
+    }
 
     const aqua = await ensureAquaPath(flags[INPUT_FLAG_NAME]);
 
@@ -145,6 +154,7 @@ export default class Run extends Command {
             timeout: flags.timeout,
             import: imports,
             "json-service": jsonServicePaths,
+            sk: keyPair.secretKey,
             ...data,
           },
         },

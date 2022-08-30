@@ -129,7 +129,6 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .fluence
 **/node_modules
 **/target/
-.vscode/settings.json
 .repl_history`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;

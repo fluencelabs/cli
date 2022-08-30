@@ -29,11 +29,12 @@ import {
   FS_OPTIONS,
   RECOMMENDED_GITIGNORE_CONTENT,
   NO_INPUT_FLAG,
+  AQUA_DIR_NAME,
+  FLUENCE_DIR_NAME,
 } from "../lib/const";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import {
-  ensureFluenceAquaDir,
   ensureVSCodeExtensionsJsonPath,
   ensureVSCodeSettingsJsonPath,
   ensureSrcAquaMainPath,
@@ -154,8 +155,8 @@ const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
 
 const validateSettingsJson = ajv.compile(settingsJsonSchema);
 
-const initSettingsConfig = async (): Promise<SettingsJson> => ({
-  [AQUA_SETTINGS_IMPORTS]: [await ensureFluenceAquaDir()],
+const initSettingsConfig = (): SettingsJson => ({
+  [AQUA_SETTINGS_IMPORTS]: [path.join(FLUENCE_DIR_NAME, AQUA_DIR_NAME)],
 });
 
 const ensureRecommendedSettings = async (): Promise<void> => {
@@ -168,7 +169,7 @@ const ensureRecommendedSettings = async (): Promise<void> => {
   } catch {
     await fsPromises.writeFile(
       settingsJsonPath,
-      JSON.stringify(await initSettingsConfig(), null, 2),
+      JSON.stringify(initSettingsConfig(), null, 2),
       FS_OPTIONS
     );
 
@@ -187,7 +188,7 @@ const ensureRecommendedSettings = async (): Promise<void> => {
     parsedFileContent[AQUA_SETTINGS_IMPORTS] = [
       ...new Set([
         ...(parsedFileContent[AQUA_SETTINGS_IMPORTS] ?? []),
-        ...((await initSettingsConfig())[AQUA_SETTINGS_IMPORTS] ?? []),
+        ...(initSettingsConfig()[AQUA_SETTINGS_IMPORTS] ?? []),
       ]),
     ];
 
