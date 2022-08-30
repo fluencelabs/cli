@@ -94,14 +94,13 @@ pre-commit runs each time before you commit. It includes prettier and generates 
 If you want README.md file to be correctly generated please don't forget to run `npm run build` before committing
 
 Pull request and release process:
-1. Update version in package.json
-2. Run `npm run check` to make sure everything ok with the code
-3. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
-4. Push your changes
-5. Create pull request and merge your changes to `main`
-6. Switch to `main` locally and pull merged changes
-7. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
-8. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
+1. Run `npm run check` to make sure everything ok with the code
+2. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
+3. Push your changes
+4. Create pull request and merge your changes to `main`
+5. Switch to `main` locally and pull merged changes
+6. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
+7. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
 
 # Commands
 
@@ -312,7 +311,7 @@ USAGE
   $ fluence module new [PATH] [--no-input]
 
 ARGUMENTS
-  PATH  Path to a module
+  PATH  Module path
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
@@ -375,11 +374,12 @@ Run aqua script
 ```
 USAGE
   $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout <value>] [--no-input]
+    [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout <value>] [--no-input] [-k <value>]
 
 FLAGS
   -f, --func=<function-call>  Function call
   -i, --input=<path>          Path to an aqua file or to a directory that contains aqua files
+  -k, --key-pair-name=<name>  Key pair name
   --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
                               argument names
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
