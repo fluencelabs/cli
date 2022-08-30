@@ -31,6 +31,7 @@ import {
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { input } from "../../lib/prompt";
 
 const PATH = "PATH";
 
@@ -43,14 +44,18 @@ export default class New extends Command {
   static override args = [
     {
       name: PATH,
-      description: "Path to a module",
+      description: "Module path",
     },
   ];
   async run(): Promise<void> {
     const { args, flags } = await this.parse(New);
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
-    const pathToModuleDir: unknown = args[PATH];
+
+    const pathToModuleDir: unknown =
+      args[PATH] ??
+      (await input({ isInteractive, message: "Enter module path" }));
+
     assert(typeof pathToModuleDir === "string");
     await generateNewModule(pathToModuleDir, this);
 

@@ -43,7 +43,9 @@ export type AquaCliInput =
   | {
       command: "run";
       flags: Flags<"addr" | "input" | "func"> &
-        OptionalFlags<"on" | "timeout" | "data" | "import" | "json-service">;
+        OptionalFlags<
+          "on" | "timeout" | "data" | "import" | "json-service" | "sk"
+        >;
     }
   | {
       command?: never;
