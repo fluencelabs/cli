@@ -104,7 +104,7 @@ const ensureRecommendedExtensions = async (): Promise<void> => {
   } catch {
     await fsPromises.writeFile(
       extensionsJsonPath,
-      JSON.stringify(extensionsConfig, null, 2),
+      JSON.stringify(extensionsConfig, null, 2) + "\n",
       FS_OPTIONS
     );
 
@@ -169,7 +169,7 @@ const ensureRecommendedSettings = async (): Promise<void> => {
   } catch {
     await fsPromises.writeFile(
       settingsJsonPath,
-      JSON.stringify(initSettingsConfig(), null, 2),
+      JSON.stringify(initSettingsConfig(), null, 2) + "\n",
       FS_OPTIONS
     );
 
