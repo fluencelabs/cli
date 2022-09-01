@@ -26,17 +26,19 @@ import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
 import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
 import { list, Choices } from "./prompt";
 
-type GetUserKeyPairArg = {
+type GetKeyPairArg = {
   commandObj: CommandObj;
-  isInteractive: boolean;
-  keyPairName?: string | undefined;
+  keyPairName: string | undefined;
 };
 
-const getUserKeyPair = async ({
+type GetExistingKeyPairArg = GetKeyPairArg & {
+  isInteractive: boolean;
+};
+
+export const getUserKeyPair = async ({
   commandObj,
   keyPairName,
-  isInteractive,
-}: GetUserKeyPairArg): Promise<ConfigKeyPair> => {
+}: GetKeyPairArg): Promise<ConfigKeyPair | undefined> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
 
   if (keyPairName === undefined) {
@@ -52,9 +54,21 @@ const getUserKeyPair = async ({
     ({ name }): boolean => name === keyPairName
   );
 
+  return keyPair;
+};
+
+const getExistingUserKeyPair = async ({
+  commandObj,
+  keyPairName,
+  isInteractive,
+}: GetExistingKeyPairArg): Promise<ConfigKeyPair> => {
+  const keyPair = await getUserKeyPair({ commandObj, keyPairName });
+
   if (keyPair !== undefined) {
     return keyPair;
   }
+
+  const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
 
   const noUserKeyPairMessage = `No key-pair ${color.yellow(keyPairName)} found`;
 
@@ -105,13 +119,7 @@ const getUserKeyPair = async ({
   });
 };
 
-type GetKeyPairArg = {
-  commandObj: CommandObj;
-  isInteractive: boolean;
-  keyPairName: string | undefined;
-};
-
-const getProjectKeyPair = async ({
+export const getProjectKeyPair = async ({
   commandObj,
   keyPairName,
 }: GetKeyPairArg): Promise<ConfigKeyPair | undefined> => {
@@ -130,12 +138,12 @@ const getProjectKeyPair = async ({
   );
 };
 
-export const getKeyPair = async (
-  options: GetKeyPairArg
+export const getExistingKeyPair = async (
+  options: GetExistingKeyPairArg
 ): Promise<ConfigKeyPair> =>
-  (await getProjectKeyPair(options)) ?? getUserKeyPair(options);
+  (await getProjectKeyPair(options)) ?? getExistingUserKeyPair(options);
 
-export const getKeyPairFromFlags = async (
+export const getExistingKeyPairFromFlags = async (
   {
     [KEY_PAIR_FLAG_NAME]: keyPairName,
   }: {
@@ -144,7 +152,7 @@ export const getKeyPairFromFlags = async (
   commandObj: CommandObj,
   isInteractive: boolean
 ): Promise<ConfigKeyPair | Error> =>
-  getKeyPair({ commandObj, keyPairName, isInteractive });
+  getExistingKeyPair({ commandObj, keyPairName, isInteractive });
 
 export type ConfigKeyPair = {
   peerId: string;

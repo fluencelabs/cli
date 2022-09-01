@@ -132,7 +132,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
   required: ["version", "services", "keyPairName", "timestamp"],
 };
 
-export type ServicesV2 = Record<
+type ServicesV2 = Record<
   string,
   Record<string, Array<DeployedServiceConfigV1>>
 >;
@@ -183,8 +183,63 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
   required: ["version", "services", "keyPairName", "timestamp"],
 };
 
+type DeployedServiceConfigV3 = DeployedServiceConfigV1 & {
+  keyPairName: string;
+};
+
+export type ServicesV3 = Record<
+  string,
+  Record<string, Array<DeployedServiceConfigV3>>
+>;
+
+type ConfigV3 = {
+  version: 3;
+  services: ServicesV3;
+  timestamp: string;
+  relays?: Relays;
+};
+
+const configSchemaV3: JSONSchemaType<ConfigV3> = {
+  type: "object",
+  properties: {
+    version: { type: "number", enum: [3] },
+    services: {
+      type: "object",
+      additionalProperties: {
+        type: "object",
+        additionalProperties: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              peerId: { type: "string" },
+              serviceId: { type: "string" },
+              blueprintId: { type: "string" },
+              keyPairName: { type: "string" },
+            },
+            required: ["peerId", "serviceId", "blueprintId", "keyPairName"],
+          },
+        },
+        required: [],
+      },
+      required: [],
+    },
+    timestamp: { type: "string" },
+    relays: {
+      type: ["string", "array"],
+      oneOf: [
+        { type: "string", enum: NETWORKS },
+        { type: "array", items: { type: "string" } },
+      ],
+      nullable: true,
+    },
+  },
+  required: ["version", "services", "timestamp"],
+};
+
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
+const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 
 const migrations: Migrations<Config> = [
   (config: Config): ConfigV1 => {
@@ -229,7 +284,7 @@ const migrations: Migrations<Config> = [
     if (!validateConfigSchemaV1(config)) {
       throw new Error(
         `Migration error. Errors: ${JSON.stringify(
-          validateConfigSchemaV0.errors
+          validateConfigSchemaV1.errors
         )}`
       );
     }
@@ -257,16 +312,52 @@ const migrations: Migrations<Config> = [
       ...(typeof relays === "string" || relays.length > 0 ? { relays } : {}),
     };
   },
+  (config: Config): ConfigV3 => {
+    if (!validateConfigSchemaV2(config)) {
+      throw new Error(
+        `Migration error. Errors: ${JSON.stringify(
+          validateConfigSchemaV2.errors
+        )}`
+      );
+    }
+
+    const { keyPairName, services, ...rest } = config;
+
+    return {
+      ...rest,
+      version: 3,
+      services: Object.entries(services).reduce<ServicesV3>(
+        (acc, [serviceName, service]): ServicesV3 => {
+          acc[serviceName] = Object.entries(service).reduce<ServicesV3[string]>(
+            (acc, [deployId, deploys]): ServicesV3[string] => {
+              acc[deployId] = deploys.map(
+                (deploy): ServicesV3[string][string][number] => ({
+                  ...deploy,
+                  keyPairName,
+                })
+              );
+
+              return acc;
+            },
+            {}
+          );
+
+          return acc;
+        },
+        {}
+      ),
+    };
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1 | ConfigV2;
-type LatestConfig = ConfigV2;
+type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3;
+type LatestConfig = ConfigV3;
 export type AppConfig = InitializedConfig<LatestConfig>;
 export type AppConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
-  latestSchema: configSchemaV2,
+  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2, configSchemaV3],
+  latestSchema: configSchemaV3,
   migrations,
   name: APP_CONFIG_FILE_NAME,
   getConfigDirPath: ensureFluenceDir,

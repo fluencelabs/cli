@@ -33,7 +33,7 @@ import {
 import { getAppJson } from "../lib/deployedApp";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { getKeyPairFromFlags } from "../lib/keypairs";
+import { getExistingKeyPairFromFlags } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -72,6 +72,16 @@ export default class Run extends Command {
       helpValue: "<path>",
       multiple: true,
     }),
+    plugin: Flags.string({
+      description: "[experimental] Path to a directory with JS plugins",
+      helpValue: "<path>",
+    }),
+    const: Flags.string({
+      description:
+        'Constant that will be used in the aqua code that you run (example of aqua code: SOME_CONST ?= "default_value"). Constant name must be upper cased.',
+      helpValue: "<NAME = value>",
+      multiple: true,
+    }),
     [JSON_SERVICE]: Flags.string({
       description: "Path to a file that contains a JSON formatted service",
       helpValue: "<path>",
@@ -101,7 +111,11 @@ export default class Run extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
 
-    const keyPair = await getKeyPairFromFlags(flags, this, isInteractive);
+    const keyPair = await getExistingKeyPairFromFlags(
+      flags,
+      this,
+      isInteractive
+    );
 
     if (keyPair instanceof Error) {
       this.error(keyPair.message);
@@ -155,6 +169,8 @@ export default class Run extends Command {
             import: imports,
             "json-service": jsonServicePaths,
             sk: keyPair.secretKey,
+            plugin: flags.plugin,
+            const: flags.const,
             ...data,
           },
         },

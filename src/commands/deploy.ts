@@ -26,7 +26,7 @@ import {
   DeployedServiceConfig,
   initAppConfig,
   initNewReadonlyAppConfig,
-  ServicesV2,
+  ServicesV3,
 } from "../lib/configs/project/app";
 import {
   Distribution,
@@ -41,6 +41,7 @@ import {
   ModuleConfigReadonly,
   MODULE_TYPE_RUST,
 } from "../lib/configs/project/module";
+import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
@@ -54,6 +55,7 @@ import {
   FORCE_FLAG_NAME,
   FS_OPTIONS,
   KEY_PAIR_FLAG,
+  KEY_PAIR_FLAG_NAME,
   MODULE_CONFIG_FILE_NAME,
   NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
@@ -77,7 +79,13 @@ import { generateServiceInterface } from "../lib/helpers/generateServiceInterfac
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { getKeyPairFromFlags } from "../lib/keypairs";
+import {
+  ConfigKeyPair,
+  generateKeyPair,
+  getExistingKeyPair,
+  getProjectKeyPair,
+  getUserKeyPair,
+} from "../lib/keypairs";
 import { initMarineCli } from "../lib/marineCli";
 import {
   getEvenlyDistributedIds,
@@ -92,6 +100,7 @@ import {
   ensureFluenceTmpDeployJsonPath,
 } from "../lib/paths";
 import { confirm } from "../lib/prompt";
+import { hasKey } from "../lib/typeHelpers";
 
 import { removeApp } from "./remove";
 
@@ -117,16 +126,20 @@ export default class Deploy extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
 
-    const keyPair = await getKeyPairFromFlags(flags, this, isInteractive);
-
-    if (keyPair instanceof Error) {
-      this.error(keyPair.message);
-    }
-
     const fluenceConfig = await initReadonlyFluenceConfig(this);
 
     if (fluenceConfig === null) {
       this.error("You must init Fluence project first to deploy");
+    }
+
+    const defaultKeyPair = await getExistingKeyPair({
+      keyPairName: flags[KEY_PAIR_FLAG_NAME] ?? fluenceConfig.keyPairName,
+      commandObj: this,
+      isInteractive,
+    });
+
+    if (defaultKeyPair instanceof Error) {
+      this.error(defaultKeyPair.message);
     }
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
@@ -134,6 +147,8 @@ export default class Deploy extends Command {
     const preparedForDeployItems = await prepareForDeploy({
       commandObj: this,
       fluenceConfig,
+      defaultKeyPair,
+      isInteractive,
     });
 
     const aquaCli = await initAquaCli(this);
@@ -163,7 +178,7 @@ export default class Deploy extends Command {
       });
     }
 
-    const allServices: ServicesV2 = appConfig?.services ?? {};
+    const allServices: ServicesV3 = appConfig?.services ?? {};
 
     this.log(
       `\nGoing to deploy services described in ${color.yellow(
@@ -183,6 +198,7 @@ export default class Deploy extends Command {
       deployId,
       peerId,
       serviceName,
+      keyPair,
     } of preparedForDeployItems) {
       // Here we don't deploy in parallel because it often fails if run in parallel
       // And also when user requests, we interactively ask about each deploy
@@ -210,7 +226,7 @@ export default class Deploy extends Command {
 
         successfullyDeployedServicesByName[deployId] = [
           ...(successfullyDeployedServicesByName[deployId] ?? []),
-          deployedServiceConfig,
+          { ...deployedServiceConfig, keyPairName: keyPair.name },
         ];
 
         allServices[serviceName] = successfullyDeployedServicesByName;
@@ -244,9 +260,8 @@ export default class Deploy extends Command {
 
     const newAppConfig = await initNewReadonlyAppConfig(
       {
-        version: 2,
+        version: 3,
         services: allServices,
-        keyPairName: keyPair.name,
         timestamp: new Date().toISOString(),
         relays: fluenceConfig.relays,
       },
@@ -268,6 +283,7 @@ type DeployInfo = {
   deployId: string;
   peerId: string;
   modules: Array<DeployInfoModule>;
+  keyPair: ConfigKeyPair;
 };
 
 const overrideModule = (
@@ -280,15 +296,19 @@ type PreparedForDeploy = Omit<DeployInfo, "modules" | "serviceDirPath"> & {
   deployJSON: DeployJSONConfig;
 };
 
-type GetDeployJSONsArg = {
+type PrepareForDeployArg = {
   commandObj: CommandObj;
   fluenceConfig: FluenceConfigReadonly;
+  defaultKeyPair: ConfigKeyPair;
+  isInteractive: boolean;
 };
 
 const prepareForDeploy = async ({
   commandObj,
   fluenceConfig,
-}: GetDeployJSONsArg): Promise<Array<PreparedForDeploy>> => {
+  defaultKeyPair,
+  isInteractive,
+}: PrepareForDeployArg): Promise<Array<PreparedForDeploy>> => {
   if (
     fluenceConfig.services === undefined ||
     Object.keys(fluenceConfig.services).length === 0
@@ -307,17 +327,65 @@ const prepareForDeploy = async ({
     serviceDirPath: string;
     get: string;
     deploy: Array<ServiceDeployV1>;
+    keyPair: ConfigKeyPair;
   }>;
 
   CliUx.ux.action.start("Making sure all services are downloaded");
 
+  const projectSecretsConfig = await initProjectSecretsConfig(commandObj);
+
+  const getKeyPair = async (
+    defaultKeyPair: ConfigKeyPair,
+    keyPairName: string | undefined
+  ): Promise<ConfigKeyPair> => {
+    if (keyPairName === undefined) {
+      return defaultKeyPair;
+    }
+
+    let keyPair =
+      (await getProjectKeyPair({
+        commandObj,
+        keyPairName,
+      })) ??
+      (await getUserKeyPair({
+        commandObj,
+        keyPairName,
+      }));
+
+    if (keyPair === undefined) {
+      CliUx.ux.action.stop("paused");
+
+      commandObj.warn(`Key pair ${color.yellow(keyPairName)} not found`);
+
+      const doGenerate = await confirm({
+        message: `Do you want to generate new key-pair ${color.yellow(
+          keyPairName
+        )} for your project?`,
+        isInteractive,
+      });
+
+      if (!doGenerate) {
+        return commandObj.error("Aborted");
+      }
+
+      CliUx.ux.action.start("Making sure all services are downloaded");
+
+      keyPair = await generateKeyPair(keyPairName);
+      projectSecretsConfig.keyPairs.push(keyPair);
+      await projectSecretsConfig.$commit();
+    }
+
+    return keyPair;
+  };
+
   const servicePaths = await Promise.all(
     Object.entries(fluenceConfig.services).map(
-      ([serviceName, { get, deploy }]): ServicePathPromises =>
+      ([serviceName, { get, deploy, keyPairName }]): ServicePathPromises =>
         (async (): ServicePathPromises => ({
           serviceName,
           deploy,
           get,
+          keyPair: await getKeyPair(defaultKeyPair, keyPairName),
           serviceDirPath: isUrl(get)
             ? await downloadService(get)
             : path.resolve(get),
@@ -332,14 +400,22 @@ const prepareForDeploy = async ({
     serviceConfig: ServiceConfigReadonly;
     serviceDirPath: string;
     deploy: Array<ServiceDeployV1>;
+    keyPair: ConfigKeyPair;
   }>;
 
   const serviceConfigs = await Promise.all(
     servicePaths.map(
-      ({ serviceName, serviceDirPath, deploy, get }): ServiceConfigPromises =>
+      ({
+        serviceName,
+        serviceDirPath,
+        deploy,
+        get,
+        keyPair,
+      }): ServiceConfigPromises =>
         (async (): ServiceConfigPromises => ({
           serviceName,
           deploy,
+          keyPair,
           serviceConfig:
             (await initReadonlyServiceConfig(serviceDirPath, commandObj)) ??
             commandObj.error(
@@ -358,57 +434,63 @@ const prepareForDeploy = async ({
     )
   );
 
-  const allDeployInfos = serviceConfigs.flatMap(
-    ({
-      serviceName,
-      deploy,
-      serviceConfig,
-      serviceDirPath,
-    }): Array<DeployInfo> =>
-      deploy.flatMap(
-        ({
-          deployId,
-          count,
-          peerId,
-          peerIds,
-          overrideModules,
-          distribution,
-        }): Array<DeployInfo> => {
-          const deployIdValidity = validateAquaName(deployId);
+  const allDeployInfos = await Promise.all(
+    serviceConfigs.flatMap(
+      ({
+        serviceName,
+        deploy,
+        serviceConfig,
+        serviceDirPath,
+        keyPair,
+      }): Array<Promise<DeployInfo>> =>
+        deploy.flatMap(
+          ({
+            deployId,
+            count,
+            peerId,
+            peerIds,
+            overrideModules,
+            distribution,
+            keyPairName,
+          }): Array<Promise<DeployInfo>> => {
+            const deployIdValidity = validateAquaName(deployId);
 
-          if (deployIdValidity !== true) {
-            return commandObj.error(
-              `deployId ${color.yellow(deployId)} ${deployIdValidity}`
+            if (deployIdValidity !== true) {
+              return commandObj.error(
+                `deployId ${color.yellow(deployId)} ${deployIdValidity}`
+              );
+            }
+
+            return getPeerIds({
+              peerId: peerIds ?? peerId,
+              distribution,
+              count,
+              relays: fluenceConfig.relays,
+              namedPeerIds: fluenceConfig.peerIds,
+            }).map(
+              (peerId: string): Promise<DeployInfo> =>
+                (async (): Promise<DeployInfo> => ({
+                  serviceName,
+                  serviceDirPath,
+                  deployId,
+                  peerId:
+                    typeof peerId === "string"
+                      ? fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId
+                      : peerId,
+                  modules: getDeployInfoModules({
+                    commandObj,
+                    deployId,
+                    overrideModules,
+                    serviceConfigModules: serviceConfig.modules,
+                    serviceDirPath,
+                    serviceName,
+                  }),
+                  keyPair: await getKeyPair(keyPair, keyPairName),
+                }))()
             );
           }
-
-          return getPeerIds({
-            peerId: peerIds ?? peerId,
-            distribution,
-            count,
-            relays: fluenceConfig.relays,
-            namedPeerIds: fluenceConfig.peerIds,
-          }).map(
-            (peerId: string): DeployInfo => ({
-              serviceName,
-              serviceDirPath,
-              deployId,
-              peerId:
-                typeof peerId === "string"
-                  ? fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId
-                  : peerId,
-              modules: getDeployInfoModules({
-                commandObj,
-                deployId,
-                overrideModules,
-                serviceConfigModules: serviceConfig.modules,
-                serviceDirPath,
-                serviceName,
-              }),
-            })
-          );
-        }
-      )
+        )
+    )
   );
 
   const setOfAllGets = [
@@ -783,10 +865,19 @@ const deployService = async ({
     return null;
   }
 
-  const [, blueprintId] = /Blueprint id:\n(.*)/.exec(result) ?? [];
-  const [, serviceId] = /And your service id is:\n"(.*)"/.exec(result) ?? [];
+  const firstBraceIndex = [...result].reverse().indexOf("{");
+  const parsedResult: unknown = JSON.parse(result.slice(-firstBraceIndex - 1));
 
-  if (blueprintId === undefined || serviceId === undefined) {
+  if (
+    !(
+      hasKey("blueprint_id", parsedResult) &&
+      typeof parsedResult.blueprint_id === "string"
+    ) ||
+    !(
+      hasKey("service_id", parsedResult) &&
+      typeof parsedResult.service_id === "string"
+    )
+  ) {
     commandObj.warn(
       `Deployment finished without errors but not able to parse serviceId or blueprintId from aqua cli output:\n\n${result}`
     );
@@ -795,7 +886,11 @@ const deployService = async ({
   }
 
   return {
-    deployedServiceConfig: { blueprintId, serviceId, peerId },
+    deployedServiceConfig: {
+      blueprintId: parsedResult.blueprint_id,
+      serviceId: parsedResult.service_id,
+      peerId,
+    },
     serviceName,
     deployId,
   };
