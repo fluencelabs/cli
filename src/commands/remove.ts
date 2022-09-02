@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
@@ -24,7 +25,7 @@ import { AquaCLI, initAquaCli } from "../lib/aquaCli";
 import {
   AppConfig,
   initAppConfig,
-  ServicesV2,
+  ServicesV3,
 } from "../lib/configs/project/app";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
 import {
@@ -35,7 +36,11 @@ import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { getKeyPair } from "../lib/keypairs";
+import {
+  ConfigKeyPair,
+  getProjectKeyPair,
+  getUserKeyPair,
+} from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceJSAppPath,
@@ -121,17 +126,49 @@ export const removeApp = async (
       })
     : true;
 
-  const { keyPairName, services, relays } = appConfig;
-  const keyPair = await getKeyPair({ commandObj, keyPairName, isInteractive });
-  const notRemovedServices: ServicesV2 = {};
+  const { services, relays } = appConfig;
+  const notRemovedServices: ServicesV3 = {};
   const addr = relay ?? getRandomRelayAddr(relays);
+
+  const allKeyPairNames = [
+    ...new Set(
+      Object.entries(services).flatMap(
+        ([, servicesByName]): Array<string> =>
+          Object.entries(servicesByName).flatMap(
+            ([, services]): Array<string> =>
+              services.map(({ keyPairName }): string => keyPairName)
+          )
+      )
+    ),
+  ];
+
+  const keyPairsMap = new Map(
+    await Promise.all(
+      allKeyPairNames.map(
+        (keyPairName): Promise<[string, ConfigKeyPair]> =>
+          (async (): Promise<[string, ConfigKeyPair]> => {
+            const keyPair =
+              (await getProjectKeyPair({ commandObj, keyPairName })) ??
+              (await getUserKeyPair({ commandObj, keyPairName }));
+
+            if (keyPair === undefined) {
+              return commandObj.error(`Key-pair ${keyPairName} not found`);
+            }
+
+            return [keyPairName, keyPair];
+          })()
+      )
+    )
+  );
 
   for (const [serviceName, servicesByName] of Object.entries(services)) {
     const notRemovedServicesByName: typeof servicesByName = {};
 
     for (const [deployId, services] of Object.entries(servicesByName)) {
       for (const service of services) {
-        const { serviceId, peerId } = service;
+        const { serviceId, peerId, keyPairName } = service;
+        const keyPair = keyPairsMap.get(keyPairName);
+        assert(keyPair !== undefined);
 
         const keyValuePairs = {
           service: serviceName,

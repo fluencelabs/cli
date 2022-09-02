@@ -111,6 +111,9 @@ Pull request and release process:
 * [`fluence deploy`](#fluence-deploy)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH]`](#fluence-init-path)
+* [`fluence key default [NAME]`](#fluence-key-default-name)
+* [`fluence key new [NAME]`](#fluence-key-new-name)
+* [`fluence key remove [NAME]`](#fluence-key-remove-name)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [PATH]`](#fluence-module-new-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
@@ -279,6 +282,72 @@ EXAMPLES
 
 _See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/init.ts)_
 
+## `fluence key default [NAME]`
+
+Set default key-pair for user or project
+
+```
+USAGE
+  $ fluence key default [NAME] [--no-input] [--user]
+
+ARGUMENTS
+  NAME  Key-pair name
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+  --user      Set default key-pair for current user instead of current project
+
+DESCRIPTION
+  Set default key-pair for user or project
+
+EXAMPLES
+  $ fluence key default
+```
+
+## `fluence key new [NAME]`
+
+Generate key-pair and store it in user's or project's .fluence/secrets.yaml
+
+```
+USAGE
+  $ fluence key new [NAME] [--no-input] [--user]
+
+ARGUMENTS
+  NAME  Key-pair name
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+  --user      Generate key-pair for current user instead of generating key-pair for current project
+
+DESCRIPTION
+  Generate key-pair and store it in user's or project's .fluence/secrets.yaml
+
+EXAMPLES
+  $ fluence key new
+```
+
+## `fluence key remove [NAME]`
+
+Remove key-pair from user's or project's .fluence/secrets.yaml
+
+```
+USAGE
+  $ fluence key remove [NAME] [--no-input] [--user]
+
+ARGUMENTS
+  NAME  Key-pair name
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+  --user      Remove key-pair from current user instead of removing key-pair from current project
+
+DESCRIPTION
+  Remove key-pair from user's or project's .fluence/secrets.yaml
+
+EXAMPLES
+  $ fluence key remove
+```
+
 ## `fluence module add [PATH | URL]`
 
 Add module to service.yaml
@@ -373,13 +442,16 @@ Run aqua script
 
 ```
 USAGE
-  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout <value>] [--no-input] [-k <value>]
+  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>] [--plugin
+    <value>] [--const <value>] [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout <value>]
+    [--no-input] [-k <value>]
 
 FLAGS
   -f, --func=<function-call>  Function call
   -i, --input=<path>          Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>  Key pair name
+  --const=<NAME = value>...   Constant that will be used in the aqua code that you run (example of aqua code: SOME_CONST
+                              ?= "default_value"). Constant name must be upper cased.
   --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
                               argument names
   --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
@@ -388,6 +460,8 @@ FLAGS
   --json-service=<path>...    Path to a file that contains a JSON formatted service
   --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of a peer where you want to run the function
+  --plugin=<path>             [experimental] Path to a directory with JS plugins (Read more:
+                              https://doc.fluence.dev/aqua-book/aqua-cli/plugins)
   --relay=<multiaddr>         Relay node multiaddr
   --timeout=<milliseconds>    Timeout used for command execution
 

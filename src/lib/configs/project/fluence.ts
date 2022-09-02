@@ -76,12 +76,14 @@ export type ServiceDeployV1 = {
   peerIds?: Array<string>;
   overrideModules?: OverrideModules;
   distribution?: Distribution;
+  keyPairName?: string;
 };
 export type FluenceConfigModule = Partial<ServiceModuleConfig>;
 
 type ServiceV1 = {
   get: string;
   deploy: Array<ServiceDeployV1>;
+  keyPairName?: string;
 };
 
 type ConfigV1 = {
@@ -89,6 +91,7 @@ type ConfigV1 = {
   services?: Record<string, ServiceV1>;
   relays?: Relays;
   peerIds?: Record<string, string>;
+  keyPairName?: string;
 };
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = {
@@ -106,6 +109,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
             items: {
               type: "object",
               properties: {
+                keyPairName: { type: "string", nullable: true },
                 deployId: {
                   type: "string",
                 },
@@ -176,6 +180,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
               required: ["deployId"],
             },
           },
+          keyPairName: { type: "string", nullable: true },
         },
         required: ["get", "deploy"],
       },
@@ -196,6 +201,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       required: [],
       additionalProperties: { type: "string" },
     },
+    keyPairName: { type: "string", nullable: true },
   },
   required: ["version"],
 };
@@ -245,11 +251,15 @@ export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const examples = `
+keyPairName: # Name of key pair to use. Default: defaultKeyPairName from project's .fluence/secretes.yaml or if it is empty - defaultKeyPairName from user's .fluence/secrets.yaml
+# keyPairName is always searched in project's .fluence/secrets.yaml first and then if nothing is found it is searched in user's .fluence/secrets.yaml.
 services:
   someService: # Service name. It must start with a lowercase letter and contain only letters, numbers, and underscores.
+    keyPairName: # overrides top-level keyPairName. Optional
     get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true # URL or path
     deploy:
-      - deployId: default # must start with a lowercase letter and contain only letters, numbers, and underscores.
+      - keyPairName: # overrides top-level keyPairName. Optional
+        deployId: default # must start with a lowercase letter and contain only letters, numbers, and underscores.
         # Used in aqua to access deployed service ids
         # You can access deployment info in aqua like this:
         # services <- App.services()

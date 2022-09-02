@@ -20,7 +20,7 @@ import color from "@oclif/color";
 import { CliUx } from "@oclif/core";
 
 import type { AquaCLI } from "./aquaCli";
-import type { ServicesV2 } from "./configs/project/app";
+import type { ServicesV3 } from "./configs/project/app";
 import { FS_OPTIONS } from "./const";
 import { capitalize } from "./helpers/capitilize";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
@@ -37,7 +37,7 @@ const SERVICES_FUNCTION_NAME = "services";
 const SERVICE_IDS_ITEM = "ServiceIdsItem";
 const SERVICES_DATA_AQUA_TYPE = "Services";
 
-export const getAppJson = (services: ServicesV2): string =>
+export const getAppJson = (services: ServicesV3): string =>
   JSON.stringify(
     {
       name: APP_SERVICE_NAME,
@@ -118,7 +118,7 @@ export function registerApp(
 };
 
 type GenerateRegisterAppArg = {
-  deployedServices: ServicesV2;
+  deployedServices: ServicesV3;
   aquaCli: AquaCLI;
 };
 
@@ -140,7 +140,7 @@ const getDeploysDataName = (serviceName: string): string =>
   `${capitalize(serviceName)}Deploys`;
 
 export const generateDeployedAppAqua = async (
-  services: ServicesV2
+  services: ServicesV3
 ): Promise<void> => {
   const appServicesFilePath = await ensureFluenceAquaDeployedAppPath();
 

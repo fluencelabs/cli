@@ -78,7 +78,10 @@ export const ensureUserFluenceCargoCratesPath = async (
 
 // Project paths:
 
-export const getProjectRootDir = (): string => process.cwd();
+// cwd is cached in order for paths to be correct even if cwd changes during the
+// execution (e.g. Marince CLI has to change cwd in order to work correctly)
+const projectRootDir = process.cwd();
+export const getProjectRootDir = (): string => projectRootDir;
 
 export const ensureSrcAquaDir = (): Promise<string> =>
   ensureDir(path.join(getProjectRootDir(), SRC_DIR_NAME, AQUA_DIR_NAME));

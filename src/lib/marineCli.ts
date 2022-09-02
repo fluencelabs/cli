@@ -52,8 +52,9 @@ export const initMarineCli = async (
     commandObj,
   });
 
-  const projectRootDir = getProjectRootDir();
-
+  /** This function uses process.chdir - be cautious
+   * @returns Marine CLI execution result
+   */
   return async ({
     command,
     flags,
@@ -78,7 +79,7 @@ export const initMarineCli = async (
     );
 
     if (workingDir !== undefined) {
-      process.chdir(projectRootDir);
+      process.chdir(getProjectRootDir());
     }
 
     return result;

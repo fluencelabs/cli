@@ -26,6 +26,7 @@ import { initServiceConfig } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   MODULE_CONFIG_FILE_NAME,
+  NAME_FLAG_NAME,
   NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
@@ -36,7 +37,6 @@ import { input } from "../../lib/prompt";
 import { hasKey } from "../../lib/typeHelpers";
 
 const PATH_OR_URL = "PATH | URL";
-const NAME_FLAG_NAME = "name";
 
 export default class Add extends Command {
   static override description = `Add module to ${color.yellow(
