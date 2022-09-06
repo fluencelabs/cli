@@ -73,12 +73,14 @@ const generateRegisterAppTSorJS = async ({
     `${isJS ? "" : 'import { FluencePeer } from "@fluencelabs/fluence";'}
 import { registerApp as registerAppService } from "./deployed.app";
 
-const service = {
-  ${SERVICES_FUNCTION_NAME}: () => (${JSON.stringify(
+export const ${SERVICES_FUNCTION_NAME} = ${JSON.stringify(
       deployedServices,
       null,
       2
-    )}),
+    )}
+
+const service = {
+  ${SERVICES_FUNCTION_NAME}: () => ${SERVICES_FUNCTION_NAME},
 };
 
 ${
