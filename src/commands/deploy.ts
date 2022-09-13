@@ -86,7 +86,7 @@ import {
   getProjectKeyPair,
   getUserKeyPair,
 } from "../lib/keypairs";
-import { initMarineCli } from "../lib/marineCli";
+import { initMarineCli, MarineCLI } from "../lib/marineCli";
 import {
   getEvenlyDistributedIds,
   getEvenlyDistributedIdsFromTheList,
@@ -144,11 +144,14 @@ export default class Deploy extends Command {
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
 
+    const marineCli = await initMarineCli(this);
+
     const preparedForDeployItems = await prepareForDeploy({
       commandObj: this,
       fluenceConfig,
       defaultKeyPair,
       isInteractive,
+      marineCli,
     });
 
     const aquaCli = await initAquaCli(this);
@@ -179,6 +182,7 @@ export default class Deploy extends Command {
     }
 
     const allServices: ServicesV3 = appConfig?.services ?? {};
+    const serviceNamePathToFacadeMap: Record<string, string> = {};
 
     this.log(
       `\nGoing to deploy services described in ${color.yellow(
@@ -199,6 +203,7 @@ export default class Deploy extends Command {
       peerId,
       serviceName,
       keyPair,
+      pathToFacade,
     } of preparedForDeployItems) {
       // Here we don't deploy in parallel because it often fails if run in parallel
       // And also when user requests, we interactively ask about each deploy
@@ -216,6 +221,7 @@ export default class Deploy extends Command {
         commandObj: this,
         doDeployAll,
         isInteractive,
+        pathToFacade,
       });
 
       if (res !== null) {
@@ -230,12 +236,31 @@ export default class Deploy extends Command {
         ];
 
         allServices[serviceName] = successfullyDeployedServicesByName;
+        serviceNamePathToFacadeMap[serviceName] = pathToFacade;
       }
     }
 
     if (Object.keys(allServices).length === 0) {
       return;
     }
+
+    // remove previously generated interfaces for services
+    await fsPromises.rm(await ensureFluenceAquaServicesDir(), {
+      recursive: true,
+      force: true,
+    });
+
+    // generate interfaces for all services
+    await Promise.all(
+      Object.entries(serviceNamePathToFacadeMap).map(
+        ([serviceName, pathToFacade]): Promise<void> =>
+          generateServiceInterface({
+            pathToFacade,
+            marineCli,
+            serviceName,
+          })
+      )
+    );
 
     await generateDeployedAppAqua(allServices);
 
@@ -294,6 +319,7 @@ const overrideModule = (
 
 type PreparedForDeploy = Omit<DeployInfo, "modules" | "serviceDirPath"> & {
   deployJSON: DeployJSONConfig;
+  pathToFacade: string;
 };
 
 type PrepareForDeployArg = {
@@ -301,6 +327,7 @@ type PrepareForDeployArg = {
   fluenceConfig: FluenceConfigReadonly;
   defaultKeyPair: ConfigKeyPair;
   isInteractive: boolean;
+  marineCli: MarineCLI;
 };
 
 const prepareForDeploy = async ({
@@ -308,6 +335,7 @@ const prepareForDeploy = async ({
   fluenceConfig,
   defaultKeyPair,
   isInteractive,
+  marineCli,
 }: PrepareForDeployArg): Promise<Array<PreparedForDeploy>> => {
   if (
     fluenceConfig.services === undefined ||
@@ -496,42 +524,20 @@ const prepareForDeploy = async ({
   const setOfAllGets = [
     ...new Set(
       allDeployInfos.flatMap(
-        ({
-          modules,
-          serviceDirPath,
-          serviceName,
-        }): Array<{ get: string; moduleName: string; serviceName: string }> =>
-          modules.map(
-            ({
-              moduleConfig: { get },
-              moduleName,
-            }): { get: string; moduleName: string; serviceName: string } => ({
-              get: getModuleUrlOrAbsolutePath(get, serviceDirPath),
-              moduleName,
-              serviceName,
-            })
+        ({ modules, serviceDirPath }): Array<string> =>
+          modules.map(({ moduleConfig: { get } }): string =>
+            getModuleUrlOrAbsolutePath(get, serviceDirPath)
           )
       )
     ),
   ];
-
-  const marineCli = await initMarineCli(commandObj);
-
-  await fsPromises.rm(await ensureFluenceAquaServicesDir(), {
-    recursive: true,
-    force: true,
-  });
 
   CliUx.ux.action.start("Making sure all modules are downloaded and built");
 
   const mapOfAllModuleConfigs = new Map(
     await Promise.all(
       setOfAllGets.map(
-        ({
-          get,
-          moduleName,
-          serviceName,
-        }): Promise<[string, ModuleConfigReadonly]> =>
+        (get): Promise<[string, ModuleConfigReadonly]> =>
           (async (): Promise<[string, ModuleConfigReadonly]> => {
             const moduleConfig = isUrl(get)
               ? await initReadonlyModuleConfig(
@@ -558,14 +564,6 @@ const prepareForDeploy = async ({
               });
             }
 
-            if (moduleName === FACADE_MODULE_NAME) {
-              await generateServiceInterface({
-                pathToFacade: getModuleWasmPath(moduleConfig),
-                marineCli,
-                serviceName,
-              });
-            }
-
             return [get, moduleConfig];
           })()
       )
@@ -576,29 +574,50 @@ const prepareForDeploy = async ({
 
   return allDeployInfos.map(
     ({ modules, serviceDirPath, ...rest }): PreparedForDeploy => {
+      const moduleConfigs = modules.map(
+        ({
+          moduleConfig: { get, ...overrides },
+        }): ModuleConfigReadonly & { path: string } => {
+          const moduleConfig = mapOfAllModuleConfigs.get(
+            getModuleUrlOrAbsolutePath(get, serviceDirPath)
+          );
+
+          if (moduleConfig === undefined) {
+            return commandObj.error(
+              `Unreachable. Wasn't able to find module config for ${get}`
+            );
+          }
+
+          const overriddenModuleConfig = { ...moduleConfig, ...overrides };
+
+          return {
+            ...overriddenModuleConfig,
+            path: getModuleWasmPath(overriddenModuleConfig),
+          };
+        }
+      );
+
       const deployJSON = {
         [DEFAULT_DEPLOY_NAME]: {
-          modules: modules.map(
-            ({ moduleConfig: { get, ...overrides } }): JSONModuleConf => {
-              const moduleConfig = mapOfAllModuleConfigs.get(
-                getModuleUrlOrAbsolutePath(get, serviceDirPath)
-              );
-
-              if (moduleConfig === undefined) {
-                return commandObj.error(
-                  `Unreachable. Wasn't able to find module config for ${get}`
-                );
-              }
-
-              return serviceModuleToJSONModuleConfig(moduleConfig, overrides);
-            }
+          modules: moduleConfigs.map(
+            (moduleConfig): JSONModuleConf =>
+              serviceModuleToJSONModuleConfig(moduleConfig)
           ),
         },
       };
 
+      const facadeModuleConfig = moduleConfigs[moduleConfigs.length - 1];
+
+      if (facadeModuleConfig === undefined) {
+        return commandObj.error(
+          "Unreachable. Each service must have at least one module"
+        );
+      }
+
       return {
         ...rest,
         deployJSON,
+        pathToFacade: facadeModuleConfig.path,
       };
     }
   );
@@ -728,11 +747,8 @@ type DeployJSONConfig = Record<
 >;
 
 const serviceModuleToJSONModuleConfig = (
-  moduleConfig: ModuleConfigReadonly,
-  overrides: Omit<ModuleV0, "get">
+  moduleConfig: ModuleConfigReadonly & { path: string }
 ): JSONModuleConf => {
-  const overriddenConfig = { ...moduleConfig, ...overrides };
-
   const {
     name,
     loggerEnabled,
@@ -742,11 +758,12 @@ const serviceModuleToJSONModuleConfig = (
     maxHeapSize,
     mountedBinaries,
     preopenedFiles,
-  } = overriddenConfig;
+    path,
+  } = moduleConfig;
 
   const jsonModuleConfig: JSONModuleConf = {
     name,
-    path: getModuleWasmPath(overriddenConfig),
+    path,
   };
 
   if (loggerEnabled === true) {
@@ -793,6 +810,7 @@ type DeployServiceArg = Readonly<{
   serviceName: string;
   deployId: string;
   tmpDeployJSONPath: string;
+  pathToFacade: string;
   commandObj: CommandObj;
   doDeployAll: boolean;
   isInteractive: boolean;
@@ -812,6 +830,7 @@ const deployService = async ({
   secretKey,
   aquaCli,
   tmpDeployJSONPath,
+  pathToFacade,
   timeout,
   commandObj,
   doDeployAll,
@@ -820,6 +839,7 @@ const deployService = async ({
   deployedServiceConfig: DeployedServiceConfig;
   serviceName: string;
   deployId: string;
+  pathToFacade: string;
 } | null> => {
   const keyValuePairs = { service: serviceName, deployId, on: peerId };
 
@@ -893,5 +913,6 @@ const deployService = async ({
     },
     serviceName,
     deployId,
+    pathToFacade,
   };
 };
