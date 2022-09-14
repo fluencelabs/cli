@@ -49,6 +49,7 @@ import {
   ServiceConfigReadonly,
 } from "../lib/configs/project/service";
 import {
+  AQUA_EXT,
   CommandObj,
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -245,10 +246,21 @@ export default class Deploy extends Command {
     }
 
     // remove previously generated interfaces for services
-    await fsPromises.rm(await ensureFluenceAquaServicesDir(), {
-      recursive: true,
-      force: true,
-    });
+    const aquaServicesDirPath = await ensureFluenceAquaServicesDir();
+
+    const servicesDirContent = await fsPromises.readdir(aquaServicesDirPath);
+
+    await Promise.all(
+      servicesDirContent
+        .filter(
+          (fileName): boolean =>
+            !(fileName.slice(0, 1 + AQUA_EXT.length) in allServices)
+        )
+        .map(
+          (fileName): Promise<void> =>
+            fsPromises.unlink(path.join(aquaServicesDirPath, fileName))
+        )
+    );
 
     // generate interfaces for all services
     await Promise.all(

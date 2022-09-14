@@ -22,6 +22,7 @@ import {
   testNet,
   Node,
 } from "@fluencelabs/fluence-network-environment";
+import shuffle from "lodash/shuffle";
 import { Multiaddr } from "multiaddr";
 
 export const NETWORKS = ["kras", "stage", "testnet"] as const;
@@ -29,7 +30,7 @@ export type Network = typeof NETWORKS[number];
 export type Relays = Network | Array<string> | undefined;
 
 const getAddrs = (nodes: Array<Node>): Array<string> =>
-  nodes.map(({ multiaddr }): string => multiaddr);
+  shuffle(nodes.map(({ multiaddr }): string => multiaddr));
 
 const ADDR_MAP: Record<Network, Array<string>> = {
   kras: getAddrs(krasnodar),
@@ -110,17 +111,17 @@ export const getEvenlyDistributedIdsFromTheList = (
   count = ids.length
 ): Array<string> => {
   const result: Array<string> = [];
-  const sortedIds = ids.sort();
+  const sortedIds = [...ids].sort();
   const key = JSON.stringify(sortedIds);
   let offset = offsets.get(key) ?? 0;
 
   for (let i = 0; i < count; i = i + 1) {
-    const id = sortedIds[(i + offset) % sortedIds.length];
+    const id = ids[(i + offset) % ids.length];
     assert(typeof id === "string");
     result.push(id);
   }
 
-  offset = (offset + count) % sortedIds.length;
+  offset = (offset + count) % ids.length;
   offsets.set(key, offset);
 
   return result;

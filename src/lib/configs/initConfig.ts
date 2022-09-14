@@ -242,7 +242,7 @@ export type InitializedConfig<LatestConfig> = Mutable<
 > & {
   $commit(): Promise<void>;
 };
-type BaseConfig = { version: number };
+type BaseConfig = { version: number } & Record<string, unknown>;
 export type Migrations<Config> = Array<
   (config: Config) => Config | Promise<Config>
 >;
