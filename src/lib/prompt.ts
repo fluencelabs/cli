@@ -18,7 +18,7 @@ import assert from "node:assert";
 
 import color from "@oclif/color";
 import type { JSONSchemaType, ValidateFunction } from "ajv";
-import inquirer, { DistinctQuestion, Separator } from "inquirer";
+import inquirer, { Answers, DistinctQuestion, Separator } from "inquirer";
 
 import { ajv } from "./ajv";
 import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const";
@@ -54,7 +54,7 @@ const arrayOfStringsSchema: JSONSchemaType<{ [NAME]: Array<string> }> = {
 
 const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 
-type PromptOptions<T, U> = DistinctQuestion<U> & {
+type PromptOptions<T, U extends Answers> = DistinctQuestion<U> & {
   validateType: ValidateFunction<{ NAME: T }>;
   isInteractive: boolean;
   flagName: string | undefined;
