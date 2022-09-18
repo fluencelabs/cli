@@ -18,7 +18,7 @@ import { Command, Flags } from "@oclif/core";
 import type { stringify } from "yaml";
 
 export const AQUA_RECOMMENDED_VERSION = "0.7.5-342";
-export const MARINE_RECOMMENDED_VERSION = "0.12.2";
+export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.1";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.6.15";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.5.0";
