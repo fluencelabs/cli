@@ -18,27 +18,24 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
+import { CliUx } from "@oclif/core";
 
-import { getVersionToUse } from "./configs/user/dependency";
+import type { FluenceConfig } from "./configs/project/fluence";
 import {
   BIN_DIR_NAME,
-  CargoDependency,
   CommandObj,
-  FS_OPTIONS,
   MARINE_CARGO_DEPENDENCY,
   MARINE_RECOMMENDED_VERSION,
   MREPL_CARGO_DEPENDENCY,
   MREPL_RECOMMENDED_VERSION,
-  RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE,
+  REQUIRED_RUST_TOOLCHAIN,
   RUST_WASM32_WASI_TARGET,
 } from "./const";
 import { execPromise } from "./execPromise";
+import { splitPackageNameAndVersion } from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import { unparseFlags } from "./helpers/unparseFlags";
-import {
-  ensureUserFluenceCargoCratesPath,
-  ensureUserFluenceCargoDir,
-} from "./paths";
+import { ensureUserFluenceCargoDir } from "./paths";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -75,16 +72,14 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
 
   if (!(await hasRequiredRustToolchain())) {
     await execPromise(
-      `${RUSTUP} install ${RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE}`,
-      `Installing ${color.yellow(
-        RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE
-      )} rust toolchain`
+      `${RUSTUP} install ${REQUIRED_RUST_TOOLCHAIN}`,
+      `Installing ${color.yellow(REQUIRED_RUST_TOOLCHAIN)} rust toolchain`
     );
 
     if (!(await hasRequiredRustToolchain())) {
       commandObj.error(
         `Not able to install ${color.yellow(
-          RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE
+          REQUIRED_RUST_TOOLCHAIN
         )} rust toolchain`
       );
     }
@@ -118,7 +113,7 @@ const isRustInstalled = async (): Promise<boolean> => {
 
 const hasRequiredRustToolchain = async (): Promise<boolean> =>
   (await execPromise(`${RUSTUP} toolchain list`)).includes(
-    RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE
+    REQUIRED_RUST_TOOLCHAIN
   );
 
 const hasRequiredRustTarget = async (): Promise<boolean> =>
@@ -126,116 +121,121 @@ const hasRequiredRustTarget = async (): Promise<boolean> =>
     `${RUST_WASM32_WASI_TARGET} (installed)`
   );
 
-const cargoInstall = async ({
-  packageName,
-  version,
-  isNightlyX86,
-  commandObj,
-  message,
-}: CargoDependencyInfo & {
-  version: string;
-  commandObj: CommandObj;
-  message: string;
-}): Promise<string> =>
-  execPromise(
-    `${CARGO}${
-      isNightlyX86 === true ? " +nightly-x86_64" : ""
-    } install ${packageName} ${unparseFlags(
-      {
-        version,
-        root: await ensureUserFluenceCargoDir(commandObj),
-      },
-      commandObj
-    )}`,
-    message
-  );
-
 type CargoDependencyInfo = {
   recommendedVersion: string;
-  packageName: string;
-  isNightlyX86?: true;
+  toolchain?: string;
 };
 
-export const cargoDependencies: Record<CargoDependency, CargoDependencyInfo> = {
+export const fluenceCargoDependencies: Record<string, CargoDependencyInfo> = {
   [MARINE_CARGO_DEPENDENCY]: {
     recommendedVersion: MARINE_RECOMMENDED_VERSION,
-    packageName: MARINE_CARGO_DEPENDENCY,
-    isNightlyX86: true,
+    toolchain: REQUIRED_RUST_TOOLCHAIN,
   },
   [MREPL_CARGO_DEPENDENCY]: {
     recommendedVersion: MREPL_RECOMMENDED_VERSION,
-    packageName: MREPL_CARGO_DEPENDENCY,
-    isNightlyX86: true,
+    toolchain: REQUIRED_RUST_TOOLCHAIN,
   },
 };
 
-type CargoDependencyArg = {
-  name: CargoDependency;
+type GetLatestVersionOfCargoDependency = {
+  name: string;
   commandObj: CommandObj;
 };
 
-const isCorrectVersionInstalled = async ({
+export const getLatestVersionOfCargoDependency = async ({
   name,
   commandObj,
-}: CargoDependencyArg): Promise<boolean> => {
-  const { packageName, recommendedVersion } = cargoDependencies[name];
-  const cratesTomlPath = await ensureUserFluenceCargoCratesPath(commandObj);
-  const version = await getVersionToUse(recommendedVersion, name, commandObj);
+}: GetLatestVersionOfCargoDependency): Promise<string> =>
+  (
+    (await execPromise(`${CARGO} search ${name} --limit 1`)).split('"')[1] ??
+    commandObj.error(
+      `Not able to find the latest version of ${color.yellow(
+        name
+      )}. Please make sure ${color.yellow(name)} is spelled correctly`
+    )
+  ).trim();
 
-  try {
-    const cratesTomlContent = await fsPromises.readFile(
-      cratesTomlPath,
-      FS_OPTIONS
-    );
-
-    return cratesTomlContent.includes(`${packageName} ${version}`);
-  } catch {
-    return false;
-  }
+type CargoDependencyArg = {
+  nameAndVersion: string;
+  commandObj: CommandObj;
+  fluenceConfig?: FluenceConfig | null | undefined;
+  toolchain?: string | undefined;
+  isSpinnerVisible?: boolean;
+  explicitInstallation?: boolean;
 };
 
 export const ensureCargoDependency = async ({
-  name,
+  nameAndVersion,
   commandObj,
+  fluenceConfig,
+  toolchain: toolchainFromArgs,
+  isSpinnerVisible = true,
+  explicitInstallation = false,
 }: CargoDependencyArg): Promise<string> => {
   await ensureRust(commandObj);
-  const dependency = cargoDependencies[name];
-  const { packageName, recommendedVersion } = dependency;
+  const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
+  const maybeCargoDependencyInfo = fluenceCargoDependencies[name];
 
-  const userFluenceCargoCratesPath = await ensureUserFluenceCargoCratesPath(
-    commandObj
-  );
+  const version =
+    maybeVersion ??
+    (explicitInstallation
+      ? undefined
+      : fluenceConfig?.dependencies?.cargo?.[name] ??
+        fluenceCargoDependencies[name]?.recommendedVersion) ??
+    (await getLatestVersionOfCargoDependency({ name, commandObj }));
 
-  const dependencyPath = path.join(
-    await ensureUserFluenceCargoDir(commandObj),
-    BIN_DIR_NAME,
-    packageName
-  );
+  const toolchain = toolchainFromArgs ?? maybeCargoDependencyInfo?.toolchain;
+  const cargoDirPath = await ensureUserFluenceCargoDir(commandObj);
 
-  if (await isCorrectVersionInstalled({ name, commandObj })) {
-    return dependencyPath;
+  const dependencyPath = path.join(cargoDirPath, name, version);
+
+  try {
+    await fsPromises.access(dependencyPath);
+  } catch {
+    try {
+      await execPromise(
+        `${CARGO}${
+          typeof toolchain === "string" ? ` +${toolchain}` : ""
+        } install ${nameAndVersion} ${unparseFlags(
+          {
+            root: dependencyPath,
+          },
+          commandObj
+        )}`,
+        isSpinnerVisible
+          ? `Installing version ${color.yellow(
+              version
+            )} of ${name} to ${replaceHomeDir(dependencyPath)}`
+          : undefined
+      );
+    } catch (error) {
+      CliUx.ux.action.stop("failed");
+      return commandObj.error(
+        `Not able to install ${name}@${version} to ${replaceHomeDir(
+          dependencyPath
+        )}. Please make sure ${color.yellow(
+          name
+        )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
+          `fluence dependency cargo install ${name}@<version>`
+        )} command.\n${String(error)}`
+      );
+    }
   }
 
-  const version = await getVersionToUse(recommendedVersion, name, commandObj);
-
-  await cargoInstall({
-    version,
-    message: `Installing version ${color.yellow(
-      version
-    )} of ${packageName} to ${replaceHomeDir(
-      await ensureUserFluenceCargoDir(commandObj)
-    )}`,
-    commandObj,
-    ...dependency,
-  });
-
-  if (await isCorrectVersionInstalled({ name, commandObj })) {
-    return dependencyPath;
+  if (fluenceConfig !== undefined && fluenceConfig !== null) {
+    fluenceConfig.dependencies.cargo[name] = version;
+    await fluenceConfig.$commit();
   }
 
-  return commandObj.error(
-    `Not able to install ${color.yellow(
-      version
-    )} of ${packageName} to ${replaceHomeDir(userFluenceCargoCratesPath)}`
-  );
+  if (explicitInstallation) {
+    commandObj.log(
+      `Successfully installed ${name}@${version} to ${replaceHomeDir(
+        dependencyPath
+      )}`
+    );
+  }
+
+  return maybeCargoDependencyInfo === undefined
+    ? dependencyPath
+    : path.join(dependencyPath, BIN_DIR_NAME, name);
 };

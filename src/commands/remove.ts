@@ -27,6 +27,7 @@ import {
   initAppConfig,
   ServicesV3,
 } from "../lib/configs/project/app";
+import { initFluenceConfig } from "../lib/configs/project/fluence";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
 import {
   generateDeployedAppAqua,
@@ -87,7 +88,8 @@ export default class Remove extends Command {
       this.error("Aborted");
     }
 
-    const aquaCli = await initAquaCli(this);
+    const fluenceConfig = await initFluenceConfig(this);
+    const aquaCli = await initAquaCli(this, fluenceConfig);
 
     await removeApp({
       appConfig,

@@ -23,7 +23,10 @@ import stringifyToTOML from "@iarna/toml/stringify";
 import color from "@oclif/color";
 import { CliUx, Command } from "@oclif/core";
 
-import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
+import {
+  initFluenceConfig,
+  initReadonlyFluenceConfig,
+} from "../../lib/configs/project/fluence";
 import {
   initReadonlyModuleConfig,
   MODULE_TYPE_RUST,
@@ -100,7 +103,8 @@ export default class REPL extends Command {
       nameOrPathOrUrl,
     });
 
-    const marineCli = await initMarineCli(this);
+    const fluenceConfig = await initFluenceConfig(this);
+    const marineCli = await initMarineCli(this, fluenceConfig);
 
     const moduleConfigs = await ensureModuleConfigs({
       serviceModules,
@@ -124,8 +128,9 @@ export default class REPL extends Command {
 
     spawn(
       await ensureCargoDependency({
-        name: MREPL_CARGO_DEPENDENCY,
+        nameAndVersion: MREPL_CARGO_DEPENDENCY,
         commandObj: this,
+        fluenceConfig,
       }),
       [fluenceTmpConfigTomlPath],
       { stdio: "inherit", detached: true }

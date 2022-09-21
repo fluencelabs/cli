@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { FluenceConfig } from "./configs/project/fluence";
 import { CommandObj, MARINE_CARGO_DEPENDENCY } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
@@ -45,11 +46,13 @@ export type MarineCLI = {
 };
 
 export const initMarineCli = async (
-  commandObj: CommandObj
+  commandObj: CommandObj,
+  fluenceConfig: FluenceConfig | null
 ): Promise<MarineCLI> => {
   const marineCliPath = await ensureCargoDependency({
-    name: MARINE_CARGO_DEPENDENCY,
+    nameAndVersion: MARINE_CARGO_DEPENDENCY,
     commandObj,
+    fluenceConfig,
   });
 
   /** This function uses process.chdir - be cautious

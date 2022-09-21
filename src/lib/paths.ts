@@ -27,7 +27,6 @@ import {
   CARGO_DIR_NAME,
   CommandObj,
   CONFIG_TOML,
-  CRATES_TOML,
   DEFAULT_SRC_AQUA_FILE_NAME,
   DEPLOYED_APP_AQUA_FILE_NAME,
   DEPLOYED_APP_JS_FILE_NAME,
@@ -71,17 +70,16 @@ export const ensureUserFluenceCargoDir = async (
 ): Promise<string> =>
   ensureDir(path.join(await ensureUserFluenceDir(commandObj), CARGO_DIR_NAME));
 
-export const ensureUserFluenceCargoCratesPath = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  path.join(await ensureUserFluenceCargoDir(commandObj), CRATES_TOML);
-
 // Project paths:
 
 // cwd is cached in order for paths to be correct even if cwd changes during the
 // execution (e.g. Marince CLI has to change cwd in order to work correctly)
-const projectRootDir = process.cwd();
+let projectRootDir = process.cwd();
 export const getProjectRootDir = (): string => projectRootDir;
+
+export const setProjectRootDir = (dir: string): void => {
+  projectRootDir = dir;
+};
 
 export const ensureSrcAquaDir = (): Promise<string> =>
   ensureDir(path.join(getProjectRootDir(), SRC_DIR_NAME, AQUA_DIR_NAME));

@@ -32,7 +32,7 @@ import {
   Distribution,
   DISTRIBUTION_EVEN,
   FluenceConfigReadonly,
-  initReadonlyFluenceConfig,
+  initFluenceConfig,
   OverrideModules,
   ServiceDeployV1,
 } from "../lib/configs/project/fluence";
@@ -127,7 +127,7 @@ export default class Deploy extends Command {
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
 
-    const fluenceConfig = await initReadonlyFluenceConfig(this);
+    const fluenceConfig = await initFluenceConfig(this);
 
     if (fluenceConfig === null) {
       this.error("You must init Fluence project first to deploy");
@@ -145,7 +145,7 @@ export default class Deploy extends Command {
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
 
-    const marineCli = await initMarineCli(this);
+    const marineCli = await initMarineCli(this, fluenceConfig);
 
     const preparedForDeployItems = await prepareForDeploy({
       commandObj: this,
@@ -155,7 +155,7 @@ export default class Deploy extends Command {
       marineCli,
     });
 
-    const aquaCli = await initAquaCli(this);
+    const aquaCli = await initAquaCli(this, fluenceConfig);
     const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
     let appConfig = await initAppConfig(this);
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { FluenceConfig } from "./configs/project/fluence";
 import { AQUA_NPM_DEPENDENCY, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
@@ -78,10 +79,14 @@ export type AquaCLI = {
   ): Promise<string>;
 };
 
-export const initAquaCli = async (commandObj: CommandObj): Promise<AquaCLI> => {
+export const initAquaCli = async (
+  commandObj: CommandObj,
+  fluenceConfig: FluenceConfig | null
+): Promise<AquaCLI> => {
   const aquaCliPath = await ensureNpmDependency({
-    name: AQUA_NPM_DEPENDENCY,
+    nameAndVersion: AQUA_NPM_DEPENDENCY,
     commandObj,
+    fluenceConfig,
   });
 
   return (aquaCliInput, message, keyValuePairs): Promise<string> => {
