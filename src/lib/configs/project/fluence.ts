@@ -227,6 +227,8 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
       [MREPL_CARGO_DEPENDENCY]: string;
     } & Record<string, string>;
   };
+  appTSPath?: string;
+  appJSPath?: string;
 };
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
@@ -255,6 +257,8 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       },
       required: ["npm", "cargo"],
     },
+    appTSPath: { type: "string", nullable: true },
+    appJSPath: { type: "string", nullable: true },
   },
 };
 
@@ -360,7 +364,9 @@ dependencies:
     marine: 0.12.2
     mrepl: 0.18.1
   npm: # npm dependencies. They are installed in user's home directory in .fluence/npm
-    "@fluencelabs/aqua": 0.7.5-342`;
+    "@fluencelabs/aqua": 0.7.5-342
+appTSPath: ./path/to/app-ts/dir # Optional. If you want to generate ts files including app.ts to be able to access deployed app data in aqua when using FluenceJS,
+appJSPath: ./path/to/app-js/dir # Optional. If you want to generate js files including app.js to be able to access deployed app data in aqua when using FluenceJS`;
 
 const validate: ConfigValidateFunction<LatestConfig> = (
   config

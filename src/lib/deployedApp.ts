@@ -21,6 +21,7 @@ import { CliUx } from "@oclif/core";
 
 import type { AquaCLI } from "./aquaCli";
 import type { ServicesV3 } from "./configs/project/app";
+import type { FluenceConfigReadonly } from "./configs/project/fluence";
 import { FS_OPTIONS } from "./const";
 import { capitalize } from "./helpers/capitilize";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
@@ -28,8 +29,7 @@ import {
   ensureFluenceJSAppPath,
   ensureFluenceTSAppPath,
   ensureFluenceAquaDeployedAppPath,
-  ensureFluenceJSDir,
-  ensureFluenceTSDir,
+  ensureDir,
 } from "./paths";
 
 const APP_SERVICE_NAME = "App";
@@ -57,13 +57,17 @@ const generateRegisterAppTSorJS = async ({
   deployedServices,
   aquaCli,
   isJS,
-}: GenerateRegisterAppArg & {
+  fluenceJSorTSDir,
+}: Omit<GenerateRegisterAppArg, "fluenceConfig"> & {
   isJS: boolean;
+  fluenceJSorTSDir: string;
 }): Promise<void> => {
+  await ensureDir(fluenceJSorTSDir);
+
   await aquaCli({
     flags: {
       input: await ensureFluenceAquaDeployedAppPath(),
-      output: await (isJS ? ensureFluenceJSDir() : ensureFluenceTSDir()),
+      output: fluenceJSorTSDir,
       js: isJS,
     },
   });
@@ -113,7 +117,9 @@ export function registerApp(
 `;
 
   await fsPromises.writeFile(
-    await (isJS ? ensureFluenceJSAppPath() : ensureFluenceTSAppPath()),
+    isJS
+      ? ensureFluenceJSAppPath(fluenceJSorTSDir)
+      : ensureFluenceTSAppPath(fluenceJSorTSDir),
     appContent,
     FS_OPTIONS
   );
@@ -122,20 +128,44 @@ export function registerApp(
 type GenerateRegisterAppArg = {
   deployedServices: ServicesV3;
   aquaCli: AquaCLI;
+  fluenceConfig: FluenceConfigReadonly | null;
 };
 
-export const generateRegisterApp = async (
-  options: GenerateRegisterAppArg
-): Promise<void> => {
-  CliUx.ux.action.start(
-    `Compiling ${color.yellow(
-      replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
-    )}`
-  );
+export const generateRegisterApp = async ({
+  fluenceConfig,
+  ...options
+}: GenerateRegisterAppArg): Promise<void> => {
+  if (typeof fluenceConfig?.appJSPath === "string") {
+    CliUx.ux.action.start(
+      `Compiling ${color.yellow(
+        replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
+      )} to ${color.yellow(fluenceConfig.appJSPath)}`
+    );
 
-  await generateRegisterAppTSorJS({ ...options, isJS: true });
-  await generateRegisterAppTSorJS({ ...options, isJS: false });
-  CliUx.ux.action.stop();
+    await generateRegisterAppTSorJS({
+      ...options,
+      isJS: true,
+      fluenceJSorTSDir: fluenceConfig.appJSPath,
+    });
+
+    CliUx.ux.action.stop();
+  }
+
+  if (typeof fluenceConfig?.appTSPath === "string") {
+    CliUx.ux.action.start(
+      `Compiling ${color.yellow(
+        replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
+      )} to ${color.yellow(fluenceConfig.appTSPath)}`
+    );
+
+    await generateRegisterAppTSorJS({
+      ...options,
+      isJS: false,
+      fluenceJSorTSDir: fluenceConfig.appTSPath,
+    });
+
+    CliUx.ux.action.stop();
+  }
 };
 
 const getDeploysDataName = (serviceName: string): string =>

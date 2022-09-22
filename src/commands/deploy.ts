@@ -279,6 +279,7 @@ export default class Deploy extends Command {
     await generateRegisterApp({
       deployedServices: allServices,
       aquaCli,
+      fluenceConfig,
     });
 
     const logResults = (configPath: string): void => {
