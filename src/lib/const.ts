@@ -113,7 +113,7 @@ export const FORCE_FLAG_NAME = "force";
 export const NAME_FLAG_NAME = "name";
 
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
-  "PACKAGE_NAME | PACKAGE_NAME@VERSION";
+  "PACKAGE-NAME | PACKAGE-NAME@VERSION";
 
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
