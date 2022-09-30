@@ -18,98 +18,127 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
+import { CliUx } from "@oclif/core";
 
-import { getVersionToUse } from "./configs/user/dependency";
+import type { FluenceConfig } from "./configs/project/fluence";
 import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
-  BIN_DIR_NAME,
   CommandObj,
-  NPMDependency,
+  DOT_BIN_DIR_NAME,
+  NODE_MODULES_DIR_NAME,
 } from "./const";
 import { execPromise } from "./execPromise";
+import { splitPackageNameAndVersion } from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
+import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureUserFluenceNpmDir } from "./paths";
 
-type NPMInstallArg = {
-  packageName: string;
-  version: string;
-  message: string;
-  commandObj: CommandObj;
-};
+type NPMDependencyInfo = { recommendedVersion: string; bin?: string };
 
-const npmInstall = async ({
-  packageName,
-  version,
-  message,
-  commandObj,
-}: NPMInstallArg): Promise<string> =>
-  execPromise(
-    `npm i ${packageName}@${version} -g --prefix ${await ensureUserFluenceNpmDir(
-      commandObj
-    )}`,
-    message
-  );
-
-export const npmDependencies: Record<
-  NPMDependency,
-  { recommendedVersion: string; bin: string; packageName: string }
-> = {
+export const fluenceNPMDependencies: Record<string, NPMDependencyInfo> = {
   [AQUA_NPM_DEPENDENCY]: {
     recommendedVersion: AQUA_RECOMMENDED_VERSION,
     bin: "aqua",
-    packageName: "@fluencelabs/aqua",
   },
 };
 
+export const getLatestVersionOfNPMDependency = async (
+  name: string,
+  commandObj: CommandObj
+): Promise<string> => {
+  try {
+    return (await execPromise(`npm show ${name} version`)).trim();
+  } catch (error) {
+    commandObj.error(
+      `Failed to get latest version of ${color.yellow(
+        name
+      )} from npm registry. Please make sure ${color.yellow(
+        name
+      )} is spelled correctly\n${String(error)}`
+    );
+  }
+};
+
 type NpmDependencyArg = {
-  name: NPMDependency;
+  nameAndVersion: string;
+  fluenceConfig?: FluenceConfig | null | undefined;
   commandObj: CommandObj;
+  isSpinnerVisible?: boolean;
+  explicitInstallation?: boolean;
 };
 
 export const ensureNpmDependency = async ({
-  name,
+  nameAndVersion,
   commandObj,
+  fluenceConfig,
+  isSpinnerVisible = true,
+  explicitInstallation = false,
 }: NpmDependencyArg): Promise<string> => {
-  const { bin, packageName, recommendedVersion } = npmDependencies[name];
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
+  const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const dependencyPath = commandObj.config.windows
-    ? path.join(npmDirPath, bin)
-    : path.join(npmDirPath, BIN_DIR_NAME, bin);
+  const version =
+    maybeVersion ??
+    (explicitInstallation
+      ? undefined
+      : fluenceConfig?.dependencies?.npm?.[name] ??
+        fluenceNPMDependencies[name]?.recommendedVersion) ??
+    (await getLatestVersionOfNPMDependency(name, commandObj));
 
-  const version = await getVersionToUse(recommendedVersion, name, commandObj);
+  const dependencyPath = path.join(npmDirPath, ...name.split("/"), version);
 
   try {
     await fsPromises.access(dependencyPath);
-    const result = await getNpmDependencyVersion(dependencyPath);
-
-    if (!result.includes(version)) {
-      throw new Error("Outdated");
-    }
   } catch {
-    await npmInstall({
-      packageName,
-      version,
-      message: `Installing version ${color.yellow(
-        version
-      )} of ${packageName} to ${replaceHomeDir(npmDirPath)}`,
-      commandObj,
-    });
-
-    const result = await getNpmDependencyVersion(dependencyPath);
-
-    if (!result.includes(version)) {
+    try {
+      await execPromise(
+        `npm i ${nameAndVersion} ${unparseFlags(
+          {
+            prefix: dependencyPath,
+          },
+          commandObj
+        )}`,
+        isSpinnerVisible
+          ? `Installing ${nameAndVersion} to ${replaceHomeDir(npmDirPath)}`
+          : undefined
+      );
+    } catch (error) {
+      CliUx.ux.action.stop("failed");
+      await fsPromises.rm(dependencyPath, { recursive: true });
       return commandObj.error(
-        `Not able to install version ${color.yellow(
-          version
-        )} of ${packageName} to ${replaceHomeDir(npmDirPath)}`
+        `Not able to install ${name}@${version} to ${replaceHomeDir(
+          dependencyPath
+        )}. Please make sure ${color.yellow(
+          name
+        )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
+          `fluence dependency npm install ${name}@<version>`
+        )} command.\n${String(error)}`
       );
     }
   }
 
-  return dependencyPath;
-};
+  if (fluenceConfig !== undefined && fluenceConfig !== null) {
+    fluenceConfig.dependencies.npm[name] = version;
+    await fluenceConfig.$commit();
+  }
 
-const getNpmDependencyVersion = (dependencyPath: string): Promise<string> =>
-  execPromise(`${dependencyPath} --version`);
+  if (explicitInstallation) {
+    commandObj.log(
+      `Successfully installed ${name}@${version} to ${replaceHomeDir(
+        dependencyPath
+      )}`
+    );
+  }
+
+  const maybeNpmDependencyInfo = fluenceNPMDependencies[name];
+
+  return maybeNpmDependencyInfo?.bin === undefined
+    ? path.join(dependencyPath, NODE_MODULES_DIR_NAME)
+    : path.join(
+        dependencyPath,
+        NODE_MODULES_DIR_NAME,
+        DOT_BIN_DIR_NAME,
+        maybeNpmDependencyInfo.bin
+      );
+};

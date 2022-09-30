@@ -27,6 +27,10 @@ import {
   initAppConfig,
   ServicesV3,
 } from "../lib/configs/project/app";
+import {
+  initFluenceConfig,
+  initReadonlyFluenceConfig,
+} from "../lib/configs/project/fluence";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
 import {
   generateDeployedAppAqua,
@@ -87,7 +91,8 @@ export default class Remove extends Command {
       this.error("Aborted");
     }
 
-    const aquaCli = await initAquaCli(this);
+    const fluenceConfig = await initFluenceConfig(this);
+    const aquaCli = await initAquaCli(this, fluenceConfig);
 
     await removeApp({
       appConfig,
@@ -227,15 +232,25 @@ export const removeApp = async (
     }
   }
 
+  const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
+
   if (Object.keys(notRemovedServices).length === 0) {
-    const pathsToRemove = await Promise.all([
-      ensureFluenceAquaDeployedAppPath(),
-      ensureFluenceTSAppPath(),
-      ensureFluenceJSAppPath(),
-      ensureFluenceTSDeployedAppPath(),
-      ensureFluenceJSDeployedAppPath(),
-      Promise.resolve(appConfig.$getPath()),
-    ]);
+    const pathsToRemove = [
+      await ensureFluenceAquaDeployedAppPath(),
+      ...(typeof fluenceConfig?.appTSPath === "string"
+        ? [
+            ensureFluenceTSAppPath(fluenceConfig.appTSPath),
+            ensureFluenceTSDeployedAppPath(fluenceConfig.appTSPath),
+          ]
+        : []),
+      ...(typeof fluenceConfig?.appJSPath === "string"
+        ? [
+            ensureFluenceJSAppPath(fluenceConfig.appJSPath),
+            ensureFluenceJSDeployedAppPath(fluenceConfig.appJSPath),
+          ]
+        : []),
+      appConfig.$getPath(),
+    ];
 
     await Promise.allSettled(
       pathsToRemove.map((path): Promise<void> => fsPromises.unlink(path))
@@ -249,6 +264,7 @@ export const removeApp = async (
   await generateRegisterApp({
     deployedServices: notRemovedServices,
     aquaCli,
+    fluenceConfig,
   });
 
   appConfig.services = notRemovedServices;

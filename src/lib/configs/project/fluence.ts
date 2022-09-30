@@ -20,7 +20,15 @@ import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajv";
-import { FLUENCE_CONFIG_FILE_NAME } from "../../const";
+import {
+  AQUA_NPM_DEPENDENCY,
+  AQUA_RECOMMENDED_VERSION,
+  FLUENCE_CONFIG_FILE_NAME,
+  MARINE_CARGO_DEPENDENCY,
+  MARINE_RECOMMENDED_VERSION,
+  MREPL_CARGO_DEPENDENCY,
+  MREPL_RECOMMENDED_VERSION,
+} from "../../const";
 import { NETWORKS, Relays } from "../../multiaddr";
 import { ensureFluenceDir, getProjectRootDir } from "../../paths";
 import {
@@ -94,7 +102,7 @@ type ConfigV1 = {
   keyPairName?: string;
 };
 
-const configSchemaV1: JSONSchemaType<ConfigV1> = {
+const configSchemaV1Obj = {
   type: "object",
   properties: {
     version: { type: "number", enum: [1] },
@@ -204,13 +212,74 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
     keyPairName: { type: "string", nullable: true },
   },
   required: ["version"],
+} as const;
+
+const configSchemaV1: JSONSchemaType<ConfigV1> = configSchemaV1Obj;
+
+type ConfigV2 = Omit<ConfigV1, "version"> & {
+  version: 2;
+  dependencies: {
+    npm: {
+      [AQUA_NPM_DEPENDENCY]: string;
+    } & Record<string, string>;
+    cargo: {
+      [MARINE_CARGO_DEPENDENCY]: string;
+      [MREPL_CARGO_DEPENDENCY]: string;
+    } & Record<string, string>;
+  };
+  appTSPath?: string;
+  appJSPath?: string;
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
-  version: 1,
-});
+const configSchemaV2: JSONSchemaType<ConfigV2> = {
+  ...configSchemaV1Obj,
+  properties: {
+    ...configSchemaV1Obj.properties,
+    version: { type: "number", enum: [2] },
+    dependencies: {
+      type: "object",
+      properties: {
+        npm: {
+          type: "object",
+          properties: {
+            [AQUA_NPM_DEPENDENCY]: { type: "string" },
+          },
+          required: [AQUA_NPM_DEPENDENCY],
+        },
+        cargo: {
+          type: "object",
+          properties: {
+            [MARINE_CARGO_DEPENDENCY]: { type: "string" },
+            [MREPL_CARGO_DEPENDENCY]: { type: "string" },
+          },
+          required: [],
+        },
+      },
+      required: ["npm", "cargo"],
+    },
+    appTSPath: { type: "string", nullable: true },
+    appJSPath: { type: "string", nullable: true },
+  },
+};
+
+const configSchemaV2DefaultConfig: ConfigV2 = {
+  version: 2,
+  dependencies: {
+    npm: {
+      [AQUA_NPM_DEPENDENCY]: AQUA_RECOMMENDED_VERSION,
+    },
+    cargo: {
+      [MARINE_CARGO_DEPENDENCY]: MARINE_RECOMMENDED_VERSION,
+      [MREPL_CARGO_DEPENDENCY]: MREPL_RECOMMENDED_VERSION,
+    },
+  },
+};
+
+const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig =>
+  configSchemaV2DefaultConfig;
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 
 const migrations: Migrations<Config> = [
   (config: Config): ConfigV1 => {
@@ -243,10 +312,24 @@ const migrations: Migrations<Config> = [
       services,
     };
   },
+  (config: Config): ConfigV2 => {
+    if (!validateConfigSchemaV1(config)) {
+      throw new Error(
+        `Migration error. Errors: ${JSON.stringify(
+          validateConfigSchemaV1.errors
+        )}`
+      );
+    }
+
+    return {
+      ...config,
+      ...configSchemaV2DefaultConfig,
+    };
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1;
-type LatestConfig = ConfigV1;
+type Config = ConfigV0 | ConfigV1 | ConfigV2;
+type LatestConfig = ConfigV2;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
@@ -275,7 +358,15 @@ services:
         #     get: ./relative/path # Override facade module
 peerIds: # A map of named peerIds. Optional.
   MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
-relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras`;
+relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras
+dependencies:
+  cargo: # cargo dependencies. They are installed in user's home directory in .fluence/cargo
+    marine: 0.12.2
+    mrepl: 0.18.1
+  npm: # npm dependencies. They are installed in user's home directory in .fluence/npm
+    "@fluencelabs/aqua": 0.7.5-342
+appTSPath: ./path/to/app-ts/dir # Optional. If you want to generate ts files including app.ts to be able to access deployed app data in aqua when using FluenceJS,
+appJSPath: ./path/to/app-js/dir # Optional. If you want to generate js files including app.js to be able to access deployed app data in aqua when using FluenceJS`;
 
 const validate: ConfigValidateFunction<LatestConfig> = (
   config
@@ -319,8 +410,8 @@ const validate: ConfigValidateFunction<LatestConfig> = (
 };
 
 export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0, configSchemaV1],
-  latestSchema: configSchemaV1,
+  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
+  latestSchema: configSchemaV2,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigDirPath: getProjectRootDir,

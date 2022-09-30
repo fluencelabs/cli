@@ -15,14 +15,13 @@
  */
 
 import { Command, Flags } from "@oclif/core";
-import type { stringify } from "yaml";
 
 export const AQUA_RECOMMENDED_VERSION = "0.7.5-342";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
-export const MREPL_RECOMMENDED_VERSION = "0.18.1";
+export const MREPL_RECOMMENDED_VERSION = "0.18.6";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.6.15";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.5.0";
-export const RUST_TOOLCHAIN_REQUIRED_TO_INSTALL_MARINE = "nightly-x86_64";
+export const REQUIRED_RUST_TOOLCHAIN = "nightly-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const AQUA_EXT = "aqua";
@@ -41,13 +40,12 @@ export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
 export const AQUA_SERVICES_DIR_NAME = "services";
-export const TS_DIR_NAME = "ts";
-export const JS_DIR_NAME = "js";
 export const MODULES_DIR_NAME = "modules";
 export const SERVICES_DIR_NAME = "services";
 export const NPM_DIR_NAME = "npm";
 export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
+export const DOT_BIN_DIR_NAME = ".bin";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
 export const SECRETS_CONFIG_FILE_NAME = `secrets.${YAML_EXT}`;
@@ -82,16 +80,6 @@ export const FS_OPTIONS = {
   encoding: "utf8",
 } as const;
 
-export const YAML_FORMAT: [
-  Parameters<typeof stringify>[1],
-  Parameters<typeof stringify>[2]
-] = [
-  null,
-  {
-    doubleQuotedAsJSON: true,
-  },
-];
-
 export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
 
@@ -122,6 +110,9 @@ export const TIMEOUT_FLAG = {
 export const FORCE_FLAG_NAME = "force";
 export const NAME_FLAG_NAME = "name";
 
+export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
+  "PACKAGE-NAME | PACKAGE-NAME@VERSION";
+
 export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
@@ -136,12 +127,4 @@ export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
 export const MREPL_CARGO_DEPENDENCY = "mrepl";
-export const cargoDependencyList = [
-  MARINE_CARGO_DEPENDENCY,
-  MREPL_CARGO_DEPENDENCY,
-] as const;
-export type CargoDependency = typeof cargoDependencyList[number];
-
-export const AQUA_NPM_DEPENDENCY = "aqua";
-export const npmDependencyList = [AQUA_NPM_DEPENDENCY] as const;
-export type NPMDependency = typeof npmDependencyList[number];
+export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";

@@ -19,9 +19,10 @@ import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
 
 import { initAquaCli } from "../lib/aquaCli";
+import { initFluenceConfig } from "../lib/configs/project/fluence";
 import { NO_INPUT_FLAG } from "../lib/const";
+import { ensureAquaImports } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { ensureFluenceAquaDir } from "../lib/paths";
 import { input } from "../lib/prompt";
 
 export default class Aqua extends Command {
@@ -100,18 +101,23 @@ export default class Aqua extends Command {
           "Enter path to the output directory. Will be created if it doesn't exists",
         flagName: "input",
       }),
-      import: importsFromFlags,
       ...aquaCliOptionalFlags
     } = flags;
+
+    const fluenceConfig = await initFluenceConfig(this);
 
     const aquaCliFlags = {
       input: inputFromFlags,
       output,
-      import: [...(importsFromFlags ?? []), await ensureFluenceAquaDir()],
       ...aquaCliOptionalFlags,
+      import: await ensureAquaImports({
+        commandObj: this,
+        flags,
+        fluenceConfig,
+      }),
     };
 
-    const aquaCli = await initAquaCli(this);
+    const aquaCli = await initAquaCli(this, fluenceConfig);
 
     const compile = (): Promise<string> =>
       aquaCli({ flags: aquaCliFlags }, "Compiling");

@@ -23,6 +23,7 @@ import type { JSONSchemaType } from "ajv";
 import { ajv } from "../lib/ajv";
 import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
+import { initFluenceConfig } from "../lib/configs/project/fluence";
 import {
   CommandObj,
   FS_OPTIONS,
@@ -31,13 +32,13 @@ import {
   KEY_PAIR_FLAG,
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
+import { ensureAquaImports } from "../lib/helpers/aquaImports";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceTmpAppServiceJsonPath,
-  ensureFluenceAquaDir,
   ensureSrcAquaMainPath,
 } from "../lib/paths";
 import { input } from "../lib/prompt";
@@ -134,14 +135,7 @@ export default class Run extends Command {
 
     const appConfig = await initReadonlyAppConfig(this);
     const relay = flags.relay ?? getRandomRelayAddr(appConfig?.relays);
-
     const data = await getRunData(flags, this);
-
-    const imports: Array<string> = [
-      ...(flags.import ?? []),
-      await ensureFluenceAquaDir(),
-    ];
-
     const appJsonServicePath = await ensureFluenceTmpAppServiceJsonPath();
     const jsonServicePaths = flags[JSON_SERVICE] ?? [];
 
@@ -156,7 +150,8 @@ export default class Run extends Command {
     }
 
     let result: string;
-    const aquaCli = await initAquaCli(this);
+    const fluenceConfig = await initFluenceConfig(this);
+    const aquaCli = await initAquaCli(this, fluenceConfig);
 
     try {
       result = await aquaCli(
@@ -167,7 +162,11 @@ export default class Run extends Command {
             func,
             input: aqua,
             timeout: flags.timeout,
-            import: imports,
+            import: await ensureAquaImports({
+              commandObj: this,
+              flags,
+              fluenceConfig,
+            }),
             "json-service": jsonServicePaths,
             sk: keyPair.secretKey,
             plugin: flags.plugin,
