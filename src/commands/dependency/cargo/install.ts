@@ -68,12 +68,17 @@ export default class Install extends Command {
 
     const fluenceConfig = await initFluenceConfig(this);
 
+    // packageNameAndVersion is always a string or undefined,
+    // while oclif framework says it's 'any'
+    // we can be sure fluence config is not null just because
+    // we executed 'ensureFluenceProject' function above
     assert(
       (packageNameAndVersion === undefined ||
         typeof packageNameAndVersion === "string") &&
         fluenceConfig !== null
     );
 
+    // if packageNameAndVersion not provided just install all cargo dependencies
     if (packageNameAndVersion === undefined) {
       await installAllCargoDependenciesFromFluenceConfig({
         fluenceConfig,
