@@ -196,9 +196,10 @@ export const ensureCargoDependency = async ({
       await execPromise(
         `${CARGO}${
           typeof toolchain === "string" ? ` +${toolchain}` : ""
-        } install ${nameAndVersion} ${unparseFlags(
+        } install ${name} ${unparseFlags(
           {
             root: dependencyPath,
+            version,
           },
           commandObj
         )}`,
