@@ -93,14 +93,14 @@ export const ensureNpmDependency = async ({
   } catch {
     try {
       await execPromise(
-        `npm i ${nameAndVersion} ${unparseFlags(
+        `npm i ${name}@${version} ${unparseFlags(
           {
             prefix: dependencyPath,
           },
           commandObj
         )}`,
         isSpinnerVisible
-          ? `Installing ${nameAndVersion} to ${replaceHomeDir(npmDirPath)}`
+          ? `Installing ${name}@${version} to ${replaceHomeDir(npmDirPath)}`
           : undefined
       );
     } catch (error) {
