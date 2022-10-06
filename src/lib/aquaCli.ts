@@ -31,7 +31,7 @@ export type AquaCliInput =
   | {
       command: "remote deploy_service";
       flags: Flags<"addr" | "sk" | "service" | "config-path"> &
-        OptionalFlags<"on" | "timeout">;
+        OptionalFlags<"on" | "timeout" | "log-level" | "verbose" | "print-air">;
     }
   | {
       command: "remote create_service";

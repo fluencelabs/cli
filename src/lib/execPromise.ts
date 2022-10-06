@@ -72,7 +72,11 @@ export const execPromise = (
 
         rej(
           new Error(
-            `Command execution failed:\n\n${stderr}\n\n${failedCommandText}\n`
+            `Command execution failed:\n\n${color.yellow(
+              "stdout:"
+            )}\n\n${stdout}\n\n${color.yellow(
+              "stderr:"
+            )}\n\n${stderr}\n\n${failedCommandText}\n`
           )
         );
 

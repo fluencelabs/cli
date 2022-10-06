@@ -16,7 +16,7 @@
 
 import { Command, Flags } from "@oclif/core";
 
-export const AQUA_RECOMMENDED_VERSION = "0.7.6-346";
+export const AQUA_RECOMMENDED_VERSION = "0.7.6-347";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.6";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.6.15";
