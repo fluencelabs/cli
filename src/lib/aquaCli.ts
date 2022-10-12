@@ -18,7 +18,6 @@ import type { FluenceConfig } from "./configs/project/fluence";
 import { AQUA_NPM_DEPENDENCY, CommandObj } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
-import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureNpmDependency } from "./npm";
 import type { Flags, OptionalFlags } from "./typeHelpers";
 
@@ -29,20 +28,20 @@ const AQUA_CLI_EXECUTION_TIMEOUT = 90_000;
 
 export type AquaCliInput =
   | {
-      command: "remote deploy_service";
+      args: ["remote", "deploy_service"];
       flags: Flags<"addr" | "sk" | "service" | "config-path"> &
         OptionalFlags<"on" | "timeout" | "log-level" | "verbose" | "print-air">;
     }
   | {
-      command: "remote create_service";
+      args: ["remote", "create_service"];
       flags: Flags<"addr" | "sk" | "id"> & OptionalFlags<"on" | "timeout">;
     }
   | {
-      command: "remote remove_service";
+      args: ["remote", "remove_service"];
       flags: Flags<"addr" | "sk" | "id"> & OptionalFlags<"on" | "timeout">;
     }
   | {
-      command: "run";
+      args: ["run"];
       flags: Flags<"addr" | "input" | "func"> &
         OptionalFlags<
           | "on"
@@ -56,7 +55,7 @@ export type AquaCliInput =
         >;
     }
   | {
-      command?: never;
+      args?: never;
       flags: Flags<"input" | "output"> &
         OptionalFlags<
           | "js"
@@ -90,16 +89,22 @@ export const initAquaCli = async (
   });
 
   return (aquaCliInput, message, keyValuePairs): Promise<string> => {
-    const { command, flags } = aquaCliInput;
+    const { args, flags } = aquaCliInput;
 
     const timeoutNumber = Number(flags.timeout);
 
-    return execPromise(
-      `${aquaCliPath} ${command ?? ""}${unparseFlags(flags, commandObj)}`,
-      message === undefined
-        ? undefined
-        : getMessageWithKeyValuePairs(message, keyValuePairs),
-      Number.isNaN(timeoutNumber) ? AQUA_CLI_EXECUTION_TIMEOUT : timeoutNumber
-    );
+    return execPromise({
+      command: aquaCliPath,
+      args,
+      flags,
+      message:
+        message === undefined
+          ? undefined
+          : getMessageWithKeyValuePairs(message, keyValuePairs),
+      timeout: Number.isNaN(timeoutNumber)
+        ? AQUA_CLI_EXECUTION_TIMEOUT
+        : timeoutNumber,
+      printOutput: true,
+    });
   };
 };

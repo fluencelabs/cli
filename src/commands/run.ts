@@ -156,7 +156,7 @@ export default class Run extends Command {
     try {
       result = await aquaCli(
         {
-          command: "run",
+          args: ["run"],
           flags: {
             addr: relay,
             func,

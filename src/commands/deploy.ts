@@ -571,9 +571,9 @@ const prepareForDeploy = async ({
 
             if (moduleConfig.type === MODULE_TYPE_RUST) {
               await marineCli({
-                command: "build",
+                args: ["build"],
                 flags: { release: true },
-                workingDir: path.dirname(moduleConfig.$getPath()),
+                cwd: path.dirname(moduleConfig.$getPath()),
               });
             }
 
@@ -880,7 +880,7 @@ const deployService = async ({
   try {
     result = await aquaCli(
       {
-        command: "remote deploy_service",
+        args: ["remote", "deploy_service"],
         flags: {
           "config-path": tmpDeployJSONPath,
           service: DEFAULT_DEPLOY_NAME,

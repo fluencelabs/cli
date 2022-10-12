@@ -18,21 +18,17 @@ import type { FluenceConfig } from "./configs/project/fluence";
 import { CommandObj, MARINE_CARGO_DEPENDENCY } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
-import { unparseFlags } from "./helpers/unparseFlags";
-import { getProjectRootDir } from "./paths";
 import { ensureCargoDependency } from "./rust";
 import type { Flags } from "./typeHelpers";
 
 export type MarineCliInput =
   | {
-      command: "aqua";
+      args: ["aqua"] | ["aqua", string];
       flags?: never;
-      args: Array<string>;
     }
   | {
-      command: "build";
+      args: ["build"];
       flags: Flags<"release">;
-      args?: never;
     };
 
 export type MarineCLI = {
@@ -40,7 +36,7 @@ export type MarineCLI = {
     args: {
       message?: string | undefined;
       keyValuePairs?: Record<string, string>;
-      workingDir?: string;
+      cwd?: string;
     } & MarineCliInput
   ): Promise<string>;
 };
@@ -55,36 +51,22 @@ export const initMarineCli = async (
     fluenceConfig,
   });
 
-  /** This function uses process.chdir - be cautious
-   * @returns Marine CLI execution result
-   */
   return async ({
-    command,
-    flags,
     args,
+    flags,
     message,
     keyValuePairs,
-    workingDir,
-  }): Promise<string> => {
-    if (workingDir !== undefined) {
-      process.chdir(workingDir);
-    }
-
-    const result = await execPromise(
-      `${marineCliPath} ${command ?? ""}${
-        args === undefined
-          ? ""
-          : ` ${args.map((arg): string => `'${arg}'`).join(" ")}`
-      } ${unparseFlags(flags ?? {}, commandObj)}`,
-      message === undefined
-        ? undefined
-        : getMessageWithKeyValuePairs(message, keyValuePairs)
-    );
-
-    if (workingDir !== undefined) {
-      process.chdir(getProjectRootDir());
-    }
-
-    return result;
-  };
+    cwd,
+  }): Promise<string> =>
+    execPromise({
+      command: marineCliPath,
+      args,
+      flags,
+      message:
+        message === undefined
+          ? undefined
+          : getMessageWithKeyValuePairs(message, keyValuePairs),
+      options: { cwd },
+      printOutput: true,
+    });
 };

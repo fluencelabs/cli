@@ -235,9 +235,9 @@ const ensureModuleConfigs = ({
 
           if (type === MODULE_TYPE_RUST) {
             await marineCli({
-              command: "build",
+              args: ["build"],
               flags: { release: true },
-              workingDir: path.dirname(moduleConfig.$getPath()),
+              cwd: path.dirname(moduleConfig.$getPath()),
             });
           }
 

@@ -18,7 +18,6 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { CliUx } from "@oclif/core";
 
 import type { FluenceConfig } from "./configs/project/fluence";
 import {
@@ -34,7 +33,6 @@ import {
 import { execPromise } from "./execPromise";
 import { splitPackageNameAndVersion } from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
-import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureUserFluenceCargoDir } from "./paths";
 
 const CARGO = "cargo";
@@ -48,18 +46,14 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
       );
     }
 
-    const rustupInitFlags = unparseFlags(
-      {
-        quiet: true,
-        y: true,
+    await execPromise({
+      command: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --quiet -y`,
+      options: {
+        shell: true,
       },
-      commandObj
-    );
-
-    await execPromise(
-      `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- ${rustupInitFlags}`,
-      "Installing rust"
-    );
+      message: "Installing Rust",
+      printOutput: true,
+    });
 
     if (!(await isRustInstalled())) {
       commandObj.error(
@@ -71,10 +65,13 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
   }
 
   if (!(await hasRequiredRustToolchain())) {
-    await execPromise(
-      `${RUSTUP} install ${REQUIRED_RUST_TOOLCHAIN}`,
-      `Installing ${color.yellow(REQUIRED_RUST_TOOLCHAIN)} rust toolchain`
-    );
+    await execPromise({
+      command: `${RUSTUP} install ${REQUIRED_RUST_TOOLCHAIN}`,
+      message: `Installing ${color.yellow(
+        REQUIRED_RUST_TOOLCHAIN
+      )} rust toolchain`,
+      printOutput: true,
+    });
 
     if (!(await hasRequiredRustToolchain())) {
       commandObj.error(
@@ -86,10 +83,11 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
   }
 
   if (!(await hasRequiredRustTarget())) {
-    await execPromise(
-      `${RUSTUP} target add ${RUST_WASM32_WASI_TARGET}`,
-      `Adding ${color.yellow(RUST_WASM32_WASI_TARGET)} rust target`
-    );
+    await execPromise({
+      command: `${RUSTUP} target add ${RUST_WASM32_WASI_TARGET}`,
+      message: `Adding ${color.yellow(RUST_WASM32_WASI_TARGET)} rust target`,
+      printOutput: true,
+    });
 
     if (!(await hasRequiredRustTarget())) {
       commandObj.error(
@@ -103,8 +101,14 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
 
 const isRustInstalled = async (): Promise<boolean> => {
   try {
-    await execPromise(`${CARGO} --version`);
-    await execPromise(`${RUSTUP} --version`);
+    await execPromise({
+      command: `${CARGO} --version`,
+    });
+
+    await execPromise({
+      command: `${RUSTUP} --version`,
+    });
+
     return true;
   } catch {
     return false;
@@ -112,14 +116,18 @@ const isRustInstalled = async (): Promise<boolean> => {
 };
 
 const hasRequiredRustToolchain = async (): Promise<boolean> =>
-  (await execPromise(`${RUSTUP} toolchain list`)).includes(
-    REQUIRED_RUST_TOOLCHAIN
-  );
+  (
+    await execPromise({
+      command: `${RUSTUP} toolchain list`,
+    })
+  ).includes(REQUIRED_RUST_TOOLCHAIN);
 
 const hasRequiredRustTarget = async (): Promise<boolean> =>
-  (await execPromise(`${RUSTUP} target list`)).includes(
-    `${RUST_WASM32_WASI_TARGET} (installed)`
-  );
+  (
+    await execPromise({
+      command: `${RUSTUP} target list`,
+    })
+  ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
 
 type CargoDependencyInfo = {
   recommendedVersion: string;
@@ -147,7 +155,11 @@ export const getLatestVersionOfCargoDependency = async ({
   commandObj,
 }: GetLatestVersionOfCargoDependency): Promise<string> =>
   (
-    (await execPromise(`${CARGO} search ${name} --limit 1`)).split('"')[1] ??
+    (
+      await execPromise({
+        command: `${CARGO} search ${name} --limit 1`,
+      })
+    ).split('"')[1] ??
     commandObj.error(
       `Not able to find the latest version of ${color.yellow(
         name
@@ -160,7 +172,6 @@ type CargoDependencyArg = {
   commandObj: CommandObj;
   fluenceConfig?: FluenceConfig | null | undefined;
   toolchain?: string | undefined;
-  isSpinnerVisible?: boolean;
   explicitInstallation?: boolean;
 };
 
@@ -169,7 +180,6 @@ export const ensureCargoDependency = async ({
   commandObj,
   fluenceConfig,
   toolchain: toolchainFromArgs,
-  isSpinnerVisible = true,
   explicitInstallation = false,
 }: CargoDependencyArg): Promise<string> => {
   await ensureRust(commandObj);
@@ -187,33 +197,32 @@ export const ensureCargoDependency = async ({
   const toolchain = toolchainFromArgs ?? maybeCargoDependencyInfo?.toolchain;
   const cargoDirPath = await ensureUserFluenceCargoDir(commandObj);
 
-  const dependencyPath = path.join(cargoDirPath, name, version);
+  const root = path.join(cargoDirPath, name, version);
 
   try {
-    await fsPromises.access(dependencyPath);
+    await fsPromises.access(root);
   } catch {
     try {
-      await execPromise(
-        `${CARGO}${
-          typeof toolchain === "string" ? ` +${toolchain}` : ""
-        } install ${name} ${unparseFlags(
-          {
-            root: dependencyPath,
-            version,
-          },
-          commandObj
+      await execPromise({
+        command: CARGO,
+        args: [
+          ...(typeof toolchain === "string" ? [`+${toolchain}`] : []),
+          "install",
+          name,
+        ],
+        flags: {
+          version,
+          root,
+        },
+        message: `Installing ${name}@${version} to ${replaceHomeDir(
+          cargoDirPath
         )}`,
-        isSpinnerVisible
-          ? `Installing version ${color.yellow(
-              version
-            )} of ${name} to ${replaceHomeDir(dependencyPath)}`
-          : undefined
-      );
+        printOutput: true,
+      });
     } catch (error) {
-      CliUx.ux.action.stop("failed");
       return commandObj.error(
         `Not able to install ${name}@${version} to ${replaceHomeDir(
-          dependencyPath
+          root
         )}. Please make sure ${color.yellow(
           name
         )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
@@ -230,13 +239,11 @@ export const ensureCargoDependency = async ({
 
   if (explicitInstallation) {
     commandObj.log(
-      `Successfully installed ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
-      )}`
+      `Successfully installed ${name}@${version} to ${replaceHomeDir(root)}`
     );
   }
 
   return maybeCargoDependencyInfo === undefined
-    ? dependencyPath
-    : path.join(dependencyPath, BIN_DIR_NAME, name);
+    ? root
+    : path.join(root, BIN_DIR_NAME, name);
 };

@@ -18,7 +18,6 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { CliUx } from "@oclif/core";
 
 import type { FluenceConfig } from "./configs/project/fluence";
 import {
@@ -31,7 +30,6 @@ import {
 import { execPromise } from "./execPromise";
 import { splitPackageNameAndVersion } from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
-import { unparseFlags } from "./helpers/unparseFlags";
 import { ensureUserFluenceNpmDir } from "./paths";
 
 type NPMDependencyInfo = { recommendedVersion: string; bin?: string };
@@ -48,7 +46,7 @@ export const getLatestVersionOfNPMDependency = async (
   commandObj: CommandObj
 ): Promise<string> => {
   try {
-    return (await execPromise(`npm show ${name} version`)).trim();
+    return (await execPromise({ command: `npm show ${name} version` })).trim();
   } catch (error) {
     commandObj.error(
       `Failed to get latest version of ${color.yellow(
@@ -64,7 +62,6 @@ type NpmDependencyArg = {
   nameAndVersion: string;
   fluenceConfig?: FluenceConfig | null | undefined;
   commandObj: CommandObj;
-  isSpinnerVisible?: boolean;
   explicitInstallation?: boolean;
 };
 
@@ -72,7 +69,6 @@ export const ensureNpmDependency = async ({
   nameAndVersion,
   commandObj,
   fluenceConfig,
-  isSpinnerVisible = true,
   explicitInstallation = false,
 }: NpmDependencyArg): Promise<string> => {
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
@@ -92,19 +88,15 @@ export const ensureNpmDependency = async ({
     await fsPromises.access(dependencyPath);
   } catch {
     try {
-      await execPromise(
-        `npm i ${name}@${version} ${unparseFlags(
-          {
-            prefix: dependencyPath,
-          },
-          commandObj
+      await execPromise({
+        command: `npm i ${name}@${version}`,
+        flags: { prefix: dependencyPath },
+        message: `Installing ${name}@${version} to ${replaceHomeDir(
+          npmDirPath
         )}`,
-        isSpinnerVisible
-          ? `Installing ${name}@${version} to ${replaceHomeDir(npmDirPath)}`
-          : undefined
-      );
+        printOutput: true,
+      });
     } catch (error) {
-      CliUx.ux.action.stop("failed");
       await fsPromises.rm(dependencyPath, { recursive: true });
       return commandObj.error(
         `Not able to install ${name}@${version} to ${replaceHomeDir(
