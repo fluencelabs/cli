@@ -334,14 +334,14 @@ export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const examples = `
-keyPairName: # Name of key pair to use. Default: defaultKeyPairName from project's .fluence/secretes.yaml or if it is empty - defaultKeyPairName from user's .fluence/secrets.yaml
+keyPairName: myKeyPairName # Name of key pair to use. Default: defaultKeyPairName from project's .fluence/secretes.yaml or if it is empty - defaultKeyPairName from user's .fluence/secrets.yaml
 # keyPairName is always searched in project's .fluence/secrets.yaml first and then if nothing is found it is searched in user's .fluence/secrets.yaml.
 services:
   someService: # Service name. It must start with a lowercase letter and contain only letters, numbers, and underscores.
-    keyPairName: # overrides top-level keyPairName. Optional
+    keyPairName: myKeyPairName # overrides top-level keyPairName. Optional
     get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true # URL or path
     deploy:
-      - keyPairName: # overrides top-level keyPairName. Optional
+      - keyPairName: myKeyPairName # overrides top-level keyPairName. Optional
         deployId: default # must start with a lowercase letter and contain only letters, numbers, and underscores.
         # Used in aqua to access deployed service ids
         # You can access deployment info in aqua like this:
@@ -359,12 +359,6 @@ services:
 peerIds: # A map of named peerIds. Optional.
   MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
 relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras
-dependencies:
-  cargo: # cargo dependencies. They are installed in user's home directory in .fluence/cargo
-    marine: 0.12.2
-    mrepl: 0.18.1
-  npm: # npm dependencies. They are installed in user's home directory in .fluence/npm
-    "@fluencelabs/aqua": 0.7.5-342
 appTSPath: ./path/to/app-ts/dir # Optional. If you want to generate ts files including app.ts to be able to access deployed app data in aqua when using FluenceJS,
 appJSPath: ./path/to/app-js/dir # Optional. If you want to generate js files including app.js to be able to access deployed app data in aqua when using FluenceJS`;
 
