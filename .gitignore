@@ -18,3 +18,4 @@ oclif.manifest.json
 Cargo.lock
 **/target/
 .repl_history
+vscode/settings.json
