@@ -33,8 +33,7 @@ export const generateServiceInterface = async ({
   marineCli,
 }: GenerateServiceInterfaceArg): Promise<void> => {
   const interfaceString = await marineCli({
-    command: "aqua",
-    args: [pathToFacade],
+    args: ["aqua", pathToFacade],
   });
 
   const aquaInterfacePath = path.join(

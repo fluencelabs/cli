@@ -208,7 +208,7 @@ export const removeApp = async (
           // eslint-disable-next-line no-await-in-loop
           await aquaCli(
             {
-              command: "remote remove_service",
+              args: ["remote", "remove_service"],
               flags: {
                 addr,
                 id: serviceId,

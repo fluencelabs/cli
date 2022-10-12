@@ -14,32 +14,58 @@
  * limitations under the License.
  */
 
-import { exec } from "node:child_process";
+import assert from "node:assert";
+import { spawn } from "node:child_process";
+import console from "node:console";
 
 import color from "@oclif/color";
 import { CliUx } from "@oclif/core";
 
 import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const";
+import { Flags, flagsToArgs } from "./helpers/flagsToArgs";
 
-export const execPromise = (
-  command: string,
-  message?: string,
-  timeout?: number
-): Promise<string> => {
+type SpawnParams = Parameters<typeof spawn>;
+
+export type ExecPromiseArg = {
+  command: SpawnParams[0];
+  args?: SpawnParams[1] | undefined;
+  flags?: Flags | undefined;
+  options?: SpawnParams[2] | undefined;
+  message?: string | undefined;
+  timeout?: number | undefined;
+  printOutput?: boolean | undefined;
+};
+
+export const execPromise = ({
+  command,
+  args,
+  flags,
+  options,
+  message,
+  timeout,
+  printOutput = false,
+}: ExecPromiseArg): Promise<string> => {
+  const flagArgs = flags === undefined ? [] : flagsToArgs(flags);
+  const argsFromCommand = command.split(" ");
+  const commandName = argsFromCommand.shift();
+  assert(commandName !== undefined);
+  const allArgs = [...argsFromCommand, ...(args ?? []), ...flagArgs];
+  const fullCommand = [commandName, ...allArgs].join(" ");
+
+  const commandToDisplay = IS_DEVELOPMENT
+    ? fullCommand
+    : fullCommand.replace(
+        /([\S\s]*--sk ).*([\S\s]*)/,
+        "$1<SECRET_KEY_IS_HIDDEN>$2"
+      );
+
   if (typeof message === "string") {
-    CliUx.ux.action.start(`${message}\n`);
+    CliUx.ux.action.start(message);
   }
 
+  const failedCommandText = `Debug info:\n${commandToDisplay}\n`;
+
   return new Promise<string>((res, rej): void => {
-    const commandToDisplay = IS_DEVELOPMENT
-      ? command
-      : command.replace(
-          /([\S\s]*--sk ').*('[\S\s]*)/,
-          "$1<SECRET_KEY_IS_HIDDEN>$2"
-        );
-
-    const failedCommandText = `Debug info:\n${commandToDisplay}\n`;
-
     const execTimeout =
       timeout !== undefined &&
       setTimeout((): void => {
@@ -60,31 +86,55 @@ export const execPromise = (
         );
       }, timeout);
 
-    const childProcess = exec(command, (error, stdout, stderr): void => {
+    const childProcess = spawn(commandName, allArgs, options ?? {});
+
+    let stdout = "";
+
+    childProcess.stdout?.on("data", (data): void => {
+      if (printOutput) {
+        console.log(String(data));
+      }
+
+      stdout = `${stdout}${String(data)}`;
+    });
+
+    let stderr = "";
+
+    childProcess.stderr?.on("data", (data): void => {
+      if (printOutput) {
+        console.log(String(data));
+      }
+
+      stderr = `${stderr}${String(data)}`;
+    });
+
+    childProcess.on("error", (): void => {
+      if (typeof message === "string") {
+        CliUx.ux.action.stop(color.red("failed"));
+      }
+
+      rej(new Error(`Failed to start subprocess\n${failedCommandText}`));
+    });
+
+    childProcess.on("close", (code): void => {
+      if (typeof message === "string") {
+        CliUx.ux.action.stop(code === 0 ? "done" : color.red("failed"));
+      }
+
       if (execTimeout !== false) {
         clearTimeout(execTimeout);
       }
 
-      if (error !== null) {
-        if (typeof message === "string") {
-          CliUx.ux.action.stop(color.red("Failed"));
-        }
-
+      if (code !== 0) {
         rej(
           new Error(
-            `Command execution failed:\n\n${color.yellow(
-              "stdout:"
-            )}\n\n${stdout}\n\n${color.yellow(
-              "stderr:"
-            )}\n\n${stderr}\n\n${failedCommandText}\n`
+            `process exited${
+              code === null ? "" : ` with code ${code}`
+            }\n${failedCommandText}`
           )
         );
 
         return;
-      }
-
-      if (typeof message === "string") {
-        CliUx.ux.action.stop();
       }
 
       if (stdout !== "") {

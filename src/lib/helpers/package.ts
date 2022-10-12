@@ -19,7 +19,7 @@ import assert from "node:assert";
 export const splitPackageNameAndVersion = (
   packageNameAndMaybeVersion: string
 ): [string] | [string, string] => {
-  const hasVersion = /.+@[\d.-]+$/.test(packageNameAndMaybeVersion);
+  const hasVersion = /.+@.+/.test(packageNameAndMaybeVersion);
 
   if (!hasVersion) {
     const packageName = packageNameAndMaybeVersion;

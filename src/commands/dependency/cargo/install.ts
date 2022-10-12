@@ -18,7 +18,7 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { CliUx, Command, Flags } from "@oclif/core";
+import { Command, Flags } from "@oclif/core";
 
 import {
   FluenceConfig,
@@ -106,25 +106,18 @@ export const installAllCargoDependenciesFromFluenceConfig = async ({
   fluenceConfig,
   commandObj,
 }: InstallAllDependenciesArg): Promise<void> => {
-  CliUx.ux.action.start(
-    `Installing cargo dependencies from ${color.yellow(
-      fluenceConfig.$getPath()
-    )}`
-  );
+  for (const [name, version] of Object.entries(
+    fluenceConfig.dependencies.cargo
+  )) {
+    assert(name !== undefined && version !== undefined);
 
-  await Promise.all(
-    Object.entries(fluenceConfig.dependencies.cargo).map(
-      ([name, version]): Promise<string> => {
-        assert(name !== undefined && version !== undefined);
-        return ensureCargoDependency({
-          nameAndVersion: `${name}@${version}`,
-          commandObj,
-          fluenceConfig,
-          isSpinnerVisible: false,
-        });
-      }
-    )
-  );
-
-  CliUx.ux.action.stop();
+    // Not installing dependencies in parallel
+    // for cargo logs to be clearly readable
+    // eslint-disable-next-line no-await-in-loop
+    await ensureCargoDependency({
+      nameAndVersion: `${name}@${version}`,
+      commandObj,
+      fluenceConfig,
+    });
+  }
 };
