@@ -37,7 +37,7 @@ import { getIsInteractive } from "../../../lib/helpers/getIsInteractive";
 import { ensureCargoDependency } from "../../../lib/rust";
 
 export default class Install extends Command {
-  static override aliases = ["dependency:cargo:i"];
+  static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
   static override description = `Install cargo project dependencies (all dependencies are cached inside ${path.join(
     FLUENCE_DIR_NAME,
     CARGO_DIR_NAME

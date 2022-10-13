@@ -29,6 +29,7 @@ import {
   FS_OPTIONS,
   RECOMMENDED_GITIGNORE_CONTENT,
   NO_INPUT_FLAG,
+  MAIN_AQUA_FILE_CONTENT,
 } from "../lib/const";
 import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
@@ -194,7 +195,11 @@ export const init = async (options: InitArg): Promise<void> => {
     try {
       await fsPromises.access(srcMainAquaPath);
     } catch {
-      await fsPromises.writeFile(srcMainAquaPath, "");
+      await fsPromises.writeFile(
+        srcMainAquaPath,
+        MAIN_AQUA_FILE_CONTENT,
+        FS_OPTIONS
+      );
     }
 
     await ensureVSCodeRecommendedExtensions();

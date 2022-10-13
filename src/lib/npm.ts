@@ -74,13 +74,18 @@ export const ensureNpmDependency = async ({
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const version =
+  const resolvedVersion =
     maybeVersion ??
     (explicitInstallation
       ? undefined
       : fluenceConfig?.dependencies?.npm?.[name] ??
         fluenceNPMDependencies[name]?.recommendedVersion) ??
     (await getLatestVersionOfNPMDependency(name, commandObj));
+
+  const version = await getLatestVersionOfNPMDependency(
+    `${name}@${resolvedVersion}`,
+    commandObj
+  );
 
   const dependencyPath = path.join(npmDirPath, ...name.split("/"), version);
 

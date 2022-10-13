@@ -17,6 +17,7 @@
 import { Command, Flags } from "@oclif/core";
 
 export const AQUA_RECOMMENDED_VERSION = "0.7.5-342";
+export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.6";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.6.15";
@@ -121,7 +122,8 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 **/node_modules
 **/target/
 .repl_history
-.vscode/settings.json`;
+.vscode/settings.json
+src/aqua/*.ts`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
@@ -129,3 +131,53 @@ export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 export const MARINE_CARGO_DEPENDENCY = "marine";
 export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
+export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
+
+export const MAIN_AQUA_FILE_CONTENT = `module Main
+
+-- import App from "deployed.app.aqua"
+import "@fluencelabs/aqua-lib/builtin.aqua"
+
+-- export App
+
+-- DOCUMENTATION:
+-- https://fluence.dev
+
+-- local
+func hello_world(name: string) -> string:
+    <- Op.concat_strings("Hello, ", name)
+
+-- remote
+func hello_world_remote(name: string) -> string:
+    on HOST_PEER_ID:
+        hello_msg <- hello_world(name)
+        from_msg <- Op.concat_strings(hello_msg, "! From ")
+        from_peer_msg <- Op.concat_strings(from_msg, HOST_PEER_ID)
+    <- from_peer_msg
+
+-- request response
+func get_info() -> Info, PeerId:
+    on HOST_PEER_ID:
+        info <- Peer.identify()
+    <- info, HOST_PEER_ID
+
+-- iterate through several peers
+func get_infos(peers: []PeerId) -> []Info:
+    infos: *Info
+    for p <- peers:
+        on p:
+            infos <- Peer.identify()
+    <- infos
+
+-- parallel computation
+func get_infos_par(peers: []PeerId) -> []Info:
+    infos: *Info
+    for p <- peers par:
+        on p:
+            infos <- Peer.identify()
+
+    join infos[Op.array_length(peers) - 1] -- "-1" because it's 0-based
+    par Peer.timeout(PARTICLE_TTL / 2, "")
+
+    <- infos
+`;

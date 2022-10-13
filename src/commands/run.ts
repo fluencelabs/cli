@@ -134,7 +134,12 @@ export default class Run extends Command {
       }));
 
     const appConfig = await initReadonlyAppConfig(this);
-    const relay = flags.relay ?? getRandomRelayAddr(appConfig?.relays);
+    const fluenceConfig = await initFluenceConfig(this);
+
+    const relay =
+      flags.relay ??
+      getRandomRelayAddr(appConfig?.relays ?? fluenceConfig?.relays);
+
     const data = await getRunData(flags, this);
     const appJsonServicePath = await ensureFluenceTmpAppServiceJsonPath();
     const jsonServicePaths = flags[JSON_SERVICE] ?? [];
@@ -150,7 +155,6 @@ export default class Run extends Command {
     }
 
     let result: string;
-    const fluenceConfig = await initFluenceConfig(this);
     const aquaCli = await initAquaCli(this, fluenceConfig);
 
     try {

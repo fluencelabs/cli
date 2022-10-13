@@ -44,7 +44,7 @@ import { installAllCargoDependenciesFromFluenceConfig } from "./cargo/install";
 const REQUIRED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY} and ${MREPL_CARGO_DEPENDENCY}`;
 
 export default class Install extends Command {
-  static override aliases = ["dependency:i"];
+  static override aliases = ["dependency:i", "dep:i"];
   static override description = `Install all project dependencies (dependencies are cached inside ${color.yellow(
     FLUENCE_DIR_NAME
   )} directory of the current user)`;

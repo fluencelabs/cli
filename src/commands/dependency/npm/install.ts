@@ -40,7 +40,7 @@ import { getIsInteractive } from "../../../lib/helpers/getIsInteractive";
 import { ensureNpmDependency } from "../../../lib/npm";
 
 export default class Install extends Command {
-  static override aliases = ["dependency:npm:i"];
+  static override aliases = ["dependency:npm:i", "dep:npm:i"];
   static override description = `Install npm project dependencies (all dependencies are cached inside ${path.join(
     FLUENCE_DIR_NAME,
     NPM_DIR_NAME

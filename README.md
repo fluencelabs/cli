@@ -109,6 +109,9 @@ Pull request and release process:
 <!-- commands -->
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-i-package-name--package-nameversion)
+* [`fluence dep i`](#fluence-dep-i)
+* [`fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-i-package-name--package-nameversion)
 * [`fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-i-package-name--package-nameversion)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency i`](#fluence-dependency-i)
@@ -194,6 +197,87 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
 
+## `fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+
+Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
+
+```
+USAGE
+  $ fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>]
+
+ARGUMENTS
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
+                                       to install a specific version, you can do so by appending @ and the version to
+                                       the package name. For example: marine@0.12.4
+
+FLAGS
+  --no-input                    Don't interactively ask for any input from the user
+  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
+
+DESCRIPTION
+  Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
+
+ALIASES
+  $ fluence dependency cargo i
+  $ fluence dep cargo i
+
+EXAMPLES
+  $ fluence dep cargo i
+```
+
+## `fluence dep i`
+
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+
+```
+USAGE
+  $ fluence dep i [--recommended | --latest] [--no-input]
+
+FLAGS
+  --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
+                 dependencies from fluence.yaml
+  --no-input     Don't interactively ask for any input from the user
+  --recommended  Set latest versions of @fluencelabs/aqua, marine and mrepl dependencies and install all dependencies
+                 from fluence.yaml
+
+DESCRIPTION
+  Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+
+ALIASES
+  $ fluence dependency i
+  $ fluence dep i
+
+EXAMPLES
+  $ fluence dep i
+```
+
+## `fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+
+Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of the current user)
+
+```
+USAGE
+  $ fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
+
+ARGUMENTS
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
+                                       to install a specific version, you can do so by appending @ and the version to
+                                       the package name. For example: @fluencelabs/aqua@0.7.5-342
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of the current user)
+
+ALIASES
+  $ fluence dependency npm i
+  $ fluence dep npm i
+
+EXAMPLES
+  $ fluence dep npm i
+```
+
 ## `fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
@@ -216,6 +300,7 @@ DESCRIPTION
 
 ALIASES
   $ fluence dependency cargo i
+  $ fluence dep cargo i
 
 EXAMPLES
   $ fluence dependency cargo i
@@ -243,6 +328,7 @@ DESCRIPTION
 
 ALIASES
   $ fluence dependency cargo i
+  $ fluence dep cargo i
 
 EXAMPLES
   $ fluence dependency cargo install
@@ -268,6 +354,7 @@ DESCRIPTION
 
 ALIASES
   $ fluence dependency i
+  $ fluence dep i
 
 EXAMPLES
   $ fluence dependency i
@@ -293,6 +380,7 @@ DESCRIPTION
 
 ALIASES
   $ fluence dependency i
+  $ fluence dep i
 
 EXAMPLES
   $ fluence dependency install
@@ -319,6 +407,7 @@ DESCRIPTION
 
 ALIASES
   $ fluence dependency npm i
+  $ fluence dep npm i
 
 EXAMPLES
   $ fluence dependency npm i
@@ -345,6 +434,7 @@ DESCRIPTION
 
 ALIASES
   $ fluence dependency npm i
+  $ fluence dep npm i
 
 EXAMPLES
   $ fluence dependency npm install

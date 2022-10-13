@@ -16,7 +16,6 @@
 
 import assert from "node:assert";
 import { spawn } from "node:child_process";
-import console from "node:console";
 
 import color from "@oclif/color";
 import { CliUx } from "@oclif/core";
@@ -92,7 +91,7 @@ export const execPromise = ({
 
     childProcess.stdout?.on("data", (data): void => {
       if (printOutput) {
-        console.log(String(data));
+        process.stdout.write(String(data));
       }
 
       stdout = `${stdout}${String(data)}`;
@@ -102,7 +101,7 @@ export const execPromise = ({
 
     childProcess.stderr?.on("data", (data): void => {
       if (printOutput) {
-        console.log(String(data));
+        process.stdout.write(String(data));
       }
 
       stderr = `${stderr}${String(data)}`;
