@@ -44,6 +44,15 @@ import {
   VSCODE_DIR_NAME,
 } from "./const";
 
+export const validatePath = async (path: string): Promise<string | true> => {
+  try {
+    await fsPromises.access(path);
+    return true;
+  } catch (error) {
+    return String(error);
+  }
+};
+
 export const ensureDir = async (dirPath: string): Promise<string> => {
   await fsPromises.mkdir(dirPath, { recursive: true });
   return dirPath;

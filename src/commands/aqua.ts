@@ -23,6 +23,7 @@ import { initFluenceConfig } from "../lib/configs/project/fluence";
 import { NO_INPUT_FLAG } from "../lib/const";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { validatePath } from "../lib/paths";
 import { input } from "../lib/prompt";
 
 export default class Aqua extends Command {
@@ -94,12 +95,15 @@ export default class Aqua extends Command {
         message:
           "Enter path to an aqua file or an input directory that contains your .aqua files",
         flagName: "input",
+        default: "./src/aqua/main.aqua",
+        validate: validatePath,
       }),
       output = await input({
         isInteractive,
         message:
           "Enter path to the output directory. Will be created if it doesn't exists",
         flagName: "input",
+        default: "./src/aqua",
       }),
       ...aquaCliOptionalFlags
     } = flags;

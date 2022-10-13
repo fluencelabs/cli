@@ -21,6 +21,8 @@ import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajv";
 import {
+  AQUA_LIB_NPM_DEPENDENCY,
+  AQUA_LIB_RECOMMENDED_VERSION,
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
   FLUENCE_CONFIG_FILE_NAME,
@@ -267,6 +269,7 @@ const configSchemaV2DefaultConfig: ConfigV2 = {
   dependencies: {
     npm: {
       [AQUA_NPM_DEPENDENCY]: AQUA_RECOMMENDED_VERSION,
+      [AQUA_LIB_NPM_DEPENDENCY]: AQUA_LIB_RECOMMENDED_VERSION,
     },
     cargo: {
       [MARINE_CARGO_DEPENDENCY]: MARINE_RECOMMENDED_VERSION,
