@@ -170,11 +170,8 @@ export default class Deploy extends Command {
           })
         : true)
     ) {
-      const addr = relay ?? getRandomRelayAddr(appConfig.relays);
-
       appConfig = await removeApp({
         appConfig,
-        relay: addr,
         commandObj: this,
         isInteractive,
         timeout: flags[TIMEOUT_FLAG_NAME],

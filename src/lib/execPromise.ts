@@ -63,7 +63,7 @@ export const execPromise = ({
     CliUx.ux.action.start(message);
   }
 
-  const failedCommandText = `Debug info:\n${commandToDisplay}\n`;
+  const debugInfo = `Debug info:\n${commandToDisplay}\n`;
 
   return new Promise<string>((res, rej): void => {
     const execTimeout =
@@ -81,7 +81,7 @@ export const execPromise = ({
               `${timeout}ms`
             )}\nIt's best to just try again or increase timeout using ${color.yellow(
               `--${TIMEOUT_FLAG_NAME}`
-            )} flag\n${failedCommandText}`
+            )} flag\n${debugInfo}`
           )
         );
       }, timeout);
@@ -108,12 +108,12 @@ export const execPromise = ({
       stderr = `${stderr}${String(data)}`;
     });
 
-    childProcess.on("error", (): void => {
+    childProcess.on("error", (error): void => {
       if (typeof message === "string") {
         CliUx.ux.action.stop(color.red("failed"));
       }
 
-      rej(new Error(`Failed to start subprocess\n${failedCommandText}`));
+      rej(new Error(`${String(error)}\n${debugInfo}`));
     });
 
     childProcess.on("close", (code): void => {
@@ -130,7 +130,7 @@ export const execPromise = ({
           new Error(
             `process exited${
               code === null ? "" : ` with code ${code}`
-            }\n${failedCommandText}`
+            }\n${debugInfo}`
           )
         );
 
