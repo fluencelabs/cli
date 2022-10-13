@@ -111,8 +111,8 @@ export const removeApp = async (
     timeout: number | undefined;
     appConfig: AppConfig;
     isInteractive: boolean;
-    relay: string | undefined;
     aquaCli: AquaCLI;
+    relay?: string | undefined;
   }>
 ): Promise<AppConfig | null> => {
   const { commandObj, timeout, appConfig, isInteractive, relay, aquaCli } =
