@@ -133,7 +133,12 @@ export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 
-export const MAIN_AQUA_FILE_CONTENT = `import "@fluencelabs/aqua-lib/builtin.aqua"
+export const MAIN_AQUA_FILE_CONTENT = `module Main
+
+-- import App from "deployed.app.aqua"
+import "@fluencelabs/aqua-lib/builtin.aqua"
+
+-- export App
 
 -- DOCUMENTATION:
 -- https://fluence.dev
