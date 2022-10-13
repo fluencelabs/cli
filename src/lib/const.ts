@@ -120,7 +120,8 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .fluence
 **/node_modules
 **/target/
-.repl_history`;
+.repl_history
+.vscode/settings.json`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
