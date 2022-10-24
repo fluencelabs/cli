@@ -81,7 +81,7 @@ maxHeapSize: "100" # 100 bytes
 # K, Kb - kilobyte; Ki, KiB - kibibyte; M, Mb - megabyte; Mi, MiB - mebibyte; G, Gb - gigabyte; Gi, GiB - gibibyte;
 # Current limit is 4 GiB
 loggerEnabled: true # true, if it allows module to use the Marine SDK logger.
-loggingMask: 0 # manages the logging targets, described in here: https://doc.fluence.dev/marine-book/marine-rust-sdk/developing/logging#using-target-map
+loggingMask: 0 # manages the logging targets, described in here: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
 mountedBinaries:
   curl: /usr/bin/curl # a map of mounted binary executable files
 preopenedFiles: # a list of files and directories that this module could access with WASI
