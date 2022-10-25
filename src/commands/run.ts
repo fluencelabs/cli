@@ -75,7 +75,7 @@ export default class Run extends Command {
     }),
     plugin: Flags.string({
       description:
-        "[experimental] Path to a directory with JS plugins (Read more: https://doc.fluence.dev/aqua-book/aqua-cli/plugins)",
+        "[experimental] Path to a directory with JS plugins (Read more: https://fluence.dev/docs/aqua-book/aqua-cli/plugins)",
       helpValue: "<path>",
     }),
     const: Flags.string({

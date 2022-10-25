@@ -29,7 +29,7 @@
     "test": "npm run mocha-test",
     "posttest": "npm run lint",
     "prepare": "husky install",
-    "check": "npm run build && npm run lint-fix && npm run mocha-test",
+    "check": "npm run build && npm run lint-fix",
     "pre-commit": "oclif readme && git add README.md"
   },
   "dependencies": {
