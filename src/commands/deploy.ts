@@ -201,7 +201,7 @@ export default class Deploy extends Command {
       peerId,
       serviceName,
       keyPair,
-      pathToFacade,
+      facadeModuleWasmPath,
     } of preparedForDeployItems) {
       // Here we don't deploy in parallel because it often fails if run in parallel
       // And also when user requests, we interactively ask about each deploy
@@ -219,7 +219,6 @@ export default class Deploy extends Command {
         commandObj: this,
         doDeployAll,
         isInteractive,
-        pathToFacade,
       });
 
       if (res !== null) {
@@ -234,7 +233,7 @@ export default class Deploy extends Command {
         ];
 
         allServices[serviceName] = successfullyDeployedServicesByName;
-        serviceNamePathToFacadeMap[serviceName] = pathToFacade;
+        serviceNamePathToFacadeMap[serviceName] = facadeModuleWasmPath;
       }
     }
 
@@ -262,9 +261,9 @@ export default class Deploy extends Command {
     // generate interfaces for all services
     await Promise.all(
       Object.entries(serviceNamePathToFacadeMap).map(
-        ([serviceName, pathToFacade]): Promise<void> =>
+        ([serviceName, pathToFacadeWasm]): Promise<void> =>
           generateServiceInterface({
-            pathToFacade,
+            pathToFacadeWasm,
             marineCli,
             serviceName,
           })
@@ -329,7 +328,7 @@ const overrideModule = (
 
 type PreparedForDeploy = Omit<DeployInfo, "modules" | "serviceDirPath"> & {
   deployJSON: DeployJSONConfig;
-  pathToFacade: string;
+  facadeModuleWasmPath: string;
 };
 
 type PrepareForDeployArg = {
@@ -587,7 +586,7 @@ const prepareForDeploy = async ({
       const moduleConfigs = modules.map(
         ({
           moduleConfig: { get, ...overrides },
-        }): ModuleConfigReadonly & { path: string } => {
+        }): ModuleConfigReadonly & { wasmPath: string } => {
           const moduleConfig = mapOfAllModuleConfigs.get(
             getModuleUrlOrAbsolutePath(get, serviceDirPath)
           );
@@ -602,7 +601,7 @@ const prepareForDeploy = async ({
 
           return {
             ...overriddenModuleConfig,
-            path: getModuleWasmPath(overriddenModuleConfig),
+            wasmPath: getModuleWasmPath(overriddenModuleConfig),
           };
         }
       );
@@ -627,7 +626,7 @@ const prepareForDeploy = async ({
       return {
         ...rest,
         deployJSON,
-        pathToFacade: facadeModuleConfig.path,
+        facadeModuleWasmPath: facadeModuleConfig.wasmPath,
       };
     }
   );
@@ -757,7 +756,7 @@ type DeployJSONConfig = Record<
 >;
 
 const serviceModuleToJSONModuleConfig = (
-  moduleConfig: ModuleConfigReadonly & { path: string }
+  moduleConfig: ModuleConfigReadonly & { wasmPath: string }
 ): JSONModuleConf => {
   const {
     name,
@@ -768,12 +767,12 @@ const serviceModuleToJSONModuleConfig = (
     maxHeapSize,
     mountedBinaries,
     preopenedFiles,
-    path,
+    wasmPath,
   } = moduleConfig;
 
   const jsonModuleConfig: JSONModuleConf = {
     name,
-    path,
+    path: wasmPath,
   };
 
   if (loggerEnabled === true) {
@@ -820,7 +819,6 @@ type DeployServiceArg = Readonly<{
   serviceName: string;
   deployId: string;
   tmpDeployJSONPath: string;
-  pathToFacade: string;
   commandObj: CommandObj;
   doDeployAll: boolean;
   isInteractive: boolean;
@@ -840,7 +838,6 @@ const deployService = async ({
   secretKey,
   aquaCli,
   tmpDeployJSONPath,
-  pathToFacade,
   timeout,
   commandObj,
   doDeployAll,
@@ -849,7 +846,6 @@ const deployService = async ({
   deployedServiceConfig: DeployedServiceConfig;
   serviceName: string;
   deployId: string;
-  pathToFacade: string;
 } | null> => {
   const keyValuePairs = { service: serviceName, deployId, on: peerId };
 
@@ -923,6 +919,5 @@ const deployService = async ({
     },
     serviceName,
     deployId,
-    pathToFacade,
   };
 };
