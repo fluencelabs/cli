@@ -15,12 +15,20 @@
  */
 
 import assert from "node:assert";
+import path from "node:path";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
-import { initFluenceConfig } from "../../lib/configs/project/fluence";
-import { initReadonlyServiceConfig } from "../../lib/configs/project/service";
+import {
+  FluenceConfig,
+  initFluenceConfig,
+} from "../../lib/configs/project/fluence";
+import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
+import {
+  FACADE_MODULE_NAME,
+  initReadonlyServiceConfig,
+} from "../../lib/configs/project/service";
 import {
   CommandObj,
   DEFAULT_DEPLOY_NAME,
@@ -31,11 +39,15 @@ import {
 } from "../../lib/const";
 import {
   AQUA_NAME_REQUIREMENTS,
+  downloadModule,
   downloadService,
+  getModuleWasmPath,
   isUrl,
 } from "../../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
+import { generateServiceInterface } from "../../lib/helpers/generateServiceInterface";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { initMarineCli } from "../../lib/marineCli";
 import { input } from "../../lib/prompt";
 
 const PATH_OR_URL = "PATH | URL";
@@ -62,6 +74,11 @@ export default class Add extends Command {
     const { args, flags } = await this.parse(Add);
     const isInteractive = getIsInteractive(flags);
     await ensureFluenceProject(this, isInteractive);
+    const fluenceConfig = await initFluenceConfig(this);
+
+    if (fluenceConfig === null) {
+      return this.error("You must init Fluence project first to add services");
+    }
 
     const servicePathOrUrl: unknown =
       args[PATH_OR_URL] ??
@@ -83,11 +100,35 @@ export default class Add extends Command {
       );
     }
 
-    await addService({
+    const serviceName = await addService({
       commandObj: this,
       serviceName: flags[NAME_FLAG_NAME] ?? serviceConfig.name,
       pathOrUrl: servicePathOrUrl,
       isInteractive,
+      fluenceConfig,
+    });
+
+    const facadeModuleGet = serviceConfig.modules[FACADE_MODULE_NAME].get;
+
+    const facadeModulePath = isUrl(facadeModuleGet)
+      ? await downloadModule(facadeModuleGet)
+      : path.resolve(servicePath, facadeModuleGet);
+
+    const facadeReadonlyConfig = await initReadonlyModuleConfig(
+      facadeModulePath,
+      this
+    );
+
+    if (facadeReadonlyConfig === null) {
+      this.error(`Facade module not found at ${facadeModulePath}`);
+    }
+
+    const marineCli = await initMarineCli(this, fluenceConfig);
+
+    await generateServiceInterface({
+      pathToFacadeWasm: getModuleWasmPath(facadeReadonlyConfig),
+      marineCli,
+      serviceName,
     });
   }
 }
@@ -97,6 +138,7 @@ type AddServiceArg = {
   serviceName: string;
   pathOrUrl: string;
   isInteractive: boolean;
+  fluenceConfig: FluenceConfig;
 };
 
 export const addService = async ({
@@ -104,15 +146,8 @@ export const addService = async ({
   serviceName,
   pathOrUrl,
   isInteractive,
-}: AddServiceArg): Promise<void> => {
-  const fluenceConfig = await initFluenceConfig(commandObj);
-
-  if (fluenceConfig === null) {
-    return commandObj.error(
-      "You must init Fluence project first to add services"
-    );
-  }
-
+  fluenceConfig,
+}: AddServiceArg): Promise<string> => {
   if (fluenceConfig.services === undefined) {
     fluenceConfig.services = {};
   }
@@ -155,4 +190,6 @@ export const addService = async ({
       FLUENCE_CONFIG_FILE_NAME
     )}`
   );
+
+  return validServiceName;
 };

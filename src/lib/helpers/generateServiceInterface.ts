@@ -22,18 +22,18 @@ import type { MarineCLI } from "../marineCli";
 import { ensureFluenceAquaServicesDir } from "../paths";
 
 type GenerateServiceInterfaceArg = {
-  pathToFacade: string;
+  pathToFacadeWasm: string;
   marineCli: MarineCLI;
   serviceName: string;
 };
 
 export const generateServiceInterface = async ({
   serviceName,
-  pathToFacade,
+  pathToFacadeWasm,
   marineCli,
 }: GenerateServiceInterfaceArg): Promise<void> => {
   const interfaceString = await marineCli({
-    args: ["aqua", pathToFacade],
+    args: ["aqua", pathToFacadeWasm],
   });
 
   const aquaInterfacePath = path.join(

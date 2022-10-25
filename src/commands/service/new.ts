@@ -21,6 +21,7 @@ import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 import camelcase from "camelcase";
 
+import { initFluenceConfig } from "../../lib/configs/project/fluence";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
@@ -32,6 +33,7 @@ import {
   ensureValidAquaName,
   validateAquaName,
 } from "../../lib/helpers/downloadFile";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { confirm, input } from "../../lib/prompt";
 import { generateNewModule } from "../module/new";
@@ -59,6 +61,12 @@ export default class New extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(New);
     const isInteractive = getIsInteractive(flags);
+    await ensureFluenceProject(this, isInteractive);
+    const fluenceConfig = await initFluenceConfig(this);
+
+    if (fluenceConfig === null) {
+      this.error("Unreachable. Not a Fluence project");
+    }
 
     const servicePath: unknown =
       args[PATH] ??
@@ -107,6 +115,7 @@ export default class New extends Command {
         serviceName,
         pathOrUrl: servicePath,
         isInteractive,
+        fluenceConfig,
       });
     }
   }
