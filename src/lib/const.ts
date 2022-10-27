@@ -135,13 +135,30 @@ export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 
 export const MAIN_AQUA_FILE_CONTENT = `module Main
 
--- import App from "deployed.app.aqua"
 import "@fluencelabs/aqua-lib/builtin.aqua"
 
--- export App
+
+-- Uncomment the following when you deploy your app with Adder service:
+
+-- import App from "deployed.app.aqua"
+-- import Adder from "services/adder.aqua"
+-- export App, add_one
+
+-- IMPORTANT: Add exports for all functions that you want to run
+export hello_world, hello_world_remote, get_info, get_infos, get_infos_par
 
 -- DOCUMENTATION:
 -- https://fluence.dev
+
+
+-- Uncomment the following when you deploy your app with Adder service:
+
+-- func add_one(x: u64) -> u64:
+--     services <- App.services()
+--     on services.adder.default!.peerId:
+--         Adder services.adder.default!.serviceId
+--         res <- Adder.add_one(x)
+--     <- res
 
 -- local
 func hello_world(name: string) -> string:
