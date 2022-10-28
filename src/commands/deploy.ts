@@ -32,7 +32,6 @@ import {
   Distribution,
   DISTRIBUTION_EVEN,
   FluenceConfigReadonly,
-  initFluenceConfig,
   OverrideModules,
   ServiceDeployV1,
 } from "../lib/configs/project/fluence";
@@ -125,13 +124,7 @@ export default class Deploy extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Deploy);
     const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
-
-    const fluenceConfig = await initFluenceConfig(this);
-
-    if (fluenceConfig === null) {
-      this.error("You must init Fluence project first to deploy");
-    }
+    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
 
     const defaultKeyPair = await getExistingKeyPair({
       keyPairName: flags[KEY_PAIR_FLAG_NAME] ?? fluenceConfig.keyPairName,

@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
-import path from "node:path";
-
 import { init } from "../../commands/init";
-import { initConfigOptions as fluenceConfigInitOptions } from "../configs/project/fluence";
-import { CommandObj, FLUENCE_CONFIG_FILE_NAME } from "../const";
+import { FluenceConfig, initFluenceConfig } from "../configs/project/fluence";
+import type { CommandObj } from "../const";
 import { confirm } from "../prompt";
 
 export const ensureFluenceProject = async (
   commandObj: CommandObj,
   isInteractive: boolean
-): Promise<void> => {
-  const projectFluencePath = path.join(
-    await fluenceConfigInitOptions.getConfigDirPath(commandObj),
-    FLUENCE_CONFIG_FILE_NAME
-  );
+): Promise<FluenceConfig> => {
+  const fluenceConfig = await initFluenceConfig(commandObj);
 
-  try {
-    await fsPromises.access(projectFluencePath);
-    return;
-  } catch {}
+  if (fluenceConfig !== null) {
+    return fluenceConfig;
+  }
 
   const errorMessage = "Not a fluence project";
 
@@ -45,7 +38,7 @@ export const ensureFluenceProject = async (
   commandObj.warn(errorMessage);
 
   const doInit = await confirm({
-    message: `Do you want to init fluence project in the current directory (${process.cwd()})`,
+    message: `Do you want to init fluence project`,
     isInteractive,
   });
 

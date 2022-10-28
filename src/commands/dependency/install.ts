@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
-import { initFluenceConfig } from "../../lib/configs/project/fluence";
 import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
@@ -63,9 +60,7 @@ export default class Install extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Install);
     const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
-    const fluenceConfig = await initFluenceConfig(this);
-    assert(fluenceConfig !== null);
+    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
 
     if (flags.recommended) {
       fluenceConfig.dependencies.npm[AQUA_NPM_DEPENDENCY] =

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import path from "node:path";
+
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
@@ -23,7 +25,7 @@ import { initFluenceConfig } from "../lib/configs/project/fluence";
 import { NO_INPUT_FLAG } from "../lib/const";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { validatePath } from "../lib/paths";
+import { getProjectRootDir, validatePath } from "../lib/paths";
 import { input } from "../lib/prompt";
 
 export default class Aqua extends Command {
@@ -87,32 +89,39 @@ export default class Aqua extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Aqua);
     const isInteractive = getIsInteractive(flags);
+    const fluenceConfig = await initFluenceConfig(this);
 
     const {
       watch,
-      input: inputFromFlags = await input({
-        isInteractive,
-        message:
-          "Enter path to an aqua file or an input directory that contains your .aqua files",
-        flagName: "input",
-        default: "./src/aqua/main.aqua",
-        validate: validatePath,
-      }),
-      output = await input({
-        isInteractive,
-        message:
-          "Enter path to the output directory. Will be created if it doesn't exists",
-        flagName: "input",
-        default: "./src/aqua",
-      }),
+      input: inputPath = fluenceConfig?.aquaInputPath ??
+        (await input({
+          isInteractive,
+          message:
+            "Enter path to an aqua file or an input directory that contains your .aqua files",
+          flagName: "input",
+          validate: validatePath,
+        })),
+      output: outputPath = flags.dry
+        ? undefined
+        : fluenceConfig?.aquaOutputTSPath ??
+          fluenceConfig?.aquaOutputJSPath ??
+          (await input({
+            isInteractive,
+            message:
+              "Enter path to the output directory. Will be created if it doesn't exists",
+            flagName: "input",
+          })),
+      js = flags.js ?? fluenceConfig?.aquaOutputJSPath !== undefined,
       ...aquaCliOptionalFlags
     } = flags;
 
-    const fluenceConfig = await initFluenceConfig(this);
-
     const aquaCliFlags = {
-      input: inputFromFlags,
-      output,
+      input: path.join(getProjectRootDir(), inputPath),
+      output:
+        outputPath === undefined
+          ? undefined
+          : path.join(getProjectRootDir(), outputPath),
+      js,
       ...aquaCliOptionalFlags,
       import: await ensureAquaImports({
         commandObj: this,

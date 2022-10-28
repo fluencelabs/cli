@@ -56,8 +56,9 @@ export type AquaCliInput =
     }
   | {
       args?: never;
-      flags: Flags<"input" | "output"> &
+      flags: Flags<"input"> &
         OptionalFlags<
+          | "output"
           | "js"
           | "air"
           | "js"

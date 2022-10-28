@@ -20,10 +20,7 @@ import path from "node:path";
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
-import {
-  FluenceConfig,
-  initFluenceConfig,
-} from "../../lib/configs/project/fluence";
+import type { FluenceConfig } from "../../lib/configs/project/fluence";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
 import {
   FACADE_MODULE_NAME,
@@ -43,6 +40,7 @@ import {
   downloadService,
   getModuleWasmPath,
   isUrl,
+  validateAquaName,
 } from "../../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { generateServiceInterface } from "../../lib/helpers/generateServiceInterface";
@@ -73,12 +71,7 @@ export default class Add extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Add);
     const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
-    const fluenceConfig = await initFluenceConfig(this);
-
-    if (fluenceConfig === null) {
-      return this.error("You must init Fluence project first to add services");
-    }
+    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
 
     const servicePathOrUrl: unknown =
       args[PATH_OR_URL] ??
@@ -152,11 +145,20 @@ export const addService = async ({
     fluenceConfig.services = {};
   }
 
-  const validateServiceName = (name: string): true | string =>
-    !(name in (fluenceConfig?.services ?? {})) ||
-    `You already have ${color.yellow(name)} in ${color.yellow(
-      FLUENCE_CONFIG_FILE_NAME
-    )}`;
+  const validateServiceName = (name: string): true | string => {
+    const aquaNameValidity = validateAquaName(name);
+
+    if (typeof aquaNameValidity === "string") {
+      return aquaNameValidity;
+    }
+
+    return (
+      !(name in (fluenceConfig?.services ?? {})) ||
+      `You already have ${color.yellow(name)} in ${color.yellow(
+        FLUENCE_CONFIG_FILE_NAME
+      )}`
+    );
+  };
 
   let validServiceName = serviceName;
   const serviceNameValidity = validateServiceName(validServiceName);

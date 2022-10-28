@@ -46,7 +46,9 @@ export const getLatestVersionOfNPMDependency = async (
   commandObj: CommandObj
 ): Promise<string> => {
   try {
-    return (await execPromise({ command: `npm show ${name} version` })).trim();
+    return (
+      await execPromise({ command: "npm", args: ["show", name, "version"] })
+    ).trim();
   } catch (error) {
     commandObj.error(
       `Failed to get latest version of ${color.yellow(
@@ -94,7 +96,8 @@ export const ensureNpmDependency = async ({
   } catch {
     try {
       await execPromise({
-        command: `npm i ${name}@${version}`,
+        command: "npm",
+        args: ["i", `${name}@${version}`],
         flags: { prefix: dependencyPath },
         message: `Installing ${name}@${version} to ${replaceHomeDir(
           npmDirPath
