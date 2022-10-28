@@ -119,10 +119,7 @@ export const TIMEOUT_FLAG = {
   }),
 } as const;
 
-export const TEMPLATE_MINIMAL = "minimal";
-export const TEMPLATE_TS = "ts";
-export const TEMPLATE_JS = "js";
-export const templates = [TEMPLATE_MINIMAL, TEMPLATE_TS, TEMPLATE_JS] as const;
+export const templates = ["minimal", "ts", "js"] as const;
 export type Template = typeof templates[number];
 export const isTemplate = (template: unknown): template is Template =>
   // eslint-disable-next-line unicorn/prefer-includes

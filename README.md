@@ -492,7 +492,8 @@ ARGUMENTS
   PATH  Project path
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  -t, --template=<value>  [default: minimal] Template to use for the project. One of: minimal, ts, js
+  --no-input              Don't interactively ask for any input from the user
 
 DESCRIPTION
   Initialize fluence project

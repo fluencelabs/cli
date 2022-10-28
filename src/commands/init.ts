@@ -33,7 +33,6 @@ import {
   RECOMMENDED_GITIGNORE_CONTENT,
   NO_INPUT_FLAG,
   Template,
-  TEMPLATE_MINIMAL,
   templates,
   isTemplate,
   FLUENCE_JS_RECOMMENDED_VERSION,
@@ -75,7 +74,6 @@ export default class Init extends Command {
         ", "
       )}`,
       char: "t",
-      default: TEMPLATE_MINIMAL,
     }),
     ...NO_INPUT_FLAG,
   };
@@ -123,7 +121,7 @@ const selectTemplate = ({
   });
 
 type EnsureTemplateArg = {
-  templateOrUnknown: string;
+  templateOrUnknown: string | undefined;
   commandObj: CommandObj;
   isInteractive: boolean;
 };
@@ -137,11 +135,13 @@ const ensureTemplate = ({
     return Promise.resolve(templateOrUnknown);
   }
 
-  commandObj.warn(
-    `Unknown template: ${color.yellow(
-      templateOrUnknown
-    )}. Available templates: ${templates.join(", ")}`
-  );
+  if (typeof templateOrUnknown === "string") {
+    commandObj.warn(
+      `Unknown template: ${color.yellow(
+        templateOrUnknown
+      )}. Available templates: ${templates.join(", ")}`
+    );
+  }
 
   return selectTemplate({ commandObj, isInteractive });
 };
