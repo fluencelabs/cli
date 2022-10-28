@@ -443,8 +443,6 @@ export function getConfigInitFunction<
       );
     }
 
-    initializedConfigs.add(configPath);
-
     const maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
       options,
       getDefaultConfig
@@ -453,6 +451,8 @@ export function getConfigInitFunction<
     if (maybeInitializedReadonlyConfig === null) {
       return null;
     }
+
+    initializedConfigs.add(configPath);
 
     const initializedReadonlyConfig = maybeInitializedReadonlyConfig;
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { spawn } from "node:child_process";
 
 import color from "@oclif/color";
@@ -45,11 +44,8 @@ export const execPromise = ({
   printOutput = false,
 }: ExecPromiseArg): Promise<string> => {
   const flagArgs = flags === undefined ? [] : flagsToArgs(flags);
-  const argsFromCommand = command.split(" ");
-  const commandName = argsFromCommand.shift();
-  assert(commandName !== undefined);
-  const allArgs = [...argsFromCommand, ...(args ?? []), ...flagArgs];
-  const fullCommand = [commandName, ...allArgs].join(" ");
+  const allArgs = [...(args ?? []), ...flagArgs];
+  const fullCommand = [command, ...allArgs].join(" ");
 
   const commandToDisplay = IS_DEVELOPMENT
     ? fullCommand
@@ -85,7 +81,7 @@ export const execPromise = ({
         );
       }, timeout);
 
-    const childProcess = spawn(commandName, allArgs, options ?? {});
+    const childProcess = spawn(command, allArgs, options ?? {});
 
     let stdout = "";
 

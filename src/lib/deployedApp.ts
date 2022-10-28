@@ -24,6 +24,7 @@ import type { ServicesV3 } from "./configs/project/app";
 import type { FluenceConfigReadonly } from "./configs/project/fluence";
 import { FS_OPTIONS } from "./const";
 import { capitalize } from "./helpers/capitilize";
+import { js } from "./helpers/jsTemplateLitteral";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import {
   ensureFluenceJSAppPath,
@@ -74,8 +75,8 @@ const generateRegisterAppTSorJS = async ({
 
   const appContent =
     // Codegeneration:
-    `${isJS ? "" : 'import { FluencePeer } from "@fluencelabs/fluence";'}
-import { registerApp as registerAppService } from "./deployed.app";
+    js`${isJS ? "" : 'import type { FluencePeer } from "@fluencelabs/fluence";'}
+import { registerApp as registerAppService } from "./deployed.app${isJS}";
 
 export const ${SERVICES_FUNCTION_NAME} = ${JSON.stringify(
       deployedServices,
@@ -118,8 +119,8 @@ export function registerApp(
 
   await fsPromises.writeFile(
     isJS
-      ? ensureFluenceJSAppPath(fluenceJSorTSDir)
-      : ensureFluenceTSAppPath(fluenceJSorTSDir),
+      ? await ensureFluenceJSAppPath(fluenceJSorTSDir)
+      : await ensureFluenceTSAppPath(fluenceJSorTSDir),
     appContent,
     FS_OPTIONS
   );

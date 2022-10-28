@@ -20,10 +20,7 @@ import path from "node:path";
 import color from "@oclif/color";
 import { Command } from "@oclif/core";
 
-import {
-  FluenceConfig,
-  initFluenceConfig,
-} from "../../../lib/configs/project/fluence";
+import type { FluenceConfig } from "../../../lib/configs/project/fluence";
 import {
   CommandObj,
   FLUENCE_DIR_NAME,
@@ -60,21 +57,16 @@ export default class Install extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Install);
     const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
+    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
 
     const packageNameAndVersion: unknown =
       args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
-    const fluenceConfig = await initFluenceConfig(this);
-
     // packageNameAndVersion is always a string or undefined,
     // while oclif framework says it's 'any'
-    // we can be sure fluence config is not null just because
-    // we executed 'ensureFluenceProject' function above
     assert(
-      (packageNameAndVersion === undefined ||
-        typeof packageNameAndVersion === "string") &&
-        fluenceConfig !== null
+      packageNameAndVersion === undefined ||
+        typeof packageNameAndVersion === "string"
     );
 
     // if packageNameAndVersion is undefined, then we call ensureAquaImports

@@ -47,7 +47,20 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
     }
 
     await execPromise({
-      command: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --quiet -y`,
+      command: "curl",
+      args: [
+        "--proto",
+        "'=https'",
+        "--tlsv1.2",
+        "-sSf",
+        "https://sh.rustup.rs",
+        "|",
+        "sh",
+        "-s",
+        "--",
+        "--quiet",
+        "-y",
+      ],
       options: {
         shell: true,
       },
@@ -66,7 +79,8 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
 
   if (!(await hasRequiredRustToolchain())) {
     await execPromise({
-      command: `${RUSTUP} install ${REQUIRED_RUST_TOOLCHAIN}`,
+      command: RUSTUP,
+      args: ["install", REQUIRED_RUST_TOOLCHAIN],
       message: `Installing ${color.yellow(
         REQUIRED_RUST_TOOLCHAIN
       )} rust toolchain`,
@@ -84,7 +98,8 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
 
   if (!(await hasRequiredRustTarget())) {
     await execPromise({
-      command: `${RUSTUP} target add ${RUST_WASM32_WASI_TARGET}`,
+      command: RUSTUP,
+      args: ["target", "add", RUST_WASM32_WASI_TARGET],
       message: `Adding ${color.yellow(RUST_WASM32_WASI_TARGET)} rust target`,
       printOutput: true,
     });
@@ -102,11 +117,13 @@ const ensureRust = async (commandObj: CommandObj): Promise<void> => {
 const isRustInstalled = async (): Promise<boolean> => {
   try {
     await execPromise({
-      command: `${CARGO} --version`,
+      command: CARGO,
+      args: ["--version"],
     });
 
     await execPromise({
-      command: `${RUSTUP} --version`,
+      command: RUSTUP,
+      args: ["--version"],
     });
 
     return true;
@@ -118,14 +135,16 @@ const isRustInstalled = async (): Promise<boolean> => {
 const hasRequiredRustToolchain = async (): Promise<boolean> =>
   (
     await execPromise({
-      command: `${RUSTUP} toolchain list`,
+      command: RUSTUP,
+      args: ["toolchain", "list"],
     })
   ).includes(REQUIRED_RUST_TOOLCHAIN);
 
 const hasRequiredRustTarget = async (): Promise<boolean> =>
   (
     await execPromise({
-      command: `${RUSTUP} target list`,
+      command: RUSTUP,
+      args: ["target", "list"],
     })
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
 
@@ -157,7 +176,8 @@ export const getLatestVersionOfCargoDependency = async ({
   (
     (
       await execPromise({
-        command: `${CARGO} search ${name} --limit 1`,
+        command: CARGO,
+        args: ["search", name, "--limit", "1"],
       })
     ).split('"')[1] ??
     commandObj.error(

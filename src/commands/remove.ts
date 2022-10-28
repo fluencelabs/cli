@@ -27,10 +27,7 @@ import {
   initAppConfig,
   ServicesV3,
 } from "../lib/configs/project/app";
-import {
-  initFluenceConfig,
-  initReadonlyFluenceConfig,
-} from "../lib/configs/project/fluence";
+import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
 import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
 import {
   generateDeployedAppAqua,
@@ -69,7 +66,7 @@ export default class Remove extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
+    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
 
     const appConfig = await initAppConfig(this);
 
@@ -91,7 +88,6 @@ export default class Remove extends Command {
       this.error("Aborted");
     }
 
-    const fluenceConfig = await initFluenceConfig(this);
     const aquaCli = await initAquaCli(this, fluenceConfig);
 
     await removeApp({
@@ -239,14 +235,14 @@ export const removeApp = async (
       await ensureFluenceAquaDeployedAppPath(),
       ...(typeof fluenceConfig?.appTSPath === "string"
         ? [
-            ensureFluenceTSAppPath(fluenceConfig.appTSPath),
-            ensureFluenceTSDeployedAppPath(fluenceConfig.appTSPath),
+            await ensureFluenceTSAppPath(fluenceConfig.appTSPath),
+            await ensureFluenceTSDeployedAppPath(fluenceConfig.appTSPath),
           ]
         : []),
       ...(typeof fluenceConfig?.appJSPath === "string"
         ? [
-            ensureFluenceJSAppPath(fluenceConfig.appJSPath),
-            ensureFluenceJSDeployedAppPath(fluenceConfig.appJSPath),
+            await ensureFluenceJSAppPath(fluenceConfig.appJSPath),
+            await ensureFluenceJSDeployedAppPath(fluenceConfig.appJSPath),
           ]
         : []),
       appConfig.$getPath(),
