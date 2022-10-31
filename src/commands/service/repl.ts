@@ -122,9 +122,30 @@ export default class REPL extends Command {
       FS_OPTIONS
     );
 
+    const facadeModuleConfig = moduleConfigs[moduleConfigs.length - 1];
+
+    assert(
+      facadeModuleConfig !== undefined,
+      "Unreachable: no modules in the service"
+    );
+
     if (!isInteractive) {
       return;
     }
+
+    this.log(`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Execute ${color.yellow("help")} inside repl to see available commands.
+Current service <module_name> is: ${color.yellow(facadeModuleConfig.name)}
+Call ${facadeModuleConfig.name} service functions in repl like this:
+
+${color.yellow(
+  `call ${facadeModuleConfig.name} <function_name> [<arg1>, <arg2>]`
+)}
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    `);
 
     spawn(
       await ensureCargoDependency({
@@ -156,10 +177,11 @@ const ensureServiceConfig = async ({
     ? await downloadService(get)
     : path.resolve(get);
 
-  const modules = (await initReadonlyServiceConfig(serviceDirPath, commandObj))
-    ?.modules;
+  const readonlyServiceConfig = (
+    await initReadonlyServiceConfig(serviceDirPath, commandObj)
+  )?.modules;
 
-  if (modules === undefined) {
+  if (readonlyServiceConfig === undefined) {
     CliUx.ux.action.stop(color.red("error"));
     return commandObj.error(
       `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
@@ -168,7 +190,8 @@ const ensureServiceConfig = async ({
     );
   }
 
-  const { [FACADE_MODULE_NAME]: facade, ...otherModules } = modules;
+  const { [FACADE_MODULE_NAME]: facade, ...otherModules } =
+    readonlyServiceConfig;
 
   return [...Object.values(otherModules), facade].map(
     (moduleConfig): ServiceModule => ({

@@ -486,13 +486,14 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [--no-input]
+  $ fluence init [PATH] [-t <value>] [--no-input]
 
 ARGUMENTS
   PATH  Project path
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  -t, --template=<value>  Template to use for the project. One of: minimal, ts, js
+  --no-input              Don't interactively ask for any input from the user
 
 DESCRIPTION
   Initialize fluence project
@@ -682,7 +683,7 @@ FLAGS
   --no-input                  Don't interactively ask for any input from the user
   --on=<peer_id>              PeerId of a peer where you want to run the function
   --plugin=<path>             [experimental] Path to a directory with JS plugins (Read more:
-                              https://doc.fluence.dev/aqua-book/aqua-cli/plugins)
+                              https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --relay=<multiaddr>         Relay node multiaddr
   --timeout=<milliseconds>    Timeout used for command execution
 
