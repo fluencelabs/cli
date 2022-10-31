@@ -136,8 +136,8 @@ export default class REPL extends Command {
     this.log(`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Execute ${color.yellow("help")} inside repl to see available commands
-current service <module_name> is: ${color.yellow(facadeModuleConfig.name)}
+Execute ${color.yellow("help")} inside repl to see available commands.
+Current service <module_name> is: ${color.yellow(facadeModuleConfig.name)}
 Call ${facadeModuleConfig.name} service functions in repl like this:
 
 ${color.yellow(
