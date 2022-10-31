@@ -56,29 +56,25 @@ You can edit `fluence.yaml` manually if you want to deploy multiple times, deplo
 5. Run `fluence service new ./src/services/newService` to generate new service template. You will be asked if you want to add the service to `fluence.yaml` - say yes.
 6. Run `fluence service repl newService` to build the service and get into the repl
 7. Run `fluence deploy` to deploy the application you described in `fluence.yaml`. Services written in rust will be automatically built before deployment. User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag). You can also add project-level secret key to your project `.fluence/secrets.yaml` using `fluence key new` and setup `fluence.yaml` with key-pair names as you wish
-8. Write some aqua in `src/aqua/main.aqua`. Example `src/aqua/main.aqua`:
+8. Uncomment Adder and App aqua in `src/aqua/main.aqua`:
 ```aqua
-module Main
-
 import App from "deployed.app.aqua"
-
+import Adder from "services/adder.aqua"
 export App, add_one
 
-service AddOne:
-    add_one: u64 -> u64
+-- snip --
 
-func add_one(value: u64) -> u64:
+func add_one(x: u64) -> u64:
     services <- App.services()
-
     on services.adder.default!.peerId:
-        AddOne services.adder.default!.serviceId
-        res <- AddOne.add_one(value)
+        Adder services.adder.default!.serviceId
+        res <- Adder.add_one(x)
     <- res
 ```
 `"deployed.app.aqua"` file was generated after you ran `fluence deploy` and it is located at `.fluence/aqua/deployed.app.aqua`. `App.services()` method returns ids of the previously deployed services that you can use in your aqua code (info about previously deployed services is stored at `.fluence/app.yaml`).
 
 9. Run `fluence run -f 'add_one(1)'`. Function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and executed. 
-Alternatively, if you are js developer - import generated `registerApp` function from `.fluence/ts/app.ts` or `.fluence/js/app.js` and execute it after `Fluence.run()` in your js application in order to give access to deployed services ids to your aqua code. Then compile `src/aqua/main.aqua` using `fluence aqua` command. Import and run `add_one(1)` in your js code.
+Alternatively, if you are js/ts developer - add appJSPath or appTSPath keys to fluence.yaml, deploy again, import generated `registerApp` function in your js/ts file and execute it after `Fluence.run()` in order to give access to deployed services ids to your aqua code. Then compile `src/aqua/main.aqua` using `fluence aqua` command. Import and run `add_one(1)` in your js/ts code.
 10. Run `fluence remove` to remove the previously deployed fluence application 
 
 
