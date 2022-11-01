@@ -18,12 +18,12 @@ import { Command, Flags } from "@oclif/core";
 
 import { js } from "./helpers/jsTemplateLitteral";
 
-export const AQUA_RECOMMENDED_VERSION = "0.7.5-342";
+export const AQUA_RECOMMENDED_VERSION = "0.7.7-362";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.6";
-export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.6.15";
-export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.5.0";
+export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
+export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
 export const FLUENCE_JS_RECOMMENDED_VERSION = "0.26.3";
 export const FLUENCE_NETWORK_INVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
