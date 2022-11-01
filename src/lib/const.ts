@@ -16,12 +16,12 @@
 
 import { Command, Flags } from "@oclif/core";
 
-export const AQUA_RECOMMENDED_VERSION = "0.7.5-342";
+export const AQUA_RECOMMENDED_VERSION = "0.7.7-362";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.6";
-export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.6.15";
-export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.5.0";
+export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
+export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
 export const REQUIRED_RUST_TOOLCHAIN = "nightly-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
