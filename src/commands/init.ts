@@ -19,28 +19,49 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import { color } from "@oclif/color";
-import { Command } from "@oclif/core";
+import { Command, Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../lib/ajv";
-import { initNewReadonlyFluenceConfig } from "../lib/configs/project/fluence";
+import {
+  FluenceConfig,
+  initNewFluenceConfig,
+} from "../lib/configs/project/fluence";
 import {
   CommandObj,
   FS_OPTIONS,
   RECOMMENDED_GITIGNORE_CONTENT,
   NO_INPUT_FLAG,
-  MAIN_AQUA_FILE_CONTENT,
+  Template,
+  templates,
+  isTemplate,
+  FLUENCE_JS_RECOMMENDED_VERSION,
+  FLUENCE_NETWORK_INVIRONMENT_RECOMMENDED_VERSION,
+  PACKAGE_JSON_FILE_NAME,
+  INDEX_JS_FILE_NAME,
+  INDEX_TS_FILE_NAME,
+  SRC_DIR_NAME,
+  getTemplateIndexFileContent,
+  TYPESCRIPT_RECOMMENDED_VERSION,
+  TS_NODE_RECOMMENDED_VERSION,
+  TS_CONFIG_FILE_NAME,
+  IS_DEVELOPMENT,
 } from "../lib/const";
+import { execPromise } from "../lib/execPromise";
 import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import {
+  ensureDefaultAquaJSPath,
+  ensureDefaultAquaTSPath,
+  ensureDefaultJSDirPath,
+  ensureDefaultTSDirPath,
   ensureVSCodeExtensionsJsonPath,
-  ensureSrcAquaMainPath,
   getGitignorePath,
+  getProjectRootDir,
   setProjectRootDir,
 } from "../lib/paths";
-import { input } from "../lib/prompt";
+import { input, list } from "../lib/prompt";
 
 export const PATH = "PATH";
 
@@ -48,6 +69,12 @@ export default class Init extends Command {
   static override description = "Initialize fluence project";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    template: Flags.string({
+      description: `Template to use for the project. One of: ${templates.join(
+        ", "
+      )}`,
+      char: "t",
+    }),
     ...NO_INPUT_FLAG,
   };
   static override args = [
@@ -66,9 +93,58 @@ export default class Init extends Command {
       commandObj: this,
       isInteractive,
       projectPath,
+      template: await ensureTemplate({
+        isInteractive,
+        commandObj: this,
+        templateOrUnknown: flags.template,
+      }),
     });
   }
 }
+
+type SelectTemplateArg = {
+  commandObj: CommandObj;
+  isInteractive: boolean;
+};
+
+const selectTemplate = ({
+  commandObj,
+  isInteractive,
+}: SelectTemplateArg): Promise<Template> =>
+  list({
+    message: "Select template",
+    options: [...templates],
+    oneChoiceMessage: (): never =>
+      commandObj.error("Unreachable: only one template"),
+    onNoChoices: (): never => commandObj.error("Unreachable: no templates"),
+    isInteractive,
+  });
+
+type EnsureTemplateArg = {
+  templateOrUnknown: string | undefined;
+  commandObj: CommandObj;
+  isInteractive: boolean;
+};
+
+const ensureTemplate = ({
+  commandObj,
+  isInteractive,
+  templateOrUnknown,
+}: EnsureTemplateArg): Promise<Template> => {
+  if (isTemplate(templateOrUnknown)) {
+    return Promise.resolve(templateOrUnknown);
+  }
+
+  if (typeof templateOrUnknown === "string") {
+    commandObj.warn(
+      `Unknown template: ${color.yellow(
+        templateOrUnknown
+      )}. Available templates: ${templates.join(", ")}`
+    );
+  }
+
+  return selectTemplate({ commandObj, isInteractive });
+};
 
 const RECOMMENDATIONS = "recommendations";
 
@@ -168,10 +244,15 @@ type InitArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
   projectPath?: string | undefined;
+  template?: Template;
 };
 
-export const init = async (options: InitArg): Promise<void> => {
-  const { commandObj, isInteractive } = options;
+export const init = async (options: InitArg): Promise<FluenceConfig> => {
+  const {
+    commandObj,
+    isInteractive,
+    template = await selectTemplate({ commandObj, isInteractive }),
+  } = options;
 
   const projectPath =
     options.projectPath === undefined && !isInteractive
@@ -185,35 +266,141 @@ export const init = async (options: InitArg): Promise<void> => {
             }))
         );
 
-  try {
-    await fsPromises.mkdir(projectPath, { recursive: true });
-    setProjectRootDir(projectPath);
-    await initNewReadonlyFluenceConfig(commandObj);
+  await fsPromises.mkdir(projectPath, { recursive: true });
+  setProjectRootDir(projectPath);
 
-    const srcMainAquaPath = await ensureSrcAquaMainPath();
+  const fluenceConfig = await initNewFluenceConfig(commandObj);
 
-    try {
-      await fsPromises.access(srcMainAquaPath);
-    } catch {
-      await fsPromises.writeFile(
-        srcMainAquaPath,
-        MAIN_AQUA_FILE_CONTENT,
-        FS_OPTIONS
-      );
+  switch (template) {
+    case "minimal":
+      break;
+
+    case "js": {
+      await initTSorJSProject({ isJS: true, fluenceConfig });
+      break;
     }
 
-    await ensureVSCodeRecommendedExtensions();
-    await ensureVSCodeSettingsJSON({ generateSettingsJson: true, commandObj });
-    await ensureGitIgnore();
+    case "ts": {
+      await initTSorJSProject({ isJS: false, fluenceConfig });
+      break;
+    }
 
-    commandObj.log(
-      color.magentaBright(
-        `\nSuccessfully initialized Fluence project template at ${replaceHomeDir(
-          projectPath
-        )}\n`
-      )
-    );
-  } catch (error) {
-    commandObj.error(String(error));
+    default: {
+      const _exhaustiveCheck: never = template;
+      return _exhaustiveCheck;
+    }
   }
+
+  await ensureVSCodeRecommendedExtensions();
+  await ensureVSCodeSettingsJSON({ generateSettingsJson: true, commandObj });
+  await ensureGitIgnore();
+
+  commandObj.log(
+    color.magentaBright(
+      `\nSuccessfully initialized Fluence project template at ${replaceHomeDir(
+        projectPath
+      )}\n`
+    )
+  );
+
+  return fluenceConfig;
+};
+
+type InitTSorJSProjectArg = {
+  isJS: boolean;
+  fluenceConfig: FluenceConfig;
+};
+
+export const initTSorJSProject = async ({
+  isJS,
+  fluenceConfig,
+}: InitTSorJSProjectArg): Promise<void> => {
+  const defaultAquaTSorJSPath = isJS
+    ? await ensureDefaultAquaJSPath()
+    : await ensureDefaultAquaTSPath();
+
+  const defaultAquaTSorJSPathRelative = path.relative(
+    getProjectRootDir(),
+    defaultAquaTSorJSPath
+  );
+
+  const defaultTSorJSDirPath = isJS
+    ? await ensureDefaultJSDirPath()
+    : await ensureDefaultTSDirPath();
+
+  const indexFileName = isJS ? INDEX_JS_FILE_NAME : INDEX_TS_FILE_NAME;
+
+  const PACKAGE_JSON = {
+    name: path.dirname(getProjectRootDir()),
+    version: "1.0.0",
+    description: "",
+    main: indexFileName,
+    ...(isJS ? { type: "module" } : {}),
+    scripts: {
+      postinstall: IS_DEVELOPMENT ? "../../bin/dev aqua" : "fluence aqua",
+      start: `${isJS ? "node" : "ts-node"} ${path.join(
+        SRC_DIR_NAME,
+        indexFileName
+      )}`,
+    },
+    keywords: ["fluence"],
+    author: "",
+    license: "ISC",
+    dependencies: {
+      "@fluencelabs/fluence": FLUENCE_JS_RECOMMENDED_VERSION,
+      "@fluencelabs/fluence-network-environment":
+        FLUENCE_NETWORK_INVIRONMENT_RECOMMENDED_VERSION,
+      ...(isJS ? {} : { "ts-node": TS_NODE_RECOMMENDED_VERSION }),
+      typescript: TYPESCRIPT_RECOMMENDED_VERSION,
+    },
+  } as const;
+
+  await fsPromises.writeFile(
+    path.join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
+    JSON.stringify(PACKAGE_JSON, null, 2) + "\n",
+    FS_OPTIONS
+  );
+
+  await fsPromises.writeFile(
+    path.join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
+    getTemplateIndexFileContent(isJS),
+    FS_OPTIONS
+  );
+
+  if (isJS) {
+    fluenceConfig.aquaOutputJSPath = defaultAquaTSorJSPathRelative;
+    fluenceConfig.appJSPath = defaultAquaTSorJSPathRelative;
+  } else {
+    const TS_CONFIG = {
+      compilerOptions: {
+        target: "es2016",
+        module: "commonjs",
+        esModuleInterop: true,
+        forceConsistentCasingInFileNames: true,
+        strict: true,
+        skipLibCheck: true,
+      },
+    };
+
+    await fsPromises.writeFile(
+      path.join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
+      JSON.stringify(TS_CONFIG),
+      FS_OPTIONS
+    );
+
+    fluenceConfig.aquaOutputTSPath = defaultAquaTSorJSPathRelative;
+    fluenceConfig.appTSPath = defaultAquaTSorJSPathRelative;
+  }
+
+  await fluenceConfig.$commit();
+
+  await execPromise({
+    printOutput: true,
+    command: "npm",
+    args: ["i"],
+    options: { cwd: defaultTSorJSDirPath },
+    message: `Installing npm dependencies for ${
+      isJS ? "JS" : "TS"
+    } project and compiling aqua example`,
+  });
 };

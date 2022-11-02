@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
@@ -26,15 +27,22 @@ import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
   FLUENCE_CONFIG_FILE_NAME,
+  FS_OPTIONS,
+  MAIN_AQUA_FILE_CONTENT,
   MARINE_CARGO_DEPENDENCY,
   MARINE_RECOMMENDED_VERSION,
   MREPL_CARGO_DEPENDENCY,
   MREPL_RECOMMENDED_VERSION,
 } from "../../const";
+import { recursivelyFindFile } from "../../helpers/recursivelyFindFile";
 import { NETWORKS, Relays } from "../../multiaddr";
-import { ensureFluenceDir, getProjectRootDir } from "../../paths";
 import {
-  GetDefaultConfig,
+  ensureFluenceDir,
+  ensureSrcAquaMainPath,
+  getProjectRootDir,
+  setProjectRootDir,
+} from "../../paths";
+import {
   getConfigInitFunction,
   InitConfigOptions,
   InitializedConfig,
@@ -218,6 +226,8 @@ const configSchemaV1Obj = {
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = configSchemaV1Obj;
 
+export const AQUA_INPUT_PATH_PROPERTY = "aquaInputPath";
+
 type ConfigV2 = Omit<ConfigV1, "version"> & {
   version: 2;
   dependencies: {
@@ -229,6 +239,9 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
       [MREPL_CARGO_DEPENDENCY]: string;
     } & Record<string, string>;
   };
+  [AQUA_INPUT_PATH_PROPERTY]?: string;
+  aquaOutputTSPath?: string;
+  aquaOutputJSPath?: string;
   appTSPath?: string;
   appJSPath?: string;
 };
@@ -259,27 +272,49 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       },
       required: ["npm", "cargo"],
     },
+    [AQUA_INPUT_PATH_PROPERTY]: { type: "string", nullable: true },
+    aquaOutputTSPath: { type: "string", nullable: true },
+    aquaOutputJSPath: { type: "string", nullable: true },
     appTSPath: { type: "string", nullable: true },
     appJSPath: { type: "string", nullable: true },
   },
 };
 
-const configSchemaV2DefaultConfig: ConfigV2 = {
-  version: 2,
-  dependencies: {
-    npm: {
-      [AQUA_NPM_DEPENDENCY]: AQUA_RECOMMENDED_VERSION,
-      [AQUA_LIB_NPM_DEPENDENCY]: AQUA_LIB_RECOMMENDED_VERSION,
+const initFluenceProject = async (): Promise<ConfigV2> => {
+  const srcMainAquaPath = await ensureSrcAquaMainPath();
+
+  try {
+    await fsPromises.access(srcMainAquaPath);
+  } catch {
+    await fsPromises.writeFile(
+      srcMainAquaPath,
+      MAIN_AQUA_FILE_CONTENT,
+      FS_OPTIONS
+    );
+  }
+
+  const srcMainAquaPathRelative = path.relative(
+    getProjectRootDir(),
+    srcMainAquaPath
+  );
+
+  return {
+    version: 2,
+    dependencies: {
+      npm: {
+        [AQUA_NPM_DEPENDENCY]: AQUA_RECOMMENDED_VERSION,
+        [AQUA_LIB_NPM_DEPENDENCY]: AQUA_LIB_RECOMMENDED_VERSION,
+      },
+      cargo: {
+        [MARINE_CARGO_DEPENDENCY]: MARINE_RECOMMENDED_VERSION,
+        [MREPL_CARGO_DEPENDENCY]: MREPL_RECOMMENDED_VERSION,
+      },
     },
-    cargo: {
-      [MARINE_CARGO_DEPENDENCY]: MARINE_RECOMMENDED_VERSION,
-      [MREPL_CARGO_DEPENDENCY]: MREPL_RECOMMENDED_VERSION,
-    },
-  },
+    [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
+  } as const;
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig =>
-  configSchemaV2DefaultConfig;
+const getDefault = (): Promise<LatestConfig> => initFluenceProject();
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
@@ -315,7 +350,7 @@ const migrations: Migrations<Config> = [
       services,
     };
   },
-  (config: Config): ConfigV2 => {
+  async (config: Config): Promise<ConfigV2> => {
     if (!validateConfigSchemaV1(config)) {
       throw new Error(
         `Migration error. Errors: ${JSON.stringify(
@@ -326,7 +361,7 @@ const migrations: Migrations<Config> = [
 
     return {
       ...config,
-      ...configSchemaV2DefaultConfig,
+      ...(await initFluenceProject()),
     };
   },
 ];
@@ -362,6 +397,9 @@ services:
 peerIds: # A map of named peerIds. Optional.
   MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
 relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras
+${AQUA_INPUT_PATH_PROPERTY}: ./path/to/aqua/file/or/dir # Optional. Path to aqua file or directory with aqua files
+aquaOutputTSPath: ./path/to/ts/aqua/dir # Optional. Default compilation target dir from aqua to ts
+aquaOutputJSPath: ./path/to/js/aqua/dir # Optional. Overrides aquaOutputTSPath. Default compilation target dir from aqua to js
 appTSPath: ./path/to/app-ts/dir # Optional. If you want to generate ts files including app.ts to be able to access deployed app data in aqua when using FluenceJS,
 appJSPath: ./path/to/app-js/dir # Optional. If you want to generate js files including app.js to be able to access deployed app data in aqua when using FluenceJS`;
 
@@ -411,17 +449,26 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV2,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
-  getConfigDirPath: getProjectRootDir,
+  getConfigDirPath: async (): Promise<string> => {
+    const fluenceConfigPath = await recursivelyFindFile(
+      FLUENCE_CONFIG_FILE_NAME,
+      getProjectRootDir()
+    );
+
+    if (fluenceConfigPath === null) {
+      return getProjectRootDir();
+    }
+
+    const projectRootDir = path.dirname(fluenceConfigPath);
+    setProjectRootDir(projectRootDir);
+    return projectRootDir;
+  },
   getSchemaDirPath: ensureFluenceDir,
   examples,
   validate,
 };
 
 export const initNewFluenceConfig = getConfigInitFunction(
-  initConfigOptions,
-  getDefault
-);
-export const initNewReadonlyFluenceConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );

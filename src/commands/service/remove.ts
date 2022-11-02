@@ -19,7 +19,6 @@ import assert from "node:assert";
 import color from "@oclif/color";
 import { Command } from "@oclif/core";
 
-import { initFluenceConfig } from "../../lib/configs/project/fluence";
 import { FLUENCE_CONFIG_FILE_NAME, NO_INPUT_FLAG } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
@@ -46,7 +45,7 @@ export default class Remove extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Remove);
     const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
+    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
     const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
 
     assert(
@@ -62,12 +61,6 @@ export default class Remove extends Command {
           FLUENCE_CONFIG_FILE_NAME
         )}, path to a service or url to .tar.gz archive`,
       }));
-
-    const fluenceConfig = await initFluenceConfig(this);
-
-    if (fluenceConfig === null) {
-      this.error("You must init Fluence project first to remove services");
-    }
 
     if (fluenceConfig.services === undefined) {
       this.error(

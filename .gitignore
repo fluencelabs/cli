@@ -1,3 +1,4 @@
+# oclif default
 *-debug.log
 *-error.log
 /.nyc_output
@@ -5,18 +6,23 @@
 /tmp
 /--fix
 /yarn.lock
-node_modules
 oclif.manifest.json
 .eslintcache
+
+# for ease of development
 /fluence.yaml
-.fluence
-/src/aqua
-/src/services
+src/aqua
+src/services
+src/ts
+src/js
+
+# recommended by Fluence
 .idea
 .DS_Store
+.fluence
 **/node_modules
-Cargo.lock
 **/target/
 .repl_history
 .vscode/settings.json
-src/aqua/*.ts
+src/ts/src/aqua
+src/js/src/aqua

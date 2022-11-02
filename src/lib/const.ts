@@ -16,12 +16,18 @@
 
 import { Command, Flags } from "@oclif/core";
 
+import { js } from "./helpers/jsTemplateLitteral";
+
 export const AQUA_RECOMMENDED_VERSION = "0.7.7-362";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.6";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
+export const FLUENCE_JS_RECOMMENDED_VERSION = "0.26.3";
+export const FLUENCE_NETWORK_INVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
+export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
+export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const REQUIRED_RUST_TOOLCHAIN = "nightly-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
@@ -36,6 +42,8 @@ export const TOML_EXT = "toml";
 export const FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
+export const TS_DIR_NAME = "ts";
+export const JS_DIR_NAME = "js";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
@@ -64,6 +72,7 @@ export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
 export const GITIGNORE_FILE_NAME = ".gitignore";
 
 export const PACKAGE_JSON_FILE_NAME = `package.${JSON_EXT}`;
+export const TS_CONFIG_FILE_NAME = `tsconfig.${JSON_EXT}`;
 export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
 export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
 export const DEPLOY_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
@@ -73,6 +82,8 @@ export const APP_TS_FILE_NAME = `app.${TS_EXT}`;
 export const APP_JS_FILE_NAME = `app.${JS_EXT}`;
 export const DEPLOYED_APP_TS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${TS_EXT}`;
 export const DEPLOYED_APP_JS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${JS_EXT}`;
+export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
+export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
 
 export const CRATES_TOML = `.crates.${TOML_EXT}`;
 export const CONFIG_TOML = `Config.${TOML_EXT}`;
@@ -108,6 +119,12 @@ export const TIMEOUT_FLAG = {
   }),
 } as const;
 
+export const templates = ["minimal", "ts", "js"] as const;
+export type Template = typeof templates[number];
+export const isTemplate = (template: unknown): template is Template =>
+  // eslint-disable-next-line unicorn/prefer-includes
+  templates.some((val): boolean => template === val);
+
 export const FORCE_FLAG_NAME = "force";
 export const NAME_FLAG_NAME = "name";
 
@@ -123,7 +140,8 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 **/target/
 .repl_history
 .vscode/settings.json
-src/aqua/*.ts`;
+src/ts/src/aqua
+src/js/src/aqua`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
@@ -142,10 +160,10 @@ import "@fluencelabs/aqua-lib/builtin.aqua"
 
 -- import App from "deployed.app.aqua"
 -- import Adder from "services/adder.aqua"
--- export App, add_one
+-- export App, addOne
 
 -- IMPORTANT: Add exports for all functions that you want to run
-export hello_world, hello_world_remote, get_info, get_infos, get_infos_par
+export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
 
 -- DOCUMENTATION:
 -- https://fluence.dev
@@ -153,7 +171,7 @@ export hello_world, hello_world_remote, get_info, get_infos, get_infos_par
 
 -- Uncomment the following when you deploy your app with Adder service:
 
--- func add_one(x: u64) -> u64:
+-- func addOne(x: u64) -> u64:
 --     services <- App.services()
 --     on services.adder.default!.peerId:
 --         Adder services.adder.default!.serviceId
@@ -161,25 +179,25 @@ export hello_world, hello_world_remote, get_info, get_infos, get_infos_par
 --     <- res
 
 -- local
-func hello_world(name: string) -> string:
+func helloWorld(name: string) -> string:
     <- Op.concat_strings("Hello, ", name)
 
 -- remote
-func hello_world_remote(name: string) -> string:
+func helloWorldRemote(name: string) -> string:
     on HOST_PEER_ID:
-        hello_msg <- hello_world(name)
+        hello_msg <- helloWorld(name)
         from_msg <- Op.concat_strings(hello_msg, "! From ")
         from_peer_msg <- Op.concat_strings(from_msg, HOST_PEER_ID)
     <- from_peer_msg
 
 -- request response
-func get_info() -> Info, PeerId:
+func getInfo() -> Info, PeerId:
     on HOST_PEER_ID:
         info <- Peer.identify()
     <- info, HOST_PEER_ID
 
 -- iterate through several peers
-func get_infos(peers: []PeerId) -> []Info:
+func getInfos(peers: []PeerId) -> []Info:
     infos: *Info
     for p <- peers:
         on p:
@@ -187,7 +205,7 @@ func get_infos(peers: []PeerId) -> []Info:
     <- infos
 
 -- parallel computation
-func get_infos_par(peers: []PeerId) -> []Info:
+func getInfosInParallel(peers: []PeerId) -> []Info:
     infos: *Info
     for p <- peers par:
         on p:
@@ -197,4 +215,49 @@ func get_infos_par(peers: []PeerId) -> []Info:
     par Peer.timeout(PARTICLE_TTL / 2, "")
 
     <- infos
+`;
+
+export const getTemplateIndexFileContent = (isJS: boolean): string => js`
+import { Fluence } from "@fluencelabs/fluence";
+import { krasnodar } from "@fluencelabs/fluence-network-environment";
+
+import {
+  helloWorld,
+  helloWorldRemote,
+  getInfo,
+  getInfos,
+  getInfosInParallel,
+} from "./aqua/main${isJS}";
+
+// // Uncomment following imports when app is deployed:
+// import { addOne } from "./aqua/main${isJS}";
+// import { registerApp } from "./aqua/app${isJS}";
+
+const peerIds = krasnodar.map(({ peerId }) => peerId);
+
+const main = async () => {
+  const connectTo = krasnodar[0];
+
+  if (connectTo === undefined) {
+    throw new Error("No relay");
+  }
+
+  await Fluence.start({ connectTo });
+
+  const helloWorldResult = await helloWorld("Fluence");
+  const helloWorldRemoteResult = await helloWorldRemote("Fluence");
+  const getInfoResult = await getInfo();
+  const getInfosResult = await getInfos(peerIds);
+  const getInfosInParallelResult = await getInfosInParallel(peerIds);
+
+  console.log(helloWorldResult);
+
+  // // Uncomment when app is deployed:
+  // registerApp()
+  // console.log(await addOne(1))
+};
+
+main().catch((error) => {
+  console.error(error);
+});
 `;
