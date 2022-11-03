@@ -396,13 +396,6 @@ type GetPeerIdsArg = {
   namedPeerIds: Record<string, string> | undefined;
 };
 
-const getNamedPeerIdsFn =
-  (
-    namedPeerIds: Record<string, string>
-  ): ((peerIds: Array<string>) => string[]) =>
-  (peerIds: Array<string>): string[] =>
-    peerIds.map((peerId): string => namedPeerIds[peerId] ?? peerId);
-
 const getPeerIds = ({
   peerId,
   distribution = DISTRIBUTION_EVEN,
@@ -410,7 +403,8 @@ const getPeerIds = ({
   relays,
   namedPeerIds = {},
 }: GetPeerIdsArg): Array<string> => {
-  const getNamedPeerIds = getNamedPeerIdsFn(namedPeerIds);
+  const getNamedPeerIds = (peerIds: Array<string>): string[] =>
+    peerIds.map((peerId): string => namedPeerIds[peerId] ?? peerId);
 
   if (distribution === DISTRIBUTION_EVEN) {
     if (peerId === undefined) {
