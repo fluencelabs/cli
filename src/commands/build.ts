@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
 import { CliUx, Command } from "@oclif/core";
 
-import {
-  Distribution,
-  DISTRIBUTION_EVEN,
+import type {
   FluenceConfigReadonly,
   OverrideModules,
   ServiceDeployV1,
@@ -49,10 +48,12 @@ import {
   downloadModule,
   downloadService,
   getModuleUrlOrAbsolutePath,
+  getModuleWasmPath,
   isUrl,
   validateAquaName,
 } from "../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
+import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import {
   ConfigKeyPair,
@@ -62,13 +63,6 @@ import {
   getUserKeyPair,
 } from "../lib/keypairs";
 import { initMarineCli, MarineCLI } from "../lib/marineCli";
-import {
-  getEvenlyDistributedIds,
-  getEvenlyDistributedIdsFromTheList,
-  getRandomRelayId,
-  getRandomRelayIdFromTheList,
-  Relays,
-} from "../lib/multiaddr";
 import { confirm } from "../lib/prompt";
 
 export default class Build extends Command {
@@ -96,50 +90,52 @@ export default class Build extends Command {
 
     const marineCli = await initMarineCli(this, fluenceConfig);
 
-    const allServiceInfos = await resolveServiceInfos({
-      commandObj: this,
+    await build({
       fluenceConfig,
       defaultKeyPair,
       isInteractive,
+      marineCli,
+      commandObj: this,
     });
-
-    await build({ allServiceInfos, marineCli, commandObj: this });
   }
 }
 
-type DeployInfoModule = {
+type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
   moduleConfig: ModuleV0;
 };
-
-type ServiceInfo = {
+type ServiceInfoWithUnresolvedModuleConfigs = Omit<
+  ServiceDeployV1,
+  "overrideModules" | "keyPairName"
+> & {
   serviceName: string;
   serviceDirPath: string;
-  deployId: string;
-  peerId: string;
-  modules: Array<DeployInfoModule>;
+  moduleNamesAndConfigsDefinedInService: Array<ModuleNameAndConfigDefinedInService>;
   keyPair: ConfigKeyPair;
 };
 
-const overrideModule = (
-  mod: ModuleV0,
-  overrideModules: OverrideModules | undefined,
-  moduleName: string
-): ModuleV0 => ({ ...mod, ...overrideModules?.[moduleName] });
+export type ServiceInfo = Omit<
+  ServiceInfoWithUnresolvedModuleConfigs,
+  "moduleNamesAndConfigsDefinedInService" | "serviceDirPath"
+> & {
+  moduleConfigs: Array<ModuleConfigReadonly & { wasmPath: string }>;
+};
 
-type ResolveServiceInfos = {
+type ResolveServiceInfosArg = {
   commandObj: CommandObj;
   fluenceConfig: FluenceConfigReadonly;
   defaultKeyPair: ConfigKeyPair;
   isInteractive: boolean;
 };
 
-export const resolveServiceInfos = async ({
+const resolveServiceInfos = async ({
   commandObj,
   fluenceConfig,
   defaultKeyPair,
   isInteractive,
-}: ResolveServiceInfos): Promise<ServiceInfo[]> => {
+}: ResolveServiceInfosArg): Promise<
+  ServiceInfoWithUnresolvedModuleConfigs[]
+> => {
   if (
     fluenceConfig.services === undefined ||
     Object.keys(fluenceConfig.services).length === 0
@@ -151,10 +147,10 @@ export const resolveServiceInfos = async ({
     );
   }
 
-  type ServicePathPromises = Promise<{
+  type ServiceConfigPromises = Promise<{
     serviceName: string;
     serviceDirPath: string;
-    get: string;
+    serviceConfig: ServiceConfigReadonly;
     deploy: Array<ServiceDeployV1>;
     keyPair: ConfigKeyPair;
   }>;
@@ -207,61 +203,38 @@ export const resolveServiceInfos = async ({
     return keyPair;
   };
 
-  const servicePaths = await Promise.all(
+  const serviceConfigs = await Promise.all(
     Object.entries(fluenceConfig.services).map(
-      ([serviceName, { get, deploy, keyPairName }]): ServicePathPromises =>
-        (async (): ServicePathPromises => ({
-          serviceName,
-          deploy,
-          get,
-          keyPair: await getKeyPair(defaultKeyPair, keyPairName),
-          serviceDirPath: isUrl(get)
+      ([serviceName, { get, deploy, keyPairName }]): ServiceConfigPromises =>
+        (async (): ServiceConfigPromises => {
+          const serviceDirPath = isUrl(get)
             ? await downloadService(get)
-            : path.resolve(get),
-        }))()
+            : path.resolve(get);
+
+          return {
+            serviceName,
+            deploy,
+            keyPair: await getKeyPair(defaultKeyPair, keyPairName),
+            serviceDirPath,
+            serviceConfig:
+              (await initReadonlyServiceConfig(serviceDirPath, commandObj)) ??
+              commandObj.error(
+                `Service ${color.yellow(serviceName)} must have ${color.yellow(
+                  SERVICE_CONFIG_FILE_NAME
+                )}. ${
+                  isUrl(get)
+                    ? `Not able to find it after downloading and decompressing ${color.yellow(
+                        get
+                      )}`
+                    : `Not able to find it at ${color.yellow(get)}`
+                }`
+              ),
+          };
+        })()
     )
   );
 
   CliUx.ux.action.stop();
-
-  type ServiceConfigPromises = Promise<{
-    serviceName: string;
-    serviceConfig: ServiceConfigReadonly;
-    serviceDirPath: string;
-    deploy: Array<ServiceDeployV1>;
-    keyPair: ConfigKeyPair;
-  }>;
-
-  const serviceConfigs = await Promise.all(
-    servicePaths.map(
-      ({
-        serviceName,
-        serviceDirPath,
-        deploy,
-        get,
-        keyPair,
-      }): ServiceConfigPromises =>
-        (async (): ServiceConfigPromises => ({
-          serviceName,
-          deploy,
-          keyPair,
-          serviceConfig:
-            (await initReadonlyServiceConfig(serviceDirPath, commandObj)) ??
-            commandObj.error(
-              `Service ${color.yellow(serviceName)} must have ${color.yellow(
-                SERVICE_CONFIG_FILE_NAME
-              )}. ${
-                isUrl(get)
-                  ? `Not able to find it after downloading and decompressing ${color.yellow(
-                      get
-                    )}`
-                  : `Not able to find it at ${color.yellow(get)}`
-              }`
-            ),
-          serviceDirPath,
-        }))()
-    )
-  );
 
   return Promise.all(
     serviceConfigs.flatMap(
@@ -271,17 +244,14 @@ export const resolveServiceInfos = async ({
         serviceConfig,
         serviceDirPath,
         keyPair,
-      }): Array<Promise<ServiceInfo>> =>
+      }): Array<Promise<ServiceInfoWithUnresolvedModuleConfigs>> =>
         deploy.flatMap(
-          ({
-            deployId,
-            count,
-            peerId,
-            peerIds,
+          async ({
             overrideModules,
-            distribution,
             keyPairName,
-          }): Array<Promise<ServiceInfo>> => {
+            ...rest
+          }): Promise<ServiceInfoWithUnresolvedModuleConfigs> => {
+            const { deployId } = rest;
             const deployIdValidity = validateAquaName(deployId);
 
             if (deployIdValidity !== true) {
@@ -290,54 +260,46 @@ export const resolveServiceInfos = async ({
               );
             }
 
-            return getPeerIds({
-              peerId: peerIds ?? peerId,
-              distribution,
-              count,
-              relays: fluenceConfig.relays,
-              namedPeerIds: fluenceConfig.peerIds,
-            }).map(
-              (peerId: string): Promise<ServiceInfo> =>
-                (async (): Promise<ServiceInfo> => ({
-                  serviceName,
-                  serviceDirPath,
+            return {
+              serviceName,
+              serviceDirPath,
+              moduleNamesAndConfigsDefinedInService:
+                getModuleNamesAndConfigsDefinedInServices({
+                  commandObj,
                   deployId,
-                  peerId:
-                    typeof peerId === "string"
-                      ? fluenceConfig?.peerIds?.[peerId ?? ""] ?? peerId
-                      : peerId,
-                  modules: getDeployInfoModules({
-                    commandObj,
-                    deployId,
-                    overrideModules,
-                    serviceConfigModules: serviceConfig.modules,
-                    serviceDirPath,
-                    serviceName,
-                  }),
-                  keyPair: await getKeyPair(keyPair, keyPairName),
-                }))()
-            );
+                  overrideModules,
+                  serviceConfigModules: serviceConfig.modules,
+                  serviceDirPath,
+                  serviceName,
+                }),
+              keyPair: await getKeyPair(keyPair, keyPairName),
+              ...rest,
+            };
           }
         )
     )
   );
 };
 
-type BuildArg = {
-  commandObj: CommandObj;
-  allServiceInfos: ServiceInfo[];
+export type BuildArg = ResolveServiceInfosArg & {
   marineCli: MarineCLI;
 };
 
 export const build = async ({
-  commandObj,
-  allServiceInfos,
   marineCli,
-}: BuildArg): Promise<Map<string, ModuleConfigReadonly>> => {
-  const setOfAllGets = [
+  ...resolveDeployInfosArg
+}: BuildArg): Promise<Array<ServiceInfo>> => {
+  const { commandObj } = resolveDeployInfosArg;
+
+  const serviceInfos = await resolveServiceInfos(resolveDeployInfosArg);
+
+  const setOfAllModuleGets = [
     ...new Set(
-      allServiceInfos.flatMap(
-        ({ modules, serviceDirPath }): Array<string> =>
+      serviceInfos.flatMap(
+        ({
+          moduleNamesAndConfigsDefinedInService: modules,
+          serviceDirPath,
+        }): Array<string> =>
           modules.map(({ moduleConfig: { get } }): string =>
             getModuleUrlOrAbsolutePath(get, serviceDirPath)
           )
@@ -347,9 +309,9 @@ export const build = async ({
 
   CliUx.ux.action.start("Making sure all modules are downloaded and built");
 
-  const mapOfAllModuleConfigs = new Map(
+  const mapOfModuleConfigs = new Map(
     await Promise.all(
-      setOfAllGets.map(
+      setOfAllModuleGets.map(
         (get): Promise<[string, ModuleConfigReadonly]> =>
           (async (): Promise<[string, ModuleConfigReadonly]> => {
             const moduleConfig = isUrl(get)
@@ -385,51 +347,76 @@ export const build = async ({
 
   CliUx.ux.action.stop();
 
-  return mapOfAllModuleConfigs;
-};
+  const serviceNamePathToFacadeMap: Record<string, string> = {};
 
-type GetPeerIdsArg = {
-  peerId: undefined | string | Array<string>;
-  distribution: Distribution | undefined;
-  count: number | undefined;
-  relays: Relays;
-  namedPeerIds: Record<string, string> | undefined;
-};
+  const serviceInfoWithModuleConfigs = serviceInfos.map(
+    ({
+      moduleNamesAndConfigsDefinedInService: modules,
+      serviceDirPath,
+      ...rest
+    }): ServiceInfo => {
+      const moduleConfigs = modules.map(
+        ({
+          moduleConfig: { get, ...overrides },
+        }): ModuleConfigReadonly & { wasmPath: string } => {
+          const moduleConfig = mapOfModuleConfigs.get(
+            getModuleUrlOrAbsolutePath(get, serviceDirPath)
+          );
 
-const getPeerIds = ({
-  peerId,
-  distribution = DISTRIBUTION_EVEN,
-  count,
-  relays,
-  namedPeerIds = {},
-}: GetPeerIdsArg): Array<string> => {
-  const getNamedPeerIds = (peerIds: Array<string>): string[] =>
-    peerIds.map((peerId): string => namedPeerIds[peerId] ?? peerId);
+          if (moduleConfig === undefined) {
+            return commandObj.error(
+              `Unreachable. Wasn't able to find module config for ${get}`
+            );
+          }
 
-  if (distribution === DISTRIBUTION_EVEN) {
-    if (peerId === undefined) {
-      return getEvenlyDistributedIds(relays, count);
+          const overriddenModuleConfig = { ...moduleConfig, ...overrides };
+
+          return {
+            ...overriddenModuleConfig,
+            wasmPath: getModuleWasmPath(overriddenModuleConfig),
+          };
+        }
+      );
+
+      const facadeModuleConfig = moduleConfigs[moduleConfigs.length - 1];
+
+      assert(
+        facadeModuleConfig !== undefined,
+        "Unreachable. Each service must have at least one module"
+      );
+
+      serviceNamePathToFacadeMap[rest.serviceName] =
+        facadeModuleConfig.wasmPath;
+
+      return {
+        moduleConfigs,
+        ...rest,
+      };
     }
-
-    return getEvenlyDistributedIdsFromTheList(
-      getNamedPeerIds(typeof peerId === "string" ? [peerId] : peerId),
-      count
-    );
-  }
-
-  if (peerId === undefined) {
-    return Array.from({ length: count ?? 1 }).map((): string =>
-      getRandomRelayId(relays)
-    );
-  }
-
-  const peerIds = typeof peerId === "string" ? [peerId] : peerId;
-  return Array.from({ length: count ?? peerIds.length }).map((): string =>
-    getRandomRelayIdFromTheList(peerIds)
   );
+
+  // generate interfaces for all services
+  await Promise.all(
+    Object.entries(serviceNamePathToFacadeMap).map(
+      ([serviceName, pathToFacadeWasm]): Promise<void> =>
+        generateServiceInterface({
+          pathToFacadeWasm,
+          marineCli,
+          serviceName,
+        })
+    )
+  );
+
+  return serviceInfoWithModuleConfigs;
 };
 
-type GetDeployInfoModulesArg = {
+const overrideModule = (
+  mod: ModuleV0,
+  overrideModules: OverrideModules | undefined,
+  moduleName: string
+): ModuleV0 => ({ ...mod, ...overrideModules?.[moduleName] });
+
+type GetModuleNamesAndConfigsDefinedInServicesArg = {
   commandObj: CommandObj;
   overrideModules: OverrideModules | undefined;
   serviceName: string;
@@ -438,14 +425,14 @@ type GetDeployInfoModulesArg = {
   serviceConfigModules: { facade: ModuleV0 } & Record<string, ModuleV0>;
 };
 
-const getDeployInfoModules = ({
+const getModuleNamesAndConfigsDefinedInServices = ({
   commandObj,
   overrideModules,
   serviceName,
   deployId,
   serviceDirPath,
   serviceConfigModules,
-}: GetDeployInfoModulesArg): Array<DeployInfoModule> => {
+}: GetModuleNamesAndConfigsDefinedInServicesArg): ModuleNameAndConfigDefinedInService[] => {
   const modulesNotFoundInServiceYaml = Object.keys(
     overrideModules ?? {}
   ).filter((moduleName): boolean => !(moduleName in serviceConfigModules));
@@ -469,7 +456,7 @@ const getDeployInfoModules = ({
 
   return [
     ...Object.entries(otherModules).map(
-      ([moduleName, mod]): DeployInfoModule => ({
+      ([moduleName, mod]): ModuleNameAndConfigDefinedInService => ({
         moduleConfig: overrideModule(mod, overrideModules, moduleName),
         moduleName,
       })

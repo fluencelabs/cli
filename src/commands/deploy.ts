@@ -28,8 +28,11 @@ import {
   initNewReadonlyAppConfig,
   ServicesV3,
 } from "../lib/configs/project/app";
+import {
+  Distribution,
+  DISTRIBUTION_EVEN,
+} from "../lib/configs/project/fluence";
 import type { ModuleConfigReadonly } from "../lib/configs/project/module";
-import type { ModuleV0 } from "../lib/configs/project/service";
 import {
   AQUA_EXT,
   CommandObj,
@@ -47,18 +50,20 @@ import {
   generateDeployedAppAqua,
   generateRegisterApp,
 } from "../lib/deployedApp";
-import {
-  getModuleUrlOrAbsolutePath,
-  getModuleWasmPath,
-} from "../lib/helpers/downloadFile";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
-import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { ConfigKeyPair, getExistingKeyPair } from "../lib/keypairs";
+import { getExistingKeyPair } from "../lib/keypairs";
 import { initMarineCli } from "../lib/marineCli";
-import { getRandomRelayAddr } from "../lib/multiaddr";
+import {
+  getEvenlyDistributedIds,
+  getEvenlyDistributedIdsFromTheList,
+  getRandomRelayAddr,
+  getRandomRelayId,
+  getRandomRelayIdFromTheList,
+  Relays,
+} from "../lib/multiaddr";
 import {
   ensureFluenceAquaServicesDir,
   ensureFluenceTmpDeployJsonPath,
@@ -66,7 +71,7 @@ import {
 import { confirm } from "../lib/prompt";
 import { hasKey } from "../lib/typeHelpers";
 
-import { build, resolveServiceInfos } from "./build";
+import { build, BuildArg, ServiceInfo } from "./build";
 import { removeApp } from "./remove";
 
 export default class Deploy extends Command {
@@ -138,7 +143,6 @@ export default class Deploy extends Command {
     }
 
     const allServices: ServicesV3 = appConfig?.services ?? {};
-    const serviceNamePathToFacadeMap: Record<string, string> = {};
 
     this.log(
       `\nGoing to deploy services described in ${color.yellow(
@@ -159,7 +163,6 @@ export default class Deploy extends Command {
       peerId,
       serviceName,
       keyPair,
-      facadeModuleWasmPath,
     } of preparedForDeployItems) {
       // Here we don't deploy in parallel because it often fails if run in parallel
       // And also when user requests, we interactively ask about each deploy
@@ -191,7 +194,6 @@ export default class Deploy extends Command {
         ];
 
         allServices[serviceName] = successfullyDeployedServicesByName;
-        serviceNamePathToFacadeMap[serviceName] = facadeModuleWasmPath;
       }
     }
 
@@ -214,18 +216,6 @@ export default class Deploy extends Command {
           (fileName): Promise<void> =>
             fsPromises.unlink(path.join(aquaServicesDirPath, fileName))
         )
-    );
-
-    // generate interfaces for all services
-    await Promise.all(
-      Object.entries(serviceNamePathToFacadeMap).map(
-        ([serviceName, pathToFacadeWasm]): Promise<void> =>
-          generateServiceInterface({
-            pathToFacadeWasm,
-            marineCli,
-            serviceName,
-          })
-      )
     );
 
     await generateDeployedAppAqua(allServices);
@@ -264,91 +254,95 @@ export default class Deploy extends Command {
   }
 }
 
-type DeployInfoModule = {
-  moduleName: string;
-  moduleConfig: ModuleV0;
-};
-
-type DeployInfo = {
-  serviceName: string;
-  serviceDirPath: string;
-  deployId: string;
+type PreparedForDeploy = Omit<
+  ServiceInfo,
+  | "peerId"
+  | "peerIds"
+  | "distribution"
+  | "count"
+  | "serviceDirPath"
+  | "moduleConfigs"
+> & {
   peerId: string;
-  modules: Array<DeployInfoModule>;
-  keyPair: ConfigKeyPair;
-};
-
-type PreparedForDeploy = Omit<DeployInfo, "modules" | "serviceDirPath"> & {
   deployJSON: DeployJSONConfig;
-  facadeModuleWasmPath: string;
 };
 
-type PrepareForDeployArg = Omit<
-  Parameters<typeof resolveServiceInfos>[0] & Parameters<typeof build>[0],
-  "allServiceInfos"
->;
+const prepareForDeploy = async (
+  buildArg: BuildArg
+): Promise<Array<PreparedForDeploy>> => {
+  const { fluenceConfig } = buildArg;
+  const serviceInfos = await build(buildArg);
 
-const prepareForDeploy = async ({
-  marineCli,
-  commandObj,
-  ...rest
-}: PrepareForDeployArg): Promise<Array<PreparedForDeploy>> => {
-  const allServiceInfos = await resolveServiceInfos({ commandObj, ...rest });
+  return serviceInfos.flatMap(
+    ({
+      peerId,
+      peerIds,
+      distribution,
+      count,
+      moduleConfigs,
+      ...serviceInfo
+    }): Array<PreparedForDeploy> =>
+      getPeerIds({
+        peerId: peerIds ?? peerId,
+        distribution,
+        count,
+        relays: fluenceConfig.relays,
+        namedPeerIds: fluenceConfig.peerIds,
+      }).map(
+        (peerId: string): PreparedForDeploy => ({
+          ...serviceInfo,
+          peerId,
+          deployJSON: {
+            [DEFAULT_DEPLOY_NAME]: {
+              modules: moduleConfigs.map(
+                (moduleConfig): JSONModuleConf =>
+                  serviceModuleToJSONModuleConfig(moduleConfig)
+              ),
+            },
+          },
+        })
+      )
+  );
+};
 
-  const mapOfAllModuleConfigs = await build({
-    allServiceInfos,
-    commandObj,
-    marineCli,
-  });
+type GetPeerIdsArg = {
+  peerId: undefined | string | Array<string>;
+  distribution: Distribution | undefined;
+  count: number | undefined;
+  relays: Relays;
+  namedPeerIds: Record<string, string> | undefined;
+};
 
-  return allServiceInfos.map(
-    ({ modules, serviceDirPath, ...rest }): PreparedForDeploy => {
-      const moduleConfigs = modules.map(
-        ({
-          moduleConfig: { get, ...overrides },
-        }): ModuleConfigReadonly & { wasmPath: string } => {
-          const moduleConfig = mapOfAllModuleConfigs.get(
-            getModuleUrlOrAbsolutePath(get, serviceDirPath)
-          );
+const getPeerIds = ({
+  peerId,
+  distribution = DISTRIBUTION_EVEN,
+  count,
+  relays,
+  namedPeerIds = {},
+}: GetPeerIdsArg): Array<string> => {
+  const getNamedPeerIds = (peerIds: Array<string>): string[] =>
+    peerIds.map((peerId): string => namedPeerIds[peerId] ?? peerId);
 
-          if (moduleConfig === undefined) {
-            return commandObj.error(
-              `Unreachable. Wasn't able to find module config for ${get}`
-            );
-          }
-
-          const overriddenModuleConfig = { ...moduleConfig, ...overrides };
-
-          return {
-            ...overriddenModuleConfig,
-            wasmPath: getModuleWasmPath(overriddenModuleConfig),
-          };
-        }
-      );
-
-      const deployJSON = {
-        [DEFAULT_DEPLOY_NAME]: {
-          modules: moduleConfigs.map(
-            (moduleConfig): JSONModuleConf =>
-              serviceModuleToJSONModuleConfig(moduleConfig)
-          ),
-        },
-      };
-
-      const facadeModuleConfig = moduleConfigs[moduleConfigs.length - 1];
-
-      if (facadeModuleConfig === undefined) {
-        return commandObj.error(
-          "Unreachable. Each service must have at least one module"
-        );
-      }
-
-      return {
-        ...rest,
-        deployJSON,
-        facadeModuleWasmPath: facadeModuleConfig.wasmPath,
-      };
+  if (distribution === DISTRIBUTION_EVEN) {
+    if (peerId === undefined) {
+      return getEvenlyDistributedIds(relays, count);
     }
+
+    return getEvenlyDistributedIdsFromTheList(
+      getNamedPeerIds(typeof peerId === "string" ? [peerId] : peerId),
+      count
+    );
+  }
+
+  if (peerId === undefined) {
+    return Array.from({ length: count ?? 1 }).map((): string =>
+      getRandomRelayId(relays)
+    );
+  }
+
+  const peerIds = typeof peerId === "string" ? [peerId] : peerId;
+  return Array.from({ length: count ?? peerIds.length }).map((): string =>
+    getRandomRelayIdFromTheList(peerIds)
   );
 };
 
