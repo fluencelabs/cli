@@ -16,5 +16,5 @@
 
 export const logAndFail = (...args: Parameters<typeof console.log>): void => {
   console.log(...args);
-  throw new Error("fail");
+  throw new Error("Successfully logged and failed");
 };

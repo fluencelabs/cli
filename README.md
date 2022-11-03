@@ -105,6 +105,7 @@ Pull request and release process:
 <!-- commands -->
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence build`](#fluence-build)
 * [`fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-i-package-name--package-nameversion)
 * [`fluence dep i`](#fluence-dep-i)
 * [`fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-i-package-name--package-nameversion)
@@ -192,6 +193,26 @@ EXAMPLES
 ```
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
+
+## `fluence build`
+
+Build all application services, described in fluence.yaml
+
+```
+USAGE
+  $ fluence build [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Build all application services, described in fluence.yaml
+
+EXAMPLES
+  $ fluence build
+```
+
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/build.ts)_
 
 ## `fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
