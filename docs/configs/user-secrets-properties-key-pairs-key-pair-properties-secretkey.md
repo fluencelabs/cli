@@ -1,0 +1,3 @@
+## secretKey Type
+
+`string`

@@ -8,6 +8,7 @@ A tool that makes working with Fluence network more convenient
 <!-- toc -->
 * [Prerequisites](#prerequisites)
 * [Usage](#usage)
+* [Configs Documentation](#configs-documentation)
 * [Currently supported workflow example](#currently-supported-workflow-example)
 * [Contributing](#contributing)
 * [Commands](#commands)
@@ -20,63 +21,62 @@ A tool that makes working with Fluence network more convenient
 
 # Usage
 
-<!-- usage -->
 ```sh-session
 $ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
-$ fluence (--version)
+$ fluence
 @fluencelabs/cli/0.0.0 linux-x64 node-v16.14.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
 ...
 ```
-<!-- usagestop -->
+
+# Configs Documentation
+
+Documentation for all the configs that Fluence CLI uses can be found [here](./docs/configs/README)
 
 # Currently supported workflow example
 
-A lot of what is described next will be improved and automated in the future (key-management etc.) Currently Fluence CLI is a convenience wrapper around Aqua CLI and Marine
+1. Run `fluence service add 'https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true'` to add Adder service to your application. Fluence CLI will suggest you to init project if it wasn't already initialized. Choose `ts` template.
+1. Run `fluence run -f 'helloWorld("Fluence")'` if you want to run `helloWorld` example aqua function from `src/aqua/main.aqua`.
+1. Run `fluence deploy` to deploy the application described in `fluence.yaml`
+1. Uncomment Adder and App aqua in `src/aqua/main.aqua`:
+    ```aqua
+    import App from "deployed.app.aqua"
+    import Adder from "services/adder.aqua"
+    export App, addOne
 
-1. Run `fluence init my-fluence-project` to initialize new project
-2. Go to the newly initialized project dir (`cd my-fluence-project`). Pay attention to the newly generated `fluence.yaml` file in the project's root directory - it's your application configuration. All configs produced by fluence cli have schema for intellisense and validation and commented-out help so you can read about the config right inside the config itself
-3. Dependencies, especially rust ones, such as `marine` and `mrepl`, take very long to install so if you are definitely planning to use them do `fluence dependency install` (or short version of the command: `fluence dependency i`) to install all the dependencies listed in `fluence.yaml`. It will take a while so go drink a cup of coffee while it's happening. All dependencies are cached to the user's `.fluence` dir so if you init a different project with the same versions of the dependencies - you will be able to run `fluence dependency install` there almost instantly
-4. Run `fluence service add 'https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true'`. `fluence.yaml` will be updated to look like this:
-```yaml
-version: 1
-services:
-  adder:
-    get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true
-    deploy:
-      - deployId: default
-```
-`deployId` property is set to `default`, but it can be any string that starts with a lowercase letter and contains only letters, numbers, and underscores. It also must be unique service-wise. `deployId` is used in aqua to access ids of deployed services as you will see in a moment.
-You can edit `fluence.yaml` manually if you want to deploy multiple times, deploy on specific network, deploy on specific peerId or if you want to override `service.yaml` service configuration 
+    -- snip --
 
-5. Run `fluence service new ./src/services/newService` to generate new service template. You will be asked if you want to add the service to `fluence.yaml` - say yes.
-6. Run `fluence service repl newService` to build the service and get into the repl
-7. Run `fluence deploy` to deploy the application you described in `fluence.yaml`. Services written in rust will be automatically built before deployment. User-level secret key from `~/.fluence/secrets.yaml` will be used to deploy each service (can be overridden using `-k` flag). You can also add project-level secret key to your project `.fluence/secrets.yaml` using `fluence key new` and setup `fluence.yaml` with key-pair names as you wish
-8. Uncomment Adder and App aqua in `src/aqua/main.aqua`:
-```aqua
-import App from "deployed.app.aqua"
-import Adder from "services/adder.aqua"
-export App, add_one
+    func addOne(x: u64) -> u64:
+        services <- App.services()
+        on services.adder.default!.peerId:
+            Adder services.adder.default!.serviceId
+            res <- Adder.addOne(x)
+        <- res
+    ```
+    `"deployed.app.aqua"` file was generated after you ran `fluence deploy` and it is located at `.fluence/aqua/deployed.app.aqua`. 
+    
+    `App.services()` method returns ids of the previously deployed services that you can use in your aqua code (info about previously deployed services is stored at `.fluence/app.yaml`).
 
--- snip --
+1. Run `fluence aqua` to compile `src/aqua/main.aqua` to typescript
+1. Open `src/ts/src/index.ts` example file and uncomment newly generated imports and code that uses those imports
+    ```ts
+    import { addOne } from "./aqua/main.ts";
+    import { registerApp } from "./aqua/app.ts";
 
-func add_one(x: u64) -> u64:
-    services <- App.services()
-    on services.adder.default!.peerId:
-        Adder services.adder.default!.serviceId
-        res <- Adder.add_one(x)
-    <- res
-```
-`"deployed.app.aqua"` file was generated after you ran `fluence deploy` and it is located at `.fluence/aqua/deployed.app.aqua`. `App.services()` method returns ids of the previously deployed services that you can use in your aqua code (info about previously deployed services is stored at `.fluence/app.yaml`).
+    // ---snip---
 
-9. Run `fluence run -f 'add_one(1)'`. Function with this name will be searched inside the `src/aqua/main.aqua` (can be overridden with `--input` flag) and executed. 
-Alternatively, if you are js/ts developer - add appJSPath or appTSPath keys to fluence.yaml, deploy again, import generated `registerApp` function in your js/ts file and execute it after `Fluence.run()` in order to give access to deployed services ids to your aqua code. Then compile `src/aqua/main.aqua` using `fluence aqua` command. Import and run `add_one(1)` in your js/ts code.
-10. Run `fluence remove` to remove the previously deployed fluence application 
+      registerApp()
+      console.log(await addOne(1))
+    ```
 
+1. Go to `src/ts` directory and run `npm run start`. All the functions from `src/aqua/main.aqua` will run and you will see:
+    - `Hello, Fluence` as a result of `helloWorld("Fluence")`
+    - `2` as a result of `addOne(1)`
+1. Run `fluence remove` to remove the previously deployed fluence application
 
 # Contributing
 
@@ -549,7 +549,7 @@ EXAMPLES
 
 ## `fluence key new [NAME]`
 
-Generate key-pair and store it in user's or project's .fluence/secrets.yaml
+Generate key-pair and store it in user-secrets.yaml or project-secrets.yaml
 
 ```
 USAGE
@@ -563,7 +563,7 @@ FLAGS
   --user      Generate key-pair for current user instead of generating key-pair for current project
 
 DESCRIPTION
-  Generate key-pair and store it in user's or project's .fluence/secrets.yaml
+  Generate key-pair and store it in user-secrets.yaml or project-secrets.yaml
 
 EXAMPLES
   $ fluence key new
@@ -571,7 +571,7 @@ EXAMPLES
 
 ## `fluence key remove [NAME]`
 
-Remove key-pair from user's or project's .fluence/secrets.yaml
+Remove key-pair from user-secrets.yaml or project-secrets.yaml
 
 ```
 USAGE
@@ -585,7 +585,7 @@ FLAGS
   --user      Remove key-pair from current user instead of removing key-pair from current project
 
 DESCRIPTION
-  Remove key-pair from user's or project's .fluence/secrets.yaml
+  Remove key-pair from user-secrets.yaml or project-secrets.yaml
 
 EXAMPLES
   $ fluence key remove

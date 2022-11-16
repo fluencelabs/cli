@@ -18,13 +18,13 @@ import { Command, Flags } from "@oclif/core";
 
 import { js } from "./helpers/jsTemplateLitteral";
 
-export const AQUA_RECOMMENDED_VERSION = "0.7.7-362";
+export const AQUA_RECOMMENDED_VERSION = "0.7.7-363";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.6";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
-export const FLUENCE_JS_RECOMMENDED_VERSION = "0.26.3";
+export const FLUENCE_JS_RECOMMENDED_VERSION = "0.27.1";
 export const FLUENCE_NETWORK_INVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
@@ -57,7 +57,8 @@ export const BIN_DIR_NAME = "bin";
 export const DOT_BIN_DIR_NAME = ".bin";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
-export const SECRETS_CONFIG_FILE_NAME = `secrets.${YAML_EXT}`;
+export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
+export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
 export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
 export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
 export const APP_CONFIG_FILE_NAME = `app.${YAML_EXT}`;
@@ -91,6 +92,8 @@ export const CONFIG_TOML = `Config.${TOML_EXT}`;
 export const FS_OPTIONS = {
   encoding: "utf8",
 } as const;
+
+export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";

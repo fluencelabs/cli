@@ -18,9 +18,9 @@ import assert from "node:assert";
 
 import { KeyPair } from "@fluencelabs/fluence";
 import color from "@oclif/color";
-import type { JSONSchemaType } from "ajv";
 import { Separator } from "inquirer";
 
+import type { ConfigKeyPair } from "./configs/keyPair";
 import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets";
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
 import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
@@ -153,24 +153,6 @@ export const getExistingKeyPairFromFlags = async (
   isInteractive: boolean
 ): Promise<ConfigKeyPair | Error> =>
   getExistingKeyPair({ commandObj, keyPairName, isInteractive });
-
-export type ConfigKeyPair = {
-  peerId: string;
-  secretKey: string;
-  publicKey: string;
-  name: string;
-};
-
-export const configKeyPairSchema: JSONSchemaType<ConfigKeyPair> = {
-  type: "object",
-  properties: {
-    peerId: { type: "string" },
-    secretKey: { type: "string" },
-    publicKey: { type: "string" },
-    name: { type: "string" },
-  },
-  required: ["peerId", "secretKey", "publicKey", "name"],
-};
 
 export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
   const keyPair = await KeyPair.randomEd25519();

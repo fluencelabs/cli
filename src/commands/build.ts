@@ -20,6 +20,7 @@ import path from "node:path";
 import color from "@oclif/color";
 import { CliUx, Command } from "@oclif/core";
 
+import type { ConfigKeyPair } from "../lib/configs/keyPair";
 import type {
   FluenceConfigReadonly,
   OverrideModules,
@@ -56,7 +57,6 @@ import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import {
-  ConfigKeyPair,
   generateKeyPair,
   getExistingKeyPair,
   getProjectKeyPair,

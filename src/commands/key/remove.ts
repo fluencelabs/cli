@@ -22,10 +22,10 @@ import { Command, Flags } from "@oclif/core";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
 import {
-  FLUENCE_DIR_NAME,
   NAME_FLAG_NAME,
   NO_INPUT_FLAG,
-  SECRETS_CONFIG_FILE_NAME,
+  PROJECT_SECRETS_CONFIG_FILE_NAME,
+  USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
@@ -34,7 +34,7 @@ import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
 import { list } from "../../lib/prompt";
 
 export default class Remove extends Command {
-  static override description = `Remove key-pair from user's or project's ${FLUENCE_DIR_NAME}/${SECRETS_CONFIG_FILE_NAME}`;
+  static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,

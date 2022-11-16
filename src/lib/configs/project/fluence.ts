@@ -33,7 +33,11 @@ import {
   MARINE_RECOMMENDED_VERSION,
   MREPL_CARGO_DEPENDENCY,
   MREPL_RECOMMENDED_VERSION,
+  PROJECT_SECRETS_CONFIG_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+  USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../const";
+import { jsonStringify } from "../../helpers/jsonStringify";
 import { recursivelyFindFile } from "../../helpers/recursivelyFindFile";
 import { NETWORKS, Relays } from "../../multiaddr";
 import {
@@ -52,7 +56,7 @@ import {
   ConfigValidateFunction,
 } from "../initConfig";
 
-import { MODULE_TYPES } from "./module";
+import { moduleProperties } from "./module";
 import type { ModuleV0 as ServiceModuleConfig } from "./service";
 
 type ServiceV0 = { name: string; count?: number };
@@ -65,8 +69,9 @@ type ConfigV0 = {
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
-    version: { type: "number", enum: [0] },
+    version: { type: "number", const: 0 },
     services: {
+      title: "Services",
       type: "array",
       items: {
         type: "object",
@@ -112,33 +117,57 @@ type ConfigV1 = {
   keyPairName?: string;
 };
 
+const keyPairName = {
+  type: "string",
+  nullable: true,
+  description: `The Key Pair that will be used for the deployment. It is resolved in the following order (from the lowest to the highest priority):
+1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FILE_NAME}
+1. "defaultKeyPairName" property from ${PROJECT_SECRETS_CONFIG_FILE_NAME}
+1. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FILE_NAME}
+1. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FILE_NAME}
+1. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FILE_NAME}`,
+} as const;
+
 const configSchemaV1Obj = {
   type: "object",
   properties: {
-    version: { type: "number", enum: [1] },
+    version: { type: "number", const: 1 },
     services: {
+      title: "Services",
       type: "object",
       additionalProperties: {
+        title: "Deployment id map",
         type: "object",
         properties: {
-          get: { type: "string" },
+          get: {
+            type: "string",
+            description: `Path to service directory or URL to the tar.gz archive with the service`,
+          },
           deploy: {
             type: "array",
+            title: "Deployment list",
+            description: "List of deployments for the particular service",
             items: {
               type: "object",
+              title: "Deployment",
+              description:
+                "A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, distribution, etc.",
               properties: {
-                keyPairName: { type: "string", nullable: true },
+                keyPairName,
                 deployId: {
                   type: "string",
+                  description: `This id can be used in Aqua to access actually deployed peer and service ids. The ID must start with a lowercase letter and contain only letters, numbers, and underscores.`,
                 },
                 count: {
                   type: "number",
                   minimum: 1,
                   nullable: true,
+                  description: `Number of services to deploy. Default: 1 or if "peerIds" property is provided - exactly the number of peerIds`,
                 },
                 peerId: {
                   type: "string",
                   nullable: true,
+                  description: `Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of ${FLUENCE_CONFIG_FILE_NAME} are selected for each deploy. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
                 },
                 peerIds: {
                   type: "array",
@@ -146,47 +175,30 @@ const configSchemaV1Obj = {
                     type: "string",
                   },
                   nullable: true,
+                  title: "Peer ids",
+                  description: `Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
                 },
                 distribution: {
                   type: "string",
                   enum: DISTRIBUTIONS,
                   nullable: true,
+                  description: `"even" distribution is used by default, means that the services will be deployed evenly across the listed peers. "random" distribution means that the services will be deployed randomly across the listed peers.`,
                 },
                 overrideModules: {
                   type: "object",
+                  title: "Overrides",
+                  description: "A map of modules to override",
                   additionalProperties: {
                     type: "object",
+                    title: "Module overrides",
                     properties: {
-                      get: { type: "string", nullable: true },
-                      type: {
+                      ...moduleProperties,
+                      get: {
                         type: "string",
                         nullable: true,
-                        enum: MODULE_TYPES,
+                        description: `Path to module directory or URL to the tar.gz archive with the module`,
                       },
-                      name: { type: "string", nullable: true },
-                      maxHeapSize: { type: "string", nullable: true },
-                      loggerEnabled: { type: "boolean", nullable: true },
-                      loggingMask: { type: "number", nullable: true },
-                      volumes: {
-                        type: "object",
-                        nullable: true,
-                        required: [],
-                      },
-                      preopenedFiles: {
-                        type: "array",
-                        nullable: true,
-                        items: { type: "string" },
-                      },
-                      envs: {
-                        type: "object",
-                        nullable: true,
-                        required: [],
-                      },
-                      mountedBinaries: {
-                        type: "object",
-                        nullable: true,
-                        required: [],
-                      },
+                      name: { ...moduleProperties.name, nullable: true },
                     },
                     required: [],
                     nullable: true,
@@ -198,7 +210,7 @@ const configSchemaV1Obj = {
               required: ["deployId"],
             },
           },
-          keyPairName: { type: "string", nullable: true },
+          keyPairName,
         },
         required: ["get", "deploy"],
       },
@@ -206,20 +218,29 @@ const configSchemaV1Obj = {
       nullable: true,
     },
     relays: {
+      title: "Relays",
+      description: `List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: ${NETWORKS[0]}`,
       type: ["string", "array"],
       oneOf: [
-        { type: "string", enum: NETWORKS },
-        { type: "array", items: { type: "string" } },
+        { type: "string", description: "Network name", enum: NETWORKS },
+        {
+          type: "array",
+          title: "Multi addresses",
+          items: { type: "string" },
+        },
       ],
       nullable: true,
     },
     peerIds: {
+      title: "Peer ids",
+      description:
+        "A map of named peerIds. Example:\n\nMY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS",
       type: "object",
       nullable: true,
       required: [],
       additionalProperties: { type: "string" },
     },
-    keyPairName: { type: "string", nullable: true },
+    keyPairName,
   },
   required: ["version"],
 } as const;
@@ -248,14 +269,23 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
   ...configSchemaV1Obj,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FILE_NAME,
+  description: "Describes what exactly you want to deploy and how",
   properties: {
     ...configSchemaV1Obj.properties,
-    version: { type: "number", enum: [2] },
+    version: { type: "number", const: 2 },
     dependencies: {
       type: "object",
+      title: "Dependencies",
+      description:
+        "A map of the exact dependency versions. Acts like a lock file",
       properties: {
         npm: {
           type: "object",
+          title: "npm dependencies",
+          description:
+            "A map of the exact npm dependency versions. Acts like a lock file. CLI ensures dependencies are installed each time you run aqua",
           properties: {
             [AQUA_NPM_DEPENDENCY]: { type: "string" },
           },
@@ -263,6 +293,8 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
         },
         cargo: {
           type: "object",
+          title: "Cargo dependencies",
+          description: `A map of the exact cargo dependency versions. Acts like a lock file. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
           properties: {
             [MARINE_CARGO_DEPENDENCY]: { type: "string" },
             [MREPL_CARGO_DEPENDENCY]: { type: "string" },
@@ -272,11 +304,33 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       },
       required: ["npm", "cargo"],
     },
-    [AQUA_INPUT_PATH_PROPERTY]: { type: "string", nullable: true },
-    aquaOutputTSPath: { type: "string", nullable: true },
-    aquaOutputJSPath: { type: "string", nullable: true },
-    appTSPath: { type: "string", nullable: true },
-    appJSPath: { type: "string", nullable: true },
+    [AQUA_INPUT_PATH_PROPERTY]: {
+      type: "string",
+      nullable: true,
+      description: `Path to the aqua file or directory with aqua files that you want to compile by default`,
+    },
+    aquaOutputTSPath: {
+      type: "string",
+      nullable: true,
+      description: "Default compilation target dir from aqua to ts",
+    },
+    aquaOutputJSPath: {
+      type: "string",
+      nullable: true,
+      description: `Default compilation target dir from aqua to js. Overrides "aquaOutputTSPath" property`,
+    },
+    appTSPath: {
+      type: "string",
+      nullable: true,
+      description:
+        "Path to the directory where you want to generate app.ts after deployment. If you run registerApp() function in your typescript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua",
+    },
+    appJSPath: {
+      type: "string",
+      nullable: true,
+      description:
+        "Path to the directory where you want to generate app.js after deployment. If you run registerApp() function in your javascript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua",
+    },
   },
 };
 
@@ -323,7 +377,7 @@ const migrations: Migrations<Config> = [
   (config: Config): ConfigV1 => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
-        `Migration error. Errors: ${JSON.stringify(
+        `Migration error. Errors: ${jsonStringify(
           validateConfigSchemaV0.errors
         )}`
       );
@@ -353,7 +407,7 @@ const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV2> => {
     if (!validateConfigSchemaV1(config)) {
       throw new Error(
-        `Migration error. Errors: ${JSON.stringify(
+        `Migration error. Errors: ${jsonStringify(
           validateConfigSchemaV1.errors
         )}`
       );
@@ -370,38 +424,6 @@ type Config = ConfigV0 | ConfigV1 | ConfigV2;
 type LatestConfig = ConfigV2;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
-
-const examples = `
-keyPairName: myKeyPairName # Name of key pair to use. Default: defaultKeyPairName from project's .fluence/secretes.yaml or if it is empty - defaultKeyPairName from user's .fluence/secrets.yaml
-# keyPairName is always searched in project's .fluence/secrets.yaml first and then if nothing is found it is searched in user's .fluence/secrets.yaml.
-services:
-  someService: # Service name. It must start with a lowercase letter and contain only letters, numbers, and underscores.
-    keyPairName: myKeyPairName # overrides top-level keyPairName. Optional
-    get: https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true # URL or path
-    deploy:
-      - keyPairName: myKeyPairName # overrides top-level keyPairName. Optional
-        deployId: default # must start with a lowercase letter and contain only letters, numbers, and underscores.
-        # Used in aqua to access deployed service ids
-        # You can access deployment info in aqua like this:
-        # services <- App.services()
-        # on services.someService.default!.peerId:
-        distribution: even # Deploy strategy. Can also be 'random'. Default: 'even'
-        peerId: MY_PEER # Peer id or peer id name to deploy on. Default: Random peer id is selected for each deploy
-        peerIds: # Overrides peerId property. Can be used to deploy on multiple peers.
-          - 12D3KooWR4cv1a8tv7pps4HH6wePNaK6gf1Hww5wcCMzeWxyNw51
-          - MY_PEER
-        count: 1 # How many times to deploy. Default: 1 or if peerIds is provided - exactly the number of peerIds
-        # overrideModules: # Override modules from service.yaml
-        #   facade:
-        #     get: ./relative/path # Override facade module
-peerIds: # A map of named peerIds. Optional.
-  MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
-relays: kras # Array of relay multi-addresses or keywords: kras, testnet, stage. Default: kras
-${AQUA_INPUT_PATH_PROPERTY}: ./path/to/aqua/file/or/dir # Optional. Path to aqua file or directory with aqua files
-aquaOutputTSPath: ./path/to/ts/aqua/dir # Optional. Default compilation target dir from aqua to ts
-aquaOutputJSPath: ./path/to/js/aqua/dir # Optional. Overrides aquaOutputTSPath. Default compilation target dir from aqua to js
-appTSPath: ./path/to/app-ts/dir # Optional. If you want to generate ts files including app.ts to be able to access deployed app data in aqua when using FluenceJS,
-appJSPath: ./path/to/app-js/dir # Optional. If you want to generate js files including app.js to be able to access deployed app data in aqua when using FluenceJS`;
 
 const validate: ConfigValidateFunction<LatestConfig> = (
   config
@@ -464,7 +486,6 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
     return projectRootDir;
   },
   getSchemaDirPath: ensureFluenceDir,
-  examples,
   validate,
 };
 
@@ -475,3 +496,5 @@ export const initNewFluenceConfig = getConfigInitFunction(
 export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
+
+export const fluenceSchema = configSchemaV2;

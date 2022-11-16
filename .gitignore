@@ -15,6 +15,7 @@ src/aqua
 src/services
 src/ts
 src/js
+schemas
 
 # recommended by Fluence
 .idea

@@ -1,0 +1,3 @@
+## defaultKeyPairName Type
+
+`string`

@@ -1,0 +1,3 @@
+## aquaInputPath Type
+
+`string`

@@ -1,0 +1,3 @@
+## aquaOutputJSPath Type
+
+`string`

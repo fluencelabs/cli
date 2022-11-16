@@ -1,0 +1,3 @@
+## appTSPath Type
+
+`string`

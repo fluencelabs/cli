@@ -22,6 +22,7 @@ import { Command, Flags } from "@oclif/core";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
+import type { ConfigKeyPair } from "../lib/configs/keyPair";
 import {
   AppConfig,
   initAppConfig,
@@ -37,11 +38,7 @@ import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import {
-  ConfigKeyPair,
-  getProjectKeyPair,
-  getUserKeyPair,
-} from "../lib/keypairs";
+import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceJSAppPath,

@@ -1,0 +1,3 @@
+## maxHeapSize Type
+
+`string`

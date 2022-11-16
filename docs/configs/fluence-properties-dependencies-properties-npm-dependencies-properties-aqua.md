@@ -1,0 +1,3 @@
+## aqua Type
+
+`string`
