@@ -150,7 +150,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FILE_NAME}`,
   title: MODULE_CONFIG_FILE_NAME,
-  description: `Module is a directory which contains this config and either a precompiled .wasm Marine module or a source code of the module written in Rust which can be compiled into a .wasm Marine module`,
+  description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). For Fluence CLI, **module** - is a directory which contains this config and either a precompiled .wasm Marine module or a source code of the module written in Rust which can be compiled into a .wasm Marine module. You can use \`fluence module new\` command to generate a template for new module`,
   properties: modulePropertiesV0,
   required: ["version", "name"],
 };

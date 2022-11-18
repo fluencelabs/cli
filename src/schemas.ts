@@ -27,6 +27,7 @@ import {
   APP_CONFIG_FILE_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   JSON_EXT,
+  YAML_EXT,
   MODULE_CONFIG_FILE_NAME,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   SCHEMAS_DIR_NAME,
@@ -35,18 +36,37 @@ import {
 } from "./lib/const";
 import { jsonStringify } from "./lib/helpers/jsonStringify";
 
+const schemas = Object.entries({
+  [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
+  [APP_CONFIG_FILE_NAME]: appSchema,
+  [MODULE_CONFIG_FILE_NAME]: moduleSchema,
+  [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
+  [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
+  [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
+});
+
 const main = async (): Promise<void> => {
+  if (process.argv[2] === "-f") {
+    return fsPromises.writeFile(
+      path.join("docs", "configs", "README.md"),
+      `# Fluence CLI Configs
+
+${schemas
+  .map(
+    ([name, schema]): string =>
+      `## [${name}](./${name.replace(`.${YAML_EXT}`, "")})\n\n${String(
+        // eslint-disable-next-line dot-notation
+        schema["description"]
+      )}`
+  )
+  .join("\n")}`
+    );
+  }
+
   await fsPromises.mkdir(SCHEMAS_DIR_NAME, { recursive: true });
 
   await Promise.all(
-    Object.entries({
-      [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
-      [APP_CONFIG_FILE_NAME]: appSchema,
-      [MODULE_CONFIG_FILE_NAME]: moduleSchema,
-      [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
-      [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
-      [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
-    }).map(
+    schemas.map(
       ([filename, schema]): Promise<void> =>
         fsPromises.writeFile(
           path.join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),

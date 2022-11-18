@@ -50,7 +50,8 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROJECT_SECRETS_CONFIG_FILE_NAME}`,
   title: PROJECT_SECRETS_CONFIG_FILE_NAME,
   type: "object",
-  description: "Located in the project's .fluence directory",
+  description:
+    "Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands",
   properties: {
     version: { type: "number", const: 0 },
     keyPairs: {

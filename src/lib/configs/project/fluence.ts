@@ -271,7 +271,8 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
   ...configSchemaV1Obj,
   $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FILE_NAME}`,
   title: FLUENCE_CONFIG_FILE_NAME,
-  description: "Describes what exactly you want to deploy and how",
+  description:
+    "Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use `fluence init` command to generate a template for new Fluence project",
   properties: {
     ...configSchemaV1Obj.properties,
     version: { type: "number", const: 2 },

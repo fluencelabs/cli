@@ -8,7 +8,7 @@ A tool that makes working with Fluence network more convenient
 <!-- toc -->
 * [Prerequisites](#prerequisites)
 * [Usage](#usage)
-* [Configs Documentation](#configs-documentation)
+* [[Configs Documentation](./docs/configs/README)](#configs-documentationdocsconfigsreadme)
 * [Currently supported workflow example](#currently-supported-workflow-example)
 * [Contributing](#contributing)
 * [Commands](#commands)
@@ -33,7 +33,7 @@ USAGE
 ...
 ```
 
-# Configs Documentation
+# [Configs Documentation](./docs/configs/README)
 
 Documentation for all the configs that Fluence CLI uses can be found [here](./docs/configs/README)
 
