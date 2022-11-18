@@ -54,7 +54,7 @@ const main = async (): Promise<void> => {
 ${schemas
   .map(
     ([name, schema]): string =>
-      `## [${name}](./${name.replace(`.${YAML_EXT}`, "")})\n\n${String(
+      `## [${name}](./${name.replace(`.${YAML_EXT}`, "")}.md)\n\n${String(
         // eslint-disable-next-line dot-notation
         schema["description"]
       )}`
