@@ -6,35 +6,9 @@
 
 | Property                                  | Type     | Required | Nullable       | Defined by                                                                                                                                        |
 | :---------------------------------------- | :------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [version](#version)                       | `number` | Required | cannot be null | [user-secrets.yaml](user-secrets-properties-version.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/version")                       |
 | [defaultKeyPairName](#defaultkeypairname) | `string` | Required | cannot be null | [user-secrets.yaml](user-secrets-properties-defaultkeypairname.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/defaultKeyPairName") |
 | [keyPairs](#keypairs)                     | `array`  | Required | cannot be null | [user-secrets.yaml](user-secrets-properties-key-pairs.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/keyPairs")                    |
-
-## version
-
-
-
-`version`
-
-*   is required
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [user-secrets.yaml](user-secrets-properties-version.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-0
-```
+| [version](#version)                       | `number` | Required | cannot be null | [user-secrets.yaml](user-secrets-properties-version.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/version")                       |
 
 ## defaultKeyPairName
 
@@ -71,3 +45,29 @@
 ### keyPairs Type
 
 `object[]` ([Key Pair](user-secrets-properties-key-pairs-key-pair.md))
+
+## version
+
+
+
+`version`
+
+*   is required
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [user-secrets.yaml](user-secrets-properties-version.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/version")
+
+### version Type
+
+`number`
+
+### version Constraints
+
+**constant**: the value of this property must be equal to:
+
+```json
+0
+```

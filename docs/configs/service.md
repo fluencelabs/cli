@@ -6,35 +6,9 @@
 
 | Property            | Type     | Required | Nullable       | Defined by                                                                                                   |
 | :------------------ | :------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------- |
-| [version](#version) | `number` | Required | cannot be null | [service.yaml](service-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/version") |
 | [name](#name)       | `string` | Required | cannot be null | [service.yaml](service-properties-name.md "https://fluence.dev/schemas/service.yaml#/properties/name")       |
 | [modules](#modules) | `object` | Required | cannot be null | [service.yaml](service-properties-modules.md "https://fluence.dev/schemas/service.yaml#/properties/modules") |
-
-## version
-
-
-
-`version`
-
-*   is required
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [service.yaml](service-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-0
-```
+| [version](#version) | `number` | Required | cannot be null | [service.yaml](service-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/version") |
 
 ## name
 
@@ -71,3 +45,29 @@ Service must have a facade module. Each module properties can be overridden by t
 ### modules Type
 
 `object` ([Modules](service-properties-modules.md))
+
+## version
+
+
+
+`version`
+
+*   is required
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [service.yaml](service-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/version")
+
+### version Type
+
+`number`
+
+### version Constraints
+
+**constant**: the value of this property must be equal to:
+
+```json
+0
+```

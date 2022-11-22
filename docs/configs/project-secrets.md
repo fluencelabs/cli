@@ -6,35 +6,9 @@
 
 | Property                                  | Type     | Required | Nullable       | Defined by                                                                                                                                                 |
 | :---------------------------------------- | :------- | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [version](#version)                       | `number` | Required | cannot be null | [project-secrets.yaml](project-secrets-properties-version.md "https://fluence.dev/schemas/project-secrets.yaml#/properties/version")                       |
 | [keyPairs](#keypairs)                     | `array`  | Required | cannot be null | [project-secrets.yaml](project-secrets-properties-key-pairs.md "https://fluence.dev/schemas/project-secrets.yaml#/properties/keyPairs")                    |
 | [defaultKeyPairName](#defaultkeypairname) | `string` | Optional | cannot be null | [project-secrets.yaml](project-secrets-properties-defaultkeypairname.md "https://fluence.dev/schemas/project-secrets.yaml#/properties/defaultKeyPairName") |
-
-## version
-
-
-
-`version`
-
-*   is required
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [project-secrets.yaml](project-secrets-properties-version.md "https://fluence.dev/schemas/project-secrets.yaml#/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-0
-```
+| [version](#version)                       | `number` | Required | cannot be null | [project-secrets.yaml](project-secrets-properties-version.md "https://fluence.dev/schemas/project-secrets.yaml#/properties/version")                       |
 
 ## keyPairs
 
@@ -71,3 +45,29 @@ Key pair with this name will be used for the deployment by default. You can over
 ### defaultKeyPairName Type
 
 `string`
+
+## version
+
+
+
+`version`
+
+*   is required
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [project-secrets.yaml](project-secrets-properties-version.md "https://fluence.dev/schemas/project-secrets.yaml#/properties/version")
+
+### version Type
+
+`number`
+
+### version Constraints
+
+**constant**: the value of this property must be equal to:
+
+```json
+0
+```

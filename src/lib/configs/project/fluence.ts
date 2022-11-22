@@ -120,7 +120,7 @@ type ConfigV1 = {
 const keyPairName = {
   type: "string",
   nullable: true,
-  description: `The Key Pair that will be used for the deployment. It is resolved in the following order (from the lowest to the highest priority):
+  description: `The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
 1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FILE_NAME}
 1. "defaultKeyPairName" property from ${PROJECT_SECRETS_CONFIG_FILE_NAME}
 1. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FILE_NAME}
@@ -131,12 +131,15 @@ const keyPairName = {
 const configSchemaV1Obj = {
   type: "object",
   properties: {
-    version: { type: "number", const: 1 },
     services: {
       title: "Services",
+      description:
+        "A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config",
       type: "object",
       additionalProperties: {
-        title: "Deployment id map",
+        title: "Service config",
+        description:
+          "Service names as keys (must start with a lowercase letter and contain only letters numbers and underscores) and Service config (defines where the service is and how to deploy it) as values",
         type: "object",
         properties: {
           get: {
@@ -191,6 +194,8 @@ const configSchemaV1Obj = {
                   additionalProperties: {
                     type: "object",
                     title: "Module overrides",
+                    description:
+                      "Module names as keys and overrides for the module config as values",
                     properties: {
                       ...moduleProperties,
                       get: {
@@ -238,9 +243,13 @@ const configSchemaV1Obj = {
       type: "object",
       nullable: true,
       required: [],
-      additionalProperties: { type: "string" },
+      additionalProperties: {
+        type: "string",
+        description: "Peer id names as keys and the actual peer ids as values",
+      },
     },
     keyPairName,
+    version: { type: "number", const: 1 },
   },
   required: ["version"],
 } as const;

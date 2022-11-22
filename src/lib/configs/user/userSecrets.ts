@@ -54,13 +54,13 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   description:
     "Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `fluence key` group of commands with `--user` flag",
   properties: {
-    version: { type: "number", const: 0 },
     defaultKeyPairName: { type: "string" },
     keyPairs: {
       title: "Key Pairs",
       type: "array",
       items: configKeyPairSchema,
     },
+    version: { type: "number", const: 0 },
   },
   required: ["version", "keyPairs", "defaultKeyPairName"],
 };

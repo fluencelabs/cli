@@ -72,7 +72,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   title: SERVICE_CONFIG_FILE_NAME,
   description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. For Fluence CLI, **service** - is a directory which contains this config. You can use \`fluence service new\` command to generate a template for new service`,
   properties: {
-    version: { type: "number", const: 0 },
     name: {
       type: "string",
       description: `Service name. Currently it is used for the service name only when you add service to ${FLUENCE_CONFIG_FILE_NAME} using "add" command. But this name can be overridden to any other with the --name flag or manually in ${FLUENCE_CONFIG_FILE_NAME}`,
@@ -87,6 +86,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       },
       required: [FACADE_MODULE_NAME],
     },
+    version: { type: "number", const: 0 },
   },
   required: ["version", "name", "modules"],
 };

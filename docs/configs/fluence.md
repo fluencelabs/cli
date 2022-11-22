@@ -6,11 +6,11 @@
 
 | Property                              | Type     | Required | Nullable       | Defined by                                                                                                                     |
 | :------------------------------------ | :------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------- |
-| [version](#version)                   | `number` | Required | cannot be null | [fluence.yaml](fluence-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/version")                   |
 | [services](#services)                 | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-services.md "https://fluence.dev/schemas/fluence.yaml#/properties/services")                 |
 | [relays](#relays)                     | Merged   | Optional | can be null    | [fluence.yaml](fluence-properties-relays.md "https://fluence.dev/schemas/fluence.yaml#/properties/relays")                     |
 | [peerIds](#peerids)                   | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-peer-ids.md "https://fluence.dev/schemas/fluence.yaml#/properties/peerIds")                  |
 | [keyPairName](#keypairname)           | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-keypairname.md "https://fluence.dev/schemas/fluence.yaml#/properties/keyPairName")           |
+| [version](#version)                   | `number` | Required | cannot be null | [fluence.yaml](fluence-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/version")                   |
 | [dependencies](#dependencies)         | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-dependencies.md "https://fluence.dev/schemas/fluence.yaml#/properties/dependencies")         |
 | [aquaInputPath](#aquainputpath)       | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-aquainputpath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaInputPath")       |
 | [aquaOutputTSPath](#aquaoutputtspath) | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-aquaoutputtspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaOutputTSPath") |
@@ -18,35 +18,9 @@
 | [appTSPath](#apptspath)               | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-apptspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appTSPath")               |
 | [appJSPath](#appjspath)               | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-appjspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appJSPath")               |
 
-## version
-
-
-
-`version`
-
-*   is required
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-2
-```
-
 ## services
 
-
+A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config
 
 `services`
 
@@ -108,7 +82,7 @@ MY\_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
 
 ## keyPairName
 
-The Key Pair that will be used for the deployment. It is resolved in the following order (from the lowest to the highest priority):
+The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
 
 1.  "defaultKeyPairName" property from user-secrets.yaml
 2.  "defaultKeyPairName" property from project-secrets.yaml
@@ -129,6 +103,32 @@ The Key Pair that will be used for the deployment. It is resolved in the followi
 ### keyPairName Type
 
 `string`
+
+## version
+
+
+
+`version`
+
+*   is required
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/version")
+
+### version Type
+
+`number`
+
+### version Constraints
+
+**constant**: the value of this property must be equal to:
+
+```json
+2
+```
 
 ## dependencies
 

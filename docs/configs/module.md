@@ -6,7 +6,6 @@
 
 | Property                            | Type      | Required | Nullable       | Defined by                                                                                                                 |
 | :---------------------------------- | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| [version](#version)                 | `number`  | Required | cannot be null | [module.yaml](module-properties-version.md "https://fluence.dev/schemas/module.yaml#/properties/version")                  |
 | [type](#type)                       | `string`  | Optional | cannot be null | [module.yaml](module-properties-type.md "https://fluence.dev/schemas/module.yaml#/properties/type")                        |
 | [name](#name)                       | `string`  | Required | cannot be null | [module.yaml](module-properties-name.md "https://fluence.dev/schemas/module.yaml#/properties/name")                        |
 | [maxHeapSize](#maxheapsize)         | `string`  | Optional | cannot be null | [module.yaml](module-properties-maxheapsize.md "https://fluence.dev/schemas/module.yaml#/properties/maxHeapSize")          |
@@ -16,32 +15,7 @@
 | [preopenedFiles](#preopenedfiles)   | `array`   | Optional | cannot be null | [module.yaml](module-properties-preopened-files.md "https://fluence.dev/schemas/module.yaml#/properties/preopenedFiles")   |
 | [envs](#envs)                       | `object`  | Optional | cannot be null | [module.yaml](module-properties-environment-variables.md "https://fluence.dev/schemas/module.yaml#/properties/envs")       |
 | [mountedBinaries](#mountedbinaries) | `object`  | Optional | cannot be null | [module.yaml](module-properties-mounted-binaries.md "https://fluence.dev/schemas/module.yaml#/properties/mountedBinaries") |
-
-## version
-
-
-
-`version`
-
-*   is required
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [module.yaml](module-properties-version.md "https://fluence.dev/schemas/module.yaml#/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-0
-```
+| [version](#version)                 | `number`  | Required | cannot be null | [module.yaml](module-properties-version.md "https://fluence.dev/schemas/module.yaml#/properties/version")                  |
 
 ## type
 
@@ -262,3 +236,29 @@ A map of binary executable files that module is allowed to call. Example: curl: 
 ### mountedBinaries Type
 
 `object` ([Mounted binaries](module-properties-mounted-binaries.md))
+
+## version
+
+
+
+`version`
+
+*   is required
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [module.yaml](module-properties-version.md "https://fluence.dev/schemas/module.yaml#/properties/version")
+
+### version Type
+
+`number`
+
+### version Constraints
+
+**constant**: the value of this property must be equal to:
+
+```json
+0
+```

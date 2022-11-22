@@ -53,7 +53,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   description:
     "Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands",
   properties: {
-    version: { type: "number", const: 0 },
     keyPairs: {
       title: "Key Pairs",
       description: "Key Pairs available for the particular project",
@@ -65,6 +64,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       nullable: true,
       description: `Key pair with this name will be used for the deployment by default. You can override it with flags or by using keyPair properties in ${FLUENCE_CONFIG_FILE_NAME}`,
     },
+    version: { type: "number", const: 0 },
   },
   required: ["version", "keyPairs"],
 };
