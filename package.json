@@ -29,9 +29,10 @@
     "test": "npm run mocha-test",
     "posttest": "npm run lint",
     "prepare": "husky install",
-    "check": "npm run build && npm run lint-fix",
+    "check": "npm run build && npm run lint-fix && npm run schemas",
     "pre-commit": "oclif readme && git add README.md",
-    "clean": "shx rm -rf .fluence && shx rm -rf fluence.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js"
+    "clean": "shx rm -rf .fluence && shx rm -rf fluence.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
+    "schemas": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f"
   },
   "dependencies": {
     "@fluencelabs/fluence": "^0.24.1",
@@ -58,6 +59,7 @@
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
+    "@adobe/jsonschema2md": "^7.1.3",
     "@oclif/test": "^2",
     "@tsconfig/node16-strictest": "^1.0.3",
     "@types/chai": "^4",

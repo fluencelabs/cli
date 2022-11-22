@@ -16,7 +16,12 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { CommandObj, SERVICE_CONFIG_FILE_NAME } from "../../const";
+import {
+  CommandObj,
+  FLUENCE_CONFIG_FILE_NAME,
+  SERVICE_CONFIG_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+} from "../../const";
 import { validateAquaName } from "../../helpers/downloadFile";
 import { ensureFluenceDir } from "../../paths";
 import {
@@ -30,7 +35,7 @@ import {
   ConfigValidateFunction,
 } from "../initConfig";
 
-import { ConfigV0 as ModuleConfig, MODULE_TYPES } from "./module";
+import { ConfigV0 as ModuleConfig, moduleProperties } from "./module";
 
 export type ModuleV0 = {
   get: string;
@@ -38,23 +43,17 @@ export type ModuleV0 = {
 
 export type Module = ModuleV0;
 
-const moduleSchema: JSONSchemaType<ModuleV0> = {
+const moduleSchemaForService: JSONSchemaType<ModuleV0> = {
   type: "object",
+  title: "Module",
   properties: {
-    get: { type: "string" },
-    type: { type: "string", nullable: true, enum: MODULE_TYPES },
-    name: { type: "string", nullable: true },
-    maxHeapSize: { type: "string", nullable: true },
-    loggerEnabled: { type: "boolean", nullable: true },
-    loggingMask: { type: "number", nullable: true },
-    volumes: { type: "object", nullable: true, required: [] },
-    preopenedFiles: {
-      type: "array",
-      nullable: true,
-      items: { type: "string" },
+    ...moduleProperties,
+    get: {
+      type: "string",
+      description:
+        "Either path to the module directory or URL to the tar.gz archive which contains the content of the module directory",
     },
-    envs: { type: "object", nullable: true, required: [] },
-    mountedBinaries: { type: "object", nullable: true, required: [] },
+    name: { ...moduleProperties.name, nullable: true },
   },
   required: ["get"],
 };
@@ -69,14 +68,22 @@ export type ConfigV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${SERVICE_CONFIG_FILE_NAME}`,
+  title: SERVICE_CONFIG_FILE_NAME,
+  description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. For Fluence CLI, **service** - is a directory which contains this config. You can use \`fluence service new\` command to generate a template for new service`,
   properties: {
-    version: { type: "number", enum: [0] },
-    name: { type: "string" },
+    version: { type: "number", const: 0 },
+    name: {
+      type: "string",
+      description: `Service name. Currently it is used for the service name only when you add service to ${FLUENCE_CONFIG_FILE_NAME} using "add" command. But this name can be overridden to any other with the --name flag or manually in ${FLUENCE_CONFIG_FILE_NAME}`,
+    },
     modules: {
+      title: "Modules",
+      description: `Service must have a facade module. Each module properties can be overridden by the same properties in the service config`,
       type: "object",
-      additionalProperties: moduleSchema,
+      additionalProperties: moduleSchemaForService,
       properties: {
-        [FACADE_MODULE_NAME]: moduleSchema,
+        [FACADE_MODULE_NAME]: moduleSchemaForService,
       },
       required: [FACADE_MODULE_NAME],
     },
@@ -85,33 +92,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 };
 
 const migrations: Migrations<Config> = [];
-
-const examples = `
-modules:
-  facade:
-    get: modules/facade
-
-    # Overrides for module:
-    maxHeapSize: "100" # 100 bytes
-    # maxHeapSize: 100K # 100 kilobytes
-    # maxHeapSize: 100 Ki # 100 kibibytes
-    # Max size of the heap that a module can allocate in format: <number><whitespace?><specificator?>
-    # where ? is an optional field and specificator is one from the following (case-insensitive):
-    # K, Kb - kilobyte; Ki, KiB - kibibyte; M, Mb - megabyte; Mi, MiB - mebibyte; G, Gb - gigabyte; Gi, GiB - gibibyte;
-    # Current limit is 4 GiB
-    loggerEnabled: true # true, if it allows module to use the Marine SDK logger.
-    loggingMask: 0 # manages the logging targets, described in here: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
-    mountedBinaries:
-      curl: /usr/bin/curl # a map of mounted binary executable files
-    preopenedFiles: # a list of files and directories that this module could access with WASI
-      - ./dir
-    volumes: # a map of accessible files and their aliases.
-    # Aliases should be normally used in Marine module development because it's hard to know the full path to a file.
-      aliasForSomePath: ./some/path
-    envs: # environment variables accessible by a particular module with standard Rust env API like this std::env::var(IPFS_ADDR_ENV_NAME).
-      # Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl
-      ENV1: arg1
-      ENV2: arg2`;
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
@@ -140,7 +120,6 @@ const getInitConfigOptions = (
   name: SERVICE_CONFIG_FILE_NAME,
   getSchemaDirPath: ensureFluenceDir,
   getConfigDirPath: (): string => configDirPath,
-  examples,
   validate,
 });
 
@@ -186,3 +165,5 @@ export const initNewReadonlyServiceConfig = (
     getInitConfigOptions(configPath),
     getDefault(relativePathToFacade, name)
   )(commandObj);
+
+export const serviceSchema = configSchemaV0;

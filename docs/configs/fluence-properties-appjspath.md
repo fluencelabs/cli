@@ -1,0 +1,3 @@
+## appJSPath Type
+
+`string`

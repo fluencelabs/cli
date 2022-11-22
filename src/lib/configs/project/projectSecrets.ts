@@ -17,14 +17,17 @@
 import color from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
-import { SECRETS_CONFIG_FILE_NAME } from "../../const";
+import {
+  FLUENCE_CONFIG_FILE_NAME,
+  PROJECT_SECRETS_CONFIG_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+} from "../../const";
 import {
   validateHasDefault,
   validateMultiple,
   validateUnique,
   ValidationResult,
 } from "../../helpers/validations";
-import { ConfigKeyPair, configKeyPairSchema } from "../../keypairs";
 import { ensureFluenceDir } from "../../paths";
 import {
   GetDefaultConfig,
@@ -35,6 +38,7 @@ import {
   getReadonlyConfigInitFunction,
   Migrations,
 } from "../initConfig";
+import { ConfigKeyPair, configKeyPairSchema } from "../keyPair";
 
 type ConfigV0 = {
   version: 0;
@@ -43,14 +47,24 @@ type ConfigV0 = {
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROJECT_SECRETS_CONFIG_FILE_NAME}`,
+  title: PROJECT_SECRETS_CONFIG_FILE_NAME,
   type: "object",
+  description:
+    "Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands",
   properties: {
-    version: { type: "number", enum: [0] },
+    version: { type: "number", const: 0 },
     keyPairs: {
+      title: "Key Pairs",
+      description: "Key Pairs available for the particular project",
       type: "array",
       items: configKeyPairSchema,
     },
-    defaultKeyPairName: { type: "string", nullable: true },
+    defaultKeyPairName: {
+      type: "string",
+      nullable: true,
+      description: `Key pair with this name will be used for the deployment by default. You can override it with flags or by using keyPair properties in ${FLUENCE_CONFIG_FILE_NAME}`,
+    },
   },
   required: ["version", "keyPairs"],
 };
@@ -92,7 +106,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: SECRETS_CONFIG_FILE_NAME,
+  name: PROJECT_SECRETS_CONFIG_FILE_NAME,
   getConfigDirPath: ensureFluenceDir,
   validate,
 };
@@ -105,3 +119,4 @@ export const initReadonlyProjectSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );
+export const projectSecretsSchema = configSchemaV0;

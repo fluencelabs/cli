@@ -1,0 +1,3 @@
+## serviceId Type
+
+`string`

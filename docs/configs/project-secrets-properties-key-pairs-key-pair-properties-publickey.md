@@ -1,0 +1,3 @@
+## publicKey Type
+
+`string`

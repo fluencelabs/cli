@@ -19,11 +19,12 @@ import path from "node:path";
 
 import color from "@oclif/color";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
+import Ajv from "ajv";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { ajv } from "../ajv";
-import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME } from "../const";
+import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const";
+import { jsonStringify } from "../helpers/jsonStringify";
 import { replaceHomeDir } from "../helpers/replaceHomeDir";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
@@ -55,7 +56,7 @@ const ensureSchema = async ({
 
   await fsPromises.writeFile(
     path.join(schemaDir, `${name}.json`),
-    JSON.stringify(schema, null, 2) + "\n",
+    jsonStringify(schema) + "\n",
     FS_OPTIONS
   );
 
@@ -67,7 +68,7 @@ type GetConfigString<LatestConfig> = {
   schemaRelativePath: string;
   commandObj: CommandObj;
   getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined;
-  examples: string | undefined;
+  name: string;
 };
 
 const getConfigString = async <LatestConfig extends BaseConfig>({
@@ -75,7 +76,7 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
   schemaRelativePath,
   commandObj,
   getDefaultConfig,
-  examples,
+  name,
 }: GetConfigString<LatestConfig>): Promise<string | null> => {
   const schemaPathCommentStart = "# yaml-language-server: $schema=";
   const schemaPathComment = `${schemaPathCommentStart}${schemaRelativePath}`;
@@ -95,15 +96,10 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
     }
 
     configString = yamlDiffPatch(
-      `${schemaPathComment}\n\n${
-        examples === undefined
-          ? ""
-          : `EXAMPLES:${examples}`
-              .split("\n")
-              .map((ex): string => `# ${ex}`)
-              .join("\n")
-              .trim()
-      }`,
+      `${schemaPathComment}\n\n# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
+        `.${YAML_EXT}`,
+        ""
+      )}.md\n\n`,
       {},
       await getDefaultConfig(commandObj)
     );
@@ -158,7 +154,7 @@ const migrateConfig = async <
     throw new Error(
       `Couldn't migrate config ${color.yellow(
         configPath
-      )}. Errors: ${JSON.stringify(validateLatestConfig.errors, null, 2)}`
+      )}. Errors: ${jsonStringify(validateLatestConfig.errors)}`
     );
   }
 
@@ -209,10 +205,8 @@ const ensureConfigIsValidLatest = async <
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     throw new Error(
-      `Invalid config ${color.yellow(configPath)}. Errors: ${JSON.stringify(
-        validateLatestConfig.errors,
-        null,
-        2
+      `Invalid config ${color.yellow(configPath)}. Errors: ${jsonStringify(
+        validateLatestConfig.errors
       )}`
     );
   }
@@ -267,7 +261,6 @@ export type InitConfigOptions<
   getConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
   validate?: ConfigValidateFunction<LatestConfig>;
-  examples?: string;
 };
 
 type InitFunction<LatestConfig> = (
@@ -322,17 +315,20 @@ export function getReadonlyConfigInitFunction<
       getConfigDirPath,
       validate,
       getSchemaDirPath,
-      examples,
     } = options;
 
     const configDirPath = await getConfigDirPath(commandObj);
     const configPath = getConfigPath(configDirPath, name);
 
-    const validateAllConfigVersions = ajv.compile<Config>({
+    const validateAllConfigVersions = new Ajv({
+      allowUnionTypes: true,
+    }).compile<Config>({
       oneOf: allSchemas,
     });
 
-    const validateLatestConfig = ajv.compile<LatestConfig>(latestSchema);
+    const validateLatestConfig = new Ajv({
+      allowUnionTypes: true,
+    }).compile<LatestConfig>(latestSchema);
 
     const schemaRelativePath = await ensureSchema({
       name,
@@ -347,7 +343,7 @@ export function getReadonlyConfigInitFunction<
       schemaRelativePath,
       commandObj,
       getDefaultConfig,
-      examples,
+      name,
     });
 
     if (maybeConfigString === null) {
@@ -360,12 +356,8 @@ export function getReadonlyConfigInitFunction<
 
     if (!validateAllConfigVersions(config)) {
       throw new Error(
-        `Invalid config at ${color.yellow(
-          configPath
-        )}. Errors: ${JSON.stringify(
-          validateAllConfigVersions.errors,
-          null,
-          2
+        `Invalid config at ${color.yellow(configPath)}. Errors: ${jsonStringify(
+          validateAllConfigVersions.errors
         )}`
       );
     }
@@ -465,10 +457,8 @@ export function getConfigInitFunction<
           throw new Error(
             `Couldn't save config ${color.yellow(
               configPath
-            )}. Errors: ${JSON.stringify(
-              initializedReadonlyConfig.$validateLatest.errors,
-              null,
-              2
+            )}. Errors: ${jsonStringify(
+              initializedReadonlyConfig.$validateLatest.errors
             )}`
           );
         }

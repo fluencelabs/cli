@@ -186,7 +186,7 @@ const ensureServiceConfig = async ({
     return commandObj.error(
       `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
         SERVICE_CONFIG_FILE_NAME
-      )}`
+      )}. Check name or path or url of the service is typed correctly`
     );
   }
 
