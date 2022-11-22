@@ -1,0 +1,3 @@
+## blueprintId Type
+
+`string`

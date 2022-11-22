@@ -1,0 +1,27 @@
+## overrideModules Type
+
+`object` ([Overrides](fluence-properties-services-deployment-id-map-properties-deployment-list-deployment-properties-overrides.md))
+
+# overrideModules Properties
+
+| Property              | Type     | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                                |
+| :-------------------- | :------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Additional Properties | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-deployment-id-map-properties-deployment-list-deployment-properties-overrides-module-overrides.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties") |
+
+## Additional Properties
+
+Additional properties are allowed, as long as they follow this schema:
+
+
+
+*   is optional
+
+*   Type: `object` ([Module overrides](fluence-properties-services-deployment-id-map-properties-deployment-list-deployment-properties-overrides-module-overrides.md))
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-services-deployment-id-map-properties-deployment-list-deployment-properties-overrides-module-overrides.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties")
+
+### additionalProperties Type
+
+`object` ([Module overrides](fluence-properties-services-deployment-id-map-properties-deployment-list-deployment-properties-overrides-module-overrides.md))
