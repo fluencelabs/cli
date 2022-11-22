@@ -6,7 +6,6 @@
 
 | Property                            | Type      | Required | Nullable       | Defined by                                                                                                                                                                                      |
 | :---------------------------------- | :-------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [version](#version)                 | `number`  | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/version")                  |
 | [type](#type)                       | `string`  | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-type.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/type")                        |
 | [name](#name)                       | `string`  | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-name.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/name")                        |
 | [maxHeapSize](#maxheapsize)         | `string`  | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-maxheapsize.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/maxHeapSize")          |
@@ -16,33 +15,8 @@
 | [preopenedFiles](#preopenedfiles)   | `array`   | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-preopened-files.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/preopenedFiles")   |
 | [envs](#envs)                       | `object`  | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-environment-variables.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/envs")       |
 | [mountedBinaries](#mountedbinaries) | `object`  | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-mounted-binaries.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/mountedBinaries") |
+| [version](#version)                 | `number`  | Optional | cannot be null | [service.yaml](service-properties-modules-module-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/version")                  |
 | [get](#get)                         | `string`  | Required | cannot be null | [service.yaml](service-properties-modules-module-properties-get.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/get")                          |
-
-## version
-
-
-
-`version`
-
-*   is optional
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [service.yaml](service-properties-modules-module-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-0
-```
 
 ## type
 
@@ -263,6 +237,32 @@ A map of binary executable files that module is allowed to call. Example: curl: 
 ### mountedBinaries Type
 
 `object` ([Mounted binaries](service-properties-modules-module-properties-mounted-binaries.md))
+
+## version
+
+
+
+`version`
+
+*   is optional
+
+*   Type: `number`
+
+*   cannot be null
+
+*   defined in: [service.yaml](service-properties-modules-module-properties-version.md "https://fluence.dev/schemas/service.yaml#/properties/modules/additionalProperties/properties/version")
+
+### version Type
+
+`number`
+
+### version Constraints
+
+**constant**: the value of this property must be equal to:
+
+```json
+0
+```
 
 ## get
 

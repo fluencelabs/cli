@@ -12,7 +12,7 @@
 
 Additional properties are allowed, as long as they follow this schema:
 
-
+Peer id names as keys and the actual peer ids as values
 
 *   is optional
 

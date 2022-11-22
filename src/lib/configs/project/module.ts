@@ -52,7 +52,6 @@ export type ConfigV0 = {
 };
 
 const modulePropertiesV0 = {
-  version: { type: "number", const: 0 },
   type: {
     type: "string",
     enum: MODULE_TYPES,
@@ -144,6 +143,7 @@ Please note that Marine adds three additional environment variables. Module envi
     required: [],
     description: `A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl`,
   },
+  version: { type: "number", const: 0 },
 } as const;
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
