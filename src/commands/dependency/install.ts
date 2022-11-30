@@ -96,7 +96,10 @@ export default class Install extends Command {
 
     await ensureVSCodeSettingsJSON({
       commandObj: this,
-      aquaImports: await ensureAquaImports({ commandObj: this, fluenceConfig }),
+      aquaImports: await ensureAquaImports({
+        commandObj: this,
+        maybeFluenceConfig: fluenceConfig,
+      }),
     });
 
     await installAllCargoDependenciesFromFluenceConfig({

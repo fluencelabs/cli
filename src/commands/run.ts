@@ -25,7 +25,8 @@ import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
 import {
   AQUA_INPUT_PATH_PROPERTY,
-  FluenceConfig,
+  FluenceConfigReadonly,
+  initFluenceConfig,
 } from "../lib/configs/project/fluence";
 import {
   CommandObj,
@@ -37,7 +38,6 @@ import {
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
-import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
@@ -112,7 +112,7 @@ export default class Run extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
+    const maybeFluenceConfig = await initFluenceConfig(this);
 
     const keyPair = await getExistingKeyPairFromFlags(
       flags,
@@ -127,7 +127,7 @@ export default class Run extends Command {
     const aqua = await ensureAquaPath({
       aquaPathFromFlags: flags[INPUT_FLAG_NAME],
       isInteractive,
-      fluenceConfig,
+      maybeFluenceConfig,
       commandObj: this,
     });
 
@@ -143,7 +143,7 @@ export default class Run extends Command {
 
     const relay =
       flags.relay ??
-      getRandomRelayAddr(appConfig?.relays ?? fluenceConfig?.relays);
+      getRandomRelayAddr(appConfig?.relays ?? maybeFluenceConfig?.relays);
 
     const data = await getRunData(flags, this);
     const appJsonServicePath = await ensureFluenceTmpAppServiceJsonPath();
@@ -160,7 +160,7 @@ export default class Run extends Command {
     }
 
     let result: string;
-    const aquaCli = await initAquaCli(this, fluenceConfig);
+    const aquaCli = await initAquaCli(this, maybeFluenceConfig);
 
     try {
       result = await aquaCli(
@@ -174,7 +174,7 @@ export default class Run extends Command {
             import: await ensureAquaImports({
               commandObj: this,
               flags,
-              fluenceConfig,
+              maybeFluenceConfig,
             }),
             "json-service": jsonServicePaths,
             sk: keyPair.secretKey,
@@ -198,14 +198,14 @@ export default class Run extends Command {
 
 type EnsureAquaPathArg = {
   aquaPathFromFlags: string | undefined;
-  fluenceConfig: FluenceConfig;
+  maybeFluenceConfig: FluenceConfigReadonly | null;
   isInteractive: boolean;
   commandObj: CommandObj;
 };
 
 const ensureAquaPath = async ({
   aquaPathFromFlags,
-  fluenceConfig,
+  maybeFluenceConfig,
   isInteractive,
   commandObj,
 }: EnsureAquaPathArg): Promise<string> => {
@@ -213,15 +213,15 @@ const ensureAquaPath = async ({
     return aquaPathFromFlags;
   }
 
-  if (typeof fluenceConfig.aquaInputPath === "string") {
+  if (typeof maybeFluenceConfig?.aquaInputPath === "string") {
     try {
-      await fsPromises.access(fluenceConfig.aquaInputPath);
-      return fluenceConfig.aquaInputPath;
+      await fsPromises.access(maybeFluenceConfig.aquaInputPath);
+      return maybeFluenceConfig.aquaInputPath;
     } catch {
       commandObj.warn(
         `Invalid ${color.yellow(AQUA_INPUT_PATH_PROPERTY)} in ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
-        )}: ${fluenceConfig.aquaInputPath}`
+        )}: ${maybeFluenceConfig.aquaInputPath}`
       );
     }
   }

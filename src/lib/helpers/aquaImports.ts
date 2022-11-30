@@ -37,7 +37,7 @@ import {
 type GetAquaImportsArg = {
   commandObj: CommandObj;
   flags?: { import?: string[] | undefined };
-  fluenceConfig: FluenceConfig | null;
+  maybeFluenceConfig?: FluenceConfig | null | undefined;
 };
 
 export async function ensureAquaImports(
@@ -49,16 +49,16 @@ export async function ensureAquaImports(
     return defaultImports;
   }
 
-  const { commandObj, flags, fluenceConfig } = args;
+  const { commandObj, flags, maybeFluenceConfig } = args;
 
   return (async (): Promise<string[]> => [
     ...defaultImports,
     ...(flags?.import ?? []),
-    ...(fluenceConfig === null
+    ...(maybeFluenceConfig === null || maybeFluenceConfig === undefined
       ? []
       : (
           await installAllNPMDependenciesFromFluenceConfig({
-            fluenceConfig,
+            fluenceConfig: maybeFluenceConfig,
             commandObj,
           })
         ).filter(
