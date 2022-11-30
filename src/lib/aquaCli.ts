@@ -81,12 +81,12 @@ export type AquaCLI = {
 
 export const initAquaCli = async (
   commandObj: CommandObj,
-  fluenceConfig: FluenceConfig | null
+  maybeFluenceConfig: FluenceConfig | null
 ): Promise<AquaCLI> => {
   const aquaCliPath = await ensureNpmDependency({
     nameAndVersion: AQUA_NPM_DEPENDENCY,
     commandObj,
-    fluenceConfig,
+    maybeFluenceConfig,
   });
 
   return (aquaCliInput, message, keyValuePairs): Promise<string> => {

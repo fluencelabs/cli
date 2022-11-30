@@ -378,7 +378,7 @@ export const build = async ({
         }
       );
 
-      const facadeModuleConfig = moduleConfigs[moduleConfigs.length - 1];
+      const facadeModuleConfig = moduleConfigs.at(-1);
 
       assert(
         facadeModuleConfig !== undefined,

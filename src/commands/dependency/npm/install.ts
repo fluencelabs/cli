@@ -75,7 +75,7 @@ export default class Install extends Command {
     if (packageNameAndVersion === undefined) {
       const aquaImports = await ensureAquaImports({
         commandObj: this,
-        fluenceConfig,
+        maybeFluenceConfig: fluenceConfig,
       });
 
       await ensureVSCodeSettingsJSON({
@@ -89,13 +89,16 @@ export default class Install extends Command {
     await ensureNpmDependency({
       commandObj: this,
       nameAndVersion: packageNameAndVersion,
-      fluenceConfig,
+      maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,
     });
 
     await ensureVSCodeSettingsJSON({
       commandObj: this,
-      aquaImports: await ensureAquaImports({ commandObj: this, fluenceConfig }),
+      aquaImports: await ensureAquaImports({
+        commandObj: this,
+        maybeFluenceConfig: fluenceConfig,
+      }),
     });
   }
 }
@@ -123,7 +126,7 @@ export const installAllNPMDependenciesFromFluenceConfig = async ({
       await ensureNpmDependency({
         nameAndVersion: `${name}@${version}`,
         commandObj,
-        fluenceConfig,
+        maybeFluenceConfig: fluenceConfig,
       })
     );
   }

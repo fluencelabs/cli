@@ -38,10 +38,14 @@ const ADDR_MAP: Record<Network, Array<string>> = {
   testnet: getAddrs(testNet),
 };
 
-const resolveAddrs = (relays: Relays): Array<string> => {
-  if (relays === undefined) {
+const resolveAddrs = (
+  maybeRelays: Relays | null | undefined
+): Array<string> => {
+  if (maybeRelays === undefined || maybeRelays === null) {
     return ADDR_MAP.kras;
   }
+
+  const relays = maybeRelays;
 
   if (Array.isArray(relays)) {
     return relays;
@@ -50,8 +54,10 @@ const resolveAddrs = (relays: Relays): Array<string> => {
   return ADDR_MAP[relays];
 };
 
-export const getRandomRelayAddr = (relays: Relays): string => {
-  const addrs = resolveAddrs(relays);
+export const getRandomRelayAddr = (
+  maybeRelays: Relays | null | undefined
+): string => {
+  const addrs = resolveAddrs(maybeRelays);
   const largestIndex = addrs.length - 1;
   const randomIndex = Math.round(Math.random() * largestIndex);
 

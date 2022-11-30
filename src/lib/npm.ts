@@ -62,7 +62,7 @@ export const getLatestVersionOfNPMDependency = async (
 
 type NpmDependencyArg = {
   nameAndVersion: string;
-  fluenceConfig?: FluenceConfig | null | undefined;
+  maybeFluenceConfig?: FluenceConfig | null | undefined;
   commandObj: CommandObj;
   explicitInstallation?: boolean;
 };
@@ -70,7 +70,7 @@ type NpmDependencyArg = {
 export const ensureNpmDependency = async ({
   nameAndVersion,
   commandObj,
-  fluenceConfig,
+  maybeFluenceConfig,
   explicitInstallation = false,
 }: NpmDependencyArg): Promise<string> => {
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
@@ -80,7 +80,7 @@ export const ensureNpmDependency = async ({
     maybeVersion ??
     (explicitInstallation
       ? undefined
-      : fluenceConfig?.dependencies?.npm?.[name] ??
+      : maybeFluenceConfig?.dependencies?.npm?.[name] ??
         fluenceNPMDependencies[name]?.recommendedVersion) ??
     (await getLatestVersionOfNPMDependency(name, commandObj));
 
@@ -118,9 +118,9 @@ export const ensureNpmDependency = async ({
     }
   }
 
-  if (fluenceConfig !== undefined && fluenceConfig !== null) {
-    fluenceConfig.dependencies.npm[name] = version;
-    await fluenceConfig.$commit();
+  if (maybeFluenceConfig !== undefined && maybeFluenceConfig !== null) {
+    maybeFluenceConfig.dependencies.npm[name] = version;
+    await maybeFluenceConfig.$commit();
   }
 
   if (explicitInstallation) {

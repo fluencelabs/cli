@@ -89,11 +89,11 @@ export default class Aqua extends Command {
   async run(): Promise<void> {
     const { flags } = await this.parse(Aqua);
     const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await initFluenceConfig(this);
+    const maybeFluenceConfig = await initFluenceConfig(this);
 
     const {
       watch,
-      input: inputPath = fluenceConfig?.aquaInputPath ??
+      input: inputPath = maybeFluenceConfig?.aquaInputPath ??
         (await input({
           isInteractive,
           message:
@@ -103,15 +103,15 @@ export default class Aqua extends Command {
         })),
       output: outputPath = flags.dry
         ? undefined
-        : fluenceConfig?.aquaOutputTSPath ??
-          fluenceConfig?.aquaOutputJSPath ??
+        : maybeFluenceConfig?.aquaOutputTSPath ??
+          maybeFluenceConfig?.aquaOutputJSPath ??
           (await input({
             isInteractive,
             message:
               "Enter path to the output directory. Will be created if it doesn't exists",
             flagName: "input",
           })),
-      js = flags.js ?? fluenceConfig?.aquaOutputJSPath !== undefined,
+      js = flags.js ?? maybeFluenceConfig?.aquaOutputJSPath !== undefined,
       ...aquaCliOptionalFlags
     } = flags;
 
@@ -126,11 +126,11 @@ export default class Aqua extends Command {
       import: await ensureAquaImports({
         commandObj: this,
         flags,
-        fluenceConfig,
+        maybeFluenceConfig,
       }),
     };
 
-    const aquaCli = await initAquaCli(this, fluenceConfig);
+    const aquaCli = await initAquaCli(this, maybeFluenceConfig);
 
     const compile = (): Promise<string> =>
       aquaCli({ flags: aquaCliFlags }, "Compiling");

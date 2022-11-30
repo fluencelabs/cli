@@ -122,7 +122,7 @@ export default class REPL extends Command {
       FS_OPTIONS
     );
 
-    const facadeModuleConfig = moduleConfigs[moduleConfigs.length - 1];
+    const facadeModuleConfig = moduleConfigs.at(-1);
 
     assert(
       facadeModuleConfig !== undefined,
