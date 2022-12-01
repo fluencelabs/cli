@@ -225,7 +225,7 @@ const configSchemaV1Obj = {
       description: `List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: ${NETWORKS[0]}`,
       type: ["string", "array"],
       oneOf: [
-        { type: "string", description: "Network name", enum: NETWORKS },
+        { type: "string", title: "Network name", enum: NETWORKS },
         {
           type: "array",
           title: "Multi addresses",
