@@ -32,6 +32,7 @@ import {
   Distribution,
   DISTRIBUTION_EVEN,
 } from "../lib/configs/project/fluence";
+import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock";
 import type { ModuleConfigReadonly } from "../lib/configs/project/module";
 import {
   AQUA_EXT,
@@ -108,7 +109,13 @@ export default class Deploy extends Command {
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
 
-    const marineCli = await initMarineCli(this, fluenceConfig);
+    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+
+    const marineCli = await initMarineCli(
+      this,
+      fluenceConfig,
+      maybeFluenceLockConfig
+    );
 
     const preparedForDeployItems = await prepareForDeploy({
       commandObj: this,
@@ -118,7 +125,12 @@ export default class Deploy extends Command {
       marineCli,
     });
 
-    const aquaCli = await initAquaCli(this, fluenceConfig);
+    const aquaCli = await initAquaCli(
+      this,
+      fluenceConfig,
+      maybeFluenceLockConfig
+    );
+
     const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
     let appConfig = await initAppConfig(this);
 

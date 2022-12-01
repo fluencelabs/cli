@@ -27,6 +27,7 @@ import {
   initFluenceConfig,
   initReadonlyFluenceConfig,
 } from "../../lib/configs/project/fluence";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
 import {
   initReadonlyModuleConfig,
   MODULE_TYPE_RUST,
@@ -103,8 +104,14 @@ export default class REPL extends Command {
       nameOrPathOrUrl,
     });
 
-    const fluenceConfig = await initFluenceConfig(this);
-    const marineCli = await initMarineCli(this, fluenceConfig);
+    const maybeFluenceConfig = await initFluenceConfig(this);
+    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+
+    const marineCli = await initMarineCli(
+      this,
+      maybeFluenceConfig,
+      maybeFluenceLockConfig
+    );
 
     const moduleConfigs = await ensureModuleConfigs({
       serviceModules,
@@ -151,7 +158,8 @@ ${color.yellow(
       await ensureCargoDependency({
         nameAndVersion: MREPL_CARGO_DEPENDENCY,
         commandObj: this,
-        fluenceConfig,
+        maybeFluenceConfig,
+        maybeFluenceLockConfig,
       }),
       [fluenceTmpConfigTomlPath],
       { stdio: "inherit", detached: true }

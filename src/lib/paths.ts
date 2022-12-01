@@ -33,6 +33,7 @@ import {
   DEPLOYED_APP_TS_FILE_NAME,
   DEPLOY_CONFIG_FILE_NAME,
   EXTENSIONS_JSON_FILE_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
   JS_DIR_NAME,
@@ -45,6 +46,7 @@ import {
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
 } from "./const";
+import { recursivelyFindFile } from "./helpers/recursivelyFindFile";
 
 export const validatePath = async (path: string): Promise<string | true> => {
   try {
@@ -83,21 +85,37 @@ export const ensureUserFluenceCargoDir = async (
 
 // cwd is cached in order for paths to be correct even if cwd changes during the
 // execution (e.g. Marince CLI has to change cwd in order to work correctly)
-let projectRootDir = process.cwd();
-export const getProjectRootDir = (): string => projectRootDir;
+const initialCwd = process.cwd();
+export let projectRootDirPromise = (async (): Promise<string> => {
+  const fluenceConfigPath = await recursivelyFindFile(
+    FLUENCE_CONFIG_FILE_NAME,
+    initialCwd
+  );
+
+  if (fluenceConfigPath === null) {
+    return initialCwd;
+  }
+
+  const newProjectRootDir = path.dirname(fluenceConfigPath);
+  return newProjectRootDir;
+})().catch((error): never => {
+  throw error;
+});
 
 export const setProjectRootDir = (dir: string): void => {
-  projectRootDir = dir;
+  projectRootDirPromise = Promise.resolve(dir);
 };
 
-export const ensureSrcAquaDir = (): Promise<string> =>
-  ensureDir(path.join(getProjectRootDir(), SRC_DIR_NAME, AQUA_DIR_NAME));
+export const ensureSrcAquaDir = async (): Promise<string> =>
+  ensureDir(
+    path.join(await projectRootDirPromise, SRC_DIR_NAME, AQUA_DIR_NAME)
+  );
 
 export const ensureSrcAquaMainPath = async (): Promise<string> =>
   path.join(await ensureSrcAquaDir(), DEFAULT_SRC_AQUA_FILE_NAME);
 
-export const ensureVSCodeDir = (): Promise<string> =>
-  ensureDir(path.join(getProjectRootDir(), VSCODE_DIR_NAME));
+export const ensureVSCodeDir = async (): Promise<string> =>
+  ensureDir(path.join(await projectRootDirPromise, VSCODE_DIR_NAME));
 
 export const ensureVSCodeSettingsJsonPath = async (): Promise<string> =>
   path.join(await ensureVSCodeDir(), SETTINGS_JSON_FILE_NAME);
@@ -105,13 +123,13 @@ export const ensureVSCodeSettingsJsonPath = async (): Promise<string> =>
 export const ensureVSCodeExtensionsJsonPath = async (): Promise<string> =>
   path.join(await ensureVSCodeDir(), EXTENSIONS_JSON_FILE_NAME);
 
-export const getGitignorePath = (): string =>
-  path.join(getProjectRootDir(), GITIGNORE_FILE_NAME);
+export const getGitignorePath = async (): Promise<string> =>
+  path.join(await projectRootDirPromise, GITIGNORE_FILE_NAME);
 
 // Project .fluence paths:
 
-export const ensureFluenceDir = (): Promise<string> =>
-  ensureDir(path.join(getProjectRootDir(), FLUENCE_DIR_NAME));
+export const ensureFluenceDir = async (): Promise<string> =>
+  ensureDir(path.join(await projectRootDirPromise, FLUENCE_DIR_NAME));
 
 export const ensureFluenceAquaDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureFluenceDir(), AQUA_DIR_NAME));
@@ -134,8 +152,8 @@ export const ensureFluenceJSDeployedAppPath = async (
 ): Promise<string> =>
   path.join(await ensureDir(fluenceJSDir), DEPLOYED_APP_JS_FILE_NAME);
 
-export const ensureDefaultJSDirPath = (): Promise<string> =>
-  ensureDir(path.join(getProjectRootDir(), SRC_DIR_NAME, JS_DIR_NAME));
+export const ensureDefaultJSDirPath = async (): Promise<string> =>
+  ensureDir(path.join(await projectRootDirPromise, SRC_DIR_NAME, JS_DIR_NAME));
 
 export const ensureDefaultJSPath = async (): Promise<string> =>
   ensureDir(path.join(await ensureDefaultJSDirPath(), SRC_DIR_NAME));
@@ -157,8 +175,8 @@ export const ensureFluenceTSDeployedAppPath = async (
 ): Promise<string> =>
   path.join(await ensureDir(fluenceTSDir), DEPLOYED_APP_TS_FILE_NAME);
 
-export const ensureDefaultTSDirPath = (): Promise<string> =>
-  ensureDir(path.join(getProjectRootDir(), SRC_DIR_NAME, TS_DIR_NAME));
+export const ensureDefaultTSDirPath = async (): Promise<string> =>
+  ensureDir(path.join(await projectRootDirPromise, SRC_DIR_NAME, TS_DIR_NAME));
 
 export const ensureDefaultTSPath = async (): Promise<string> =>
   ensureDir(path.join(await ensureDefaultTSDirPath(), SRC_DIR_NAME));

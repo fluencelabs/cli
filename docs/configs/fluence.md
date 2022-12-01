@@ -132,7 +132,7 @@ The name of the Key Pair to use. It is resolved in the following order (from the
 
 ## dependencies
 
-A map of the exact dependency versions. Acts like a lock file
+A map of dependency versions
 
 `dependencies`
 

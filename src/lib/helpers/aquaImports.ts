@@ -22,6 +22,7 @@ import type { JSONSchemaType } from "ajv";
 import { installAllNPMDependenciesFromFluenceConfig } from "../../commands/dependency/npm/install";
 import { ajv } from "../ajv";
 import type { FluenceConfig } from "../configs/project/fluence";
+import type { FluenceLockConfig } from "../configs/project/fluenceLock";
 import {
   CommandObj,
   DOT_BIN_DIR_NAME,
@@ -34,11 +35,19 @@ import {
   ensureVSCodeSettingsJsonPath,
 } from "../paths";
 
-type GetAquaImportsArg = {
-  commandObj: CommandObj;
-  flags?: { import?: string[] | undefined };
-  maybeFluenceConfig?: FluenceConfig | null | undefined;
-};
+type GetAquaImportsArg =
+  | {
+      commandObj: CommandObj;
+      flags?: { import?: string[] | undefined };
+      maybeFluenceConfig: FluenceConfig;
+      maybeFluenceLockConfig: FluenceLockConfig;
+    }
+  | {
+      commandObj: CommandObj;
+      flags?: { import?: string[] | undefined };
+      maybeFluenceConfig: null;
+      maybeFluenceLockConfig: null;
+    };
 
 export async function ensureAquaImports(
   args?: GetAquaImportsArg
@@ -49,25 +58,29 @@ export async function ensureAquaImports(
     return defaultImports;
   }
 
-  const { commandObj, flags, maybeFluenceConfig } = args;
+  const { commandObj, flags, maybeFluenceConfig, maybeFluenceLockConfig } =
+    args;
 
-  return (async (): Promise<string[]> => [
+  let importsFromFluenceConfig: Array<string> = [];
+
+  if (maybeFluenceConfig !== null) {
+    importsFromFluenceConfig = (
+      await installAllNPMDependenciesFromFluenceConfig({
+        fluenceConfig: maybeFluenceConfig,
+        fluenceLockConfig: maybeFluenceLockConfig,
+        commandObj,
+      })
+    ).filter(
+      (dependency): boolean =>
+        !dependency.includes(path.join(NODE_MODULES_DIR_NAME, DOT_BIN_DIR_NAME))
+    );
+  }
+
+  return [
     ...defaultImports,
     ...(flags?.import ?? []),
-    ...(maybeFluenceConfig === null || maybeFluenceConfig === undefined
-      ? []
-      : (
-          await installAllNPMDependenciesFromFluenceConfig({
-            fluenceConfig: maybeFluenceConfig,
-            commandObj,
-          })
-        ).filter(
-          (dependency): boolean =>
-            !dependency.includes(
-              path.join(NODE_MODULES_DIR_NAME, DOT_BIN_DIR_NAME)
-            )
-        )),
-  ])();
+    ...importsFromFluenceConfig,
+  ];
 }
 
 const AQUA_SETTINGS_IMPORTS = "aquaSettings.imports";

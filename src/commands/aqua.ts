@@ -22,10 +22,15 @@ import chokidar from "chokidar";
 
 import { initAquaCli } from "../lib/aquaCli";
 import { initFluenceConfig } from "../lib/configs/project/fluence";
+import {
+  defaultFluenceLockConfig,
+  initFluenceLockConfig,
+  initNewFluenceLockConfig,
+} from "../lib/configs/project/fluenceLock";
 import { NO_INPUT_FLAG } from "../lib/const";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
-import { getProjectRootDir, validatePath } from "../lib/paths";
+import { projectRootDirPromise, validatePath } from "../lib/paths";
 import { input } from "../lib/prompt";
 
 export default class Aqua extends Command {
@@ -115,22 +120,43 @@ export default class Aqua extends Command {
       ...aquaCliOptionalFlags
     } = flags;
 
+    const projectRootDir = await projectRootDirPromise;
+
+    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+
+    const aquaImports =
+      maybeFluenceConfig === null
+        ? await ensureAquaImports({
+            commandObj: this,
+            flags,
+            maybeFluenceConfig,
+            maybeFluenceLockConfig: null,
+          })
+        : await ensureAquaImports({
+            commandObj: this,
+            flags,
+            maybeFluenceConfig,
+            maybeFluenceLockConfig:
+              maybeFluenceLockConfig ??
+              (await initNewFluenceLockConfig(defaultFluenceLockConfig, this)),
+          });
+
     const aquaCliFlags = {
-      input: path.join(getProjectRootDir(), inputPath),
+      input: path.join(projectRootDir, inputPath),
       output:
         outputPath === undefined
           ? undefined
-          : path.join(getProjectRootDir(), outputPath),
+          : path.join(projectRootDir, outputPath),
       js,
       ...aquaCliOptionalFlags,
-      import: await ensureAquaImports({
-        commandObj: this,
-        flags,
-        maybeFluenceConfig,
-      }),
+      import: aquaImports,
     };
 
-    const aquaCli = await initAquaCli(this, maybeFluenceConfig);
+    const aquaCli = await initAquaCli(
+      this,
+      maybeFluenceConfig,
+      maybeFluenceLockConfig
+    );
 
     const compile = (): Promise<string> =>
       aquaCli({ flags: aquaCliFlags }, "Compiling");

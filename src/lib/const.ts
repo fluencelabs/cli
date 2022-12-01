@@ -57,6 +57,7 @@ export const BIN_DIR_NAME = "bin";
 export const DOT_BIN_DIR_NAME = ".bin";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
+export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
 export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
@@ -124,9 +125,9 @@ export const TIMEOUT_FLAG = {
 
 export const templates = ["minimal", "ts", "js"] as const;
 export type Template = typeof templates[number];
-export const isTemplate = (template: unknown): template is Template =>
+export const isTemplate = (unknown: unknown): unknown is Template =>
   // eslint-disable-next-line unicorn/prefer-includes
-  templates.some((val): boolean => template === val);
+  templates.some((val): boolean => unknown === val);
 
 export const FORCE_FLAG_NAME = "force";
 export const NAME_FLAG_NAME = "name";

@@ -22,6 +22,12 @@ import { Command } from "@oclif/core";
 
 import type { FluenceConfig } from "../../../lib/configs/project/fluence";
 import {
+  defaultFluenceLockConfig,
+  FluenceLockConfig,
+  initFluenceLockConfig,
+  initNewFluenceLockConfig,
+} from "../../../lib/configs/project/fluenceLock";
+import {
   CommandObj,
   FLUENCE_DIR_NAME,
   NO_INPUT_FLAG,
@@ -69,6 +75,10 @@ export default class Install extends Command {
         typeof packageNameAndVersion === "string"
     );
 
+    const fluenceLockConfig =
+      (await initFluenceLockConfig(this)) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+
     // if packageNameAndVersion is undefined, then we call ensureAquaImports
     // which also installs all npm dependencies from fluence config
     // and then add those imports to vscode settings.json
@@ -76,6 +86,7 @@ export default class Install extends Command {
       const aquaImports = await ensureAquaImports({
         commandObj: this,
         maybeFluenceConfig: fluenceConfig,
+        maybeFluenceLockConfig: fluenceLockConfig,
       });
 
       await ensureVSCodeSettingsJSON({
@@ -90,6 +101,7 @@ export default class Install extends Command {
       commandObj: this,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
+      maybeFluenceLockConfig: fluenceLockConfig,
       explicitInstallation: true,
     });
 
@@ -98,6 +110,7 @@ export default class Install extends Command {
       aquaImports: await ensureAquaImports({
         commandObj: this,
         maybeFluenceConfig: fluenceConfig,
+        maybeFluenceLockConfig: fluenceLockConfig,
       }),
     });
   }
@@ -106,11 +119,13 @@ export default class Install extends Command {
 type InstallAllDependenciesArg = {
   commandObj: CommandObj;
   fluenceConfig: FluenceConfig;
+  fluenceLockConfig: FluenceLockConfig;
 };
 
 export const installAllNPMDependenciesFromFluenceConfig = async ({
   fluenceConfig,
   commandObj,
+  fluenceLockConfig,
 }: InstallAllDependenciesArg): Promise<string[]> => {
   const dependencyPaths = [];
 
@@ -127,6 +142,7 @@ export const installAllNPMDependenciesFromFluenceConfig = async ({
         nameAndVersion: `${name}@${version}`,
         commandObj,
         maybeFluenceConfig: fluenceConfig,
+        maybeFluenceLockConfig: fluenceLockConfig,
       })
     );
   }

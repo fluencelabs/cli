@@ -21,6 +21,7 @@ import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
 import type { FluenceConfig } from "../../lib/configs/project/fluence";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
 import {
   FACADE_MODULE_NAME,
@@ -116,7 +117,13 @@ export default class Add extends Command {
       this.error(`Facade module not found at ${facadeModulePath}`);
     }
 
-    const marineCli = await initMarineCli(this, fluenceConfig);
+    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+
+    const marineCli = await initMarineCli(
+      this,
+      fluenceConfig,
+      maybeFluenceLockConfig
+    );
 
     await generateServiceInterface({
       pathToFacadeWasm: getModuleWasmPath(facadeReadonlyConfig),
