@@ -18,7 +18,7 @@ import { Command, Flags } from "@oclif/core";
 
 import { js } from "./helpers/jsTemplateLitteral";
 
-export const AQUA_RECOMMENDED_VERSION = "0.7.7-363";
+export const AQUA_RECOMMENDED_VERSION = "0.8.0-367";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.4";
 export const MREPL_RECOMMENDED_VERSION = "0.18.6";
