@@ -26,6 +26,7 @@ import type {
   OverrideModules,
   ServiceDeployV1,
 } from "../lib/configs/project/fluence";
+import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock";
 import {
   initReadonlyModuleConfig,
   ModuleConfigReadonly,
@@ -88,7 +89,13 @@ export default class Build extends Command {
       this.error(defaultKeyPair.message);
     }
 
-    const marineCli = await initMarineCli(this, fluenceConfig);
+    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+
+    const marineCli = await initMarineCli(
+      this,
+      fluenceConfig,
+      maybeFluenceLockConfig
+    );
 
     await build({
       fluenceConfig,

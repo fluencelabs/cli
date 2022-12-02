@@ -56,7 +56,7 @@ any of the folllowing: `string` or `array` ([Relays](fluence-properties-relays.m
 
 one (and only one) of
 
-*   [Untitled string in fluence.yaml](fluence-properties-relays-oneof-0.md "check type definition")
+*   [Network name](fluence-properties-relays-oneof-network-name.md "check type definition")
 
 *   [Multi addresses](fluence-properties-relays-oneof-multi-addresses.md "check type definition")
 
@@ -132,7 +132,7 @@ The name of the Key Pair to use. It is resolved in the following order (from the
 
 ## dependencies
 
-A map of the exact dependency versions. Acts like a lock file
+A map of dependency versions
 
 `dependencies`
 

@@ -251,7 +251,7 @@ const configSchemaV3: JSONSchemaType<ConfigV3> = {
       oneOf: [
         {
           type: "string",
-          description: "A name of the network",
+          title: "Network name",
           enum: NETWORKS,
         },
         {

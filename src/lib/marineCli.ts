@@ -15,6 +15,7 @@
  */
 
 import type { FluenceConfig } from "./configs/project/fluence";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock";
 import { CommandObj, MARINE_CARGO_DEPENDENCY } from "./const";
 import { execPromise } from "./execPromise";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
@@ -43,12 +44,14 @@ export type MarineCLI = {
 
 export const initMarineCli = async (
   commandObj: CommandObj,
-  fluenceConfig: FluenceConfig | null
+  maybeFluenceConfig: FluenceConfig | null,
+  maybeFluenceLockConfig: FluenceLockConfig | null
 ): Promise<MarineCLI> => {
   const marineCliPath = await ensureCargoDependency({
     nameAndVersion: MARINE_CARGO_DEPENDENCY,
     commandObj,
-    fluenceConfig,
+    maybeFluenceLockConfig,
+    maybeFluenceConfig,
   });
 
   return async ({

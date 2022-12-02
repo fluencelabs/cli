@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
 
 import type { FluenceConfig } from "./configs/project/fluence";
+import {
+  defaultFluenceLockConfig,
+  FluenceLockConfig,
+  initNewReadonlyFluenceLockConfig,
+} from "./configs/project/fluenceLock";
 import {
   BIN_DIR_NAME,
   CommandObj,
@@ -190,7 +196,8 @@ export const getLatestVersionOfCargoDependency = async ({
 type CargoDependencyArg = {
   nameAndVersion: string;
   commandObj: CommandObj;
-  fluenceConfig?: FluenceConfig | null | undefined;
+  maybeFluenceConfig: FluenceConfig | null;
+  maybeFluenceLockConfig: FluenceLockConfig | null;
   toolchain?: string | undefined;
   explicitInstallation?: boolean;
 };
@@ -198,7 +205,8 @@ type CargoDependencyArg = {
 export const ensureCargoDependency = async ({
   nameAndVersion,
   commandObj,
-  fluenceConfig,
+  maybeFluenceConfig,
+  maybeFluenceLockConfig,
   toolchain: toolchainFromArgs,
   explicitInstallation = false,
 }: CargoDependencyArg): Promise<string> => {
@@ -210,7 +218,8 @@ export const ensureCargoDependency = async ({
     maybeVersion ??
     (explicitInstallation
       ? undefined
-      : fluenceConfig?.dependencies?.cargo?.[name] ??
+      : maybeFluenceLockConfig?.cargo?.[name] ??
+        maybeFluenceConfig?.dependencies?.cargo?.[name] ??
         fluenceCargoDependencies[name]?.recommendedVersion) ??
     (await getLatestVersionOfCargoDependency({ name, commandObj }));
 
@@ -240,6 +249,7 @@ export const ensureCargoDependency = async ({
         printOutput: true,
       });
     } catch (error) {
+      await fsPromises.rm(root, { recursive: true });
       return commandObj.error(
         `Not able to install ${name}@${version} to ${replaceHomeDir(
           root
@@ -252,9 +262,24 @@ export const ensureCargoDependency = async ({
     }
   }
 
-  if (fluenceConfig !== undefined && fluenceConfig !== null) {
-    fluenceConfig.dependencies.cargo[name] = version;
-    await fluenceConfig.$commit();
+  if (maybeFluenceLockConfig !== undefined && maybeFluenceLockConfig !== null) {
+    if (maybeFluenceLockConfig.cargo === undefined) {
+      maybeFluenceLockConfig.cargo = {};
+    }
+
+    assert(maybeFluenceLockConfig.cargo !== undefined);
+    maybeFluenceLockConfig.cargo[name] = version;
+    await maybeFluenceLockConfig.$commit();
+  } else if (maybeFluenceConfig !== undefined && maybeFluenceConfig !== null) {
+    await initNewReadonlyFluenceLockConfig(
+      {
+        ...defaultFluenceLockConfig,
+        cargo: {
+          [name]: version,
+        },
+      },
+      commandObj
+    );
   }
 
   if (explicitInstallation) {

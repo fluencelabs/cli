@@ -29,6 +29,11 @@ import {
   initFluenceConfig,
 } from "../lib/configs/project/fluence";
 import {
+  defaultFluenceLockConfig,
+  initFluenceLockConfig,
+  initNewFluenceLockConfig,
+} from "../lib/configs/project/fluenceLock";
+import {
   CommandObj,
   FS_OPTIONS,
   NO_INPUT_FLAG,
@@ -160,7 +165,30 @@ export default class Run extends Command {
     }
 
     let result: string;
-    const aquaCli = await initAquaCli(this, maybeFluenceConfig);
+    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+
+    const aquaCli = await initAquaCli(
+      this,
+      maybeFluenceConfig,
+      maybeFluenceLockConfig
+    );
+
+    const aquaImports =
+      maybeFluenceConfig === null
+        ? await ensureAquaImports({
+            commandObj: this,
+            flags,
+            maybeFluenceConfig,
+            maybeFluenceLockConfig: null,
+          })
+        : await ensureAquaImports({
+            commandObj: this,
+            flags,
+            maybeFluenceConfig,
+            maybeFluenceLockConfig:
+              maybeFluenceLockConfig ??
+              (await initNewFluenceLockConfig(defaultFluenceLockConfig, this)),
+          });
 
     try {
       result = await aquaCli(
@@ -171,11 +199,7 @@ export default class Run extends Command {
             func,
             input: aqua,
             timeout: flags.timeout,
-            import: await ensureAquaImports({
-              commandObj: this,
-              flags,
-              maybeFluenceConfig,
-            }),
+            import: aquaImports,
             "json-service": jsonServicePaths,
             sk: keyPair.secretKey,
             plugin: flags.plugin,

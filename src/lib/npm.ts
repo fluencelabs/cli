@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
 
 import type { FluenceConfig } from "./configs/project/fluence";
+import {
+  defaultFluenceLockConfig,
+  FluenceLockConfig,
+  initNewReadonlyFluenceLockConfig,
+} from "./configs/project/fluenceLock";
 import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
@@ -62,7 +68,8 @@ export const getLatestVersionOfNPMDependency = async (
 
 type NpmDependencyArg = {
   nameAndVersion: string;
-  maybeFluenceConfig?: FluenceConfig | null | undefined;
+  maybeFluenceConfig: FluenceConfig | null;
+  maybeFluenceLockConfig: FluenceLockConfig | null;
   commandObj: CommandObj;
   explicitInstallation?: boolean;
 };
@@ -71,6 +78,7 @@ export const ensureNpmDependency = async ({
   nameAndVersion,
   commandObj,
   maybeFluenceConfig,
+  maybeFluenceLockConfig,
   explicitInstallation = false,
 }: NpmDependencyArg): Promise<string> => {
   const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
@@ -80,7 +88,8 @@ export const ensureNpmDependency = async ({
     maybeVersion ??
     (explicitInstallation
       ? undefined
-      : maybeFluenceConfig?.dependencies?.npm?.[name] ??
+      : maybeFluenceLockConfig?.npm?.[name] ??
+        maybeFluenceConfig?.dependencies?.npm?.[name] ??
         fluenceNPMDependencies[name]?.recommendedVersion) ??
     (await getLatestVersionOfNPMDependency(name, commandObj));
 
@@ -118,9 +127,24 @@ export const ensureNpmDependency = async ({
     }
   }
 
-  if (maybeFluenceConfig !== undefined && maybeFluenceConfig !== null) {
-    maybeFluenceConfig.dependencies.npm[name] = version;
-    await maybeFluenceConfig.$commit();
+  if (maybeFluenceLockConfig !== undefined && maybeFluenceLockConfig !== null) {
+    if (maybeFluenceLockConfig.npm === undefined) {
+      maybeFluenceLockConfig.npm = {};
+    }
+
+    assert(maybeFluenceLockConfig.npm !== undefined);
+    maybeFluenceLockConfig.npm[name] = version;
+    await maybeFluenceLockConfig.$commit();
+  } else if (maybeFluenceConfig !== undefined && maybeFluenceConfig !== null) {
+    await initNewReadonlyFluenceLockConfig(
+      {
+        ...defaultFluenceLockConfig,
+        npm: {
+          [name]: version,
+        },
+      },
+      commandObj
+    );
   }
 
   if (explicitInstallation) {

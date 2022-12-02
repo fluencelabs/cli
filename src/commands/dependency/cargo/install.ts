@@ -22,6 +22,12 @@ import { Command, Flags } from "@oclif/core";
 
 import type { FluenceConfig } from "../../../lib/configs/project/fluence";
 import {
+  defaultFluenceLockConfig,
+  FluenceLockConfig,
+  initFluenceLockConfig,
+  initNewFluenceLockConfig,
+} from "../../../lib/configs/project/fluenceLock";
+import {
   CARGO_DIR_NAME,
   CommandObj,
   FLUENCE_DIR_NAME,
@@ -60,6 +66,10 @@ export default class Install extends Command {
     const isInteractive = getIsInteractive(flags);
     const fluenceConfig = await ensureFluenceProject(this, isInteractive);
 
+    const fluenceLockConfig =
+      (await initFluenceLockConfig(this)) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+
     const packageNameAndVersion: unknown =
       args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
@@ -75,6 +85,7 @@ export default class Install extends Command {
       await installAllCargoDependenciesFromFluenceConfig({
         fluenceConfig,
         commandObj: this,
+        fluenceLockConfig,
       });
 
       return;
@@ -83,8 +94,9 @@ export default class Install extends Command {
     await ensureCargoDependency({
       commandObj: this,
       nameAndVersion: packageNameAndVersion,
-      fluenceConfig,
+      maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,
+      maybeFluenceLockConfig: fluenceLockConfig,
     });
   }
 }
@@ -92,10 +104,12 @@ export default class Install extends Command {
 type InstallAllDependenciesArg = {
   commandObj: CommandObj;
   fluenceConfig: FluenceConfig;
+  fluenceLockConfig: FluenceLockConfig;
 };
 
 export const installAllCargoDependenciesFromFluenceConfig = async ({
   fluenceConfig,
+  fluenceLockConfig,
   commandObj,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
@@ -109,7 +123,8 @@ export const installAllCargoDependenciesFromFluenceConfig = async ({
     await ensureCargoDependency({
       nameAndVersion: `${name}@${version}`,
       commandObj,
-      fluenceConfig,
+      maybeFluenceConfig: fluenceConfig,
+      maybeFluenceLockConfig: fluenceLockConfig,
     });
   }
 };

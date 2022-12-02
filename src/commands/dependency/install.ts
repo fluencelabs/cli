@@ -18,6 +18,11 @@ import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
 import {
+  defaultFluenceLockConfig,
+  initFluenceLockConfig,
+  initNewFluenceLockConfig,
+} from "../../lib/configs/project/fluenceLock";
+import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
   FLUENCE_DIR_NAME,
@@ -62,6 +67,10 @@ export default class Install extends Command {
     const isInteractive = getIsInteractive(flags);
     const fluenceConfig = await ensureFluenceProject(this, isInteractive);
 
+    const fluenceLockConfig =
+      (await initFluenceLockConfig(this)) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+
     if (flags.recommended) {
       fluenceConfig.dependencies.npm[AQUA_NPM_DEPENDENCY] =
         AQUA_RECOMMENDED_VERSION;
@@ -99,12 +108,14 @@ export default class Install extends Command {
       aquaImports: await ensureAquaImports({
         commandObj: this,
         maybeFluenceConfig: fluenceConfig,
+        maybeFluenceLockConfig: fluenceLockConfig,
       }),
     });
 
     await installAllCargoDependenciesFromFluenceConfig({
       commandObj: this,
       fluenceConfig,
+      fluenceLockConfig: fluenceLockConfig,
     });
   }
 }

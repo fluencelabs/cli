@@ -69,6 +69,7 @@ type GetConfigString<LatestConfig> = {
   commandObj: CommandObj;
   getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined;
   name: string;
+  description: string;
 };
 
 const getConfigString = async <LatestConfig extends BaseConfig>({
@@ -77,6 +78,7 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
   commandObj,
   getDefaultConfig,
   name,
+  description,
 }: GetConfigString<LatestConfig>): Promise<string | null> => {
   const schemaPathCommentStart = "# yaml-language-server: $schema=";
   const schemaPathComment = `${schemaPathCommentStart}${schemaRelativePath}`;
@@ -95,11 +97,13 @@ const getConfigString = async <LatestConfig extends BaseConfig>({
       return null;
     }
 
+    const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
+      `.${YAML_EXT}`,
+      ""
+    )}.md`;
+
     configString = yamlDiffPatch(
-      `${schemaPathComment}\n\n# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
-        `.${YAML_EXT}`,
-        ""
-      )}.md\n\n`,
+      `${schemaPathComment}\n\n# ${description}\n\n${documentationLinkComment}\n\n`,
       {},
       await getDefaultConfig(commandObj)
     );
@@ -344,6 +348,10 @@ export function getReadonlyConfigInitFunction<
       commandObj,
       getDefaultConfig,
       name,
+      description:
+        typeof latestSchema["description"] === "string"
+          ? latestSchema["description"]
+          : "",
     });
 
     if (maybeConfigString === null) {

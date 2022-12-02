@@ -19,6 +19,7 @@ import path from "node:path";
 
 import { appSchema } from "./lib/configs/project/app";
 import { fluenceSchema } from "./lib/configs/project/fluence";
+import { fluenceLockSchema } from "./lib/configs/project/fluenceLock";
 import { moduleSchema } from "./lib/configs/project/module";
 import { projectSecretsSchema } from "./lib/configs/project/projectSecrets";
 import { serviceSchema } from "./lib/configs/project/service";
@@ -33,11 +34,13 @@ import {
   SCHEMAS_DIR_NAME,
   SERVICE_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
+  FLUENCE_LOCK_CONFIG_FILE_NAME,
 } from "./lib/const";
 import { jsonStringify } from "./lib/helpers/jsonStringify";
 
 const schemas = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
+  [FLUENCE_LOCK_CONFIG_FILE_NAME]: fluenceLockSchema,
   [APP_CONFIG_FILE_NAME]: appSchema,
   [MODULE_CONFIG_FILE_NAME]: moduleSchema,
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
@@ -55,7 +58,6 @@ ${schemas
   .map(
     ([name, schema]): string =>
       `## [${name}](./${name.replace(`.${YAML_EXT}`, "")}.md)\n\n${String(
-        // eslint-disable-next-line dot-notation
         schema["description"]
       )}`
   )

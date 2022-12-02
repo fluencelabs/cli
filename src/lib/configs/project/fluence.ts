@@ -38,13 +38,11 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../const";
 import { jsonStringify } from "../../helpers/jsonStringify";
-import { recursivelyFindFile } from "../../helpers/recursivelyFindFile";
 import { NETWORKS, Relays } from "../../multiaddr";
 import {
   ensureFluenceDir,
   ensureSrcAquaMainPath,
-  getProjectRootDir,
-  setProjectRootDir,
+  projectRootDirPromise,
 } from "../../paths";
 import {
   getConfigInitFunction,
@@ -227,7 +225,7 @@ const configSchemaV1Obj = {
       description: `List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: ${NETWORKS[0]}`,
       type: ["string", "array"],
       oneOf: [
-        { type: "string", description: "Network name", enum: NETWORKS },
+        { type: "string", title: "Network name", enum: NETWORKS },
         {
           type: "array",
           title: "Multi addresses",
@@ -288,14 +286,13 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     dependencies: {
       type: "object",
       title: "Dependencies",
-      description:
-        "A map of the exact dependency versions. Acts like a lock file",
+      description: "A map of dependency versions",
       properties: {
         npm: {
           type: "object",
           title: "npm dependencies",
           description:
-            "A map of the exact npm dependency versions. Acts like a lock file. CLI ensures dependencies are installed each time you run aqua",
+            "A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua",
           properties: {
             [AQUA_NPM_DEPENDENCY]: { type: "string" },
           },
@@ -304,7 +301,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
         cargo: {
           type: "object",
           title: "Cargo dependencies",
-          description: `A map of the exact cargo dependency versions. Acts like a lock file. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
+          description: `A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
           properties: {
             [MARINE_CARGO_DEPENDENCY]: { type: "string" },
             [MREPL_CARGO_DEPENDENCY]: { type: "string" },
@@ -358,7 +355,7 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
   }
 
   const srcMainAquaPathRelative = path.relative(
-    getProjectRootDir(),
+    await projectRootDirPromise,
     srcMainAquaPath
   );
 
@@ -384,7 +381,7 @@ const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 
 const migrations: Migrations<Config> = [
-  (config: Config): ConfigV1 => {
+  async (config: Config): Promise<ConfigV1> => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
         `Migration error. Errors: ${jsonStringify(
@@ -393,13 +390,15 @@ const migrations: Migrations<Config> = [
       );
     }
 
+    const projectRootDir = await projectRootDirPromise;
+
     const services = config.services.reduce<Record<string, ServiceV1>>(
       (acc, { name, count = 1 }, i): Record<string, ServiceV1> => ({
         ...acc,
         [name]: {
           get: path.relative(
-            getProjectRootDir(),
-            path.join(getProjectRootDir(), "artifacts", name)
+            projectRootDir,
+            path.join(projectRootDir, "artifacts", name)
           ),
           deploy: [
             { deployId: `default_${i}`, ...(count > 1 ? { count } : {}) },
@@ -481,20 +480,7 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV2,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
-  getConfigDirPath: async (): Promise<string> => {
-    const fluenceConfigPath = await recursivelyFindFile(
-      FLUENCE_CONFIG_FILE_NAME,
-      getProjectRootDir()
-    );
-
-    if (fluenceConfigPath === null) {
-      return getProjectRootDir();
-    }
-
-    const projectRootDir = path.dirname(fluenceConfigPath);
-    setProjectRootDir(projectRootDir);
-    return projectRootDir;
-  },
+  getConfigDirPath: (): Promise<string> => projectRootDirPromise,
   getSchemaDirPath: ensureFluenceDir,
   validate,
 };

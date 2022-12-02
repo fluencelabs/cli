@@ -1,6 +1,6 @@
 ## 0 Type
 
-`string`
+`string` ([Network name](app-properties-relays-oneof-network-name.md))
 
 ## 0 Constraints
 

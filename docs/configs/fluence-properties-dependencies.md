@@ -11,7 +11,7 @@
 
 ## npm
 
-A map of the exact npm dependency versions. Acts like a lock file. CLI ensures dependencies are installed each time you run aqua
+A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua
 
 `npm`
 
@@ -29,7 +29,7 @@ A map of the exact npm dependency versions. Acts like a lock file. CLI ensures d
 
 ## cargo
 
-A map of the exact cargo dependency versions. Acts like a lock file. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
+A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
 
 `cargo`
 
