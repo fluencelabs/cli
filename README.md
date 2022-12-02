@@ -244,7 +244,7 @@ EXAMPLES
 
 ## `fluence dep i`
 
-Install all project dependencies (dependencies are cached inside fluence directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
