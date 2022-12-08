@@ -96,7 +96,7 @@ export default class New extends Command {
     );
 
     if (
-      isInteractive &&
+      !isInteractive ||
       (await confirm({
         isInteractive,
         message: `Do you want add ${color.yellow(
@@ -143,12 +143,13 @@ const getServiceName = async ({
 
   if (
     serviceNameValidity !== true ||
-    !(await confirm({
-      isInteractive,
-      message: `Do you want to use ${color.yellow(
-        camelCasedServiceName
-      )} as the name of your new service?`,
-    }))
+    (isInteractive &&
+      !(await confirm({
+        isInteractive,
+        message: `Do you want to use ${color.yellow(
+          camelCasedServiceName
+        )} as the name of your new service?`,
+      })))
   ) {
     return undefined;
   }

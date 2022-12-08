@@ -15,7 +15,6 @@
  */
 
 import fsPromises from "node:fs/promises";
-import path from "node:path";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
@@ -35,7 +34,6 @@ import {
 import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock";
 import type { ModuleConfigReadonly } from "../lib/configs/project/module";
 import {
-  AQUA_EXT,
   CommandObj,
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -50,6 +48,7 @@ import {
 import {
   generateDeployedAppAqua,
   generateRegisterApp,
+  removePreviouslyGeneratedInterfacesForServices,
 } from "../lib/deployedApp";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
@@ -65,10 +64,7 @@ import {
   getRandomRelayIdFromTheList,
   Relays,
 } from "../lib/multiaddr";
-import {
-  ensureFluenceAquaServicesDir,
-  ensureFluenceTmpDeployJsonPath,
-} from "../lib/paths";
+import { ensureFluenceTmpDeployJsonPath } from "../lib/paths";
 import { confirm } from "../lib/prompt";
 import { hasKey } from "../lib/typeHelpers";
 
@@ -209,26 +205,11 @@ export default class Deploy extends Command {
       }
     }
 
+    await removePreviouslyGeneratedInterfacesForServices(allServices);
+
     if (Object.keys(allServices).length === 0) {
       return;
     }
-
-    // remove previously generated interfaces for services
-    const aquaServicesDirPath = await ensureFluenceAquaServicesDir();
-
-    const servicesDirContent = await fsPromises.readdir(aquaServicesDirPath);
-
-    await Promise.all(
-      servicesDirContent
-        .filter(
-          (fileName): boolean =>
-            !(fileName.slice(0, 1 + AQUA_EXT.length) in allServices)
-        )
-        .map(
-          (fileName): Promise<void> =>
-            fsPromises.unlink(path.join(aquaServicesDirPath, fileName))
-        )
-    );
 
     await generateDeployedAppAqua(allServices);
 

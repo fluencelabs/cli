@@ -19,7 +19,7 @@ import path from "node:path";
 
 export const recursivelyFindFile = async (
   fileName: string,
-  dirPath: string = process.cwd()
+  dirPath: string
 ): Promise<null | string> => {
   let currentDirPath = dirPath;
 

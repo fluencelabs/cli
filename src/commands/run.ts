@@ -15,6 +15,7 @@
  */
 
 import fsPromises from "node:fs/promises";
+import path from "node:path";
 
 import color from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
@@ -46,7 +47,10 @@ import { ensureAquaImports } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs";
 import { getRandomRelayAddr } from "../lib/multiaddr";
-import { ensureFluenceTmpAppServiceJsonPath } from "../lib/paths";
+import {
+  ensureFluenceTmpAppServiceJsonPath,
+  projectRootDirPromise,
+} from "../lib/paths";
 import { input } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
@@ -238,14 +242,19 @@ const ensureAquaPath = async ({
   }
 
   if (typeof maybeFluenceConfig?.aquaInputPath === "string") {
+    const aquaInputPath = path.resolve(
+      await projectRootDirPromise,
+      maybeFluenceConfig.aquaInputPath
+    );
+
     try {
-      await fsPromises.access(maybeFluenceConfig.aquaInputPath);
-      return maybeFluenceConfig.aquaInputPath;
+      await fsPromises.access(aquaInputPath);
+      return aquaInputPath;
     } catch {
       commandObj.warn(
         `Invalid ${color.yellow(AQUA_INPUT_PATH_PROPERTY)} in ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
-        )}: ${maybeFluenceConfig.aquaInputPath}`
+        )}: ${aquaInputPath}`
       );
     }
   }

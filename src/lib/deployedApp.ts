@@ -15,6 +15,7 @@
  */
 
 import fsPromises from "node:fs/promises";
+import path from "node:path";
 
 import color from "@oclif/color";
 import { CliUx } from "@oclif/core";
@@ -22,15 +23,17 @@ import { CliUx } from "@oclif/core";
 import type { AquaCLI } from "./aquaCli";
 import type { ServicesV3 } from "./configs/project/app";
 import type { FluenceConfigReadonly } from "./configs/project/fluence";
-import { FS_OPTIONS } from "./const";
+import { AQUA_EXT, FS_OPTIONS } from "./const";
 import { capitalize } from "./helpers/capitilize";
-import { js } from "./helpers/jsTemplateLitteral";
+import { jsFile } from "./helpers/jsTemplateLitteral";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
 import {
   ensureFluenceJSAppPath,
   ensureFluenceTSAppPath,
   ensureFluenceAquaDeployedAppPath,
   ensureDir,
+  projectRootDirPromise,
+  ensureFluenceAquaServicesDir,
 } from "./paths";
 
 const APP_SERVICE_NAME = "App";
@@ -75,7 +78,9 @@ const generateRegisterAppTSorJS = async ({
 
   const appContent =
     // Codegeneration:
-    js`${isJS ? "" : 'import type { FluencePeer } from "@fluencelabs/fluence";'}
+    jsFile`${
+      isJS ? "" : 'import type { FluencePeer } from "@fluencelabs/fluence";'
+    }
 import { registerApp as registerAppService } from "./deployed.app${isJS}";
 
 export const ${SERVICES_FUNCTION_NAME} = ${JSON.stringify(
@@ -136,37 +141,65 @@ export const generateRegisterApp = async ({
   fluenceConfig,
   ...options
 }: GenerateRegisterAppArg): Promise<void> => {
+  const projectRootDir = await projectRootDirPromise;
+
   if (typeof fluenceConfig?.appJSPath === "string") {
+    const appJSPath = path.resolve(projectRootDir, fluenceConfig.appJSPath);
+
     CliUx.ux.action.start(
       `Compiling ${color.yellow(
         replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
-      )} to ${color.yellow(fluenceConfig.appJSPath)}`
+      )} to ${color.yellow(replaceHomeDir(appJSPath))}`
     );
 
     await generateRegisterAppTSorJS({
       ...options,
       isJS: true,
-      fluenceJSorTSDir: fluenceConfig.appJSPath,
+      fluenceJSorTSDir: appJSPath,
     });
 
     CliUx.ux.action.stop();
   }
 
   if (typeof fluenceConfig?.appTSPath === "string") {
+    const appTSPath = path.resolve(projectRootDir, fluenceConfig.appTSPath);
+
     CliUx.ux.action.start(
       `Compiling ${color.yellow(
         replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
-      )} to ${color.yellow(fluenceConfig.appTSPath)}`
+      )} to ${color.yellow(replaceHomeDir(appTSPath))}`
     );
 
     await generateRegisterAppTSorJS({
       ...options,
       isJS: false,
-      fluenceJSorTSDir: fluenceConfig.appTSPath,
+      fluenceJSorTSDir: path.resolve(appTSPath),
     });
 
     CliUx.ux.action.stop();
   }
+};
+
+const AQUA_EXT_LENGTH = `.${AQUA_EXT}`.length;
+
+export const removePreviouslyGeneratedInterfacesForServices = async (
+  allServices: ServicesV3
+): Promise<void> => {
+  const aquaServicesDirPath = await ensureFluenceAquaServicesDir();
+
+  const servicesDirContent = await fsPromises.readdir(aquaServicesDirPath);
+
+  await Promise.all(
+    servicesDirContent
+      .filter(
+        (fileName): boolean =>
+          !(fileName.slice(0, -AQUA_EXT_LENGTH) in allServices)
+      )
+      .map(
+        (fileName): Promise<void> =>
+          fsPromises.unlink(path.join(aquaServicesDirPath, fileName))
+      )
+  );
 };
 
 const getDeploysDataName = (serviceName: string): string =>
