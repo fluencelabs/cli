@@ -257,10 +257,6 @@ export const TEMPLATE_INDEX_APP_REGISTER_COMMENT = jsComment(
   TEMPLATE_INDEX_APP_REGISTER
 );
 
-export const ES_LINT_DISABLE_TS_NO_CHECK_COMMENTS = `/* eslint-disable */
-// @ts-nocheck
-`;
-
 export const getTemplateIndexFileContent = (isJS: boolean): string => jsFile`
 import { Fluence } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
