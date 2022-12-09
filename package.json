@@ -26,7 +26,6 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest && oclif readme",
     "test": "jest",
-    "ts-node": "ts-node",
     "posttest": "npm run lint",
     "prepare": "husky install",
     "check": "npm run build && npm run lint-fix && npm run gen-config-docs",
