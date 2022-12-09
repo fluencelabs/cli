@@ -55,7 +55,7 @@ const initFirstTime = async (template: Template) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const initializedTemplatesPartial = templates.reduce<
+const initializedTemplates = templates.reduce<
   Partial<Record<Template, Promise<string>>>
 >(
   (acc, val) => ({
@@ -65,38 +65,15 @@ const initializedTemplatesPartial = templates.reduce<
   {}
 ) as Record<Template, Promise<string>>;
 
-export const init = async (dir: string, template: Template): Promise<void> => {
-  const templatePath = await initializedTemplatesPartial[template];
+export const init = async (cwd: string, template: Template): Promise<void> => {
+  const templatePath = await initializedTemplates[template];
 
   try {
-    await rm(dir, { recursive: true });
+    await rm(cwd, { recursive: true });
   } catch {}
 
-  await cp(templatePath, dir, { recursive: true });
+  await cp(templatePath, cwd, { recursive: true });
 };
 
-export type Test = {
-  name: Parameters<typeof test>[0];
-  callback: (cwd: string) => unknown | void | Promise<void | unknown>;
-  template: Template;
-};
-
-export type TestUsingTemplateArg = {
-  description: string;
-  tests: Array<Test>;
-};
-
-export const testUsingTemplates = ({
-  description,
-  tests,
-}: TestUsingTemplateArg): void => {
-  describe(description, () => {
-    for (const { name, callback, template } of tests) {
-      test(name, async () => {
-        const cwd = path.join("tmp", description, name);
-        await init(cwd, template);
-        await callback(path.join(process.cwd(), cwd));
-      });
-    }
-  });
-};
+export const getCWD = (): string =>
+  path.join("tmp", expect.getState().currentTestName);
