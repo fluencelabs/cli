@@ -54,8 +54,9 @@ describe("tutorial", () => {
       cwd,
     });
 
+    await deploy(cwd);
+
     try {
-      await deploy(cwd);
       await uncommentCodeInMainAqua(cwd);
 
       await fluence({
@@ -90,9 +91,9 @@ describe("tutorial", () => {
     const cwd = getCWD();
     await init(cwd, "ts");
     await addAdderServiceToFluenceYAML(cwd);
+    await deploy(cwd);
 
     try {
-      await deploy(cwd);
       await uncommentCodeInMainAqua(cwd);
       await compileAqua(cwd);
       const indexTSorJSPath = await uncommentJSorTSCode("ts", cwd);
@@ -112,9 +113,9 @@ describe("tutorial", () => {
     const cwd = getCWD();
     await init(cwd, "js");
     await addAdderServiceToFluenceYAML(cwd);
+    await deploy(cwd);
 
     try {
-      await deploy(cwd);
       await uncommentCodeInMainAqua(cwd);
       await compileAqua(cwd);
       const indexTSorJSPath = await uncommentJSorTSCode("js", cwd);
