@@ -17,6 +17,6 @@ env:
 
 jobs:
   fluence-cli:
-    uses: ./.github/workflows/snapshot.yml
+    uses: ./.github/workflows/tests.yml
     with:
       ref: ${{ github.ref }}
