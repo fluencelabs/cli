@@ -11,6 +11,10 @@ on:
         description: "Fluence enviroment to run tests agains"
         type: string
         default: "local"
+      rust-peer-image:
+        description: "rust-peer image tag"
+        type: string
+        default: "fluencelabs/fluence:minimal"
       fluence-js-version:
         description: "@fluencejs/fluence version"
         type: string
