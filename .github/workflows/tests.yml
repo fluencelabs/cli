@@ -18,11 +18,11 @@ on:
     outputs:
       fluence-cli-version:
         description: "@fluencelabs/cli version"
-        value: ${{ jobs.publish-fluence-cli.outputs.version }}
+        value: ${{ jobs.tests.outputs.version }}
 
 jobs:
-  publish-fluence-cli:
-    name: "Publish @fluencelabs/cli snapshot"
+  tests:
+    name: "Run tests"
     runs-on: builder
 
     outputs:
