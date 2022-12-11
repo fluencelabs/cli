@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
-export const logAndFail = (log: unknown): never => {
-  throw new Error(String(log));
-};
+const comment =
+  (commentToken: string) =>
+  (text: string): string =>
+    text
+      .split("\n")
+      .map((line) =>
+        line === ""
+          ? ""
+          : line.replaceAll(
+              /(^|\n)\s*/g,
+              (spaces) => `${spaces}${commentToken} `
+            )
+      )
+      .join("\n");
+
+export const jsComment = comment("//");
+export const aquaComment = comment("--");

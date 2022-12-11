@@ -16,7 +16,8 @@
 
 import { Command, Flags } from "@oclif/core";
 
-import { js } from "./helpers/jsTemplateLitteral";
+import { aquaComment, jsComment } from "./helpers/comment";
+import { js, jsFile } from "./helpers/jsTemplateLitteral";
 
 export const AQUA_RECOMMENDED_VERSION = "0.8.0-367";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
@@ -155,16 +156,37 @@ export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 
+const MAIN_AQUA_FILE_UNCOMMENT_TEXT = `-- Uncomment the following when you deploy your app with Adder service:
+`;
+
+export const MAIN_AQUA_FILE_APP_IMPORT_TEXT = `${MAIN_AQUA_FILE_UNCOMMENT_TEXT}
+import App from "deployed.app.aqua"
+import Adder from "services/adder.aqua"
+export App, addOne`;
+
+export const MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT = aquaComment(
+  MAIN_AQUA_FILE_APP_IMPORT_TEXT
+);
+
+export const MAIN_AQUA_FILE_ADD_ONE = `${MAIN_AQUA_FILE_UNCOMMENT_TEXT}
+func addOne(x: u64) -> u64:
+    services <- App.services()
+    on services.adder.default!.peerId:
+        Adder services.adder.default!.serviceId
+        res <- Adder.add_one(x)
+    <- res`;
+
+export const MAIN_AQUA_FILE_ADD_ONE_COMMENT = aquaComment(
+  MAIN_AQUA_FILE_ADD_ONE
+);
+
 export const MAIN_AQUA_FILE_CONTENT = `module Main
 
 import "@fluencelabs/aqua-lib/builtin.aqua"
 
+${MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT}
 
--- Uncomment the following when you deploy your app with Adder service:
 
--- import App from "deployed.app.aqua"
--- import Adder from "services/adder.aqua"
--- export App, addOne
 
 -- IMPORTANT: Add exports for all functions that you want to run
 export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
@@ -173,14 +195,9 @@ export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
 -- https://fluence.dev
 
 
--- Uncomment the following when you deploy your app with Adder service:
+${MAIN_AQUA_FILE_ADD_ONE_COMMENT}
 
--- func addOne(x: u64) -> u64:
---     services <- App.services()
---     on services.adder.default!.peerId:
---         Adder services.adder.default!.serviceId
---         res <- Adder.add_one(x)
---     <- res
+
 
 -- local
 func helloWorld(name: string) -> string:
@@ -221,7 +238,26 @@ func getInfosInParallel(peers: []PeerId) -> []Info:
     <- infos
 `;
 
-export const getTemplateIndexFileContent = (isJS: boolean): string => js`
+const TEMPLATE_INDEX_FILE_UNCOMMENT_TEST = "// Uncomment when app is deployed:";
+
+export const getTemplateIndexAppImports = (
+  isJS: boolean
+): string => js`${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
+import { addOne } from "./aqua/main${isJS}";
+import { registerApp } from "./aqua/app${isJS}";`;
+
+export const getTemplateIndexAppImportsComment = (isJS: boolean): string =>
+  jsComment(getTemplateIndexAppImports(isJS));
+
+export const TEMPLATE_INDEX_APP_REGISTER = `  ${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
+  registerApp()
+  console.log(await addOne(1))`;
+
+export const TEMPLATE_INDEX_APP_REGISTER_COMMENT = jsComment(
+  TEMPLATE_INDEX_APP_REGISTER
+);
+
+export const getTemplateIndexFileContent = (isJS: boolean): string => jsFile`
 import { Fluence } from "@fluencelabs/fluence";
 import { krasnodar } from "@fluencelabs/fluence-network-environment";
 
@@ -233,9 +269,7 @@ import {
   getInfosInParallel,
 } from "./aqua/main${isJS}";
 
-// // Uncomment following imports when app is deployed:
-// import { addOne } from "./aqua/main${isJS}";
-// import { registerApp } from "./aqua/app${isJS}";
+${getTemplateIndexAppImportsComment(isJS)}
 
 const peerIds = krasnodar.map(({ peerId }) => peerId);
 
@@ -256,9 +290,8 @@ const main = async () => {
 
   console.log(helloWorldResult);
 
-  // // Uncomment when app is deployed:
-  // registerApp()
-  // console.log(await addOne(1))
+${TEMPLATE_INDEX_APP_REGISTER_COMMENT}
+  process.exit(0);
 };
 
 main().catch((error) => {
