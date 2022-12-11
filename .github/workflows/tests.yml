@@ -24,6 +24,10 @@ on:
         description: "@fluencelabs/cli version"
         value: ${{ jobs.tests.outputs.version }}
 
+env:
+  FORCE_COLOR: true
+  RUST_PEER_IMAGE: "${{ inputs.rust-peer-image }}"
+
 jobs:
   tests:
     name: "Run tests"
