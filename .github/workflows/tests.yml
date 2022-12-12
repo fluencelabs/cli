@@ -10,7 +10,7 @@ on:
       fluence-env:
         description: "Fluence enviroment to run tests agains"
         type: string
-        default: "local"
+        default: "kras"
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
