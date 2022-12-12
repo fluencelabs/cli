@@ -30,6 +30,8 @@ import { execPromise, ExecPromiseArg } from "../src/lib/execPromise";
 
 import { localNodes } from "./localNodes";
 
+const FLUENCE_ENV = "FLUENCE_ENV";
+
 type FluenceArg = {
   args?: ExecPromiseArg["args"];
   flags?: ExecPromiseArg["flags"];
@@ -75,9 +77,9 @@ const initFirstTime = async (template: Template) => {
     {
       ...fluenceConfig,
       relays:
-        process.env.FLUENCE_ENV === "local"
+        process.env[FLUENCE_ENV] === "local"
           ? localNodes
-          : process.env.FLUENCE_ENV,
+          : process.env[FLUENCE_ENV],
     }
   );
 
