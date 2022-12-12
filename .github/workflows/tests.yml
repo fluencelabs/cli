@@ -110,7 +110,7 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: npm run test
 
-      - run: ls -alh ~/.fluence
+      - run: tree -a ~/.fluence
         if: always()
 
       - name: Generate snapshot version
