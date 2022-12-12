@@ -1,0 +1,12 @@
+module NewService
+
+import App from "deployed.app.aqua"
+import NewService from "services/newService.aqua"
+export App, greeting
+
+func greeting(name: string) -> string:
+    services <- App.services()
+    on services.newService.default!.peerId:
+        NewService services.newService.default!.serviceId
+        res <- NewService.greeting(name)
+    <- res

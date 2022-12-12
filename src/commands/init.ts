@@ -339,7 +339,12 @@ export const initTSorJSProject = async ({
     main: indexFileName,
     ...(isJS ? { type: "module" } : {}),
     scripts: {
-      postinstall: IS_DEVELOPMENT ? "../../bin/dev aqua" : "fluence aqua",
+      postinstall: IS_DEVELOPMENT
+        ? `${path.relative(
+            defaultTSorJSDirPath,
+            path.join(process.cwd(), "bin", "dev")
+          )} aqua`
+        : "fluence aqua",
       start: `${isJS ? "node" : "ts-node"} ${path.join(
         SRC_DIR_NAME,
         indexFileName

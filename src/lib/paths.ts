@@ -143,20 +143,27 @@ export const ensureFluenceAquaDeployedAppPath = async (): Promise<string> =>
 // JS
 
 export const ensureFluenceJSAppPath = async (
-  fluenceJSDir: string
+  fluenceJSRelativeDirPath: string
 ): Promise<string> =>
-  path.join(await ensureDir(fluenceJSDir), APP_JS_FILE_NAME);
+  path.join(
+    await ensureDir(
+      path.resolve(await projectRootDirPromise, fluenceJSRelativeDirPath)
+    ),
+    APP_JS_FILE_NAME
+  );
 
 export const ensureFluenceJSDeployedAppPath = async (
-  fluenceJSDir: string
+  fluenceJSRelativeDirPath: string
 ): Promise<string> =>
-  path.join(await ensureDir(fluenceJSDir), DEPLOYED_APP_JS_FILE_NAME);
+  path.join(
+    await ensureDir(
+      path.resolve(await projectRootDirPromise, fluenceJSRelativeDirPath)
+    ),
+    DEPLOYED_APP_JS_FILE_NAME
+  );
 
 export const ensureDefaultJSDirPath = async (): Promise<string> =>
   ensureDir(path.join(await projectRootDirPromise, SRC_DIR_NAME, JS_DIR_NAME));
-
-export const ensureDefaultJSPath = async (): Promise<string> =>
-  ensureDir(path.join(await ensureDefaultJSDirPath(), SRC_DIR_NAME));
 
 export const ensureDefaultAquaJSPath = async (): Promise<string> =>
   ensureDir(
@@ -166,20 +173,27 @@ export const ensureDefaultAquaJSPath = async (): Promise<string> =>
 // TS
 
 export const ensureFluenceTSAppPath = async (
-  fluenceTSDir: string
+  fluenceTSRelativeDirPath: string
 ): Promise<string> =>
-  path.join(await ensureDir(fluenceTSDir), APP_TS_FILE_NAME);
+  path.join(
+    await ensureDir(
+      path.resolve(await projectRootDirPromise, fluenceTSRelativeDirPath)
+    ),
+    APP_TS_FILE_NAME
+  );
 
 export const ensureFluenceTSDeployedAppPath = async (
-  fluenceTSDir: string
+  fluenceTSRelativeDirPath: string
 ): Promise<string> =>
-  path.join(await ensureDir(fluenceTSDir), DEPLOYED_APP_TS_FILE_NAME);
+  path.join(
+    await ensureDir(
+      path.resolve(await projectRootDirPromise, fluenceTSRelativeDirPath)
+    ),
+    DEPLOYED_APP_TS_FILE_NAME
+  );
 
 export const ensureDefaultTSDirPath = async (): Promise<string> =>
   ensureDir(path.join(await projectRootDirPromise, SRC_DIR_NAME, TS_DIR_NAME));
-
-export const ensureDefaultTSPath = async (): Promise<string> =>
-  ensureDir(path.join(await ensureDefaultTSDirPath(), SRC_DIR_NAME));
 
 export const ensureDefaultAquaTSPath = async (): Promise<string> =>
   ensureDir(

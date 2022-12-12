@@ -125,7 +125,7 @@ export const execPromise = ({
           new Error(
             `process exited${
               code === null ? "" : ` with code ${code}`
-            }\n${debugInfo}`
+            }\n${stderr}${debugInfo}`
           )
         );
 

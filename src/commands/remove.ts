@@ -18,7 +18,7 @@ import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags, Command } from "@oclif/core";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
@@ -34,6 +34,7 @@ import { CommandObj, NO_INPUT_FLAG, TIMEOUT_FLAG } from "../lib/const";
 import {
   generateDeployedAppAqua,
   generateRegisterApp,
+  removePreviouslyGeneratedInterfacesForServices,
 } from "../lib/deployedApp";
 import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
@@ -233,6 +234,8 @@ export const removeApp = async (
   }
 
   const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
+
+  await removePreviouslyGeneratedInterfacesForServices(notRemovedServices);
 
   if (Object.keys(notRemovedServices).length === 0) {
     const pathsToRemove = [

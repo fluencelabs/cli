@@ -24,13 +24,20 @@ import assert from "node:assert";
  * @param expressions - array of expressions that are interpolated
  * @returns string
  */
+export const jsFile = (
+  strings: TemplateStringsArray,
+  ...expressions: Array<boolean | string>
+): string => {
+  return `/* eslint-disable */
+// @ts-nocheck
+${js(strings, ...expressions)}`;
+};
+
 export const js = (
   strings: TemplateStringsArray,
   ...expressions: Array<boolean | string>
 ): string => {
-  let result = `/* eslint-disable */
-// @ts-nocheck
-`;
+  let result = "";
 
   for (const [index, expression] of expressions.entries()) {
     const string = strings[index];
@@ -41,9 +48,7 @@ export const js = (
   const lastString = strings[strings.length - 1];
   assert(typeof lastString === "string", "Unreachable. JS template bug");
 
-  return `${result}${lastString}
-/* eslint-enable */
-`;
+  return `${result}${lastString}`;
 };
 
 const resolveExpressionInJSLiteral = (expression: string | boolean): string => {

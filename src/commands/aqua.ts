@@ -142,11 +142,11 @@ export default class Aqua extends Command {
           });
 
     const aquaCliFlags = {
-      input: path.join(projectRootDir, inputPath),
+      input: path.resolve(projectRootDir, inputPath),
       output:
         outputPath === undefined
           ? undefined
-          : path.join(projectRootDir, outputPath),
+          : path.resolve(projectRootDir, outputPath),
       js,
       ...aquaCliOptionalFlags,
       import: aquaImports,
