@@ -127,7 +127,6 @@ export const TIMEOUT_FLAG = {
 export const templates = ["minimal", "ts", "js"] as const;
 export type Template = typeof templates[number];
 export const isTemplate = (unknown: unknown): unknown is Template =>
-  // eslint-disable-next-line unicorn/prefer-includes
   templates.some((val): boolean => unknown === val);
 
 export const FORCE_FLAG_NAME = "force";
