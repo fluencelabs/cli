@@ -10,7 +10,7 @@ on:
       fluence-env:
         description: "Fluence enviroment to run tests agains"
         type: string
-        default: "kras"
+        default: "local"
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
@@ -117,10 +117,9 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: npm run test
 
-      - run: |
-          sudo apt-get install tree -y
-          tree -a ~/.fluence
+      - name: Cleanup
         if: always()
+        run: rm -rf .tmp ~/.fluence
 
       - name: Generate snapshot version
         id: version
