@@ -110,6 +110,9 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: npm run test
 
+      - run: ls -alh ~/.fluence
+        if: always()
+
       - name: Generate snapshot version
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
