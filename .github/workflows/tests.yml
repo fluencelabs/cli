@@ -15,12 +15,28 @@ on:
         description: "rust-peer image tag"
         type: string
         default: "fluencelabs/fluence:minimal"
+      fluence-js-version:
+        description: "@fluencejs/fluence version"
+        type: string
+        default: "null"
+      aqua-version:
+        description: "@fluencejs/aqua version"
+        type: string
+        default: "null"
       marine-version:
         description: "marine version"
         type: string
         default: "null"
-      fluence-js-version:
-        description: "@fluencejs/fluence version"
+      mrepl-version:
+        description: "mrepl version"
+        type: string
+        default: "null"
+      marine-rs-sdk-version:
+        description: "marine-rs-sdk version"
+        type: string
+        default: "null"
+      marine-rs-sdk-test-version:
+        description: "marine-rs-sdk-test version"
         type: string
         default: "null"
     outputs:
@@ -103,9 +119,47 @@ jobs:
           package: "@fluencelabs/fluence"
           version: ${{ inputs.fluence-js-version }}
 
+      - name: Set fluence-js version
+        if: inputs.fluence-js-version != 'null'
+        uses: .github/actions/replace-const.yml
+        with:
+          key: FLUENCE_JS_RECOMMENDED_VERSION
+          value: ${{ inputs.fluence-js-version }}
+
+      - name: Set aqua version
+        if: inputs.aqua-version != 'null'
+        uses: .github/actions/replace-const.yml
+        with:
+          key: AQUA_RECOMMENDED_VERSION
+          value: ${{ inputs.aqua-version }}
+
       - name: Set marine version
         if: inputs.marine-version != 'null'
-        run: echo "CARGO_REGISTRY_DEFAULT=fluence" >> $GITHUB_ENV
+        uses: .github/actions/replace-const.yml
+        with:
+          key: MARINE_RECOMMENDED_VERSION
+          value: ${{ inputs.marine-version }}
+
+      - name: Set mrepl version
+        if: inputs.mrepl-version != 'null'
+        uses: .github/actions/replace-const.yml
+        with:
+          key: MREPL_RECOMMENDED_VERSION
+          value: ${{ inputs.mrepl-version }}
+
+      - name: Set marine-rs-sdk version
+        if: inputs.marine-rs-sdk-version != 'null'
+        uses: .github/actions/replace-const.yml
+        with:
+          key: MARINE_RS_SDK_TEMPLATE_VERSION
+          value: ${{ inputs.marine-rs-sdk-version }}
+
+      - name: Set marine-rs-sdk-test version
+        if: inputs.marine-rs-sdk-test-version != 'null'
+        uses: .github/actions/replace-const.yml
+        with:
+          key: MARINE_RS_SDK_TEST_TEMPLATE_VERSION
+          value: ${{ inputs.marine-rs-sdk-test-version }}
 
       - run: npm run build
 
