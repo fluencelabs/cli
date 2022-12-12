@@ -119,7 +119,7 @@ jobs:
 
       - name: Cleanup
         if: always()
-        run: rm -rf .tmp ~/.fluence
+        run: rm -rf tmp ~/.fluence
 
       - name: Generate snapshot version
         id: version
