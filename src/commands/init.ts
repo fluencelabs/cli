@@ -36,7 +36,7 @@ import {
   templates,
   isTemplate,
   FLUENCE_JS_RECOMMENDED_VERSION,
-  FLUENCE_NETWORK_INVIRONMENT_RECOMMENDED_VERSION,
+  FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
   PACKAGE_JSON_FILE_NAME,
   INDEX_JS_FILE_NAME,
   INDEX_TS_FILE_NAME,
@@ -45,7 +45,6 @@ import {
   TYPESCRIPT_RECOMMENDED_VERSION,
   TS_NODE_RECOMMENDED_VERSION,
   TS_CONFIG_FILE_NAME,
-  IS_DEVELOPMENT,
 } from "../lib/const";
 import { execPromise } from "../lib/execPromise";
 import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports";
@@ -339,12 +338,6 @@ export const initTSorJSProject = async ({
     main: indexFileName,
     ...(isJS ? { type: "module" } : {}),
     scripts: {
-      postinstall: IS_DEVELOPMENT
-        ? `${path.relative(
-            defaultTSorJSDirPath,
-            path.join(process.cwd(), "bin", "dev")
-          )} aqua`
-        : "fluence aqua",
       start: `${isJS ? "node" : "ts-node"} ${path.join(
         SRC_DIR_NAME,
         indexFileName
@@ -356,7 +349,7 @@ export const initTSorJSProject = async ({
     dependencies: {
       "@fluencelabs/fluence": FLUENCE_JS_RECOMMENDED_VERSION,
       "@fluencelabs/fluence-network-environment":
-        FLUENCE_NETWORK_INVIRONMENT_RECOMMENDED_VERSION,
+        FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
       ...(isJS ? {} : { "ts-node": TS_NODE_RECOMMENDED_VERSION }),
       typescript: TYPESCRIPT_RECOMMENDED_VERSION,
     },
@@ -406,8 +399,6 @@ export const initTSorJSProject = async ({
     command: "npm",
     args: ["i"],
     options: { cwd: defaultTSorJSDirPath },
-    message: `Installing npm dependencies for ${
-      isJS ? "JS" : "TS"
-    } project and compiling aqua example`,
+    message: `Installing npm dependencies for ${isJS ? "JS" : "TS"} project`,
   });
 };

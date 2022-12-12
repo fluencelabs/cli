@@ -80,6 +80,5 @@ export function getIsStringUnion<T extends string>(
   array: ReadonlyArray<T>
 ): (unknown: unknown) => unknown is Array<T>[number] {
   return (unknown: unknown): unknown is Array<T>[number] =>
-    // eslint-disable-next-line unicorn/prefer-includes
     array.some((v): boolean => v === unknown);
 }
