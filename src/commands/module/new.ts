@@ -92,7 +92,8 @@ export const generateNewModule = async (
   await initNewReadonlyModuleConfig(pathToModuleDir, commandObj, name);
 };
 
-const MAIN_RS_CONTENT = `use marine_rs_sdk::marine;
+const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
+use marine_rs_sdk::marine;
 use marine_rs_sdk::module_manifest;
 
 module_manifest!();
