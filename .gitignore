@@ -17,6 +17,7 @@ src/services
 src/ts
 src/js
 schemas
+.env
 
 # recommended by Fluence
 .idea
