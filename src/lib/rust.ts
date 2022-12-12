@@ -249,7 +249,10 @@ export const ensureCargoDependency = async ({
         printOutput: true,
       });
     } catch (error) {
-      await fsPromises.rm(root, { recursive: true });
+      try {
+        await fsPromises.rm(root, { recursive: true });
+      } catch {}
+
       return commandObj.error(
         `Not able to install ${name}@${version} to ${replaceHomeDir(
           root
