@@ -81,7 +81,7 @@ describe("tutorial", () => {
           },
           cwd,
         })
-      ).toBe('"Hi, world"\n\nResult:\n\n"Hi, world"\n\n');
+      ).toContain('"Hi, world"');
     } finally {
       await remove(cwd);
     }
