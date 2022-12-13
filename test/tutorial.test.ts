@@ -81,7 +81,7 @@ describe("tutorial", () => {
           },
           cwd,
         })
-      ).toBe('"Hi, world"\n\nResult:\n\n"Hi, world"\n\n');
+      ).toContain('"Hi, world"');
     } finally {
       await remove(cwd);
     }
@@ -102,6 +102,7 @@ describe("tutorial", () => {
         await execPromise({
           command: "npx",
           args: ["ts-node", indexTSorJSPath],
+          printOutput: true,
         })
       ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
     } finally {
@@ -124,6 +125,7 @@ describe("tutorial", () => {
         await execPromise({
           command: "node",
           args: [indexTSorJSPath],
+          printOutput: true,
         })
       ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
     } finally {

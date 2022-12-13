@@ -27,8 +27,9 @@ import {
   templates,
 } from "../src/lib/const";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise";
+import { localMultiaddrs } from "../src/lib/localNodes";
 
-import { localNodes } from "./localNodes";
+const FLUENCE_ENV = "FLUENCE_ENV";
 
 type FluenceArg = {
   args?: ExecPromiseArg["args"];
@@ -50,6 +51,7 @@ export const fluence = async ({
     ],
     flags,
     options: { cwd },
+    printOutput: true,
   });
 
 const initFirstTime = async (template: Template) => {
@@ -75,13 +77,15 @@ const initFirstTime = async (template: Template) => {
     {
       ...fluenceConfig,
       relays:
-        process.env.FLUENCE_ENV === "local"
-          ? localNodes
-          : process.env.FLUENCE_ENV,
+        process.env[FLUENCE_ENV] === "local"
+          ? localMultiaddrs
+          : process.env[FLUENCE_ENV],
     }
   );
 
   await writeFile(fluenceConfigPath, newFluenceConfigString, FS_OPTIONS);
+
+  console.log(`Initialized template "${template}"`);
 
   return templatePath;
 };
@@ -107,5 +111,8 @@ export const init = async (cwd: string, template: Template): Promise<void> => {
   await cp(templatePath, cwd, { recursive: true });
 };
 
-export const getCWD = (): string =>
-  path.join("tmp", expect.getState().currentTestName);
+export const getCWD = (): string => {
+  const testName = expect.getState().currentTestName;
+  console.log(`Running test: ${testName}`);
+  return path.join("tmp", testName);
+};

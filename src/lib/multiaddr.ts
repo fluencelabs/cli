@@ -66,12 +66,14 @@ export const getRandomRelayAddr = (
   return randomRelayAddr;
 };
 
+export const getPeerId = (addr: string): string => {
+  const id = new Multiaddr(addr).getPeerId();
+  assert(id !== null);
+  return id;
+};
+
 const getIds = (nodes: Array<string>): Array<string> =>
-  nodes.map((addr): string => {
-    const id = new Multiaddr(addr).getPeerId();
-    assert(id !== null);
-    return id;
-  });
+  nodes.map((addr): string => getPeerId(addr));
 
 export const getRandomRelayId = (relays: Relays): string => {
   const addrs = resolveAddrs(relays);

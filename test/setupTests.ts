@@ -14,38 +14,4 @@
  * limitations under the License.
  */
 
-import dotenv from "dotenv";
-
-import { NETWORKS } from "../src/lib/multiaddr";
-
-import type { FluenceEnv } from "./environment.d";
-
-export const FLUENCE_ENV = "FLUENCE_ENV";
-
-dotenv.config();
-
-const resolveEnvVariable = <T>(
-  variableName: string,
-  isValid: (v: unknown) => v is T,
-  defaultVariable: T
-): T => {
-  const variable = process.env[variableName];
-
-  if (variable === undefined) {
-    return defaultVariable;
-  }
-
-  if (!isValid(variable)) {
-    throw new Error(
-      `Invalid environment variable: ${variableName}="${variable}"`
-    );
-  }
-
-  return variable;
-};
-
-process.env[FLUENCE_ENV] = resolveEnvVariable(
-  FLUENCE_ENV,
-  (v): v is FluenceEnv => NETWORKS.some((n) => n === v) || v === "local",
-  "kras"
-);
+import "../src/lib/setupEnvironment";
