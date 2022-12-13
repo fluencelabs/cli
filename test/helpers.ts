@@ -27,8 +27,7 @@ import {
   templates,
 } from "../src/lib/const";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise";
-
-import { localNodes } from "./localNodes";
+import { localMultiaddrs } from "../src/lib/localNodes";
 
 const FLUENCE_ENV = "FLUENCE_ENV";
 
@@ -79,7 +78,7 @@ const initFirstTime = async (template: Template) => {
       ...fluenceConfig,
       relays:
         process.env[FLUENCE_ENV] === "local"
-          ? localNodes
+          ? localMultiaddrs
           : process.env[FLUENCE_ENV],
     }
   );

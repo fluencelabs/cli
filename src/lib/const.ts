@@ -17,7 +17,10 @@
 import { Command, Flags } from "@oclif/core";
 
 import { aquaComment, jsComment } from "./helpers/comment";
+import { jsonStringify } from "./helpers/jsonStringify";
 import { js, jsFile } from "./helpers/jsTemplateLitteral";
+import { local } from "./localNodes";
+import { FLUENCE_ENV } from "./setupEnvironment";
 
 export const AQUA_RECOMMENDED_VERSION = "0.8.0-367";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
@@ -256,9 +259,38 @@ export const TEMPLATE_INDEX_APP_REGISTER_COMMENT = jsComment(
   TEMPLATE_INDEX_APP_REGISTER
 );
 
+const NODES_CONST = "nodes";
+
+const getPeersImportStatement = (peersToImport: string): string =>
+  `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
+
+const PEERS = (() => {
+  const fluenceEnv = process.env[FLUENCE_ENV];
+
+  switch (fluenceEnv) {
+    case "kras":
+      return getPeersImportStatement("krasnodar");
+    case "stage":
+      return getPeersImportStatement("stage");
+    case "testnet":
+      return getPeersImportStatement("testNet");
+    case "local":
+      return `const ${NODES_CONST} = ${jsonStringify(local)}`;
+
+    default: {
+      const _exhaustiveCheck: never = fluenceEnv;
+      throw new Error(
+        `Unknown value of environment variable FLUENCE_ENV="${String(
+          _exhaustiveCheck
+        )}"`
+      );
+    }
+  }
+})();
+
 export const getTemplateIndexFileContent = (isJS: boolean): string => jsFile`
 import { Fluence } from "@fluencelabs/fluence";
-import { krasnodar } from "@fluencelabs/fluence-network-environment";
+${PEERS}
 
 import {
   helloWorld,
@@ -270,15 +302,13 @@ import {
 
 ${getTemplateIndexAppImportsComment(isJS)}
 
-const peerIds = krasnodar.map(({ peerId }) => peerId);
+const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
+const connectTo = ${NODES_CONST}[0].multiaddr;
+if (typeof connectTo !== "string") {
+  throw new Error("connectTo is not a string");
+}
 
 const main = async () => {
-  const connectTo = krasnodar[0];
-
-  if (connectTo === undefined) {
-    throw new Error("No relay");
-  }
-
   await Fluence.start({ connectTo });
 
   const helloWorldResult = await helloWorld("Fluence");
