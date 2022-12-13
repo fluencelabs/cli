@@ -28,8 +28,7 @@ import {
 } from "../src/lib/const";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise";
 import { localMultiaddrs } from "../src/lib/localNodes";
-
-const FLUENCE_ENV = "FLUENCE_ENV";
+import { FLUENCE_ENV } from "../src/lib/setupEnvironment";
 
 type FluenceArg = {
   args?: ExecPromiseArg["args"];
