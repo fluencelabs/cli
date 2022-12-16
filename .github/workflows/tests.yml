@@ -112,7 +112,7 @@ jobs:
 
       - run: npm i
 
-      - name: Set fluence-js version
+      - name: Set fluence-js version in package.json
         if: inputs.fluence-js-version != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
