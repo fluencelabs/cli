@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         # Replace constant ${{ inputs.key }}
-        sed -r 's/(export const ${{ inputs.key }}) = ".*";/\1 = "inputs.value";/g' src/lib/const.ts
+        sed -ir 's/(export const ${{ inputs.key }}) = ".*";/\1 = "inputs.value";/g' src/lib/const.ts
 
     - name: Use self-hosted cargo registry
       if: inputs.cargo == 'true'
