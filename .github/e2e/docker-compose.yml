@@ -6,11 +6,27 @@ networks:
       - subnet: 10.50.10.0/24
 
 services:
+  ipfs:
+    image: ipfs/go-ipfs
+    ports:
+      - 5001:5001
+      - 4001:4001
+    environment:
+      IPFS_PROFILE: server
+    volumes:
+      - ./ipfs/:/container-init.d/
+    networks:
+      fluence:
+        ipv4_address: 10.50.10.100
+
   fluence-1:
     image: ${RUST_PEER_IMAGE}
     ports:
       - 7771:7771
       - 9991:9991
+    environment:
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
       - -t=7771
@@ -24,6 +40,8 @@ services:
       # - --bootstraps=/dns/fluence-1/tcp/7771
       # 12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR
       - -k=hK62afickoeP2uZbmSkAYXxxqP8ozq16VRN7qfTP719EHC5V5tjrtW57BSjUr8GvsEXmJRbtejUWyPZ2rZMyQdq
+    depends_on:
+      - ipfs
     networks:
       fluence:
         ipv4_address: 10.50.10.10
@@ -33,6 +51,9 @@ services:
     ports:
       - 7772:7772
       - 9992:9992
+    environment:
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
       - -t=7772
@@ -45,6 +66,8 @@ services:
       - --bootstraps=/dns/fluence-1/tcp/7771
       # 12D3KooWQdpukY3p2DhDfUfDgphAqsGu5ZUrmQ4mcHSGrRag6gQK
       - -k=2WijTVdhVRzyZamWjqPx4V4iNMrajegNMwNa2PmvPSZV6RRpo5M2fsPWdQr22HVRubuJhhSw8BrWiGt6FPhFAuXy
+    depends_on:
+      - ipfs
     networks:
       fluence:
         ipv4_address: 10.50.10.20
@@ -54,6 +77,9 @@ services:
     ports:
       - 7773:7773
       - 9993:9993
+    environment:
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
       - -t=7773
@@ -66,6 +92,8 @@ services:
       - --bootstraps=/dns/fluence-1/tcp/7771
       # 12D3KooWRT8V5awYdEZm6aAV9HWweCEbhWd7df4wehqHZXAB7yMZ
       - -k=2n2wBVanBeu2GWtvKBdrYK9DJAocgG3PrTUXMharq6TTfxqTL4sLdXL9BF23n6rsnkAY5pR9vBtx2uWYDQAiZdrX
+    depends_on:
+      - ipfs
     networks:
       fluence:
         ipv4_address: 10.50.10.30
@@ -75,6 +103,9 @@ services:
     ports:
       - 7774:7774
       - 9994:9994
+    environment:
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
       - -t=7774
@@ -87,6 +118,8 @@ services:
       - --bootstraps=/dns/fluence-1/tcp/7771
       # 12D3KooWBzLSu9RL7wLP6oUowzCbkCj2AGBSXkHSJKuq4wwTfwof
       - -k=4zp8ucAikkjB8CmkufYiFBW4QCDUCbQG7yMjviX7W8bMyN5rfChQ2Pi5QCWThrCTbAm9uq5nbFbxtFcNZq3De4dX
+    depends_on:
+      - ipfs
     networks:
       fluence:
         ipv4_address: 10.50.10.40
@@ -96,6 +129,9 @@ services:
     ports:
       - 7775:7775
       - 9995:9995
+    environment:
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
       - -t=7775
@@ -108,6 +144,8 @@ services:
       - --bootstraps=/dns/fluence-1/tcp/7771
       # 12D3KooWBf6hFgrnXwHkBnwPGMysP3b1NJe5HGtAWPYfwmQ2MBiU
       - -k=3ry26rm5gkJXvdqRH4FoM3ezWq4xVVsBQF7wtKq4E4pbuaa6p1F84tNqifUS7DdfJL9hs2gcdW64Wc342vHZHMUp
+    depends_on:
+      - ipfs
     networks:
       fluence:
         ipv4_address: 10.50.10.50
@@ -117,6 +155,9 @@ services:
     ports:
       - 7776:7776
       - 9996:9996
+    environment:
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
       - -t=7776
@@ -129,6 +170,8 @@ services:
       - --allow-private-ips
       # 12D3KooWPisGn7JhooWhggndz25WM7vQ2JmA121EV8jUDQ5xMovJ
       - -k=5Qh8bB1sF28uLPwr3HTvEksCeC6mAWQvebCfcgv9y6j4qKwSzNKm2tzLUg4nACUEo2KZpBw11gNCnwaAdM7o1pEn
+    depends_on:
+      - ipfs
     networks:
       fluence:
         ipv4_address: 10.50.10.60
