@@ -140,6 +140,13 @@ export default class REPL extends Command {
       return;
     }
 
+    const mreplPath = await ensureCargoDependency({
+      nameAndVersion: MREPL_CARGO_DEPENDENCY,
+      commandObj: this,
+      maybeFluenceConfig,
+      maybeFluenceLockConfig,
+    });
+
     this.log(`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -154,16 +161,10 @@ ${color.yellow(
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     `);
 
-    spawn(
-      await ensureCargoDependency({
-        nameAndVersion: MREPL_CARGO_DEPENDENCY,
-        commandObj: this,
-        maybeFluenceConfig,
-        maybeFluenceLockConfig,
-      }),
-      [fluenceTmpConfigTomlPath],
-      { stdio: "inherit", detached: true }
-    );
+    spawn(mreplPath, [fluenceTmpConfigTomlPath], {
+      stdio: "inherit",
+      detached: true,
+    });
   }
 }
 
