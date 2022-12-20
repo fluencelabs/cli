@@ -182,7 +182,7 @@ export const MAIN_AQUA_FILE_ADD_ONE_COMMENT = aquaComment(
   MAIN_AQUA_FILE_ADD_ONE
 );
 
-export const MAIN_AQUA_FILE_CONTENT = `module Main
+export const MAIN_AQUA_FILE_CONTENT = `aqua Main
 
 import "@fluencelabs/aqua-lib/builtin.aqua"
 

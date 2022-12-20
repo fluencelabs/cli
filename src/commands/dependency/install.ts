@@ -60,6 +60,10 @@ export default class Install extends Command {
       description: `Set recommended versions of ${REQUIRED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
       exclusive: ["recommended"],
     }),
+    force: Flags.boolean({
+      description:
+        "Force install even if the dependency/dependencies is/are already installed",
+    }),
     ...NO_INPUT_FLAG,
   };
   async run(): Promise<void> {
@@ -109,6 +113,7 @@ export default class Install extends Command {
         commandObj: this,
         maybeFluenceConfig: fluenceConfig,
         maybeFluenceLockConfig: fluenceLockConfig,
+        force: flags.force,
       }),
     });
 
@@ -116,6 +121,7 @@ export default class Install extends Command {
       commandObj: this,
       fluenceConfig,
       fluenceLockConfig: fluenceLockConfig,
+      force: flags.force,
     });
   }
 }

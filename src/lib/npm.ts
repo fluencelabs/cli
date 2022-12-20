@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-import fsPromises from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
 
 import type { FluenceConfig } from "./configs/project/fluence";
-import {
-  defaultFluenceLockConfig,
-  FluenceLockConfig,
-  initNewReadonlyFluenceLockConfig,
-} from "./configs/project/fluenceLock";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock";
 import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
@@ -34,9 +29,14 @@ import {
   NODE_MODULES_DIR_NAME,
 } from "./const";
 import { execPromise } from "./execPromise";
-import { splitPackageNameAndVersion } from "./helpers/package";
+import {
+  splitPackageNameAndVersion,
+  handleLockConfig,
+  resolveDependencyPathAndTmpPath,
+  resolveVersionToInstall,
+  handleInstallation,
+} from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
-import { ensureUserFluenceNpmDir } from "./paths";
 
 type NPMDependencyInfo = { recommendedVersion: string; bin?: string };
 
@@ -66,11 +66,58 @@ export const getLatestVersionOfNPMDependency = async (
   }
 };
 
-type NpmDependencyArg = {
+type InstallNpmDependencyArg = {
+  name: string;
+  version: string;
+  dependencyTmpPath: string;
+  dependencyPath: string;
+  commandObj: CommandObj;
+};
+
+const installNpmDependency = async ({
+  commandObj,
+  dependencyPath,
+  dependencyTmpPath,
+  name,
+  version,
+}: InstallNpmDependencyArg): Promise<void> => {
+  try {
+    // cleanup before installation
+    await Promise.allSettled([
+      rm(dependencyTmpPath, { recursive: true }),
+      rm(dependencyPath, { recursive: true }),
+    ]);
+  } catch {}
+
+  try {
+    await execPromise({
+      command: "npm",
+      args: ["i", `${name}@${version}`],
+      flags: { prefix: dependencyTmpPath },
+      message: `Installing ${name}@${version} to ${replaceHomeDir(
+        dependencyPath
+      )}`,
+      printOutput: true,
+    });
+  } catch (error) {
+    commandObj.error(
+      `Not able to install ${name}@${version} to ${replaceHomeDir(
+        dependencyPath
+      )}. Please make sure ${color.yellow(
+        name
+      )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
+        `fluence dependency npm install ${name}@<version>`
+      )} command.\n${String(error)}`
+    );
+  }
+};
+
+type EnsureNpmDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
   commandObj: CommandObj;
+  force?: boolean | undefined;
   explicitInstallation?: boolean;
 };
 
@@ -79,83 +126,61 @@ export const ensureNpmDependency = async ({
   commandObj,
   maybeFluenceConfig,
   maybeFluenceLockConfig,
+  force = false,
   explicitInstallation = false,
-}: NpmDependencyArg): Promise<string> => {
-  const npmDirPath = await ensureUserFluenceNpmDir(commandObj);
+}: EnsureNpmDependencyArg): Promise<string> => {
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const resolvedVersion =
-    maybeVersion ??
-    (explicitInstallation
-      ? undefined
-      : maybeFluenceLockConfig?.npm?.[name] ??
-        maybeFluenceConfig?.dependencies?.npm?.[name] ??
-        fluenceNPMDependencies[name]?.recommendedVersion) ??
-    (await getLatestVersionOfNPMDependency(name, commandObj));
+  const versionToInstall = resolveVersionToInstall({
+    name,
+    maybeVersion,
+    explicitInstallation,
+    maybeFluenceLockConfig,
+    maybeFluenceConfig,
+    packageManager: "npm",
+  });
 
   const version = await getLatestVersionOfNPMDependency(
-    `${name}@${resolvedVersion}`,
+    versionToInstall === undefined ? name : `${name}@${versionToInstall}`,
     commandObj
   );
 
-  const dependencyPath = path.join(npmDirPath, ...name.split("/"), version);
-
-  try {
-    await fsPromises.access(dependencyPath);
-  } catch {
-    try {
-      await execPromise({
-        command: "npm",
-        args: ["i", `${name}@${version}`],
-        flags: { prefix: dependencyPath },
-        message: `Installing ${name}@${version} to ${replaceHomeDir(
-          npmDirPath
-        )}`,
-        printOutput: true,
-      });
-    } catch (error) {
-      await fsPromises.rm(dependencyPath, { recursive: true });
-      return commandObj.error(
-        `Not able to install ${name}@${version} to ${replaceHomeDir(
-          dependencyPath
-        )}. Please make sure ${color.yellow(
-          name
-        )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
-          `fluence dependency npm install ${name}@<version>`
-        )} command.\n${String(error)}`
-      );
-    }
-  }
-
-  if (maybeFluenceLockConfig !== undefined && maybeFluenceLockConfig !== null) {
-    if (maybeFluenceLockConfig.npm === undefined) {
-      maybeFluenceLockConfig.npm = {};
-    }
-
-    assert(maybeFluenceLockConfig.npm !== undefined);
-    maybeFluenceLockConfig.npm[name] = version;
-    await maybeFluenceLockConfig.$commit();
-  } else if (maybeFluenceConfig !== undefined && maybeFluenceConfig !== null) {
-    await initNewReadonlyFluenceLockConfig(
-      {
-        ...defaultFluenceLockConfig,
-        npm: {
-          [name]: version,
-        },
-      },
-      commandObj
-    );
-  }
-
-  if (explicitInstallation) {
-    commandObj.log(
-      `Successfully installed ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
-      )}`
-    );
-  }
-
   const maybeNpmDependencyInfo = fluenceNPMDependencies[name];
+
+  const { dependencyPath, dependencyTmpPath } =
+    await resolveDependencyPathAndTmpPath({
+      commandObj,
+      name,
+      packageManager: "npm",
+      version,
+    });
+
+  await handleInstallation({
+    force,
+    dependencyPath,
+    dependencyTmpPath,
+    commandObj,
+    explicitInstallation,
+    name,
+    version,
+    installDependency: () =>
+      installNpmDependency({
+        commandObj,
+        dependencyPath,
+        dependencyTmpPath,
+        name,
+        version,
+      }),
+  });
+
+  await handleLockConfig({
+    commandObj,
+    isFluenceProject: maybeFluenceConfig !== null,
+    maybeFluenceLockConfig,
+    name,
+    version,
+    packageManager: "npm",
+  });
 
   return maybeNpmDependencyInfo?.bin === undefined
     ? path.join(dependencyPath, NODE_MODULES_DIR_NAME)

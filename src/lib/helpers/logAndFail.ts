@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-export const logAndFail = (log: unknown): never => {
-  throw new Error(String(log));
+export const logAndFail = (unknown: unknown): never => {
+  console.log(unknown);
+  throw new Error("Failed after console.log");
 };
