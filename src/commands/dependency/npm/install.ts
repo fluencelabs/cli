@@ -18,7 +18,7 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command } from "@oclif/core";
+import { Command, Flags } from "@oclif/core";
 
 import type { FluenceConfig } from "../../../lib/configs/project/fluence";
 import {
@@ -51,6 +51,10 @@ export default class Install extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,
+    force: Flags.boolean({
+      description:
+        "Force install even if the dependency/dependencies is/are already installed",
+    }),
   };
   static override args = [
     {
@@ -87,6 +91,7 @@ export default class Install extends Command {
         commandObj: this,
         maybeFluenceConfig: fluenceConfig,
         maybeFluenceLockConfig: fluenceLockConfig,
+        force: flags.force,
       });
 
       await ensureVSCodeSettingsJSON({
@@ -120,12 +125,14 @@ type InstallAllDependenciesArg = {
   commandObj: CommandObj;
   fluenceConfig: FluenceConfig;
   fluenceLockConfig: FluenceLockConfig;
+  force?: boolean | undefined;
 };
 
 export const installAllNPMDependenciesFromFluenceConfig = async ({
   fluenceConfig,
   commandObj,
   fluenceLockConfig,
+  force,
 }: InstallAllDependenciesArg): Promise<string[]> => {
   const dependencyPaths = [];
 
@@ -143,6 +150,7 @@ export const installAllNPMDependenciesFromFluenceConfig = async ({
         commandObj,
         maybeFluenceConfig: fluenceConfig,
         maybeFluenceLockConfig: fluenceLockConfig,
+        force,
       })
     );
   }

@@ -52,6 +52,10 @@ export default class Install extends Command {
       description: `Rustup toolchain name (such as stable or ${REQUIRED_RUST_TOOLCHAIN})`,
       helpValue: "<toolchain_name>",
     }),
+    force: Flags.boolean({
+      description:
+        "Force install even if the dependency/dependencies is/are already installed",
+    }),
   };
   static override args = [
     {
@@ -86,6 +90,7 @@ export default class Install extends Command {
         fluenceConfig,
         commandObj: this,
         fluenceLockConfig,
+        force: flags.force,
       });
 
       return;
@@ -97,6 +102,7 @@ export default class Install extends Command {
       maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,
       maybeFluenceLockConfig: fluenceLockConfig,
+      force: flags.force,
     });
   }
 }
@@ -105,12 +111,14 @@ type InstallAllDependenciesArg = {
   commandObj: CommandObj;
   fluenceConfig: FluenceConfig;
   fluenceLockConfig: FluenceLockConfig;
+  force: boolean;
 };
 
 export const installAllCargoDependenciesFromFluenceConfig = async ({
   fluenceConfig,
   fluenceLockConfig,
   commandObj,
+  force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
     fluenceConfig.dependencies.cargo
@@ -125,6 +133,7 @@ export const installAllCargoDependenciesFromFluenceConfig = async ({
       commandObj,
       maybeFluenceConfig: fluenceConfig,
       maybeFluenceLockConfig: fluenceLockConfig,
+      force,
     });
   }
 };

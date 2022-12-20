@@ -38,15 +38,17 @@ import {
 type GetAquaImportsArg =
   | {
       commandObj: CommandObj;
-      flags?: { import?: string[] | undefined };
       maybeFluenceConfig: FluenceConfig;
       maybeFluenceLockConfig: FluenceLockConfig;
+      force?: boolean;
+      flags?: { import?: string[] | undefined };
     }
   | {
       commandObj: CommandObj;
-      flags?: { import?: string[] | undefined };
       maybeFluenceConfig: null;
       maybeFluenceLockConfig: null;
+      force?: boolean;
+      flags?: { import?: string[] | undefined };
     };
 
 export async function ensureAquaImports(
@@ -58,8 +60,13 @@ export async function ensureAquaImports(
     return defaultImports;
   }
 
-  const { commandObj, flags, maybeFluenceConfig, maybeFluenceLockConfig } =
-    args;
+  const {
+    commandObj,
+    flags,
+    maybeFluenceConfig,
+    maybeFluenceLockConfig,
+    force,
+  } = args;
 
   let importsFromFluenceConfig: Array<string> = [];
 
@@ -69,6 +76,7 @@ export async function ensureAquaImports(
         fluenceConfig: maybeFluenceConfig,
         fluenceLockConfig: maybeFluenceLockConfig,
         commandObj,
+        force,
       })
     ).filter(
       (dependency): boolean =>

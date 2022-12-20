@@ -15,6 +15,209 @@
  */
 
 import assert from "node:assert";
+import { access, mkdir, rename } from "node:fs/promises";
+import { join } from "node:path";
+
+import type { FluenceConfig } from "../configs/project/fluence";
+import {
+  defaultFluenceLockConfig,
+  FluenceLockConfig,
+  initNewReadonlyFluenceLockConfig,
+} from "../configs/project/fluenceLock";
+import type { CommandObj } from "../const";
+import { fluenceNPMDependencies } from "../npm";
+import {
+  ensureUserFluenceCargoDir,
+  ensureUserFluenceNpmDir,
+  ensureUserFluenceTmpCargoDir,
+  ensureUserFluenceTmpNpmDir,
+} from "../paths";
+import { fluenceCargoDependencies } from "../rust";
+
+import { replaceHomeDir } from "./replaceHomeDir";
+
+const packageManagers = ["npm", "cargo"] as const;
+type PackageManager = typeof packageManagers[number];
+
+type UpdateOrCreateLockConfigArg = {
+  isFluenceProject: boolean;
+  maybeFluenceLockConfig: FluenceLockConfig | null;
+  name: string;
+  version: string;
+  commandObj: CommandObj;
+  packageManager: PackageManager;
+};
+
+export const handleLockConfig = async ({
+  maybeFluenceLockConfig,
+  isFluenceProject,
+  name,
+  version,
+  commandObj,
+  packageManager,
+}: UpdateOrCreateLockConfigArg): Promise<void> => {
+  if (maybeFluenceLockConfig !== null) {
+    if (maybeFluenceLockConfig[packageManager] === undefined) {
+      maybeFluenceLockConfig[packageManager] = {};
+    }
+
+    // Disabled because we made sure it's not undefined above
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    maybeFluenceLockConfig[packageManager]![name] = version;
+    await maybeFluenceLockConfig.$commit();
+    return;
+  }
+
+  if (isFluenceProject) {
+    await initNewReadonlyFluenceLockConfig(
+      {
+        ...defaultFluenceLockConfig,
+        [packageManager]: {
+          [name]: version,
+        },
+      },
+      commandObj
+    );
+  }
+};
+
+const recommendedDependenciesMap: Record<
+  PackageManager,
+  Record<string, { recommendedVersion: string }>
+> = {
+  npm: fluenceNPMDependencies,
+  cargo: fluenceCargoDependencies,
+};
+
+type ResolveVersionArg = {
+  name: string;
+  maybeVersion: string | undefined;
+  explicitInstallation: boolean;
+  maybeFluenceLockConfig: FluenceLockConfig | null;
+  maybeFluenceConfig: FluenceConfig | null;
+  packageManager: PackageManager;
+};
+
+export const resolveVersionToInstall = ({
+  name,
+  maybeVersion,
+  explicitInstallation,
+  maybeFluenceLockConfig,
+  maybeFluenceConfig,
+  packageManager,
+}: ResolveVersionArg): string | undefined => {
+  if (typeof maybeVersion === "string") {
+    return maybeVersion;
+  }
+
+  if (explicitInstallation) {
+    return undefined;
+  }
+
+  const versionFromLockConfig =
+    maybeFluenceLockConfig?.[packageManager]?.[name];
+
+  if (versionFromLockConfig !== undefined) {
+    return versionFromLockConfig;
+  }
+
+  const versionFromFluenceConfig =
+    maybeFluenceConfig?.dependencies?.[packageManager]?.[name];
+
+  if (versionFromFluenceConfig !== undefined) {
+    return versionFromFluenceConfig;
+  }
+
+  return recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
+};
+
+const dependenciesPathsGettersMap: Record<
+  PackageManager,
+  (commandObj: CommandObj) => [Promise<string>, Promise<string>]
+> = {
+  npm: (commandObj: CommandObj) => [
+    ensureUserFluenceNpmDir(commandObj),
+    ensureUserFluenceTmpNpmDir(commandObj),
+  ],
+  cargo: (commandObj: CommandObj) => [
+    ensureUserFluenceCargoDir(commandObj),
+    ensureUserFluenceTmpCargoDir(commandObj),
+  ],
+};
+
+type ResolveDependencyPathAndTmpPath = {
+  commandObj: CommandObj;
+  name: string;
+  version: string;
+  packageManager: PackageManager;
+};
+
+export const resolveDependencyPathAndTmpPath = async ({
+  commandObj,
+  name,
+  version,
+  packageManager,
+}: ResolveDependencyPathAndTmpPath): Promise<{
+  dependencyTmpPath: string;
+  dependencyPath: string;
+}> => {
+  const [depDirPath, depTmpDirPath] = await Promise.all(
+    dependenciesPathsGettersMap[packageManager](commandObj)
+  );
+
+  const dependencyPathEnding = join(...name.split("/"), version);
+  return {
+    dependencyTmpPath: join(depTmpDirPath, dependencyPathEnding),
+    dependencyPath: join(depDirPath, dependencyPathEnding),
+  };
+};
+
+type HandleInstallationArg = {
+  force: boolean;
+  installDependency: () => Promise<void>;
+  dependencyPath: string;
+  dependencyTmpPath: string;
+  commandObj: CommandObj;
+  name: string;
+  version: string;
+  explicitInstallation: boolean;
+};
+
+export const handleInstallation = async ({
+  force,
+  installDependency,
+  dependencyPath,
+  dependencyTmpPath,
+  explicitInstallation,
+  commandObj,
+  name,
+  version,
+}: HandleInstallationArg): Promise<void> => {
+  const installAndMoveToDependencyPath = async (): Promise<void> => {
+    await installDependency();
+    await mkdir(dependencyPath, { recursive: true });
+    await rename(dependencyTmpPath, dependencyPath);
+  };
+
+  if (force) {
+    await installAndMoveToDependencyPath();
+  } else {
+    try {
+      // if dependency is already installed it will be there
+      await access(dependencyPath);
+    } catch {
+      await installAndMoveToDependencyPath();
+    }
+  }
+
+  if (explicitInstallation) {
+    commandObj.log(
+      `Successfully installed ${name}@${version} to ${replaceHomeDir(
+        dependencyPath
+      )}`
+    );
+  }
+};
 
 export const splitPackageNameAndVersion = (
   packageNameAndMaybeVersion: string

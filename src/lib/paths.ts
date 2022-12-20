@@ -71,10 +71,32 @@ export const ensureUserFluenceDir = async (
     ? ensureDir(commandObj.config.configDir)
     : ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
 
+export const ensureUserFluenceTmpNpmDir = async (
+  commandObj: CommandObj
+): Promise<string> =>
+  ensureDir(
+    path.join(
+      await ensureUserFluenceDir(commandObj),
+      TMP_DIR_NAME,
+      NPM_DIR_NAME
+    )
+  );
+
 export const ensureUserFluenceNpmDir = async (
   commandObj: CommandObj
 ): Promise<string> =>
   ensureDir(path.join(await ensureUserFluenceDir(commandObj), NPM_DIR_NAME));
+
+export const ensureUserFluenceTmpCargoDir = async (
+  commandObj: CommandObj
+): Promise<string> =>
+  ensureDir(
+    path.join(
+      await ensureUserFluenceDir(commandObj),
+      TMP_DIR_NAME,
+      CARGO_DIR_NAME
+    )
+  );
 
 export const ensureUserFluenceCargoDir = async (
   commandObj: CommandObj

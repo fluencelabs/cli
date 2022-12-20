@@ -196,7 +196,7 @@ _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomp
 
 ## `fluence build`
 
-Build all application services, described in [33mfluence.yaml[39m
+Build all application services, described in fluence.yaml
 
 ```
 USAGE
@@ -220,7 +220,7 @@ Install cargo project dependencies (all dependencies are cached inside .fluence/
 
 ```
 USAGE
-  $ fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>]
+  $ fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -228,6 +228,7 @@ ARGUMENTS
                                        the package name. For example: marine@0.12.4
 
 FLAGS
+  --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
 
@@ -244,13 +245,14 @@ EXAMPLES
 
 ## `fluence dep i`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
-  $ fluence dep i [--recommended | --latest] [--no-input]
+  $ fluence dep i [--recommended | --latest] [--force] [--no-input]
 
 FLAGS
+  --force        Force install even if the dependency/dependencies is/are already installed
   --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
                  dependencies from fluence.yaml
   --no-input     Don't interactively ask for any input from the user
@@ -274,7 +276,7 @@ Install npm project dependencies (all dependencies are cached inside .fluence/np
 
 ```
 USAGE
-  $ fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
+  $ fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -282,6 +284,7 @@ ARGUMENTS
                                        the package name. For example: @fluencelabs/aqua@0.7.5-342
 
 FLAGS
+  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -301,7 +304,7 @@ Install cargo project dependencies (all dependencies are cached inside .fluence/
 
 ```
 USAGE
-  $ fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>]
+  $ fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -309,6 +312,7 @@ ARGUMENTS
                                        the package name. For example: marine@0.12.4
 
 FLAGS
+  --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
 
@@ -329,7 +333,7 @@ Install cargo project dependencies (all dependencies are cached inside .fluence/
 
 ```
 USAGE
-  $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>]
+  $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -337,6 +341,7 @@ ARGUMENTS
                                        the package name. For example: marine@0.12.4
 
 FLAGS
+  --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
 
@@ -353,13 +358,14 @@ EXAMPLES
 
 ## `fluence dependency i`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
-  $ fluence dependency i [--recommended | --latest] [--no-input]
+  $ fluence dependency i [--recommended | --latest] [--force] [--no-input]
 
 FLAGS
+  --force        Force install even if the dependency/dependencies is/are already installed
   --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
                  dependencies from fluence.yaml
   --no-input     Don't interactively ask for any input from the user
@@ -379,13 +385,14 @@ EXAMPLES
 
 ## `fluence dependency install`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
-  $ fluence dependency install [--recommended | --latest] [--no-input]
+  $ fluence dependency install [--recommended | --latest] [--force] [--no-input]
 
 FLAGS
+  --force        Force install even if the dependency/dependencies is/are already installed
   --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
                  dependencies from fluence.yaml
   --no-input     Don't interactively ask for any input from the user
@@ -409,7 +416,7 @@ Install npm project dependencies (all dependencies are cached inside .fluence/np
 
 ```
 USAGE
-  $ fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
+  $ fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -417,6 +424,7 @@ ARGUMENTS
                                        the package name. For example: @fluencelabs/aqua@0.7.5-342
 
 FLAGS
+  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -436,7 +444,7 @@ Install npm project dependencies (all dependencies are cached inside .fluence/np
 
 ```
 USAGE
-  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
+  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -444,6 +452,7 @@ ARGUMENTS
                                        the package name. For example: @fluencelabs/aqua@0.7.5-342
 
 FLAGS
+  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -459,7 +468,7 @@ EXAMPLES
 
 ## `fluence deploy`
 
-Deploy application, described in [33mfluence.yaml[39m
+Deploy application, described in fluence.yaml
 
 ```
 USAGE
@@ -593,7 +602,7 @@ EXAMPLES
 
 ## `fluence module add [PATH | URL]`
 
-Add module to [33mservice.yaml[39m
+Add module to service.yaml
 
 ```
 USAGE
@@ -637,7 +646,7 @@ EXAMPLES
 
 ## `fluence module remove [NAME | PATH | URL]`
 
-Remove module from [33mservice.yaml[39m
+Remove module from service.yaml
 
 ```
 USAGE
@@ -719,7 +728,7 @@ _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blo
 
 ## `fluence service add [PATH | URL]`
 
-Add service to [33mfluence.yaml[39m
+Add service to fluence.yaml
 
 ```
 USAGE
@@ -765,7 +774,7 @@ EXAMPLES
 
 ## `fluence service remove [NAME | PATH | URL]`
 
-Remove service from [33mfluence.yaml[39m
+Remove service from fluence.yaml
 
 ```
 USAGE

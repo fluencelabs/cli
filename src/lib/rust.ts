@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
 
 import type { FluenceConfig } from "./configs/project/fluence";
-import {
-  defaultFluenceLockConfig,
-  FluenceLockConfig,
-  initNewReadonlyFluenceLockConfig,
-} from "./configs/project/fluenceLock";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock";
 import {
   BIN_DIR_NAME,
   CommandObj,
@@ -37,9 +31,14 @@ import {
   RUST_WASM32_WASI_TARGET,
 } from "./const";
 import { execPromise } from "./execPromise";
-import { splitPackageNameAndVersion } from "./helpers/package";
+import {
+  handleInstallation,
+  handleLockConfig,
+  resolveDependencyPathAndTmpPath,
+  resolveVersionToInstall,
+  splitPackageNameAndVersion,
+} from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
-import { ensureUserFluenceCargoDir } from "./paths";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -193,11 +192,45 @@ export const getLatestVersionOfCargoDependency = async ({
     )
   ).trim();
 
+type InstallCargoDependencyArg = {
+  toolchain: string | undefined;
+  name: string;
+  version: string;
+  dependencyTmpPath: string;
+  dependencyPath: string;
+};
+
+const installCargoDependency = async ({
+  toolchain,
+  name,
+  version,
+  dependencyPath,
+  dependencyTmpPath,
+}: InstallCargoDependencyArg) => {
+  await execPromise({
+    command: CARGO,
+    args: [
+      ...(typeof toolchain === "string" ? [`+${toolchain}`] : []),
+      "install",
+      name,
+    ],
+    flags: {
+      version,
+      root: dependencyTmpPath,
+    },
+    message: `Installing ${name}@${version} to ${replaceHomeDir(
+      dependencyPath
+    )}`,
+    printOutput: true,
+  });
+};
+
 type CargoDependencyArg = {
   nameAndVersion: string;
   commandObj: CommandObj;
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
+  force?: boolean;
   toolchain?: string | undefined;
   explicitInstallation?: boolean;
 };
@@ -207,91 +240,62 @@ export const ensureCargoDependency = async ({
   commandObj,
   maybeFluenceConfig,
   maybeFluenceLockConfig,
+  force = false,
   toolchain: toolchainFromArgs,
   explicitInstallation = false,
 }: CargoDependencyArg): Promise<string> => {
   await ensureRust(commandObj);
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
-  const maybeCargoDependencyInfo = fluenceCargoDependencies[name];
 
   const version =
-    maybeVersion ??
-    (explicitInstallation
-      ? undefined
-      : maybeFluenceLockConfig?.cargo?.[name] ??
-        maybeFluenceConfig?.dependencies?.cargo?.[name] ??
-        fluenceCargoDependencies[name]?.recommendedVersion) ??
-    (await getLatestVersionOfCargoDependency({ name, commandObj }));
+    resolveVersionToInstall({
+      name,
+      maybeVersion,
+      explicitInstallation,
+      maybeFluenceLockConfig,
+      maybeFluenceConfig,
+      packageManager: "cargo",
+    }) ?? (await getLatestVersionOfCargoDependency({ name, commandObj }));
 
+  const maybeCargoDependencyInfo = fluenceCargoDependencies[name];
   const toolchain = toolchainFromArgs ?? maybeCargoDependencyInfo?.toolchain;
-  const cargoDirPath = await ensureUserFluenceCargoDir(commandObj);
 
-  const root = path.join(cargoDirPath, name, version);
+  const { dependencyPath, dependencyTmpPath } =
+    await resolveDependencyPathAndTmpPath({
+      commandObj,
+      name,
+      packageManager: "cargo",
+      version,
+    });
 
-  try {
-    await fsPromises.access(root);
-  } catch {
-    try {
-      await execPromise({
-        command: CARGO,
-        args: [
-          ...(typeof toolchain === "string" ? [`+${toolchain}`] : []),
-          "install",
-          name,
-        ],
-        flags: {
-          version,
-          root,
-        },
-        message: `Installing ${name}@${version} to ${replaceHomeDir(
-          cargoDirPath
-        )}`,
-        printOutput: true,
-      });
-    } catch (error) {
-      try {
-        await fsPromises.rm(root, { recursive: true });
-      } catch {}
+  await handleInstallation({
+    force,
+    dependencyPath,
+    dependencyTmpPath,
+    commandObj,
+    explicitInstallation,
+    name,
+    version,
+    installDependency: () =>
+      installCargoDependency({
+        dependencyPath,
+        dependencyTmpPath,
+        name,
+        toolchain,
+        version,
+      }),
+  });
 
-      return commandObj.error(
-        `Not able to install ${name}@${version} to ${replaceHomeDir(
-          root
-        )}. Please make sure ${color.yellow(
-          name
-        )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
-          `fluence dependency cargo install ${name}@<version>`
-        )} command.\n${String(error)}`
-      );
-    }
-  }
-
-  if (maybeFluenceLockConfig !== undefined && maybeFluenceLockConfig !== null) {
-    if (maybeFluenceLockConfig.cargo === undefined) {
-      maybeFluenceLockConfig.cargo = {};
-    }
-
-    assert(maybeFluenceLockConfig.cargo !== undefined);
-    maybeFluenceLockConfig.cargo[name] = version;
-    await maybeFluenceLockConfig.$commit();
-  } else if (maybeFluenceConfig !== undefined && maybeFluenceConfig !== null) {
-    await initNewReadonlyFluenceLockConfig(
-      {
-        ...defaultFluenceLockConfig,
-        cargo: {
-          [name]: version,
-        },
-      },
-      commandObj
-    );
-  }
-
-  if (explicitInstallation) {
-    commandObj.log(
-      `Successfully installed ${name}@${version} to ${replaceHomeDir(root)}`
-    );
-  }
+  await handleLockConfig({
+    commandObj,
+    isFluenceProject: maybeFluenceConfig !== null,
+    maybeFluenceLockConfig,
+    name,
+    packageManager: "cargo",
+    version,
+  });
 
   return maybeCargoDependencyInfo === undefined
-    ? root
-    : path.join(root, BIN_DIR_NAME, name);
+    ? dependencyPath
+    : path.join(dependencyPath, BIN_DIR_NAME, name);
 };
