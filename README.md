@@ -125,7 +125,6 @@ Pull request and release process:
 * [`fluence module new [PATH]`](#fluence-module-new-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence remove`](#fluence-remove)
-* [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
 * [`fluence service new [PATH]`](#fluence-service-new-path)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
@@ -688,52 +687,6 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/remove.ts)_
-
-## `fluence run`
-
-Run aqua script
-
-```
-USAGE
-  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--log-level-avm <value>] [--quiet] [--plugin <value>] [--const <value>]
-    [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout
-    <value>] [--no-input] [-k <value>]
-
-FLAGS
-  -f, --func=<function-call>    Function call
-  -i, --input=<path>            Path to an aqua file or to a directory that contains aqua files
-  -k, --key-pair-name=<name>    Key pair name
-  --const=<NAME = value>...     Constant that will be used in the aqua code that you run (example of aqua code:
-                                SOME_CONST ?= "default_value"). Constant name must be upper cased.
-  --data=<json>                 JSON in { [argumentName]: argumentValue } format. You can call a function using these
-                                argument names
-  --data-path=<path>            Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
-                                using these argument names
-  --import=<path>...            Path to a directory to import from. May be used several times
-  --json-service=<path>...      Path to a file that contains a JSON formatted service
-  --log-level-avm=<level>       Set log level for AquaVM. Must be one of: debug, info, warn, error, off, trace
-  --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
-                                warn, error, off
-  --no-input                    Don't interactively ask for any input from the user
-  --no-relay                    Do not generate a pass through the relay node
-  --no-xor                      Do not generate a wrapper that catches and displays errors
-  --on=<peer_id>                PeerId of a peer where you want to run the function
-  --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
-                                https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
-  --print-air                   Prints generated AIR code before function execution
-  --quiet                       Print only execution result. Overrides all --log-level-* flags
-  --relay=<multiaddr>           Relay node multiaddr
-  --timeout=<milliseconds>      Timeout used for command execution
-
-DESCRIPTION
-  Run aqua script
-
-EXAMPLES
-  $ fluence run
-```
-
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
