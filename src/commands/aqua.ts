@@ -27,7 +27,7 @@ import {
   initFluenceLockConfig,
   initNewFluenceLockConfig,
 } from "../lib/configs/project/fluenceLock";
-import { NO_INPUT_FLAG } from "../lib/const";
+import { aquaLogLevelsString, NO_INPUT_FLAG } from "../lib/const";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
 import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { projectRootDirPromise, validatePath } from "../lib/paths";
@@ -64,13 +64,14 @@ export default class Aqua extends Command {
       description: "Generate .js file instead of .ts",
       exclusive: ["air"],
     }),
-    "log-level": Flags.string({
-      description: "Set log level",
+    "log-level-compiler": Flags.string({
+      description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
       helpValue: "<level>",
     }),
     const: Flags.string({
-      description: "Set log level",
+      description: "Constants to be passed to the compiler",
       helpValue: "<NAME=value>",
+      multiple: true,
     }),
     "no-relay": Flags.boolean({
       description: "Do not generate a pass through the relay node",
@@ -117,6 +118,7 @@ export default class Aqua extends Command {
             flagName: "input",
           })),
       js = flags.js ?? maybeFluenceConfig?.aquaOutputJSPath !== undefined,
+      "log-level-compiler": logLevelCompiler,
       ...aquaCliOptionalFlags
     } = flags;
 
@@ -150,6 +152,7 @@ export default class Aqua extends Command {
       js,
       ...aquaCliOptionalFlags,
       import: aquaImports,
+      "log-level": logLevelCompiler,
     };
 
     const aquaCli = await initAquaCli(
