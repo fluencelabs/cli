@@ -62,6 +62,8 @@ export async function compile({
   data?: Data | undefined;
 } & CommonArgs) {
   const config = new api.AquaConfig(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     logLevelCompiler,
     constants,
     noXor,
