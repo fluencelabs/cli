@@ -292,7 +292,11 @@ export default class Run extends Command {
     };
 
     const useAquaRun =
-      typeof flags.plugin === "string" || jsonServicePaths.length > 0;
+      typeof flags.plugin === "string" ||
+      jsonServicePaths.length > 0 ||
+      consts.length > 0 ||
+      noXor ||
+      noRelay;
 
     const result: unknown = await (useAquaRun
       ? aquaRun(runArgs)
