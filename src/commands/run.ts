@@ -430,11 +430,6 @@ const getRunData = async (
   return dataString === "{}" ? undefined : runData;
 };
 
-const isAvmLogLevelOrUndefined = (
-  unknown: unknown
-): unknown is AvmLoglevel | undefined =>
-  unknown === undefined || isAvmLogLevel(unknown);
-
 type ResolveAVMLogLevelArgs = {
   commandObj: CommandObj;
   maybeAVMLogLevel: string | undefined;
@@ -452,7 +447,11 @@ const resolveAVMLogLevel = async ({
     return "off";
   }
 
-  if (isAvmLogLevelOrUndefined(maybeAVMLogLevel)) {
+  if (maybeAVMLogLevel === undefined) {
+    return undefined;
+  }
+
+  if (isAvmLogLevel(maybeAVMLogLevel)) {
     return maybeAVMLogLevel;
   }
 
@@ -473,11 +472,6 @@ const resolveAVMLogLevel = async ({
   });
 };
 
-const isAquaLogLevelOrUndefined = (
-  unknown: unknown
-): unknown is AvmLoglevel | undefined =>
-  unknown === undefined || isAquaLogLevel(unknown);
-
 type ResolveAquaLogLevelArgs = {
   commandObj: CommandObj;
   maybeAquaLogLevel: string | undefined;
@@ -495,7 +489,11 @@ const resolveAquaLogLevel = async ({
     return "off";
   }
 
-  if (isAquaLogLevelOrUndefined(maybeAquaLogLevel)) {
+  if (maybeAquaLogLevel === undefined) {
+    return undefined;
+  }
+
+  if (isAquaLogLevel(maybeAquaLogLevel)) {
     return maybeAquaLogLevel;
   }
 
