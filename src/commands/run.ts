@@ -182,7 +182,7 @@ export default class Run extends Command {
     }
 
     if (typeof flags[ON_FLAG_NAME] === "string") {
-      const onPeerConst = `ON_PEER="${flags[ON_FLAG_NAME]}"`;
+      const onPeerConst = `ON_PEER = "${flags[ON_FLAG_NAME]}"`;
 
       flags.const =
         flags.const === undefined
@@ -197,6 +197,7 @@ export default class Run extends Command {
       "print-air": printAir,
       plugin,
       timeout,
+      on,
     } = flags;
 
     const keyPair = await getExistingKeyPairFromFlags(
@@ -269,10 +270,10 @@ export default class Run extends Command {
           });
 
     const runArgs: RunArgs = {
+      commandObj: this,
       appJsonServicePath,
       aquaFilePath,
       aquaImports,
-      commandObj: this,
       consts,
       data,
       funcCallStr,
@@ -289,6 +290,7 @@ export default class Run extends Command {
       relay,
       secretKey,
       timeout,
+      on,
     };
 
     const useAquaRun =
@@ -535,6 +537,7 @@ type RunArgs = {
   appJsonServicePath: string;
   noXor: boolean;
   noRelay: boolean;
+  on: string | undefined;
 };
 
 const aquaRun = async ({
@@ -557,6 +560,7 @@ const aquaRun = async ({
   appJsonServicePath,
   noXor,
   noRelay,
+  on,
 }: RunArgs) => {
   const aquaCli = await initAquaCli(
     commandObj,
@@ -585,6 +589,7 @@ const aquaRun = async ({
           "log-level": logLevelCompiler,
           "no-xor": noXor,
           "no-relay": noRelay,
+          on,
         },
       },
       "Running",
