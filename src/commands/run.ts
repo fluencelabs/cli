@@ -128,10 +128,11 @@ export default class Run extends Command {
       helpValue: "<path>",
       multiple: true,
     }),
-    [ON_FLAG_NAME]: Flags.string({
-      description: "PeerId of a peer where you want to run the function",
-      helpValue: "<peer_id>",
-    }),
+    // TODO: DXJ-207
+    // [ON_FLAG_NAME]: Flags.string({
+    //   description: "PeerId of a peer where you want to run the function",
+    //   helpValue: "<peer_id>",
+    // }),
     [INPUT_FLAG_NAME]: Flags.string({
       description:
         "Path to an aqua file or to a directory that contains aqua files",
@@ -191,13 +192,12 @@ export default class Run extends Command {
     }
 
     const {
-      const: consts = [],
+      const: constants = [],
       "no-relay": noRelay,
       "no-xor": noXor,
       "print-air": printAir,
       plugin,
       timeout,
-      on,
     } = flags;
 
     const keyPair = await getExistingKeyPairFromFlags(
@@ -272,11 +272,11 @@ export default class Run extends Command {
     const runArgs: RunArgs = {
       commandObj: this,
       appJsonServicePath,
-      aquaFilePath,
-      aquaImports,
-      consts,
+      filePath: aquaFilePath,
+      imports: aquaImports,
+      constants,
       data,
-      funcCallStr,
+      funcCall: funcCallStr,
       jsonServicePaths,
       logLevelAVM,
       logLevelCompiler,
@@ -290,13 +290,12 @@ export default class Run extends Command {
       relay,
       secretKey,
       timeout,
-      on,
     };
 
     const useAquaRun =
       typeof flags.plugin === "string" ||
       jsonServicePaths.length > 0 ||
-      consts.length > 0 ||
+      constants.length > 0 ||
       noXor ||
       noRelay;
 
@@ -522,14 +521,14 @@ type RunArgs = {
   maybeFluenceLockConfig: FluenceLockConfig | null;
   maybeAppConfig: AppConfigReadonly | null;
   relay: string;
-  funcCallStr: string;
-  aquaFilePath: string;
+  funcCall: string;
+  filePath: string;
   timeout: number | undefined;
-  aquaImports: string[];
+  imports: string[];
   jsonServicePaths: string[];
   secretKey: string;
   plugin: string | undefined;
-  consts: Array<string>;
+  constants: Array<string>;
   logLevelCompiler: AquaLogLevel | undefined;
   logLevelAVM: AvmLoglevel | undefined;
   printAir: boolean;
@@ -537,7 +536,6 @@ type RunArgs = {
   appJsonServicePath: string;
   noXor: boolean;
   noRelay: boolean;
-  on: string | undefined;
 };
 
 const aquaRun = async ({
@@ -546,21 +544,20 @@ const aquaRun = async ({
   maybeFluenceLockConfig,
   maybeAppConfig,
   relay,
-  funcCallStr,
-  aquaFilePath,
+  funcCall,
+  filePath,
   timeout,
-  aquaImports,
+  imports,
   jsonServicePaths,
   secretKey,
   plugin,
-  consts,
+  constants,
   logLevelCompiler,
   printAir,
   data,
   appJsonServicePath,
   noXor,
   noRelay,
-  on,
 }: RunArgs) => {
   const aquaCli = await initAquaCli(
     commandObj,
@@ -576,24 +573,23 @@ const aquaRun = async ({
         args: ["run"],
         flags: {
           addr: relay,
-          func: funcCallStr,
-          input: aquaFilePath,
+          func: funcCall,
+          input: filePath,
           timeout: timeout,
-          import: aquaImports,
+          import: imports,
           "json-service": jsonServicePaths,
           sk: secretKey,
           plugin,
-          const: consts,
+          const: constants,
           "print-air": printAir,
           ...(data === undefined ? {} : { data: JSON.stringify(data) }),
           "log-level": logLevelCompiler,
           "no-xor": noXor,
           "no-relay": noRelay,
-          on,
         },
       },
       "Running",
-      { function: funcCallStr, relay }
+      { function: funcCall, relay }
     );
   } finally {
     if (maybeAppConfig !== null) {
@@ -607,11 +603,11 @@ const aquaRun = async ({
 const fluenceRun = async ({
   commandObj,
   relay,
-  funcCallStr,
-  aquaFilePath,
-  aquaImports,
+  funcCall,
+  filePath,
+  imports,
   secretKey,
-  consts,
+  constants,
   logLevelCompiler,
   logLevelAVM,
   printAir,
@@ -622,14 +618,18 @@ const fluenceRun = async ({
 }: RunArgs) => {
   const fluencePeer = new FluencePeer();
 
-  const [{ funcDef, script }] = await Promise.all([
+  const [
+    {
+      functionCall: { funcDef, script },
+    },
+  ] = await Promise.all([
     compile({
-      funcCallStr,
+      funcCall,
       data,
-      absoluteAquaFilePath: aquaFilePath,
-      aquaImports,
-      constants: consts,
-      logLevelCompiler,
+      filePath,
+      imports,
+      constants,
+      logLevel: logLevelCompiler,
       noXor,
       noRelay,
     }),

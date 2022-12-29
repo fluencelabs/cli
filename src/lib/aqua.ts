@@ -18,75 +18,72 @@
 
 import assert from "node:assert";
 
-import api from "@fluencelabs/aqua-api/aqua-api";
+import {
+  AquaConfig,
+  CompilationResult,
+  Aqua,
+  Call,
+  Input,
+  Path,
+} from "@fluencelabs/aqua-api/aqua-api";
 import type { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction";
 
 export type Data = Parameters<typeof callFunctionImpl>[4];
 
 type CommonArgs = {
-  aquaImports: string[];
-  constants: string[] | undefined;
-  logLevelCompiler: string | undefined;
-  noRelay?: boolean;
-  noXor?: boolean;
+  imports?: string[] | undefined;
+  constants?: string[] | undefined;
+  logLevel?: string | undefined;
+  noRelay?: boolean | undefined;
+  noXor?: boolean | undefined;
 };
 
 export async function compile(
   arg: { code: string } & CommonArgs
-): ReturnType<typeof api.Aqua.compileString>;
+): Promise<CompilationResult>;
 export async function compile(
-  arg: { absoluteAquaFilePath: string } & CommonArgs
-): ReturnType<typeof api.Aqua.compile>;
+  arg: { filePath: string } & CommonArgs
+): Promise<CompilationResult>;
 export async function compile(
   arg: {
-    absoluteAquaFilePath: string;
-    funcCallStr: string;
-    data: Data | undefined;
+    filePath: string;
+    funcCall: string;
+    data?: Data | undefined;
   } & CommonArgs
-): ReturnType<typeof api.Aqua.compileRun>;
+): Promise<Required<CompilationResult>>;
 
 export async function compile({
-  funcCallStr,
+  funcCall,
   code,
-  absoluteAquaFilePath,
-  aquaImports,
+  filePath,
   data = {},
+  imports = [],
   constants = [],
-  logLevelCompiler = "info",
+  logLevel = "info",
   noRelay = false,
   noXor = false,
 }: {
   code?: string;
-  absoluteAquaFilePath?: string;
-  funcCallStr?: string;
+  filePath?: string;
+  funcCall?: string;
   data?: Data | undefined;
 } & CommonArgs) {
-  const config = new api.AquaConfig(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    logLevelCompiler,
-    constants,
-    noXor,
-    noRelay
-  );
+  const config = new AquaConfig(logLevel, constants, noXor, noRelay);
 
-  if (
-    typeof funcCallStr === "string" &&
-    typeof absoluteAquaFilePath !== "undefined"
-  ) {
-    return api.Aqua.compileRun(
-      funcCallStr,
-      data,
-      absoluteAquaFilePath,
-      aquaImports,
+  if (typeof funcCall === "string" && filePath !== undefined) {
+    const result = await Aqua.compile(
+      new Call(funcCall, data, new Input(filePath)),
+      imports,
       config
     );
+
+    return result;
   }
 
   if (typeof code === "string") {
-    return api.Aqua.compileString(code, aquaImports, config);
+    return Aqua.compile(new Input(code), imports, config);
   }
 
-  assert(typeof absoluteAquaFilePath === "string");
-  return api.Aqua.compile(absoluteAquaFilePath, aquaImports, config);
+  assert(typeof filePath === "string");
+  return Aqua.compile(new Path(filePath), imports, config);
 }
