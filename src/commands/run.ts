@@ -293,11 +293,7 @@ export default class Run extends Command {
     };
 
     const useAquaRun =
-      typeof flags.plugin === "string" ||
-      jsonServicePaths.length > 0 ||
-      constants.length > 0 ||
-      noXor ||
-      noRelay;
+      typeof flags.plugin === "string" || jsonServicePaths.length > 0;
 
     const result: unknown = await (useAquaRun
       ? aquaRun(runArgs)
@@ -618,11 +614,7 @@ const fluenceRun = async ({
 }: RunArgs) => {
   const fluencePeer = new FluencePeer();
 
-  const [
-    {
-      functionCall: { funcDef, script },
-    },
-  ] = await Promise.all([
+  const [{ functionCall, errors }] = await Promise.all([
     compile({
       funcCall,
       data,
@@ -642,6 +634,12 @@ const fluenceRun = async ({
       ...(typeof timeout === "number" ? { defaultTtlMs: timeout } : {}),
     }),
   ]);
+
+  if (errors.length > 0) {
+    throw new Error(errors.join("\n"));
+  }
+
+  const { funcDef, script } = functionCall;
 
   if (printAir) {
     commandObj.log(script);
