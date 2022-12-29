@@ -219,7 +219,7 @@ export default class Run extends Command {
       commandObj: this,
     });
 
-    const funcCallStr =
+    const funcCall =
       flags[FUNC_FLAG_NAME] ??
       (await input({
         message: `Enter a function call that you want to execute`,
@@ -276,7 +276,7 @@ export default class Run extends Command {
       imports: aquaImports,
       constants,
       data,
-      funcCall: funcCallStr,
+      funcCall,
       jsonServicePaths,
       logLevelAVM,
       logLevelCompiler,
