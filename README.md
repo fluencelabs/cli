@@ -139,24 +139,25 @@ Compile aqua file or directory that contains your .aqua files
 
 ```
 USAGE
-  $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js] [--log-level <value>]
-    [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled] [-w] [--no-input]
+  $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js] [--log-level-compiler
+    <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled] [-w] [--no-input]
 
 FLAGS
-  -i, --input=<path>    Path to an aqua file or an input directory that contains your .aqua files
-  -o, --output=<path>   Path to the output directory. Will be created if it doesn't exists
-  -w, --watch           Watch aqua file or folder for changes and recompile
-  --air                 Generate .air file instead of .ts
-  --const=<NAME=value>  Set log level
-  --dry                 Checks if compilation is succeeded, without output
-  --import=<path>...    Path to a directory to import from. May be used several times
-  --js                  Generate .js file instead of .ts
-  --log-level=<level>   Set log level
-  --no-input            Don't interactively ask for any input from the user
-  --no-relay            Do not generate a pass through the relay node
-  --no-xor              Do not generate a wrapper that catches and displays errors
-  --scheduled           Generate air code for script storage. Without error handling wrappers and hops on relay. Will
-                        ignore other options
+  -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files
+  -o, --output=<path>           Path to the output directory. Will be created if it doesn't exists
+  -w, --watch                   Watch aqua file or folder for changes and recompile
+  --air                         Generate .air file instead of .ts
+  --const=<NAME=value>...       Constants to be passed to the compiler
+  --dry                         Checks if compilation is succeeded, without output
+  --import=<path>...            Path to a directory to import from. May be used several times
+  --js                          Generate .js file instead of .ts
+  --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
+                                warn, error, off
+  --no-input                    Don't interactively ask for any input from the user
+  --no-relay                    Do not generate a pass through the relay node
+  --no-xor                      Do not generate a wrapper that catches and displays errors
+  --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
+                                Will ignore other options
 
 DESCRIPTION
   Compile aqua file or directory that contains your .aqua files
@@ -251,7 +252,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dep i [--no-input] [--recommended | --latest] [--force]
+  $ fluence dep i [--recommended | --latest] [--force] [--no-input]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -364,7 +365,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dependency i [--no-input] [--recommended | --latest] [--force]
+  $ fluence dependency i [--recommended | --latest] [--force] [--no-input]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -391,7 +392,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dependency install [--no-input] [--recommended | --latest] [--force]
+  $ fluence dependency install [--recommended | --latest] [--force] [--no-input]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -474,7 +475,7 @@ Deploy application, described in fluence.yaml
 
 ```
 USAGE
-  $ fluence deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>]
+  $ fluence deploy [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--no-input]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -518,7 +519,7 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [--no-input] [-t <value>]
+  $ fluence init [PATH] [-t <value>] [--no-input]
 
 ARGUMENTS
   PATH  Project path
@@ -674,7 +675,7 @@ Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--no-input] [--relay <value>] [--timeout <value>]
+  $ fluence remove [--relay <value>] [--timeout <value>] [--no-input]
 
 FLAGS
   --no-input                Don't interactively ask for any input from the user
@@ -696,28 +697,35 @@ Run aqua script
 
 ```
 USAGE
-  $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--plugin <value>] [--const <value>] [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout
-    <value>] [-k <value>]
+  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
+    [--log-level-compiler <value>] [--log-level-avm <value>] [--quiet] [--plugin <value>] [--const <value>]
+    [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout <value>]
+    [--no-input] [-k <value>]
 
 FLAGS
-  -f, --func=<function-call>  Function call
-  -i, --input=<path>          Path to an aqua file or to a directory that contains aqua files
-  -k, --key-pair-name=<name>  Key pair name
-  --const=<NAME = value>...   Constant that will be used in the aqua code that you run (example of aqua code: SOME_CONST
-                              ?= "default_value"). Constant name must be upper cased.
-  --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
-                              argument names
-  --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
-                              using these argument names
-  --import=<path>...          Path to a directory to import from. May be used several times
-  --json-service=<path>...    Path to a file that contains a JSON formatted service
-  --no-input                  Don't interactively ask for any input from the user
-  --on=<peer_id>              PeerId of a peer where you want to run the function
-  --plugin=<path>             [experimental] Path to a directory with JS plugins (Read more:
-                              https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
-  --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    Timeout used for command execution
+  -f, --func=<function-call>    Function call
+  -i, --input=<path>            Path to an aqua file or to a directory that contains aqua files
+  -k, --key-pair-name=<name>    Key pair name
+  --const=<NAME = value>...     Constant that will be used in the aqua code that you run (example of aqua code:
+                                SOME_CONST ?= "default_value"). Constant name must be upper cased.
+  --data=<json>                 JSON in { [argumentName]: argumentValue } format. You can call a function using these
+                                argument names
+  --data-path=<path>            Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
+                                using these argument names
+  --import=<path>...            Path to a directory to import from. May be used several times
+  --json-service=<path>...      Path to a file that contains a JSON formatted service
+  --log-level-avm=<level>       Set log level for AquaVM. Must be one of: debug, info, warn, error, off, trace
+  --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
+                                warn, error, off
+  --no-input                    Don't interactively ask for any input from the user
+  --no-relay                    Do not generate a pass through the relay node
+  --no-xor                      Do not generate a wrapper that catches and displays errors
+  --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
+                                https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
+  --print-air                   Prints generated AIR code before function execution
+  --quiet                       Print only execution result. Overrides all --log-level-* flags
+  --relay=<multiaddr>           Relay node multiaddr
+  --timeout=<milliseconds>      Timeout used for command execution
 
 DESCRIPTION
   Run aqua script

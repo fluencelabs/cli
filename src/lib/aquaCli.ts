@@ -53,6 +53,10 @@ export type AquaCliInput =
           | "sk"
           | "plugin"
           | "const"
+          | "print-air"
+          | "log-level"
+          | "no-xor"
+          | "no-relay"
         >;
     }
   | {
