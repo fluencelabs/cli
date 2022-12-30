@@ -252,7 +252,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dep i [--recommended | --latest] [--force] [--no-input]
+  $ fluence dep i [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -365,7 +365,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dependency i [--recommended | --latest] [--force] [--no-input]
+  $ fluence dependency i [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -392,7 +392,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dependency install [--recommended | --latest] [--force] [--no-input]
+  $ fluence dependency install [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -475,7 +475,7 @@ Deploy application, described in fluence.yaml
 
 ```
 USAGE
-  $ fluence deploy [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--no-input]
+  $ fluence deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -519,7 +519,7 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [-t <value>] [--no-input]
+  $ fluence init [PATH] [--no-input] [-t <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -675,7 +675,7 @@ Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--relay <value>] [--timeout <value>] [--no-input]
+  $ fluence remove [--no-input] [--relay <value>] [--timeout <value>]
 
 FLAGS
   --no-input                Don't interactively ask for any input from the user
@@ -697,10 +697,10 @@ Run aqua script
 
 ```
 USAGE
-  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
+  $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--log-level-avm <value>] [--quiet] [--plugin <value>] [--const <value>]
-    [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout <value>]
-    [--no-input] [-k <value>]
+    [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout <value>] [-k
+    <value>]
 
 FLAGS
   -f, --func=<function-call>    Function call

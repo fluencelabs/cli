@@ -88,7 +88,7 @@ export async function initCli<A extends Args, F extends Flags>(
 export async function initCli<A extends Args, F extends Flags>(
   commandObj: CommandObj,
   { args, flags }: { args: A; flags: F },
-  requiresFluenceProject = true
+  requiresFluenceProject = false
 ): Promise<
   CommonReturn<A, F> & {
     fluenceConfig?: FluenceConfig | null;
