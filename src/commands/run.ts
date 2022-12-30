@@ -70,7 +70,7 @@ import { input, list } from "../lib/prompt";
 
 const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
-const ON_FLAG_NAME = "on";
+// const ON_FLAG_NAME = "on";
 const DATA_FLAG_NAME = "data";
 const JSON_SERVICE = "json-service";
 const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
@@ -157,7 +157,7 @@ export default class Run extends Command {
     ...NO_INPUT_FLAG,
     ...KEY_PAIR_FLAG,
   };
-  async run(): Promise<void | string> {
+  async run(): Promise<void> {
     const { flags } = await this.parse(Run);
     const isInteractive = getIsInteractive(flags);
     const maybeFluenceConfig = await initFluenceConfig(this);
@@ -182,14 +182,14 @@ export default class Run extends Command {
       this.log = () => {};
     }
 
-    if (typeof flags[ON_FLAG_NAME] === "string") {
-      const onPeerConst = `ON_PEER = "${flags[ON_FLAG_NAME]}"`;
+    // if (typeof flags[ON_FLAG_NAME] === "string") {
+    //   const onPeerConst = `ON_PEER = "${flags[ON_FLAG_NAME]}"`;
 
-      flags.const =
-        flags.const === undefined
-          ? [onPeerConst]
-          : [...flags.const, onPeerConst];
-    }
+    //   flags.const =
+    //     flags.const === undefined
+    //       ? [onPeerConst]
+    //       : [...flags.const, onPeerConst];
+    // }
 
     const {
       const: constants = [],
