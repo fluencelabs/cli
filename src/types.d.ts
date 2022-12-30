@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
+/* eslint-disable camelcase */
 declare module "replace-homedir" {
   export = replaceHomedir;
   declare function replaceHomedir(
     filepath: string,
     replacement: string
   ): string;
+}
+
+declare module "countly-sdk-nodejs" {
+  export const device_id: string;
+  function init(config: unknown): void;
+  function begin_session(): void;
+  function end_session(): void;
+  function add_event(event: unknown): void;
+  function add_log(message: string): void;
+  function log_error(error: unknown): void;
 }

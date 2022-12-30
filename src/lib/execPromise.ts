@@ -104,6 +104,8 @@ export const execPromise = ({
     });
 
     childProcess.on("error", (error): void => {
+      childProcess.kill();
+
       if (typeof message === "string") {
         CliUx.ux.action.stop(color.red("failed"));
       }
@@ -112,6 +114,8 @@ export const execPromise = ({
     });
 
     childProcess.on("close", (code): void => {
+      childProcess.kill();
+
       if (typeof message === "string") {
         CliUx.ux.action.stop(code === 0 ? "done" : color.red("failed"));
       }

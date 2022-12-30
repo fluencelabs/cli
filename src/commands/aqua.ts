@@ -21,7 +21,6 @@ import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
 
 import { initAquaCli } from "../lib/aquaCli";
-import { initFluenceConfig } from "../lib/configs/project/fluence";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
@@ -29,7 +28,7 @@ import {
 } from "../lib/configs/project/fluenceLock";
 import { NO_INPUT_FLAG } from "../lib/const";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
-import { getIsInteractive } from "../lib/helpers/getIsInteractive";
+import { exitCli, initCli } from "../lib/lifecyle";
 import { projectRootDirPromise, validatePath } from "../lib/paths";
 import { input } from "../lib/prompt";
 
@@ -92,9 +91,8 @@ export default class Aqua extends Command {
     ...NO_INPUT_FLAG,
   };
   async run(): Promise<void> {
-    const { flags } = await this.parse(Aqua);
-    const isInteractive = getIsInteractive(flags);
-    const maybeFluenceConfig = await initFluenceConfig(this);
+    const { commandObj, flags, isInteractive, maybeFluenceConfig } =
+      await initCli(this, await this.parse(Aqua));
 
     const {
       watch,
@@ -127,13 +125,13 @@ export default class Aqua extends Command {
     const aquaImports =
       maybeFluenceConfig === null
         ? await ensureAquaImports({
-            commandObj: this,
+            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig: null,
           })
         : await ensureAquaImports({
-            commandObj: this,
+            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig:
@@ -162,7 +160,9 @@ export default class Aqua extends Command {
       aquaCli({ flags: aquaCliFlags }, "Compiling");
 
     if (!watch) {
-      return this.log(await compile());
+      this.log(await compile());
+      await exitCli();
+      return;
     }
 
     const watchingNotification = (): void =>

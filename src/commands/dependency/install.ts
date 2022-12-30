@@ -15,8 +15,9 @@
  */
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
+import { BaseCommand } from "../../baseCommand";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
@@ -30,22 +31,21 @@ import {
   MARINE_RECOMMENDED_VERSION,
   MREPL_CARGO_DEPENDENCY,
   MREPL_RECOMMENDED_VERSION,
-  NO_INPUT_FLAG,
 } from "../../lib/const";
 import {
   ensureAquaImports,
   ensureVSCodeSettingsJSON,
 } from "../../lib/helpers/aquaImports";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { initCli } from "../../lib/lifecyle";
 import { getLatestVersionOfNPMDependency } from "../../lib/npm";
-import { getLatestVersionOfCargoDependency } from "../../lib/rust";
-
-import { installAllCargoDependenciesFromFluenceConfig } from "./cargo/install";
+import {
+  getLatestVersionOfCargoDependency,
+  installAllCargoDependenciesFromFluenceConfig,
+} from "../../lib/rust";
 
 const REQUIRED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY} and ${MREPL_CARGO_DEPENDENCY}`;
 
-export default class Install extends Command {
+export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:i", "dep:i"];
   static override description = `Install all project dependencies (dependencies are cached inside ${color.yellow(
     FLUENCE_DIR_NAME
@@ -64,12 +64,13 @@ export default class Install extends Command {
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),
-    ...NO_INPUT_FLAG,
   };
   async run(): Promise<void> {
-    const { flags } = await this.parse(Install);
-    const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
+    const { flags, fluenceConfig, commandObj } = await initCli(
+      this,
+      await this.parse(Install),
+      true
+    );
 
     const fluenceLockConfig =
       (await initFluenceLockConfig(this)) ??
@@ -95,22 +96,22 @@ export default class Install extends Command {
       fluenceConfig.dependencies.cargo[MARINE_CARGO_DEPENDENCY] =
         await getLatestVersionOfCargoDependency({
           name: MARINE_CARGO_DEPENDENCY,
-          commandObj: this,
+          commandObj,
         });
 
       fluenceConfig.dependencies.cargo[MREPL_CARGO_DEPENDENCY] =
         await getLatestVersionOfCargoDependency({
           name: MREPL_CARGO_DEPENDENCY,
-          commandObj: this,
+          commandObj,
         });
 
       await fluenceConfig.$commit();
     }
 
     await ensureVSCodeSettingsJSON({
-      commandObj: this,
+      commandObj,
       aquaImports: await ensureAquaImports({
-        commandObj: this,
+        commandObj,
         maybeFluenceConfig: fluenceConfig,
         maybeFluenceLockConfig: fluenceLockConfig,
         force: flags.force,
@@ -118,10 +119,12 @@ export default class Install extends Command {
     });
 
     await installAllCargoDependenciesFromFluenceConfig({
-      commandObj: this,
+      commandObj,
       fluenceConfig,
       fluenceLockConfig: fluenceLockConfig,
       force: flags.force,
     });
+
+    commandObj.log("cargo and npm dependencies successfully installed");
   }
 }

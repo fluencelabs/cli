@@ -18,9 +18,10 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
-import type { FluenceConfig } from "../../lib/configs/project/fluence";
+import { BaseCommand } from "../../baseCommand";
+import { addService } from "../../lib/addService";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
 import {
@@ -28,11 +29,8 @@ import {
   initReadonlyServiceConfig,
 } from "../../lib/configs/project/service";
 import {
-  CommandObj,
-  DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   NAME_FLAG_NAME,
-  NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import {
@@ -41,23 +39,20 @@ import {
   downloadService,
   getModuleWasmPath,
   isUrl,
-  validateAquaName,
 } from "../../lib/helpers/downloadFile";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { generateServiceInterface } from "../../lib/helpers/generateServiceInterface";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { initCli } from "../../lib/lifecyle";
 import { initMarineCli } from "../../lib/marineCli";
 import { input } from "../../lib/prompt";
 
 const PATH_OR_URL = "PATH | URL";
 
-export default class Add extends Command {
+export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add service to ${color.yellow(
     FLUENCE_CONFIG_FILE_NAME
   )}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     [NAME_FLAG_NAME]: Flags.string({
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
@@ -70,9 +65,8 @@ export default class Add extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Add);
-    const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
+    const { args, flags, isInteractive, commandObj, fluenceConfig } =
+      await initCli(this, await this.parse(Add), true);
 
     const servicePathOrUrl: unknown =
       args[PATH_OR_URL] ??
@@ -95,7 +89,7 @@ export default class Add extends Command {
     }
 
     const serviceName = await addService({
-      commandObj: this,
+      commandObj,
       serviceName: flags[NAME_FLAG_NAME] ?? serviceConfig.name,
       pathOrUrl: servicePathOrUrl,
       isInteractive,
@@ -132,73 +126,3 @@ export default class Add extends Command {
     });
   }
 }
-
-type AddServiceArg = {
-  commandObj: CommandObj;
-  serviceName: string;
-  pathOrUrl: string;
-  isInteractive: boolean;
-  fluenceConfig: FluenceConfig;
-};
-
-export const addService = async ({
-  commandObj,
-  serviceName,
-  pathOrUrl,
-  isInteractive,
-  fluenceConfig,
-}: AddServiceArg): Promise<string> => {
-  if (fluenceConfig.services === undefined) {
-    fluenceConfig.services = {};
-  }
-
-  const validateServiceName = (name: string): true | string => {
-    const aquaNameValidity = validateAquaName(name);
-
-    if (typeof aquaNameValidity === "string") {
-      return aquaNameValidity;
-    }
-
-    return (
-      !(name in (fluenceConfig?.services ?? {})) ||
-      `You already have ${color.yellow(name)} in ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )}`
-    );
-  };
-
-  let validServiceName = serviceName;
-  const serviceNameValidity = validateServiceName(validServiceName);
-
-  if (serviceNameValidity !== true) {
-    commandObj.warn(serviceNameValidity);
-
-    validServiceName = await input({
-      isInteractive,
-      message: `Enter another name for the service (${AQUA_NAME_REQUIREMENTS})`,
-      validate: validateServiceName,
-    });
-  }
-
-  fluenceConfig.services = {
-    ...fluenceConfig.services,
-    [validServiceName]: {
-      get: pathOrUrl,
-      deploy: [
-        {
-          deployId: DEFAULT_DEPLOY_NAME,
-        },
-      ],
-    },
-  };
-
-  await fluenceConfig.$commit();
-
-  commandObj.log(
-    `Added ${color.yellow(serviceName)} to ${color.yellow(
-      FLUENCE_CONFIG_FILE_NAME
-    )}`
-  );
-
-  return validServiceName;
-};

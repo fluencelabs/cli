@@ -19,7 +19,6 @@ import path from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
-import { installAllNPMDependenciesFromFluenceConfig } from "../../commands/dependency/npm/install";
 import { ajv } from "../ajv";
 import type { FluenceConfig } from "../configs/project/fluence";
 import type { FluenceLockConfig } from "../configs/project/fluenceLock";
@@ -29,6 +28,7 @@ import {
   FS_OPTIONS,
   NODE_MODULES_DIR_NAME,
 } from "../const";
+import { installAllNPMDependenciesFromFluenceConfig } from "../npm";
 import {
   ensureFluenceAquaDir,
   ensureUserFluenceNpmDir,

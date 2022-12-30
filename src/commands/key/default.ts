@@ -17,22 +17,22 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
+import { BaseCommand } from "../../baseCommand";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
-import { NAME_FLAG_NAME, NO_INPUT_FLAG } from "../../lib/const";
+import { NAME_FLAG_NAME } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
+import { initCli } from "../../lib/lifecyle";
 import { list } from "../../lib/prompt";
 
-export default class Default extends Command {
+export default class Default extends BaseCommand<typeof Default> {
   static override description = "Set default key-pair for user or project";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     user: Flags.boolean({
       description:
         "Set default key-pair for current user instead of current project",
@@ -45,9 +45,13 @@ export default class Default extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Default);
-    const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
+    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
+      await initCli(this, await this.parse(Default));
+
+    if (!flags.user && maybeFluenceConfig === null) {
+      await ensureFluenceProject(commandObj, isInteractive);
+    }
+
     const userSecretsConfig = await initUserSecretsConfig(this);
     const projectSecretsConfig = await initProjectSecretsConfig(this);
 
@@ -68,8 +72,8 @@ export default class Default extends Command {
 
       return (
         (flags.user
-          ? await getUserKeyPair({ commandObj: this, keyPairName })
-          : await getProjectKeyPair({ commandObj: this, keyPairName })) !==
+          ? await getUserKeyPair({ commandObj, keyPairName })
+          : await getProjectKeyPair({ commandObj, keyPairName })) !==
           undefined ||
         `Key-pair with name ${color.yellow(
           keyPairName

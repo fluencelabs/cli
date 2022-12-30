@@ -18,33 +18,31 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
-import { initFluenceConfig } from "../../lib/configs/project/fluence";
+import { BaseCommand } from "../../baseCommand";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
 import { initServiceConfig } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   MODULE_CONFIG_FILE_NAME,
   NAME_FLAG_NAME,
-  NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { downloadModule, isUrl } from "../../lib/helpers/downloadFile";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
+import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
 import { hasKey } from "../../lib/typeHelpers";
 
 const PATH_OR_URL = "PATH | URL";
 
-export default class Add extends Command {
+export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add module to ${color.yellow(
     SERVICE_CONFIG_FILE_NAME
   )}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     [NAME_FLAG_NAME]: Flags.string({
       description: "Override module name",
       helpValue: "<name>",
@@ -63,8 +61,10 @@ export default class Add extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Add);
-    const isInteractive = getIsInteractive(flags);
+    const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Add)
+    );
 
     const modulePathOrUrl: unknown =
       args[PATH_OR_URL] ??
@@ -98,11 +98,10 @@ export default class Add extends Command {
         )} or path to the service directory`,
       }));
 
-    const fluenceConfig = await initFluenceConfig(this);
     let servicePath = serviceNameOrPath;
 
-    if (hasKey(serviceNameOrPath, fluenceConfig?.services)) {
-      const serviceGet = fluenceConfig?.services[serviceNameOrPath]?.get;
+    if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
+      const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
       servicePath = serviceGet;
     }
@@ -127,7 +126,7 @@ export default class Add extends Command {
     }
 
     const validateModuleName = (name: string): true | string =>
-      !(name in (fluenceConfig?.services ?? {})) ||
+      !(name in (maybeFluenceConfig?.services ?? {})) ||
       `You already have ${color.yellow(name)} in ${color.yellow(
         serviceConfig.$getPath()
       )}`;

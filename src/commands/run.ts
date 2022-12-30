@@ -18,16 +18,16 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
+import { BaseCommand } from "../baseCommand";
 import { ajv } from "../lib/ajv";
 import { initAquaCli } from "../lib/aquaCli";
 import { initReadonlyAppConfig } from "../lib/configs/project/app";
 import {
   AQUA_INPUT_PATH_PROPERTY,
   FluenceConfigReadonly,
-  initFluenceConfig,
 } from "../lib/configs/project/fluence";
 import {
   defaultFluenceLockConfig,
@@ -37,15 +37,14 @@ import {
 import {
   CommandObj,
   FS_OPTIONS,
-  NO_INPUT_FLAG,
   TIMEOUT_FLAG,
   KEY_PAIR_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
-import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs";
+import { initCli } from "../lib/lifecyle";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -59,7 +58,7 @@ const ON_FLAG_NAME = "on";
 const DATA_FLAG_NAME = "data";
 const JSON_SERVICE = "json-service";
 
-export default class Run extends Command {
+export default class Run extends BaseCommand<typeof Run> {
   static override description = "Run aqua script";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
@@ -115,13 +114,11 @@ export default class Run extends Command {
       helpValue: "<function-call>",
     }),
     ...TIMEOUT_FLAG,
-    ...NO_INPUT_FLAG,
     ...KEY_PAIR_FLAG,
   };
   async run(): Promise<void> {
-    const { flags } = await this.parse(Run);
-    const isInteractive = getIsInteractive(flags);
-    const maybeFluenceConfig = await initFluenceConfig(this);
+    const { commandObj, flags, isInteractive, maybeFluenceConfig } =
+      await initCli(this, await this.parse(Run));
 
     const keyPair = await getExistingKeyPairFromFlags(
       flags,
@@ -137,7 +134,7 @@ export default class Run extends Command {
       aquaPathFromFlags: flags[INPUT_FLAG_NAME],
       isInteractive,
       maybeFluenceConfig,
-      commandObj: this,
+      commandObj,
     });
 
     const func =
@@ -180,13 +177,13 @@ export default class Run extends Command {
     const aquaImports =
       maybeFluenceConfig === null
         ? await ensureAquaImports({
-            commandObj: this,
+            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig: null,
           })
         : await ensureAquaImports({
-            commandObj: this,
+            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig:

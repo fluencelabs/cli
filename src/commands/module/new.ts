@@ -15,32 +15,19 @@
  */
 
 import assert from "node:assert";
-import fsPromises from "node:fs/promises";
-import path from "node:path";
 
 import color from "@oclif/color";
-import { Command } from "@oclif/core";
 
-import { initNewReadonlyModuleConfig } from "../../lib/configs/project/module";
-import {
-  CommandObj,
-  FS_OPTIONS,
-  MARINE_RS_SDK_TEMPLATE_VERSION,
-  MARINE_RS_SDK_TEST_TEMPLATE_VERSION,
-  NO_INPUT_FLAG,
-} from "../../lib/const";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { BaseCommand } from "../../baseCommand";
+import { generateNewModule } from "../../lib/generateNewModule";
+import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
 
 const PATH = "PATH";
 
-export default class New extends Command {
+export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine module template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override flags = {
-    ...NO_INPUT_FLAG,
-  };
   static override args = [
     {
       name: PATH,
@@ -48,9 +35,7 @@ export default class New extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(New);
-    const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
+    const { args, isInteractive } = await initCli(this, await this.parse(New));
 
     const pathToModuleDir: unknown =
       args[PATH] ??
@@ -66,58 +51,3 @@ export default class New extends Command {
     );
   }
 }
-
-export const generateNewModule = async (
-  pathToModuleDir: string,
-  commandObj: CommandObj
-): Promise<void> => {
-  await fsPromises.mkdir(pathToModuleDir, { recursive: true });
-  const name = path.basename(pathToModuleDir);
-
-  const newModuleSrcDirPath = path.join(pathToModuleDir, "src");
-  await fsPromises.mkdir(newModuleSrcDirPath, { recursive: true });
-
-  await fsPromises.writeFile(
-    path.join(newModuleSrcDirPath, "main.rs"),
-    MAIN_RS_CONTENT,
-    FS_OPTIONS
-  );
-
-  await fsPromises.writeFile(
-    path.join(pathToModuleDir, "Cargo.toml"),
-    getCargoTomlContent(name),
-    FS_OPTIONS
-  );
-
-  await initNewReadonlyModuleConfig(pathToModuleDir, commandObj, name);
-};
-
-const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
-use marine_rs_sdk::marine;
-use marine_rs_sdk::module_manifest;
-
-module_manifest!();
-
-pub fn main() {}
-
-#[marine]
-pub fn greeting(name: String) -> String {
-    format!("Hi, {}", name)
-}
-`;
-
-const getCargoTomlContent = (name: string): string => `[package]
-name = "${name}"
-version = "0.1.0"
-edition = "2018"
-
-[[bin]]
-name = "${name}"
-path = "src/main.rs"
-
-[dependencies]
-marine-rs-sdk = "${MARINE_RS_SDK_TEMPLATE_VERSION}"
-
-[dev-dependencies]
-marine-rs-sdk-test = "${MARINE_RS_SDK_TEST_TEMPLATE_VERSION}"
-`;

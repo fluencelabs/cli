@@ -15,7 +15,7 @@
  */
 
 import { Network } from "../src/lib/multiaddr";
-import { FLUENCE_ENV } from "../src/lib/setupEnvironment";
+import { DEBUG_COUNTLY, FLUENCE_ENV } from "../src/lib/setupEnvironment";
 
 export type FluenceEnv = Network | "local";
 
@@ -23,6 +23,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       [FLUENCE_ENV]: FluenceEnv;
+      [DEBUG_COUNTLY]: "true" | "false";
     }
   }
 }

@@ -23,10 +23,7 @@ import stringifyToTOML from "@iarna/toml/stringify";
 import color from "@oclif/color";
 import { CliUx, Command } from "@oclif/core";
 
-import {
-  initFluenceConfig,
-  initReadonlyFluenceConfig,
-} from "../../lib/configs/project/fluence";
+import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
 import {
   initReadonlyModuleConfig,
@@ -46,6 +43,7 @@ import {
   NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
+import { haltCountly } from "../../lib/countly";
 import {
   downloadModule,
   downloadService,
@@ -53,7 +51,7 @@ import {
   getModuleWasmPath,
   isUrl,
 } from "../../lib/helpers/downloadFile";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { initCli } from "../../lib/lifecyle";
 import { initMarineCli, MarineCLI } from "../../lib/marineCli";
 import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths";
 import { input } from "../../lib/prompt";
@@ -77,8 +75,9 @@ export default class REPL extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(REPL);
-    const isInteractive = getIsInteractive(flags);
+    const { args, isInteractive, commandObj, maybeFluenceConfig } =
+      await initCli(this, await this.parse(REPL));
+
     const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
 
     assert(
@@ -100,11 +99,10 @@ export default class REPL extends Command {
     );
 
     const serviceModules = await ensureServiceConfig({
-      commandObj: this,
+      commandObj,
       nameOrPathOrUrl,
     });
 
-    const maybeFluenceConfig = await initFluenceConfig(this);
     const maybeFluenceLockConfig = await initFluenceLockConfig(this);
 
     const marineCli = await initMarineCli(
@@ -115,7 +113,7 @@ export default class REPL extends Command {
 
     const moduleConfigs = await ensureModuleConfigs({
       serviceModules,
-      commandObj: this,
+      commandObj,
       marineCli,
     });
 
@@ -142,7 +140,7 @@ export default class REPL extends Command {
 
     const mreplPath = await ensureCargoDependency({
       nameAndVersion: MREPL_CARGO_DEPENDENCY,
-      commandObj: this,
+      commandObj,
       maybeFluenceConfig,
       maybeFluenceLockConfig,
     });
@@ -160,6 +158,8 @@ ${color.yellow(
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     `);
+
+    await haltCountly();
 
     spawn(mreplPath, [fluenceTmpConfigTomlPath], {
       stdio: "inherit",

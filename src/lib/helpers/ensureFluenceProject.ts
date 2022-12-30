@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { init } from "../../commands/init";
 import { FluenceConfig, initFluenceConfig } from "../configs/project/fluence";
 import type { CommandObj } from "../const";
+import { init } from "../init";
 import { confirm } from "../prompt";
 
 export const ensureFluenceProject = async (

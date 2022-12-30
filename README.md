@@ -91,14 +91,16 @@ Don't name arguments or flags with names that contain underscore symbols, becaus
 pre-commit runs each time before you commit. It includes prettier and generates this README.md file. 
 If you want README.md file to be correctly generated please don't forget to run `npm run build` before committing
 
+Don't export anything from commands except for commands themselves. If you need to share code between commands - create a separate file
+
 Pull request and release process:
 1. Run `npm run check` to make sure everything ok with the code
-2. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
-3. Push your changes
-4. Create pull request and merge your changes to `main`
-5. Switch to `main` locally and pull merged changes
-6. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
-7. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
+1. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
+1. Push your changes
+1. Create pull request and merge your changes to `main`
+1. Switch to `main` locally and pull merged changes
+1. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
+1. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
 
 # Commands
 
@@ -249,7 +251,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dep i [--recommended | --latest] [--force] [--no-input]
+  $ fluence dep i [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -362,7 +364,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dependency i [--recommended | --latest] [--force] [--no-input]
+  $ fluence dependency i [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -389,7 +391,7 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dependency install [--recommended | --latest] [--force] [--no-input]
+  $ fluence dependency install [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
   --force        Force install even if the dependency/dependencies is/are already installed
@@ -472,7 +474,7 @@ Deploy application, described in fluence.yaml
 
 ```
 USAGE
-  $ fluence deploy [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--no-input]
+  $ fluence deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -516,7 +518,7 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [-t <value>] [--no-input]
+  $ fluence init [PATH] [--no-input] [-t <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -672,7 +674,7 @@ Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--relay <value>] [--timeout <value>] [--no-input]
+  $ fluence remove [--no-input] [--relay <value>] [--timeout <value>]
 
 FLAGS
   --no-input                Don't interactively ask for any input from the user
@@ -694,9 +696,9 @@ Run aqua script
 
 ```
 USAGE
-  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>] [--plugin
-    <value>] [--const <value>] [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout <value>]
-    [--no-input] [-k <value>]
+  $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
+    [--plugin <value>] [--const <value>] [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout
+    <value>] [-k <value>]
 
 FLAGS
   -f, --func=<function-call>  Function call

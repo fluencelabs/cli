@@ -17,31 +17,30 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
+import { BaseCommand } from "../../baseCommand";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
 import {
   NAME_FLAG_NAME,
-  NO_INPUT_FLAG,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import {
   getProjectKeyPair,
   getUserKeyPair,
   generateKeyPair,
 } from "../../lib/keypairs";
+import { initCli } from "../../lib/lifecyle";
 import { confirm, input } from "../../lib/prompt";
 
-export default class New extends Command {
+export default class New extends BaseCommand<typeof New> {
   static override description = `Generate key-pair and store it in ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     user: Flags.boolean({
       description:
         "Generate key-pair for current user instead of generating key-pair for current project",
@@ -54,9 +53,13 @@ export default class New extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(New);
-    const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
+    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
+      await initCli(this, await this.parse(New));
+
+    if (!flags.user && maybeFluenceConfig === null) {
+      await ensureFluenceProject(commandObj, isInteractive);
+    }
+
     const userSecretsConfig = await initUserSecretsConfig(this);
     const projectSecretsConfig = await initProjectSecretsConfig(this);
 
@@ -79,9 +82,8 @@ export default class New extends Command {
       keyPairName: string
     ): Promise<true | string> =>
       (flags.user
-        ? await getUserKeyPair({ commandObj: this, keyPairName })
-        : await getProjectKeyPair({ commandObj: this, keyPairName })) ===
-        undefined ||
+        ? await getUserKeyPair({ commandObj, keyPairName })
+        : await getProjectKeyPair({ commandObj, keyPairName })) === undefined ||
       `Key-pair with name ${color.yellow(
         keyPairName
       )} already exists at ${secretsConfigPath}. Please, choose another name.`;

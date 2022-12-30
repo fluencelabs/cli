@@ -59,11 +59,13 @@ export const NPM_DIR_NAME = "npm";
 export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
 export const DOT_BIN_DIR_NAME = ".bin";
+export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
 export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
+export const CONFIG_FILE_NAME = `config.${YAML_EXT}`;
 export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
 export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
 export const APP_CONFIG_FILE_NAME = `app.${YAML_EXT}`;

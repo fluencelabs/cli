@@ -23,6 +23,7 @@ import { fluenceLockSchema } from "./lib/configs/project/fluenceLock";
 import { moduleSchema } from "./lib/configs/project/module";
 import { projectSecretsSchema } from "./lib/configs/project/projectSecrets";
 import { serviceSchema } from "./lib/configs/project/service";
+import { userConfigSchema } from "./lib/configs/user/config";
 import { userSecretsSchema } from "./lib/configs/user/userSecrets";
 import {
   APP_CONFIG_FILE_NAME,
@@ -35,6 +36,7 @@ import {
   SERVICE_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
   FLUENCE_LOCK_CONFIG_FILE_NAME,
+  CONFIG_FILE_NAME,
 } from "./lib/const";
 import { jsonStringify } from "./lib/helpers/jsonStringify";
 
@@ -44,6 +46,7 @@ const schemas = Object.entries({
   [APP_CONFIG_FILE_NAME]: appSchema,
   [MODULE_CONFIG_FILE_NAME]: moduleSchema,
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
+  [CONFIG_FILE_NAME]: userConfigSchema,
   [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
   [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
 });
