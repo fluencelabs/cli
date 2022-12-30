@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
 import assert from "node:assert";
 
 import {
@@ -67,7 +65,7 @@ export async function compile({
   filePath?: string;
   funcCall?: string;
   data?: Data | undefined;
-} & CommonArgs) {
+} & CommonArgs): Promise<CompilationResult> {
   const config = new AquaConfig(logLevel, constants, noXor, noRelay);
 
   if (typeof funcCall === "string" && filePath !== undefined) {
