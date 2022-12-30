@@ -36,6 +36,17 @@ type CommonArgs = {
   noXor?: boolean | undefined;
 };
 
+/**
+ * Compile aqua code
+ *
+ * There are 3 ways to call the function:
+ *
+ * 1. Compile aqua code from string (use `code` field)
+ * 1. Compile aqua code from file (use `filePath` field)
+ * 1. Compile aqua function call from file (use `filePath`, `funcCall` and, optionally `data` fields)
+ *
+ * @param arg Compilation config
+ */
 export async function compile(
   arg: { code: string } & CommonArgs
 ): Promise<CompilationResult>;
