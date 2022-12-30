@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { AvmLoglevel } from "@fluencelabs/fluence";
 import { Command, Flags } from "@oclif/core";
 
 import { aquaComment, jsComment } from "./helpers/comment";
@@ -131,6 +132,42 @@ export const templates = ["minimal", "ts", "js"] as const;
 export type Template = typeof templates[number];
 export const isTemplate = (unknown: unknown): unknown is Template =>
   templates.some((val): boolean => unknown === val);
+
+export const AQUA_LOG_LEVELS = [
+  "all",
+  "trace",
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "off",
+] as const;
+
+export type AquaLogLevel = typeof AQUA_LOG_LEVELS[number];
+
+export const isAquaLogLevel = (unknown: unknown): unknown is AquaLogLevel =>
+  AQUA_LOG_LEVELS.some((val): boolean => unknown === val);
+
+export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
+  ", "
+)}`;
+
+/**
+ * Subject to change after change after DXJ-71
+ */
+export const AVM_LOG_LEVELS: Array<AvmLoglevel> = [
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "off",
+  "trace",
+];
+
+export const avmLogLevelsString = AVM_LOG_LEVELS.join(", ");
+
+export const isAvmLogLevel = (unknown: unknown): unknown is AvmLoglevel =>
+  AVM_LOG_LEVELS.some((level) => level === unknown);
 
 export const FORCE_FLAG_NAME = "force";
 export const NAME_FLAG_NAME = "name";
