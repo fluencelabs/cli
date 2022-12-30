@@ -197,44 +197,6 @@ export default class Run extends BaseCommand<typeof Run> {
       timeout,
     } = flags;
 
-    const logLevelAVM: AvmLoglevel | undefined = await resolveAVMLogLevel({
-      commandObj: this,
-      isInteractive,
-      maybeAVMLogLevel: flags["log-level-avm"],
-      isQuite: flags.quiet,
-    });
-
-    const logLevelCompiler: AquaLogLevel | undefined =
-      await resolveAquaLogLevel({
-        commandObj: this,
-        isInteractive,
-        maybeAquaLogLevel: flags["log-level-avm"],
-        isQuite: flags.quiet,
-      });
-
-    if (flags.quiet) {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      this.log = () => {};
-    }
-
-    // if (typeof flags[ON_FLAG_NAME] === "string") {
-    //   const onPeerConst = `ON_PEER = "${flags[ON_FLAG_NAME]}"`;
-
-    //   flags.const =
-    //     flags.const === undefined
-    //       ? [onPeerConst]
-    //       : [...flags.const, onPeerConst];
-    // }
-
-    const {
-      const: constants = [],
-      "no-relay": noRelay,
-      "no-xor": noXor,
-      "print-air": printAir,
-      plugin,
-      timeout,
-    } = flags;
-
     const keyPair = await getExistingKeyPairFromFlags(
       flags,
       this,
