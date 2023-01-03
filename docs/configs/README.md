@@ -15,6 +15,9 @@ Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). For F
 ## [service.yaml](./service.md)
 
 Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. For Fluence CLI, **service** - is a directory which contains this config. You can use `fluence service new` command to generate a template for new service
+## [config.yaml](./config.md)
+
+Defines global config for Fluence CLI
 ## [user-secrets.yaml](./user-secrets.md)
 
 Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `fluence key` group of commands with `--user` flag

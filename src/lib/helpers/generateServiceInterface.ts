@@ -41,6 +41,5 @@ export const generateServiceInterface = async ({
     `${serviceName}.${AQUA_EXT}`
   );
 
-  console.log(aquaInterfacePath, interfaceString);
   return fsPromises.writeFile(aquaInterfacePath, interfaceString, FS_OPTIONS);
 };

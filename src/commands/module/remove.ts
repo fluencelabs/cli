@@ -18,32 +18,30 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
-import { initFluenceConfig } from "../../lib/configs/project/fluence";
+import { BaseCommand } from "../../baseCommand";
 import {
   FACADE_MODULE_NAME,
   initServiceConfig,
 } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
-  NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { isUrl } from "../../lib/helpers/downloadFile";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
 import { hasKey } from "../../lib/typeHelpers";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
-export default class Remove extends Command {
+export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove module from ${color.yellow(
     SERVICE_CONFIG_FILE_NAME
   )}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     service: Flags.directory({
       description: `Service name from ${color.yellow(
         FLUENCE_CONFIG_FILE_NAME
@@ -60,8 +58,11 @@ export default class Remove extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Remove);
-    const isInteractive = getIsInteractive(flags);
+    const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Remove)
+    );
+
     const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
 
     assert(
@@ -89,11 +90,10 @@ export default class Remove extends Command {
         )} or path to the service directory`,
       }));
 
-    const fluenceConfig = await initFluenceConfig(this);
     let servicePath = serviceNameOrPath;
 
-    if (hasKey(serviceNameOrPath, fluenceConfig?.services)) {
-      const serviceGet = fluenceConfig?.services[serviceNameOrPath]?.get;
+    if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
+      const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
       servicePath = serviceGet;
     }

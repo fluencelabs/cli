@@ -18,28 +18,27 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
-import type { FluenceConfig } from "../../../lib/configs/project/fluence";
+import { BaseCommand } from "../../../baseCommand";
 import {
   defaultFluenceLockConfig,
-  FluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
 } from "../../../lib/configs/project/fluenceLock";
 import {
   CARGO_DIR_NAME,
-  CommandObj,
   FLUENCE_DIR_NAME,
-  NO_INPUT_FLAG,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
   REQUIRED_RUST_TOOLCHAIN,
 } from "../../../lib/const";
-import { ensureFluenceProject } from "../../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../../lib/helpers/getIsInteractive";
-import { ensureCargoDependency } from "../../../lib/rust";
+import { initCli } from "../../../lib/lifecyle";
+import {
+  ensureCargoDependency,
+  installAllCargoDependenciesFromFluenceConfig,
+} from "../../../lib/rust";
 
-export default class Install extends Command {
+export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
   static override description = `Install cargo project dependencies (all dependencies are cached inside ${path.join(
     FLUENCE_DIR_NAME,
@@ -47,7 +46,6 @@ export default class Install extends Command {
   )} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     toolchain: Flags.string({
       description: `Rustup toolchain name (such as stable or ${REQUIRED_RUST_TOOLCHAIN})`,
       helpValue: "<toolchain_name>",
@@ -66,9 +64,11 @@ export default class Install extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Install);
-    const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
+    const { args, flags, commandObj, fluenceConfig } = await initCli(
+      this,
+      await this.parse(Install),
+      true
+    );
 
     const fluenceLockConfig =
       (await initFluenceLockConfig(this)) ??
@@ -88,16 +88,16 @@ export default class Install extends Command {
     if (packageNameAndVersion === undefined) {
       await installAllCargoDependenciesFromFluenceConfig({
         fluenceConfig,
-        commandObj: this,
+        commandObj,
         fluenceLockConfig,
         force: flags.force,
       });
 
-      return;
+      return commandObj.log("cargo dependencies successfully installed");
     }
 
     await ensureCargoDependency({
-      commandObj: this,
+      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,
@@ -106,34 +106,3 @@ export default class Install extends Command {
     });
   }
 }
-
-type InstallAllDependenciesArg = {
-  commandObj: CommandObj;
-  fluenceConfig: FluenceConfig;
-  fluenceLockConfig: FluenceLockConfig;
-  force: boolean;
-};
-
-export const installAllCargoDependenciesFromFluenceConfig = async ({
-  fluenceConfig,
-  fluenceLockConfig,
-  commandObj,
-  force,
-}: InstallAllDependenciesArg): Promise<void> => {
-  for (const [name, version] of Object.entries(
-    fluenceConfig.dependencies.cargo
-  )) {
-    assert(name !== undefined && version !== undefined);
-
-    // Not installing dependencies in parallel
-    // for cargo logs to be clearly readable
-    // eslint-disable-next-line no-await-in-loop
-    await ensureCargoDependency({
-      nameAndVersion: `${name}@${version}`,
-      commandObj,
-      maybeFluenceConfig: fluenceConfig,
-      maybeFluenceLockConfig: fluenceLockConfig,
-      force,
-    });
-  }
-};

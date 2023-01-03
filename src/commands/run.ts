@@ -20,9 +20,10 @@ import { resolve } from "node:path";
 import { AvmLoglevel, FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction";
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
+import { BaseCommand } from "../baseCommand";
 import { ajv } from "../lib/ajv";
 import { compile, Data } from "../lib/aqua";
 import { initAquaCli } from "../lib/aquaCli";
@@ -34,7 +35,6 @@ import {
   AQUA_INPUT_PATH_PROPERTY,
   FluenceConfig,
   FluenceConfigReadonly,
-  initFluenceConfig,
 } from "../lib/configs/project/fluence";
 import {
   defaultFluenceLockConfig,
@@ -45,7 +45,6 @@ import {
 import {
   CommandObj,
   FS_OPTIONS,
-  NO_INPUT_FLAG,
   TIMEOUT_FLAG,
   KEY_PAIR_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
@@ -59,8 +58,8 @@ import {
 } from "../lib/const";
 import { getAppJson } from "../lib/deployedApp";
 import { ensureAquaImports } from "../lib/helpers/aquaImports";
-import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs";
+import { initCli } from "../lib/lifecyle";
 import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -76,7 +75,7 @@ const JSON_SERVICE = "json-service";
 const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
 const LOG_LEVEL_AVM_FLAG_NAME = "log-level-avm";
 
-export default class Run extends Command {
+export default class Run extends BaseCommand<typeof Run> {
   static override description = "Run aqua script";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
@@ -154,13 +153,11 @@ export default class Run extends Command {
       description: "Prints generated AIR code before function execution",
     }),
     ...TIMEOUT_FLAG,
-    ...NO_INPUT_FLAG,
     ...KEY_PAIR_FLAG,
   };
   async run(): Promise<void> {
-    const { flags } = await this.parse(Run);
-    const isInteractive = getIsInteractive(flags);
-    const maybeFluenceConfig = await initFluenceConfig(this);
+    const { commandObj, flags, isInteractive, maybeFluenceConfig } =
+      await initCli(this, await this.parse(Run));
 
     const logLevelAVM: AvmLoglevel | undefined = await resolveAVMLogLevel({
       commandObj: this,
@@ -216,7 +213,7 @@ export default class Run extends Command {
       aquaPathFromFlags: flags[INPUT_FLAG_NAME],
       isInteractive,
       maybeFluenceConfig,
-      commandObj: this,
+      commandObj,
     });
 
     const funcCall =
@@ -255,13 +252,13 @@ export default class Run extends Command {
     const aquaImports =
       maybeFluenceConfig === null
         ? await ensureAquaImports({
-            commandObj: this,
+            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig: null,
           })
         : await ensureAquaImports({
-            commandObj: this,
+            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig:

@@ -91,14 +91,16 @@ Don't name arguments or flags with names that contain underscore symbols, becaus
 pre-commit runs each time before you commit. It includes prettier and generates this README.md file. 
 If you want README.md file to be correctly generated please don't forget to run `npm run build` before committing
 
+Don't export anything from commands except for commands themselves. If you need to share code between commands - create a separate file
+
 Pull request and release process:
 1. Run `npm run check` to make sure everything ok with the code
-2. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
-3. Push your changes
-4. Create pull request and merge your changes to `main`
-5. Switch to `main` locally and pull merged changes
-6. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
-7. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
+1. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated
+1. Push your changes
+1. Create pull request and merge your changes to `main`
+1. Switch to `main` locally and pull merged changes
+1. Run `git tag -a v0.0.0 -m ""` with version number that you want instead of `0.0.0`
+1. Run `git push origin v0.0.0` with version number that you want instead of `0.0.0` to trigger release
 
 # Commands
 

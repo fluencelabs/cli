@@ -17,10 +17,12 @@
 import fsPromises from "node:fs/promises";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { BaseCommand } from "../baseCommand";
 import { AquaCLI, initAquaCli } from "../lib/aquaCli";
+import { build, BuildArg, ServiceInfo } from "../lib/build";
 import {
   DeployedServiceConfig,
   initAppConfig,
@@ -41,7 +43,6 @@ import {
   FS_OPTIONS,
   KEY_PAIR_FLAG,
   KEY_PAIR_FLAG_NAME,
-  NO_INPUT_FLAG,
   TIMEOUT_FLAG,
   TIMEOUT_FLAG_NAME,
 } from "../lib/const";
@@ -50,11 +51,10 @@ import {
   generateRegisterApp,
   removePreviouslyGeneratedInterfacesForServices,
 } from "../lib/deployedApp";
-import { ensureFluenceProject } from "../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
 import { getExistingKeyPair } from "../lib/keypairs";
+import { initCli } from "../lib/lifecyle";
 import { initMarineCli } from "../lib/marineCli";
 import {
   getEvenlyDistributedIds,
@@ -66,12 +66,10 @@ import {
 } from "../lib/multiaddr";
 import { ensureFluenceTmpDeployJsonPath } from "../lib/paths";
 import { confirm } from "../lib/prompt";
+import { removeApp } from "../lib/removeApp";
 import { hasKey } from "../lib/typeHelpers";
 
-import { build, BuildArg, ServiceInfo } from "./build";
-import { removeApp } from "./remove";
-
-export default class Deploy extends Command {
+export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy application, described in ${color.yellow(
     FLUENCE_CONFIG_FILE_NAME
   )}`;
@@ -86,16 +84,17 @@ export default class Deploy extends Command {
     }),
     ...TIMEOUT_FLAG,
     ...KEY_PAIR_FLAG,
-    ...NO_INPUT_FLAG,
   };
   async run(): Promise<void> {
-    const { flags } = await this.parse(Deploy);
-    const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
+    const { commandObj, flags, isInteractive, fluenceConfig } = await initCli(
+      this,
+      await this.parse(Deploy),
+      true
+    );
 
     const defaultKeyPair = await getExistingKeyPair({
       keyPairName: flags[KEY_PAIR_FLAG_NAME] ?? fluenceConfig.keyPairName,
-      commandObj: this,
+      commandObj,
       isInteractive,
     });
 
@@ -105,7 +104,7 @@ export default class Deploy extends Command {
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+    const maybeFluenceLockConfig = await initFluenceLockConfig(commandObj);
 
     const marineCli = await initMarineCli(
       this,
@@ -114,7 +113,7 @@ export default class Deploy extends Command {
     );
 
     const preparedForDeployItems = await prepareForDeploy({
-      commandObj: this,
+      commandObj,
       fluenceConfig,
       defaultKeyPair,
       isInteractive,
@@ -143,7 +142,7 @@ export default class Deploy extends Command {
     ) {
       appConfig = await removeApp({
         appConfig,
-        commandObj: this,
+        commandObj,
         isInteractive,
         timeout: flags[TIMEOUT_FLAG_NAME],
         aquaCli,
@@ -185,7 +184,7 @@ export default class Deploy extends Command {
         aquaCli,
         timeout: flags[TIMEOUT_FLAG_NAME],
         tmpDeployJSONPath,
-        commandObj: this,
+        commandObj,
         doDeployAll,
         isInteractive,
       });
@@ -230,7 +229,8 @@ export default class Deploy extends Command {
     if (appConfig !== null) {
       appConfig.services = allServices;
       await appConfig.$commit();
-      return logResults(appConfig.$getPath());
+      logResults(appConfig.$getPath());
+      return;
     }
 
     const newAppConfig = await initNewReadonlyAppConfig(

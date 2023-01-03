@@ -27,6 +27,7 @@ import {
   CARGO_DIR_NAME,
   CommandObj,
   CONFIG_TOML,
+  COUNTLY_DIR_NAME,
   DEFAULT_SRC_AQUA_FILE_NAME,
   DEPLOYED_APP_AQUA_FILE_NAME,
   DEPLOYED_APP_JS_FILE_NAME,
@@ -70,6 +71,15 @@ export const ensureUserFluenceDir = async (
   commandObj.config.windows
     ? ensureDir(commandObj.config.configDir)
     : ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
+
+export const getUserCountlyDir = async (
+  commandObj: CommandObj
+): Promise<string> =>
+  path.join(
+    await ensureUserFluenceDir(commandObj),
+    COUNTLY_DIR_NAME,
+    COUNTLY_DIR_NAME
+  );
 
 export const ensureUserFluenceTmpNpmDir = async (
   commandObj: CommandObj

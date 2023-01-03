@@ -18,34 +18,28 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 import camelcase from "camelcase";
 
+import { BaseCommand } from "../../baseCommand";
+import { addService } from "../../lib/addService";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
-import {
-  FLUENCE_CONFIG_FILE_NAME,
-  NAME_FLAG_NAME,
-  NO_INPUT_FLAG,
-} from "../../lib/const";
+import { FLUENCE_CONFIG_FILE_NAME, NAME_FLAG_NAME } from "../../lib/const";
+import { generateNewModule } from "../../lib/generateNewModule";
 import {
   AQUA_NAME_REQUIREMENTS,
   ensureValidAquaName,
   validateAquaName,
 } from "../../lib/helpers/downloadFile";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
+import { initCli } from "../../lib/lifecyle";
 import { confirm, input } from "../../lib/prompt";
-import { generateNewModule } from "../module/new";
-
-import { addService } from "./add";
 
 const PATH = "PATH";
 
-export default class New extends Command {
+export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine service template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     [NAME_FLAG_NAME]: Flags.string({
       description: `Unique service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
@@ -58,9 +52,8 @@ export default class New extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(New);
-    const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
+    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
+      await initCli(this, await this.parse(New));
 
     const servicePath: unknown =
       args[PATH] ??
@@ -96,20 +89,21 @@ export default class New extends Command {
     );
 
     if (
-      !isInteractive ||
-      (await confirm({
-        isInteractive,
-        message: `Do you want add ${color.yellow(
-          serviceName
-        )} to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}?`,
-      }))
+      maybeFluenceConfig !== null &&
+      (!isInteractive ||
+        (await confirm({
+          isInteractive,
+          message: `Do you want add ${color.yellow(
+            serviceName
+          )} to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}?`,
+        })))
     ) {
       await addService({
-        commandObj: this,
+        commandObj,
         serviceName,
         pathOrUrl: servicePath,
         isInteractive,
-        fluenceConfig,
+        fluenceConfig: maybeFluenceConfig,
       });
     }
   }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 
@@ -28,6 +29,7 @@ import {
   DOT_BIN_DIR_NAME,
   NODE_MODULES_DIR_NAME,
 } from "./const";
+import { addCountlyLog } from "./countly";
 import { execPromise } from "./execPromise";
 import {
   splitPackageNameAndVersion,
@@ -182,6 +184,8 @@ export const ensureNpmDependency = async ({
     packageManager: "npm",
   });
 
+  addCountlyLog(`Using ${name}@${version} npm dependency`);
+
   return maybeNpmDependencyInfo?.bin === undefined
     ? path.join(dependencyPath, NODE_MODULES_DIR_NAME)
     : path.join(
@@ -190,4 +194,41 @@ export const ensureNpmDependency = async ({
         DOT_BIN_DIR_NAME,
         maybeNpmDependencyInfo.bin
       );
+};
+
+type InstallAllDependenciesArg = {
+  commandObj: CommandObj;
+  fluenceConfig: FluenceConfig;
+  fluenceLockConfig: FluenceLockConfig;
+  force?: boolean | undefined;
+};
+
+export const installAllNPMDependenciesFromFluenceConfig = async ({
+  fluenceConfig,
+  commandObj,
+  fluenceLockConfig,
+  force,
+}: InstallAllDependenciesArg): Promise<string[]> => {
+  const dependencyPaths = [];
+
+  for (const [name, version] of Object.entries(
+    fluenceConfig.dependencies.npm
+  )) {
+    assert(name !== undefined && version !== undefined);
+
+    dependencyPaths.push(
+      // Not installing dependencies in parallel
+      // for npm logs to be clearly readable
+      // eslint-disable-next-line no-await-in-loop
+      await ensureNpmDependency({
+        nameAndVersion: `${name}@${version}`,
+        commandObj,
+        maybeFluenceConfig: fluenceConfig,
+        maybeFluenceLockConfig: fluenceLockConfig,
+        force,
+      })
+    );
+  }
+
+  return dependencyPaths;
 };

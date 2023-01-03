@@ -1,0 +1,3 @@
+## countlyConsent Type
+
+`boolean`

@@ -17,27 +17,26 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
+import { BaseCommand } from "../../baseCommand";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
 import {
   NAME_FLAG_NAME,
-  NO_INPUT_FLAG,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../lib/helpers/getIsInteractive";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
+import { initCli } from "../../lib/lifecyle";
 import { list } from "../../lib/prompt";
 
-export default class Remove extends Command {
+export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     user: Flags.boolean({
       description:
         "Remove key-pair from current user instead of removing key-pair from current project",
@@ -50,9 +49,13 @@ export default class Remove extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Remove);
-    const isInteractive = getIsInteractive(flags);
-    await ensureFluenceProject(this, isInteractive);
+    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
+      await initCli(this, await this.parse(Remove));
+
+    if (!flags.user && maybeFluenceConfig === null) {
+      await ensureFluenceProject(commandObj, isInteractive);
+    }
+
     const userSecretsConfig = await initUserSecretsConfig(this);
     const projectSecretsConfig = await initProjectSecretsConfig(this);
 
@@ -73,8 +76,8 @@ export default class Remove extends Command {
 
       return (
         (flags.user
-          ? await getUserKeyPair({ commandObj: this, keyPairName })
-          : await getProjectKeyPair({ commandObj: this, keyPairName })) !==
+          ? await getUserKeyPair({ commandObj, keyPairName })
+          : await getProjectKeyPair({ commandObj, keyPairName })) !==
           undefined ||
         `Key-pair with name ${color.yellow(
           keyPairName

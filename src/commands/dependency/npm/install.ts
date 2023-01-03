@@ -18,19 +18,16 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
-import type { FluenceConfig } from "../../../lib/configs/project/fluence";
+import { BaseCommand } from "../../../baseCommand";
 import {
   defaultFluenceLockConfig,
-  FluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
 } from "../../../lib/configs/project/fluenceLock";
 import {
-  CommandObj,
   FLUENCE_DIR_NAME,
-  NO_INPUT_FLAG,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
 } from "../../../lib/const";
@@ -38,11 +35,10 @@ import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
 } from "../../../lib/helpers/aquaImports";
-import { ensureFluenceProject } from "../../../lib/helpers/ensureFluenceProject";
-import { getIsInteractive } from "../../../lib/helpers/getIsInteractive";
+import { initCli } from "../../../lib/lifecyle";
 import { ensureNpmDependency } from "../../../lib/npm";
 
-export default class Install extends Command {
+export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
   static override description = `Install npm project dependencies (all dependencies are cached inside ${path.join(
     FLUENCE_DIR_NAME,
@@ -50,7 +46,6 @@ export default class Install extends Command {
   )} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    ...NO_INPUT_FLAG,
     force: Flags.boolean({
       description:
         "Force install even if the dependency/dependencies is/are already installed",
@@ -65,9 +60,11 @@ export default class Install extends Command {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Install);
-    const isInteractive = getIsInteractive(flags);
-    const fluenceConfig = await ensureFluenceProject(this, isInteractive);
+    const { args, flags, fluenceConfig, commandObj } = await initCli(
+      this,
+      await this.parse(Install),
+      true
+    );
 
     const packageNameAndVersion: unknown =
       args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
@@ -87,73 +84,25 @@ export default class Install extends Command {
     // which also installs all npm dependencies from fluence config
     // and then add those imports to vscode settings.json
     if (packageNameAndVersion === undefined) {
-      const aquaImports = await ensureAquaImports({
-        commandObj: this,
-        maybeFluenceConfig: fluenceConfig,
-        maybeFluenceLockConfig: fluenceLockConfig,
-        force: flags.force,
-      });
-
       await ensureVSCodeSettingsJSON({
-        commandObj: this,
-        aquaImports,
+        commandObj,
+        aquaImports: await ensureAquaImports({
+          commandObj,
+          maybeFluenceConfig: fluenceConfig,
+          maybeFluenceLockConfig: fluenceLockConfig,
+          force: flags.force,
+        }),
       });
 
-      return;
+      return commandObj.log("npm dependencies successfully installed");
     }
 
     await ensureNpmDependency({
-      commandObj: this,
+      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       maybeFluenceLockConfig: fluenceLockConfig,
       explicitInstallation: true,
     });
-
-    await ensureVSCodeSettingsJSON({
-      commandObj: this,
-      aquaImports: await ensureAquaImports({
-        commandObj: this,
-        maybeFluenceConfig: fluenceConfig,
-        maybeFluenceLockConfig: fluenceLockConfig,
-      }),
-    });
   }
 }
-
-type InstallAllDependenciesArg = {
-  commandObj: CommandObj;
-  fluenceConfig: FluenceConfig;
-  fluenceLockConfig: FluenceLockConfig;
-  force?: boolean | undefined;
-};
-
-export const installAllNPMDependenciesFromFluenceConfig = async ({
-  fluenceConfig,
-  commandObj,
-  fluenceLockConfig,
-  force,
-}: InstallAllDependenciesArg): Promise<string[]> => {
-  const dependencyPaths = [];
-
-  for (const [name, version] of Object.entries(
-    fluenceConfig.dependencies.npm
-  )) {
-    assert(name !== undefined && version !== undefined);
-
-    dependencyPaths.push(
-      // Not installing dependencies in parallel
-      // for npm logs to be clearly readable
-      // eslint-disable-next-line no-await-in-loop
-      await ensureNpmDependency({
-        nameAndVersion: `${name}@${version}`,
-        commandObj,
-        maybeFluenceConfig: fluenceConfig,
-        maybeFluenceLockConfig: fluenceLockConfig,
-        force,
-      })
-    );
-  }
-
-  return dependencyPaths;
-};

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
@@ -30,6 +31,7 @@ import {
   REQUIRED_RUST_TOOLCHAIN,
   RUST_WASM32_WASI_TARGET,
 } from "./const";
+import { addCountlyLog } from "./countly";
 import { execPromise } from "./execPromise";
 import {
   handleInstallation,
@@ -295,7 +297,40 @@ export const ensureCargoDependency = async ({
     version,
   });
 
+  addCountlyLog(`Using ${name}@${version} cargo dependency`);
+
   return maybeCargoDependencyInfo === undefined
     ? dependencyPath
     : path.join(dependencyPath, BIN_DIR_NAME, name);
+};
+
+type InstallAllDependenciesArg = {
+  commandObj: CommandObj;
+  fluenceConfig: FluenceConfig;
+  fluenceLockConfig: FluenceLockConfig;
+  force: boolean;
+};
+
+export const installAllCargoDependenciesFromFluenceConfig = async ({
+  fluenceConfig,
+  fluenceLockConfig,
+  commandObj,
+  force,
+}: InstallAllDependenciesArg): Promise<void> => {
+  for (const [name, version] of Object.entries(
+    fluenceConfig.dependencies.cargo
+  )) {
+    assert(name !== undefined && version !== undefined);
+
+    // Not installing dependencies in parallel
+    // for cargo logs to be clearly readable
+    // eslint-disable-next-line no-await-in-loop
+    await ensureCargoDependency({
+      nameAndVersion: `${name}@${version}`,
+      commandObj,
+      maybeFluenceConfig: fluenceConfig,
+      maybeFluenceLockConfig: fluenceLockConfig,
+      force,
+    });
+  }
 };
