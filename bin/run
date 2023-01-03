@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const oclif = require("@oclif/core");
-const { createErrorPromise } = require("../src/countlyInterceptor");
+const { createErrorPromise } = require("../dist/countlyInterceptor");
 
 oclif
   .run()
