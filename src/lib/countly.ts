@@ -18,7 +18,7 @@
 
 import Countly from "countly-sdk-nodejs";
 
-import { sessionEndPromise } from "../countlyInterceptor";
+import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor";
 
 import type { FluenceConfig } from "./configs/project/fluence";
 import type { UserConfig } from "./configs/user/config";
@@ -85,7 +85,7 @@ const dependenciesToSegmentation = (
  * @returns void
  */
 export const addCountlyLog = (message: string): void => {
-  if (Countly.device_id === undefined) {
+  if (!isCountlyInited()) {
     return;
   }
 
@@ -93,7 +93,7 @@ export const addCountlyLog = (message: string): void => {
 };
 
 export const haltCountly = async (): Promise<void> => {
-  if (Countly.device_id === undefined) {
+  if (!isCountlyInited()) {
     return;
   }
 

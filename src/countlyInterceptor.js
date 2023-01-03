@@ -4,6 +4,11 @@ const {
 const Countly = require("countly-sdk-nodejs");
 
 /**
+ * @type {() => boolean}
+ */
+const isCountlyInited = () => Countly.device_id !== undefined;
+
+/**
  * @type {() => void}
  */
 let resolveErrorPromise;
@@ -17,7 +22,7 @@ let hasSessionEnded = false;
  * @returns
  */
 const createErrorPromise = (error, errorHandler) => {
-  if (Countly.device_id === undefined) {
+  if (!isCountlyInited()) {
     return errorHandler(error);
   }
 
@@ -70,4 +75,4 @@ interceptor.on("response", (_response, request) => {
   }
 });
 
-module.exports = { createErrorPromise, sessionEndPromise };
+module.exports = { createErrorPromise, sessionEndPromise, isCountlyInited };
