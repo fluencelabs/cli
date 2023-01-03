@@ -19,6 +19,7 @@ import path from "node:path";
 
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
+import Countly from "countly-sdk-nodejs";
 
 import { ajv } from "../lib/ajv";
 import {
@@ -199,6 +200,7 @@ const ensureGitIgnore = async (): Promise<void> => {
 type InitArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
+  maybeFluenceConfig?: FluenceConfig | null | undefined;
   projectPath?: string | undefined;
   template?: Template;
 };
@@ -208,7 +210,10 @@ export const init = async (options: InitArg): Promise<FluenceConfig> => {
     commandObj,
     isInteractive,
     template = await selectTemplate({ commandObj, isInteractive }),
+    maybeFluenceConfig,
   } = options;
+
+  Countly.add_event({ key: `init:template:${template}` });
 
   const projectPath =
     options.projectPath === undefined && !isInteractive
@@ -225,7 +230,8 @@ export const init = async (options: InitArg): Promise<FluenceConfig> => {
   await fsPromises.mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
 
-  const fluenceConfig = await initNewFluenceConfig(commandObj);
+  const fluenceConfig =
+    maybeFluenceConfig ?? (await initNewFluenceConfig(commandObj));
 
   switch (template) {
     case "minimal":

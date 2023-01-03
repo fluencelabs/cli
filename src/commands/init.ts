@@ -20,8 +20,8 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../baseCommand";
 import { templates } from "../lib/const";
-import { getIsInteractive } from "../lib/helpers/getIsInteractive";
 import { ensureTemplate, init } from "../lib/init";
+import { initCli } from "../lib/lifecyle";
 
 const PATH = "PATH";
 
@@ -43,19 +43,20 @@ export default class Init extends BaseCommand<typeof Init> {
     },
   ];
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Init);
-    const isInteractive = getIsInteractive(flags);
+    const { commandObj, flags, isInteractive, args, maybeFluenceConfig } =
+      await initCli(this, await this.parse(Init));
 
     const projectPath: unknown = args[PATH];
     assert(projectPath === undefined || typeof projectPath === "string");
 
     await init({
-      commandObj: this,
+      commandObj,
       isInteractive,
       projectPath,
+      maybeFluenceConfig,
       template: await ensureTemplate({
         isInteractive,
-        commandObj: this,
+        commandObj,
         templateOrUnknown: flags.template,
       }),
     });
