@@ -84,7 +84,7 @@ const dependenciesToSegmentation = (
  * @param message - message to be logged
  * @returns void
  */
-export const addLog = (message: string): void => {
+export const addCountlyLog = (message: string): void => {
   if (Countly.device_id === undefined) {
     return;
   }

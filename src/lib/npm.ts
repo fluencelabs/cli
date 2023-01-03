@@ -29,7 +29,7 @@ import {
   DOT_BIN_DIR_NAME,
   NODE_MODULES_DIR_NAME,
 } from "./const";
-import { addLog } from "./countly";
+import { addCountlyLog } from "./countly";
 import { execPromise } from "./execPromise";
 import {
   splitPackageNameAndVersion,
@@ -184,7 +184,7 @@ export const ensureNpmDependency = async ({
     packageManager: "npm",
   });
 
-  addLog(`Using ${name}@${version} npm dependency`);
+  addCountlyLog(`Using ${name}@${version} npm dependency`);
 
   return maybeNpmDependencyInfo?.bin === undefined
     ? path.join(dependencyPath, NODE_MODULES_DIR_NAME)

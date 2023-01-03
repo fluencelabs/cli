@@ -31,7 +31,7 @@ import {
   REQUIRED_RUST_TOOLCHAIN,
   RUST_WASM32_WASI_TARGET,
 } from "./const";
-import { addLog } from "./countly";
+import { addCountlyLog } from "./countly";
 import { execPromise } from "./execPromise";
 import {
   handleInstallation,
@@ -297,7 +297,7 @@ export const ensureCargoDependency = async ({
     version,
   });
 
-  addLog(`Using ${name}@${version} cargo dependency`);
+  addCountlyLog(`Using ${name}@${version} cargo dependency`);
 
   return maybeCargoDependencyInfo === undefined
     ? dependencyPath
