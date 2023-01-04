@@ -126,10 +126,11 @@ export default class Remove extends BaseCommand<typeof Remove> {
             message: `Select new default key-pair name for user's secrets`,
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
-            onNoChoices: (): never =>
-              this.error(
+            onNoChoices: (): never => {
+              throw new Error(
                 `Unreachable. There are no key-pairs to set as default for user's secrets`
-              ),
+              );
+            },
             options: userSecretsConfig.keyPairs.map(
               (value): string => value.name
             ),
@@ -139,8 +140,13 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
           userSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
         } else {
-          userSecretsConfig.defaultKeyPairName =
-            userSecretsConfig.keyPairs?.[0]?.name ?? this.error("Unreachable");
+          const newDefaultKeyPairName = userSecretsConfig.keyPairs?.[0]?.name;
+
+          if (newDefaultKeyPairName === undefined) {
+            throw new Error("Unreachable");
+          }
+
+          userSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
         }
       }
 
@@ -159,10 +165,11 @@ export default class Remove extends BaseCommand<typeof Remove> {
             message: `Select new default key-pair name for project's secrets`,
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
-            onNoChoices: (): never =>
-              this.error(
+            onNoChoices: (): never => {
+              throw new Error(
                 `Unreachable. There are no key-pairs to set as default for project's secrets`
-              ),
+              );
+            },
             options: projectSecretsConfig.keyPairs.map(
               (value): string => value.name
             ),
@@ -172,9 +179,14 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
           projectSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
         } else {
-          projectSecretsConfig.defaultKeyPairName =
-            projectSecretsConfig?.keyPairs?.[0]?.name ??
-            this.error("Unreachable");
+          const newDefaultKeypairName =
+            projectSecretsConfig?.keyPairs?.[0]?.name;
+
+          if (newDefaultKeypairName === undefined) {
+            throw new Error("Unreachable");
+          }
+
+          projectSecretsConfig.defaultKeyPairName = newDefaultKeypairName;
         }
       }
 

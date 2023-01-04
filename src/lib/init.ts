@@ -59,21 +59,16 @@ import {
 } from "../lib/paths";
 import { input, list } from "../lib/prompt";
 
-type SelectTemplateArg = {
-  commandObj: CommandObj;
-  isInteractive: boolean;
-};
-
-const selectTemplate = ({
-  commandObj,
-  isInteractive,
-}: SelectTemplateArg): Promise<Template> =>
+const selectTemplate = (isInteractive: boolean): Promise<Template> =>
   list({
     message: "Select template",
     options: [...templates],
-    oneChoiceMessage: (): never =>
-      commandObj.error("Unreachable: only one template"),
-    onNoChoices: (): never => commandObj.error("Unreachable: no templates"),
+    oneChoiceMessage: (): never => {
+      throw new Error("Unreachable: only one template");
+    },
+    onNoChoices: (): never => {
+      throw new Error("Unreachable: no templates");
+    },
     isInteractive,
   });
 
@@ -100,7 +95,7 @@ export const ensureTemplate = ({
     );
   }
 
-  return selectTemplate({ commandObj, isInteractive });
+  return selectTemplate(isInteractive);
 };
 
 const RECOMMENDATIONS = "recommendations";
@@ -209,7 +204,7 @@ export const init = async (options: InitArg): Promise<FluenceConfig> => {
   const {
     commandObj,
     isInteractive,
-    template = await selectTemplate({ commandObj, isInteractive }),
+    template = await selectTemplate(isInteractive),
     maybeFluenceConfig,
   } = options;
 

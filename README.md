@@ -93,6 +93,8 @@ If you want README.md file to be correctly generated please don't forget to run 
 
 Don't export anything from commands except for commands themselves. If you need to share code between commands - create a separate file
 
+Use `this.error` (or `commandObj.error`) for human readable errors. They will be reported to analytics as events. Use `throw new Error` (or `assert`) for unexpected errors. They will be reported to analytics as crashes.
+
 Pull request and release process:
 1. Run `npm run check` to make sure everything ok with the code
 1. Only after that commit your changes to trigger pre-commit hook that updates `README.md`. Read `README.md` to make sure it is correctly updated

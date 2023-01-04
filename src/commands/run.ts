@@ -457,10 +457,10 @@ const resolveAVMLogLevel = async ({
     isInteractive,
     message: "Select a valid AVM log level",
     oneChoiceMessage() {
-      return commandObj.error("Unreachable");
+      throw new Error("Unreachable");
     },
     onNoChoices() {
-      return commandObj.error("Unreachable");
+      throw new Error("Unreachable");
     },
     options: AVM_LOG_LEVELS,
   });
@@ -499,10 +499,10 @@ const resolveAquaLogLevel = async ({
     isInteractive,
     message: "Select a valid compiler log level",
     oneChoiceMessage() {
-      return commandObj.error("Unreachable");
+      throw new Error("Unreachable");
     },
     onNoChoices() {
-      return commandObj.error("Unreachable");
+      throw new Error("Unreachable");
     },
     options: [...AQUA_LOG_LEVELS],
   });

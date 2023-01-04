@@ -28,7 +28,10 @@ declare module "countly-sdk-nodejs" {
   function init(config: unknown): void;
   function begin_session(): void;
   function end_session(): void;
-  function add_event(event: unknown): void;
+  function add_event(event: {
+    key: string;
+    segmentation?: Record<string, string>;
+  }): void;
   function add_log(message: string): void;
   function log_error(error: unknown): void;
 }
