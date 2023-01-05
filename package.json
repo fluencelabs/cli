@@ -25,7 +25,7 @@
     "lint-fix": "eslint . --ext .ts --cache --fix",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest && oclif readme",
-    "test": "jest",
+    "test": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && cd tmp && npm init -y && npm i ./fluencelabs-cli-0.0.0.tgz && cd .. && jest",
     "posttest": "npm run lint",
     "prepare": "husky install",
     "check": "npm run build && npm run lint-fix && npm run gen-config-docs",

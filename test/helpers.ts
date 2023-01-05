@@ -45,7 +45,13 @@ export const fluence = async ({
     command: "npx",
     args: [
       "ts-node",
-      path.relative(cwd, path.join(process.cwd(), "bin/run")),
+      path.relative(
+        cwd,
+        path.join(
+          process.cwd(),
+          path.join("tmp", "node_modules", "@fluencelabs", "cli", "bin", "run")
+        )
+      ),
       ...args,
     ],
     flags,
