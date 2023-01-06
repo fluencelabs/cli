@@ -23,18 +23,28 @@ import { initCli } from "../../../lib/lifecyle";
 import {
   getDealContract,
   getFLTContract,
-  getWallet,
+  getSigner,
 } from "../../../lib/provider";
+import type { ChainNetwork } from "../../../lib/const";
 
 const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
 
 export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
-  static override description = "TODO: description";
+  static override description =
+    "Create PAT (Peer auth token) in a deal for auth";
   static override flags = {
     privKey: Flags.string({
       char: "k",
-      description: "Your private key",
-      required: true,
+      description:
+        "Private key with which transactions will be signed through cli",
+      required: false,
+    }),
+    network: Flags.string({
+      char: "n",
+      description:
+        "The network in which the deal will be created (local, testnet, mainnet)",
+      required: false,
+      default: "local",
     }),
   };
 
@@ -49,17 +59,19 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
   async run(): Promise<void> {
     const { args, flags } = await initCli(this, await this.parse(CreatePAT));
 
+    const network = flags.network as ChainNetwork;
+
     const dealAddress: unknown = args[DEAL_ADDRESS_ARG];
     assert(typeof dealAddress === "string");
 
-    const wallet = getWallet(flags.privKey);
-    const deal = getDealContract(dealAddress, wallet);
-    const flt = await getFLTContract(wallet);
+    const signer = await getSigner(network, flags.privKey);
+    const deal = getDealContract(dealAddress, signer);
+    const flt = await getFLTContract(signer, network);
 
     const v = (await deal.settings()).requiredStake;
     const approveTx = await flt.approve(dealAddress, v);
 
-    if ((await deal.getRole(wallet.address)) === 0) {
+    if ((await deal.getRole(await signer.getAddress())) === 0) {
       await (await deal.register()).wait();
     }
 

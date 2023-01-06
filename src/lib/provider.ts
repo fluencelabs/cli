@@ -30,40 +30,99 @@ import {
   ERC20,
   ERC20__factory,
 } from "@fluencelabs/deal-aurora";
-import { ethers } from "ethers";
+import { BytesLike, ethers, providers } from "ethers";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+import type { IQRCodeModal } from "@walletconnect/types";
+import { DEAL_CONFIG, ChainNetwork } from "./const";
 
-import { DEAL_CONFIG } from "./const";
+class WalletConnectModal implements IQRCodeModal {
+  open(uri: string, _: any, __?: any): void {
+    console.log(
+      "You need to open the following URI in your wallet or on this website (https://todo)."
+    );
+    console.log(uri);
+  }
+  close(): void {}
+}
 
-export const getWallet = (privKey: string): ethers.Wallet =>
-  new ethers.Wallet(
+const provider = new WalletConnectProvider({
+  rpc: {
+    31337: DEAL_CONFIG[ChainNetwork.Local]!.ethereumNodeUrl,
+  },
+  qrcode: true,
+  qrcodeModal: new WalletConnectModal(),
+});
+
+export const getSigner = async (
+  network: ChainNetwork,
+  privKey: BytesLike | undefined
+): Promise<ethers.Signer> => {
+  return privKey ? getWallet(privKey, network) : getWalletConnectProvider();
+};
+
+const getWalletConnectProvider = async (): Promise<ethers.Signer> => {
+  await provider.enable();
+
+  return new providers.Web3Provider(provider).getSigner();
+};
+
+const getWallet = (
+  privKey: BytesLike,
+  network: ChainNetwork
+): ethers.Wallet => {
+  return new ethers.Wallet(
     privKey,
-    new ethers.providers.JsonRpcProvider(DEAL_CONFIG.ethereumNodeUrl)
+    new providers.JsonRpcProvider(DEAL_CONFIG[network]!.ethereumNodeUrl)
   );
+};
 
-export const getCoreContract = (wallet: ethers.Wallet): Core =>
-  Core__factory.connect(DEAL_CONFIG.coreAddress, wallet);
+export const getCoreContract = (
+  signer: ethers.Signer,
+  network: ChainNetwork
+): Core => Core__factory.connect(DEAL_CONFIG[network]!.coreAddress, signer);
 
-export const getFactoryContract = (wallet: ethers.Wallet): DealFactory =>
-  DealFactory__factory.connect(DEAL_CONFIG.dealFactoryAddress, wallet);
+export const getFactoryContract = (
+  signer: ethers.Signer,
+  network: ChainNetwork
+): DealFactory =>
+  DealFactory__factory.connect(
+    DEAL_CONFIG[network]!.dealFactoryAddress,
+    signer
+  );
 
 export const getAquaProxy = (
   address: string,
-  wallet: ethers.Wallet
-): AquaProxy => AquaProxy__factory.connect(address, wallet);
+  provider: ethers.providers.Provider
+): AquaProxy => AquaProxy__factory.connect(address, provider);
 
-export const getDeveloperContract = (wallet: ethers.Wallet): DeveloperFaucet =>
-  DeveloperFaucet__factory.connect(DEAL_CONFIG.developerFaucetAddress, wallet);
+export const getDeveloperContract = (
+  signer: ethers.Signer,
+  network: ChainNetwork
+): DeveloperFaucet =>
+  DeveloperFaucet__factory.connect(
+    DEAL_CONFIG[network]!.developerFaucetAddress,
+    signer
+  );
 
 export const getDealContract = (
   dealAddress: string,
-  wallet: ethers.Wallet
-): Deal => Deal__factory.connect(dealAddress, wallet);
+  signer: ethers.Signer
+): Deal => Deal__factory.connect(dealAddress, signer);
 
-export const getUSDContract = async (wallet: ethers.Wallet): Promise<ERC20> =>
-  ERC20__factory.connect(await getDeveloperContract(wallet).usdToken(), wallet);
-
-export const getFLTContract = async (wallet: ethers.Wallet): Promise<ERC20> =>
+export const getUSDContract = async (
+  signer: ethers.Signer,
+  network: ChainNetwork
+): Promise<ERC20> =>
   ERC20__factory.connect(
-    await getDeveloperContract(wallet).fluenceToken(),
-    wallet
+    await getDeveloperContract(signer, network).usdToken(),
+    signer
+  );
+
+export const getFLTContract = async (
+  signer: ethers.Signer,
+  network: ChainNetwork
+): Promise<ERC20> =>
+  ERC20__factory.connect(
+    await getDeveloperContract(signer, network).fluenceToken(),
+    signer
   );

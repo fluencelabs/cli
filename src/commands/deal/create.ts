@@ -24,27 +24,38 @@ import { initCli } from "../../lib/lifecyle";
 import {
   getFactoryContract,
   getUSDContract,
-  getWallet,
+  getSigner,
 } from "../../lib/provider";
+import type { ChainNetwork } from "../../lib/const";
 
 export default class Create extends BaseCommand<typeof Create> {
-  static override description = "TODO: description";
+  static override description =
+    "Create your deal with the specified parameters";
   static override flags = {
     privKey: Flags.string({
       char: "k",
-      description: "Your private key",
-      required: true,
+      description:
+        "Private key with which transactions will be signed through cli",
+      required: false,
+    }),
+    network: Flags.string({
+      char: "n",
+      description:
+        "The network in which the deal will be created (local, testnet, mainnet)",
+      required: false,
+      default: "local",
     }),
     subnetId: Flags.string({
-      description: "Subnet ID for deal",
+      description: "Subnet ID for a deal",
       required: true,
     }),
     pricePerEpoch: Flags.string({
-      description: "Price per epoch",
+      description: "The price that you will pay to resource owners per epoch",
       required: true,
     }),
     requiredStake: Flags.string({
-      description: "Required stake for a peer",
+      description:
+        "Required collateral in FLT tokens to join a deal for resource owners.",
       required: true,
     }),
   };
@@ -52,12 +63,14 @@ export default class Create extends BaseCommand<typeof Create> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Create));
 
-    const wallet = getWallet(flags.privKey);
-    const factory = getFactoryContract(wallet);
+    const network = flags.network as ChainNetwork;
+
+    const signer = await getSigner(network, flags.privKey);
+    const factory = getFactoryContract(signer, network);
     const tx = await factory.createDeal(
       utils.keccak256(utils.toUtf8Bytes(flags["subnetId"])), // TODO: base64?
       {
-        paymentToken: (await getUSDContract(wallet)).address,
+        paymentToken: (await getUSDContract(signer, network)).address,
         pricePerEpoch: BigNumber.from(flags["pricePerEpoch"]).mul(
           BigNumber.from(10).pow(18)
         ),
