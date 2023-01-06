@@ -325,7 +325,7 @@ export const build = async ({
           );
 
           if (moduleConfig === undefined) {
-            return commandObj.error(
+            throw new Error(
               `Unreachable. Wasn't able to find module config for ${get}`
             );
           }

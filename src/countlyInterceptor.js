@@ -17,16 +17,40 @@ let hasSentCommandEvent = false;
 let hasSessionEnded = false;
 
 /**
+ * @type {boolean | undefined}
+ */
+let isErrorExpected;
+/**
+ * some of the errors (e.g. invalid user input) are expected and
+ * should not be reported to Countly as crashes
+ * @param {unknown} unknown
+ * @returns {unknown is Error}
+ */
+const getIsErrorExpected = (unknown) =>
+  typeof unknown === "object" && unknown !== null && "oclif" in unknown;
+
+const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
+
+/**
  * @param {unknown} error
  * @param {(unknown: unknown) => unknown} errorHandler
  * @returns
  */
 const createErrorPromise = (error, errorHandler) => {
+  isErrorExpected = getIsErrorExpected(error);
+
   if (!isCountlyInited()) {
     return errorHandler(error);
   }
 
-  Countly.log_error(error);
+  if (getIsErrorExpected(error)) {
+    Countly.add_event({
+      key: ERROR_HANDLED_BY_OCLIF_KEY,
+      segmentation: { error: error.message, stack: error.stack || "" },
+    });
+  } else {
+    Countly.log_error(error);
+  }
 
   return new Promise((resolve) => {
     resolveErrorPromise = () => resolve(errorHandler(error));
@@ -41,15 +65,22 @@ const sessionEndPromise = new Promise((resolve) => {
   resolveSessionEndPromise = resolve;
 });
 
+const EVENTS_URL_PART = "/i?events=";
+
 const interceptor = new ClientRequestInterceptor();
 interceptor.apply();
 interceptor.on("response", (_response, request) => {
-  if (request.url.includes("/i?crash=")) {
+  if (
+    isErrorExpected !== undefined &&
+    isErrorExpected
+      ? request.url.includes(EVENTS_URL_PART) &&
+        request.url.includes(ERROR_HANDLED_BY_OCLIF_KEY)
+      : request.url.includes("/i?crash=")
+  ) {
     hasCrashed = true;
     if (hasSentCommandEvent) {
       resolveErrorPromise?.();
     }
-    return;
   }
 
   if (request.url.includes("/i?end_session=")) {
@@ -57,11 +88,10 @@ interceptor.on("response", (_response, request) => {
     if (hasSentCommandEvent) {
       resolveSessionEndPromise?.();
     }
-    return;
   }
 
   if (
-    request.url.includes("/i?events=") &&
+    request.url.includes(EVENTS_URL_PART) &&
     request.url.includes("command%3A")
   ) {
     hasSentCommandEvent = true;
@@ -71,7 +101,6 @@ interceptor.on("response", (_response, request) => {
     if (hasSessionEnded) {
       resolveSessionEndPromise?.();
     }
-    return;
   }
 });
 
