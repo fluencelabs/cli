@@ -50,19 +50,18 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(Create));
+    const { flags } = await initCli(this, await this.parse(Create));
 
     const wallet = getWallet(flags.privKey);
     const factory = getFactoryContract(wallet);
-
     const tx = await factory.createDeal(
-      utils.keccak256(utils.toUtf8Bytes(args["subnetId"])), // TODO: base64?
+      utils.keccak256(utils.toUtf8Bytes(flags["subnetId"])), // TODO: base64?
       {
         paymentToken: (await getUSDContract(wallet)).address,
-        pricePerEpoch: BigNumber.from(args["pricePerEpoch"]).mul(
+        pricePerEpoch: BigNumber.from(flags["pricePerEpoch"]).mul(
           BigNumber.from(10).pow(18)
         ),
-        requiredStake: BigNumber.from(args["requiredStake"]).mul(
+        requiredStake: BigNumber.from(flags["requiredStake"]).mul(
           BigNumber.from(10).pow(18)
         ),
       }
@@ -74,6 +73,6 @@ export default class Create extends BaseCommand<typeof Create> {
     assert(log !== undefined);
     const dealAddress: unknown = factory.interface.parseLog(log).args["deal"];
     assert(typeof dealAddress === "string");
-    this.log(`Your deal contract: ${dealAddress}`);
+    this.log(`Deal contract created: ${dealAddress}`);
   }
 }
