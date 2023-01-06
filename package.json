@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@fluencelabs/aqua-api": "^0.9.1-373",
+    "@fluencelabs/deal-aurora": "^0.0.1",
     "@fluencelabs/fluence": "0.27.5",
     "@fluencelabs/fluence-network-environment": "^1.0.13",
     "@iarna/toml": "^2.2.5",
@@ -51,6 +52,7 @@
     "countly-sdk-nodejs": "^22.6.0",
     "decompress": "^4.2.1",
     "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
     "filenamify": "^4.3.0",
     "inquirer": "^8",
     "lodash": "^4.17.21",

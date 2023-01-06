@@ -110,6 +110,7 @@ Pull request and release process:
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
+* [`fluence deal create`](#fluence-deal-create)
 * [`fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-i-package-name--package-nameversion)
 * [`fluence dep i`](#fluence-dep-i)
 * [`fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-i-package-name--package-nameversion)
@@ -120,6 +121,8 @@ Pull request and release process:
 * [`fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-i-package-name--package-nameversion)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
 * [`fluence deploy`](#fluence-deploy)
+* [`fluence dev faucet flt VALUE`](#fluence-dev-faucet-flt-value)
+* [`fluence dev faucet usd VALUE`](#fluence-dev-faucet-usd-value)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
@@ -129,6 +132,7 @@ Pull request and release process:
 * [`fluence module new [PATH]`](#fluence-module-new-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence remove`](#fluence-remove)
+* [`fluence resource-owner pat create DEAL-ADDRESS`](#fluence-resource-owner-pat-create-deal-address)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
 * [`fluence service new [PATH]`](#fluence-service-new-path)
@@ -218,6 +222,25 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/build.ts)_
+
+## `fluence deal create`
+
+TODO: description
+
+```
+USAGE
+  $ fluence deal create -k <value> --subnetId <value> --pricePerEpoch <value> --requiredStake <value> [--no-input]
+
+FLAGS
+  -k, --privKey=<value>    (required) Your private key
+  --no-input               Don't interactively ask for any input from the user
+  --pricePerEpoch=<value>  (required) Price per epoch
+  --requiredStake=<value>  (required) Required stake for a peer
+  --subnetId=<value>       (required) Subnet ID for deal
+
+DESCRIPTION
+  TODO: description
+```
 
 ## `fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -495,6 +518,44 @@ EXAMPLES
 
 _See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/deploy.ts)_
 
+## `fluence dev faucet flt VALUE`
+
+TODO: description
+
+```
+USAGE
+  $ fluence dev faucet flt [VALUE] -k <value> [--no-input]
+
+ARGUMENTS
+  VALUE  Amount of FLT to receive
+
+FLAGS
+  -k, --privKey=<value>  (required) Your private key
+  --no-input             Don't interactively ask for any input from the user
+
+DESCRIPTION
+  TODO: description
+```
+
+## `fluence dev faucet usd VALUE`
+
+TODO: description
+
+```
+USAGE
+  $ fluence dev faucet usd [VALUE] -k <value> [--no-input]
+
+ARGUMENTS
+  VALUE  Amount of USD to receive
+
+FLAGS
+  -k, --privKey=<value>  (required) Your private key
+  --no-input             Don't interactively ask for any input from the user
+
+DESCRIPTION
+  TODO: description
+```
+
 ## `fluence help [COMMAND]`
 
 Display help for fluence.
@@ -692,6 +753,25 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/remove.ts)_
+
+## `fluence resource-owner pat create DEAL-ADDRESS`
+
+TODO: description
+
+```
+USAGE
+  $ fluence resource-owner pat create [DEAL-ADDRESS] -k <value> [--no-input]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+
+FLAGS
+  -k, --privKey=<value>  (required) Your private key
+  --no-input             Don't interactively ask for any input from the user
+
+DESCRIPTION
+  TODO: description
+```
 
 ## `fluence run`
 
