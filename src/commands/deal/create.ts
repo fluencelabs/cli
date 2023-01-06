@@ -54,6 +54,7 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const wallet = getWallet(flags.privKey);
     const factory = getFactoryContract(wallet);
+
     const tx = await factory.createDeal(
       utils.keccak256(utils.toUtf8Bytes(flags["subnetId"])), // TODO: base64?
       {
