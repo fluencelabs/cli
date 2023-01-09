@@ -111,6 +111,7 @@ Pull request and release process:
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence deal create`](#fluence-deal-create)
+* [`fluence deal faucet VALUE TOKEN`](#fluence-deal-faucet-value-token)
 * [`fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-i-package-name--package-nameversion)
 * [`fluence dep i`](#fluence-dep-i)
 * [`fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-i-package-name--package-nameversion)
@@ -121,8 +122,6 @@ Pull request and release process:
 * [`fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-i-package-name--package-nameversion)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
 * [`fluence deploy`](#fluence-deploy)
-* [`fluence dev faucet flt VALUE`](#fluence-dev-faucet-flt-value)
-* [`fluence dev faucet usd VALUE`](#fluence-dev-faucet-usd-value)
 * [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
@@ -205,7 +204,7 @@ _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomp
 
 ## `fluence build`
 
-Build all application services, described in fluence.yaml
+Build all application services, described in [33mfluence.yaml[39m
 
 ```
 USAGE
@@ -225,21 +224,44 @@ _See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/b
 
 ## `fluence deal create`
 
-TODO: description
+Create your deal with the specified parameters
 
 ```
 USAGE
-  $ fluence deal create -k <value> --subnetId <value> --pricePerEpoch <value> --requiredStake <value> [--no-input]
+  $ fluence deal create --subnetId <value> --pricePerEpoch <value> --requiredStake <value> [--no-input] [-k
+    <value>] [-n <value>]
 
 FLAGS
-  -k, --privKey=<value>    (required) Your private key
+  -k, --privKey=<value>    Private key with which transactions will be signed through cli
+  -n, --network=<value>    [default: local] The network in which the deal will be created (local, testnet, mainnet)
   --no-input               Don't interactively ask for any input from the user
-  --pricePerEpoch=<value>  (required) Price per epoch
-  --requiredStake=<value>  (required) Required stake for a peer
-  --subnetId=<value>       (required) Subnet ID for deal
+  --pricePerEpoch=<value>  (required) The price that you will pay to resource owners per epoch
+  --requiredStake=<value>  (required) Required collateral in FLT tokens to join a deal for resource owners.
+  --subnetId=<value>       (required) Subnet ID for a deal
 
 DESCRIPTION
-  TODO: description
+  Create your deal with the specified parameters
+```
+
+## `fluence deal faucet VALUE TOKEN`
+
+Dev faucet for receiving FLT and FakeUSD tokens
+
+```
+USAGE
+  $ fluence deal faucet [VALUE] [TOKEN] [--no-input] [-k <value>] [-n <value>]
+
+ARGUMENTS
+  VALUE  Amount of FLT to receive
+  TOKEN  FakeUSD or FLT
+
+FLAGS
+  -k, --privKey=<value>  Private key with which transactions will be signed through cli
+  -n, --network=<value>  [default: local] The network in which the deal will be created (local, testnet, mainnet)
+  --no-input             Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Dev faucet for receiving FLT and FakeUSD tokens
 ```
 
 ## `fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
@@ -273,7 +295,7 @@ EXAMPLES
 
 ## `fluence dep i`
 
-Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
 
 ```
 USAGE
@@ -386,7 +408,7 @@ EXAMPLES
 
 ## `fluence dependency i`
 
-Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
 
 ```
 USAGE
@@ -413,7 +435,7 @@ EXAMPLES
 
 ## `fluence dependency install`
 
-Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
 
 ```
 USAGE
@@ -496,7 +518,7 @@ EXAMPLES
 
 ## `fluence deploy`
 
-Deploy application, described in fluence.yaml
+Deploy application, described in [33mfluence.yaml[39m
 
 ```
 USAGE
@@ -517,44 +539,6 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.0.0/dist/commands/deploy.ts)_
-
-## `fluence dev faucet flt VALUE`
-
-TODO: description
-
-```
-USAGE
-  $ fluence dev faucet flt [VALUE] -k <value> [--no-input]
-
-ARGUMENTS
-  VALUE  Amount of FLT to receive
-
-FLAGS
-  -k, --privKey=<value>  (required) Your private key
-  --no-input             Don't interactively ask for any input from the user
-
-DESCRIPTION
-  TODO: description
-```
-
-## `fluence dev faucet usd VALUE`
-
-TODO: description
-
-```
-USAGE
-  $ fluence dev faucet usd [VALUE] -k <value> [--no-input]
-
-ARGUMENTS
-  VALUE  Amount of USD to receive
-
-FLAGS
-  -k, --privKey=<value>  (required) Your private key
-  --no-input             Don't interactively ask for any input from the user
-
-DESCRIPTION
-  TODO: description
-```
 
 ## `fluence help [COMMAND]`
 
@@ -668,7 +652,7 @@ EXAMPLES
 
 ## `fluence module add [PATH | URL]`
 
-Add module to service.yaml
+Add module to [33mservice.yaml[39m
 
 ```
 USAGE
@@ -712,7 +696,7 @@ EXAMPLES
 
 ## `fluence module remove [NAME | PATH | URL]`
 
-Remove module from service.yaml
+Remove module from [33mservice.yaml[39m
 
 ```
 USAGE
@@ -756,21 +740,22 @@ _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/
 
 ## `fluence resource-owner pat create DEAL-ADDRESS`
 
-TODO: description
+Create PAT (Peer auth token) in a deal for auth
 
 ```
 USAGE
-  $ fluence resource-owner pat create [DEAL-ADDRESS] -k <value> [--no-input]
+  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [-k <value>] [-n <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
 
 FLAGS
-  -k, --privKey=<value>  (required) Your private key
+  -k, --privKey=<value>  Private key with which transactions will be signed through cli
+  -n, --network=<value>  [default: local] The network in which the deal will be created (local, testnet, mainnet)
   --no-input             Don't interactively ask for any input from the user
 
 DESCRIPTION
-  TODO: description
+  Create PAT (Peer auth token) in a deal for auth
 ```
 
 ## `fluence run`
@@ -820,7 +805,7 @@ _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blo
 
 ## `fluence service add [PATH | URL]`
 
-Add service to fluence.yaml
+Add service to [33mfluence.yaml[39m
 
 ```
 USAGE
@@ -866,7 +851,7 @@ EXAMPLES
 
 ## `fluence service remove [NAME | PATH | URL]`
 
-Remove service from fluence.yaml
+Remove service from [33mfluence.yaml[39m
 
 ```
 USAGE
