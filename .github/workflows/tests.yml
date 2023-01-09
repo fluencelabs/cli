@@ -161,6 +161,10 @@ jobs:
           key: MARINE_RS_SDK_TEST_TEMPLATE_VERSION
           value: ${{ inputs.marine-rs-sdk-test-version }}
 
+      - name: debug
+        if: always()
+        run: cat src/lib/conts.ts
+
       - name: Run tests
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
