@@ -204,7 +204,7 @@ _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomp
 
 ## `fluence build`
 
-Build all application services, described in [33mfluence.yaml[39m
+Build all application services, described in fluence.yaml
 
 ```
 USAGE
@@ -229,11 +229,12 @@ Create your deal with the specified parameters
 ```
 USAGE
   $ fluence deal create --subnetId <value> --pricePerEpoch <value> --requiredStake <value> [--no-input] [-k
-    <value>] [-n <value>]
+    <value>] [--network <value>]
 
 FLAGS
   -k, --privKey=<value>    Private key with which transactions will be signed through cli
-  -n, --network=<value>    [default: local] The network in which the deal will be created (local, testnet, mainnet)
+  --network=<network>      [default: local] $The network in which the transactions used by the command will be carried
+                           out (local)
   --no-input               Don't interactively ask for any input from the user
   --pricePerEpoch=<value>  (required) The price that you will pay to resource owners per epoch
   --requiredStake=<value>  (required) Required collateral in FLT tokens to join a deal for resource owners.
@@ -249,7 +250,7 @@ Dev faucet for receiving FLT and FakeUSD tokens
 
 ```
 USAGE
-  $ fluence deal faucet [VALUE] [TOKEN] [--no-input] [-k <value>] [-n <value>]
+  $ fluence deal faucet [VALUE] [TOKEN] [--no-input] [-k <value>] [--network <value>]
 
 ARGUMENTS
   VALUE  Amount of FLT to receive
@@ -257,7 +258,8 @@ ARGUMENTS
 
 FLAGS
   -k, --privKey=<value>  Private key with which transactions will be signed through cli
-  -n, --network=<value>  [default: local] The network in which the deal will be created (local, testnet, mainnet)
+  --network=<network>    [default: local] $The network in which the transactions used by the command will be carried out
+                         (local)
   --no-input             Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -295,7 +297,7 @@ EXAMPLES
 
 ## `fluence dep i`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
@@ -408,7 +410,7 @@ EXAMPLES
 
 ## `fluence dependency i`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
@@ -435,7 +437,7 @@ EXAMPLES
 
 ## `fluence dependency install`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
@@ -518,7 +520,7 @@ EXAMPLES
 
 ## `fluence deploy`
 
-Deploy application, described in [33mfluence.yaml[39m
+Deploy application, described in fluence.yaml
 
 ```
 USAGE
@@ -652,7 +654,7 @@ EXAMPLES
 
 ## `fluence module add [PATH | URL]`
 
-Add module to [33mservice.yaml[39m
+Add module to service.yaml
 
 ```
 USAGE
@@ -696,7 +698,7 @@ EXAMPLES
 
 ## `fluence module remove [NAME | PATH | URL]`
 
-Remove module from [33mservice.yaml[39m
+Remove module from service.yaml
 
 ```
 USAGE
@@ -744,14 +746,15 @@ Create PAT (Peer auth token) in a deal for auth
 
 ```
 USAGE
-  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [-k <value>] [-n <value>]
+  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [-k <value>] [--network <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
 
 FLAGS
   -k, --privKey=<value>  Private key with which transactions will be signed through cli
-  -n, --network=<value>  [default: local] The network in which the deal will be created (local, testnet, mainnet)
+  --network=<network>    [default: local] $The network in which the transactions used by the command will be carried out
+                         (local)
   --no-input             Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -805,7 +808,7 @@ _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blo
 
 ## `fluence service add [PATH | URL]`
 
-Add service to [33mfluence.yaml[39m
+Add service to fluence.yaml
 
 ```
 USAGE
@@ -851,7 +854,7 @@ EXAMPLES
 
 ## `fluence service remove [NAME | PATH | URL]`
 
-Remove service from [33mfluence.yaml[39m
+Remove service from fluence.yaml
 
 ```
 USAGE

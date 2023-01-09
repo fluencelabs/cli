@@ -30,65 +30,108 @@ import {
   ERC20,
   ERC20__factory,
 } from "@fluencelabs/deal-aurora";
-import { BytesLike, ethers, providers } from "ethers";
-import WalletConnectProvider from "@walletconnect/web3-provider";
+import color from "@oclif/color";
+// eslint-disable-next-line node/no-missing-import
 import type { IQRCodeModal } from "@walletconnect/types";
-import { DEAL_CONFIG, ChainNetwork } from "./const";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+import { BytesLike, ethers, providers } from "ethers";
+
+import {
+  DEAL_CONFIG,
+  ChainNetwork,
+  CommandObj,
+  CHAIN_NETWORKS,
+  isChainNetwork,
+  NETWORK_FLAG_NAME,
+} from "./const";
+import { list } from "./prompt";
 
 class WalletConnectModal implements IQRCodeModal {
-  open(uri: string, _: any, __?: any): void {
+  open(uri: string): void {
     console.log(
+      // TODO: add actual url
       "You need to open the following URI in your wallet or on this website (https://todo)."
     );
+
     console.log(uri);
   }
-  close(): void {}
+  close(): void {
+    console.log();
+  }
 }
 
-const provider = new WalletConnectProvider({
-  rpc: {
-    31337: DEAL_CONFIG[ChainNetwork.Local]!.ethereumNodeUrl,
-  },
-  qrcode: true,
-  qrcodeModal: new WalletConnectModal(),
-});
+type EnsureChainNetworkArg = {
+  maybeChainNetwork: string;
+  commandObj: CommandObj;
+  isInteractive: boolean;
+};
+
+export const ensureChainNetwork = async ({
+  maybeChainNetwork,
+  commandObj,
+  isInteractive,
+}: EnsureChainNetworkArg): Promise<ChainNetwork> => {
+  if (isChainNetwork(maybeChainNetwork)) {
+    return maybeChainNetwork;
+  }
+
+  commandObj.warn(`Invalid chain network: ${maybeChainNetwork}`);
+
+  const chainNetwork = await list({
+    isInteractive,
+    message: "Select chain network",
+    options: [...CHAIN_NETWORKS],
+    oneChoiceMessage(chainNetwork) {
+      return `Do you want to use ${color.yellow(chainNetwork)} chain network?`;
+    },
+    onNoChoices() {
+      return commandObj.error("No chain network selected");
+    },
+    flagName: NETWORK_FLAG_NAME,
+  });
+
+  return chainNetwork;
+};
 
 export const getSigner = async (
   network: ChainNetwork,
   privKey: BytesLike | undefined
+): Promise<ethers.Signer> =>
+  privKey === undefined
+    ? getWalletConnectProvider(network)
+    : getWallet(privKey, network);
+
+const getWalletConnectProvider = async (
+  network: ChainNetwork
 ): Promise<ethers.Signer> => {
-  return privKey ? getWallet(privKey, network) : getWalletConnectProvider();
-};
+  const provider = new WalletConnectProvider({
+    rpc: {
+      31_337: DEAL_CONFIG[network].ethereumNodeUrl,
+    },
+    qrcode: true,
+    qrcodeModal: new WalletConnectModal(),
+  });
 
-const getWalletConnectProvider = async (): Promise<ethers.Signer> => {
   await provider.enable();
-
   return new providers.Web3Provider(provider).getSigner();
 };
 
-const getWallet = (
-  privKey: BytesLike,
-  network: ChainNetwork
-): ethers.Wallet => {
-  return new ethers.Wallet(
+const getWallet = (privKey: BytesLike, network: ChainNetwork): ethers.Wallet =>
+  new ethers.Wallet(
     privKey,
-    new providers.JsonRpcProvider(DEAL_CONFIG[network]!.ethereumNodeUrl)
+    new providers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl)
   );
-};
 
 export const getCoreContract = (
   signer: ethers.Signer,
   network: ChainNetwork
-): Core => Core__factory.connect(DEAL_CONFIG[network]!.coreAddress, signer);
+): Core => Core__factory.connect(DEAL_CONFIG[network].coreAddress, signer);
 
 export const getFactoryContract = (
   signer: ethers.Signer,
   network: ChainNetwork
 ): DealFactory =>
-  DealFactory__factory.connect(
-    DEAL_CONFIG[network]!.dealFactoryAddress,
-    signer
-  );
+  DealFactory__factory.connect(DEAL_CONFIG[network].dealFactoryAddress, signer);
 
 export const getAquaProxy = (
   address: string,
@@ -100,7 +143,7 @@ export const getDeveloperContract = (
   network: ChainNetwork
 ): DeveloperFaucet =>
   DeveloperFaucet__factory.connect(
-    DEAL_CONFIG[network]!.developerFaucetAddress,
+    DEAL_CONFIG[network].developerFaucetAddress,
     signer
   );
 

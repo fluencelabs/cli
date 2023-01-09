@@ -19,13 +19,14 @@ import assert from "node:assert";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../../baseCommand";
+import { NETWORK_FLAG } from "../../../lib/const";
 import { initCli } from "../../../lib/lifecyle";
 import {
+  ensureChainNetwork,
   getDealContract,
   getFLTContract,
   getSigner,
 } from "../../../lib/provider";
-import type { ChainNetwork } from "../../../lib/const";
 
 const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
 
@@ -39,13 +40,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
         "Private key with which transactions will be signed through cli",
       required: false,
     }),
-    network: Flags.string({
-      char: "n",
-      description:
-        "The network in which the deal will be created (local, testnet, mainnet)",
-      required: false,
-      default: "local",
-    }),
+    ...NETWORK_FLAG,
   };
 
   static override args = [
@@ -57,9 +52,16 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
   ];
 
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(CreatePAT));
+    const { args, flags, commandObj, isInteractive } = await initCli(
+      this,
+      await this.parse(CreatePAT)
+    );
 
-    const network = flags.network as ChainNetwork;
+    const network = await ensureChainNetwork({
+      commandObj,
+      isInteractive,
+      maybeChainNetwork: flags.network,
+    });
 
     const dealAddress: unknown = args[DEAL_ADDRESS_ARG];
     assert(typeof dealAddress === "string");

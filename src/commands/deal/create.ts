@@ -20,13 +20,14 @@ import { Flags } from "@oclif/core";
 import { BigNumber, utils } from "ethers";
 
 import { BaseCommand } from "../../baseCommand";
+import { NETWORK_FLAG } from "../../lib/const";
 import { initCli } from "../../lib/lifecyle";
 import {
   getFactoryContract,
   getUSDContract,
   getSigner,
+  ensureChainNetwork,
 } from "../../lib/provider";
-import type { ChainNetwork } from "../../lib/const";
 
 export default class Create extends BaseCommand<typeof Create> {
   static override description =
@@ -37,13 +38,6 @@ export default class Create extends BaseCommand<typeof Create> {
       description:
         "Private key with which transactions will be signed through cli",
       required: false,
-    }),
-    network: Flags.string({
-      char: "n",
-      description:
-        "The network in which the deal will be created (local, testnet, mainnet)",
-      required: false,
-      default: "local",
     }),
     subnetId: Flags.string({
       description: "Subnet ID for a deal",
@@ -58,12 +52,20 @@ export default class Create extends BaseCommand<typeof Create> {
         "Required collateral in FLT tokens to join a deal for resource owners.",
       required: true,
     }),
+    ...NETWORK_FLAG,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Create));
+    const { flags, commandObj, isInteractive } = await initCli(
+      this,
+      await this.parse(Create)
+    );
 
-    const network = flags.network as ChainNetwork;
+    const network = await ensureChainNetwork({
+      commandObj,
+      isInteractive,
+      maybeChainNetwork: flags.network,
+    });
 
     const signer = await getSigner(network, flags.privKey);
     const factory = getFactoryContract(signer, network);

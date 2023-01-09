@@ -36,11 +36,15 @@ export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const REQUIRED_RUST_TOOLCHAIN = "nightly-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
-export enum ChainNetwork {
-  Local = "local",
-  Testnet = "testnet",
-  Mainnet = "mainnet",
-}
+export const CHAIN_NETWORKS = [
+  "local",
+  //  "testnet",
+  //  "mainnet"
+] as const;
+
+export const isChainNetwork = (unknown: string): unknown is ChainNetwork =>
+  CHAIN_NETWORKS.some((n) => n === unknown);
+export type ChainNetwork = typeof CHAIN_NETWORKS[number];
 
 export type ChainConfig = {
   ethereumNodeUrl: string;
@@ -49,10 +53,8 @@ export type ChainConfig = {
   developerFaucetAddress: string;
 };
 
-export const DEAL_CONFIG: {
-  [network: string]: ChainConfig;
-} = {
-  [ChainNetwork.Local]: {
+export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
+  local: {
     ethereumNodeUrl: "http://127.0.0.1:8545/",
     coreAddress: "0x10537D7bD661C9c34F547b38EC662D6FD482Ae95",
     dealFactoryAddress: "0xfb6dAB6200b8958C2655C3747708F82243d3F32E",
@@ -153,6 +155,17 @@ export const TIMEOUT_FLAG = {
     helpValue: "<milliseconds>",
   }),
 } as const;
+
+export const NETWORK_FLAG_NAME = "network";
+export const NETWORK_FLAG = {
+  [NETWORK_FLAG_NAME]: Flags.string({
+    description: `$The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
+      ", "
+    )})`,
+    helpValue: "<network>",
+    default: "local",
+  }),
+};
 
 export const templates = ["minimal", "ts", "js"] as const;
 export type Template = typeof templates[number];

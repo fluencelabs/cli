@@ -20,9 +20,13 @@ import { Flags } from "@oclif/core";
 import { BigNumber, ContractReceipt } from "ethers";
 
 import { BaseCommand } from "../../baseCommand";
+import { NETWORK_FLAG } from "../../lib/const";
 import { initCli } from "../../lib/lifecyle";
-import { getDeveloperContract, getSigner } from "../../lib/provider";
-import type { ChainNetwork } from "../../lib/const";
+import {
+  ensureChainNetwork,
+  getDeveloperContract,
+  getSigner,
+} from "../../lib/provider";
 
 const VALUE_ARG = "VALUE";
 const TOKEN_ARG = "TOKEN";
@@ -37,13 +41,7 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
         "Private key with which transactions will be signed through cli",
       required: false,
     }),
-    network: Flags.string({
-      char: "n",
-      description:
-        "The network in which the deal will be created (local, testnet, mainnet)",
-      required: false,
-      default: "local",
-    }),
+    ...NETWORK_FLAG,
   };
 
   static override args = [
@@ -60,14 +58,22 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
   ];
 
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(Faucet));
+    const { args, flags, commandObj, isInteractive } = await initCli(
+      this,
+      await this.parse(Faucet)
+    );
+
     const value: unknown = args[VALUE_ARG];
     assert(typeof value === "string");
 
     const token: unknown = args[TOKEN_ARG];
     assert(typeof token === "string");
 
-    const network = flags.network as ChainNetwork;
+    const network = await ensureChainNetwork({
+      commandObj,
+      isInteractive,
+      maybeChainNetwork: flags.network,
+    });
 
     const signer = await getSigner(network, flags.privKey);
     const address = await signer.getAddress();
@@ -77,6 +83,7 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
     const v = BigNumber.from(value).mul(BigNumber.from(10).pow(18));
 
     let tx: ContractReceipt;
+
     switch (token) {
       case "FLT":
         tx = await (await dev.receiveFLT(address, v)).wait();
@@ -85,9 +92,9 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
         tx = await (await dev.receiveUSD(address, v)).wait();
         break;
       default:
-        this.log(`Unknown token: ${token}`);
+        return this.log(`Unknown token: ${token}`);
     }
 
-    this.log(`Tx hash: ${tx!.transactionHash}`);
+    this.log(`Tx hash: ${tx.transactionHash}`);
   }
 }
