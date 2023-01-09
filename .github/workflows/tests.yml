@@ -163,7 +163,7 @@ jobs:
 
       - name: debug
         if: always()
-        run: cat src/lib/conts.ts
+        run: cat src/lib/const.ts
 
       - name: Run tests
         env:
