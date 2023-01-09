@@ -67,6 +67,7 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const signer = await getSigner(network, flags.privKey);
     const factory = getFactoryContract(signer, network);
+
     const tx = await factory.createDeal(
       utils.keccak256(utils.toUtf8Bytes(flags["subnetId"])), // TODO: base64?
       {
