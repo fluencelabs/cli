@@ -201,7 +201,7 @@ _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomp
 
 ## `fluence build`
 
-Build all application services, described in [33mfluence.yaml[39m
+Build all application services, described in fluence.yaml
 
 ```
 USAGE
@@ -250,7 +250,7 @@ EXAMPLES
 
 ## `fluence dep i`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
@@ -363,7 +363,7 @@ EXAMPLES
 
 ## `fluence dependency i`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
@@ -390,7 +390,7 @@ EXAMPLES
 
 ## `fluence dependency install`
 
-Install all project dependencies (dependencies are cached inside [33m.fluence[39m directory of the current user)
+Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
 
 ```
 USAGE
@@ -473,7 +473,7 @@ EXAMPLES
 
 ## `fluence deploy`
 
-Deploy application, described in [33mfluence.yaml[39m
+Deploy application, described in fluence.yaml
 
 ```
 USAGE
@@ -607,7 +607,7 @@ EXAMPLES
 
 ## `fluence module add [PATH | URL]`
 
-Add module to [33mservice.yaml[39m
+Add module to service.yaml
 
 ```
 USAGE
@@ -651,7 +651,7 @@ EXAMPLES
 
 ## `fluence module remove [NAME | PATH | URL]`
 
-Remove module from [33mservice.yaml[39m
+Remove module from service.yaml
 
 ```
 USAGE
@@ -740,7 +740,7 @@ _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blo
 
 ## `fluence service add [PATH | URL]`
 
-Add service to [33mfluence.yaml[39m
+Add service to fluence.yaml
 
 ```
 USAGE
@@ -786,7 +786,7 @@ EXAMPLES
 
 ## `fluence service remove [NAME | PATH | URL]`
 
-Remove service from [33mfluence.yaml[39m
+Remove service from fluence.yaml
 
 ```
 USAGE
