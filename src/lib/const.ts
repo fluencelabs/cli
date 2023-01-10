@@ -56,9 +56,9 @@ export type ChainConfig = {
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   local: {
     ethereumNodeUrl: "http://127.0.0.1:8545/",
-    coreAddress: "0x10537D7bD661C9c34F547b38EC662D6FD482Ae95",
-    dealFactoryAddress: "0xfb6dAB6200b8958C2655C3747708F82243d3F32E",
-    developerFaucetAddress: "0x8D75F9F7f4F4C4eFAB9402261bC864f21DF0c649",
+    coreAddress: "0xf4e3Db4978DDb1c5f144d072729Ff8AfCb0a6040",
+    dealFactoryAddress: "0xA7489Ba54188533acFEe0a6161aE039111ce55aD",
+    developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
   },
 };
 
