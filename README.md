@@ -141,24 +141,25 @@ Compile aqua file or directory that contains your .aqua files
 
 ```
 USAGE
-  $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js] [--log-level <value>]
-    [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled] [-w] [--no-input]
+  $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js] [--log-level-compiler
+    <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled] [-w] [--no-input]
 
 FLAGS
-  -i, --input=<path>    Path to an aqua file or an input directory that contains your .aqua files
-  -o, --output=<path>   Path to the output directory. Will be created if it doesn't exists
-  -w, --watch           Watch aqua file or folder for changes and recompile
-  --air                 Generate .air file instead of .ts
-  --const=<NAME=value>  Set log level
-  --dry                 Checks if compilation is succeeded, without output
-  --import=<path>...    Path to a directory to import from. May be used several times
-  --js                  Generate .js file instead of .ts
-  --log-level=<level>   Set log level
-  --no-input            Don't interactively ask for any input from the user
-  --no-relay            Do not generate a pass through the relay node
-  --no-xor              Do not generate a wrapper that catches and displays errors
-  --scheduled           Generate air code for script storage. Without error handling wrappers and hops on relay. Will
-                        ignore other options
+  -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files
+  -o, --output=<path>           Path to the output directory. Will be created if it doesn't exists
+  -w, --watch                   Watch aqua file or folder for changes and recompile
+  --air                         Generate .air file instead of .ts
+  --const=<NAME=value>...       Constants to be passed to the compiler
+  --dry                         Checks if compilation is succeeded, without output
+  --import=<path>...            Path to a directory to import from. May be used several times
+  --js                          Generate .js file instead of .ts
+  --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
+                                warn, error, off
+  --no-input                    Don't interactively ask for any input from the user
+  --no-relay                    Do not generate a pass through the relay node
+  --no-xor                      Do not generate a wrapper that catches and displays errors
+  --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
+                                Will ignore other options
 
 DESCRIPTION
   Compile aqua file or directory that contains your .aqua files
@@ -224,7 +225,7 @@ Install cargo project dependencies (all dependencies are cached inside .fluence/
 
 ```
 USAGE
-  $ fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>]
+  $ fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -232,6 +233,7 @@ ARGUMENTS
                                        the package name. For example: marine@0.12.4
 
 FLAGS
+  --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
 
@@ -252,9 +254,10 @@ Install all project dependencies (dependencies are cached inside [33m.fluence[
 
 ```
 USAGE
-  $ fluence dep i [--recommended | --latest] [--no-input]
+  $ fluence dep i [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
+  --force        Force install even if the dependency/dependencies is/are already installed
   --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
                  dependencies from fluence.yaml
   --no-input     Don't interactively ask for any input from the user
@@ -278,7 +281,7 @@ Install npm project dependencies (all dependencies are cached inside .fluence/np
 
 ```
 USAGE
-  $ fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
+  $ fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -286,6 +289,7 @@ ARGUMENTS
                                        the package name. For example: @fluencelabs/aqua@0.7.5-342
 
 FLAGS
+  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -305,7 +309,7 @@ Install cargo project dependencies (all dependencies are cached inside .fluence/
 
 ```
 USAGE
-  $ fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>]
+  $ fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -313,6 +317,7 @@ ARGUMENTS
                                        the package name. For example: marine@0.12.4
 
 FLAGS
+  --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
 
@@ -333,7 +338,7 @@ Install cargo project dependencies (all dependencies are cached inside .fluence/
 
 ```
 USAGE
-  $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>]
+  $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -341,6 +346,7 @@ ARGUMENTS
                                        the package name. For example: marine@0.12.4
 
 FLAGS
+  --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
 
@@ -361,9 +367,10 @@ Install all project dependencies (dependencies are cached inside [33m.fluence[
 
 ```
 USAGE
-  $ fluence dependency i [--recommended | --latest] [--no-input]
+  $ fluence dependency i [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
+  --force        Force install even if the dependency/dependencies is/are already installed
   --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
                  dependencies from fluence.yaml
   --no-input     Don't interactively ask for any input from the user
@@ -387,9 +394,10 @@ Install all project dependencies (dependencies are cached inside [33m.fluence[
 
 ```
 USAGE
-  $ fluence dependency install [--recommended | --latest] [--no-input]
+  $ fluence dependency install [--no-input] [--recommended | --latest] [--force]
 
 FLAGS
+  --force        Force install even if the dependency/dependencies is/are already installed
   --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
                  dependencies from fluence.yaml
   --no-input     Don't interactively ask for any input from the user
@@ -413,7 +421,7 @@ Install npm project dependencies (all dependencies are cached inside .fluence/np
 
 ```
 USAGE
-  $ fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
+  $ fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -421,6 +429,7 @@ ARGUMENTS
                                        the package name. For example: @fluencelabs/aqua@0.7.5-342
 
 FLAGS
+  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -440,7 +449,7 @@ Install npm project dependencies (all dependencies are cached inside .fluence/np
 
 ```
 USAGE
-  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
+  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -448,6 +457,7 @@ ARGUMENTS
                                        the package name. For example: @fluencelabs/aqua@0.7.5-342
 
 FLAGS
+  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -467,7 +477,7 @@ Deploy application, described in [33mfluence.yaml[39m
 
 ```
 USAGE
-  $ fluence deploy [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--no-input]
+  $ fluence deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -511,7 +521,7 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [-t <value>] [--no-input]
+  $ fluence init [PATH] [--no-input] [-t <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -667,7 +677,7 @@ Remove previously deployed config
 
 ```
 USAGE
-  $ fluence remove [--relay <value>] [--timeout <value>] [--no-input]
+  $ fluence remove [--no-input] [--relay <value>] [--timeout <value>]
 
 FLAGS
   --no-input                Don't interactively ask for any input from the user
@@ -689,28 +699,35 @@ Run aqua script
 
 ```
 USAGE
-  $ fluence run [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>] [--plugin
-    <value>] [--const <value>] [--json-service <value>] [--on <value>] [-i <value>] [-f <value>] [--timeout <value>]
-    [--no-input] [-k <value>]
+  $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
+    [--log-level-compiler <value>] [--log-level-avm <value>] [--quiet] [--plugin <value>] [--const <value>]
+    [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout <value>] [-k
+    <value>]
 
 FLAGS
-  -f, --func=<function-call>  Function call
-  -i, --input=<path>          Path to an aqua file or to a directory that contains aqua files
-  -k, --key-pair-name=<name>  Key pair name
-  --const=<NAME = value>...   Constant that will be used in the aqua code that you run (example of aqua code: SOME_CONST
-                              ?= "default_value"). Constant name must be upper cased.
-  --data=<json>               JSON in { [argumentName]: argumentValue } format. You can call a function using these
-                              argument names
-  --data-path=<path>          Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
-                              using these argument names
-  --import=<path>...          Path to a directory to import from. May be used several times
-  --json-service=<path>...    Path to a file that contains a JSON formatted service
-  --no-input                  Don't interactively ask for any input from the user
-  --on=<peer_id>              PeerId of a peer where you want to run the function
-  --plugin=<path>             [experimental] Path to a directory with JS plugins (Read more:
-                              https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
-  --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    Timeout used for command execution
+  -f, --func=<function-call>    Function call
+  -i, --input=<path>            Path to an aqua file or to a directory that contains aqua files
+  -k, --key-pair-name=<name>    Key pair name
+  --const=<NAME = value>...     Constant that will be used in the aqua code that you run (example of aqua code:
+                                SOME_CONST ?= "default_value"). Constant name must be upper cased.
+  --data=<json>                 JSON in { [argumentName]: argumentValue } format. You can call a function using these
+                                argument names
+  --data-path=<path>            Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
+                                using these argument names
+  --import=<path>...            Path to a directory to import from. May be used several times
+  --json-service=<path>...      Path to a file that contains a JSON formatted service
+  --log-level-avm=<level>       Set log level for AquaVM. Must be one of: debug, info, warn, error, off, trace
+  --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
+                                warn, error, off
+  --no-input                    Don't interactively ask for any input from the user
+  --no-relay                    Do not generate a pass through the relay node
+  --no-xor                      Do not generate a wrapper that catches and displays errors
+  --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
+                                https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
+  --print-air                   Prints generated AIR code before function execution
+  --quiet                       Print only execution result. Overrides all --log-level-* flags
+  --relay=<multiaddr>           Relay node multiaddr
+  --timeout=<milliseconds>      Timeout used for command execution
 
 DESCRIPTION
   Run aqua script
