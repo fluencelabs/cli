@@ -165,10 +165,6 @@ jobs:
           value: ${{ inputs.marine-rs-sdk-test-version }}
           cargo: true
 
-      - name: debug
-        if: always()
-        run: cat src/lib/const.ts
-
       - name: Run tests
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
