@@ -139,6 +139,7 @@ jobs:
         with:
           key: MARINE_RECOMMENDED_VERSION
           value: ${{ inputs.marine-version }}
+          cargo: true
 
       - name: Set mrepl version
         if: inputs.mrepl-version != 'null'
@@ -146,6 +147,7 @@ jobs:
         with:
           key: MREPL_RECOMMENDED_VERSION
           value: ${{ inputs.mrepl-version }}
+          cargo: true
 
       - name: Set marine-rs-sdk version
         if: inputs.marine-rs-sdk-version != 'null'
@@ -153,6 +155,7 @@ jobs:
         with:
           key: MARINE_RS_SDK_TEMPLATE_VERSION
           value: ${{ inputs.marine-rs-sdk-version }}
+          cargo: true
 
       - name: Set marine-rs-sdk-test version
         if: inputs.marine-rs-sdk-test-version != 'null'
@@ -160,6 +163,7 @@ jobs:
         with:
           key: MARINE_RS_SDK_TEST_TEMPLATE_VERSION
           value: ${{ inputs.marine-rs-sdk-test-version }}
+          cargo: true
 
       - name: Run tests
         env:
