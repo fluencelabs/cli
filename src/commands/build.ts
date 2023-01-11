@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
-
 import { BaseCommand } from "../baseCommand";
 import { build } from "../lib/build";
 import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock";
@@ -25,9 +23,7 @@ import { initCli } from "../lib/lifecyle";
 import { initMarineCli } from "../lib/marineCli";
 
 export default class Build extends BaseCommand<typeof Build> {
-  static override description = `Build all application services, described in ${color.yellow(
-    FLUENCE_CONFIG_FILE_NAME
-  )}`;
+  static override description = `Build all application services, described in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   async run(): Promise<void> {
     const { isInteractive, commandObj, fluenceConfig } = await initCli(

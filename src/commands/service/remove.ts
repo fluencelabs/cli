@@ -26,16 +26,12 @@ import { input } from "../../lib/prompt";
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static override description = `Remove service from ${color.yellow(
-    FLUENCE_CONFIG_FILE_NAME
-  )}`;
+  static override description = `Remove service from ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override args = [
     {
       name: NAME_OR_PATH_OR_URL,
-      description: `Service name from ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )}, path to a service or url to .tar.gz archive`,
+      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
     },
   ];
   async run(): Promise<void> {
