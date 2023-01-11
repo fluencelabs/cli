@@ -101,7 +101,7 @@ const resolveServiceInfos = async ({
     fluenceConfig.services === undefined ||
     Object.keys(fluenceConfig.services).length === 0
   ) {
-    throw new Error(
+    return commandObj.error(
       `Use ${color.yellow(
         "fluence service add"
       )} command to add services to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`

@@ -22,13 +22,13 @@ const hook: Hook<"init"> = async function (): Promise<void> {
   const { version } = platform;
 
   if (version === undefined) {
-    throw new Error("Unknown platform");
+    return this.error("Unknown platform");
   }
 
   const majorVersion = Number(version.split(".")[0]);
 
   if (majorVersion < 16) {
-    throw new Error(
+    return this.error(
       `Fluence CLI requires node.js version >= "16.x"; Detected ${version}. Please update node.js to version 16 or higher.\nYou can use https://nvm.sh utility to update node.js version: "nvm install 17 && nvm use 17 && nvm alias default 17"`
     );
   }
