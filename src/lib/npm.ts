@@ -37,6 +37,7 @@ import {
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   handleInstallation,
+  handleFluenceConfig,
 } from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
 
@@ -133,7 +134,7 @@ export const ensureNpmDependency = async ({
 }: EnsureNpmDependencyArg): Promise<string> => {
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const versionToInstall = resolveVersionToInstall({
+  const maybeVersionToInstall = resolveVersionToInstall({
     name,
     maybeVersion,
     explicitInstallation,
@@ -143,7 +144,9 @@ export const ensureNpmDependency = async ({
   });
 
   const version = await getLatestVersionOfNPMDependency(
-    versionToInstall === undefined ? name : `${name}@${versionToInstall}`,
+    maybeVersionToInstall === undefined
+      ? name
+      : `${name}@${maybeVersionToInstall}`,
     commandObj
   );
 
@@ -175,14 +178,22 @@ export const ensureNpmDependency = async ({
       }),
   });
 
-  await handleLockConfig({
-    commandObj,
-    isFluenceProject: maybeFluenceConfig !== null,
-    maybeFluenceLockConfig,
-    name,
-    version,
-    packageManager: "npm",
-  });
+  if (maybeFluenceConfig !== null) {
+    await handleFluenceConfig({
+      fluenceConfig: maybeFluenceConfig,
+      name,
+      packageManager: "npm",
+      versionFromArgs: maybeVersion ?? version,
+    });
+
+    await handleLockConfig({
+      commandObj,
+      maybeFluenceLockConfig,
+      name,
+      version,
+      packageManager: "npm",
+    });
+  }
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 
@@ -212,7 +223,7 @@ export const installAllNPMDependenciesFromFluenceConfig = async ({
   const dependencyPaths = [];
 
   for (const [name, version] of Object.entries(
-    fluenceConfig.dependencies.npm
+    fluenceConfig?.dependencies?.npm ?? {}
   )) {
     assert(name !== undefined && version !== undefined);
 

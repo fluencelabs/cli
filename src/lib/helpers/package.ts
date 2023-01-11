@@ -39,8 +39,34 @@ import { replaceHomeDir } from "./replaceHomeDir";
 const packageManagers = ["npm", "cargo"] as const;
 type PackageManager = typeof packageManagers[number];
 
-type UpdateOrCreateLockConfigArg = {
-  isFluenceProject: boolean;
+type HandleFluenceConfigArgs = {
+  fluenceConfig: FluenceConfig;
+  name: string;
+  versionFromArgs: string;
+  packageManager: PackageManager;
+};
+
+export const handleFluenceConfig = async ({
+  fluenceConfig,
+  name,
+  versionFromArgs,
+  packageManager,
+}: HandleFluenceConfigArgs): Promise<void> => {
+  if (fluenceConfig.dependencies === undefined) {
+    fluenceConfig.dependencies = {};
+  }
+
+  if (fluenceConfig.dependencies[packageManager] === undefined) {
+    fluenceConfig.dependencies[packageManager] = {};
+  }
+
+  // Disabled because we made sure it's not undefined above
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  fluenceConfig.dependencies[packageManager]![name] = versionFromArgs;
+  await fluenceConfig.$commit();
+};
+
+type HandleLockConfigArgs = {
   maybeFluenceLockConfig: FluenceLockConfig | null;
   name: string;
   version: string;
@@ -50,25 +76,12 @@ type UpdateOrCreateLockConfigArg = {
 
 export const handleLockConfig = async ({
   maybeFluenceLockConfig,
-  isFluenceProject,
   name,
   version,
   commandObj,
   packageManager,
-}: UpdateOrCreateLockConfigArg): Promise<void> => {
-  if (maybeFluenceLockConfig !== null) {
-    if (maybeFluenceLockConfig[packageManager] === undefined) {
-      maybeFluenceLockConfig[packageManager] = {};
-    }
-
-    // Disabled because we made sure it's not undefined above
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    maybeFluenceLockConfig[packageManager]![name] = version;
-    await maybeFluenceLockConfig.$commit();
-    return;
-  }
-
-  if (isFluenceProject) {
+}: HandleLockConfigArgs): Promise<void> => {
+  if (maybeFluenceLockConfig === null) {
     await initNewReadonlyFluenceLockConfig(
       {
         ...defaultFluenceLockConfig,
@@ -78,7 +91,20 @@ export const handleLockConfig = async ({
       },
       commandObj
     );
+
+    return;
   }
+
+  const fluenceLockConfig = maybeFluenceLockConfig;
+
+  if (fluenceLockConfig[packageManager] === undefined) {
+    fluenceLockConfig[packageManager] = {};
+  }
+
+  // Disabled because we made sure it's not undefined above
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  fluenceLockConfig[packageManager]![name] = version;
+  await fluenceLockConfig.$commit();
 };
 
 const recommendedDependenciesMap: Record<

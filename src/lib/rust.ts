@@ -34,6 +34,7 @@ import {
 import { addCountlyLog } from "./countly";
 import { execPromise } from "./execPromise";
 import {
+  handleFluenceConfig,
   handleInstallation,
   handleLockConfig,
   resolveDependencyPathAndTmpPath,
@@ -288,14 +289,22 @@ export const ensureCargoDependency = async ({
       }),
   });
 
-  await handleLockConfig({
-    commandObj,
-    isFluenceProject: maybeFluenceConfig !== null,
-    maybeFluenceLockConfig,
-    name,
-    packageManager: "cargo",
-    version,
-  });
+  if (maybeFluenceConfig !== null) {
+    await handleFluenceConfig({
+      fluenceConfig: maybeFluenceConfig,
+      name,
+      packageManager: "npm",
+      versionFromArgs: maybeVersion ?? version,
+    });
+
+    await handleLockConfig({
+      commandObj,
+      maybeFluenceLockConfig,
+      name,
+      version,
+      packageManager: "npm",
+    });
+  }
 
   addCountlyLog(`Using ${name}@${version} cargo dependency`);
 
@@ -318,7 +327,7 @@ export const installAllCargoDependenciesFromFluenceConfig = async ({
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
-    fluenceConfig.dependencies.cargo
+    fluenceConfig?.dependencies?.cargo ?? {}
   )) {
     assert(name !== undefined && version !== undefined);
 
