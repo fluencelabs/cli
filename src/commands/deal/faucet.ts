@@ -83,7 +83,6 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
     const v = BigNumber.from(value).mul(BigNumber.from(10).pow(18));
 
     let tx: ContractReceipt;
-
     switch (token) {
       case "FLT":
         tx = await (await dev.receiveFLT(address, v)).wait();

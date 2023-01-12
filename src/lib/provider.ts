@@ -43,6 +43,7 @@ import {
   CHAIN_NETWORKS,
   isChainNetwork,
   NETWORK_FLAG_NAME,
+  CLI_CONNECTOR_URL,
 } from "./const";
 import { list } from "./prompt";
 
@@ -50,10 +51,15 @@ class WalletConnectModal implements IQRCodeModal {
   open(uri: string): void {
     console.log(
       // TODO: add actual url
-      "You need to open the following URI in your wallet or on this website (https://todo)."
+      "Please, open this url or write connection string"
     );
 
-    console.log(uri);
+    const wc = uri.split(":")[1];
+    const bridge = uri.split("?bridge=")[1];
+    const key = uri.split("&key=")[1];
+    console.log(`${CLI_CONNECTOR_URL}?wc=${wc}&bridge=${bridge}&key=${key}`);
+
+    console.log(`\nConnection string:${uri}`);
   }
   close(): void {
     console.log();
@@ -106,8 +112,10 @@ const getWalletConnectProvider = async (
 ): Promise<ethers.Signer> => {
   const provider = new WalletConnectProvider({
     rpc: {
-      31_337: DEAL_CONFIG[network].ethereumNodeUrl,
+      31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
+      1_313_161_555: DEAL_CONFIG["testnet"].ethereumNodeUrl,
     },
+    chainId: DEAL_CONFIG[network].chainId,
     qrcode: true,
     qrcodeModal: new WalletConnectModal(),
   });

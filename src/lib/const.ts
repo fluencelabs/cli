@@ -38,7 +38,7 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const CHAIN_NETWORKS = [
   "local",
-  //  "testnet",
+  "testnet",
   //  "mainnet"
 ] as const;
 
@@ -51,14 +51,24 @@ export type ChainConfig = {
   coreAddress: string;
   dealFactoryAddress: string;
   developerFaucetAddress: string;
+  chainId: number;
 };
 
+export const CLI_CONNECTOR_URL = "http://localhost:3000";
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   local: {
-    ethereumNodeUrl: "http://127.0.0.1:8545/",
+    ethereumNodeUrl: "http://127.0.0.1:8545",
     coreAddress: "0xf4e3Db4978DDb1c5f144d072729Ff8AfCb0a6040",
     dealFactoryAddress: "0xA7489Ba54188533acFEe0a6161aE039111ce55aD",
     developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
+    chainId: 31_337,
+  },
+  testnet: {
+    ethereumNodeUrl: "https://testnet.aurora.dev",
+    coreAddress: "0x5645d336434d65Bb939a9F787C64798C419eA921",
+    dealFactoryAddress: "0x966C62Fe1695efb869B0493C0bd3820b3A1FAa7a",
+    developerFaucetAddress: "0x2568f501205cF16aAF6E8C6557Db5a3b3cb6F937",
+    chainId: 1_313_161_555,
   },
 };
 
