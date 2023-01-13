@@ -22,6 +22,8 @@ import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajv";
 import {
+  AQUA_LIB_NPM_DEPENDENCY,
+  AQUA_LIB_RECOMMENDED_VERSION,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MAIN_AQUA_FILE_CONTENT,
@@ -345,6 +347,11 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
   return {
     version: 2,
     [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
+    dependencies: {
+      npm: {
+        [AQUA_LIB_NPM_DEPENDENCY]: AQUA_LIB_RECOMMENDED_VERSION,
+      },
+    },
   } as const;
 };
 

@@ -293,7 +293,7 @@ export const ensureCargoDependency = async ({
     await handleFluenceConfig({
       fluenceConfig: maybeFluenceConfig,
       name,
-      packageManager: "npm",
+      packageManager: "cargo",
       versionFromArgs: maybeVersion ?? version,
     });
 
@@ -302,7 +302,7 @@ export const ensureCargoDependency = async ({
       maybeFluenceLockConfig,
       name,
       version,
-      packageManager: "npm",
+      packageManager: "cargo",
     });
   }
 

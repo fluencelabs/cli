@@ -44,7 +44,7 @@ import {
   installAllCargoDependenciesFromFluenceConfig,
 } from "../../lib/rust";
 
-const REQUIRED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY} and ${MREPL_CARGO_DEPENDENCY}`;
+const RECOMMENDED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY} and ${MREPL_CARGO_DEPENDENCY}`;
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:i", "dep:i"];
@@ -52,11 +52,11 @@ export default class Install extends BaseCommand<typeof Install> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     recommended: Flags.boolean({
-      description: `Set latest versions of ${REQUIRED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
+      description: `Set latest versions of ${RECOMMENDED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
       exclusive: ["latest"],
     }),
     latest: Flags.boolean({
-      description: `Set recommended versions of ${REQUIRED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
+      description: `Set recommended versions of ${RECOMMENDED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
       exclusive: ["recommended"],
     }),
     force: Flags.boolean({

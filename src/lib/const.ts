@@ -24,6 +24,7 @@ import { local } from "./localNodes";
 import { FLUENCE_ENV } from "./setupEnvironment";
 
 export const AQUA_RECOMMENDED_VERSION = "0.8.0-368";
+export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.5";
 export const MREPL_RECOMMENDED_VERSION = "0.18.8";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
@@ -222,7 +223,7 @@ export const MAIN_AQUA_FILE_ADD_ONE_COMMENT = aquaComment(
 
 export const MAIN_AQUA_FILE_CONTENT = `aqua Main
 
-import "@fluencelabs/aqua-lib/builtin.aqua"
+import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 
 ${MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT}
 

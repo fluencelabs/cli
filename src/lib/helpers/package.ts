@@ -140,18 +140,18 @@ export const resolveVersionToInstall = ({
     return undefined;
   }
 
-  const versionFromLockConfig =
+  const maybeVersionFromLockConfig =
     maybeFluenceLockConfig?.[packageManager]?.[name];
 
-  if (versionFromLockConfig !== undefined) {
-    return versionFromLockConfig;
+  if (typeof maybeVersionFromLockConfig === "string") {
+    return maybeVersionFromLockConfig;
   }
 
-  const versionFromFluenceConfig =
+  const maybeVersionFromFluenceConfig =
     maybeFluenceConfig?.dependencies?.[packageManager]?.[name];
 
-  if (versionFromFluenceConfig !== undefined) {
-    return versionFromFluenceConfig;
+  if (typeof maybeVersionFromFluenceConfig === "string") {
+    return maybeVersionFromFluenceConfig;
   }
 
   return recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
