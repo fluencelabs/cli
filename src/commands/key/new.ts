@@ -28,12 +28,9 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
+import { generateKeyPair } from "../../lib/helpers/generateKeyPair";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
-import {
-  getProjectKeyPair,
-  getUserKeyPair,
-  generateKeyPair,
-} from "../../lib/keypairs";
+import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
 import { initCli } from "../../lib/lifecyle";
 import { confirm, input } from "../../lib/prompt";
 

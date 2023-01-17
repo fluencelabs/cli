@@ -53,13 +53,11 @@ import {
   validateAquaName,
 } from "../lib/helpers/downloadFile";
 import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
-import {
-  generateKeyPair,
-  getProjectKeyPair,
-  getUserKeyPair,
-} from "../lib/keypairs";
+import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs";
 import type { MarineCLI } from "../lib/marineCli";
 import { confirm } from "../lib/prompt";
+
+import { generateKeyPair } from "./helpers/generateKeyPair";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;

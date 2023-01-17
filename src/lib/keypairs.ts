@@ -16,7 +16,6 @@
 
 import assert from "node:assert";
 
-import { KeyPair } from "@fluencelabs/fluence";
 import color from "@oclif/color";
 import { Separator } from "inquirer";
 
@@ -153,15 +152,3 @@ export const getExistingKeyPairFromFlags = async (
   isInteractive: boolean
 ): Promise<ConfigKeyPair | Error> =>
   getExistingKeyPair({ commandObj, keyPairName, isInteractive });
-
-export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
-  const keyPair = await KeyPair.randomEd25519();
-  return {
-    peerId: keyPair.Libp2pPeerId.toB58String(),
-    secretKey: Buffer.from(keyPair.toEd25519PrivateKey()).toString("base64"),
-    publicKey: Buffer.from(keyPair.Libp2pPeerId.pubKey.bytes).toString(
-      "base64"
-    ),
-    name,
-  };
-};

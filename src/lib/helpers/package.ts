@@ -24,15 +24,17 @@ import {
   FluenceLockConfig,
   initNewReadonlyFluenceLockConfig,
 } from "../configs/project/fluenceLock";
-import type { CommandObj } from "../const";
-import { fluenceNPMDependencies } from "../npm";
+import {
+  CommandObj,
+  fluenceCargoDependencies,
+  fluenceNPMDependencies,
+} from "../const";
 import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceNpmDir,
   ensureUserFluenceTmpCargoDir,
   ensureUserFluenceTmpNpmDir,
 } from "../paths";
-import { fluenceCargoDependencies } from "../rust";
 
 import { replaceHomeDir } from "./replaceHomeDir";
 
@@ -140,8 +142,12 @@ export const resolveVersionToInstall = ({
     return undefined;
   }
 
+  console.log("1111111111111111111");
+
   const maybeVersionFromLockConfig =
     maybeFluenceLockConfig?.[packageManager]?.[name];
+
+  console.log("2222222222222222222");
 
   if (typeof maybeVersionFromLockConfig === "string") {
     return maybeVersionFromLockConfig;
@@ -150,11 +156,20 @@ export const resolveVersionToInstall = ({
   const maybeVersionFromFluenceConfig =
     maybeFluenceConfig?.dependencies?.[packageManager]?.[name];
 
+  console.log("3333333333333333333");
+
   if (typeof maybeVersionFromFluenceConfig === "string") {
     return maybeVersionFromFluenceConfig;
   }
 
-  return recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
+  console.log(packageManager, name, recommendedDependenciesMap);
+
+  const res =
+    recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
+
+  console.log("4444444444444444444");
+
+  return res;
 };
 
 const dependenciesPathsGettersMap: Record<
