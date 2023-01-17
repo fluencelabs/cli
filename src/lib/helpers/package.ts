@@ -142,12 +142,8 @@ export const resolveVersionToInstall = ({
     return undefined;
   }
 
-  console.log("1111111111111111111");
-
   const maybeVersionFromLockConfig =
     maybeFluenceLockConfig?.[packageManager]?.[name];
-
-  console.log("2222222222222222222");
 
   if (typeof maybeVersionFromLockConfig === "string") {
     return maybeVersionFromLockConfig;
@@ -156,18 +152,12 @@ export const resolveVersionToInstall = ({
   const maybeVersionFromFluenceConfig =
     maybeFluenceConfig?.dependencies?.[packageManager]?.[name];
 
-  console.log("3333333333333333333");
-
   if (typeof maybeVersionFromFluenceConfig === "string") {
     return maybeVersionFromFluenceConfig;
   }
 
-  console.log(packageManager, name, recommendedDependenciesMap);
-
   const res =
     recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
-
-  console.log("4444444444444444444");
 
   return res;
 };
