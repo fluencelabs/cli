@@ -23,13 +23,14 @@ import { js, jsFile } from "./helpers/jsTemplateLitteral";
 import { local } from "./localNodes";
 import { FLUENCE_ENV } from "./setupEnvironment";
 
-export const AQUA_RECOMMENDED_VERSION = "0.8.0-368";
+export const AQUA_RECOMMENDED_VERSION =
+  "=0.0.1-renovate-fluencelabs-fluence-0-x-871e3f3-136-1.0";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.5";
 export const MREPL_RECOMMENDED_VERSION = "0.18.8";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
-export const FLUENCE_JS_RECOMMENDED_VERSION = "0.27.4";
+export const FLUENCE_JS_RECOMMENDED_VERSION = "0.28.0";
 export const FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
