@@ -146,11 +146,30 @@ export type Choices<T> = [T] extends [string]
   : Array<{ value: T; name: string } | SeparatorObj>;
 
 type ListOptions<T, U> = DistinctQuestion & {
+  /**
+   * Choices to choose from
+   * can be either an array of strings or an array of objects with `value` and `name` properties
+   */
   options: Choices<T>;
+  /**
+   * Message to print to when there are multiple choices
+   */
   message: string;
+  /**
+   * Runs when there is only one choice
+   * @param {string} choice - the only choice
+   * @returns a message to print to the user when there is only one choice
+   */
   oneChoiceMessage: (choice: string) => string;
+  /**
+   * Runs when there are no choices and if there was one choice and user refused to use it
+   * @returns value to return if there are no choices
+   */
   onNoChoices: () => U;
   isInteractive: boolean;
+  /**
+   * Flag name to use if user can't be prompted because he uses cli in non-interactive mode
+   */
   flagName?: string | undefined;
 };
 
