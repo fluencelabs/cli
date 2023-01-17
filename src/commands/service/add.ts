@@ -48,9 +48,7 @@ import { input } from "../../lib/prompt";
 const PATH_OR_URL = "PATH | URL";
 
 export default class Add extends BaseCommand<typeof Add> {
-  static override description = `Add service to ${color.yellow(
-    FLUENCE_CONFIG_FILE_NAME
-  )}`;
+  static override description = `Add service to ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     [NAME_FLAG_NAME]: Flags.string({

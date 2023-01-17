@@ -38,9 +38,7 @@ import { hasKey } from "../../lib/typeHelpers";
 const PATH_OR_URL = "PATH | URL";
 
 export default class Add extends BaseCommand<typeof Add> {
-  static override description = `Add module to ${color.yellow(
-    SERVICE_CONFIG_FILE_NAME
-  )}`;
+  static override description = `Add module to ${SERVICE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     [NAME_FLAG_NAME]: Flags.string({
@@ -48,9 +46,7 @@ export default class Add extends BaseCommand<typeof Add> {
       helpValue: "<name>",
     }),
     service: Flags.directory({
-      description: `Service name from ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )} or path to the service directory`,
+      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME} or path to the service directory`,
       helpValue: "<name | path>",
     }),
   };

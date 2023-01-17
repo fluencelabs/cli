@@ -23,18 +23,56 @@ import { js, jsFile } from "./helpers/jsTemplateLitteral";
 import { local } from "./localNodes";
 import { FLUENCE_ENV } from "./setupEnvironment";
 
-export const AQUA_RECOMMENDED_VERSION = "0.8.0-368";
+export const AQUA_RECOMMENDED_VERSION =
+  "=0.0.1-renovate-fluencelabs-fluence-0-x-871e3f3-136-1.0";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.5";
 export const MREPL_RECOMMENDED_VERSION = "0.18.8";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
-export const FLUENCE_JS_RECOMMENDED_VERSION = "0.27.4";
+export const FLUENCE_JS_RECOMMENDED_VERSION = "0.28.0";
 export const FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const REQUIRED_RUST_TOOLCHAIN = "nightly-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
+
+export const CHAIN_NETWORKS = [
+  "local",
+  "testnet",
+  //  "mainnet"
+] as const;
+
+export const isChainNetwork = (unknown: unknown): unknown is ChainNetwork =>
+  CHAIN_NETWORKS.some((n) => n === unknown);
+export type ChainNetwork = typeof CHAIN_NETWORKS[number];
+
+export type ChainConfig = {
+  ethereumNodeUrl: string;
+  coreAddress: string;
+  dealFactoryAddress: string;
+  developerFaucetAddress: string;
+  chainId: number;
+};
+
+// TODO DXJ-234: add actual url
+export const CLI_CONNECTOR_URL = "http://localhost:3000";
+export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
+  local: {
+    ethereumNodeUrl: "http://127.0.0.1:8545",
+    coreAddress: "0xf4e3Db4978DDb1c5f144d072729Ff8AfCb0a6040",
+    dealFactoryAddress: "0xA7489Ba54188533acFEe0a6161aE039111ce55aD",
+    developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
+    chainId: 31_337,
+  },
+  testnet: {
+    ethereumNodeUrl: "https://testnet.aurora.dev",
+    coreAddress: "0x5645d336434d65Bb939a9F787C64798C419eA921",
+    dealFactoryAddress: "0x966C62Fe1695efb869B0493C0bd3820b3A1FAa7a",
+    developerFaucetAddress: "0x2568f501205cF16aAF6E8C6557Db5a3b3cb6F937",
+    chainId: 1_313_161_555,
+  },
+};
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
@@ -129,6 +167,23 @@ export const TIMEOUT_FLAG = {
     helpValue: "<milliseconds>",
   }),
 } as const;
+
+export const NETWORK_FLAG_NAME = "network";
+export const NETWORK_FLAG = {
+  [NETWORK_FLAG_NAME]: Flags.string({
+    description: `$The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
+      ", "
+    )})`,
+    helpValue: "<network>",
+    default: "local",
+  }),
+};
+
+export const TOKENS = ["FakeUSD", "FLT"] as const;
+export const TOKENS_STRING = TOKENS.join(", ");
+export type Token = typeof TOKENS[number];
+export const isToken = (unknown: unknown): unknown is Token =>
+  TOKENS.some((val): boolean => unknown === val);
 
 export const templates = ["minimal", "ts", "js"] as const;
 export type Template = typeof templates[number];

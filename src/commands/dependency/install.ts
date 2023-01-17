@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
@@ -47,9 +46,7 @@ const REQUIRED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:i", "dep:i"];
-  static override description = `Install all project dependencies (dependencies are cached inside ${color.yellow(
-    FLUENCE_DIR_NAME
-  )} directory of the current user)`;
+  static override description = `Install all project dependencies (dependencies are cached inside ${FLUENCE_DIR_NAME} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     recommended: Flags.boolean({

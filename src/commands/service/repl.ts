@@ -69,9 +69,7 @@ export default class REPL extends Command {
   static override args = [
     {
       name: NAME_OR_PATH_OR_URL,
-      description: `Service name from ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )}, path to a service or url to .tar.gz archive`,
+      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
     },
   ];
   async run(): Promise<void> {

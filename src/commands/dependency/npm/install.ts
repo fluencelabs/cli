@@ -17,7 +17,6 @@
 import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../../baseCommand";
@@ -54,9 +53,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override args = [
     {
       name: PACKAGE_NAME_AND_VERSION_ARG_NAME,
-      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: ${color.yellow(
-        "@fluencelabs/aqua@0.7.5-342"
-      )}`,
+      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: "@fluencelabs/aqua-lib@0.6.0"`,
     },
   ];
   async run(): Promise<void> {

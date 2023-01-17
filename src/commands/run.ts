@@ -296,7 +296,7 @@ export default class Run extends BaseCommand<typeof Run> {
       ? aquaRun(runArgs)
       : fluenceRun(runArgs));
 
-    const stringResult = String(result);
+    const stringResult = JSON.stringify(result);
 
     if (flags.quiet) {
       console.log(stringResult);
@@ -633,7 +633,7 @@ const fluenceRun = async ({
   ]);
 
   if (errors.length > 0) {
-    throw new Error(errors.join("\n"));
+    commandObj.error(errors.join("\n"));
   }
 
   const { funcDef, script } = functionCall;
@@ -651,6 +651,5 @@ const fluenceRun = async ({
   );
 
   await fluencePeer.stop();
-
   return result;
 };

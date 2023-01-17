@@ -70,9 +70,7 @@ import { removeApp } from "../lib/removeApp";
 import { hasKey } from "../lib/typeHelpers";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy application, described in ${color.yellow(
-    FLUENCE_CONFIG_FILE_NAME
-  )}`;
+  static override description = `Deploy application, described in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     relay: Flags.string({
