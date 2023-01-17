@@ -127,8 +127,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
             onNoChoices: (): never => {
-              throw new Error(
-                `Unreachable. There are no key-pairs to set as default for user's secrets`
+              this.error(
+                "There are no key-pairs to set as default for user's secrets"
               );
             },
             options: userSecretsConfig.keyPairs.map(
@@ -166,8 +166,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
             onNoChoices: (): never => {
-              throw new Error(
-                `Unreachable. There are no key-pairs to set as default for project's secrets`
+              this.error(
+                "There are no key-pairs to set as default for project's secrets"
               );
             },
             options: projectSecretsConfig.keyPairs.map(
