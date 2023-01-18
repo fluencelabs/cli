@@ -104,6 +104,9 @@ jobs:
           compose-file: ".github/e2e/docker-compose.yml"
           down-flags: "--volumes"
 
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
