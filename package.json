@@ -34,7 +34,7 @@
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f"
   },
   "dependencies": {
-    "@fluencelabs/aqua-api": "=v0.0.4-renovate-fluencelabs-fluence-0-x-871e3f3-136-1.0",
+    "@fluencelabs/aqua-api": "=0.9.2",
     "@fluencelabs/deal-aurora": "^0.0.1",
     "@fluencelabs/fluence": "0.28.0",
     "@fluencelabs/fluence-network-environment": "^1.0.13",
