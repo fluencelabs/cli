@@ -23,8 +23,7 @@ import { js, jsFile } from "./helpers/jsTemplateLitteral";
 import { local } from "./localNodes";
 import { FLUENCE_ENV } from "./setupEnvironment";
 
-export const AQUA_RECOMMENDED_VERSION =
-  "=0.0.1-renovate-fluencelabs-fluence-0-x-871e3f3-136-1.0";
+export const AQUA_RECOMMENDED_VERSION = "0.9.2";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.5";
 export const MREPL_RECOMMENDED_VERSION = "0.18.8";
@@ -34,7 +33,7 @@ export const FLUENCE_JS_RECOMMENDED_VERSION = "0.28.0";
 export const FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
-export const REQUIRED_RUST_TOOLCHAIN = "nightly-x86_64";
+export const REQUIRED_RUST_TOOLCHAIN = "nightly-2022-09-15-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const CHAIN_NETWORKS = [
