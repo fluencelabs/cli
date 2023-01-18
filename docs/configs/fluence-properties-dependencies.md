@@ -6,8 +6,8 @@
 
 | Property        | Type     | Required | Nullable       | Defined by                                                                                                                                                            |
 | :-------------- | :------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [npm](#npm)     | `object` | Required | cannot be null | [fluence.yaml](fluence-properties-dependencies-properties-npm-dependencies.md "https://fluence.dev/schemas/fluence.yaml#/properties/dependencies/properties/npm")     |
-| [cargo](#cargo) | `object` | Required | cannot be null | [fluence.yaml](fluence-properties-dependencies-properties-cargo-dependencies.md "https://fluence.dev/schemas/fluence.yaml#/properties/dependencies/properties/cargo") |
+| [npm](#npm)     | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-dependencies-properties-npm-dependencies.md "https://fluence.dev/schemas/fluence.yaml#/properties/dependencies/properties/npm")     |
+| [cargo](#cargo) | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-dependencies-properties-cargo-dependencies.md "https://fluence.dev/schemas/fluence.yaml#/properties/dependencies/properties/cargo") |
 
 ## npm
 
@@ -15,7 +15,7 @@ A map of npm dependency versions. CLI ensures dependencies are installed each ti
 
 `npm`
 
-*   is required
+*   is optional
 
 *   Type: `object` ([npm dependencies](fluence-properties-dependencies-properties-npm-dependencies.md))
 
@@ -33,7 +33,7 @@ A map of cargo dependency versions. CLI ensures dependencies are installed each 
 
 `cargo`
 
-*   is required
+*   is optional
 
 *   Type: `object` ([Cargo dependencies](fluence-properties-dependencies-properties-cargo-dependencies.md))
 

@@ -55,11 +55,11 @@ export async function initCountly({
         userAgent: commandObj.config.userAgent,
         platform: commandObj.config.platform,
         ...dependenciesToSegmentation(
-          maybeFluenceConfig?.dependencies.npm,
+          maybeFluenceConfig?.dependencies?.npm,
           "npm"
         ),
         ...dependenciesToSegmentation(
-          maybeFluenceConfig?.dependencies.cargo,
+          maybeFluenceConfig?.dependencies?.cargo,
           "cargo"
         ),
       },

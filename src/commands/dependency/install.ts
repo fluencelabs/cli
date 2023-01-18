@@ -17,6 +17,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
+import type { FluenceConfig } from "../../lib/configs/project/fluence";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
@@ -25,6 +26,7 @@ import {
 import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
+  CommandObj,
   FLUENCE_DIR_NAME,
   MARINE_CARGO_DEPENDENCY,
   MARINE_RECOMMENDED_VERSION,
@@ -42,7 +44,7 @@ import {
   installAllCargoDependenciesFromFluenceConfig,
 } from "../../lib/rust";
 
-const REQUIRED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY} and ${MREPL_CARGO_DEPENDENCY}`;
+const RECOMMENDED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY} and ${MREPL_CARGO_DEPENDENCY}`;
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:i", "dep:i"];
@@ -50,11 +52,11 @@ export default class Install extends BaseCommand<typeof Install> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     recommended: Flags.boolean({
-      description: `Set latest versions of ${REQUIRED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
+      description: `Set latest versions of ${RECOMMENDED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
       exclusive: ["latest"],
     }),
     latest: Flags.boolean({
-      description: `Set recommended versions of ${REQUIRED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
+      description: `Set recommended versions of ${RECOMMENDED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
       exclusive: ["recommended"],
     }),
     force: Flags.boolean({
@@ -71,38 +73,12 @@ export default class Install extends BaseCommand<typeof Install> {
 
     const fluenceLockConfig =
       (await initFluenceLockConfig(this)) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig, commandObj));
 
     if (flags.recommended) {
-      fluenceConfig.dependencies.npm[AQUA_NPM_DEPENDENCY] =
-        AQUA_RECOMMENDED_VERSION;
-
-      fluenceConfig.dependencies.cargo[MARINE_CARGO_DEPENDENCY] =
-        MARINE_RECOMMENDED_VERSION;
-
-      fluenceConfig.dependencies.cargo[MREPL_CARGO_DEPENDENCY] =
-        MREPL_RECOMMENDED_VERSION;
-
-      await fluenceConfig.$commit();
-    }
-
-    if (flags.latest) {
-      fluenceConfig.dependencies.npm[AQUA_NPM_DEPENDENCY] =
-        await getLatestVersionOfNPMDependency(AQUA_NPM_DEPENDENCY, this);
-
-      fluenceConfig.dependencies.cargo[MARINE_CARGO_DEPENDENCY] =
-        await getLatestVersionOfCargoDependency({
-          name: MARINE_CARGO_DEPENDENCY,
-          commandObj,
-        });
-
-      fluenceConfig.dependencies.cargo[MREPL_CARGO_DEPENDENCY] =
-        await getLatestVersionOfCargoDependency({
-          name: MREPL_CARGO_DEPENDENCY,
-          commandObj,
-        });
-
-      await fluenceConfig.$commit();
+      await handleRecommendedFlag(fluenceConfig);
+    } else if (flags.latest) {
+      await handleLatestFlag(fluenceConfig, commandObj);
     }
 
     await ensureVSCodeSettingsJSON({
@@ -125,3 +101,58 @@ export default class Install extends BaseCommand<typeof Install> {
     commandObj.log("cargo and npm dependencies successfully installed");
   }
 }
+
+const handleRecommendedFlag = (fluenceConfig: FluenceConfig): Promise<void> => {
+  if (fluenceConfig?.dependencies?.npm?.[AQUA_NPM_DEPENDENCY] !== undefined) {
+    fluenceConfig.dependencies.npm[AQUA_NPM_DEPENDENCY] =
+      AQUA_RECOMMENDED_VERSION;
+  }
+
+  if (
+    fluenceConfig?.dependencies?.cargo?.[MARINE_CARGO_DEPENDENCY] !== undefined
+  ) {
+    fluenceConfig.dependencies.cargo[MARINE_CARGO_DEPENDENCY] =
+      MARINE_RECOMMENDED_VERSION;
+  }
+
+  if (
+    fluenceConfig?.dependencies?.cargo?.[MREPL_CARGO_DEPENDENCY] !== undefined
+  ) {
+    fluenceConfig.dependencies.cargo[MREPL_CARGO_DEPENDENCY] =
+      MREPL_RECOMMENDED_VERSION;
+  }
+
+  return fluenceConfig.$commit();
+};
+
+const handleLatestFlag = async (
+  fluenceConfig: FluenceConfig,
+  commandObj: CommandObj
+): Promise<void> => {
+  if (fluenceConfig?.dependencies?.npm?.[AQUA_NPM_DEPENDENCY] !== undefined) {
+    fluenceConfig.dependencies.npm[AQUA_NPM_DEPENDENCY] =
+      await getLatestVersionOfNPMDependency(AQUA_NPM_DEPENDENCY, commandObj);
+  }
+
+  if (
+    fluenceConfig?.dependencies?.cargo?.[MARINE_CARGO_DEPENDENCY] !== undefined
+  ) {
+    fluenceConfig.dependencies.cargo[MARINE_CARGO_DEPENDENCY] =
+      await getLatestVersionOfCargoDependency({
+        name: MARINE_CARGO_DEPENDENCY,
+        commandObj,
+      });
+  }
+
+  if (
+    fluenceConfig?.dependencies?.cargo?.[MREPL_CARGO_DEPENDENCY] !== undefined
+  ) {
+    fluenceConfig.dependencies.cargo[MREPL_CARGO_DEPENDENCY] =
+      await getLatestVersionOfCargoDependency({
+        name: MREPL_CARGO_DEPENDENCY,
+        commandObj,
+      });
+  }
+
+  return fluenceConfig.$commit();
+};

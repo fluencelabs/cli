@@ -22,13 +22,13 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../const";
+import { generateKeyPair } from "../../helpers/generateKeyPair";
 import {
   validateHasDefault,
   validateMultiple,
   validateUnique,
   ValidationResult,
 } from "../../helpers/validations";
-import { generateKeyPair } from "../../keypairs";
 import { ensureUserFluenceDir } from "../../paths";
 import {
   GetDefaultConfig,

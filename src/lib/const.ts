@@ -252,6 +252,33 @@ export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 
+export const fluenceNPMDependencies: Record<
+  string,
+  { recommendedVersion: string; bin?: string }
+> = {
+  [AQUA_NPM_DEPENDENCY]: {
+    recommendedVersion: AQUA_RECOMMENDED_VERSION,
+    bin: "aqua",
+  },
+};
+
+export const fluenceCargoDependencies: Record<
+  string,
+  {
+    recommendedVersion: string;
+    toolchain?: string;
+  }
+> = {
+  [MARINE_CARGO_DEPENDENCY]: {
+    recommendedVersion: MARINE_RECOMMENDED_VERSION,
+    toolchain: REQUIRED_RUST_TOOLCHAIN,
+  },
+  [MREPL_CARGO_DEPENDENCY]: {
+    recommendedVersion: MREPL_RECOMMENDED_VERSION,
+    toolchain: REQUIRED_RUST_TOOLCHAIN,
+  },
+};
+
 const MAIN_AQUA_FILE_UNCOMMENT_TEXT = `-- Uncomment the following when you deploy your app with Adder service:
 `;
 
@@ -278,7 +305,7 @@ export const MAIN_AQUA_FILE_ADD_ONE_COMMENT = aquaComment(
 
 export const MAIN_AQUA_FILE_CONTENT = `aqua Main
 
-import "@fluencelabs/aqua-lib/builtin.aqua"
+import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 
 ${MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT}
 

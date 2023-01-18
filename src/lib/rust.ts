@@ -24,16 +24,14 @@ import type { FluenceLockConfig } from "./configs/project/fluenceLock";
 import {
   BIN_DIR_NAME,
   CommandObj,
-  MARINE_CARGO_DEPENDENCY,
-  MARINE_RECOMMENDED_VERSION,
-  MREPL_CARGO_DEPENDENCY,
-  MREPL_RECOMMENDED_VERSION,
+  fluenceCargoDependencies,
   REQUIRED_RUST_TOOLCHAIN,
   RUST_WASM32_WASI_TARGET,
 } from "./const";
 import { addCountlyLog } from "./countly";
 import { execPromise } from "./execPromise";
 import {
+  handleFluenceConfig,
   handleInstallation,
   handleLockConfig,
   resolveDependencyPathAndTmpPath,
@@ -155,22 +153,6 @@ const hasRequiredRustTarget = async (): Promise<boolean> =>
     })
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
 
-type CargoDependencyInfo = {
-  recommendedVersion: string;
-  toolchain?: string;
-};
-
-export const fluenceCargoDependencies: Record<string, CargoDependencyInfo> = {
-  [MARINE_CARGO_DEPENDENCY]: {
-    recommendedVersion: MARINE_RECOMMENDED_VERSION,
-    toolchain: REQUIRED_RUST_TOOLCHAIN,
-  },
-  [MREPL_CARGO_DEPENDENCY]: {
-    recommendedVersion: MREPL_RECOMMENDED_VERSION,
-    toolchain: REQUIRED_RUST_TOOLCHAIN,
-  },
-};
-
 type GetLatestVersionOfCargoDependency = {
   name: string;
   commandObj: CommandObj;
@@ -288,14 +270,22 @@ export const ensureCargoDependency = async ({
       }),
   });
 
-  await handleLockConfig({
-    commandObj,
-    isFluenceProject: maybeFluenceConfig !== null,
-    maybeFluenceLockConfig,
-    name,
-    packageManager: "cargo",
-    version,
-  });
+  if (maybeFluenceConfig !== null) {
+    await handleFluenceConfig({
+      fluenceConfig: maybeFluenceConfig,
+      name,
+      packageManager: "cargo",
+      versionFromArgs: maybeVersion ?? version,
+    });
+
+    await handleLockConfig({
+      commandObj,
+      maybeFluenceLockConfig,
+      name,
+      version,
+      packageManager: "cargo",
+    });
+  }
 
   addCountlyLog(`Using ${name}@${version} cargo dependency`);
 
@@ -318,7 +308,7 @@ export const installAllCargoDependenciesFromFluenceConfig = async ({
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
-    fluenceConfig.dependencies.cargo
+    fluenceConfig?.dependencies?.cargo ?? {}
   )) {
     assert(name !== undefined && version !== undefined);
 

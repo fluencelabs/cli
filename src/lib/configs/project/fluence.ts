@@ -24,15 +24,9 @@ import { ajv } from "../../ajv";
 import {
   AQUA_LIB_NPM_DEPENDENCY,
   AQUA_LIB_RECOMMENDED_VERSION,
-  AQUA_NPM_DEPENDENCY,
-  AQUA_RECOMMENDED_VERSION,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MAIN_AQUA_FILE_CONTENT,
-  MARINE_CARGO_DEPENDENCY,
-  MARINE_RECOMMENDED_VERSION,
-  MREPL_CARGO_DEPENDENCY,
-  MREPL_RECOMMENDED_VERSION,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
@@ -258,14 +252,9 @@ export const AQUA_INPUT_PATH_PROPERTY = "aquaInputPath";
 
 type ConfigV2 = Omit<ConfigV1, "version"> & {
   version: 2;
-  dependencies: {
-    npm: {
-      [AQUA_NPM_DEPENDENCY]: string;
-    } & Record<string, string>;
-    cargo: {
-      [MARINE_CARGO_DEPENDENCY]: string;
-      [MREPL_CARGO_DEPENDENCY]: string;
-    } & Record<string, string>;
+  dependencies?: {
+    npm?: Record<string, string>;
+    cargo?: Record<string, string>;
   };
   [AQUA_INPUT_PATH_PROPERTY]?: string;
   aquaOutputTSPath?: string;
@@ -286,30 +275,26 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     dependencies: {
       type: "object",
       title: "Dependencies",
+      nullable: true,
       description: "A map of dependency versions",
       properties: {
         npm: {
           type: "object",
           title: "npm dependencies",
+          nullable: true,
           description:
             "A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua",
-          properties: {
-            [AQUA_NPM_DEPENDENCY]: { type: "string" },
-          },
-          required: [AQUA_NPM_DEPENDENCY],
+          required: [],
         },
         cargo: {
           type: "object",
           title: "Cargo dependencies",
+          nullable: true,
           description: `A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
-          properties: {
-            [MARINE_CARGO_DEPENDENCY]: { type: "string" },
-            [MREPL_CARGO_DEPENDENCY]: { type: "string" },
-          },
           required: [],
         },
       },
-      required: ["npm", "cargo"],
+      required: [],
     },
     [AQUA_INPUT_PATH_PROPERTY]: {
       type: "string",
@@ -361,17 +346,12 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
 
   return {
     version: 2,
+    [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
     dependencies: {
       npm: {
-        [AQUA_NPM_DEPENDENCY]: AQUA_RECOMMENDED_VERSION,
         [AQUA_LIB_NPM_DEPENDENCY]: AQUA_LIB_RECOMMENDED_VERSION,
       },
-      cargo: {
-        [MARINE_CARGO_DEPENDENCY]: MARINE_RECOMMENDED_VERSION,
-        [MREPL_CARGO_DEPENDENCY]: MREPL_RECOMMENDED_VERSION,
-      },
     },
-    [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
   } as const;
 };
 

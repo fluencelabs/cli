@@ -207,6 +207,9 @@
           "next": "case"
         }
       ],
+      "import/no-cycle": [
+        "error"
+      ],
       "@typescript-eslint/explicit-member-accessibility": [
         "error",
         {

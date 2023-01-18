@@ -23,10 +23,9 @@ import color from "@oclif/color";
 import type { FluenceConfig } from "./configs/project/fluence";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock";
 import {
-  AQUA_NPM_DEPENDENCY,
-  AQUA_RECOMMENDED_VERSION,
   CommandObj,
   DOT_BIN_DIR_NAME,
+  fluenceNPMDependencies,
   NODE_MODULES_DIR_NAME,
 } from "./const";
 import { addCountlyLog } from "./countly";
@@ -37,17 +36,9 @@ import {
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   handleInstallation,
+  handleFluenceConfig,
 } from "./helpers/package";
 import { replaceHomeDir } from "./helpers/replaceHomeDir";
-
-type NPMDependencyInfo = { recommendedVersion: string; bin?: string };
-
-export const fluenceNPMDependencies: Record<string, NPMDependencyInfo> = {
-  [AQUA_NPM_DEPENDENCY]: {
-    recommendedVersion: AQUA_RECOMMENDED_VERSION,
-    bin: "aqua",
-  },
-};
 
 export const getLatestVersionOfNPMDependency = async (
   name: string,
@@ -133,7 +124,7 @@ export const ensureNpmDependency = async ({
 }: EnsureNpmDependencyArg): Promise<string> => {
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const versionToInstall = resolveVersionToInstall({
+  const maybeVersionToInstall = resolveVersionToInstall({
     name,
     maybeVersion,
     explicitInstallation,
@@ -143,7 +134,9 @@ export const ensureNpmDependency = async ({
   });
 
   const version = await getLatestVersionOfNPMDependency(
-    versionToInstall === undefined ? name : `${name}@${versionToInstall}`,
+    maybeVersionToInstall === undefined
+      ? name
+      : `${name}@${maybeVersionToInstall}`,
     commandObj
   );
 
@@ -175,14 +168,22 @@ export const ensureNpmDependency = async ({
       }),
   });
 
-  await handleLockConfig({
-    commandObj,
-    isFluenceProject: maybeFluenceConfig !== null,
-    maybeFluenceLockConfig,
-    name,
-    version,
-    packageManager: "npm",
-  });
+  if (maybeFluenceConfig !== null) {
+    await handleFluenceConfig({
+      fluenceConfig: maybeFluenceConfig,
+      name,
+      packageManager: "npm",
+      versionFromArgs: maybeVersion ?? version,
+    });
+
+    await handleLockConfig({
+      commandObj,
+      maybeFluenceLockConfig,
+      name,
+      version,
+      packageManager: "npm",
+    });
+  }
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 
@@ -212,7 +213,7 @@ export const installAllNPMDependenciesFromFluenceConfig = async ({
   const dependencyPaths = [];
 
   for (const [name, version] of Object.entries(
-    fluenceConfig.dependencies.npm
+    fluenceConfig?.dependencies?.npm ?? {}
   )) {
     assert(name !== undefined && version !== undefined);
 

@@ -24,23 +24,51 @@ import {
   FluenceLockConfig,
   initNewReadonlyFluenceLockConfig,
 } from "../configs/project/fluenceLock";
-import type { CommandObj } from "../const";
-import { fluenceNPMDependencies } from "../npm";
+import {
+  CommandObj,
+  fluenceCargoDependencies,
+  fluenceNPMDependencies,
+} from "../const";
 import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceNpmDir,
   ensureUserFluenceTmpCargoDir,
   ensureUserFluenceTmpNpmDir,
 } from "../paths";
-import { fluenceCargoDependencies } from "../rust";
 
 import { replaceHomeDir } from "./replaceHomeDir";
 
 const packageManagers = ["npm", "cargo"] as const;
 type PackageManager = typeof packageManagers[number];
 
-type UpdateOrCreateLockConfigArg = {
-  isFluenceProject: boolean;
+type HandleFluenceConfigArgs = {
+  fluenceConfig: FluenceConfig;
+  name: string;
+  versionFromArgs: string;
+  packageManager: PackageManager;
+};
+
+export const handleFluenceConfig = async ({
+  fluenceConfig,
+  name,
+  versionFromArgs,
+  packageManager,
+}: HandleFluenceConfigArgs): Promise<void> => {
+  if (fluenceConfig.dependencies === undefined) {
+    fluenceConfig.dependencies = {};
+  }
+
+  if (fluenceConfig.dependencies[packageManager] === undefined) {
+    fluenceConfig.dependencies[packageManager] = {};
+  }
+
+  // Disabled because we made sure it's not undefined above
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  fluenceConfig.dependencies[packageManager]![name] = versionFromArgs;
+  await fluenceConfig.$commit();
+};
+
+type HandleLockConfigArgs = {
   maybeFluenceLockConfig: FluenceLockConfig | null;
   name: string;
   version: string;
@@ -50,25 +78,12 @@ type UpdateOrCreateLockConfigArg = {
 
 export const handleLockConfig = async ({
   maybeFluenceLockConfig,
-  isFluenceProject,
   name,
   version,
   commandObj,
   packageManager,
-}: UpdateOrCreateLockConfigArg): Promise<void> => {
-  if (maybeFluenceLockConfig !== null) {
-    if (maybeFluenceLockConfig[packageManager] === undefined) {
-      maybeFluenceLockConfig[packageManager] = {};
-    }
-
-    // Disabled because we made sure it's not undefined above
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    maybeFluenceLockConfig[packageManager]![name] = version;
-    await maybeFluenceLockConfig.$commit();
-    return;
-  }
-
-  if (isFluenceProject) {
+}: HandleLockConfigArgs): Promise<void> => {
+  if (maybeFluenceLockConfig === null) {
     await initNewReadonlyFluenceLockConfig(
       {
         ...defaultFluenceLockConfig,
@@ -78,7 +93,20 @@ export const handleLockConfig = async ({
       },
       commandObj
     );
+
+    return;
   }
+
+  const fluenceLockConfig = maybeFluenceLockConfig;
+
+  if (fluenceLockConfig[packageManager] === undefined) {
+    fluenceLockConfig[packageManager] = {};
+  }
+
+  // Disabled because we made sure it's not undefined above
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  fluenceLockConfig[packageManager]![name] = version;
+  await fluenceLockConfig.$commit();
 };
 
 const recommendedDependenciesMap: Record<
@@ -114,21 +142,24 @@ export const resolveVersionToInstall = ({
     return undefined;
   }
 
-  const versionFromLockConfig =
+  const maybeVersionFromLockConfig =
     maybeFluenceLockConfig?.[packageManager]?.[name];
 
-  if (versionFromLockConfig !== undefined) {
-    return versionFromLockConfig;
+  if (typeof maybeVersionFromLockConfig === "string") {
+    return maybeVersionFromLockConfig;
   }
 
-  const versionFromFluenceConfig =
+  const maybeVersionFromFluenceConfig =
     maybeFluenceConfig?.dependencies?.[packageManager]?.[name];
 
-  if (versionFromFluenceConfig !== undefined) {
-    return versionFromFluenceConfig;
+  if (typeof maybeVersionFromFluenceConfig === "string") {
+    return maybeVersionFromFluenceConfig;
   }
 
-  return recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
+  const res =
+    recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
+
+  return res;
 };
 
 const dependenciesPathsGettersMap: Record<
