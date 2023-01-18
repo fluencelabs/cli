@@ -54,8 +54,7 @@ export type ChainConfig = {
   chainId: number;
 };
 
-// TODO DXJ-234: add actual url
-export const CLI_CONNECTOR_URL = "http://localhost:3000";
+export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   local: {
     ethereumNodeUrl: "http://127.0.0.1:8545",
