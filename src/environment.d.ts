@@ -15,7 +15,11 @@
  */
 
 import { Network } from "../src/lib/multiaddr";
-import { DEBUG_COUNTLY, FLUENCE_ENV } from "../src/lib/setupEnvironment";
+import {
+  DEBUG_COUNTLY,
+  FLUENCE_ENV,
+  USER_FLUENCE_DIR_PATH,
+} from "../src/lib/setupEnvironment";
 
 export type FluenceEnv = Network | "local";
 
@@ -24,6 +28,7 @@ declare global {
     interface ProcessEnv {
       [FLUENCE_ENV]: FluenceEnv;
       [DEBUG_COUNTLY]: "true" | "false";
+      [USER_FLUENCE_DIR_PATH]: string | undefined;
     }
   }
 }

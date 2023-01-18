@@ -48,6 +48,7 @@ import {
   VSCODE_DIR_NAME,
 } from "./const";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile";
+import { USER_FLUENCE_DIR_PATH } from "./setupEnvironment";
 
 export const validatePath = async (path: string): Promise<string | true> => {
   try {
@@ -65,12 +66,21 @@ export const ensureDir = async (dirPath: string): Promise<string> => {
 
 // User .fluence paths:
 
-export const ensureUserFluenceDir = async (
+export const ensureUserFluenceDir = (
   commandObj: CommandObj
-): Promise<string> =>
-  commandObj.config.windows
-    ? ensureDir(commandObj.config.configDir)
-    : ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
+): Promise<string> => {
+  const globalFluenceDirPathFromEnv = process.env[USER_FLUENCE_DIR_PATH];
+
+  if (typeof globalFluenceDirPathFromEnv === "string") {
+    return ensureDir(path.resolve(globalFluenceDirPathFromEnv));
+  }
+
+  if (commandObj.config.windows) {
+    return ensureDir(commandObj.config.configDir);
+  }
+
+  return ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
+};
 
 export const getUserCountlyDir = async (
   commandObj: CommandObj

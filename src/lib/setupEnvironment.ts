@@ -22,6 +22,7 @@ import { NETWORKS } from "./multiaddr";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
+export const USER_FLUENCE_DIR_PATH = "USER_FLUENCE_DIR_PATH";
 
 dotenv.config();
 
@@ -48,6 +49,8 @@ const resolveEnvVariable = <T>(
 const isTrueOrFalseString = (v: unknown): v is "true" | "false" =>
   v === "true" || v === "false";
 
+const isString = (v: unknown): v is string => typeof v === "string";
+
 process.env[FLUENCE_ENV] = resolveEnvVariable(
   FLUENCE_ENV,
   (v): v is FluenceEnv => NETWORKS.some((n) => n === v) || v === "local",
@@ -58,4 +61,10 @@ process.env[DEBUG_COUNTLY] = resolveEnvVariable(
   DEBUG_COUNTLY,
   isTrueOrFalseString,
   "false"
+);
+
+process.env[USER_FLUENCE_DIR_PATH] = resolveEnvVariable(
+  USER_FLUENCE_DIR_PATH,
+  isString,
+  undefined
 );
