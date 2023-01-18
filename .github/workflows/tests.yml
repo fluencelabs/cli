@@ -168,7 +168,7 @@ jobs:
       - name: Run tests
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
-          USER_FLUENCE_DIR_PATH: "${{ github.workspace }}/tmp/.fluence"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"

@@ -24,7 +24,7 @@ import { NETWORKS } from "./multiaddr";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
-export const USER_FLUENCE_DIR_PATH = "USER_FLUENCE_DIR_PATH";
+export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
 
 dotenv.config();
 
@@ -66,8 +66,8 @@ process.env[DEBUG_COUNTLY] = resolveEnvVariable(
   "false"
 );
 
-process.env[USER_FLUENCE_DIR_PATH] = resolveEnvVariable(
-  USER_FLUENCE_DIR_PATH,
+process.env[FLUENCE_USER_DIR] = resolveEnvVariable(
+  FLUENCE_USER_DIR,
   isAbsolutePath,
   undefined
 );
