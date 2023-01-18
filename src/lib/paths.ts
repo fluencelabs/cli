@@ -118,10 +118,13 @@ export const ensureUserFluenceCargoDir = async (
 // cwd is cached in order for paths to be correct even if cwd changes during the
 // execution (e.g. Marince CLI has to change cwd in order to work correctly)
 const initialCwd = process.cwd();
-export let projectRootDirPromise = (async (): Promise<string> => {
+
+export const recursivelyFindProjectRootDir = async (
+  initialPath: string
+): Promise<string> => {
   const fluenceConfigPath = await recursivelyFindFile(
     FLUENCE_CONFIG_FILE_NAME,
-    initialCwd
+    initialPath
   );
 
   if (fluenceConfigPath === null) {
@@ -130,7 +133,11 @@ export let projectRootDirPromise = (async (): Promise<string> => {
 
   const newProjectRootDir = path.dirname(fluenceConfigPath);
   return newProjectRootDir;
-})().catch((error): never => {
+};
+
+export let projectRootDirPromise = recursivelyFindProjectRootDir(
+  initialCwd
+).catch((error): never => {
   throw error;
 });
 
