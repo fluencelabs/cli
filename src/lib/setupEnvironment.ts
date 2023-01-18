@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import path from "node:path";
+
 import dotenv from "dotenv";
 
 import type { FluenceEnv } from "../environment.d";
@@ -49,7 +51,8 @@ const resolveEnvVariable = <T>(
 const isTrueOrFalseString = (v: unknown): v is "true" | "false" =>
   v === "true" || v === "false";
 
-const isString = (v: unknown): v is string => typeof v === "string";
+const isAbsolutePath = (v: unknown): v is string =>
+  typeof v === "string" && path.isAbsolute(v);
 
 process.env[FLUENCE_ENV] = resolveEnvVariable(
   FLUENCE_ENV,
@@ -65,6 +68,6 @@ process.env[DEBUG_COUNTLY] = resolveEnvVariable(
 
 process.env[USER_FLUENCE_DIR_PATH] = resolveEnvVariable(
   USER_FLUENCE_DIR_PATH,
-  isString,
+  isAbsolutePath,
   undefined
 );

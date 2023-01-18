@@ -72,7 +72,7 @@ export const ensureUserFluenceDir = (
   const globalFluenceDirPathFromEnv = process.env[USER_FLUENCE_DIR_PATH];
 
   if (typeof globalFluenceDirPathFromEnv === "string") {
-    return ensureDir(path.resolve(globalFluenceDirPathFromEnv));
+    return ensureDir(globalFluenceDirPathFromEnv);
   }
 
   if (commandObj.config.windows) {
