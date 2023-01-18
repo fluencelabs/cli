@@ -230,7 +230,7 @@ ARGUMENTS
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
+  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-2022-09-15-x86_64)
 
 DESCRIPTION
   Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
@@ -314,7 +314,7 @@ ARGUMENTS
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
+  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-2022-09-15-x86_64)
 
 DESCRIPTION
   Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
@@ -343,7 +343,7 @@ ARGUMENTS
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-x86_64)
+  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-2022-09-15-x86_64)
 
 DESCRIPTION
   Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
