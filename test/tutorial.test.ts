@@ -29,6 +29,7 @@ import {
   TEMPLATE_INDEX_APP_REGISTER_COMMENT,
 } from "../src/lib/const";
 import { execPromise } from "../src/lib/execPromise";
+import { localMultiaddrs } from "../src/lib/localNodes";
 
 import { fluence, getCWD, init } from "./helpers";
 
@@ -77,7 +78,7 @@ describe("tutorial", () => {
           args: ["run"],
           flags: {
             f: 'greeting("world")',
-            i: "./src/aqua/newService.aqua",
+            i: path.join("src", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
           },
           cwd,
         })
@@ -131,6 +132,19 @@ describe("tutorial", () => {
     } finally {
       await remove(cwd);
     }
+  });
+
+  test("should work without project", async () => {
+    const result = await fluence({
+      args: ["run"],
+      flags: {
+        f: "identify()",
+        i: path.join("test", "aqua", "smoke.aqua"),
+        relay: localMultiaddrs[0],
+      },
+    });
+
+    console.log(result);
   });
 });
 

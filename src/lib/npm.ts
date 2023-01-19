@@ -23,6 +23,7 @@ import color from "@oclif/color";
 import type { FluenceConfig } from "./configs/project/fluence";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock";
 import {
+  AQUA_LIB_NPM_DEPENDENCY,
   CommandObj,
   DOT_BIN_DIR_NAME,
   fluenceNPMDependencies,
@@ -197,25 +198,31 @@ export const ensureNpmDependency = async ({
       );
 };
 
-type InstallAllDependenciesArg = {
+type InstallAllNPMDependenciesArg = {
   commandObj: CommandObj;
-  fluenceConfig: FluenceConfig;
-  fluenceLockConfig: FluenceLockConfig;
+  maybeFluenceConfig: FluenceConfig | null;
+  maybeFluenceLockConfig: FluenceLockConfig | null;
   force?: boolean | undefined;
 };
 
-export const installAllNPMDependenciesFromFluenceConfig = async ({
-  fluenceConfig,
+export const installAllNPMDependencies = async ({
+  maybeFluenceConfig,
   commandObj,
-  fluenceLockConfig,
+  maybeFluenceLockConfig,
   force,
-}: InstallAllDependenciesArg): Promise<string[]> => {
+}: InstallAllNPMDependenciesArg): Promise<string[]> => {
   const dependencyPaths = [];
 
+  let aquaLibIsListedInFluenceYAML = false;
+
   for (const [name, version] of Object.entries(
-    fluenceConfig?.dependencies?.npm ?? {}
+    maybeFluenceConfig?.dependencies?.npm ?? {}
   )) {
     assert(name !== undefined && version !== undefined);
+
+    if (name === AQUA_LIB_NPM_DEPENDENCY) {
+      aquaLibIsListedInFluenceYAML = true;
+    }
 
     dependencyPaths.push(
       // Not installing dependencies in parallel
@@ -224,8 +231,20 @@ export const installAllNPMDependenciesFromFluenceConfig = async ({
       await ensureNpmDependency({
         nameAndVersion: `${name}@${version}`,
         commandObj,
-        maybeFluenceConfig: fluenceConfig,
-        maybeFluenceLockConfig: fluenceLockConfig,
+        maybeFluenceConfig,
+        maybeFluenceLockConfig,
+        force,
+      })
+    );
+  }
+
+  if (!aquaLibIsListedInFluenceYAML) {
+    dependencyPaths.push(
+      await ensureNpmDependency({
+        nameAndVersion: AQUA_LIB_NPM_DEPENDENCY,
+        commandObj,
+        maybeFluenceConfig,
+        maybeFluenceLockConfig,
         force,
       })
     );
