@@ -144,7 +144,8 @@ describe("tutorial", () => {
       },
     });
 
-    console.log(result);
+    const parsedResult: unknown = JSON.parse(result);
+    expect(parsedResult).toHaveProperty("air_version");
   });
 });
 

@@ -1,5 +1,5 @@
 import "@fluencelabs/aqua-lib/builtin.aqua"
 
-func identify():
-    on HOST_PEER_ID:
-        Peer.identify()
+func identify() -> Info:
+  on HOST_PEER_ID:
+    <- Peer.identify()
