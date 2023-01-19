@@ -19,7 +19,7 @@ import path from "node:path";
 import "../src/lib/setupEnvironment";
 import { fluence, init } from "./helpers";
 
-const main = async () => {
+export default async (): Promise<void> => {
   const cwd = path.join("tmp", "installMarine");
   await init(cwd, "minimal");
 
@@ -31,7 +31,3 @@ const main = async () => {
     cwd,
   });
 };
-
-main().catch((error) => {
-  throw error;
-});
