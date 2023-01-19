@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import path from "node:path";
+
 import dotenv from "dotenv";
 
 import type { FluenceEnv } from "../environment.d";
@@ -22,6 +24,7 @@ import { NETWORKS } from "./multiaddr";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
+export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
 
 dotenv.config();
 
@@ -48,6 +51,9 @@ const resolveEnvVariable = <T>(
 const isTrueOrFalseString = (v: unknown): v is "true" | "false" =>
   v === "true" || v === "false";
 
+const isAbsolutePath = (v: unknown): v is string =>
+  typeof v === "string" && path.isAbsolute(v);
+
 process.env[FLUENCE_ENV] = resolveEnvVariable(
   FLUENCE_ENV,
   (v): v is FluenceEnv => NETWORKS.some((n) => n === v) || v === "local",
@@ -58,4 +64,10 @@ process.env[DEBUG_COUNTLY] = resolveEnvVariable(
   DEBUG_COUNTLY,
   isTrueOrFalseString,
   "false"
+);
+
+process.env[FLUENCE_USER_DIR] = resolveEnvVariable(
+  FLUENCE_USER_DIR,
+  isAbsolutePath,
+  undefined
 );
