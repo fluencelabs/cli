@@ -15,7 +15,7 @@
  */
 
 import { access, readFile, unlink, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 import { AvmLoglevel, FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction";
@@ -64,6 +64,8 @@ import { getRandomRelayAddr } from "../lib/multiaddr";
 import {
   ensureFluenceTmpAppServiceJsonPath,
   projectRootDirPromise,
+  recursivelyFindProjectRootDir,
+  setProjectRootDir,
 } from "../lib/paths";
 import { input, list } from "../lib/prompt";
 
@@ -156,8 +158,21 @@ export default class Run extends BaseCommand<typeof Run> {
     ...KEY_PAIR_FLAG,
   };
   async run(): Promise<void> {
+    const parseResult = await this.parse(Run);
+    const inputFlag = parseResult.flags[INPUT_FLAG_NAME];
+
+    if (typeof inputFlag === "string") {
+      const resolvedInputDirName = resolve(dirname(inputFlag));
+
+      const projectRootDir = await recursivelyFindProjectRootDir(
+        resolvedInputDirName
+      );
+
+      setProjectRootDir(projectRootDir);
+    }
+
     const { commandObj, flags, isInteractive, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Run));
+      await initCli(this, parseResult);
 
     const logLevelAVM: AvmLoglevel | undefined = await resolveAVMLogLevel({
       commandObj: this,
