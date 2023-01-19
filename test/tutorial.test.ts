@@ -31,23 +31,10 @@ import {
 import { execPromise } from "../src/lib/execPromise";
 import { localMultiaddrs } from "../src/lib/localNodes";
 
-import { fluence, init } from "./helpers";
+import { fluence, init, maybeConcurrentTest } from "./helpers";
 
 describe("tutorial", () => {
-  beforeAll(async () => {
-    const cwd = path.join("tmp", "installMarine");
-    await init(cwd, "minimal");
-
-    await fluence({
-      args: ["dep", "cargo", "i", "marine"],
-      flags: {
-        "no-input": true,
-      },
-      cwd,
-    });
-  });
-
-  test.concurrent("should work with minimal template", async () => {
+  maybeConcurrentTest("should work with minimal template", async () => {
     const cwd = path.join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
@@ -101,7 +88,7 @@ describe("tutorial", () => {
     }
   });
 
-  test.concurrent("should work with ts template", async () => {
+  maybeConcurrentTest("should work with ts template", async () => {
     const cwd = path.join("tmp", "shouldWorkWithTSTemplate");
     await init(cwd, "ts");
     await addAdderServiceToFluenceYAML(cwd);
@@ -124,7 +111,7 @@ describe("tutorial", () => {
     }
   });
 
-  test.concurrent("should work with js template", async () => {
+  maybeConcurrentTest("should work with js template", async () => {
     const cwd = path.join("tmp", "shouldWorkWithJSTemplate");
     await init(cwd, "js");
     await addAdderServiceToFluenceYAML(cwd);
@@ -147,7 +134,7 @@ describe("tutorial", () => {
     }
   });
 
-  test.concurrent("should work without project", async () => {
+  maybeConcurrentTest("should work without project", async () => {
     const result = await fluence({
       args: ["run"],
       flags: {

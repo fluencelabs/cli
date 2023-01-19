@@ -14,4 +14,24 @@
  * limitations under the License.
  */
 
+import path from "node:path";
+
 import "../src/lib/setupEnvironment";
+import { fluence, init } from "./helpers";
+
+const main = async () => {
+  const cwd = path.join("tmp", "installMarine");
+  await init(cwd, "minimal");
+
+  await fluence({
+    args: ["dep", "cargo", "i", "marine"],
+    flags: {
+      "no-input": true,
+    },
+    cwd,
+  });
+};
+
+main().catch((error) => {
+  throw error;
+});

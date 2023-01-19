@@ -25,6 +25,7 @@ import { NETWORKS } from "./multiaddr";
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
 export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
+export const RUN_TESTS_IN_PARALLEL = "RUN_TESTS_IN_PARALLEL";
 
 dotenv.config();
 
@@ -64,6 +65,12 @@ process.env[DEBUG_COUNTLY] = resolveEnvVariable(
   DEBUG_COUNTLY,
   isTrueOrFalseString,
   "false"
+);
+
+process.env[RUN_TESTS_IN_PARALLEL] = resolveEnvVariable(
+  RUN_TESTS_IN_PARALLEL,
+  isTrueOrFalseString,
+  "true"
 );
 
 process.env[FLUENCE_USER_DIR] = resolveEnvVariable(

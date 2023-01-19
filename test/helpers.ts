@@ -28,7 +28,10 @@ import {
 } from "../src/lib/const";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise";
 import { localMultiaddrs } from "../src/lib/localNodes";
-import { FLUENCE_ENV } from "../src/lib/setupEnvironment";
+import {
+  FLUENCE_ENV,
+  RUN_TESTS_IN_PARALLEL,
+} from "../src/lib/setupEnvironment";
 
 type FluenceArg = {
   args?: ExecPromiseArg["args"];
@@ -114,4 +117,13 @@ export const init = async (cwd: string, template: Template): Promise<void> => {
   } catch {}
 
   await cp(templatePath, cwd, { recursive: true });
+};
+
+export const maybeConcurrentTest = (...args: Parameters<typeof test>): void => {
+  if (process.env[RUN_TESTS_IN_PARALLEL] === "false") {
+    test(...args);
+    return;
+  }
+
+  test.concurrent(...args);
 };
