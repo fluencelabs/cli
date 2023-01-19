@@ -34,7 +34,7 @@ import { localMultiaddrs } from "../src/lib/localNodes";
 import { fluence, getCWD, init } from "./helpers";
 
 describe("tutorial", () => {
-  test("should work with minimal template", async () => {
+  test.concurrent("should work with minimal template", async () => {
     const cwd = getCWD();
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
@@ -88,7 +88,7 @@ describe("tutorial", () => {
     }
   });
 
-  test("should work with ts template", async () => {
+  test.concurrent("should work with ts template", async () => {
     const cwd = getCWD();
     await init(cwd, "ts");
     await addAdderServiceToFluenceYAML(cwd);
@@ -111,7 +111,7 @@ describe("tutorial", () => {
     }
   });
 
-  test("should work with js template", async () => {
+  test.concurrent("should work with js template", async () => {
     const cwd = getCWD();
     await init(cwd, "js");
     await addAdderServiceToFluenceYAML(cwd);
@@ -134,7 +134,7 @@ describe("tutorial", () => {
     }
   });
 
-  test("should work without project", async () => {
+  test.concurrent("should work without project", async () => {
     const result = await fluence({
       args: ["run"],
       flags: {
