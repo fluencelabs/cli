@@ -15,6 +15,7 @@
  */
 
 import path from "node:path";
+
 import {
   AQUA_LIB_NPM_DEPENDENCY,
   AQUA_NPM_DEPENDENCY,
