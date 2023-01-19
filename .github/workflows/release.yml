@@ -68,9 +68,9 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
 
-      - run: npm run build
-
       - run: npm i
+
+      - run: npm run build
 
       - name: Publish to npm registry
         run: npm publish --access public
