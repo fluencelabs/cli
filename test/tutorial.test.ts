@@ -34,6 +34,19 @@ import { localMultiaddrs } from "../src/lib/localNodes";
 import { fluence, init } from "./helpers";
 
 describe("tutorial", () => {
+  beforeAll(async () => {
+    const cwd = path.join("tmp", "installMarine");
+    await init(cwd, "minimal");
+
+    await fluence({
+      args: ["dep", "cargo", "i", "marine"],
+      flags: {
+        "no-input": true,
+      },
+      cwd,
+    });
+  });
+
   test.concurrent("should work with minimal template", async () => {
     const cwd = path.join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
