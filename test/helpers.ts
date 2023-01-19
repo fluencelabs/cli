@@ -115,9 +115,3 @@ export const init = async (cwd: string, template: Template): Promise<void> => {
 
   await cp(templatePath, cwd, { recursive: true });
 };
-
-export const getCWD = (): string => {
-  const testName = expect.getState().currentTestName;
-  console.log(`Running test: ${testName}`);
-  return path.join("tmp", testName);
-};

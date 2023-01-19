@@ -31,11 +31,11 @@ import {
 import { execPromise } from "../src/lib/execPromise";
 import { localMultiaddrs } from "../src/lib/localNodes";
 
-import { fluence, getCWD, init } from "./helpers";
+import { fluence, init } from "./helpers";
 
 describe("tutorial", () => {
   test.concurrent("should work with minimal template", async () => {
-    const cwd = getCWD();
+    const cwd = path.join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
 
@@ -89,7 +89,7 @@ describe("tutorial", () => {
   });
 
   test.concurrent("should work with ts template", async () => {
-    const cwd = getCWD();
+    const cwd = path.join("tmp", "shouldWorkWithTSTemplate");
     await init(cwd, "ts");
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
@@ -112,7 +112,7 @@ describe("tutorial", () => {
   });
 
   test.concurrent("should work with js template", async () => {
-    const cwd = getCWD();
+    const cwd = path.join("tmp", "shouldWorkWithJSTemplate");
     await init(cwd, "js");
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
@@ -141,6 +141,7 @@ describe("tutorial", () => {
         f: "identify()",
         i: path.join("test", "aqua", "smoke.aqua"),
         relay: localMultiaddrs[0],
+        quiet: true,
       },
     });
 
