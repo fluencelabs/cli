@@ -24,13 +24,29 @@ export default async (): Promise<void> => {
   const cwd = path.join("tmp", "installMarine");
   await init(cwd, "minimal");
 
-  await fluence({
-    args: ["dep", "cargo", "i", "marine"],
-    flags: {
-      "no-input": true,
-    },
-    cwd,
-  });
+  await Promise.all([
+    fluence({
+      args: ["dep", "cargo", "i", "marine"],
+      flags: {
+        "no-input": true,
+      },
+      cwd,
+    }),
+    fluence({
+      args: ["dep", "npm", "i", "aqua"],
+      flags: {
+        "no-input": true,
+      },
+      cwd,
+    }),
+    fluence({
+      args: ["dep", "npm", "i", "aqua-lib"],
+      flags: {
+        "no-input": true,
+      },
+      cwd,
+    }),
+  ]);
 
   console.log("Tests are ready to run!");
 };
