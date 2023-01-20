@@ -29,12 +29,13 @@ import {
   TEMPLATE_INDEX_APP_REGISTER_COMMENT,
 } from "../src/lib/const";
 import { execPromise } from "../src/lib/execPromise";
+import { localMultiaddrs } from "../src/lib/localNodes";
 
-import { fluence, getCWD, init } from "./helpers";
+import { fluence, init, maybeConcurrentTest } from "./helpers";
 
 describe("tutorial", () => {
-  test("should work with minimal template", async () => {
-    const cwd = getCWD();
+  maybeConcurrentTest("should work with minimal template", async () => {
+    const cwd = path.join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
 
@@ -77,7 +78,7 @@ describe("tutorial", () => {
           args: ["run"],
           flags: {
             f: 'greeting("world")',
-            i: "./src/aqua/newService.aqua",
+            i: path.join("src", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
           },
           cwd,
         })
@@ -87,8 +88,8 @@ describe("tutorial", () => {
     }
   });
 
-  test("should work with ts template", async () => {
-    const cwd = getCWD();
+  maybeConcurrentTest("should work with ts template", async () => {
+    const cwd = path.join("tmp", "shouldWorkWithTSTemplate");
     await init(cwd, "ts");
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
@@ -110,8 +111,8 @@ describe("tutorial", () => {
     }
   });
 
-  test("should work with js template", async () => {
-    const cwd = getCWD();
+  maybeConcurrentTest("should work with js template", async () => {
+    const cwd = path.join("tmp", "shouldWorkWithJSTemplate");
     await init(cwd, "js");
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
@@ -131,6 +132,21 @@ describe("tutorial", () => {
     } finally {
       await remove(cwd);
     }
+  });
+
+  maybeConcurrentTest("should work without project", async () => {
+    const result = await fluence({
+      args: ["run"],
+      flags: {
+        f: "identify()",
+        i: path.join("test", "aqua", "smoke.aqua"),
+        relay: localMultiaddrs[0],
+        quiet: true,
+      },
+    });
+
+    const parsedResult: unknown = JSON.parse(result);
+    expect(parsedResult).toHaveProperty("air_version");
   });
 });
 

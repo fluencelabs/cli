@@ -258,6 +258,9 @@ export const fluenceNPMDependencies: Record<
     recommendedVersion: AQUA_RECOMMENDED_VERSION,
     bin: "aqua",
   },
+  [AQUA_LIB_NPM_DEPENDENCY]: {
+    recommendedVersion: AQUA_LIB_RECOMMENDED_VERSION,
+  },
 };
 
 export const fluenceCargoDependencies: Record<

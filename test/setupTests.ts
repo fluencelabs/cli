@@ -14,4 +14,45 @@
  * limitations under the License.
  */
 
+import path from "node:path";
+
+import {
+  AQUA_LIB_NPM_DEPENDENCY,
+  AQUA_NPM_DEPENDENCY,
+  MARINE_CARGO_DEPENDENCY,
+} from "../src/lib/const";
+
 import "../src/lib/setupEnvironment";
+import { fluence, init } from "./helpers";
+
+export default async (): Promise<void> => {
+  console.log("Setting up tests...");
+  const cwd = path.join("tmp", "installMarine");
+  await init(cwd, "minimal");
+
+  await Promise.all([
+    fluence({
+      args: ["dep", "cargo", "i", MARINE_CARGO_DEPENDENCY],
+      flags: {
+        "no-input": true,
+      },
+      cwd,
+    }),
+    fluence({
+      args: ["dep", "npm", "i", AQUA_NPM_DEPENDENCY],
+      flags: {
+        "no-input": true,
+      },
+      cwd,
+    }),
+    fluence({
+      args: ["dep", "npm", "i", AQUA_LIB_NPM_DEPENDENCY],
+      flags: {
+        "no-input": true,
+      },
+      cwd,
+    }),
+  ]);
+
+  console.log("Tests are ready to run!");
+};
