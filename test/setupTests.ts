@@ -18,8 +18,11 @@ import path from "node:path";
 
 import {
   AQUA_LIB_NPM_DEPENDENCY,
+  AQUA_LIB_RECOMMENDED_VERSION,
   AQUA_NPM_DEPENDENCY,
+  AQUA_RECOMMENDED_VERSION,
   MARINE_CARGO_DEPENDENCY,
+  MARINE_RECOMMENDED_VERSION,
 } from "../src/lib/const";
 
 import "../src/lib/setupEnvironment";
@@ -32,21 +35,36 @@ export default async (): Promise<void> => {
 
   await Promise.all([
     fluence({
-      args: ["dep", "cargo", "i", MARINE_CARGO_DEPENDENCY],
+      args: [
+        "dep",
+        "cargo",
+        "i",
+        `${MARINE_CARGO_DEPENDENCY}@${MARINE_RECOMMENDED_VERSION}`,
+      ],
       flags: {
         "no-input": true,
       },
       cwd,
     }),
     fluence({
-      args: ["dep", "npm", "i", AQUA_NPM_DEPENDENCY],
+      args: [
+        "dep",
+        "npm",
+        "i",
+        `${AQUA_NPM_DEPENDENCY}@${AQUA_RECOMMENDED_VERSION}`,
+      ],
       flags: {
         "no-input": true,
       },
       cwd,
     }),
     fluence({
-      args: ["dep", "npm", "i", AQUA_LIB_NPM_DEPENDENCY],
+      args: [
+        "dep",
+        "npm",
+        "i",
+        `${AQUA_LIB_NPM_DEPENDENCY}@${AQUA_LIB_RECOMMENDED_VERSION}`,
+      ],
       flags: {
         "no-input": true,
       },
