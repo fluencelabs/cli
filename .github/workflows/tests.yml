@@ -11,6 +11,10 @@ on:
         description: "Fluence environment to run tests against"
         type: string
         default: "local"
+      run-tests-in-parallel:
+        description: "Whether to run tests in parallel or synchronously"
+        type: string
+        default: "true"
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
@@ -168,6 +172,7 @@ jobs:
       - name: Run tests
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          RUN_TESTS_IN_PARALLEL: "${{ inputs.run-tests-in-parallel }}"
           FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"

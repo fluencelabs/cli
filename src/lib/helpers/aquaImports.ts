@@ -28,7 +28,7 @@ import {
   FS_OPTIONS,
   NODE_MODULES_DIR_NAME,
 } from "../const";
-import { installAllNPMDependenciesFromFluenceConfig } from "../npm";
+import { installAllNPMDependencies } from "../npm";
 import {
   ensureFluenceAquaDir,
   ensureUserFluenceNpmDir,
@@ -70,19 +70,17 @@ export async function ensureAquaImports(
 
   let importsFromFluenceConfig: Array<string> = [];
 
-  if (maybeFluenceConfig !== null) {
-    importsFromFluenceConfig = (
-      await installAllNPMDependenciesFromFluenceConfig({
-        fluenceConfig: maybeFluenceConfig,
-        fluenceLockConfig: maybeFluenceLockConfig,
-        commandObj,
-        force,
-      })
-    ).filter(
-      (dependency): boolean =>
-        !dependency.includes(path.join(NODE_MODULES_DIR_NAME, DOT_BIN_DIR_NAME))
-    );
-  }
+  importsFromFluenceConfig = (
+    await installAllNPMDependencies({
+      maybeFluenceConfig,
+      maybeFluenceLockConfig,
+      commandObj,
+      force,
+    })
+  ).filter(
+    (dependency): boolean =>
+      !dependency.includes(path.join(NODE_MODULES_DIR_NAME, DOT_BIN_DIR_NAME))
+  );
 
   return [
     ...defaultImports,
