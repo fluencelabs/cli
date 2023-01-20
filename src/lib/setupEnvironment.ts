@@ -30,22 +30,35 @@ dotenv.config();
 
 const resolveEnvVariable = <T>(
   variableName: string,
-  isValid: (v: unknown) => v is T,
-  defaultVariable: T
+  isValid: (v: unknown) => v is T
 ): T => {
   const variable = process.env[variableName];
 
-  if (variable === undefined) {
-    return defaultVariable;
-  }
-
   if (!isValid(variable)) {
     throw new Error(
-      `Invalid environment variable: ${variableName}="${variable}"`
+      `Invalid environment variable: ${variableName}="${String(variable)}"`
     );
   }
 
   return variable;
+};
+
+const setEnvVariable = <T extends string>(
+  variableName: string,
+  isValid: (v: unknown) => v is T,
+  defaultVariable?: T
+) => {
+  const variable = process.env[variableName];
+
+  if (variable === undefined) {
+    if (defaultVariable !== undefined) {
+      process.env[variableName] = defaultVariable;
+    }
+
+    return;
+  }
+
+  process.env[variableName] = resolveEnvVariable(variableName, isValid);
 };
 
 const isTrueOrFalseString = (v: unknown): v is "true" | "false" =>
@@ -54,20 +67,9 @@ const isTrueOrFalseString = (v: unknown): v is "true" | "false" =>
 const isAbsolutePath = (v: unknown): v is string =>
   typeof v === "string" && path.isAbsolute(v);
 
-process.env[FLUENCE_ENV] = resolveEnvVariable(
-  FLUENCE_ENV,
-  (v): v is FluenceEnv => NETWORKS.some((n) => n === v) || v === "local",
-  "kras"
-);
+const isFluenceEnv = (v: unknown): v is FluenceEnv =>
+  NETWORKS.some((n) => n === v) || v === "local";
 
-process.env[DEBUG_COUNTLY] = resolveEnvVariable(
-  DEBUG_COUNTLY,
-  isTrueOrFalseString,
-  "false"
-);
-
-process.env[FLUENCE_USER_DIR] = resolveEnvVariable(
-  FLUENCE_USER_DIR,
-  isAbsolutePath,
-  undefined
-);
+setEnvVariable(FLUENCE_ENV, isFluenceEnv, "kras");
+setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
+setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);
