@@ -163,7 +163,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.34/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.35/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -212,7 +212,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.34/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.35/dist/commands/build.ts)_
 
 ## `fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -488,7 +488,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.34/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.35/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMAND]`
 
@@ -532,7 +532,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.34/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.35/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -686,7 +686,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.34/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.35/dist/commands/remove.ts)_
 
 ## `fluence run`
 
@@ -695,9 +695,9 @@ Run aqua script
 ```
 USAGE
   $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--log-level-avm <value>] [--quiet] [--plugin <value>] [--const <value>]
-    [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout <value>] [-k
-    <value>]
+    [--log-level-compiler <value>] [--log-level-avm <value>] [--print-particle-id] [--quiet] [--plugin <value>] [--const
+    <value>] [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout
+    <value>] [-k <value>]
 
 FLAGS
   -f, --func=<function-call>    Function call
@@ -720,6 +720,8 @@ FLAGS
   --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                   Prints generated AIR code before function execution
+  --print-particle-id           If set, newly initiated particle ids will be printed to console. Useful to see what
+                                particle id is responsible for aqua function
   --quiet                       Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddr>           Relay node multiaddr
   --timeout=<milliseconds>      Timeout used for command execution
@@ -731,7 +733,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.34/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.35/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
