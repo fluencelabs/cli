@@ -695,9 +695,9 @@ Run aqua script
 ```
 USAGE
   $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--log-level-avm <value>] [--print-particle-id] [--quiet] [--plugin <value>] [--const
-    <value>] [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout
-    <value>] [-k <value>]
+    [--log-level-compiler <value>] [--log-level-avm <value>] [--quiet] [--plugin <value>] [--const <value>]
+    [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout <value>] [-k
+    <value>]
 
 FLAGS
   -f, --func=<function-call>    Function call
@@ -720,8 +720,6 @@ FLAGS
   --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                   Prints generated AIR code before function execution
-  --print-particle-id           If set, newly initiated particle ids will be printed to console. Useful to see what
-                                particle id is responsible for aqua function
   --quiet                       Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddr>           Relay node multiaddr
   --timeout=<milliseconds>      Timeout used for command execution
