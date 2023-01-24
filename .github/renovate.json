@@ -3,13 +3,11 @@
   "extends": [
     "config:base"
   ],
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
   "enabledManagers": ["npm", "github-actions"],
   "schedule": "every weekend",
   "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
-    },
     {
       "matchUpdateTypes": ["major"],
       "prConcurrentLimit": 1
@@ -17,6 +15,19 @@
     {
       "matchManagers": ["github-actions"],
       "prPriority": 1
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchPackagePatterns": [
+        "@fluencelabs/.*"
+      ],
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "deps",
+      "schedule": "at any time"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "prPriority": -1
     }
   ]
 }

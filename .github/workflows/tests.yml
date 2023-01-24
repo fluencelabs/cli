@@ -56,6 +56,7 @@ jobs:
   tests:
     name: "Run tests"
     runs-on: builder
+    timeout-minutes: 60
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
