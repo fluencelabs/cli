@@ -29,7 +29,7 @@ import { replaceHomeDir } from "../helpers/replaceHomeDir";
 import type { ValidationResult } from "../helpers/validations";
 import type { Mutable } from "../typeHelpers";
 
-type SchemaArg = {
+type EnsureSchemaArg = {
   name: string;
   configDirPath: string;
   getSchemaDirPath: GetPath | undefined;
@@ -43,7 +43,7 @@ const ensureSchema = async ({
   getSchemaDirPath,
   commandObj,
   schema,
-}: SchemaArg): Promise<string> => {
+}: EnsureSchemaArg): Promise<string> => {
   const schemaDir = path.join(
     getSchemaDirPath === undefined
       ? configDirPath
@@ -61,56 +61,6 @@ const ensureSchema = async ({
   );
 
   return path.relative(configDirPath, schemaPath);
-};
-
-type GetConfigString<LatestConfig> = {
-  configPath: string;
-  schemaRelativePath: string;
-  commandObj: CommandObj;
-  getDefaultConfig: GetDefaultConfig<LatestConfig> | undefined;
-  name: string;
-  description: string;
-};
-
-const getConfigString = async <LatestConfig extends BaseConfig>({
-  configPath,
-  schemaRelativePath,
-  commandObj,
-  getDefaultConfig,
-  name,
-  description,
-}: GetConfigString<LatestConfig>): Promise<string | null> => {
-  const schemaPathCommentStart = "# yaml-language-server: $schema=";
-  const schemaPathComment = `${schemaPathCommentStart}${schemaRelativePath}`;
-  let configString: string;
-
-  try {
-    const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
-
-    configString = fileContent.startsWith(schemaPathCommentStart)
-      ? `${[schemaPathComment, ...fileContent.split("\n").slice(1)]
-          .join("\n")
-          .trim()}`
-      : `${schemaPathComment}\n${fileContent}`;
-  } catch {
-    if (getDefaultConfig === undefined) {
-      return null;
-    }
-
-    const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
-      `.${YAML_EXT}`,
-      ""
-    )}.md`;
-
-    configString = yamlDiffPatch(
-      `${schemaPathComment}\n\n# ${description}\n\n${documentationLinkComment}\n\n`,
-      {},
-      await getDefaultConfig(commandObj)
-    );
-  }
-
-  await fsPromises.writeFile(configPath, `${configString}\n`, FS_OPTIONS);
-  return configString;
 };
 
 type MigrateConfigOptions<
@@ -334,31 +284,65 @@ export function getReadonlyConfigInitFunction<
       allowUnionTypes: true,
     }).compile<LatestConfig>(latestSchema);
 
-    const schemaRelativePath = await ensureSchema({
-      name,
-      configDirPath,
-      getSchemaDirPath,
-      commandObj,
-      schema: validateLatestConfig.schema,
-    });
+    const schemaPathCommentStart = "# yaml-language-server: $schema=";
 
-    const maybeConfigString = await getConfigString({
-      configPath,
-      schemaRelativePath,
-      commandObj,
-      getDefaultConfig,
-      name,
-      description:
+    const getSchemaPathComment = async (): Promise<string> =>
+      `${schemaPathCommentStart}${await ensureSchema({
+        commandObj,
+        name,
+        configDirPath,
+        getSchemaDirPath,
+        schema: validateLatestConfig.schema,
+      })}`;
+
+    let configString: string;
+
+    try {
+      // If config file exists, read it and add schema path comment if it's missing
+      const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
+      const schemaPathComment = await getSchemaPathComment();
+
+      configString = fileContent.startsWith(schemaPathCommentStart)
+        ? `${[schemaPathComment, ...fileContent.split("\n").slice(1)]
+            .join("\n")
+            .trim()}\n`
+        : `${schemaPathComment}\n${fileContent.trim()}\n`;
+
+      if (configString !== fileContent) {
+        await fsPromises.writeFile(configPath, configString, FS_OPTIONS);
+      }
+    } catch {
+      if (getDefaultConfig === undefined) {
+        // If config file doesn't exist and there is no default config, return null
+        return null;
+      }
+
+      // If config file doesn't exist, create it with default config and schema path comment
+
+      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
+        `.${YAML_EXT}`,
+        ""
+      )}.md`;
+
+      const schemaPathComment = await getSchemaPathComment();
+
+      const description =
         typeof latestSchema["description"] === "string"
-          ? latestSchema["description"]
-          : "",
-    });
+          ? `\n\n# ${latestSchema["description"]}`
+          : "";
 
-    if (maybeConfigString === null) {
-      return null;
+      configString = yamlDiffPatch(
+        `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
+        {},
+        await getDefaultConfig(commandObj)
+      );
+
+      await fsPromises.writeFile(
+        configPath,
+        `${configString.trim()}\n`,
+        FS_OPTIONS
+      );
     }
-
-    let configString = maybeConfigString;
 
     const config: unknown = parse(configString);
 
@@ -482,20 +466,16 @@ export function getConfigInitFunction<
           }
         }
 
-        const newConfigString = yamlDiffPatch(
+        const newConfigString = `${yamlDiffPatch(
           configString,
           parse(configString),
           config
-        );
+        ).trim()}\n`;
 
         if (configString !== newConfigString) {
           configString = newConfigString;
 
-          await fsPromises.writeFile(
-            configPath,
-            configString + "\n",
-            FS_OPTIONS
-          );
+          await fsPromises.writeFile(configPath, configString, FS_OPTIONS);
         }
       },
       $getConfigString(): string {
