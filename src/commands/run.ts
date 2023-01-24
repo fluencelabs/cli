@@ -76,6 +76,7 @@ const DATA_FLAG_NAME = "data";
 const JSON_SERVICE = "json-service";
 const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
 const LOG_LEVEL_AVM_FLAG_NAME = "log-level-avm";
+const PRINT_PARTICLE_ID_FLAG_NAME = "print-particle-id";
 
 export default class Run extends BaseCommand<typeof Run> {
   static override description = "Run aqua script";
@@ -108,6 +109,10 @@ export default class Run extends BaseCommand<typeof Run> {
     [LOG_LEVEL_AVM_FLAG_NAME]: Flags.string({
       description: `Set log level for AquaVM. Must be one of: ${avmLogLevelsString}`,
       helpValue: "<level>",
+    }),
+    [PRINT_PARTICLE_ID_FLAG_NAME]: Flags.boolean({
+      description:
+        "If set, newly initiated particle ids will be printed to console. Useful to see what particle id is responsible for aqua function",
     }),
     quiet: Flags.boolean({
       description:
@@ -174,18 +179,18 @@ export default class Run extends BaseCommand<typeof Run> {
     const { commandObj, flags, isInteractive, maybeFluenceConfig } =
       await initCli(this, parseResult);
 
-    const logLevelAVM: AvmLoglevel | undefined = await resolveAVMLogLevel({
-      commandObj: this,
+    const marineLogLevel: AvmLoglevel | undefined = await resolveAVMLogLevel({
+      commandObj,
       isInteractive,
-      maybeAVMLogLevel: flags["log-level-avm"],
+      maybeAVMLogLevel: flags[LOG_LEVEL_AVM_FLAG_NAME],
       isQuite: flags.quiet,
     });
 
     const logLevelCompiler: AquaLogLevel | undefined =
       await resolveAquaLogLevel({
-        commandObj: this,
+        commandObj,
         isInteractive,
-        maybeAquaLogLevel: flags["log-level-avm"],
+        maybeAquaLogLevel: flags[LOG_LEVEL_COMPILER_FLAG_NAME],
         isQuite: flags.quiet,
       });
 
@@ -282,7 +287,7 @@ export default class Run extends BaseCommand<typeof Run> {
           });
 
     const runArgs: RunArgs = {
-      commandObj: this,
+      commandObj,
       appJsonServicePath,
       filePath: aquaFilePath,
       imports: aquaImports,
@@ -290,7 +295,8 @@ export default class Run extends BaseCommand<typeof Run> {
       data,
       funcCall,
       jsonServicePaths,
-      logLevelAVM,
+      marineLogLevel,
+      printParticleId: flags[PRINT_PARTICLE_ID_FLAG_NAME],
       logLevelCompiler,
       maybeAppConfig,
       maybeFluenceConfig,
@@ -538,7 +544,8 @@ type RunArgs = {
   plugin: string | undefined;
   constants: Array<string>;
   logLevelCompiler: AquaLogLevel | undefined;
-  logLevelAVM: AvmLoglevel | undefined;
+  marineLogLevel: AvmLoglevel | undefined;
+  printParticleId: boolean;
   printAir: boolean;
   data: Data | undefined;
   appJsonServicePath: string;
@@ -617,7 +624,8 @@ const fluenceRun = async ({
   secretKey,
   constants,
   logLevelCompiler,
-  logLevelAVM,
+  marineLogLevel,
+  printParticleId,
   printAir,
   timeout,
   data,
@@ -640,9 +648,9 @@ const fluenceRun = async ({
     fluencePeer.start({
       connectTo: relay,
       KeyPair: await KeyPair.fromEd25519SK(Buffer.from(secretKey, "base64")),
-      ...(typeof logLevelAVM === "string"
-        ? { debug: { marineLogLevel: logLevelAVM } }
-        : {}),
+      ...(typeof marineLogLevel === "string"
+        ? { debug: { marineLogLevel, printParticleId } }
+        : { debug: { printParticleId } }),
       ...(typeof timeout === "number" ? { defaultTtlMs: timeout } : {}),
     }),
   ]);
