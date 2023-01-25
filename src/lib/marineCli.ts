@@ -38,6 +38,7 @@ export type MarineCLI = {
       message?: string | undefined;
       keyValuePairs?: Record<string, string>;
       cwd?: string;
+      printOutput?: boolean;
     } & MarineCliInput
   ): Promise<string>;
 };
@@ -60,6 +61,7 @@ export const initMarineCli = async (
     message,
     keyValuePairs,
     cwd,
+    printOutput = true,
   }): Promise<string> =>
     execPromise({
       command: marineCliPath,
@@ -70,6 +72,6 @@ export const initMarineCli = async (
           ? undefined
           : getMessageWithKeyValuePairs(message, keyValuePairs),
       options: { cwd },
-      printOutput: true,
+      printOutput,
     });
 };
