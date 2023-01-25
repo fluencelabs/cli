@@ -15,26 +15,26 @@
  */
 
 import color from "@oclif/color";
+import { Args } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { generateNewModule } from "../../lib/generateNewModule";
-import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
-
-const PATH = "PATH";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine module template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override args = {
-    [PATH]: getArg(PATH, "Module path"),
+    path: Args.string({
+      description: "Module path",
+    }),
   };
   async run(): Promise<void> {
     const { args, isInteractive } = await initCli(this, await this.parse(New));
 
     const pathToModuleDir =
-      args[PATH] ??
+      args.path ??
       (await input({ isInteractive, message: "Enter module path" }));
 
     await generateNewModule(pathToModuleDir, this);

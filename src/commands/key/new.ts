@@ -17,19 +17,17 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
 import {
-  NAME_FLAG_NAME,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { generateKeyPair } from "../../lib/helpers/generateKeyPair";
-import { getArg } from "../../lib/helpers/getArg";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
 import { initCli } from "../../lib/lifecyle";
@@ -45,7 +43,9 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   static override args = {
-    [NAME_FLAG_NAME]: getArg(NAME_FLAG_NAME, "Key-pair name"),
+    name: Args.string({
+      description: "Key-pair name",
+    }),
   };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
@@ -65,7 +65,7 @@ export default class New extends BaseCommand<typeof New> {
     const enterKeyPairNameMessage = `Enter key-pair name to generate at ${secretsConfigPath}`;
 
     let keyPairName =
-      args[NAME_FLAG_NAME] ??
+      args.name ??
       (await input({
         isInteractive,
         message: enterKeyPairNameMessage,

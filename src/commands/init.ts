@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../baseCommand";
 import { templates } from "../lib/const";
-import { getArg } from "../lib/helpers/getArg";
 import { ensureTemplate, init } from "../lib/init";
 import { initCli } from "../lib/lifecyle";
-
-const PATH = "PATH";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description = "Initialize fluence project";
@@ -36,7 +33,9 @@ export default class Init extends BaseCommand<typeof Init> {
     }),
   };
   static override args = {
-    [PATH]: getArg(PATH, "Project path"),
+    path: Args.string({
+      description: "Project path",
+    }),
   };
   async run(): Promise<void> {
     const { commandObj, flags, isInteractive, args, maybeFluenceConfig } =
@@ -45,7 +44,7 @@ export default class Init extends BaseCommand<typeof Init> {
     await init({
       commandObj,
       isInteractive,
-      projectPath: args[PATH],
+      maybeProjectPath: args.path,
       maybeFluenceConfig,
       template: await ensureTemplate({
         isInteractive,

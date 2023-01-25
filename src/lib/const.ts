@@ -224,9 +224,6 @@ export const avmLogLevelsString = AVM_LOG_LEVELS.join(", ");
 export const isAvmLogLevel = (unknown: unknown): unknown is AvmLoglevel =>
   AVM_LOG_LEVELS.some((level) => level === unknown);
 
-export const FORCE_FLAG_NAME = "force";
-export const NAME_FLAG_NAME = "name";
-
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";
 

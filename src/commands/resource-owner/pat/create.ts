@@ -16,11 +16,10 @@
 
 import assert from "node:assert";
 
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../../baseCommand";
 import { NETWORK_FLAG } from "../../../lib/const";
-import { getArg } from "../../../lib/helpers/getArg";
 import { initCli } from "../../../lib/lifecyle";
 import { input } from "../../../lib/prompt";
 import {
@@ -47,7 +46,9 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     ...NETWORK_FLAG,
   };
   static override args = {
-    [DEAL_ADDRESS_ARG]: getArg(DEAL_ADDRESS_ARG, "Deal address"),
+    [DEAL_ADDRESS_ARG]: Args.string({
+      description: "Deal address",
+    }),
   };
   async run(): Promise<void> {
     const { args, flags, commandObj, isInteractive } = await initCli(

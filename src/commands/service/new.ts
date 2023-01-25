@@ -17,53 +17,51 @@
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 import camelcase from "camelcase";
 
 import { BaseCommand } from "../../baseCommand";
 import { addService } from "../../lib/addService";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
-import { FLUENCE_CONFIG_FILE_NAME, NAME_FLAG_NAME } from "../../lib/const";
+import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const";
 import { generateNewModule } from "../../lib/generateNewModule";
 import {
   AQUA_NAME_REQUIREMENTS,
   ensureValidAquaName,
   validateAquaName,
 } from "../../lib/helpers/downloadFile";
-import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { confirm, input } from "../../lib/prompt";
-
-const PATH = "PATH";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine service template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    [NAME_FLAG_NAME]: Flags.string({
+    name: Flags.string({
       description: `Unique service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
   };
   static override args = {
-    [PATH]: getArg(PATH, "Path to a service"),
+    path: Args.string({
+      description: "Path to a service",
+    }),
   };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
       await initCli(this, await this.parse(New));
 
     const servicePath =
-      args[PATH] ??
+      args.path ??
       (await input({ isInteractive, message: "Enter service path" }));
 
     const serviceName = await ensureValidAquaName({
       stringToValidate: await getServiceName({
         isInteractive,
-        nameFromFlags: flags[NAME_FLAG_NAME],
+        nameFromFlags: flags.name,
         servicePath,
       }),
       message: "Enter service name",
-      flagName: NAME_FLAG_NAME,
       isInteractive,
     });
 

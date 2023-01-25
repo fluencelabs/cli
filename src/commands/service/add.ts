@@ -17,7 +17,7 @@
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { addService } from "../../lib/addService";
@@ -29,7 +29,6 @@ import {
 } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
-  NAME_FLAG_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import {
@@ -40,7 +39,6 @@ import {
   isUrl,
 } from "../../lib/helpers/downloadFile";
 import { generateServiceInterface } from "../../lib/helpers/generateServiceInterface";
-import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { initMarineCli } from "../../lib/marineCli";
 import { input } from "../../lib/prompt";
@@ -51,16 +49,15 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add service to ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    [NAME_FLAG_NAME]: Flags.string({
+    name: Flags.string({
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
   };
   static override args = {
-    [PATH_OR_URL]: getArg(
-      PATH_OR_URL,
-      "Path to a service or url to .tar.gz archive"
-    ),
+    [PATH_OR_URL]: Args.string({
+      description: "Path to a service or url to .tar.gz archive",
+    }),
   };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, fluenceConfig } =
@@ -86,7 +83,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     const serviceName = await addService({
       commandObj,
-      serviceName: flags[NAME_FLAG_NAME] ?? serviceConfig.name,
+      serviceName: flags.name ?? serviceConfig.name,
       pathOrUrl: servicePathOrUrl,
       isInteractive,
       fluenceConfig,

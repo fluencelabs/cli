@@ -39,7 +39,6 @@ import {
   CommandObj,
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
-  FORCE_FLAG_NAME,
   FS_OPTIONS,
   KEY_PAIR_FLAG,
   KEY_PAIR_FLAG_NAME,
@@ -77,7 +76,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       description: "Relay node multiaddr",
       helpValue: "<multiaddr>",
     }),
-    [FORCE_FLAG_NAME]: Flags.boolean({
+    force: Flags.boolean({
       description: "Force removing of previously deployed app",
     }),
     ...TIMEOUT_FLAG,
@@ -130,13 +129,14 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     if (
       appConfig !== null &&
       Object.keys(appConfig.services).length > 0 &&
-      (isInteractive
-        ? await confirm({
-            isInteractive,
-            message:
-              "Do you want to select previously deployed services that you want to remove?",
-          })
-        : true)
+      (flags.force ||
+        (isInteractive
+          ? await confirm({
+              isInteractive,
+              message:
+                "Do you want to select previously deployed services that you want to remove?",
+            })
+          : true))
     ) {
       appConfig = await removeApp({
         appConfig,

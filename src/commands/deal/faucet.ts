@@ -15,7 +15,7 @@
  */
 
 import type { DeveloperFaucet } from "@fluencelabs/deal-aurora";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 import { BigNumber } from "ethers";
 
 import { BaseCommand } from "../../baseCommand";
@@ -27,7 +27,6 @@ import {
   TOKENS,
   TOKENS_STRING,
 } from "../../lib/const";
-import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { input, list } from "../../lib/prompt";
 import {
@@ -35,9 +34,6 @@ import {
   getDeveloperContract,
   getSigner,
 } from "../../lib/provider";
-
-const AMOUNT_ARG = "AMOUNT";
-const TOKEN_ARG = "TOKEN";
 
 const TOKEN_TO_METHOD_NAME_MAP: Record<
   Token,
@@ -62,8 +58,12 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
   };
 
   static override args = {
-    [AMOUNT_ARG]: getArg(AMOUNT_ARG, "Amount of tokens to receive"),
-    [TOKEN_ARG]: getArg(TOKEN_ARG, `Name of the token: ${TOKENS_STRING}`),
+    amount: Args.string({
+      description: "Amount of tokens to receive",
+    }),
+    token: Args.string({
+      description: `Name of the token: ${TOKENS_STRING}`,
+    }),
   };
 
   async run(): Promise<void> {
@@ -73,7 +73,7 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
     );
 
     const amount =
-      args[AMOUNT_ARG] ??
+      args.amount ??
       (await input({
         isInteractive,
         message: "Enter amount of tokens to receive",
@@ -86,7 +86,7 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
     const token = await resolveToken({
       commandObj,
       isInteractive,
-      tokenFromArgs: args[TOKEN_ARG],
+      tokenFromArgs: args.token,
     });
 
     const network = await ensureChainNetwork({

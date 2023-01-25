@@ -18,7 +18,7 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import {
@@ -30,7 +30,6 @@ import {
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { isUrl } from "../../lib/helpers/downloadFile";
-import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
 import { hasKey } from "../../lib/typeHelpers";
@@ -47,10 +46,9 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   static override args = {
-    [NAME_OR_PATH_OR_URL]: getArg(
-      NAME_OR_PATH_OR_URL,
-      `Module name from ${SERVICE_CONFIG_FILE_NAME}, path to a module or url to .tar.gz archive`
-    ),
+    [NAME_OR_PATH_OR_URL]: Args.string({
+      description: `Module name from ${SERVICE_CONFIG_FILE_NAME}, path to a module or url to .tar.gz archive`,
+    }),
   };
   async run(): Promise<void> {
     const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
@@ -66,8 +64,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
           SERVICE_CONFIG_FILE_NAME
         )}, path to a module or url to .tar.gz archive`,
       }));
-
-    assert(typeof nameOrPathOrUrl === "string");
 
     const serviceNameOrPath =
       flags.service ??
