@@ -133,7 +133,7 @@ const migrateConfig = async <
   }
 
   return {
-    latestConfig: latestConfig,
+    latestConfig,
     configString: migratedConfigString,
   };
 };
@@ -299,6 +299,7 @@ export function getReadonlyConfigInitFunction<
 
     try {
       // If config file exists, read it and add schema path comment if it's missing
+      // or replace it if it's incorrect
       const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
       const schemaPathComment = await getSchemaPathComment();
 
@@ -316,7 +317,6 @@ export function getReadonlyConfigInitFunction<
         // If config file doesn't exist and there is no default config, return null
         return null;
       }
-
       // If config file doesn't exist, create it with default config and schema path comment
 
       const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
