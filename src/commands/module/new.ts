@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import color from "@oclif/color";
 
 import { BaseCommand } from "../../baseCommand";
 import { generateNewModule } from "../../lib/generateNewModule";
+import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
 
@@ -28,20 +27,16 @@ const PATH = "PATH";
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine module template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override args = [
-    {
-      name: PATH,
-      description: "Module path",
-    },
-  ];
+  static override args = {
+    [PATH]: getArg(PATH, "Module path"),
+  };
   async run(): Promise<void> {
     const { args, isInteractive } = await initCli(this, await this.parse(New));
 
-    const pathToModuleDir: unknown =
+    const pathToModuleDir =
       args[PATH] ??
       (await input({ isInteractive, message: "Enter module path" }));
 
-    assert(typeof pathToModuleDir === "string");
     await generateNewModule(pathToModuleDir, this);
 
     this.log(

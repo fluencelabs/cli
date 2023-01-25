@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import type { DeveloperFaucet } from "@fluencelabs/deal-aurora";
 import { Flags } from "@oclif/core";
 import { BigNumber } from "ethers";
@@ -29,8 +27,9 @@ import {
   TOKENS,
   TOKENS_STRING,
 } from "../../lib/const";
+import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
-import { list } from "../../lib/prompt";
+import { input, list } from "../../lib/prompt";
 import {
   ensureChainNetwork,
   getDeveloperContract,
@@ -62,18 +61,10 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
     ...NETWORK_FLAG,
   };
 
-  static override args = [
-    {
-      name: AMOUNT_ARG,
-      description: "Amount of tokens to receive",
-      required: true,
-    },
-    {
-      name: TOKEN_ARG,
-      description: `Name of the token: ${TOKENS_STRING}`,
-      required: true,
-    },
-  ];
+  static override args = {
+    [AMOUNT_ARG]: getArg(AMOUNT_ARG, "Amount of tokens to receive"),
+    [TOKEN_ARG]: getArg(TOKEN_ARG, `Name of the token: ${TOKENS_STRING}`),
+  };
 
   async run(): Promise<void> {
     const { args, flags, commandObj, isInteractive } = await initCli(
@@ -81,8 +72,12 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
       await this.parse(Faucet)
     );
 
-    const amount: unknown = args[AMOUNT_ARG];
-    assert(typeof amount === "string");
+    const amount =
+      args[AMOUNT_ARG] ??
+      (await input({
+        isInteractive,
+        message: "Enter amount of tokens to receive",
+      }));
 
     const amountBigNumber = BigNumber.from(amount).mul(
       BigNumber.from(10).pow(18)
@@ -114,7 +109,7 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
 }
 
 type ResolveTokenArg = {
-  tokenFromArgs: unknown;
+  tokenFromArgs: string | undefined;
   commandObj: CommandObj;
   isInteractive: boolean;
 };
@@ -124,11 +119,13 @@ const resolveToken = ({
   isInteractive,
   tokenFromArgs,
 }: ResolveTokenArg) => {
-  if (isToken(tokenFromArgs)) {
-    return tokenFromArgs;
-  }
+  if (typeof tokenFromArgs === "string") {
+    if (isToken(tokenFromArgs)) {
+      return tokenFromArgs;
+    }
 
-  commandObj.warn(`Invalid token: ${String(tokenFromArgs)}`);
+    commandObj.warn(`Invalid token: ${tokenFromArgs}`);
+  }
 
   return list({
     isInteractive,

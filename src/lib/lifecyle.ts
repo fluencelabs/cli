@@ -15,6 +15,11 @@
  */
 
 import color from "@oclif/color";
+import type {
+  ParserOutput,
+  ArgOutput,
+  FlagOutput,
+} from "@oclif/core/lib/interfaces/parser";
 
 import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence";
 import {
@@ -62,7 +67,7 @@ const ensureUserConfig = async ({
   return newUserConfig;
 };
 
-type CommonReturn<A extends Args, F extends Flags> = {
+type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
   userConfig: UserConfig;
   commandObj: CommandObj;
   maybeFluenceConfig: FluenceConfig | null;
@@ -71,23 +76,42 @@ type CommonReturn<A extends Args, F extends Flags> = {
   flags: F;
 };
 
-type Args = Record<string, unknown>;
-type Flags = Record<string, unknown> & { [NO_INPUT_FLAG_NAME]: boolean };
+type ParserOutputWithNoInputFlag<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+> = ParserOutput<F, F2, A> & {
+  flags: {
+    [NO_INPUT_FLAG_NAME]: boolean;
+  };
+};
 
-export async function initCli<A extends Args, F extends Flags>(
+export async function initCli<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+>(
   commandObj: CommandObj,
-  { args, flags }: { args: A; flags: F },
+  parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
   requiresFluenceProject?: false
 ): Promise<CommonReturn<A, F> & { maybeFluenceConfig: FluenceConfig | null }>;
-export async function initCli<A extends Args, F extends Flags>(
+export async function initCli<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+>(
   commandObj: CommandObj,
-  { args, flags }: { args: A; flags: F },
+  parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
   requiresFluenceProject: true
 ): Promise<CommonReturn<A, F> & { fluenceConfig: FluenceConfig }>;
 
-export async function initCli<A extends Args, F extends Flags>(
+export async function initCli<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+>(
   commandObj: CommandObj,
-  { args, flags }: { args: A; flags: F },
+  { args, flags }: ParserOutputWithNoInputFlag<F, F2, A>,
   requiresFluenceProject = false
 ): Promise<
   CommonReturn<A, F> & {

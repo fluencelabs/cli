@@ -30,6 +30,7 @@ import {
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { downloadModule, isUrl } from "../../lib/helpers/downloadFile";
+import { getArg } from "../../lib/helpers/getArg";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
@@ -50,26 +51,24 @@ export default class Add extends BaseCommand<typeof Add> {
       helpValue: "<name | path>",
     }),
   };
-  static override args = [
-    {
-      name: PATH_OR_URL,
-      description: "Path to a module or url to .tar.gz archive",
-    },
-  ];
+  static override args = {
+    [PATH_OR_URL]: getArg(
+      PATH_OR_URL,
+      "Path to a module or url to .tar.gz archive"
+    ),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(Add)
     );
 
-    const modulePathOrUrl: unknown =
+    const modulePathOrUrl =
       args[PATH_OR_URL] ??
       (await input({
         isInteractive,
         message: "Enter path to a module or url to .tar.gz archive",
       }));
-
-    assert(typeof modulePathOrUrl === "string");
 
     const modulePath = isUrl(modulePathOrUrl)
       ? await downloadModule(modulePathOrUrl)

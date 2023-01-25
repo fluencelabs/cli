@@ -28,6 +28,7 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
+import { getArg } from "../../lib/helpers/getArg";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
 import { initCli } from "../../lib/lifecyle";
@@ -42,12 +43,9 @@ export default class Remove extends BaseCommand<typeof Remove> {
         "Remove key-pair from current user instead of removing key-pair from current project",
     }),
   };
-  static override args = [
-    {
-      name: NAME_FLAG_NAME,
-      description: "Key-pair name",
-    },
-  ];
+  static override args = {
+    [NAME_FLAG_NAME]: getArg(NAME_FLAG_NAME, "Key-pair name"),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
       await initCli(this, await this.parse(Remove));
@@ -63,9 +61,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
     );
 
-    let keyPairName: unknown = args[NAME_FLAG_NAME];
-
-    assert(typeof keyPairName === "string" || keyPairName === undefined);
+    let keyPairName = args[NAME_FLAG_NAME];
 
     const validateKeyPairName = async (
       keyPairName: string | undefined

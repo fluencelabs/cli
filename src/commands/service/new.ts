@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
@@ -31,6 +30,7 @@ import {
   ensureValidAquaName,
   validateAquaName,
 } from "../../lib/helpers/downloadFile";
+import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { confirm, input } from "../../lib/prompt";
 
@@ -45,21 +45,16 @@ export default class New extends BaseCommand<typeof New> {
       helpValue: "<name>",
     }),
   };
-  static override args = [
-    {
-      name: PATH,
-      description: "Path to a service",
-    },
-  ];
+  static override args = {
+    [PATH]: getArg(PATH, "Path to a service"),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
       await initCli(this, await this.parse(New));
 
-    const servicePath: unknown =
+    const servicePath =
       args[PATH] ??
       (await input({ isInteractive, message: "Enter service path" }));
-
-    assert(typeof servicePath === "string");
 
     const serviceName = await ensureValidAquaName({
       stringToValidate: await getServiceName({

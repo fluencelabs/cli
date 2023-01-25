@@ -20,7 +20,9 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../../baseCommand";
 import { NETWORK_FLAG } from "../../../lib/const";
+import { getArg } from "../../../lib/helpers/getArg";
 import { initCli } from "../../../lib/lifecyle";
+import { input } from "../../../lib/prompt";
 import {
   ensureChainNetwork,
   getDealContract,
@@ -44,15 +46,9 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     }),
     ...NETWORK_FLAG,
   };
-
-  static override args = [
-    {
-      name: DEAL_ADDRESS_ARG,
-      description: "Deal address",
-      required: true,
-    },
-  ];
-
+  static override args = {
+    [DEAL_ADDRESS_ARG]: getArg(DEAL_ADDRESS_ARG, "Deal address"),
+  };
   async run(): Promise<void> {
     const { args, flags, commandObj, isInteractive } = await initCli(
       this,
@@ -65,8 +61,9 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
       maybeChainNetwork: flags.network,
     });
 
-    const dealAddress: unknown = args[DEAL_ADDRESS_ARG];
-    assert(typeof dealAddress === "string");
+    const dealAddress =
+      args[DEAL_ADDRESS_ARG] ??
+      (await input({ isInteractive, message: "Enter deal address" }));
 
     const signer = await getSigner(network, flags.privKey, commandObj);
     const deal = getDealContract(dealAddress, signer);

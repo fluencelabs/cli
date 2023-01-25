@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
 import { Flags } from "@oclif/core";
@@ -34,6 +33,7 @@ import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
 } from "../../../lib/helpers/aquaImports";
+import { getArg } from "../../../lib/helpers/getArg";
 import { initCli } from "../../../lib/lifecyle";
 import { ensureNpmDependency } from "../../../lib/npm";
 
@@ -50,12 +50,13 @@ export default class Install extends BaseCommand<typeof Install> {
         "Force install even if the dependency/dependencies is/are already installed",
     }),
   };
-  static override args = [
-    {
-      name: PACKAGE_NAME_AND_VERSION_ARG_NAME,
-      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: "@fluencelabs/aqua-lib@0.6.0"`,
-    },
-  ];
+  static override args = {
+    [PACKAGE_NAME_AND_VERSION_ARG_NAME]: getArg(
+      PACKAGE_NAME_AND_VERSION_ARG_NAME,
+      "Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0"
+    ),
+  };
+
   async run(): Promise<void> {
     const { args, flags, fluenceConfig, commandObj } = await initCli(
       this,
@@ -63,15 +64,7 @@ export default class Install extends BaseCommand<typeof Install> {
       true
     );
 
-    const packageNameAndVersion: unknown =
-      args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
-
-    // packageNameAndVersion is always a string or undefined,
-    // while oclif framework says it's 'any'
-    assert(
-      packageNameAndVersion === undefined ||
-        typeof packageNameAndVersion === "string"
-    );
+    const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     const fluenceLockConfig =
       (await initFluenceLockConfig(this)) ??

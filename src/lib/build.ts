@@ -18,7 +18,7 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { CliUx } from "@oclif/core";
+import { ux } from "@oclif/core";
 
 import type { ConfigKeyPair } from "../lib/configs/keyPair";
 import type {
@@ -114,7 +114,7 @@ const resolveServiceInfos = async ({
     keyPair: ConfigKeyPair;
   }>;
 
-  CliUx.ux.action.start("Making sure all services are downloaded");
+  ux.action.start("Making sure all services are downloaded");
 
   const projectSecretsConfig = await initProjectSecretsConfig(commandObj);
 
@@ -137,7 +137,7 @@ const resolveServiceInfos = async ({
       }));
 
     if (keyPair === undefined) {
-      CliUx.ux.action.stop("paused");
+      ux.action.stop("paused");
 
       commandObj.warn(`Key pair ${color.yellow(keyPairName)} not found`);
 
@@ -152,7 +152,7 @@ const resolveServiceInfos = async ({
         return commandObj.error("Aborted");
       }
 
-      CliUx.ux.action.start("Making sure all services are downloaded");
+      ux.action.start("Making sure all services are downloaded");
 
       keyPair = await generateKeyPair(keyPairName);
       projectSecretsConfig.keyPairs.push(keyPair);
@@ -193,7 +193,7 @@ const resolveServiceInfos = async ({
     )
   );
 
-  CliUx.ux.action.stop();
+  ux.action.stop();
 
   return Promise.all(
     serviceConfigs.flatMap(
@@ -266,7 +266,7 @@ export const build = async ({
     ),
   ];
 
-  CliUx.ux.action.start("Making sure all modules are downloaded and built");
+  ux.action.start("Making sure all modules are downloaded and built");
 
   const mapOfModuleConfigs = new Map(
     await Promise.all(
@@ -281,7 +281,7 @@ export const build = async ({
               : await initReadonlyModuleConfig(get, commandObj);
 
             if (moduleConfig === null) {
-              CliUx.ux.action.stop(color.red("error"));
+              ux.action.stop(color.red("error"));
 
               return commandObj.error(
                 `Module with get: ${color.yellow(
@@ -304,7 +304,7 @@ export const build = async ({
     )
   );
 
-  CliUx.ux.action.stop();
+  ux.action.stop();
 
   const serviceNamePathToFacadeMap: Record<string, string> = {};
 

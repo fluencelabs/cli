@@ -30,6 +30,7 @@ import {
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { isUrl } from "../../lib/helpers/downloadFile";
+import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
 import { hasKey } from "../../lib/typeHelpers";
@@ -45,27 +46,20 @@ export default class Remove extends BaseCommand<typeof Remove> {
       helpValue: "<name | path>",
     }),
   };
-  static override args = [
-    {
-      name: NAME_OR_PATH_OR_URL,
-      description: `Module name from ${SERVICE_CONFIG_FILE_NAME}, path to a module or url to .tar.gz archive`,
-    },
-  ];
+  static override args = {
+    [NAME_OR_PATH_OR_URL]: getArg(
+      NAME_OR_PATH_OR_URL,
+      `Module name from ${SERVICE_CONFIG_FILE_NAME}, path to a module or url to .tar.gz archive`
+    ),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(Remove)
     );
 
-    const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
-
-    assert(
-      typeof nameOrPathOrUrlFromArgs === "string" ||
-        typeof nameOrPathOrUrlFromArgs === "undefined"
-    );
-
     const nameOrPathOrUrl =
-      nameOrPathOrUrlFromArgs ??
+      args[NAME_OR_PATH_OR_URL] ??
       (await input({
         isInteractive,
         message: `Enter module name from ${color.yellow(

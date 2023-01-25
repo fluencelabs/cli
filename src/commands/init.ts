@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import { Flags } from "@oclif/core";
 
 import { BaseCommand } from "../baseCommand";
 import { templates } from "../lib/const";
+import { getArg } from "../lib/helpers/getArg";
 import { ensureTemplate, init } from "../lib/init";
 import { initCli } from "../lib/lifecyle";
 
@@ -36,23 +35,17 @@ export default class Init extends BaseCommand<typeof Init> {
       char: "t",
     }),
   };
-  static override args = [
-    {
-      name: PATH,
-      description: "Project path",
-    },
-  ];
+  static override args = {
+    [PATH]: getArg(PATH, "Project path"),
+  };
   async run(): Promise<void> {
     const { commandObj, flags, isInteractive, args, maybeFluenceConfig } =
       await initCli(this, await this.parse(Init));
 
-    const projectPath: unknown = args[PATH];
-    assert(projectPath === undefined || typeof projectPath === "string");
-
     await init({
       commandObj,
       isInteractive,
-      projectPath,
+      projectPath: args[PATH],
       maybeFluenceConfig,
       template: await ensureTemplate({
         isInteractive,

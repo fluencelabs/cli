@@ -29,6 +29,7 @@ import {
 } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { generateKeyPair } from "../../lib/helpers/generateKeyPair";
+import { getArg } from "../../lib/helpers/getArg";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
 import { initCli } from "../../lib/lifecyle";
@@ -43,12 +44,9 @@ export default class New extends BaseCommand<typeof New> {
         "Generate key-pair for current user instead of generating key-pair for current project",
     }),
   };
-  static override args = [
-    {
-      name: NAME_FLAG_NAME,
-      description: "Key-pair name",
-    },
-  ];
+  static override args = {
+    [NAME_FLAG_NAME]: getArg(NAME_FLAG_NAME, "Key-pair name"),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
       await initCli(this, await this.parse(New));
@@ -66,7 +64,7 @@ export default class New extends BaseCommand<typeof New> {
 
     const enterKeyPairNameMessage = `Enter key-pair name to generate at ${secretsConfigPath}`;
 
-    let keyPairName: unknown =
+    let keyPairName =
       args[NAME_FLAG_NAME] ??
       (await input({
         isInteractive,
@@ -96,8 +94,6 @@ export default class New extends BaseCommand<typeof New> {
         validate: validateKeyPairName,
       });
     }
-
-    assert(typeof keyPairName === "string");
 
     const newKeyPair = await generateKeyPair(keyPairName);
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
@@ -41,6 +40,7 @@ import {
   isUrl,
 } from "../../lib/helpers/downloadFile";
 import { generateServiceInterface } from "../../lib/helpers/generateServiceInterface";
+import { getArg } from "../../lib/helpers/getArg";
 import { initCli } from "../../lib/lifecyle";
 import { initMarineCli } from "../../lib/marineCli";
 import { input } from "../../lib/prompt";
@@ -56,21 +56,19 @@ export default class Add extends BaseCommand<typeof Add> {
       helpValue: "<name>",
     }),
   };
-  static override args = [
-    {
-      name: PATH_OR_URL,
-      description: "Path to a service or url to .tar.gz archive",
-    },
-  ];
+  static override args = {
+    [PATH_OR_URL]: getArg(
+      PATH_OR_URL,
+      "Path to a service or url to .tar.gz archive"
+    ),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, fluenceConfig } =
       await initCli(this, await this.parse(Add), true);
 
-    const servicePathOrUrl: unknown =
+    const servicePathOrUrl =
       args[PATH_OR_URL] ??
       (await input({ isInteractive, message: "Enter service path or url" }));
-
-    assert(typeof servicePathOrUrl === "string");
 
     const servicePath = isUrl(servicePathOrUrl)
       ? await downloadService(servicePathOrUrl)
