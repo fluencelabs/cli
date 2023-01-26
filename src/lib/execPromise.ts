@@ -17,7 +17,7 @@
 import { spawn } from "node:child_process";
 
 import color from "@oclif/color";
-import { CliUx } from "@oclif/core";
+import { ux } from "@oclif/core";
 
 import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const";
 import { Flags, flagsToArgs } from "./helpers/flagsToArgs";
@@ -55,7 +55,7 @@ export const execPromise = ({
       );
 
   if (typeof message === "string") {
-    CliUx.ux.action.start(message);
+    ux.action.start(message);
   }
 
   const debugInfo = `Debug info:\n${commandToDisplay}\n`;
@@ -65,7 +65,7 @@ export const execPromise = ({
       timeout !== undefined &&
       setTimeout((): void => {
         if (typeof message === "string") {
-          CliUx.ux.action.stop(color.red("Timed out"));
+          ux.action.stop(color.red("Timed out"));
         }
 
         childProcess.kill();
@@ -107,7 +107,7 @@ export const execPromise = ({
       childProcess.kill();
 
       if (typeof message === "string") {
-        CliUx.ux.action.stop(color.red("failed"));
+        ux.action.stop(color.red("failed"));
       }
 
       rej(new Error(`${String(error)}\n${debugInfo}`));
@@ -117,7 +117,7 @@ export const execPromise = ({
       childProcess.kill();
 
       if (typeof message === "string") {
-        CliUx.ux.action.stop(code === 0 ? "done" : color.red("failed"));
+        ux.action.stop(code === 0 ? "done" : color.red("failed"));
       }
 
       if (execTimeout !== false) {

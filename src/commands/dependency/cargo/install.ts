@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../../baseCommand";
 import {
@@ -55,14 +53,13 @@ export default class Install extends BaseCommand<typeof Install> {
         "Force install even if the dependency/dependencies is/are already installed",
     }),
   };
-  static override args = [
-    {
-      name: PACKAGE_NAME_AND_VERSION_ARG_NAME,
-      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: ${color.yellow(
-        "marine@0.12.4"
-      )}`,
-    },
-  ];
+  static override args = {
+    [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
+      description:
+        "Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: marine@0.12.4",
+    }),
+  };
+
   async run(): Promise<void> {
     const { args, flags, commandObj, fluenceConfig } = await initCli(
       this,
@@ -74,15 +71,7 @@ export default class Install extends BaseCommand<typeof Install> {
       (await initFluenceLockConfig(this)) ??
       (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
 
-    const packageNameAndVersion: unknown =
-      args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
-
-    // packageNameAndVersion is always a string or undefined,
-    // while oclif framework says it's 'any'
-    assert(
-      packageNameAndVersion === undefined ||
-        typeof packageNameAndVersion === "string"
-    );
+    const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     // if packageNameAndVersion not provided just install all cargo dependencies
     if (packageNameAndVersion === undefined) {

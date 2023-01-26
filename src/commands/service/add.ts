@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { addService } from "../../lib/addService";
@@ -30,7 +29,6 @@ import {
 } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
-  NAME_FLAG_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import {
@@ -51,26 +49,23 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add service to ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    [NAME_FLAG_NAME]: Flags.string({
+    name: Flags.string({
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
   };
-  static override args = [
-    {
-      name: PATH_OR_URL,
+  static override args = {
+    [PATH_OR_URL]: Args.string({
       description: "Path to a service or url to .tar.gz archive",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, fluenceConfig } =
       await initCli(this, await this.parse(Add), true);
 
-    const servicePathOrUrl: unknown =
+    const servicePathOrUrl =
       args[PATH_OR_URL] ??
       (await input({ isInteractive, message: "Enter service path or url" }));
-
-    assert(typeof servicePathOrUrl === "string");
 
     const servicePath = isUrl(servicePathOrUrl)
       ? await downloadService(servicePathOrUrl)
@@ -88,7 +83,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     const serviceName = await addService({
       commandObj,
-      serviceName: flags[NAME_FLAG_NAME] ?? serviceConfig.name,
+      serviceName: flags.name ?? serviceConfig.name,
       pathOrUrl: servicePathOrUrl,
       isInteractive,
       fluenceConfig,

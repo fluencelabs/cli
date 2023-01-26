@@ -17,6 +17,7 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
+import { Args } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const";
@@ -28,12 +29,11 @@ const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove service from ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override args = [
-    {
-      name: NAME_OR_PATH_OR_URL,
+  static override args = {
+    [NAME_OR_PATH_OR_URL]: Args.string({
       description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
     const { args, isInteractive, fluenceConfig } = await initCli(
       this,
@@ -41,15 +41,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
       true
     );
 
-    const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
-
-    assert(
-      typeof nameOrPathOrUrlFromArgs === "string" ||
-        typeof nameOrPathOrUrlFromArgs === "undefined"
-    );
-
     const nameOrPathOrUrl =
-      nameOrPathOrUrlFromArgs ??
+      args[NAME_OR_PATH_OR_URL] ??
       (await input({
         isInteractive,
         message: `Enter service name from ${color.yellow(
