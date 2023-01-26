@@ -18,7 +18,7 @@ import assert from "node:assert";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
@@ -26,7 +26,6 @@ import { initServiceConfig } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   MODULE_CONFIG_FILE_NAME,
-  NAME_FLAG_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { downloadModule, isUrl } from "../../lib/helpers/downloadFile";
@@ -41,7 +40,7 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add module to ${SERVICE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    [NAME_FLAG_NAME]: Flags.string({
+    name: Flags.string({
       description: "Override module name",
       helpValue: "<name>",
     }),
@@ -50,26 +49,23 @@ export default class Add extends BaseCommand<typeof Add> {
       helpValue: "<name | path>",
     }),
   };
-  static override args = [
-    {
-      name: PATH_OR_URL,
+  static override args = {
+    [PATH_OR_URL]: Args.string({
       description: "Path to a module or url to .tar.gz archive",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(Add)
     );
 
-    const modulePathOrUrl: unknown =
+    const modulePathOrUrl =
       args[PATH_OR_URL] ??
       (await input({
         isInteractive,
         message: "Enter path to a module or url to .tar.gz archive",
       }));
-
-    assert(typeof modulePathOrUrl === "string");
 
     const modulePath = isUrl(modulePathOrUrl)
       ? await downloadModule(modulePathOrUrl)
@@ -127,7 +123,7 @@ export default class Add extends BaseCommand<typeof Add> {
         serviceConfig.$getPath()
       )}`;
 
-    let validModuleName = flags[NAME_FLAG_NAME] ?? moduleConfig.name;
+    let validModuleName = flags.name ?? moduleConfig.name;
     const serviceNameValidity = validateModuleName(validModuleName);
 
     if (serviceNameValidity !== true) {

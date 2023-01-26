@@ -18,7 +18,7 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 
 import color from "@oclif/color";
-import { CliUx } from "@oclif/core";
+import { ux } from "@oclif/core";
 
 import type { AquaCLI } from "./aquaCli";
 import type { ServicesV3 } from "./configs/project/app";
@@ -146,7 +146,7 @@ export const generateRegisterApp = async ({
   if (typeof fluenceConfig?.appJSPath === "string") {
     const appJSPath = path.resolve(projectRootDir, fluenceConfig.appJSPath);
 
-    CliUx.ux.action.start(
+    ux.action.start(
       `Compiling ${color.yellow(
         replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
       )} to ${color.yellow(replaceHomeDir(appJSPath))}`
@@ -158,13 +158,13 @@ export const generateRegisterApp = async ({
       fluenceJSorTSDir: appJSPath,
     });
 
-    CliUx.ux.action.stop();
+    ux.action.stop();
   }
 
   if (typeof fluenceConfig?.appTSPath === "string") {
     const appTSPath = path.resolve(projectRootDir, fluenceConfig.appTSPath);
 
-    CliUx.ux.action.start(
+    ux.action.start(
       `Compiling ${color.yellow(
         replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
       )} to ${color.yellow(replaceHomeDir(appTSPath))}`
@@ -176,7 +176,7 @@ export const generateRegisterApp = async ({
       fluenceJSorTSDir: path.resolve(appTSPath),
     });
 
-    CliUx.ux.action.stop();
+    ux.action.stop();
   }
 };
 

@@ -21,7 +21,7 @@ import path from "node:path";
 
 import stringifyToTOML from "@iarna/toml/stringify";
 import color from "@oclif/color";
-import { CliUx, Command } from "@oclif/core";
+import { Args, Command, ux } from "@oclif/core";
 
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
@@ -66,25 +66,17 @@ export default class REPL extends Command {
   static override flags = {
     ...NO_INPUT_FLAG,
   };
-  static override args = [
-    {
-      name: NAME_OR_PATH_OR_URL,
+  static override args = {
+    [NAME_OR_PATH_OR_URL]: Args.string({
       description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
     const { args, isInteractive, commandObj, maybeFluenceConfig } =
       await initCli(this, await this.parse(REPL));
 
-    const nameOrPathOrUrlFromArgs: unknown = args[NAME_OR_PATH_OR_URL];
-
-    assert(
-      typeof nameOrPathOrUrlFromArgs === "string" ||
-        typeof nameOrPathOrUrlFromArgs === "undefined"
-    );
-
     const nameOrPathOrUrl =
-      nameOrPathOrUrlFromArgs ??
+      args[NAME_OR_PATH_OR_URL] ??
       (await input({
         isInteractive,
         message: `Enter service name from ${color.yellow(
@@ -92,9 +84,7 @@ export default class REPL extends Command {
         )}, path to a service or url to .tar.gz archive`,
       }));
 
-    CliUx.ux.action.start(
-      "Making sure service and modules are downloaded and built"
-    );
+    ux.action.start("Making sure service and modules are downloaded and built");
 
     const serviceModules = await ensureServiceConfig({
       commandObj,
@@ -115,7 +105,7 @@ export default class REPL extends Command {
       marineCli,
     });
 
-    CliUx.ux.action.stop();
+    ux.action.stop();
 
     const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
 
@@ -189,7 +179,7 @@ const ensureServiceConfig = async ({
   )?.modules;
 
   if (readonlyServiceConfig === undefined) {
-    CliUx.ux.action.stop(color.red("error"));
+    ux.action.stop(color.red("error"));
     return commandObj.error(
       `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
         SERVICE_CONFIG_FILE_NAME
@@ -240,15 +230,21 @@ const ensureModuleConfigs = ({
         (async (): Promise<TomlModuleConfig> => {
           const modulePath = isUrl(get) ? await downloadModule(get) : get;
 
-          const moduleConfig =
-            (await initReadonlyModuleConfig(modulePath, commandObj)) ??
-            CliUx.ux.action.stop(color.red("error")) ??
-            commandObj.error(
+          const maybeModuleConfig = await initReadonlyModuleConfig(
+            modulePath,
+            commandObj
+          );
+
+          if (maybeModuleConfig === null) {
+            ux.action.stop(color.red("error"));
+            return commandObj.error(
               `Module with get: ${color.yellow(
                 get
               )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
             );
+          }
 
+          const moduleConfig = maybeModuleConfig;
           const overriddenModules = { ...moduleConfig, ...overrides };
 
           const {

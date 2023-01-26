@@ -20,28 +20,34 @@ import { NO_INPUT_FLAG } from "./lib/const";
 import { exitCli } from "./lib/lifecyle";
 
 export type Flags<T extends typeof Command> = Interfaces.InferredFlags<
-  typeof BaseCommand["globalFlags"] & T["flags"]
+  typeof BaseCommand["baseFlags"] & T["flags"]
 >;
+export type Args<T extends typeof Command> = Interfaces.InferredArgs<T["args"]>;
 
 export abstract class BaseCommand<T extends typeof Command> extends Command {
   // define flags that can be inherited by any command that extends BaseCommand
-  static override globalFlags = {
+  static override baseFlags = {
     ...NO_INPUT_FLAG,
   };
 
   protected flags!: Flags<T>;
+  protected args!: Args<T>;
 
   override async init(): Promise<void> {
     await super.init();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse(
+    const { args, flags } = await this.parse({
+      flags: this.ctor.flags,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.constructor as Interfaces.Command.Class
-    );
+      baseFlags: (super.ctor as typeof BaseCommand).baseFlags,
+      args: this.ctor.args,
+      strict: this.ctor.strict,
+    });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.flags = flags;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.flags = flags as Flags<T>;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.args = args as Args<T>;
   }
 
   protected override async catch(

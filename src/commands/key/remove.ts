@@ -17,13 +17,12 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
 import {
-  NAME_FLAG_NAME,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../lib/const";
@@ -42,12 +41,11 @@ export default class Remove extends BaseCommand<typeof Remove> {
         "Remove key-pair from current user instead of removing key-pair from current project",
     }),
   };
-  static override args = [
-    {
-      name: NAME_FLAG_NAME,
+  static override args = {
+    name: Args.string({
       description: "Key-pair name",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
       await initCli(this, await this.parse(Remove));
@@ -63,9 +61,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
     );
 
-    let keyPairName: unknown = args[NAME_FLAG_NAME];
-
-    assert(typeof keyPairName === "string" || keyPairName === undefined);
+    let keyPairName = args.name;
 
     const validateKeyPairName = async (
       keyPairName: string | undefined

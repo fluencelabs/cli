@@ -17,12 +17,11 @@
 import assert from "node:assert";
 
 import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
-import { NAME_FLAG_NAME } from "../../lib/const";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
@@ -38,12 +37,11 @@ export default class Default extends BaseCommand<typeof Default> {
         "Set default key-pair for current user instead of current project",
     }),
   };
-  static override args = [
-    {
-      name: NAME_FLAG_NAME,
+  static override args = {
+    name: Args.string({
       description: "Key-pair name",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
     const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
       await initCli(this, await this.parse(Default));
@@ -59,9 +57,7 @@ export default class Default extends BaseCommand<typeof Default> {
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
     );
 
-    let keyPairName: unknown = args[NAME_FLAG_NAME];
-
-    assert(typeof keyPairName === "string" || keyPairName === undefined);
+    let keyPairName = args.name;
 
     const validateKeyPairName = async (
       keyPairName: string | undefined

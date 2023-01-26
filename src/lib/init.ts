@@ -196,7 +196,7 @@ type InitArg = {
   commandObj: CommandObj;
   isInteractive: boolean;
   maybeFluenceConfig?: FluenceConfig | null | undefined;
-  projectPath?: string | undefined;
+  maybeProjectPath?: string | undefined;
   template?: Template;
 };
 
@@ -211,10 +211,10 @@ export const init = async (options: InitArg): Promise<FluenceConfig> => {
   Countly.add_event({ key: `init:template:${template}` });
 
   const projectPath =
-    options.projectPath === undefined && !isInteractive
+    options.maybeProjectPath === undefined && !isInteractive
       ? process.cwd()
       : path.resolve(
-          options.projectPath ??
+          options.maybeProjectPath ??
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory:",

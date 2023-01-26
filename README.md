@@ -281,7 +281,7 @@ USAGE
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
                                        to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: "@fluencelabs/aqua-lib@0.6.0"
+                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -421,7 +421,7 @@ USAGE
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
                                        to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: "@fluencelabs/aqua-lib@0.6.0"
+                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -449,7 +449,7 @@ USAGE
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
                                        to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: "@fluencelabs/aqua-lib@0.6.0"
+                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
