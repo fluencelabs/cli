@@ -73,7 +73,7 @@
     "@types/filenamify": "^2.0.2",
     "@types/iarna__toml": "^2.0.2",
     "@types/inquirer": "^8",
-    "@types/jest": "^27.5.2",
+    "@types/jest": "^29.0.0",
     "@types/lodash": "^4.14.191",
     "@types/node": "^17.0.41",
     "@types/node-fetch": "^2.6.2",
