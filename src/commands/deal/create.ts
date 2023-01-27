@@ -76,20 +76,18 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const tx = await factory.createDeal(
       utils.keccak256(utils.toUtf8Bytes(flags.subnetId)), // TODO: base64?
-      {
-        paymentToken: (await getUSDContract(signer, network)).address,
-        pricePerEpoch: BigNumber.from(flags.pricePerEpoch).mul(
-          BigNumber.from(10).pow(18)
-        ),
-        requiredStake: BigNumber.from(flags.requiredStake).mul(
-          BigNumber.from(10).pow(18)
-        ),
-      }
+      (
+        await getUSDContract(signer, network)
+      ).address,
+      BigNumber.from(flags.pricePerEpoch).mul(BigNumber.from(10).pow(18)),
+      BigNumber.from(flags.requiredStake).mul(BigNumber.from(10).pow(18))
     );
 
     const res = await tx.wait();
     const eventTopic = factory.interface.getEventTopic(EVENT_TOPIC_FRAGMENT);
-    const log = res.logs.find(({ topics }) => topics[0] === eventTopic);
+    const log = res.logs.find(
+      (log: { topics: Array<any> }) => log.topics[0] === eventTopic
+    );
     assert(log !== undefined);
 
     const dealAddress: unknown =

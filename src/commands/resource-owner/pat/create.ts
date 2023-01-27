@@ -70,7 +70,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const deal = getDealContract(dealAddress, signer);
     const flt = await getFLTContract(signer, network);
 
-    const v = (await deal.settings()).requiredStake;
+    const v = await deal.requiredStake();
     const approveTx = await flt.approve(dealAddress, v);
     const signerAddress = await signer.getAddress();
     const dealRole = await deal.getRole(signerAddress);
@@ -79,14 +79,15 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
       await (await deal.register()).wait();
     }
 
-    await (await deal.deposit(flt.address, v)).wait();
-    const res = await (await deal.addProviderToken(approveTx.hash)).wait();
+    const res = await (await deal.createProviderToken(approveTx.hash)).wait();
 
     const eventTopic = deal.interface.getEventTopic(
       ADD_PROVIDER_TOKEN_EVENT_TOPIC
     );
 
-    const log = res.logs.find(({ topics }) => topics[0] === eventTopic);
+    const log = res.logs.find(
+      (log: { topics: Array<any> }) => log.topics[0] === eventTopic
+    );
     assert(log !== undefined);
     const patId: unknown = deal.interface.parseLog(log).args["id"];
     assert(typeof patId === "string");
