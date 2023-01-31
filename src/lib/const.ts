@@ -44,7 +44,7 @@ export const CHAIN_NETWORKS = [
 
 export const isChainNetwork = (unknown: unknown): unknown is ChainNetwork =>
   CHAIN_NETWORKS.some((n) => n === unknown);
-export type ChainNetwork = typeof CHAIN_NETWORKS[number];
+export type ChainNetwork = (typeof CHAIN_NETWORKS)[number];
 
 export type ChainConfig = {
   ethereumNodeUrl: string;
@@ -65,9 +65,9 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   },
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
-    coreAddress: "0x5645d336434d65Bb939a9F787C64798C419eA921",
-    dealFactoryAddress: "0x966C62Fe1695efb869B0493C0bd3820b3A1FAa7a",
-    developerFaucetAddress: "0x2568f501205cF16aAF6E8C6557Db5a3b3cb6F937",
+    coreAddress: "0x63e3C161081Ce2c03C39451E01c9d02b8BB108CC",
+    dealFactoryAddress: "0x7489685Eb4559fcE7Fd71D201a773a6562d246b5",
+    developerFaucetAddress: "0xAaA84F66894D313274D3CB5C07F3D3322834e78C",
     chainId: 1_313_161_555,
   },
 };
@@ -179,12 +179,12 @@ export const NETWORK_FLAG = {
 
 export const TOKENS = ["FakeUSD", "FLT"] as const;
 export const TOKENS_STRING = TOKENS.join(", ");
-export type Token = typeof TOKENS[number];
+export type Token = (typeof TOKENS)[number];
 export const isToken = (unknown: unknown): unknown is Token =>
   TOKENS.some((val): boolean => unknown === val);
 
 export const templates = ["minimal", "ts", "js"] as const;
-export type Template = typeof templates[number];
+export type Template = (typeof templates)[number];
 export const isTemplate = (unknown: unknown): unknown is Template =>
   templates.some((val): boolean => unknown === val);
 
@@ -198,7 +198,7 @@ export const AQUA_LOG_LEVELS = [
   "off",
 ] as const;
 
-export type AquaLogLevel = typeof AQUA_LOG_LEVELS[number];
+export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
 
 export const isAquaLogLevel = (unknown: unknown): unknown is AquaLogLevel =>
   AQUA_LOG_LEVELS.some((val): boolean => unknown === val);
