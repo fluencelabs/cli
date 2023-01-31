@@ -85,9 +85,11 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const res = await tx.wait();
     const eventTopic = factory.interface.getEventTopic(EVENT_TOPIC_FRAGMENT);
+
     const log = res.logs.find(
       (log: { topics: Array<any> }) => log.topics[0] === eventTopic
     );
+
     assert(log !== undefined);
 
     const dealAddress: unknown =

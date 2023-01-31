@@ -88,6 +88,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const log = res.logs.find(
       (log: { topics: Array<any> }) => log.topics[0] === eventTopic
     );
+
     assert(log !== undefined);
     const patId: unknown = deal.interface.parseLog(log).args["id"];
     assert(typeof patId === "string");
