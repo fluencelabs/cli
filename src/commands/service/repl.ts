@@ -23,12 +23,9 @@ import stringifyToTOML from "@iarna/toml/stringify";
 import color from "@oclif/color";
 import { Args, Command, ux } from "@oclif/core";
 
+import { buildModule } from "../../lib/build";
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
-import {
-  initReadonlyModuleConfig,
-  MODULE_TYPE_RUST,
-} from "../../lib/configs/project/module";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
@@ -38,16 +35,13 @@ import {
   CommandObj,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
-  MODULE_CONFIG_FILE_NAME,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import { haltCountly } from "../../lib/countly";
 import {
-  downloadModule,
   downloadService,
-  getModuleUrlOrAbsolutePath,
   getModuleWasmPath,
   isUrl,
 } from "../../lib/helpers/downloadFile";
@@ -86,7 +80,7 @@ export default class REPL extends Command {
 
     ux.action.start("Making sure service and modules are downloaded and built");
 
-    const serviceModules = await ensureServiceConfig({
+    const { serviceModules, serviceDirPath } = await ensureServiceConfig({
       commandObj,
       nameOrPathOrUrl,
     });
@@ -94,7 +88,7 @@ export default class REPL extends Command {
     const maybeFluenceLockConfig = await initFluenceLockConfig(this);
 
     const marineCli = await initMarineCli(
-      this,
+      commandObj,
       maybeFluenceConfig,
       maybeFluenceLockConfig
     );
@@ -103,6 +97,7 @@ export default class REPL extends Command {
       serviceModules,
       commandObj,
       marineCli,
+      serviceDirPath,
     });
 
     ux.action.stop();
@@ -164,7 +159,10 @@ type EnsureServiceConfigArg = {
 const ensureServiceConfig = async ({
   commandObj,
   nameOrPathOrUrl,
-}: EnsureServiceConfigArg): Promise<Array<ServiceModule>> => {
+}: EnsureServiceConfigArg): Promise<{
+  serviceModules: Array<ServiceModule>;
+  serviceDirPath: string;
+}> => {
   const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
 
   const get =
@@ -190,12 +188,10 @@ const ensureServiceConfig = async ({
   const { [FACADE_MODULE_NAME]: facade, ...otherModules } =
     readonlyServiceConfig;
 
-  return [...Object.values(otherModules), facade].map(
-    (moduleConfig): ServiceModule => ({
-      ...moduleConfig,
-      get: getModuleUrlOrAbsolutePath(moduleConfig.get, serviceDirPath),
-    })
-  );
+  return {
+    serviceDirPath,
+    serviceModules: [...Object.values(otherModules), facade],
+  };
 };
 
 /* eslint-disable camelcase */
@@ -217,57 +213,39 @@ type EnsureModuleConfigsArg = {
   serviceModules: Array<ServiceModule>;
   commandObj: CommandObj;
   marineCli: MarineCLI;
+  serviceDirPath: string;
 };
 
 const ensureModuleConfigs = ({
   commandObj,
   serviceModules,
   marineCli,
+  serviceDirPath,
 }: EnsureModuleConfigsArg): Promise<Array<TomlModuleConfig>> =>
   Promise.all(
     serviceModules.map(
       ({ get, ...overrides }): Promise<TomlModuleConfig> =>
         (async (): Promise<TomlModuleConfig> => {
-          const modulePath = isUrl(get) ? await downloadModule(get) : get;
-
-          const maybeModuleConfig = await initReadonlyModuleConfig(
-            modulePath,
-            commandObj
-          );
-
-          if (maybeModuleConfig === null) {
-            ux.action.stop(color.red("error"));
-            return commandObj.error(
-              `Module with get: ${color.yellow(
-                get
-              )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
-            );
-          }
-
-          const moduleConfig = maybeModuleConfig;
-          const overriddenModules = { ...moduleConfig, ...overrides };
+          const overriddenModuleConfig = await buildModule({
+            get,
+            commandObj,
+            marineCli,
+            serviceDirPath,
+            overrides,
+          });
 
           const {
             name,
             envs,
             loggerEnabled,
             volumes,
-            type,
             preopenedFiles,
             mountedBinaries,
             maxHeapSize,
             loggingMask,
-          } = overriddenModules;
+          } = overriddenModuleConfig;
 
-          if (type === MODULE_TYPE_RUST) {
-            await marineCli({
-              args: ["build"],
-              flags: { release: true },
-              cwd: path.dirname(moduleConfig.$getPath()),
-            });
-          }
-
-          const load_from = getModuleWasmPath(overriddenModules);
+          const load_from = getModuleWasmPath(overriddenModuleConfig);
 
           const tomlModuleConfig: TomlModuleConfig = {
             name,

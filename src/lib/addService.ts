@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+import path from "node:path";
+
 import color from "@oclif/color";
 
+import { buildModule } from "./build";
 import type { FluenceConfig } from "./configs/project/fluence";
+import {
+  FACADE_MODULE_NAME,
+  ServiceConfigReadonly,
+} from "./configs/project/service";
 import {
   CommandObj,
   DEFAULT_DEPLOY_NAME,
@@ -24,8 +31,11 @@ import {
 } from "./const";
 import {
   AQUA_NAME_REQUIREMENTS,
+  getModuleWasmPath,
   validateAquaName,
 } from "./helpers/downloadFile";
+import { generateServiceInterface } from "./helpers/generateServiceInterface";
+import type { MarineCLI } from "./marineCli";
 import { input } from "./prompt";
 
 type AddServiceArg = {
@@ -34,15 +44,21 @@ type AddServiceArg = {
   pathOrUrl: string;
   isInteractive: boolean;
   fluenceConfig: FluenceConfig;
+  serviceConfig: ServiceConfigReadonly;
+  marineCli: MarineCLI;
 };
 
 export const addService = async ({
   commandObj,
-  serviceName,
+  serviceName: serviceNameFromArgs,
   pathOrUrl,
   isInteractive,
   fluenceConfig,
+  serviceConfig,
+  marineCli,
 }: AddServiceArg): Promise<string> => {
+  let serviceName = serviceNameFromArgs;
+
   if (fluenceConfig.services === undefined) {
     fluenceConfig.services = {};
   }
@@ -62,13 +78,12 @@ export const addService = async ({
     );
   };
 
-  let validServiceName = serviceName;
-  const serviceNameValidity = validateServiceName(validServiceName);
+  const serviceNameValidity = validateServiceName(serviceName);
 
   if (serviceNameValidity !== true) {
     commandObj.warn(serviceNameValidity);
 
-    validServiceName = await input({
+    serviceName = await input({
       isInteractive,
       message: `Enter another name for the service (${AQUA_NAME_REQUIREMENTS})`,
       validate: validateServiceName,
@@ -77,7 +92,7 @@ export const addService = async ({
 
   fluenceConfig.services = {
     ...fluenceConfig.services,
-    [validServiceName]: {
+    [serviceName]: {
       get: pathOrUrl,
       deploy: [
         {
@@ -87,6 +102,37 @@ export const addService = async ({
     },
   };
 
+  const moduleConfigs = await Promise.all(
+    Object.entries(serviceConfig.modules).map(([name, { get }]) =>
+      (async () => {
+        const moduleConfig = await buildModule({
+          get,
+          marineCli,
+          commandObj,
+          serviceDirPath: path.dirname(serviceConfig.$getPath()),
+        });
+
+        return [name, moduleConfig] as const;
+      })()
+    )
+  );
+
+  const maybeFacadeReadonlyConfig = moduleConfigs.find(
+    ([name]) => name === FACADE_MODULE_NAME
+  )?.[1];
+
+  if (maybeFacadeReadonlyConfig === undefined) {
+    throw new Error("Unreachable. Facade module config not found");
+  }
+
+  const facadeReadonlyConfig = maybeFacadeReadonlyConfig;
+
+  await generateServiceInterface({
+    pathToFacadeWasm: getModuleWasmPath(facadeReadonlyConfig),
+    marineCli,
+    serviceName,
+  });
+
   await fluenceConfig.$commit();
 
   commandObj.log(
@@ -95,5 +141,5 @@ export const addService = async ({
     )}`
   );
 
-  return validServiceName;
+  return serviceName;
 };

@@ -137,13 +137,33 @@ const isRustInstalled = async (): Promise<boolean> => {
   }
 };
 
-const hasRequiredRustToolchain = async (): Promise<boolean> =>
-  (
+const regExpRecommendedToolchain = new RegExp(
+  `^${REQUIRED_RUST_TOOLCHAIN}.*\\(override\\)$`,
+  "gm"
+);
+
+const hasRequiredRustToolchain = async (): Promise<boolean> => {
+  const toolChainList = await execPromise({
+    command: RUSTUP,
+    args: ["toolchain", "list"],
+  });
+
+  const hasRequiredRustToolchain = toolChainList.includes(
+    REQUIRED_RUST_TOOLCHAIN
+  );
+
+  if (
+    hasRequiredRustToolchain &&
+    !regExpRecommendedToolchain.test(toolChainList)
+  ) {
     await execPromise({
       command: RUSTUP,
-      args: ["toolchain", "list"],
-    })
-  ).includes(REQUIRED_RUST_TOOLCHAIN);
+      args: ["override", "set", REQUIRED_RUST_TOOLCHAIN],
+    });
+  }
+
+  return hasRequiredRustToolchain;
+};
 
 const hasRequiredRustTarget = async (): Promise<boolean> =>
   (

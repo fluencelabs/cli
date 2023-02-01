@@ -23,9 +23,9 @@ import { js, jsFile } from "./helpers/jsTemplateLitteral";
 import { local } from "./localNodes";
 import { FLUENCE_ENV } from "./setupEnvironment";
 
-export const AQUA_RECOMMENDED_VERSION = "0.9.2";
+export const AQUA_RECOMMENDED_VERSION = "0.9.4";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
-export const MARINE_RECOMMENDED_VERSION = "0.12.5";
+export const MARINE_RECOMMENDED_VERSION = "0.12.6";
 export const MREPL_RECOMMENDED_VERSION = "0.18.8";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";

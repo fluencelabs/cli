@@ -28,7 +28,7 @@ import {
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
-import { downloadModule, isUrl } from "../../lib/helpers/downloadFile";
+import { getModuleAbsolutePath, isUrl } from "../../lib/helpers/downloadFile";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
 import { initCli } from "../../lib/lifecyle";
 import { input } from "../../lib/prompt";
@@ -55,10 +55,8 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Add)
-    );
+    const { args, flags, isInteractive, maybeFluenceConfig, commandObj } =
+      await initCli(this, await this.parse(Add));
 
     const modulePathOrUrl =
       args[PATH_OR_URL] ??
@@ -67,14 +65,11 @@ export default class Add extends BaseCommand<typeof Add> {
         message: "Enter path to a module or url to .tar.gz archive",
       }));
 
-    const modulePath = isUrl(modulePathOrUrl)
-      ? await downloadModule(modulePathOrUrl)
-      : modulePathOrUrl;
-
-    const moduleConfig = await initReadonlyModuleConfig(modulePath, this);
+    const modulePath = await getModuleAbsolutePath(modulePathOrUrl);
+    const moduleConfig = await initReadonlyModuleConfig(modulePath, commandObj);
 
     if (moduleConfig === null) {
-      this.error(
+      return commandObj.error(
         `${color.yellow(
           MODULE_CONFIG_FILE_NAME
         )} not found for ${modulePathOrUrl}`
@@ -90,46 +85,45 @@ export default class Add extends BaseCommand<typeof Add> {
         )} or path to the service directory`,
       }));
 
-    let servicePath = serviceNameOrPath;
+    let serviceDirPath = serviceNameOrPath;
 
     if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
       const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
-      servicePath = serviceGet;
+      serviceDirPath = serviceGet;
     }
 
-    if (isUrl(servicePath)) {
-      this.error(
-        `Can't modify downloaded service ${color.yellow(servicePath)}`
+    if (isUrl(serviceDirPath)) {
+      return commandObj.error(
+        `Can't modify downloaded service ${color.yellow(serviceDirPath)}`
       );
     }
 
-    const serviceConfig = await initServiceConfig(
-      path.resolve(servicePath),
-      this
-    );
+    serviceDirPath = path.resolve(serviceDirPath);
+
+    const serviceConfig = await initServiceConfig(serviceDirPath, commandObj);
 
     if (serviceConfig === null) {
-      this.error(
-        `Directory ${color.yellow(servicePath)} does not contain ${color.yellow(
-          SERVICE_CONFIG_FILE_NAME
-        )}`
+      return commandObj.error(
+        `Directory ${color.yellow(
+          serviceDirPath
+        )} does not contain ${color.yellow(SERVICE_CONFIG_FILE_NAME)}`
       );
     }
 
     const validateModuleName = (name: string): true | string =>
-      !(name in (maybeFluenceConfig?.services ?? {})) ||
+      !(name in serviceConfig.modules) ||
       `You already have ${color.yellow(name)} in ${color.yellow(
         serviceConfig.$getPath()
       )}`;
 
-    let validModuleName = flags.name ?? moduleConfig.name;
-    const serviceNameValidity = validateModuleName(validModuleName);
+    let moduleName = flags.name ?? moduleConfig.name;
+    const moduleNameValidity = validateModuleName(moduleName);
 
-    if (serviceNameValidity !== true) {
-      this.warn(serviceNameValidity);
+    if (moduleNameValidity !== true) {
+      this.warn(moduleNameValidity);
 
-      validModuleName = await input({
+      moduleName = await input({
         isInteractive,
         message: `Enter another name for module`,
         validate: validateModuleName,
@@ -138,21 +132,18 @@ export default class Add extends BaseCommand<typeof Add> {
 
     serviceConfig.modules = {
       ...serviceConfig.modules,
-      [validModuleName]: {
+      [moduleName]: {
         get: isUrl(modulePathOrUrl)
           ? modulePathOrUrl
-          : path.relative(
-              path.resolve(servicePath),
-              path.resolve(modulePathOrUrl)
-            ),
+          : path.relative(serviceDirPath, modulePath),
       },
     };
 
     await serviceConfig.$commit();
 
     this.log(
-      `Added ${color.yellow(validModuleName)} to ${color.yellow(
-        replaceHomeDir(path.resolve(servicePath))
+      `Added ${color.yellow(moduleName)} to ${color.yellow(
+        replaceHomeDir(serviceDirPath)
       )}`
     );
   }

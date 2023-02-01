@@ -22,6 +22,7 @@ import camelcase from "camelcase";
 
 import { BaseCommand } from "../../baseCommand";
 import { addService } from "../../lib/addService";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const";
 import { generateNewModule } from "../../lib/generateNewModule";
@@ -31,6 +32,7 @@ import {
   validateAquaName,
 } from "../../lib/helpers/downloadFile";
 import { initCli } from "../../lib/lifecyle";
+import { initMarineCli } from "../../lib/marineCli";
 import { confirm, input } from "../../lib/prompt";
 
 export default class New extends BaseCommand<typeof New> {
@@ -68,7 +70,7 @@ export default class New extends BaseCommand<typeof New> {
     const pathToModuleDir = path.join(servicePath, "modules", serviceName);
     await generateNewModule(pathToModuleDir, this);
 
-    await initNewReadonlyServiceConfig(
+    const serviceConfig = await initNewReadonlyServiceConfig(
       servicePath,
       this,
       path.relative(servicePath, pathToModuleDir),
@@ -91,12 +93,22 @@ export default class New extends BaseCommand<typeof New> {
           )} to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}?`,
         })))
     ) {
+      const maybeFluenceLockConfig = await initFluenceLockConfig(commandObj);
+
+      const marineCli = await initMarineCli(
+        commandObj,
+        maybeFluenceConfig,
+        maybeFluenceLockConfig
+      );
+
       await addService({
+        marineCli,
         commandObj,
         serviceName,
         pathOrUrl: servicePath,
         isInteractive,
         fluenceConfig: maybeFluenceConfig,
+        serviceConfig,
       });
     }
   }
