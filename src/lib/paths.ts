@@ -37,6 +37,7 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
+  JSON_EXT,
   JS_DIR_NAME,
   MODULES_DIR_NAME,
   NPM_DIR_NAME,
@@ -44,6 +45,7 @@ import {
   SETTINGS_JSON_FILE_NAME,
   SRC_DIR_NAME,
   TMP_DIR_NAME,
+  TMP_SERVICES_DIR_NAME,
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
 } from "./const";
@@ -257,6 +259,32 @@ export const ensureFluenceServicesDir = async (): Promise<string> =>
 
 export const ensureFluenceTmpDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureFluenceDir(), TMP_DIR_NAME));
+
+export const ensureFluenceTmpServicesDir = async (): Promise<string> =>
+  ensureDir(path.join(await ensureFluenceTmpDir(), TMP_SERVICES_DIR_NAME));
+
+type EnsureFluenceTmpServiceConfigPathArg = {
+  serviceName: string;
+  deployId: string;
+  moduleName: string;
+};
+
+export const ensureFluenceTmpServiceConfigPath = async ({
+  serviceName,
+  deployId,
+  moduleName,
+}: EnsureFluenceTmpServiceConfigPathArg): Promise<string> =>
+  path.join(
+    await ensureDir(
+      path.join(
+        await ensureFluenceTmpServicesDir(),
+        TMP_SERVICES_DIR_NAME,
+        serviceName,
+        deployId
+      )
+    ),
+    `${moduleName}.${JSON_EXT}`
+  );
 
 export const ensureFluenceTmpAppServiceJsonPath = async (): Promise<string> =>
   path.join(await ensureFluenceTmpDir(), APP_SERVICE_JSON_FILE_NAME);
