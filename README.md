@@ -115,7 +115,7 @@ Pull request and release process:
 * [`fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-i-package-name--package-nameversion)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
 * [`fluence deploy`](#fluence-deploy)
-* [`fluence help [COMMAND]`](#fluence-help-command)
+* [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
 * [`fluence key new [NAME]`](#fluence-key-new-name)
@@ -192,7 +192,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.6/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.2/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -490,16 +490,16 @@ EXAMPLES
 
 _See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/deploy.ts)_
 
-## `fluence help [COMMAND]`
+## `fluence help [COMMANDS]`
 
 Display help for fluence.
 
 ```
 USAGE
-  $ fluence help [COMMAND] [-n]
+  $ fluence help [COMMANDS] [-n]
 
 ARGUMENTS
-  COMMAND  Command to show help for.
+  COMMANDS  Command to show help for.
 
 FLAGS
   -n, --nested-commands  Include all nested commands in the output.
@@ -508,7 +508,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.19/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.1/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
