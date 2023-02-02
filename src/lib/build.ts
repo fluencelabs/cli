@@ -40,12 +40,12 @@ import {
 } from "../lib/configs/project/service";
 import {
   CommandObj,
-  FLUENCE_CONFIG_FILE_NAME,
   MODULE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../lib/const";
 import {
-  downloadModule,
+  getModuleAbsolutePath,
   downloadService,
   getModuleUrlOrAbsolutePath,
   getModuleWasmPath,
@@ -252,51 +252,30 @@ export const build = async ({
 
   const serviceInfos = await resolveServiceInfos(resolveDeployInfosArg);
 
-  const setOfAllModuleGets = [
-    ...new Set(
-      serviceInfos.flatMap(
-        ({
-          moduleNamesAndConfigsDefinedInService: modules,
-          serviceDirPath,
-        }): Array<string> =>
-          modules.map(({ moduleConfig: { get } }): string =>
-            getModuleUrlOrAbsolutePath(get, serviceDirPath)
-          )
-      )
-    ),
-  ];
+  const setOfAllModuleGets = new Set(
+    serviceInfos.flatMap(
+      ({
+        moduleNamesAndConfigsDefinedInService: modules,
+        serviceDirPath,
+      }): Array<string> =>
+        modules.map(({ moduleConfig: { get } }): string =>
+          getModuleUrlOrAbsolutePath(get, serviceDirPath)
+        )
+    )
+  );
 
   ux.action.start("Making sure all modules are downloaded and built");
 
   const mapOfModuleConfigs = new Map(
     await Promise.all(
-      setOfAllModuleGets.map(
+      [...setOfAllModuleGets].map(
         (get): Promise<[string, ModuleConfigReadonly]> =>
           (async (): Promise<[string, ModuleConfigReadonly]> => {
-            const moduleConfig = isUrl(get)
-              ? await initReadonlyModuleConfig(
-                  await downloadModule(get),
-                  commandObj
-                )
-              : await initReadonlyModuleConfig(get, commandObj);
-
-            if (moduleConfig === null) {
-              ux.action.stop(color.red("error"));
-
-              return commandObj.error(
-                `Module with get: ${color.yellow(
-                  get
-                )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
-              );
-            }
-
-            if (moduleConfig.type === MODULE_TYPE_RUST) {
-              await marineCli({
-                args: ["build"],
-                flags: { release: true },
-                cwd: path.dirname(moduleConfig.$getPath()),
-              });
-            }
+            const moduleConfig = await buildModule({
+              get,
+              commandObj,
+              marineCli,
+            });
 
             return [get, moduleConfig];
           })()
@@ -367,6 +346,51 @@ export const build = async ({
   );
 
   return serviceInfoWithModuleConfigs;
+};
+
+type BuildModuleArg = {
+  get: string;
+  commandObj: CommandObj;
+  marineCli: MarineCLI;
+  serviceDirPath?: string | undefined;
+  overrides?: Partial<ModuleConfigReadonly> | undefined;
+};
+
+export const buildModule = async ({
+  get,
+  commandObj,
+  marineCli,
+  serviceDirPath,
+  overrides = {},
+}: BuildModuleArg): Promise<ModuleConfigReadonly> => {
+  const modulePath = await getModuleAbsolutePath(get, serviceDirPath);
+
+  const maybeModuleConfig = await initReadonlyModuleConfig(
+    modulePath,
+    commandObj
+  );
+
+  if (maybeModuleConfig === null) {
+    ux.action.stop(color.red("error"));
+    return commandObj.error(
+      `Module with get: ${color.yellow(get)} doesn't have ${color.yellow(
+        MODULE_CONFIG_FILE_NAME
+      )}`
+    );
+  }
+
+  const moduleConfig = maybeModuleConfig;
+  const overriddenModuleConfig = { ...moduleConfig, ...overrides };
+
+  if (overriddenModuleConfig.type === MODULE_TYPE_RUST) {
+    await marineCli({
+      args: ["build"],
+      flags: { release: true },
+      cwd: path.dirname(moduleConfig.$getPath()),
+    });
+  }
+
+  return overriddenModuleConfig;
 };
 
 const overrideModule = (

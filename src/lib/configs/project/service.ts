@@ -160,7 +160,7 @@ export const initNewReadonlyServiceConfig = (
   commandObj: CommandObj,
   relativePathToFacade: string,
   name: string
-): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
+): Promise<InitializedReadonlyConfig<LatestConfig>> =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(relativePathToFacade, name)

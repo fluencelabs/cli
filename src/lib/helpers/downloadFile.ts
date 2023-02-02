@@ -143,5 +143,29 @@ export const getModuleWasmPath = (config: {
 
 export const getModuleUrlOrAbsolutePath = (
   get: string,
-  serviceDirPath: string
-): string => (isUrl(get) ? get : path.resolve(serviceDirPath, get));
+  absolutePath = process.cwd()
+): string => {
+  if (isUrl(get)) {
+    return get;
+  }
+
+  if (path.isAbsolute(get)) {
+    return get;
+  }
+
+  return path.resolve(absolutePath, get);
+};
+
+export const getModuleAbsolutePath = async (
+  modulePathOrUrl: string,
+  absolutePath?: string | undefined
+): Promise<string> => {
+  const moduleUrlOrAbsolutePath = getModuleUrlOrAbsolutePath(
+    modulePathOrUrl,
+    absolutePath
+  );
+
+  return isUrl(moduleUrlOrAbsolutePath)
+    ? downloadModule(moduleUrlOrAbsolutePath)
+    : Promise.resolve(moduleUrlOrAbsolutePath);
+};

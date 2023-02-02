@@ -51,10 +51,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Remove)
-    );
+    const { args, flags, isInteractive, maybeFluenceConfig, commandObj } =
+      await initCli(this, await this.parse(Remove));
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
@@ -74,40 +72,41 @@ export default class Remove extends BaseCommand<typeof Remove> {
         )} or path to the service directory`,
       }));
 
-    let servicePath = serviceNameOrPath;
+    let serviceDirPath = serviceNameOrPath;
 
     if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
       const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
-      servicePath = serviceGet;
+      serviceDirPath = serviceGet;
     }
 
-    if (isUrl(servicePath)) {
-      this.error(
-        `Can't modify downloaded service ${color.yellow(servicePath)}`
+    if (isUrl(serviceDirPath)) {
+      return commandObj.error(
+        `Can't modify downloaded service ${color.yellow(serviceDirPath)}`
       );
     }
 
-    const serviceConfig = await initServiceConfig(
-      path.resolve(servicePath),
-      this
-    );
+    serviceDirPath = path.resolve(serviceDirPath);
+
+    const serviceConfig = await initServiceConfig(serviceDirPath, this);
 
     if (serviceConfig === null) {
-      this.error(
-        `Directory ${color.yellow(servicePath)} does not contain ${color.yellow(
-          SERVICE_CONFIG_FILE_NAME
-        )}`
+      return commandObj.error(
+        `Directory ${color.yellow(
+          serviceDirPath
+        )} does not contain ${color.yellow(SERVICE_CONFIG_FILE_NAME)}`
       );
     }
 
     if (nameOrPathOrUrl === FACADE_MODULE_NAME) {
-      this.error(
+      return commandObj.error(
         `Each service must have a facade module, if you want to change it either override it in ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )} or replace it manually in ${color.yellow(SERVICE_CONFIG_FILE_NAME)}`
       );
-    } else if (nameOrPathOrUrl in serviceConfig.modules) {
+    }
+
+    if (nameOrPathOrUrl in serviceConfig.modules) {
       delete serviceConfig.modules[nameOrPathOrUrl];
     } else if (
       Object.values(serviceConfig.modules).some(
@@ -122,18 +121,18 @@ export default class Remove extends BaseCommand<typeof Remove> {
       assert(typeof moduleName === "string");
       delete serviceConfig.modules[moduleName];
     } else {
-      this.error(
+      return commandObj.error(
         `There is no module ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
-          servicePath
+          serviceDirPath
         )}`
       );
     }
 
     await serviceConfig.$commit();
 
-    this.log(
+    commandObj.log(
       `Removed module ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
-        servicePath
+        serviceDirPath
       )}`
     );
   }
