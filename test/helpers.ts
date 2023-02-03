@@ -52,7 +52,14 @@ export const fluence = async ({
         cwd,
         path.join(
           process.cwd(),
-          path.join("tmp", "node_modules", "@fluencelabs", "cli", "bin", "run")
+          path.join(
+            "tmp",
+            "node_modules",
+            "@fluencelabs",
+            "cli",
+            "bin",
+            "run.js"
+          )
         )
       ),
       ...args,
