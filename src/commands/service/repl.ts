@@ -19,18 +19,19 @@ import { spawn } from "node:child_process";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import stringifyToTOML from "@iarna/toml/stringify";
-import color from "@oclif/color";
+import stringifyToTOML from "@iarna/toml/stringify.js";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Command, ux } from "@oclif/core";
 
-import { buildModule } from "../../lib/build";
-import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
+import { buildModule } from "../../lib/build.js";
+import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
   ModuleV0 as ServiceModule,
-} from "../../lib/configs/project/service";
+} from "../../lib/configs/project/service.js";
 import {
   CommandObj,
   FLUENCE_CONFIG_FILE_NAME,
@@ -38,18 +39,18 @@ import {
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
-} from "../../lib/const";
-import { haltCountly } from "../../lib/countly";
+} from "../../lib/const.js";
+import { haltCountly } from "../../lib/countly.js";
 import {
   downloadService,
   getModuleWasmPath,
   isUrl,
-} from "../../lib/helpers/downloadFile";
-import { initCli } from "../../lib/lifecyle";
-import { initMarineCli, MarineCLI } from "../../lib/marineCli";
-import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths";
-import { input } from "../../lib/prompt";
-import { ensureCargoDependency } from "../../lib/rust";
+} from "../../lib/helpers/downloadFile.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { initMarineCli, MarineCLI } from "../../lib/marineCli.js";
+import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths.js";
+import { input } from "../../lib/prompt.js";
+import { ensureCargoDependency } from "../../lib/rust.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 

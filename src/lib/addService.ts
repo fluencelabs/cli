@@ -16,27 +16,28 @@
 
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import { buildModule } from "./build";
-import type { FluenceConfig } from "./configs/project/fluence";
+import { buildModule } from "./build.js";
+import type { FluenceConfig } from "./configs/project/fluence.js";
 import {
   FACADE_MODULE_NAME,
   ServiceConfigReadonly,
-} from "./configs/project/service";
+} from "./configs/project/service.js";
 import {
   CommandObj,
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
-} from "./const";
+} from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   getModuleWasmPath,
   validateAquaName,
-} from "./helpers/downloadFile";
-import { generateServiceInterface } from "./helpers/generateServiceInterface";
-import type { MarineCLI } from "./marineCli";
-import { input } from "./prompt";
+} from "./helpers/downloadFile.js";
+import { generateServiceInterface } from "./helpers/generateServiceInterface.js";
+import type { MarineCLI } from "./marineCli.js";
+import { input } from "./prompt.js";
 
 type AddServiceArg = {
   commandObj: CommandObj;

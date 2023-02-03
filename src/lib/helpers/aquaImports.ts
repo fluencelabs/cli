@@ -19,21 +19,21 @@ import path from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../ajv";
-import type { FluenceConfig } from "../configs/project/fluence";
-import type { FluenceLockConfig } from "../configs/project/fluenceLock";
+import { ajv } from "../ajv.js";
+import type { FluenceConfig } from "../configs/project/fluence.js";
+import type { FluenceLockConfig } from "../configs/project/fluenceLock.js";
 import {
   CommandObj,
   DOT_BIN_DIR_NAME,
   FS_OPTIONS,
   NODE_MODULES_DIR_NAME,
-} from "../const";
-import { installAllNPMDependencies } from "../npm";
+} from "../const.js";
+import { installAllNPMDependencies } from "../npm.js";
 import {
   ensureFluenceAquaDir,
   ensureUserFluenceNpmDir,
   ensureVSCodeSettingsJsonPath,
-} from "../paths";
+} from "../paths.js";
 
 type GetAquaImportsArg =
   | {

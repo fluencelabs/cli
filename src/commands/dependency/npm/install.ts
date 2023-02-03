@@ -18,23 +18,23 @@ import path from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../../baseCommand";
+import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../../../lib/configs/project/fluenceLock";
+} from "../../../lib/configs/project/fluenceLock.js";
 import {
   FLUENCE_DIR_NAME,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
-} from "../../../lib/const";
+} from "../../../lib/const.js";
 import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
-} from "../../../lib/helpers/aquaImports";
-import { initCli } from "../../../lib/lifecyle";
-import { ensureNpmDependency } from "../../../lib/npm";
+} from "../../../lib/helpers/aquaImports.js";
+import { initCli } from "../../../lib/lifecyle.js";
+import { ensureNpmDependency } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
@@ -44,6 +44,7 @@ export default class Install extends BaseCommand<typeof Install> {
   )} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     force: Flags.boolean({
       description:
         "Force install even if the dependency/dependencies is/are already installed",

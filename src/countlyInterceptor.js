@@ -1,12 +1,10 @@
-const {
-  ClientRequestInterceptor,
-} = require("@mswjs/interceptors/lib/interceptors/ClientRequest");
-const Countly = require("countly-sdk-nodejs");
+import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/ClientRequest/index.js";
+import Countly from "countly-sdk-nodejs";
 
 /**
  * @type {() => boolean}
  */
-const isCountlyInited = () => Countly.device_id !== undefined;
+export const isCountlyInited = () => Countly.device_id !== undefined;
 
 /**
  * @type {() => void}
@@ -36,7 +34,7 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
  * @param {(unknown: unknown) => unknown} errorHandler
  * @returns
  */
-const createErrorPromise = (error, errorHandler) => {
+export const createErrorPromise = (error, errorHandler) => {
   isErrorExpected = getIsErrorExpected(error);
 
   if (!isCountlyInited()) {
@@ -61,7 +59,7 @@ const createErrorPromise = (error, errorHandler) => {
  * @type {(value?: unknown) => void}
  */
 let resolveSessionEndPromise;
-const sessionEndPromise = new Promise((resolve) => {
+export const sessionEndPromise = new Promise((resolve) => {
   resolveSessionEndPromise = resolve;
 });
 
@@ -71,8 +69,7 @@ const interceptor = new ClientRequestInterceptor();
 interceptor.apply();
 interceptor.on("response", (_response, request) => {
   if (
-    isErrorExpected !== undefined &&
-    isErrorExpected
+    isErrorExpected !== undefined && isErrorExpected
       ? request.url.includes(EVENTS_URL_PART) &&
         request.url.includes(ERROR_HANDLED_BY_OCLIF_KEY)
       : request.url.includes("/i?crash=")
@@ -103,5 +100,3 @@ interceptor.on("response", (_response, request) => {
     }
   }
 });
-
-module.exports = { createErrorPromise, sessionEndPromise, isCountlyInited };

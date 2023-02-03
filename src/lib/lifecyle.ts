@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type {
-  ParserOutput,
   ArgOutput,
   FlagOutput,
-} from "@oclif/core/lib/interfaces/parser";
+  ParserOutput,
+} from "@oclif/core/lib/interfaces/parser.js";
 
-import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence";
+import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence.js";
 import {
   initNewUserConfig,
   initUserConfig,
   UserConfig,
-} from "./configs/user/config";
-import type { CommandObj, NO_INPUT_FLAG_NAME } from "./const";
-import { haltCountly, initCountly } from "./countly";
-import "./setupEnvironment";
-import { ensureFluenceProject } from "./helpers/ensureFluenceProject";
-import { getIsInteractive } from "./helpers/getIsInteractive";
-import { confirm } from "./prompt";
+} from "./configs/user/config.js";
+import type { CommandObj, NO_INPUT_FLAG_NAME } from "./const.js";
+import { haltCountly, initCountly } from "./countly.js";
+import "./setupEnvironment.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
+import { getIsInteractive } from "./helpers/getIsInteractive.js";
+import { confirm } from "./prompt.js";
 
 type EnsureUserConfigArg = {
   commandObj: CommandObj;
@@ -147,6 +148,6 @@ export const exitCli = async (): Promise<never> => {
 
   // Countly doesn't let process to finish
   // So there is a need to do it explicitly
-  // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
+  // eslint-disable-next-line no-process-exit
   process.exit(0);
 };

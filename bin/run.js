@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Copyright 2022 Fluence Labs Limited
  *
@@ -14,21 +16,11 @@
  * limitations under the License.
  */
 
-import { Network } from "../src/lib/multiaddr.js";
-import {
-  DEBUG_COUNTLY,
-  FLUENCE_ENV,
-  FLUENCE_USER_DIR,
-} from "../src/lib/setupEnvironment.js";
+import oclif from "@oclif/core";
 
-export type FluenceEnv = Network | "local";
+import { createErrorPromise } from "../dist/countlyInterceptor.js";
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      [FLUENCE_ENV]: FluenceEnv;
-      [DEBUG_COUNTLY]: "true" | "false";
-      [FLUENCE_USER_DIR]?: string;
-    }
-  }
-}
+oclif
+  .run(process.argv.slice(2), import.meta.url)
+  .then(oclif.flush)
+  .catch((error) => createErrorPromise(error, oclif.Errors.handle));

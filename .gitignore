@@ -4,7 +4,6 @@
 /.nyc_output
 /dist
 /tmp
-/--fix
 /yarn.lock
 oclif.manifest.json
 .eslintcache

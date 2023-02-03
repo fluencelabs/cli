@@ -15,23 +15,24 @@
  */
 
 import type { Hook } from "@oclif/core";
-import platform from "platform";
+import { version } from "platform";
 
-// eslint-disable-next-line @typescript-eslint/require-await
-const hook: Hook<"init"> = async function (): Promise<void> {
-  const { version } = platform;
-
+const hook: Hook<"init"> = function (): Promise<void> {
   if (version === undefined) {
-    return this.error("Unknown platform");
+    return Promise.resolve(this.error("Unknown platform"));
   }
 
   const majorVersion = Number(version.split(".")[0]);
 
-  if (majorVersion < 16) {
-    return this.error(
-      `Fluence CLI requires node.js version >= "16.x"; Detected ${version}. Please update node.js to version 16 or higher.\nYou can use https://nvm.sh utility to update node.js version: "nvm install 17 && nvm use 17 && nvm alias default 17"`
+  if (majorVersion < 18) {
+    return Promise.resolve(
+      this.error(
+        `Fluence CLI requires node.js version >= "18.x"; Detected ${version}. Please update node.js to version 18 or higher.\nYou can use https://nvm.sh utility to update node.js version: "nvm install 17 && nvm use 17 && nvm alias default 17"`
+      )
     );
   }
+
+  return Promise.resolve();
 };
 
 export default hook;

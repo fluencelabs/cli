@@ -18,30 +18,31 @@ import { access, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import { AvmLoglevel, FluencePeer, KeyPair } from "@fluencelabs/fluence";
-import { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction";
-import color from "@oclif/color";
+import { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction.js";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
-import { BaseCommand } from "../baseCommand";
-import { ajv } from "../lib/ajv";
-import { compile, Data } from "../lib/aqua";
-import { initAquaCli } from "../lib/aquaCli";
+import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { ajv } from "../lib/ajv.js";
+import { compile, Data } from "../lib/aqua.js";
+import { initAquaCli } from "../lib/aquaCli.js";
 import {
   AppConfigReadonly,
   initReadonlyAppConfig,
-} from "../lib/configs/project/app";
+} from "../lib/configs/project/app.js";
 import {
   AQUA_INPUT_PATH_PROPERTY,
   FluenceConfig,
   FluenceConfigReadonly,
-} from "../lib/configs/project/fluence";
+} from "../lib/configs/project/fluence.js";
 import {
   defaultFluenceLockConfig,
   FluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../lib/configs/project/fluenceLock";
+} from "../lib/configs/project/fluenceLock.js";
 import {
   CommandObj,
   FS_OPTIONS,
@@ -55,19 +56,19 @@ import {
   isAquaLogLevel,
   AquaLogLevel,
   AQUA_LOG_LEVELS,
-} from "../lib/const";
-import { getAppJson } from "../lib/deployedApp";
-import { ensureAquaImports } from "../lib/helpers/aquaImports";
-import { getExistingKeyPairFromFlags } from "../lib/keypairs";
-import { initCli } from "../lib/lifecyle";
-import { getRandomRelayAddr } from "../lib/multiaddr";
+} from "../lib/const.js";
+import { getAppJson } from "../lib/deployedApp.js";
+import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
+import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
+import { initCli } from "../lib/lifecyle.js";
+import { getRandomRelayAddr } from "../lib/multiaddr.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
   projectRootDirPromise,
   recursivelyFindProjectRootDir,
   setProjectRootDir,
-} from "../lib/paths";
-import { input, list } from "../lib/prompt";
+} from "../lib/paths.js";
+import { input, list } from "../lib/prompt.js";
 
 const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
@@ -82,6 +83,7 @@ export default class Run extends BaseCommand<typeof Run> {
   static override description = "Run aqua script";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     relay: Flags.string({
       description: "Relay node multiaddr",
       helpValue: "<multiaddr>",

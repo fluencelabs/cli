@@ -16,11 +16,12 @@
 
 import { spawn } from "node:child_process";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { ux } from "@oclif/core";
 
-import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const";
-import { Flags, flagsToArgs } from "./helpers/flagsToArgs";
+import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const.js";
+import { Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 
 type SpawnParams = Parameters<typeof spawn>;
 

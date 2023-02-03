@@ -16,12 +16,15 @@
 
 import assert from "node:assert";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { JSONSchemaType, ValidateFunction } from "ajv";
-import inquirer, { Answers, DistinctQuestion, Separator } from "inquirer";
+import inquirer, { Answers, DistinctQuestion } from "inquirer";
 
-import { ajv } from "./ajv";
-import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const";
+import { ajv } from "./ajv.js";
+import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const.js";
+
+export const Separator = inquirer.Separator;
 
 const NAME = "NAME";
 
@@ -139,7 +142,8 @@ export const input = ({
     flagName,
   });
 
-type SeparatorObj = InstanceType<typeof Separator>;
+type Separator = typeof inquirer.Separator;
+type SeparatorObj = InstanceType<Separator>;
 
 export type Choices<T> = [T] extends [string]
   ? Array<T | SeparatorObj>

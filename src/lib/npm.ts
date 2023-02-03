@@ -18,19 +18,20 @@ import assert from "node:assert";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import type { FluenceConfig } from "./configs/project/fluence";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
   AQUA_LIB_NPM_DEPENDENCY,
   CommandObj,
   DOT_BIN_DIR_NAME,
   fluenceNPMDependencies,
   NODE_MODULES_DIR_NAME,
-} from "./const";
-import { addCountlyLog } from "./countly";
-import { execPromise } from "./execPromise";
+} from "./const.js";
+import { addCountlyLog } from "./countly.js";
+import { execPromise } from "./execPromise.js";
 import {
   splitPackageNameAndVersion,
   handleLockConfig,
@@ -38,8 +39,8 @@ import {
   resolveVersionToInstall,
   handleInstallation,
   handleFluenceConfig,
-} from "./helpers/package";
-import { replaceHomeDir } from "./helpers/replaceHomeDir";
+} from "./helpers/package.js";
+import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
 export const getLatestVersionOfNPMDependency = async (
   name: string,

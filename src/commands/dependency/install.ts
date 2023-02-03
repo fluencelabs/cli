@@ -16,13 +16,13 @@
 
 import { Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import type { FluenceConfig } from "../../lib/configs/project/fluence";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../../lib/configs/project/fluenceLock";
+} from "../../lib/configs/project/fluenceLock.js";
 import {
   AQUA_NPM_DEPENDENCY,
   AQUA_RECOMMENDED_VERSION,
@@ -32,17 +32,17 @@ import {
   MARINE_RECOMMENDED_VERSION,
   MREPL_CARGO_DEPENDENCY,
   MREPL_RECOMMENDED_VERSION,
-} from "../../lib/const";
+} from "../../lib/const.js";
 import {
   ensureAquaImports,
   ensureVSCodeSettingsJSON,
-} from "../../lib/helpers/aquaImports";
-import { initCli } from "../../lib/lifecyle";
-import { getLatestVersionOfNPMDependency } from "../../lib/npm";
+} from "../../lib/helpers/aquaImports.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { getLatestVersionOfNPMDependency } from "../../lib/npm.js";
 import {
   getLatestVersionOfCargoDependency,
   installAllCargoDependenciesFromFluenceConfig,
-} from "../../lib/rust";
+} from "../../lib/rust.js";
 
 const RECOMMENDED_DEPENDENCIES = `${AQUA_NPM_DEPENDENCY}, ${MARINE_CARGO_DEPENDENCY} and ${MREPL_CARGO_DEPENDENCY}`;
 
@@ -51,6 +51,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override description = `Install all project dependencies (dependencies are cached inside ${FLUENCE_DIR_NAME} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     recommended: Flags.boolean({
       description: `Set latest versions of ${RECOMMENDED_DEPENDENCIES} dependencies and install all dependencies from fluence.yaml`,
       exclusive: ["latest"],

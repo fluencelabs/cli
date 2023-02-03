@@ -19,19 +19,19 @@ import path from "node:path";
 
 import {
   FS_OPTIONS,
-  getTemplateIndexAppImports,
-  getTemplateIndexAppImportsComment,
+  TEMPLATE_INDEX_APP_IMPORTS,
+  TEMPLATE_INDEX_APP_IMPORTS_COMMENT,
   MAIN_AQUA_FILE_ADD_ONE,
   MAIN_AQUA_FILE_ADD_ONE_COMMENT,
   MAIN_AQUA_FILE_APP_IMPORT_TEXT,
   MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT,
   TEMPLATE_INDEX_APP_REGISTER,
   TEMPLATE_INDEX_APP_REGISTER_COMMENT,
-} from "../src/lib/const";
-import { execPromise } from "../src/lib/execPromise";
-import { localMultiaddrs } from "../src/lib/localNodes";
+} from "../src/lib/const.js";
+import { execPromise } from "../src/lib/execPromise.js";
+import { localMultiaddrs } from "../src/lib/localNodes.js";
 
-import { fluence, init, maybeConcurrentTest } from "./helpers";
+import { fluence, init, maybeConcurrentTest } from "./helpers.js";
 
 describe("tutorial", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
@@ -216,8 +216,8 @@ const uncommentJSorTSCode = async (
   const TSorJSFileContent = await readFile(indexTSorJSPath, FS_OPTIONS);
 
   const newTSorJSFileContent = TSorJSFileContent.replace(
-    getTemplateIndexAppImportsComment(JSOrTs === "js"),
-    getTemplateIndexAppImports(JSOrTs === "js")
+    TEMPLATE_INDEX_APP_IMPORTS_COMMENT,
+    TEMPLATE_INDEX_APP_IMPORTS
   ).replace(TEMPLATE_INDEX_APP_REGISTER_COMMENT, TEMPLATE_INDEX_APP_REGISTER);
 
   await writeFile(indexTSorJSPath, newTSorJSFileContent);

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import { FluenceConfig, initFluenceConfig } from "../configs/project/fluence";
-import type { CommandObj } from "../const";
-import { init } from "../init";
-import { confirm } from "../prompt";
+import {
+  FluenceConfig,
+  initFluenceConfig,
+} from "../configs/project/fluence.js";
+import type { CommandObj } from "../const.js";
+import { init } from "../init.js";
+import { confirm } from "../prompt.js";
 
 export const ensureFluenceProject = async (
   commandObj: CommandObj,

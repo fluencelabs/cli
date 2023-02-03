@@ -16,15 +16,15 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../../ajv";
+import { ajv } from "../../ajv.js";
 import {
   APP_CONFIG_FILE_NAME,
   CommandObj,
   TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
-import { jsonStringify } from "../../helpers/jsonStringify";
-import { NETWORKS, Relays } from "../../multiaddr";
-import { ensureFluenceDir } from "../../paths";
+} from "../../const.js";
+import { jsonStringify } from "../../helpers/jsonStringify.js";
+import { NETWORKS, Relays } from "../../multiaddr.js";
+import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -32,7 +32,7 @@ import {
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
-} from "../initConfig";
+} from "../initConfig.js";
 
 type DeployedServiceConfigV0 = {
   name: string;
@@ -413,4 +413,4 @@ export const initNewReadonlyAppConfig = (
     (): LatestConfig => config
   )(commandObj);
 
-export const appSchema = configSchemaV3;
+export const appSchema: JSONSchemaType<LatestConfig> = configSchemaV3;

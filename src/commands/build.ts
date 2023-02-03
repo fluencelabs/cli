@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import { BaseCommand } from "../baseCommand";
-import { build } from "../lib/build";
-import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock";
-import { FLUENCE_CONFIG_FILE_NAME } from "../lib/const";
-import { getExistingKeyPair } from "../lib/keypairs";
-import { initCli } from "../lib/lifecyle";
-import { initMarineCli } from "../lib/marineCli";
+import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { build } from "../lib/build.js";
+import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
+import { FLUENCE_CONFIG_FILE_NAME } from "../lib/const.js";
+import { getExistingKeyPair } from "../lib/keypairs.js";
+import { initCli } from "../lib/lifecyle.js";
+import { initMarineCli } from "../lib/marineCli.js";
 
 export default class Build extends BaseCommand<typeof Build> {
   static override description = `Build all application services, described in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
+  static override flags = {
+    ...baseFlags,
+  };
   async run(): Promise<void> {
     const { isInteractive, commandObj, fluenceConfig } = await initCli(
       this,

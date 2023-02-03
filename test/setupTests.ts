@@ -23,10 +23,10 @@ import {
   AQUA_RECOMMENDED_VERSION,
   MARINE_CARGO_DEPENDENCY,
   MARINE_RECOMMENDED_VERSION,
-} from "../src/lib/const";
+} from "../src/lib/const.js";
 
-import "../src/lib/setupEnvironment";
-import { fluence, init } from "./helpers";
+import "../src/lib/setupEnvironment.js";
+import { fluence, init } from "./helpers.js";
 
 export default async (): Promise<void> => {
   console.log("Setting up tests...");

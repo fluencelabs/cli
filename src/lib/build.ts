@@ -17,33 +17,34 @@
 import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { ux } from "@oclif/core";
 
-import type { ConfigKeyPair } from "../lib/configs/keyPair";
+import type { ConfigKeyPair } from "../lib/configs/keyPair.js";
 import type {
   FluenceConfigReadonly,
   OverrideModules,
   ServiceDeployV1,
-} from "../lib/configs/project/fluence";
+} from "../lib/configs/project/fluence.js";
 import {
   initReadonlyModuleConfig,
   ModuleConfigReadonly,
   MODULE_TYPE_RUST,
-} from "../lib/configs/project/module";
-import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets";
+} from "../lib/configs/project/module.js";
+import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets.js";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
   ModuleV0,
   ServiceConfigReadonly,
-} from "../lib/configs/project/service";
+} from "../lib/configs/project/service.js";
 import {
   CommandObj,
-  MODULE_CONFIG_FILE_NAME,
   FLUENCE_CONFIG_FILE_NAME,
+  MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
-} from "../lib/const";
+} from "../lib/const.js";
 import {
   getModuleAbsolutePath,
   downloadService,
@@ -51,13 +52,13 @@ import {
   getModuleWasmPath,
   isUrl,
   validateAquaName,
-} from "../lib/helpers/downloadFile";
-import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
-import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs";
-import type { MarineCLI } from "../lib/marineCli";
-import { confirm } from "../lib/prompt";
+} from "../lib/helpers/downloadFile.js";
+import { generateServiceInterface } from "../lib/helpers/generateServiceInterface.js";
+import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs.js";
+import type { MarineCLI } from "../lib/marineCli.js";
+import { confirm } from "../lib/prompt.js";
 
-import { generateKeyPair } from "./helpers/generateKeyPair";
+import { generateKeyPair } from "./helpers/generateKeyPair.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;

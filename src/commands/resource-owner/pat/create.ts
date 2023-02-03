@@ -18,25 +18,25 @@ import assert from "node:assert";
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../../baseCommand";
-import { NETWORK_FLAG } from "../../../lib/const";
-import { initCli } from "../../../lib/lifecyle";
-import { input } from "../../../lib/prompt";
+import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { NETWORK_FLAG } from "../../../lib/const.js";
+import { initCli } from "../../../lib/lifecyle.js";
+import { input } from "../../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getDealContract,
   getFLTContract,
   getSigner,
-} from "../../../lib/provider";
+} from "../../../lib/provider.js";
 
 const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
 const ADD_PROVIDER_TOKEN_EVENT_TOPIC = "AddProviderToken";
 
 export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
-  static override hidden = true;
   static override description =
     "Create PAT (Peer auth token) in a deal for auth";
   static override flags = {
+    ...baseFlags,
     privKey: Flags.string({
       char: "k",
       description:
@@ -86,7 +86,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     );
 
     const log = res.logs.find(
-      (log: { topics: Array<any> }) => log.topics[0] === eventTopic
+      (log: { topics: Array<string> }) => log.topics[0] === eventTopic
     );
 
     assert(log !== undefined);
