@@ -1,3 +1,5 @@
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm/transpile-only
+
 /**
  * Copyright 2022 Fluence Labs Limited
  *
@@ -13,6 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* eslint-disable node/shebang */
 
 import path from "node:path";
 import url from "node:url";
@@ -32,6 +36,7 @@ register({
     "tsconfig.json"
   ),
   transpileOnly: true,
+  swc: true,
 });
 
 // In dev mode, always show stack traces

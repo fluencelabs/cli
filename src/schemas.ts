@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 import { appSchema } from "./lib/configs/project/app.js";
@@ -53,7 +53,7 @@ const schemas = Object.entries({
 
 const main = async (): Promise<void> => {
   if (process.argv[2] === "-f") {
-    return fsPromises.writeFile(
+    return writeFile(
       path.join("docs", "configs", "README.md"),
       `# Fluence CLI Configs
 
@@ -68,12 +68,12 @@ ${schemas
     );
   }
 
-  await fsPromises.mkdir(SCHEMAS_DIR_NAME, { recursive: true });
+  await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
 
   await Promise.all(
     schemas.map(
       ([filename, schema]): Promise<void> =>
-        fsPromises.writeFile(
+        writeFile(
           path.join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),
           jsonStringify(schema)
         )
