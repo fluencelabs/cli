@@ -37,8 +37,8 @@ export const stopSpinner = (message?: string) => {
     return;
   }
 
-  currentMessage = undefined;
   const previousTaskMessage = currentMessage ?? "previous task";
+  currentMessage = undefined;
 
   if (message === undefined) {
     console.log(`done: ${previousTaskMessage}`);
