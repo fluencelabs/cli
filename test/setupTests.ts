@@ -28,7 +28,7 @@ import {
 import "../src/lib/setupEnvironment.js";
 import { fluence, init } from "./helpers.js";
 
-export default async (): Promise<void> => {
+(async (): Promise<void> => {
   console.log("Setting up tests...");
   const cwd = path.join("tmp", "installMarine");
   await init(cwd, "minimal");
@@ -73,4 +73,6 @@ export default async (): Promise<void> => {
   ]);
 
   console.log("Tests are ready to run!");
-};
+})().catch((error) => {
+  throw new Error(String(error));
+});
