@@ -37,6 +37,7 @@ describe("tutorial", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
     const cwd = path.join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
+    await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
 
     await fluence({
@@ -91,6 +92,7 @@ describe("tutorial", () => {
   maybeConcurrentTest("should work with ts template", async () => {
     const cwd = path.join("tmp", "shouldWorkWithTSTemplate");
     await init(cwd, "ts");
+    await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
 
@@ -114,6 +116,7 @@ describe("tutorial", () => {
   maybeConcurrentTest("should work with js template", async () => {
     const cwd = path.join("tmp", "shouldWorkWithJSTemplate");
     await init(cwd, "js");
+    await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
 
@@ -167,6 +170,16 @@ const deploy = (cwd: string) =>
     args: ["deploy"],
     flags: {
       "no-input": true,
+    },
+    cwd,
+  });
+
+const generateDefaultKey = (cwd: string) =>
+  fluence({
+    args: ["key new default"],
+    flags: {
+      "no-input": true,
+      default: true,
     },
     cwd,
   });

@@ -131,9 +131,8 @@
       "ecmaVersion": 2022,
       "project": [
         "./tsconfig.json",
-        "./tsconfig.bin.json",
-        "./test/tsconfig.json",
-        "./test/tsconfig.eslint.json"
+        "./tsconfig.eslint.json",
+        "./test/tsconfig.json"
       ]
     },
     "extends": [

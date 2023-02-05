@@ -5,14 +5,13 @@
     "importHelpers": true,
     "outDir": "dist",
     "rootDir": "src",
-    "moduleResolution": "nodenext",
-    "target": "ESNext"
+    "moduleResolution": "nodenext"
   },
   "ts-node": {
     "esm": true
   },
   "include": ["src/**/*"],
-  "exclude": ["src/ts/**/*"],
+  "exclude": ["src/ts/**/*", "src/js/**/*"],
   "files": ["src/types.d.ts"],
   "types": ["node", "jest"]
 }
