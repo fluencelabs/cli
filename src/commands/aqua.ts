@@ -63,7 +63,7 @@ export default class Aqua extends Command {
     }),
     air: Flags.boolean({
       description: "Generate .air file instead of .ts",
-      exclusive: ["js", "esm"],
+      exclusive: ["js", "common-js"],
     }),
     js: Flags.boolean({
       description: "Generate .js file instead of .ts",
@@ -236,29 +236,21 @@ const resolveOutputPath = (
 const addFileExtensionsInTsFiles = async (outputDirPath: string) => {
   const dirContent = await readdir(outputDirPath, FS_OPTIONS);
 
-  const tsFiles = await Promise.all(
+  await Promise.all(
     dirContent
       .filter((file) => file.endsWith(".ts"))
       .map((fileName) =>
         (async () => {
           const filePath = path.join(outputDirPath, fileName);
-          return {
-            content: await readFile(filePath, FS_OPTIONS),
+          const content = await readFile(filePath, FS_OPTIONS);
+          return writeFile(
             filePath,
-          };
+            content.replaceAll(
+              "@fluencelabs/fluence/dist/internal/compilerSupport/v4",
+              "@fluencelabs/fluence/dist/internal/compilerSupport/v4.js"
+            )
+          );
         })()
       )
-  );
-
-  await Promise.all(
-    tsFiles.map(({ content, filePath }) =>
-      writeFile(
-        filePath,
-        content.replaceAll(
-          "@fluencelabs/fluence/dist/internal/compilerSupport/v4",
-          "@fluencelabs/fluence/dist/internal/compilerSupport/v4.js"
-        )
-      )
-    )
   );
 };
