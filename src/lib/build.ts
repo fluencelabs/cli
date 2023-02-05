@@ -19,7 +19,6 @@ import path from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { ux } from "@oclif/core";
 
 import type { ConfigKeyPair } from "../lib/configs/keyPair.js";
 import type {
@@ -59,6 +58,7 @@ import type { MarineCLI } from "../lib/marineCli.js";
 import { confirm } from "../lib/prompt.js";
 
 import { generateKeyPair } from "./helpers/generateKeyPair.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -115,7 +115,7 @@ const resolveServiceInfos = async ({
     keyPair: ConfigKeyPair;
   }>;
 
-  ux.action.start("Making sure all services are downloaded");
+  startSpinner("Making sure all services are downloaded");
 
   const projectSecretsConfig = await initProjectSecretsConfig(commandObj);
 
@@ -138,7 +138,7 @@ const resolveServiceInfos = async ({
       }));
 
     if (keyPair === undefined) {
-      ux.action.stop("paused");
+      stopSpinner("paused");
 
       commandObj.warn(`Key pair ${color.yellow(keyPairName)} not found`);
 
@@ -153,7 +153,7 @@ const resolveServiceInfos = async ({
         return commandObj.error("Aborted");
       }
 
-      ux.action.start("Making sure all services are downloaded");
+      startSpinner("Making sure all services are downloaded");
 
       keyPair = await generateKeyPair(keyPairName);
       projectSecretsConfig.keyPairs.push(keyPair);
@@ -194,7 +194,7 @@ const resolveServiceInfos = async ({
     )
   );
 
-  ux.action.stop();
+  stopSpinner();
 
   return Promise.all(
     serviceConfigs.flatMap(
@@ -265,7 +265,7 @@ export const build = async ({
     )
   );
 
-  ux.action.start("Making sure all modules are downloaded and built");
+  startSpinner("Making sure all modules are downloaded and built");
 
   const mapOfModuleConfigs = new Map(
     await Promise.all(
@@ -284,7 +284,7 @@ export const build = async ({
     )
   );
 
-  ux.action.stop();
+  stopSpinner();
 
   const serviceNamePathToFacadeMap: Record<string, string> = {};
 
@@ -372,7 +372,7 @@ export const buildModule = async ({
   );
 
   if (maybeModuleConfig === null) {
-    ux.action.stop(color.red("error"));
+    stopSpinner(color.red("error"));
     return commandObj.error(
       `Module with get: ${color.yellow(get)} doesn't have ${color.yellow(
         MODULE_CONFIG_FILE_NAME

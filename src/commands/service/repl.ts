@@ -22,7 +22,7 @@ import path from "node:path";
 import stringifyToTOML from "@iarna/toml/stringify.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Args, Command, ux } from "@oclif/core";
+import { Args, Command } from "@oclif/core";
 
 import { buildModule } from "../../lib/build.js";
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js";
@@ -46,6 +46,7 @@ import {
   getModuleWasmPath,
   isUrl,
 } from "../../lib/helpers/downloadFile.js";
+import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { initMarineCli, MarineCLI } from "../../lib/marineCli.js";
 import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths.js";
@@ -79,7 +80,7 @@ export default class REPL extends Command {
         )}, path to a service or url to .tar.gz archive`,
       }));
 
-    ux.action.start("Making sure service and modules are downloaded and built");
+    startSpinner("Making sure service and modules are downloaded and built");
 
     const { serviceModules, serviceDirPath } = await ensureServiceConfig({
       commandObj,
@@ -101,7 +102,7 @@ export default class REPL extends Command {
       serviceDirPath,
     });
 
-    ux.action.stop();
+    stopSpinner();
 
     const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
 
@@ -178,7 +179,7 @@ const ensureServiceConfig = async ({
   )?.modules;
 
   if (readonlyServiceConfig === undefined) {
-    ux.action.stop(color.red("error"));
+    stopSpinner(color.red("error"));
     return commandObj.error(
       `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
         SERVICE_CONFIG_FILE_NAME

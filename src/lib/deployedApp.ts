@@ -19,7 +19,6 @@ import path from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { ux } from "@oclif/core";
 
 import type { AquaCLI } from "./aquaCli.js";
 import type { ServicesV3 } from "./configs/project/app.js";
@@ -27,6 +26,7 @@ import type { FluenceConfigReadonly } from "./configs/project/fluence.js";
 import { DISABLE_TS_AND_ES_LINT, FS_OPTIONS } from "./const.js";
 import { capitalize } from "./helpers/capitilize.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import {
   ensureFluenceJSAppPath,
   ensureFluenceTSAppPath,
@@ -144,7 +144,7 @@ export const generateRegisterApp = async ({
   if (typeof fluenceConfig?.appJSPath === "string") {
     const appJSPath = path.resolve(projectRootDir, fluenceConfig.appJSPath);
 
-    ux.action.start(
+    startSpinner(
       `Compiling ${color.yellow(
         replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
       )} to ${color.yellow(replaceHomeDir(appJSPath))}`
@@ -156,13 +156,13 @@ export const generateRegisterApp = async ({
       fluenceJSorTSDir: appJSPath,
     });
 
-    ux.action.stop();
+    stopSpinner();
   }
 
   if (typeof fluenceConfig?.appTSPath === "string") {
     const appTSPath = path.resolve(projectRootDir, fluenceConfig.appTSPath);
 
-    ux.action.start(
+    startSpinner(
       `Compiling ${color.yellow(
         replaceHomeDir(await ensureFluenceAquaDeployedAppPath())
       )} to ${color.yellow(replaceHomeDir(appTSPath))}`
@@ -174,7 +174,7 @@ export const generateRegisterApp = async ({
       fluenceJSorTSDir: path.resolve(appTSPath),
     });
 
-    ux.action.stop();
+    stopSpinner();
   }
 };
 
