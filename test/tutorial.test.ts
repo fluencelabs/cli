@@ -176,7 +176,7 @@ const deploy = (cwd: string) =>
 
 const generateDefaultKey = (cwd: string) =>
   fluence({
-    args: ["key new default"],
+    args: ["key", "new", "default"],
     flags: {
       "no-input": true,
       default: true,
