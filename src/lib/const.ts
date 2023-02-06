@@ -172,7 +172,7 @@ export const NETWORK_FLAG = {
       ", "
     )})`,
     helpValue: "<network>",
-    default: "local",
+    default: "testnet",
   }),
 };
 

@@ -220,7 +220,7 @@ USAGE
 
 FLAGS
   -k, --privKey=<value>    Private key with which transactions will be signed through cli
-  --network=<network>      [default: local] $The network in which the transactions used by the command will be carried
+  --network=<network>      [default: testnet] $The network in which the transactions used by the command will be carried
                            out (local, testnet)
   --no-input               Don't interactively ask for any input from the user
   --pricePerEpoch=<value>  (required) The price that you will pay to resource owners per epoch
@@ -245,8 +245,8 @@ ARGUMENTS
 
 FLAGS
   -k, --privKey=<value>  Private key with which transactions will be signed through cli
-  --network=<network>    [default: local] $The network in which the transactions used by the command will be carried out
-                         (local, testnet)
+  --network=<network>    [default: testnet] $The network in which the transactions used by the command will be carried
+                         out (local, testnet)
   --no-input             Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -741,8 +741,8 @@ ARGUMENTS
 
 FLAGS
   -k, --privKey=<value>  Private key with which transactions will be signed through cli
-  --network=<network>    [default: local] $The network in which the transactions used by the command will be carried out
-                         (local, testnet)
+  --network=<network>    [default: testnet] $The network in which the transactions used by the command will be carried
+                         out (local, testnet)
   --no-input             Don't interactively ask for any input from the user
 
 DESCRIPTION
