@@ -23,9 +23,9 @@ import { js, jsFile } from "./helpers/jsTemplateLitteral";
 import { local } from "./localNodes";
 import { FLUENCE_ENV } from "./setupEnvironment";
 
-export const AQUA_RECOMMENDED_VERSION = "0.9.2";
+export const AQUA_RECOMMENDED_VERSION = "0.9.4";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
-export const MARINE_RECOMMENDED_VERSION = "0.12.5";
+export const MARINE_RECOMMENDED_VERSION = "0.12.6";
 export const MREPL_RECOMMENDED_VERSION = "0.18.8";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
@@ -65,9 +65,9 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   },
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
-    coreAddress: "0xf391741Feb1A8728164F7113301b81E09aAd4b97",
-    dealFactoryAddress: "0x401BB065C6596141c2F36C0Bf2B6a4ff17937032",
-    developerFaucetAddress: "0x45A115E70C5e8273FE47798f656EF423de297e2d",
+    coreAddress: "0x63e3C161081Ce2c03C39451E01c9d02b8BB108CC",
+    dealFactoryAddress: "0x7489685Eb4559fcE7Fd71D201a773a6562d246b5",
+    developerFaucetAddress: "0xAaA84F66894D313274D3CB5C07F3D3322834e78C",
     chainId: 1_313_161_555,
   },
 };

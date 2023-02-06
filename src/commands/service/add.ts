@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-import path from "node:path";
-
 import color from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand } from "../../baseCommand";
 import { addService } from "../../lib/addService";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
-import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
-import {
-  FACADE_MODULE_NAME,
-  initReadonlyServiceConfig,
-} from "../../lib/configs/project/service";
+import { initReadonlyServiceConfig } from "../../lib/configs/project/service";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const";
 import {
   AQUA_NAME_REQUIREMENTS,
-  downloadModule,
   downloadService,
-  getModuleWasmPath,
   isUrl,
 } from "../../lib/helpers/downloadFile";
-import { generateServiceInterface } from "../../lib/helpers/generateServiceInterface";
 import { initCli } from "../../lib/lifecyle";
 import { initMarineCli } from "../../lib/marineCli";
 import { input } from "../../lib/prompt";
@@ -67,11 +58,14 @@ export default class Add extends BaseCommand<typeof Add> {
       args[PATH_OR_URL] ??
       (await input({ isInteractive, message: "Enter service path or url" }));
 
-    const servicePath = isUrl(servicePathOrUrl)
+    const serviceDirPath = isUrl(servicePathOrUrl)
       ? await downloadService(servicePathOrUrl)
       : servicePathOrUrl;
 
-    const serviceConfig = await initReadonlyServiceConfig(servicePath, this);
+    const serviceConfig = await initReadonlyServiceConfig(
+      serviceDirPath,
+      commandObj
+    );
 
     if (serviceConfig === null) {
       this.error(
@@ -81,41 +75,22 @@ export default class Add extends BaseCommand<typeof Add> {
       );
     }
 
-    const serviceName = await addService({
+    const maybeFluenceLockConfig = await initFluenceLockConfig(commandObj);
+
+    const marineCli = await initMarineCli(
+      commandObj,
+      fluenceConfig,
+      maybeFluenceLockConfig
+    );
+
+    await addService({
       commandObj,
       serviceName: flags.name ?? serviceConfig.name,
       pathOrUrl: servicePathOrUrl,
       isInteractive,
       fluenceConfig,
-    });
-
-    const facadeModuleGet = serviceConfig.modules[FACADE_MODULE_NAME].get;
-
-    const facadeModulePath = isUrl(facadeModuleGet)
-      ? await downloadModule(facadeModuleGet)
-      : path.resolve(servicePath, facadeModuleGet);
-
-    const facadeReadonlyConfig = await initReadonlyModuleConfig(
-      facadeModulePath,
-      this
-    );
-
-    if (facadeReadonlyConfig === null) {
-      this.error(`Facade module not found at ${facadeModulePath}`);
-    }
-
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
-
-    const marineCli = await initMarineCli(
-      this,
-      fluenceConfig,
-      maybeFluenceLockConfig
-    );
-
-    await generateServiceInterface({
-      pathToFacadeWasm: getModuleWasmPath(facadeReadonlyConfig),
       marineCli,
-      serviceName,
+      serviceConfig,
     });
   }
 }
