@@ -33,7 +33,7 @@ export const startSpinner = (message: string) => {
 
 export const stopSpinner = (message?: string) => {
   if (process.env[SHOW_SPINNER] === "true") {
-    stopSpinner(message);
+    ux.action.stop(message);
     return;
   }
 
