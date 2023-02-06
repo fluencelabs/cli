@@ -22,11 +22,8 @@ import {
   testNet,
   Node,
 } from "@fluencelabs/fluence-network-environment";
-import lodash from "lodash";
+import { shuffle } from "lodash-es";
 import { Multiaddr } from "multiaddr";
-
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const { shuffle } = lodash;
 
 export const NETWORKS = ["kras", "stage", "testnet"] as const;
 export type Network = (typeof NETWORKS)[number];
