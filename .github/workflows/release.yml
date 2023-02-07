@@ -73,7 +73,7 @@ jobs:
       - run: npm run build
 
       - name: Publish to npm registry
-        run: npm publish --access public
+        run: npm publish --access public --tag unstable
 
   slack:
     if: always()
