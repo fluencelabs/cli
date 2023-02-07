@@ -35,13 +35,12 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, isInteractive } = await initCli(this, await this.parse(New));
+    const { args } = await initCli(this, await this.parse(New));
 
     const pathToModuleDir =
-      args.path ??
-      (await input({ isInteractive, message: "Enter module path" }));
+      args.path ?? (await input({ message: "Enter module path" }));
 
-    await generateNewModule(pathToModuleDir, this);
+    await generateNewModule(pathToModuleDir);
 
     this.log(
       `Successfully generated template for new module at ${color.yellow(

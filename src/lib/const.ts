@@ -15,7 +15,7 @@
  */
 
 import type { AvmLoglevel } from "@fluencelabs/fluence";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
 import { aquaComment, jsComment } from "./helpers/comment.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
@@ -225,8 +225,6 @@ export const isAvmLogLevel = (unknown: unknown): unknown is AvmLoglevel =>
 
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";
-
-export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store

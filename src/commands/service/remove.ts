@@ -39,7 +39,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   async run(): Promise<void> {
-    const { args, isInteractive, fluenceConfig } = await initCli(
+    const { args, fluenceConfig } = await initCli(
       this,
       await this.parse(Remove),
       true
@@ -48,7 +48,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
-        isInteractive,
         message: `Enter service name from ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )}, path to a service or url to .tar.gz archive`,

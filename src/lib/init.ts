@@ -27,7 +27,6 @@ import {
   initNewFluenceConfig,
 } from "../lib/configs/project/fluence.js";
 import {
-  CommandObj,
   FS_OPTIONS,
   RECOMMENDED_GITIGNORE_CONTENT,
   Template,
@@ -59,7 +58,9 @@ import {
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
 
-const selectTemplate = (isInteractive: boolean): Promise<Template> =>
+import { commandObj, isInteractive } from "./lifecyle.js";
+
+const selectTemplate = (): Promise<Template> =>
   list({
     message: "Select template",
     options: [...templates],
@@ -69,18 +70,13 @@ const selectTemplate = (isInteractive: boolean): Promise<Template> =>
     onNoChoices: (): never => {
       throw new Error("Unreachable: no templates");
     },
-    isInteractive,
   });
 
 type EnsureTemplateArg = {
   templateOrUnknown: string | undefined;
-  commandObj: CommandObj;
-  isInteractive: boolean;
 };
 
 export const ensureTemplate = ({
-  commandObj,
-  isInteractive,
   templateOrUnknown,
 }: EnsureTemplateArg): Promise<Template> => {
   if (isTemplate(templateOrUnknown)) {
@@ -95,7 +91,7 @@ export const ensureTemplate = ({
     );
   }
 
-  return selectTemplate(isInteractive);
+  return selectTemplate();
 };
 
 const RECOMMENDATIONS = "recommendations";
@@ -193,20 +189,13 @@ const ensureGitIgnore = async (): Promise<void> => {
 };
 
 type InitArg = {
-  commandObj: CommandObj;
-  isInteractive: boolean;
   maybeFluenceConfig?: FluenceConfig | null | undefined;
   maybeProjectPath?: string | undefined;
   template?: Template;
 };
 
-export const init = async (options: InitArg): Promise<FluenceConfig> => {
-  const {
-    commandObj,
-    isInteractive,
-    template = await selectTemplate(isInteractive),
-    maybeFluenceConfig,
-  } = options;
+export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
+  const { template = await selectTemplate(), maybeFluenceConfig } = options;
 
   Countly.add_event({ key: `init:template:${template}` });
 
@@ -218,15 +207,13 @@ export const init = async (options: InitArg): Promise<FluenceConfig> => {
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory:",
-              isInteractive,
             }))
         );
 
   await fsPromises.mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
 
-  const fluenceConfig =
-    maybeFluenceConfig ?? (await initNewFluenceConfig(commandObj));
+  const fluenceConfig = maybeFluenceConfig ?? (await initNewFluenceConfig());
 
   switch (template) {
     case "minimal":
@@ -249,7 +236,7 @@ export const init = async (options: InitArg): Promise<FluenceConfig> => {
   }
 
   await ensureVSCodeRecommendedExtensions();
-  await ensureVSCodeSettingsJSON({ generateSettingsJson: true, commandObj });
+  await ensureVSCodeSettingsJSON({ generateSettingsJson: true });
   await ensureGitIgnore();
 
   commandObj.log(

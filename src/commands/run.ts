@@ -44,7 +44,6 @@ import {
   initNewFluenceLockConfig,
 } from "../lib/configs/project/fluenceLock.js";
 import {
-  CommandObj,
   FS_OPTIONS,
   TIMEOUT_FLAG,
   KEY_PAIR_FLAG,
@@ -60,7 +59,7 @@ import {
 import { getAppJson } from "../lib/deployedApp.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
-import { initCli } from "../lib/lifecyle.js";
+import { commandObj, initCli } from "../lib/lifecyle.js";
 import { getRandomRelayAddr } from "../lib/multiaddr.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -178,20 +177,15 @@ export default class Run extends BaseCommand<typeof Run> {
       setProjectRootDir(projectRootDir);
     }
 
-    const { commandObj, flags, isInteractive, maybeFluenceConfig } =
-      await initCli(this, parseResult);
+    const { flags, maybeFluenceConfig } = await initCli(this, parseResult);
 
     const marineLogLevel: AvmLoglevel | undefined = await resolveAVMLogLevel({
-      commandObj,
-      isInteractive,
       maybeAVMLogLevel: flags[LOG_LEVEL_AVM_FLAG_NAME],
       isQuite: flags.quiet,
     });
 
     const logLevelCompiler: AquaLogLevel | undefined =
       await resolveAquaLogLevel({
-        commandObj,
-        isInteractive,
         maybeAquaLogLevel: flags[LOG_LEVEL_COMPILER_FLAG_NAME],
         isQuite: flags.quiet,
       });
@@ -221,8 +215,7 @@ export default class Run extends BaseCommand<typeof Run> {
 
     const keyPair = await getExistingKeyPairFromFlags(
       flags,
-      this,
-      isInteractive
+      maybeFluenceConfig
     );
 
     if (keyPair instanceof Error) {
@@ -233,20 +226,17 @@ export default class Run extends BaseCommand<typeof Run> {
 
     const aquaFilePath = await ensureAquaPath({
       aquaPathFromFlags: flags[INPUT_FLAG_NAME],
-      isInteractive,
       maybeFluenceConfig,
-      commandObj,
     });
 
     const funcCall =
       flags[FUNC_FLAG_NAME] ??
       (await input({
         message: `Enter a function call that you want to execute`,
-        isInteractive,
         flagName: FUNC_FLAG_NAME,
       }));
 
-    const maybeAppConfig = await initReadonlyAppConfig(this);
+    const maybeAppConfig = await initReadonlyAppConfig();
 
     const relay =
       flags.relay ??
@@ -254,9 +244,9 @@ export default class Run extends BaseCommand<typeof Run> {
 
     const [data, appJsonServicePath, maybeFluenceLockConfig] =
       await Promise.all([
-        getRunData(flags, this),
+        getRunData(flags),
         ensureFluenceTmpAppServiceJsonPath(),
-        initFluenceLockConfig(this),
+        initFluenceLockConfig(),
       ]);
 
     const jsonServicePaths = flags[JSON_SERVICE] ?? [];
@@ -274,22 +264,19 @@ export default class Run extends BaseCommand<typeof Run> {
     const aquaImports =
       maybeFluenceConfig === null
         ? await ensureAquaImports({
-            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig: null,
           })
         : await ensureAquaImports({
-            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig:
               maybeFluenceLockConfig ??
-              (await initNewFluenceLockConfig(defaultFluenceLockConfig, this)),
+              (await initNewFluenceLockConfig(defaultFluenceLockConfig)),
           });
 
     const runArgs: RunArgs = {
-      commandObj,
       appJsonServicePath,
       filePath: aquaFilePath,
       imports: aquaImports,
@@ -333,15 +320,11 @@ export default class Run extends BaseCommand<typeof Run> {
 type EnsureAquaPathArg = {
   aquaPathFromFlags: string | undefined;
   maybeFluenceConfig: FluenceConfigReadonly | null;
-  isInteractive: boolean;
-  commandObj: CommandObj;
 };
 
 const ensureAquaPath = async ({
   aquaPathFromFlags,
   maybeFluenceConfig,
-  isInteractive,
-  commandObj,
 }: EnsureAquaPathArg): Promise<string> => {
   if (typeof aquaPathFromFlags === "string") {
     return aquaPathFromFlags;
@@ -366,7 +349,6 @@ const ensureAquaPath = async ({
   }
 
   return input({
-    isInteractive,
     message: "Enter path to the input file or directory",
     flagName: "input",
   });
@@ -380,10 +362,10 @@ const runDataSchema: JSONSchemaType<RunData> = {
 
 const validateRunData = ajv.compile(runDataSchema);
 
-const getRunData = async (
-  flags: { data: string | undefined; "data-path": string | undefined },
-  commandObj: CommandObj
-): Promise<Data | undefined> => {
+const getRunData = async (flags: {
+  data: string | undefined;
+  "data-path": string | undefined;
+}): Promise<Data | undefined> => {
   const runData: RunData = {};
   const { data, "data-path": dataPath } = flags;
 
@@ -448,16 +430,12 @@ const getRunData = async (
 };
 
 type ResolveAVMLogLevelArgs = {
-  commandObj: CommandObj;
   maybeAVMLogLevel: string | undefined;
-  isInteractive: boolean;
   isQuite: boolean;
 };
 
 const resolveAVMLogLevel = async ({
   maybeAVMLogLevel,
-  commandObj,
-  isInteractive,
   isQuite,
 }: ResolveAVMLogLevelArgs): Promise<AvmLoglevel | undefined> => {
   if (isQuite) {
@@ -477,7 +455,6 @@ const resolveAVMLogLevel = async ({
   );
 
   return list({
-    isInteractive,
     message: "Select a valid AVM log level",
     oneChoiceMessage() {
       throw new Error("Unreachable");
@@ -490,16 +467,12 @@ const resolveAVMLogLevel = async ({
 };
 
 type ResolveAquaLogLevelArgs = {
-  commandObj: CommandObj;
   maybeAquaLogLevel: string | undefined;
-  isInteractive: boolean;
   isQuite: boolean;
 };
 
 const resolveAquaLogLevel = async ({
   maybeAquaLogLevel,
-  commandObj,
-  isInteractive,
   isQuite,
 }: ResolveAquaLogLevelArgs): Promise<AquaLogLevel | undefined> => {
   if (isQuite) {
@@ -519,7 +492,6 @@ const resolveAquaLogLevel = async ({
   );
 
   return list({
-    isInteractive,
     message: "Select a valid compiler log level",
     oneChoiceMessage() {
       throw new Error("Unreachable");
@@ -532,7 +504,6 @@ const resolveAquaLogLevel = async ({
 };
 
 type RunArgs = {
-  commandObj: CommandObj;
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
   maybeAppConfig: AppConfigReadonly | null;
@@ -556,7 +527,6 @@ type RunArgs = {
 };
 
 const aquaRun = async ({
-  commandObj,
   maybeFluenceConfig,
   maybeFluenceLockConfig,
   maybeAppConfig,
@@ -576,11 +546,7 @@ const aquaRun = async ({
   noXor,
   noRelay,
 }: RunArgs) => {
-  const aquaCli = await initAquaCli(
-    commandObj,
-    maybeFluenceConfig,
-    maybeFluenceLockConfig
-  );
+  const aquaCli = await initAquaCli(maybeFluenceConfig, maybeFluenceLockConfig);
 
   let result;
 
@@ -618,7 +584,6 @@ const aquaRun = async ({
 };
 
 const fluenceRun = async ({
-  commandObj,
   relay,
   funcCall,
   filePath,

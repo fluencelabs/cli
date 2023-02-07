@@ -51,22 +51,17 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, commandObj, isInteractive } = await initCli(
-      this,
-      await this.parse(CreatePAT)
-    );
+    const { args, flags } = await initCli(this, await this.parse(CreatePAT));
 
     const network = await ensureChainNetwork({
-      commandObj,
-      isInteractive,
       maybeChainNetwork: flags.network,
     });
 
     const dealAddress =
       args[DEAL_ADDRESS_ARG] ??
-      (await input({ isInteractive, message: "Enter deal address" }));
+      (await input({ message: "Enter deal address" }));
 
-    const signer = await getSigner(network, flags.privKey, commandObj);
+    const signer = await getSigner(network, flags.privKey);
     const deal = getDealContract(dealAddress, signer);
     const flt = await getFLTContract(signer, network);
 

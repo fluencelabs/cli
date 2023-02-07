@@ -37,12 +37,10 @@ import {
 import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
 import type { ModuleConfigReadonly } from "../lib/configs/project/module.js";
 import {
-  CommandObj,
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   KEY_PAIR_FLAG,
-  KEY_PAIR_FLAG_NAME,
   TIMEOUT_FLAG,
   TIMEOUT_FLAG_NAME,
 } from "../lib/const.js";
@@ -52,8 +50,8 @@ import {
 } from "../lib/deployedApp.js";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
-import { getExistingKeyPair } from "../lib/keypairs.js";
-import { initCli } from "../lib/lifecyle.js";
+import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
+import { commandObj, initCli, isInteractive } from "../lib/lifecyle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 import {
   getEvenlyDistributedIds,
@@ -84,17 +82,16 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...KEY_PAIR_FLAG,
   };
   async run(): Promise<void> {
-    const { commandObj, flags, isInteractive, fluenceConfig } = await initCli(
+    const { flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Deploy),
       true
     );
 
-    const defaultKeyPair = await getExistingKeyPair({
-      keyPairName: flags[KEY_PAIR_FLAG_NAME] ?? fluenceConfig.keyPairName,
-      commandObj,
-      isInteractive,
-    });
+    const defaultKeyPair = await getExistingKeyPairFromFlags(
+      flags,
+      fluenceConfig
+    );
 
     if (defaultKeyPair instanceof Error) {
       this.error(defaultKeyPair.message);
@@ -102,30 +99,22 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig(commandObj);
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const marineCli = await initMarineCli(
-      this,
       fluenceConfig,
       maybeFluenceLockConfig
     );
 
     const preparedForDeployItems = await prepareForDeploy({
-      commandObj,
       fluenceConfig,
       defaultKeyPair,
-      isInteractive,
       marineCli,
     });
 
-    const aquaCli = await initAquaCli(
-      this,
-      fluenceConfig,
-      maybeFluenceLockConfig
-    );
-
+    const aquaCli = await initAquaCli(fluenceConfig, maybeFluenceLockConfig);
     const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
-    let appConfig = await initAppConfig(this);
+    let appConfig = await initAppConfig();
 
     if (
       appConfig !== null &&
@@ -133,7 +122,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       (flags.force ||
         (isInteractive
           ? await confirm({
-              isInteractive,
               message:
                 "Do you want to select previously deployed services that you want to remove?",
             })
@@ -141,8 +129,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ) {
       appConfig = await removeApp({
         appConfig,
-        commandObj,
-        isInteractive,
         timeout: flags[TIMEOUT_FLAG_NAME],
         aquaCli,
       });
@@ -158,7 +144,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const doDeployAll = isInteractive
       ? await confirm({
-          isInteractive,
           message: "Do you want to deploy all of these services?",
         })
       : true;
@@ -183,9 +168,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         aquaCli,
         timeout: flags[TIMEOUT_FLAG_NAME],
         tmpDeployJSONPath,
-        commandObj,
         doDeployAll,
-        isInteractive,
       });
 
       if (res !== null) {
@@ -230,15 +213,12 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       return;
     }
 
-    const newAppConfig = await initNewReadonlyAppConfig(
-      {
-        version: 3,
-        services: allServices,
-        timestamp: new Date().toISOString(),
-        relays: fluenceConfig.relays,
-      },
-      this
-    );
+    const newAppConfig = await initNewReadonlyAppConfig({
+      version: 3,
+      services: allServices,
+      timestamp: new Date().toISOString(),
+      relays: fluenceConfig.relays,
+    });
 
     logResults(newAppConfig.$getPath());
   }
@@ -420,9 +400,7 @@ type DeployServiceArg = Readonly<{
   serviceName: string;
   deployId: string;
   tmpDeployJSONPath: string;
-  commandObj: CommandObj;
   doDeployAll: boolean;
-  isInteractive: boolean;
 }>;
 
 /**
@@ -440,9 +418,7 @@ const deployService = async ({
   aquaCli,
   tmpDeployJSONPath,
   timeout,
-  commandObj,
   doDeployAll,
-  isInteractive,
 }: DeployServiceArg & { peerId: string }): Promise<{
   deployedServiceConfig: DeployedServiceConfig;
   serviceName: string;
@@ -453,7 +429,6 @@ const deployService = async ({
   if (
     !doDeployAll &&
     !(await confirm({
-      isInteractive,
       message: getMessageWithKeyValuePairs(
         "Do you want to deploy",
         keyValuePairs

@@ -29,7 +29,7 @@ import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js"
 import { generateKeyPair } from "../../lib/helpers/generateKeyPair.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { commandObj, initCli, isInteractive } from "../../lib/lifecyle.js";
 import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -51,15 +51,17 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
-      await initCli(this, await this.parse(New));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(New)
+    );
 
     if (!flags.user && maybeFluenceConfig === null) {
-      await ensureFluenceProject(commandObj, isInteractive);
+      await ensureFluenceProject();
     }
 
-    const userSecretsConfig = await initUserSecretsConfig(this);
-    const projectSecretsConfig = await initProjectSecretsConfig(this);
+    const userSecretsConfig = await initUserSecretsConfig();
+    const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
@@ -70,7 +72,6 @@ export default class New extends BaseCommand<typeof New> {
     let keyPairName =
       args.name ??
       (await input({
-        isInteractive,
         message: enterKeyPairNameMessage,
       }));
 
@@ -78,8 +79,8 @@ export default class New extends BaseCommand<typeof New> {
       keyPairName: string
     ): Promise<true | string> =>
       (flags.user
-        ? await getUserKeyPair({ commandObj, keyPairName })
-        : await getProjectKeyPair({ commandObj, keyPairName })) === undefined ||
+        ? await getUserKeyPair(keyPairName)
+        : await getProjectKeyPair(keyPairName)) === undefined ||
       `Key-pair with name ${color.yellow(
         keyPairName
       )} already exists at ${secretsConfigPath}. Please, choose another name.`;
@@ -90,7 +91,6 @@ export default class New extends BaseCommand<typeof New> {
       commandObj.warn(keyPairValidationResult);
 
       keyPairName = await input({
-        isInteractive,
         message: enterKeyPairNameMessage,
         validate: validateKeyPairName,
       });
@@ -108,7 +108,6 @@ export default class New extends BaseCommand<typeof New> {
       flags.default ||
       (isInteractive
         ? await confirm({
-            isInteractive,
             message: `Do you want to set ${color.yellow(
               keyPairName
             )} as default key-pair for ${secretsConfigPath}`,

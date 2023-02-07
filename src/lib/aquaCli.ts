@@ -16,7 +16,7 @@
 
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
-import { AQUA_NPM_DEPENDENCY, CommandObj } from "./const.js";
+import { AQUA_NPM_DEPENDENCY } from "./const.js";
 import { execPromise } from "./execPromise.js";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
 import { ensureNpmDependency } from "./npm.js";
@@ -84,13 +84,11 @@ export type AquaCLI = {
 };
 
 export const initAquaCli = async (
-  commandObj: CommandObj,
   maybeFluenceConfig: FluenceConfig | null,
   maybeFluenceLockConfig: FluenceLockConfig | null
 ): Promise<AquaCLI> => {
   const aquaCliPath = await ensureNpmDependency({
     nameAndVersion: AQUA_NPM_DEPENDENCY,
-    commandObj,
     maybeFluenceConfig,
     maybeFluenceLockConfig,
   });

@@ -24,7 +24,6 @@ import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
   BIN_DIR_NAME,
-  CommandObj,
   fluenceCargoDependencies,
   REQUIRED_RUST_TOOLCHAIN,
   RUST_WASM32_WASI_TARGET,
@@ -40,11 +39,12 @@ import {
   splitPackageNameAndVersion,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
+import { commandObj } from "./lifecyle.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
 
-const ensureRust = async (commandObj: CommandObj): Promise<void> => {
+const ensureRust = async (): Promise<void> => {
   if (!(await isRustInstalled())) {
     if (commandObj.config.windows) {
       commandObj.error(
@@ -174,15 +174,9 @@ const hasRequiredRustTarget = async (): Promise<boolean> =>
     })
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
 
-type GetLatestVersionOfCargoDependency = {
-  name: string;
-  commandObj: CommandObj;
-};
-
-export const getLatestVersionOfCargoDependency = async ({
-  name,
-  commandObj,
-}: GetLatestVersionOfCargoDependency): Promise<string> =>
+export const getLatestVersionOfCargoDependency = async (
+  name: string
+): Promise<string> =>
   (
     (
       await execPromise({
@@ -232,7 +226,6 @@ const installCargoDependency = async ({
 
 type CargoDependencyArg = {
   nameAndVersion: string;
-  commandObj: CommandObj;
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
   force?: boolean;
@@ -242,14 +235,13 @@ type CargoDependencyArg = {
 
 export const ensureCargoDependency = async ({
   nameAndVersion,
-  commandObj,
   maybeFluenceConfig,
   maybeFluenceLockConfig,
   force = false,
   toolchain: toolchainFromArgs,
   explicitInstallation = false,
 }: CargoDependencyArg): Promise<string> => {
-  await ensureRust(commandObj);
+  await ensureRust();
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
   const version =
@@ -260,14 +252,13 @@ export const ensureCargoDependency = async ({
       maybeFluenceLockConfig,
       maybeFluenceConfig,
       packageManager: "cargo",
-    }) ?? (await getLatestVersionOfCargoDependency({ name, commandObj }));
+    }) ?? (await getLatestVersionOfCargoDependency(name));
 
   const maybeCargoDependencyInfo = fluenceCargoDependencies[name];
   const toolchain = toolchainFromArgs ?? maybeCargoDependencyInfo?.toolchain;
 
   const { dependencyPath, dependencyTmpPath } =
     await resolveDependencyPathAndTmpPath({
-      commandObj,
       name,
       packageManager: "cargo",
       version,
@@ -277,7 +268,6 @@ export const ensureCargoDependency = async ({
     force,
     dependencyPath,
     dependencyTmpPath,
-    commandObj,
     explicitInstallation,
     name,
     version,
@@ -300,7 +290,6 @@ export const ensureCargoDependency = async ({
     });
 
     await handleLockConfig({
-      commandObj,
       maybeFluenceLockConfig,
       name,
       version,
@@ -316,7 +305,6 @@ export const ensureCargoDependency = async ({
 };
 
 type InstallAllDependenciesArg = {
-  commandObj: CommandObj;
   fluenceConfig: FluenceConfig;
   fluenceLockConfig: FluenceLockConfig;
   force: boolean;
@@ -325,7 +313,6 @@ type InstallAllDependenciesArg = {
 export const installAllCargoDependenciesFromFluenceConfig = async ({
   fluenceConfig,
   fluenceLockConfig,
-  commandObj,
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
@@ -338,7 +325,6 @@ export const installAllCargoDependenciesFromFluenceConfig = async ({
     // eslint-disable-next-line no-await-in-loop
     await ensureCargoDependency({
       nameAndVersion: `${name}@${version}`,
-      commandObj,
       maybeFluenceConfig: fluenceConfig,
       maybeFluenceLockConfig: fluenceLockConfig,
       force,

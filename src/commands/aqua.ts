@@ -34,7 +34,7 @@ import {
   NO_INPUT_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { exitCli, initCli } from "../lib/lifecyle.js";
+import { commandObj, exitCli, initCli } from "../lib/lifecyle.js";
 import { projectRootDirPromise, validatePath } from "../lib/paths.js";
 import { input } from "../lib/prompt.js";
 
@@ -102,14 +102,15 @@ export default class Aqua extends Command {
     ...NO_INPUT_FLAG,
   };
   async run(): Promise<void> {
-    const { commandObj, flags, isInteractive, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Aqua));
+    const { flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Aqua)
+    );
 
     const {
       watch,
       input: inputPath = maybeFluenceConfig?.aquaInputPath ??
         (await input({
-          isInteractive,
           message:
             "Enter path to an aqua file or an input directory that contains your .aqua files",
           flagName: "input",
@@ -120,7 +121,6 @@ export default class Aqua extends Command {
         : maybeFluenceConfig?.aquaOutputTSPath ??
           maybeFluenceConfig?.aquaOutputJSPath ??
           (await input({
-            isInteractive,
             message:
               "Enter path to the output directory. Will be created if it doesn't exists",
             flagName: "input",
@@ -133,23 +133,21 @@ export default class Aqua extends Command {
 
     const projectRootDir = await projectRootDirPromise;
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const aquaImports =
       maybeFluenceConfig === null
         ? await ensureAquaImports({
-            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig: null,
           })
         : await ensureAquaImports({
-            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig:
               maybeFluenceLockConfig ??
-              (await initNewFluenceLockConfig(defaultFluenceLockConfig, this)),
+              (await initNewFluenceLockConfig(defaultFluenceLockConfig)),
           });
 
     const aquaCliFlags = {
@@ -162,7 +160,6 @@ export default class Aqua extends Command {
     };
 
     const aquaCli = await initAquaCli(
-      this,
       maybeFluenceConfig,
       maybeFluenceLockConfig
     );

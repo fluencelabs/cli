@@ -39,17 +39,15 @@ export default class Init extends BaseCommand<typeof Init> {
     }),
   };
   async run(): Promise<void> {
-    const { commandObj, flags, isInteractive, args, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Init));
+    const { flags, args, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Init)
+    );
 
     await init({
-      commandObj,
-      isInteractive,
       maybeProjectPath: args.path,
       maybeFluenceConfig,
       template: await ensureTemplate({
-        isInteractive,
-        commandObj,
         templateOrUnknown: flags.template,
       }),
     });

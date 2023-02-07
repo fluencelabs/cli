@@ -43,12 +43,12 @@ import { BytesLike, ethers, providers } from "ethers";
 import {
   DEAL_CONFIG,
   ChainNetwork,
-  CommandObj,
   CHAIN_NETWORKS,
   isChainNetwork,
   NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,
 } from "./const.js";
+import { commandObj } from "./lifecyle.js";
 import { list } from "./prompt.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
@@ -56,9 +56,6 @@ const BRIDGE_QUERY_PARAM_NAME = "bridge";
 const KEY_QUERY_PARAM_NAME = "key";
 
 class WalletConnectModal implements IQRCodeModal {
-  constructor(private readonly commandObj: CommandObj) {
-    this.commandObj = commandObj;
-  }
   open(connectionString: string): void {
     const connectionStringUrl = new URL(connectionString);
     const wc = connectionStringUrl.pathname;
@@ -75,7 +72,7 @@ class WalletConnectModal implements IQRCodeModal {
     url.searchParams.set(BRIDGE_QUERY_PARAM_NAME, bridge);
     url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
 
-    this.commandObj.log(
+    commandObj.log(
       `To approve transactions with your to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${connectionString}`
     );
   }
@@ -85,14 +82,10 @@ class WalletConnectModal implements IQRCodeModal {
 
 type EnsureChainNetworkArg = {
   maybeChainNetwork: string | undefined;
-  commandObj: CommandObj;
-  isInteractive: boolean;
 };
 
 export const ensureChainNetwork = async ({
   maybeChainNetwork,
-  commandObj,
-  isInteractive,
 }: EnsureChainNetworkArg): Promise<ChainNetwork> => {
   if (isChainNetwork(maybeChainNetwork)) {
     return maybeChainNetwork;
@@ -101,7 +94,6 @@ export const ensureChainNetwork = async ({
   commandObj.warn(`Invalid chain network: ${String(maybeChainNetwork)}`);
 
   const chainNetwork = await list({
-    isInteractive,
     message: "Select chain network",
     options: [...CHAIN_NETWORKS],
     oneChoiceMessage(chainNetwork) {
@@ -118,16 +110,14 @@ export const ensureChainNetwork = async ({
 
 export const getSigner = async (
   network: ChainNetwork,
-  privKey: BytesLike | undefined,
-  commandObj: CommandObj
+  privKey: BytesLike | undefined
 ): Promise<ethers.Signer> =>
   privKey === undefined
-    ? getWalletConnectProvider(network, commandObj)
+    ? getWalletConnectProvider(network)
     : getWallet(privKey, network);
 
 const getWalletConnectProvider = async (
-  network: ChainNetwork,
-  commandObj: CommandObj
+  network: ChainNetwork
 ): Promise<ethers.Signer> => {
   const provider = new WalletConnectProvider({
     rpc: {
@@ -136,7 +126,7 @@ const getWalletConnectProvider = async (
     },
     chainId: DEAL_CONFIG[network].chainId,
     qrcode: true,
-    qrcodeModal: new WalletConnectModal(commandObj),
+    qrcodeModal: new WalletConnectModal(),
   });
 
   await provider.enable();
