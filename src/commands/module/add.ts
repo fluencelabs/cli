@@ -17,22 +17,26 @@
 import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
-import { initServiceConfig } from "../../lib/configs/project/service";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
+import { initServiceConfig } from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
-} from "../../lib/const";
-import { getModuleAbsolutePath, isUrl } from "../../lib/helpers/downloadFile";
-import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
-import { initCli } from "../../lib/lifecyle";
-import { input } from "../../lib/prompt";
-import { hasKey } from "../../lib/typeHelpers";
+} from "../../lib/const.js";
+import {
+  getModuleAbsolutePath,
+  isUrl,
+} from "../../lib/helpers/downloadFile.js";
+import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
+import { commandObj, initCli } from "../../lib/lifecyle.js";
+import { input } from "../../lib/prompt.js";
+import { hasKey } from "../../lib/typeHelpers.js";
 
 const PATH_OR_URL = "PATH | URL";
 
@@ -40,6 +44,7 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add module to ${SERVICE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     name: Flags.string({
       description: "Override module name",
       helpValue: "<name>",
@@ -55,18 +60,19 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, maybeFluenceConfig, commandObj } =
-      await initCli(this, await this.parse(Add));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Add)
+    );
 
     const modulePathOrUrl =
       args[PATH_OR_URL] ??
       (await input({
-        isInteractive,
         message: "Enter path to a module or url to .tar.gz archive",
       }));
 
     const modulePath = await getModuleAbsolutePath(modulePathOrUrl);
-    const moduleConfig = await initReadonlyModuleConfig(modulePath, commandObj);
+    const moduleConfig = await initReadonlyModuleConfig(modulePath);
 
     if (moduleConfig === null) {
       return commandObj.error(
@@ -79,7 +85,6 @@ export default class Add extends BaseCommand<typeof Add> {
     const serviceNameOrPath =
       flags.service ??
       (await input({
-        isInteractive,
         message: `Enter service name from ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )} or path to the service directory`,
@@ -101,7 +106,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     serviceDirPath = path.resolve(serviceDirPath);
 
-    const serviceConfig = await initServiceConfig(serviceDirPath, commandObj);
+    const serviceConfig = await initServiceConfig(serviceDirPath);
 
     if (serviceConfig === null) {
       return commandObj.error(
@@ -124,7 +129,6 @@ export default class Add extends BaseCommand<typeof Add> {
       this.warn(moduleNameValidity);
 
       moduleName = await input({
-        isInteractive,
         message: `Enter another name for module`,
         validate: validateModuleName,
       });

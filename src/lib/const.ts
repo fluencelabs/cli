@@ -15,13 +15,12 @@
  */
 
 import type { AvmLoglevel } from "@fluencelabs/fluence";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
-import { aquaComment, jsComment } from "./helpers/comment";
-import { jsonStringify } from "./helpers/jsonStringify";
-import { js, jsFile } from "./helpers/jsTemplateLitteral";
-import { local } from "./localNodes";
-import { FLUENCE_ENV } from "./setupEnvironment";
+import { aquaComment, jsComment } from "./helpers/comment.js";
+import { jsonStringify } from "./helpers/jsonStringify.js";
+import { local } from "./localNodes.js";
+import { FLUENCE_ENV } from "./setupEnvironment.js";
 
 export const AQUA_RECOMMENDED_VERSION = "0.9.4";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
@@ -173,7 +172,7 @@ export const NETWORK_FLAG = {
       ", "
     )})`,
     helpValue: "<network>",
-    default: "local",
+    default: "testnet",
   }),
 };
 
@@ -226,8 +225,6 @@ export const isAvmLogLevel = (unknown: unknown): unknown is AvmLoglevel =>
 
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";
-
-export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
@@ -359,20 +356,22 @@ func getInfosInParallel(peers: []PeerId) -> []Info:
     <- infos
 `;
 
+export const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
+// @ts-nocheck`;
+
 const TEMPLATE_INDEX_FILE_UNCOMMENT_TEST = "// Uncomment when app is deployed:";
 
-export const getTemplateIndexAppImports = (
-  isJS: boolean
-): string => js`${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
-import { addOne } from "./aqua/main${isJS}";
-import { registerApp } from "./aqua/app${isJS}";`;
+export const TEMPLATE_INDEX_APP_IMPORTS = `${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
+import { addOne } from "./aqua/main.js";
+import { registerApp } from "./aqua/app.js";`;
 
-export const getTemplateIndexAppImportsComment = (isJS: boolean): string =>
-  jsComment(getTemplateIndexAppImports(isJS));
+export const TEMPLATE_INDEX_APP_IMPORTS_COMMENT = jsComment(
+  TEMPLATE_INDEX_APP_IMPORTS
+);
 
 export const TEMPLATE_INDEX_APP_REGISTER = `  ${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
-  registerApp()
-  console.log(await addOne(1))`;
+registerApp()
+console.log(await addOne(1))`;
 
 export const TEMPLATE_INDEX_APP_REGISTER_COMMENT = jsComment(
   TEMPLATE_INDEX_APP_REGISTER
@@ -383,31 +382,14 @@ const NODES_CONST = "nodes";
 const getPeersImportStatement = (peersToImport: string): string =>
   `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
 
-const PEERS = (() => {
-  const fluenceEnv = process.env[FLUENCE_ENV];
+const PEERS = {
+  kras: getPeersImportStatement("krasnodar"),
+  stage: getPeersImportStatement("stage"),
+  testnet: getPeersImportStatement("testNet"),
+  local: `const ${NODES_CONST} = ${jsonStringify(local)}`,
+}[process.env[FLUENCE_ENV]];
 
-  switch (fluenceEnv) {
-    case "kras":
-      return getPeersImportStatement("krasnodar");
-    case "stage":
-      return getPeersImportStatement("stage");
-    case "testnet":
-      return getPeersImportStatement("testNet");
-    case "local":
-      return `const ${NODES_CONST} = ${jsonStringify(local)}`;
-
-    default: {
-      const _exhaustiveCheck: never = fluenceEnv;
-      throw new Error(
-        `Unknown value of environment variable FLUENCE_ENV="${String(
-          _exhaustiveCheck
-        )}"`
-      );
-    }
-  }
-})();
-
-export const getTemplateIndexFileContent = (isJS: boolean): string => jsFile`
+export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
 import { Fluence } from "@fluencelabs/fluence";
 ${PEERS}
 
@@ -417,9 +399,9 @@ import {
   getInfo,
   getInfos,
   getInfosInParallel,
-} from "./aqua/main${isJS}";
+} from "./aqua/main.js";
 
-${getTemplateIndexAppImportsComment(isJS)}
+${TEMPLATE_INDEX_APP_IMPORTS_COMMENT}
 
 const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
 const connectTo = ${NODES_CONST}[0].multiaddr;
@@ -444,5 +426,4 @@ ${TEMPLATE_INDEX_APP_REGISTER_COMMENT}
 
 main().catch((error) => {
   console.error(error);
-});
-`;
+});`;

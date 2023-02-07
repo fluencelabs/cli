@@ -19,32 +19,29 @@ import path from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../ajv";
-import type { FluenceConfig } from "../configs/project/fluence";
-import type { FluenceLockConfig } from "../configs/project/fluenceLock";
+import { ajv } from "../ajv.js";
+import type { FluenceConfig } from "../configs/project/fluence.js";
+import type { FluenceLockConfig } from "../configs/project/fluenceLock.js";
 import {
-  CommandObj,
   DOT_BIN_DIR_NAME,
   FS_OPTIONS,
   NODE_MODULES_DIR_NAME,
-} from "../const";
-import { installAllNPMDependencies } from "../npm";
+} from "../const.js";
+import { installAllNPMDependencies } from "../npm.js";
 import {
   ensureFluenceAquaDir,
   ensureUserFluenceNpmDir,
   ensureVSCodeSettingsJsonPath,
-} from "../paths";
+} from "../paths.js";
 
 type GetAquaImportsArg =
   | {
-      commandObj: CommandObj;
       maybeFluenceConfig: FluenceConfig;
       maybeFluenceLockConfig: FluenceLockConfig;
       force?: boolean;
       flags?: { import?: string[] | undefined };
     }
   | {
-      commandObj: CommandObj;
       maybeFluenceConfig: null;
       maybeFluenceLockConfig: null;
       force?: boolean;
@@ -60,13 +57,7 @@ export async function ensureAquaImports(
     return defaultImports;
   }
 
-  const {
-    commandObj,
-    flags,
-    maybeFluenceConfig,
-    maybeFluenceLockConfig,
-    force,
-  } = args;
+  const { flags, maybeFluenceConfig, maybeFluenceLockConfig, force } = args;
 
   let importsFromFluenceConfig: Array<string> = [];
 
@@ -74,7 +65,6 @@ export async function ensureAquaImports(
     await installAllNPMDependencies({
       maybeFluenceConfig,
       maybeFluenceLockConfig,
-      commandObj,
       force,
     })
   ).filter(
@@ -116,7 +106,6 @@ const initSettingsConfig = async (
 });
 
 type EnsureRecommendedSettings = {
-  commandObj: CommandObj;
   aquaImports?: string[];
   generateSettingsJson?: boolean;
 };
@@ -124,7 +113,6 @@ type EnsureRecommendedSettings = {
 export const ensureVSCodeSettingsJSON = async ({
   aquaImports,
   generateSettingsJson = false,
-  commandObj,
 }: EnsureRecommendedSettings): Promise<void> => {
   const settingsJsonPath = await ensureVSCodeSettingsJsonPath();
 
@@ -154,7 +142,7 @@ export const ensureVSCodeSettingsJSON = async ({
 
   if (validateSettingsJson(parsedFileContent)) {
     const newAquaImports = [...(aquaImports ?? (await ensureAquaImports()))];
-    const userFluenceNpmDir = await ensureUserFluenceNpmDir(commandObj);
+    const userFluenceNpmDir = await ensureUserFluenceNpmDir();
 
     const newAquaImportPathStartsFromUserFluenceNpmDir = new Set(
       newAquaImports

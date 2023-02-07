@@ -14,23 +14,29 @@
  * limitations under the License.
  */
 
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
 
-import { initAquaCli } from "../lib/aquaCli";
+import { initAquaCli } from "../lib/aquaCli.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../lib/configs/project/fluenceLock";
-import { aquaLogLevelsString, NO_INPUT_FLAG } from "../lib/const";
-import { ensureAquaImports } from "../lib/helpers/aquaImports";
-import { exitCli, initCli } from "../lib/lifecyle";
-import { projectRootDirPromise, validatePath } from "../lib/paths";
-import { input } from "../lib/prompt";
+} from "../lib/configs/project/fluenceLock.js";
+import {
+  aquaLogLevelsString,
+  FS_OPTIONS,
+  NO_INPUT_FLAG,
+} from "../lib/const.js";
+import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
+import { commandObj, exitCli, initCli } from "../lib/lifecyle.js";
+import { projectRootDirPromise, validatePath } from "../lib/paths.js";
+import { input } from "../lib/prompt.js";
 
 export default class Aqua extends Command {
   static override description =
@@ -57,10 +63,14 @@ export default class Aqua extends Command {
     }),
     air: Flags.boolean({
       description: "Generate .air file instead of .ts",
-      exclusive: ["js"],
+      exclusive: ["js", "common-js"],
     }),
     js: Flags.boolean({
       description: "Generate .js file instead of .ts",
+      exclusive: ["air"],
+    }),
+    "common-js": Flags.boolean({
+      description: "Use no extension in generated .ts file",
       exclusive: ["air"],
     }),
     "log-level-compiler": Flags.string({
@@ -92,14 +102,15 @@ export default class Aqua extends Command {
     ...NO_INPUT_FLAG,
   };
   async run(): Promise<void> {
-    const { commandObj, flags, isInteractive, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Aqua));
+    const { flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Aqua)
+    );
 
     const {
       watch,
       input: inputPath = maybeFluenceConfig?.aquaInputPath ??
         (await input({
-          isInteractive,
           message:
             "Enter path to an aqua file or an input directory that contains your .aqua files",
           flagName: "input",
@@ -110,43 +121,38 @@ export default class Aqua extends Command {
         : maybeFluenceConfig?.aquaOutputTSPath ??
           maybeFluenceConfig?.aquaOutputJSPath ??
           (await input({
-            isInteractive,
             message:
               "Enter path to the output directory. Will be created if it doesn't exists",
             flagName: "input",
           })),
       js = flags.js ?? maybeFluenceConfig?.aquaOutputJSPath !== undefined,
       "log-level-compiler": logLevelCompiler,
+      "common-js": isCommonJs,
       ...aquaCliOptionalFlags
     } = flags;
 
     const projectRootDir = await projectRootDirPromise;
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const aquaImports =
       maybeFluenceConfig === null
         ? await ensureAquaImports({
-            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig: null,
           })
         : await ensureAquaImports({
-            commandObj,
             flags,
             maybeFluenceConfig,
             maybeFluenceLockConfig:
               maybeFluenceLockConfig ??
-              (await initNewFluenceLockConfig(defaultFluenceLockConfig, this)),
+              (await initNewFluenceLockConfig(defaultFluenceLockConfig)),
           });
 
     const aquaCliFlags = {
       input: path.resolve(projectRootDir, inputPath),
-      output:
-        outputPath === undefined
-          ? undefined
-          : path.resolve(projectRootDir, outputPath),
+      output: resolveOutputPath(projectRootDir, outputPath),
       js,
       ...aquaCliOptionalFlags,
       import: aquaImports,
@@ -154,13 +160,23 @@ export default class Aqua extends Command {
     };
 
     const aquaCli = await initAquaCli(
-      this,
       maybeFluenceConfig,
       maybeFluenceLockConfig
     );
 
-    const compile = (): Promise<string> =>
-      aquaCli({ flags: aquaCliFlags }, "Compiling");
+    const compile = async (): Promise<string> => {
+      const result = await aquaCli({ flags: aquaCliFlags }, "Compiling");
+
+      if (
+        !isCommonJs &&
+        !aquaCliFlags.js &&
+        aquaCliFlags.output !== undefined
+      ) {
+        await addFileExtensionsInTsFiles(aquaCliFlags.output);
+      }
+
+      return result;
+    };
 
     if (!watch) {
       this.log(await compile());
@@ -190,9 +206,48 @@ export default class Aqua extends Command {
             watchingNotification();
           })
           .catch((error): void => {
-            this.log(error);
+            commandObj.log(String(error));
             return watchingNotification();
           });
       });
   }
 }
+
+const resolveOutputPath = (
+  projectRootDir: string,
+  maybeOutputPath: string | undefined
+): string | undefined => {
+  if (maybeOutputPath === undefined) {
+    return undefined;
+  }
+
+  const outputPath = maybeOutputPath;
+
+  if (path.isAbsolute(outputPath)) {
+    return outputPath;
+  }
+
+  return path.resolve(projectRootDir, outputPath);
+};
+
+const addFileExtensionsInTsFiles = async (outputDirPath: string) => {
+  const dirContent = await readdir(outputDirPath, FS_OPTIONS);
+
+  await Promise.all(
+    dirContent
+      .filter((file) => file.endsWith(".ts"))
+      .map((fileName) =>
+        (async () => {
+          const filePath = path.join(outputDirPath, fileName);
+          const content = await readFile(filePath, FS_OPTIONS);
+          return writeFile(
+            filePath,
+            content.replaceAll(
+              "@fluencelabs/fluence/dist/internal/compilerSupport/v4",
+              "@fluencelabs/fluence/dist/internal/compilerSupport/v4.js"
+            )
+          );
+        })()
+      )
+  );
+};

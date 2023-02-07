@@ -16,15 +16,16 @@
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../baseCommand";
-import { templates } from "../lib/const";
-import { ensureTemplate, init } from "../lib/init";
-import { initCli } from "../lib/lifecyle";
+import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { templates } from "../lib/const.js";
+import { ensureTemplate, init } from "../lib/init.js";
+import { initCli } from "../lib/lifecyle.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description = "Initialize fluence project";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     template: Flags.string({
       description: `Template to use for the project. One of: ${templates.join(
         ", "
@@ -38,17 +39,15 @@ export default class Init extends BaseCommand<typeof Init> {
     }),
   };
   async run(): Promise<void> {
-    const { commandObj, flags, isInteractive, args, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Init));
+    const { flags, args, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Init)
+    );
 
     await init({
-      commandObj,
-      isInteractive,
       maybeProjectPath: args.path,
       maybeFluenceConfig,
       template: await ensureTemplate({
-        isInteractive,
-        commandObj,
         templateOrUnknown: flags.template,
       }),
     });

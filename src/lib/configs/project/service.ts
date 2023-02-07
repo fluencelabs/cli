@@ -17,13 +17,12 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  CommandObj,
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
-import { validateAquaName } from "../../helpers/downloadFile";
-import { ensureFluenceDir } from "../../paths";
+} from "../../const.js";
+import { validateAquaName } from "../../helpers/downloadFile.js";
+import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -33,9 +32,9 @@ import {
   Migrations,
   GetDefaultConfig,
   ConfigValidateFunction,
-} from "../initConfig";
+} from "../initConfig.js";
 
-import { ConfigV0 as ModuleConfig, moduleProperties } from "./module";
+import { ConfigV0 as ModuleConfig, moduleProperties } from "./module.js";
 
 export type ModuleV0 = {
   get: string;
@@ -124,18 +123,14 @@ const getInitConfigOptions = (
 });
 
 export const initServiceConfig = (
-  configDirPath: string,
-  commandObj: CommandObj
+  configDirPath: string
 ): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(getInitConfigOptions(configDirPath))(commandObj);
+  getConfigInitFunction(getInitConfigOptions(configDirPath))();
 
 export const initReadonlyServiceConfig = (
-  configDirPath: string,
-  commandObj: CommandObj
+  configDirPath: string
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(getInitConfigOptions(configDirPath))(
-    commandObj
-  );
+  getReadonlyConfigInitFunction(getInitConfigOptions(configDirPath))();
 
 const getDefault: (
   relativePathToFacade: string,
@@ -157,13 +152,12 @@ const getDefault: (
 
 export const initNewReadonlyServiceConfig = (
   configPath: string,
-  commandObj: CommandObj,
   relativePathToFacade: string,
   name: string
 ): Promise<InitializedReadonlyConfig<LatestConfig>> =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(relativePathToFacade, name)
-  )(commandObj);
+  )();
 
-export const serviceSchema = configSchemaV0;
+export const serviceSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

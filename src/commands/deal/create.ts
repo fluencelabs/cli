@@ -19,24 +19,24 @@ import assert from "node:assert";
 import { Flags } from "@oclif/core";
 import { BigNumber, utils } from "ethers";
 
-import { BaseCommand } from "../../baseCommand";
-import { NETWORK_FLAG } from "../../lib/const";
-import { initCli } from "../../lib/lifecyle";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { NETWORK_FLAG } from "../../lib/const.js";
+import { initCli } from "../../lib/lifecyle.js";
 import {
   getFactoryContract,
   getUSDContract,
   getSigner,
   ensureChainNetwork,
-} from "../../lib/provider";
+} from "../../lib/provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
 export default class Create extends BaseCommand<typeof Create> {
-  static override hidden = true;
   static override description =
     "Create your deal with the specified parameters";
   static override flags = {
+    ...baseFlags,
     privKey: Flags.string({
       char: "k",
       description:
@@ -77,18 +77,13 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { flags, commandObj, isInteractive } = await initCli(
-      this,
-      await this.parse(Create)
-    );
+    const { flags } = await initCli(this, await this.parse(Create));
 
     const network = await ensureChainNetwork({
-      commandObj,
-      isInteractive,
       maybeChainNetwork: flags.network,
     });
 
-    const signer = await getSigner(network, flags.privKey, commandObj);
+    const signer = await getSigner(network, flags.privKey);
     const factory = getFactoryContract(signer, network);
 
     const tx = await factory.createDeal(
@@ -108,7 +103,7 @@ export default class Create extends BaseCommand<typeof Create> {
     const eventTopic = factory.interface.getEventTopic(EVENT_TOPIC_FRAGMENT);
 
     const log = res.logs.find(
-      (log: { topics: Array<any> }) => log.topics[0] === eventTopic
+      (log: { topics: Array<string> }) => log.topics[0] === eventTopic
     );
 
     assert(log !== undefined);

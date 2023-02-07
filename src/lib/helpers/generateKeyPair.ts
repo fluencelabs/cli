@@ -16,7 +16,7 @@
 
 import { KeyPair } from "@fluencelabs/fluence";
 
-import type { ConfigKeyPair } from "../configs/keyPair";
+import type { ConfigKeyPair } from "../configs/keyPair.js";
 
 export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
   const keyPair = await KeyPair.randomEd25519();

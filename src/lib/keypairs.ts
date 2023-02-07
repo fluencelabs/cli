@@ -16,29 +16,25 @@
 
 import assert from "node:assert";
 
-import color from "@oclif/color";
-import { Separator } from "inquirer";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import inquirer from "inquirer";
 
-import type { ConfigKeyPair } from "./configs/keyPair";
-import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets";
-import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
-import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
-import { list, Choices } from "./prompt";
+import type { ConfigKeyPair } from "./configs/keyPair.js";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
+import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
+import { KEY_PAIR_FLAG_NAME } from "./const.js";
+import { commandObj, isInteractive } from "./lifecyle.js";
+import { list, Choices } from "./prompt.js";
 
-type GetKeyPairArg = {
-  commandObj: CommandObj;
-  keyPairName: string | undefined;
-};
+export const getKeyPair = async (keyPairName: string | undefined) =>
+  (await getProjectKeyPair(keyPairName)) ?? (await getUserKeyPair(keyPairName));
 
-type GetExistingKeyPairArg = GetKeyPairArg & {
-  isInteractive: boolean;
-};
-
-export const getUserKeyPair = async ({
-  commandObj,
-  keyPairName,
-}: GetKeyPairArg): Promise<ConfigKeyPair | undefined> => {
-  const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
+export const getUserKeyPair = async (
+  keyPairName: string | undefined
+): Promise<ConfigKeyPair | undefined> => {
+  const userSecretsConfig = await initReadonlyUserSecretsConfig();
 
   if (keyPairName === undefined) {
     const defaultKeyPair = userSecretsConfig.keyPairs.find(
@@ -56,18 +52,16 @@ export const getUserKeyPair = async ({
   return keyPair;
 };
 
-const getExistingUserKeyPair = async ({
-  commandObj,
-  keyPairName,
-  isInteractive,
-}: GetExistingKeyPairArg): Promise<ConfigKeyPair> => {
-  const keyPair = await getUserKeyPair({ commandObj, keyPairName });
+const getExistingUserKeyPair = async (
+  keyPairName: string | undefined
+): Promise<ConfigKeyPair> => {
+  const keyPair = await getUserKeyPair(keyPairName);
 
   if (keyPair !== undefined) {
     return keyPair;
   }
 
-  const userSecretsConfig = await initReadonlyUserSecretsConfig(commandObj);
+  const userSecretsConfig = await initReadonlyUserSecretsConfig();
 
   const noUserKeyPairMessage = `No key-pair ${color.yellow(keyPairName)} found`;
 
@@ -77,9 +71,7 @@ const getExistingUserKeyPair = async ({
 
   commandObj.warn(noUserKeyPairMessage);
 
-  const readonlyProjectSecretsConfig = await initReadonlyProjectSecretsConfig(
-    commandObj
-  );
+  const readonlyProjectSecretsConfig = await initReadonlyProjectSecretsConfig();
 
   const options: Choices<ConfigKeyPair> = [];
 
@@ -98,11 +90,17 @@ const getExistingUserKeyPair = async ({
   );
 
   if (projectKeyPairOptions.length > 0) {
-    options.push(new Separator("Project key-pairs:"), ...projectKeyPairOptions);
+    options.push(
+      new inquirer.Separator("Project key-pairs:"),
+      ...projectKeyPairOptions
+    );
   }
 
   if (userKeyPairOptions.length > 0) {
-    options.push(new Separator("User key-pairs:"), ...userKeyPairOptions);
+    options.push(
+      new inquirer.Separator("User key-pairs:"),
+      ...userKeyPairOptions
+    );
   }
 
   return list({
@@ -114,17 +112,13 @@ const getExistingUserKeyPair = async ({
       commandObj.error(
         "There are no other key-pairs. You need a key-pair to continue"
       ),
-    isInteractive,
   });
 };
 
-export const getProjectKeyPair = async ({
-  commandObj,
-  keyPairName,
-}: GetKeyPairArg): Promise<ConfigKeyPair | undefined> => {
-  const projectSecretsConfig = await initReadonlyProjectSecretsConfig(
-    commandObj
-  );
+export const getProjectKeyPair = async (
+  keyPairName: string | undefined
+): Promise<ConfigKeyPair | undefined> => {
+  const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
 
   if (keyPairName === undefined) {
     return projectSecretsConfig.keyPairs.find(
@@ -138,9 +132,9 @@ export const getProjectKeyPair = async ({
 };
 
 export const getExistingKeyPair = async (
-  options: GetExistingKeyPairArg
+  keyPairName: string | undefined
 ): Promise<ConfigKeyPair> =>
-  (await getProjectKeyPair(options)) ?? getExistingUserKeyPair(options);
+  (await getProjectKeyPair(keyPairName)) ?? getExistingUserKeyPair(keyPairName);
 
 export const getExistingKeyPairFromFlags = async (
   {
@@ -148,7 +142,6 @@ export const getExistingKeyPairFromFlags = async (
   }: {
     [KEY_PAIR_FLAG_NAME]: string | undefined;
   },
-  commandObj: CommandObj,
-  isInteractive: boolean
+  maybeFluenceConfig: FluenceConfig | null
 ): Promise<ConfigKeyPair | Error> =>
-  getExistingKeyPair({ commandObj, keyPairName, isInteractive });
+  getExistingKeyPair(keyPairName ?? maybeFluenceConfig?.keyPairName);

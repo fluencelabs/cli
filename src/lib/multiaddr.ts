@@ -22,11 +22,11 @@ import {
   testNet,
   Node,
 } from "@fluencelabs/fluence-network-environment";
-import shuffle from "lodash/shuffle";
+import { shuffle } from "lodash-es";
 import { Multiaddr } from "multiaddr";
 
 export const NETWORKS = ["kras", "stage", "testnet"] as const;
-export type Network = typeof NETWORKS[number];
+export type Network = (typeof NETWORKS)[number];
 export type Relays = Network | Array<string> | undefined;
 
 const getAddrs = (nodes: Array<Node>): Array<string> =>

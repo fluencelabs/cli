@@ -14,7 +14,7 @@ on:
       run-tests-in-parallel:
         description: "Whether to run tests in parallel or synchronously"
         type: string
-        default: "false"
+        default: "true"
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
@@ -178,6 +178,7 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+          SHOW_SPINNER: "false"
         run: npm run test
 
       - name: Cleanup

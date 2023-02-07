@@ -19,37 +19,38 @@ import { spawn } from "node:child_process";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import stringifyToTOML from "@iarna/toml/stringify";
-import color from "@oclif/color";
-import { Args, Command, ux } from "@oclif/core";
+import stringifyToTOML from "@iarna/toml/stringify.js";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import { Args, Command } from "@oclif/core";
 
-import { buildModule } from "../../lib/build";
-import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
+import { buildModule } from "../../lib/build.js";
+import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
   ModuleV0 as ServiceModule,
-} from "../../lib/configs/project/service";
+} from "../../lib/configs/project/service.js";
 import {
-  CommandObj,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SERVICE_CONFIG_FILE_NAME,
-} from "../../lib/const";
-import { haltCountly } from "../../lib/countly";
+} from "../../lib/const.js";
+import { haltCountly } from "../../lib/countly.js";
 import {
   downloadService,
   getModuleWasmPath,
   isUrl,
-} from "../../lib/helpers/downloadFile";
-import { initCli } from "../../lib/lifecyle";
-import { initMarineCli, MarineCLI } from "../../lib/marineCli";
-import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths";
-import { input } from "../../lib/prompt";
-import { ensureCargoDependency } from "../../lib/rust";
+} from "../../lib/helpers/downloadFile.js";
+import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
+import { commandObj, initCli, isInteractive } from "../../lib/lifecyle.js";
+import { initMarineCli, MarineCLI } from "../../lib/marineCli.js";
+import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths.js";
+import { input } from "../../lib/prompt.js";
+import { ensureCargoDependency } from "../../lib/rust.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
@@ -66,41 +67,39 @@ export default class REPL extends Command {
     }),
   };
   async run(): Promise<void> {
-    const { args, isInteractive, commandObj, maybeFluenceConfig } =
-      await initCli(this, await this.parse(REPL));
+    const { args, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(REPL)
+    );
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
-        isInteractive,
         message: `Enter service name from ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )}, path to a service or url to .tar.gz archive`,
       }));
 
-    ux.action.start("Making sure service and modules are downloaded and built");
+    startSpinner("Making sure service and modules are downloaded and built");
 
     const { serviceModules, serviceDirPath } = await ensureServiceConfig({
-      commandObj,
       nameOrPathOrUrl,
     });
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const marineCli = await initMarineCli(
-      commandObj,
       maybeFluenceConfig,
       maybeFluenceLockConfig
     );
 
     const moduleConfigs = await ensureModuleConfigs({
       serviceModules,
-      commandObj,
       marineCli,
       serviceDirPath,
     });
 
-    ux.action.stop();
+    stopSpinner();
 
     const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
 
@@ -123,7 +122,6 @@ export default class REPL extends Command {
 
     const mreplPath = await ensureCargoDependency({
       nameAndVersion: MREPL_CARGO_DEPENDENCY,
-      commandObj,
       maybeFluenceConfig,
       maybeFluenceLockConfig,
     });
@@ -153,17 +151,15 @@ ${color.yellow(
 
 type EnsureServiceConfigArg = {
   nameOrPathOrUrl: string;
-  commandObj: CommandObj;
 };
 
 const ensureServiceConfig = async ({
-  commandObj,
   nameOrPathOrUrl,
 }: EnsureServiceConfigArg): Promise<{
   serviceModules: Array<ServiceModule>;
   serviceDirPath: string;
 }> => {
-  const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
+  const fluenceConfig = await initReadonlyFluenceConfig();
 
   const get =
     fluenceConfig?.services?.[nameOrPathOrUrl]?.get ?? nameOrPathOrUrl;
@@ -173,11 +169,11 @@ const ensureServiceConfig = async ({
     : path.resolve(get);
 
   const readonlyServiceConfig = (
-    await initReadonlyServiceConfig(serviceDirPath, commandObj)
+    await initReadonlyServiceConfig(serviceDirPath)
   )?.modules;
 
   if (readonlyServiceConfig === undefined) {
-    ux.action.stop(color.red("error"));
+    stopSpinner(color.red("error"));
     return commandObj.error(
       `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
         SERVICE_CONFIG_FILE_NAME
@@ -211,13 +207,11 @@ type TomlModuleConfig = {
 
 type EnsureModuleConfigsArg = {
   serviceModules: Array<ServiceModule>;
-  commandObj: CommandObj;
   marineCli: MarineCLI;
   serviceDirPath: string;
 };
 
 const ensureModuleConfigs = ({
-  commandObj,
   serviceModules,
   marineCli,
   serviceDirPath,
@@ -228,7 +222,6 @@ const ensureModuleConfigs = ({
         (async (): Promise<TomlModuleConfig> => {
           const overriddenModuleConfig = await buildModule({
             get,
-            commandObj,
             marineCli,
             serviceDirPath,
             overrides,

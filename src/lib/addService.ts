@@ -16,43 +16,37 @@
 
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import { buildModule } from "./build";
-import type { FluenceConfig } from "./configs/project/fluence";
+import { buildModule } from "./build.js";
+import type { FluenceConfig } from "./configs/project/fluence.js";
 import {
   FACADE_MODULE_NAME,
   ServiceConfigReadonly,
-} from "./configs/project/service";
-import {
-  CommandObj,
-  DEFAULT_DEPLOY_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
-} from "./const";
+} from "./configs/project/service.js";
+import { DEFAULT_DEPLOY_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   getModuleWasmPath,
   validateAquaName,
-} from "./helpers/downloadFile";
-import { generateServiceInterface } from "./helpers/generateServiceInterface";
-import type { MarineCLI } from "./marineCli";
-import { input } from "./prompt";
+} from "./helpers/downloadFile.js";
+import { generateServiceInterface } from "./helpers/generateServiceInterface.js";
+import { commandObj } from "./lifecyle.js";
+import type { MarineCLI } from "./marineCli.js";
+import { input } from "./prompt.js";
 
 type AddServiceArg = {
-  commandObj: CommandObj;
   serviceName: string;
   pathOrUrl: string;
-  isInteractive: boolean;
   fluenceConfig: FluenceConfig;
   serviceConfig: ServiceConfigReadonly;
   marineCli: MarineCLI;
 };
 
 export const addService = async ({
-  commandObj,
   serviceName: serviceNameFromArgs,
   pathOrUrl,
-  isInteractive,
   fluenceConfig,
   serviceConfig,
   marineCli,
@@ -84,7 +78,6 @@ export const addService = async ({
     commandObj.warn(serviceNameValidity);
 
     serviceName = await input({
-      isInteractive,
       message: `Enter another name for the service (${AQUA_NAME_REQUIREMENTS})`,
       validate: validateServiceName,
     });
@@ -108,7 +101,6 @@ export const addService = async ({
         const moduleConfig = await buildModule({
           get,
           marineCli,
-          commandObj,
           serviceDirPath: path.dirname(serviceConfig.$getPath()),
         });
 

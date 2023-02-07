@@ -18,28 +18,25 @@ import assert from "node:assert";
 import { access, mkdir, rename } from "node:fs/promises";
 import { join } from "node:path";
 
-import type { FluenceConfig } from "../configs/project/fluence";
+import type { FluenceConfig } from "../configs/project/fluence.js";
 import {
   defaultFluenceLockConfig,
   FluenceLockConfig,
   initNewReadonlyFluenceLockConfig,
-} from "../configs/project/fluenceLock";
-import {
-  CommandObj,
-  fluenceCargoDependencies,
-  fluenceNPMDependencies,
-} from "../const";
+} from "../configs/project/fluenceLock.js";
+import { fluenceCargoDependencies, fluenceNPMDependencies } from "../const.js";
+import { commandObj } from "../lifecyle.js";
 import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceNpmDir,
   ensureUserFluenceTmpCargoDir,
   ensureUserFluenceTmpNpmDir,
-} from "../paths";
+} from "../paths.js";
 
-import { replaceHomeDir } from "./replaceHomeDir";
+import { replaceHomeDir } from "./replaceHomeDir.js";
 
 const packageManagers = ["npm", "cargo"] as const;
-type PackageManager = typeof packageManagers[number];
+type PackageManager = (typeof packageManagers)[number];
 
 type HandleFluenceConfigArgs = {
   fluenceConfig: FluenceConfig;
@@ -72,7 +69,6 @@ type HandleLockConfigArgs = {
   maybeFluenceLockConfig: FluenceLockConfig | null;
   name: string;
   version: string;
-  commandObj: CommandObj;
   packageManager: PackageManager;
 };
 
@@ -80,19 +76,15 @@ export const handleLockConfig = async ({
   maybeFluenceLockConfig,
   name,
   version,
-  commandObj,
   packageManager,
 }: HandleLockConfigArgs): Promise<void> => {
   if (maybeFluenceLockConfig === null) {
-    await initNewReadonlyFluenceLockConfig(
-      {
-        ...defaultFluenceLockConfig,
-        [packageManager]: {
-          [name]: version,
-        },
+    await initNewReadonlyFluenceLockConfig({
+      ...defaultFluenceLockConfig,
+      [packageManager]: {
+        [name]: version,
       },
-      commandObj
-    );
+    });
 
     return;
   }
@@ -164,27 +156,19 @@ export const resolveVersionToInstall = ({
 
 const dependenciesPathsGettersMap: Record<
   PackageManager,
-  (commandObj: CommandObj) => [Promise<string>, Promise<string>]
+  () => [Promise<string>, Promise<string>]
 > = {
-  npm: (commandObj: CommandObj) => [
-    ensureUserFluenceNpmDir(commandObj),
-    ensureUserFluenceTmpNpmDir(commandObj),
-  ],
-  cargo: (commandObj: CommandObj) => [
-    ensureUserFluenceCargoDir(commandObj),
-    ensureUserFluenceTmpCargoDir(commandObj),
-  ],
+  npm: () => [ensureUserFluenceNpmDir(), ensureUserFluenceTmpNpmDir()],
+  cargo: () => [ensureUserFluenceCargoDir(), ensureUserFluenceTmpCargoDir()],
 };
 
 type ResolveDependencyPathAndTmpPath = {
-  commandObj: CommandObj;
   name: string;
   version: string;
   packageManager: PackageManager;
 };
 
 export const resolveDependencyPathAndTmpPath = async ({
-  commandObj,
   name,
   version,
   packageManager,
@@ -193,7 +177,7 @@ export const resolveDependencyPathAndTmpPath = async ({
   dependencyPath: string;
 }> => {
   const [depDirPath, depTmpDirPath] = await Promise.all(
-    dependenciesPathsGettersMap[packageManager](commandObj)
+    dependenciesPathsGettersMap[packageManager]()
   );
 
   const dependencyPathEnding = join(...name.split("/"), version);
@@ -208,7 +192,6 @@ type HandleInstallationArg = {
   installDependency: () => Promise<void>;
   dependencyPath: string;
   dependencyTmpPath: string;
-  commandObj: CommandObj;
   name: string;
   version: string;
   explicitInstallation: boolean;
@@ -220,7 +203,6 @@ export const handleInstallation = async ({
   dependencyPath,
   dependencyTmpPath,
   explicitInstallation,
-  commandObj,
   name,
   version,
 }: HandleInstallationArg): Promise<void> => {

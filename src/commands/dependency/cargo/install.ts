@@ -18,23 +18,23 @@ import path from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../../baseCommand";
+import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../../../lib/configs/project/fluenceLock";
+} from "../../../lib/configs/project/fluenceLock.js";
 import {
   CARGO_DIR_NAME,
   FLUENCE_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
   REQUIRED_RUST_TOOLCHAIN,
-} from "../../../lib/const";
-import { initCli } from "../../../lib/lifecyle";
+} from "../../../lib/const.js";
+import { commandObj, initCli } from "../../../lib/lifecyle.js";
 import {
   ensureCargoDependency,
   installAllCargoDependenciesFromFluenceConfig,
-} from "../../../lib/rust";
+} from "../../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
@@ -44,6 +44,7 @@ export default class Install extends BaseCommand<typeof Install> {
   )} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     toolchain: Flags.string({
       description: `Rustup toolchain name (such as stable or ${REQUIRED_RUST_TOOLCHAIN})`,
       helpValue: "<toolchain_name>",
@@ -61,15 +62,15 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, commandObj, fluenceConfig } = await initCli(
+    const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Install),
       true
     );
 
     const fluenceLockConfig =
-      (await initFluenceLockConfig(this)) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+      (await initFluenceLockConfig()) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
@@ -77,7 +78,6 @@ export default class Install extends BaseCommand<typeof Install> {
     if (packageNameAndVersion === undefined) {
       await installAllCargoDependenciesFromFluenceConfig({
         fluenceConfig,
-        commandObj,
         fluenceLockConfig,
         force: flags.force,
       });
@@ -86,7 +86,6 @@ export default class Install extends BaseCommand<typeof Install> {
     }
 
     await ensureCargoDependency({
-      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,

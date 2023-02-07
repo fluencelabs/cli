@@ -16,26 +16,30 @@
 
 import assert from "node:assert";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const";
-import { initCli } from "../../lib/lifecyle";
-import { input } from "../../lib/prompt";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { input } from "../../lib/prompt.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove service from ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
+  static override flags = {
+    ...baseFlags,
+  };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
       description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
     }),
   };
   async run(): Promise<void> {
-    const { args, isInteractive, fluenceConfig } = await initCli(
+    const { args, fluenceConfig } = await initCli(
       this,
       await this.parse(Remove),
       true
@@ -44,7 +48,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
-        isInteractive,
         message: `Enter service name from ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )}, path to a service or url to .tar.gz archive`,

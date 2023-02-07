@@ -17,10 +17,11 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../../ajv";
+import { ajv } from "../../ajv.js";
 import {
   AQUA_LIB_NPM_DEPENDENCY,
   AQUA_LIB_RECOMMENDED_VERSION,
@@ -30,14 +31,14 @@ import {
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
-} from "../../const";
-import { jsonStringify } from "../../helpers/jsonStringify";
-import { NETWORKS, Relays } from "../../multiaddr";
+} from "../../const.js";
+import { jsonStringify } from "../../helpers/jsonStringify.js";
+import { NETWORKS, Relays } from "../../multiaddr.js";
 import {
   ensureFluenceDir,
   ensureSrcAquaMainPath,
   projectRootDirPromise,
-} from "../../paths";
+} from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -46,10 +47,10 @@ import {
   getReadonlyConfigInitFunction,
   Migrations,
   ConfigValidateFunction,
-} from "../initConfig";
+} from "../initConfig.js";
 
-import { moduleProperties } from "./module";
-import type { ModuleV0 as ServiceModuleConfig } from "./service";
+import { moduleProperties } from "./module.js";
+import type { ModuleV0 as ServiceModuleConfig } from "./service.js";
 
 type ServiceV0 = { name: string; count?: number };
 
@@ -83,7 +84,7 @@ export const DISTRIBUTION_RANDOM = "random";
 export const DISTRIBUTIONS = [DISTRIBUTION_EVEN, DISTRIBUTION_RANDOM] as const;
 
 export type OverrideModules = Record<string, FluenceConfigModule>;
-export type Distribution = typeof DISTRIBUTIONS[number];
+export type Distribution = (typeof DISTRIBUTIONS)[number];
 export type ServiceDeployV1 = {
   deployId: string;
   count?: number;
@@ -473,4 +474,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema = configSchemaV2;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV2;

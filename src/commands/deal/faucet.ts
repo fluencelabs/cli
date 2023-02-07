@@ -18,22 +18,21 @@ import type { DeveloperFaucet } from "@fluencelabs/deal-aurora";
 import { Args, Flags } from "@oclif/core";
 import { BigNumber } from "ethers";
 
-import { BaseCommand } from "../../baseCommand";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import {
-  CommandObj,
   isToken,
   NETWORK_FLAG,
   Token,
   TOKENS,
   TOKENS_STRING,
-} from "../../lib/const";
-import { initCli } from "../../lib/lifecyle";
-import { input, list } from "../../lib/prompt";
+} from "../../lib/const.js";
+import { commandObj, initCli } from "../../lib/lifecyle.js";
+import { input, list } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getDeveloperContract,
   getSigner,
-} from "../../lib/provider";
+} from "../../lib/provider.js";
 
 const TOKEN_TO_METHOD_NAME_MAP: Record<
   Token,
@@ -44,10 +43,10 @@ const TOKEN_TO_METHOD_NAME_MAP: Record<
 };
 
 export default class Faucet extends BaseCommand<typeof Faucet> {
-  static override hidden = true;
   static override description =
     "Dev faucet for receiving FLT and FakeUSD tokens";
   static override flags = {
+    ...baseFlags,
     privKey: Flags.string({
       char: "k",
       description:
@@ -67,15 +66,11 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, commandObj, isInteractive } = await initCli(
-      this,
-      await this.parse(Faucet)
-    );
+    const { args, flags } = await initCli(this, await this.parse(Faucet));
 
     const amount =
       args.amount ??
       (await input({
-        isInteractive,
         message: "Enter amount of tokens to receive",
       }));
 
@@ -84,18 +79,14 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
     );
 
     const token = await resolveToken({
-      commandObj,
-      isInteractive,
       tokenFromArgs: args.token,
     });
 
     const network = await ensureChainNetwork({
-      commandObj,
-      isInteractive,
       maybeChainNetwork: flags.network,
     });
 
-    const signer = await getSigner(network, flags.privKey, commandObj);
+    const signer = await getSigner(network, flags.privKey);
     const address = await signer.getAddress();
     const developerContract = getDeveloperContract(signer, network);
     const methodName = TOKEN_TO_METHOD_NAME_MAP[token];
@@ -110,15 +101,9 @@ export default class Faucet extends BaseCommand<typeof Faucet> {
 
 type ResolveTokenArg = {
   tokenFromArgs: string | undefined;
-  commandObj: CommandObj;
-  isInteractive: boolean;
 };
 
-const resolveToken = ({
-  commandObj,
-  isInteractive,
-  tokenFromArgs,
-}: ResolveTokenArg) => {
+const resolveToken = ({ tokenFromArgs }: ResolveTokenArg) => {
   if (typeof tokenFromArgs === "string") {
     if (isToken(tokenFromArgs)) {
       return tokenFromArgs;
@@ -128,7 +113,6 @@ const resolveToken = ({
   }
 
   return list({
-    isInteractive,
     message: "Select token",
     options: [...TOKENS],
     oneChoiceMessage() {

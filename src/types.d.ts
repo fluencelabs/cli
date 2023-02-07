@@ -33,5 +33,5 @@ declare module "countly-sdk-nodejs" {
     segmentation?: Record<string, string>;
   }): void;
   function add_log(message: string): void;
-  function log_error(error: unknown): void;
+  function log_error(error: string): void;
 }

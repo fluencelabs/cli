@@ -17,33 +17,32 @@
 import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
-import { ux } from "@oclif/core";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import type { ConfigKeyPair } from "../lib/configs/keyPair";
+import type { ConfigKeyPair } from "../lib/configs/keyPair.js";
 import type {
   FluenceConfigReadonly,
   OverrideModules,
   ServiceDeployV1,
-} from "../lib/configs/project/fluence";
+} from "../lib/configs/project/fluence.js";
 import {
   initReadonlyModuleConfig,
   ModuleConfigReadonly,
   MODULE_TYPE_RUST,
-} from "../lib/configs/project/module";
-import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets";
+} from "../lib/configs/project/module.js";
+import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets.js";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
   ModuleV0,
   ServiceConfigReadonly,
-} from "../lib/configs/project/service";
+} from "../lib/configs/project/service.js";
 import {
-  CommandObj,
-  MODULE_CONFIG_FILE_NAME,
   FLUENCE_CONFIG_FILE_NAME,
+  MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
-} from "../lib/const";
+} from "../lib/const.js";
 import {
   getModuleAbsolutePath,
   downloadService,
@@ -51,13 +50,15 @@ import {
   getModuleWasmPath,
   isUrl,
   validateAquaName,
-} from "../lib/helpers/downloadFile";
-import { generateServiceInterface } from "../lib/helpers/generateServiceInterface";
-import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs";
-import type { MarineCLI } from "../lib/marineCli";
-import { confirm } from "../lib/prompt";
+} from "../lib/helpers/downloadFile.js";
+import { generateServiceInterface } from "../lib/helpers/generateServiceInterface.js";
+import type { MarineCLI } from "../lib/marineCli.js";
+import { confirm } from "../lib/prompt.js";
 
-import { generateKeyPair } from "./helpers/generateKeyPair";
+import { generateKeyPair } from "./helpers/generateKeyPair.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+import { getKeyPair } from "./keypairs.js";
+import { commandObj } from "./lifecyle.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -81,17 +82,13 @@ export type ServiceInfo = Omit<
 };
 
 type ResolveServiceInfosArg = {
-  commandObj: CommandObj;
   fluenceConfig: FluenceConfigReadonly;
   defaultKeyPair: ConfigKeyPair;
-  isInteractive: boolean;
 };
 
 const resolveServiceInfos = async ({
-  commandObj,
   fluenceConfig,
   defaultKeyPair,
-  isInteractive,
 }: ResolveServiceInfosArg): Promise<
   ServiceInfoWithUnresolvedModuleConfigs[]
 > => {
@@ -114,11 +111,11 @@ const resolveServiceInfos = async ({
     keyPair: ConfigKeyPair;
   }>;
 
-  ux.action.start("Making sure all services are downloaded");
+  startSpinner("Making sure all services are downloaded");
 
-  const projectSecretsConfig = await initProjectSecretsConfig(commandObj);
+  const projectSecretsConfig = await initProjectSecretsConfig();
 
-  const getKeyPair = async (
+  const ensureKeyPair = async (
     defaultKeyPair: ConfigKeyPair,
     keyPairName: string | undefined
   ): Promise<ConfigKeyPair> => {
@@ -126,18 +123,10 @@ const resolveServiceInfos = async ({
       return defaultKeyPair;
     }
 
-    let keyPair =
-      (await getProjectKeyPair({
-        commandObj,
-        keyPairName,
-      })) ??
-      (await getUserKeyPair({
-        commandObj,
-        keyPairName,
-      }));
+    let keyPair = await getKeyPair(keyPairName);
 
     if (keyPair === undefined) {
-      ux.action.stop("paused");
+      stopSpinner("paused");
 
       commandObj.warn(`Key pair ${color.yellow(keyPairName)} not found`);
 
@@ -145,14 +134,13 @@ const resolveServiceInfos = async ({
         message: `Do you want to generate new key-pair ${color.yellow(
           keyPairName
         )} for your project?`,
-        isInteractive,
       });
 
       if (!doGenerate) {
         return commandObj.error("Aborted");
       }
 
-      ux.action.start("Making sure all services are downloaded");
+      startSpinner("Making sure all services are downloaded");
 
       keyPair = await generateKeyPair(keyPairName);
       projectSecretsConfig.keyPairs.push(keyPair);
@@ -173,10 +161,10 @@ const resolveServiceInfos = async ({
           return {
             serviceName,
             deploy,
-            keyPair: await getKeyPair(defaultKeyPair, keyPairName),
+            keyPair: await ensureKeyPair(defaultKeyPair, keyPairName),
             serviceDirPath,
             serviceConfig:
-              (await initReadonlyServiceConfig(serviceDirPath, commandObj)) ??
+              (await initReadonlyServiceConfig(serviceDirPath)) ??
               commandObj.error(
                 `Service ${color.yellow(serviceName)} must have ${color.yellow(
                   SERVICE_CONFIG_FILE_NAME
@@ -193,7 +181,7 @@ const resolveServiceInfos = async ({
     )
   );
 
-  ux.action.stop();
+  stopSpinner();
 
   return Promise.all(
     serviceConfigs.flatMap(
@@ -224,14 +212,13 @@ const resolveServiceInfos = async ({
               serviceDirPath,
               moduleNamesAndConfigsDefinedInService:
                 getModuleNamesAndConfigsDefinedInServices({
-                  commandObj,
                   deployId,
                   overrideModules,
                   serviceConfigModules: serviceConfig.modules,
                   serviceDirPath,
                   serviceName,
                 }),
-              keyPair: await getKeyPair(keyPair, keyPairName),
+              keyPair: await ensureKeyPair(keyPair, keyPairName),
               ...rest,
             };
           }
@@ -248,8 +235,6 @@ export const build = async ({
   marineCli,
   ...resolveDeployInfosArg
 }: BuildArg): Promise<Array<ServiceInfo>> => {
-  const { commandObj } = resolveDeployInfosArg;
-
   const serviceInfos = await resolveServiceInfos(resolveDeployInfosArg);
 
   const setOfAllModuleGets = new Set(
@@ -264,7 +249,7 @@ export const build = async ({
     )
   );
 
-  ux.action.start("Making sure all modules are downloaded and built");
+  startSpinner("Making sure all modules are downloaded and built");
 
   const mapOfModuleConfigs = new Map(
     await Promise.all(
@@ -273,7 +258,6 @@ export const build = async ({
           (async (): Promise<[string, ModuleConfigReadonly]> => {
             const moduleConfig = await buildModule({
               get,
-              commandObj,
               marineCli,
             });
 
@@ -283,7 +267,7 @@ export const build = async ({
     )
   );
 
-  ux.action.stop();
+  stopSpinner();
 
   const serviceNamePathToFacadeMap: Record<string, string> = {};
 
@@ -350,7 +334,6 @@ export const build = async ({
 
 type BuildModuleArg = {
   get: string;
-  commandObj: CommandObj;
   marineCli: MarineCLI;
   serviceDirPath?: string | undefined;
   overrides?: Partial<ModuleConfigReadonly> | undefined;
@@ -358,20 +341,15 @@ type BuildModuleArg = {
 
 export const buildModule = async ({
   get,
-  commandObj,
   marineCli,
   serviceDirPath,
   overrides = {},
 }: BuildModuleArg): Promise<ModuleConfigReadonly> => {
   const modulePath = await getModuleAbsolutePath(get, serviceDirPath);
-
-  const maybeModuleConfig = await initReadonlyModuleConfig(
-    modulePath,
-    commandObj
-  );
+  const maybeModuleConfig = await initReadonlyModuleConfig(modulePath);
 
   if (maybeModuleConfig === null) {
-    ux.action.stop(color.red("error"));
+    stopSpinner(color.red("error"));
     return commandObj.error(
       `Module with get: ${color.yellow(get)} doesn't have ${color.yellow(
         MODULE_CONFIG_FILE_NAME
@@ -400,7 +378,6 @@ const overrideModule = (
 ): ModuleV0 => ({ ...mod, ...overrideModules?.[moduleName] });
 
 type GetModuleNamesAndConfigsDefinedInServicesArg = {
-  commandObj: CommandObj;
   overrideModules: OverrideModules | undefined;
   serviceName: string;
   deployId: string;
@@ -409,7 +386,6 @@ type GetModuleNamesAndConfigsDefinedInServicesArg = {
 };
 
 const getModuleNamesAndConfigsDefinedInServices = ({
-  commandObj,
   overrideModules,
   serviceName,
   deployId,

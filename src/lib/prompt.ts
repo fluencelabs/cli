@@ -16,12 +16,16 @@
 
 import assert from "node:assert";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { JSONSchemaType, ValidateFunction } from "ajv";
-import inquirer, { Answers, DistinctQuestion, Separator } from "inquirer";
+import inquirer, { Answers, DistinctQuestion } from "inquirer";
 
-import { ajv } from "./ajv";
-import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const";
+import { ajv } from "./ajv.js";
+import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const.js";
+import { commandObj, isInteractive } from "./lifecyle.js";
+
+export const Separator = inquirer.Separator;
 
 const NAME = "NAME";
 
@@ -56,13 +60,11 @@ const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 
 type PromptOptions<T, U extends Answers> = DistinctQuestion<U> & {
   validateType: ValidateFunction<{ NAME: T }>;
-  isInteractive: boolean;
   flagName: string | undefined;
 };
 
 const prompt = async <T, U extends { [NAME]: T }>({
   validateType,
-  isInteractive,
   flagName,
   ...question
 }: PromptOptions<T, U>): Promise<T> => {
@@ -81,11 +83,11 @@ const prompt = async <T, U extends { [NAME]: T }>({
   const advice = `${promptMessageWarning}${flagAdvice}`;
 
   if (!IS_TTY) {
-    throw new Error(`Cannot prompt in non-interactive mode1.${advice}`);
+    return commandObj.error(`Cannot prompt in non-interactive mode.${advice}`);
   }
 
   if (!isInteractive) {
-    throw new Error(
+    return commandObj.error(
       `Can't prompt when in non-interactive mode or when ${color.yellow(
         `--${NO_INPUT_FLAG_NAME}`
       )} is set.${advice}`
@@ -98,17 +100,15 @@ const prompt = async <T, U extends { [NAME]: T }>({
     return result[NAME];
   }
 
-  throw new Error("Prompt error");
+  throw new Error("Unreachable. Prompt error");
 };
 
 type ConfirmArg = DistinctQuestion & {
-  isInteractive: boolean;
   message: string;
   flagName?: string | undefined;
 };
 
 export const confirm = ({
-  isInteractive,
   flagName,
   ...question
 }: ConfirmArg): Promise<boolean> =>
@@ -116,30 +116,24 @@ export const confirm = ({
     ...question,
     type: "confirm",
     validateType: validateBooleanPrompt,
-    isInteractive,
     flagName,
   });
 
 type InputArg = DistinctQuestion & {
-  isInteractive: boolean;
   message: string;
   flagName?: string | undefined;
 };
 
-export const input = ({
-  isInteractive,
-  flagName,
-  ...question
-}: InputArg): Promise<string> =>
+export const input = ({ flagName, ...question }: InputArg): Promise<string> =>
   prompt({
     ...question,
     type: "input",
     validateType: validateStringPrompt,
-    isInteractive,
     flagName,
   });
 
-type SeparatorObj = InstanceType<typeof Separator>;
+type Separator = typeof inquirer.Separator;
+type SeparatorObj = InstanceType<Separator>;
 
 export type Choices<T> = [T] extends [string]
   ? Array<T | SeparatorObj>
@@ -166,7 +160,6 @@ type ListOptions<T, U> = DistinctQuestion & {
    * @returns value to return if there are no choices
    */
   onNoChoices: () => U;
-  isInteractive: boolean;
   /**
    * Flag name to use if user can't be prompted because he uses cli in non-interactive mode
    */
@@ -179,8 +172,7 @@ const handleList = async <T, U>(
   choices: Array<{ value: T; name: string } | SeparatorObj>;
   result?: T | U;
 }> => {
-  const { options, oneChoiceMessage, onNoChoices, isInteractive, flagName } =
-    listOptions;
+  const { options, oneChoiceMessage, onNoChoices, flagName } = listOptions;
 
   const choices = options.map(
     (choice): { name: string; value: T } | SeparatorObj =>
@@ -208,7 +200,6 @@ const handleList = async <T, U>(
   ) {
     const doConfirm = await confirm({
       message: oneChoiceMessage(firstChoice.name),
-      isInteractive,
       flagName,
     });
 
@@ -233,20 +224,13 @@ const handleList = async <T, U>(
 export const list = async <T, U>(
   listOptions: ListOptions<T, U>
 ): Promise<T | U> => {
-  const {
-    options,
-    oneChoiceMessage,
-    onNoChoices,
-    isInteractive,
-    flagName,
-    ...question
-  } = listOptions;
+  const { options, oneChoiceMessage, onNoChoices, flagName, ...question } =
+    listOptions;
 
   const { choices, result } = await handleList({
     options,
     oneChoiceMessage,
     onNoChoices,
-    isInteractive,
     flagName,
   });
 
@@ -261,7 +245,6 @@ export const list = async <T, U>(
     choices: choices.map((choice): string | SeparatorObj =>
       choice instanceof Separator ? choice : choice.name
     ),
-    isInteractive,
     flagName,
   });
 
@@ -283,7 +266,6 @@ export const checkboxes = async <T, U>(
     options,
     oneChoiceMessage, // used for confirm in case the list contains only one item
     onNoChoices, // do something if list is empty
-    isInteractive,
     flagName,
     ...question
   } = listOptions;
@@ -292,7 +274,6 @@ export const checkboxes = async <T, U>(
     options,
     oneChoiceMessage,
     onNoChoices,
-    isInteractive,
     flagName,
   });
 
@@ -307,7 +288,6 @@ export const checkboxes = async <T, U>(
     choices: choices.map((choice): string | SeparatorObj =>
       choice instanceof Separator ? choice : choice.name
     ),
-    isInteractive,
     flagName,
   });
 

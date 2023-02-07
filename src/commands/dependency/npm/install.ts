@@ -18,23 +18,23 @@ import path from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../../baseCommand";
+import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../../../lib/configs/project/fluenceLock";
+} from "../../../lib/configs/project/fluenceLock.js";
 import {
   FLUENCE_DIR_NAME,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
-} from "../../../lib/const";
+} from "../../../lib/const.js";
 import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
-} from "../../../lib/helpers/aquaImports";
-import { initCli } from "../../../lib/lifecyle";
-import { ensureNpmDependency } from "../../../lib/npm";
+} from "../../../lib/helpers/aquaImports.js";
+import { commandObj, initCli } from "../../../lib/lifecyle.js";
+import { ensureNpmDependency } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
@@ -44,6 +44,7 @@ export default class Install extends BaseCommand<typeof Install> {
   )} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     force: Flags.boolean({
       description:
         "Force install even if the dependency/dependencies is/are already installed",
@@ -57,7 +58,7 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig, commandObj } = await initCli(
+    const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Install),
       true
@@ -66,17 +67,15 @@ export default class Install extends BaseCommand<typeof Install> {
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     const fluenceLockConfig =
-      (await initFluenceLockConfig(this)) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+      (await initFluenceLockConfig()) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
 
     // if packageNameAndVersion is undefined, then we call ensureAquaImports
     // which also installs all npm dependencies from fluence config
     // and then add those imports to vscode settings.json
     if (packageNameAndVersion === undefined) {
       await ensureVSCodeSettingsJSON({
-        commandObj,
         aquaImports: await ensureAquaImports({
-          commandObj,
           maybeFluenceConfig: fluenceConfig,
           maybeFluenceLockConfig: fluenceLockConfig,
           force: flags.force,
@@ -87,7 +86,6 @@ export default class Install extends BaseCommand<typeof Install> {
     }
 
     await ensureNpmDependency({
-      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       maybeFluenceLockConfig: fluenceLockConfig,

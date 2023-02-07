@@ -25,13 +25,13 @@ import {
   FS_OPTIONS,
   Template,
   templates,
-} from "../src/lib/const";
-import { execPromise, ExecPromiseArg } from "../src/lib/execPromise";
-import { localMultiaddrs } from "../src/lib/localNodes";
+} from "../src/lib/const.js";
+import { execPromise, ExecPromiseArg } from "../src/lib/execPromise.js";
+import { localMultiaddrs } from "../src/lib/localNodes.js";
 import {
   FLUENCE_ENV,
   RUN_TESTS_IN_PARALLEL,
-} from "../src/lib/setupEnvironment";
+} from "../src/lib/setupEnvironment.js";
 
 type FluenceArg = {
   args?: ExecPromiseArg["args"];
@@ -52,7 +52,14 @@ export const fluence = async ({
         cwd,
         path.join(
           process.cwd(),
-          path.join("tmp", "node_modules", "@fluencelabs", "cli", "bin", "run")
+          path.join(
+            "tmp",
+            "node_modules",
+            "@fluencelabs",
+            "cli",
+            "bin",
+            "run.js"
+          )
         )
       ),
       ...args,

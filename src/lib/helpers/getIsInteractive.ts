@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IS_TTY, NO_INPUT_FLAG_NAME } from "../const";
+import { IS_TTY, NO_INPUT_FLAG_NAME } from "../const.js";
 
 export const getIsInteractive = (flags: {
   [NO_INPUT_FLAG_NAME]: boolean;

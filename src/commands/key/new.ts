@@ -14,32 +14,35 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
-import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
+import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
-} from "../../lib/const";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { generateKeyPair } from "../../lib/helpers/generateKeyPair";
-import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
-import { initCli } from "../../lib/lifecyle";
-import { confirm, input } from "../../lib/prompt";
+} from "../../lib/const.js";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
+import { generateKeyPair } from "../../lib/helpers/generateKeyPair.js";
+import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
+import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
+import { commandObj, initCli, isInteractive } from "../../lib/lifecyle.js";
+import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = `Generate key-pair and store it in ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     user: Flags.boolean({
       description:
         "Generate key-pair for current user instead of generating key-pair for current project",
+    }),
+    default: Flags.boolean({
+      description: "Set new key-pair as default for current project or user",
     }),
   };
   static override args = {
@@ -48,15 +51,17 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
-      await initCli(this, await this.parse(New));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(New)
+    );
 
     if (!flags.user && maybeFluenceConfig === null) {
-      await ensureFluenceProject(commandObj, isInteractive);
+      await ensureFluenceProject();
     }
 
-    const userSecretsConfig = await initUserSecretsConfig(this);
-    const projectSecretsConfig = await initProjectSecretsConfig(this);
+    const userSecretsConfig = await initUserSecretsConfig();
+    const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
@@ -67,18 +72,15 @@ export default class New extends BaseCommand<typeof New> {
     let keyPairName =
       args.name ??
       (await input({
-        isInteractive,
         message: enterKeyPairNameMessage,
       }));
-
-    assert(typeof keyPairName === "string");
 
     const validateKeyPairName = async (
       keyPairName: string
     ): Promise<true | string> =>
       (flags.user
-        ? await getUserKeyPair({ commandObj, keyPairName })
-        : await getProjectKeyPair({ commandObj, keyPairName })) === undefined ||
+        ? await getUserKeyPair(keyPairName)
+        : await getProjectKeyPair(keyPairName)) === undefined ||
       `Key-pair with name ${color.yellow(
         keyPairName
       )} already exists at ${secretsConfigPath}. Please, choose another name.`;
@@ -86,10 +88,9 @@ export default class New extends BaseCommand<typeof New> {
     const keyPairValidationResult = await validateKeyPairName(keyPairName);
 
     if (keyPairValidationResult !== true) {
-      this.warn(keyPairValidationResult);
+      commandObj.warn(keyPairValidationResult);
 
       keyPairName = await input({
-        isInteractive,
         message: enterKeyPairNameMessage,
         validate: validateKeyPairName,
       });
@@ -104,14 +105,14 @@ export default class New extends BaseCommand<typeof New> {
     }
 
     if (
-      isInteractive
+      flags.default ||
+      (isInteractive
         ? await confirm({
-            isInteractive,
             message: `Do you want to set ${color.yellow(
               keyPairName
             )} as default key-pair for ${secretsConfigPath}`,
           })
-        : false
+        : false)
     ) {
       if (flags.user) {
         userSecretsConfig.defaultKeyPairName = newKeyPair.name;
