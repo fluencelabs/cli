@@ -187,7 +187,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.4/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.5/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -215,17 +215,20 @@ Create your deal with the specified parameters
 
 ```
 USAGE
-  $ fluence deal create --subnetId <value> --pricePerEpoch <value> --requiredStake <value> [--no-input] [-k
-    <value>] [--network <value>]
+  $ fluence deal create --appCID <value> --requiredStake <value> [--no-input] [-k <value>] [--pricePerEpoch
+    <value>] [--minWorkers <value>] [--maxWorkers <value>] [--targetWorkers <value>] [--network <value>]
 
 FLAGS
   -k, --privKey=<value>    Private key with which transactions will be signed through cli
+  --appCID=<value>         (required) CID of the application that will be deployed
+  --maxWorkers=<value>     [default: 5]
+  --minWorkers=<value>     [default: 1]
   --network=<network>      [default: testnet] $The network in which the transactions used by the command will be carried
                            out (local, testnet)
   --no-input               Don't interactively ask for any input from the user
-  --pricePerEpoch=<value>  (required) The price that you will pay to resource owners per epoch
+  --pricePerEpoch=<value>  [default: 1] The price that you will pay to resource owners per epoch
   --requiredStake=<value>  (required) Required collateral in FLT tokens to join a deal for resource owners.
-  --subnetId=<value>       (required) Subnet ID for a deal
+  --targetWorkers=<value>  [default: 3]
 
 DESCRIPTION
   Create your deal with the specified parameters
@@ -547,7 +550,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.2/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.4/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 

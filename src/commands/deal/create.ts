@@ -29,7 +29,7 @@ import {
   ensureChainNetwork,
 } from "../../lib/provider.js";
 
-const EVENT_TOPIC_FRAGMENT = "CreateDeal";
+const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
 export default class Create extends BaseCommand<typeof Create> {
@@ -43,12 +43,8 @@ export default class Create extends BaseCommand<typeof Create> {
         "Private key with which transactions will be signed through cli",
       required: false,
     }),
-    subnetId: Flags.string({
-      description: "Subnet ID for a deal",
-      required: true,
-    }),
-    pricePerEpoch: Flags.string({
-      description: "The price that you will pay to resource owners per epoch",
+    appCID: Flags.string({
+      description: "CID of the application that will be deployed",
       required: true,
     }),
     requiredStake: Flags.string({
@@ -56,6 +52,27 @@ export default class Create extends BaseCommand<typeof Create> {
         "Required collateral in FLT tokens to join a deal for resource owners.",
       required: true,
     }),
+    pricePerEpoch: Flags.string({
+      description: "The price that you will pay to resource owners per epoch",
+      required: false,
+      default: "1",
+    }),
+    minWorkers: Flags.string({
+      description: "",
+      required: false,
+      default: "1",
+    }),
+    maxWorkers: Flags.string({
+      description: "",
+      required: false,
+      default: "5",
+    }),
+    targetWorkers: Flags.string({
+      description: "",
+      required: false,
+      default: "3",
+    }),
+
     ...NETWORK_FLAG,
   };
 
@@ -70,12 +87,16 @@ export default class Create extends BaseCommand<typeof Create> {
     const factory = getFactoryContract(signer, network);
 
     const tx = await factory.createDeal(
-      utils.keccak256(utils.toUtf8Bytes(flags.subnetId)), // TODO: base64?
       (
         await getUSDContract(signer, network)
       ).address,
       BigNumber.from(flags.pricePerEpoch).mul(BigNumber.from(10).pow(18)),
-      BigNumber.from(flags.requiredStake).mul(BigNumber.from(10).pow(18))
+      BigNumber.from(flags.requiredStake).mul(BigNumber.from(10).pow(18)),
+      BigNumber.from(flags.minWorkers),
+      BigNumber.from(flags.maxWorkers),
+      BigNumber.from(flags.targetWorkers),
+      utils.formatBytes32String(flags.appCID),
+      []
     );
 
     const res = await tx.wait();
