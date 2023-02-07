@@ -17,19 +17,20 @@
 import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import type { FluenceConfig } from "./configs/project/fluence";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
   BIN_DIR_NAME,
   CommandObj,
   fluenceCargoDependencies,
   REQUIRED_RUST_TOOLCHAIN,
   RUST_WASM32_WASI_TARGET,
-} from "./const";
-import { addCountlyLog } from "./countly";
-import { execPromise } from "./execPromise";
+} from "./const.js";
+import { addCountlyLog } from "./countly.js";
+import { execPromise } from "./execPromise.js";
 import {
   handleFluenceConfig,
   handleInstallation,
@@ -37,8 +38,8 @@ import {
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   splitPackageNameAndVersion,
-} from "./helpers/package";
-import { replaceHomeDir } from "./helpers/replaceHomeDir";
+} from "./helpers/package.js";
+import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";

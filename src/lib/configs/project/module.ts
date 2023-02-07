@@ -20,8 +20,8 @@ import {
   CommandObj,
   MODULE_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
-import { ensureFluenceDir } from "../../paths";
+} from "../../const.js";
+import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -30,13 +30,13 @@ import {
   getReadonlyConfigInitFunction,
   Migrations,
   GetDefaultConfig,
-} from "../initConfig";
+} from "../initConfig.js";
 
 export const MODULE_TYPE_RUST = "rust";
 export const MODULE_TYPE_COMPILED = "compiled";
 export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
 
-export type ModuleType = typeof MODULE_TYPES[number];
+export type ModuleType = (typeof MODULE_TYPES)[number];
 
 export type ConfigV0 = {
   version: 0;
@@ -201,5 +201,5 @@ export const initNewReadonlyModuleConfig = (
     getDefault(name)
   )(commandObj);
 
-export const moduleSchema = configSchemaV0;
+export const moduleSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 export const moduleProperties = modulePropertiesV0;

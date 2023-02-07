@@ -16,14 +16,15 @@
 
 import assert from "node:assert";
 
-import color from "@oclif/color";
-import { Separator } from "inquirer";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import inquirer from "inquirer";
 
-import type { ConfigKeyPair } from "./configs/keyPair";
-import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets";
-import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets";
-import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const";
-import { list, Choices } from "./prompt";
+import type { ConfigKeyPair } from "./configs/keyPair.js";
+import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
+import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
+import { CommandObj, KEY_PAIR_FLAG_NAME } from "./const.js";
+import { list, Choices } from "./prompt.js";
 
 type GetKeyPairArg = {
   commandObj: CommandObj;
@@ -98,11 +99,17 @@ const getExistingUserKeyPair = async ({
   );
 
   if (projectKeyPairOptions.length > 0) {
-    options.push(new Separator("Project key-pairs:"), ...projectKeyPairOptions);
+    options.push(
+      new inquirer.Separator("Project key-pairs:"),
+      ...projectKeyPairOptions
+    );
   }
 
   if (userKeyPairOptions.length > 0) {
-    options.push(new Separator("User key-pairs:"), ...userKeyPairOptions);
+    options.push(
+      new inquirer.Separator("User key-pairs:"),
+      ...userKeyPairOptions
+    );
   }
 
   return list({

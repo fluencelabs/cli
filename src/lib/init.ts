@@ -21,11 +21,11 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import Countly from "countly-sdk-nodejs";
 
-import { ajv } from "../lib/ajv";
+import { ajv } from "../lib/ajv.js";
 import {
   FluenceConfig,
   initNewFluenceConfig,
-} from "../lib/configs/project/fluence";
+} from "../lib/configs/project/fluence.js";
 import {
   CommandObj,
   FS_OPTIONS,
@@ -39,14 +39,14 @@ import {
   INDEX_JS_FILE_NAME,
   INDEX_TS_FILE_NAME,
   SRC_DIR_NAME,
-  getTemplateIndexFileContent,
+  TEMPLATE_INDEX_FILE_CONTENT,
   TYPESCRIPT_RECOMMENDED_VERSION,
   TS_NODE_RECOMMENDED_VERSION,
   TS_CONFIG_FILE_NAME,
-} from "../lib/const";
-import { execPromise } from "../lib/execPromise";
-import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
+} from "../lib/const.js";
+import { execPromise } from "../lib/execPromise.js";
+import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports.js";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
   ensureDefaultAquaJSPath,
   ensureDefaultAquaTSPath,
@@ -56,8 +56,8 @@ import {
   getGitignorePath,
   projectRootDirPromise,
   setProjectRootDir,
-} from "../lib/paths";
-import { input, list } from "../lib/prompt";
+} from "../lib/paths.js";
+import { input, list } from "../lib/prompt.js";
 
 const selectTemplate = (isInteractive: boolean): Promise<Template> =>
   list({
@@ -290,11 +290,10 @@ export const initTSorJSProject = async ({
   const indexFileName = isJS ? INDEX_JS_FILE_NAME : INDEX_TS_FILE_NAME;
 
   const PACKAGE_JSON = {
-    name: path.dirname(projectRootDir),
+    type: "module",
     version: "1.0.0",
     description: "",
     main: indexFileName,
-    ...(isJS ? { type: "module" } : {}),
     scripts: {
       start: `${isJS ? "node" : "ts-node"} ${path.join(
         SRC_DIR_NAME,
@@ -321,7 +320,7 @@ export const initTSorJSProject = async ({
 
   await fsPromises.writeFile(
     path.join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
-    getTemplateIndexFileContent(isJS),
+    TEMPLATE_INDEX_FILE_CONTENT,
     FS_OPTIONS
   );
 
@@ -331,12 +330,14 @@ export const initTSorJSProject = async ({
   } else {
     const TS_CONFIG = {
       compilerOptions: {
-        target: "es2016",
-        module: "commonjs",
-        esModuleInterop: true,
-        forceConsistentCasingInFileNames: true,
+        target: "es2022",
+        module: "es2022",
         strict: true,
         skipLibCheck: true,
+        moduleResolution: "nodenext",
+      },
+      "ts-node": {
+        esm: true,
       },
     };
 

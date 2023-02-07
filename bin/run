@@ -1,9 +1,0 @@
-#!/usr/bin/env node
-
-const oclif = require("@oclif/core");
-const { createErrorPromise } = require("../dist/countlyInterceptor");
-
-oclif
-  .run()
-  .then(require("@oclif/core/flush"))
-  .catch((error) => createErrorPromise(error, require("@oclif/core/handle")));

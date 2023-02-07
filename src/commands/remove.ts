@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Flags } from "@oclif/core";
 
-import { BaseCommand } from "../baseCommand";
-import { initAquaCli } from "../lib/aquaCli";
-import { initAppConfig } from "../lib/configs/project/app";
-import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock";
-import { TIMEOUT_FLAG } from "../lib/const";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { initCli } from "../lib/lifecyle";
-import { confirm } from "../lib/prompt";
-import { removeApp } from "../lib/removeApp";
+import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { initAquaCli } from "../lib/aquaCli.js";
+import { initAppConfig } from "../lib/configs/project/app.js";
+import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
+import { TIMEOUT_FLAG } from "../lib/const.js";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
+import { initCli } from "../lib/lifecyle.js";
+import { confirm } from "../lib/prompt.js";
+import { removeApp } from "../lib/removeApp.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = "Remove previously deployed config";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     relay: Flags.string({
       description: "Relay node multiaddr",
       helpValue: "<multiaddr>",

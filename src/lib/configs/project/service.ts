@@ -21,9 +21,9 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
-import { validateAquaName } from "../../helpers/downloadFile";
-import { ensureFluenceDir } from "../../paths";
+} from "../../const.js";
+import { validateAquaName } from "../../helpers/downloadFile.js";
+import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -33,9 +33,9 @@ import {
   Migrations,
   GetDefaultConfig,
   ConfigValidateFunction,
-} from "../initConfig";
+} from "../initConfig.js";
 
-import { ConfigV0 as ModuleConfig, moduleProperties } from "./module";
+import { ConfigV0 as ModuleConfig, moduleProperties } from "./module.js";
 
 export type ModuleV0 = {
   get: string;
@@ -166,4 +166,4 @@ export const initNewReadonlyServiceConfig = (
     getDefault(relativePathToFacade, name)
   )(commandObj);
 
-export const serviceSchema = configSchemaV0;
+export const serviceSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import { addService } from "../../lib/addService";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
-import { initReadonlyServiceConfig } from "../../lib/configs/project/service";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { addService } from "../../lib/addService.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
+import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
-} from "../../lib/const";
+} from "../../lib/const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   downloadService,
   isUrl,
-} from "../../lib/helpers/downloadFile";
-import { initCli } from "../../lib/lifecyle";
-import { initMarineCli } from "../../lib/marineCli";
-import { input } from "../../lib/prompt";
+} from "../../lib/helpers/downloadFile.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { initMarineCli } from "../../lib/marineCli.js";
+import { input } from "../../lib/prompt.js";
 
 const PATH_OR_URL = "PATH | URL";
 
@@ -40,6 +41,7 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add service to ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     name: Flags.string({
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",

@@ -33,11 +33,11 @@ import {
   ERC20,
   ERC20__factory,
 } from "@fluencelabs/deal-aurora";
-import color from "@oclif/color";
-// for some reason eslint can't see the @walletconnect/types dependency
-// eslint-disable-next-line node/no-missing-import
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { IQRCodeModal } from "@walletconnect/types";
-import WalletConnectProvider from "@walletconnect/web3-provider";
+import walletconnect from "@walletconnect/web3-provider";
+const WalletConnectProvider = walletconnect.default;
 import { BytesLike, ethers, providers } from "ethers";
 
 import {
@@ -48,8 +48,8 @@ import {
   isChainNetwork,
   NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,
-} from "./const";
-import { list } from "./prompt";
+} from "./const.js";
+import { list } from "./prompt.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
 const BRIDGE_QUERY_PARAM_NAME = "bridge";

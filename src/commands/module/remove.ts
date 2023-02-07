@@ -17,22 +17,23 @@
 import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import {
   FACADE_MODULE_NAME,
   initServiceConfig,
-} from "../../lib/configs/project/service";
+} from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
-} from "../../lib/const";
-import { isUrl } from "../../lib/helpers/downloadFile";
-import { initCli } from "../../lib/lifecyle";
-import { input } from "../../lib/prompt";
-import { hasKey } from "../../lib/typeHelpers";
+} from "../../lib/const.js";
+import { isUrl } from "../../lib/helpers/downloadFile.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { input } from "../../lib/prompt.js";
+import { hasKey } from "../../lib/typeHelpers.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
@@ -40,6 +41,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove module from ${SERVICE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     service: Flags.directory({
       description: `Service name from ${FLUENCE_CONFIG_FILE_NAME} or path to the service directory`,
       helpValue: "<name | path>",

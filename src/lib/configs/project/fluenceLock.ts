@@ -20,8 +20,8 @@ import {
   CommandObj,
   FLUENCE_LOCK_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
-import { ensureFluenceDir, projectRootDirPromise } from "../../paths";
+} from "../../const.js";
+import { ensureFluenceDir, projectRootDirPromise } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -29,7 +29,7 @@ import {
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
-} from "../initConfig";
+} from "../initConfig.js";
 
 type ConfigV0 = {
   version: 0;
@@ -104,4 +104,4 @@ export const initFluenceLockConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceLockConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceLockSchema = configSchemaV0;
+export const fluenceLockSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

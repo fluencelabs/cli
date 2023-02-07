@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { FluenceConfig } from "./configs/project/fluence";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock";
-import { AQUA_NPM_DEPENDENCY, CommandObj } from "./const";
-import { execPromise } from "./execPromise";
-import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
-import { ensureNpmDependency } from "./npm";
-import type { Flags, OptionalFlags } from "./typeHelpers";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
+import { AQUA_NPM_DEPENDENCY, CommandObj } from "./const.js";
+import { execPromise } from "./execPromise.js";
+import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
+import { ensureNpmDependency } from "./npm.js";
+import type { Flags, OptionalFlags } from "./typeHelpers.js";
 
 /**
  * Execution timeout in milliseconds
@@ -66,7 +66,6 @@ export type AquaCliInput =
           | "output"
           | "js"
           | "air"
-          | "js"
           | "log-level"
           | "const"
           | "no-relay"

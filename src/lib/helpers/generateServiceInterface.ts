@@ -17,9 +17,9 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { AQUA_EXT, FS_OPTIONS } from "../const";
-import type { MarineCLI } from "../marineCli";
-import { ensureFluenceAquaServicesDir } from "../paths";
+import { AQUA_EXT, FS_OPTIONS } from "../const.js";
+import type { MarineCLI } from "../marineCli.js";
+import { ensureFluenceAquaServicesDir } from "../paths.js";
 
 type GenerateServiceInterfaceArg = {
   pathToFacadeWasm: string;

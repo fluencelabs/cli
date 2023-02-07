@@ -18,28 +18,28 @@ import assert from "node:assert";
 import { access, mkdir, rename } from "node:fs/promises";
 import { join } from "node:path";
 
-import type { FluenceConfig } from "../configs/project/fluence";
+import type { FluenceConfig } from "../configs/project/fluence.js";
 import {
   defaultFluenceLockConfig,
   FluenceLockConfig,
   initNewReadonlyFluenceLockConfig,
-} from "../configs/project/fluenceLock";
+} from "../configs/project/fluenceLock.js";
 import {
   CommandObj,
   fluenceCargoDependencies,
   fluenceNPMDependencies,
-} from "../const";
+} from "../const.js";
 import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceNpmDir,
   ensureUserFluenceTmpCargoDir,
   ensureUserFluenceTmpNpmDir,
-} from "../paths";
+} from "../paths.js";
 
-import { replaceHomeDir } from "./replaceHomeDir";
+import { replaceHomeDir } from "./replaceHomeDir.js";
 
 const packageManagers = ["npm", "cargo"] as const;
-type PackageManager = typeof packageManagers[number];
+type PackageManager = (typeof packageManagers)[number];
 
 type HandleFluenceConfigArgs = {
   fluenceConfig: FluenceConfig;

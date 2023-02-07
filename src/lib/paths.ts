@@ -46,9 +46,9 @@ import {
   TMP_DIR_NAME,
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
-} from "./const";
-import { recursivelyFindFile } from "./helpers/recursivelyFindFile";
-import { FLUENCE_USER_DIR } from "./setupEnvironment";
+} from "./const.js";
+import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
+import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
   try {

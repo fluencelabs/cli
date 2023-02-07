@@ -18,12 +18,12 @@
 
 import Countly from "countly-sdk-nodejs";
 
-import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor";
+import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor.js";
 
-import type { FluenceConfig } from "./configs/project/fluence";
-import type { UserConfig } from "./configs/user/config";
-import { CommandObj, IS_DEVELOPMENT } from "./const";
-import { ensureDir, getUserCountlyDir } from "./paths";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import type { UserConfig } from "./configs/user/config.js";
+import { CommandObj, IS_DEVELOPMENT } from "./const.js";
+import { ensureDir, getUserCountlyDir } from "./paths.js";
 
 type InitCountlyArgs = {
   commandObj: CommandObj;

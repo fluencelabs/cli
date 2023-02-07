@@ -16,29 +16,31 @@
 
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 import camelcase from "camelcase";
 
-import { BaseCommand } from "../../baseCommand";
-import { addService } from "../../lib/addService";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
-import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
-import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const";
-import { generateNewModule } from "../../lib/generateNewModule";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { addService } from "../../lib/addService.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
+import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
+import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   ensureValidAquaName,
   validateAquaName,
-} from "../../lib/helpers/downloadFile";
-import { initCli } from "../../lib/lifecyle";
-import { initMarineCli } from "../../lib/marineCli";
-import { confirm, input } from "../../lib/prompt";
+} from "../../lib/helpers/downloadFile.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { initMarineCli } from "../../lib/marineCli.js";
+import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine service template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     name: Flags.string({
       description: `Unique service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",

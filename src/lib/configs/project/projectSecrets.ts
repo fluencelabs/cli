@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
 import {
   FLUENCE_CONFIG_FILE_NAME,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
+} from "../../const.js";
 import {
   validateHasDefault,
   validateMultiple,
   validateUnique,
   ValidationResult,
-} from "../../helpers/validations";
-import { ensureFluenceDir } from "../../paths";
+} from "../../helpers/validations.js";
+import { ensureFluenceDir } from "../../paths.js";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -37,8 +38,8 @@ import {
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
-} from "../initConfig";
-import { ConfigKeyPair, configKeyPairSchema } from "../keyPair";
+} from "../initConfig.js";
+import { ConfigKeyPair, configKeyPairSchema } from "../keyPair.js";
 
 type ConfigV0 = {
   version: 0;
@@ -119,4 +120,5 @@ export const initReadonlyProjectSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );
-export const projectSecretsSchema = configSchemaV0;
+export const projectSecretsSchema: JSONSchemaType<LatestConfig> =
+  configSchemaV0;

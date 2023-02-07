@@ -18,26 +18,24 @@ import crypto from "node:crypto";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import decompress from "decompress";
 import filenamify from "filenamify";
 import fetch from "node-fetch";
 
-import { MODULE_TYPE_RUST } from "../configs/project/module";
-import { WASM_EXT } from "../const";
-import { ensureFluenceModulesDir, ensureFluenceServicesDir } from "../paths";
-import { input } from "../prompt";
+import { MODULE_TYPE_RUST } from "../configs/project/module.js";
+import { WASM_EXT } from "../const.js";
+import { ensureFluenceModulesDir, ensureFluenceServicesDir } from "../paths.js";
+import { input } from "../prompt.js";
 
 export const getHashOfString = (str: string): Promise<string> => {
   const md5Hash = crypto.createHash("md5");
   return new Promise((resolve): void => {
     md5Hash.on("readable", (): void => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const data = md5Hash.read();
+      const data: unknown = md5Hash.read();
 
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-      if (data) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      if (data instanceof Buffer) {
         resolve(data.toString("hex"));
       }
     });
@@ -54,8 +52,8 @@ const downloadFile = async (path: string, url: string): Promise<string> => {
     throw new Error(`Failed when downloading ${color.yellow(url)}`);
   }
 
-  const buffer = await res.buffer();
-  await fsPromises.writeFile(path, buffer);
+  const arrayBuffer = await res.arrayBuffer();
+  await fsPromises.writeFile(path, new Uint8Array(arrayBuffer));
   return path;
 };
 

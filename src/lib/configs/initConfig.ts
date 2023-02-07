@@ -17,17 +17,23 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
 import Ajv from "ajv";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { CommandObj, FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const";
-import { jsonStringify } from "../helpers/jsonStringify";
-import { replaceHomeDir } from "../helpers/replaceHomeDir";
-import type { ValidationResult } from "../helpers/validations";
-import type { Mutable } from "../typeHelpers";
+import {
+  CommandObj,
+  FS_OPTIONS,
+  SCHEMAS_DIR_NAME,
+  YAML_EXT,
+} from "../const.js";
+import { jsonStringify } from "../helpers/jsonStringify.js";
+import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
+import type { ValidationResult } from "../helpers/validations.js";
+import type { Mutable } from "../typeHelpers.js";
 
 type EnsureSchemaArg = {
   name: string;
@@ -116,7 +122,6 @@ const migrateConfig = async <
     validate !== undefined && (await validate(latestConfig, configPath));
 
   if (typeof maybeValidationError === "string") {
-    // eslint-disable-next-line unicorn/prefer-type-error
     throw new Error(
       `Invalid config ${color.yellow(
         configPath
@@ -169,7 +174,6 @@ const ensureConfigIsValidLatest = async <
     validate !== undefined && (await validate(config, configPath));
 
   if (typeof maybeValidationError === "string") {
-    // eslint-disable-next-line unicorn/prefer-type-error
     throw new Error(
       `Invalid config ${color.yellow(
         configPath
@@ -274,13 +278,13 @@ export function getReadonlyConfigInitFunction<
     const configDirPath = await getConfigDirPath(commandObj);
     const configPath = getConfigPath(configDirPath, name);
 
-    const validateAllConfigVersions = new Ajv({
+    const validateAllConfigVersions = new Ajv.default({
       allowUnionTypes: true,
     }).compile<Config>({
       oneOf: allSchemas,
     });
 
-    const validateLatestConfig = new Ajv({
+    const validateLatestConfig = new Ajv.default({
       allowUnionTypes: true,
     }).compile<LatestConfig>(latestSchema);
 

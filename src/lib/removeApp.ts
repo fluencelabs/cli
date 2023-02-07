@@ -17,31 +17,31 @@
 import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import type { AquaCLI } from "../lib/aquaCli";
-import type { ConfigKeyPair } from "../lib/configs/keyPair";
-import type { AppConfig, ServicesV3 } from "../lib/configs/project/app";
-import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
-import type { CommandObj } from "../lib/const";
+import type { AquaCLI } from "../lib/aquaCli.js";
+import type { ConfigKeyPair } from "../lib/configs/keyPair.js";
+import type { AppConfig, ServicesV3 } from "../lib/configs/project/app.js";
+import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence.js";
+import type { CommandObj } from "../lib/const.js";
 import {
   generateDeployedAppAqua,
   generateRegisterApp,
-  removePreviouslyGeneratedInterfacesForServices,
-} from "../lib/deployedApp";
-import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs";
-import { getRandomRelayAddr } from "../lib/multiaddr";
+} from "../lib/deployedApp.js";
+import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs.js";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
+import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs.js";
+import { getRandomRelayAddr } from "../lib/multiaddr.js";
 import {
   ensureFluenceJSAppPath,
   ensureFluenceTSAppPath,
   ensureFluenceAquaDeployedAppPath,
   ensureFluenceJSDeployedAppPath,
   ensureFluenceTSDeployedAppPath,
-} from "../lib/paths";
-import { confirm } from "../lib/prompt";
+} from "../lib/paths.js";
+import { confirm } from "../lib/prompt.js";
 
 export const removeApp = async (
   removeAppArg: Readonly<{
@@ -171,8 +171,6 @@ export const removeApp = async (
   }
 
   const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
-
-  await removePreviouslyGeneratedInterfacesForServices(notRemovedServices);
 
   if (Object.keys(notRemovedServices).length === 0) {
     const pathsToRemove = [

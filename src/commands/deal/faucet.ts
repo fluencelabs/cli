@@ -18,7 +18,7 @@ import type { DeveloperFaucet } from "@fluencelabs/deal-aurora";
 import { Args, Flags } from "@oclif/core";
 import { BigNumber } from "ethers";
 
-import { BaseCommand } from "../../baseCommand";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import {
   CommandObj,
   isToken,
@@ -26,14 +26,14 @@ import {
   Token,
   TOKENS,
   TOKENS_STRING,
-} from "../../lib/const";
-import { initCli } from "../../lib/lifecyle";
-import { input, list } from "../../lib/prompt";
+} from "../../lib/const.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { input, list } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getDeveloperContract,
   getSigner,
-} from "../../lib/provider";
+} from "../../lib/provider.js";
 
 const TOKEN_TO_METHOD_NAME_MAP: Record<
   Token,
@@ -44,10 +44,10 @@ const TOKEN_TO_METHOD_NAME_MAP: Record<
 };
 
 export default class Faucet extends BaseCommand<typeof Faucet> {
-  static override hidden = true;
   static override description =
     "Dev faucet for receiving FLT and FakeUSD tokens";
   static override flags = {
+    ...baseFlags,
     privKey: Flags.string({
       char: "k",
       description:

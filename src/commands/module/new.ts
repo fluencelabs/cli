@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import { generateNewModule } from "../../lib/generateNewModule";
-import { initCli } from "../../lib/lifecyle";
-import { input } from "../../lib/prompt";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { generateNewModule } from "../../lib/generateNewModule.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine module template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
+  static override flags = {
+    ...baseFlags,
+  };
   static override args = {
     path: Args.string({
       description: "Module path",

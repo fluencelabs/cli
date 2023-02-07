@@ -16,26 +16,28 @@
 
 import assert from "node:assert";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
-import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
+import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
-} from "../../lib/const";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
-import { initCli } from "../../lib/lifecyle";
-import { list } from "../../lib/prompt";
+} from "../../lib/const.js";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
+import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
+import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { list } from "../../lib/prompt.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     user: Flags.boolean({
       description:
         "Remove key-pair from current user instead of removing key-pair from current project",

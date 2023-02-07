@@ -17,13 +17,13 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { initNewReadonlyModuleConfig } from "./configs/project/module";
+import { initNewReadonlyModuleConfig } from "./configs/project/module.js";
 import {
   CommandObj,
   FS_OPTIONS,
   MARINE_RS_SDK_TEMPLATE_VERSION,
   MARINE_RS_SDK_TEST_TEMPLATE_VERSION,
-} from "./const";
+} from "./const.js";
 
 export const generateNewModule = async (
   pathToModuleDir: string,
