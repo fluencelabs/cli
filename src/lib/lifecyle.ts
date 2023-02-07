@@ -21,6 +21,7 @@ import type {
   FlagOutput,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
+import platform from "platform";
 
 import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence.js";
 import {
@@ -120,6 +121,18 @@ export async function initCli<
     maybeFluenceConfig?: FluenceConfig | null;
   }
 > {
+  if (platform.version === undefined) {
+    return commandObj.error("Unknown platform");
+  }
+
+  const majorVersion = Number(platform.version.split(".")[0]);
+
+  if (majorVersion < 16 || majorVersion >= 17) {
+    return commandObj.error(
+      `Fluence CLI requires NodeJS version "16.x"; Detected ${platform.version}. Please use NodeJS version 16.\nYou can use https://nvm.sh utility to update node.js version: "nvm install 16 && nvm use 16 && nvm alias default 16"`
+    );
+  }
+
   const isInteractive = getIsInteractive(flags);
   const userConfig = await ensureUserConfig({ commandObj, isInteractive });
   const maybeFluenceConfig = await initFluenceConfig(commandObj);

@@ -110,13 +110,10 @@
       "@oclif/plugin-not-found",
       "@oclif/plugin-autocomplete"
     ],
-    "topicSeparator": " ",
-    "hooks": {
-      "init": "./src/hooks/init/init"
-    }
+    "topicSeparator": " "
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "=16"
   },
   "bugs": {
     "url": "https://github.com/fluencelabs/fluence-cli/issues"
