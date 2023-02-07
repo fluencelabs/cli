@@ -25,7 +25,6 @@ import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
   AQUA_LIB_NPM_DEPENDENCY,
-  CommandObj,
   DOT_BIN_DIR_NAME,
   fluenceNPMDependencies,
   NODE_MODULES_DIR_NAME,
@@ -41,10 +40,10 @@ import {
   handleFluenceConfig,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
+import { commandObj } from "./lifecyle.js";
 
 export const getLatestVersionOfNPMDependency = async (
-  name: string,
-  commandObj: CommandObj
+  name: string
 ): Promise<string> => {
   try {
     return (
@@ -66,11 +65,9 @@ type InstallNpmDependencyArg = {
   version: string;
   dependencyTmpPath: string;
   dependencyPath: string;
-  commandObj: CommandObj;
 };
 
 const installNpmDependency = async ({
-  commandObj,
   dependencyPath,
   dependencyTmpPath,
   name,
@@ -111,14 +108,12 @@ type EnsureNpmDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
-  commandObj: CommandObj;
   force?: boolean | undefined;
   explicitInstallation?: boolean;
 };
 
 export const ensureNpmDependency = async ({
   nameAndVersion,
-  commandObj,
   maybeFluenceConfig,
   maybeFluenceLockConfig,
   force = false,
@@ -138,15 +133,13 @@ export const ensureNpmDependency = async ({
   const version = await getLatestVersionOfNPMDependency(
     maybeVersionToInstall === undefined
       ? name
-      : `${name}@${maybeVersionToInstall}`,
-    commandObj
+      : `${name}@${maybeVersionToInstall}`
   );
 
   const maybeNpmDependencyInfo = fluenceNPMDependencies[name];
 
   const { dependencyPath, dependencyTmpPath } =
     await resolveDependencyPathAndTmpPath({
-      commandObj,
       name,
       packageManager: "npm",
       version,
@@ -156,13 +149,11 @@ export const ensureNpmDependency = async ({
     force,
     dependencyPath,
     dependencyTmpPath,
-    commandObj,
     explicitInstallation,
     name,
     version,
     installDependency: () =>
       installNpmDependency({
-        commandObj,
         dependencyPath,
         dependencyTmpPath,
         name,
@@ -179,7 +170,6 @@ export const ensureNpmDependency = async ({
     });
 
     await handleLockConfig({
-      commandObj,
       maybeFluenceLockConfig,
       name,
       version,
@@ -200,7 +190,6 @@ export const ensureNpmDependency = async ({
 };
 
 type InstallAllNPMDependenciesArg = {
-  commandObj: CommandObj;
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
   force?: boolean | undefined;
@@ -208,7 +197,6 @@ type InstallAllNPMDependenciesArg = {
 
 export const installAllNPMDependencies = async ({
   maybeFluenceConfig,
-  commandObj,
   maybeFluenceLockConfig,
   force,
 }: InstallAllNPMDependenciesArg): Promise<string[]> => {
@@ -231,7 +219,6 @@ export const installAllNPMDependencies = async ({
       // eslint-disable-next-line no-await-in-loop
       await ensureNpmDependency({
         nameAndVersion: `${name}@${version}`,
-        commandObj,
         maybeFluenceConfig,
         maybeFluenceLockConfig,
         force,
@@ -243,7 +230,6 @@ export const installAllNPMDependencies = async ({
     dependencyPaths.push(
       await ensureNpmDependency({
         nameAndVersion: AQUA_LIB_NPM_DEPENDENCY,
-        commandObj,
         maybeFluenceConfig,
         maybeFluenceLockConfig,
         force,

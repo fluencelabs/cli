@@ -30,7 +30,7 @@ import {
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
   REQUIRED_RUST_TOOLCHAIN,
 } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifecyle.js";
+import { commandObj, initCli } from "../../../lib/lifecyle.js";
 import {
   ensureCargoDependency,
   installAllCargoDependenciesFromFluenceConfig,
@@ -62,15 +62,15 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, commandObj, fluenceConfig } = await initCli(
+    const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Install),
       true
     );
 
     const fluenceLockConfig =
-      (await initFluenceLockConfig(this)) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+      (await initFluenceLockConfig()) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
@@ -78,7 +78,6 @@ export default class Install extends BaseCommand<typeof Install> {
     if (packageNameAndVersion === undefined) {
       await installAllCargoDependenciesFromFluenceConfig({
         fluenceConfig,
-        commandObj,
         fluenceLockConfig,
         force: flags.force,
       });
@@ -87,7 +86,6 @@ export default class Install extends BaseCommand<typeof Install> {
     }
 
     await ensureCargoDependency({
-      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,

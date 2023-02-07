@@ -33,7 +33,7 @@ import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
 } from "../../../lib/helpers/aquaImports.js";
-import { initCli } from "../../../lib/lifecyle.js";
+import { commandObj, initCli } from "../../../lib/lifecyle.js";
 import { ensureNpmDependency } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
@@ -58,7 +58,7 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig, commandObj } = await initCli(
+    const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Install),
       true
@@ -67,17 +67,15 @@ export default class Install extends BaseCommand<typeof Install> {
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     const fluenceLockConfig =
-      (await initFluenceLockConfig(this)) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+      (await initFluenceLockConfig()) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
 
     // if packageNameAndVersion is undefined, then we call ensureAquaImports
     // which also installs all npm dependencies from fluence config
     // and then add those imports to vscode settings.json
     if (packageNameAndVersion === undefined) {
       await ensureVSCodeSettingsJSON({
-        commandObj,
         aquaImports: await ensureAquaImports({
-          commandObj,
           maybeFluenceConfig: fluenceConfig,
           maybeFluenceLockConfig: fluenceLockConfig,
           force: flags.force,
@@ -88,7 +86,6 @@ export default class Install extends BaseCommand<typeof Install> {
     }
 
     await ensureNpmDependency({
-      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       maybeFluenceLockConfig: fluenceLockConfig,

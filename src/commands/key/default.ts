@@ -45,15 +45,17 @@ export default class Default extends BaseCommand<typeof Default> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Default));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Default)
+    );
 
     if (!flags.user && maybeFluenceConfig === null) {
-      await ensureFluenceProject(commandObj, isInteractive);
+      await ensureFluenceProject();
     }
 
-    const userSecretsConfig = await initUserSecretsConfig(this);
-    const projectSecretsConfig = await initProjectSecretsConfig(this);
+    const userSecretsConfig = await initUserSecretsConfig();
+    const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
@@ -70,9 +72,8 @@ export default class Default extends BaseCommand<typeof Default> {
 
       return (
         (flags.user
-          ? await getUserKeyPair({ commandObj, keyPairName })
-          : await getProjectKeyPair({ commandObj, keyPairName })) !==
-          undefined ||
+          ? await getUserKeyPair(keyPairName)
+          : await getProjectKeyPair(keyPairName)) !== undefined ||
         `Key-pair with name ${color.yellow(
           keyPairName
         )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
@@ -85,7 +86,6 @@ export default class Default extends BaseCommand<typeof Default> {
       this.warn(keyPairValidationResult);
 
       keyPairName = await list({
-        isInteractive,
         message: `Select key-pair name to set as default at ${secretsConfigPath}`,
         oneChoiceMessage: (choice: string): string =>
           `Do you want to set ${color.yellow(choice)} as default?`,

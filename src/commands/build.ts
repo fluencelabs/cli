@@ -29,26 +29,21 @@ export default class Build extends BaseCommand<typeof Build> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    const { isInteractive, commandObj, fluenceConfig } = await initCli(
+    const { fluenceConfig } = await initCli(
       this,
       await this.parse(Build),
       true
     );
 
-    const defaultKeyPair = await getExistingKeyPair({
-      keyPairName: fluenceConfig.keyPairName,
-      commandObj,
-      isInteractive,
-    });
+    const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);
 
     if (defaultKeyPair instanceof Error) {
       this.error(defaultKeyPair.message);
     }
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const marineCli = await initMarineCli(
-      this,
       fluenceConfig,
       maybeFluenceLockConfig
     );
@@ -56,9 +51,7 @@ export default class Build extends BaseCommand<typeof Build> {
     await build({
       fluenceConfig,
       defaultKeyPair,
-      isInteractive,
       marineCli,
-      commandObj,
     });
   }
 }

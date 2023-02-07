@@ -24,22 +24,17 @@ import Ajv from "ajv";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import {
-  CommandObj,
-  FS_OPTIONS,
-  SCHEMAS_DIR_NAME,
-  YAML_EXT,
-} from "../const.js";
+import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const.js";
 import { jsonStringify } from "../helpers/jsonStringify.js";
 import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
+import { commandObj } from "../lifecyle.js";
 import type { Mutable } from "../typeHelpers.js";
 
 type EnsureSchemaArg = {
   name: string;
   configDirPath: string;
   getSchemaDirPath: GetPath | undefined;
-  commandObj: CommandObj;
   schema: AnySchema;
 };
 
@@ -47,13 +42,10 @@ const ensureSchema = async ({
   name,
   configDirPath,
   getSchemaDirPath,
-  commandObj,
   schema,
 }: EnsureSchemaArg): Promise<string> => {
   const schemaDir = path.join(
-    getSchemaDirPath === undefined
-      ? configDirPath
-      : await getSchemaDirPath(commandObj),
+    getSchemaDirPath === undefined ? configDirPath : await getSchemaDirPath(),
     SCHEMAS_DIR_NAME
   );
 
@@ -111,7 +103,7 @@ const migrateConfig = async <
   const latestConfig: unknown = parse(migratedConfigString);
 
   if (!validateLatestConfig(latestConfig)) {
-    throw new Error(
+    return commandObj.error(
       `Couldn't migrate config ${color.yellow(
         configPath
       )}. Errors: ${jsonStringify(validateLatestConfig.errors)}`
@@ -122,7 +114,7 @@ const migrateConfig = async <
     validate !== undefined && (await validate(latestConfig, configPath));
 
   if (typeof maybeValidationError === "string") {
-    throw new Error(
+    return commandObj.error(
       `Invalid config ${color.yellow(
         configPath
       )} after successful migration. Config after migration looks like this:\n\n${migratedConfigString}\n\nErrors: ${maybeValidationError}`
@@ -163,7 +155,7 @@ const ensureConfigIsValidLatest = async <
   validate,
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
-    throw new Error(
+    return commandObj.error(
       `Invalid config ${color.yellow(configPath)}. Errors: ${jsonStringify(
         validateLatestConfig.errors
       )}`
@@ -174,7 +166,7 @@ const ensureConfigIsValidLatest = async <
     validate !== undefined && (await validate(config, configPath));
 
   if (typeof maybeValidationError === "string") {
-    throw new Error(
+    return commandObj.error(
       `Invalid config ${color.yellow(
         configPath
       )}. Errors: ${maybeValidationError}`
@@ -198,10 +190,10 @@ type BaseConfig = { version: number } & Record<string, unknown>;
 export type Migrations<Config> = Array<
   (config: Config) => Config | Promise<Config>
 >;
-export type GetDefaultConfig<LatestConfig> = (
-  commandObj: CommandObj
-) => LatestConfig | Promise<LatestConfig>;
-type GetPath = (commandObj: CommandObj) => string | Promise<string>;
+export type GetDefaultConfig<LatestConfig> = () =>
+  | LatestConfig
+  | Promise<LatestConfig>;
+type GetPath = () => string | Promise<string>;
 
 export type ConfigValidateFunction<LatestConfig> = (
   config: LatestConfig,
@@ -221,21 +213,19 @@ export type InitConfigOptions<
   validate?: ConfigValidateFunction<LatestConfig>;
 };
 
-type InitFunction<LatestConfig> = (
-  commandObj: CommandObj
-) => Promise<InitializedConfig<LatestConfig> | null>;
+type InitFunction<LatestConfig> =
+  () => Promise<InitializedConfig<LatestConfig> | null>;
 
-type InitFunctionWithDefault<LatestConfig> = (
-  commandObj: CommandObj
-) => Promise<InitializedConfig<LatestConfig>>;
+type InitFunctionWithDefault<LatestConfig> = () => Promise<
+  InitializedConfig<LatestConfig>
+>;
 
-type InitReadonlyFunction<LatestConfig> = (
-  commandObj: CommandObj
-) => Promise<InitializedReadonlyConfig<LatestConfig> | null>;
+type InitReadonlyFunction<LatestConfig> =
+  () => Promise<InitializedReadonlyConfig<LatestConfig> | null>;
 
-type InitReadonlyFunctionWithDefault<LatestConfig> = (
-  commandObj: CommandObj
-) => Promise<InitializedReadonlyConfig<LatestConfig>>;
+type InitReadonlyFunctionWithDefault<LatestConfig> = () => Promise<
+  InitializedReadonlyConfig<LatestConfig>
+>;
 
 export const getConfigPath = (configDirPath: string, name: string): string =>
   path.join(configDirPath, name);
@@ -262,9 +252,7 @@ export function getReadonlyConfigInitFunction<
   options: InitConfigOptions<Config, LatestConfig>,
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitReadonlyFunction<LatestConfig> {
-  return async (
-    commandObj: CommandObj
-  ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
+  return async (): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
     const {
       allSchemas,
       latestSchema,
@@ -275,7 +263,7 @@ export function getReadonlyConfigInitFunction<
       getSchemaDirPath,
     } = options;
 
-    const configDirPath = await getConfigDirPath(commandObj);
+    const configDirPath = await getConfigDirPath();
     const configPath = getConfigPath(configDirPath, name);
 
     const validateAllConfigVersions = new Ajv.default({
@@ -292,7 +280,6 @@ export function getReadonlyConfigInitFunction<
 
     const getSchemaPathComment = async (): Promise<string> =>
       `${schemaPathCommentStart}${await ensureSchema({
-        commandObj,
         name,
         configDirPath,
         getSchemaDirPath,
@@ -338,7 +325,7 @@ export function getReadonlyConfigInitFunction<
       configString = yamlDiffPatch(
         `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
         {},
-        await getDefaultConfig(commandObj)
+        await getDefaultConfig()
       );
 
       await fsPromises.writeFile(
@@ -351,7 +338,7 @@ export function getReadonlyConfigInitFunction<
     const config: unknown = parse(configString);
 
     if (!validateAllConfigVersions(config)) {
-      throw new Error(
+      return commandObj.error(
         `Invalid config at ${color.yellow(configPath)}. Errors: ${jsonStringify(
           validateAllConfigVersions.errors
         )}`
@@ -415,11 +402,9 @@ export function getConfigInitFunction<
   options: InitConfigOptions<Config, LatestConfig>,
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitFunction<LatestConfig> {
-  return async (
-    commandObj: CommandObj
-  ): Promise<InitializedConfig<LatestConfig> | null> => {
+  return async (): Promise<InitializedConfig<LatestConfig> | null> => {
     const configPath = getConfigPath(
-      await options.getConfigDirPath(commandObj),
+      await options.getConfigDirPath(),
       options.name
     );
 
@@ -434,7 +419,7 @@ export function getConfigInitFunction<
     const maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
       options,
       getDefaultConfig
-    )(commandObj);
+    )();
 
     if (maybeInitializedReadonlyConfig === null) {
       return null;

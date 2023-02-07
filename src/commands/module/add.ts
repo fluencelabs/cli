@@ -34,7 +34,7 @@ import {
   isUrl,
 } from "../../lib/helpers/downloadFile.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { commandObj, initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
 
@@ -60,18 +60,19 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, maybeFluenceConfig, commandObj } =
-      await initCli(this, await this.parse(Add));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Add)
+    );
 
     const modulePathOrUrl =
       args[PATH_OR_URL] ??
       (await input({
-        isInteractive,
         message: "Enter path to a module or url to .tar.gz archive",
       }));
 
     const modulePath = await getModuleAbsolutePath(modulePathOrUrl);
-    const moduleConfig = await initReadonlyModuleConfig(modulePath, commandObj);
+    const moduleConfig = await initReadonlyModuleConfig(modulePath);
 
     if (moduleConfig === null) {
       return commandObj.error(
@@ -84,7 +85,6 @@ export default class Add extends BaseCommand<typeof Add> {
     const serviceNameOrPath =
       flags.service ??
       (await input({
-        isInteractive,
         message: `Enter service name from ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )} or path to the service directory`,
@@ -106,7 +106,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     serviceDirPath = path.resolve(serviceDirPath);
 
-    const serviceConfig = await initServiceConfig(serviceDirPath, commandObj);
+    const serviceConfig = await initServiceConfig(serviceDirPath);
 
     if (serviceConfig === null) {
       return commandObj.error(
@@ -129,7 +129,6 @@ export default class Add extends BaseCommand<typeof Add> {
       this.warn(moduleNameValidity);
 
       moduleName = await input({
-        isInteractive,
         message: `Enter another name for module`,
         validate: validateModuleName,
       });

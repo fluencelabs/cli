@@ -25,7 +25,6 @@ import {
   AQUA_DIR_NAME,
   AQUA_SERVICES_DIR_NAME,
   CARGO_DIR_NAME,
-  CommandObj,
   CONFIG_TOML,
   COUNTLY_DIR_NAME,
   DEFAULT_SRC_AQUA_FILE_NAME,
@@ -48,6 +47,7 @@ import {
   VSCODE_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
+import { commandObj } from "./lifecyle.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
@@ -66,9 +66,7 @@ export const ensureDir = async (dirPath: string): Promise<string> => {
 
 // User .fluence paths:
 
-export const ensureUserFluenceDir = (
-  commandObj: CommandObj
-): Promise<string> => {
+export const ensureUserFluenceDir = (): Promise<string> => {
   const globalFluenceDirPathFromEnv = process.env[FLUENCE_USER_DIR];
 
   if (typeof globalFluenceDirPathFromEnv === "string") {
@@ -82,46 +80,24 @@ export const ensureUserFluenceDir = (
   return ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
 };
 
-export const getUserCountlyDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  path.join(
-    await ensureUserFluenceDir(commandObj),
-    COUNTLY_DIR_NAME,
-    COUNTLY_DIR_NAME
-  );
+export const getUserCountlyDir = async (): Promise<string> =>
+  path.join(await ensureUserFluenceDir(), COUNTLY_DIR_NAME, COUNTLY_DIR_NAME);
 
-export const ensureUserFluenceTmpNpmDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
+export const ensureUserFluenceTmpNpmDir = async (): Promise<string> =>
   ensureDir(
-    path.join(
-      await ensureUserFluenceDir(commandObj),
-      TMP_DIR_NAME,
-      NPM_DIR_NAME
-    )
+    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, NPM_DIR_NAME)
   );
 
-export const ensureUserFluenceNpmDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  ensureDir(path.join(await ensureUserFluenceDir(commandObj), NPM_DIR_NAME));
+export const ensureUserFluenceNpmDir = async (): Promise<string> =>
+  ensureDir(path.join(await ensureUserFluenceDir(), NPM_DIR_NAME));
 
-export const ensureUserFluenceTmpCargoDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
+export const ensureUserFluenceTmpCargoDir = async (): Promise<string> =>
   ensureDir(
-    path.join(
-      await ensureUserFluenceDir(commandObj),
-      TMP_DIR_NAME,
-      CARGO_DIR_NAME
-    )
+    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, CARGO_DIR_NAME)
   );
 
-export const ensureUserFluenceCargoDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  ensureDir(path.join(await ensureUserFluenceDir(commandObj), CARGO_DIR_NAME));
+export const ensureUserFluenceCargoDir = async (): Promise<string> =>
+  ensureDir(path.join(await ensureUserFluenceDir(), CARGO_DIR_NAME));
 
 // Project paths:
 

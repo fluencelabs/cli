@@ -18,15 +18,12 @@ import {
   FluenceConfig,
   initFluenceConfig,
 } from "../configs/project/fluence.js";
-import type { CommandObj } from "../const.js";
 import { init } from "../init.js";
+import { commandObj, isInteractive } from "../lifecyle.js";
 import { confirm } from "../prompt.js";
 
-export const ensureFluenceProject = async (
-  commandObj: CommandObj,
-  isInteractive: boolean
-): Promise<FluenceConfig> => {
-  const fluenceConfig = await initFluenceConfig(commandObj);
+export const ensureFluenceProject = async (): Promise<FluenceConfig> => {
+  const fluenceConfig = await initFluenceConfig();
 
   if (fluenceConfig !== null) {
     return fluenceConfig;
@@ -42,7 +39,6 @@ export const ensureFluenceProject = async (
 
   const doInit = await confirm({
     message: `Do you want to init fluence project`,
-    isInteractive,
   });
 
   if (!doInit) {
@@ -51,5 +47,5 @@ export const ensureFluenceProject = async (
     );
   }
 
-  return init({ commandObj, isInteractive });
+  return init();
 };

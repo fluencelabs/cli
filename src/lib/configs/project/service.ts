@@ -17,7 +17,6 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  CommandObj,
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -124,18 +123,14 @@ const getInitConfigOptions = (
 });
 
 export const initServiceConfig = (
-  configDirPath: string,
-  commandObj: CommandObj
+  configDirPath: string
 ): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(getInitConfigOptions(configDirPath))(commandObj);
+  getConfigInitFunction(getInitConfigOptions(configDirPath))();
 
 export const initReadonlyServiceConfig = (
-  configDirPath: string,
-  commandObj: CommandObj
+  configDirPath: string
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(getInitConfigOptions(configDirPath))(
-    commandObj
-  );
+  getReadonlyConfigInitFunction(getInitConfigOptions(configDirPath))();
 
 const getDefault: (
   relativePathToFacade: string,
@@ -157,13 +152,12 @@ const getDefault: (
 
 export const initNewReadonlyServiceConfig = (
   configPath: string,
-  commandObj: CommandObj,
   relativePathToFacade: string,
   name: string
 ): Promise<InitializedReadonlyConfig<LatestConfig>> =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(relativePathToFacade, name)
-  )(commandObj);
+  )();
 
 export const serviceSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

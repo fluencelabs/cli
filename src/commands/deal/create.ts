@@ -60,18 +60,13 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { flags, commandObj, isInteractive } = await initCli(
-      this,
-      await this.parse(Create)
-    );
+    const { flags } = await initCli(this, await this.parse(Create));
 
     const network = await ensureChainNetwork({
-      commandObj,
-      isInteractive,
       maybeChainNetwork: flags.network,
     });
 
-    const signer = await getSigner(network, flags.privKey, commandObj);
+    const signer = await getSigner(network, flags.privKey);
     const factory = getFactoryContract(signer, network);
 
     const tx = await factory.createDeal(

@@ -17,7 +17,6 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  CommandObj,
   FLUENCE_LOCK_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
@@ -85,21 +84,16 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 };
 
 export const initNewReadonlyFluenceLockConfig = (
-  defaultConfig: LatestConfig,
-  commandObj: CommandObj
+  defaultConfig: LatestConfig
 ): Promise<InitializedReadonlyConfig<ConfigV0>> =>
   getReadonlyConfigInitFunction(
     initConfigOptions,
     (): ConfigV0 => defaultConfig
-  )(commandObj);
+  )();
 export const initNewFluenceLockConfig = (
-  defaultConfig: LatestConfig,
-  commandObj: CommandObj
+  defaultConfig: LatestConfig
 ): Promise<InitializedConfig<ConfigV0>> =>
-  getConfigInitFunction(
-    initConfigOptions,
-    (): ConfigV0 => defaultConfig
-  )(commandObj);
+  getConfigInitFunction(initConfigOptions, (): ConfigV0 => defaultConfig)();
 export const initFluenceLockConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceLockConfig =
   getReadonlyConfigInitFunction(initConfigOptions);

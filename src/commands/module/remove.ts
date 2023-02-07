@@ -31,7 +31,7 @@ import {
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import { isUrl } from "../../lib/helpers/downloadFile.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { commandObj, initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
 
@@ -53,13 +53,14 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, maybeFluenceConfig, commandObj } =
-      await initCli(this, await this.parse(Remove));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Remove)
+    );
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
-        isInteractive,
         message: `Enter module name from ${color.yellow(
           SERVICE_CONFIG_FILE_NAME
         )}, path to a module or url to .tar.gz archive`,
@@ -68,7 +69,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const serviceNameOrPath =
       flags.service ??
       (await input({
-        isInteractive,
         message: `Enter service name from ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )} or path to the service directory`,
@@ -89,8 +89,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }
 
     serviceDirPath = path.resolve(serviceDirPath);
-
-    const serviceConfig = await initServiceConfig(serviceDirPath, this);
+    const serviceConfig = await initServiceConfig(serviceDirPath);
 
     if (serviceConfig === null) {
       return commandObj.error(

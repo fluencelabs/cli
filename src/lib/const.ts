@@ -15,7 +15,7 @@
  */
 
 import type { AvmLoglevel } from "@fluencelabs/fluence";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
 import { aquaComment, jsComment } from "./helpers/comment.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
@@ -226,8 +226,6 @@ export const isAvmLogLevel = (unknown: unknown): unknown is AvmLoglevel =>
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";
 
-export type CommandObj = Readonly<InstanceType<typeof Command>>;
-
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
 .fluence
@@ -384,29 +382,12 @@ const NODES_CONST = "nodes";
 const getPeersImportStatement = (peersToImport: string): string =>
   `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
 
-const PEERS = (() => {
-  const fluenceEnv = process.env[FLUENCE_ENV];
-
-  switch (fluenceEnv) {
-    case "kras":
-      return getPeersImportStatement("krasnodar");
-    case "stage":
-      return getPeersImportStatement("stage");
-    case "testnet":
-      return getPeersImportStatement("testNet");
-    case "local":
-      return `const ${NODES_CONST} = ${jsonStringify(local)}`;
-
-    default: {
-      const _exhaustiveCheck: never = fluenceEnv;
-      throw new Error(
-        `Unknown value of environment variable FLUENCE_ENV="${String(
-          _exhaustiveCheck
-        )}"`
-      );
-    }
-  }
-})();
+const PEERS = {
+  kras: getPeersImportStatement("krasnodar"),
+  stage: getPeersImportStatement("stage"),
+  testnet: getPeersImportStatement("testNet"),
+  local: `const ${NODES_CONST} = ${jsonStringify(local)}`,
+}[process.env[FLUENCE_ENV]];
 
 export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
 import { Fluence } from "@fluencelabs/fluence";

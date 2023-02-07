@@ -24,7 +24,7 @@ import { initAppConfig } from "../lib/configs/project/app.js";
 import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
 import { TIMEOUT_FLAG } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
-import { initCli } from "../lib/lifecyle.js";
+import { initCli, isInteractive } from "../lib/lifecyle.js";
 import { confirm } from "../lib/prompt.js";
 import { removeApp } from "../lib/removeApp.js";
 
@@ -40,13 +40,13 @@ export default class Remove extends BaseCommand<typeof Remove> {
     ...TIMEOUT_FLAG,
   };
   async run(): Promise<void> {
-    const { commandObj, flags, isInteractive, fluenceConfig } = await initCli(
+    const { flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Remove),
       true
     );
 
-    const appConfig = await initAppConfig(this);
+    const appConfig = await initAppConfig();
 
     if (appConfig === null || Object.keys(appConfig.services).length === 0) {
       this.error(
@@ -60,26 +60,18 @@ export default class Remove extends BaseCommand<typeof Remove> {
         message: `Are you sure you want to remove app described in ${color.yellow(
           replaceHomeDir(appConfig.$getPath())
         )}?`,
-        isInteractive,
       }))
     ) {
       this.error("Aborted");
     }
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
-
-    const aquaCli = await initAquaCli(
-      this,
-      fluenceConfig,
-      maybeFluenceLockConfig
-    );
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
+    const aquaCli = await initAquaCli(fluenceConfig, maybeFluenceLockConfig);
 
     await removeApp({
       appConfig,
-      commandObj,
       timeout: flags.timeout,
       relay: flags.relay,
-      isInteractive,
       aquaCli,
     });
   }

@@ -22,21 +22,20 @@ import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor.js";
 
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { UserConfig } from "./configs/user/config.js";
-import { CommandObj, IS_DEVELOPMENT } from "./const.js";
+import { IS_DEVELOPMENT } from "./const.js";
+import { commandObj } from "./lifecyle.js";
 import { ensureDir, getUserCountlyDir } from "./paths.js";
 
 type InitCountlyArgs = {
-  commandObj: CommandObj;
   userConfig: UserConfig;
   maybeFluenceConfig: FluenceConfig | null;
 };
 
 export async function initCountly({
-  commandObj,
   userConfig,
   maybeFluenceConfig,
 }: InitCountlyArgs): Promise<void> {
-  const userCountlyDir = await getUserCountlyDir(commandObj);
+  const userCountlyDir = await getUserCountlyDir();
 
   if (!IS_DEVELOPMENT && userConfig.countlyConsent) {
     Countly.init({
