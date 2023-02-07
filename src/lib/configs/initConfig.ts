@@ -103,7 +103,7 @@ const migrateConfig = async <
   const latestConfig: unknown = parse(migratedConfigString);
 
   if (!validateLatestConfig(latestConfig)) {
-    throw new Error(
+    return commandObj.error(
       `Couldn't migrate config ${color.yellow(
         configPath
       )}. Errors: ${jsonStringify(validateLatestConfig.errors)}`
@@ -114,7 +114,7 @@ const migrateConfig = async <
     validate !== undefined && (await validate(latestConfig, configPath));
 
   if (typeof maybeValidationError === "string") {
-    throw new Error(
+    return commandObj.error(
       `Invalid config ${color.yellow(
         configPath
       )} after successful migration. Config after migration looks like this:\n\n${migratedConfigString}\n\nErrors: ${maybeValidationError}`
@@ -155,7 +155,7 @@ const ensureConfigIsValidLatest = async <
   validate,
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
-    throw new Error(
+    return commandObj.error(
       `Invalid config ${color.yellow(configPath)}. Errors: ${jsonStringify(
         validateLatestConfig.errors
       )}`
@@ -166,7 +166,7 @@ const ensureConfigIsValidLatest = async <
     validate !== undefined && (await validate(config, configPath));
 
   if (typeof maybeValidationError === "string") {
-    throw new Error(
+    return commandObj.error(
       `Invalid config ${color.yellow(
         configPath
       )}. Errors: ${maybeValidationError}`

@@ -26,6 +26,7 @@ import fetch from "node-fetch";
 
 import { MODULE_TYPE_RUST } from "../configs/project/module.js";
 import { WASM_EXT } from "../const.js";
+import { commandObj } from "../lifecyle.js";
 import { ensureFluenceModulesDir, ensureFluenceServicesDir } from "../paths.js";
 import { input } from "../prompt.js";
 
@@ -49,7 +50,7 @@ const downloadFile = async (path: string, url: string): Promise<string> => {
   const res = await fetch(url);
 
   if (res.status === 404) {
-    throw new Error(`Failed when downloading ${color.yellow(url)}`);
+    return commandObj.error(`Failed when downloading ${color.yellow(url)}`);
   }
 
   const arrayBuffer = await res.arrayBuffer();
