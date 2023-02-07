@@ -115,7 +115,7 @@ Pull request and release process:
 * [`fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-i-package-name--package-nameversion)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
 * [`fluence deploy`](#fluence-deploy)
-* [`fluence help [COMMANDS]`](#fluence-help-commands)
+* [`fluence help [COMMAND]`](#fluence-help-command)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
 * [`fluence key new [NAME]`](#fluence-key-new-name)
@@ -192,7 +192,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.2/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.6/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -281,7 +281,7 @@ USAGE
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
                                        to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
+                                       the package name. For example: "@fluencelabs/aqua-lib@0.6.0"
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -421,7 +421,7 @@ USAGE
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
                                        to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
+                                       the package name. For example: "@fluencelabs/aqua-lib@0.6.0"
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -449,7 +449,7 @@ USAGE
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
                                        to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
+                                       the package name. For example: "@fluencelabs/aqua-lib@0.6.0"
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -490,16 +490,16 @@ EXAMPLES
 
 _See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/deploy.ts)_
 
-## `fluence help [COMMANDS]`
+## `fluence help [COMMAND]`
 
 Display help for fluence.
 
 ```
 USAGE
-  $ fluence help [COMMANDS] [-n]
+  $ fluence help [COMMAND] [-n]
 
 ARGUMENTS
-  COMMANDS  Command to show help for.
+  COMMAND  Command to show help for.
 
 FLAGS
   -n, --nested-commands  Include all nested commands in the output.
@@ -508,7 +508,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.1/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.19/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -695,9 +695,9 @@ Run aqua script
 ```
 USAGE
   $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--log-level-avm <value>] [--print-particle-id] [--quiet] [--plugin <value>] [--const
-    <value>] [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout
-    <value>] [-k <value>]
+    [--log-level-compiler <value>] [--log-level-avm <value>] [--quiet] [--plugin <value>] [--const <value>]
+    [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout <value>] [-k
+    <value>]
 
 FLAGS
   -f, --func=<function-call>    Function call
@@ -720,8 +720,6 @@ FLAGS
   --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                   Prints generated AIR code before function execution
-  --print-particle-id           If set, newly initiated particle ids will be printed to console. Useful to see what
-                                particle id is responsible for aqua function
   --quiet                       Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddr>           Relay node multiaddr
   --timeout=<milliseconds>      Timeout used for command execution
