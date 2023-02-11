@@ -113,7 +113,7 @@
     "topicSeparator": " "
   },
   "engines": {
-    "node": "=16"
+    "node": "=v18.14.0"
   },
   "bugs": {
     "url": "https://github.com/fluencelabs/fluence-cli/issues"
