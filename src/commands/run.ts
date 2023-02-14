@@ -17,7 +17,7 @@
 import { access, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
-import type { AvmLoglevel } from "@fluencelabs/fluence";
+import { AvmLoglevel, FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -58,7 +58,6 @@ import {
   AQUA_LOG_LEVELS,
 } from "../lib/const.js";
 import { getAppJson } from "../lib/deployedApp.js";
-import { startFluencePeer } from "../lib/fluencePeer.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
 import { initCli } from "../lib/lifecyle.js";
@@ -601,7 +600,9 @@ const fluenceRun = async ({
   noXor,
   noRelay,
 }: RunArgs) => {
-  const [{ functionCall, errors }, fluencePeer] = await Promise.all([
+  const fluencePeer = new FluencePeer();
+
+  const [{ functionCall, errors }] = await Promise.all([
     compile({
       funcCall,
       data,
@@ -612,12 +613,19 @@ const fluenceRun = async ({
       noXor,
       noRelay,
     }),
-    startFluencePeer({
-      relay,
-      secretKey,
-      marineLogLevel,
-      printParticleId,
-      timeout,
+    fluencePeer.start({
+      connectTo: relay,
+      ...(typeof marineLogLevel === "string"
+        ? { debug: { marineLogLevel, printParticleId } }
+        : { debug: { printParticleId } }),
+      ...(typeof timeout === "number" ? { defaultTtlMs: timeout } : {}),
+      ...(secretKey === undefined
+        ? {}
+        : {
+            KeyPair: await KeyPair.fromEd25519SK(
+              Buffer.from(secretKey, "base64")
+            ),
+          }),
     }),
   ]);
 

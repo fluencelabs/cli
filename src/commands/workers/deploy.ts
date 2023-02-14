@@ -17,6 +17,7 @@
 import assert from "node:assert";
 import path, { isAbsolute, resolve } from "node:path";
 
+import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
@@ -46,11 +47,9 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
-  TIMEOUT_FLAG_NAME,
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
-import { startFluencePeer } from "../../lib/fluencePeer.js";
 import {
   downloadModule,
   downloadService,
@@ -104,11 +103,17 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
 
-    const fluencePeer = await startFluencePeer({
-      relay,
-      printParticleId: true,
-      timeout: flags[TIMEOUT_FLAG_NAME] ?? 60000,
-      secretKey,
+    const fluencePeer = new FluencePeer();
+
+    await fluencePeer.start({
+      connectTo: relay,
+      ...(secretKey === undefined
+        ? {}
+        : {
+            KeyPair: await KeyPair.fromEd25519SK(
+              Buffer.from(secretKey, "base64")
+            ),
+          }),
     });
 
     doRegisterIpfsClient(fluencePeer, flags["aqua-logs"]);
