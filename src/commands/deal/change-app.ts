@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { NETWORK_FLAG } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifecyle.js";
-import { input } from "../../../lib/prompt.js";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { NETWORK_FLAG } from "../../lib/const.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { input } from "../../lib/prompt.js";
 import {
+  getSigner,
   ensureChainNetwork,
   getDealContract,
-  getFLTContract,
-  getSigner,
-} from "../../../lib/provider.js";
+} from "../../lib/provider.js";
 
+const DEAL_NEW_APP_CID_ARG = "DEAL-NEW-APP-CID";
 const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
-const ADD_PROVIDER_TOKEN_EVENT_TOPIC = "AddProviderToken";
 
-export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
-  static override description = "Create provider access token for the deal";
+export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
+  static override description = "Change app id in the deal";
   static override flags = {
     ...baseFlags,
     privKey: Flags.string({
@@ -42,45 +39,40 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
         "Private key with which transactions will be signed through cli",
       required: false,
     }),
+
     ...NETWORK_FLAG,
   };
+
   static override args = {
     [DEAL_ADDRESS_ARG]: Args.string({
       description: "Deal address",
     }),
+    [DEAL_NEW_APP_CID_ARG]: Args.string({
+      description: "New app CID for the deal",
+    }),
   };
+
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(CreatePAT));
+    const { args, flags } = await initCli(this, await this.parse(ChangeApp));
 
     const network = await ensureChainNetwork({
       maybeChainNetwork: flags.network,
     });
 
-    const dealAddress =
+    const dealAddress: string =
       args[DEAL_ADDRESS_ARG] ??
       (await input({ message: "Enter deal address" }));
 
+    const newAppCID =
+      args[DEAL_NEW_APP_CID_ARG] ??
+      (await input({ message: "Enter new app CID" }));
+
     const signer = await getSigner(network, flags.privKey);
     const deal = getDealContract(dealAddress, signer);
-    const flt = await getFLTContract(signer, network);
 
-    const v = await deal.requiredStake();
-    const approveTx = await flt.approve(dealAddress, v);
+    const tx = await deal.setAppCID(newAppCID);
+    await tx.wait();
 
-    const res = await (await deal.createProviderToken(approveTx.hash)).wait();
-
-    const eventTopic = deal.interface.getEventTopic(
-      ADD_PROVIDER_TOKEN_EVENT_TOPIC
-    );
-
-    const log = res.logs.find(
-      (log: { topics: Array<string> }) => log.topics[0] === eventTopic
-    );
-
-    assert(log !== undefined);
-    const patId: unknown = deal.interface.parseLog(log).args["id"];
-    assert(typeof patId === "string");
-
-    this.log(`PAT ID: ${patId}`);
+    this.log(`Tx hash: ${tx.hash}`);
   }
 }

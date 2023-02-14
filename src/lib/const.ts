@@ -57,16 +57,16 @@ export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   local: {
     ethereumNodeUrl: "http://127.0.0.1:8545",
-    coreAddress: "0xf4e3Db4978DDb1c5f144d072729Ff8AfCb0a6040",
-    dealFactoryAddress: "0xA7489Ba54188533acFEe0a6161aE039111ce55aD",
+    coreAddress: "0x42e59295F72a5B31884d8532396C0D89732c8e84",
+    dealFactoryAddress: "0xea6777e8c011E7968605fd012A9Dd49401ec386C",
     developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
     chainId: 31_337,
   },
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
-    coreAddress: "0x63e3C161081Ce2c03C39451E01c9d02b8BB108CC",
-    dealFactoryAddress: "0x7489685Eb4559fcE7Fd71D201a773a6562d246b5",
-    developerFaucetAddress: "0xAaA84F66894D313274D3CB5C07F3D3322834e78C",
+    coreAddress: "0xFA835FE7774E2E57D8F46D1B37b5b3789557aa15",
+    dealFactoryAddress: "0x432FE883CfF46313aA2C35D2f0b5D9785E9eE711",
+    developerFaucetAddress: "0xdD67B18A7Ec33b785B99B145590E6Cb7Bee4814f",
     chainId: 1_313_161_555,
   },
 };
