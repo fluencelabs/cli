@@ -23,6 +23,7 @@ import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
 
 import { initAquaCli } from "../lib/aquaCli.js";
+import { commandObj } from "../lib/commandObj.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
@@ -34,7 +35,7 @@ import {
   NO_INPUT_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { commandObj, exitCli, initCli } from "../lib/lifecyle.js";
+import { exitCli, initCli } from "../lib/lifecyle.js";
 import { projectRootDirPromise, validatePath } from "../lib/paths.js";
 import { input } from "../lib/prompt.js";
 
@@ -243,8 +244,9 @@ const addFileExtensionsInTsFiles = async (outputDirPath: string) => {
           return writeFile(
             filePath,
             content.replaceAll(
-              "@fluencelabs/fluence/dist/internal/compilerSupport/v4",
-              "@fluencelabs/fluence/dist/internal/compilerSupport/v4.js"
+              // we will do this until we update aqua to generate correct imports for new js-client
+              "@fluencelabs/fluence/dist/internal/compilerSupport/v4'",
+              "@fluencelabs/fluence/dist/internal/compilerSupport/v4.js'"
             )
           );
         })()

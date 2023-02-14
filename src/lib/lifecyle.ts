@@ -16,7 +16,6 @@
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import type { Command } from "@oclif/core";
 import type {
   ArgOutput,
   FlagOutput,
@@ -24,6 +23,12 @@ import type {
 } from "@oclif/core/lib/interfaces/parser.js";
 import platform from "platform";
 
+import {
+  commandObj,
+  CommandObj,
+  isInteractive,
+  setCommandObjAndIsInteractive,
+} from "./commandObj.js";
 import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence.js";
 import {
   initNewUserConfig,
@@ -36,10 +41,6 @@ import "./setupEnvironment.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
 import { confirm } from "./prompt.js";
-
-type CommandObj = Readonly<InstanceType<typeof Command>>;
-export let commandObj: CommandObj;
-export let isInteractive: boolean;
 
 const ensureUserConfig = async (): Promise<UserConfig> => {
   const userConfig = await initUserConfig();
@@ -67,7 +68,6 @@ const ensureUserConfig = async (): Promise<UserConfig> => {
 
 type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
   userConfig: UserConfig;
-  maybeFluenceConfig: FluenceConfig | null;
   args: A;
   flags: F;
 };
@@ -115,8 +115,7 @@ export async function initCli<
     maybeFluenceConfig?: FluenceConfig | null;
   }
 > {
-  commandObj = commandObjFromArgs;
-  isInteractive = getIsInteractive(flags);
+  setCommandObjAndIsInteractive(commandObjFromArgs, getIsInteractive(flags));
 
   if (platform.version === undefined) {
     return commandObj.error("Unknown platform");
@@ -126,7 +125,7 @@ export async function initCli<
 
   if (majorVersion < 16 || majorVersion >= 17) {
     return commandObj.error(
-      `Fluence CLI requires NodeJS version "16.x"; Detected ${platform.version}. Please use NodeJS version 16.\nYou can use https://nvm.sh utility to update node.js version: "nvm install 16 && nvm use 16 && nvm alias default 16"`
+      `Fluence CLI requires Node.js version "16.x.x"; Detected ${platform.version}. Please use Node.js version 16.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install 16 && nvm use 16 && nvm alias default 16"`
     );
   }
 
@@ -135,7 +134,6 @@ export async function initCli<
   await initCountly({ userConfig, maybeFluenceConfig });
 
   return {
-    maybeFluenceConfig,
     userConfig,
     args,
     flags,

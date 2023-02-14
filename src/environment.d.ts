@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { Network } from "../src/lib/multiaddr.js";
+import { FluenceEnv } from "../src/lib/multiaddres.js";
 import {
   DEBUG_COUNTLY,
   FLUENCE_ENV,
   FLUENCE_USER_DIR,
 } from "../src/lib/setupEnvironment.js";
-
-export type FluenceEnv = Network | "local";
 
 declare global {
   namespace NodeJS {

@@ -20,6 +20,7 @@ import { Flags } from "@oclif/core";
 import { aquaComment, jsComment } from "./helpers/comment.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { local } from "./localNodes.js";
+import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 
 export const AQUA_RECOMMENDED_VERSION = "0.9.4";
@@ -85,6 +86,7 @@ export const SRC_DIR_NAME = "src";
 export const TS_DIR_NAME = "ts";
 export const JS_DIR_NAME = "js";
 export const TMP_DIR_NAME = "tmp";
+export const TMP_SERVICES_DIR_NAME = "services";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
@@ -98,6 +100,9 @@ export const DOT_BIN_DIR_NAME = ".bin";
 export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
+export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
+export const HOSTS_CONFIG_FILE_NAME = `hosts.${YAML_EXT}`;
+export const DEPLOYED_CONFIG_FILE_NAME = `deployed.${YAML_EXT}`;
 export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
@@ -140,6 +145,7 @@ export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
+export const DEFAULT_WORKER_NAME = "defaultWorker";
 
 export const KEY_PAIR_FLAG_NAME = "key-pair-name";
 export const KEY_PAIR_FLAG = {
@@ -387,7 +393,9 @@ const PEERS = {
   stage: getPeersImportStatement("stage"),
   testnet: getPeersImportStatement("testNet"),
   local: `const ${NODES_CONST} = ${jsonStringify(local)}`,
-}[process.env[FLUENCE_ENV]];
+  // This typescript error happens only when running config docs generation script that's why type assertion is used
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
+}[process.env[FLUENCE_ENV] as FluenceEnv];
 
 export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
 import { Fluence } from "@fluencelabs/fluence";

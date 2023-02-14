@@ -22,6 +22,7 @@ const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
 import { initServiceConfig } from "../../lib/configs/project/service.js";
 import {
@@ -34,7 +35,7 @@ import {
   isUrl,
 } from "../../lib/helpers/downloadFile.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
-import { commandObj, initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
 

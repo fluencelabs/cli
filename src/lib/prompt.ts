@@ -21,9 +21,9 @@ const color = oclifColor.default;
 import type { JSONSchemaType, ValidateFunction } from "ajv";
 import inquirer, { Answers, DistinctQuestion } from "inquirer";
 
-import { ajv } from "./ajv.js";
+import { ajv } from "./ajvInstance.js";
+import { commandObj, isInteractive } from "./commandObj.js";
 import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const.js";
-import { commandObj, isInteractive } from "./lifecyle.js";
 
 export const Separator = inquirer.Separator;
 

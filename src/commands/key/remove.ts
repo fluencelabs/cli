@@ -21,6 +21,7 @@ const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { isInteractive } from "../../lib/commandObj.js";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
@@ -30,7 +31,7 @@ import {
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
-import { initCli, isInteractive } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { list } from "../../lib/prompt.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {

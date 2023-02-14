@@ -15,6 +15,7 @@
  */
 
 import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/ClientRequest/index.js";
+import { Errors } from "@oclif/core";
 import Countly from "countly-sdk-nodejs";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
@@ -49,15 +50,19 @@ const getIsErrorExpected = (unknown) =>
 const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
 
 /**
- * @param {unknown} error
- * @param {(unknown: unknown) => unknown} errorHandler
+ * @param {Error | unknown} errorOrUnknown
  * @returns
  */
-export const createErrorPromise = (error, errorHandler) => {
+export const createErrorPromise = (errorOrUnknown) => {
+  const error =
+    errorOrUnknown instanceof Error
+      ? errorOrUnknown
+      : new Error(String(errorOrUnknown));
+
   isErrorExpected = getIsErrorExpected(error);
 
   if (!isCountlyInited()) {
-    return errorHandler(error);
+    return Errors.handle(error);
   }
 
   if (getIsErrorExpected(error)) {
@@ -70,7 +75,7 @@ export const createErrorPromise = (error, errorHandler) => {
   }
 
   return new Promise((resolve) => {
-    resolveErrorPromise = () => resolve(errorHandler(error));
+    resolveErrorPromise = () => resolve(Errors.handle(error));
 
     setTimeout(() => {
       console.log(

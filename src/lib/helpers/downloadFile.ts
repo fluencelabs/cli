@@ -22,11 +22,12 @@ import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import decompress from "decompress";
 import filenamify from "filenamify";
-import fetch from "node-fetch";
+import nodeFetch from "node-fetch";
+const fetch = nodeFetch.default;
 
+import { commandObj } from "../commandObj.js";
 import { MODULE_TYPE_RUST } from "../configs/project/module.js";
 import { WASM_EXT } from "../const.js";
-import { commandObj } from "../lifecyle.js";
 import { ensureFluenceModulesDir, ensureFluenceServicesDir } from "../paths.js";
 import { input } from "../prompt.js";
 

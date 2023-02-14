@@ -24,3 +24,12 @@ Defines user's secret keys that can be used across different Fluence projects. Y
 ## [project-secrets.yaml](./project-secrets.md)
 
 Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands
+## [workers.yaml](./workers.md)
+
+Defines which workers to host on which peer IDs
+## [hosts.yaml](./hosts.md)
+
+Defines which workers to host on which peer IDs
+## [deployed.yaml](./deployed.md)
+
+A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command

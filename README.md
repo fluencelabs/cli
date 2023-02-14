@@ -101,12 +101,15 @@ USAGE
 * [`fluence dep cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-i-package-name--package-nameversion)
 * [`fluence dep i`](#fluence-dep-i)
 * [`fluence dep npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-i-package-name--package-nameversion)
+* [`fluence dep v`](#fluence-dep-v)
 * [`fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-i-package-name--package-nameversion)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency i`](#fluence-dependency-i)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-i-package-name--package-nameversion)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
+* [`fluence dependency v`](#fluence-dependency-v)
+* [`fluence dependency versions`](#fluence-dependency-versions)
 * [`fluence deploy`](#fluence-deploy)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
@@ -158,7 +161,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -187,7 +190,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.5/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.6/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -207,7 +210,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/build.ts)_
 
 ## `fluence deal create`
 
@@ -338,6 +341,28 @@ ALIASES
 
 EXAMPLES
   $ fluence dep npm i
+```
+
+## `fluence dep v`
+
+Get versions of all currently used dependencies
+
+```
+USAGE
+  $ fluence dep v [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Get versions of all currently used dependencies
+
+ALIASES
+  $ fluence dependency v
+  $ fluence dep v
+
+EXAMPLES
+  $ fluence dep v
 ```
 
 ## `fluence dependency cargo i [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
@@ -508,6 +533,50 @@ EXAMPLES
   $ fluence dependency npm install
 ```
 
+## `fluence dependency v`
+
+Get versions of all currently used dependencies
+
+```
+USAGE
+  $ fluence dependency v [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Get versions of all currently used dependencies
+
+ALIASES
+  $ fluence dependency v
+  $ fluence dep v
+
+EXAMPLES
+  $ fluence dependency v
+```
+
+## `fluence dependency versions`
+
+Get versions of all currently used dependencies
+
+```
+USAGE
+  $ fluence dependency versions [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Get versions of all currently used dependencies
+
+ALIASES
+  $ fluence dependency v
+  $ fluence dep v
+
+EXAMPLES
+  $ fluence dependency versions
+```
+
 ## `fluence deploy`
 
 Deploy application, described in fluence.yaml
@@ -530,7 +599,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -574,7 +643,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -729,7 +798,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/remove.ts)_
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
@@ -797,7 +866,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 

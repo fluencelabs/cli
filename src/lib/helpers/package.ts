@@ -18,6 +18,7 @@ import assert from "node:assert";
 import { access, mkdir, rename } from "node:fs/promises";
 import { join } from "node:path";
 
+import { commandObj } from "../commandObj.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
 import {
   defaultFluenceLockConfig,
@@ -25,7 +26,6 @@ import {
   initNewReadonlyFluenceLockConfig,
 } from "../configs/project/fluenceLock.js";
 import { fluenceCargoDependencies, fluenceNPMDependencies } from "../const.js";
-import { commandObj } from "../lifecyle.js";
 import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceNpmDir,

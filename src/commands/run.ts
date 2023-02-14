@@ -17,7 +17,7 @@
 import { access, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
-import { AvmLoglevel, FluencePeer, KeyPair } from "@fluencelabs/fluence";
+import type { AvmLoglevel } from "@fluencelabs/fluence";
 import { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -25,9 +25,10 @@ import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { ajv } from "../lib/ajv.js";
+import { ajv } from "../lib/ajvInstance.js";
 import { compile, Data } from "../lib/aqua.js";
 import { initAquaCli } from "../lib/aquaCli.js";
+import { commandObj } from "../lib/commandObj.js";
 import {
   AppConfigReadonly,
   initReadonlyAppConfig,
@@ -57,10 +58,11 @@ import {
   AQUA_LOG_LEVELS,
 } from "../lib/const.js";
 import { getAppJson } from "../lib/deployedApp.js";
+import { startFluencePeer } from "../lib/fluencePeer.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
-import { commandObj, initCli } from "../lib/lifecyle.js";
-import { getRandomRelayAddr } from "../lib/multiaddr.js";
+import { initCli } from "../lib/lifecyle.js";
+import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
   projectRootDirPromise,
@@ -599,9 +601,7 @@ const fluenceRun = async ({
   noXor,
   noRelay,
 }: RunArgs) => {
-  const fluencePeer = new FluencePeer();
-
-  const [{ functionCall, errors }] = await Promise.all([
+  const [{ functionCall, errors }, fluencePeer] = await Promise.all([
     compile({
       funcCall,
       data,
@@ -612,13 +612,12 @@ const fluenceRun = async ({
       noXor,
       noRelay,
     }),
-    fluencePeer.start({
-      connectTo: relay,
-      KeyPair: await KeyPair.fromEd25519SK(Buffer.from(secretKey, "base64")),
-      ...(typeof marineLogLevel === "string"
-        ? { debug: { marineLogLevel, printParticleId } }
-        : { debug: { printParticleId } }),
-      ...(typeof timeout === "number" ? { defaultTtlMs: timeout } : {}),
+    startFluencePeer({
+      relay,
+      secretKey,
+      marineLogLevel,
+      printParticleId,
+      timeout,
     }),
   ]);
 

@@ -25,6 +25,7 @@ const color = oclifColor.default;
 import { Args, Command } from "@oclif/core";
 
 import { buildModule } from "../../lib/build.js";
+import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import {
@@ -46,7 +47,7 @@ import {
   isUrl,
 } from "../../lib/helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
-import { commandObj, initCli, isInteractive } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { initMarineCli, MarineCLI } from "../../lib/marineCli.js";
 import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";

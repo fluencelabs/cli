@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import { commandObj, isInteractive } from "../commandObj.js";
 import {
   FluenceConfig,
   initFluenceConfig,
 } from "../configs/project/fluence.js";
 import { init } from "../init.js";
-import { commandObj, isInteractive } from "../lifecyle.js";
 import { confirm } from "../prompt.js";
 
 export const ensureFluenceProject = async (): Promise<FluenceConfig> => {

@@ -20,12 +20,12 @@ import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import inquirer from "inquirer";
 
+import { commandObj, isInteractive } from "./commandObj.js";
 import type { ConfigKeyPair } from "./configs/keyPair.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
 import { KEY_PAIR_FLAG_NAME } from "./const.js";
-import { commandObj, isInteractive } from "./lifecyle.js";
 import { list, Choices } from "./prompt.js";
 
 export const getKeyPair = async (keyPairName: string | undefined) =>
