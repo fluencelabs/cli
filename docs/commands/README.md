@@ -1,4 +1,4 @@
-# Commands (hopefully)
+# Commands
 <!-- commands -->
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
