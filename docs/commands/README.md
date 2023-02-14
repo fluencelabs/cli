@@ -25,6 +25,7 @@
 * [`fluence service new [PATH]`](#fluence-service-new-path)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence workers deploy`](#fluence-workers-deploy)
 
 ## `fluence aqua`
 
@@ -641,5 +642,28 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence service repl
+```
+
+## `fluence workers deploy`
+
+Deploy workers to hosts, described in hosts.yaml
+
+```
+USAGE
+  $ fluence workers deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--aqua-logs]
+
+FLAGS
+  -k, --key-pair-name=<name>  Key pair name
+  --aqua-logs                 Enable Aqua logs
+  --force                     Force removing of previously deployed app
+  --no-input                  Don't interactively ask for any input from the user
+  --relay=<multiaddr>         Relay node multiaddr
+  --timeout=<milliseconds>    Timeout used for command execution
+
+DESCRIPTION
+  Deploy workers to hosts, described in hosts.yaml
+
+EXAMPLES
+  $ fluence workers deploy
 ```
 <!-- commandsstop -->

@@ -44,11 +44,11 @@ import {
 } from "../../lib/configs/project/service.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
-  FLUENCE_CONFIG_FILE_NAME,
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
+  HOSTS_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import {
   downloadModule,
@@ -65,8 +65,7 @@ import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 import { projectRootDirPromise } from "../../lib/paths.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override hidden = true;
-  static override description = `Deploy application, described in ${FLUENCE_CONFIG_FILE_NAME}`;
+  static override description = `Deploy workers to hosts, described in ${HOSTS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
