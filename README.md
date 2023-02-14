@@ -27,7 +27,7 @@ USAGE
 
 ## Documentation
 
-A complete list of commands together with usage examples is available [here](./docs/COMMANDS.md) with a detailed workflow [example](./docs/EXAMPLE.md). Documentation for all configs that Fluence CLI uses can be found [here](./docs/configs/README.md).
+A complete list of commands together with usage examples is available [here](./docs/commands/README.md) with a detailed workflow [example](./docs/EXAMPLE.md). Documentation for all configs that Fluence CLI uses can be found [here](./docs/configs/README.md).
 
 A few recommendations are in order:
 
