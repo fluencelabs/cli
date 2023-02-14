@@ -8,7 +8,7 @@ Fluence CLI is designed to be the only tool that you need to manage the life cyc
 
 With this release we are rolling out the functionality related to the serverless with the following limitations:
  - you can only deploy to nodes that are provided by Fluence Labs (later it will be possible to deploy to the nodes that are provided by various compute providers)
- - you will be able to create deals using FakeUSD tokens that can be acquired though the token facet serivice for Free. They will be delivered to your Aurora wallet ID
+ - you will be able to create deals using FakeUSD tokens that can be acquired though the token facet service for Free. They will be delivered to your Aurora wallet ID
  - Fluence-cli takes care of installing all the external dependencies. You will only need to install node 16 and Metamask for the on-chain functionality to work
  
 
@@ -56,19 +56,14 @@ Prerequisites:
 - Linux or MacOS (there are currently some bugs on Windows)
 - [Node.js = 16.x.x](https://nodejs.org/)
 
-To install and try fluence, run:
-
+### Install flurnce-cli
 ```sh-session
-$ npm install -g @fluencelabs/cli
-$ fluence COMMAND
-running command...
-$ fluence
-@fluencelabs/cli/0.0.0 linux-x64 node-v16.14.0
-$ fluence --help [COMMAND]
-USAGE
-  $ fluence COMMAND
-...
+npm install -g @fluencelabs/cli
 ```
+
+### Get Fluence USD from Token Faucet
+Got to [Fluence Faucet](https://faucet.fluence.dev) and claim your free Fluence USD tokens.
+
 
 
 ## Documentation
