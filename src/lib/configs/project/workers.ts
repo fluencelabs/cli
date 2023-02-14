@@ -50,7 +50,8 @@ type ConfigV0 = {
 const configSchemaV0 = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FILE_NAME}`,
   title: WORKERS_CONFIG_FILE_NAME,
-  description: "Defines which workers to host on which peer IDs",
+  description:
+    "Defines workers and what they consist of. Currently worker includes a set of services that you want to deploy on a particular peer",
   type: "object",
   properties: {
     workers: {

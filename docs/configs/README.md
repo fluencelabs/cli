@@ -26,7 +26,7 @@ Defines user's secret keys that can be used across different Fluence projects. Y
 Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands
 ## [workers.yaml](./workers.md)
 
-Defines which workers to host on which peer IDs
+Defines workers and what they consist of. Currently worker includes a set of services that you want to deploy on a particular peer
 ## [hosts.yaml](./hosts.md)
 
 Defines which workers to host on which peer IDs
