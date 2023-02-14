@@ -27,7 +27,7 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest && oclif readme",
     "test": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && cd tmp && npm init -y && npm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "pretest": "npm run lint && npm run circular",
+    "posttest": "npm run lint && npm run circular",
     "prepare": "husky install",
     "check": "npm run build && npm run lint-fix && npm run circular",
     "circular": "madge --circular --extensions ts ./",
