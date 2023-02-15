@@ -102,6 +102,7 @@ export const COUNTLY_DIR_NAME = "countly";
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
 export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
 export const HOSTS_CONFIG_FILE_NAME = `hosts.${YAML_EXT}`;
+export const DEALS_CONFIG_FILE_NAME = `deals.${YAML_EXT}`;
 export const DEPLOYED_CONFIG_FILE_NAME = `deployed.${YAML_EXT}`;
 export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
@@ -179,6 +180,14 @@ export const NETWORK_FLAG = {
     )})`,
     helpValue: "<network>",
     default: "testnet",
+  }),
+};
+
+export const PRIV_KEY_FLAG = {
+  privKey: Flags.string({
+    char: "k",
+    description:
+      "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
   }),
 };
 

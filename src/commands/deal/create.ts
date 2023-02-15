@@ -14,81 +14,38 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import { Flags } from "@oclif/core";
-import { BigNumber } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { NETWORK_FLAG } from "../../lib/const.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { dealCreate } from "../../lib/dealCreate.js";
 import { initCli } from "../../lib/lifecyle.js";
-import {
-  getFactoryContract,
-  getSigner,
-  ensureChainNetwork,
-} from "../../lib/provider.js";
-
-const EVENT_TOPIC_FRAGMENT = "DealCreated";
-const DEAL_LOG_ARG_NAME = "deal";
 
 export default class Create extends BaseCommand<typeof Create> {
   static override description =
     "Create your deal with the specified parameters";
   static override flags = {
     ...baseFlags,
-    privKey: Flags.string({
-      char: "k",
-      description:
-        "Private key with which transactions will be signed through cli",
-      required: false,
-    }),
     appCID: Flags.string({
       description: "CID of the application that will be deployed",
       required: true,
     }),
-    minWorkers: Flags.string({
+    minWorkers: Flags.integer({
       description: "Required workers to activate the deal",
-      required: false,
-      default: "1",
+      default: 1,
     }),
-    targetWorkers: Flags.string({
+    targetWorkers: Flags.integer({
       description: "Max workers in the deal",
-      required: false,
-      default: "3",
+      default: 3,
     }),
-
     ...NETWORK_FLAG,
+    ...PRIV_KEY_FLAG,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Create));
-
-    const network = await ensureChainNetwork({
-      maybeChainNetwork: flags.network,
-    });
-
-    const signer = await getSigner(network, flags.privKey);
-    const factory = getFactoryContract(signer, network);
-
-    const tx = await factory.createDeal(
-      BigNumber.from(flags.minWorkers),
-      BigNumber.from(flags.targetWorkers),
-      flags.appCID
-    );
-
-    const res = await tx.wait();
-    const eventTopic = factory.interface.getEventTopic(EVENT_TOPIC_FRAGMENT);
-
-    const log = res.logs.find(
-      (log: { topics: Array<string> }) => log.topics[0] === eventTopic
-    );
-
-    assert(log !== undefined);
-
-    const dealAddress: unknown =
-      factory.interface.parseLog(log).args[DEAL_LOG_ARG_NAME];
-
-    assert(typeof dealAddress === "string");
-    this.log(`Deal contract created: ${dealAddress}`);
+    const dealAddress = await dealCreate(flags);
+    commandObj.log(`Deal contract created: ${dealAddress}`);
   }
 }

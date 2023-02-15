@@ -13,6 +13,7 @@ oclif.manifest.json
 /fluence-lock.yaml
 /hosts.yaml
 /workers.yaml
+/deals.yaml
 src/aqua
 src/services
 src/ts
