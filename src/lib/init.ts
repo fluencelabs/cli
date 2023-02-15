@@ -59,7 +59,7 @@ import {
 import { input, list } from "../lib/prompt.js";
 
 import { commandObj, isInteractive } from "./commandObj.js";
-import { initReadonlyHostsConfig } from "./configs/project/hosts.js";
+import { initReadonlyDealsConfig } from "./configs/project/deals.js";
 import { initReadonlyWorkersConfig } from "./configs/project/workers.js";
 
 const selectTemplate = (): Promise<Template> =>
@@ -217,7 +217,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
 
   const fluenceConfig = maybeFluenceConfig ?? (await initNewFluenceConfig());
   const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
-  await initReadonlyHostsConfig(fluenceConfig, workersConfig);
+  await initReadonlyDealsConfig(workersConfig);
 
   switch (template) {
     case "minimal":

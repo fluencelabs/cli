@@ -132,6 +132,22 @@ export const input = ({ flagName, ...question }: InputArg): Promise<string> =>
     flagName,
   });
 
+type PasswordArg = DistinctQuestion & {
+  message: string;
+  flagName?: string | undefined;
+};
+
+export const password = ({
+  flagName,
+  ...question
+}: PasswordArg): Promise<string> =>
+  prompt({
+    ...question,
+    type: "password",
+    validateType: validateStringPrompt,
+    flagName,
+  });
+
 type Separator = typeof inquirer.Separator;
 type SeparatorObj = InstanceType<Separator>;
 

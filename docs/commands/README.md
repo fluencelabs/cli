@@ -61,7 +61,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -110,7 +110,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/build.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID]`
 
@@ -125,7 +125,7 @@ ARGUMENTS
   DEAL-NEW-APP-CID  New app CID for the deal
 
 FLAGS
-  -k, --privKey=<value>  Private key with which transactions will be signed through cli
+  -k, --privKey=<value>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --network=<network>    [default: testnet] $The network in which the transactions used by the command will be carried
                          out (local, testnet)
   --no-input             Don't interactively ask for any input from the user
@@ -140,11 +140,11 @@ Create your deal with the specified parameters
 
 ```
 USAGE
-  $ fluence deal create --appCID <value> [--no-input] [-k <value>] [--minWorkers <value>] [--targetWorkers
-    <value>] [--network <value>]
+  $ fluence deal create --appCID <value> [--no-input] [--minWorkers <value>] [--targetWorkers <value>] [--network
+    <value>] [-k <value>]
 
 FLAGS
-  -k, --privKey=<value>    Private key with which transactions will be signed through cli
+  -k, --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --appCID=<value>         (required) CID of the application that will be deployed
   --minWorkers=<value>     [default: 1] Required workers to activate the deal
   --network=<network>      [default: testnet] $The network in which the transactions used by the command will be carried
@@ -284,7 +284,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -328,7 +328,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -483,7 +483,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/remove.ts)_
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
@@ -497,7 +497,7 @@ ARGUMENTS
   DEAL-ADDRESS  Deal address
 
 FLAGS
-  -k, --privKey=<value>  Private key with which transactions will be signed through cli
+  -k, --privKey=<value>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --network=<network>    [default: testnet] $The network in which the transactions used by the command will be carried
                          out (local, testnet)
   --no-input             Don't interactively ask for any input from the user
@@ -551,7 +551,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -648,11 +648,13 @@ Deploy workers to hosts, described in hosts.yaml
 ```
 USAGE
   $ fluence workers deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [--ttl <value>] [-k <value>]
-    [--aqua-logs]
+    [--aqua-logs] [--direct] [-k <value>]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
+  -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --aqua-logs                 Enable Aqua logs
+  --direct                    Deploy workers directly to hosts (use hosts.yaml config instead of deals.yaml)
   --force                     Force removing of previously deployed app
   --no-input                  Don't interactively ask for any input from the user
   --relay=<multiaddr>         Relay node multiaddr

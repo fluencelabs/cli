@@ -16,10 +16,10 @@
 
 import assert from "node:assert";
 
-import { Args, Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { NETWORK_FLAG } from "../../../lib/const.js";
+import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifecyle.js";
 import { input } from "../../../lib/prompt.js";
 import {
@@ -36,12 +36,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
   static override description = "Create provider access token for the deal";
   static override flags = {
     ...baseFlags,
-    privKey: Flags.string({
-      char: "k",
-      description:
-        "Private key with which transactions will be signed through cli",
-      required: false,
-    }),
+    ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
   };
   static override args = {

@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
 import {
+  ChainNetwork,
+  CHAIN_NETWORKS,
+  DEALS_CONFIG_FILE_NAME,
   DEFAULT_WORKER_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
-  HOSTS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
 } from "../../const.js";
-import { local } from "../../localNodes.js";
-import { FluenceEnv, getPeerId, getRandomRelayId } from "../../multiaddres.js";
 import { ensureFluenceDir, projectRootDirPromise } from "../../paths.js";
-import { FLUENCE_ENV } from "../../setupEnvironment.js";
 import {
   getConfigInitFunction,
   InitializedConfig,
@@ -41,21 +37,28 @@ import {
   ConfigValidateFunction,
 } from "../initConfig.js";
 
-import type { FluenceConfigReadonly } from "./fluence.js";
 import type { WorkersConfigReadonly } from "./workers.js";
+
+export const MIN_WORKERS = 1;
+export const TARGET_WORKERS = 3;
 
 type ConfigV0 = {
   version: 0;
-  hosts: Array<{ workerName: string; peerIds: Array<string> }>;
+  deals: Array<{
+    workerName: string;
+    minWorkers?: number;
+    targetWorkers?: number;
+  }>;
+  network?: ChainNetwork;
 };
 
 const configSchemaV0 = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${HOSTS_CONFIG_FILE_NAME}`,
-  title: HOSTS_CONFIG_FILE_NAME,
-  description: "Defines which workers to host on which peer IDs",
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${DEALS_CONFIG_FILE_NAME}`,
+  title: DEALS_CONFIG_FILE_NAME,
+  description: "Defines deal configuration for each worker you wanna deploy",
   type: "object",
   properties: {
-    hosts: {
+    deals: {
       description:
         "Array of objects, each object defines a worker and a list of peer IDs to host it on",
       type: "array",
@@ -64,82 +67,64 @@ const configSchemaV0 = {
         properties: {
           workerName: {
             type: "string",
-            description: `Name of the worker to host. The same as in ${WORKERS_CONFIG_FILE_NAME}`,
+            description: `Name of the worker. The same as in ${WORKERS_CONFIG_FILE_NAME}`,
           },
-          peerIds: {
-            type: "array",
-            description: "a list of peer IDs to deploy on",
-            items: { type: "string" },
+          minWorkers: {
+            type: "number",
+            description: "Required workers to activate the deal",
+            default: MIN_WORKERS,
+            nullable: true,
+          },
+          targetWorkers: {
+            type: "number",
+            description: "Max workers in the deal",
+            default: TARGET_WORKERS,
+            nullable: true,
           },
         },
-        required: ["workerName", "peerIds"],
+        required: ["workerName"],
       },
+    },
+    network: {
+      type: "string",
+      description: "The network in which the transactions will be carried out",
+      enum: CHAIN_NETWORKS,
+      default: "testnet",
+      nullable: true,
     },
     version: { type: "number", enum: [0] },
   },
-  required: ["version", "hosts"],
+  required: ["version", "deals"],
 } as const satisfies JSONSchemaType<ConfigV0>;
 
 const migrations: Migrations<Config> = [];
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
-export type HostsConfig = InitializedConfig<LatestConfig>;
-export type HostsConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
+export type DealsConfig = InitializedConfig<LatestConfig>;
+export type DealsConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const getDefaultPeerId = (fluenceConfig: FluenceConfigReadonly): string => {
-  if (Array.isArray(fluenceConfig?.relays)) {
-    const firstRelay = fluenceConfig?.relays[0];
-
-    assert(
-      firstRelay !== undefined,
-      `relays array is empty in ${FLUENCE_CONFIG_FILE_NAME}`
-    );
-
-    return getPeerId(firstRelay);
-  }
-
-  // This typescript error happens only when running config docs generation script that's why type assertion is used
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
-  const fluenceEnv = (fluenceConfig?.relays ??
-    process.env[FLUENCE_ENV]) as FluenceEnv;
-
-  if (fluenceEnv === "local") {
-    const localNode = local[0];
-    assert(localNode !== undefined);
-    return localNode.peerId;
-  }
-
-  return getRandomRelayId(fluenceEnv);
-};
-
-const getDefault =
-  (fluenceConfig: FluenceConfigReadonly) => (): LatestConfig => ({
-    version: 0,
-    hosts: [
-      {
-        workerName: DEFAULT_WORKER_NAME,
-        peerIds: [getDefaultPeerId(fluenceConfig)],
-      },
-    ],
-  });
+const getDefault = (): LatestConfig => ({
+  version: 0,
+  deals: [
+    {
+      workerName: DEFAULT_WORKER_NAME,
+    },
+  ],
+});
 
 const getValidate =
   (
     workersConfig: WorkersConfigReadonly
   ): ConfigValidateFunction<LatestConfig> =>
   (config): ReturnType<ConfigValidateFunction<LatestConfig>> => {
-    if (config.hosts === undefined) {
-      return true;
-    }
-
     const workersSet = new Set(
       Object.keys(workersConfig?.workers ?? {}).flatMap(
         (serviceName) => serviceName
       )
     );
 
-    const areWorkerNamesValid = config.hosts.reduce<string | true>(
+    const areWorkerNamesValid = config.deals.reduce<string | true>(
       (acc, { workerName }) => {
         if (workersSet.has(workerName)) {
           return acc;
@@ -162,7 +147,7 @@ const getValidate =
       return areWorkerNamesValid;
     }
 
-    const { error } = config.hosts.reduce<{
+    const { error } = config.deals.reduce<{
       error: string;
       workerNames: Set<string>;
     }>(
@@ -194,27 +179,18 @@ export const getInitConfigOptions = (
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: HOSTS_CONFIG_FILE_NAME,
+  name: DEALS_CONFIG_FILE_NAME,
   getConfigDirPath: (): Promise<string> => projectRootDirPromise,
   getSchemaDirPath: ensureFluenceDir,
   validate: getValidate(workersConfig),
 });
 
-export const initHostsConfig = (
-  fluenceConfig: FluenceConfigReadonly,
-  workersConfig: WorkersConfigReadonly
-) =>
-  getConfigInitFunction(
-    getInitConfigOptions(workersConfig),
-    getDefault(fluenceConfig)
-  )();
-export const initReadonlyHostsConfig = (
-  fluenceConfig: FluenceConfigReadonly,
-  workersConfig: WorkersConfigReadonly
-) =>
+export const initDealsConfig = (workersConfig: WorkersConfigReadonly) =>
+  getConfigInitFunction(getInitConfigOptions(workersConfig), getDefault)();
+export const initReadonlyDealsConfig = (workersConfig: WorkersConfigReadonly) =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(workersConfig),
-    getDefault(fluenceConfig)
+    getDefault
   )();
 
-export const hostsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export const dealsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

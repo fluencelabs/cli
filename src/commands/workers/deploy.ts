@@ -24,13 +24,20 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
-  upload_deploy,
-  Upload_deployArgConfig,
-} from "../../lib/compiled-aqua/installation-spell/cli.js";
+  UploadArgConfig,
+  upload,
+} from "../../lib/compiled-aqua/installation-spell/config.js";
 import { spellInstallAirScript } from "../../lib/compiled-aqua/installation-spell/spell.js";
 import type { InitializedReadonlyConfig } from "../../lib/configs/initConfig.js";
+import {
+  initReadonlyDealsConfig,
+  MIN_WORKERS,
+  TARGET_WORKERS,
+} from "../../lib/configs/project/deals.js";
 import { initNewReadonlyProjectSecretsConfig } from "../../lib/configs/project/deployed.js";
+import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initReadonlyHostsConfig } from "../../lib/configs/project/hosts.js";
 import {
@@ -42,14 +49,20 @@ import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
 } from "../../lib/configs/project/service.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
+import {
+  initReadonlyWorkersConfig,
+  WorkersConfigReadonly,
+} from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
   HOSTS_CONFIG_FILE_NAME,
+  DEALS_CONFIG_FILE_NAME,
+  PRIV_KEY_FLAG,
 } from "../../lib/const.js";
+import { dealCreate } from "../../lib/dealCreate.js";
 import {
   downloadModule,
   downloadService,
@@ -87,6 +100,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     "aqua-logs": Flags.boolean({
       description: "Enable Aqua logs",
     }),
+    direct: Flags.boolean({
+      description: `Deploy workers directly to hosts (use ${HOSTS_CONFIG_FILE_NAME} config instead of ${DEALS_CONFIG_FILE_NAME})`,
+    }),
+    ...PRIV_KEY_FLAG,
   };
   async run(): Promise<void> {
     const { flags, fluenceConfig } = await initCli(
@@ -128,233 +145,313 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
 
-    const hostsConfig = await initReadonlyHostsConfig(
+    if (flags.direct) {
+      await hostDirectly({ workersConfig, fluenceConfig, fluencePeer });
+      commandObj.log("Successfully deployed");
+      return;
+    }
+
+    await hostUsingDeals({
+      workersConfig,
       fluenceConfig,
-      workersConfig
-    );
+      fluencePeer,
+      privKey: flags.privKey,
+    });
+  }
+}
 
-    const workersToHost = [
-      ...new Set(
-        hostsConfig.hosts.reduce<Array<string>>(
-          (acc, { workerName }) => [...acc, workerName],
-          []
+type PrepareForDeployArg = {
+  fluenceConfig: FluenceConfig;
+  arrayWithWorkerNames: Array<{ workerName: string; peerIds?: Array<string> }>;
+  workersConfig: WorkersConfigReadonly;
+};
+
+const prepareForDeploy = async ({
+  arrayWithWorkerNames,
+  fluenceConfig,
+  workersConfig,
+}: PrepareForDeployArg): Promise<UploadArgConfig> => {
+  const workersToHost = [
+    ...new Set(arrayWithWorkerNames.map(({ workerName }) => workerName)),
+  ];
+
+  const workerConfigs = workersToHost.map((workerName) => {
+    const workerConfig = workersConfig.workers[workerName];
+    assert(workerConfig !== undefined);
+    return {
+      workerName,
+      workerConfig,
+    };
+  });
+
+  const serviceNames = [
+    ...new Set(
+      workerConfigs.flatMap(({ workerConfig }) => workerConfig.services)
+    ),
+  ];
+
+  const serviceConfigs = await Promise.all(
+    serviceNames.map((serviceName) =>
+      (async () => {
+        const { get = undefined, overrideModules = undefined } =
+          fluenceConfig?.services?.[serviceName] ?? {};
+
+        assert(get !== undefined);
+
+        const serviceDirPath = isUrl(get)
+          ? await downloadService(get)
+          : path.resolve(await projectRootDirPromise, get);
+
+        const serviceConfig = await initReadonlyServiceConfig(serviceDirPath);
+
+        if (serviceConfig === null) {
+          return commandObj.error(
+            `${
+              isUrl(get)
+                ? `Downloaded invalid service ${color.yellow(
+                    serviceName
+                  )} from ${color.yellow(get)}`
+                : `Invalid service ${color.yellow(serviceName)}`
+            }. No ${SERVICE_CONFIG_FILE_NAME} found at ${color.yellow(
+              serviceDirPath
+            )}`
+          );
+        }
+
+        return {
+          serviceName,
+          overrideModules,
+          serviceConfig,
+          serviceDirPath,
+        };
+      })()
+    )
+  );
+
+  const modulesUrls = [
+    ...new Set(
+      serviceConfigs
+        .flatMap(({ serviceConfig }) =>
+          Object.values(serviceConfig.modules).map(({ get }) => get)
         )
-      ),
-    ];
+        .filter((get) => isUrl(get))
+    ),
+  ];
 
-    const workerConfigs = workersToHost.map((workerName) => {
-      const workerConfig = workersConfig.workers[workerName];
-      assert(workerConfig !== undefined);
-      return {
-        workerName,
-        workerConfig,
-      };
+  const modulePathsMap = new Map<string, string>(
+    await Promise.all(
+      modulesUrls.map(
+        (url): Promise<[string, string]> =>
+          (async () => [url, await downloadModule(url)])()
+      )
+    )
+  );
+
+  serviceConfigs
+    .flatMap(({ serviceConfig, serviceDirPath }) =>
+      Object.values(serviceConfig.modules).map(({ get }) => ({
+        get,
+        serviceDirPath,
+      }))
+    )
+    .filter(({ get }) => !isUrl(get))
+    .forEach(({ get, serviceDirPath }) => {
+      if (isAbsolute(get)) {
+        modulePathsMap.set(get, get);
+        return;
+      }
+
+      const absolutePath = resolve(serviceDirPath, get);
+      modulePathsMap.set(absolutePath, absolutePath);
     });
 
-    const serviceNames = [
-      ...new Set(
-        workerConfigs.flatMap(({ workerConfig }) => workerConfig.services)
-      ),
-    ];
+  const moduleConfigsMap = new Map<string, InitializedReadonlyConfig<ConfigV0>>(
+    await Promise.all(
+      [...modulePathsMap.entries()].map(([absolutePathOrUrl, moduleDirPath]) =>
+        (async (): Promise<[string, InitializedReadonlyConfig<ConfigV0>]> => {
+          const moduleConfig = await initReadonlyModuleConfig(moduleDirPath);
 
-    const serviceConfigs = await Promise.all(
-      serviceNames.map((serviceName) =>
-        (async () => {
-          const { get = undefined, overrideModules = undefined } =
-            fluenceConfig?.services?.[serviceName] ?? {};
-
-          assert(get !== undefined);
-
-          const serviceDirPath = isUrl(get)
-            ? await downloadService(get)
-            : path.resolve(await projectRootDirPromise, get);
-
-          const serviceConfig = await initReadonlyServiceConfig(serviceDirPath);
-
-          if (serviceConfig === null) {
+          if (moduleConfig === null) {
             return commandObj.error(
               `${
-                isUrl(get)
-                  ? `Downloaded invalid service ${color.yellow(
-                      serviceName
-                    )} from ${color.yellow(get)}`
-                  : `Invalid service ${color.yellow(serviceName)}`
-              }. No ${SERVICE_CONFIG_FILE_NAME} found at ${color.yellow(
-                serviceDirPath
+                isUrl(absolutePathOrUrl)
+                  ? `Downloaded invalid module from ${color.yellow(
+                      absolutePathOrUrl
+                    )}`
+                  : `Invalid module`
+              }. No ${MODULE_CONFIG_FILE_NAME} found at ${color.yellow(
+                moduleDirPath
               )}`
             );
           }
 
-          return {
-            serviceName,
-            overrideModules,
-            serviceConfig,
-            serviceDirPath,
-          };
+          return [absolutePathOrUrl, moduleConfig];
         })()
       )
-    );
+    )
+  );
 
-    const modulesUrls = [
-      ...new Set(
-        serviceConfigs
-          .flatMap(({ serviceConfig }) =>
-            Object.values(serviceConfig.modules).map(({ get }) => get)
-          )
-          .filter((get) => isUrl(get))
-      ),
-    ];
+  const fluenceLockConfig = await initFluenceLockConfig();
 
-    const modulePathsMap = new Map<string, string>(
-      await Promise.all(
-        modulesUrls.map(
-          (url): Promise<[string, string]> =>
-            (async () => [url, await downloadModule(url)])()
-        )
+  const marineCli = await initMarineCli(fluenceConfig, fluenceLockConfig);
+
+  await Promise.all(
+    [...moduleConfigsMap.values()]
+      .filter(({ type }) => type === "rust")
+      .map((moduleConfig) =>
+        marineCli({
+          args: ["build"],
+          flags: { release: true },
+          cwd: path.dirname(moduleConfig.$getPath()),
+        })
       )
-    );
+  );
 
-    serviceConfigs
-      .flatMap(({ serviceConfig, serviceDirPath }) =>
-        Object.values(serviceConfig.modules).map(({ get }) => ({
-          get,
-          serviceDirPath,
-        }))
-      )
-      .filter(({ get }) => !isUrl(get))
-      .forEach(({ get, serviceDirPath }) => {
-        if (isAbsolute(get)) {
-          modulePathsMap.set(get, get);
-          return;
-        }
+  const workers: UploadArgConfig["workers"] = arrayWithWorkerNames.map(
+    ({ workerName, peerIds = [] }) => {
+      const workerConfig = workersConfig.workers[workerName];
+      assert(workerConfig !== undefined);
 
-        const absolutePath = resolve(serviceDirPath, get);
-        modulePathsMap.set(absolutePath, absolutePath);
-      });
+      const services = workerConfig.services.map((serviceName) => {
+        const serviceConfig = serviceConfigs.find(
+          ({ serviceName: name }) => name === serviceName
+        );
 
-    const moduleConfigsMap = new Map<
-      string,
-      InitializedReadonlyConfig<ConfigV0>
-    >(
-      await Promise.all(
-        [...modulePathsMap.entries()].map(
-          ([absolutePathOrUrl, moduleDirPath]) =>
-            (async (): Promise<
-              [string, InitializedReadonlyConfig<ConfigV0>]
-            > => {
-              const moduleConfig = await initReadonlyModuleConfig(
-                moduleDirPath
-              );
+        assert(serviceConfig !== undefined);
+        const { overrideModules = undefined } = serviceConfig;
 
-              if (moduleConfig === null) {
-                return commandObj.error(
-                  `${
-                    isUrl(absolutePathOrUrl)
-                      ? `Downloaded invalid module from ${color.yellow(
-                          absolutePathOrUrl
-                        )}`
-                      : `Invalid module`
-                  }. No ${MODULE_CONFIG_FILE_NAME} found at ${color.yellow(
-                    moduleDirPath
-                  )}`
-                );
-              }
+        const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
+          serviceConfig.serviceConfig.modules;
 
-              return [absolutePathOrUrl, moduleConfig];
-            })()
-        )
-      )
-    );
-
-    const fluenceLockConfig = await initFluenceLockConfig();
-
-    const marineCli = await initMarineCli(fluenceConfig, fluenceLockConfig);
-
-    await Promise.all(
-      [...moduleConfigsMap.values()]
-        .filter(({ type }) => type === "rust")
-        .map((moduleConfig) =>
-          marineCli({
-            args: ["build"],
-            flags: { release: true },
-            cwd: path.dirname(moduleConfig.$getPath()),
-          })
-        )
-    );
-
-    const workers: Upload_deployArgConfig["workers"] = hostsConfig.hosts.map(
-      ({ peerIds, workerName }) => {
-        const workerConfig = workersConfig.workers[workerName];
-        assert(workerConfig !== undefined);
-
-        const services = workerConfig.services.map((serviceName) => {
-          const serviceConfig = serviceConfigs.find(
-            ({ serviceName: name }) => name === serviceName
+        const modules = [
+          ...Object.entries(otherModules),
+          [FACADE_MODULE_NAME, facadeModule] as const,
+        ].map(([name, { get }]) => {
+          const moduleConfig = moduleConfigsMap.get(
+            isUrl(get) || isAbsolute(get)
+              ? get
+              : resolve(serviceConfig.serviceDirPath, get)
           );
 
-          assert(serviceConfig !== undefined);
-          const { overrideModules = undefined } = serviceConfig;
+          assert(moduleConfig !== undefined);
 
-          const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
-            serviceConfig.serviceConfig.modules;
-
-          const modules = [
-            ...Object.entries(otherModules),
-            [FACADE_MODULE_NAME, facadeModule] as const,
-          ].map(([name, { get }]) => {
-            const moduleConfig = moduleConfigsMap.get(
-              isUrl(get) || isAbsolute(get)
-                ? get
-                : resolve(serviceConfig.serviceDirPath, get)
-            );
-
-            assert(moduleConfig !== undefined);
-
-            const overriddenModuleConfig = {
-              ...moduleConfig,
-              ...overrideModules?.[name],
-            };
-
-            return {
-              wasm: getModuleWasmPath(overriddenModuleConfig),
-              config: JSON.stringify(
-                serviceModuleToJSONModuleConfig(overriddenModuleConfig)
-              ),
-            };
-          });
+          const overriddenModuleConfig = {
+            ...moduleConfig,
+            ...overrideModules?.[name],
+          };
 
           return {
-            name: serviceName,
-            modules,
+            wasm: getModuleWasmPath(overriddenModuleConfig),
+            config: JSON.stringify(
+              serviceModuleToJSONModuleConfig(overriddenModuleConfig)
+            ),
           };
         });
 
         return {
-          name: workerName,
-          hosts: peerIds,
-          config: {
-            services,
-            spells: [],
-          },
+          name: serviceName,
+          modules,
         };
-      }
+      });
+
+      return {
+        name: workerName,
+        hosts: peerIds,
+        config: {
+          services,
+          spells: [],
+        },
+      };
+    }
+  );
+
+  return {
+    workers: workers,
+    installation_script: spellInstallAirScript,
+    installation_trigger: {
+      clock: { start_sec: 1676293670, end_sec: 0, period_sec: 600 },
+      connections: { connect: false, disconnect: false },
+      blockchain: { start_block: 0, end_block: 0 },
+    },
+  };
+};
+
+type HostDirectlyArg = {
+  fluenceConfig: FluenceConfig;
+  workersConfig: WorkersConfigReadonly;
+  fluencePeer: FluencePeer;
+};
+
+const hostDirectly = async ({
+  workersConfig,
+  fluenceConfig,
+  fluencePeer,
+}: HostDirectlyArg) => {
+  const hostsConfig = await initReadonlyHostsConfig(
+    fluenceConfig,
+    workersConfig
+  );
+
+  const uploadDeployArg = await prepareForDeploy({
+    arrayWithWorkerNames: hostsConfig.hosts,
+    fluenceConfig,
+    workersConfig,
+  });
+
+  const result = await upload_deploy(fluencePeer, uploadDeployArg);
+  await initNewReadonlyProjectSecretsConfig(result);
+};
+
+type HostUsingDeals = {
+  fluenceConfig: FluenceConfig;
+  workersConfig: WorkersConfigReadonly;
+  fluencePeer: FluencePeer;
+  privKey: undefined | string;
+};
+
+const hostUsingDeals = async ({
+  workersConfig,
+  fluenceConfig,
+  fluencePeer,
+  privKey,
+}: HostUsingDeals) => {
+  const dealsConfig = await initReadonlyDealsConfig(workersConfig);
+
+  const uploadDeployArg = await prepareForDeploy({
+    arrayWithWorkerNames: dealsConfig.deals,
+    fluenceConfig,
+    workersConfig,
+  });
+
+  const uploadResult = await upload(fluencePeer, uploadDeployArg);
+
+  for (const {
+    workerName,
+    minWorkers = MIN_WORKERS,
+    targetWorkers = TARGET_WORKERS,
+  } of dealsConfig.deals) {
+    const workerDefinitionCid = uploadResult.workers.find(
+      ({ name }) => name === workerName
+    )?.definition;
+
+    assert(workerDefinitionCid !== undefined);
+    commandObj.log(`Creating deal for worker ${color.yellow(workerName)}`);
+
+    const dealAddress = await dealCreate({
+      network: dealsConfig.network ?? "testnet",
+      privKey,
+      appCID: workerDefinitionCid,
+      minWorkers,
+      targetWorkers,
+    });
+
+    commandObj.log(
+      `Deal contract for worker ${color.yellow(
+        workerName
+      )} with cid ${workerDefinitionCid} created: ${color.yellow(dealAddress)}`
     );
-
-    const upload_deploy_arg: Upload_deployArgConfig = {
-      workers,
-      installation_script: spellInstallAirScript,
-      installation_trigger: {
-        clock: { start_sec: 1676293670, end_sec: 0, period_sec: 600 },
-        connections: { connect: false, disconnect: false },
-        blockchain: { start_block: 0, end_block: 0 },
-      },
-    };
-
-    const result = await upload_deploy(fluencePeer, upload_deploy_arg);
-    await initNewReadonlyProjectSecretsConfig(result);
-    commandObj.log("Successfully deployed");
   }
-}
+};
 
 /* eslint-disable camelcase */
 type JSONModuleConf = {

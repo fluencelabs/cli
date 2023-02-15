@@ -126,7 +126,10 @@ export default class Aqua extends Command {
               "Enter path to the output directory. Will be created if it doesn't exists",
             flagName: "input",
           })),
-      js = flags.js ?? maybeFluenceConfig?.aquaOutputJSPath !== undefined,
+      js = flags.js ??
+        (flags.output === undefined
+          ? maybeFluenceConfig?.aquaOutputJSPath !== undefined
+          : false),
       "log-level-compiler": logLevelCompiler,
       "common-js": isCommonJs,
       ...aquaCliOptionalFlags
