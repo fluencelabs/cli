@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import path from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
 import { buildModule } from "./build.js";
+import { commandObj, isInteractive } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import {
   FACADE_MODULE_NAME,
   ServiceConfigReadonly,
 } from "./configs/project/service.js";
-import { DEFAULT_DEPLOY_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
+import type { WorkersConfig } from "./configs/project/workers.js";
+import { DEFAULT_WORKER_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   getModuleWasmPath,
   validateAquaName,
 } from "./helpers/downloadFile.js";
 import { generateServiceInterface } from "./helpers/generateServiceInterface.js";
-import { commandObj } from "./lifecyle.js";
 import type { MarineCLI } from "./marineCli.js";
-import { input } from "./prompt.js";
+import { confirm, input } from "./prompt.js";
 
 type AddServiceArg = {
   serviceName: string;
@@ -42,6 +44,7 @@ type AddServiceArg = {
   fluenceConfig: FluenceConfig;
   serviceConfig: ServiceConfigReadonly;
   marineCli: MarineCLI;
+  workersConfig: WorkersConfig;
 };
 
 export const addService = async ({
@@ -50,6 +53,7 @@ export const addService = async ({
   fluenceConfig,
   serviceConfig,
   marineCli,
+  workersConfig,
 }: AddServiceArg): Promise<string> => {
   let serviceName = serviceNameFromArgs;
 
@@ -87,11 +91,6 @@ export const addService = async ({
     ...fluenceConfig.services,
     [serviceName]: {
       get: pathOrUrl,
-      deploy: [
-        {
-          deployId: DEFAULT_DEPLOY_NAME,
-        },
-      ],
     },
   };
 
@@ -132,6 +131,32 @@ export const addService = async ({
       FLUENCE_CONFIG_FILE_NAME
     )}`
   );
+
+  if (
+    isInteractive &&
+    DEFAULT_WORKER_NAME in workersConfig.workers &&
+    (await confirm({
+      message: `Do you want to add service ${color.yellow(
+        serviceName
+      )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
+    }))
+  ) {
+    const defaultWorker = workersConfig.workers[DEFAULT_WORKER_NAME];
+    assert(defaultWorker !== undefined);
+
+    workersConfig.workers[DEFAULT_WORKER_NAME] = {
+      ...defaultWorker,
+      services: [...defaultWorker.services, serviceName],
+    };
+
+    await workersConfig.$commit();
+
+    commandObj.log(
+      `Added ${color.yellow(serviceName)} to ${color.yellow(
+        DEFAULT_WORKER_NAME
+      )}`
+    );
+  }
 
   return serviceName;
 };

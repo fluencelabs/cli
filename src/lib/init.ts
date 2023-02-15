@@ -21,7 +21,7 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import Countly from "countly-sdk-nodejs";
 
-import { ajv } from "../lib/ajv.js";
+import { ajv } from "../lib/ajvInstance.js";
 import {
   FluenceConfig,
   initNewFluenceConfig,
@@ -58,7 +58,9 @@ import {
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
 
-import { commandObj, isInteractive } from "./lifecyle.js";
+import { commandObj, isInteractive } from "./commandObj.js";
+import { initReadonlyHostsConfig } from "./configs/project/hosts.js";
+import { initReadonlyWorkersConfig } from "./configs/project/workers.js";
 
 const selectTemplate = (): Promise<Template> =>
   list({
@@ -214,6 +216,8 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   setProjectRootDir(projectPath);
 
   const fluenceConfig = maybeFluenceConfig ?? (await initNewFluenceConfig());
+  const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
+  await initReadonlyHostsConfig(fluenceConfig, workersConfig);
 
   switch (template) {
     case "minimal":

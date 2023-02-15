@@ -21,7 +21,7 @@ import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../../ajv.js";
+import { ajv } from "../../ajvInstance.js";
 import {
   AQUA_LIB_NPM_DEPENDENCY,
   AQUA_LIB_RECOMMENDED_VERSION,
@@ -33,7 +33,7 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
-import { NETWORKS, Relays } from "../../multiaddr.js";
+import { NETWORKS, Relays } from "../../multiaddres.js";
 import {
   ensureFluenceDir,
   ensureSrcAquaMainPath,
@@ -98,7 +98,8 @@ export type FluenceConfigModule = Partial<ServiceModuleConfig>;
 
 type ServiceV1 = {
   get: string;
-  deploy: Array<ServiceDeployV1>;
+  overrideModules?: OverrideModules;
+  deploy?: Array<ServiceDeployV1>;
   keyPairName?: string;
 };
 
@@ -139,9 +140,34 @@ const configSchemaV1Obj = {
             type: "string",
             description: `Path to service directory or URL to the tar.gz archive with the service`,
           },
+          overrideModules: {
+            type: "object",
+            title: "Overrides",
+            description: "A map of modules to override",
+            additionalProperties: {
+              type: "object",
+              title: "Module overrides",
+              description:
+                "Module names as keys and overrides for the module config as values",
+              properties: {
+                ...moduleProperties,
+                get: {
+                  type: "string",
+                  nullable: true,
+                  description: `Path to module directory or URL to the tar.gz archive with the module`,
+                },
+                name: { ...moduleProperties.name, nullable: true },
+              },
+              required: [],
+              nullable: true,
+            },
+            nullable: true,
+            required: [],
+          },
           deploy: {
             type: "array",
             title: "Deployment list",
+            nullable: true,
             description: "List of deployments for the particular service",
             items: {
               type: "object",
@@ -210,7 +236,7 @@ const configSchemaV1Obj = {
           },
           keyPairName,
         },
-        required: ["get", "deploy"],
+        required: ["get"],
       },
       required: [],
       nullable: true,
@@ -431,7 +457,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (
     const deployIds = new Set<string>();
     const notUniqueDeployIds = new Set<string>();
 
-    for (const { deployId } of deploy) {
+    for (const { deployId } of deploy ?? []) {
       if (deployIds.has(deployId)) {
         notUniqueDeployIds.add(deployId);
       }

@@ -8,6 +8,7 @@
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
+* [`fluence dependency versions`](#fluence-dependency-versions)
 * [`fluence deploy`](#fluence-deploy)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
@@ -24,6 +25,7 @@
 * [`fluence service new [PATH]`](#fluence-service-new-path)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence workers deploy`](#fluence-workers-deploy)
 
 ## `fluence aqua`
 
@@ -88,7 +90,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.5/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.6/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -239,6 +241,28 @@ ALIASES
 
 EXAMPLES
   $ fluence dependency npm install
+```
+
+## `fluence dependency versions`
+
+Get versions of all currently used dependencies
+
+```
+USAGE
+  $ fluence dependency versions [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Get versions of all currently used dependencies
+
+ALIASES
+  $ fluence dependency v
+  $ fluence dep v
+
+EXAMPLES
+  $ fluence dependency versions
 ```
 
 ## `fluence deploy`
@@ -618,5 +642,28 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence service repl
+```
+
+## `fluence workers deploy`
+
+Deploy workers to hosts, described in hosts.yaml
+
+```
+USAGE
+  $ fluence workers deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--aqua-logs]
+
+FLAGS
+  -k, --key-pair-name=<name>  Key pair name
+  --aqua-logs                 Enable Aqua logs
+  --force                     Force removing of previously deployed app
+  --no-input                  Don't interactively ask for any input from the user
+  --relay=<multiaddr>         Relay node multiaddr
+  --timeout=<milliseconds>    Timeout used for command execution
+
+DESCRIPTION
+  Deploy workers to hosts, described in hosts.yaml
+
+EXAMPLES
+  $ fluence workers deploy
 ```
 <!-- commandsstop -->

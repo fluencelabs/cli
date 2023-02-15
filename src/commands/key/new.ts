@@ -19,6 +19,7 @@ const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
@@ -29,7 +30,7 @@ import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js"
 import { generateKeyPair } from "../../lib/helpers/generateKeyPair.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
-import { commandObj, initCli, isInteractive } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {

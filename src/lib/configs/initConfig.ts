@@ -24,11 +24,11 @@ import Ajv from "ajv";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const.js";
 import { jsonStringify } from "../helpers/jsonStringify.js";
 import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
-import { commandObj } from "../lifecyle.js";
 import type { Mutable } from "../typeHelpers.js";
 
 type EnsureSchemaArg = {

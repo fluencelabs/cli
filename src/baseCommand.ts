@@ -34,14 +34,6 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
   protected flags!: Flags<T>;
   protected args!: Args<T>;
 
-  protected override async catch(
-    err: Error & { exitCode?: number }
-  ): Promise<unknown> {
-    // add any custom logic to handle errors from the command
-    // or simply return the parent class error handling
-    return super.catch(err);
-  }
-
   protected override async finally(
     maybeError: Error | undefined
   ): Promise<unknown> {

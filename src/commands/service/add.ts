@@ -22,6 +22,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
+import { initWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
@@ -84,10 +85,13 @@ export default class Add extends BaseCommand<typeof Add> {
       maybeFluenceLockConfig
     );
 
+    const workersConfig = await initWorkersConfig(fluenceConfig);
+
     await addService({
       serviceName: flags.name ?? serviceConfig.name,
       pathOrUrl: servicePathOrUrl,
       fluenceConfig,
+      workersConfig,
       marineCli,
       serviceConfig,
     });

@@ -19,6 +19,7 @@ import { Args, Flags } from "@oclif/core";
 import { BigNumber } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import {
   isToken,
   NETWORK_FLAG,
@@ -26,7 +27,7 @@ import {
   TOKENS,
   TOKENS_STRING,
 } from "../../lib/const.js";
-import { commandObj, initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { input, list } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,

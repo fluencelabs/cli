@@ -17,6 +17,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
 import {
   defaultFluenceLockConfig,
@@ -36,7 +37,7 @@ import {
   ensureAquaImports,
   ensureVSCodeSettingsJSON,
 } from "../../lib/helpers/aquaImports.js";
-import { commandObj, initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { getLatestVersionOfNPMDependency } from "../../lib/npm.js";
 import {
   getLatestVersionOfCargoDependency,

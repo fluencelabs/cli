@@ -16,10 +16,10 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../../ajv.js";
+import { ajv } from "../../ajvInstance.js";
 import { APP_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
-import { NETWORKS, Relays } from "../../multiaddr.js";
+import { NETWORKS, Relays } from "../../multiaddres.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,

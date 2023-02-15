@@ -55,7 +55,7 @@ Relays that you can connect to to find the peers where services are deployed
 
 *   is optional
 
-*   Type: any of the folllowing: `string` or `array` ([Relays](app-properties-relays.md))
+*   Type: any of the following: `string` or `array` ([Relays](app-properties-relays.md))
 
 *   cannot be null
 
@@ -63,7 +63,7 @@ Relays that you can connect to to find the peers where services are deployed
 
 ### relays Type
 
-any of the folllowing: `string` or `array` ([Relays](app-properties-relays.md))
+any of the following: `string` or `array` ([Relays](app-properties-relays.md))
 
 one (and only one) of
 

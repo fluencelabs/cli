@@ -23,8 +23,10 @@ import camelcase from "camelcase";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
+import { isInteractive } from "../../lib/commandObj.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
+import { initWorkersConfig } from "../../lib/configs/project/workers.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
@@ -32,7 +34,7 @@ import {
   ensureValidAquaName,
   validateAquaName,
 } from "../../lib/helpers/downloadFile.js";
-import { initCli, isInteractive } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { confirm, input } from "../../lib/prompt.js";
 
@@ -99,7 +101,10 @@ export default class New extends BaseCommand<typeof New> {
         maybeFluenceLockConfig
       );
 
+      const workersConfig = await initWorkersConfig(maybeFluenceConfig);
+
       await addService({
+        workersConfig,
         marineCli,
         serviceName,
         pathOrUrl: servicePath,

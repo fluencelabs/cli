@@ -19,6 +19,7 @@ import path from "node:path";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { commandObj } from "../../../lib/commandObj.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
@@ -33,7 +34,7 @@ import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
 } from "../../../lib/helpers/aquaImports.js";
-import { commandObj, initCli } from "../../../lib/lifecyle.js";
+import { initCli } from "../../../lib/lifecyle.js";
 import { ensureNpmDependency } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {

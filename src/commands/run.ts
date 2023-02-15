@@ -25,9 +25,10 @@ import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { ajv } from "../lib/ajv.js";
+import { ajv } from "../lib/ajvInstance.js";
 import { compile, Data } from "../lib/aqua.js";
 import { initAquaCli } from "../lib/aquaCli.js";
+import { commandObj } from "../lib/commandObj.js";
 import {
   AppConfigReadonly,
   initReadonlyAppConfig,
@@ -59,8 +60,8 @@ import {
 import { getAppJson } from "../lib/deployedApp.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
-import { commandObj, initCli } from "../lib/lifecyle.js";
-import { getRandomRelayAddr } from "../lib/multiaddr.js";
+import { initCli } from "../lib/lifecyle.js";
+import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
   projectRootDirPromise,
@@ -614,11 +615,17 @@ const fluenceRun = async ({
     }),
     fluencePeer.start({
       connectTo: relay,
-      KeyPair: await KeyPair.fromEd25519SK(Buffer.from(secretKey, "base64")),
       ...(typeof marineLogLevel === "string"
         ? { debug: { marineLogLevel, printParticleId } }
         : { debug: { printParticleId } }),
       ...(typeof timeout === "number" ? { defaultTtlMs: timeout } : {}),
+      ...(secretKey === undefined
+        ? {}
+        : {
+            KeyPair: await KeyPair.fromEd25519SK(
+              Buffer.from(secretKey, "base64")
+            ),
+          }),
     }),
   ]);
 

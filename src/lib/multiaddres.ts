@@ -22,17 +22,20 @@ import {
   testNet,
   Node,
 } from "@fluencelabs/fluence-network-environment";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { shuffle } from "lodash-es";
 import { Multiaddr } from "multiaddr";
 
 export const NETWORKS = ["kras", "stage", "testnet"] as const;
 export type Network = (typeof NETWORKS)[number];
+export type FluenceEnv = Network | "local";
 export type Relays = Network | Array<string> | undefined;
 
 const getAddrs = (nodes: Array<Node>): Array<string> =>
   shuffle(nodes.map(({ multiaddr }): string => multiaddr));
 
-const ADDR_MAP: Record<Network, Array<string>> = {
+export const ADDR_MAP: Record<Network, Array<string>> = {
   kras: getAddrs(krasnodar),
   stage: getAddrs(stage),
   testnet: getAddrs(testNet),
@@ -68,7 +71,12 @@ export const getRandomRelayAddr = (
 
 export const getPeerId = (addr: string): string => {
   const id = new Multiaddr(addr).getPeerId();
-  assert(id !== null);
+
+  assert(
+    id !== null,
+    `Can't extract peer id from multiaddr ${color.yellow(addr)}`
+  );
+
   return id;
 };
 

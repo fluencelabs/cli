@@ -40,6 +40,7 @@ import walletconnect from "@walletconnect/web3-provider";
 const WalletConnectProvider = walletconnect.default;
 import { BytesLike, ethers, providers } from "ethers";
 
+import { commandObj } from "./commandObj.js";
 import {
   DEAL_CONFIG,
   ChainNetwork,
@@ -48,7 +49,6 @@ import {
   NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,
 } from "./const.js";
-import { commandObj } from "./lifecyle.js";
 import { list } from "./prompt.js";
 
 const WC_QUERY_PARAM_NAME = "wc";

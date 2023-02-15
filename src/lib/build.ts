@@ -39,6 +39,7 @@ import {
   ServiceConfigReadonly,
 } from "../lib/configs/project/service.js";
 import {
+  DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
@@ -55,10 +56,11 @@ import { generateServiceInterface } from "../lib/helpers/generateServiceInterfac
 import type { MarineCLI } from "../lib/marineCli.js";
 import { confirm } from "../lib/prompt.js";
 
+import { commandObj } from "./commandObj.js";
 import { generateKeyPair } from "./helpers/generateKeyPair.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { getKeyPair } from "./keypairs.js";
-import { commandObj } from "./lifecyle.js";
+import { projectRootDirPromise } from "./paths.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -152,11 +154,14 @@ const resolveServiceInfos = async ({
 
   const serviceConfigs = await Promise.all(
     Object.entries(fluenceConfig.services).map(
-      ([serviceName, { get, deploy, keyPairName }]): ServiceConfigPromises =>
+      ([
+        serviceName,
+        { get, deploy = [{ deployId: DEFAULT_DEPLOY_NAME }], keyPairName },
+      ]): ServiceConfigPromises =>
         (async (): ServiceConfigPromises => {
           const serviceDirPath = isUrl(get)
             ? await downloadService(get)
-            : path.resolve(get);
+            : path.resolve(await projectRootDirPromise, get);
 
           return {
             serviceName,

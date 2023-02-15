@@ -19,7 +19,7 @@ import path from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../ajv.js";
+import { ajv } from "../ajvInstance.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
 import type { FluenceLockConfig } from "../configs/project/fluenceLock.js";
 import {

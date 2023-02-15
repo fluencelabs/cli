@@ -19,6 +19,7 @@ import path from "node:path";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { commandObj } from "../../../lib/commandObj.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
@@ -30,7 +31,7 @@ import {
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
   REQUIRED_RUST_TOOLCHAIN,
 } from "../../../lib/const.js";
-import { commandObj, initCli } from "../../../lib/lifecyle.js";
+import { initCli } from "../../../lib/lifecyle.js";
 import {
   ensureCargoDependency,
   installAllCargoDependenciesFromFluenceConfig,
