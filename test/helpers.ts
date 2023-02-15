@@ -17,6 +17,11 @@
 import { access, cp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import {
+  krasnodar,
+  stage,
+  testNet,
+} from "@fluencelabs/fluence-network-environment";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
@@ -27,11 +32,21 @@ import {
   templates,
 } from "../src/lib/const.js";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise.js";
-import { localMultiaddrs } from "../src/lib/localNodes.js";
+import { local, localMultiaddrs } from "../src/lib/localNodes.js";
+import type { FluenceEnv } from "../src/lib/multiaddres.js";
 import {
   FLUENCE_ENV,
   RUN_TESTS_IN_PARALLEL,
 } from "../src/lib/setupEnvironment.js";
+
+export const multiaddrs = {
+  kras: krasnodar,
+  stage: stage,
+  testnet: testNet,
+  local,
+  // This typescript error happens only when running config docs generation script that's why type assertion is used
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
+}[process.env[FLUENCE_ENV] as FluenceEnv];
 
 type FluenceArg = {
   args?: ExecPromiseArg["args"];
@@ -39,31 +54,19 @@ type FluenceArg = {
   cwd?: string;
 };
 
+const pathToFluenceExecutable = path.join(
+  process.cwd(),
+  path.join("tmp", "node_modules", "@fluencelabs", "cli", "bin", "run.js")
+);
+
 export const fluence = async ({
   args = [],
   flags,
   cwd = process.cwd(),
 }: FluenceArg): ReturnType<typeof execPromise> =>
   execPromise({
-    command: "npx",
-    args: [
-      "ts-node",
-      path.relative(
-        cwd,
-        path.join(
-          process.cwd(),
-          path.join(
-            "tmp",
-            "node_modules",
-            "@fluencelabs",
-            "cli",
-            "bin",
-            "run.js"
-          )
-        )
-      ),
-      ...args,
-    ],
+    command: pathToFluenceExecutable,
+    args,
     flags,
     options: { cwd },
     printOutput: true,

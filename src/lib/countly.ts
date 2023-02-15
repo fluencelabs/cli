@@ -20,10 +20,10 @@ import Countly from "countly-sdk-nodejs";
 
 import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor.js";
 
+import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { UserConfig } from "./configs/user/config.js";
 import { IS_DEVELOPMENT } from "./const.js";
-import { commandObj } from "./lifecyle.js";
 import { ensureDir, getUserCountlyDir } from "./paths.js";
 
 type InitCountlyArgs = {

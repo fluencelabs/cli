@@ -24,6 +24,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { AquaCLI, initAquaCli } from "../lib/aquaCli.js";
 import { build, BuildArg, ServiceInfo } from "../lib/build.js";
+import { commandObj, isInteractive } from "../lib/commandObj.js";
 import {
   DeployedServiceConfig,
   initAppConfig,
@@ -51,7 +52,7 @@ import {
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
-import { commandObj, initCli, isInteractive } from "../lib/lifecyle.js";
+import { initCli } from "../lib/lifecyle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 import {
   getEvenlyDistributedIds,
@@ -60,7 +61,7 @@ import {
   getRandomRelayId,
   getRandomRelayIdFromTheList,
   Relays,
-} from "../lib/multiaddr.js";
+} from "../lib/multiaddres.js";
 import { ensureFluenceTmpDeployJsonPath } from "../lib/paths.js";
 import { confirm } from "../lib/prompt.js";
 import { removeApp } from "../lib/removeApp.js";

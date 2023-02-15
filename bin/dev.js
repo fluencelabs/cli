@@ -46,4 +46,4 @@ oclif.settings.debug = true;
 oclif
   .run(process.argv.slice(2), import.meta.url)
   .then(oclif.flush)
-  .catch((error) => createErrorPromise(error, oclif.Errors.handle));
+  .catch((error) => createErrorPromise(error));

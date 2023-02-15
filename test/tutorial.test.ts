@@ -29,9 +29,8 @@ import {
   TEMPLATE_INDEX_APP_REGISTER_COMMENT,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
-import { localMultiaddrs } from "../src/lib/localNodes.js";
 
-import { fluence, init, maybeConcurrentTest } from "./helpers.js";
+import { fluence, init, maybeConcurrentTest, multiaddrs } from "./helpers.js";
 
 describe("tutorial", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
@@ -143,7 +142,7 @@ describe("tutorial", () => {
       flags: {
         f: "identify()",
         i: path.join("test", "aqua", "smoke.aqua"),
-        relay: localMultiaddrs[0],
+        relay: multiaddrs[0]?.multiaddr,
         quiet: true,
       },
     });

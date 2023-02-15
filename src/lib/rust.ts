@@ -20,6 +20,7 @@ import path from "node:path";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
+import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
@@ -39,7 +40,6 @@ import {
   splitPackageNameAndVersion,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
-import { commandObj } from "./lifecyle.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";

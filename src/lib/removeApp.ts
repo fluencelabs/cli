@@ -32,7 +32,7 @@ import {
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import { getKeyPair } from "../lib/keypairs.js";
-import { getRandomRelayAddr } from "../lib/multiaddr.js";
+import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceJSAppPath,
   ensureFluenceTSAppPath,
@@ -42,7 +42,7 @@ import {
 } from "../lib/paths.js";
 import { confirm } from "../lib/prompt.js";
 
-import { commandObj, isInteractive } from "./lifecyle.js";
+import { commandObj, isInteractive } from "./commandObj.js";
 
 export const removeApp = async (
   removeAppArg: Readonly<{

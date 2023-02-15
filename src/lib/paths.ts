@@ -18,6 +18,7 @@ import fsPromises from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import { commandObj } from "./commandObj.js";
 import {
   APP_JS_FILE_NAME,
   APP_SERVICE_JSON_FILE_NAME,
@@ -47,7 +48,6 @@ import {
   VSCODE_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
-import { commandObj } from "./lifecyle.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {

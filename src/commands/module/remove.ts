@@ -22,6 +22,7 @@ const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import {
   FACADE_MODULE_NAME,
   initServiceConfig,
@@ -31,7 +32,7 @@ import {
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import { isUrl } from "../../lib/helpers/downloadFile.js";
-import { commandObj, initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
 

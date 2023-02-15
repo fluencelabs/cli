@@ -1,0 +1,3 @@
+## loggingMask Type
+
+`number`
