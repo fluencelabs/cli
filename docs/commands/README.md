@@ -61,7 +61,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -110,7 +110,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/build.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID]`
 
@@ -284,7 +284,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -328,7 +328,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -483,7 +483,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/remove.ts)_
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
@@ -551,7 +551,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.38/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -647,7 +647,8 @@ Deploy workers to hosts, described in hosts.yaml
 
 ```
 USAGE
-  $ fluence workers deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>] [--aqua-logs]
+  $ fluence workers deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [--ttl <value>] [-k <value>]
+    [--aqua-logs]
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
@@ -656,6 +657,9 @@ FLAGS
   --no-input                  Don't interactively ask for any input from the user
   --relay=<multiaddr>         Relay node multiaddr
   --timeout=<milliseconds>    Timeout used for command execution
+  --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
+                              the originating particle's TTL is defined then that value will be used If the option is
+                              not set default TTL will be 60000
 
 DESCRIPTION
   Deploy workers to hosts, described in hosts.yaml

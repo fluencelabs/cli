@@ -64,6 +64,8 @@ import { initMarineCli } from "../../lib/marineCli.js";
 import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 import { projectRootDirPromise } from "../../lib/paths.js";
 
+const DEFAULT_TTL = 60000;
+
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers to hosts, described in ${HOSTS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
@@ -77,6 +79,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       description: "Force removing of previously deployed app",
     }),
     ...TIMEOUT_FLAG,
+    ttl: Flags.integer({
+      description: `Sets the default TTL for all particles originating from the peer with no TTL specified. If the originating particle's TTL is defined then that value will be used If the option is not set default TTL will be ${DEFAULT_TTL}`,
+      helpValue: "<milliseconds>",
+    }),
     ...KEY_PAIR_FLAG,
     "aqua-logs": Flags.boolean({
       description: "Enable Aqua logs",
@@ -105,6 +111,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const fluencePeer = new FluencePeer();
 
     await fluencePeer.start({
+      dialTimeoutMs: flags.timeout ?? DEFAULT_TTL,
+      defaultTtlMs: flags.ttl ?? DEFAULT_TTL,
       connectTo: relay,
       ...(secretKey === undefined
         ? {}
