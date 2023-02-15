@@ -8,8 +8,8 @@ Fluence CLI is designed to be the only tool that you need to manage the life cyc
 
 Prerequisites:
 
-- Linux or MacOS (there are currently some bugs on Windows)
-- [Node.js = 16.x.x](https://nodejs.org/)
+-   Linux or MacOS (there are currently some bugs on Windows)
+-   [Node.js = 16.x.x](https://nodejs.org/)
 
 To install and try fluence, run:
 
@@ -31,15 +31,12 @@ A complete list of commands together with usage examples is available [here](./d
 
 ## Support
 
-Please, file an [issue](https://github.com/fluencelabs/fluence-cli/issues) if you find a bug. You can also contact us at [Discord](https://discord.com/invite/5qSnPZKh7u) or [Telegram](https://t.me/fluence_project).  We will do our best to resolve the issue ASAP.
-
+Please, file an [issue](https://github.com/fluencelabs/fluence-cli/issues) if you find a bug. You can also contact us at [Discord](https://discord.com/invite/5qSnPZKh7u) or [Telegram](https://t.me/fluence_project). We will do our best to resolve the issue ASAP.
 
 ## Contributing
 
 Any interested person is welcome to contribute to the project. Please, make sure you read and follow some basic [rules](./CONTRIBUTING.md).
 
-
 ## License
 
 All software code is copyright (c) Fluence Labs, Inc. under the [Apache-2.0](./LICENSE) license.
-

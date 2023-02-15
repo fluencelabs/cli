@@ -3,8 +3,8 @@
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
+* [`fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID]`](#fluence-deal-change-app-deal-address-deal-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
-* [`fluence deal faucet [AMOUNT] [TOKEN]`](#fluence-deal-faucet-amount-token)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
@@ -112,42 +112,17 @@ EXAMPLES
 
 _See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/build.ts)_
 
-## `fluence deal create`
+## `fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID]`
 
-Create your deal with the specified parameters
-
-```
-USAGE
-  $ fluence deal create --appCID <value> --requiredStake <value> [--no-input] [-k <value>] [--pricePerEpoch
-    <value>] [--minWorkers <value>] [--maxWorkers <value>] [--targetWorkers <value>] [--network <value>]
-
-FLAGS
-  -k, --privKey=<value>    Private key with which transactions will be signed through cli
-  --appCID=<value>         (required) CID of the application that will be deployed
-  --maxWorkers=<value>     [default: 5]
-  --minWorkers=<value>     [default: 1]
-  --network=<network>      [default: testnet] $The network in which the transactions used by the command will be carried
-                           out (local, testnet)
-  --no-input               Don't interactively ask for any input from the user
-  --pricePerEpoch=<value>  [default: 1] The price that you will pay to resource owners per epoch
-  --requiredStake=<value>  (required) Required collateral in FLT tokens to join a deal for resource owners.
-  --targetWorkers=<value>  [default: 3]
-
-DESCRIPTION
-  Create your deal with the specified parameters
-```
-
-## `fluence deal faucet [AMOUNT] [TOKEN]`
-
-Dev faucet for receiving FLT and FakeUSD tokens
+Change app id in the deal
 
 ```
 USAGE
-  $ fluence deal faucet [AMOUNT] [TOKEN] [--no-input] [-k <value>] [--network <value>]
+  $ fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID] [--no-input] [-k <value>] [--network <value>]
 
 ARGUMENTS
-  AMOUNT  Amount of tokens to receive
-  TOKEN   Name of the token: FakeUSD, FLT
+  DEAL-ADDRESS      Deal address
+  DEAL-NEW-APP-CID  New app CID for the deal
 
 FLAGS
   -k, --privKey=<value>  Private key with which transactions will be signed through cli
@@ -156,7 +131,29 @@ FLAGS
   --no-input             Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Dev faucet for receiving FLT and FakeUSD tokens
+  Change app id in the deal
+```
+
+## `fluence deal create`
+
+Create your deal with the specified parameters
+
+```
+USAGE
+  $ fluence deal create --appCID <value> [--no-input] [-k <value>] [--minWorkers <value>] [--targetWorkers
+    <value>] [--network <value>]
+
+FLAGS
+  -k, --privKey=<value>    Private key with which transactions will be signed through cli
+  --appCID=<value>         (required) CID of the application that will be deployed
+  --minWorkers=<value>     [default: 1] Required workers to activate the deal
+  --network=<network>      [default: testnet] $The network in which the transactions used by the command will be carried
+                           out (local, testnet)
+  --no-input               Don't interactively ask for any input from the user
+  --targetWorkers=<value>  [default: 3] Max workers in the deal
+
+DESCRIPTION
+  Create your deal with the specified parameters
 ```
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
@@ -490,7 +487,7 @@ _See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
-Create PAT (Peer auth token) in a deal for auth
+Create provider access token for the deal
 
 ```
 USAGE
@@ -506,7 +503,7 @@ FLAGS
   --no-input             Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Create PAT (Peer auth token) in a deal for auth
+  Create provider access token for the deal
 ```
 
 ## `fluence run`

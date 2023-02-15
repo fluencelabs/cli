@@ -17,14 +17,13 @@
 import assert from "node:assert";
 
 import { Flags } from "@oclif/core";
-import { BigNumber, utils } from "ethers";
+import { BigNumber } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { NETWORK_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifecyle.js";
 import {
   getFactoryContract,
-  getUSDContract,
   getSigner,
   ensureChainNetwork,
 } from "../../lib/provider.js";
@@ -47,28 +46,13 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "CID of the application that will be deployed",
       required: true,
     }),
-    requiredStake: Flags.string({
-      description:
-        "Required collateral in FLT tokens to join a deal for resource owners.",
-      required: true,
-    }),
-    pricePerEpoch: Flags.string({
-      description: "The price that you will pay to resource owners per epoch",
-      required: false,
-      default: "1",
-    }),
     minWorkers: Flags.string({
-      description: "",
+      description: "Required workers to activate the deal",
       required: false,
       default: "1",
-    }),
-    maxWorkers: Flags.string({
-      description: "",
-      required: false,
-      default: "5",
     }),
     targetWorkers: Flags.string({
-      description: "",
+      description: "Max workers in the deal",
       required: false,
       default: "3",
     }),
@@ -87,16 +71,9 @@ export default class Create extends BaseCommand<typeof Create> {
     const factory = getFactoryContract(signer, network);
 
     const tx = await factory.createDeal(
-      (
-        await getUSDContract(signer, network)
-      ).address,
-      BigNumber.from(flags.pricePerEpoch).mul(BigNumber.from(10).pow(18)),
-      BigNumber.from(flags.requiredStake).mul(BigNumber.from(10).pow(18)),
       BigNumber.from(flags.minWorkers),
-      BigNumber.from(flags.maxWorkers),
       BigNumber.from(flags.targetWorkers),
-      utils.formatBytes32String(flags.appCID),
-      []
+      flags.appCID
     );
 
     const res = await tx.wait();
