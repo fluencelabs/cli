@@ -56,3 +56,4 @@ export function registerConsole(...args: any) {
 }
 
 // Functions
+/* prettier-ignore-end */

@@ -14,8 +14,27 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-process-exit */
+
 import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/ClientRequest/index.js";
+import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
+
+const handleError = (/** @type {unknown} */ error) => {
+  const err =
+    error instanceof Error
+      ? error
+      : new CLIError(`Error: ${String(error ?? "no error?")}`);
+
+  console.error(err);
+
+  const exitCode =
+    "oclif" in err && err.oclif?.exit !== undefined && err.oclif?.exit !== false
+      ? err.oclif?.exit
+      : 1;
+
+  process.exit(exitCode);
+};
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -61,7 +80,7 @@ export const createErrorPromise = (errorOrUnknown) => {
   isErrorExpected = getIsErrorExpected(error);
 
   if (!isCountlyInited()) {
-    return console.error(error);
+    return handleError(error);
   }
 
   if (getIsErrorExpected(error)) {
@@ -74,7 +93,7 @@ export const createErrorPromise = (errorOrUnknown) => {
   }
 
   return new Promise((resolve) => {
-    resolveErrorPromise = () => resolve(console.error(error));
+    resolveErrorPromise = () => resolve(handleError(error));
 
     setTimeout(() => {
       console.log(
