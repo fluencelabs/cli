@@ -74,6 +74,10 @@ export default class Aqua extends Command {
       description: "Use no extension in generated .ts file",
       exclusive: ["air"],
     }),
+    "old-fluence-js": Flags.boolean({
+      description: "Generate TypeScript or JavaScript files for new JS Client",
+      default: false,
+    }),
     "log-level-compiler": Flags.string({
       description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
       helpValue: "<level>",
