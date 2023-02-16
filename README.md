@@ -70,6 +70,9 @@ Got to [Fluence Faucet](https://faucet.fluence.dev) and claim your free Fluence 
 
 A complete list of commands together with usage examples is available [here](./docs/commands/README.md) with a detailed workflow [example](./docs/EXAMPLE.md). Documentation for all configs that Fluence CLI uses can be found [here](./docs/configs/README.md).
 
+Do not forget to check our [YouTube channel](https://www.youtube.com/@fluencelabs).
+
+
 ## Support
 
 Please, file an [issue](https://github.com/fluencelabs/fluence-cli/issues) if you find a bug. You can also contact us at [Discord](https://discord.com/invite/5qSnPZKh7u) or [Telegram](https://t.me/fluence_project).  We will do our best to resolve the issue ASAP.
