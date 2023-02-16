@@ -34,7 +34,8 @@ Compile aqua file or directory that contains your .aqua files
 ```
 USAGE
   $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js | --common-js]
-    [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled] [-w] [--no-input]
+    [--old-fluence-js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled]
+    [-w] [--no-input]
 
 FLAGS
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files
@@ -51,6 +52,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
+  --old-fluence-js              Generate TypeScript or JavaScript files for new JS Client
   --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
                                 Will ignore other options
 
