@@ -71,6 +71,7 @@ const generateRegisterAppTSorJS = async ({
     flags: {
       input: await ensureFluenceAquaDeployedAppPath(),
       output: fluenceJSorTSDir,
+      "old-fluence-js": true,
       js: isJS,
     },
   });

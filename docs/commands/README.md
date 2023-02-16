@@ -34,7 +34,8 @@ Compile aqua file or directory that contains your .aqua files
 ```
 USAGE
   $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js | --common-js]
-    [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled] [-w] [--no-input]
+    [--old-fluence-js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled]
+    [-w] [--no-input]
 
 FLAGS
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files
@@ -51,6 +52,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
+  --old-fluence-js              Generate TypeScript or JavaScript files for new JS Client
   --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
                                 Will ignore other options
 
@@ -61,7 +63,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -110,7 +112,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/build.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID]`
 
@@ -284,7 +286,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -328,7 +330,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -483,7 +485,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/remove.ts)_
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
@@ -551,7 +553,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 

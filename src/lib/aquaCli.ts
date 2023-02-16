@@ -72,6 +72,7 @@ export type AquaCliInput =
           | "no-xor"
           | "dry"
           | "scheduled"
+          | "old-fluence-js"
         > & { timeout?: never };
     };
 
