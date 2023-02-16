@@ -19,8 +19,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
+import { upload } from "../../lib/compiled-aqua/installation-spell/config.js";
 import { initReadonlyHostsConfig } from "../../lib/configs/project/hosts.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
@@ -30,6 +29,7 @@ import {
   PRIV_KEY_FLAG,
 } from "../../lib/const.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
+import { jsonStringify } from "../../lib/helpers/jsonStringify.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
@@ -38,8 +38,8 @@ import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 
 const DEFAULT_TTL = 60000;
 
-export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy workers to hosts, described in ${HOSTS_CONFIG_FILE_NAME}`;
+export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
+  static override description = `Upload workers to hosts, described in ${HOSTS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -66,7 +66,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
-      await this.parse(Deploy),
+      await this.parse(UPLOAD),
       true
     );
 
@@ -80,9 +80,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }
 
     const secretKey = defaultKeyPair.secretKey;
-
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
-
     const fluencePeer = new FluencePeer();
 
     await fluencePeer.start({
@@ -108,29 +106,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       workersConfig
     );
 
-    const uploadDeployArg = await prepareForDeploy({
+    const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       arrayWithWorkerNames: hostsConfig.hosts,
       fluenceConfig,
       workersConfig,
     });
 
-    const uploadDeployResult = await upload_deploy(
-      fluencePeer,
-      uploadDeployArg
-    );
+    const uploadResult = await upload(fluencePeer, uploadArg);
 
-    const newDeployedConfig = {
-      ...uploadDeployResult,
-      workers: uploadDeployResult.workers.map((worker) => ({
-        ...worker,
-        timestamp: new Date().toISOString(),
-      })),
-    };
-
-    const deployedConfig = await initDeployedConfig();
-    deployedConfig.workers.push(...newDeployedConfig.workers);
-    await deployedConfig.$commit();
-    commandObj.log("Successfully deployed");
+    commandObj.log(jsonStringify(uploadResult.workers));
   }
 }

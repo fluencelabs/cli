@@ -18,9 +18,12 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { initReadonlyDealsConfig } from "../../lib/configs/project/deals.js";
+import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
-import { dealCreate } from "../../lib/dealCreate.js";
+import { dealCreate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifecyle.js";
+import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Create extends BaseCommand<typeof Create> {
   static override description =
@@ -44,8 +47,23 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Create));
-    const dealAddress = await dealCreate(flags);
+    const { flags, fluenceConfig } = await initCli(
+      this,
+      await this.parse(Create),
+      true
+    );
+
+    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
+    const dealsConfig = await initReadonlyDealsConfig(workersConfig);
+
+    const dealAddress = await dealCreate({
+      ...flags,
+      network: await ensureChainNetwork({
+        maybeNetworkFromFlags: flags.network,
+        maybeDealsConfigNetwork: dealsConfig.network,
+      }),
+    });
+
     commandObj.log(`Deal contract created: ${dealAddress}`);
   }
 }

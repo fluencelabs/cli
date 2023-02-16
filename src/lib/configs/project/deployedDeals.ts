@@ -16,7 +16,12 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { DEPLOYED_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import {
+  ChainNetwork,
+  CHAIN_NETWORKS,
+  DEPLOYED_DEALS_CONFIG_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+} from "../../const.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   InitConfigOptions,
@@ -30,52 +35,45 @@ import {
 
 type ConfigV0 = {
   version: 0;
-  workers: {
-    installation_spells: {
-      host_id: string;
-      spell_id: string;
-      worker_id: string;
-    }[];
-    name: string;
+  deals: {
+    workerName: string;
+    workerCID: string;
+    dealAddress: string;
     timestamp: string;
+    network: ChainNetwork;
   }[];
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${DEPLOYED_CONFIG_FILE_NAME}`,
-  title: DEPLOYED_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${DEPLOYED_DEALS_CONFIG_FILE_NAME}`,
+  title: DEPLOYED_DEALS_CONFIG_FILE_NAME,
   type: "object",
   description:
-    "A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command",
+    "A result of deals deployment. This file is created automatically after successful deployment using `fluence deal deploy` command",
   properties: {
     version: { type: "number", const: 0 },
-    workers: {
+    deals: {
       type: "array",
-      description: "A list of deployed workers",
+      description: "A list of deployed deals",
       items: {
         type: "object",
         properties: {
-          name: { type: "string" },
-          installation_spells: {
-            type: "array",
-            description: "A list of installation spells",
-            items: {
-              type: "object",
-              properties: {
-                host_id: { type: "string" },
-                spell_id: { type: "string" },
-                worker_id: { type: "string" },
-              },
-              required: ["host_id", "spell_id", "worker_id"],
-            },
-          },
+          workerName: { type: "string" },
+          workerCID: { type: "string" },
+          dealAddress: { type: "string" },
+          network: { type: "string", enum: CHAIN_NETWORKS },
           timestamp: {
             type: "string",
-            description:
-              "ISO timestamp of the time when the worker was deployed",
+            description: "ISO timestamp of the time when the deal was deployed",
           },
         },
-        required: ["name", "installation_spells", "timestamp"],
+        required: [
+          "workerName",
+          "workerCID",
+          "dealAddress",
+          "timestamp",
+          "network",
+        ],
       },
     },
   },
@@ -86,30 +84,31 @@ const migrations: Migrations<Config> = [];
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
-export type DeployedConfig = InitializedConfig<LatestConfig>;
-export type DeployedConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
+export type DeployedDealsConfig = InitializedConfig<LatestConfig>;
+export type DeployedDealsConfigReadonly =
+  InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: DEPLOYED_CONFIG_FILE_NAME,
+  name: DEPLOYED_DEALS_CONFIG_FILE_NAME,
   getConfigDirPath: ensureFluenceDir,
 };
 
 const getDefault: GetDefaultConfig<LatestConfig> = () => ({
   version: 0,
-  workers: [],
+  deals: [],
 });
 
-export const initReadonlyDeployedConfig = getReadonlyConfigInitFunction(
+export const initReadonlyDeployedDealsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );
 
-export const initDeployedConfig = getConfigInitFunction(
+export const initDeployedDealsConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault
 );
 
-export const deployedSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export const deployedDealsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

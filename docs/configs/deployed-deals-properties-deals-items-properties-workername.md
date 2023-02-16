@@ -1,0 +1,3 @@
+## workerName Type
+
+`string`

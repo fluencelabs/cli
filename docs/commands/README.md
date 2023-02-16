@@ -3,8 +3,9 @@
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
-* [`fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID]`](#fluence-deal-change-app-deal-address-deal-new-app-cid)
+* [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
+* [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
@@ -25,7 +26,8 @@
 * [`fluence service new [PATH]`](#fluence-service-new-path)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
-* [`fluence workers deploy`](#fluence-workers-deploy)
+* [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
+* [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
 
 ## `fluence aqua`
 
@@ -61,7 +63,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -110,19 +112,19 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/build.ts)_
 
-## `fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID]`
+## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
 Change app id in the deal
 
 ```
 USAGE
-  $ fluence deal change-app [DEAL-ADDRESS] [DEAL-NEW-APP-CID] [--no-input] [-k <value>] [--network <value>]
+  $ fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID] [--no-input] [-k <value>] [--network <value>]
 
 ARGUMENTS
-  DEAL-ADDRESS      Deal address
-  DEAL-NEW-APP-CID  New app CID for the deal
+  DEAL-ADDRESS  Deal address
+  NEW-APP-CID   New worker CID for the deal
 
 FLAGS
   -k, --privKey=<value>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
@@ -154,6 +156,38 @@ FLAGS
 
 DESCRIPTION
   Create your deal with the specified parameters
+```
+
+## `fluence deal deploy [WORKER-NAMES]`
+
+Deploy workers according to deal in deals.yaml
+
+```
+USAGE
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
+    <value>] [--aqua-logs] [-k <value>] [--network <value>]
+
+ARGUMENTS
+  WORKER-NAMES  Names of workers to deploy (by default all deals from deals.yaml are deployed)
+
+FLAGS
+  -k, --key-pair-name=<name>  Key pair name
+  -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --aqua-logs                 Enable Aqua logs
+  --network=<network>         [default: testnet] $The network in which the transactions used by the command will be
+                              carried out (local, testnet)
+  --no-input                  Don't interactively ask for any input from the user
+  --relay=<multiaddr>         Relay node multiaddr
+  --timeout=<milliseconds>    Timeout used for command execution
+  --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
+                              the originating particle's TTL is defined then that value will be used If the option is
+                              not set default TTL will be 60000
+
+DESCRIPTION
+  Deploy workers according to deal in deals.yaml
+
+EXAMPLES
+  $ fluence deal deploy
 ```
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
@@ -284,7 +318,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -328,7 +362,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -483,7 +517,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/remove.ts)_
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
@@ -551,7 +585,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.39/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.40/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -641,21 +675,22 @@ EXAMPLES
   $ fluence service repl
 ```
 
-## `fluence workers deploy`
+## `fluence workers deploy [WORKER-NAMES]`
 
 Deploy workers to hosts, described in hosts.yaml
 
 ```
 USAGE
-  $ fluence workers deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [--ttl <value>] [-k <value>]
-    [--aqua-logs] [--direct] [-k <value>]
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
+    <value>] [--aqua-logs] [-k <value>]
+
+ARGUMENTS
+  WORKER-NAMES  Names of workers to deploy (by default all workers from hosts.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --aqua-logs                 Enable Aqua logs
-  --direct                    Deploy workers directly to hosts (use hosts.yaml config instead of deals.yaml)
-  --force                     Force removing of previously deployed app
   --no-input                  Don't interactively ask for any input from the user
   --relay=<multiaddr>         Relay node multiaddr
   --timeout=<milliseconds>    Timeout used for command execution
@@ -668,5 +703,35 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence workers deploy
+```
+
+## `fluence workers upload [WORKER-NAMES]`
+
+Upload workers to hosts, described in hosts.yaml
+
+```
+USAGE
+  $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
+    <value>] [--aqua-logs] [-k <value>]
+
+ARGUMENTS
+  WORKER-NAMES  Names of workers to deploy (by default all workers from hosts.yaml are deployed)
+
+FLAGS
+  -k, --key-pair-name=<name>  Key pair name
+  -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --aqua-logs                 Enable Aqua logs
+  --no-input                  Don't interactively ask for any input from the user
+  --relay=<multiaddr>         Relay node multiaddr
+  --timeout=<milliseconds>    Timeout used for command execution
+  --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
+                              the originating particle's TTL is defined then that value will be used If the option is
+                              not set default TTL will be 60000
+
+DESCRIPTION
+  Upload workers to hosts, described in hosts.yaml
+
+EXAMPLES
+  $ fluence workers upload
 ```
 <!-- commandsstop -->

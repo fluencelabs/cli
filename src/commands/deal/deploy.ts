@@ -14,32 +14,44 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
+
 import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
-import { initReadonlyHostsConfig } from "../../lib/configs/project/hosts.js";
+import { upload } from "../../lib/compiled-aqua/installation-spell/config.js";
+import {
+  initReadonlyDealsConfig,
+  MIN_WORKERS,
+  TARGET_WORKERS,
+} from "../../lib/configs/project/deals.js";
+import { initDeployedDealsConfig } from "../../lib/configs/project/deployedDeals.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
-  HOSTS_CONFIG_FILE_NAME,
   PRIV_KEY_FLAG,
+  DEALS_CONFIG_FILE_NAME,
+  NETWORK_FLAG,
 } from "../../lib/const.js";
+import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../../lib/multiaddres.js";
+import { confirm } from "../../lib/prompt.js";
+import { ensureChainNetwork } from "../../lib/provider.js";
 
 const DEFAULT_TTL = 60000;
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy workers to hosts, described in ${HOSTS_CONFIG_FILE_NAME}`;
+  static override description = `Deploy workers according to deal in ${DEALS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -57,10 +69,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       description: "Enable Aqua logs",
     }),
     ...PRIV_KEY_FLAG,
+    ...NETWORK_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all workers from ${HOSTS_CONFIG_FILE_NAME} are deployed)`,
+      description: `Names of workers to deploy (by default all deals from ${DEALS_CONFIG_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
@@ -103,34 +116,95 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
 
-    const hostsConfig = await initReadonlyHostsConfig(
-      fluenceConfig,
-      workersConfig
-    );
+    const dealsConfig = await initReadonlyDealsConfig(workersConfig);
 
-    const uploadDeployArg = await prepareForDeploy({
+    const network = await ensureChainNetwork({
+      maybeNetworkFromFlags: flags.network,
+      maybeDealsConfigNetwork: dealsConfig.network,
+    });
+
+    const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
-      arrayWithWorkerNames: hostsConfig.hosts,
+      arrayWithWorkerNames: dealsConfig.deals,
       fluenceConfig,
       workersConfig,
     });
 
-    const uploadDeployResult = await upload_deploy(
-      fluencePeer,
-      uploadDeployArg
-    );
+    const uploadResult = await upload(fluencePeer, uploadArg);
+    const deployedDealsConfig = await initDeployedDealsConfig();
 
-    const newDeployedConfig = {
-      ...uploadDeployResult,
-      workers: uploadDeployResult.workers.map((worker) => ({
-        ...worker,
+    for (const { name: workerName } of [...uploadArg.workers]) {
+      const appCID = uploadResult.workers.find(
+        (worker) => workerName === worker.name
+      )?.definition;
+
+      assert(appCID !== undefined);
+
+      const deal = dealsConfig.deals.find((d) => d.workerName === workerName);
+      assert(deal !== undefined);
+      const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
+
+      const previouslyDeployedDealIndex = deployedDealsConfig.deals.findIndex(
+        (d) => d.workerName === workerName
+      );
+
+      const maybePreviouslyDeployedDeal =
+        deployedDealsConfig.deals[previouslyDeployedDealIndex];
+
+      if (
+        maybePreviouslyDeployedDeal !== undefined &&
+        network === maybePreviouslyDeployedDeal.network &&
+        (await confirm({
+          message: `There is a previously deployed deal for worker ${color.yellow(
+            workerName
+          )}. Do you want to update this existing deal?`,
+        }))
+      ) {
+        commandObj.log(
+          `\nUpdating deal for worker ${color.yellow(workerName)}\n`
+        );
+
+        await dealUpdate({
+          network,
+          privKey: flags.privKey,
+          appCID,
+          dealAddress: maybePreviouslyDeployedDeal.dealAddress,
+        });
+
+        maybePreviouslyDeployedDeal.timestamp = new Date().toISOString();
+
+        deployedDealsConfig.deals.splice(
+          previouslyDeployedDealIndex,
+          1,
+          maybePreviouslyDeployedDeal
+        );
+
+        await deployedDealsConfig.$commit();
+
+        continue;
+      }
+
+      commandObj.log(
+        `\nCreating deal for worker ${color.yellow(workerName)}\n`
+      );
+
+      const dealAddress = await dealCreate({
+        network: dealsConfig.network ?? "testnet",
+        privKey: flags.privKey,
+        appCID,
+        minWorkers,
+        targetWorkers,
+      });
+
+      deployedDealsConfig.deals.push({
+        workerName,
+        dealAddress,
         timestamp: new Date().toISOString(),
-      })),
-    };
+        workerCID: appCID,
+        network,
+      });
 
-    const deployedConfig = await initDeployedConfig();
-    deployedConfig.workers.push(...newDeployedConfig.workers);
-    await deployedConfig.$commit();
-    commandObj.log("Successfully deployed");
+      await deployedDealsConfig.$commit();
+    }
   }
 }

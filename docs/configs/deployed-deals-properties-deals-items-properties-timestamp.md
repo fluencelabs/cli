@@ -1,0 +1,3 @@
+## timestamp Type
+
+`string`

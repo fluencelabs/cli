@@ -17,17 +17,14 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { initReadonlyDealsConfig } from "../../lib/configs/project/deals.js";
+import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { dealUpdate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
-import {
-  getSigner,
-  ensureChainNetwork,
-  getDealContract,
-} from "../../lib/provider.js";
-
-const DEAL_NEW_APP_CID_ARG = "DEAL-NEW-APP-CID";
-const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
+import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   static override description = "Change app id in the deal";
@@ -38,35 +35,37 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   };
 
   static override args = {
-    [DEAL_ADDRESS_ARG]: Args.string({
+    "DEAL-ADDRESS": Args.string({
       description: "Deal address",
     }),
-    [DEAL_NEW_APP_CID_ARG]: Args.string({
-      description: "New app CID for the deal",
+    "NEW-APP-CID": Args.string({
+      description: "New worker CID for the deal",
     }),
   };
 
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(ChangeApp));
+    const { flags, fluenceConfig, args } = await initCli(
+      this,
+      await this.parse(ChangeApp),
+      true
+    );
 
-    const network = await ensureChainNetwork({
-      maybeChainNetwork: flags.network,
+    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
+    const dealsConfig = await initReadonlyDealsConfig(workersConfig);
+
+    const tx = await dealUpdate({
+      dealAddress:
+        args["DEAL-ADDRESS"] ??
+        (await input({ message: "Enter deal address" })),
+      appCID:
+        args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
+      network: await ensureChainNetwork({
+        maybeNetworkFromFlags: flags.network,
+        maybeDealsConfigNetwork: dealsConfig.network,
+      }),
+      privKey: flags.privKey,
     });
 
-    const dealAddress: string =
-      args[DEAL_ADDRESS_ARG] ??
-      (await input({ message: "Enter deal address" }));
-
-    const newAppCID =
-      args[DEAL_NEW_APP_CID_ARG] ??
-      (await input({ message: "Enter new app CID" }));
-
-    const signer = await getSigner(network, flags.privKey);
-    const deal = getDealContract(dealAddress, signer);
-
-    const tx = await deal.setAppCID(newAppCID);
-    await tx.wait();
-
-    this.log(`Tx hash: ${tx.hash}`);
+    commandObj.log(`Tx hash: ${tx.hash}`);
   }
 }

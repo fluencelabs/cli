@@ -18,17 +18,14 @@ import assert from "node:assert";
 
 import { BigNumber } from "ethers";
 
-import {
-  getFactoryContract,
-  getSigner,
-  ensureChainNetwork,
-} from "./provider.js";
+import type { ChainNetwork } from "./const.js";
+import { getFactoryContract, getSigner, getDealContract } from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
 type DealCreateArg = {
-  network: string | undefined;
+  network: ChainNetwork;
   privKey: string | undefined;
   appCID: string;
   minWorkers: number;
@@ -36,13 +33,12 @@ type DealCreateArg = {
 };
 
 export const dealCreate = async ({
-  network: maybeChainNetwork,
+  network,
   appCID,
   minWorkers,
   privKey,
   targetWorkers,
 }: DealCreateArg) => {
-  const network = await ensureChainNetwork({ maybeChainNetwork });
   const signer = await getSigner(network, privKey);
   const factory = getFactoryContract(signer, network);
 
@@ -66,4 +62,25 @@ export const dealCreate = async ({
 
   assert(typeof dealAddress === "string");
   return dealAddress;
+};
+
+type DealUpdateArg = {
+  network: ChainNetwork;
+  privKey: string | undefined;
+  dealAddress: string;
+  appCID: string;
+};
+
+export const dealUpdate = async ({
+  network,
+  privKey,
+  dealAddress,
+  appCID,
+}: DealUpdateArg) => {
+  const signer = await getSigner(network, privKey);
+  const deal = getDealContract(dealAddress, signer);
+
+  const tx = await deal.setAppCID(appCID);
+  await tx.wait();
+  return tx;
 };

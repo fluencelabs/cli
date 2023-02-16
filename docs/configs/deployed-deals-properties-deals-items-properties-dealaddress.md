@@ -1,0 +1,3 @@
+## dealAddress Type
+
+`string`
