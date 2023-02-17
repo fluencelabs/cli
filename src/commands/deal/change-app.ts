@@ -39,7 +39,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
       description: "Deal address",
     }),
     "NEW-APP-CID": Args.string({
-      description: "New worker CID for the deal",
+      description: "New app CID for the deal",
     }),
   };
 

@@ -16,7 +16,12 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { DEPLOYED_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import {
+  ChainNetwork,
+  CHAIN_NETWORKS,
+  DEPLOYED_CONFIG_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+} from "../../const.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   InitConfigOptions,
@@ -38,6 +43,10 @@ type ConfigV0 = {
     }[];
     name: string;
     timestamp: string;
+    definition: string;
+    workerCID?: string | undefined;
+    dealAddress?: string | undefined;
+    network?: ChainNetwork | undefined;
   }[];
 };
 
@@ -69,13 +78,17 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
               required: ["host_id", "spell_id", "worker_id"],
             },
           },
+          definition: { type: "string" },
+          workerCID: { type: "string", nullable: true },
+          dealAddress: { type: "string", nullable: true },
+          network: { type: "string", enum: CHAIN_NETWORKS, nullable: true },
           timestamp: {
             type: "string",
             description:
               "ISO timestamp of the time when the worker was deployed",
           },
         },
-        required: ["name", "installation_spells", "timestamp"],
+        required: ["name", "installation_spells", "timestamp", "definition"],
       },
     },
   },

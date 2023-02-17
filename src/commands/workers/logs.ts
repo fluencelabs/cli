@@ -15,21 +15,26 @@
  */
 
 import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
+import {
+  get_logs,
+  Get_logsArgApp_workers,
+} from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
-import { initReadonlyHostsConfig } from "../../lib/configs/project/hosts.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
-  HOSTS_CONFIG_FILE_NAME,
   PRIV_KEY_FLAG,
+  DEALS_CONFIG_FILE_NAME,
+  NETWORK_FLAG,
+  DEPLOYED_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
-import { prepareForDeploy } from "../../lib/deployWorkers.js";
+import { parseWorkers } from "../../lib/deployWorkers.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
@@ -38,8 +43,8 @@ import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 
 const DEFAULT_TTL = 60000;
 
-export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy workers to hosts, described in ${HOSTS_CONFIG_FILE_NAME}`;
+export default class Logs extends BaseCommand<typeof Logs> {
+  static override description = `Deploy workers according to deal in ${DEALS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -57,16 +62,17 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       description: "Enable Aqua logs",
     }),
     ...PRIV_KEY_FLAG,
+    ...NETWORK_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all workers from ${HOSTS_CONFIG_FILE_NAME} are deployed)`,
+      description: `Names of workers to deploy (by default all deals from ${DEALS_CONFIG_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
-      await this.parse(Deploy),
+      await this.parse(Logs),
       true
     );
 
@@ -99,36 +105,51 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     doRegisterIpfsClient(fluencePeer, flags["aqua-logs"]);
     doRegisterLog(fluencePeer, flags["aqua-logs"]);
 
-    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
+    const deployedConfig = await initDeployedConfig();
+    const workerNamesString = args["WORKER-NAMES"];
 
-    const hostsConfig = await initReadonlyHostsConfig(
-      fluenceConfig,
-      workersConfig
+    const workerNamesSet = [
+      ...new Set(deployedConfig.workers.map(({ name }) => name)),
+    ];
+
+    const workersToGetLogsFor =
+      workerNamesString === undefined
+        ? workerNamesSet
+        : parseWorkers(workerNamesString);
+
+    const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
+      (workerName) => !workerNamesSet.includes(workerName)
     );
 
-    const uploadDeployArg = await prepareForDeploy({
-      workerNames: args["WORKER-NAMES"],
-      arrayWithWorkerNames: hostsConfig.hosts,
-      fluenceConfig,
-      workersConfig,
-    });
+    if (workerNamesNotFoundInWorkersConfig.length !== 0) {
+      commandObj.error(
+        `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
+          .map((workerName) => color.yellow(workerName))
+          .join(", ")} in ${color.yellow(
+          DEPLOYED_CONFIG_FILE_NAME
+        )} please check the spelling and try again`
+      );
+    }
 
-    const uploadDeployResult = await upload_deploy(
-      fluencePeer,
-      uploadDeployArg
-    );
-
-    const newDeployedConfig = {
-      ...uploadDeployResult,
-      workers: uploadDeployResult.workers.map((worker) => ({
-        ...worker,
-        timestamp: new Date().toISOString(),
-      })),
+    const workersArg: Get_logsArgApp_workers = {
+      workers: deployedConfig.workers.filter(({ name }) =>
+        workersToGetLogsFor.includes(name)
+      ),
     };
 
-    const deployedConfig = await initDeployedConfig();
-    deployedConfig.workers.push(...newDeployedConfig.workers);
-    await deployedConfig.$commit();
-    commandObj.log("Successfully deployed");
+    const logs = await get_logs(fluencePeer, workersArg);
+
+    commandObj.log(
+      logs
+        .map(
+          ({ host_id, logs, spell_id, worker_name }) =>
+            `${color.yellow(
+              worker_name
+            )} (host_id: ${host_id}, spell_id: ${spell_id}):\n\n${logs.join(
+              "\n"
+            )}`
+        )
+        .join("\n\n")
+    );
   }
 }
