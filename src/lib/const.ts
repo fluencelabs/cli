@@ -104,7 +104,6 @@ export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
 export const HOSTS_CONFIG_FILE_NAME = `hosts.${YAML_EXT}`;
 export const DEALS_CONFIG_FILE_NAME = `deals.${YAML_EXT}`;
 export const DEPLOYED_CONFIG_FILE_NAME = `deployed.${YAML_EXT}`;
-export const DEPLOYED_DEALS_CONFIG_FILE_NAME = `deployed-deals.${YAML_EXT}`;
 export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;

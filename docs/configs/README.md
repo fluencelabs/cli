@@ -33,6 +33,3 @@ Defines which workers to host on which peer IDs
 ## [deployed.yaml](./deployed.md)
 
 A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command
-## [deployed-deals.yaml](./deployed-deals.md)
-
-A result of deals deployment. This file is created automatically after successful deployment using `fluence deal deploy` command
