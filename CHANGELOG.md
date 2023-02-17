@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.42](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.41...fluence-cli-v0.2.42) (2023-02-17)
+
+
+### Features
+
+* move deploy command to `fluence deal deploy`, add `fluence workers upload`, allow deployment of workers that you specified in a comma-separated argument [fixes DXJ-294] ([#150](https://github.com/fluencelabs/fluence-cli/issues/150)) ([ff268ce](https://github.com/fluencelabs/fluence-cli/commit/ff268ce42488c9591ff470cbef36121a2a265c62))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/aqua-api to v0.10.1 ([#151](https://github.com/fluencelabs/fluence-cli/issues/151)) ([e92f453](https://github.com/fluencelabs/fluence-cli/commit/e92f453f88221d6b597447520dd327cc6e2513a9))
+
 ## [0.2.41](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.40...fluence-cli-v0.2.41) (2023-02-16)
 
 
