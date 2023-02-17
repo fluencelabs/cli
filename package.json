@@ -40,7 +40,7 @@
     "compile-air": "./bin/dev.js aqua --no-relay -i node_modules/@fluencelabs/installation-spell/src/aqua/spell.aqua -o src/lib/compiled-aqua/installation-spell/air --import node_modules --air"
   },
   "dependencies": {
-    "@fluencelabs/aqua-api": "=0.10.0",
+    "@fluencelabs/aqua-api": "=0.10.1",
     "@fluencelabs/deal-aurora": "^0.1.8",
     "@fluencelabs/fluence": "0.28.0",
     "@fluencelabs/fluence-network-environment": "^1.0.13",
