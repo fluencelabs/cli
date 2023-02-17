@@ -80,32 +80,42 @@ class WalletConnectModal implements IQRCodeModal {
   close(): void {}
 }
 
+const DEFAULT_NETWORK = "testnet";
+
 type EnsureChainNetworkArg = {
-  maybeChainNetwork: string | undefined;
+  maybeNetworkFromFlags: string | undefined;
+  maybeDealsConfigNetwork: ChainNetwork | undefined;
 };
 
 export const ensureChainNetwork = async ({
-  maybeChainNetwork,
+  maybeNetworkFromFlags,
+  maybeDealsConfigNetwork,
 }: EnsureChainNetworkArg): Promise<ChainNetwork> => {
-  if (isChainNetwork(maybeChainNetwork)) {
-    return maybeChainNetwork;
+  const isValidNetworkFromFlags =
+    isChainNetwork(maybeNetworkFromFlags) ||
+    maybeNetworkFromFlags === undefined;
+
+  if (!isValidNetworkFromFlags) {
+    commandObj.warn(`Invalid chain network: ${String(maybeNetworkFromFlags)}`);
+    return list({
+      message: "Select chain network",
+      options: [...CHAIN_NETWORKS],
+      oneChoiceMessage(chainNetwork) {
+        return `Do you want to use ${color.yellow(
+          chainNetwork
+        )} chain network?`;
+      },
+      onNoChoices() {
+        return commandObj.error("No chain network selected");
+      },
+      flagName: NETWORK_FLAG_NAME,
+    });
   }
 
-  commandObj.warn(`Invalid chain network: ${String(maybeChainNetwork)}`);
+  const networkToUse =
+    maybeNetworkFromFlags ?? maybeDealsConfigNetwork ?? DEFAULT_NETWORK;
 
-  const chainNetwork = await list({
-    message: "Select chain network",
-    options: [...CHAIN_NETWORKS],
-    oneChoiceMessage(chainNetwork) {
-      return `Do you want to use ${color.yellow(chainNetwork)} chain network?`;
-    },
-    onNoChoices() {
-      return commandObj.error("No chain network selected");
-    },
-    flagName: NETWORK_FLAG_NAME,
-  });
-
-  return chainNetwork;
+  return networkToUse;
 };
 
 export const getSigner = async (

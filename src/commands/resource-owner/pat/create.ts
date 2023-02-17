@@ -19,6 +19,8 @@ import assert from "node:assert";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { initReadonlyDealsConfig } from "../../../lib/configs/project/deals.js";
+import { initReadonlyWorkersConfig } from "../../../lib/configs/project/workers.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifecyle.js";
 import { input } from "../../../lib/prompt.js";
@@ -45,10 +47,18 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(CreatePAT));
+    const { flags, fluenceConfig, args } = await initCli(
+      this,
+      await this.parse(CreatePAT),
+      true
+    );
+
+    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
+    const dealsConfig = await initReadonlyDealsConfig(workersConfig);
 
     const network = await ensureChainNetwork({
-      maybeChainNetwork: flags.network,
+      maybeNetworkFromFlags: flags.network,
+      maybeDealsConfigNetwork: dealsConfig.network,
     });
 
     const dealAddress =
