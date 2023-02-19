@@ -113,6 +113,8 @@ USAGE
 * [`fluence key default [NAME]`](#fluence-key-default-name)
 * [`fluence key new [NAME]`](#fluence-key-new-name)
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
+* [`fluence list`](#fluence-list)
+* [`fluence list services`](#fluence-list-services)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [PATH]`](#fluence-module-new-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
@@ -158,7 +160,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/aqua.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -207,7 +209,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/build.ts)_
 
 ## `fluence deal create`
 
@@ -530,7 +532,7 @@ EXAMPLES
   $ fluence deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/deploy.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -574,7 +576,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -641,6 +643,50 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence key remove
+```
+
+## `fluence list`
+
+Run aqua script
+
+```
+USAGE
+  $ fluence list [--no-input] [--json] [--paths] [--modules]
+
+FLAGS
+  --json      JSON description
+  --modules   MODULES description
+  --no-input  Don't interactively ask for any input from the user
+  --paths     PATHS description
+
+DESCRIPTION
+  Run aqua script
+
+EXAMPLES
+  $ fluence list
+```
+
+_See code: [dist/commands/list.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/list.ts)_
+
+## `fluence list services`
+
+Run aqua script
+
+```
+USAGE
+  $ fluence list services [--no-input] [--json] [--paths] [--modules]
+
+FLAGS
+  --json      JSON description
+  --modules   MODULES description
+  --no-input  Don't interactively ask for any input from the user
+  --paths     PATHS description
+
+DESCRIPTION
+  Run aqua script
+
+EXAMPLES
+  $ fluence list services
 ```
 
 ## `fluence module add [PATH | URL]`
@@ -729,7 +775,7 @@ EXAMPLES
   $ fluence remove
 ```
 
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/remove.ts)_
+_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/remove.ts)_
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
@@ -797,7 +843,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.36/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.37/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
