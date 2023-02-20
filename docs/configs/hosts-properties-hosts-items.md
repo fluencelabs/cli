@@ -29,7 +29,7 @@ Name of the worker to host. The same as in workers.yaml
 
 ## peerIds
 
-a list of peer IDs to deploy on
+An array of peer IDs to deploy on
 
 `peerIds`
 

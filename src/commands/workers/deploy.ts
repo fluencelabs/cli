@@ -15,6 +15,8 @@
  */
 
 import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -28,6 +30,7 @@ import {
   TIMEOUT_FLAG,
   HOSTS_CONFIG_FILE_NAME,
   PRIV_KEY_FLAG,
+  WORKERS_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
@@ -112,6 +115,33 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       fluenceConfig,
       workersConfig,
     });
+
+    const errorMessages = uploadDeployArg.workers.reduce<Array<string>>(
+      (acc, { config: { services }, hosts, name }) => {
+        if (services.length === 0) {
+          acc.push(
+            `Worker ${color.yellow(
+              name
+            )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`
+          );
+        }
+
+        if (hosts.length === 0) {
+          acc.push(
+            `Worker ${color.yellow(
+              name
+            )} has no peerIds listed in ${HOSTS_CONFIG_FILE_NAME}`
+          );
+        }
+
+        return acc;
+      },
+      []
+    );
+
+    if (errorMessages.length > 0) {
+      commandObj.error(errorMessages.join("\n"));
+    }
 
     const uploadDeployResult = await upload_deploy(
       fluencePeer,
