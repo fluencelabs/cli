@@ -68,7 +68,7 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
     coreAddress: "0xc301d2d67abB97919A670B8A0801667d42963adc",
     dealFactoryAddress: "0x5858103A51dd9FF771e5744C43f821162aB8eb1f",
     developerFaucetAddress: "0xdDFb0BC4652606880F121eB46AAeC900D548B108",
-    chainId: 1_313_161_555,
+    chainId: 80001,
   },
 };
 
