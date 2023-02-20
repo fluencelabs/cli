@@ -1,7 +1,7 @@
 {
   "name": "@fluencelabs/cli",
   "type": "module",
-  "version": "0.2.43",
+  "version": "0.2.44",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
