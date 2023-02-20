@@ -32,7 +32,7 @@ import {
   ensureFluenceTSAppPath,
   ensureFluenceAquaDeployedAppPath,
   ensureDir,
-  projectRootDirPromise,
+  projectRootDir,
 } from "./paths.js";
 
 const APP_SERVICE_NAME = "App";
@@ -140,8 +140,6 @@ export const generateRegisterApp = async ({
   fluenceConfig,
   ...options
 }: GenerateRegisterAppArg): Promise<void> => {
-  const projectRootDir = await projectRootDirPromise;
-
   if (typeof fluenceConfig?.appJSPath === "string") {
     const appJSPath = path.resolve(projectRootDir, fluenceConfig.appJSPath);
 

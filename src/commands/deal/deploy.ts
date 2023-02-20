@@ -131,20 +131,19 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       workersConfig,
     });
 
-    const errorMessages = uploadArg.workers.reduce<Array<string>>(
-      (acc, { config: { services }, name }) => {
+    const errorMessages = uploadArg.workers
+      .map<string | null>(({ config: { services }, name }) => {
         if (services.length === 0) {
-          acc.push(
-            `Worker ${color.yellow(
-              name
-            )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`
-          );
+          return `Worker ${color.yellow(
+            name
+          )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`;
         }
 
-        return acc;
-      },
-      []
-    );
+        return null;
+      })
+      .filter<string>(
+        (errorMessage): errorMessage is string => errorMessage !== null
+      );
 
     if (errorMessages.length > 0) {
       commandObj.error(errorMessages.join("\n"));

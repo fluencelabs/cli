@@ -26,7 +26,7 @@ import { FLUENCE_ENV } from "./setupEnvironment.js";
 export const AQUA_RECOMMENDED_VERSION = "0.10.0";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.6";
-export const MREPL_RECOMMENDED_VERSION = "0.18.8";
+export const MREPL_RECOMMENDED_VERSION = "0.19.1";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
 export const FLUENCE_JS_RECOMMENDED_VERSION = "0.28.0";
@@ -137,6 +137,7 @@ export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
 
 export const CRATES_TOML = `.crates.${TOML_EXT}`;
 export const CONFIG_TOML = `Config.${TOML_EXT}`;
+export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
 export const FS_OPTIONS = {
   encoding: "utf8",

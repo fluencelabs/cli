@@ -15,18 +15,14 @@
  */
 
 import assert from "node:assert";
-import path from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { buildModule } from "./build.js";
+import { resolveSingleServiceModuleConfigsAndBuild } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import {
-  FACADE_MODULE_NAME,
-  ServiceConfigReadonly,
-} from "./configs/project/service.js";
+import type { ServiceConfigReadonly } from "./configs/project/service.js";
 import type { WorkersConfig } from "./configs/project/workers.js";
 import { DEFAULT_WORKER_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
 import {
@@ -94,32 +90,15 @@ export const addService = async ({
     },
   };
 
-  const moduleConfigs = await Promise.all(
-    Object.entries(serviceConfig.modules).map(([name, { get }]) =>
-      (async () => {
-        const moduleConfig = await buildModule({
-          get,
-          marineCli,
-          serviceDirPath: path.dirname(serviceConfig.$getPath()),
-        });
-
-        return [name, moduleConfig] as const;
-      })()
-    )
-  );
-
-  const maybeFacadeReadonlyConfig = moduleConfigs.find(
-    ([name]) => name === FACADE_MODULE_NAME
-  )?.[1];
-
-  if (maybeFacadeReadonlyConfig === undefined) {
-    throw new Error("Unreachable. Facade module config not found");
-  }
-
-  const facadeReadonlyConfig = maybeFacadeReadonlyConfig;
+  const { facadeModuleConfig } =
+    await resolveSingleServiceModuleConfigsAndBuild(
+      serviceConfig,
+      fluenceConfig,
+      marineCli
+    );
 
   await generateServiceInterface({
-    pathToFacadeWasm: getModuleWasmPath(facadeReadonlyConfig),
+    pathToFacadeWasm: getModuleWasmPath(facadeModuleConfig),
     marineCli,
     serviceName,
   });

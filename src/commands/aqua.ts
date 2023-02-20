@@ -36,7 +36,7 @@ import {
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { exitCli, initCli } from "../lib/lifecyle.js";
-import { projectRootDirPromise, validatePath } from "../lib/paths.js";
+import { projectRootDir, validatePath } from "../lib/paths.js";
 import { input } from "../lib/prompt.js";
 
 export default class Aqua extends Command {
@@ -138,8 +138,6 @@ export default class Aqua extends Command {
       "common-js": isCommonJs,
       ...aquaCliOptionalFlags
     } = flags;
-
-    const projectRootDir = await projectRootDirPromise;
 
     const maybeFluenceLockConfig = await initFluenceLockConfig();
 

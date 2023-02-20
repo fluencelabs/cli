@@ -15,11 +15,12 @@
  */
 
 import assert from "node:assert";
-import path, { isAbsolute, resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
+import { buildModules } from "./build.js";
 import { commandObj } from "./commandObj.js";
 import type { UploadArgConfig } from "./compiled-aqua/installation-spell/config.js";
 import { spellInstallAirScript } from "./compiled-aqua/installation-spell/spell.js";
@@ -43,12 +44,12 @@ import {
 } from "./const.js";
 import {
   downloadModule,
-  downloadService,
   getModuleWasmPath,
+  getServiceDirAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
 import { initMarineCli } from "./marineCli.js";
-import { projectRootDirPromise } from "./paths.js";
+import { projectRootDir } from "./paths.js";
 
 export const parseWorkers = (workerNamesString: string) =>
   workerNamesString.split(",").map((s) => s.trim());
@@ -114,9 +115,10 @@ export const prepareForDeploy = async ({
 
         assert(get !== undefined);
 
-        const serviceDirPath = isUrl(get)
-          ? await downloadService(get)
-          : path.resolve(await projectRootDirPromise, get);
+        const serviceDirPath = await getServiceDirAbsolutePath(
+          get,
+          projectRootDir
+        );
 
         const serviceConfig = await initReadonlyServiceConfig(serviceDirPath);
 
@@ -208,20 +210,8 @@ export const prepareForDeploy = async ({
   );
 
   const fluenceLockConfig = await initFluenceLockConfig();
-
   const marineCli = await initMarineCli(fluenceConfig, fluenceLockConfig);
-
-  await Promise.all(
-    [...moduleConfigsMap.values()]
-      .filter(({ type }) => type === "rust")
-      .map((moduleConfig) =>
-        marineCli({
-          args: ["build"],
-          flags: { release: true },
-          cwd: path.dirname(moduleConfig.$getPath()),
-        })
-      )
-  );
+  await buildModules([...moduleConfigsMap.values()], marineCli);
 
   const workers: UploadArgConfig["workers"] = arrayWithWorkerNames
     .filter(({ workerName }) => workersToHost.includes(workerName))

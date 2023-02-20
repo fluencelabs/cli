@@ -53,7 +53,7 @@ import {
   ensureDefaultTSDirPath,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
-  projectRootDirPromise,
+  projectRootDir,
   setProjectRootDir,
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
@@ -162,7 +162,7 @@ const ensureVSCodeRecommendedExtensions = async (): Promise<void> => {
 };
 
 const ensureGitIgnore = async (): Promise<void> => {
-  const gitIgnorePath = await getGitignorePath();
+  const gitIgnorePath = getGitignorePath();
   let newGitIgnoreContent: string;
 
   try {
@@ -266,8 +266,6 @@ export const initTSorJSProject = async ({
   const defaultAquaTSorJSPath = isJS
     ? await ensureDefaultAquaJSPath()
     : await ensureDefaultAquaTSPath();
-
-  const projectRootDir = await projectRootDirPromise;
 
   const defaultAquaTSorJSPathRelative = path.relative(
     projectRootDir,

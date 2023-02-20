@@ -38,4 +38,3 @@
     - `Hello, Fluence` as a result of `helloWorld("Fluence")`
     - `2` as a result of `addOne(1)`
 1. Run `fluence remove` to remove the previously deployed fluence application
-

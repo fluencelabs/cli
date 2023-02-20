@@ -64,7 +64,7 @@ import { initCli } from "../lib/lifecyle.js";
 import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
-  projectRootDirPromise,
+  projectRootDir,
   recursivelyFindProjectRootDir,
   setProjectRootDir,
 } from "../lib/paths.js";
@@ -165,20 +165,18 @@ export default class Run extends BaseCommand<typeof Run> {
     ...KEY_PAIR_FLAG,
   };
   async run(): Promise<void> {
-    const parseResult = await this.parse(Run);
-    const inputFlag = parseResult.flags[INPUT_FLAG_NAME];
+    const { flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Run)
+    );
+
+    const inputFlag = flags[INPUT_FLAG_NAME];
 
     if (typeof inputFlag === "string") {
-      const resolvedInputDirName = resolve(dirname(inputFlag));
-
-      const projectRootDir = await recursivelyFindProjectRootDir(
-        resolvedInputDirName
+      setProjectRootDir(
+        await recursivelyFindProjectRootDir(resolve(dirname(inputFlag)))
       );
-
-      setProjectRootDir(projectRootDir);
     }
-
-    const { flags, maybeFluenceConfig } = await initCli(this, parseResult);
 
     const marineLogLevel: AvmLoglevel | undefined = await resolveAVMLogLevel({
       maybeAVMLogLevel: flags[LOG_LEVEL_AVM_FLAG_NAME],
@@ -331,7 +329,7 @@ const ensureAquaPath = async ({
 
   if (typeof maybeFluenceConfig?.aquaInputPath === "string") {
     const aquaInputPath = resolve(
-      await projectRootDirPromise,
+      projectRootDir,
       maybeFluenceConfig.aquaInputPath
     );
 
