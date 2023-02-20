@@ -29,6 +29,8 @@ import { Multiaddr } from "multiaddr";
 
 export const NETWORKS = ["kras", "stage", "testnet"] as const;
 export type Network = (typeof NETWORKS)[number];
+export const isNetwork = (unknown: unknown): unknown is Network =>
+  NETWORKS.some((network) => network === unknown);
 export type FluenceEnv = Network | "local";
 export type Relays = Network | Array<string> | undefined;
 

@@ -6,6 +6,7 @@
 * [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
@@ -191,6 +192,27 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence deal deploy
+```
+
+## `fluence default peers [NETWORK]`
+
+Print default Fluence network peer addresses
+
+```
+USAGE
+  $ fluence default peers [NETWORK] [--no-input]
+
+ARGUMENTS
+  NETWORK  Network to use. One of kras, stage, testnet
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Print default Fluence network peer addresses
+
+EXAMPLES
+  $ fluence default peers
 ```
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
