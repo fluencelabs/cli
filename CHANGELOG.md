@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.44](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.43...fluence-cli-v0.2.44) (2023-02-20)
+
+
+### Bug Fixes
+
+* **blockchain:** change testnet ([#163](https://github.com/fluencelabs/fluence-cli/issues/163)) ([ba077d3](https://github.com/fluencelabs/fluence-cli/commit/ba077d32d416f68f3e38225ff546dd09c276fdd2))
+
 ## [0.2.43](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.42...fluence-cli-v0.2.43) (2023-02-20)
 
 
