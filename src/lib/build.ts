@@ -511,6 +511,10 @@ export const buildModules = async (
     rustModuleConfigs.map((moduleConfig) => dirname(moduleConfig.$getPath()))
   );
 
+  if (rustModuleConfigs.length === 0) {
+    return;
+  }
+
   await marineCli({
     args: ["build", ...rustModuleConfigs.flatMap(({ name }) => ["-p", name])],
     flags: { release: true },

@@ -32,7 +32,7 @@
     "check": "npm run build && npm run lint-fix && npm run circular",
     "circular": "madge --circular --extensions ts ./",
     "pre-commit": "exitzero npm run build && exitzero npm run lint-fix && cd docs/commands && oclif readme --no-aliases && git add README.md",
-    "clean": "shx rm -rf .fluence && shx rm -rf fluence-lock.yaml && shx rm -rf fluence.yaml && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
+    "clean": "shx rm -rf .fluence && shx rm -rf fluence-lock.yaml && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f",
     "compile-cli-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/cli.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
     "compile-files-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/files.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
