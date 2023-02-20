@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.43](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.42...fluence-cli-v0.2.43) (2023-02-20)
+
+
+### Features
+
+* add `fluence default peers` command [fixes DXJ-303] ([#160](https://github.com/fluencelabs/fluence-cli/issues/160)) ([16eba7f](https://github.com/fluencelabs/fluence-cli/commit/16eba7fb08327b9c53770090811dff39ca38357b))
+* add `fluence workers logs` command [fixes DXJ-297] ([#153](https://github.com/fluencelabs/fluence-cli/issues/153)) ([53585a2](https://github.com/fluencelabs/fluence-cli/commit/53585a2f999b13585f36bb83a5f77c05a6e52838))
+
+
+### Bug Fixes
+
+* don't print result of aqua call twice, check that workers have services and that peerIds is not an empty array when deploying workers, prettify error messages  [fixes DXJ-301] ([#161](https://github.com/fluencelabs/fluence-cli/issues/161)) ([afb6d75](https://github.com/fluencelabs/fluence-cli/commit/afb6d75f41eb04d99bf50b92a05093f3a0a8adea))
+* migrate to mumbai testnet ([#162](https://github.com/fluencelabs/fluence-cli/issues/162)) ([28f7ce2](https://github.com/fluencelabs/fluence-cli/commit/28f7ce29d2865f1e22151b7f270cbde1f0d4184f))
+
 ## [0.2.42](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.41...fluence-cli-v0.2.42) (2023-02-17)
 
 
