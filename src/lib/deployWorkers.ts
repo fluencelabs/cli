@@ -50,6 +50,9 @@ import {
 import { initMarineCli } from "./marineCli.js";
 import { projectRootDirPromise } from "./paths.js";
 
+export const parseWorkers = (workerNamesString: string) =>
+  workerNamesString.split(",").map((s) => s.trim());
+
 type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
@@ -68,7 +71,9 @@ export const prepareForDeploy = async ({
   ];
 
   const workersToHost =
-    workerNamesString?.split(",").map((s) => s.trim()) ?? workerNamesSet;
+    workerNamesString === undefined
+      ? workerNamesSet
+      : parseWorkers(workerNamesString);
 
   const workersFromWorkersConfig = Object.keys(workersConfig.workers);
 

@@ -19,7 +19,6 @@ import path from "node:path";
 
 import { appSchema } from "./lib/configs/project/app.js";
 import { deployedSchema } from "./lib/configs/project/deployed.js";
-import { deployedDealsSchema } from "./lib/configs/project/deployedDeals.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { fluenceLockSchema } from "./lib/configs/project/fluenceLock.js";
 import { hostsSchema } from "./lib/configs/project/hosts.js";
@@ -44,7 +43,6 @@ import {
   WORKERS_CONFIG_FILE_NAME,
   HOSTS_CONFIG_FILE_NAME,
   DEPLOYED_CONFIG_FILE_NAME,
-  DEPLOYED_DEALS_CONFIG_FILE_NAME,
 } from "./lib/const.js";
 import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
@@ -60,7 +58,6 @@ const schemas = Object.entries({
   [WORKERS_CONFIG_FILE_NAME]: workersSchema,
   [HOSTS_CONFIG_FILE_NAME]: hostsSchema,
   [DEPLOYED_CONFIG_FILE_NAME]: deployedSchema,
-  [DEPLOYED_DEALS_CONFIG_FILE_NAME]: deployedDealsSchema,
 });
 
 const main = async (): Promise<void> => {

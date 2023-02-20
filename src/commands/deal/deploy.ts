@@ -23,13 +23,13 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload } from "../../lib/compiled-aqua/installation-spell/config.js";
+import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
   initReadonlyDealsConfig,
   MIN_WORKERS,
   TARGET_WORKERS,
 } from "../../lib/configs/project/deals.js";
-import { initDeployedDealsConfig } from "../../lib/configs/project/deployedDeals.js";
+import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -130,33 +130,36 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       workersConfig,
     });
 
-    const uploadResult = await upload(fluencePeer, uploadArg);
-    const deployedDealsConfig = await initDeployedDealsConfig();
+    const uploadDeployResult = await upload_deploy(fluencePeer, uploadArg);
+    const deployedConfig = await initDeployedConfig();
 
     for (const { name: workerName } of [...uploadArg.workers]) {
-      const appCID = uploadResult.workers.find(
+      const uploadedWorker = uploadDeployResult.workers.find(
         (worker) => workerName === worker.name
-      )?.definition;
+      );
 
-      assert(appCID !== undefined);
-
+      assert(uploadedWorker !== undefined);
+      const { definition: appCID, installation_spells } = uploadedWorker;
       const deal = dealsConfig.deals.find((d) => d.workerName === workerName);
       assert(deal !== undefined);
       const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
 
-      const previouslyDeployedDealIndex = deployedDealsConfig.deals.findIndex(
-        (d) => d.workerName === workerName
+      const previouslyDeployedDealIndex = deployedConfig.workers.findIndex(
+        (d) => d.name === workerName
       );
 
       const maybePreviouslyDeployedDeal =
-        deployedDealsConfig.deals[previouslyDeployedDealIndex];
+        deployedConfig.workers[previouslyDeployedDealIndex];
 
       if (
         maybePreviouslyDeployedDeal !== undefined &&
         network === maybePreviouslyDeployedDeal.network &&
+        maybePreviouslyDeployedDeal.dealAddress !== undefined &&
         (await confirm({
           message: `There is a previously deployed deal for worker ${color.yellow(
             workerName
+          )} on network ${color.yellow(
+            network
           )}. Do you want to update this existing deal?`,
         }))
       ) {
@@ -172,14 +175,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         });
 
         maybePreviouslyDeployedDeal.timestamp = new Date().toISOString();
+        maybePreviouslyDeployedDeal.installation_spells = installation_spells;
 
-        deployedDealsConfig.deals.splice(
+        deployedConfig.workers.splice(
           previouslyDeployedDealIndex,
           1,
           maybePreviouslyDeployedDeal
         );
 
-        await deployedDealsConfig.$commit();
+        await deployedConfig.$commit();
 
         continue;
       }
@@ -196,15 +200,16 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         targetWorkers,
       });
 
-      deployedDealsConfig.deals.push({
-        workerName,
-        dealAddress,
+      deployedConfig.workers.push({
+        installation_spells,
+        definition: appCID,
+        name: workerName,
         timestamp: new Date().toISOString(),
-        workerCID: appCID,
+        dealAddress,
         network,
       });
 
-      await deployedDealsConfig.$commit();
+      await deployedConfig.$commit();
     }
   }
 }
