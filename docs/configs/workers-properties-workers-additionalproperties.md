@@ -10,7 +10,7 @@
 
 ## services
 
-An array of service names include in this worker. Service names must be listed in fluence.yaml
+An array of service names to include in this worker. Service names must be listed in fluence.yaml
 
 `services`
 

@@ -17,6 +17,8 @@
 /* eslint-disable no-process-exit */
 
 import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/ClientRequest/index.js";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
 
@@ -26,7 +28,17 @@ const handleError = (/** @type {unknown} */ error) => {
       ? error
       : new CLIError(`Error: ${String(error ?? "no error?")}`);
 
-  console.error(err);
+  if ("stack" in err) {
+    if (err.stack.startsWith("Error")) {
+      console.error(err.stack);
+    } else {
+      console.error(`${color.red("Error:")} ${err.stack}`);
+    }
+  } else if ("message" in err) {
+    console.error(`${color.red("Error:")}\n${err.message}`);
+  } else {
+    console.error(err);
+  }
 
   const exitCode =
     "oclif" in err && err.oclif?.exit !== undefined && err.oclif?.exit !== false

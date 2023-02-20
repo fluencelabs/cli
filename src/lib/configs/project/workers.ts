@@ -63,7 +63,7 @@ const configSchemaV0 = {
         description: "Worker config",
         properties: {
           services: {
-            description: `An array of service names include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
+            description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
             type: "array",
             items: { type: "string" },
           },

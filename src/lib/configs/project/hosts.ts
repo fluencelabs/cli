@@ -68,7 +68,7 @@ const configSchemaV0 = {
           },
           peerIds: {
             type: "array",
-            description: "a list of peer IDs to deploy on",
+            description: "An array of peer IDs to deploy on",
             items: { type: "string" },
           },
         },

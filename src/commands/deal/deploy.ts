@@ -37,6 +37,7 @@ import {
   PRIV_KEY_FLAG,
   DEALS_CONFIG_FILE_NAME,
   NETWORK_FLAG,
+  WORKERS_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
@@ -129,6 +130,25 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       fluenceConfig,
       workersConfig,
     });
+
+    const errorMessages = uploadArg.workers.reduce<Array<string>>(
+      (acc, { config: { services }, name }) => {
+        if (services.length === 0) {
+          acc.push(
+            `Worker ${color.yellow(
+              name
+            )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`
+          );
+        }
+
+        return acc;
+      },
+      []
+    );
+
+    if (errorMessages.length > 0) {
+      commandObj.error(errorMessages.join("\n"));
+    }
 
     const uploadDeployResult = await upload_deploy(fluencePeer, uploadArg);
     const deployedConfig = await initDeployedConfig();

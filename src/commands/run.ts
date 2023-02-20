@@ -313,8 +313,6 @@ export default class Run extends BaseCommand<typeof Run> {
       console.log(stringResult);
       return;
     }
-
-    this.log(`\n${color.yellow("Result:")}\n\n${stringResult}`);
   }
 }
 
