@@ -64,11 +64,11 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
     chainId: 31_337,
   },
   testnet: {
-    ethereumNodeUrl: "https://testnet.aurora.dev",
-    coreAddress: "0xFA835FE7774E2E57D8F46D1B37b5b3789557aa15",
-    dealFactoryAddress: "0x432FE883CfF46313aA2C35D2f0b5D9785E9eE711",
-    developerFaucetAddress: "0xdD67B18A7Ec33b785B99B145590E6Cb7Bee4814f",
-    chainId: 1_313_161_555,
+    ethereumNodeUrl: "https://polygon-testnet.public.blastapi.io",
+    coreAddress: "0xc301d2d67abB97919A670B8A0801667d42963adc",
+    dealFactoryAddress: "0x5858103A51dd9FF771e5744C43f821162aB8eb1f",
+    developerFaucetAddress: "0xdDFb0BC4652606880F121eB46AAeC900D548B108",
+    chainId: 80001,
   },
 };
 
