@@ -282,7 +282,7 @@ export const prepareForDeploy = async ({
     });
 
   return {
-    workers: workers,
+    workers,
     installation_script: spellInstallAirScript,
     installation_trigger: {
       clock: { start_sec: 1676293670, end_sec: 0, period_sec: 600 },
