@@ -71,6 +71,10 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
     chainId: 80001,
   },
 };
+export const DEAL_RPC_CONFIG = {
+  31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
+  80001: DEAL_CONFIG["testnet"].ethereumNodeUrl,
+};
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
