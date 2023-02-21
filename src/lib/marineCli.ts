@@ -28,7 +28,7 @@ export type MarineCliInput =
       flags?: never;
     }
   | {
-      args: ["build"];
+      args: ["build", ...("-p" | string)[]];
       flags: Flags<"release">;
     };
 

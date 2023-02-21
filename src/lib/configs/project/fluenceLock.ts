@@ -20,7 +20,7 @@ import {
   FLUENCE_LOCK_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
-import { ensureFluenceDir, projectRootDirPromise } from "../../paths.js";
+import { ensureFluenceDir, projectRootDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -79,7 +79,7 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: FLUENCE_LOCK_CONFIG_FILE_NAME,
-  getConfigDirPath: (): Promise<string> => projectRootDirPromise,
+  getConfigDirPath: () => projectRootDir,
   getSchemaDirPath: ensureFluenceDir,
 };
 

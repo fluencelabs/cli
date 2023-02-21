@@ -29,7 +29,7 @@ import {
 } from "../../const.js";
 import { local } from "../../localNodes.js";
 import { FluenceEnv, getPeerId, getRandomRelayId } from "../../multiaddres.js";
-import { ensureFluenceDir, projectRootDirPromise } from "../../paths.js";
+import { ensureFluenceDir, projectRootDir } from "../../paths.js";
 import { FLUENCE_ENV } from "../../setupEnvironment.js";
 import {
   getConfigInitFunction,
@@ -195,7 +195,7 @@ export const getInitConfigOptions = (
   latestSchema: configSchemaV0,
   migrations,
   name: HOSTS_CONFIG_FILE_NAME,
-  getConfigDirPath: (): Promise<string> => projectRootDirPromise,
+  getConfigDirPath: () => projectRootDir,
   getSchemaDirPath: ensureFluenceDir,
   validate: getValidate(workersConfig),
 });

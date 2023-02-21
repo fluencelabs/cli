@@ -16,7 +16,7 @@
 
 import crypto from "node:crypto";
 import fsPromises from "node:fs/promises";
-import path from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -28,7 +28,11 @@ const fetch = nodeFetch.default;
 import { commandObj } from "../commandObj.js";
 import { MODULE_TYPE_RUST } from "../configs/project/module.js";
 import { WASM_EXT } from "../const.js";
-import { ensureFluenceModulesDir, ensureFluenceServicesDir } from "../paths.js";
+import {
+  ensureFluenceModulesDir,
+  ensureFluenceServicesDir,
+  projectRootDir,
+} from "../paths.js";
 import { input } from "../prompt.js";
 
 export const getHashOfString = (str: string): Promise<string> => {
@@ -105,7 +109,7 @@ const downloadAndDecompress = async (
   const prefix =
     lastPortionOfPath === "" ? "" : `${filenamify(lastPortionOfPath)}_`;
 
-  const dirPath = path.join(pathStart, `${prefix}${hash}`);
+  const dirPath = join(pathStart, `${prefix}${hash}`);
 
   try {
     await fsPromises.access(dirPath);
@@ -113,7 +117,7 @@ const downloadAndDecompress = async (
   } catch {}
 
   await fsPromises.mkdir(dirPath, { recursive: true });
-  const archivePath = path.join(dirPath, ARCHIVE_FILE);
+  const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
   await decompress(archivePath, dirPath);
   await fsPromises.unlink(archivePath);
@@ -135,37 +139,40 @@ export const getModuleWasmPath = (config: {
   $getPath: () => string;
 }): string => {
   const fileName = `${config.name}.${WASM_EXT}`;
-  const configDirName = path.dirname(config.$getPath());
+  const configDirName = dirname(config.$getPath());
   return config.type === MODULE_TYPE_RUST
-    ? path.resolve(configDirName, "target", "wasm32-wasi", "release", fileName)
-    : path.resolve(configDirName, fileName);
+    ? resolve(projectRootDir, "target", "wasm32-wasi", "release", fileName)
+    : resolve(configDirName, fileName);
 };
 
-export const getModuleUrlOrAbsolutePath = (
-  get: string,
-  absolutePath = process.cwd()
+export const getUrlOrAbsolutePath = (
+  pathOrUrl: string,
+  absolutePath: string
 ): string => {
-  if (isUrl(get)) {
-    return get;
+  if (isUrl(pathOrUrl)) {
+    return pathOrUrl;
   }
 
-  if (path.isAbsolute(get)) {
-    return get;
+  if (isAbsolute(pathOrUrl)) {
+    return pathOrUrl;
   }
 
-  return path.resolve(absolutePath, get);
+  return resolve(absolutePath, pathOrUrl);
 };
 
-export const getModuleAbsolutePath = async (
-  modulePathOrUrl: string,
-  absolutePath?: string | undefined
-): Promise<string> => {
-  const moduleUrlOrAbsolutePath = getModuleUrlOrAbsolutePath(
-    modulePathOrUrl,
-    absolutePath
-  );
+const getDirAbsolutePath =
+  (downloadFunction: (get: string) => Promise<string>) =>
+  async (pathOrUrl: string, absolutePath = projectRootDir): Promise<string> => {
+    if (isUrl(pathOrUrl)) {
+      return downloadFunction(pathOrUrl);
+    }
 
-  return isUrl(moduleUrlOrAbsolutePath)
-    ? downloadModule(moduleUrlOrAbsolutePath)
-    : Promise.resolve(moduleUrlOrAbsolutePath);
-};
+    if (isAbsolute(pathOrUrl)) {
+      return pathOrUrl;
+    }
+
+    return resolve(absolutePath, pathOrUrl);
+  };
+
+export const getModuleDirAbsolutePath = getDirAbsolutePath(downloadModule);
+export const getServiceDirAbsolutePath = getDirAbsolutePath(downloadService);

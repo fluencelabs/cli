@@ -37,7 +37,7 @@ import { NETWORKS, Relays } from "../../multiaddres.js";
 import {
   ensureFluenceDir,
   ensureSrcAquaMainPath,
-  projectRootDirPromise,
+  projectRootDir,
 } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -367,7 +367,7 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
   }
 
   const srcMainAquaPathRelative = path.relative(
-    await projectRootDirPromise,
+    projectRootDir,
     srcMainAquaPath
   );
 
@@ -388,7 +388,7 @@ const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 
 const migrations: Migrations<Config> = [
-  async (config: Config): Promise<ConfigV1> => {
+  (config: Config): ConfigV1 => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
         `Migration error. Errors: ${jsonStringify(
@@ -396,8 +396,6 @@ const migrations: Migrations<Config> = [
         )}`
       );
     }
-
-    const projectRootDir = await projectRootDirPromise;
 
     const services = config.services.reduce<Record<string, ServiceV1>>(
       (acc, { name, count = 1 }, i): Record<string, ServiceV1> => ({
@@ -487,7 +485,7 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV2,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
-  getConfigDirPath: (): Promise<string> => projectRootDirPromise,
+  getConfigDirPath: () => projectRootDir,
   getSchemaDirPath: ensureFluenceDir,
   validate,
 };

@@ -20,6 +20,8 @@ src/ts
 src/js
 schemas
 .env
+Cargo.lock
+Cargo.toml
 
 # recommended by Fluence
 .idea

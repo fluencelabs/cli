@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
-import path from "node:path";
+import { access, readdir } from "node:fs/promises";
+import { resolve, dirname, join } from "node:path";
 
 export const recursivelyFindFile = async (
   fileName: string,
@@ -25,14 +25,14 @@ export const recursivelyFindFile = async (
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const filePath = path.join(currentDirPath, fileName);
+    const filePath = join(currentDirPath, fileName);
 
     try {
       // eslint-disable-next-line no-await-in-loop
-      await fsPromises.access(filePath);
+      await access(filePath);
       return filePath;
     } catch {
-      const parentDir = path.dirname(currentDirPath);
+      const parentDir = dirname(currentDirPath);
 
       if (parentDir === currentDirPath) {
         return null;
@@ -42,3 +42,27 @@ export const recursivelyFindFile = async (
     }
   }
 };
+
+const recursivelyGetDirFiles = async (
+  dirPath: string
+): Promise<Array<string>> =>
+  (
+    await Promise.all(
+      (
+        await readdir(dirPath, { withFileTypes: true })
+      ).map((entry) => {
+        const fileOrDirPath = resolve(dirPath, entry.name);
+        return entry.isDirectory()
+          ? recursivelyGetDirFiles(fileOrDirPath)
+          : fileOrDirPath;
+      })
+    )
+  ).flat();
+
+export const recursivelyFindFileInADir = async (
+  dirPath: string,
+  fullFileName: string
+) =>
+  (await recursivelyGetDirFiles(dirPath)).filter((filePath) =>
+    filePath.endsWith(fullFileName)
+  );

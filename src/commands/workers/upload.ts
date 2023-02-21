@@ -116,28 +116,25 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
       workersConfig,
     });
 
-    const errorMessages = uploadArg.workers.reduce<Array<string>>(
-      (acc, { config: { services }, hosts, name }) => {
+    const errorMessages = uploadArg.workers
+      .map<string | null>(({ config: { services }, hosts, name }) => {
         if (services.length === 0) {
-          acc.push(
-            `Worker ${color.yellow(
-              name
-            )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`
-          );
+          return `Worker ${color.yellow(
+            name
+          )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`;
         }
 
         if (hosts.length === 0) {
-          acc.push(
-            `Worker ${color.yellow(
-              name
-            )} has no peerIds listed in ${HOSTS_CONFIG_FILE_NAME}`
-          );
+          return `Worker ${color.yellow(
+            name
+          )} has no peerIds listed in ${HOSTS_CONFIG_FILE_NAME}`;
         }
 
-        return acc;
-      },
-      []
-    );
+        return null;
+      })
+      .filter<string>(
+        (errorMessage): errorMessage is string => errorMessage !== null
+      );
 
     if (errorMessages.length > 0) {
       commandObj.error(errorMessages.join("\n"));

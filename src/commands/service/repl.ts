@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { spawn } from "node:child_process";
 import fsPromises from "node:fs/promises";
-import path from "node:path";
 
 import stringifyToTOML from "@iarna/toml/stringify.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args, Command } from "@oclif/core";
 
-import { buildModule } from "../../lib/build.js";
+import { resolveSingleServiceModuleConfigsAndBuild } from "../../lib/build.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
+import type { ModuleConfigReadonly } from "../../lib/configs/project/module.js";
 import {
-  FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
-  ModuleV0 as ServiceModule,
+  ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
@@ -42,14 +40,16 @@ import {
 } from "../../lib/const.js";
 import { haltCountly } from "../../lib/countly.js";
 import {
-  downloadService,
   getModuleWasmPath,
-  isUrl,
+  getServiceDirAbsolutePath,
 } from "../../lib/helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { initCli } from "../../lib/lifecyle.js";
-import { initMarineCli, MarineCLI } from "../../lib/marineCli.js";
-import { ensureFluenceTmpConfigTomlPath } from "../../lib/paths.js";
+import { initMarineCli } from "../../lib/marineCli.js";
+import {
+  ensureFluenceTmpConfigTomlPath,
+  projectRootDir,
+} from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 import { ensureCargoDependency } from "../../lib/rust.js";
 
@@ -81,12 +81,7 @@ export default class REPL extends Command {
         )}, path to a service or url to .tar.gz archive`,
       }));
 
-    startSpinner("Making sure service and modules are downloaded and built");
-
-    const { serviceModules, serviceDirPath } = await ensureServiceConfig({
-      nameOrPathOrUrl,
-    });
-
+    const serviceConfig = await ensureServiceConfig(nameOrPathOrUrl);
     const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const marineCli = await initMarineCli(
@@ -94,11 +89,14 @@ export default class REPL extends Command {
       maybeFluenceLockConfig
     );
 
-    const moduleConfigs = await ensureModuleConfigs({
-      serviceModules,
-      marineCli,
-      serviceDirPath,
-    });
+    startSpinner("Making sure service and modules are downloaded and built");
+
+    const { moduleConfigs, facadeModuleConfig } =
+      await resolveSingleServiceModuleConfigsAndBuild(
+        serviceConfig,
+        maybeFluenceConfig,
+        marineCli
+      );
 
     stopSpinner();
 
@@ -106,15 +104,8 @@ export default class REPL extends Command {
 
     await fsPromises.writeFile(
       fluenceTmpConfigTomlPath,
-      stringifyToTOML({ module: moduleConfigs }),
+      stringifyToTOML({ module: ensureModuleConfigsForToml(moduleConfigs) }),
       FS_OPTIONS
-    );
-
-    const facadeModuleConfig = moduleConfigs.at(-1);
-
-    assert(
-      facadeModuleConfig !== undefined,
-      "Unreachable: no modules in the service"
     );
 
     if (!isInteractive) {
@@ -150,30 +141,18 @@ ${color.yellow(
   }
 }
 
-type EnsureServiceConfigArg = {
-  nameOrPathOrUrl: string;
-};
-
-const ensureServiceConfig = async ({
-  nameOrPathOrUrl,
-}: EnsureServiceConfigArg): Promise<{
-  serviceModules: Array<ServiceModule>;
-  serviceDirPath: string;
-}> => {
+const ensureServiceConfig = async (
+  nameOrPathOrUrl: string
+): Promise<ServiceConfigReadonly> => {
   const fluenceConfig = await initReadonlyFluenceConfig();
 
   const get =
     fluenceConfig?.services?.[nameOrPathOrUrl]?.get ?? nameOrPathOrUrl;
 
-  const serviceDirPath = isUrl(get)
-    ? await downloadService(get)
-    : path.resolve(get);
+  const serviceDirPath = await getServiceDirAbsolutePath(get, projectRootDir);
+  const readonlyServiceConfig = await initReadonlyServiceConfig(serviceDirPath);
 
-  const readonlyServiceConfig = (
-    await initReadonlyServiceConfig(serviceDirPath)
-  )?.modules;
-
-  if (readonlyServiceConfig === undefined) {
+  if (readonlyServiceConfig === null) {
     stopSpinner(color.red("error"));
     return commandObj.error(
       `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
@@ -182,13 +161,7 @@ const ensureServiceConfig = async ({
     );
   }
 
-  const { [FACADE_MODULE_NAME]: facade, ...otherModules } =
-    readonlyServiceConfig;
-
-  return {
-    serviceDirPath,
-    serviceModules: [...Object.values(otherModules), facade],
-  };
+  return readonlyServiceConfig;
 };
 
 /* eslint-disable camelcase */
@@ -206,86 +179,64 @@ type TomlModuleConfig = {
   mounted_binaries?: Record<string, string>;
 };
 
-type EnsureModuleConfigsArg = {
-  serviceModules: Array<ServiceModule>;
-  marineCli: MarineCLI;
-  serviceDirPath: string;
-};
+const ensureModuleConfigsForToml = (
+  moduleConfigs: Array<ModuleConfigReadonly>
+) =>
+  moduleConfigs.map((moduleConfig) => {
+    const {
+      name,
+      envs,
+      loggerEnabled,
+      volumes,
+      preopenedFiles,
+      mountedBinaries,
+      maxHeapSize,
+      loggingMask,
+    } = moduleConfig;
 
-const ensureModuleConfigs = ({
-  serviceModules,
-  marineCli,
-  serviceDirPath,
-}: EnsureModuleConfigsArg): Promise<Array<TomlModuleConfig>> =>
-  Promise.all(
-    serviceModules.map(
-      ({ get, ...overrides }): Promise<TomlModuleConfig> =>
-        (async (): Promise<TomlModuleConfig> => {
-          const overriddenModuleConfig = await buildModule({
-            get,
-            marineCli,
-            serviceDirPath,
-            overrides,
-          });
+    const load_from = getModuleWasmPath(moduleConfig);
 
-          const {
-            name,
-            envs,
-            loggerEnabled,
-            volumes,
-            preopenedFiles,
-            mountedBinaries,
-            maxHeapSize,
-            loggingMask,
-          } = overriddenModuleConfig;
+    const tomlModuleConfig: TomlModuleConfig = {
+      name,
+      load_from,
+    };
 
-          const load_from = getModuleWasmPath(overriddenModuleConfig);
+    if (loggerEnabled === true) {
+      tomlModuleConfig.logger_enabled = true;
+    }
 
-          const tomlModuleConfig: TomlModuleConfig = {
-            name,
-            load_from,
-          };
+    if (typeof loggingMask === "number") {
+      tomlModuleConfig.logging_mask = loggingMask;
+    }
 
-          if (loggerEnabled === true) {
-            tomlModuleConfig.logger_enabled = true;
-          }
+    if (typeof maxHeapSize === "string") {
+      tomlModuleConfig.max_heap_size = maxHeapSize;
+    }
 
-          if (typeof loggingMask === "number") {
-            tomlModuleConfig.logging_mask = loggingMask;
-          }
+    if (volumes !== undefined) {
+      tomlModuleConfig.wasi = {
+        mapped_dirs: volumes,
+        preopened_files: [...new Set(Object.values(volumes))],
+      };
+    }
 
-          if (typeof maxHeapSize === "string") {
-            tomlModuleConfig.max_heap_size = maxHeapSize;
-          }
+    if (preopenedFiles !== undefined) {
+      tomlModuleConfig.wasi = {
+        preopened_files: [
+          ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
+        ],
+      };
+    }
 
-          if (volumes !== undefined) {
-            tomlModuleConfig.wasi = {
-              mapped_dirs: volumes,
-              preopened_files: [...new Set(Object.values(volumes))],
-            };
-          }
+    if (envs !== undefined) {
+      tomlModuleConfig.wasi = { envs };
+    }
 
-          if (preopenedFiles !== undefined) {
-            tomlModuleConfig.wasi = {
-              preopened_files: [
-                ...new Set([
-                  ...Object.values(volumes ?? {}),
-                  ...preopenedFiles,
-                ]),
-              ],
-            };
-          }
+    if (mountedBinaries !== undefined) {
+      tomlModuleConfig.mounted_binaries = mountedBinaries;
+    }
 
-          if (envs !== undefined) {
-            tomlModuleConfig.wasi = { envs };
-          }
+    return tomlModuleConfig;
+  });
 
-          if (mountedBinaries !== undefined) {
-            tomlModuleConfig.mounted_binaries = mountedBinaries;
-          }
-
-          return tomlModuleConfig;
-        })()
-    )
-  );
 /* eslint-enable camelcase */

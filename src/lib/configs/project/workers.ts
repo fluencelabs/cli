@@ -24,7 +24,7 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
 } from "../../const.js";
-import { ensureFluenceDir, projectRootDirPromise } from "../../paths.js";
+import { ensureFluenceDir, projectRootDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitializedConfig,
@@ -141,7 +141,7 @@ export const getInitConfigOptions = (
   latestSchema: configSchemaV0,
   migrations,
   name: WORKERS_CONFIG_FILE_NAME,
-  getConfigDirPath: (): Promise<string> => projectRootDirPromise,
+  getConfigDirPath: () => projectRootDir,
   getSchemaDirPath: ensureFluenceDir,
   validate: getValidate(fluenceConfig),
 });

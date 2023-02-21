@@ -31,7 +31,7 @@ import {
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import {
-  getModuleAbsolutePath,
+  getModuleDirAbsolutePath,
   isUrl,
 } from "../../lib/helpers/downloadFile.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
@@ -72,7 +72,7 @@ export default class Add extends BaseCommand<typeof Add> {
         message: "Enter path to a module or url to .tar.gz archive",
       }));
 
-    const modulePath = await getModuleAbsolutePath(modulePathOrUrl);
+    const modulePath = await getModuleDirAbsolutePath(modulePathOrUrl);
     const moduleConfig = await initReadonlyModuleConfig(modulePath);
 
     if (moduleConfig === null) {

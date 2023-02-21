@@ -40,6 +40,11 @@ import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
+import {
+  projectRootDir,
+  recursivelyFindProjectRootDir,
+  setProjectRootDir,
+} from "./paths.js";
 import { confirm } from "./prompt.js";
 
 const ensureUserConfig = async (): Promise<UserConfig> => {
@@ -115,6 +120,7 @@ export async function initCli<
     maybeFluenceConfig?: FluenceConfig | null;
   }
 > {
+  setProjectRootDir(await recursivelyFindProjectRootDir(projectRootDir));
   setCommandObjAndIsInteractive(commandObjFromArgs, getIsInteractive(flags));
 
   if (platform.version === undefined) {

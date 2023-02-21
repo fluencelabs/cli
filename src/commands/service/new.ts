@@ -27,7 +27,6 @@ import { isInteractive } from "../../lib/commandObj.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { initWorkersConfig } from "../../lib/configs/project/workers.js";
-import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
   AQUA_NAME_REQUIREMENTS,
@@ -85,15 +84,7 @@ export default class New extends BaseCommand<typeof New> {
       )}`
     );
 
-    if (
-      maybeFluenceConfig !== null &&
-      (!isInteractive ||
-        (await confirm({
-          message: `Do you want add ${color.yellow(
-            serviceName
-          )} to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}?`,
-        })))
-    ) {
+    if (maybeFluenceConfig !== null) {
       const maybeFluenceLockConfig = await initFluenceLockConfig();
 
       const marineCli = await initMarineCli(

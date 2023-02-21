@@ -22,30 +22,44 @@ const color = oclifColor.default;
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
 
-const handleError = (/** @type {unknown} */ error) => {
-  const err =
-    error instanceof Error
-      ? error
-      : new CLIError(`Error: ${String(error ?? "no error?")}`);
+const printError = (/** @type {Error | CLIError} */ error) => {
+  const hasStackTrace = "stack" in error;
 
-  if ("stack" in err) {
-    if (err.stack.startsWith("Error")) {
-      console.error(err.stack);
-    } else {
-      console.error(`${color.red("Error:")} ${err.stack}`);
-    }
-  } else if ("message" in err) {
-    console.error(`${color.red("Error:")}\n${err.message}`);
-  } else {
-    console.error(err);
+  if (hasStackTrace && error.stack.startsWith("Error")) {
+    return console.error(error.stack);
   }
 
-  const exitCode =
-    "oclif" in err && err.oclif?.exit !== undefined && err.oclif?.exit !== false
-      ? err.oclif?.exit
-      : 1;
+  if (hasStackTrace) {
+    return console.error(`${color.red("Error:")} ${error.stack}`);
+  }
 
-  process.exit(exitCode);
+  if ("message" in error) {
+    return console.error(`${color.red("Error:")}\n${error.message}`);
+  }
+
+  return console.error(error);
+};
+
+const resolveExitCode = (/** @type {Error | CLIError} */ error) => {
+  if (
+    "oclif" in error &&
+    error.oclif?.exit !== undefined &&
+    error.oclif?.exit !== false
+  ) {
+    return error.oclif.exit;
+  }
+
+  return 1;
+};
+
+const handleError = (/** @type {unknown} */ unknownError) => {
+  const error =
+    unknownError instanceof Error
+      ? unknownError
+      : new CLIError(`Error: ${String(unknownError ?? "no error?")}`);
+
+  printError(error);
+  process.exit(resolveExitCode(error));
 };
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
