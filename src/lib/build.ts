@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { dirname, relative } from "node:path";
 
 import { parse } from "@iarna/toml";
@@ -411,13 +411,23 @@ members = []
     );
   }
 
+  const oldCargoWorkspaceMembers = parsedConfig?.workspace?.members ?? [];
+
+  const cargoWorkspaceMembersExistance = await Promise.allSettled(
+    oldCargoWorkspaceMembers.map((member) => access(member))
+  );
+
+  const existingCargoWorkspaceMembers = oldCargoWorkspaceMembers.filter(
+    (_, i) => cargoWorkspaceMembersExistance[i]?.status === "fulfilled"
+  );
+
   const newConfig = {
     ...parsedConfig,
     workspace: {
       ...(parsedConfig?.workspace ?? {}),
       members: [
         ...new Set([
-          ...(parsedConfig?.workspace?.members ?? []),
+          ...existingCargoWorkspaceMembers,
           ...moduleAbsolutePaths.map((moduleAbsolutePath) =>
             relative(projectRootDir, moduleAbsolutePath)
           ),
