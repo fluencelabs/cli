@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.46](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.45...fluence-cli-v0.2.46) (2023-02-21)
+
+
+### Bug Fixes
+
+* **blockchain:** fix chainId ([#167](https://github.com/fluencelabs/fluence-cli/issues/167)) ([21bc546](https://github.com/fluencelabs/fluence-cli/commit/21bc5465a97695f0636b69e072522cabfdff78ee))
+* fix chainId ([21bc546](https://github.com/fluencelabs/fluence-cli/commit/21bc5465a97695f0636b69e072522cabfdff78ee))
+
 ## [0.2.45](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.44...fluence-cli-v0.2.45) (2023-02-21)
 
 
