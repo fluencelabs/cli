@@ -14,36 +14,27 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-import path from "node:path";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import { Args, Flags } from "@oclif/core";
 
-import color from "@oclif/color";
-import { Flags } from "@oclif/core";
-
-import { BaseCommand } from "../../baseCommand";
-import { addService } from "../../lib/addService";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock";
-import { initReadonlyModuleConfig } from "../../lib/configs/project/module";
-import {
-  FACADE_MODULE_NAME,
-  initReadonlyServiceConfig,
-} from "../../lib/configs/project/service";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { addService } from "../../lib/addService.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
+import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
+import { initWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
-  NAME_FLAG_NAME,
   SERVICE_CONFIG_FILE_NAME,
-} from "../../lib/const";
+} from "../../lib/const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
-  downloadModule,
   downloadService,
-  getModuleWasmPath,
   isUrl,
-} from "../../lib/helpers/downloadFile";
-import { generateServiceInterface } from "../../lib/helpers/generateServiceInterface";
-import { initCli } from "../../lib/lifecyle";
-import { initMarineCli } from "../../lib/marineCli";
-import { input } from "../../lib/prompt";
+} from "../../lib/helpers/downloadFile.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { initMarineCli } from "../../lib/marineCli.js";
+import { input } from "../../lib/prompt.js";
 
 const PATH_OR_URL = "PATH | URL";
 
@@ -51,32 +42,33 @@ export default class Add extends BaseCommand<typeof Add> {
   static override description = `Add service to ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    [NAME_FLAG_NAME]: Flags.string({
+    ...baseFlags,
+    name: Flags.string({
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
   };
-  static override args = [
-    {
-      name: PATH_OR_URL,
+  static override args = {
+    [PATH_OR_URL]: Args.string({
       description: "Path to a service or url to .tar.gz archive",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, commandObj, fluenceConfig } =
-      await initCli(this, await this.parse(Add), true);
+    const { args, flags, fluenceConfig } = await initCli(
+      this,
+      await this.parse(Add),
+      true
+    );
 
-    const servicePathOrUrl: unknown =
+    const servicePathOrUrl =
       args[PATH_OR_URL] ??
-      (await input({ isInteractive, message: "Enter service path or url" }));
+      (await input({ message: "Enter service path or url" }));
 
-    assert(typeof servicePathOrUrl === "string");
-
-    const servicePath = isUrl(servicePathOrUrl)
+    const serviceDirPath = isUrl(servicePathOrUrl)
       ? await downloadService(servicePathOrUrl)
       : servicePathOrUrl;
 
-    const serviceConfig = await initReadonlyServiceConfig(servicePath, this);
+    const serviceConfig = await initReadonlyServiceConfig(serviceDirPath);
 
     if (serviceConfig === null) {
       this.error(
@@ -86,41 +78,22 @@ export default class Add extends BaseCommand<typeof Add> {
       );
     }
 
-    const serviceName = await addService({
-      commandObj,
-      serviceName: flags[NAME_FLAG_NAME] ?? serviceConfig.name,
-      pathOrUrl: servicePathOrUrl,
-      isInteractive,
-      fluenceConfig,
-    });
-
-    const facadeModuleGet = serviceConfig.modules[FACADE_MODULE_NAME].get;
-
-    const facadeModulePath = isUrl(facadeModuleGet)
-      ? await downloadModule(facadeModuleGet)
-      : path.resolve(servicePath, facadeModuleGet);
-
-    const facadeReadonlyConfig = await initReadonlyModuleConfig(
-      facadeModulePath,
-      this
-    );
-
-    if (facadeReadonlyConfig === null) {
-      this.error(`Facade module not found at ${facadeModulePath}`);
-    }
-
-    const maybeFluenceLockConfig = await initFluenceLockConfig(this);
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const marineCli = await initMarineCli(
-      this,
       fluenceConfig,
       maybeFluenceLockConfig
     );
 
-    await generateServiceInterface({
-      pathToFacadeWasm: getModuleWasmPath(facadeReadonlyConfig),
+    const workersConfig = await initWorkersConfig(fluenceConfig);
+
+    await addService({
+      serviceName: flags.name ?? serviceConfig.name,
+      pathOrUrl: servicePathOrUrl,
+      fluenceConfig,
+      workersConfig,
       marineCli,
-      serviceName,
+      serviceConfig,
     });
   }
 }

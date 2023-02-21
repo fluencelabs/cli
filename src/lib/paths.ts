@@ -18,6 +18,7 @@ import fsPromises from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import { commandObj } from "./commandObj.js";
 import {
   APP_JS_FILE_NAME,
   APP_SERVICE_JSON_FILE_NAME,
@@ -25,7 +26,6 @@ import {
   AQUA_DIR_NAME,
   AQUA_SERVICES_DIR_NAME,
   CARGO_DIR_NAME,
-  CommandObj,
   CONFIG_TOML,
   COUNTLY_DIR_NAME,
   DEFAULT_SRC_AQUA_FILE_NAME,
@@ -46,8 +46,9 @@ import {
   TMP_DIR_NAME,
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
-} from "./const";
-import { recursivelyFindFile } from "./helpers/recursivelyFindFile";
+} from "./const.js";
+import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
+import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
   try {
@@ -65,63 +66,51 @@ export const ensureDir = async (dirPath: string): Promise<string> => {
 
 // User .fluence paths:
 
-export const ensureUserFluenceDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  commandObj.config.windows
-    ? ensureDir(commandObj.config.configDir)
-    : ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
+export const ensureUserFluenceDir = (): Promise<string> => {
+  const globalFluenceDirPathFromEnv = process.env[FLUENCE_USER_DIR];
 
-export const getUserCountlyDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  path.join(
-    await ensureUserFluenceDir(commandObj),
-    COUNTLY_DIR_NAME,
-    COUNTLY_DIR_NAME
-  );
+  if (typeof globalFluenceDirPathFromEnv === "string") {
+    return ensureDir(globalFluenceDirPathFromEnv);
+  }
 
-export const ensureUserFluenceTmpNpmDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
+  if (commandObj.config.windows) {
+    return ensureDir(commandObj.config.configDir);
+  }
+
+  return ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
+};
+
+export const getUserCountlyDir = async (): Promise<string> =>
+  path.join(await ensureUserFluenceDir(), COUNTLY_DIR_NAME, COUNTLY_DIR_NAME);
+
+export const ensureUserFluenceTmpNpmDir = async (): Promise<string> =>
   ensureDir(
-    path.join(
-      await ensureUserFluenceDir(commandObj),
-      TMP_DIR_NAME,
-      NPM_DIR_NAME
-    )
+    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, NPM_DIR_NAME)
   );
 
-export const ensureUserFluenceNpmDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  ensureDir(path.join(await ensureUserFluenceDir(commandObj), NPM_DIR_NAME));
+export const ensureUserFluenceNpmDir = async (): Promise<string> =>
+  ensureDir(path.join(await ensureUserFluenceDir(), NPM_DIR_NAME));
 
-export const ensureUserFluenceTmpCargoDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
+export const ensureUserFluenceTmpCargoDir = async (): Promise<string> =>
   ensureDir(
-    path.join(
-      await ensureUserFluenceDir(commandObj),
-      TMP_DIR_NAME,
-      CARGO_DIR_NAME
-    )
+    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, CARGO_DIR_NAME)
   );
 
-export const ensureUserFluenceCargoDir = async (
-  commandObj: CommandObj
-): Promise<string> =>
-  ensureDir(path.join(await ensureUserFluenceDir(commandObj), CARGO_DIR_NAME));
+export const ensureUserFluenceCargoDir = async (): Promise<string> =>
+  ensureDir(path.join(await ensureUserFluenceDir(), CARGO_DIR_NAME));
 
 // Project paths:
 
 // cwd is cached in order for paths to be correct even if cwd changes during the
 // execution (e.g. Marince CLI has to change cwd in order to work correctly)
 const initialCwd = process.cwd();
-export let projectRootDirPromise = (async (): Promise<string> => {
+
+export const recursivelyFindProjectRootDir = async (
+  initialPath: string
+): Promise<string> => {
   const fluenceConfigPath = await recursivelyFindFile(
     FLUENCE_CONFIG_FILE_NAME,
-    initialCwd
+    initialPath
   );
 
   if (fluenceConfigPath === null) {
@@ -130,7 +119,11 @@ export let projectRootDirPromise = (async (): Promise<string> => {
 
   const newProjectRootDir = path.dirname(fluenceConfigPath);
   return newProjectRootDir;
-})().catch((error): never => {
+};
+
+export let projectRootDirPromise = recursivelyFindProjectRootDir(
+  initialCwd
+).catch((error): never => {
   throw error;
 });
 

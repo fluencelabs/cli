@@ -14,35 +14,49 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import assert from "node:assert";
+import path from "node:path";
 
-import type { FluenceConfig } from "./configs/project/fluence";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+
+import { buildModule } from "./build.js";
+import { commandObj, isInteractive } from "./commandObj.js";
+import type { FluenceConfig } from "./configs/project/fluence.js";
 import {
-  CommandObj,
-  DEFAULT_DEPLOY_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
-} from "./const";
+  FACADE_MODULE_NAME,
+  ServiceConfigReadonly,
+} from "./configs/project/service.js";
+import type { WorkersConfig } from "./configs/project/workers.js";
+import { DEFAULT_WORKER_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
+  getModuleWasmPath,
   validateAquaName,
-} from "./helpers/downloadFile";
-import { input } from "./prompt";
+} from "./helpers/downloadFile.js";
+import { generateServiceInterface } from "./helpers/generateServiceInterface.js";
+import type { MarineCLI } from "./marineCli.js";
+import { confirm, input } from "./prompt.js";
 
 type AddServiceArg = {
-  commandObj: CommandObj;
   serviceName: string;
   pathOrUrl: string;
-  isInteractive: boolean;
   fluenceConfig: FluenceConfig;
+  serviceConfig: ServiceConfigReadonly;
+  marineCli: MarineCLI;
+  workersConfig: WorkersConfig;
 };
 
 export const addService = async ({
-  commandObj,
-  serviceName,
+  serviceName: serviceNameFromArgs,
   pathOrUrl,
-  isInteractive,
   fluenceConfig,
+  serviceConfig,
+  marineCli,
+  workersConfig,
 }: AddServiceArg): Promise<string> => {
+  let serviceName = serviceNameFromArgs;
+
   if (fluenceConfig.services === undefined) {
     fluenceConfig.services = {};
   }
@@ -62,14 +76,12 @@ export const addService = async ({
     );
   };
 
-  let validServiceName = serviceName;
-  const serviceNameValidity = validateServiceName(validServiceName);
+  const serviceNameValidity = validateServiceName(serviceName);
 
   if (serviceNameValidity !== true) {
     commandObj.warn(serviceNameValidity);
 
-    validServiceName = await input({
-      isInteractive,
+    serviceName = await input({
       message: `Enter another name for the service (${AQUA_NAME_REQUIREMENTS})`,
       validate: validateServiceName,
     });
@@ -77,15 +89,40 @@ export const addService = async ({
 
   fluenceConfig.services = {
     ...fluenceConfig.services,
-    [validServiceName]: {
+    [serviceName]: {
       get: pathOrUrl,
-      deploy: [
-        {
-          deployId: DEFAULT_DEPLOY_NAME,
-        },
-      ],
     },
   };
+
+  const moduleConfigs = await Promise.all(
+    Object.entries(serviceConfig.modules).map(([name, { get }]) =>
+      (async () => {
+        const moduleConfig = await buildModule({
+          get,
+          marineCli,
+          serviceDirPath: path.dirname(serviceConfig.$getPath()),
+        });
+
+        return [name, moduleConfig] as const;
+      })()
+    )
+  );
+
+  const maybeFacadeReadonlyConfig = moduleConfigs.find(
+    ([name]) => name === FACADE_MODULE_NAME
+  )?.[1];
+
+  if (maybeFacadeReadonlyConfig === undefined) {
+    throw new Error("Unreachable. Facade module config not found");
+  }
+
+  const facadeReadonlyConfig = maybeFacadeReadonlyConfig;
+
+  await generateServiceInterface({
+    pathToFacadeWasm: getModuleWasmPath(facadeReadonlyConfig),
+    marineCli,
+    serviceName,
+  });
 
   await fluenceConfig.$commit();
 
@@ -95,5 +132,31 @@ export const addService = async ({
     )}`
   );
 
-  return validServiceName;
+  if (
+    isInteractive &&
+    DEFAULT_WORKER_NAME in workersConfig.workers &&
+    (await confirm({
+      message: `Do you want to add service ${color.yellow(
+        serviceName
+      )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
+    }))
+  ) {
+    const defaultWorker = workersConfig.workers[DEFAULT_WORKER_NAME];
+    assert(defaultWorker !== undefined);
+
+    workersConfig.workers[DEFAULT_WORKER_NAME] = {
+      ...defaultWorker,
+      services: [...defaultWorker.services, serviceName],
+    };
+
+    await workersConfig.$commit();
+
+    commandObj.log(
+      `Added ${color.yellow(serviceName)} to ${color.yellow(
+        DEFAULT_WORKER_NAME
+      )}`
+    );
+  }
+
+  return serviceName;
 };

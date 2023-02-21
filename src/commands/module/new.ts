@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import { Args } from "@oclif/core";
 
-import color from "@oclif/color";
-
-import { BaseCommand } from "../../baseCommand";
-import { generateNewModule } from "../../lib/generateNewModule";
-import { initCli } from "../../lib/lifecyle";
-import { input } from "../../lib/prompt";
-
-const PATH = "PATH";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { generateNewModule } from "../../lib/generateNewModule.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine module template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
-  static override args = [
-    {
-      name: PATH,
+  static override flags = {
+    ...baseFlags,
+  };
+  static override args = {
+    path: Args.string({
       description: "Module path",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
-    const { args, isInteractive } = await initCli(this, await this.parse(New));
+    const { args } = await initCli(this, await this.parse(New));
 
-    const pathToModuleDir: unknown =
-      args[PATH] ??
-      (await input({ isInteractive, message: "Enter module path" }));
+    const pathToModuleDir =
+      args.path ?? (await input({ message: "Enter module path" }));
 
-    assert(typeof pathToModuleDir === "string");
-    await generateNewModule(pathToModuleDir, this);
+    await generateNewModule(pathToModuleDir);
 
     this.log(
       `Successfully generated template for new module at ${color.yellow(

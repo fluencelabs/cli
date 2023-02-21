@@ -16,12 +16,8 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import {
-  CommandObj,
-  MODULE_CONFIG_FILE_NAME,
-  TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
-import { ensureFluenceDir } from "../../paths";
+import { MODULE_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -30,13 +26,13 @@ import {
   getReadonlyConfigInitFunction,
   Migrations,
   GetDefaultConfig,
-} from "../initConfig";
+} from "../initConfig.js";
 
 export const MODULE_TYPE_RUST = "rust";
 export const MODULE_TYPE_COMPILED = "compiled";
 export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
 
-export type ModuleType = typeof MODULE_TYPES[number];
+export type ModuleType = (typeof MODULE_TYPES)[number];
 
 export type ConfigV0 = {
   version: 0;
@@ -173,15 +169,13 @@ const getInitConfigOptions = (
 });
 
 export const initModuleConfig = (
-  configPath: string,
-  commandObj: CommandObj
+  configPath: string
 ): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(getInitConfigOptions(configPath))(commandObj);
+  getConfigInitFunction(getInitConfigOptions(configPath))();
 export const initReadonlyModuleConfig = (
-  configPath: string,
-  commandObj: CommandObj
+  configPath: string
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(getInitConfigOptions(configPath))(commandObj);
+  getReadonlyConfigInitFunction(getInitConfigOptions(configPath))();
 
 const getDefault: (name: string) => GetDefaultConfig<LatestConfig> =
   (name: string): GetDefaultConfig<LatestConfig> =>
@@ -193,13 +187,12 @@ const getDefault: (name: string) => GetDefaultConfig<LatestConfig> =
 
 export const initNewReadonlyModuleConfig = (
   configPath: string,
-  commandObj: CommandObj,
   name: string
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(name)
-  )(commandObj);
+  )();
 
-export const moduleSchema = configSchemaV0;
+export const moduleSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 export const moduleProperties = modulePropertiesV0;

@@ -16,41 +16,23 @@
 
 import { Command, Flags, Interfaces } from "@oclif/core";
 
-import { NO_INPUT_FLAG } from "./lib/const";
-import { exitCli } from "./lib/lifecyle";
+import { NO_INPUT_FLAG } from "./lib/const.js";
+import { exitCli } from "./lib/lifecyle.js";
 
 export type Flags<T extends typeof Command> = Interfaces.InferredFlags<
-  typeof BaseCommand["globalFlags"] & T["flags"]
+  (typeof BaseCommand)["baseFlags"] & T["flags"]
 >;
+export type Args<T extends typeof Command> = Interfaces.InferredArgs<T["args"]>;
+/**
+ * As of Feb 3 2023 for some reason oclif's baseFlags are not working so we have to do this explicitly
+ */
+export const baseFlags = {
+  ...NO_INPUT_FLAG,
+};
 
 export abstract class BaseCommand<T extends typeof Command> extends Command {
-  // define flags that can be inherited by any command that extends BaseCommand
-  static override globalFlags = {
-    ...NO_INPUT_FLAG,
-  };
-
   protected flags!: Flags<T>;
-
-  override async init(): Promise<void> {
-    await super.init();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.constructor as Interfaces.Command.Class
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.flags = flags;
-  }
-
-  protected override async catch(
-    err: Error & { exitCode?: number }
-  ): Promise<unknown> {
-    // add any custom logic to handle errors from the command
-    // or simply return the parent class error handling
-    return super.catch(err);
-  }
+  protected args!: Args<T>;
 
   protected override async finally(
     maybeError: Error | undefined

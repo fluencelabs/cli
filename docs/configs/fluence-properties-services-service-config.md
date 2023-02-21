@@ -4,11 +4,12 @@
 
 # additionalProperties Properties
 
-| Property                    | Type     | Required | Nullable       | Defined by                                                                                                                                                                                       |
-| :-------------------------- | :------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [get](#get)                 | `string` | Required | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-get.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/get")                 |
-| [deploy](#deploy)           | `array`  | Required | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy")  |
-| [keyPairName](#keypairname) | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-keypairname.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/keyPairName") |
+| Property                            | Type     | Required | Nullable       | Defined by                                                                                                                                                                                         |
+| :---------------------------------- | :------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [get](#get)                         | `string` | Required | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-get.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/get")                   |
+| [overrideModules](#overridemodules) | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-overrides.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/overrideModules") |
+| [deploy](#deploy)                   | `array`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy")    |
+| [keyPairName](#keypairname)         | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-keypairname.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/keyPairName")   |
 
 ## get
 
@@ -28,13 +29,31 @@ Path to service directory or URL to the tar.gz archive with the service
 
 `string`
 
+## overrideModules
+
+A map of modules to override
+
+`overrideModules`
+
+*   is optional
+
+*   Type: `object` ([Overrides](fluence-properties-services-service-config-properties-overrides.md))
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-overrides.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/overrideModules")
+
+### overrideModules Type
+
+`object` ([Overrides](fluence-properties-services-service-config-properties-overrides.md))
+
 ## deploy
 
 List of deployments for the particular service
 
 `deploy`
 
-*   is required
+*   is optional
 
 *   Type: `object[]` ([Deployment](fluence-properties-services-service-config-properties-deployment-list-deployment.md))
 

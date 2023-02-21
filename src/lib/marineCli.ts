@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { FluenceConfig } from "./configs/project/fluence";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock";
-import { CommandObj, MARINE_CARGO_DEPENDENCY } from "./const";
-import { execPromise } from "./execPromise";
-import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs";
-import { ensureCargoDependency } from "./rust";
-import type { Flags } from "./typeHelpers";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
+import { MARINE_CARGO_DEPENDENCY } from "./const.js";
+import { execPromise } from "./execPromise.js";
+import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
+import { ensureCargoDependency } from "./rust.js";
+import type { Flags } from "./typeHelpers.js";
 
 export type MarineCliInput =
   | {
@@ -38,18 +38,17 @@ export type MarineCLI = {
       message?: string | undefined;
       keyValuePairs?: Record<string, string>;
       cwd?: string;
+      printOutput?: boolean;
     } & MarineCliInput
   ): Promise<string>;
 };
 
 export const initMarineCli = async (
-  commandObj: CommandObj,
   maybeFluenceConfig: FluenceConfig | null,
   maybeFluenceLockConfig: FluenceLockConfig | null
 ): Promise<MarineCLI> => {
   const marineCliPath = await ensureCargoDependency({
     nameAndVersion: MARINE_CARGO_DEPENDENCY,
-    commandObj,
     maybeFluenceLockConfig,
     maybeFluenceConfig,
   });
@@ -60,6 +59,7 @@ export const initMarineCli = async (
     message,
     keyValuePairs,
     cwd,
+    printOutput = true,
   }): Promise<string> =>
     execPromise({
       command: marineCliPath,
@@ -70,6 +70,6 @@ export const initMarineCli = async (
           ? undefined
           : getMessageWithKeyValuePairs(message, keyValuePairs),
       options: { cwd },
-      printOutput: true,
+      printOutput,
     });
 };

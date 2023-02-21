@@ -18,40 +18,32 @@ import assert from "node:assert";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import type { FluenceConfig } from "./configs/project/fluence";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock";
+import { commandObj } from "./commandObj.js";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
-  AQUA_NPM_DEPENDENCY,
-  AQUA_RECOMMENDED_VERSION,
-  CommandObj,
+  AQUA_LIB_NPM_DEPENDENCY,
   DOT_BIN_DIR_NAME,
+  fluenceNPMDependencies,
   NODE_MODULES_DIR_NAME,
-} from "./const";
-import { addCountlyLog } from "./countly";
-import { execPromise } from "./execPromise";
+} from "./const.js";
+import { addCountlyLog } from "./countly.js";
+import { execPromise } from "./execPromise.js";
 import {
   splitPackageNameAndVersion,
   handleLockConfig,
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   handleInstallation,
-} from "./helpers/package";
-import { replaceHomeDir } from "./helpers/replaceHomeDir";
-
-type NPMDependencyInfo = { recommendedVersion: string; bin?: string };
-
-export const fluenceNPMDependencies: Record<string, NPMDependencyInfo> = {
-  [AQUA_NPM_DEPENDENCY]: {
-    recommendedVersion: AQUA_RECOMMENDED_VERSION,
-    bin: "aqua",
-  },
-};
+  handleFluenceConfig,
+} from "./helpers/package.js";
+import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
 export const getLatestVersionOfNPMDependency = async (
-  name: string,
-  commandObj: CommandObj
+  name: string
 ): Promise<string> => {
   try {
     return (
@@ -73,11 +65,9 @@ type InstallNpmDependencyArg = {
   version: string;
   dependencyTmpPath: string;
   dependencyPath: string;
-  commandObj: CommandObj;
 };
 
 const installNpmDependency = async ({
-  commandObj,
   dependencyPath,
   dependencyTmpPath,
   name,
@@ -118,14 +108,12 @@ type EnsureNpmDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
-  commandObj: CommandObj;
   force?: boolean | undefined;
   explicitInstallation?: boolean;
 };
 
 export const ensureNpmDependency = async ({
   nameAndVersion,
-  commandObj,
   maybeFluenceConfig,
   maybeFluenceLockConfig,
   force = false,
@@ -133,7 +121,7 @@ export const ensureNpmDependency = async ({
 }: EnsureNpmDependencyArg): Promise<string> => {
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const versionToInstall = resolveVersionToInstall({
+  const maybeVersionToInstall = resolveVersionToInstall({
     name,
     maybeVersion,
     explicitInstallation,
@@ -143,15 +131,15 @@ export const ensureNpmDependency = async ({
   });
 
   const version = await getLatestVersionOfNPMDependency(
-    versionToInstall === undefined ? name : `${name}@${versionToInstall}`,
-    commandObj
+    maybeVersionToInstall === undefined
+      ? name
+      : `${name}@${maybeVersionToInstall}`
   );
 
   const maybeNpmDependencyInfo = fluenceNPMDependencies[name];
 
   const { dependencyPath, dependencyTmpPath } =
     await resolveDependencyPathAndTmpPath({
-      commandObj,
       name,
       packageManager: "npm",
       version,
@@ -161,13 +149,11 @@ export const ensureNpmDependency = async ({
     force,
     dependencyPath,
     dependencyTmpPath,
-    commandObj,
     explicitInstallation,
     name,
     version,
     installDependency: () =>
       installNpmDependency({
-        commandObj,
         dependencyPath,
         dependencyTmpPath,
         name,
@@ -175,14 +161,21 @@ export const ensureNpmDependency = async ({
       }),
   });
 
-  await handleLockConfig({
-    commandObj,
-    isFluenceProject: maybeFluenceConfig !== null,
-    maybeFluenceLockConfig,
-    name,
-    version,
-    packageManager: "npm",
-  });
+  if (maybeFluenceConfig !== null) {
+    await handleFluenceConfig({
+      fluenceConfig: maybeFluenceConfig,
+      name,
+      packageManager: "npm",
+      versionFromArgs: maybeVersion ?? version,
+    });
+
+    await handleLockConfig({
+      maybeFluenceLockConfig,
+      name,
+      version,
+      packageManager: "npm",
+    });
+  }
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 
@@ -196,25 +189,29 @@ export const ensureNpmDependency = async ({
       );
 };
 
-type InstallAllDependenciesArg = {
-  commandObj: CommandObj;
-  fluenceConfig: FluenceConfig;
-  fluenceLockConfig: FluenceLockConfig;
+type InstallAllNPMDependenciesArg = {
+  maybeFluenceConfig: FluenceConfig | null;
+  maybeFluenceLockConfig: FluenceLockConfig | null;
   force?: boolean | undefined;
 };
 
-export const installAllNPMDependenciesFromFluenceConfig = async ({
-  fluenceConfig,
-  commandObj,
-  fluenceLockConfig,
+export const installAllNPMDependencies = async ({
+  maybeFluenceConfig,
+  maybeFluenceLockConfig,
   force,
-}: InstallAllDependenciesArg): Promise<string[]> => {
+}: InstallAllNPMDependenciesArg): Promise<string[]> => {
   const dependencyPaths = [];
 
+  let aquaLibIsListedInFluenceYAML = false;
+
   for (const [name, version] of Object.entries(
-    fluenceConfig.dependencies.npm
+    maybeFluenceConfig?.dependencies?.npm ?? {}
   )) {
     assert(name !== undefined && version !== undefined);
+
+    if (name === AQUA_LIB_NPM_DEPENDENCY) {
+      aquaLibIsListedInFluenceYAML = true;
+    }
 
     dependencyPaths.push(
       // Not installing dependencies in parallel
@@ -222,9 +219,19 @@ export const installAllNPMDependenciesFromFluenceConfig = async ({
       // eslint-disable-next-line no-await-in-loop
       await ensureNpmDependency({
         nameAndVersion: `${name}@${version}`,
-        commandObj,
-        maybeFluenceConfig: fluenceConfig,
-        maybeFluenceLockConfig: fluenceLockConfig,
+        maybeFluenceConfig,
+        maybeFluenceLockConfig,
+        force,
+      })
+    );
+  }
+
+  if (!aquaLibIsListedInFluenceYAML) {
+    dependencyPaths.push(
+      await ensureNpmDependency({
+        nameAndVersion: AQUA_LIB_NPM_DEPENDENCY,
+        maybeFluenceConfig,
+        maybeFluenceLockConfig,
         force,
       })
     );

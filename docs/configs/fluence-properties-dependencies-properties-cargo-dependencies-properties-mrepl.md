@@ -1,3 +1,0 @@
-## mrepl Type
-
-`string`

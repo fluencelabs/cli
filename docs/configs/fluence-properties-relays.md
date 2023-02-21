@@ -1,6 +1,6 @@
 ## relays Type
 
-any of the folllowing: `string` or `array` ([Relays](fluence-properties-relays.md))
+any of the following: `string` or `array` ([Relays](fluence-properties-relays.md))
 
 one (and only one) of
 

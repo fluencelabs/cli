@@ -17,48 +17,45 @@
 import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import type { AquaCLI } from "../lib/aquaCli";
-import type { ConfigKeyPair } from "../lib/configs/keyPair";
-import type { AppConfig, ServicesV3 } from "../lib/configs/project/app";
-import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence";
-import type { CommandObj } from "../lib/const";
+import type { AquaCLI } from "../lib/aquaCli.js";
+import type { ConfigKeyPair } from "../lib/configs/keyPair.js";
+import type { AppConfig, ServicesV3 } from "../lib/configs/project/app.js";
+import { initReadonlyFluenceConfig } from "../lib/configs/project/fluence.js";
 import {
   generateDeployedAppAqua,
   generateRegisterApp,
-  removePreviouslyGeneratedInterfacesForServices,
-} from "../lib/deployedApp";
-import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
-import { getProjectKeyPair, getUserKeyPair } from "../lib/keypairs";
-import { getRandomRelayAddr } from "../lib/multiaddr";
+} from "../lib/deployedApp.js";
+import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs.js";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
+import { getKeyPair } from "../lib/keypairs.js";
+import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceJSAppPath,
   ensureFluenceTSAppPath,
   ensureFluenceAquaDeployedAppPath,
   ensureFluenceJSDeployedAppPath,
   ensureFluenceTSDeployedAppPath,
-} from "../lib/paths";
-import { confirm } from "../lib/prompt";
+} from "../lib/paths.js";
+import { confirm } from "../lib/prompt.js";
+
+import { commandObj, isInteractive } from "./commandObj.js";
 
 export const removeApp = async (
   removeAppArg: Readonly<{
-    commandObj: CommandObj;
     timeout: number | undefined;
     appConfig: AppConfig;
-    isInteractive: boolean;
     aquaCli: AquaCLI;
     relay?: string | undefined;
   }>
 ): Promise<AppConfig | null> => {
-  const { commandObj, timeout, appConfig, isInteractive, relay, aquaCli } =
-    removeAppArg;
+  const { timeout, appConfig, relay, aquaCli } = removeAppArg;
 
   const isRemovingAll = isInteractive
     ? await confirm({
-        isInteractive,
         message: `\n\nCurrently deployed services described in ${color.yellow(
           replaceHomeDir(appConfig.$getPath())
         )}:\n\n${yamlDiffPatch(
@@ -90,9 +87,7 @@ export const removeApp = async (
       allKeyPairNames.map(
         (keyPairName): Promise<[string, ConfigKeyPair]> =>
           (async (): Promise<[string, ConfigKeyPair]> => {
-            const keyPair =
-              (await getProjectKeyPair({ commandObj, keyPairName })) ??
-              (await getUserKeyPair({ commandObj, keyPairName }));
+            const keyPair = await getKeyPair(keyPairName);
 
             if (keyPair === undefined) {
               return commandObj.error(`Key-pair ${keyPairName} not found`);
@@ -131,7 +126,6 @@ export const removeApp = async (
           !isRemovingAll &&
           // eslint-disable-next-line no-await-in-loop
           !(await confirm({
-            isInteractive,
             message: getMessageWithKeyValuePairs(
               "Do you want to remove",
               keyValuePairs
@@ -170,9 +164,7 @@ export const removeApp = async (
     }
   }
 
-  const fluenceConfig = await initReadonlyFluenceConfig(commandObj);
-
-  await removePreviouslyGeneratedInterfacesForServices(notRemovedServices);
+  const fluenceConfig = await initReadonlyFluenceConfig();
 
   if (Object.keys(notRemovedServices).length === 0) {
     const pathsToRemove = [
@@ -212,7 +204,6 @@ export const removeApp = async (
 
   if (
     await confirm({
-      isInteractive,
       message: `\n\nNot removed services described in ${color.yellow(
         replaceHomeDir(appConfig.$getPath())
       )}:\n\n${yamlDiffPatch(

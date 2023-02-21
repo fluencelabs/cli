@@ -14,70 +14,67 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import { Args, Flags } from "@oclif/core";
 import camelcase from "camelcase";
 
-import { BaseCommand } from "../../baseCommand";
-import { addService } from "../../lib/addService";
-import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service";
-import { FLUENCE_CONFIG_FILE_NAME, NAME_FLAG_NAME } from "../../lib/const";
-import { generateNewModule } from "../../lib/generateNewModule";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { addService } from "../../lib/addService.js";
+import { isInteractive } from "../../lib/commandObj.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
+import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
+import { initWorkersConfig } from "../../lib/configs/project/workers.js";
+import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   ensureValidAquaName,
   validateAquaName,
-} from "../../lib/helpers/downloadFile";
-import { initCli } from "../../lib/lifecyle";
-import { confirm, input } from "../../lib/prompt";
-
-const PATH = "PATH";
+} from "../../lib/helpers/downloadFile.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { initMarineCli } from "../../lib/marineCli.js";
+import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine service template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    [NAME_FLAG_NAME]: Flags.string({
+    ...baseFlags,
+    name: Flags.string({
       description: `Unique service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
   };
-  static override args = [
-    {
-      name: PATH,
+  static override args = {
+    path: Args.string({
       description: "Path to a service",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
-      await initCli(this, await this.parse(New));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(New)
+    );
 
-    const servicePath: unknown =
-      args[PATH] ??
-      (await input({ isInteractive, message: "Enter service path" }));
-
-    assert(typeof servicePath === "string");
+    const servicePath =
+      args.path ?? (await input({ message: "Enter service path" }));
 
     const serviceName = await ensureValidAquaName({
       stringToValidate: await getServiceName({
-        isInteractive,
-        nameFromFlags: flags[NAME_FLAG_NAME],
+        nameFromFlags: flags.name,
         servicePath,
       }),
       message: "Enter service name",
-      flagName: NAME_FLAG_NAME,
-      isInteractive,
     });
 
     const pathToModuleDir = path.join(servicePath, "modules", serviceName);
-    await generateNewModule(pathToModuleDir, this);
+    await generateNewModule(pathToModuleDir);
 
-    await initNewReadonlyServiceConfig(
+    const serviceConfig = await initNewReadonlyServiceConfig(
       servicePath,
-      this,
       path.relative(servicePath, pathToModuleDir),
       serviceName
     );
@@ -92,18 +89,27 @@ export default class New extends BaseCommand<typeof New> {
       maybeFluenceConfig !== null &&
       (!isInteractive ||
         (await confirm({
-          isInteractive,
           message: `Do you want add ${color.yellow(
             serviceName
           )} to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}?`,
         })))
     ) {
+      const maybeFluenceLockConfig = await initFluenceLockConfig();
+
+      const marineCli = await initMarineCli(
+        maybeFluenceConfig,
+        maybeFluenceLockConfig
+      );
+
+      const workersConfig = await initWorkersConfig(maybeFluenceConfig);
+
       await addService({
-        commandObj,
+        workersConfig,
+        marineCli,
         serviceName,
         pathOrUrl: servicePath,
-        isInteractive,
         fluenceConfig: maybeFluenceConfig,
+        serviceConfig,
       });
     }
   }
@@ -112,11 +118,9 @@ export default class New extends BaseCommand<typeof New> {
 type GetServiceNameArg = {
   nameFromFlags: undefined | string;
   servicePath: string;
-  isInteractive: boolean;
 };
 
 const getServiceName = async ({
-  isInteractive,
   nameFromFlags,
   servicePath,
 }: GetServiceNameArg): Promise<string | undefined> => {
@@ -139,7 +143,6 @@ const getServiceName = async ({
     serviceNameValidity !== true ||
     (isInteractive &&
       !(await confirm({
-        isInteractive,
         message: `Do you want to use ${color.yellow(
           camelCasedServiceName
         )} as the name of your new service?`,

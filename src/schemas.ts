@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { appSchema } from "./lib/configs/project/app";
-import { fluenceSchema } from "./lib/configs/project/fluence";
-import { fluenceLockSchema } from "./lib/configs/project/fluenceLock";
-import { moduleSchema } from "./lib/configs/project/module";
-import { projectSecretsSchema } from "./lib/configs/project/projectSecrets";
-import { serviceSchema } from "./lib/configs/project/service";
-import { userConfigSchema } from "./lib/configs/user/config";
-import { userSecretsSchema } from "./lib/configs/user/userSecrets";
+import { appSchema } from "./lib/configs/project/app.js";
+import { deployedSchema } from "./lib/configs/project/deployed.js";
+import { fluenceSchema } from "./lib/configs/project/fluence.js";
+import { fluenceLockSchema } from "./lib/configs/project/fluenceLock.js";
+import { hostsSchema } from "./lib/configs/project/hosts.js";
+import { moduleSchema } from "./lib/configs/project/module.js";
+import { projectSecretsSchema } from "./lib/configs/project/projectSecrets.js";
+import { serviceSchema } from "./lib/configs/project/service.js";
+import { workersSchema } from "./lib/configs/project/workers.js";
+import { userConfigSchema } from "./lib/configs/user/config.js";
+import { userSecretsSchema } from "./lib/configs/user/userSecrets.js";
 import {
   APP_CONFIG_FILE_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -37,8 +40,11 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
   FLUENCE_LOCK_CONFIG_FILE_NAME,
   CONFIG_FILE_NAME,
-} from "./lib/const";
-import { jsonStringify } from "./lib/helpers/jsonStringify";
+  WORKERS_CONFIG_FILE_NAME,
+  HOSTS_CONFIG_FILE_NAME,
+  DEPLOYED_CONFIG_FILE_NAME,
+} from "./lib/const.js";
+import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
 const schemas = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
@@ -49,11 +55,14 @@ const schemas = Object.entries({
   [CONFIG_FILE_NAME]: userConfigSchema,
   [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
   [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
+  [WORKERS_CONFIG_FILE_NAME]: workersSchema,
+  [HOSTS_CONFIG_FILE_NAME]: hostsSchema,
+  [DEPLOYED_CONFIG_FILE_NAME]: deployedSchema,
 });
 
 const main = async (): Promise<void> => {
   if (process.argv[2] === "-f") {
-    return fsPromises.writeFile(
+    return writeFile(
       path.join("docs", "configs", "README.md"),
       `# Fluence CLI Configs
 
@@ -68,12 +77,12 @@ ${schemas
     );
   }
 
-  await fsPromises.mkdir(SCHEMAS_DIR_NAME, { recursive: true });
+  await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
 
   await Promise.all(
     schemas.map(
       ([filename, schema]): Promise<void> =>
-        fsPromises.writeFile(
+        writeFile(
           path.join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),
           jsonStringify(schema)
         )

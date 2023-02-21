@@ -44,7 +44,7 @@ List of Fluence Peer multi addresses or a name of the network. This multi addres
 
 *   is optional
 
-*   Type: any of the folllowing: `string` or `array` ([Relays](fluence-properties-relays.md))
+*   Type: any of the following: `string` or `array` ([Relays](fluence-properties-relays.md))
 
 *   can be null
 
@@ -52,7 +52,7 @@ List of Fluence Peer multi addresses or a name of the network. This multi addres
 
 ### relays Type
 
-any of the folllowing: `string` or `array` ([Relays](fluence-properties-relays.md))
+any of the following: `string` or `array` ([Relays](fluence-properties-relays.md))
 
 one (and only one) of
 

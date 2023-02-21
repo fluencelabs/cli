@@ -16,15 +16,11 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../../ajv";
-import {
-  APP_CONFIG_FILE_NAME,
-  CommandObj,
-  TOP_LEVEL_SCHEMA_ID,
-} from "../../const";
-import { jsonStringify } from "../../helpers/jsonStringify";
-import { NETWORKS, Relays } from "../../multiaddr";
-import { ensureFluenceDir } from "../../paths";
+import { ajv } from "../../ajvInstance.js";
+import { APP_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import { jsonStringify } from "../../helpers/jsonStringify.js";
+import { NETWORKS, Relays } from "../../multiaddres.js";
+import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -32,7 +28,7 @@ import {
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
-} from "../initConfig";
+} from "../initConfig.js";
 
 type DeployedServiceConfigV0 = {
   name: string;
@@ -396,21 +392,14 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 export const initAppConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyAppConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
-export const initNewAppConfig = (
-  config: LatestConfig,
-  commandObj: CommandObj
-): Promise<AppConfig> =>
-  getConfigInitFunction(
-    initConfigOptions,
-    (): LatestConfig => config
-  )(commandObj);
+export const initNewAppConfig = (config: LatestConfig): Promise<AppConfig> =>
+  getConfigInitFunction(initConfigOptions, (): LatestConfig => config)();
 export const initNewReadonlyAppConfig = (
-  config: LatestConfig,
-  commandObj: CommandObj
+  config: LatestConfig
 ): Promise<AppConfigReadonly> =>
   getReadonlyConfigInitFunction(
     initConfigOptions,
     (): LatestConfig => config
-  )(commandObj);
+  )();
 
-export const appSchema = configSchemaV3;
+export const appSchema: JSONSchemaType<LatestConfig> = configSchemaV3;

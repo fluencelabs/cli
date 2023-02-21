@@ -14,44 +14,48 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import type {
+  ArgOutput,
+  FlagOutput,
+  ParserOutput,
+} from "@oclif/core/lib/interfaces/parser.js";
+import platform from "platform";
 
-import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence";
+import {
+  commandObj,
+  CommandObj,
+  isInteractive,
+  setCommandObjAndIsInteractive,
+} from "./commandObj.js";
+import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence.js";
 import {
   initNewUserConfig,
   initUserConfig,
   UserConfig,
-} from "./configs/user/config";
-import type { CommandObj, NO_INPUT_FLAG_NAME } from "./const";
-import { haltCountly, initCountly } from "./countly";
-import "./setupEnvironment";
-import { ensureFluenceProject } from "./helpers/ensureFluenceProject";
-import { getIsInteractive } from "./helpers/getIsInteractive";
-import { confirm } from "./prompt";
+} from "./configs/user/config.js";
+import type { NO_INPUT_FLAG_NAME } from "./const.js";
+import { haltCountly, initCountly } from "./countly.js";
+import "./setupEnvironment.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
+import { getIsInteractive } from "./helpers/getIsInteractive.js";
+import { confirm } from "./prompt.js";
 
-type EnsureUserConfigArg = {
-  commandObj: CommandObj;
-  isInteractive: boolean;
-};
-
-const ensureUserConfig = async ({
-  commandObj,
-  isInteractive,
-}: EnsureUserConfigArg): Promise<UserConfig> => {
-  const userConfig = await initUserConfig(commandObj);
+const ensureUserConfig = async (): Promise<UserConfig> => {
+  const userConfig = await initUserConfig();
 
   if (userConfig !== null) {
     return userConfig;
   }
 
-  const newUserConfig = await initNewUserConfig(commandObj);
+  const newUserConfig = await initNewUserConfig();
 
   if (
     isInteractive &&
     (await confirm({
-      isInteractive,
       message: `Help me improve Fluence CLI by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
-        "Metrics will help the developers know which features are useful so they can prioritise what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data."
+        "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data."
       )}\nOK?`,
     }))
   ) {
@@ -62,32 +66,48 @@ const ensureUserConfig = async ({
   return newUserConfig;
 };
 
-type CommonReturn<A extends Args, F extends Flags> = {
+type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
   userConfig: UserConfig;
-  commandObj: CommandObj;
-  maybeFluenceConfig: FluenceConfig | null;
-  isInteractive: boolean;
   args: A;
   flags: F;
 };
 
-type Args = Record<string, unknown>;
-type Flags = Record<string, unknown> & { [NO_INPUT_FLAG_NAME]: boolean };
+type ParserOutputWithNoInputFlag<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+> = ParserOutput<F, F2, A> & {
+  flags: {
+    [NO_INPUT_FLAG_NAME]: boolean;
+  };
+};
 
-export async function initCli<A extends Args, F extends Flags>(
+export async function initCli<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+>(
   commandObj: CommandObj,
-  { args, flags }: { args: A; flags: F },
+  parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
   requiresFluenceProject?: false
 ): Promise<CommonReturn<A, F> & { maybeFluenceConfig: FluenceConfig | null }>;
-export async function initCli<A extends Args, F extends Flags>(
+export async function initCli<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+>(
   commandObj: CommandObj,
-  { args, flags }: { args: A; flags: F },
+  parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
   requiresFluenceProject: true
 ): Promise<CommonReturn<A, F> & { fluenceConfig: FluenceConfig }>;
 
-export async function initCli<A extends Args, F extends Flags>(
-  commandObj: CommandObj,
-  { args, flags }: { args: A; flags: F },
+export async function initCli<
+  F extends FlagOutput,
+  F2 extends FlagOutput,
+  A extends ArgOutput
+>(
+  commandObjFromArgs: CommandObj,
+  { args, flags }: ParserOutputWithNoInputFlag<F, F2, A>,
   requiresFluenceProject = false
 ): Promise<
   CommonReturn<A, F> & {
@@ -95,23 +115,33 @@ export async function initCli<A extends Args, F extends Flags>(
     maybeFluenceConfig?: FluenceConfig | null;
   }
 > {
-  const isInteractive = getIsInteractive(flags);
-  const userConfig = await ensureUserConfig({ commandObj, isInteractive });
-  const maybeFluenceConfig = await initFluenceConfig(commandObj);
-  await initCountly({ commandObj, userConfig, maybeFluenceConfig });
+  setCommandObjAndIsInteractive(commandObjFromArgs, getIsInteractive(flags));
+
+  if (platform.version === undefined) {
+    return commandObj.error("Unknown platform");
+  }
+
+  const majorVersion = Number(platform.version.split(".")[0]);
+
+  if (majorVersion < 16 || majorVersion >= 17) {
+    return commandObj.error(
+      `Fluence CLI requires Node.js version "16.x.x"; Detected ${platform.version}. Please use Node.js version 16.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install 16 && nvm use 16 && nvm alias default 16"`
+    );
+  }
+
+  const userConfig = await ensureUserConfig();
+  const maybeFluenceConfig = await initFluenceConfig();
+  await initCountly({ userConfig, maybeFluenceConfig });
 
   return {
-    maybeFluenceConfig,
     userConfig,
-    commandObj,
-    isInteractive,
     args,
     flags,
     ...(requiresFluenceProject
       ? {
           fluenceConfig:
             maybeFluenceConfig === null
-              ? await ensureFluenceProject(commandObj, isInteractive)
+              ? await ensureFluenceProject()
               : maybeFluenceConfig,
         }
       : { maybeFluenceConfig }),
@@ -123,6 +153,6 @@ export const exitCli = async (): Promise<never> => {
 
   // Countly doesn't let process to finish
   // So there is a need to do it explicitly
-  // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
+  // eslint-disable-next-line no-process-exit
   process.exit(0);
 };

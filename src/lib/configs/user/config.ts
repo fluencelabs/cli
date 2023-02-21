@@ -16,8 +16,8 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const";
-import { ensureUserFluenceDir } from "../../paths";
+import { CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import { ensureUserFluenceDir } from "../../paths.js";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -26,7 +26,7 @@ import {
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
-} from "../initConfig";
+} from "../initConfig.js";
 
 type ConfigV0 = {
   version: 0;
@@ -76,4 +76,4 @@ export const initNewUserConfig = getConfigInitFunction(
 export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const userConfigSchema = configSchemaV0;
+export const userConfigSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

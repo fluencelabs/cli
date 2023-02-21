@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
+import { Args, Flags } from "@oclif/core";
 
-import { Flags } from "@oclif/core";
-
-import { BaseCommand } from "../baseCommand";
-import { templates } from "../lib/const";
-import { ensureTemplate, init } from "../lib/init";
-import { initCli } from "../lib/lifecyle";
-
-const PATH = "PATH";
+import { BaseCommand, baseFlags } from "../baseCommand.js";
+import { templates } from "../lib/const.js";
+import { ensureTemplate, init } from "../lib/init.js";
+import { initCli } from "../lib/lifecyle.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description = "Initialize fluence project";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     template: Flags.string({
       description: `Template to use for the project. One of: ${templates.join(
         ", "
@@ -36,27 +33,21 @@ export default class Init extends BaseCommand<typeof Init> {
       char: "t",
     }),
   };
-  static override args = [
-    {
-      name: PATH,
+  static override args = {
+    path: Args.string({
       description: "Project path",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
-    const { commandObj, flags, isInteractive, args, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Init));
-
-    const projectPath: unknown = args[PATH];
-    assert(projectPath === undefined || typeof projectPath === "string");
+    const { flags, args, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Init)
+    );
 
     await init({
-      commandObj,
-      isInteractive,
-      projectPath,
+      maybeProjectPath: args.path,
       maybeFluenceConfig,
       template: await ensureTemplate({
-        isInteractive,
-        commandObj,
         templateOrUnknown: flags.template,
       }),
     });

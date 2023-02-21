@@ -18,25 +18,24 @@
 
 import Countly from "countly-sdk-nodejs";
 
-import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor";
+import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor.js";
 
-import type { FluenceConfig } from "./configs/project/fluence";
-import type { UserConfig } from "./configs/user/config";
-import { CommandObj, IS_DEVELOPMENT } from "./const";
-import { ensureDir, getUserCountlyDir } from "./paths";
+import { commandObj } from "./commandObj.js";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import type { UserConfig } from "./configs/user/config.js";
+import { IS_DEVELOPMENT } from "./const.js";
+import { ensureDir, getUserCountlyDir } from "./paths.js";
 
 type InitCountlyArgs = {
-  commandObj: CommandObj;
   userConfig: UserConfig;
   maybeFluenceConfig: FluenceConfig | null;
 };
 
 export async function initCountly({
-  commandObj,
   userConfig,
   maybeFluenceConfig,
 }: InitCountlyArgs): Promise<void> {
-  const userCountlyDir = await getUserCountlyDir(commandObj);
+  const userCountlyDir = await getUserCountlyDir();
 
   if (!IS_DEVELOPMENT && userConfig.countlyConsent) {
     Countly.init({
@@ -55,11 +54,11 @@ export async function initCountly({
         userAgent: commandObj.config.userAgent,
         platform: commandObj.config.platform,
         ...dependenciesToSegmentation(
-          maybeFluenceConfig?.dependencies.npm,
+          maybeFluenceConfig?.dependencies?.npm,
           "npm"
         ),
         ...dependenciesToSegmentation(
-          maybeFluenceConfig?.dependencies.cargo,
+          maybeFluenceConfig?.dependencies?.cargo,
           "cargo"
         ),
       },

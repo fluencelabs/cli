@@ -17,17 +17,15 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import { initNewReadonlyModuleConfig } from "./configs/project/module";
+import { initNewReadonlyModuleConfig } from "./configs/project/module.js";
 import {
-  CommandObj,
   FS_OPTIONS,
   MARINE_RS_SDK_TEMPLATE_VERSION,
   MARINE_RS_SDK_TEST_TEMPLATE_VERSION,
-} from "./const";
+} from "./const.js";
 
 export const generateNewModule = async (
-  pathToModuleDir: string,
-  commandObj: CommandObj
+  pathToModuleDir: string
 ): Promise<void> => {
   await fsPromises.mkdir(pathToModuleDir, { recursive: true });
   const name = path.basename(pathToModuleDir);
@@ -47,7 +45,7 @@ export const generateNewModule = async (
     FS_OPTIONS
   );
 
-  await initNewReadonlyModuleConfig(pathToModuleDir, commandObj, name);
+  await initNewReadonlyModuleConfig(pathToModuleDir, name);
 };
 
 const MAIN_RS_CONTENT = `#![allow(non_snake_case)]

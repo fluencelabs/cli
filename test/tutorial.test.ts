@@ -19,23 +19,24 @@ import path from "node:path";
 
 import {
   FS_OPTIONS,
-  getTemplateIndexAppImports,
-  getTemplateIndexAppImportsComment,
+  TEMPLATE_INDEX_APP_IMPORTS,
+  TEMPLATE_INDEX_APP_IMPORTS_COMMENT,
   MAIN_AQUA_FILE_ADD_ONE,
   MAIN_AQUA_FILE_ADD_ONE_COMMENT,
   MAIN_AQUA_FILE_APP_IMPORT_TEXT,
   MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT,
   TEMPLATE_INDEX_APP_REGISTER,
   TEMPLATE_INDEX_APP_REGISTER_COMMENT,
-} from "../src/lib/const";
-import { execPromise } from "../src/lib/execPromise";
+} from "../src/lib/const.js";
+import { execPromise } from "../src/lib/execPromise.js";
 
-import { fluence, getCWD, init } from "./helpers";
+import { fluence, init, maybeConcurrentTest, multiaddrs } from "./helpers.js";
 
 describe("tutorial", () => {
-  test("should work with minimal template", async () => {
-    const cwd = getCWD();
+  maybeConcurrentTest("should work with minimal template", async () => {
+    const cwd = path.join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
+    await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
 
     await fluence({
@@ -77,7 +78,7 @@ describe("tutorial", () => {
           args: ["run"],
           flags: {
             f: 'greeting("world")',
-            i: "./src/aqua/newService.aqua",
+            i: path.join("src", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
           },
           cwd,
         })
@@ -87,9 +88,10 @@ describe("tutorial", () => {
     }
   });
 
-  test("should work with ts template", async () => {
-    const cwd = getCWD();
+  maybeConcurrentTest("should work with ts template", async () => {
+    const cwd = path.join("tmp", "shouldWorkWithTSTemplate");
     await init(cwd, "ts");
+    await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
 
@@ -110,9 +112,10 @@ describe("tutorial", () => {
     }
   });
 
-  test("should work with js template", async () => {
-    const cwd = getCWD();
+  maybeConcurrentTest("should work with js template", async () => {
+    const cwd = path.join("tmp", "shouldWorkWithJSTemplate");
     await init(cwd, "js");
+    await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
     await deploy(cwd);
 
@@ -131,6 +134,21 @@ describe("tutorial", () => {
     } finally {
       await remove(cwd);
     }
+  });
+
+  maybeConcurrentTest("should work without project", async () => {
+    const result = await fluence({
+      args: ["run"],
+      flags: {
+        f: "identify()",
+        i: path.join("test", "aqua", "smoke.aqua"),
+        relay: multiaddrs[0]?.multiaddr,
+        quiet: true,
+      },
+    });
+
+    const parsedResult: unknown = JSON.parse(result);
+    expect(parsedResult).toHaveProperty("air_version");
   });
 });
 
@@ -151,6 +169,16 @@ const deploy = (cwd: string) =>
     args: ["deploy"],
     flags: {
       "no-input": true,
+    },
+    cwd,
+  });
+
+const generateDefaultKey = (cwd: string) =>
+  fluence({
+    args: ["key", "new", "default"],
+    flags: {
+      "no-input": true,
+      default: true,
     },
     cwd,
   });
@@ -181,7 +209,7 @@ const remove = (cwd: string) =>
 
 const compileAqua = (cwd: string) =>
   fluence({
-    args: ["aqua"],
+    args: ["aqua", "--old-fluence-js"],
     cwd,
   });
 
@@ -200,8 +228,8 @@ const uncommentJSorTSCode = async (
   const TSorJSFileContent = await readFile(indexTSorJSPath, FS_OPTIONS);
 
   const newTSorJSFileContent = TSorJSFileContent.replace(
-    getTemplateIndexAppImportsComment(JSOrTs === "js"),
-    getTemplateIndexAppImports(JSOrTs === "js")
+    TEMPLATE_INDEX_APP_IMPORTS_COMMENT,
+    TEMPLATE_INDEX_APP_IMPORTS
   ).replace(TEMPLATE_INDEX_APP_REGISTER_COMMENT, TEMPLATE_INDEX_APP_REGISTER);
 
   await writeFile(indexTSorJSPath, newTSorJSFileContent);

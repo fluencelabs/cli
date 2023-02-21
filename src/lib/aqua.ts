@@ -23,8 +23,8 @@ import {
   Call,
   Input,
   Path,
-} from "@fluencelabs/aqua-api/aqua-api";
-import type { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction";
+} from "@fluencelabs/aqua-api/aqua-api.js";
+import type { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction.js";
 
 export type Data = Parameters<typeof callFunctionImpl>[4];
 

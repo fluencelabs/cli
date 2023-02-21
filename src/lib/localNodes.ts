@@ -16,7 +16,7 @@
 
 import type { Node } from "@fluencelabs/fluence-network-environment";
 
-import { getPeerId } from "./multiaddr";
+import { getPeerId } from "./multiaddres.js";
 
 export const localMultiaddrs: string[] = [
   "/ip4/127.0.0.1/tcp/9991/ws/p2p/12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR",

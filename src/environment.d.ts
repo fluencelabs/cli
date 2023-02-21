@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import { Network } from "../src/lib/multiaddr";
-import { DEBUG_COUNTLY, FLUENCE_ENV } from "../src/lib/setupEnvironment";
-
-export type FluenceEnv = Network | "local";
+import { FluenceEnv } from "../src/lib/multiaddres.js";
+import {
+  DEBUG_COUNTLY,
+  FLUENCE_ENV,
+  FLUENCE_USER_DIR,
+} from "../src/lib/setupEnvironment.js";
 
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
       [FLUENCE_ENV]: FluenceEnv;
       [DEBUG_COUNTLY]: "true" | "false";
+      [SHOW_SPINNER]: "true" | "false";
+      [FLUENCE_USER_DIR]?: string;
     }
   }
 }

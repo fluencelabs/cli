@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
-import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../../baseCommand";
+import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { commandObj } from "../../../lib/commandObj.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../../../lib/configs/project/fluenceLock";
+} from "../../../lib/configs/project/fluenceLock.js";
 import {
   CARGO_DIR_NAME,
   FLUENCE_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
   REQUIRED_RUST_TOOLCHAIN,
-} from "../../../lib/const";
-import { initCli } from "../../../lib/lifecyle";
+} from "../../../lib/const.js";
+import { initCli } from "../../../lib/lifecyle.js";
 import {
   ensureCargoDependency,
   installAllCargoDependenciesFromFluenceConfig,
-} from "../../../lib/rust";
+} from "../../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
@@ -46,6 +45,7 @@ export default class Install extends BaseCommand<typeof Install> {
   )} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     toolchain: Flags.string({
       description: `Rustup toolchain name (such as stable or ${REQUIRED_RUST_TOOLCHAIN})`,
       helpValue: "<toolchain_name>",
@@ -55,40 +55,30 @@ export default class Install extends BaseCommand<typeof Install> {
         "Force install even if the dependency/dependencies is/are already installed",
     }),
   };
-  static override args = [
-    {
-      name: PACKAGE_NAME_AND_VERSION_ARG_NAME,
-      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: ${color.yellow(
-        "marine@0.12.4"
-      )}`,
-    },
-  ];
+  static override args = {
+    [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
+      description:
+        "Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: marine@0.12.4",
+    }),
+  };
+
   async run(): Promise<void> {
-    const { args, flags, commandObj, fluenceConfig } = await initCli(
+    const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Install),
       true
     );
 
     const fluenceLockConfig =
-      (await initFluenceLockConfig(this)) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+      (await initFluenceLockConfig()) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
 
-    const packageNameAndVersion: unknown =
-      args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
-
-    // packageNameAndVersion is always a string or undefined,
-    // while oclif framework says it's 'any'
-    assert(
-      packageNameAndVersion === undefined ||
-        typeof packageNameAndVersion === "string"
-    );
+    const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     // if packageNameAndVersion not provided just install all cargo dependencies
     if (packageNameAndVersion === undefined) {
       await installAllCargoDependenciesFromFluenceConfig({
         fluenceConfig,
-        commandObj,
         fluenceLockConfig,
         force: flags.force,
       });
@@ -97,7 +87,6 @@ export default class Install extends BaseCommand<typeof Install> {
     }
 
     await ensureCargoDependency({
-      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,

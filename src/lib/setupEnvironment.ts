@@ -14,48 +14,64 @@
  * limitations under the License.
  */
 
+import path from "node:path";
+
 import dotenv from "dotenv";
 
-import type { FluenceEnv } from "../environment.d";
-
-import { NETWORKS } from "./multiaddr";
+import { FluenceEnv, NETWORKS } from "./multiaddres.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
+export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
+export const RUN_TESTS_IN_PARALLEL = "RUN_TESTS_IN_PARALLEL";
+export const SHOW_SPINNER = "SHOW_SPINNER";
 
 dotenv.config();
 
 const resolveEnvVariable = <T>(
   variableName: string,
-  isValid: (v: unknown) => v is T,
-  defaultVariable: T
+  isValid: (v: unknown) => v is T
 ): T => {
   const variable = process.env[variableName];
 
-  if (variable === undefined) {
-    return defaultVariable;
-  }
-
   if (!isValid(variable)) {
     throw new Error(
-      `Invalid environment variable: ${variableName}="${variable}"`
+      `Invalid environment variable: ${variableName}="${String(variable)}"`
     );
   }
 
   return variable;
 };
 
+const setEnvVariable = <T extends string>(
+  variableName: string,
+  isValid: (v: unknown) => v is T,
+  defaultVariable?: T
+) => {
+  const variable = process.env[variableName];
+
+  if (variable === undefined) {
+    if (defaultVariable !== undefined) {
+      process.env[variableName] = defaultVariable;
+    }
+
+    return;
+  }
+
+  process.env[variableName] = resolveEnvVariable(variableName, isValid);
+};
+
 const isTrueOrFalseString = (v: unknown): v is "true" | "false" =>
   v === "true" || v === "false";
 
-process.env[FLUENCE_ENV] = resolveEnvVariable(
-  FLUENCE_ENV,
-  (v): v is FluenceEnv => NETWORKS.some((n) => n === v) || v === "local",
-  "kras"
-);
+const isAbsolutePath = (v: unknown): v is string =>
+  typeof v === "string" && path.isAbsolute(v);
 
-process.env[DEBUG_COUNTLY] = resolveEnvVariable(
-  DEBUG_COUNTLY,
-  isTrueOrFalseString,
-  "false"
-);
+const isFluenceEnv = (v: unknown): v is FluenceEnv =>
+  NETWORKS.some((n) => n === v) || v === "local";
+
+setEnvVariable(FLUENCE_ENV, isFluenceEnv, "kras");
+setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
+setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "true");
+setEnvVariable(SHOW_SPINNER, isTrueOrFalseString, "true");
+setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

@@ -16,56 +16,57 @@
 
 import assert from "node:assert";
 
-import color from "@oclif/color";
-import { Flags } from "@oclif/core";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
+import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../baseCommand";
-import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets";
-import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { isInteractive } from "../../lib/commandObj.js";
+import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
+import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
-  NAME_FLAG_NAME,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
-} from "../../lib/const";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject";
-import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs";
-import { initCli } from "../../lib/lifecyle";
-import { list } from "../../lib/prompt";
+} from "../../lib/const.js";
+import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
+import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
+import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { list } from "../../lib/prompt.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     user: Flags.boolean({
       description:
         "Remove key-pair from current user instead of removing key-pair from current project",
     }),
   };
-  static override args = [
-    {
-      name: NAME_FLAG_NAME,
+  static override args = {
+    name: Args.string({
       description: "Key-pair name",
-    },
-  ];
+    }),
+  };
   async run(): Promise<void> {
-    const { args, flags, isInteractive, commandObj, maybeFluenceConfig } =
-      await initCli(this, await this.parse(Remove));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Remove)
+    );
 
     if (!flags.user && maybeFluenceConfig === null) {
-      await ensureFluenceProject(commandObj, isInteractive);
+      await ensureFluenceProject();
     }
 
-    const userSecretsConfig = await initUserSecretsConfig(this);
-    const projectSecretsConfig = await initProjectSecretsConfig(this);
+    const userSecretsConfig = await initUserSecretsConfig();
+    const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
     );
 
-    let keyPairName: unknown = args[NAME_FLAG_NAME];
-
-    assert(typeof keyPairName === "string" || keyPairName === undefined);
+    let keyPairName = args.name;
 
     const validateKeyPairName = async (
       keyPairName: string | undefined
@@ -76,9 +77,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
       return (
         (flags.user
-          ? await getUserKeyPair({ commandObj, keyPairName })
-          : await getProjectKeyPair({ commandObj, keyPairName })) !==
-          undefined ||
+          ? await getUserKeyPair(keyPairName)
+          : await getProjectKeyPair(keyPairName)) !== undefined ||
         `Key-pair with name ${color.yellow(
           keyPairName
         )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
@@ -97,7 +97,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
       this.warn(keyPairValidationResult);
 
       keyPairName = await list({
-        isInteractive,
         message: `Select key-pair name to remove at ${secretsConfigPath}`,
         oneChoiceMessage: (choice: string): string =>
           `Do you want to remove ${color.yellow(choice)}?`,
@@ -122,13 +121,12 @@ export default class Remove extends BaseCommand<typeof Remove> {
       if (keyPairName === userSecretsConfig.defaultKeyPairName) {
         if (isInteractive) {
           const newDefaultKeyPairName = await list({
-            isInteractive,
             message: `Select new default key-pair name for user's secrets`,
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
             onNoChoices: (): never => {
-              throw new Error(
-                `Unreachable. There are no key-pairs to set as default for user's secrets`
+              this.error(
+                "There are no key-pairs to set as default for user's secrets"
               );
             },
             options: userSecretsConfig.keyPairs.map(
@@ -161,13 +159,12 @@ export default class Remove extends BaseCommand<typeof Remove> {
       } else if (keyPairName === projectSecretsConfig.defaultKeyPairName) {
         if (isInteractive) {
           const newDefaultKeyPairName = await list({
-            isInteractive,
             message: `Select new default key-pair name for project's secrets`,
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
             onNoChoices: (): never => {
-              throw new Error(
-                `Unreachable. There are no key-pairs to set as default for project's secrets`
+              this.error(
+                "There are no key-pairs to set as default for project's secrets"
               );
             },
             options: projectSecretsConfig.keyPairs.map(

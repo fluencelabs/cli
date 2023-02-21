@@ -1,11 +1,17 @@
 {
-  "extends": "@tsconfig/node16-strictest/tsconfig.json",
+  "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
   "compilerOptions": {
+    "declaration": true,
+    "importHelpers": true,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "moduleResolution": "nodenext"
+  },
+  "ts-node": {
+    "esm": true
   },
   "include": ["src/**/*"],
-  "exclude": ["src/ts/**/*"],
+  "exclude": ["src/ts/**/*", "src/js/**/*"],
   "files": ["src/types.d.ts"],
   "types": ["node", "jest"]
 }

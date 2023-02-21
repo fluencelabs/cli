@@ -16,11 +16,12 @@
 
 import { spawn } from "node:child_process";
 
-import color from "@oclif/color";
-import { CliUx } from "@oclif/core";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const";
-import { Flags, flagsToArgs } from "./helpers/flagsToArgs";
+import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const.js";
+import { Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
 type SpawnParams = Parameters<typeof spawn>;
 
@@ -55,7 +56,7 @@ export const execPromise = ({
       );
 
   if (typeof message === "string") {
-    CliUx.ux.action.start(message);
+    startSpinner(message);
   }
 
   const debugInfo = `Debug info:\n${commandToDisplay}\n`;
@@ -65,7 +66,7 @@ export const execPromise = ({
       timeout !== undefined &&
       setTimeout((): void => {
         if (typeof message === "string") {
-          CliUx.ux.action.stop(color.red("Timed out"));
+          stopSpinner(color.red("Timed out"));
         }
 
         childProcess.kill();
@@ -107,7 +108,7 @@ export const execPromise = ({
       childProcess.kill();
 
       if (typeof message === "string") {
-        CliUx.ux.action.stop(color.red("failed"));
+        stopSpinner(color.red("failed"));
       }
 
       rej(new Error(`${String(error)}\n${debugInfo}`));
@@ -117,7 +118,7 @@ export const execPromise = ({
       childProcess.kill();
 
       if (typeof message === "string") {
-        CliUx.ux.action.stop(code === 0 ? "done" : color.red("failed"));
+        stopSpinner(code === 0 ? "done" : color.red("failed"));
       }
 
       if (execTimeout !== false) {

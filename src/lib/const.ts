@@ -15,26 +15,62 @@
  */
 
 import type { AvmLoglevel } from "@fluencelabs/fluence";
-import { Command, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
-import { aquaComment, jsComment } from "./helpers/comment";
-import { jsonStringify } from "./helpers/jsonStringify";
-import { js, jsFile } from "./helpers/jsTemplateLitteral";
-import { local } from "./localNodes";
-import { FLUENCE_ENV } from "./setupEnvironment";
+import { aquaComment, jsComment } from "./helpers/comment.js";
+import { jsonStringify } from "./helpers/jsonStringify.js";
+import { local } from "./localNodes.js";
+import type { FluenceEnv } from "./multiaddres.js";
+import { FLUENCE_ENV } from "./setupEnvironment.js";
 
-export const AQUA_RECOMMENDED_VERSION = "0.8.0-368";
+export const AQUA_RECOMMENDED_VERSION = "0.10.0";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
-export const MARINE_RECOMMENDED_VERSION = "0.12.5";
+export const MARINE_RECOMMENDED_VERSION = "0.12.6";
 export const MREPL_RECOMMENDED_VERSION = "0.18.8";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
-export const FLUENCE_JS_RECOMMENDED_VERSION = "0.27.4";
+export const FLUENCE_JS_RECOMMENDED_VERSION = "0.28.0";
 export const FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
-export const REQUIRED_RUST_TOOLCHAIN = "nightly-x86_64";
+export const REQUIRED_RUST_TOOLCHAIN = "nightly-2022-09-15-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
+
+export const CHAIN_NETWORKS = [
+  "local",
+  "testnet",
+  //  "mainnet"
+] as const;
+
+export const isChainNetwork = (unknown: unknown): unknown is ChainNetwork =>
+  CHAIN_NETWORKS.some((n) => n === unknown);
+export type ChainNetwork = (typeof CHAIN_NETWORKS)[number];
+
+export type ChainConfig = {
+  ethereumNodeUrl: string;
+  coreAddress: string;
+  dealFactoryAddress: string;
+  developerFaucetAddress: string;
+  chainId: number;
+};
+
+export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
+export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
+  local: {
+    ethereumNodeUrl: "http://127.0.0.1:8545",
+    coreAddress: "0x42e59295F72a5B31884d8532396C0D89732c8e84",
+    dealFactoryAddress: "0xea6777e8c011E7968605fd012A9Dd49401ec386C",
+    developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
+    chainId: 31_337,
+  },
+  testnet: {
+    ethereumNodeUrl: "https://polygon-testnet.public.blastapi.io",
+    coreAddress: "0xc301d2d67abB97919A670B8A0801667d42963adc",
+    dealFactoryAddress: "0x5858103A51dd9FF771e5744C43f821162aB8eb1f",
+    developerFaucetAddress: "0xdDFb0BC4652606880F121eB46AAeC900D548B108",
+    chainId: 80001,
+  },
+};
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
@@ -50,6 +86,7 @@ export const SRC_DIR_NAME = "src";
 export const TS_DIR_NAME = "ts";
 export const JS_DIR_NAME = "js";
 export const TMP_DIR_NAME = "tmp";
+export const TMP_SERVICES_DIR_NAME = "services";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
@@ -63,6 +100,10 @@ export const DOT_BIN_DIR_NAME = ".bin";
 export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
+export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
+export const HOSTS_CONFIG_FILE_NAME = `hosts.${YAML_EXT}`;
+export const DEALS_CONFIG_FILE_NAME = `deals.${YAML_EXT}`;
+export const DEPLOYED_CONFIG_FILE_NAME = `deployed.${YAML_EXT}`;
 export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
@@ -105,6 +146,7 @@ export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
+export const DEFAULT_WORKER_NAME = "defaultWorker";
 
 export const KEY_PAIR_FLAG_NAME = "key-pair-name";
 export const KEY_PAIR_FLAG = {
@@ -130,8 +172,33 @@ export const TIMEOUT_FLAG = {
   }),
 } as const;
 
+export const NETWORK_FLAG_NAME = "network";
+export const NETWORK_FLAG = {
+  [NETWORK_FLAG_NAME]: Flags.string({
+    description: `$The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
+      ", "
+    )})`,
+    helpValue: "<network>",
+    default: "testnet",
+  }),
+};
+
+export const PRIV_KEY_FLAG = {
+  privKey: Flags.string({
+    char: "k",
+    description:
+      "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
+  }),
+};
+
+export const TOKENS = ["FakeUSD", "FLT"] as const;
+export const TOKENS_STRING = TOKENS.join(", ");
+export type Token = (typeof TOKENS)[number];
+export const isToken = (unknown: unknown): unknown is Token =>
+  TOKENS.some((val): boolean => unknown === val);
+
 export const templates = ["minimal", "ts", "js"] as const;
-export type Template = typeof templates[number];
+export type Template = (typeof templates)[number];
 export const isTemplate = (unknown: unknown): unknown is Template =>
   templates.some((val): boolean => unknown === val);
 
@@ -145,7 +212,7 @@ export const AQUA_LOG_LEVELS = [
   "off",
 ] as const;
 
-export type AquaLogLevel = typeof AQUA_LOG_LEVELS[number];
+export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
 
 export const isAquaLogLevel = (unknown: unknown): unknown is AquaLogLevel =>
   AQUA_LOG_LEVELS.some((val): boolean => unknown === val);
@@ -171,13 +238,8 @@ export const avmLogLevelsString = AVM_LOG_LEVELS.join(", ");
 export const isAvmLogLevel = (unknown: unknown): unknown is AvmLoglevel =>
   AVM_LOG_LEVELS.some((level) => level === unknown);
 
-export const FORCE_FLAG_NAME = "force";
-export const NAME_FLAG_NAME = "name";
-
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";
-
-export type CommandObj = Readonly<InstanceType<typeof Command>>;
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
@@ -196,6 +258,36 @@ export const MARINE_CARGO_DEPENDENCY = "marine";
 export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
+
+export const fluenceNPMDependencies: Record<
+  string,
+  { recommendedVersion: string; bin?: string }
+> = {
+  [AQUA_NPM_DEPENDENCY]: {
+    recommendedVersion: AQUA_RECOMMENDED_VERSION,
+    bin: "aqua",
+  },
+  [AQUA_LIB_NPM_DEPENDENCY]: {
+    recommendedVersion: AQUA_LIB_RECOMMENDED_VERSION,
+  },
+};
+
+export const fluenceCargoDependencies: Record<
+  string,
+  {
+    recommendedVersion: string;
+    toolchain?: string;
+  }
+> = {
+  [MARINE_CARGO_DEPENDENCY]: {
+    recommendedVersion: MARINE_RECOMMENDED_VERSION,
+    toolchain: REQUIRED_RUST_TOOLCHAIN,
+  },
+  [MREPL_CARGO_DEPENDENCY]: {
+    recommendedVersion: MREPL_RECOMMENDED_VERSION,
+    toolchain: REQUIRED_RUST_TOOLCHAIN,
+  },
+};
 
 const MAIN_AQUA_FILE_UNCOMMENT_TEXT = `-- Uncomment the following when you deploy your app with Adder service:
 `;
@@ -223,7 +315,7 @@ export const MAIN_AQUA_FILE_ADD_ONE_COMMENT = aquaComment(
 
 export const MAIN_AQUA_FILE_CONTENT = `aqua Main
 
-import "@fluencelabs/aqua-lib/builtin.aqua"
+import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 
 ${MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT}
 
@@ -279,20 +371,22 @@ func getInfosInParallel(peers: []PeerId) -> []Info:
     <- infos
 `;
 
+export const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
+// @ts-nocheck`;
+
 const TEMPLATE_INDEX_FILE_UNCOMMENT_TEST = "// Uncomment when app is deployed:";
 
-export const getTemplateIndexAppImports = (
-  isJS: boolean
-): string => js`${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
-import { addOne } from "./aqua/main${isJS}";
-import { registerApp } from "./aqua/app${isJS}";`;
+export const TEMPLATE_INDEX_APP_IMPORTS = `${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
+import { addOne } from "./aqua/main.js";
+import { registerApp } from "./aqua/app.js";`;
 
-export const getTemplateIndexAppImportsComment = (isJS: boolean): string =>
-  jsComment(getTemplateIndexAppImports(isJS));
+export const TEMPLATE_INDEX_APP_IMPORTS_COMMENT = jsComment(
+  TEMPLATE_INDEX_APP_IMPORTS
+);
 
 export const TEMPLATE_INDEX_APP_REGISTER = `  ${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
-  registerApp()
-  console.log(await addOne(1))`;
+registerApp()
+console.log(await addOne(1))`;
 
 export const TEMPLATE_INDEX_APP_REGISTER_COMMENT = jsComment(
   TEMPLATE_INDEX_APP_REGISTER
@@ -303,31 +397,16 @@ const NODES_CONST = "nodes";
 const getPeersImportStatement = (peersToImport: string): string =>
   `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
 
-const PEERS = (() => {
-  const fluenceEnv = process.env[FLUENCE_ENV];
+const PEERS = {
+  kras: getPeersImportStatement("krasnodar"),
+  stage: getPeersImportStatement("stage"),
+  testnet: getPeersImportStatement("testNet"),
+  local: `const ${NODES_CONST} = ${jsonStringify(local)}`,
+  // This typescript error happens only when running config docs generation script that's why type assertion is used
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
+}[process.env[FLUENCE_ENV] as FluenceEnv];
 
-  switch (fluenceEnv) {
-    case "kras":
-      return getPeersImportStatement("krasnodar");
-    case "stage":
-      return getPeersImportStatement("stage");
-    case "testnet":
-      return getPeersImportStatement("testNet");
-    case "local":
-      return `const ${NODES_CONST} = ${jsonStringify(local)}`;
-
-    default: {
-      const _exhaustiveCheck: never = fluenceEnv;
-      throw new Error(
-        `Unknown value of environment variable FLUENCE_ENV="${String(
-          _exhaustiveCheck
-        )}"`
-      );
-    }
-  }
-})();
-
-export const getTemplateIndexFileContent = (isJS: boolean): string => jsFile`
+export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
 import { Fluence } from "@fluencelabs/fluence";
 ${PEERS}
 
@@ -337,9 +416,9 @@ import {
   getInfo,
   getInfos,
   getInfosInParallel,
-} from "./aqua/main${isJS}";
+} from "./aqua/main.js";
 
-${getTemplateIndexAppImportsComment(isJS)}
+${TEMPLATE_INDEX_APP_IMPORTS_COMMENT}
 
 const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
 const connectTo = ${NODES_CONST}[0].multiaddr;
@@ -364,5 +443,4 @@ ${TEMPLATE_INDEX_APP_REGISTER_COMMENT}
 
 main().catch((error) => {
   console.error(error);
-});
-`;
+});`;

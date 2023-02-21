@@ -21,13 +21,12 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import Countly from "countly-sdk-nodejs";
 
-import { ajv } from "../lib/ajv";
+import { ajv } from "../lib/ajvInstance.js";
 import {
   FluenceConfig,
   initNewFluenceConfig,
-} from "../lib/configs/project/fluence";
+} from "../lib/configs/project/fluence.js";
 import {
-  CommandObj,
   FS_OPTIONS,
   RECOMMENDED_GITIGNORE_CONTENT,
   Template,
@@ -39,14 +38,14 @@ import {
   INDEX_JS_FILE_NAME,
   INDEX_TS_FILE_NAME,
   SRC_DIR_NAME,
-  getTemplateIndexFileContent,
+  TEMPLATE_INDEX_FILE_CONTENT,
   TYPESCRIPT_RECOMMENDED_VERSION,
   TS_NODE_RECOMMENDED_VERSION,
   TS_CONFIG_FILE_NAME,
-} from "../lib/const";
-import { execPromise } from "../lib/execPromise";
-import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir";
+} from "../lib/const.js";
+import { execPromise } from "../lib/execPromise.js";
+import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports.js";
+import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
   ensureDefaultAquaJSPath,
   ensureDefaultAquaTSPath,
@@ -56,10 +55,14 @@ import {
   getGitignorePath,
   projectRootDirPromise,
   setProjectRootDir,
-} from "../lib/paths";
-import { input, list } from "../lib/prompt";
+} from "../lib/paths.js";
+import { input, list } from "../lib/prompt.js";
 
-const selectTemplate = (isInteractive: boolean): Promise<Template> =>
+import { commandObj, isInteractive } from "./commandObj.js";
+import { initReadonlyDealsConfig } from "./configs/project/deals.js";
+import { initReadonlyWorkersConfig } from "./configs/project/workers.js";
+
+const selectTemplate = (): Promise<Template> =>
   list({
     message: "Select template",
     options: [...templates],
@@ -69,18 +72,13 @@ const selectTemplate = (isInteractive: boolean): Promise<Template> =>
     onNoChoices: (): never => {
       throw new Error("Unreachable: no templates");
     },
-    isInteractive,
   });
 
 type EnsureTemplateArg = {
   templateOrUnknown: string | undefined;
-  commandObj: CommandObj;
-  isInteractive: boolean;
 };
 
 export const ensureTemplate = ({
-  commandObj,
-  isInteractive,
   templateOrUnknown,
 }: EnsureTemplateArg): Promise<Template> => {
   if (isTemplate(templateOrUnknown)) {
@@ -95,7 +93,7 @@ export const ensureTemplate = ({
     );
   }
 
-  return selectTemplate(isInteractive);
+  return selectTemplate();
 };
 
 const RECOMMENDATIONS = "recommendations";
@@ -193,40 +191,33 @@ const ensureGitIgnore = async (): Promise<void> => {
 };
 
 type InitArg = {
-  commandObj: CommandObj;
-  isInteractive: boolean;
   maybeFluenceConfig?: FluenceConfig | null | undefined;
-  projectPath?: string | undefined;
+  maybeProjectPath?: string | undefined;
   template?: Template;
 };
 
-export const init = async (options: InitArg): Promise<FluenceConfig> => {
-  const {
-    commandObj,
-    isInteractive,
-    template = await selectTemplate(isInteractive),
-    maybeFluenceConfig,
-  } = options;
+export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
+  const { template = await selectTemplate(), maybeFluenceConfig } = options;
 
   Countly.add_event({ key: `init:template:${template}` });
 
   const projectPath =
-    options.projectPath === undefined && !isInteractive
+    options.maybeProjectPath === undefined && !isInteractive
       ? process.cwd()
       : path.resolve(
-          options.projectPath ??
+          options.maybeProjectPath ??
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory:",
-              isInteractive,
             }))
         );
 
   await fsPromises.mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
 
-  const fluenceConfig =
-    maybeFluenceConfig ?? (await initNewFluenceConfig(commandObj));
+  const fluenceConfig = maybeFluenceConfig ?? (await initNewFluenceConfig());
+  const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
+  await initReadonlyDealsConfig(workersConfig);
 
   switch (template) {
     case "minimal":
@@ -249,7 +240,7 @@ export const init = async (options: InitArg): Promise<FluenceConfig> => {
   }
 
   await ensureVSCodeRecommendedExtensions();
-  await ensureVSCodeSettingsJSON({ generateSettingsJson: true, commandObj });
+  await ensureVSCodeSettingsJSON({ generateSettingsJson: true });
   await ensureGitIgnore();
 
   commandObj.log(
@@ -290,11 +281,10 @@ export const initTSorJSProject = async ({
   const indexFileName = isJS ? INDEX_JS_FILE_NAME : INDEX_TS_FILE_NAME;
 
   const PACKAGE_JSON = {
-    name: path.dirname(projectRootDir),
+    type: "module",
     version: "1.0.0",
     description: "",
     main: indexFileName,
-    ...(isJS ? { type: "module" } : {}),
     scripts: {
       start: `${isJS ? "node" : "ts-node"} ${path.join(
         SRC_DIR_NAME,
@@ -321,7 +311,7 @@ export const initTSorJSProject = async ({
 
   await fsPromises.writeFile(
     path.join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
-    getTemplateIndexFileContent(isJS),
+    TEMPLATE_INDEX_FILE_CONTENT,
     FS_OPTIONS
   );
 
@@ -331,12 +321,14 @@ export const initTSorJSProject = async ({
   } else {
     const TS_CONFIG = {
       compilerOptions: {
-        target: "es2016",
-        module: "commonjs",
-        esModuleInterop: true,
-        forceConsistentCasingInFileNames: true,
+        target: "es2022",
+        module: "es2022",
         strict: true,
         skipLibCheck: true,
+        moduleResolution: "nodenext",
+      },
+      "ts-node": {
+        esm: true,
       },
     };
 

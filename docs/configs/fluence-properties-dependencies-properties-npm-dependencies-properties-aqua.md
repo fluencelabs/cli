@@ -1,3 +1,0 @@
-## aqua Type
-
-`string`

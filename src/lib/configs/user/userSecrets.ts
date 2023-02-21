@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
 import {
   AUTO_GENERATED,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
-} from "../../const";
+} from "../../const.js";
+import { generateKeyPair } from "../../helpers/generateKeyPair.js";
 import {
   validateHasDefault,
   validateMultiple,
   validateUnique,
   ValidationResult,
-} from "../../helpers/validations";
-import { generateKeyPair } from "../../keypairs";
-import { ensureUserFluenceDir } from "../../paths";
+} from "../../helpers/validations.js";
+import { ensureUserFluenceDir } from "../../paths.js";
 import {
   GetDefaultConfig,
   getConfigInitFunction,
@@ -38,8 +39,8 @@ import {
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
-} from "../initConfig";
-import { ConfigKeyPair, configKeyPairSchema } from "../keyPair";
+} from "../initConfig.js";
+import { ConfigKeyPair, configKeyPairSchema } from "../keyPair.js";
 
 type ConfigV0 = {
   version: 0;
@@ -113,4 +114,4 @@ export const initReadonlyUserSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );
-export const userSecretsSchema = configSchemaV0;
+export const userSecretsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

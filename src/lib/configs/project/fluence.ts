@@ -17,33 +17,28 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
-import color from "@oclif/color";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
-import { ajv } from "../../ajv";
+import { ajv } from "../../ajvInstance.js";
 import {
   AQUA_LIB_NPM_DEPENDENCY,
   AQUA_LIB_RECOMMENDED_VERSION,
-  AQUA_NPM_DEPENDENCY,
-  AQUA_RECOMMENDED_VERSION,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MAIN_AQUA_FILE_CONTENT,
-  MARINE_CARGO_DEPENDENCY,
-  MARINE_RECOMMENDED_VERSION,
-  MREPL_CARGO_DEPENDENCY,
-  MREPL_RECOMMENDED_VERSION,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
-} from "../../const";
-import { jsonStringify } from "../../helpers/jsonStringify";
-import { NETWORKS, Relays } from "../../multiaddr";
+} from "../../const.js";
+import { jsonStringify } from "../../helpers/jsonStringify.js";
+import { NETWORKS, Relays } from "../../multiaddres.js";
 import {
   ensureFluenceDir,
   ensureSrcAquaMainPath,
   projectRootDirPromise,
-} from "../../paths";
+} from "../../paths.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -52,10 +47,10 @@ import {
   getReadonlyConfigInitFunction,
   Migrations,
   ConfigValidateFunction,
-} from "../initConfig";
+} from "../initConfig.js";
 
-import { moduleProperties } from "./module";
-import type { ModuleV0 as ServiceModuleConfig } from "./service";
+import { moduleProperties } from "./module.js";
+import type { ModuleV0 as ServiceModuleConfig } from "./service.js";
 
 type ServiceV0 = { name: string; count?: number };
 
@@ -89,7 +84,7 @@ export const DISTRIBUTION_RANDOM = "random";
 export const DISTRIBUTIONS = [DISTRIBUTION_EVEN, DISTRIBUTION_RANDOM] as const;
 
 export type OverrideModules = Record<string, FluenceConfigModule>;
-export type Distribution = typeof DISTRIBUTIONS[number];
+export type Distribution = (typeof DISTRIBUTIONS)[number];
 export type ServiceDeployV1 = {
   deployId: string;
   count?: number;
@@ -103,7 +98,8 @@ export type FluenceConfigModule = Partial<ServiceModuleConfig>;
 
 type ServiceV1 = {
   get: string;
-  deploy: Array<ServiceDeployV1>;
+  overrideModules?: OverrideModules;
+  deploy?: Array<ServiceDeployV1>;
   keyPairName?: string;
 };
 
@@ -144,9 +140,34 @@ const configSchemaV1Obj = {
             type: "string",
             description: `Path to service directory or URL to the tar.gz archive with the service`,
           },
+          overrideModules: {
+            type: "object",
+            title: "Overrides",
+            description: "A map of modules to override",
+            additionalProperties: {
+              type: "object",
+              title: "Module overrides",
+              description:
+                "Module names as keys and overrides for the module config as values",
+              properties: {
+                ...moduleProperties,
+                get: {
+                  type: "string",
+                  nullable: true,
+                  description: `Path to module directory or URL to the tar.gz archive with the module`,
+                },
+                name: { ...moduleProperties.name, nullable: true },
+              },
+              required: [],
+              nullable: true,
+            },
+            nullable: true,
+            required: [],
+          },
           deploy: {
             type: "array",
             title: "Deployment list",
+            nullable: true,
             description: "List of deployments for the particular service",
             items: {
               type: "object",
@@ -215,7 +236,7 @@ const configSchemaV1Obj = {
           },
           keyPairName,
         },
-        required: ["get", "deploy"],
+        required: ["get"],
       },
       required: [],
       nullable: true,
@@ -258,14 +279,9 @@ export const AQUA_INPUT_PATH_PROPERTY = "aquaInputPath";
 
 type ConfigV2 = Omit<ConfigV1, "version"> & {
   version: 2;
-  dependencies: {
-    npm: {
-      [AQUA_NPM_DEPENDENCY]: string;
-    } & Record<string, string>;
-    cargo: {
-      [MARINE_CARGO_DEPENDENCY]: string;
-      [MREPL_CARGO_DEPENDENCY]: string;
-    } & Record<string, string>;
+  dependencies?: {
+    npm?: Record<string, string>;
+    cargo?: Record<string, string>;
   };
   [AQUA_INPUT_PATH_PROPERTY]?: string;
   aquaOutputTSPath?: string;
@@ -286,30 +302,26 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     dependencies: {
       type: "object",
       title: "Dependencies",
+      nullable: true,
       description: "A map of dependency versions",
       properties: {
         npm: {
           type: "object",
           title: "npm dependencies",
+          nullable: true,
           description:
             "A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua",
-          properties: {
-            [AQUA_NPM_DEPENDENCY]: { type: "string" },
-          },
-          required: [AQUA_NPM_DEPENDENCY],
+          required: [],
         },
         cargo: {
           type: "object",
           title: "Cargo dependencies",
+          nullable: true,
           description: `A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
-          properties: {
-            [MARINE_CARGO_DEPENDENCY]: { type: "string" },
-            [MREPL_CARGO_DEPENDENCY]: { type: "string" },
-          },
           required: [],
         },
       },
-      required: ["npm", "cargo"],
+      required: [],
     },
     [AQUA_INPUT_PATH_PROPERTY]: {
       type: "string",
@@ -361,17 +373,12 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
 
   return {
     version: 2,
+    [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
     dependencies: {
       npm: {
-        [AQUA_NPM_DEPENDENCY]: AQUA_RECOMMENDED_VERSION,
         [AQUA_LIB_NPM_DEPENDENCY]: AQUA_LIB_RECOMMENDED_VERSION,
       },
-      cargo: {
-        [MARINE_CARGO_DEPENDENCY]: MARINE_RECOMMENDED_VERSION,
-        [MREPL_CARGO_DEPENDENCY]: MREPL_RECOMMENDED_VERSION,
-      },
     },
-    [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
   } as const;
 };
 
@@ -450,7 +457,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (
     const deployIds = new Set<string>();
     const notUniqueDeployIds = new Set<string>();
 
-    for (const { deployId } of deploy) {
+    for (const { deployId } of deploy ?? []) {
       if (deployIds.has(deployId)) {
         notUniqueDeployIds.add(deployId);
       }
@@ -493,4 +500,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema = configSchemaV2;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV2;

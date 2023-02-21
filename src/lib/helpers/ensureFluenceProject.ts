@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { FluenceConfig, initFluenceConfig } from "../configs/project/fluence";
-import type { CommandObj } from "../const";
-import { init } from "../init";
-import { confirm } from "../prompt";
+import { commandObj, isInteractive } from "../commandObj.js";
+import {
+  FluenceConfig,
+  initFluenceConfig,
+} from "../configs/project/fluence.js";
+import { init } from "../init.js";
+import { confirm } from "../prompt.js";
 
-export const ensureFluenceProject = async (
-  commandObj: CommandObj,
-  isInteractive: boolean
-): Promise<FluenceConfig> => {
-  const fluenceConfig = await initFluenceConfig(commandObj);
+export const ensureFluenceProject = async (): Promise<FluenceConfig> => {
+  const fluenceConfig = await initFluenceConfig();
 
   if (fluenceConfig !== null) {
     return fluenceConfig;
@@ -39,7 +39,6 @@ export const ensureFluenceProject = async (
 
   const doInit = await confirm({
     message: `Do you want to init fluence project`,
-    isInteractive,
   });
 
   if (!doInit) {
@@ -48,5 +47,5 @@ export const ensureFluenceProject = async (
     );
   }
 
-  return init({ commandObj, isInteractive });
+  return init();
 };

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import path from "node:path";
 
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
-import { BaseCommand } from "../../../baseCommand";
+import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { commandObj } from "../../../lib/commandObj.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
   initNewFluenceLockConfig,
-} from "../../../lib/configs/project/fluenceLock";
+} from "../../../lib/configs/project/fluenceLock.js";
 import {
   FLUENCE_DIR_NAME,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
-} from "../../../lib/const";
+} from "../../../lib/const.js";
 import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
-} from "../../../lib/helpers/aquaImports";
-import { initCli } from "../../../lib/lifecyle";
-import { ensureNpmDependency } from "../../../lib/npm";
+} from "../../../lib/helpers/aquaImports.js";
+import { initCli } from "../../../lib/lifecyle.js";
+import { ensureNpmDependency } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
@@ -45,46 +45,38 @@ export default class Install extends BaseCommand<typeof Install> {
   )} directory of the current user)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    ...baseFlags,
     force: Flags.boolean({
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),
   };
-  static override args = [
-    {
-      name: PACKAGE_NAME_AND_VERSION_ARG_NAME,
-      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: "@fluencelabs/aqua-lib@0.6.0"`,
-    },
-  ];
+  static override args = {
+    [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
+      description:
+        "Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0",
+    }),
+  };
+
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig, commandObj } = await initCli(
+    const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Install),
       true
     );
 
-    const packageNameAndVersion: unknown =
-      args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
-
-    // packageNameAndVersion is always a string or undefined,
-    // while oclif framework says it's 'any'
-    assert(
-      packageNameAndVersion === undefined ||
-        typeof packageNameAndVersion === "string"
-    );
+    const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     const fluenceLockConfig =
-      (await initFluenceLockConfig(this)) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig, this));
+      (await initFluenceLockConfig()) ??
+      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
 
     // if packageNameAndVersion is undefined, then we call ensureAquaImports
     // which also installs all npm dependencies from fluence config
     // and then add those imports to vscode settings.json
     if (packageNameAndVersion === undefined) {
       await ensureVSCodeSettingsJSON({
-        commandObj,
         aquaImports: await ensureAquaImports({
-          commandObj,
           maybeFluenceConfig: fluenceConfig,
           maybeFluenceLockConfig: fluenceLockConfig,
           force: flags.force,
@@ -95,7 +87,6 @@ export default class Install extends BaseCommand<typeof Install> {
     }
 
     await ensureNpmDependency({
-      commandObj,
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       maybeFluenceLockConfig: fluenceLockConfig,

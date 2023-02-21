@@ -4,7 +4,6 @@
 /.nyc_output
 /dist
 /tmp
-/--fix
 /yarn.lock
 oclif.manifest.json
 .eslintcache
@@ -12,6 +11,9 @@ oclif.manifest.json
 # for ease of development
 /fluence.yaml
 /fluence-lock.yaml
+/hosts.yaml
+/workers.yaml
+/deals.yaml
 src/aqua
 src/services
 src/ts
@@ -29,3 +31,6 @@ schemas
 .vscode/settings.json
 src/ts/src/aqua
 src/js/src/aqua
+
+# ignore compiled files
+src/lib/compiled-aqua/installation-spell/air
