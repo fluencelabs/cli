@@ -48,6 +48,7 @@ import {
   isChainNetwork,
   NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,
+  DEAL_RPC_CONFIG,
 } from "./const.js";
 import { list } from "./prompt.js";
 
@@ -130,10 +131,7 @@ const getWalletConnectProvider = async (
   network: ChainNetwork
 ): Promise<ethers.Signer> => {
   const provider = new WalletConnectProvider({
-    rpc: {
-      31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
-      1_313_161_555: DEAL_CONFIG["testnet"].ethereumNodeUrl,
-    },
+    rpc: DEAL_RPC_CONFIG,
     chainId: DEAL_CONFIG[network].chainId,
     qrcode: true,
     qrcodeModal: new WalletConnectModal(),
