@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.45](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.44...fluence-cli-v0.2.45) (2023-02-21)
+
+
+### Features
+
+* Add a root Cargo.toml with workspaces, do some refactoring [fixes DXJ-295] ([#165](https://github.com/fluencelabs/fluence-cli/issues/165)) ([538c484](https://github.com/fluencelabs/fluence-cli/commit/538c4842751757f7598dd563e7977482b132ce22))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @oclif/plugin-autocomplete to v2 ([#155](https://github.com/fluencelabs/fluence-cli/issues/155)) ([95f526a](https://github.com/fluencelabs/fluence-cli/commit/95f526a056dfd01798c1611e38cf68ef7fd01565))
+
 ## [0.2.44](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.43...fluence-cli-v0.2.44) (2023-02-20)
 
 
