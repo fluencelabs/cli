@@ -211,6 +211,7 @@ jobs:
           | avm        | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/avm).version') |
           | marine-js  | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/marine-js).version') |
           | fluence-js | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/fluence).version') |
+          | aqua-api   | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/aqua-api).version') |
           SNAPSHOT
 
       - name: Dump rust-peer logs
