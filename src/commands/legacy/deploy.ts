@@ -21,22 +21,22 @@ const color = oclifColor.default;
 import { Flags } from "@oclif/core";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { AquaCLI, initAquaCli } from "../lib/aquaCli.js";
-import { build, BuildArg, ServiceInfo } from "../lib/build.js";
-import { commandObj, isInteractive } from "../lib/commandObj.js";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { AquaCLI, initAquaCli } from "../../lib/aquaCli.js";
+import { build, BuildArg, ServiceInfo } from "../../lib/build.js";
+import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import {
   DeployedServiceConfig,
   initAppConfig,
   initNewReadonlyAppConfig,
   ServicesV3,
-} from "../lib/configs/project/app.js";
+} from "../../lib/configs/project/app.js";
 import {
   Distribution,
   DISTRIBUTION_EVEN,
-} from "../lib/configs/project/fluence.js";
-import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
-import type { ModuleConfigReadonly } from "../lib/configs/project/module.js";
+} from "../../lib/configs/project/fluence.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
+import type { ModuleConfigReadonly } from "../../lib/configs/project/module.js";
 import {
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -44,16 +44,16 @@ import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
   TIMEOUT_FLAG_NAME,
-} from "../lib/const.js";
+} from "../../lib/const.js";
 import {
   generateDeployedAppAqua,
   generateRegisterApp,
-} from "../lib/deployedApp.js";
-import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs.js";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
-import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
-import { initCli } from "../lib/lifecyle.js";
-import { initMarineCli } from "../lib/marineCli.js";
+} from "../../lib/deployedApp.js";
+import { getMessageWithKeyValuePairs } from "../../lib/helpers/getMessageWithKeyValuePairs.js";
+import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
+import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { initMarineCli } from "../../lib/marineCli.js";
 import {
   getEvenlyDistributedIds,
   getEvenlyDistributedIdsFromTheList,
@@ -61,13 +61,14 @@ import {
   getRandomRelayId,
   getRandomRelayIdFromTheList,
   Relays,
-} from "../lib/multiaddres.js";
-import { ensureFluenceTmpDeployJsonPath } from "../lib/paths.js";
-import { confirm } from "../lib/prompt.js";
-import { removeApp } from "../lib/removeApp.js";
-import { hasKey } from "../lib/typeHelpers.js";
+} from "../../lib/multiaddres.js";
+import { ensureFluenceTmpDeployJsonPath } from "../../lib/paths.js";
+import { confirm } from "../../lib/prompt.js";
+import { removeApp } from "../../lib/removeApp.js";
+import { hasKey } from "../../lib/typeHelpers.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
+  static override hidden = true;
   static override description = `Deploy application, described in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
@@ -95,7 +96,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     if (defaultKeyPair instanceof Error) {
-      this.error(defaultKeyPair.message);
+      commandObj.error(defaultKeyPair.message);
     }
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);

@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
-import path from "node:path";
+import assert from "node:assert";
 
-import { AQUA_EXT, FS_OPTIONS } from "../const.js";
+import camelcase from "camelcase";
+
 import type { MarineCLI } from "../marineCli.js";
-import { ensureFluenceAquaServicesDir } from "../paths.js";
 
 type GenerateServiceInterfaceArg = {
   pathToFacadeWasm: string;
   marineCli: MarineCLI;
-  serviceName: string;
 };
 
 export const generateServiceInterface = async ({
-  serviceName,
   pathToFacadeWasm,
   marineCli,
-}: GenerateServiceInterfaceArg): Promise<void> => {
-  const interfaceString = await marineCli({
-    args: ["aqua", pathToFacadeWasm],
-    printOutput: false,
-  });
+}: GenerateServiceInterfaceArg): Promise<string> => {
+  const interfaceDeclaration = (
+    await marineCli({
+      args: ["aqua", pathToFacadeWasm],
+      printOutput: false,
+    })
+  )
+    .split("declares *")[1]
+    ?.trim();
 
-  const aquaInterfacePath = path.join(
-    await ensureFluenceAquaServicesDir(),
-    `${serviceName}.${AQUA_EXT}`
+  assert(
+    interfaceDeclaration !== undefined,
+    `Failed to generate service interface for ${pathToFacadeWasm}`
   );
 
-  return fsPromises.writeFile(aquaInterfacePath, interfaceString, FS_OPTIONS);
+  const [start, ...end] = interfaceDeclaration.split(":");
+  const serviceName = camelcase(start?.slice("service ".length).trim() ?? "");
+
+  return `${start ?? ""}("${serviceName}"):${end.join(":")}`;
 };

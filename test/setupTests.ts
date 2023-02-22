@@ -16,15 +16,6 @@
 
 import path from "node:path";
 
-import {
-  AQUA_LIB_NPM_DEPENDENCY,
-  AQUA_LIB_RECOMMENDED_VERSION,
-  AQUA_NPM_DEPENDENCY,
-  AQUA_RECOMMENDED_VERSION,
-  MARINE_CARGO_DEPENDENCY,
-  MARINE_RECOMMENDED_VERSION,
-} from "../src/lib/const.js";
-
 import "../src/lib/setupEnvironment.js";
 import { fluence, init } from "./helpers.js";
 
@@ -33,44 +24,13 @@ import { fluence, init } from "./helpers.js";
   const cwd = path.join("tmp", "installMarine");
   await init(cwd, "minimal");
 
-  await Promise.all([
-    fluence({
-      args: [
-        "dep",
-        "cargo",
-        "i",
-        `${MARINE_CARGO_DEPENDENCY}@${MARINE_RECOMMENDED_VERSION}`,
-      ],
-      flags: {
-        "no-input": true,
-      },
-      cwd,
-    }),
-    fluence({
-      args: [
-        "dep",
-        "npm",
-        "i",
-        `${AQUA_NPM_DEPENDENCY}@${AQUA_RECOMMENDED_VERSION}`,
-      ],
-      flags: {
-        "no-input": true,
-      },
-      cwd,
-    }),
-    fluence({
-      args: [
-        "dep",
-        "npm",
-        "i",
-        `${AQUA_LIB_NPM_DEPENDENCY}@${AQUA_LIB_RECOMMENDED_VERSION}`,
-      ],
-      flags: {
-        "no-input": true,
-      },
-      cwd,
-    }),
-  ]);
+  await fluence({
+    args: ["dep", "i"],
+    flags: {
+      "no-input": true,
+    },
+    cwd,
+  });
 
   console.log("Tests are ready to run!");
 })().catch((error) => {

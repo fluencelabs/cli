@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { color } from "@oclif/color";
@@ -44,13 +44,14 @@ import {
   TS_CONFIG_FILE_NAME,
 } from "../lib/const.js";
 import { execPromise } from "../lib/execPromise.js";
-import { ensureVSCodeSettingsJSON } from "../lib/helpers/aquaImports.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
   ensureDefaultAquaJSPath,
   ensureDefaultAquaTSPath,
   ensureDefaultJSDirPath,
   ensureDefaultTSDirPath,
+  ensureFluenceAquaDealPath,
+  ensureFluenceAquaServicesPath,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
   projectRootDir,
@@ -59,8 +60,6 @@ import {
 import { input, list } from "../lib/prompt.js";
 
 import { commandObj, isInteractive } from "./commandObj.js";
-import { initReadonlyDealsConfig } from "./configs/project/deals.js";
-import { initReadonlyWorkersConfig } from "./configs/project/workers.js";
 
 const selectTemplate = (): Promise<Template> =>
   list({
@@ -126,9 +125,9 @@ const ensureVSCodeRecommendedExtensions = async (): Promise<void> => {
   let fileContent: string;
 
   try {
-    fileContent = await fsPromises.readFile(extensionsJsonPath, FS_OPTIONS);
+    fileContent = await readFile(extensionsJsonPath, FS_OPTIONS);
   } catch {
-    await fsPromises.writeFile(
+    await writeFile(
       extensionsJsonPath,
       JSON.stringify(extensionsConfig, null, 2) + "\n",
       FS_OPTIONS
@@ -153,7 +152,7 @@ const ensureVSCodeRecommendedExtensions = async (): Promise<void> => {
       ]),
     ];
 
-    await fsPromises.writeFile(
+    await writeFile(
       extensionsJsonPath,
       JSON.stringify(parsedFileContent, null, 2) + "\n",
       FS_OPTIONS
@@ -166,10 +165,7 @@ const ensureGitIgnore = async (): Promise<void> => {
   let newGitIgnoreContent: string;
 
   try {
-    const currentGitIgnoreContent = await fsPromises.readFile(
-      gitIgnorePath,
-      FS_OPTIONS
-    );
+    const currentGitIgnoreContent = await readFile(gitIgnorePath, FS_OPTIONS);
 
     const currentGitIgnoreEntries = new Set(
       currentGitIgnoreContent.split("\n")
@@ -187,7 +183,7 @@ const ensureGitIgnore = async (): Promise<void> => {
     newGitIgnoreContent = RECOMMENDED_GITIGNORE_CONTENT;
   }
 
-  return fsPromises.writeFile(gitIgnorePath, newGitIgnoreContent, FS_OPTIONS);
+  return writeFile(gitIgnorePath, newGitIgnoreContent, FS_OPTIONS);
 };
 
 type InitArg = {
@@ -212,12 +208,11 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
             }))
         );
 
-  await fsPromises.mkdir(projectPath, { recursive: true });
+  await mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
-
+  await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
+  await writeFile(await ensureFluenceAquaDealPath(), "", FS_OPTIONS);
   const fluenceConfig = maybeFluenceConfig ?? (await initNewFluenceConfig());
-  const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
-  await initReadonlyDealsConfig(workersConfig);
 
   switch (template) {
     case "minimal":
@@ -240,7 +235,25 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   }
 
   await ensureVSCodeRecommendedExtensions();
-  await ensureVSCodeSettingsJSON({ generateSettingsJson: true });
+
+  // const fluenceLockConfig = await initNewFluenceLockConfig(
+  //   defaultFluenceLockConfig
+  // );
+
+  // await ensureVSCodeSettingsJSON({
+  //   generateSettingsJson: true,
+  //   aquaImports: await ensureAquaImports({
+  //     maybeFluenceConfig: fluenceConfig,
+  //     maybeFluenceLockConfig: fluenceLockConfig,
+  //   }),
+  // });
+
+  // await installAllCargoDependenciesFromFluenceConfig({
+  //   fluenceConfig,
+  //   fluenceLockConfig: fluenceLockConfig,
+  //   force: false,
+  // });
+
   await ensureGitIgnore();
 
   commandObj.log(
@@ -301,13 +314,13 @@ export const initTSorJSProject = async ({
     },
   } as const;
 
-  await fsPromises.writeFile(
+  await writeFile(
     path.join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
     JSON.stringify(PACKAGE_JSON, null, 2) + "\n",
     FS_OPTIONS
   );
 
-  await fsPromises.writeFile(
+  await writeFile(
     path.join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
     TEMPLATE_INDEX_FILE_CONTENT,
     FS_OPTIONS
@@ -330,7 +343,7 @@ export const initTSorJSProject = async ({
       },
     };
 
-    await fsPromises.writeFile(
+    await writeFile(
       path.join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
       JSON.stringify(TS_CONFIG),
       FS_OPTIONS

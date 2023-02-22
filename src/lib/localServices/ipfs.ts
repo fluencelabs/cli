@@ -72,11 +72,11 @@ const upload = async (
 
 export const doRegisterIpfsClient = (
   peer: FluencePeer,
-  isLogsEnabled: boolean
+  offAquaLogs: boolean
 ): void => {
   const log = (msg: unknown) => {
-    if (isLogsEnabled) {
-      log(String(msg));
+    if (!offAquaLogs) {
+      commandObj.log(`ipfs: ${String(msg)}`);
     }
   };
 

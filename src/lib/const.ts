@@ -23,8 +23,10 @@ import { local } from "./localNodes.js";
 import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 
-export const AQUA_RECOMMENDED_VERSION = "0.10.0";
+export const AQUA_RECOMMENDED_VERSION = "0.10.1";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
+export const REGISTRY_RECOMMENDED_VERSION = "0.7.1";
+export const SPELL_RECOMMENDED_VERSION = "0.4.0";
 export const MARINE_RECOMMENDED_VERSION = "0.12.6";
 export const MREPL_RECOMMENDED_VERSION = "0.19.1";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
@@ -94,7 +96,6 @@ export const TMP_SERVICES_DIR_NAME = "services";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
-export const AQUA_SERVICES_DIR_NAME = "services";
 export const MODULES_DIR_NAME = "modules";
 export const SERVICES_DIR_NAME = "services";
 export const NPM_DIR_NAME = "npm";
@@ -104,9 +105,6 @@ export const DOT_BIN_DIR_NAME = ".bin";
 export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
-export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
-export const HOSTS_CONFIG_FILE_NAME = `hosts.${YAML_EXT}`;
-export const DEALS_CONFIG_FILE_NAME = `deals.${YAML_EXT}`;
 export const DEPLOYED_CONFIG_FILE_NAME = `deployed.${YAML_EXT}`;
 export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
@@ -122,6 +120,8 @@ const DEPLOYED_APP_FILE_NAME = "deployed.app";
 export const DEPLOYED_APP_AQUA_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${AQUA_EXT}`;
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
+export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
+export const AQUA_DEALS_FILE_NAME = `deals.${AQUA_EXT}`;
 
 export const GITIGNORE_FILE_NAME = ".gitignore";
 
@@ -174,6 +174,7 @@ export const TIMEOUT_FLAG = {
   [TIMEOUT_FLAG_NAME]: Flags.integer({
     description: "Timeout used for command execution",
     helpValue: "<milliseconds>",
+    default: 60000,
   }),
 } as const;
 
@@ -193,6 +194,12 @@ export const PRIV_KEY_FLAG = {
     char: "k",
     description:
       "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
+  }),
+};
+
+export const OFF_AQUA_LOGS_FLAG = {
+  "off-aqua-logs": Flags.boolean({
+    description: "Prints Aqua logs",
   }),
 };
 
@@ -263,6 +270,8 @@ export const MARINE_CARGO_DEPENDENCY = "marine";
 export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
+export const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
+export const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 
 export const fluenceNPMDependencies: Record<
   string,
@@ -274,6 +283,12 @@ export const fluenceNPMDependencies: Record<
   },
   [AQUA_LIB_NPM_DEPENDENCY]: {
     recommendedVersion: AQUA_LIB_RECOMMENDED_VERSION,
+  },
+  [REGISTRY_NPM_DEPENDENCY]: {
+    recommendedVersion: REGISTRY_RECOMMENDED_VERSION,
+  },
+  [SPELL_NPM_DEPENDENCY]: {
+    recommendedVersion: SPELL_RECOMMENDED_VERSION,
   },
 };
 
@@ -294,20 +309,43 @@ export const fluenceCargoDependencies: Record<
   },
 };
 
-const MAIN_AQUA_FILE_UNCOMMENT_TEXT = `-- Uncomment the following when you deploy your app with Adder service:
-`;
-
-export const MAIN_AQUA_FILE_APP_IMPORT_TEXT = `${MAIN_AQUA_FILE_UNCOMMENT_TEXT}
-import App from "deployed.app.aqua"
-import Adder from "services/adder.aqua"
+export const MAIN_AQUA_FILE_APP_IMPORT_TEXT = `import App from "deployed.app.aqua"
 export App, addOne`;
 
 export const MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT = aquaComment(
   MAIN_AQUA_FILE_APP_IMPORT_TEXT
 );
 
-export const MAIN_AQUA_FILE_ADD_ONE = `${MAIN_AQUA_FILE_UNCOMMENT_TEXT}
-func addOne(x: u64) -> u64:
+export const MAIN_AQUA_FILE_STATUS_TEXT = `export status
+
+service Console("run-console"):
+    print(any: ⊤)
+
+func status():
+    workersInfo <- getWorkersInfo()
+    dealId = workersInfo.defaultWorker.dealId
+    print = (answer: string, peer: string):
+      Console.print([answer, peer])
+
+    answers: *string
+    on HOST_PEER_ID:
+        workers <- resolveSubnetwork(dealId)
+        for w <- workers! par:
+            on w.metadata.peer_id via w.metadata.relay_id:
+                answer <- MyService.greeting("fluence")
+                answers <<- answer
+                print(answer, w.metadata.peer_id)
+
+    Console.print("getting answers...")
+    join answers[workers!.length - 1]
+    par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
+    Console.print("done")`;
+
+export const MAIN_AQUA_FILE_STATUS_TEXT_COMMENT = aquaComment(
+  MAIN_AQUA_FILE_STATUS_TEXT
+);
+
+export const MAIN_AQUA_FILE_ADD_ONE = `func addOne(x: u64) -> u64:
     services <- App.services()
     on services.adder.default!.peerId:
         Adder services.adder.default!.serviceId
@@ -321,6 +359,12 @@ export const MAIN_AQUA_FILE_ADD_ONE_COMMENT = aquaComment(
 export const MAIN_AQUA_FILE_CONTENT = `aqua Main
 
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
+import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
+import Registry from "${REGISTRY_NPM_DEPENDENCY}/registry-service.aqua"
+import "${SPELL_NPM_DEPENDENCY}/spell_service.aqua"
+
+import "deals.aqua"
+import "services.aqua"
 
 ${MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT}
 
@@ -331,6 +375,10 @@ export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
 
 -- DOCUMENTATION:
 -- https://fluence.dev
+
+
+${MAIN_AQUA_FILE_STATUS_TEXT_COMMENT}
+
 
 
 ${MAIN_AQUA_FILE_ADD_ONE_COMMENT}

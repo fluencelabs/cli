@@ -24,7 +24,7 @@ import {
   APP_SERVICE_JSON_FILE_NAME,
   APP_TS_FILE_NAME,
   AQUA_DIR_NAME,
-  AQUA_SERVICES_DIR_NAME,
+  AQUA_SERVICES_FILE_NAME,
   CARGO_DIR_NAME,
   CONFIG_TOML,
   CARGO_TOML,
@@ -47,6 +47,7 @@ import {
   TMP_DIR_NAME,
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
+  AQUA_DEALS_FILE_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
@@ -154,8 +155,11 @@ export const ensureFluenceDir = async (): Promise<string> =>
 export const ensureFluenceAquaDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureFluenceDir(), AQUA_DIR_NAME));
 
-export const ensureFluenceAquaServicesDir = async (): Promise<string> =>
-  ensureDir(path.join(await ensureFluenceAquaDir(), AQUA_SERVICES_DIR_NAME));
+export const ensureFluenceAquaServicesPath = async (): Promise<string> =>
+  path.join(await ensureFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
+
+export const ensureFluenceAquaDealPath = async (): Promise<string> =>
+  path.join(await ensureFluenceAquaDir(), AQUA_DEALS_FILE_NAME);
 
 export const ensureFluenceAquaDeployedAppPath = async (): Promise<string> =>
   path.join(await ensureFluenceAquaDir(), DEPLOYED_APP_AQUA_FILE_NAME);

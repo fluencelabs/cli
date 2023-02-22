@@ -23,14 +23,12 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
-import { initReadonlyHostsConfig } from "../../lib/configs/project/hosts.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
-  HOSTS_CONFIG_FILE_NAME,
   PRIV_KEY_FLAG,
-  WORKERS_CONFIG_FILE_NAME,
+  OFF_AQUA_LOGS_FLAG,
+  FLUENCE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
@@ -42,7 +40,7 @@ import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 const DEFAULT_TTL = 60000;
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy workers to hosts, described in ${HOSTS_CONFIG_FILE_NAME}`;
+  static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -56,14 +54,12 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       helpValue: "<milliseconds>",
     }),
     ...KEY_PAIR_FLAG,
-    "aqua-logs": Flags.boolean({
-      description: "Enable Aqua logs",
-    }),
+    ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all workers from ${HOSTS_CONFIG_FILE_NAME} are deployed)`,
+      description: `Names of workers to deploy (by default all workers from 'hosts' property in ${FLUENCE_CONFIG_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
@@ -79,7 +75,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     if (defaultKeyPair instanceof Error) {
-      this.error(defaultKeyPair.message);
+      commandObj.error(defaultKeyPair.message);
     }
 
     const secretKey = defaultKeyPair.secretKey;
@@ -99,21 +95,14 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           }),
     });
 
-    doRegisterIpfsClient(fluencePeer, flags["aqua-logs"]);
-    doRegisterLog(fluencePeer, flags["aqua-logs"]);
-
-    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
-
-    const hostsConfig = await initReadonlyHostsConfig(
-      fluenceConfig,
-      workersConfig
-    );
+    const offAquaLogs = flags["off-aqua-logs"];
+    doRegisterIpfsClient(fluencePeer, offAquaLogs);
+    doRegisterLog(fluencePeer, offAquaLogs);
 
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
-      arrayWithWorkerNames: hostsConfig.hosts,
       fluenceConfig,
-      workersConfig,
+      hosts: true,
     });
 
     const errorMessages = uploadDeployArg.workers
@@ -121,13 +110,13 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         if (services.length === 0) {
           return `Worker ${color.yellow(
             name
-          )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`;
+          )} has no services listed in 'workers' property of ${FLUENCE_CONFIG_FILE_NAME}`;
         }
 
         if (hosts.length === 0) {
           return `Worker ${color.yellow(
             name
-          )} has no peerIds listed in ${HOSTS_CONFIG_FILE_NAME}`;
+          )} has no peerIds listed in 'hosts' property of ${FLUENCE_CONFIG_FILE_NAME}`;
         }
 
         return null;
@@ -145,16 +134,19 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       uploadDeployArg
     );
 
-    const newDeployedConfig = {
-      ...uploadDeployResult,
-      workers: uploadDeployResult.workers.map((worker) => ({
-        ...worker,
-        timestamp: new Date().toISOString(),
-      })),
-    };
-
     const deployedConfig = await initDeployedConfig();
-    deployedConfig.workers.push(...newDeployedConfig.workers);
+
+    const newDeployedWorkers = uploadDeployResult.workers.reduce<
+      Record<string, (typeof deployedConfig.workers)[number]>
+    >(
+      (acc, { name, ...worker }) => ({
+        ...acc,
+        [name]: { ...worker, timestamp: new Date().toISOString() },
+      }),
+      { ...deployedConfig.workers }
+    );
+
+    deployedConfig.workers = newDeployedWorkers;
     await deployedConfig.$commit();
     commandObj.log("Successfully deployed");
   }

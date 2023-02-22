@@ -21,6 +21,7 @@ const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
@@ -90,7 +91,7 @@ export default class Default extends BaseCommand<typeof Default> {
         oneChoiceMessage: (choice: string): string =>
           `Do you want to set ${color.yellow(choice)} as default?`,
         onNoChoices: (): never =>
-          this.error(
+          commandObj.error(
             `There are no key-pairs to set as default at ${secretsConfigPath}`
           ),
         options: (flags.user

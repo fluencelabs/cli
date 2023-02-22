@@ -35,19 +35,23 @@ import {
 
 type ConfigV0 = {
   version: 0;
-  workers: {
-    installation_spells: {
-      host_id: string;
-      spell_id: string;
-      worker_id: string;
-    }[];
-    name: string;
-    timestamp: string;
-    definition: string;
-    workerCID?: string | undefined;
-    dealAddress?: string | undefined;
-    network?: ChainNetwork | undefined;
-  }[];
+  workers: Record<
+    string,
+    {
+      installation_spells: {
+        host_id: string;
+        spell_id: string;
+        worker_id: string;
+      }[];
+      timestamp: string;
+      definition: string;
+      workerCID?: string | undefined;
+      dealId?: string | undefined;
+      dealIdOriginal?: string | undefined;
+      chainNetwork?: ChainNetwork | undefined;
+      chainNetworkId?: number | undefined;
+    }
+  >;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -59,12 +63,11 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   properties: {
     version: { type: "number", const: 0 },
     workers: {
-      type: "array",
-      description: "A list of deployed workers",
-      items: {
+      type: "object",
+      description: "A map of deployed workers",
+      additionalProperties: {
         type: "object",
         properties: {
-          name: { type: "string" },
           installation_spells: {
             type: "array",
             description: "A list of installation spells",
@@ -80,16 +83,23 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
           },
           definition: { type: "string" },
           workerCID: { type: "string", nullable: true },
-          dealAddress: { type: "string", nullable: true },
-          network: { type: "string", enum: CHAIN_NETWORKS, nullable: true },
+          dealId: { type: "string", nullable: true },
+          dealIdOriginal: { type: "string", nullable: true },
+          chainNetwork: {
+            type: "string",
+            enum: CHAIN_NETWORKS,
+            nullable: true,
+          },
+          chainNetworkId: { type: "number", nullable: true },
           timestamp: {
             type: "string",
             description:
               "ISO timestamp of the time when the worker was deployed",
           },
         },
-        required: ["name", "installation_spells", "timestamp", "definition"],
+        required: ["installation_spells", "timestamp", "definition"],
       },
+      required: [],
     },
   },
   required: ["version"],
@@ -112,7 +122,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 const getDefault: GetDefaultConfig<LatestConfig> = () => ({
   version: 0,
-  workers: [],
+  workers: {},
 });
 
 export const initReadonlyDeployedConfig = getReadonlyConfigInitFunction(

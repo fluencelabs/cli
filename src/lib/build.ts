@@ -67,7 +67,11 @@ import { generateKeyPair } from "./helpers/generateKeyPair.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { getKeyPair } from "./keypairs.js";
-import { getCargoTomlPath, projectRootDir } from "./paths.js";
+import {
+  ensureFluenceAquaServicesPath,
+  getCargoTomlPath,
+  projectRootDir,
+} from "./paths.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -262,8 +266,6 @@ export const build = async ({
     )
   );
 
-  startSpinner("Making sure all modules are downloaded and built");
-
   const mapOfModuleConfigs = new Map(
     await Promise.all(
       [...setOfAllModuleUrlsOrAbsolutePaths].map(
@@ -278,7 +280,6 @@ export const build = async ({
             );
 
             if (maybeModuleConfig === null) {
-              stopSpinner(color.red("error"));
               return commandObj.error(
                 `Module at: ${color.yellow(
                   moduleAbsolutePathOrUrl
@@ -293,7 +294,6 @@ export const build = async ({
   );
 
   await buildModules([...mapOfModuleConfigs.values()], marineCli);
-  stopSpinner();
 
   const serviceNamePathToFacadeMap: Record<string, string> = {};
 
@@ -344,15 +344,19 @@ export const build = async ({
   );
 
   // generate interfaces for all services
-  await Promise.all(
-    Object.entries(serviceNamePathToFacadeMap).map(
-      ([serviceName, pathToFacadeWasm]): Promise<void> =>
-        generateServiceInterface({
-          pathToFacadeWasm,
-          marineCli,
-          serviceName,
-        })
+  const serviceInterfaces = await Promise.all(
+    Object.values(serviceNamePathToFacadeMap).map((pathToFacadeWasm) =>
+      generateServiceInterface({
+        pathToFacadeWasm,
+        marineCli,
+      })
     )
+  );
+
+  await writeFile(
+    await ensureFluenceAquaServicesPath(),
+    `${serviceInterfaces.join("\n\n")}\n`,
+    FS_OPTIONS
   );
 
   return serviceInfoWithModuleConfigs;
