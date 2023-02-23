@@ -91,6 +91,8 @@ export const ensureValidAquaName = async ({
 export const validateAquaName = (text: string): true | string =>
   /^[a-z]\w*$/.test(text) || AQUA_NAME_REQUIREMENTS;
 
+export const cleanAquaName = (text: string): string => text.replace(/\W/g, "");
+
 const ARCHIVE_FILE = "archive.tar.gz";
 
 const downloadAndDecompress = async (

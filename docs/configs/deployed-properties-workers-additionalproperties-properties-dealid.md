@@ -1,0 +1,3 @@
+## dealId Type
+
+`string`

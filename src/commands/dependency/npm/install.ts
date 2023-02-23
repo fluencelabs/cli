@@ -19,7 +19,6 @@ import path from "node:path";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { commandObj } from "../../../lib/commandObj.js";
 import {
   defaultFluenceLockConfig,
   initFluenceLockConfig,
@@ -71,26 +70,21 @@ export default class Install extends BaseCommand<typeof Install> {
       (await initFluenceLockConfig()) ??
       (await initNewFluenceLockConfig(defaultFluenceLockConfig));
 
-    // if packageNameAndVersion is undefined, then we call ensureAquaImports
-    // which also installs all npm dependencies from fluence config
-    // and then add those imports to vscode settings.json
-    if (packageNameAndVersion === undefined) {
-      await ensureVSCodeSettingsJSON({
-        aquaImports: await ensureAquaImports({
-          maybeFluenceConfig: fluenceConfig,
-          maybeFluenceLockConfig: fluenceLockConfig,
-          force: flags.force,
-        }),
+    if (packageNameAndVersion !== undefined) {
+      await ensureNpmDependency({
+        nameAndVersion: packageNameAndVersion,
+        maybeFluenceConfig: fluenceConfig,
+        maybeFluenceLockConfig: fluenceLockConfig,
+        explicitInstallation: true,
       });
-
-      return commandObj.log("npm dependencies successfully installed");
     }
 
-    await ensureNpmDependency({
-      nameAndVersion: packageNameAndVersion,
-      maybeFluenceConfig: fluenceConfig,
-      maybeFluenceLockConfig: fluenceLockConfig,
-      explicitInstallation: true,
+    await ensureVSCodeSettingsJSON({
+      aquaImports: await ensureAquaImports({
+        maybeFluenceConfig: fluenceConfig,
+        maybeFluenceLockConfig: fluenceLockConfig,
+        force: flags.force,
+      }),
     });
   }
 }

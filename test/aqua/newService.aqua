@@ -1,7 +1,7 @@
 module NewService
 
 import App from "deployed.app.aqua"
-import NewService from "services/newService.aqua"
+import "services.aqua"
 export App, greeting
 
 func greeting(name: string) -> string:

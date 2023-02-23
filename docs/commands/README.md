@@ -1,6 +1,8 @@
 # Commands
 <!-- commands -->
 * [`fluence aqua`](#fluence-aqua)
+* [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
+* [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
@@ -11,7 +13,6 @@
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
 * [`fluence dependency versions`](#fluence-dependency-versions)
-* [`fluence deploy`](#fluence-deploy)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
@@ -20,7 +21,6 @@
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [PATH]`](#fluence-module-new-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
-* [`fluence remove`](#fluence-remove)
 * [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
@@ -67,7 +67,56 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.46/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.0/dist/commands/aqua.ts)_
+
+## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
+
+Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
+
+```
+USAGE
+  $ fluence aqua json [FUNC] [INPUT] [OUTPUT] [--no-input]
+
+ARGUMENTS
+  FUNC    Name of the exported function
+  INPUT   Path to json file
+  OUTPUT  Path to for output file
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua
+  object literal with the same structure as the json file. For valid generation please refer to aqua documentation
+  https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and
+  what they translate into
+```
+
+## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
+
+Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
+
+```
+USAGE
+  $ fluence aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input]
+
+ARGUMENTS
+  FUNC    Name of the exported function
+  INPUT   Path to yaml file
+  OUTPUT  Path to for output file
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua
+  object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation
+  https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and
+  what they translate into
+
+ALIASES
+  $ fluence aqua yaml
+```
 
 ## `fluence autocomplete [SHELL]`
 
@@ -96,7 +145,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.6/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.1/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -116,7 +165,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.46/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.0/dist/commands/build.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -164,31 +213,31 @@ DESCRIPTION
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
-Deploy workers according to deal in deals.yaml
+Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
   $ fluence deal deploy [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--aqua-logs] [-k <value>] [--network <value>]
+    <value>] [--off-aqua-logs] [-k <value>] [--network <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Names of workers to deploy (by default all deals from deals.yaml are deployed)
+  WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --aqua-logs                 Enable Aqua logs
   --network=<network>         [default: testnet] $The network in which the transactions used by the command will be
                               carried out (local, testnet)
   --no-input                  Don't interactively ask for any input from the user
+  --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    Timeout used for command execution
+  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
   --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
                               the originating particle's TTL is defined then that value will be used If the option is
                               not set default TTL will be 60000
 
 DESCRIPTION
-  Deploy workers according to deal in deals.yaml
+  Deploy workers according to deal in 'deals' property in fluence.yaml
 
 EXAMPLES
   $ fluence deal deploy
@@ -321,30 +370,6 @@ EXAMPLES
   $ fluence dependency versions
 ```
 
-## `fluence deploy`
-
-Deploy application, described in fluence.yaml
-
-```
-USAGE
-  $ fluence deploy [--no-input] [--relay <value>] [--force] [--timeout <value>] [-k <value>]
-
-FLAGS
-  -k, --key-pair-name=<name>  Key pair name
-  --force                     Force removing of previously deployed app
-  --no-input                  Don't interactively ask for any input from the user
-  --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    Timeout used for command execution
-
-DESCRIPTION
-  Deploy application, described in fluence.yaml
-
-EXAMPLES
-  $ fluence deploy
-```
-
-_See code: [dist/commands/deploy.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.46/dist/commands/deploy.ts)_
-
 ## `fluence help [COMMANDS]`
 
 Display help for fluence.
@@ -387,7 +412,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.46/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.0/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -522,28 +547,6 @@ EXAMPLES
   $ fluence module remove
 ```
 
-## `fluence remove`
-
-Remove previously deployed config
-
-```
-USAGE
-  $ fluence remove [--no-input] [--relay <value>] [--timeout <value>]
-
-FLAGS
-  --no-input                Don't interactively ask for any input from the user
-  --relay=<multiaddr>       Relay node multiaddr
-  --timeout=<milliseconds>  Timeout used for command execution
-
-DESCRIPTION
-  Remove previously deployed config
-
-EXAMPLES
-  $ fluence remove
-```
-
-_See code: [dist/commands/remove.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.46/dist/commands/remove.ts)_
-
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
 Create provider access token for the deal
@@ -573,8 +576,8 @@ Run aqua script
 USAGE
   $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--log-level-avm <value>] [--print-particle-id] [--quiet] [--plugin <value>] [--const
-    <value>] [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--timeout
-    <value>] [-k <value>]
+    <value>] [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--off-aqua-logs]
+    [--timeout <value>] [-k <value>]
 
 FLAGS
   -f, --func=<function-call>    Function call
@@ -594,6 +597,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
+  --off-aqua-logs               Turns off logs from Console.print in aqua and from IPFS service
   --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                   Prints generated AIR code before function execution
@@ -601,7 +605,7 @@ FLAGS
                                 particle id is responsible for aqua function
   --quiet                       Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddr>           Relay node multiaddr
-  --timeout=<milliseconds>      Timeout used for command execution
+  --timeout=<milliseconds>      [default: 60000] Timeout used for command execution
 
 DESCRIPTION
   Run aqua script
@@ -610,7 +614,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.2.46/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.0/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -702,29 +706,29 @@ EXAMPLES
 
 ## `fluence workers deploy [WORKER-NAMES]`
 
-Deploy workers to hosts, described in hosts.yaml
+Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
   $ fluence workers deploy [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--aqua-logs] [-k <value>]
+    <value>] [--off-aqua-logs] [-k <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Names of workers to deploy (by default all workers from hosts.yaml are deployed)
+  WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --aqua-logs                 Enable Aqua logs
   --no-input                  Don't interactively ask for any input from the user
+  --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    Timeout used for command execution
+  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
   --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
                               the originating particle's TTL is defined then that value will be used If the option is
                               not set default TTL will be 60000
 
 DESCRIPTION
-  Deploy workers to hosts, described in hosts.yaml
+  Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 EXAMPLES
   $ fluence workers deploy
@@ -732,31 +736,29 @@ EXAMPLES
 
 ## `fluence workers logs [WORKER-NAMES]`
 
-Deploy workers according to deal in deals.yaml
+Get logs from deployed workers listed in deployed.yaml
 
 ```
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--aqua-logs] [-k <value>] [--network <value>]
+    <value>] [--off-aqua-logs] [-k <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Names of workers to deploy (by default all deals from deals.yaml are deployed)
+  WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property of fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --aqua-logs                 Enable Aqua logs
-  --network=<network>         [default: testnet] $The network in which the transactions used by the command will be
-                              carried out (local, testnet)
   --no-input                  Don't interactively ask for any input from the user
+  --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    Timeout used for command execution
+  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
   --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
                               the originating particle's TTL is defined then that value will be used If the option is
                               not set default TTL will be 60000
 
 DESCRIPTION
-  Deploy workers according to deal in deals.yaml
+  Get logs from deployed workers listed in deployed.yaml
 
 EXAMPLES
   $ fluence workers logs
@@ -764,29 +766,29 @@ EXAMPLES
 
 ## `fluence workers upload [WORKER-NAMES]`
 
-Upload workers to hosts, described in hosts.yaml
+Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--aqua-logs] [-k <value>]
+    <value>] [--off-aqua-logs] [-k <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Names of workers to deploy (by default all workers from hosts.yaml are deployed)
+  WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --aqua-logs                 Enable Aqua logs
   --no-input                  Don't interactively ask for any input from the user
+  --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    Timeout used for command execution
+  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
   --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
                               the originating particle's TTL is defined then that value will be used If the option is
                               not set default TTL will be 60000
 
 DESCRIPTION
-  Upload workers to hosts, described in hosts.yaml
+  Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 EXAMPLES
   $ fluence workers upload

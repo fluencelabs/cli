@@ -18,8 +18,6 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyDealsConfig } from "../../lib/configs/project/deals.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifecyle.js";
@@ -53,14 +51,11 @@ export default class Create extends BaseCommand<typeof Create> {
       true
     );
 
-    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
-    const dealsConfig = await initReadonlyDealsConfig(workersConfig);
-
     const dealAddress = await dealCreate({
       ...flags,
-      network: await ensureChainNetwork({
+      chainNetwork: await ensureChainNetwork({
         maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: dealsConfig.network,
+        maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
       }),
     });
 

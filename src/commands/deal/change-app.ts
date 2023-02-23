@@ -18,8 +18,6 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyDealsConfig } from "../../lib/configs/project/deals.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { dealUpdate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifecyle.js";
@@ -50,9 +48,6 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
       true
     );
 
-    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
-    const dealsConfig = await initReadonlyDealsConfig(workersConfig);
-
     const tx = await dealUpdate({
       dealAddress:
         args["DEAL-ADDRESS"] ??
@@ -61,7 +56,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
         args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
       network: await ensureChainNetwork({
         maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: dealsConfig.network,
+        maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
       }),
       privKey: flags.privKey,
     });

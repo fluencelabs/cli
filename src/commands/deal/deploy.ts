@@ -15,44 +15,53 @@
  */
 
 import assert from "node:assert";
+import { readFile, writeFile } from "node:fs/promises";
 
 import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
+import { toLower } from "lodash-es";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
+import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
 import {
-  initReadonlyDealsConfig,
   MIN_WORKERS,
   TARGET_WORKERS,
-} from "../../lib/configs/project/deals.js";
-import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
+} from "../../lib/configs/project/fluence.js";
 import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
   PRIV_KEY_FLAG,
-  DEALS_CONFIG_FILE_NAME,
   NETWORK_FLAG,
-  WORKERS_CONFIG_FILE_NAME,
+  OFF_AQUA_LOGS_FLAG,
+  DEAL_CONFIG,
+  FS_OPTIONS,
+  FLUENCE_CONFIG_FILE_NAME,
+  MAIN_AQUA_FILE_STATUS_TEXT_COMMENT,
+  MAIN_AQUA_FILE_STATUS_TEXT,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
+import { jsToAqua } from "../../lib/helpers/jsToAqua.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../../lib/multiaddres.js";
+import {
+  ensureFluenceAquaDealPath,
+  ensureSrcAquaMainPath,
+} from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 const DEFAULT_TTL = 60000;
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy workers according to deal in ${DEALS_CONFIG_FILE_NAME}`;
+  static override description = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -66,15 +75,13 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       helpValue: "<milliseconds>",
     }),
     ...KEY_PAIR_FLAG,
-    "aqua-logs": Flags.boolean({
-      description: "Enable Aqua logs",
-    }),
+    ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all deals from ${DEALS_CONFIG_FILE_NAME} are deployed)`,
+      description: `Names of workers to deploy (by default all deals from 'deals' property in ${FLUENCE_CONFIG_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
@@ -90,7 +97,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     if (defaultKeyPair instanceof Error) {
-      this.error(defaultKeyPair.message);
+      commandObj.error(defaultKeyPair.message);
     }
 
     const secretKey = defaultKeyPair.secretKey;
@@ -112,23 +119,18 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           }),
     });
 
-    doRegisterIpfsClient(fluencePeer, flags["aqua-logs"]);
-    doRegisterLog(fluencePeer, flags["aqua-logs"]);
+    const offAquaLogs = flags["off-aqua-logs"];
+    doRegisterIpfsClient(fluencePeer, offAquaLogs);
+    doRegisterLog(fluencePeer, offAquaLogs);
 
-    const workersConfig = await initReadonlyWorkersConfig(fluenceConfig);
-
-    const dealsConfig = await initReadonlyDealsConfig(workersConfig);
-
-    const network = await ensureChainNetwork({
+    const chainNetwork = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: dealsConfig.network,
+      maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
     });
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
-      arrayWithWorkerNames: dealsConfig.deals,
       fluenceConfig,
-      workersConfig,
     });
 
     const errorMessages = uploadArg.workers
@@ -136,7 +138,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         if (services.length === 0) {
           return `Worker ${color.yellow(
             name
-          )} has no services listed in ${WORKERS_CONFIG_FILE_NAME}`;
+          )} has no services listed in 'workers' property in ${FLUENCE_CONFIG_FILE_NAME}`;
         }
 
         return null;
@@ -159,26 +161,24 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       assert(uploadedWorker !== undefined);
       const { definition: appCID, installation_spells } = uploadedWorker;
-      const deal = dealsConfig.deals.find((d) => d.workerName === workerName);
+
+      const deal = Object.entries(fluenceConfig.deals ?? {}).find(
+        ([d]) => d === workerName
+      )?.[1];
+
       assert(deal !== undefined);
       const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
 
-      const previouslyDeployedDealIndex = deployedConfig.workers.findIndex(
-        (d) => d.name === workerName
-      );
-
-      const maybePreviouslyDeployedDeal =
-        deployedConfig.workers[previouslyDeployedDealIndex];
+      const maybePreviouslyDeployedDeal = deployedConfig.workers[workerName];
 
       if (
         maybePreviouslyDeployedDeal !== undefined &&
-        network === maybePreviouslyDeployedDeal.network &&
-        maybePreviouslyDeployedDeal.dealAddress !== undefined &&
+        maybePreviouslyDeployedDeal.dealId !== undefined &&
         (await confirm({
           message: `There is a previously deployed deal for worker ${color.yellow(
             workerName
           )} on network ${color.yellow(
-            network
+            chainNetwork
           )}. Do you want to update this existing deal?`,
         }))
       ) {
@@ -187,21 +187,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         );
 
         await dealUpdate({
-          network,
+          network: chainNetwork,
           privKey: flags.privKey,
           appCID,
-          dealAddress: maybePreviouslyDeployedDeal.dealAddress,
+          dealAddress: maybePreviouslyDeployedDeal.dealId,
         });
 
         maybePreviouslyDeployedDeal.timestamp = new Date().toISOString();
         maybePreviouslyDeployedDeal.installation_spells = installation_spells;
-
-        deployedConfig.workers.splice(
-          previouslyDeployedDealIndex,
-          1,
-          maybePreviouslyDeployedDeal
-        );
-
+        deployedConfig.workers[workerName] = maybePreviouslyDeployedDeal;
         await deployedConfig.$commit();
 
         continue;
@@ -211,24 +205,51 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         `\nCreating deal for worker ${color.yellow(workerName)}\n`
       );
 
-      const dealAddress = await dealCreate({
-        network: dealsConfig.network ?? "testnet",
+      const chainNetworkId = DEAL_CONFIG[chainNetwork].chainId;
+
+      const dealIdOriginal = await dealCreate({
+        chainNetwork,
         privKey: flags.privKey,
         appCID,
         minWorkers,
         targetWorkers,
       });
 
-      deployedConfig.workers.push({
+      deployedConfig.workers[workerName] = {
         installation_spells,
         definition: appCID,
-        name: workerName,
         timestamp: new Date().toISOString(),
-        dealAddress,
-        network,
-      });
+        dealIdOriginal,
+        dealId: toLower(dealIdOriginal.slice(2)),
+        chainNetwork,
+        chainNetworkId,
+      };
 
       await deployedConfig.$commit();
     }
+
+    await writeFile(
+      await ensureFluenceAquaDealPath(),
+      jsToAqua(deployedConfig.workers, "getWorkersInfo"),
+      FS_OPTIONS
+    );
+
+    try {
+      const mainAquaFileContent = await readFile(
+        await ensureSrcAquaMainPath(),
+        FS_OPTIONS
+      );
+
+      await writeFile(
+        await ensureSrcAquaMainPath(),
+        mainAquaFileContent.replace(
+          MAIN_AQUA_FILE_STATUS_TEXT_COMMENT,
+          MAIN_AQUA_FILE_STATUS_TEXT
+        ),
+        FS_OPTIONS
+      );
+    } catch {}
+
+    commandObj.log(`\nDeploy completed successfully`);
   }
 }

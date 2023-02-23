@@ -26,10 +26,10 @@ import { addService } from "../../lib/addService.js";
 import { isInteractive } from "../../lib/commandObj.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
-import { initWorkersConfig } from "../../lib/configs/project/workers.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
   AQUA_NAME_REQUIREMENTS,
+  cleanAquaName,
   ensureValidAquaName,
   validateAquaName,
 } from "../../lib/helpers/downloadFile.js";
@@ -72,7 +72,7 @@ export default class New extends BaseCommand<typeof New> {
     const pathToModuleDir = path.join(servicePath, "modules", serviceName);
     await generateNewModule(pathToModuleDir);
 
-    const serviceConfig = await initNewReadonlyServiceConfig(
+    await initNewReadonlyServiceConfig(
       servicePath,
       path.relative(servicePath, pathToModuleDir),
       serviceName
@@ -92,15 +92,11 @@ export default class New extends BaseCommand<typeof New> {
         maybeFluenceLockConfig
       );
 
-      const workersConfig = await initWorkersConfig(maybeFluenceConfig);
-
       await addService({
-        workersConfig,
         marineCli,
         serviceName,
         pathOrUrl: servicePath,
         fluenceConfig: maybeFluenceConfig,
-        serviceConfig,
       });
     }
   }
@@ -126,7 +122,7 @@ const getServiceName = async ({
       .split(withoutTrailingSlash.includes("/") ? "/" : "\\")
       .slice(-1)[0] ?? "";
 
-  const cleanLastPortionOfPath = lastPortionOfPath.replace(/\W/g, "");
+  const cleanLastPortionOfPath = cleanAquaName(lastPortionOfPath);
   const camelCasedServiceName = camelcase(cleanLastPortionOfPath);
   const serviceNameValidity = validateAquaName(camelCasedServiceName);
 

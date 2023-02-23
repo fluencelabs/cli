@@ -21,12 +21,12 @@ import { registerConsole } from "../compiled-aqua/installation-spell/console.js"
 
 export const doRegisterLog = (
   fluencePeer: FluencePeer,
-  isEnabled: boolean
+  offAquaLogs: boolean
 ): void => {
   registerConsole(fluencePeer, {
-    print(...args) {
-      if (isEnabled) {
-        commandObj.log("log:", ...args);
+    print(unknown) {
+      if (!offAquaLogs) {
+        commandObj.log("log:", unknown);
       }
     },
   });

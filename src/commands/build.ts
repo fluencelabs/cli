@@ -16,6 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
+import { commandObj } from "../lib/commandObj.js";
 import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../lib/const.js";
 import { getExistingKeyPair } from "../lib/keypairs.js";
@@ -38,7 +39,7 @@ export default class Build extends BaseCommand<typeof Build> {
     const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);
 
     if (defaultKeyPair instanceof Error) {
-      this.error(defaultKeyPair.message);
+      commandObj.error(defaultKeyPair.message);
     }
 
     const maybeFluenceLockConfig = await initFluenceLockConfig();

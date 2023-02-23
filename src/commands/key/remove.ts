@@ -21,7 +21,7 @@ const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { isInteractive } from "../../lib/commandObj.js";
+import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
@@ -86,7 +86,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     };
 
     if (flags.user && userSecretsConfig.keyPairs.length === 1) {
-      this.error(
+      return commandObj.error(
         `There is only one key-pair in ${secretsConfigPath} and it can't be removed, because having at least one user's key-pair is required.`
       );
     }
@@ -101,7 +101,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
         oneChoiceMessage: (choice: string): string =>
           `Do you want to remove ${color.yellow(choice)}?`,
         onNoChoices: (): never =>
-          this.error(
+          commandObj.error(
             `There are no key-pairs to remove at ${secretsConfigPath}`
           ),
         options: (flags.user
@@ -125,7 +125,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
             onNoChoices: (): never => {
-              this.error(
+              commandObj.error(
                 "There are no key-pairs to set as default for user's secrets"
               );
             },
@@ -163,7 +163,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
             oneChoiceMessage: (choice: string): string =>
               `Do you want to set ${color.yellow(choice)} as default key-pair?`,
             onNoChoices: (): never => {
-              this.error(
+              commandObj.error(
                 "There are no key-pairs to set as default for project's secrets"
               );
             },

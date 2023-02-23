@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
@@ -25,20 +26,41 @@ import { ajv } from "../../ajvInstance.js";
 import {
   AQUA_LIB_NPM_DEPENDENCY,
   AQUA_LIB_RECOMMENDED_VERSION,
+  AQUA_NPM_DEPENDENCY,
+  AQUA_RECOMMENDED_VERSION,
+  ChainNetwork,
+  CHAIN_NETWORKS,
+  DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MAIN_AQUA_FILE_CONTENT,
+  MARINE_CARGO_DEPENDENCY,
+  MARINE_RECOMMENDED_VERSION,
+  MREPL_CARGO_DEPENDENCY,
+  MREPL_RECOMMENDED_VERSION,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
+  REGISTRY_NPM_DEPENDENCY,
+  REGISTRY_RECOMMENDED_VERSION,
+  SPELL_NPM_DEPENDENCY,
+  SPELL_RECOMMENDED_VERSION,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
-import { NETWORKS, Relays } from "../../multiaddres.js";
+import { local } from "../../localNodes.js";
+import {
+  FluenceEnv,
+  getPeerId,
+  getRandomRelayId,
+  NETWORKS,
+  Relays,
+} from "../../multiaddres.js";
 import {
   ensureFluenceDir,
   ensureSrcAquaMainPath,
   projectRootDir,
 } from "../../paths.js";
+import { FLUENCE_ENV } from "../../setupEnvironment.js";
 import {
   getConfigInitFunction,
   InitConfigOptions,
@@ -51,6 +73,9 @@ import {
 
 import { moduleProperties } from "./module.js";
 import type { ModuleV0 as ServiceModuleConfig } from "./service.js";
+
+export const MIN_WORKERS = 1;
+export const TARGET_WORKERS = 3;
 
 type ServiceV0 = { name: string; count?: number };
 
@@ -288,6 +313,21 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   aquaOutputJSPath?: string;
   appTSPath?: string;
   appJSPath?: string;
+  hosts?: Record<string, { peerIds: Array<string> }>;
+  workers?: Record<
+    string,
+    {
+      services: Array<string>;
+    }
+  >;
+  deals?: Record<
+    string,
+    {
+      minWorkers?: number;
+      targetWorkers?: number;
+    }
+  >;
+  chainNetwork?: ChainNetwork;
 };
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
@@ -350,7 +390,103 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       description:
         "Path to the directory where you want to generate app.js after deployment. If you run registerApp() function in your javascript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua",
     },
+    hosts: {
+      description:
+        "A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on",
+      type: "object",
+      nullable: true,
+      additionalProperties: {
+        type: "object",
+        properties: {
+          peerIds: {
+            type: "array",
+            description: "An array of peer IDs to deploy on",
+            items: { type: "string" },
+          },
+        },
+        required: ["peerIds"],
+      },
+      required: [],
+    },
+    workers: {
+      nullable: true,
+      description:
+        "A Map with worker names as keys and worker configs as values",
+      type: "object",
+      additionalProperties: {
+        type: "object",
+        description: "Worker config",
+        properties: {
+          services: {
+            description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
+            type: "array",
+            items: { type: "string" },
+          },
+        },
+        required: ["services"],
+      },
+      required: [],
+    },
+    deals: {
+      description:
+        "A map of objects with worker names as keys, each object defines a deal",
+      type: "object",
+      nullable: true,
+      additionalProperties: {
+        type: "object",
+        properties: {
+          minWorkers: {
+            type: "number",
+            description: "Required workers to activate the deal",
+            default: MIN_WORKERS,
+            nullable: true,
+            minimum: 1,
+          },
+          targetWorkers: {
+            type: "number",
+            description: "Max workers in the deal",
+            default: TARGET_WORKERS,
+            nullable: true,
+            minimum: 1,
+          },
+        },
+        required: [],
+      },
+      required: [],
+    },
+    chainNetwork: {
+      type: "string",
+      description: "The network in which the transactions will be carried out",
+      enum: CHAIN_NETWORKS,
+      default: "testnet",
+      nullable: true,
+    },
   },
+};
+
+const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
+  if (Array.isArray(relays)) {
+    const firstRelay = relays[0];
+
+    assert(
+      firstRelay !== undefined,
+      `relays array is empty in ${FLUENCE_CONFIG_FILE_NAME}`
+    );
+
+    return getPeerId(firstRelay);
+  }
+
+  // This typescript error happens only when running config docs generation script that's why type assertion is used
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
+  const fluenceEnv = (relays ?? process.env[FLUENCE_ENV]) as FluenceEnv;
+
+  if (fluenceEnv === "local") {
+    const localNode = local[0];
+    assert(localNode !== undefined);
+    return localNode.peerId;
+  }
+
+  return getRandomRelayId(fluenceEnv);
 };
 
 const initFluenceProject = async (): Promise<ConfigV2> => {
@@ -376,10 +512,34 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
     [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
     dependencies: {
       npm: {
+        [AQUA_NPM_DEPENDENCY]: AQUA_RECOMMENDED_VERSION,
         [AQUA_LIB_NPM_DEPENDENCY]: AQUA_LIB_RECOMMENDED_VERSION,
+        [SPELL_NPM_DEPENDENCY]: SPELL_RECOMMENDED_VERSION,
+        [REGISTRY_NPM_DEPENDENCY]: REGISTRY_RECOMMENDED_VERSION,
+      },
+      cargo: {
+        [MARINE_CARGO_DEPENDENCY]: MARINE_RECOMMENDED_VERSION,
+        [MREPL_CARGO_DEPENDENCY]: MREPL_RECOMMENDED_VERSION,
       },
     },
-  } as const;
+    workers: {
+      [DEFAULT_WORKER_NAME]: {
+        services: [],
+      },
+    },
+    deals: {
+      [DEFAULT_WORKER_NAME]: {
+        minWorkers: MIN_WORKERS,
+        targetWorkers: TARGET_WORKERS,
+      },
+    },
+    hosts: {
+      [DEFAULT_WORKER_NAME]: {
+        peerIds: [getDefaultPeerId()],
+      },
+    },
+    relays: "stage",
+  };
 };
 
 const getDefault = (): Promise<LatestConfig> => initFluenceProject();
@@ -439,11 +599,143 @@ type LatestConfig = ConfigV2;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
+const validateWorkers = (
+  services: FluenceConfig["services"],
+  workers: FluenceConfig["workers"]
+): ReturnType<ConfigValidateFunction<LatestConfig>> => {
+  if (workers === undefined) {
+    return true;
+  }
+
+  const servicesSet = new Set(
+    Object.keys(services ?? {}).flatMap((serviceName) => serviceName)
+  );
+
+  return Object.entries(workers).reduce<string | true>(
+    (acc, [workerName, workerConfig]) => {
+      const servicesNotListedInFluenceYAML = workerConfig.services.filter(
+        (serviceName) => !servicesSet.has(serviceName)
+      );
+
+      if (servicesNotListedInFluenceYAML.length === 0) {
+        return acc;
+      }
+
+      const errorMessage = `Worker ${color.yellow(
+        workerName
+      )} has services that are not listed in ${FLUENCE_CONFIG_FILE_NAME}: ${color.yellow(
+        servicesNotListedInFluenceYAML.join(",")
+      )}`;
+
+      if (typeof acc === "string") {
+        return `${acc}\n${errorMessage}`;
+      }
+
+      return errorMessage;
+    },
+    true
+  );
+};
+
+const validateHosts = (
+  hosts: FluenceConfig["hosts"],
+  workers: FluenceConfig["workers"]
+): ReturnType<ConfigValidateFunction<LatestConfig>> => {
+  if (hosts === undefined) {
+    return true;
+  }
+
+  const workersSet = new Set(
+    Object.keys(workers ?? {}).flatMap((serviceName) => serviceName)
+  );
+
+  const areWorkerNamesValid = Object.keys(hosts).reduce<string | true>(
+    (acc, workerName) => {
+      if (workersSet.has(workerName)) {
+        return acc;
+      }
+
+      const errorMessage = `No worker named ${color.yellow(
+        workerName
+      )} found in ${FLUENCE_CONFIG_FILE_NAME}`;
+
+      if (typeof acc === "string") {
+        return `${acc}\n${errorMessage}`;
+      }
+
+      return errorMessage;
+    },
+    true
+  );
+
+  if (typeof areWorkerNamesValid === "string") {
+    return areWorkerNamesValid;
+  }
+
+  return true;
+};
+
+const validateDeals = (
+  deals: FluenceConfig["deals"],
+  workers: FluenceConfig["workers"]
+): ReturnType<ConfigValidateFunction<LatestConfig>> => {
+  if (deals === undefined) {
+    return true;
+  }
+
+  const workersSet = new Set(
+    Object.keys(workers ?? {}).flatMap((serviceName) => serviceName)
+  );
+
+  const areWorkerNamesValid = Object.keys(deals).reduce<string | true>(
+    (acc, workerName) => {
+      if (workersSet.has(workerName)) {
+        return acc;
+      }
+
+      const errorMessage = `No worker named ${color.yellow(
+        workerName
+      )} found in ${FLUENCE_CONFIG_FILE_NAME}`;
+
+      if (typeof acc === "string") {
+        return `${acc}\n${errorMessage}`;
+      }
+
+      return errorMessage;
+    },
+    true
+  );
+
+  if (typeof areWorkerNamesValid === "string") {
+    return areWorkerNamesValid;
+  }
+
+  return true;
+};
+
 const validate: ConfigValidateFunction<LatestConfig> = (
   config
 ): ReturnType<ConfigValidateFunction<LatestConfig>> => {
   if (config.services === undefined) {
     return true;
+  }
+
+  const workersValidity = validateWorkers(config.services, config.workers);
+
+  if (workersValidity !== true) {
+    return workersValidity;
+  }
+
+  const hostsValidity = validateHosts(config.hosts, config.workers);
+
+  if (hostsValidity !== true) {
+    return hostsValidity;
+  }
+
+  const dealsValidity = validateDeals(config.deals, config.workers);
+
+  if (dealsValidity !== true) {
+    return dealsValidity;
   }
 
   const notUnique: Array<{

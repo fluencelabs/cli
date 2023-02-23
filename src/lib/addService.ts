@@ -19,18 +19,15 @@ import assert from "node:assert";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { resolveSingleServiceModuleConfigsAndBuild } from "./build.js";
+import { build } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { ServiceConfigReadonly } from "./configs/project/service.js";
-import type { WorkersConfig } from "./configs/project/workers.js";
 import { DEFAULT_WORKER_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
-  getModuleWasmPath,
   validateAquaName,
 } from "./helpers/downloadFile.js";
-import { generateServiceInterface } from "./helpers/generateServiceInterface.js";
+import { getExistingKeyPair } from "./keypairs.js";
 import type { MarineCLI } from "./marineCli.js";
 import { confirm, input } from "./prompt.js";
 
@@ -38,18 +35,14 @@ type AddServiceArg = {
   serviceName: string;
   pathOrUrl: string;
   fluenceConfig: FluenceConfig;
-  serviceConfig: ServiceConfigReadonly;
   marineCli: MarineCLI;
-  workersConfig: WorkersConfig;
 };
 
 export const addService = async ({
   serviceName: serviceNameFromArgs,
   pathOrUrl,
   fluenceConfig,
-  serviceConfig,
   marineCli,
-  workersConfig,
 }: AddServiceArg): Promise<string> => {
   let serviceName = serviceNameFromArgs;
 
@@ -90,19 +83,13 @@ export const addService = async ({
     },
   };
 
-  const { facadeModuleConfig } =
-    await resolveSingleServiceModuleConfigsAndBuild(
-      serviceConfig,
-      fluenceConfig,
-      marineCli
-    );
+  const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);
 
-  await generateServiceInterface({
-    pathToFacadeWasm: getModuleWasmPath(facadeModuleConfig),
-    marineCli,
-    serviceName,
-  });
+  if (defaultKeyPair instanceof Error) {
+    commandObj.error(defaultKeyPair.message);
+  }
 
+  await build({ marineCli, fluenceConfig, defaultKeyPair });
   await fluenceConfig.$commit();
 
   commandObj.log(
@@ -113,22 +100,24 @@ export const addService = async ({
 
   if (
     isInteractive &&
-    DEFAULT_WORKER_NAME in workersConfig.workers &&
+    fluenceConfig !== undefined &&
+    fluenceConfig.workers !== undefined &&
+    DEFAULT_WORKER_NAME in fluenceConfig.workers &&
     (await confirm({
       message: `Do you want to add service ${color.yellow(
         serviceName
       )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
     }))
   ) {
-    const defaultWorker = workersConfig.workers[DEFAULT_WORKER_NAME];
+    const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
     assert(defaultWorker !== undefined);
 
-    workersConfig.workers[DEFAULT_WORKER_NAME] = {
+    fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
       ...defaultWorker,
       services: [...defaultWorker.services, serviceName],
     };
 
-    await workersConfig.$commit();
+    await fluenceConfig.$commit();
 
     commandObj.log(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
