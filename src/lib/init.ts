@@ -60,6 +60,7 @@ import {
 import { input, list } from "../lib/prompt.js";
 
 import { commandObj, isInteractive } from "./commandObj.js";
+import { ensureVSCodeSettingsJSON } from "./helpers/aquaImports.js";
 
 const selectTemplate = (): Promise<Template> =>
   list({
@@ -235,6 +236,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   }
 
   await ensureVSCodeRecommendedExtensions();
+  await ensureVSCodeSettingsJSON({ generateSettingsJson: true });
   await ensureGitIgnore();
 
   commandObj.log(
