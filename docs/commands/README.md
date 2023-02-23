@@ -71,7 +71,7 @@ _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/bl
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
-Generate aqua data structure from json
+Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
@@ -86,12 +86,15 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Generate aqua data structure from json
+  Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua
+  object literal with the same structure as the json file. For valid generation please refer to aqua documentation
+  https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and
+  what they translate into
 ```
 
 ## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
 
-Generate aqua data structure from yaml
+Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
@@ -106,7 +109,10 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Generate aqua data structure from yaml
+  Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua
+  object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation
+  https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and
+  what they translate into
 
 ALIASES
   $ fluence aqua yaml

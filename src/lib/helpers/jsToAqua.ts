@@ -41,7 +41,7 @@ export const jsToAqua = (v: unknown, funcNameFromArgs: string): string => {
   }\n\nfunc ${funcName}() -> ${type}:\n    <- ${value}\n`;
 };
 
-const jsToAquaImpl = (
+export const jsToAquaImpl = (
   v: unknown,
   fieldName: string,
   currentNesting: string

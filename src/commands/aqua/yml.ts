@@ -28,7 +28,8 @@ import { input } from "../../lib/prompt.js";
 
 export default class Yaml extends BaseCommand<typeof Yaml> {
   static override aliases = ["aqua:yaml"];
-  static override description = "Generate aqua data structure from yaml";
+  static override description =
+    "Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into";
   static override flags = {
     ...baseFlags,
   };

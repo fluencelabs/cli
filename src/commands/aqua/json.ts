@@ -26,7 +26,8 @@ import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class Json extends BaseCommand<typeof Json> {
-  static override description = "Generate aqua data structure from json";
+  static override description =
+    "Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into";
   static override flags = {
     ...baseFlags,
   };
