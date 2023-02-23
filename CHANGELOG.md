@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.46...fluence-cli-v0.3.0) (2023-02-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* different way of storing service interfaces and merged all configs into one fluence.yaml [fixes DXJ-308]
+
+### Features
+
+* Improvements and fixes for deals flow BREAKING CHANGE: different way of storing service interfaces and merged all configs into one fluence.yaml [fixes DXJ-308] ([#172](https://github.com/fluencelabs/fluence-cli/issues/172)) ([e07ad4d](https://github.com/fluencelabs/fluence-cli/commit/e07ad4dc908acfbf3e05ccae1bd4c08b2b7afd8b))
+
 ## [0.2.46](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.45...fluence-cli-v0.2.46) (2023-02-21)
 
 
