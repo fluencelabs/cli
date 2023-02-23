@@ -17,6 +17,10 @@
 | [aquaOutputJSPath](#aquaoutputjspath) | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-aquaoutputjspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaOutputJSPath") |
 | [appTSPath](#apptspath)               | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-apptspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appTSPath")               |
 | [appJSPath](#appjspath)               | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-appjspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appJSPath")               |
+| [hosts](#hosts)                       | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-hosts.md "https://fluence.dev/schemas/fluence.yaml#/properties/hosts")                       |
+| [workers](#workers)                   | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-workers.md "https://fluence.dev/schemas/fluence.yaml#/properties/workers")                   |
+| [deals](#deals)                       | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-deals.md "https://fluence.dev/schemas/fluence.yaml#/properties/deals")                       |
+| [chainNetwork](#chainnetwork)         | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-chainnetwork.md "https://fluence.dev/schemas/fluence.yaml#/properties/chainNetwork")         |
 
 ## services
 
@@ -237,3 +241,92 @@ Path to the directory where you want to generate app.js after deployment. If you
 ### appJSPath Type
 
 `string`
+
+## hosts
+
+A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on
+
+`hosts`
+
+*   is optional
+
+*   Type: `object` ([Details](fluence-properties-hosts.md))
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-hosts.md "https://fluence.dev/schemas/fluence.yaml#/properties/hosts")
+
+### hosts Type
+
+`object` ([Details](fluence-properties-hosts.md))
+
+## workers
+
+A Map with worker names as keys and worker configs as values
+
+`workers`
+
+*   is optional
+
+*   Type: `object` ([Details](fluence-properties-workers.md))
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-workers.md "https://fluence.dev/schemas/fluence.yaml#/properties/workers")
+
+### workers Type
+
+`object` ([Details](fluence-properties-workers.md))
+
+## deals
+
+A map of objects with worker names as keys, each object defines a deal
+
+`deals`
+
+*   is optional
+
+*   Type: `object` ([Details](fluence-properties-deals.md))
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-deals.md "https://fluence.dev/schemas/fluence.yaml#/properties/deals")
+
+### deals Type
+
+`object` ([Details](fluence-properties-deals.md))
+
+## chainNetwork
+
+The network in which the transactions will be carried out
+
+`chainNetwork`
+
+*   is optional
+
+*   Type: `string`
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-chainnetwork.md "https://fluence.dev/schemas/fluence.yaml#/properties/chainNetwork")
+
+### chainNetwork Type
+
+`string`
+
+### chainNetwork Constraints
+
+**enum**: the value of this property must be equal to one of the following values:
+
+| Value       | Explanation |
+| :---------- | :---------- |
+| `"local"`   |             |
+| `"testnet"` |             |
+
+### chainNetwork Default Value
+
+The default value is:
+
+```json
+"testnet"
+```

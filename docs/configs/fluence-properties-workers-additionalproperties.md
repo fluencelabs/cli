@@ -1,12 +1,12 @@
 ## additionalProperties Type
 
-`object` ([Details](workers-properties-workers-additionalproperties.md))
+`object` ([Details](fluence-properties-workers-additionalproperties.md))
 
 # additionalProperties Properties
 
 | Property              | Type    | Required | Nullable       | Defined by                                                                                                                                                                                     |
 | :-------------------- | :------ | :------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [services](#services) | `array` | Required | cannot be null | [workers.yaml](workers-properties-workers-additionalproperties-properties-services.md "https://fluence.dev/schemas/workers.yaml#/properties/workers/additionalProperties/properties/services") |
+| [services](#services) | `array` | Required | cannot be null | [fluence.yaml](fluence-properties-workers-additionalproperties-properties-services.md "https://fluence.dev/schemas/fluence.yaml#/properties/workers/additionalProperties/properties/services") |
 
 ## services
 
@@ -20,7 +20,7 @@ An array of service names to include in this worker. Service names must be liste
 
 *   cannot be null
 
-*   defined in: [workers.yaml](workers-properties-workers-additionalproperties-properties-services.md "https://fluence.dev/schemas/workers.yaml#/properties/workers/additionalProperties/properties/services")
+*   defined in: [fluence.yaml](fluence-properties-workers-additionalproperties-properties-services.md "https://fluence.dev/schemas/fluence.yaml#/properties/workers/additionalProperties/properties/services")
 
 ### services Type
 

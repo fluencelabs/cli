@@ -30,7 +30,6 @@ import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
   PRIV_KEY_FLAG,
-  NETWORK_FLAG,
   DEPLOYED_CONFIG_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
@@ -38,14 +37,13 @@ import {
 import { parseWorkers } from "../../lib/deployWorkers.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
-import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 
 const DEFAULT_TTL = 60000;
 
 export default class Logs extends BaseCommand<typeof Logs> {
-  static override description = `Deploy workers according to deal in 'deals' property of ${FLUENCE_CONFIG_FILE_NAME}`;
+  static override description = `Get logs from deployed workers listed in ${DEPLOYED_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -61,7 +59,6 @@ export default class Logs extends BaseCommand<typeof Logs> {
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
-    ...NETWORK_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -89,7 +86,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     const fluencePeer = new FluencePeer();
 
     await fluencePeer.start({
-      dialTimeoutMs: flags.timeout ?? DEFAULT_TTL,
+      dialTimeoutMs: flags.timeout,
       defaultTtlMs: flags.ttl ?? DEFAULT_TTL,
       connectTo: relay,
       ...(secretKey === undefined
@@ -102,7 +99,6 @@ export default class Logs extends BaseCommand<typeof Logs> {
     });
 
     const offAquaLogs = flags["off-aqua-logs"];
-    doRegisterIpfsClient(fluencePeer, offAquaLogs);
     doRegisterLog(fluencePeer, offAquaLogs);
 
     const deployedConfig = await initDeployedConfig();

@@ -235,25 +235,6 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   }
 
   await ensureVSCodeRecommendedExtensions();
-
-  // const fluenceLockConfig = await initNewFluenceLockConfig(
-  //   defaultFluenceLockConfig
-  // );
-
-  // await ensureVSCodeSettingsJSON({
-  //   generateSettingsJson: true,
-  //   aquaImports: await ensureAquaImports({
-  //     maybeFluenceConfig: fluenceConfig,
-  //     maybeFluenceLockConfig: fluenceLockConfig,
-  //   }),
-  // });
-
-  // await installAllCargoDependenciesFromFluenceConfig({
-  //   fluenceConfig,
-  //   fluenceLockConfig: fluenceLockConfig,
-  //   force: false,
-  // });
-
   await ensureGitIgnore();
 
   commandObj.log(

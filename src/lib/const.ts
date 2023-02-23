@@ -199,7 +199,8 @@ export const PRIV_KEY_FLAG = {
 
 export const OFF_AQUA_LOGS_FLAG = {
   "off-aqua-logs": Flags.boolean({
-    description: "Prints Aqua logs",
+    description:
+      "Turns off logs from Console.print in aqua and from IPFS service",
   }),
 };
 

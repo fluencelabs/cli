@@ -7,7 +7,7 @@
 | Property            | Type     | Required | Nullable       | Defined by                                                                                                      |
 | :------------------ | :------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------- |
 | [version](#version) | `number` | Required | cannot be null | [deployed.yaml](deployed-properties-version.md "https://fluence.dev/schemas/deployed.yaml#/properties/version") |
-| [workers](#workers) | `array`  | Optional | cannot be null | [deployed.yaml](deployed-properties-workers.md "https://fluence.dev/schemas/deployed.yaml#/properties/workers") |
+| [workers](#workers) | `object` | Optional | cannot be null | [deployed.yaml](deployed-properties-workers.md "https://fluence.dev/schemas/deployed.yaml#/properties/workers") |
 
 ## version
 
@@ -37,13 +37,13 @@
 
 ## workers
 
-A list of deployed workers
+A map of deployed workers
 
 `workers`
 
 *   is optional
 
-*   Type: `object[]` ([Details](deployed-properties-workers-items.md))
+*   Type: `object` ([Details](deployed-properties-workers.md))
 
 *   cannot be null
 
@@ -51,4 +51,4 @@ A list of deployed workers
 
 ### workers Type
 
-`object[]` ([Details](deployed-properties-workers-items.md))
+`object` ([Details](deployed-properties-workers.md))
