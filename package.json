@@ -38,7 +38,7 @@
     "compile-cli-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/cli.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
     "compile-files-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/files.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
     "compile-config-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/config.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
-    "compile-air": "./bin/dev.js aqua --no-relay -i node_modules/@fluencelabs/installation-spell/src/aqua/deal_spell.aqua -o src/lib/compiled-aqua/installation-spell/air --import node_modules --air",
+    "compile-air": "./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/deal_spell.aqua -o src/lib/compiled-aqua/installation-spell/air --import node_modules --air",
     "compile-installation-spell": "npm run compile-cli-aqua && npm run compile-files-aqua && npm run compile-config-aqua && npm run compile-air"
   },
   "dependencies": {

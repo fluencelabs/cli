@@ -23,7 +23,10 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
  (seq
   (seq
    (seq
-    (call %init_peer_id% ("getDataSrv" "ipfs") [] ipfs)
+    (seq
+     (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+     (call %init_peer_id% ("getDataSrv" "ipfs") [] ipfs)
+    )
     (call %init_peer_id% ("getDataSrv" "worker_def_cid") [] worker_def_cid)
    )
    (call %init_peer_id% ("getDataSrv" "deal_id") [] deal_id)
@@ -647,20 +650,20 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                        (seq
                         (seq
                          (seq
-                          (call %init_peer_id% ("insecure_sig" "get_peer_id") [] peer_id)
+                          (call -relay- ("insecure_sig" "get_peer_id") [] peer_id)
                           (new $option-inline
                            (seq
                             (xor
                              (ap peer_id $option-inline)
                              (null)
                             )
-                            (canon %init_peer_id% $option-inline  #option-inline-0)
+                            (canon -relay- $option-inline  #option-inline-0)
                            )
                           )
                          )
-                         (call %init_peer_id% ("registry" "get_key_bytes") [deal_id #option-inline-0 t [] ""] bytes)
+                         (call -relay- ("registry" "get_key_bytes") [deal_id #option-inline-0 t [] ""] bytes)
                         )
-                        (call %init_peer_id% ("insecure_sig" "sign") [bytes] result-0)
+                        (call -relay- ("insecure_sig" "sign") [bytes] result-0)
                        )
                        (xor
                         (match result-0.$.success! false
@@ -673,11 +676,11 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                             (seq
                              (seq
                               (ap result-0.$.signature! result-0_flat)
-                              (call %init_peer_id% ("registry" "get_key_id") [deal_id peer_id] id)
+                              (call -relay- ("registry" "get_key_id") [deal_id peer_id] id)
                              )
-                             (call %init_peer_id% ("op" "string_to_b58") [id] k)
+                             (call -relay- ("op" "string_to_b58") [id] k)
                             )
-                            (call %init_peer_id% ("kad" "neighborhood") [k [] []] nodes)
+                            (call -relay- ("kad" "neighborhood") [k [] []] nodes)
                            )
                            (xor
                             (par
@@ -714,9 +717,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                   )
                                   (call n-0 ("op" "noop") [])
                                  )
-                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
+                                 (seq
+                                  (call -relay- ("op" "noop") [])
+                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
+                                 )
                                 )
-                                (call %init_peer_id% ("op" "noop") [])
+                                (call -relay- ("op" "noop") [])
                                )
                                (next n-0)
                               )
@@ -736,17 +742,17 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                 (seq
                                  (seq
                                   (seq
-                                   (call %init_peer_id% ("math" "sub") [1 1] sub)
+                                   (call -relay- ("math" "sub") [1 1] sub)
                                    (new $successful_test
                                     (seq
                                      (seq
                                       (seq
-                                       (call %init_peer_id% ("math" "add") [sub 1] successful_incr)
+                                       (call -relay- ("math" "add") [sub 1] successful_incr)
                                        (fold $successful s
                                         (seq
                                          (seq
                                           (ap s $successful_test)
-                                          (canon %init_peer_id% $successful_test  #successful_iter_canon)
+                                          (canon -relay- $successful_test  #successful_iter_canon)
                                          )
                                          (xor
                                           (match #successful_iter_canon.length successful_incr
@@ -758,28 +764,28 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                         (never)
                                        )
                                       )
-                                      (canon %init_peer_id% $successful_test  #successful_result_canon)
+                                      (canon -relay- $successful_test  #successful_result_canon)
                                      )
                                      (ap #successful_result_canon successful_gate)
                                     )
                                    )
                                   )
-                                  (call %init_peer_id% ("math" "sub") [1 1] sub-0)
+                                  (call -relay- ("math" "sub") [1 1] sub-0)
                                  )
                                  (ap "ok" $status-0)
                                 )
-                                (call %init_peer_id% ("peer" "timeout") [6000 "timeout"] $status-0)
+                                (call -relay- ("peer" "timeout") [6000 "timeout"] $status-0)
                                )
                                (new $status-0_test
                                 (seq
                                  (seq
                                   (seq
-                                   (call %init_peer_id% ("math" "add") [0 1] status-0_incr)
+                                   (call -relay- ("math" "add") [0 1] status-0_incr)
                                    (fold $status-0 s
                                     (seq
                                      (seq
                                       (ap s $status-0_test)
-                                      (canon %init_peer_id% $status-0_test  #status-0_iter_canon)
+                                      (canon -relay- $status-0_test  #status-0_iter_canon)
                                      )
                                      (xor
                                       (match #status-0_iter_canon.length status-0_incr
@@ -791,7 +797,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                     (never)
                                    )
                                   )
-                                  (canon %init_peer_id% $status-0_test  #status-0_result_canon)
+                                  (canon -relay- $status-0_test  #status-0_result_canon)
                                  )
                                  (ap #status-0_result_canon status-0_gate)
                                 )
@@ -808,12 +814,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                               (seq
                                (seq
                                 (seq
-                                 (call %init_peer_id% ("math" "add") [0 1] result-2_incr)
+                                 (call -relay- ("math" "add") [0 1] result-2_incr)
                                  (fold $result-2 s
                                   (seq
                                    (seq
                                     (ap s $result-2_test)
-                                    (canon %init_peer_id% $result-2_test  #result-2_iter_canon)
+                                    (canon -relay- $result-2_test  #result-2_iter_canon)
                                    )
                                    (xor
                                     (match #result-2_iter_canon.length result-2_incr
@@ -825,7 +831,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                   (never)
                                  )
                                 )
-                                (canon %init_peer_id% $result-2_test  #result-2_result_canon)
+                                (canon -relay- $result-2_test  #result-2_result_canon)
                                )
                                (ap #result-2_result_canon result-2_gate)
                               )
@@ -903,18 +909,18 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                               (seq
                                (seq
                                 (seq
-                                 (call %init_peer_id% ("peer" "timestamp_sec") [] t-2)
+                                 (call -relay- ("peer" "timestamp_sec") [] t-2)
                                  (new $option-inline-2
                                   (seq
                                    (xor
-                                    (ap %init_peer_id% $option-inline-2)
+                                    (ap -relay- $option-inline-2)
                                     (null)
                                    )
-                                   (canon %init_peer_id% $option-inline-2  #option-inline-2-0)
+                                   (canon -relay- $option-inline-2  #option-inline-2-0)
                                   )
                                  )
                                 )
-                                (call %init_peer_id% ("registry" "get_record_metadata_bytes") [-subnetwork_id-flat-0.$.[0]! %init_peer_id% t-2 "" %init_peer_id% #option-inline-2-0 [] []] bytes-0)
+                                (call -relay- ("registry" "get_record_metadata_bytes") [-subnetwork_id-flat-0.$.[0]! %init_peer_id% t-2 "" %init_peer_id% #option-inline-2-0 [] []] bytes-0)
                                )
                                (xor
                                 (call %init_peer_id% ("sig" "sign") [bytes-0] sig_result-0)
@@ -924,18 +930,18 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                               (xor
                                (match sig_result-0.$.success! true
                                 (xor
-                                 (call %init_peer_id% ("registry" "create_record_metadata") [-subnetwork_id-flat-0.$.[0]! %init_peer_id% t-2 "" %init_peer_id% #option-inline-2-0 [] [] sig_result-0.$.signature.[0]!] $result-3)
+                                 (call -relay- ("registry" "create_record_metadata") [-subnetwork_id-flat-0.$.[0]! %init_peer_id% t-2 "" %init_peer_id% #option-inline-2-0 [] [] sig_result-0.$.signature.[0]!] $result-3)
                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 9])
                                 )
                                )
                                (ap sig_result-0.$.error.[0]! $error-1)
                               )
                              )
-                             (canon %init_peer_id% $result-3  #-result-fix-0)
+                             (canon -relay- $result-3  #-result-fix-0)
                             )
                             (ap #-result-fix-0 -result-flat-0)
                            )
-                           (canon %init_peer_id% $error-1  #-error-fix-1)
+                           (canon -relay- $error-1  #-error-fix-1)
                           )
                           (ap #-error-fix-1 -error-flat-1)
                          )
@@ -950,11 +956,11 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                         )
                         (seq
                          (seq
-                          (call %init_peer_id% ("peer" "timestamp_sec") [] t-1)
+                          (call -relay- ("peer" "timestamp_sec") [] t-1)
                           (new $signature
                            (seq
                             (seq
-                             (call %init_peer_id% ("registry" "get_record_bytes") [-result-flat-0.$.[0]! t-1] bytes-1)
+                             (call -relay- ("registry" "get_record_bytes") [-result-flat-0.$.[0]! t-1] bytes-1)
                              (xor
                               (call %init_peer_id% ("sig" "sign") [bytes-1] $signature)
                               (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 10])
@@ -964,12 +970,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                              (seq
                               (seq
                                (seq
-                                (call %init_peer_id% ("math" "add") [0 1] signature_incr)
+                                (call -relay- ("math" "add") [0 1] signature_incr)
                                 (fold $signature s
                                  (seq
                                   (seq
                                    (ap s $signature_test)
-                                   (canon %init_peer_id% $signature_test  #signature_iter_canon)
+                                   (canon -relay- $signature_test  #signature_iter_canon)
                                   )
                                   (xor
                                    (match #signature_iter_canon.length signature_incr
@@ -981,7 +987,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                  (never)
                                 )
                                )
-                               (canon %init_peer_id% $signature_test  #signature_result_canon)
+                               (canon -relay- $signature_test  #signature_result_canon)
                               )
                               (ap #signature_result_canon signature_gate)
                              )
@@ -1006,8 +1012,8 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                  (seq
                                   (seq
                                    (seq
-                                    (call %init_peer_id% ("op" "string_to_b58") [-subnetwork_id-flat-0.$.[0]!] k-0)
-                                    (call %init_peer_id% ("kad" "neighborhood") [k-0 [] []] nodes-2)
+                                    (call -relay- ("op" "string_to_b58") [-subnetwork_id-flat-0.$.[0]!] k-0)
+                                    (call -relay- ("kad" "neighborhood") [k-0 [] []] nodes-2)
                                    )
                                    (par
                                     (fold nodes-2 n-2-0
@@ -1032,9 +1038,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                          )
                                          (call n-2-0 ("op" "noop") [])
                                         )
-                                        (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 11])
+                                        (seq
+                                         (call -relay- ("op" "noop") [])
+                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 11])
+                                        )
                                        )
-                                       (call %init_peer_id% ("op" "noop") [])
+                                       (call -relay- ("op" "noop") [])
                                       )
                                       (next n-2-0)
                                      )
@@ -1052,17 +1061,17 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                         (seq
                                          (seq
                                           (seq
-                                           (call %init_peer_id% ("math" "sub") [1 1] sub-1)
+                                           (call -relay- ("math" "sub") [1 1] sub-1)
                                            (new $successful-1_test
                                             (seq
                                              (seq
                                               (seq
-                                               (call %init_peer_id% ("math" "add") [sub-1 1] successful-1_incr)
+                                               (call -relay- ("math" "add") [sub-1 1] successful-1_incr)
                                                (fold $successful-1 s
                                                 (seq
                                                  (seq
                                                   (ap s $successful-1_test)
-                                                  (canon %init_peer_id% $successful-1_test  #successful-1_iter_canon)
+                                                  (canon -relay- $successful-1_test  #successful-1_iter_canon)
                                                  )
                                                  (xor
                                                   (match #successful-1_iter_canon.length successful-1_incr
@@ -1074,28 +1083,28 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                                 (never)
                                                )
                                               )
-                                              (canon %init_peer_id% $successful-1_test  #successful-1_result_canon)
+                                              (canon -relay- $successful-1_test  #successful-1_result_canon)
                                              )
                                              (ap #successful-1_result_canon successful-1_gate)
                                             )
                                            )
                                           )
-                                          (call %init_peer_id% ("math" "sub") [1 1] sub-2)
+                                          (call -relay- ("math" "sub") [1 1] sub-2)
                                          )
                                          (ap "ok" $status-1)
                                         )
-                                        (call %init_peer_id% ("peer" "timeout") [6000 "timeout"] $status-1)
+                                        (call -relay- ("peer" "timeout") [6000 "timeout"] $status-1)
                                        )
                                        (new $status-1_test
                                         (seq
                                          (seq
                                           (seq
-                                           (call %init_peer_id% ("math" "add") [0 1] status-1_incr)
+                                           (call -relay- ("math" "add") [0 1] status-1_incr)
                                            (fold $status-1 s
                                             (seq
                                              (seq
                                               (ap s $status-1_test)
-                                              (canon %init_peer_id% $status-1_test  #status-1_iter_canon)
+                                              (canon -relay- $status-1_test  #status-1_iter_canon)
                                              )
                                              (xor
                                               (match #status-1_iter_canon.length status-1_incr
@@ -1107,7 +1116,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                             (never)
                                            )
                                           )
-                                          (canon %init_peer_id% $status-1_test  #status-1_result_canon)
+                                          (canon -relay- $status-1_test  #status-1_result_canon)
                                          )
                                          (ap #status-1_result_canon status-1_gate)
                                         )
@@ -1124,12 +1133,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                       (seq
                                        (seq
                                         (seq
-                                         (call %init_peer_id% ("math" "add") [0 1] result-5_incr)
+                                         (call -relay- ("math" "add") [0 1] result-5_incr)
                                          (fold $result-5 s
                                           (seq
                                            (seq
                                             (ap s $result-5_test)
-                                            (canon %init_peer_id% $result-5_test  #result-5_iter_canon)
+                                            (canon -relay- $result-5_test  #result-5_iter_canon)
                                            )
                                            (xor
                                             (match #result-5_iter_canon.length result-5_incr
@@ -1141,7 +1150,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                           (never)
                                          )
                                         )
-                                        (canon %init_peer_id% $result-5_test  #result-5_result_canon)
+                                        (canon -relay- $result-5_test  #result-5_result_canon)
                                        )
                                        (ap #result-5_result_canon result-5_gate)
                                       )
@@ -1156,8 +1165,8 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                   )
                                   (seq
                                    (seq
-                                    (canon %init_peer_id% $resources  #resources_canon)
-                                    (call %init_peer_id% ("registry" "merge_keys") [#resources_canon] merge_result)
+                                    (canon -relay- $resources  #resources_canon)
+                                    (call -relay- ("registry" "merge_keys") [#resources_canon] merge_result)
                                    )
                                    (xor
                                     (match merge_result.$.success! true
@@ -1168,7 +1177,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                   )
                                  )
                                 )
-                                (canon %init_peer_id% $result-4  #-result-fix-0-0)
+                                (canon -relay- $result-4  #-result-fix-0-0)
                                )
                                (ap #-result-fix-0-0 -result-flat-0-0)
                               )
@@ -1180,7 +1189,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                              (xor
                               (seq
                                (seq
-                                (canon %init_peer_id% $error-2  #error-2_canon)
+                                (canon -relay- $error-2  #error-2_canon)
                                 (fold #error-2_canon e-0-0
                                  (seq
                                   (ap e-0-0 $error-0)
@@ -1196,10 +1205,10 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                             (seq
                              (seq
                               (seq
-                               (call %init_peer_id% ("peer" "timestamp_sec") [] t-3)
-                               (call %init_peer_id% ("trust-graph" "get_weight") [-result-flat-0-0.$.[0].owner_peer_id! t-3] weight-0)
+                               (call -relay- ("peer" "timestamp_sec") [] t-3)
+                               (call -relay- ("trust-graph" "get_weight") [-result-flat-0-0.$.[0].owner_peer_id! t-3] weight-0)
                               )
-                              (call %init_peer_id% ("registry" "republish_key") [-result-flat-0-0.$.[0]! weight-0 t-3] result-6)
+                              (call -relay- ("registry" "republish_key") [-result-flat-0-0.$.[0]! weight-0 t-3] result-6)
                              )
                              (xor
                               (match result-6.$.success! false
@@ -1213,11 +1222,11 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                 (seq
                                  (seq
                                   (null)
-                                  (call %init_peer_id% ("peer" "timestamp_sec") [] t-4)
+                                  (call -relay- ("peer" "timestamp_sec") [] t-4)
                                  )
-                                 (call %init_peer_id% ("trust-graph" "get_weight") [-result-flat-0.$.[0].issued_by! t-4] weight-1)
+                                 (call -relay- ("trust-graph" "get_weight") [-result-flat-0.$.[0].issued_by! t-4] weight-1)
                                 )
-                                (call %init_peer_id% ("registry" "put_record") [-result-flat-0.$.[0]! t-1 signature_gate.$.[0].signature.[0]! weight-1 t-4] result-7)
+                                (call -relay- ("registry" "put_record") [-result-flat-0.$.[0]! t-1 signature_gate.$.[0].signature.[0]! weight-1 t-4] result-7)
                                )
                                (xor
                                 (match result-7.$.success! false
@@ -1230,8 +1239,8 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                  (seq
                                   (seq
                                    (seq
-                                    (call %init_peer_id% ("op" "string_to_b58") [-subnetwork_id-flat-0.$.[0]!] k-1)
-                                    (call %init_peer_id% ("kad" "neighborhood") [k-1 [] []] nodes-3)
+                                    (call -relay- ("op" "string_to_b58") [-subnetwork_id-flat-0.$.[0]!] k-1)
+                                    (call -relay- ("kad" "neighborhood") [k-1 [] []] nodes-3)
                                    )
                                    (par
                                     (fold nodes-3 n-1-0
@@ -1273,9 +1282,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                          )
                                          (call n-1-0 ("op" "noop") [])
                                         )
-                                        (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 13])
+                                        (seq
+                                         (call -relay- ("op" "noop") [])
+                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 13])
+                                        )
                                        )
-                                       (call %init_peer_id% ("op" "noop") [])
+                                       (call -relay- ("op" "noop") [])
                                       )
                                       (next n-1-0)
                                      )
@@ -1293,17 +1305,17 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                         (seq
                                          (seq
                                           (seq
-                                           (call %init_peer_id% ("math" "sub") [1 1] sub-3)
+                                           (call -relay- ("math" "sub") [1 1] sub-3)
                                            (new $successful-0_test
                                             (seq
                                              (seq
                                               (seq
-                                               (call %init_peer_id% ("math" "add") [sub-3 1] successful-0_incr)
+                                               (call -relay- ("math" "add") [sub-3 1] successful-0_incr)
                                                (fold $successful-0 s
                                                 (seq
                                                  (seq
                                                   (ap s $successful-0_test)
-                                                  (canon %init_peer_id% $successful-0_test  #successful-0_iter_canon)
+                                                  (canon -relay- $successful-0_test  #successful-0_iter_canon)
                                                  )
                                                  (xor
                                                   (match #successful-0_iter_canon.length successful-0_incr
@@ -1315,28 +1327,28 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                                 (never)
                                                )
                                               )
-                                              (canon %init_peer_id% $successful-0_test  #successful-0_result_canon)
+                                              (canon -relay- $successful-0_test  #successful-0_result_canon)
                                              )
                                              (ap #successful-0_result_canon successful-0_gate)
                                             )
                                            )
                                           )
-                                          (call %init_peer_id% ("math" "sub") [1 1] sub-4)
+                                          (call -relay- ("math" "sub") [1 1] sub-4)
                                          )
                                          (ap "ok" $status-2)
                                         )
-                                        (call %init_peer_id% ("peer" "timeout") [6000 "timeout"] $status-2)
+                                        (call -relay- ("peer" "timeout") [6000 "timeout"] $status-2)
                                        )
                                        (new $status-2_test
                                         (seq
                                          (seq
                                           (seq
-                                           (call %init_peer_id% ("math" "add") [0 1] status-2_incr)
+                                           (call -relay- ("math" "add") [0 1] status-2_incr)
                                            (fold $status-2 s
                                             (seq
                                              (seq
                                               (ap s $status-2_test)
-                                              (canon %init_peer_id% $status-2_test  #status-2_iter_canon)
+                                              (canon -relay- $status-2_test  #status-2_iter_canon)
                                              )
                                              (xor
                                               (match #status-2_iter_canon.length status-2_incr
@@ -1348,7 +1360,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                             (never)
                                            )
                                           )
-                                          (canon %init_peer_id% $status-2_test  #status-2_result_canon)
+                                          (canon -relay- $status-2_test  #status-2_result_canon)
                                          )
                                          (ap #status-2_result_canon status-2_gate)
                                         )
@@ -1365,12 +1377,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                       (seq
                                        (seq
                                         (seq
-                                         (call %init_peer_id% ("math" "add") [0 1] result-10_incr)
+                                         (call -relay- ("math" "add") [0 1] result-10_incr)
                                          (fold $result-10 s
                                           (seq
                                            (seq
                                             (ap s $result-10_test)
-                                            (canon %init_peer_id% $result-10_test  #result-10_iter_canon)
+                                            (canon -relay- $result-10_test  #result-10_iter_canon)
                                            )
                                            (xor
                                             (match #result-10_iter_canon.length result-10_incr
@@ -1382,7 +1394,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                           (never)
                                          )
                                         )
-                                        (canon %init_peer_id% $result-10_test  #result-10_result_canon)
+                                        (canon -relay- $result-10_test  #result-10_result_canon)
                                        )
                                        (ap #result-10_result_canon result-10_gate)
                                       )
@@ -1407,12 +1419,12 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                        (seq
                         (seq
                          (seq
-                          (call %init_peer_id% ("math" "add") [0 1] success_incr)
+                          (call -relay- ("math" "add") [0 1] success_incr)
                           (fold $success s
                            (seq
                             (seq
                              (ap s $success_test)
-                             (canon %init_peer_id% $success_test  #success_iter_canon)
+                             (canon -relay- $success_test  #success_iter_canon)
                             )
                             (xor
                              (match #success_iter_canon.length success_incr
@@ -1424,7 +1436,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                            (never)
                           )
                          )
-                         (canon %init_peer_id% $success_test  #success_result_canon)
+                         (canon -relay- $success_test  #success_result_canon)
                         )
                         (ap #success_result_canon success_gate)
                        )
@@ -1434,7 +1446,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                       (match success_gate.$.[0]! false
                        (ap "worker hasn't registered: timeout exceeded" $error-0)
                       )
-                      (call %init_peer_id% ("op" "noop") [])
+                      (call -relay- ("op" "noop") [])
                      )
                     )
                    )
@@ -1525,9 +1537,9 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                       (seq
                        (seq
                         (ap "error registering worker" $array-inline-27)
-                        (canon %init_peer_id% $error-0  #push-to-stream-812)
+                        (canon %init_peer_id% $error-0  #push-to-stream-813)
                        )
-                       (ap #push-to-stream-812 $array-inline-27)
+                       (ap #push-to-stream-813 $array-inline-27)
                       )
                       (canon %init_peer_id% $array-inline-27  #array-inline-27-0)
                      )
@@ -1565,9 +1577,9 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                   (seq
                    (seq
                     (ap "error creating subnetwork" $array-inline-29)
-                    (canon %init_peer_id% $error  #push-to-stream-830)
+                    (canon %init_peer_id% $error  #push-to-stream-831)
                    )
-                   (ap #push-to-stream-830 $array-inline-29)
+                   (ap #push-to-stream-831 $array-inline-29)
                   )
                   (canon %init_peer_id% $array-inline-29  #array-inline-29-0)
                  )
