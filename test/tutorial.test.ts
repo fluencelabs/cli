@@ -166,7 +166,7 @@ const addAdderServiceToFluenceYAML = (cwd: string) =>
 
 const deploy = (cwd: string) =>
   fluence({
-    args: ["deploy"],
+    args: ["legacy", "deploy"],
     flags: {
       "no-input": true,
     },
@@ -200,7 +200,7 @@ const uncommentCodeInMainAqua = async (cwd: string) => {
 
 const remove = (cwd: string) =>
   fluence({
-    args: ["remove"],
+    args: ["legacy", "remove"],
     flags: {
       "no-input": true,
     },

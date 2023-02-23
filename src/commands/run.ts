@@ -56,11 +56,14 @@ import {
   isAquaLogLevel,
   AquaLogLevel,
   AQUA_LOG_LEVELS,
+  OFF_AQUA_LOGS_FLAG,
 } from "../lib/const.js";
 import { getAppJson } from "../lib/deployedApp.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
+import { jsonStringify } from "../lib/helpers/jsonStringify.js";
 import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
 import { initCli } from "../lib/lifecyle.js";
+import { doRegisterLog } from "../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -161,6 +164,7 @@ export default class Run extends BaseCommand<typeof Run> {
     "print-air": Flags.boolean({
       description: "Prints generated AIR code before function execution",
     }),
+    ...OFF_AQUA_LOGS_FLAG,
     ...TIMEOUT_FLAG,
     ...KEY_PAIR_FLAG,
   };
@@ -218,7 +222,7 @@ export default class Run extends BaseCommand<typeof Run> {
     );
 
     if (keyPair instanceof Error) {
-      this.error(keyPair.message);
+      commandObj.error(keyPair.message);
     }
 
     const secretKey = keyPair.secretKey;
@@ -296,20 +300,22 @@ export default class Run extends BaseCommand<typeof Run> {
       relay,
       secretKey,
       timeout,
+      offAquaLogs: flags["off-aqua-logs"],
     };
 
     const useAquaRun =
-      typeof flags.plugin === "string" || jsonServicePaths.length > 0;
+      // for some reason fluence run won't work - using aqua run instead
+      true || typeof flags.plugin === "string" || jsonServicePaths.length > 0;
 
     const result: unknown = await (useAquaRun
       ? aquaRun(runArgs)
       : fluenceRun(runArgs));
 
-    const stringResult = JSON.stringify(result);
+    const stringResult =
+      typeof result === "string" ? result : jsonStringify(result);
 
-    if (flags.quiet) {
+    if (!useAquaRun) {
       console.log(stringResult);
-      return;
     }
   }
 }
@@ -521,6 +527,7 @@ type RunArgs = {
   appJsonServicePath: string;
   noXor: boolean;
   noRelay: boolean;
+  offAquaLogs: boolean;
 };
 
 const aquaRun = async ({
@@ -548,29 +555,25 @@ const aquaRun = async ({
   let result;
 
   try {
-    result = await aquaCli(
-      {
-        args: ["run"],
-        flags: {
-          addr: relay,
-          func: funcCall,
-          input: filePath,
-          timeout: timeout,
-          import: imports,
-          "json-service": jsonServicePaths,
-          sk: secretKey,
-          plugin,
-          const: constants,
-          "print-air": printAir,
-          ...(data === undefined ? {} : { data: JSON.stringify(data) }),
-          "log-level": logLevelCompiler,
-          "no-xor": noXor,
-          "no-relay": noRelay,
-        },
+    result = await aquaCli({
+      args: ["run"],
+      flags: {
+        addr: relay,
+        func: funcCall,
+        input: filePath,
+        timeout: timeout,
+        import: imports,
+        "json-service": jsonServicePaths,
+        sk: secretKey,
+        plugin,
+        const: constants,
+        "print-air": printAir,
+        ...(data === undefined ? {} : { data: JSON.stringify(data) }),
+        "log-level": logLevelCompiler,
+        "no-xor": noXor,
+        "no-relay": noRelay,
       },
-      "Running",
-      { function: funcCall, relay }
-    );
+    });
   } finally {
     if (maybeAppConfig !== null) {
       await unlink(appJsonServicePath);
@@ -595,6 +598,7 @@ const fluenceRun = async ({
   data,
   noXor,
   noRelay,
+  offAquaLogs,
 }: RunArgs) => {
   const fluencePeer = new FluencePeer();
 
@@ -624,6 +628,8 @@ const fluenceRun = async ({
           }),
     }),
   ]);
+
+  doRegisterLog(fluencePeer, offAquaLogs);
 
   if (errors.length > 0) {
     commandObj.error(errors.join("\n"));

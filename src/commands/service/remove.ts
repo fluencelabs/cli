@@ -21,6 +21,7 @@ const color = oclifColor.default;
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
@@ -54,7 +55,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       }));
 
     if (fluenceConfig.services === undefined) {
-      this.error(
+      return commandObj.error(
         `There are no services in ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
       );
     }
@@ -74,7 +75,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       assert(typeof serviceName === "string");
       delete fluenceConfig.services[serviceName];
     } else {
-      this.error(
+      commandObj.error(
         `There is no service ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
         )}`

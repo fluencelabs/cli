@@ -36,11 +36,10 @@ import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
 } from "./configs/project/service.js";
-import type { WorkersConfigReadonly } from "./configs/project/workers.js";
 import {
+  FLUENCE_CONFIG_FILE_NAME,
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
-  WORKERS_CONFIG_FILE_NAME,
 } from "./const.js";
 import {
   downloadModule,
@@ -57,26 +56,35 @@ export const parseWorkers = (workerNamesString: string) =>
 type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
-  arrayWithWorkerNames: Array<{ workerName: string; peerIds?: Array<string> }>;
-  workersConfig: WorkersConfigReadonly;
+  hosts?: boolean;
 };
 
 export const prepareForDeploy = async ({
   workerNames: workerNamesString,
-  arrayWithWorkerNames,
   fluenceConfig,
-  workersConfig,
+  hosts = false,
 }: PrepareForDeployArg): Promise<UploadArgConfig> => {
-  const workerNamesSet = [
-    ...new Set(arrayWithWorkerNames.map(({ workerName }) => workerName)),
-  ];
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const arrayWithWorkerNames = Object.entries(
+    (hosts ? fluenceConfig.hosts : fluenceConfig.deals) ?? {}
+  ) as Array<
+    [
+      string,
+      (
+        | (typeof fluenceConfig.hosts)[keyof typeof fluenceConfig.hosts]
+        | (typeof fluenceConfig.deals)[keyof typeof fluenceConfig.deals]
+      )
+    ]
+  >;
+
+  const workerNamesSet = arrayWithWorkerNames.map(([workerName]) => workerName);
 
   const workersToHost =
     workerNamesString === undefined
       ? workerNamesSet
       : parseWorkers(workerNamesString);
 
-  const workersFromWorkersConfig = Object.keys(workersConfig.workers);
+  const workersFromWorkersConfig = Object.keys(fluenceConfig.workers ?? {});
 
   const workerNamesNotFoundInWorkersConfig = workersToHost.filter(
     (workerName) => !workersFromWorkersConfig.includes(workerName)
@@ -87,13 +95,13 @@ export const prepareForDeploy = async ({
       `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
         .map((workerName) => color.yellow(workerName))
         .join(", ")} in ${color.yellow(
-        WORKERS_CONFIG_FILE_NAME
+        FLUENCE_CONFIG_FILE_NAME
       )} please check the spelling and try again`
     );
   }
 
   const workerConfigs = workersToHost.map((workerName) => {
-    const workerConfig = workersConfig.workers[workerName];
+    const workerConfig = fluenceConfig.workers?.[workerName];
     assert(workerConfig !== undefined);
     return {
       workerName,
@@ -214,9 +222,9 @@ export const prepareForDeploy = async ({
   await buildModules([...moduleConfigsMap.values()], marineCli);
 
   const workers: UploadArgConfig["workers"] = arrayWithWorkerNames
-    .filter(({ workerName }) => workersToHost.includes(workerName))
-    .map(({ workerName, peerIds = [] }) => {
-      const workerConfig = workersConfig.workers[workerName];
+    .filter(([workerName]) => workersToHost.includes(workerName))
+    .map(([workerName, { peerIds = [] }]) => {
+      const workerConfig = fluenceConfig.workers?.[workerName];
       assert(workerConfig !== undefined);
 
       const services = workerConfig.services.map((serviceName) => {

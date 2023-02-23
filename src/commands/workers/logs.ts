@@ -30,21 +30,20 @@ import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
   PRIV_KEY_FLAG,
-  DEALS_CONFIG_FILE_NAME,
-  NETWORK_FLAG,
   DEPLOYED_CONFIG_FILE_NAME,
+  OFF_AQUA_LOGS_FLAG,
+  FLUENCE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import { parseWorkers } from "../../lib/deployWorkers.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
-import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 
 const DEFAULT_TTL = 60000;
 
 export default class Logs extends BaseCommand<typeof Logs> {
-  static override description = `Deploy workers according to deal in ${DEALS_CONFIG_FILE_NAME}`;
+  static override description = `Get logs from deployed workers listed in ${DEPLOYED_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -58,15 +57,12 @@ export default class Logs extends BaseCommand<typeof Logs> {
       helpValue: "<milliseconds>",
     }),
     ...KEY_PAIR_FLAG,
-    "aqua-logs": Flags.boolean({
-      description: "Enable Aqua logs",
-    }),
+    ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
-    ...NETWORK_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all deals from ${DEALS_CONFIG_FILE_NAME} are deployed)`,
+      description: `Names of workers to deploy (by default all deals from 'deals' property of ${FLUENCE_CONFIG_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
@@ -82,7 +78,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     );
 
     if (defaultKeyPair instanceof Error) {
-      this.error(defaultKeyPair.message);
+      commandObj.error(defaultKeyPair.message);
     }
 
     const secretKey = defaultKeyPair.secretKey;
@@ -90,7 +86,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     const fluencePeer = new FluencePeer();
 
     await fluencePeer.start({
-      dialTimeoutMs: flags.timeout ?? DEFAULT_TTL,
+      dialTimeoutMs: flags.timeout,
       defaultTtlMs: flags.ttl ?? DEFAULT_TTL,
       connectTo: relay,
       ...(secretKey === undefined
@@ -102,15 +98,12 @@ export default class Logs extends BaseCommand<typeof Logs> {
           }),
     });
 
-    doRegisterIpfsClient(fluencePeer, flags["aqua-logs"]);
-    doRegisterLog(fluencePeer, flags["aqua-logs"]);
+    const offAquaLogs = flags["off-aqua-logs"];
+    doRegisterLog(fluencePeer, offAquaLogs);
 
     const deployedConfig = await initDeployedConfig();
     const workerNamesString = args["WORKER-NAMES"];
-
-    const workerNamesSet = [
-      ...new Set(deployedConfig.workers.map(({ name }) => name)),
-    ];
+    const workerNamesSet = Object.keys(deployedConfig.workers);
 
     const workersToGetLogsFor =
       workerNamesString === undefined
@@ -132,9 +125,9 @@ export default class Logs extends BaseCommand<typeof Logs> {
     }
 
     const workersArg: Get_logsArgApp_workers = {
-      workers: deployedConfig.workers.filter(({ name }) =>
-        workersToGetLogsFor.includes(name)
-      ),
+      workers: Object.entries(deployedConfig.workers)
+        .filter(([name]) => workersToGetLogsFor.includes(name))
+        .map(([name, config]) => ({ name, ...config })),
     };
 
     const logs = await get_logs(fluencePeer, workersArg);

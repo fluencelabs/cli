@@ -26,7 +26,8 @@
     "lint-fix": "eslint . --ext .ts --cache --fix",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
-    "test": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && cd tmp && npm init -y && npm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && cd tmp && npm init -y && npm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && npm run jest",
     "posttest": "npm run lint && npm run circular",
     "prepare": "husky install",
     "check": "npm run build && npm run lint-fix && npm run circular",
@@ -37,7 +38,8 @@
     "compile-cli-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/cli.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
     "compile-files-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/files.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
     "compile-config-aqua": "./bin/dev.js aqua --old-fluence-js -i node_modules/@fluencelabs/installation-spell/src/aqua/config.aqua -o src/lib/compiled-aqua/installation-spell --import node_modules",
-    "compile-air": "./bin/dev.js aqua --no-relay -i node_modules/@fluencelabs/installation-spell/src/aqua/deal_spell.aqua -o src/lib/compiled-aqua/installation-spell/air --import node_modules --air"
+    "compile-air": "./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/deal_spell.aqua -o src/lib/compiled-aqua/installation-spell/air --import node_modules --air",
+    "compile-installation-spell": "npm run compile-cli-aqua && npm run compile-files-aqua && npm run compile-config-aqua && npm run compile-air"
   },
   "dependencies": {
     "@fluencelabs/aqua-api": "=0.10.1",
@@ -76,8 +78,8 @@
     "@adobe/jsonschema2md": "^7.1.5",
     "@fluencelabs/aqua-ipfs": "^0.5.9",
     "@fluencelabs/aqua-lib": "^0.6.0",
-    "@fluencelabs/installation-spell": "^0.3.5",
-    "@fluencelabs/spell": "^0.1.0",
+    "@fluencelabs/installation-spell": "^0.4.0",
+    "@fluencelabs/spell": "^0.4.0",
     "@swc/core": "^1.3.32",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/chokidar": "^2.1.3",

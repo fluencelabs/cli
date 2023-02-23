@@ -18,18 +18,19 @@ import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { initAquaCli } from "../lib/aquaCli.js";
-import { isInteractive } from "../lib/commandObj.js";
-import { initAppConfig } from "../lib/configs/project/app.js";
-import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
-import { TIMEOUT_FLAG } from "../lib/const.js";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
-import { initCli } from "../lib/lifecyle.js";
-import { confirm } from "../lib/prompt.js";
-import { removeApp } from "../lib/removeApp.js";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { initAquaCli } from "../../lib/aquaCli.js";
+import { commandObj, isInteractive } from "../../lib/commandObj.js";
+import { initAppConfig } from "../../lib/configs/project/app.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
+import { TIMEOUT_FLAG } from "../../lib/const.js";
+import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
+import { initCli } from "../../lib/lifecyle.js";
+import { confirm } from "../../lib/prompt.js";
+import { removeApp } from "../../lib/removeApp.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
+  static override hidden = true;
   static override description = "Remove previously deployed config";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
@@ -50,7 +51,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const appConfig = await initAppConfig();
 
     if (appConfig === null || Object.keys(appConfig.services).length === 0) {
-      this.error(
+      return commandObj.error(
         "Seems like project is not currently deployed. Nothing to remove"
       );
     }
@@ -63,7 +64,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
         )}?`,
       }))
     ) {
-      this.error("Aborted");
+      return commandObj.error("Aborted");
     }
 
     const maybeFluenceLockConfig = await initFluenceLockConfig();

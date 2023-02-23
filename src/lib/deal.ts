@@ -25,7 +25,7 @@ const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
 type DealCreateArg = {
-  network: ChainNetwork;
+  chainNetwork: ChainNetwork;
   privKey: string | undefined;
   appCID: string;
   minWorkers: number;
@@ -33,14 +33,14 @@ type DealCreateArg = {
 };
 
 export const dealCreate = async ({
-  network,
+  chainNetwork,
   appCID,
   minWorkers,
   privKey,
   targetWorkers,
 }: DealCreateArg) => {
-  const signer = await getSigner(network, privKey);
-  const factory = getFactoryContract(signer, network);
+  const signer = await getSigner(chainNetwork, privKey);
+  const factory = getFactoryContract(signer, chainNetwork);
 
   const tx = await factory.createDeal(
     BigNumber.from(minWorkers),
