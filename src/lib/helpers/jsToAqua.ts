@@ -41,6 +41,8 @@ export const jsToAqua = (v: unknown, funcNameFromArgs: string): string => {
   }\n\nfunc ${funcName}() -> ${type}:\n    <- ${value}\n`;
 };
 
+const NULL = { type: "?u8", value: "nil" } as const;
+
 export const jsToAquaImpl = (
   v: unknown,
   fieldName: string,
@@ -48,7 +50,7 @@ export const jsToAquaImpl = (
 ): { type: string; value: string; typeDefs?: string | undefined } => {
   const error = (message: string) =>
     commandObj.error(
-      `Failed converting object to aqua. ${message}. At ${color.yellow(
+      `Failed converting to aqua. ${message}. At ${color.yellow(
         currentNesting === "" ? "" : `${currentNesting}.`
       )}${color.yellow(fieldName)}: ${String(v)}`
     );
@@ -70,10 +72,14 @@ export const jsToAquaImpl = (
   }
 
   if (v === null || v === undefined) {
-    return { type: "?u8", value: "nil" };
+    return NULL;
   }
 
   if (Array.isArray(v)) {
+    if (v.length === 0) {
+      return NULL;
+    }
+
     const { type, typeDefs } = jsToAquaImpl(v[0], fieldName, currentNesting);
 
     if (
@@ -102,13 +108,13 @@ export const jsToAquaImpl = (
       );
     }
 
-    const nestedType = `${currentNesting}${newName}`;
-
     const objectEntries = Object.entries(v);
 
     if (objectEntries.length === 0) {
-      return error("Object must have at least one property");
+      return NULL;
     }
+
+    const nestedType = `${currentNesting}${newName}`;
 
     const { keyTypes, keyDataTypes, entries } = objectEntries.reduce<{
       keyTypes: string[];

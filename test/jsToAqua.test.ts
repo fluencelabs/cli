@@ -30,7 +30,7 @@ const obj = [
   },
   {
     js: { a: { b: [2] }, c: null, d: [], e: [{ f: "4" }, { f: "5" }] },
-    value: `${RETURN_TYPE}(a=${RETURN_TYPE}A(b=[2.0]),c=nil,d=[],e=[${RETURN_TYPE}E(f="4"),${RETURN_TYPE}E(f="5")])`,
+    value: `${RETURN_TYPE}(a=${RETURN_TYPE}A(b=[2.0]),c=nil,d=nil,e=[${RETURN_TYPE}E(f="4"),${RETURN_TYPE}E(f="5")])`,
     type: RETURN_TYPE,
     typeDefs: `data ResA:
     b: []f64
@@ -41,7 +41,7 @@ data ResE:
 data Res:
     a: ResA
     c: ?u8
-    d: []?u8
+    d: ?u8
     e: []ResE`,
   },
 ] as const;
@@ -54,6 +54,8 @@ describe("Conversion from js to aqua", () => {
     ${false}                 | ${"false"}               | ${"bool"}       | ${undefined}
     ${null}                  | ${"nil"}                 | ${"?u8"}        | ${undefined}
     ${undefined}             | ${"nil"}                 | ${"?u8"}        | ${undefined}
+    ${[]}                    | ${"nil"}                 | ${"?u8"}        | ${undefined}
+    ${{}}                    | ${"nil"}                 | ${"?u8"}        | ${undefined}
     ${1}                     | ${"1.0"}                 | ${"f64"}        | ${undefined}
     ${1.234}                 | ${"1.234"}               | ${"f64"}        | ${undefined}
     ${[1, 2, 3]}             | ${"[1.0,2.0,3.0]"}       | ${"[]f64"}      | ${undefined}
