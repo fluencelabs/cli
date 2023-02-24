@@ -15,7 +15,7 @@
  */
 
 import fsPromises from "node:fs/promises";
-import path from "node:path";
+import path, { dirname } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -178,6 +178,7 @@ const ensureConfigIsValidLatest = async <
 
 export type InitializedReadonlyConfig<LatestConfig> = Readonly<LatestConfig> & {
   $getPath(): string;
+  $getDirPath(): string;
   $getConfigString(): string;
   $validateLatest: ValidateFunction<LatestConfig>;
 };
@@ -208,7 +209,7 @@ export type InitConfigOptions<
   latestSchema: JSONSchemaType<LatestConfig>;
   migrations: Migrations<Config>;
   name: string;
-  getConfigDirPath: GetPath;
+  getConfigOrConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
   validate?: ConfigValidateFunction<LatestConfig>;
 };
@@ -227,8 +228,19 @@ type InitReadonlyFunctionWithDefault<LatestConfig> = () => Promise<
   InitializedReadonlyConfig<LatestConfig>
 >;
 
-export const getConfigPath = (configDirPath: string, name: string): string =>
-  path.join(configDirPath, name);
+export const getConfigPath = (
+  configOrConfigDirPath: string,
+  configName: string
+) =>
+  configOrConfigDirPath.endsWith(YAML_EXT)
+    ? {
+        configPath: configOrConfigDirPath,
+        configDirPath: path.dirname(configOrConfigDirPath),
+      }
+    : {
+        configPath: path.join(configOrConfigDirPath, configName),
+        configDirPath: configOrConfigDirPath,
+      };
 
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
@@ -258,13 +270,15 @@ export function getReadonlyConfigInitFunction<
       latestSchema,
       migrations,
       name,
-      getConfigDirPath,
+      getConfigOrConfigDirPath,
       validate,
       getSchemaDirPath,
     } = options;
 
-    const configDirPath = await getConfigDirPath();
-    const configPath = getConfigPath(configDirPath, name);
+    const { configDirPath, configPath } = getConfigPath(
+      await getConfigOrConfigDirPath(),
+      name
+    );
 
     const validateAllConfigVersions = new Ajv.default({
       allowUnionTypes: true,
@@ -370,6 +384,9 @@ export function getReadonlyConfigInitFunction<
       $getPath(): string {
         return configPath;
       },
+      $getDirPath(): string {
+        return dirname(configPath);
+      },
       $getConfigString(): string {
         return configString;
       },
@@ -403,8 +420,8 @@ export function getConfigInitFunction<
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitFunction<LatestConfig> {
   return async (): Promise<InitializedConfig<LatestConfig> | null> => {
-    const configPath = getConfigPath(
-      await options.getConfigDirPath(),
+    const { configPath } = getConfigPath(
+      await options.getConfigOrConfigDirPath(),
       options.name
     );
 

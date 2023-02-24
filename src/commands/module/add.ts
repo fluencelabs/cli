@@ -16,6 +16,7 @@
 
 import assert from "node:assert";
 import path from "node:path";
+import { cwd } from "node:process";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -30,10 +31,7 @@ import {
   MODULE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
-import {
-  getModuleDirAbsolutePath,
-  isUrl,
-} from "../../lib/helpers/downloadFile.js";
+import { isUrl } from "../../lib/helpers/downloadFile.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
@@ -51,7 +49,7 @@ export default class Add extends BaseCommand<typeof Add> {
       helpValue: "<name>",
     }),
     service: Flags.directory({
-      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME} or path to the service directory`,
+      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME} or path to the service config or directory that contains ${SERVICE_CONFIG_FILE_NAME}`,
       helpValue: "<name | path>",
     }),
   };
@@ -72,8 +70,7 @@ export default class Add extends BaseCommand<typeof Add> {
         message: "Enter path to a module or url to .tar.gz archive",
       }));
 
-    const modulePath = await getModuleDirAbsolutePath(modulePathOrUrl);
-    const moduleConfig = await initReadonlyModuleConfig(modulePath);
+    const moduleConfig = await initReadonlyModuleConfig(modulePathOrUrl, cwd());
 
     if (moduleConfig === null) {
       return commandObj.error(
@@ -91,29 +88,32 @@ export default class Add extends BaseCommand<typeof Add> {
         )} or path to the service directory`,
       }));
 
-    let serviceDirPath = serviceNameOrPath;
+    let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
 
     if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
       const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
-      serviceDirPath = serviceGet;
+      serviceOrServiceDirPathOrUrl = serviceGet;
     }
 
-    if (isUrl(serviceDirPath)) {
+    if (isUrl(serviceOrServiceDirPathOrUrl)) {
       return commandObj.error(
-        `Can't modify downloaded service ${color.yellow(serviceDirPath)}`
+        `Can't modify downloaded service ${color.yellow(
+          serviceOrServiceDirPathOrUrl
+        )}`
       );
     }
 
-    serviceDirPath = path.resolve(serviceDirPath);
-
-    const serviceConfig = await initServiceConfig(serviceDirPath);
+    const serviceConfig = await initServiceConfig(
+      serviceOrServiceDirPathOrUrl,
+      cwd()
+    );
 
     if (serviceConfig === null) {
       return commandObj.error(
-        `Directory ${color.yellow(
-          serviceDirPath
-        )} does not contain ${color.yellow(SERVICE_CONFIG_FILE_NAME)}`
+        `Can't find service config at ${color.yellow(
+          serviceOrServiceDirPathOrUrl
+        )}`
       );
     }
 
@@ -140,7 +140,7 @@ export default class Add extends BaseCommand<typeof Add> {
       [moduleName]: {
         get: isUrl(modulePathOrUrl)
           ? modulePathOrUrl
-          : path.relative(serviceDirPath, modulePath),
+          : path.relative(serviceConfig.$getDirPath(), moduleConfig.$getPath()),
       },
     };
 
@@ -148,7 +148,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     this.log(
       `Added ${color.yellow(moduleName)} to ${color.yellow(
-        replaceHomeDir(serviceDirPath)
+        replaceHomeDir(serviceConfig.$getPath())
       )}`
     );
   }

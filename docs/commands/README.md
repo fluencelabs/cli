@@ -5,8 +5,6 @@
 * [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
-* [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
-* [`fluence deal create`](#fluence-deal-create)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
@@ -166,50 +164,6 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.1/dist/commands/build.ts)_
-
-## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
-
-Change app id in the deal
-
-```
-USAGE
-  $ fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID] [--no-input] [-k <value>] [--network <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
-  NEW-APP-CID   New app CID for the deal
-
-FLAGS
-  -k, --privKey=<value>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --network=<network>    [default: testnet] $The network in which the transactions used by the command will be carried
-                         out (local, testnet)
-  --no-input             Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Change app id in the deal
-```
-
-## `fluence deal create`
-
-Create your deal with the specified parameters
-
-```
-USAGE
-  $ fluence deal create --appCID <value> [--no-input] [--minWorkers <value>] [--targetWorkers <value>] [--network
-    <value>] [-k <value>]
-
-FLAGS
-  -k, --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --appCID=<value>         (required) CID of the application that will be deployed
-  --minWorkers=<value>     [default: 1] Required workers to activate the deal
-  --network=<network>      [default: testnet] $The network in which the transactions used by the command will be carried
-                           out (local, testnet)
-  --no-input               Don't interactively ask for any input from the user
-  --targetWorkers=<value>  [default: 3] Max workers in the deal
-
-DESCRIPTION
-  Create your deal with the specified parameters
-```
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -495,7 +449,8 @@ ARGUMENTS
 FLAGS
   --name=<name>            Override module name
   --no-input               Don't interactively ask for any input from the user
-  --service=<name | path>  Service name from fluence.yaml or path to the service directory
+  --service=<name | path>  Service name from fluence.yaml or path to the service config or directory that contains
+                           service.yaml
 
 DESCRIPTION
   Add module to service.yaml

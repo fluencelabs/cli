@@ -21,7 +21,10 @@ import {
   SERVICE_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
-import { validateAquaName } from "../../helpers/downloadFile.js";
+import {
+  getServiceAbsolutePath as getServiceAbsolutePath,
+  validateAquaName,
+} from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -118,19 +121,29 @@ const getInitConfigOptions = (
   migrations,
   name: SERVICE_CONFIG_FILE_NAME,
   getSchemaDirPath: ensureFluenceDir,
-  getConfigDirPath: (): string => configDirPath,
+  getConfigOrConfigDirPath: (): string => configDirPath,
   validate,
 });
 
-export const initServiceConfig = (
-  configDirPath: string
+export const initServiceConfig = async (
+  configOrConfigDirPathOrUrl: string,
+  absolutePath: string
 ): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(getInitConfigOptions(configDirPath))();
+  getConfigInitFunction(
+    getInitConfigOptions(
+      await getServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+    )
+  )();
 
-export const initReadonlyServiceConfig = (
-  configDirPath: string
+export const initReadonlyServiceConfig = async (
+  configOrConfigDirPathOrUrl: string,
+  absolutePath: string
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(getInitConfigOptions(configDirPath))();
+  getReadonlyConfigInitFunction(
+    getInitConfigOptions(
+      await getServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+    )
+  )();
 
 const getDefault: (
   relativePathToFacade: string,

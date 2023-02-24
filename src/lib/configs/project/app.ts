@@ -386,7 +386,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV3,
   migrations,
   name: APP_CONFIG_FILE_NAME,
-  getConfigDirPath: ensureFluenceDir,
+  getConfigOrConfigDirPath: ensureFluenceDir,
 };
 
 export const initAppConfig = getConfigInitFunction(initConfigOptions);
