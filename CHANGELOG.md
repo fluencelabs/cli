@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.1...fluence-cli-v0.3.2) (2023-02-24)
+
+
+### Features
+
+* **blockchain:** change addresses ([#175](https://github.com/fluencelabs/fluence-cli/issues/175)) ([aa34a69](https://github.com/fluencelabs/fluence-cli/commit/aa34a69321fcf3ece70f94d0e339ca84174ecbeb))
+
+
+### Bug Fixes
+
+* **ci:** Skip husky install when running in CI ([#170](https://github.com/fluencelabs/fluence-cli/issues/170)) ([e9ef7af](https://github.com/fluencelabs/fluence-cli/commit/e9ef7af4c2cd0125359995b3952f0ab60de9f94c))
+* **deps:** update dependency @fluencelabs/installation-spell to ^0.5.0 ([#169](https://github.com/fluencelabs/fluence-cli/issues/169)) ([a6c0b45](https://github.com/fluencelabs/fluence-cli/commit/a6c0b455da56aa829e575871aa6d3275c5cf0050))
+* **deps:** update dependency @fluencelabs/spell to ^0.5.0 ([#177](https://github.com/fluencelabs/fluence-cli/issues/177)) ([4912def](https://github.com/fluencelabs/fluence-cli/commit/4912def825ce276f3ba1208c004b231d38d59058))
+* service interface generation [fixes DXJ-315] ([#179](https://github.com/fluencelabs/fluence-cli/issues/179)) ([175159d](https://github.com/fluencelabs/fluence-cli/commit/175159db57b517019183c999f0cf123fa3a8f116))
+
 ## [0.3.1](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.0...fluence-cli-v0.3.1) (2023-02-24)
 
 
