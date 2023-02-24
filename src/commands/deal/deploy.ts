@@ -161,11 +161,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       assert(uploadedWorker !== undefined);
       const { definition: appCID, installation_spells } = uploadedWorker;
-
-      const deal = Object.entries(fluenceConfig.deals ?? {}).find(
-        ([d]) => d === workerName
-      )?.[1];
-
+      const deal = fluenceConfig?.deals?.[workerName];
       assert(deal !== undefined);
       const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
 

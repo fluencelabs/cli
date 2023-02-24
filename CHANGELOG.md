@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.0...fluence-cli-v0.3.1) (2023-02-24)
+
+
+### Features
+
+* improve error messages for `worker deploy`, infer empty object and empty array as optional instead of throwing an error [fixes DXJ-310] ([#174](https://github.com/fluencelabs/fluence-cli/issues/174)) ([ac01f29](https://github.com/fluencelabs/fluence-cli/commit/ac01f297b2e8171658319a6af08a07f684fb263d))
+
 ## [0.3.0](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.2.46...fluence-cli-v0.3.0) (2023-02-23)
 
 
