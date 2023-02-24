@@ -36,7 +36,7 @@ import {
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { exitCli, initCli } from "../lib/lifecyle.js";
-import { projectRootDir, validatePath } from "../lib/paths.js";
+import { validatePath } from "../lib/paths.js";
 import { input } from "../lib/prompt.js";
 
 export default class Aqua extends Command {
@@ -157,8 +157,8 @@ export default class Aqua extends Command {
           });
 
     const aquaCliFlags = {
-      input: path.resolve(projectRootDir, inputPath),
-      output: resolveOutputPath(projectRootDir, outputPath),
+      input: path.resolve(inputPath),
+      output: resolveOutputPath(outputPath),
       js,
       ...aquaCliOptionalFlags,
       import: aquaImports,
@@ -220,7 +220,6 @@ export default class Aqua extends Command {
 }
 
 const resolveOutputPath = (
-  projectRootDir: string,
   maybeOutputPath: string | undefined
 ): string | undefined => {
   if (maybeOutputPath === undefined) {
@@ -233,7 +232,7 @@ const resolveOutputPath = (
     return outputPath;
   }
 
-  return path.resolve(projectRootDir, outputPath);
+  return path.resolve(outputPath);
 };
 
 const addFileExtensionsInTsFiles = async (outputDirPath: string) => {

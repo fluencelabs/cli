@@ -117,7 +117,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: DEPLOYED_CONFIG_FILE_NAME,
-  getConfigDirPath: ensureFluenceDir,
+  getConfigOrConfigDirPath: ensureFluenceDir,
 };
 
 const getDefault: GetDefaultConfig<LatestConfig> = () => ({

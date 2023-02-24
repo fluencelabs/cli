@@ -25,6 +25,7 @@ import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
+  static override hidden = true;
   static override description = "Change app id in the deal";
   static override flags = {
     ...baseFlags,

@@ -204,6 +204,11 @@ export const OFF_AQUA_LOGS_FLAG = {
   }),
 };
 
+export const MODULE_TYPE_RUST = "rust";
+export const MODULE_TYPE_COMPILED = "compiled";
+export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
+export type ModuleType = (typeof MODULE_TYPES)[number];
+
 export const TOKENS = ["FakeUSD", "FLT"] as const;
 export const TOKENS_STRING = TOKENS.join(", ");
 export type Token = (typeof TOKENS)[number];

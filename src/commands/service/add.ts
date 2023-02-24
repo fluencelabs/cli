@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { cwd } from "node:process";
+
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -23,15 +23,8 @@ import { addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
-import {
-  FLUENCE_CONFIG_FILE_NAME,
-  SERVICE_CONFIG_FILE_NAME,
-} from "../../lib/const.js";
-import {
-  AQUA_NAME_REQUIREMENTS,
-  downloadService,
-  isUrl,
-} from "../../lib/helpers/downloadFile.js";
+import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { AQUA_NAME_REQUIREMENTS } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { input } from "../../lib/prompt.js";
@@ -60,22 +53,17 @@ export default class Add extends BaseCommand<typeof Add> {
       true
     );
 
-    const servicePathOrUrl =
+    const serviceOrServiceDirPathOrUrl =
       args[PATH_OR_URL] ??
       (await input({ message: "Enter service path or url" }));
 
-    const serviceDirPath = isUrl(servicePathOrUrl)
-      ? await downloadService(servicePathOrUrl)
-      : servicePathOrUrl;
-
-    const serviceConfig = await initReadonlyServiceConfig(serviceDirPath);
+    const serviceConfig = await initReadonlyServiceConfig(
+      serviceOrServiceDirPathOrUrl,
+      cwd()
+    );
 
     if (serviceConfig === null) {
-      commandObj.error(
-        `${color.yellow(
-          SERVICE_CONFIG_FILE_NAME
-        )} not found for ${servicePathOrUrl}`
-      );
+      commandObj.error(`No service config at ${serviceOrServiceDirPathOrUrl}`);
     }
 
     const maybeFluenceLockConfig = await initFluenceLockConfig();
@@ -87,7 +75,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     await addService({
       serviceName: flags.name ?? serviceConfig.name,
-      pathOrUrl: servicePathOrUrl,
+      pathOrUrl: serviceOrServiceDirPathOrUrl,
       fluenceConfig,
       marineCli,
     });

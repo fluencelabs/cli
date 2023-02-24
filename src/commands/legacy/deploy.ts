@@ -36,7 +36,6 @@ import {
   DISTRIBUTION_EVEN,
 } from "../../lib/configs/project/fluence.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
-import type { ModuleConfigReadonly } from "../../lib/configs/project/module.js";
 import {
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -50,6 +49,10 @@ import {
   generateRegisterApp,
 } from "../../lib/deployedApp.js";
 import { getMessageWithKeyValuePairs } from "../../lib/helpers/getMessageWithKeyValuePairs.js";
+import {
+  JSONModuleConf,
+  moduleToJSONModuleConfig,
+} from "../../lib/helpers/moduleToJSONModuleConfig.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
@@ -268,7 +271,7 @@ const prepareForDeploy = async (
             [DEFAULT_DEPLOY_NAME]: {
               modules: moduleConfigs.map(
                 (moduleConfig): JSONModuleConf =>
-                  serviceModuleToJSONModuleConfig(moduleConfig)
+                  moduleToJSONModuleConfig(moduleConfig)
               ),
             },
           },
@@ -318,80 +321,12 @@ const getPeerIds = ({
   );
 };
 
-/* eslint-disable camelcase */
-type JSONModuleConf = {
-  name: string;
-  path: string;
-  max_heap_size?: string;
-  logger_enabled?: boolean;
-  logging_mask?: number;
-  mapped_dirs?: Array<[string, string]>;
-  preopened_files?: Array<string>;
-  envs?: Array<[string, string]>;
-  mounted_binaries?: Array<[string, string]>;
-};
-
 type DeployJSONConfig = Record<
   string,
   {
     modules: Array<JSONModuleConf>;
   }
 >;
-
-const serviceModuleToJSONModuleConfig = (
-  moduleConfig: ModuleConfigReadonly & { wasmPath: string }
-): JSONModuleConf => {
-  const {
-    name,
-    loggerEnabled,
-    loggingMask,
-    volumes,
-    envs,
-    maxHeapSize,
-    mountedBinaries,
-    preopenedFiles,
-    wasmPath,
-  } = moduleConfig;
-
-  const jsonModuleConfig: JSONModuleConf = {
-    name,
-    path: wasmPath,
-  };
-
-  if (loggerEnabled === true) {
-    jsonModuleConfig.logger_enabled = true;
-  }
-
-  if (typeof loggingMask === "number") {
-    jsonModuleConfig.logging_mask = loggingMask;
-  }
-
-  if (typeof maxHeapSize === "string") {
-    jsonModuleConfig.max_heap_size = maxHeapSize;
-  }
-
-  if (volumes !== undefined) {
-    jsonModuleConfig.mapped_dirs = Object.entries(volumes);
-    jsonModuleConfig.preopened_files = [...new Set(Object.values(volumes))];
-  }
-
-  if (preopenedFiles !== undefined) {
-    jsonModuleConfig.preopened_files = [
-      ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
-    ];
-  }
-
-  if (envs !== undefined) {
-    jsonModuleConfig.envs = Object.entries(envs);
-  }
-
-  if (mountedBinaries !== undefined) {
-    jsonModuleConfig.mounted_binaries = Object.entries(mountedBinaries);
-  }
-
-  return jsonModuleConfig;
-};
-/* eslint-enable camelcase */
 
 type DeployServiceArg = Readonly<{
   deployJSON: DeployJSONConfig;

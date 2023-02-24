@@ -108,7 +108,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: PROJECT_SECRETS_CONFIG_FILE_NAME,
-  getConfigDirPath: ensureFluenceDir,
+  getConfigOrConfigDirPath: ensureFluenceDir,
   validate,
 };
 

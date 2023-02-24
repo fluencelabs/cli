@@ -16,7 +16,7 @@
 
 import crypto from "node:crypto";
 import fsPromises from "node:fs/promises";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -26,8 +26,7 @@ import nodeFetch from "node-fetch";
 const fetch = nodeFetch.default;
 
 import { commandObj } from "../commandObj.js";
-import { MODULE_TYPE_RUST } from "../configs/project/module.js";
-import { WASM_EXT } from "../const.js";
+import { MODULE_TYPE_RUST, WASM_EXT } from "../const.js";
 import {
   ensureFluenceModulesDir,
   ensureFluenceServicesDir,
@@ -138,10 +137,10 @@ export const isUrl = (unknown: string): boolean =>
 export const getModuleWasmPath = (config: {
   type?: string;
   name: string;
-  $getPath: () => string;
+  $getDirPath: () => string;
 }): string => {
   const fileName = `${config.name}.${WASM_EXT}`;
-  const configDirName = dirname(config.$getPath());
+  const configDirName = config.$getDirPath();
   return config.type === MODULE_TYPE_RUST
     ? resolve(projectRootDir, "target", "wasm32-wasi", "release", fileName)
     : resolve(configDirName, fileName);
@@ -164,7 +163,7 @@ export const getUrlOrAbsolutePath = (
 
 const getDirAbsolutePath =
   (downloadFunction: (get: string) => Promise<string>) =>
-  async (pathOrUrl: string, absolutePath = projectRootDir): Promise<string> => {
+  async (pathOrUrl: string, absolutePath: string): Promise<string> => {
     if (isUrl(pathOrUrl)) {
       return downloadFunction(pathOrUrl);
     }
@@ -176,5 +175,5 @@ const getDirAbsolutePath =
     return resolve(absolutePath, pathOrUrl);
   };
 
-export const getModuleDirAbsolutePath = getDirAbsolutePath(downloadModule);
-export const getServiceDirAbsolutePath = getDirAbsolutePath(downloadService);
+export const getModuleAbsolutePath = getDirAbsolutePath(downloadModule);
+export const getServiceAbsolutePath = getDirAbsolutePath(downloadService);

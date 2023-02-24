@@ -777,7 +777,7 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV2,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
-  getConfigDirPath: () => projectRootDir,
+  getConfigOrConfigDirPath: () => projectRootDir,
   getSchemaDirPath: ensureFluenceDir,
   validate,
 };

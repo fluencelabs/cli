@@ -14,36 +14,18 @@
  * limitations under the License.
  */
 
-import { ux } from "@oclif/core";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
-import { SHOW_SPINNER } from "../setupEnvironment.js";
+import { commandObj } from "../commandObj.js";
 
-let currentMessage: string | undefined;
+const SPINNER = color.yellow("#");
 
 export const startSpinner = (message: string) => {
-  if (process.env[SHOW_SPINNER] === "true") {
-    ux.action.start(message);
-    return;
-  }
-
-  currentMessage = message;
-
-  console.log(`${message}...`);
+  commandObj.log(`${SPINNER} ${message}...`);
 };
 
-export const stopSpinner = (message?: string) => {
-  if (process.env[SHOW_SPINNER] === "true") {
-    ux.action.stop(message);
-    return;
-  }
-
-  const previousTaskMessage = currentMessage ?? "previous task";
-  currentMessage = undefined;
-
-  if (message === undefined) {
-    console.log(`done: ${previousTaskMessage}`);
-    return;
-  }
-
-  console.log(`${message}: ${previousTaskMessage}`);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const stopSpinner = (_message?: string) => {
+  // Not used currently
 };

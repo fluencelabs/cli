@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import { access, readFile, writeFile } from "node:fs/promises";
-import { dirname, relative } from "node:path";
+import { relative } from "node:path";
 
 import { parse } from "@iarna/toml";
 import stringifyToTOML from "@iarna/toml/stringify.js";
@@ -33,7 +33,6 @@ import type {
 import {
   initReadonlyModuleConfig,
   ModuleConfigReadonly,
-  MODULE_TYPE_RUST,
 } from "../lib/configs/project/module.js";
 import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets.js";
 import {
@@ -47,15 +46,14 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MODULE_CONFIG_FILE_NAME,
+  MODULE_TYPE_RUST,
   SERVICE_CONFIG_FILE_NAME,
 } from "../lib/const.js";
 import {
   getUrlOrAbsolutePath,
   getModuleWasmPath,
   isUrl,
-  getModuleDirAbsolutePath,
   validateAquaName,
-  getServiceDirAbsolutePath,
 } from "../lib/helpers/downloadFile.js";
 import { generateServiceInterface } from "../lib/helpers/generateServiceInterface.js";
 import type { MarineCLI } from "../lib/marineCli.js";
@@ -118,7 +116,6 @@ const resolveServiceInfos = async ({
 
   type ServiceConfigPromises = Promise<{
     serviceName: string;
-    serviceDirPath: string;
     serviceConfig: ServiceConfigReadonly;
     deploy: Array<ServiceDeployV1>;
     keyPair: ConfigKeyPair;
@@ -153,8 +150,6 @@ const resolveServiceInfos = async ({
         return commandObj.error("Aborted");
       }
 
-      startSpinner("Making sure all services are downloaded");
-
       keyPair = await generateKeyPair(keyPairName);
       projectSecretsConfig.keyPairs.push(keyPair);
       await projectSecretsConfig.$commit();
@@ -170,18 +165,12 @@ const resolveServiceInfos = async ({
         { get, deploy = [{ deployId: DEFAULT_DEPLOY_NAME }], keyPairName },
       ]): ServiceConfigPromises =>
         (async (): ServiceConfigPromises => {
-          const serviceDirPath = await getServiceDirAbsolutePath(
-            get,
-            projectRootDir
-          );
-
           return {
             serviceName,
             deploy,
             keyPair: await ensureKeyPair(defaultKeyPair, keyPairName),
-            serviceDirPath,
             serviceConfig:
-              (await initReadonlyServiceConfig(serviceDirPath)) ??
+              (await initReadonlyServiceConfig(get, projectRootDir)) ??
               commandObj.error(
                 `Service ${color.yellow(serviceName)} must have ${color.yellow(
                   SERVICE_CONFIG_FILE_NAME
@@ -206,7 +195,6 @@ const resolveServiceInfos = async ({
         serviceName,
         deploy,
         serviceConfig,
-        serviceDirPath,
         keyPair,
       }): Array<Promise<ServiceInfoWithUnresolvedModuleConfigs>> =>
         deploy.flatMap(
@@ -223,6 +211,8 @@ const resolveServiceInfos = async ({
                 `deployId ${color.yellow(deployId)} ${deployIdValidity}`
               );
             }
+
+            const serviceDirPath = serviceConfig.$getDirPath();
 
             return {
               serviceName,
@@ -271,12 +261,8 @@ export const build = async ({
       [...setOfAllModuleUrlsOrAbsolutePaths].map(
         (moduleAbsolutePathOrUrl): Promise<[string, ModuleConfigReadonly]> =>
           (async (): Promise<[string, ModuleConfigReadonly]> => {
-            const moduleAbsolutePath = await getModuleDirAbsolutePath(
-              moduleAbsolutePathOrUrl
-            );
-
             const maybeModuleConfig = await initReadonlyModuleConfig(
-              moduleAbsolutePath
+              moduleAbsolutePathOrUrl
             );
 
             if (maybeModuleConfig === null) {
@@ -293,7 +279,9 @@ export const build = async ({
     )
   );
 
+  startSpinner("Making sure all services are built");
   await buildModules([...mapOfModuleConfigs.values()], marineCli);
+  stopSpinner();
 
   const serviceNamePathToFacadeMap: Record<string, string> = {};
 
@@ -344,14 +332,18 @@ export const build = async ({
   );
 
   // generate interfaces for all services
-  const serviceInterfaces = await Promise.all(
-    Object.values(serviceNamePathToFacadeMap).map((pathToFacadeWasm) =>
-      generateServiceInterface({
-        pathToFacadeWasm,
-        marineCli,
-      })
-    )
-  );
+  const serviceInterfaces = [
+    ...new Set(
+      await Promise.all(
+        Object.values(serviceNamePathToFacadeMap).map((pathToFacadeWasm) =>
+          generateServiceInterface({
+            pathToFacadeWasm,
+            marineCli,
+          })
+        )
+      )
+    ),
+  ];
 
   await writeFile(
     await ensureFluenceAquaServicesPath(),
@@ -460,21 +452,15 @@ const resolveSingleServiceModuleConfigs = (
       (async () => {
         const overridesFromFluenceYAML = overridesFromFluenceYAMLMap?.[name];
 
-        const moduleAbsolutePath = await getModuleDirAbsolutePath(
-          get,
-          dirname(serviceConfig.$getPath())
-        );
-
         const maybeModuleConfig = await initReadonlyModuleConfig(
-          moduleAbsolutePath
+          get,
+          serviceConfig.$getDirPath()
         );
 
         if (maybeModuleConfig === null) {
           stopSpinner(color.red("error"));
           return commandObj.error(
-            `Module at: ${color.yellow(
-              moduleAbsolutePath
-            )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
+            `Cant find module config at ${color.yellow(get)}`
           );
         }
 
@@ -522,7 +508,7 @@ export const buildModules = async (
   );
 
   await updateWorkspaceCargoToml(
-    rustModuleConfigs.map((moduleConfig) => dirname(moduleConfig.$getPath()))
+    rustModuleConfigs.map((moduleConfig) => moduleConfig.$getDirPath())
   );
 
   if (rustModuleConfigs.length === 0) {
