@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.2...fluence-cli-v0.3.3) (2023-02-24)
+
+
+### Features
+
+* remove spinner, fix relative aqua file compilation, hide some deal-related commands, allow service and module configs not to be called service.yaml and module.yaml (full path to the config with .yaml extension is needed for this to work), don't add serviceName to defaultWorker if it's already there, simplify and refactor building of modules before deploying workers, change uploaded module config so it uses records instead of arrays of tuples [fixes DXJ-316] ([#180](https://github.com/fluencelabs/fluence-cli/issues/180)) ([1cf2b20](https://github.com/fluencelabs/fluence-cli/commit/1cf2b20b1e727297f015b3ad77e999c79c5e866d))
+
 ## [0.3.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.1...fluence-cli-v0.3.2) (2023-02-24)
 
 
