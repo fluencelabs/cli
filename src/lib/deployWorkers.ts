@@ -66,7 +66,12 @@ export const prepareForDeploy = async ({
 }: PrepareForDeployArg): Promise<UploadArgConfig> => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const arrayWithWorkerNames = Object.entries(
-    (hosts ? fluenceConfig.hosts : fluenceConfig.deals) ?? {}
+    (hosts ? fluenceConfig.hosts : fluenceConfig.deals) ??
+      commandObj.error(
+        `You must have a ${color.yellow(
+          hosts ? "hosts" : "deals"
+        )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
+      )
   ) as Array<
     [
       string,
@@ -84,7 +89,22 @@ export const prepareForDeploy = async ({
       ? workerNamesSet
       : parseWorkers(workerNamesString);
 
-  const workersFromWorkersConfig = Object.keys(fluenceConfig.workers ?? {});
+  if (workersToHost.length === 0) {
+    return commandObj.error(
+      `${color.yellow(
+        hosts ? "hosts" : "deals"
+      )} record in ${FLUENCE_CONFIG_FILE_NAME} must contain at least one worker name as a key`
+    );
+  }
+
+  const workersFromWorkersConfig = Object.keys(
+    fluenceConfig.workers ??
+      commandObj.error(
+        `You must have a ${color.yellow(
+          "workers"
+        )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
+      )
+  );
 
   const workerNamesNotFoundInWorkersConfig = workersToHost.filter(
     (workerName) => !workersFromWorkersConfig.includes(workerName)
@@ -103,6 +123,17 @@ export const prepareForDeploy = async ({
   const workerConfigs = workersToHost.map((workerName) => {
     const workerConfig = fluenceConfig.workers?.[workerName];
     assert(workerConfig !== undefined);
+
+    if (workerConfig.services.length === 0) {
+      return commandObj.error(
+        `All workers must have at least one service. Worker ${color.yellow(
+          workerName
+        )} listed in ${FLUENCE_CONFIG_FILE_NAME} ${color.yellow(
+          "workers"
+        )} property does not have any services`
+      );
+    }
+
     return {
       workerName,
       workerConfig,
@@ -224,6 +255,16 @@ export const prepareForDeploy = async ({
   const workers: UploadArgConfig["workers"] = arrayWithWorkerNames
     .filter(([workerName]) => workersToHost.includes(workerName))
     .map(([workerName, { peerIds = [] }]) => {
+      if (hosts && peerIds.length === 0) {
+        commandObj.error(
+          `You must have at least one peerId listed in ${color.yellow(
+            "peerIds"
+          )} property in ${color.yellow(
+            `hosts.${workerName}`
+          )} property in ${FLUENCE_CONFIG_FILE_NAME}`
+        );
+      }
+
       const workerConfig = fluenceConfig.workers?.[workerName];
       assert(workerConfig !== undefined);
 

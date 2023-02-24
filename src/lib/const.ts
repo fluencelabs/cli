@@ -67,9 +67,9 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   },
   testnet: {
     ethereumNodeUrl: "https://polygon-testnet.public.blastapi.io",
-    coreAddress: "0xc301d2d67abB97919A670B8A0801667d42963adc",
-    dealFactoryAddress: "0x5858103A51dd9FF771e5744C43f821162aB8eb1f",
-    developerFaucetAddress: "0xdDFb0BC4652606880F121eB46AAeC900D548B108",
+    coreAddress: "0x351D1a2099dA20dc074709265A7aD2E12b91C7a3",
+    dealFactoryAddress: "0x5f6815ff1c371640883e49dDCbf04573B69568Ed",
+    developerFaucetAddress: "0x8459460cfC7B26ab29c487912a7422a54066dA2F",
     chainId: 80001,
   },
 };
