@@ -20,6 +20,8 @@ import camelcase from "camelcase";
 
 import type { MarineCLI } from "../marineCli.js";
 
+const SERVICE = "service ";
+
 type GenerateServiceInterfaceArg = {
   pathToFacadeWasm: string;
   marineCli: MarineCLI;
@@ -43,8 +45,18 @@ export const generateServiceInterface = async ({
     `Failed to generate service interface for ${pathToFacadeWasm}`
   );
 
-  const [start, ...end] = interfaceDeclaration.split(":");
-  const serviceName = camelcase(start?.slice("service ".length).trim() ?? "");
+  const declarations = interfaceDeclaration.split(SERVICE);
+  const [serviceName, ...rest] = declarations.pop()?.split(":") ?? [];
 
-  return `${start ?? ""}("${serviceName}"):${end.join(":")}`;
+  if (serviceName === undefined || rest.length === 0) {
+    throw new Error(
+      `Failed to generate service interface for ${pathToFacadeWasm}`
+    );
+  }
+
+  declarations.push(
+    `${serviceName}("${camelcase(serviceName)}"):${rest.join(":")}`
+  );
+
+  return declarations.join(SERVICE);
 };

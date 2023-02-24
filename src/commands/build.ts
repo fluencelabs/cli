@@ -24,7 +24,7 @@ import { initCli } from "../lib/lifecyle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 
 export default class Build extends BaseCommand<typeof Build> {
-  static override description = `Build all application services, described in ${FLUENCE_CONFIG_FILE_NAME}`;
+  static override description = `Build all application services, described in ${FLUENCE_CONFIG_FILE_NAME} and generate aqua interfaces for them`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
