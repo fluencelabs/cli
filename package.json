@@ -42,7 +42,7 @@
     "compile-installation-spell": "npm run compile-cli-aqua && npm run compile-files-aqua && npm run compile-config-aqua && npm run compile-air"
   },
   "dependencies": {
-    "@fluencelabs/aqua-api": "=0.10.1",
+    "@fluencelabs/aqua-api": "^0.10.2",
     "@fluencelabs/deal-aurora": "^0.1.8",
     "@fluencelabs/fluence": "0.28.0",
     "@fluencelabs/fluence-network-environment": "^1.0.13",

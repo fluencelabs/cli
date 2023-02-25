@@ -23,7 +23,7 @@ import { local } from "./localNodes.js";
 import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 
-export const AQUA_RECOMMENDED_VERSION = "0.10.1";
+export const AQUA_RECOMMENDED_VERSION = "0.10.2";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const REGISTRY_RECOMMENDED_VERSION = "0.7.1";
 export const SPELL_RECOMMENDED_VERSION = "0.4.0";
