@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.4...fluence-cli-v0.3.5) (2023-02-27)
+
+
+### Bug Fixes
+
+* aqua interface service_id generation [fixes DXJ-322] ([#186](https://github.com/fluencelabs/fluence-cli/issues/186)) ([a4230ae](https://github.com/fluencelabs/fluence-cli/commit/a4230aea7169ecd498019bd9584a8f5c37cbe33c))
+
 ## [0.3.4](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.3...fluence-cli-v0.3.4) (2023-02-25)
 
 
