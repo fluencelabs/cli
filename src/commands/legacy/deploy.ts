@@ -50,7 +50,7 @@ import {
 } from "../../lib/deployedApp.js";
 import { getMessageWithKeyValuePairs } from "../../lib/helpers/getMessageWithKeyValuePairs.js";
 import {
-  JSONModuleConf,
+  JSONModuleConfOld,
   moduleToJSONModuleConfig,
 } from "../../lib/helpers/moduleToJSONModuleConfig.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
@@ -270,8 +270,8 @@ const prepareForDeploy = async (
           deployJSON: {
             [DEFAULT_DEPLOY_NAME]: {
               modules: moduleConfigs.map(
-                (moduleConfig): JSONModuleConf =>
-                  moduleToJSONModuleConfig(moduleConfig)
+                (moduleConfig): JSONModuleConfOld =>
+                  moduleToJSONModuleConfig(moduleConfig, true)
               ),
             },
           },
@@ -324,7 +324,7 @@ const getPeerIds = ({
 type DeployJSONConfig = Record<
   string,
   {
-    modules: Array<JSONModuleConf>;
+    modules: Array<JSONModuleConfOld>;
   }
 >;
 

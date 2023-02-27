@@ -29,9 +29,30 @@ export type JSONModuleConf = {
   path?: string;
 };
 
-export const moduleToJSONModuleConfig = (
+export type JSONModuleConfOld = {
+  name: string;
+  max_heap_size?: string;
+  logger_enabled?: boolean;
+  logging_mask?: number;
+  mapped_dirs?: Array<[string, string]>;
+  preopened_files?: Array<string>;
+  envs?: Array<[string, string]>;
+  mounted_binaries?: Array<[string, string]>;
+  path?: string;
+};
+
+export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
-): JSONModuleConf => {
+): JSONModuleConf;
+export function moduleToJSONModuleConfig(
+  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
+  isOld: true
+): JSONModuleConfOld;
+
+export function moduleToJSONModuleConfig(
+  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
+  isOld = false
+): JSONModuleConf | JSONModuleConfOld {
   const {
     name,
     loggerEnabled,
@@ -44,7 +65,7 @@ export const moduleToJSONModuleConfig = (
     wasmPath,
   } = moduleConfig;
 
-  const jsonModuleConfig: JSONModuleConf = {
+  const jsonModuleConfig: JSONModuleConf | JSONModuleConfOld = {
     name,
   };
 
@@ -65,7 +86,7 @@ export const moduleToJSONModuleConfig = (
   }
 
   if (volumes !== undefined) {
-    jsonModuleConfig.mapped_dirs = volumes;
+    jsonModuleConfig.mapped_dirs = isOld ? Object.entries(volumes) : volumes;
     jsonModuleConfig.preopened_files = [...new Set(Object.values(volumes))];
   }
 
@@ -76,13 +97,15 @@ export const moduleToJSONModuleConfig = (
   }
 
   if (envs !== undefined) {
-    jsonModuleConfig.envs = envs;
+    jsonModuleConfig.envs = isOld ? Object.entries(envs) : envs;
   }
 
   if (mountedBinaries !== undefined) {
-    jsonModuleConfig.mounted_binaries = mountedBinaries;
+    jsonModuleConfig.mounted_binaries = isOld
+      ? Object.entries(mountedBinaries)
+      : mountedBinaries;
   }
 
   return jsonModuleConfig;
-};
+}
 /* eslint-enable camelcase */
