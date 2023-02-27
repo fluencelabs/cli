@@ -57,13 +57,14 @@ describe("tutorial", () => {
 
     await writeFile(
       join(cwd, "src", "services", "newService", "service.yaml"),
-      `version: 0
-    name: new
-    modules:
-      facade:
-        get: modules/new
-        envs:
-          A: B
+      `
+version: 0
+name: new
+modules:
+  facade:
+    get: modules/new
+    envs:
+      A: B
 `
     );
 
