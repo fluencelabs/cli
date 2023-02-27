@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.3...fluence-cli-v0.3.4) (2023-02-25)
+
+
+### Features
+
+* update aqua version [fixes DXJ-317] ([#183](https://github.com/fluencelabs/fluence-cli/issues/183)) ([c0b1457](https://github.com/fluencelabs/fluence-cli/commit/c0b1457e6ad414a4fee451f51dbd31a115d2e618))
+
 ## [0.3.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.2...fluence-cli-v0.3.3) (2023-02-24)
 
 
