@@ -62,7 +62,7 @@ version: 0
 name: new
 modules:
   facade:
-    get: modules/new
+    get: modules/newService
     envs:
       A: B
 `
