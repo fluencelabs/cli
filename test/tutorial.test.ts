@@ -15,7 +15,7 @@
  */
 
 import { cp, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { join } from "node:path";
 
 import {
   FS_OPTIONS,
@@ -34,7 +34,7 @@ import { fluence, init, maybeConcurrentTest, multiaddrs } from "./helpers.js";
 
 describe("tutorial", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
-    const cwd = path.join("tmp", "shouldWorkWithMinimalTemplate");
+    const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
     await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
@@ -55,6 +55,18 @@ describe("tutorial", () => {
       cwd,
     });
 
+    await writeFile(
+      join(cwd, "src", "services", "newService", "service.yaml"),
+      `version: 0
+    name: new
+    modules:
+      facade:
+        get: modules/new
+        envs:
+          A: B
+`
+    );
+
     await deploy(cwd);
 
     try {
@@ -69,8 +81,8 @@ describe("tutorial", () => {
       });
 
       await cp(
-        path.join(process.cwd(), "test", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
-        path.join(cwd, "src", "aqua", NEW_SERVICE_AQUA_FILE_NAME)
+        join(process.cwd(), "test", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
+        join(cwd, "src", "aqua", NEW_SERVICE_AQUA_FILE_NAME)
       );
 
       expect(
@@ -78,7 +90,7 @@ describe("tutorial", () => {
           args: ["run"],
           flags: {
             f: 'greeting("world")',
-            i: path.join("src", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
+            i: join("src", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
           },
           cwd,
         })
@@ -89,7 +101,7 @@ describe("tutorial", () => {
   });
 
   maybeConcurrentTest("should work with ts template", async () => {
-    const cwd = path.join("tmp", "shouldWorkWithTSTemplate");
+    const cwd = join("tmp", "shouldWorkWithTSTemplate");
     await init(cwd, "ts");
     await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
@@ -113,7 +125,7 @@ describe("tutorial", () => {
   });
 
   maybeConcurrentTest("should work with js template", async () => {
-    const cwd = path.join("tmp", "shouldWorkWithJSTemplate");
+    const cwd = join("tmp", "shouldWorkWithJSTemplate");
     await init(cwd, "js");
     await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
@@ -141,7 +153,7 @@ describe("tutorial", () => {
       args: ["run"],
       flags: {
         f: "identify()",
-        i: path.join("test", "aqua", "smoke.aqua"),
+        i: join("test", "aqua", "smoke.aqua"),
         relay: multiaddrs[0]?.multiaddr,
         quiet: true,
       },
@@ -184,7 +196,7 @@ const generateDefaultKey = (cwd: string) =>
   });
 
 const uncommentCodeInMainAqua = async (cwd: string) => {
-  const aquaFilePath = path.join(cwd, "src", "aqua", "main.aqua");
+  const aquaFilePath = join(cwd, "src", "aqua", "main.aqua");
 
   const aquaFileContent = await readFile(aquaFilePath, FS_OPTIONS);
 
@@ -217,13 +229,7 @@ const uncommentJSorTSCode = async (
   JSOrTs: "js" | "ts",
   cwd: string
 ): Promise<string> => {
-  const indexTSorJSPath = path.join(
-    cwd,
-    "src",
-    JSOrTs,
-    "src",
-    `index.${JSOrTs}`
-  );
+  const indexTSorJSPath = join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 
   const TSorJSFileContent = await readFile(indexTSorJSPath, FS_OPTIONS);
 
