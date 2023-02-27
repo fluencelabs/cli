@@ -335,11 +335,13 @@ export const build = async ({
   const serviceInterfaces = [
     ...new Set(
       await Promise.all(
-        Object.values(serviceNamePathToFacadeMap).map((pathToFacadeWasm) =>
-          generateServiceInterface({
-            pathToFacadeWasm,
-            marineCli,
-          })
+        Object.entries(serviceNamePathToFacadeMap).map(
+          ([serviceId, pathToFacadeWasm]) =>
+            generateServiceInterface({
+              serviceId,
+              pathToFacadeWasm,
+              marineCli,
+            })
         )
       )
     ),

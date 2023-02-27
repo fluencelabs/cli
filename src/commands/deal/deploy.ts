@@ -21,7 +21,6 @@ import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
-import { toLower } from "lodash-es";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -216,7 +215,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         definition: appCID,
         timestamp: new Date().toISOString(),
         dealIdOriginal,
-        dealId: toLower(dealIdOriginal.slice(2)),
+        dealId: dealIdOriginal.slice(2).toLowerCase(),
         chainNetwork,
         chainNetworkId,
       };
