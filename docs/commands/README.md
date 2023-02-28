@@ -65,7 +65,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.5/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -143,7 +143,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.1/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.3/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -163,7 +163,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.5/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -342,7 +342,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.4/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.6/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -366,7 +366,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.5/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -569,7 +569,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.5/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 

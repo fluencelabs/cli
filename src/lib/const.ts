@@ -57,6 +57,14 @@ export type ChainConfig = {
 };
 
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
+export const WC_PROJECT_ID = "70c1c5ed2a23e7383313de1044ddce7e";
+export const WC_METADATA = {
+  name: "Fluence CLI",
+  description:
+    "Fluence CLI is designed to be the only tool that you need to manage the life cycle of applications written on Fluence.",
+  url: "https://github.com/fluencelabs/fluence-cli",
+  icons: [],
+};
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   local: {
     ethereumNodeUrl: "http://127.0.0.1:8545",

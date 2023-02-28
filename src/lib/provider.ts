@@ -35,9 +35,7 @@ import {
 } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import type { IQRCodeModal } from "@walletconnect/types";
-import walletconnect from "@walletconnect/web3-provider";
-const WalletConnectProvider = walletconnect.default;
+import { UniversalProvider } from "@walletconnect/universal-provider";
 import { BytesLike, ethers, providers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
@@ -49,37 +47,15 @@ import {
   NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,
   DEAL_RPC_CONFIG,
+  WC_PROJECT_ID,
+  WC_METADATA,
 } from "./const.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { list } from "./prompt.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
-const BRIDGE_QUERY_PARAM_NAME = "bridge";
-const KEY_QUERY_PARAM_NAME = "key";
-
-class WalletConnectModal implements IQRCodeModal {
-  open(connectionString: string): void {
-    const connectionStringUrl = new URL(connectionString);
-    const wc = connectionStringUrl.pathname;
-
-    const bridge = connectionStringUrl.searchParams.get(
-      BRIDGE_QUERY_PARAM_NAME
-    );
-
-    assert(typeof bridge === "string");
-    const key = connectionStringUrl.searchParams.get(KEY_QUERY_PARAM_NAME);
-    assert(typeof key === "string");
-    const url = new URL(CLI_CONNECTOR_URL);
-    url.searchParams.set(WC_QUERY_PARAM_NAME, wc);
-    url.searchParams.set(BRIDGE_QUERY_PARAM_NAME, bridge);
-    url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
-
-    commandObj.log(
-      `To approve transactions with your to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${connectionString}`
-    );
-  }
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  close(): void {}
-}
+const RELAY_QUERY_PARAM_NAME = "relay-protocol";
+const KEY_QUERY_PARAM_NAME = "symKey";
 
 const DEFAULT_NETWORK = "testnet";
 
@@ -130,14 +106,58 @@ export const getSigner = async (
 const getWalletConnectProvider = async (
   network: ChainNetwork
 ): Promise<ethers.Signer> => {
-  const provider = new WalletConnectProvider({
-    rpc: DEAL_RPC_CONFIG,
-    chainId: DEAL_CONFIG[network].chainId,
-    qrcode: true,
-    qrcodeModal: new WalletConnectModal(),
+  const provider = await UniversalProvider.init({
+    projectId: WC_PROJECT_ID,
+    metadata: WC_METADATA,
   });
 
-  await provider.enable();
+  provider.on("display_uri", (uri: string) => {
+    const connectionStringUrl = new URL(uri);
+    const wc = connectionStringUrl.pathname;
+
+    const bridge = connectionStringUrl.searchParams.get(RELAY_QUERY_PARAM_NAME);
+
+    assert(typeof bridge === "string");
+    const key = connectionStringUrl.searchParams.get(KEY_QUERY_PARAM_NAME);
+    assert(typeof key === "string");
+    const url = new URL(CLI_CONNECTOR_URL);
+    url.searchParams.set(WC_QUERY_PARAM_NAME, wc);
+    url.searchParams.set(RELAY_QUERY_PARAM_NAME, bridge);
+    url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
+
+    commandObj.log(
+      `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`
+    );
+  });
+
+  startSpinner(color.yellow("Connecting to wallet..."));
+
+  const session = await provider.connect({
+    namespaces: {
+      eip155: {
+        methods: [
+          "eth_sendTransaction",
+          "eth_signTransaction",
+          "eth_sign",
+          "personal_sign",
+          "eth_signTypedData",
+        ],
+        chains: [`eip155:${DEAL_CONFIG[network].chainId}`],
+        events: ["chainChanged", "accountsChanged"],
+        rpcMap: DEAL_RPC_CONFIG,
+      },
+    },
+  });
+
+  const walletAddress =
+    session?.namespaces["eip155"]?.accounts[0]?.split(":")[2];
+
+  if (walletAddress == null) {
+    throw new Error("Wallet address is not defined");
+  }
+
+  stopSpinner(`\nWallet ${color.yellow(walletAddress)} connected`);
+
   return new providers.Web3Provider(provider).getSigner();
 };
 
@@ -194,3 +214,20 @@ export const getFLTContract = async (
     await getDeveloperContract(signer, network).fluenceToken(),
     signer
   );
+
+export const waitTx = async (
+  tx: ethers.ContractTransaction
+): Promise<ethers.ContractReceipt> => {
+  startSpinner("Waiting for transaction to be mined...");
+
+  const res = await tx.wait();
+  stopSpinner();
+
+  return res;
+};
+
+export const promptConfirmTx = (privKey: string | undefined) => {
+  if (privKey === undefined) {
+    commandObj.log(`Confirm transaction in your wallet...`);
+  }
+};

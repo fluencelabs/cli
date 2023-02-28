@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
+
+const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -62,6 +65,6 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
       privKey: flags.privKey,
     });
 
-    commandObj.log(`Tx hash: ${tx.hash}`);
+    commandObj.log(`Tx hash: ${color.yellow(tx.hash)}`);
   }
 }

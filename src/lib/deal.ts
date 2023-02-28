@@ -19,7 +19,13 @@ import assert from "node:assert";
 import { BigNumber } from "ethers";
 
 import type { ChainNetwork } from "./const.js";
-import { getFactoryContract, getSigner, getDealContract } from "./provider.js";
+import {
+  getFactoryContract,
+  getSigner,
+  getDealContract,
+  waitTx,
+  promptConfirmTx,
+} from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -42,13 +48,16 @@ export const dealCreate = async ({
   const signer = await getSigner(chainNetwork, privKey);
   const factory = getFactoryContract(signer, chainNetwork);
 
+  promptConfirmTx(privKey);
+
   const tx = await factory.createDeal(
     BigNumber.from(minWorkers),
     BigNumber.from(targetWorkers),
     appCID
   );
 
-  const res = await tx.wait();
+  const res = await waitTx(tx);
+
   const eventTopic = factory.interface.getEventTopic(EVENT_TOPIC_FRAGMENT);
 
   const log = res.logs.find(
@@ -80,7 +89,9 @@ export const dealUpdate = async ({
   const signer = await getSigner(network, privKey);
   const deal = getDealContract(dealAddress, signer);
 
+  promptConfirmTx(privKey);
+
   const tx = await deal.setAppCID(appCID);
-  await tx.wait();
+  await waitTx(tx);
   return tx;
 };
