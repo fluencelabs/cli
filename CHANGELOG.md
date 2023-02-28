@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.8](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.7...fluence-cli-v0.3.8) (2023-02-28)
+
+
+### Bug Fixes
+
+* lokijs ([#192](https://github.com/fluencelabs/fluence-cli/issues/192)) ([918b301](https://github.com/fluencelabs/fluence-cli/commit/918b30104b97e2e144b8ba00ef4b8088e14dd69f))
+
 ## [0.3.7](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.6...fluence-cli-v0.3.7) (2023-02-28)
 
 
