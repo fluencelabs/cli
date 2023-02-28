@@ -126,7 +126,7 @@ const getWalletConnectProvider = async (
     url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
 
     commandObj.log(
-      `To approve transactions with your to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`
+      `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`
     );
   });
 
