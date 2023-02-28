@@ -23,7 +23,7 @@ import { local } from "./localNodes.js";
 import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 
-export const AQUA_RECOMMENDED_VERSION = "0.10.1";
+export const AQUA_RECOMMENDED_VERSION = "0.10.2";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
 export const REGISTRY_RECOMMENDED_VERSION = "0.7.1";
 export const SPELL_RECOMMENDED_VERSION = "0.4.0";
@@ -211,6 +211,11 @@ export const OFF_AQUA_LOGS_FLAG = {
       "Turns off logs from Console.print in aqua and from IPFS service",
   }),
 };
+
+export const MODULE_TYPE_RUST = "rust";
+export const MODULE_TYPE_COMPILED = "compiled";
+export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
+export type ModuleType = (typeof MODULE_TYPES)[number];
 
 export const TOKENS = ["FakeUSD", "FLT"] as const;
 export const TOKENS_STRING = TOKENS.join(", ");

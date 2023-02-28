@@ -128,13 +128,86 @@ export function upload_deploy(...args: any) {
                                        (seq
                                         (seq
                                          (seq
-                                          (seq
-                                           (null)
-                                           (call h-0 ("json" "obj") ["deal_id" "dummy-deal-id-123" "ipfs" "/dns4/ipfs.fluence.dev/tcp/5001" "worker_def_cid" w-1-0.$.definition!] WorkerSpellArgs_obj)
+                                          (null)
+                                          (new $worker_id
+                                           (seq
+                                            (seq
+                                             (seq
+                                              (seq
+                                               (call h-0 ("json" "obj") ["deal_id" "dummy-deal-id-123" "ipfs" "/dns4/ipfs.fluence.dev/tcp/5001" "worker_def_cid" w-1-0.$.definition!] WorkerSpellArgs_obj)
+                                               (xor
+                                                (call h-0 ("worker" "create") [] $worker_id)
+                                                (call h-0 ("worker" "get_peer_id") [] $worker_id)
+                                               )
+                                              )
+                                              (new $worker_id_test
+                                               (seq
+                                                (seq
+                                                 (seq
+                                                  (call h-0 ("math" "add") [0 1] worker_id_incr)
+                                                  (fold $worker_id s
+                                                   (seq
+                                                    (seq
+                                                     (ap s $worker_id_test)
+                                                     (canon h-0 $worker_id_test  #worker_id_iter_canon)
+                                                    )
+                                                    (xor
+                                                     (match #worker_id_iter_canon.length worker_id_incr
+                                                      (null)
+                                                     )
+                                                     (next s)
+                                                    )
+                                                   )
+                                                   (never)
+                                                  )
+                                                 )
+                                                 (canon h-0 $worker_id_test  #worker_id_result_canon)
+                                                )
+                                                (ap #worker_id_result_canon worker_id_gate)
+                                               )
+                                              )
+                                             )
+                                             (xor
+                                              (call worker_id_gate.$.[0]! ("spell" "install") [AppDeployDefinition_obj.$.installation_script! WorkerSpellArgs_obj AppDeployDefinition_obj.$.installation_trigger!] spell_id)
+                                              (seq
+                                               (seq
+                                                (call -relay- ("op" "noop") [])
+                                                (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                                               )
+                                               (call -relay- ("op" "noop") [])
+                                              )
+                                             )
+                                            )
+                                            (new $worker_id_test-0
+                                             (seq
+                                              (seq
+                                               (seq
+                                                (call h-0 ("math" "add") [0 1] worker_id_incr-0)
+                                                (fold $worker_id s
+                                                 (seq
+                                                  (seq
+                                                   (ap s $worker_id_test-0)
+                                                   (canon h-0 $worker_id_test-0  #worker_id_iter_canon-0)
+                                                  )
+                                                  (xor
+                                                   (match #worker_id_iter_canon-0.length worker_id_incr-0
+                                                    (null)
+                                                   )
+                                                   (next s)
+                                                  )
+                                                 )
+                                                 (never)
+                                                )
+                                               )
+                                               (canon h-0 $worker_id_test-0  #worker_id_result_canon-0)
+                                              )
+                                              (ap #worker_id_result_canon-0 worker_id_gate-0)
+                                             )
+                                            )
+                                           )
                                           )
-                                          (call h-0 ("spell" "install") [AppDeployDefinition_obj.$.installation_script! WorkerSpellArgs_obj AppDeployDefinition_obj.$.installation_trigger!] spell_id)
                                          )
-                                         (call h-0 ("json" "obj") ["host_id" h-0 "spell_id" spell_id "worker_id" "TBD"] DeployedSpell_obj)
+                                         (call h-0 ("json" "obj") ["host_id" h-0 "spell_id" spell_id "worker_id" worker_id_gate-0.$.[0]!] DeployedSpell_obj)
                                         )
                                         (ap DeployedSpell_obj $spells)
                                        )
@@ -152,7 +225,7 @@ export function upload_deploy(...args: any) {
                                                (ap "deployed spell" $array-inline)
                                                (ap spell_id $array-inline)
                                               )
-                                              (ap "TBD" $array-inline)
+                                              (ap worker_id_gate-0.$.[0]! $array-inline)
                                              )
                                              (ap "to" $array-inline)
                                             )
@@ -165,10 +238,10 @@ export function upload_deploy(...args: any) {
                                         )
                                         (null)
                                        )
-                                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
+                                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
                                       )
                                      )
-                                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
                                     )
                                    )
                                    (next h-0)
@@ -188,9 +261,9 @@ export function upload_deploy(...args: any) {
                                    (seq
                                     (seq
                                      (ap "deployed workers" $array-inline-1)
-                                     (canon %init_peer_id% $workers  #push-to-stream-105)
+                                     (canon %init_peer_id% $workers  #push-to-stream-135)
                                     )
-                                    (ap #push-to-stream-105 $array-inline-1)
+                                    (ap #push-to-stream-135 $array-inline-1)
                                    )
                                    (canon %init_peer_id% $array-inline-1  #array-inline-1-0)
                                   )
@@ -199,7 +272,7 @@ export function upload_deploy(...args: any) {
                                 )
                                 (null)
                                )
-                               (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                               (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
                               )
                              )
                             )
@@ -214,10 +287,10 @@ export function upload_deploy(...args: any) {
                       )
                       (xor
                        (call %init_peer_id% ("callbackSrv" "response") [DeployedAppWorkers_obj])
-                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
+                       (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
                       )
                      )
-                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
+                     (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
                     )
     `
     return callFunction$$(

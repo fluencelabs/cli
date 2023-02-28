@@ -16,6 +16,7 @@
 
 import { spawn } from "node:child_process";
 import fsPromises from "node:fs/promises";
+import { cwd } from "node:process";
 
 import stringifyToTOML from "@iarna/toml/stringify.js";
 import oclifColor from "@oclif/color";
@@ -36,13 +37,9 @@ import {
   FS_OPTIONS,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
-  SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
 import { haltCountly } from "../../lib/countly.js";
-import {
-  getModuleWasmPath,
-  getServiceDirAbsolutePath,
-} from "../../lib/helpers/downloadFile.js";
+import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
@@ -146,18 +143,20 @@ const ensureServiceConfig = async (
 ): Promise<ServiceConfigReadonly> => {
   const fluenceConfig = await initReadonlyFluenceConfig();
 
-  const get =
+  const serviceOrServiceDirPathOrUrl =
     fluenceConfig?.services?.[nameOrPathOrUrl]?.get ?? nameOrPathOrUrl;
 
-  const serviceDirPath = await getServiceDirAbsolutePath(get, projectRootDir);
-  const readonlyServiceConfig = await initReadonlyServiceConfig(serviceDirPath);
+  const readonlyServiceConfig = await initReadonlyServiceConfig(
+    serviceOrServiceDirPathOrUrl,
+    typeof fluenceConfig?.services?.[nameOrPathOrUrl]?.get === "string"
+      ? projectRootDir
+      : cwd()
+  );
 
   if (readonlyServiceConfig === null) {
     stopSpinner(color.red("error"));
     return commandObj.error(
-      `Service ${color.yellow(nameOrPathOrUrl)} doesn't have ${color.yellow(
-        SERVICE_CONFIG_FILE_NAME
-      )}. Check name or path or url of the service is typed correctly`
+      `No service config at ${color.yellow(serviceOrServiceDirPathOrUrl)}`
     );
   }
 

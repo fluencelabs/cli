@@ -65,7 +65,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: CONFIG_FILE_NAME,
-  getConfigDirPath: ensureUserFluenceDir,
+  getConfigOrConfigDirPath: ensureUserFluenceDir,
 };
 
 export const initUserConfig = getConfigInitFunction(initConfigOptions);

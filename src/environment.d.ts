@@ -26,7 +26,6 @@ declare global {
     interface ProcessEnv {
       [FLUENCE_ENV]: FluenceEnv;
       [DEBUG_COUNTLY]: "true" | "false";
-      [SHOW_SPINNER]: "true" | "false";
       [FLUENCE_USER_DIR]?: string;
     }
   }

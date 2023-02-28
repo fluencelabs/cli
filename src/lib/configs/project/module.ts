@@ -16,7 +16,15 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { MODULE_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import {
+  ModuleType,
+  MODULE_CONFIG_FILE_NAME,
+  MODULE_TYPES,
+  MODULE_TYPE_COMPILED,
+  MODULE_TYPE_RUST,
+  TOP_LEVEL_SCHEMA_ID,
+} from "../../const.js";
+import { getModuleAbsolutePath } from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -27,12 +35,6 @@ import {
   Migrations,
   GetDefaultConfig,
 } from "../initConfig.js";
-
-export const MODULE_TYPE_RUST = "rust";
-export const MODULE_TYPE_COMPILED = "compiled";
-export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
-
-export type ModuleType = (typeof MODULE_TYPES)[number];
 
 export type ConfigV0 = {
   version: 0;
@@ -165,17 +167,31 @@ const getInitConfigOptions = (
   migrations,
   name: MODULE_CONFIG_FILE_NAME,
   getSchemaDirPath: ensureFluenceDir,
-  getConfigDirPath: (): string => configPath,
+  getConfigOrConfigDirPath: (): string => configPath,
 });
 
-export const initModuleConfig = (
-  configPath: string
+export const initModuleConfig = async (
+  configOrConfigDirPathOrUrl: string,
+  absolutePath?: string | undefined
 ): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(getInitConfigOptions(configPath))();
-export const initReadonlyModuleConfig = (
-  configPath: string
+  getConfigInitFunction(
+    getInitConfigOptions(
+      absolutePath === undefined
+        ? configOrConfigDirPathOrUrl
+        : await getModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+    )
+  )();
+export const initReadonlyModuleConfig = async (
+  configOrConfigDirPathOrUrl: string,
+  absolutePath?: string | undefined
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(getInitConfigOptions(configPath))();
+  getReadonlyConfigInitFunction(
+    getInitConfigOptions(
+      absolutePath === undefined
+        ? configOrConfigDirPathOrUrl
+        : await getModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+    )
+  )();
 
 const getDefault: (name: string) => GetDefaultConfig<LatestConfig> =
   (name: string): GetDefaultConfig<LatestConfig> =>

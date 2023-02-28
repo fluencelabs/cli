@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert";
-import { isAbsolute, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -30,23 +29,19 @@ import { initFluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
   ConfigV0,
   initReadonlyModuleConfig,
-  ModuleConfigReadonly,
 } from "./configs/project/module.js";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
 } from "./configs/project/service.js";
-import {
-  FLUENCE_CONFIG_FILE_NAME,
-  MODULE_CONFIG_FILE_NAME,
-  SERVICE_CONFIG_FILE_NAME,
-} from "./const.js";
+import { FLUENCE_CONFIG_FILE_NAME } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
-  getServiceDirAbsolutePath,
+  getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
+import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
 import { projectRootDir } from "./paths.js";
 
@@ -65,7 +60,7 @@ export const prepareForDeploy = async ({
   hosts = false,
 }: PrepareForDeployArg): Promise<UploadArgConfig> => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const arrayWithWorkerNames = Object.entries(
+  const hostsOrDeals = Object.entries(
     (hosts ? fluenceConfig.hosts : fluenceConfig.deals) ??
       commandObj.error(
         `You must have a ${color.yellow(
@@ -82,7 +77,7 @@ export const prepareForDeploy = async ({
     ]
   >;
 
-  const workerNamesSet = arrayWithWorkerNames.map(([workerName]) => workerName);
+  const workerNamesSet = hostsOrDeals.map(([workerName]) => workerName);
 
   const workersToHost =
     workerNamesString === undefined
@@ -97,17 +92,30 @@ export const prepareForDeploy = async ({
     );
   }
 
-  const workersFromWorkersConfig = Object.keys(
-    fluenceConfig.workers ??
-      commandObj.error(
-        `You must have a ${color.yellow(
-          "workers"
-        )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
-      )
-  );
+  const { services: servicesFromFluenceConfig } = fluenceConfig;
+
+  if (servicesFromFluenceConfig === undefined) {
+    return commandObj.error(
+      `You must have a ${color.yellow(
+        "services"
+      )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one service as a key`
+    );
+  }
+
+  const { workers: workersFromFluenceConfig } = fluenceConfig;
+
+  if (workersFromFluenceConfig === undefined) {
+    return commandObj.error(
+      `You must have a ${color.yellow(
+        "workers"
+      )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
+    );
+  }
+
+  const workersFromFluenceConfigArray = Object.keys(workersFromFluenceConfig);
 
   const workerNamesNotFoundInWorkersConfig = workersToHost.filter(
-    (workerName) => !workersFromWorkersConfig.includes(workerName)
+    (workerName) => !workersFromFluenceConfigArray.includes(workerName)
   );
 
   if (workerNamesNotFoundInWorkersConfig.length !== 0) {
@@ -121,8 +129,14 @@ export const prepareForDeploy = async ({
   }
 
   const workerConfigs = workersToHost.map((workerName) => {
-    const workerConfig = fluenceConfig.workers?.[workerName];
-    assert(workerConfig !== undefined);
+    const workerConfig = workersFromFluenceConfig[workerName];
+
+    assert(
+      workerConfig !== undefined,
+      `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
+        workersFromFluenceConfig
+      )}`
+    );
 
     if (workerConfig.services.length === 0) {
       return commandObj.error(
@@ -149,29 +163,31 @@ export const prepareForDeploy = async ({
   const serviceConfigs = await Promise.all(
     serviceNames.map((serviceName) =>
       (async () => {
-        const { get = undefined, overrideModules = undefined } =
-          fluenceConfig?.services?.[serviceName] ?? {};
+        const maybeService = servicesFromFluenceConfig[serviceName];
 
-        assert(get !== undefined);
+        assert(
+          maybeService !== undefined,
+          `Unreachable. can't find service ${serviceName} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
+            servicesFromFluenceConfig
+          )}`
+        );
 
-        const serviceDirPath = await getServiceDirAbsolutePath(
+        const { get, overrideModules } = maybeService;
+
+        const serviceConfig = await initReadonlyServiceConfig(
           get,
           projectRootDir
         );
 
-        const serviceConfig = await initReadonlyServiceConfig(serviceDirPath);
-
         if (serviceConfig === null) {
           return commandObj.error(
-            `${
-              isUrl(get)
-                ? `Downloaded invalid service ${color.yellow(
-                    serviceName
-                  )} from ${color.yellow(get)}`
-                : `Invalid service ${color.yellow(serviceName)}`
-            }. No ${SERVICE_CONFIG_FILE_NAME} found at ${color.yellow(
-              serviceDirPath
-            )}`
+            isUrl(get)
+              ? `Downloaded invalid service ${color.yellow(
+                  serviceName
+                )} from ${color.yellow(get)}`
+              : `Invalid service ${color.yellow(serviceName)} at ${color.yellow(
+                  get
+                )}`
           );
         }
 
@@ -179,7 +195,6 @@ export const prepareForDeploy = async ({
           serviceName,
           overrideModules,
           serviceConfig,
-          serviceDirPath,
         };
       })()
     )
@@ -195,7 +210,7 @@ export const prepareForDeploy = async ({
     ),
   ];
 
-  const modulePathsMap = new Map<string, string>(
+  const downloadedModulesMap = new Map<string, string>(
     await Promise.all(
       modulesUrls.map(
         (url): Promise<[string, string]> =>
@@ -204,46 +219,40 @@ export const prepareForDeploy = async ({
     )
   );
 
-  serviceConfigs
-    .flatMap(({ serviceConfig, serviceDirPath }) =>
+  const localModuleAbsolutePaths = serviceConfigs
+    .flatMap(({ serviceConfig }) =>
       Object.values(serviceConfig.modules).map(({ get }) => ({
         get,
-        serviceDirPath,
+        serviceDirPath: serviceConfig.$getDirPath(),
       }))
     )
     .filter(({ get }) => !isUrl(get))
-    .forEach(({ get, serviceDirPath }) => {
-      if (isAbsolute(get)) {
-        modulePathsMap.set(get, get);
-        return;
-      }
-
-      const absolutePath = resolve(serviceDirPath, get);
-      modulePathsMap.set(absolutePath, absolutePath);
-    });
+    .map(
+      ({ get, serviceDirPath }) =>
+        [get, getUrlOrAbsolutePath(get, serviceDirPath)] as const
+    );
 
   const moduleConfigsMap = new Map<string, InitializedReadonlyConfig<ConfigV0>>(
     await Promise.all(
-      [...modulePathsMap.entries()].map(([absolutePathOrUrl, moduleDirPath]) =>
-        (async (): Promise<[string, InitializedReadonlyConfig<ConfigV0>]> => {
-          const moduleConfig = await initReadonlyModuleConfig(moduleDirPath);
-
-          if (moduleConfig === null) {
-            return commandObj.error(
-              `${
-                isUrl(absolutePathOrUrl)
-                  ? `Downloaded invalid module from ${color.yellow(
-                      absolutePathOrUrl
-                    )}`
-                  : `Invalid module`
-              }. No ${MODULE_CONFIG_FILE_NAME} found at ${color.yellow(
-                moduleDirPath
-              )}`
+      [...downloadedModulesMap.entries(), ...localModuleAbsolutePaths].map(
+        ([originalGetValue, moduleAbsolutePath]) =>
+          (async (): Promise<[string, InitializedReadonlyConfig<ConfigV0>]> => {
+            const moduleConfig = await initReadonlyModuleConfig(
+              moduleAbsolutePath
             );
-          }
 
-          return [absolutePathOrUrl, moduleConfig];
-        })()
+            if (moduleConfig === null) {
+              return commandObj.error(
+                isUrl(originalGetValue)
+                  ? `Downloaded invalid module from ${color.yellow(
+                      originalGetValue
+                    )} to ${moduleAbsolutePath}`
+                  : `Invalid module found at ${moduleAbsolutePath}`
+              );
+            }
+
+            return [moduleAbsolutePath, moduleConfig];
+          })()
       )
     )
   );
@@ -252,7 +261,7 @@ export const prepareForDeploy = async ({
   const marineCli = await initMarineCli(fluenceConfig, fluenceLockConfig);
   await buildModules([...moduleConfigsMap.values()], marineCli);
 
-  const workers: UploadArgConfig["workers"] = arrayWithWorkerNames
+  const workers: UploadArgConfig["workers"] = hostsOrDeals
     .filter(([workerName]) => workersToHost.includes(workerName))
     .map(([workerName, { peerIds = [] }]) => {
       if (hosts && peerIds.length === 0) {
@@ -265,31 +274,49 @@ export const prepareForDeploy = async ({
         );
       }
 
-      const workerConfig = fluenceConfig.workers?.[workerName];
-      assert(workerConfig !== undefined);
+      const workerConfig = workersFromFluenceConfig[workerName];
+
+      assert(
+        workerConfig !== undefined,
+        `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
+          workersFromFluenceConfig
+        )}`
+      );
 
       const services = workerConfig.services.map((serviceName) => {
-        const serviceConfig = serviceConfigs.find(
-          ({ serviceName: name }) => name === serviceName
+        const maybeServiceConfig = serviceConfigs.find(
+          (c) => c.serviceName === serviceName
         );
 
-        assert(serviceConfig !== undefined);
-        const { overrideModules = undefined } = serviceConfig;
+        assert(
+          maybeServiceConfig !== undefined,
+          `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
+            serviceConfigs
+          )}`
+        );
 
-        const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
-          serviceConfig.serviceConfig.modules;
+        const { overrideModules, serviceConfig } = maybeServiceConfig;
+
+        const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
+          serviceConfig.modules;
 
         const modules = [
-          ...Object.entries(otherModules),
+          ...Object.entries(restModules),
           [FACADE_MODULE_NAME, facadeModule] as const,
         ].map(([name, { get }]) => {
-          const moduleConfig = moduleConfigsMap.get(
-            isUrl(get) || isAbsolute(get)
-              ? get
-              : resolve(serviceConfig.serviceDirPath, get)
+          const moduleUrlOrAbsolutePath = getUrlOrAbsolutePath(
+            get,
+            serviceConfig.$getDirPath()
           );
 
-          assert(moduleConfig !== undefined);
+          const moduleConfig = moduleConfigsMap.get(moduleUrlOrAbsolutePath);
+
+          assert(
+            moduleConfig !== undefined,
+            `Unreachable. Module should not be undefined because moduleConfigsMap was created from serviceConfigs.modules. Searching for ${moduleUrlOrAbsolutePath} in ${JSON.stringify(
+              Object.fromEntries(moduleConfigsMap.entries())
+            )}`
+          );
 
           const overriddenModuleConfig = {
             ...moduleConfig,
@@ -299,7 +326,7 @@ export const prepareForDeploy = async ({
           return {
             wasm: getModuleWasmPath(overriddenModuleConfig),
             config: JSON.stringify(
-              serviceModuleToJSONModuleConfig(overriddenModuleConfig)
+              moduleToJSONModuleConfig(overriddenModuleConfig)
             ),
           };
         });
@@ -330,68 +357,3 @@ export const prepareForDeploy = async ({
     },
   };
 };
-
-/* eslint-disable camelcase */
-type JSONModuleConf = {
-  name: string;
-  max_heap_size?: string;
-  logger_enabled?: boolean;
-  logging_mask?: number;
-  mapped_dirs?: Array<[string, string]>;
-  preopened_files?: Array<string>;
-  envs?: Array<[string, string]>;
-  mounted_binaries?: Array<[string, string]>;
-};
-
-const serviceModuleToJSONModuleConfig = (
-  moduleConfig: ModuleConfigReadonly
-): JSONModuleConf => {
-  const {
-    name,
-    loggerEnabled,
-    loggingMask,
-    volumes,
-    envs,
-    maxHeapSize,
-    mountedBinaries,
-    preopenedFiles,
-  } = moduleConfig;
-
-  const jsonModuleConfig: JSONModuleConf = {
-    name,
-  };
-
-  if (loggerEnabled === true) {
-    jsonModuleConfig.logger_enabled = true;
-  }
-
-  if (typeof loggingMask === "number") {
-    jsonModuleConfig.logging_mask = loggingMask;
-  }
-
-  if (typeof maxHeapSize === "string") {
-    jsonModuleConfig.max_heap_size = maxHeapSize;
-  }
-
-  if (volumes !== undefined) {
-    jsonModuleConfig.mapped_dirs = Object.entries(volumes);
-    jsonModuleConfig.preopened_files = [...new Set(Object.values(volumes))];
-  }
-
-  if (preopenedFiles !== undefined) {
-    jsonModuleConfig.preopened_files = [
-      ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
-    ];
-  }
-
-  if (envs !== undefined) {
-    jsonModuleConfig.envs = Object.entries(envs);
-  }
-
-  if (mountedBinaries !== undefined) {
-    jsonModuleConfig.mounted_binaries = Object.entries(mountedBinaries);
-  }
-
-  return jsonModuleConfig;
-};
-/* eslint-enable camelcase */

@@ -16,18 +16,18 @@
 
 import assert from "node:assert";
 
-import camelcase from "camelcase";
-
 import type { MarineCLI } from "../marineCli.js";
 
 const SERVICE = "service ";
 
 type GenerateServiceInterfaceArg = {
+  serviceId: string;
   pathToFacadeWasm: string;
   marineCli: MarineCLI;
 };
 
 export const generateServiceInterface = async ({
+  serviceId,
   pathToFacadeWasm,
   marineCli,
 }: GenerateServiceInterfaceArg): Promise<string> => {
@@ -54,9 +54,6 @@ export const generateServiceInterface = async ({
     );
   }
 
-  declarations.push(
-    `${serviceName}("${camelcase(serviceName)}"):${rest.join(":")}`
-  );
-
+  declarations.push(`${serviceName}("${serviceId}"):${rest.join(":")}`);
   return declarations.join(SERVICE);
 };

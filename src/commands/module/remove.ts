@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import path from "node:path";
+import { cwd } from "node:process";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -75,28 +75,32 @@ export default class Remove extends BaseCommand<typeof Remove> {
         )} or path to the service directory`,
       }));
 
-    let serviceDirPath = serviceNameOrPath;
+    let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
 
     if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
       const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
-      serviceDirPath = serviceGet;
+      serviceOrServiceDirPathOrUrl = serviceGet;
     }
 
-    if (isUrl(serviceDirPath)) {
+    if (isUrl(serviceOrServiceDirPathOrUrl)) {
       return commandObj.error(
-        `Can't modify downloaded service ${color.yellow(serviceDirPath)}`
+        `Can't modify downloaded service ${color.yellow(
+          serviceOrServiceDirPathOrUrl
+        )}`
       );
     }
 
-    serviceDirPath = path.resolve(serviceDirPath);
-    const serviceConfig = await initServiceConfig(serviceDirPath);
+    const serviceConfig = await initServiceConfig(
+      serviceOrServiceDirPathOrUrl,
+      cwd()
+    );
 
     if (serviceConfig === null) {
       return commandObj.error(
-        `Directory ${color.yellow(
-          serviceDirPath
-        )} does not contain ${color.yellow(SERVICE_CONFIG_FILE_NAME)}`
+        `Can't find service config at ${color.yellow(
+          serviceOrServiceDirPathOrUrl
+        )}`
       );
     }
 
@@ -104,7 +108,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       return commandObj.error(
         `Each service must have a facade module, if you want to change it either override it in ${color.yellow(
           FLUENCE_CONFIG_FILE_NAME
-        )} or replace it manually in ${color.yellow(SERVICE_CONFIG_FILE_NAME)}`
+        )} or replace it manually in ${serviceConfig.$getPath()}`
       );
     }
 
@@ -125,7 +129,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     } else {
       return commandObj.error(
         `There is no module ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
-          serviceDirPath
+          serviceOrServiceDirPathOrUrl
         )}`
       );
     }
@@ -134,7 +138,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     commandObj.log(
       `Removed module ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
-        serviceDirPath
+        serviceOrServiceDirPathOrUrl
       )}`
     );
   }

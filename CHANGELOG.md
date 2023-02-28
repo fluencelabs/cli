@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.3.6](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.5...fluence-cli-v0.3.6) (2023-02-27)
+
+
+### Features
+
+* update upload_deploy function [fixes DXJ-323] ([#188](https://github.com/fluencelabs/fluence-cli/issues/188)) ([584f5c8](https://github.com/fluencelabs/fluence-cli/commit/584f5c8133bd107cfce01514fb0c51ba8fa7b36e))
+
+
+### Bug Fixes
+
+* legacy deploy [fixes DXJ-321] ([#185](https://github.com/fluencelabs/fluence-cli/issues/185)) ([730fa1a](https://github.com/fluencelabs/fluence-cli/commit/730fa1a4e94e879362d709716d2ea73ca7cb06f3))
+
+## [0.3.5](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.4...fluence-cli-v0.3.5) (2023-02-27)
+
+
+### Bug Fixes
+
+* aqua interface service_id generation [fixes DXJ-322] ([#186](https://github.com/fluencelabs/fluence-cli/issues/186)) ([a4230ae](https://github.com/fluencelabs/fluence-cli/commit/a4230aea7169ecd498019bd9584a8f5c37cbe33c))
+
+## [0.3.4](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.3...fluence-cli-v0.3.4) (2023-02-25)
+
+
+### Features
+
+* update aqua version [fixes DXJ-317] ([#183](https://github.com/fluencelabs/fluence-cli/issues/183)) ([c0b1457](https://github.com/fluencelabs/fluence-cli/commit/c0b1457e6ad414a4fee451f51dbd31a115d2e618))
+
+## [0.3.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.2...fluence-cli-v0.3.3) (2023-02-24)
+
+
+### Features
+
+* remove spinner, fix relative aqua file compilation, hide some deal-related commands, allow service and module configs not to be called service.yaml and module.yaml (full path to the config with .yaml extension is needed for this to work), don't add serviceName to defaultWorker if it's already there, simplify and refactor building of modules before deploying workers, change uploaded module config so it uses records instead of arrays of tuples [fixes DXJ-316] ([#180](https://github.com/fluencelabs/fluence-cli/issues/180)) ([1cf2b20](https://github.com/fluencelabs/fluence-cli/commit/1cf2b20b1e727297f015b3ad77e999c79c5e866d))
+
 ## [0.3.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.1...fluence-cli-v0.3.2) (2023-02-24)
 
 
