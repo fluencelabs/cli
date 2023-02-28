@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.6...fluence-cli-v0.3.7) (2023-02-28)
+
+
+### Features
+
+* **blockchain:** Migrate to walletconnect v2 ([#190](https://github.com/fluencelabs/fluence-cli/issues/190)) ([9fdbf54](https://github.com/fluencelabs/fluence-cli/commit/9fdbf54828fd91ef9d21209fd5819536f102d565))
+
 ## [0.3.6](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.5...fluence-cli-v0.3.6) (2023-02-27)
 
 
