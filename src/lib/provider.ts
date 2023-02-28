@@ -50,8 +50,8 @@ import {
   WC_PROJECT_ID,
   WC_METADATA,
 } from "./const.js";
-import { list } from "./prompt.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+import { list } from "./prompt.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
@@ -150,7 +150,11 @@ const getWalletConnectProvider = async (
   });
 
   const walletAddress =
-    session!.namespaces["eip155"]!.accounts[0]!.split(":")[2]!;
+    session?.namespaces["eip155"]?.accounts[0]?.split(":")[2];
+
+  if (walletAddress == null) {
+    throw new Error("Wallet address is not defined");
+  }
 
   stopSpinner(`\nWallet ${color.yellow(walletAddress)} connected`);
 
