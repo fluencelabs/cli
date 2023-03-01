@@ -25,7 +25,7 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
+import { initNewDeployedConfig } from "../../lib/configs/project/deployed.js";
 import {
   MIN_WORKERS,
   TARGET_WORKERS,
@@ -151,7 +151,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }
 
     const uploadDeployResult = await upload_deploy(fluencePeer, uploadArg);
-    const deployedConfig = await initDeployedConfig();
+    const deployedConfig = await initNewDeployedConfig();
 
     for (const { name: workerName } of [...uploadArg.workers]) {
       const uploadedWorker = uploadDeployResult.workers.find(
