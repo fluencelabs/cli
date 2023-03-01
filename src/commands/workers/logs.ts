@@ -39,6 +39,7 @@ import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../../lib/multiaddres.js";
+import { input } from "../../lib/prompt.js";
 
 const DEFAULT_TTL = 60000;
 
@@ -59,6 +60,19 @@ export default class Logs extends BaseCommand<typeof Logs> {
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
+    "worker-id": Flags.string({
+      description: "Worker id",
+      helpValue: "<worker-id>",
+    }),
+    "host-id": Flags.string({
+      description: "Host id",
+      helpValue: "<host-id>",
+    }),
+    "spell-id": Flags.string({
+      description: "Spell id",
+      helpValue: "<spell-id>",
+      default: "worker-spell",
+    }),
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -101,36 +115,14 @@ export default class Logs extends BaseCommand<typeof Logs> {
     const offAquaLogs = flags["off-aqua-logs"];
     doRegisterLog(fluencePeer, offAquaLogs);
 
-    const deployedConfig = await initDeployedConfig();
-    const workerNamesString = args["WORKER-NAMES"];
-    const workerNamesSet = Object.keys(deployedConfig.workers);
+    const logsArg = await getLogsArg({
+      workerNamesString: args["WORKER-NAMES"],
+      maybeWorkerId: flags["worker-id"],
+      maybeHostId: flags["host-id"],
+      spellId: flags["spell-id"],
+    });
 
-    const workersToGetLogsFor =
-      workerNamesString === undefined
-        ? workerNamesSet
-        : parseWorkers(workerNamesString);
-
-    const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
-      (workerName) => !workerNamesSet.includes(workerName)
-    );
-
-    if (workerNamesNotFoundInWorkersConfig.length !== 0) {
-      commandObj.error(
-        `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
-          .map((workerName) => color.yellow(workerName))
-          .join(", ")} in ${color.yellow(
-          DEPLOYED_CONFIG_FILE_NAME
-        )} please check the spelling and try again`
-      );
-    }
-
-    const workersArg: Get_logsArgApp_workers = {
-      workers: Object.entries(deployedConfig.workers)
-        .filter(([name]) => workersToGetLogsFor.includes(name))
-        .map(([name, config]) => ({ name, ...config })),
-    };
-
-    const logs = await get_logs(fluencePeer, workersArg);
+    const logs = await get_logs(fluencePeer, logsArg);
 
     commandObj.log(
       logs
@@ -146,3 +138,68 @@ export default class Logs extends BaseCommand<typeof Logs> {
     );
   }
 }
+
+type GetLogsArgArg = {
+  workerNamesString: string | undefined;
+  maybeWorkerId: string | undefined;
+  maybeHostId: string | undefined;
+  spellId: string;
+};
+
+const getLogsArg = async ({
+  workerNamesString,
+  maybeWorkerId,
+  maybeHostId,
+  spellId,
+}: GetLogsArgArg): Promise<Get_logsArgApp_workers> => {
+  if (maybeWorkerId !== undefined || maybeHostId !== undefined) {
+    const workerId =
+      maybeWorkerId ?? (await input({ message: "Enter worker id" }));
+
+    const hostId = maybeHostId ?? (await input({ message: "Enter host id" }));
+
+    return {
+      workers: [
+        {
+          definition: "",
+          installation_spells: [
+            {
+              worker_id: workerId,
+              host_id: hostId,
+              spell_id: spellId,
+            },
+          ],
+          name: "",
+        },
+      ],
+    };
+  }
+
+  const deployedConfig = await initDeployedConfig();
+  const workerNamesSet = Object.keys(deployedConfig.workers);
+
+  const workersToGetLogsFor =
+    workerNamesString === undefined
+      ? workerNamesSet
+      : parseWorkers(workerNamesString);
+
+  const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
+    (workerName) => !workerNamesSet.includes(workerName)
+  );
+
+  if (workerNamesNotFoundInWorkersConfig.length !== 0) {
+    commandObj.error(
+      `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
+        .map((workerName) => color.yellow(workerName))
+        .join(", ")} in ${color.yellow(
+        DEPLOYED_CONFIG_FILE_NAME
+      )} please check the spelling and try again`
+    );
+  }
+
+  return {
+    workers: Object.entries(deployedConfig.workers)
+      .filter(([name]) => workersToGetLogsFor.includes(name))
+      .map(([name, config]) => ({ name, ...config })),
+  };
+};
