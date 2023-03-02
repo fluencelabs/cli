@@ -22,7 +22,7 @@ import {
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
 import {
-  getServiceAbsolutePath as getServiceAbsolutePath,
+  ensureServiceAbsolutePath,
   validateAquaName,
 } from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
@@ -131,7 +131,7 @@ export const initServiceConfig = async (
 ): Promise<InitializedConfig<LatestConfig> | null> =>
   getConfigInitFunction(
     getInitConfigOptions(
-      await getServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
 
@@ -141,7 +141,7 @@ export const initReadonlyServiceConfig = async (
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(
-      await getServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
 

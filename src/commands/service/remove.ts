@@ -15,6 +15,7 @@
  */
 
 import assert from "node:assert";
+import { cwd } from "node:process";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -22,14 +23,16 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import type { FluenceConfigReadonly } from "../../lib/configs/project/fluence.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static override description = `Remove service from ${FLUENCE_CONFIG_FILE_NAME}`;
+  static override description = `Remove service from ${FLUENCE_CONFIG_FILE_NAME} services property and from all of the workers`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -54,36 +57,26 @@ export default class Remove extends BaseCommand<typeof Remove> {
         )}, path to a service or url to .tar.gz archive`,
       }));
 
-    if (fluenceConfig.services === undefined) {
-      return commandObj.error(
-        `There are no services in ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
+    const serviceNameToRemove = await getServiceNameToRemove(
+      nameOrPathOrUrl,
+      fluenceConfig
+    );
+
+    assert(fluenceConfig.services !== undefined);
+    delete fluenceConfig.services[serviceNameToRemove];
+
+    if (fluenceConfig.workers !== undefined) {
+      fluenceConfig.workers = Object.fromEntries(
+        Object.entries(fluenceConfig.workers).map(([workerName, worker]) => [
+          workerName,
+          {
+            ...worker,
+            services: worker.services.filter(
+              (service) => service !== serviceNameToRemove
+            ),
+          },
+        ])
       );
-    }
-
-    if (nameOrPathOrUrl in fluenceConfig.services) {
-      delete fluenceConfig.services[nameOrPathOrUrl];
-    } else if (
-      Object.values(fluenceConfig.services).some(
-        ({ get }): boolean => get === nameOrPathOrUrl
-      )
-    ) {
-      const [serviceName] =
-        Object.entries(fluenceConfig.services).find(
-          ([, { get }]): boolean => get === nameOrPathOrUrl
-        ) ?? [];
-
-      assert(typeof serviceName === "string");
-      delete fluenceConfig.services[serviceName];
-    } else {
-      commandObj.error(
-        `There is no service ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )}`
-      );
-    }
-
-    if (Object.keys(fluenceConfig.services).length === 0) {
-      delete fluenceConfig.services;
     }
 
     await fluenceConfig.$commit();
@@ -95,3 +88,62 @@ export default class Remove extends BaseCommand<typeof Remove> {
     );
   }
 }
+
+const getServiceNameToRemove = async (
+  nameOrPathOrUrl: string,
+  fluenceConfig: FluenceConfigReadonly
+): Promise<string> => {
+  if (fluenceConfig.services === undefined) {
+    return commandObj.error(
+      `There are no services in ${color.yellow(fluenceConfig.$getPath())}`
+    );
+  }
+
+  if (nameOrPathOrUrl in fluenceConfig.services) {
+    return nameOrPathOrUrl;
+  }
+
+  const servicesAbsolutePathsWithNames = await Promise.all(
+    Object.entries(fluenceConfig.services).map(([name, { get }]) =>
+      (async () =>
+        [
+          name,
+          await getServiceAbsolutePath(get, fluenceConfig.$getDirPath()),
+        ] as const)()
+    )
+  );
+
+  const absolutePathRelativeToService = await getServiceAbsolutePath(
+    nameOrPathOrUrl,
+    fluenceConfig.$getDirPath()
+  );
+
+  let [moduleNameToRemove] =
+    servicesAbsolutePathsWithNames.find(
+      ([, absolutePath]) => absolutePath === absolutePathRelativeToService
+    ) ?? [];
+
+  if (moduleNameToRemove !== undefined) {
+    return moduleNameToRemove;
+  }
+
+  const absolutePathRelativeToCwd = await getServiceAbsolutePath(
+    nameOrPathOrUrl,
+    cwd()
+  );
+
+  [moduleNameToRemove] =
+    servicesAbsolutePathsWithNames.find(
+      ([, absolutePath]) => absolutePath === absolutePathRelativeToCwd
+    ) ?? [];
+
+  if (moduleNameToRemove !== undefined) {
+    return moduleNameToRemove;
+  }
+
+  return commandObj.error(
+    `There is no service ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
+      fluenceConfig.$getPath()
+    )}`
+  );
+};
