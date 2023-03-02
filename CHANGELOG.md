@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.9](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.8...fluence-cli-v0.3.9) (2023-03-01)
+
+
+### Features
+
+* add flags for getting worker logs by ids ([#195](https://github.com/fluencelabs/fluence-cli/issues/195)) ([8c15414](https://github.com/fluencelabs/fluence-cli/commit/8c154142c1d945e1eb4adc068af463b1e153b6d1))
+
 ## [0.3.8](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.7...fluence-cli-v0.3.8) (2023-02-28)
 
 
