@@ -26,12 +26,16 @@ import { commandObj } from "../../lib/commandObj.js";
 import {
   FACADE_MODULE_NAME,
   initServiceConfig,
+  ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
 } from "../../lib/const.js";
-import { isUrl } from "../../lib/helpers/downloadFile.js";
+import {
+  getModuleAbsolutePath,
+  isUrl,
+} from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifecyle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
@@ -112,34 +116,71 @@ export default class Remove extends BaseCommand<typeof Remove> {
       );
     }
 
-    if (nameOrPathOrUrl in serviceConfig.modules) {
-      delete serviceConfig.modules[nameOrPathOrUrl];
-    } else if (
-      Object.values(serviceConfig.modules).some(
-        ({ get }): boolean => get === nameOrPathOrUrl
-      )
-    ) {
-      const [moduleName] =
-        Object.entries(serviceConfig.modules).find(
-          ([, { get }]): boolean => get === nameOrPathOrUrl
-        ) ?? [];
+    const moduleNameToRemove = await getModuleNameToRemove(
+      nameOrPathOrUrl,
+      serviceConfig
+    );
 
-      assert(typeof moduleName === "string");
-      delete serviceConfig.modules[moduleName];
-    } else {
-      return commandObj.error(
-        `There is no module ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
-          serviceOrServiceDirPathOrUrl
-        )}`
-      );
-    }
-
+    delete serviceConfig.modules[moduleNameToRemove];
     await serviceConfig.$commit();
 
     commandObj.log(
       `Removed module ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
-        serviceOrServiceDirPathOrUrl
+        serviceConfig.$getPath()
       )}`
     );
   }
 }
+
+const getModuleNameToRemove = async (
+  nameOrPathOrUrl: string,
+  serviceConfig: ServiceConfigReadonly
+): Promise<string> => {
+  if (nameOrPathOrUrl in serviceConfig.modules) {
+    return nameOrPathOrUrl;
+  }
+
+  const serviceModulesAbsolutePathsWithNames = await Promise.all(
+    Object.entries(serviceConfig.modules).map(([name, { get }]) =>
+      (async () =>
+        [
+          name,
+          await getModuleAbsolutePath(get, serviceConfig.$getDirPath()),
+        ] as const)()
+    )
+  );
+
+  const absolutePathRelativeToService = await getModuleAbsolutePath(
+    nameOrPathOrUrl,
+    serviceConfig.$getDirPath()
+  );
+
+  let [moduleNameToRemove] =
+    serviceModulesAbsolutePathsWithNames.find(
+      ([, absolutePath]) => absolutePath === absolutePathRelativeToService
+    ) ?? [];
+
+  if (moduleNameToRemove !== undefined) {
+    return moduleNameToRemove;
+  }
+
+  const absolutePathRelativeToCwd = await getModuleAbsolutePath(
+    nameOrPathOrUrl,
+    cwd()
+  );
+
+  [moduleNameToRemove] =
+    serviceModulesAbsolutePathsWithNames.find(
+      ([, absolutePath]) => absolutePath === absolutePathRelativeToCwd
+    ) ?? [];
+
+  if (moduleNameToRemove !== undefined) {
+    return moduleNameToRemove;
+  }
+
+  return commandObj.error(
+    `There is no module ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
+      serviceConfig.$getPath()
+    )}`
+  );
+};

@@ -24,7 +24,7 @@ import {
   MODULE_TYPE_RUST,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
-import { getModuleAbsolutePath } from "../../helpers/downloadFile.js";
+import { ensureModuleAbsolutePath } from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -178,7 +178,10 @@ export const initModuleConfig = async (
     getInitConfigOptions(
       absolutePath === undefined
         ? configOrConfigDirPathOrUrl
-        : await getModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+        : await ensureModuleAbsolutePath(
+            configOrConfigDirPathOrUrl,
+            absolutePath
+          )
     )
   )();
 export const initReadonlyModuleConfig = async (
@@ -189,7 +192,10 @@ export const initReadonlyModuleConfig = async (
     getInitConfigOptions(
       absolutePath === undefined
         ? configOrConfigDirPathOrUrl
-        : await getModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
+        : await ensureModuleAbsolutePath(
+            configOrConfigDirPathOrUrl,
+            absolutePath
+          )
     )
   )();
 
