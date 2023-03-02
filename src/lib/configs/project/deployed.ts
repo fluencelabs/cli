@@ -125,14 +125,19 @@ const getDefault: GetDefaultConfig<LatestConfig> = () => ({
   workers: {},
 });
 
-export const initReadonlyDeployedConfig = getReadonlyConfigInitFunction(
+export const initNewReadonlyDeployedConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault
 );
 
-export const initDeployedConfig = getConfigInitFunction(
+export const initNewDeployedConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault
 );
+
+export const initReadonlyDeployedConfig =
+  getReadonlyConfigInitFunction(initConfigOptions);
+
+export const initDeployedConfig = getConfigInitFunction(initConfigOptions);
 
 export const deployedSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

@@ -25,7 +25,7 @@ import {
   get_logs,
   Get_logsArgApp_workers,
 } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
+import { initReadonlyDeployedConfig } from "../../lib/configs/project/deployed.js";
 import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
@@ -33,6 +33,7 @@ import {
   DEPLOYED_CONFIG_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_DIR_NAME,
 } from "../../lib/const.js";
 import { parseWorkers } from "../../lib/deployWorkers.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
@@ -80,15 +81,14 @@ export default class Logs extends BaseCommand<typeof Logs> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
+    const { flags, maybeFluenceConfig, args } = await initCli(
       this,
-      await this.parse(Logs),
-      true
+      await this.parse(Logs)
     );
 
     const defaultKeyPair = await getExistingKeyPairFromFlags(
       flags,
-      fluenceConfig
+      maybeFluenceConfig
     );
 
     if (defaultKeyPair instanceof Error) {
@@ -96,7 +96,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     }
 
     const secretKey = defaultKeyPair.secretKey;
-    const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
+    const relay = flags.relay ?? getRandomRelayAddr(maybeFluenceConfig?.relays);
     const fluencePeer = new FluencePeer();
 
     await fluencePeer.start({
@@ -175,7 +175,17 @@ const getLogsArg = async ({
     };
   }
 
-  const deployedConfig = await initDeployedConfig();
+  const maybeDeployedConfig = await initReadonlyDeployedConfig();
+
+  if (maybeDeployedConfig === null) {
+    return commandObj.error(
+      `Wasn't able to find ${color.yellow(
+        DEPLOYED_CONFIG_FILE_NAME
+      )} in ${FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`
+    );
+  }
+
+  const deployedConfig = maybeDeployedConfig;
   const workerNamesSet = Object.keys(deployedConfig.workers);
 
   const workersToGetLogsFor =
