@@ -19,7 +19,7 @@ import {
 // Services
 
 // Functions
-export type Upload_deployArgConfig = { installation_script: string; installation_trigger: { blockchain: { end_block: number; start_block: number; }; clock: { end_sec: number; period_sec: number; start_sec: number; }; connections: { connect: boolean; disconnect: boolean; }; }; workers: { config: { services: { modules: { config: string; wasm: string; }[]; name: string; }[]; spells: { config: { blockchain: { end_block: number; start_block: number; }; clock: { end_sec: number; period_sec: number; start_sec: number; }; connections: { connect: boolean; disconnect: boolean; }; }; init_args: any; name: string; script: string; }[]; }; hosts: string[]; name: string; }[]; }
+export type Upload_deployArgConfig = { installation_script: string; installation_trigger: { blockchain: { end_block: number; start_block: number; }; clock: { end_sec: number; period_sec: number; start_sec: number; }; connections: { connect: boolean; disconnect: boolean; }; }; workers: { config: { services: { modules: { config: string; wasm: string; }[]; name: string; }[]; spells: { config: { blockchain: { end_block: number; start_block: number; }; clock: { end_sec: number; period_sec: number; start_sec: number; }; connections: { connect: boolean; disconnect: boolean; }; }; init_args: any; name: string; script: string; }[]; }; hosts: string[]; name: string; }[]; } 
 export type Upload_deployResult = { workers: { definition: string; installation_spells: { host_id: string; spell_id: string; worker_id: string; }[]; name: string; }[]; }
 export function upload_deploy(
     config_: Upload_deployArgConfig,
@@ -558,7 +558,7 @@ export function upload_deploy(...args: any) {
     )
 }
 
-export type Get_logsArgApp_workers = { workers: { definition: string; installation_spells: { host_id: string; spell_id: string; worker_id: string; }[]; name: string; }[]; }
+export type Get_logsArgApp_workers = { workers: { definition: string; installation_spells: { host_id: string; spell_id: string; worker_id: string; }[]; name: string; }[]; } 
 
 export function get_logs(
     app_workers: Get_logsArgApp_workers,
@@ -586,20 +586,32 @@ export function get_logs(...args: any) {
                          (fold w-0.$.installation_spells! i_spell-0
                           (seq
                            (seq
-                            (call -relay- ("op" "noop") [])
+                            (seq
+                             (seq
+                              (null)
+                              (call -relay- ("op" "noop") [])
+                             )
+                             (call i_spell-0.$.host_id! ("op" "noop") [])
+                            )
                             (xor
                              (seq
                               (seq
                                (seq
-                                (call i_spell-0.$.host_id! (i_spell-0.$.spell_id! "list_get_strings") ["logs"] get_res)
-                                (call i_spell-0.$.host_id! ("json" "obj") ["host_id" i_spell-0.$.host_id! "logs" get_res.$.strings! "spell_id" i_spell-0.$.spell_id! "worker_name" w-0.$.name!] Log_obj)
+                                (seq
+                                 (call i_spell-0.$.worker_id! (i_spell-0.$.spell_id! "list_get_strings") ["logs"] get_res)
+                                 (call i_spell-0.$.worker_id! ("json" "obj") ["host_id" i_spell-0.$.host_id! "logs" get_res.$.strings! "spell_id" i_spell-0.$.spell_id! "worker_name" w-0.$.name!] Log_obj)
+                                )
+                                (ap Log_obj $logs)
                                )
-                               (ap Log_obj $logs)
+                               (call i_spell-0.$.host_id! ("op" "noop") [])
                               )
                               (call -relay- ("op" "noop") [])
                              )
                              (seq
-                              (call -relay- ("op" "noop") [])
+                              (seq
+                               (call i_spell-0.$.host_id! ("op" "noop") [])
+                               (call -relay- ("op" "noop") [])
+                              )
                               (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
                              )
                             )

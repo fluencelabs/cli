@@ -65,7 +65,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -143,7 +143,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.1/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.3/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -163,7 +163,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -342,7 +342,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.4/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.6/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -366,7 +366,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -569,7 +569,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.6/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -696,7 +696,7 @@ Get logs from deployed workers listed in deployed.yaml
 ```
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--off-aqua-logs] [-k <value>]
+    <value>] [--off-aqua-logs] [-k <value>] [--worker-id <value>] [--host-id <value>] [--spell-id <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property of fluence.yaml are deployed)
@@ -704,13 +704,16 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --host-id=<host-id>         Host id
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --relay=<multiaddr>         Relay node multiaddr
+  --spell-id=<spell-id>       [default: worker-spell] Spell id
   --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
   --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
                               the originating particle's TTL is defined then that value will be used If the option is
                               not set default TTL will be 60000
+  --worker-id=<worker-id>     Worker id
 
 DESCRIPTION
   Get logs from deployed workers listed in deployed.yaml

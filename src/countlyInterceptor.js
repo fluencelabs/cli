@@ -23,18 +23,18 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
 
 const printError = (/** @type {Error | CLIError} */ error) => {
-  const hasStackTrace = "stack" in error;
+  if (error instanceof CLIError && "message" in error) {
+    return console.error(`${color.red("Error:")} ${error.message}`);
+  }
 
-  if (hasStackTrace && error.stack.startsWith("Error")) {
+  if ("stack" in error && error?.stack?.startsWith?.("Error") === true) {
     return console.error(error.stack);
   }
 
-  if (hasStackTrace) {
-    return console.error(`${color.red("Error:")} ${error.stack}`);
-  }
-
-  if ("message" in error) {
-    return console.error(`${color.red("Error:")}\n${error.message}`);
+  if ("stack" in error || "message" in error) {
+    return console.error(
+      `${color.red("Error:")}\n${error.message ?? ""}\n${error.stack ?? ""}`
+    );
   }
 
   return console.error(error);

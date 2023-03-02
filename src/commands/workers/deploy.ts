@@ -22,7 +22,7 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initDeployedConfig } from "../../lib/configs/project/deployed.js";
+import { initNewDeployedConfig } from "../../lib/configs/project/deployed.js";
 import {
   KEY_PAIR_FLAG,
   TIMEOUT_FLAG,
@@ -134,7 +134,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       uploadDeployArg
     );
 
-    const deployedConfig = await initDeployedConfig();
+    const deployedConfig = await initNewDeployedConfig();
 
     const newDeployedWorkers = uploadDeployResult.workers.reduce<
       Record<string, (typeof deployedConfig.workers)[number]>

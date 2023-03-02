@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import oclifColor from "@oclif/color";
 import { Flags } from "@oclif/core";
 
+const color = oclifColor.default;
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
@@ -60,6 +62,6 @@ export default class Create extends BaseCommand<typeof Create> {
       }),
     });
 
-    commandObj.log(`Deal contract created: ${dealAddress}`);
+    commandObj.log(`Deal contract created: ${color.yellow(dealAddress)}`);
   }
 }

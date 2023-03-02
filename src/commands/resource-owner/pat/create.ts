@@ -16,7 +16,9 @@
 
 import assert from "node:assert";
 
+import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
+const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
@@ -27,6 +29,8 @@ import {
   getDealContract,
   getFLTContract,
   getSigner,
+  promptConfirmTx,
+  waitTx,
 } from "../../../lib/provider.js";
 
 const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
@@ -67,7 +71,8 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const v = await deal.requiredStake();
     const approveTx = await flt.approve(dealAddress, v);
 
-    const res = await (await deal.createProviderToken(approveTx.hash)).wait();
+    promptConfirmTx(flags.privKey);
+    const res = await waitTx(await deal.createProviderToken(approveTx.hash));
 
     const eventTopic = deal.interface.getEventTopic(
       ADD_PROVIDER_TOKEN_EVENT_TOPIC
@@ -81,6 +86,6 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const patId: unknown = deal.interface.parseLog(log).args["id"];
     assert(typeof patId === "string");
 
-    this.log(`PAT ID: ${patId}`);
+    this.log(`PAT ID: ${color.yellow(patId)}`);
   }
 }
