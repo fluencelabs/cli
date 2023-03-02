@@ -538,7 +538,7 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
         peerIds: [getDefaultPeerId()],
       },
     },
-    relays: "stage",
+    relays: "kras",
   };
 };
 
