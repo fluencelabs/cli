@@ -26,7 +26,13 @@ import nodeFetch from "node-fetch";
 const fetch = nodeFetch.default;
 
 import { commandObj } from "../commandObj.js";
-import { MODULE_TYPE_RUST, WASM_EXT } from "../const.js";
+import { getConfigPath } from "../configs/initConfig.js";
+import {
+  MODULE_CONFIG_FILE_NAME,
+  MODULE_TYPE_RUST,
+  SERVICE_CONFIG_FILE_NAME,
+  WASM_EXT,
+} from "../const.js";
 import {
   ensureFluenceModulesDir,
   ensureFluenceServicesDir,
@@ -94,7 +100,7 @@ export const cleanAquaName = (text: string): string => text.replace(/\W/g, "");
 
 const ARCHIVE_FILE = "archive.tar.gz";
 
-const downloadAndDecompress = async (
+const getDownloadDirPath = async (
   get: string,
   pathStart: string
 ): Promise<string> => {
@@ -110,7 +116,14 @@ const downloadAndDecompress = async (
   const prefix =
     lastPortionOfPath === "" ? "" : `${filenamify(lastPortionOfPath)}_`;
 
-  const dirPath = join(pathStart, `${prefix}${hash}`);
+  return join(pathStart, `${prefix}${hash}`);
+};
+
+const downloadAndDecompress = async (
+  get: string,
+  pathStart: string
+): Promise<string> => {
+  const dirPath = await getDownloadDirPath(get, pathStart);
 
   try {
     await fsPromises.access(dirPath);
@@ -130,6 +143,12 @@ export const downloadModule = async (get: string): Promise<string> =>
 
 export const downloadService = async (get: string): Promise<string> =>
   downloadAndDecompress(get, await ensureFluenceServicesDir());
+
+export const getModulePathFromUrl = async (get: string): Promise<string> =>
+  getDownloadDirPath(get, await ensureFluenceModulesDir());
+
+export const getServicePathFromUrl = async (get: string): Promise<string> =>
+  getDownloadDirPath(get, await ensureFluenceServicesDir());
 
 export const isUrl = (unknown: string): boolean =>
   unknown.startsWith("http://") || unknown.startsWith("https://");
@@ -161,19 +180,41 @@ export const getUrlOrAbsolutePath = (
   return resolve(absolutePath, pathOrUrl);
 };
 
-const getDirAbsolutePath =
-  (downloadFunction: (get: string) => Promise<string>) =>
+const ensureOrGetConfigAbsolutePath =
+  (
+    downloadOrGetFunction: (get: string) => Promise<string>,
+    configName: string
+  ) =>
   async (pathOrUrl: string, absolutePath: string): Promise<string> => {
-    if (isUrl(pathOrUrl)) {
-      return downloadFunction(pathOrUrl);
-    }
+    const dirOrConfigAbsolutePath = await (async (): Promise<string> => {
+      if (isUrl(pathOrUrl)) {
+        return downloadOrGetFunction(pathOrUrl);
+      }
 
-    if (isAbsolute(pathOrUrl)) {
-      return pathOrUrl;
-    }
+      if (isAbsolute(pathOrUrl)) {
+        return pathOrUrl;
+      }
 
-    return resolve(absolutePath, pathOrUrl);
+      return resolve(absolutePath, pathOrUrl);
+    })();
+
+    return getConfigPath(dirOrConfigAbsolutePath, configName).configPath;
   };
 
-export const getModuleAbsolutePath = getDirAbsolutePath(downloadModule);
-export const getServiceAbsolutePath = getDirAbsolutePath(downloadService);
+export const ensureModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
+  downloadModule,
+  MODULE_CONFIG_FILE_NAME
+);
+export const ensureServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
+  downloadService,
+  SERVICE_CONFIG_FILE_NAME
+);
+
+export const getModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
+  getModulePathFromUrl,
+  MODULE_CONFIG_FILE_NAME
+);
+export const getServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
+  getServicePathFromUrl,
+  SERVICE_CONFIG_FILE_NAME
+);

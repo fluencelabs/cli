@@ -619,7 +619,7 @@ EXAMPLES
 
 ## `fluence service remove [NAME | PATH | URL]`
 
-Remove service from fluence.yaml
+Remove service from fluence.yaml services property and from all of the workers
 
 ```
 USAGE
@@ -632,7 +632,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Remove service from fluence.yaml
+  Remove service from fluence.yaml services property and from all of the workers
 
 EXAMPLES
   $ fluence service remove
