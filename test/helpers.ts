@@ -29,7 +29,7 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   Template,
-  templates,
+  TEMPLATES,
 } from "../src/lib/const.js";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local, localMultiaddrs } from "../src/lib/localNodes.js";
@@ -109,7 +109,7 @@ const initFirstTime = async (template: Template) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const initializedTemplates = templates.reduce<
+const initializedTemplates = TEMPLATES.reduce<
   Partial<Record<Template, Promise<string>>>
 >(
   (acc, val) => ({
