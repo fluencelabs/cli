@@ -31,10 +31,6 @@ import {
   initNewReadonlyAppConfig,
   ServicesV3,
 } from "../../lib/configs/project/app.js";
-import {
-  Distribution,
-  DISTRIBUTION_EVEN,
-} from "../../lib/configs/project/fluence.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import {
   DEFAULT_DEPLOY_NAME,
@@ -61,8 +57,6 @@ import {
   getEvenlyDistributedIds,
   getEvenlyDistributedIdsFromTheList,
   getRandomRelayAddr,
-  getRandomRelayId,
-  getRandomRelayIdFromTheList,
   Relays,
 } from "../../lib/multiaddres.js";
 import { ensureFluenceTmpDeployJsonPath } from "../../lib/paths.js";
@@ -231,12 +225,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
 type PreparedForDeploy = Omit<
   ServiceInfo,
-  | "peerId"
-  | "peerIds"
-  | "distribution"
-  | "count"
-  | "serviceDirPath"
-  | "moduleConfigs"
+  "peerId" | "peerIds" | "count" | "serviceDirPath" | "moduleConfigs"
 > & {
   peerId: string;
   deployJSON: DeployJSONConfig;
@@ -252,14 +241,12 @@ const prepareForDeploy = async (
     ({
       peerId,
       peerIds,
-      distribution,
       count,
       moduleConfigs,
       ...serviceInfo
     }): Array<PreparedForDeploy> =>
       getPeerIds({
         peerId: peerIds ?? peerId,
-        distribution,
         count,
         relays: fluenceConfig.relays,
         namedPeerIds: fluenceConfig.peerIds,
@@ -282,7 +269,6 @@ const prepareForDeploy = async (
 
 type GetPeerIdsArg = {
   peerId: undefined | string | Array<string>;
-  distribution: Distribution | undefined;
   count: number | undefined;
   relays: Relays;
   namedPeerIds: Record<string, string> | undefined;
@@ -290,7 +276,6 @@ type GetPeerIdsArg = {
 
 const getPeerIds = ({
   peerId,
-  distribution = DISTRIBUTION_EVEN,
   count,
   relays,
   namedPeerIds = {},
@@ -298,26 +283,13 @@ const getPeerIds = ({
   const getNamedPeerIds = (peerIds: Array<string>): string[] =>
     peerIds.map((peerId): string => namedPeerIds[peerId] ?? peerId);
 
-  if (distribution === DISTRIBUTION_EVEN) {
-    if (peerId === undefined) {
-      return getEvenlyDistributedIds(relays, count);
-    }
-
-    return getEvenlyDistributedIdsFromTheList(
-      getNamedPeerIds(typeof peerId === "string" ? [peerId] : peerId),
-      count
-    );
-  }
-
   if (peerId === undefined) {
-    return Array.from({ length: count ?? 1 }).map((): string =>
-      getRandomRelayId(relays)
-    );
+    return getEvenlyDistributedIds(relays, count);
   }
 
-  const peerIds = typeof peerId === "string" ? [peerId] : peerId;
-  return Array.from({ length: count ?? peerIds.length }).map((): string =>
-    getRandomRelayIdFromTheList(peerIds)
+  return getEvenlyDistributedIdsFromTheList(
+    getNamedPeerIds(typeof peerId === "string" ? [peerId] : peerId),
+    count
   );
 };
 

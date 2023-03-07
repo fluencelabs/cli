@@ -15,14 +15,14 @@
  */
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
 
-import { initAquaCli } from "../lib/aquaCli.js";
+import { AquaCompilerFlags, initAquaCli } from "../lib/aquaCli.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
   defaultFluenceLockConfig,
@@ -31,28 +31,40 @@ import {
 } from "../lib/configs/project/fluenceLock.js";
 import {
   aquaLogLevelsString,
+  FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   NO_INPUT_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { exitCli, initCli } from "../lib/lifecyle.js";
-import { validatePath } from "../lib/paths.js";
-import { input } from "../lib/prompt.js";
+import { initCli } from "../lib/lifecyle.js";
+import { projectRootDir, validatePath } from "../lib/paths.js";
+import { input, InputArg } from "../lib/prompt.js";
 
 export default class Aqua extends Command {
   static override description =
     "Compile aqua file or directory that contains your .aqua files";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
+    /* Fluence CLI flags */
+    watch: Flags.boolean({
+      description: "Watch aqua file or folder for changes and recompile",
+      char: "w",
+    }),
+    "common-js": Flags.boolean({
+      description: "Use no extension in generated .ts file",
+    }),
+    ...NO_INPUT_FLAG,
+
+    /* Aqua CLI flags */
     input: Flags.string({
       description:
-        "Path to an aqua file or an input directory that contains your .aqua files",
+        "Path to an aqua file or an input directory that contains your .aqua files. Must be relative to the current working directory or absolute",
       helpValue: "<path>",
       char: "i",
     }),
     output: Flags.string({
       description:
-        "Path to the output directory. Will be created if it doesn't exists",
+        "Path to the output directory. Must be relative to the current working directory or absolute. Will be created if it doesn't exists",
       helpValue: "<path>",
       char: "o",
     }),
@@ -64,15 +76,9 @@ export default class Aqua extends Command {
     }),
     air: Flags.boolean({
       description: "Generate .air file instead of .ts",
-      exclusive: ["js", "common-js"],
     }),
     js: Flags.boolean({
       description: "Generate .js file instead of .ts",
-      exclusive: ["air"],
-    }),
-    "common-js": Flags.boolean({
-      description: "Use no extension in generated .ts file",
-      exclusive: ["air"],
     }),
     "old-fluence-js": Flags.boolean({
       description: "Generate TypeScript or JavaScript files for new JS Client",
@@ -100,11 +106,6 @@ export default class Aqua extends Command {
       description:
         "Generate air code for script storage. Without error handling wrappers and hops on relay. Will ignore other options",
     }),
-    watch: Flags.boolean({
-      description: "Watch aqua file or folder for changes and recompile",
-      char: "w",
-    }),
-    ...NO_INPUT_FLAG,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -112,36 +113,40 @@ export default class Aqua extends Command {
       await this.parse(Aqua)
     );
 
-    const {
-      watch,
-      input: inputPath = maybeFluenceConfig?.aquaInputPath ??
-        (await input({
-          message:
-            "Enter path to an aqua file or an input directory that contains your .aqua files",
-          flagName: "input",
-          validate: validatePath,
-        })),
-      output: outputPath = flags.dry
-        ? undefined
-        : maybeFluenceConfig?.aquaOutputTSPath ??
-          maybeFluenceConfig?.aquaOutputJSPath ??
-          (await input({
-            message:
-              "Enter path to the output directory. Will be created if it doesn't exists",
-            flagName: "input",
-          })),
-      js = flags.js ??
-        (flags.output === undefined
-          ? maybeFluenceConfig?.aquaOutputJSPath !== undefined
-          : false),
-      "log-level-compiler": logLevelCompiler,
-      "common-js": isCommonJs,
-      ...aquaCliOptionalFlags
-    } = flags;
-
     const maybeFluenceLockConfig = await initFluenceLockConfig();
 
-    const aquaImports =
+    const inputFlag = await resolveAbsoluteAquaPath({
+      maybePathFromFlags: flags.input,
+      maybePathFromFluenceYaml: maybeFluenceConfig?.aquaInputPath,
+      inputArg: {
+        message:
+          "Enter path to an aqua file or an input directory that contains your .aqua files",
+        flagName: "input",
+        validate: validatePath,
+      },
+    });
+
+    const outputFlag = flags.dry
+      ? undefined
+      : await resolveAbsoluteAquaPath({
+          maybePathFromFlags: flags.output,
+          maybePathFromFluenceYaml:
+            maybeFluenceConfig?.aquaOutputTSPath ??
+            maybeFluenceConfig?.aquaOutputJSPath,
+          inputArg: {
+            message:
+              "Enter path to the output directory. Will be created if it doesn't exists",
+            flagName: "output",
+          },
+        });
+
+    const jsFlag =
+      flags.js ??
+      (flags.output === undefined
+        ? maybeFluenceConfig?.aquaOutputJSPath !== undefined
+        : false);
+
+    const importFlag =
       maybeFluenceConfig === null
         ? await ensureAquaImports({
             flags,
@@ -157,13 +162,19 @@ export default class Aqua extends Command {
           });
 
     const aquaCliFlags = {
-      input: path.resolve(inputPath),
-      output: resolveOutputPath(outputPath),
-      js,
-      ...aquaCliOptionalFlags,
-      import: aquaImports,
-      "log-level": logLevelCompiler,
-    };
+      input: inputFlag,
+      output: outputFlag,
+      js: jsFlag,
+      import: importFlag,
+      "log-level": flags["log-level-compiler"],
+      "no-relay": flags["no-relay"],
+      "no-xor": flags["no-xor"],
+      "old-fluence-js": flags["old-fluence-js"],
+      air: flags.air,
+      const: flags.const,
+      dry: flags.dry,
+      scheduled: flags.scheduled,
+    } satisfies AquaCompilerFlags;
 
     const aquaCli = await initAquaCli(
       maybeFluenceConfig,
@@ -174,7 +185,7 @@ export default class Aqua extends Command {
       const result = await aquaCli({ flags: aquaCliFlags }, "Compiling");
 
       if (
-        !isCommonJs &&
+        !flags["common-js"] &&
         !aquaCliFlags.js &&
         aquaCliFlags.output !== undefined
       ) {
@@ -184,9 +195,8 @@ export default class Aqua extends Command {
       return result;
     };
 
-    if (!watch) {
+    if (!flags.watch) {
       this.log(await compile());
-      await exitCli();
       return;
     }
 
@@ -219,20 +229,42 @@ export default class Aqua extends Command {
   }
 }
 
-const resolveOutputPath = (
-  maybeOutputPath: string | undefined
-): string | undefined => {
-  if (maybeOutputPath === undefined) {
-    return undefined;
+type ResolveAbsoluteAquaPathArg = {
+  maybePathFromFlags: string | undefined;
+  maybePathFromFluenceYaml: string | undefined;
+  inputArg: InputArg;
+};
+
+const resolveAbsoluteAquaPath = async ({
+  maybePathFromFlags,
+  maybePathFromFluenceYaml,
+  inputArg,
+}: ResolveAbsoluteAquaPathArg) => {
+  if (maybePathFromFlags !== undefined) {
+    if (isAbsolute(maybePathFromFlags)) {
+      return maybePathFromFlags;
+    }
+
+    return resolve(maybePathFromFlags);
   }
 
-  const outputPath = maybeOutputPath;
+  if (maybePathFromFluenceYaml !== undefined) {
+    if (isAbsolute(maybePathFromFluenceYaml)) {
+      return commandObj.error(
+        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FILE_NAME} must not be absolute, but should be relative to the project root directory`
+      );
+    }
 
-  if (path.isAbsolute(outputPath)) {
-    return outputPath;
+    return resolve(projectRootDir, maybePathFromFluenceYaml);
   }
 
-  return path.resolve(outputPath);
+  const pathFromUserInput = await input(inputArg);
+
+  if (isAbsolute(pathFromUserInput)) {
+    return pathFromUserInput;
+  }
+
+  return resolve(pathFromUserInput);
 };
 
 const addFileExtensionsInTsFiles = async (outputDirPath: string) => {
@@ -243,7 +275,7 @@ const addFileExtensionsInTsFiles = async (outputDirPath: string) => {
       .filter((file) => file.endsWith(".ts"))
       .map((fileName) =>
         (async () => {
-          const filePath = path.join(outputDirPath, fileName);
+          const filePath = join(outputDirPath, fileName);
           const content = await readFile(filePath, FS_OPTIONS);
           return writeFile(
             filePath,

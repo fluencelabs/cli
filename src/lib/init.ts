@@ -30,7 +30,7 @@ import {
   FS_OPTIONS,
   RECOMMENDED_GITIGNORE_CONTENT,
   Template,
-  templates,
+  TEMPLATES,
   isTemplate,
   FLUENCE_JS_RECOMMENDED_VERSION,
   FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
@@ -65,7 +65,7 @@ import { ensureVSCodeSettingsJSON } from "./helpers/aquaImports.js";
 const selectTemplate = (): Promise<Template> =>
   list({
     message: "Select template",
-    options: [...templates],
+    options: [...TEMPLATES],
     oneChoiceMessage: (): never => {
       throw new Error("Unreachable: only one template");
     },
@@ -89,7 +89,7 @@ export const ensureTemplate = ({
     commandObj.warn(
       `Unknown template: ${color.yellow(
         templateOrUnknown
-      )}. Available templates: ${templates.join(", ")}`
+      )}. Available templates: ${TEMPLATES.join(", ")}`
     );
   }
 

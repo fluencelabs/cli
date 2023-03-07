@@ -119,7 +119,7 @@ export const confirm = ({
     flagName,
   });
 
-type InputArg = DistinctQuestion & {
+export type InputArg = DistinctQuestion & {
   message: string;
   flagName?: string | undefined;
 };

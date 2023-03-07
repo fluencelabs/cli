@@ -27,10 +27,12 @@ const color = oclifColor.default;
 import { shuffle } from "lodash-es";
 import { Multiaddr } from "multiaddr";
 
+import { commandObj } from "./commandObj.js";
+import { getIsStringUnion } from "./typeHelpers.js";
+
 export const NETWORKS = ["kras", "stage", "testnet"] as const;
 export type Network = (typeof NETWORKS)[number];
-export const isNetwork = (unknown: unknown): unknown is Network =>
-  NETWORKS.some((network) => network === unknown);
+export const isNetwork = getIsStringUnion(NETWORKS);
 export type FluenceEnv = Network | "local";
 export type Relays = Network | Array<string> | undefined;
 
@@ -59,25 +61,25 @@ const resolveAddrs = (
   return ADDR_MAP[relays];
 };
 
+const getRandomArrayItem = <T>(ar: Array<T>): T => {
+  const randomIndex = Math.round(Math.random() * (ar.length - 1));
+  const randomItem = ar[randomIndex];
+  assert(randomItem !== undefined);
+  return randomItem;
+};
+
 export const getRandomRelayAddr = (
   maybeRelays: Relays | null | undefined
-): string => {
-  const addrs = resolveAddrs(maybeRelays);
-  const largestIndex = addrs.length - 1;
-  const randomIndex = Math.round(Math.random() * largestIndex);
-
-  const randomRelayAddr = addrs[randomIndex];
-  assert(randomRelayAddr !== undefined);
-  return randomRelayAddr;
-};
+): string => getRandomArrayItem(resolveAddrs(maybeRelays));
 
 export const getPeerId = (addr: string): string => {
   const id = new Multiaddr(addr).getPeerId();
 
-  assert(
-    id !== null,
-    `Can't extract peer id from multiaddr ${color.yellow(addr)}`
-  );
+  if (id === null) {
+    return commandObj.error(
+      `Can't extract peer id from multiaddr ${color.yellow(addr)}`
+    );
+  }
 
   return id;
 };
@@ -85,21 +87,8 @@ export const getPeerId = (addr: string): string => {
 const getIds = (nodes: Array<string>): Array<string> =>
   nodes.map((addr): string => getPeerId(addr));
 
-export const getRandomRelayId = (relays: Relays): string => {
-  const addrs = resolveAddrs(relays);
-  const ids = getIds(addrs);
-  return getRandomRelayIdFromTheList(ids);
-};
-
-export const getRandomRelayIdFromTheList = (ids: Array<string>): string => {
-  const largestIndex = ids.length - 1;
-  const randomIndex = Math.round(Math.random() * largestIndex);
-
-  const randomRelayId = ids[randomIndex];
-  assert(randomRelayId !== undefined);
-
-  return randomRelayId;
-};
+export const getRandomPeerId = (relays: Relays): string =>
+  getPeerId(getRandomRelayAddr(relays));
 
 export const getEvenlyDistributedIds = (
   relays: Relays,

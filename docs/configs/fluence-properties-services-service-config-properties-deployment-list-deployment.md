@@ -11,7 +11,6 @@
 | [count](#count)                     | `number` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-count.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/count")               |
 | [peerId](#peerid)                   | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-peerid.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/peerId")             |
 | [peerIds](#peerids)                 | `array`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-peer-ids.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/peerIds")          |
-| [distribution](#distribution)       | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-distribution.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/distribution") |
 | [overrideModules](#overridemodules) | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules") |
 
 ## keyPairName
@@ -113,33 +112,6 @@ Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerI
 ### peerIds Type
 
 `string[]`
-
-## distribution
-
-"even" distribution is used by default, means that the services will be deployed evenly across the listed peers. "random" distribution means that the services will be deployed randomly across the listed peers.
-
-`distribution`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-distribution.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/distribution")
-
-### distribution Type
-
-`string`
-
-### distribution Constraints
-
-**enum**: the value of this property must be equal to one of the following values:
-
-| Value      | Explanation |
-| :--------- | :---------- |
-| `"even"`   |             |
-| `"random"` |             |
 
 ## overrideModules
 

@@ -26,7 +26,7 @@ import {
 import { generateKeyPair } from "../../helpers/generateKeyPair.js";
 import {
   validateHasDefault,
-  validateMultiple,
+  validateBatch,
   validateUnique,
   ValidationResult,
 } from "../../helpers/validations.js";
@@ -77,7 +77,7 @@ const getDefault: GetDefaultConfig<
 const migrations: Migrations<Config> = [];
 
 const validate = (config: LatestConfig): ValidationResult =>
-  validateMultiple(
+  validateBatch(
     validateUnique(
       config.keyPairs,
       ({ name }): string => name,

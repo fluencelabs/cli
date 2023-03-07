@@ -154,7 +154,7 @@ A map of dependency versions
 
 ## aquaInputPath
 
-Path to the aqua file or directory with aqua files that you want to compile by default
+Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir
 
 `aquaInputPath`
 
@@ -172,7 +172,7 @@ Path to the aqua file or directory with aqua files that you want to compile by d
 
 ## aquaOutputTSPath
 
-Default compilation target dir from aqua to ts
+Path to the default compilation target dir from aqua to ts. Must be relative to the project root dir
 
 `aquaOutputTSPath`
 
@@ -190,7 +190,7 @@ Default compilation target dir from aqua to ts
 
 ## aquaOutputJSPath
 
-Default compilation target dir from aqua to js. Overrides "aquaOutputTSPath" property
+Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property
 
 `aquaOutputJSPath`
 
