@@ -22,6 +22,7 @@ import { jsonStringify } from "./helpers/jsonStringify.js";
 import { local } from "./localNodes.js";
 import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
+import { getIsStringUnion } from "./typeHelpers.js";
 
 export const AQUA_RECOMMENDED_VERSION = "0.10.2";
 export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
@@ -44,8 +45,7 @@ export const CHAIN_NETWORKS = [
   //  "mainnet"
 ] as const;
 
-export const isChainNetwork = (unknown: unknown): unknown is ChainNetwork =>
-  CHAIN_NETWORKS.some((n) => n === unknown);
+export const isChainNetwork = getIsStringUnion(CHAIN_NETWORKS);
 export type ChainNetwork = (typeof CHAIN_NETWORKS)[number];
 
 export type ChainConfig = {
@@ -220,13 +220,11 @@ export type ModuleType = (typeof MODULE_TYPES)[number];
 export const TOKENS = ["FakeUSD", "FLT"] as const;
 export const TOKENS_STRING = TOKENS.join(", ");
 export type Token = (typeof TOKENS)[number];
-export const isToken = (unknown: unknown): unknown is Token =>
-  TOKENS.some((val): boolean => unknown === val);
+export const isToken = getIsStringUnion(TOKENS);
 
-export const templates = ["minimal", "ts", "js"] as const;
-export type Template = (typeof templates)[number];
-export const isTemplate = (unknown: unknown): unknown is Template =>
-  templates.some((val): boolean => unknown === val);
+export const TEMPLATES = ["minimal", "ts", "js"] as const;
+export type Template = (typeof TEMPLATES)[number];
+export const isTemplate = getIsStringUnion(TEMPLATES);
 
 export const AQUA_LOG_LEVELS = [
   "all",
@@ -239,9 +237,7 @@ export const AQUA_LOG_LEVELS = [
 ] as const;
 
 export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
-
-export const isAquaLogLevel = (unknown: unknown): unknown is AquaLogLevel =>
-  AQUA_LOG_LEVELS.some((val): boolean => unknown === val);
+export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
 
 export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
   ", "
@@ -260,9 +256,7 @@ export const AVM_LOG_LEVELS: Array<AvmLoglevel> = [
 ];
 
 export const avmLogLevelsString = AVM_LOG_LEVELS.join(", ");
-
-export const isAvmLogLevel = (unknown: unknown): unknown is AvmLoglevel =>
-  AVM_LOG_LEVELS.some((level) => level === unknown);
+export const isAvmLogLevel = getIsStringUnion(AVM_LOG_LEVELS);
 
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";

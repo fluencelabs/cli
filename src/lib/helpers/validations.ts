@@ -44,7 +44,7 @@ export const validateHasDefault = <T>(
 ): ValidationResult =>
   array.some((item): boolean => getField(item) === defaultValue) || errorText;
 
-export const validateMultiple = (
+export const validateBatch = (
   ...args: Array<ValidationResult>
 ): ValidationResult =>
   args.reduce<ValidationResult>((acc, result): ValidationResult => {

@@ -17,7 +17,7 @@
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { templates } from "../lib/const.js";
+import { TEMPLATES } from "../lib/const.js";
 import { ensureTemplate, init } from "../lib/init.js";
 import { initCli } from "../lib/lifecyle.js";
 
@@ -27,7 +27,7 @@ export default class Init extends BaseCommand<typeof Init> {
   static override flags = {
     ...baseFlags,
     template: Flags.string({
-      description: `Template to use for the project. One of: ${templates.join(
+      description: `Template to use for the project. One of: ${TEMPLATES.join(
         ", "
       )}`,
       char: "t",

@@ -51,7 +51,8 @@ import { local } from "../../localNodes.js";
 import {
   FluenceEnv,
   getPeerId,
-  getRandomRelayId,
+  getRandomPeerId,
+  Network,
   NETWORKS,
   Relays,
 } from "../../multiaddres.js";
@@ -104,19 +105,13 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services"],
 };
 
-export const DISTRIBUTION_EVEN = "even";
-export const DISTRIBUTION_RANDOM = "random";
-export const DISTRIBUTIONS = [DISTRIBUTION_EVEN, DISTRIBUTION_RANDOM] as const;
-
 export type OverrideModules = Record<string, FluenceConfigModule>;
-export type Distribution = (typeof DISTRIBUTIONS)[number];
 export type ServiceDeployV1 = {
   deployId: string;
   count?: number;
   peerId?: string;
   peerIds?: Array<string>;
   overrideModules?: OverrideModules;
-  distribution?: Distribution;
   keyPairName?: string;
 };
 export type FluenceConfigModule = Partial<ServiceModuleConfig>;
@@ -198,7 +193,7 @@ const configSchemaV1Obj = {
               type: "object",
               title: "Deployment",
               description:
-                "A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, distribution, etc.",
+                "A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, etc.",
               properties: {
                 keyPairName,
                 deployId: {
@@ -224,12 +219,6 @@ const configSchemaV1Obj = {
                   nullable: true,
                   title: "Peer ids",
                   description: `Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
-                },
-                distribution: {
-                  type: "string",
-                  enum: DISTRIBUTIONS,
-                  nullable: true,
-                  description: `"even" distribution is used by default, means that the services will be deployed evenly across the listed peers. "random" distribution means that the services will be deployed randomly across the listed peers.`,
                 },
                 overrideModules: {
                   type: "object",
@@ -276,6 +265,7 @@ const configSchemaV1Obj = {
           type: "array",
           title: "Multi addresses",
           items: { type: "string" },
+          minItems: 1,
         },
       ],
       nullable: true,
@@ -366,17 +356,20 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     [AQUA_INPUT_PATH_PROPERTY]: {
       type: "string",
       nullable: true,
-      description: `Path to the aqua file or directory with aqua files that you want to compile by default`,
+      description:
+        "Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir",
     },
     aquaOutputTSPath: {
       type: "string",
       nullable: true,
-      description: "Default compilation target dir from aqua to ts",
+      description:
+        "Path to the default compilation target dir from aqua to ts. Must be relative to the project root dir",
     },
     aquaOutputJSPath: {
       type: "string",
       nullable: true,
-      description: `Default compilation target dir from aqua to js. Overrides "aquaOutputTSPath" property`,
+      description:
+        "Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property",
     },
     appTSPath: {
       type: "string",
@@ -486,8 +479,10 @@ const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
     return localNode.peerId;
   }
 
-  return getRandomRelayId(fluenceEnv);
+  return getRandomPeerId(fluenceEnv);
 };
+
+const DEFAULT_RELAYS_FOR_TEMPLATE: Network = "kras";
 
 const initFluenceProject = async (): Promise<ConfigV2> => {
   const srcMainAquaPath = await ensureSrcAquaMainPath();
@@ -535,10 +530,10 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
     },
     hosts: {
       [DEFAULT_WORKER_NAME]: {
-        peerIds: [getDefaultPeerId()],
+        peerIds: [getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)],
       },
     },
-    relays: "kras",
+    relays: DEFAULT_RELAYS_FOR_TEMPLATE,
   };
 };
 

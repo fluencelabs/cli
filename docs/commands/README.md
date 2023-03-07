@@ -35,13 +35,15 @@ Compile aqua file or directory that contains your .aqua files
 
 ```
 USAGE
-  $ fluence aqua [-i <value>] [-o <value>] [--import <value>] [--air | --js | --common-js]
-    [--old-fluence-js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--scheduled]
-    [-w] [--no-input]
+  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air]
+    [--js] [--old-fluence-js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry]
+    [--scheduled]
 
 FLAGS
-  -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files
-  -o, --output=<path>           Path to the output directory. Will be created if it doesn't exists
+  -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
+                                relative to the current working directory or absolute
+  -o, --output=<path>           Path to the output directory. Must be relative to the current working directory or
+                                absolute. Will be created if it doesn't exists
   -w, --watch                   Watch aqua file or folder for changes and recompile
   --air                         Generate .air file instead of .ts
   --common-js                   Use no extension in generated .ts file

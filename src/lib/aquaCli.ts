@@ -27,6 +27,21 @@ import type { Flags, OptionalFlags } from "./typeHelpers.js";
  */
 const AQUA_CLI_EXECUTION_TIMEOUT = 90_000;
 
+export type AquaCompilerFlags = Flags<"input"> &
+  OptionalFlags<
+    | "output"
+    | "js"
+    | "air"
+    | "log-level"
+    | "const"
+    | "no-relay"
+    | "no-xor"
+    | "dry"
+    | "scheduled"
+    | "old-fluence-js"
+    | "import"
+  > & { timeout?: never };
+
 export type AquaCliInput =
   | {
       args: ["remote", "deploy_service"];
@@ -61,19 +76,7 @@ export type AquaCliInput =
     }
   | {
       args?: never;
-      flags: Flags<"input"> &
-        OptionalFlags<
-          | "output"
-          | "js"
-          | "air"
-          | "log-level"
-          | "const"
-          | "no-relay"
-          | "no-xor"
-          | "dry"
-          | "scheduled"
-          | "old-fluence-js"
-        > & { timeout?: never };
+      flags: AquaCompilerFlags;
     };
 
 export type AquaCLI = {
