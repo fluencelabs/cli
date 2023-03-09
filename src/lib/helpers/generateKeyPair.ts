@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getRandomValues } from "crypto";
+import getRandomValues from "get-random-values";
 
 import type { ConfigKeyPair } from "../configs/keyPair.js";
 

@@ -23,6 +23,11 @@ declare module "replace-homedir" {
   ): string;
 }
 
+declare module "get-random-values" {
+  export = getRandomValues;
+  declare function getRandomValues(array: Uint8Array): Uint8Array;
+}
+
 declare module "countly-sdk-nodejs" {
   export const device_id: string;
   function init(config: unknown): void;
