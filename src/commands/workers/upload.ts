@@ -14,45 +14,33 @@
  * limitations under the License.
  */
 
-import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Args, Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload } from "../../lib/compiled-aqua/installation-spell/config.js";
 import {
   KEY_PAIR_FLAG,
-  TIMEOUT_FLAG,
   PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CLIENT_FLAGS,
 } from "../../lib/const.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { jsonStringify } from "../../lib/helpers/jsonStringify.js";
-import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initFluenceClient } from "../../lib/jsClient.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
-import { getRandomRelayAddr } from "../../lib/multiaddres.js";
-
-const DEFAULT_TTL = 60000;
 
 export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    relay: Flags.string({
-      description: "Relay node multiaddr",
-      helpValue: "<multiaddr>",
-    }),
-    ...TIMEOUT_FLAG,
-    ttl: Flags.integer({
-      description: `Sets the default TTL for all particles originating from the peer with no TTL specified. If the originating particle's TTL is defined then that value will be used If the option is not set default TTL will be ${DEFAULT_TTL}`,
-      helpValue: "<milliseconds>",
-    }),
+    ...FLUENCE_CLIENT_FLAGS,
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
@@ -69,35 +57,9 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
       true
     );
 
-    const defaultKeyPair = await getExistingKeyPairFromFlags(
-      flags,
-      fluenceConfig
-    );
-
-    if (defaultKeyPair instanceof Error) {
-      commandObj.error(defaultKeyPair.message);
-    }
-
-    const secretKey = defaultKeyPair.secretKey;
-    const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
-    const fluencePeer = new FluencePeer();
-
-    await fluencePeer.start({
-      dialTimeoutMs: flags.timeout ?? DEFAULT_TTL,
-      defaultTtlMs: flags.ttl ?? DEFAULT_TTL,
-      connectTo: relay,
-      ...(secretKey === undefined
-        ? {}
-        : {
-            KeyPair: await KeyPair.fromEd25519SK(
-              Buffer.from(secretKey, "base64")
-            ),
-          }),
-    });
-
-    const offAquaLogs = flags["off-aqua-logs"];
-    doRegisterIpfsClient(fluencePeer, offAquaLogs);
-    doRegisterLog(fluencePeer, offAquaLogs);
+    const fluenceClient = await initFluenceClient(flags, fluenceConfig);
+    doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
+    doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
@@ -129,8 +91,7 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
       commandObj.error(errorMessages.join("\n"));
     }
 
-    const uploadResult = await upload(fluencePeer, uploadArg);
-
+    const uploadResult = await upload(fluenceClient, uploadArg);
     commandObj.log(jsonStringify(uploadResult.workers));
   }
 }

@@ -33,7 +33,7 @@ import {
   ensureVSCodeSettingsJSON,
   ensureAquaImports,
 } from "../../../lib/helpers/aquaImports.js";
-import { initCli } from "../../../lib/lifecyle.js";
+import { initCli } from "../../../lib/lifeCycle.js";
 import { ensureNpmDependency } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {

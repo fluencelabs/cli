@@ -33,7 +33,7 @@ import {
   ensureValidAquaName,
   validateAquaName,
 } from "../../lib/helpers/downloadFile.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { confirm, input } from "../../lib/prompt.js";
 

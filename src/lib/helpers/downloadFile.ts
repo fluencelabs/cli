@@ -22,8 +22,7 @@ import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import decompress from "decompress";
 import filenamify from "filenamify";
-import nodeFetch from "node-fetch";
-const fetch = nodeFetch.default;
+import fetch from "node-fetch";
 
 import { commandObj } from "../commandObj.js";
 import { getConfigPath } from "../configs/initConfig.js";

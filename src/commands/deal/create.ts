@@ -22,7 +22,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Create extends BaseCommand<typeof Create> {

@@ -67,7 +67,7 @@ const COUNTLY_REPORT_TIMEOUT = 3000;
 /**
  * @type {() => boolean}
  */
-export const isCountlyInited = () => Countly.device_id !== undefined;
+export const isCountlyInitialized = () => Countly.device_id !== undefined;
 
 /**
  * @type {() => void}
@@ -95,7 +95,7 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
 
 /**
  * @param {Error | unknown} errorOrUnknown
- * @returns
+ * @returns {never | Promise<void>}
  */
 export const createErrorPromise = (errorOrUnknown) => {
   const error =
@@ -105,7 +105,7 @@ export const createErrorPromise = (errorOrUnknown) => {
 
   isErrorExpected = getIsErrorExpected(error);
 
-  if (!isCountlyInited()) {
+  if (!isCountlyInitialized()) {
     return handleError(error);
   }
 

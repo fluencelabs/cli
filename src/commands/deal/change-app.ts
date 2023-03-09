@@ -23,7 +23,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { dealUpdate } from "../../lib/deal.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 

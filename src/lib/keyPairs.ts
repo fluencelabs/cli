@@ -25,7 +25,7 @@ import type { ConfigKeyPair } from "./configs/keyPair.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
-import { KEY_PAIR_FLAG_NAME } from "./const.js";
+import type { KeyPairFlag } from "./const.js";
 import { list, Choices } from "./prompt.js";
 
 export const getKeyPair = async (keyPairName: string | undefined) =>
@@ -66,7 +66,7 @@ const getExistingUserKeyPair = async (
   const noUserKeyPairMessage = `No key-pair ${color.yellow(keyPairName)} found`;
 
   if (!isInteractive) {
-    commandObj.error(noUserKeyPairMessage);
+    return commandObj.error(noUserKeyPairMessage);
   }
 
   commandObj.warn(noUserKeyPairMessage);
@@ -137,11 +137,7 @@ export const getExistingKeyPair = async (
   (await getProjectKeyPair(keyPairName)) ?? getExistingUserKeyPair(keyPairName);
 
 export const getExistingKeyPairFromFlags = async (
-  {
-    [KEY_PAIR_FLAG_NAME]: keyPairName,
-  }: {
-    [KEY_PAIR_FLAG_NAME]: string | undefined;
-  },
+  flags: KeyPairFlag,
   maybeFluenceConfig: FluenceConfig | null
-): Promise<ConfigKeyPair | Error> =>
-  getExistingKeyPair(keyPairName ?? maybeFluenceConfig?.keyPairName);
+): Promise<ConfigKeyPair> =>
+  getExistingKeyPair(flags["key-pair-name"] ?? maybeFluenceConfig?.keyPairName);

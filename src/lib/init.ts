@@ -32,7 +32,7 @@ import {
   Template,
   TEMPLATES,
   isTemplate,
-  FLUENCE_JS_RECOMMENDED_VERSION,
+  FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION,
   FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
   PACKAGE_JSON_FILE_NAME,
   INDEX_JS_FILE_NAME,
@@ -289,7 +289,7 @@ export const initTSorJSProject = async ({
     author: "",
     license: "ISC",
     dependencies: {
-      "@fluencelabs/fluence": FLUENCE_JS_RECOMMENDED_VERSION,
+      "@fluencelabs/js-client.node": FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION,
       "@fluencelabs/fluence-network-environment":
         FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
       ...(isJS ? {} : { "ts-node": TS_NODE_RECOMMENDED_VERSION }),

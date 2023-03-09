@@ -24,9 +24,9 @@ import {
   Input,
   Path,
 } from "@fluencelabs/aqua-api/aqua-api.js";
-import type { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction.js";
+import type { callAquaFunction } from "@fluencelabs/js-peer/dist/compilerSupport/callFunction.js";
 
-export type Data = Parameters<typeof callFunctionImpl>[4];
+export type Data = Parameters<typeof callAquaFunction>[0]["config"];
 
 type CommonArgs = {
   imports?: string[] | undefined;

@@ -25,7 +25,7 @@ import { initAppConfig } from "../../lib/configs/project/app.js";
 import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { TIMEOUT_FLAG } from "../../lib/const.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
 import { removeApp } from "../../lib/removeApp.js";
 

@@ -16,7 +16,7 @@
 
 import { access, readFile } from "node:fs/promises";
 
-import type { FluencePeer } from "@fluencelabs/fluence";
+import type { IFluenceClient } from "@fluencelabs/js-client.api";
 import { CID, create, IPFSHTTPClient } from "ipfs-http-client";
 import { Multiaddr, protocols } from "multiaddr";
 
@@ -29,7 +29,7 @@ import { registerIpfsClient } from "../compiled-aqua/installation-spell/files.js
 
 /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
 
-const createClient = (multiaddr: string) =>
+const createIPFSClient = (multiaddr: string) =>
   create(
     new Multiaddr(multiaddr)
       .decapsulateCode(protocols.names["p2p"]?.code ?? 421)
@@ -41,7 +41,7 @@ const upload = async (
   content: Parameters<IPFSHTTPClient["add"]>[0],
   log: (msg: unknown) => void
 ) => {
-  const ipfsClient = createClient(multiaddr);
+  const ipfsClient = createIPFSClient(multiaddr);
 
   try {
     const { path: cid } = await ipfsClient.add(content, { pin: true });
@@ -71,7 +71,7 @@ const upload = async (
 };
 
 export const doRegisterIpfsClient = (
-  peer: FluencePeer,
+  fluenceClient: IFluenceClient,
   offAquaLogs: boolean
 ): void => {
   const log = (msg: unknown) => {
@@ -80,7 +80,7 @@ export const doRegisterIpfsClient = (
     }
   };
 
-  registerIpfsClient(peer, {
+  registerIpfsClient(fluenceClient, {
     async upload(multiaddr, absolutePath) {
       try {
         await access(absolutePath);
@@ -97,12 +97,12 @@ export const doRegisterIpfsClient = (
       return upload(multiaddr, Buffer.from(string), log);
     },
     async id(multiaddr): Promise<string> {
-      const ipfsClient = createClient(multiaddr);
+      const ipfsClient = createIPFSClient(multiaddr);
       const result = await ipfsClient.id();
       return result.id.toString();
     },
     async exists(multiaddr, cid): Promise<boolean> {
-      const ipfsClient = createClient(multiaddr);
+      const ipfsClient = createIPFSClient(multiaddr);
 
       try {
         const results = ipfsClient.pin.ls({ paths: cid, type: "all" });
@@ -122,7 +122,7 @@ export const doRegisterIpfsClient = (
       }
     },
     async remove(multiaddr, cid): Promise<string> {
-      const ipfsClient = createClient(multiaddr);
+      const ipfsClient = createIPFSClient(multiaddr);
 
       try {
         await ipfsClient.pin.rm(cid, { recursive: true });

@@ -29,8 +29,8 @@ import {
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { generateKeyPair } from "../../lib/helpers/generateKeyPair.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -97,7 +97,7 @@ export default class New extends BaseCommand<typeof New> {
       });
     }
 
-    const newKeyPair = await generateKeyPair(keyPairName);
+    const newKeyPair = generateKeyPair(keyPairName);
 
     if (flags.user) {
       userSecretsConfig.keyPairs.push(newKeyPair);

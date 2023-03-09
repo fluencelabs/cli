@@ -17,7 +17,7 @@
 import { Command, Flags, Interfaces } from "@oclif/core";
 
 import { NO_INPUT_FLAG } from "./lib/const.js";
-import { exitCli } from "./lib/lifecyle.js";
+import { exitCli } from "./lib/lifeCycle.js";
 
 export type Flags<T extends typeof Command> = Interfaces.InferredFlags<
   (typeof BaseCommand)["baseFlags"] & T["flags"]

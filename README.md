@@ -9,16 +9,16 @@ Fluence CLI is designed to be the only tool that you need to manage the life cyc
 Prerequisites:
 
 -   Linux or MacOS (there are currently some bugs on Windows)
--   [Node.js = 16.x.x](https://nodejs.org/)
+-   [Node.js >= 18.x.x](https://nodejs.org/)
 
-To install and try fluence, run:
+To install and try Fluence CLI, run:
 
 ```sh-session
 $ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
 $ fluence
-@fluencelabs/cli/0.0.0 linux-x64 node-v16.14.0
+@fluencelabs/cli/0.0.0 linux-x64 node-v18.12.1
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND

@@ -18,7 +18,10 @@
 
 import Countly from "countly-sdk-nodejs";
 
-import { sessionEndPromise, isCountlyInited } from "../countlyInterceptor.js";
+import {
+  sessionEndPromise,
+  isCountlyInitialized,
+} from "../countlyInterceptor.js";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
@@ -84,7 +87,7 @@ const dependenciesToSegmentation = (
  * @returns void
  */
 export const addCountlyLog = (message: string): void => {
-  if (!isCountlyInited()) {
+  if (!isCountlyInitialized()) {
     return;
   }
 
@@ -92,7 +95,7 @@ export const addCountlyLog = (message: string): void => {
 };
 
 export const haltCountly = async (): Promise<void> => {
-  if (!isCountlyInited()) {
+  if (!isCountlyInitialized()) {
     return;
   }
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
@@ -28,36 +27,25 @@ import {
 import { initReadonlyDeployedConfig } from "../../lib/configs/project/deployed.js";
 import {
   KEY_PAIR_FLAG,
-  TIMEOUT_FLAG,
   PRIV_KEY_FLAG,
   DEPLOYED_CONFIG_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_DIR_NAME,
+  FLUENCE_CLIENT_FLAGS,
 } from "../../lib/const.js";
 import { parseWorkers } from "../../lib/deployWorkers.js";
-import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initFluenceClient } from "../../lib/jsClient.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
-import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 import { input } from "../../lib/prompt.js";
-
-const DEFAULT_TTL = 60000;
 
 export default class Logs extends BaseCommand<typeof Logs> {
   static override description = `Get logs from deployed workers listed in ${DEPLOYED_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    relay: Flags.string({
-      description: "Relay node multiaddr",
-      helpValue: "<multiaddr>",
-    }),
-    ...TIMEOUT_FLAG,
-    ttl: Flags.integer({
-      description: `Sets the default TTL for all particles originating from the peer with no TTL specified. If the originating particle's TTL is defined then that value will be used If the option is not set default TTL will be ${DEFAULT_TTL}`,
-      helpValue: "<milliseconds>",
-    }),
+    ...FLUENCE_CLIENT_FLAGS,
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
@@ -86,34 +74,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
       await this.parse(Logs)
     );
 
-    const defaultKeyPair = await getExistingKeyPairFromFlags(
-      flags,
-      maybeFluenceConfig
-    );
-
-    if (defaultKeyPair instanceof Error) {
-      commandObj.error(defaultKeyPair.message);
-    }
-
-    const secretKey = defaultKeyPair.secretKey;
-    const relay = flags.relay ?? getRandomRelayAddr(maybeFluenceConfig?.relays);
-    const fluencePeer = new FluencePeer();
-
-    await fluencePeer.start({
-      dialTimeoutMs: flags.timeout,
-      defaultTtlMs: flags.ttl ?? DEFAULT_TTL,
-      connectTo: relay,
-      ...(secretKey === undefined
-        ? {}
-        : {
-            KeyPair: await KeyPair.fromEd25519SK(
-              Buffer.from(secretKey, "base64")
-            ),
-          }),
-    });
-
-    const offAquaLogs = flags["off-aqua-logs"];
-    doRegisterLog(fluencePeer, offAquaLogs);
+    const fluenceClient = await initFluenceClient(flags, maybeFluenceConfig);
+    doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
 
     const logsArg = await getLogsArg({
       workerNamesString: args["WORKER-NAMES"],
@@ -122,7 +84,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
       spellId: flags["spell-id"],
     });
 
-    const logs = await get_logs(fluencePeer, logsArg);
+    const logs = await get_logs(fluenceClient, logsArg);
 
     commandObj.log(
       logs

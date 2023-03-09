@@ -26,8 +26,8 @@ import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecre
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keypairs.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { list } from "../../lib/prompt.js";
 
 export default class Default extends BaseCommand<typeof Default> {

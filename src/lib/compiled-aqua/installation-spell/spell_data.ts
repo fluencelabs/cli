@@ -18,35 +18,36 @@ import {
 
 // Services
 
-export interface ConsoleDef {
-    print: (anything: any, callParams: CallParams$$<'anything'>) => void | Promise<void>;
+export interface SpellDataDef {
+    spell_id: (callParams: CallParams$$<null>) => string | Promise<string>;
 }
-export function registerConsole(service: ConsoleDef): void;
-export function registerConsole(serviceId: string, service: ConsoleDef): void;
-export function registerConsole(peer: IFluenceClient$$, service: ConsoleDef): void;
-export function registerConsole(peer: IFluenceClient$$, serviceId: string, service: ConsoleDef): void;
+export function registerSpellData(service: SpellDataDef): void;
+export function registerSpellData(serviceId: string, service: SpellDataDef): void;
+export function registerSpellData(peer: IFluenceClient$$, service: SpellDataDef): void;
+export function registerSpellData(peer: IFluenceClient$$, serviceId: string, service: SpellDataDef): void;
        
 
-export function registerConsole(...args: any) {
+export function registerSpellData(...args: any) {
     registerService$$(
         args,
         {
-    "defaultServiceId" : "run-console",
+    "defaultServiceId" : "getDataSrv",
     "functions" : {
         "tag" : "labeledProduct",
         "fields" : {
-            "print" : {
+            "spell_id" : {
                 "tag" : "arrow",
                 "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "anything" : {
-                            "tag" : "topType"
-                        }
-                    }
+                    "tag" : "nil"
                 },
                 "codomain" : {
-                    "tag" : "nil"
+                    "tag" : "unlabeledProduct",
+                    "items" : [
+                        {
+                            "tag" : "scalar",
+                            "name" : "string"
+                        }
+                    ]
                 }
             }
         }

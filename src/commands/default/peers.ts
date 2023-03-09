@@ -25,7 +25,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { isNetwork, Network, NETWORKS } from "../../lib/multiaddres.js";
 import { list } from "../../lib/prompt.js";
 

@@ -36,7 +36,7 @@ import {
   NO_INPUT_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { initCli } from "../lib/lifecyle.js";
+import { initCli } from "../lib/lifeCycle.js";
 import { projectRootDir, validatePath } from "../lib/paths.js";
 import { input, InputArg } from "../lib/prompt.js";
 

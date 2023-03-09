@@ -145,7 +145,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.3/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.4/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -173,8 +173,8 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--off-aqua-logs] [-k <value>] [--network <value>]
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [-k <value>] [--network
+    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property in fluence.yaml are deployed)
@@ -182,15 +182,14 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --dial-timeout=<value>      [default: 60000] Timeout for js client
   --network=<network>         [default: testnet] $The network in which the transactions used by the command will be
                               carried out (local, testnet)
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
-  --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
-                              the originating particle's TTL is defined then that value will be used If the option is
-                              not set default TTL will be 60000
+  --particle-id               Print particle ids when running js client
+  --relay=<value>             Relay for js client to connect to
+  --ttl=<value>               [default: 60000] TTL for js client
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -531,10 +530,10 @@ Run aqua script
 
 ```
 USAGE
-  $ fluence run [--no-input] [--relay <value>] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--log-level-avm <value>] [--print-particle-id] [--quiet] [--plugin <value>] [--const
-    <value>] [--json-service <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air] [--off-aqua-logs]
-    [--timeout <value>] [-k <value>]
+  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
+    [--log-level-compiler <value>] [--quiet] [--plugin <value>] [--const <value>] [--json-service <value>] [-i <value>]
+    [-f <value>] [--no-xor] [--no-relay] [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id]
 
 FLAGS
   -f, --func=<function-call>    Function call
@@ -546,23 +545,22 @@ FLAGS
                                 argument names
   --data-path=<path>            Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
                                 using these argument names
+  --dial-timeout=<value>        [default: 60000] Timeout for js client
   --import=<path>...            Path to a directory to import from. May be used several times
   --json-service=<path>...      Path to a file that contains a JSON formatted service
-  --log-level-avm=<level>       Set log level for AquaVM. Must be one of: debug, info, warn, error, off, trace
   --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
                                 warn, error, off
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
   --off-aqua-logs               Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                 Print particle ids when running js client
   --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                   Prints generated AIR code before function execution
-  --print-particle-id           If set, newly initiated particle ids will be printed to console. Useful to see what
-                                particle id is responsible for aqua function
   --quiet                       Print only execution result. Overrides all --log-level-* flags
-  --relay=<multiaddr>           Relay node multiaddr
-  --timeout=<milliseconds>      [default: 60000] Timeout used for command execution
+  --relay=<value>               Relay for js client to connect to
+  --ttl=<value>                 [default: 60000] TTL for js client
 
 DESCRIPTION
   Run aqua script
@@ -667,8 +665,8 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers deploy [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--off-aqua-logs] [-k <value>]
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [-k <value>] [--relay <value>]
+    [--ttl <value>] [--dial-timeout <value>] [--particle-id]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -676,13 +674,12 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --dial-timeout=<value>      [default: 60000] Timeout for js client
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
-  --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
-                              the originating particle's TTL is defined then that value will be used If the option is
-                              not set default TTL will be 60000
+  --particle-id               Print particle ids when running js client
+  --relay=<value>             Relay for js client to connect to
+  --ttl=<value>               [default: 60000] TTL for js client
 
 DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
@@ -697,8 +694,9 @@ Get logs from deployed workers listed in deployed.yaml
 
 ```
 USAGE
-  $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--off-aqua-logs] [-k <value>] [--worker-id <value>] [--host-id <value>] [--spell-id <value>]
+  $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [-k <value>] [--worker-id <value>] [--host-id <value>] [--spell-id
+    <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property of fluence.yaml are deployed)
@@ -706,15 +704,14 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --dial-timeout=<value>      [default: 60000] Timeout for js client
   --host-id=<host-id>         Host id
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --relay=<multiaddr>         Relay node multiaddr
+  --particle-id               Print particle ids when running js client
+  --relay=<value>             Relay for js client to connect to
   --spell-id=<spell-id>       [default: worker-spell] Spell id
-  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
-  --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
-                              the originating particle's TTL is defined then that value will be used If the option is
-                              not set default TTL will be 60000
+  --ttl=<value>               [default: 60000] TTL for js client
   --worker-id=<worker-id>     Worker id
 
 DESCRIPTION
@@ -730,8 +727,8 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--timeout <value>] [--ttl <value>] [-k
-    <value>] [--off-aqua-logs] [-k <value>]
+  $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [-k <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -739,13 +736,12 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
   -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --dial-timeout=<value>      [default: 60000] Timeout for js client
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --relay=<multiaddr>         Relay node multiaddr
-  --timeout=<milliseconds>    [default: 60000] Timeout used for command execution
-  --ttl=<milliseconds>        Sets the default TTL for all particles originating from the peer with no TTL specified. If
-                              the originating particle's TTL is defined then that value will be used If the option is
-                              not set default TTL will be 60000
+  --particle-id               Print particle ids when running js client
+  --relay=<value>             Relay for js client to connect to
+  --ttl=<value>               [default: 60000] TTL for js client
 
 DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml

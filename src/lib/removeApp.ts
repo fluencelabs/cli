@@ -31,7 +31,7 @@ import {
 } from "../lib/deployedApp.js";
 import { getMessageWithKeyValuePairs } from "../lib/helpers/getMessageWithKeyValuePairs.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
-import { getKeyPair } from "../lib/keypairs.js";
+import { getKeyPair } from "../lib/keyPairs.js";
 import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceJSAppPath,

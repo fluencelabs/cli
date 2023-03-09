@@ -79,7 +79,11 @@ const generateRegisterAppTSorJS = async ({
   const appContent =
     // Codegeneration:
     `${DISABLE_TS_AND_ES_LINT}
-${isJS ? "" : 'import type { FluencePeer } from "@fluencelabs/fluence";'}
+${
+  isJS
+    ? ""
+    : 'import type { FluencePeer } from "@fluencelabs/js-peer/dist/js-peer/FluencePeer.js"'
+}
 import { registerApp as registerAppService } from "./deployed.app.js";
 
 export const ${SERVICES_FUNCTION_NAME} = ${JSON.stringify(
