@@ -503,7 +503,7 @@ const PEERS = {
 }[process.env[FLUENCE_ENV] as FluenceEnv];
 
 export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
-import { Fluence } from "@fluencelabs/js-client.node";
+import { Fluence } from "@fluencelabs/js-client.api";
 ${PEERS}
 
 import {
