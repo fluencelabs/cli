@@ -135,8 +135,11 @@ export async function initCli<
     );
   }
 
-  const userConfig = await ensureUserConfig();
-  const maybeFluenceConfig = await initFluenceConfig();
+  const [userConfig, maybeFluenceConfig] = await Promise.all([
+    ensureUserConfig(),
+    initFluenceConfig(),
+  ]);
+
   await initCountly({ userConfig, maybeFluenceConfig });
 
   return {

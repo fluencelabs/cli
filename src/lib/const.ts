@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LogLevel } from "@fluencelabs/marine-js/dist/types";
 import { Flags } from "@oclif/core";
 import type {
   Flag,

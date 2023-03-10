@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
-import path, { dirname } from "node:path";
+import assert from "node:assert";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join, relative } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -44,21 +45,23 @@ const ensureSchema = async ({
   getSchemaDirPath,
   schema,
 }: EnsureSchemaArg): Promise<string> => {
-  const schemaDir = path.join(
+  const schemaDir = join(
     getSchemaDirPath === undefined ? configDirPath : await getSchemaDirPath(),
     SCHEMAS_DIR_NAME
   );
 
-  await fsPromises.mkdir(schemaDir, { recursive: true });
-  const schemaPath = path.join(schemaDir, `${name}.json`);
+  await mkdir(schemaDir, { recursive: true });
+  const schemaPath = join(schemaDir, `${name}.json`);
+  const correctSchemaContent = jsonStringify(schema) + "\n";
 
-  await fsPromises.writeFile(
-    path.join(schemaDir, `${name}.json`),
-    jsonStringify(schema) + "\n",
-    FS_OPTIONS
-  );
+  try {
+    const schemaContent = await readFile(schemaPath, FS_OPTIONS);
+    assert(schemaContent === correctSchemaContent);
+  } catch {
+    await writeFile(schemaPath, correctSchemaContent, FS_OPTIONS);
+  }
 
-  return path.relative(configDirPath, schemaPath);
+  return relative(configDirPath, schemaPath);
 };
 
 type MigrateConfigOptions<
@@ -122,11 +125,7 @@ const migrateConfig = async <
   }
 
   if (configString !== migratedConfigString) {
-    await fsPromises.writeFile(
-      configPath,
-      migratedConfigString + "\n",
-      FS_OPTIONS
-    );
+    await writeFile(configPath, migratedConfigString + "\n", FS_OPTIONS);
   }
 
   return {
@@ -235,10 +234,10 @@ export const getConfigPath = (
   configOrConfigDirPath.endsWith(YAML_EXT)
     ? {
         configPath: configOrConfigDirPath,
-        configDirPath: path.dirname(configOrConfigDirPath),
+        configDirPath: dirname(configOrConfigDirPath),
       }
     : {
-        configPath: path.join(configOrConfigDirPath, configName),
+        configPath: join(configOrConfigDirPath, configName),
         configDirPath: configOrConfigDirPath,
       };
 
@@ -305,7 +304,7 @@ export function getReadonlyConfigInitFunction<
     try {
       // If config file exists, read it and add schema path comment if it's missing
       // or replace it if it's incorrect
-      const fileContent = await fsPromises.readFile(configPath, FS_OPTIONS);
+      const fileContent = await readFile(configPath, FS_OPTIONS);
       const schemaPathComment = await getSchemaPathComment();
 
       configString = fileContent.startsWith(schemaPathCommentStart)
@@ -315,7 +314,7 @@ export function getReadonlyConfigInitFunction<
         : `${schemaPathComment}\n${fileContent.trim()}\n`;
 
       if (configString !== fileContent) {
-        await fsPromises.writeFile(configPath, configString, FS_OPTIONS);
+        await writeFile(configPath, configString, FS_OPTIONS);
       }
     } catch {
       if (getDefaultConfig === undefined) {
@@ -342,11 +341,7 @@ export function getReadonlyConfigInitFunction<
         await getDefaultConfig()
       );
 
-      await fsPromises.writeFile(
-        configPath,
-        `${configString.trim()}\n`,
-        FS_OPTIONS
-      );
+      await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
     }
 
     const config: unknown = parse(configString);
@@ -481,7 +476,7 @@ export function getConfigInitFunction<
         if (configString !== newConfigString) {
           configString = newConfigString;
 
-          await fsPromises.writeFile(configPath, configString, FS_OPTIONS);
+          await writeFile(configPath, configString, FS_OPTIONS);
         }
       },
       $getConfigString(): string {

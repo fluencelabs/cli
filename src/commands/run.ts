@@ -16,6 +16,7 @@
 
 import { access, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+// import { performance, PerformanceObserver } from "node:perf_hooks";
 
 import { callAquaFunction } from "@fluencelabs/js-peer/dist/compilerSupport/callFunction.js";
 import oclifColor from "@oclif/color";
@@ -70,6 +71,15 @@ import {
   setProjectRootDir,
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
+
+// const perfObserver = new PerformanceObserver((items) => {
+//   items.getEntries().forEach((entry) => {
+//     console.log(entry);
+//   });
+// });
+
+// perfObserver.observe({ entryTypes: ["measure"], buffered: true });
+// performance.mark("whole-start");
 
 const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
@@ -163,15 +173,9 @@ export default class Run extends BaseCommand<typeof Run> {
       );
     }
 
-    const logLevelCompiler: AquaLogLevel | undefined =
-      await resolveAquaLogLevel({
-        maybeAquaLogLevel: flags["log-level-compiler"],
-        isQuite: flags.quiet,
-      });
-
     if (flags.quiet) {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      this.log = () => {};
+      commandObj.log = () => {};
     }
 
     // if (typeof flags[ON_FLAG_NAME] === "string") {
@@ -183,26 +187,34 @@ export default class Run extends BaseCommand<typeof Run> {
     //       : [...flags.const, onPeerConst];
     // }
 
+    const logLevelCompiler = await resolveAquaLogLevel({
+      maybeAquaLogLevel: flags["log-level-compiler"],
+      isQuite: flags.quiet,
+    });
+
     const aquaFilePath = await ensureAquaPath({
       aquaPathFromFlags: flags.input,
       maybeFluenceConfig,
     });
 
-    const funcCall =
-      flags.func ??
-      (await input({
-        message: `Enter a function call that you want to execute`,
-        flagName: FUNC_FLAG_NAME,
-      }));
-
-    const maybeAppConfig = await initReadonlyAppConfig();
-
-    const [runData, appJsonServicePath, maybeFluenceLockConfig] =
-      await Promise.all([
-        getRunData(flags),
-        ensureFluenceTmpAppServiceJsonPath(),
-        initFluenceLockConfig(),
-      ]);
+    const [
+      funcCall,
+      maybeAppConfig,
+      runData,
+      appJsonServicePath,
+      maybeFluenceLockConfig,
+    ] = await Promise.all([
+      flags.func === undefined
+        ? input({
+            message: `Enter a function call that you want to execute`,
+            flagName: FUNC_FLAG_NAME,
+          })
+        : Promise.resolve(flags.func),
+      initReadonlyAppConfig(),
+      getRunData(flags),
+      ensureFluenceTmpAppServiceJsonPath(),
+      initFluenceLockConfig(),
+    ]);
 
     const jsonServicePaths = flags["json-service"] ?? [];
 
@@ -258,6 +270,9 @@ export default class Run extends BaseCommand<typeof Run> {
     if (!useAquaRun) {
       console.log(stringResult);
     }
+
+    // performance.mark("whole-end");
+    // performance.measure("whole", "whole-start", "whole-end");
   }
 }
 

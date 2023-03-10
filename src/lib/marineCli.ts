@@ -65,7 +65,7 @@ export const initMarineCli = async (
       command: marineCliPath,
       args,
       flags,
-      message:
+      spinnerMessage:
         message === undefined
           ? undefined
           : getMessageWithKeyValuePairs(message, keyValuePairs),

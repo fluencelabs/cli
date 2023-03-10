@@ -16,7 +16,7 @@
 
 import type { Command } from "@oclif/core";
 
-export type CommandObj = Readonly<InstanceType<typeof Command>>;
+export type CommandObj = InstanceType<typeof Command>;
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export let commandObj: CommandObj;
 export let isInteractive: boolean;

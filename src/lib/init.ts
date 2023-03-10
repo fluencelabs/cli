@@ -345,6 +345,8 @@ export const initTSorJSProject = async ({
     command: "npm",
     args: ["i"],
     options: { cwd: defaultTSorJSDirPath },
-    message: `Installing npm dependencies for ${isJS ? "JS" : "TS"} project`,
+    spinnerMessage: `Installing npm dependencies for ${
+      isJS ? "JS" : "TS"
+    } project`,
   });
 };

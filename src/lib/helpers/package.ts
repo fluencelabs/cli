@@ -125,33 +125,54 @@ export const resolveVersionToInstall = ({
   maybeFluenceLockConfig,
   maybeFluenceConfig,
   packageManager,
-}: ResolveVersionArg): string | undefined => {
+}: ResolveVersionArg):
+  | {
+      versionToInstall: string;
+    }
+  | {
+      maybeVersionToCheck: string | undefined;
+    } => {
   if (typeof maybeVersion === "string") {
-    return maybeVersion;
+    return {
+      versionToInstall: maybeVersion,
+    };
   }
 
   if (explicitInstallation) {
-    return undefined;
+    const maybeRecommendedVersion =
+      recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
+
+    if (typeof maybeRecommendedVersion === "string") {
+      return {
+        versionToInstall: maybeRecommendedVersion,
+      };
+    }
+
+    return { maybeVersionToCheck: undefined };
   }
 
   const maybeVersionFromLockConfig =
     maybeFluenceLockConfig?.[packageManager]?.[name];
 
   if (typeof maybeVersionFromLockConfig === "string") {
-    return maybeVersionFromLockConfig;
+    return {
+      versionToInstall: maybeVersionFromLockConfig,
+    };
   }
 
   const maybeVersionFromFluenceConfig =
     maybeFluenceConfig?.dependencies?.[packageManager]?.[name];
 
   if (typeof maybeVersionFromFluenceConfig === "string") {
-    return maybeVersionFromFluenceConfig;
+    return {
+      maybeVersionToCheck: maybeVersionFromFluenceConfig,
+    };
   }
 
-  const res =
-    recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
-
-  return res;
+  // this should never happen because we either install a dependency explicitly
+  // or we install it from the lock config or the fluence config
+  // there is no other way to install a dependency
+  return { maybeVersionToCheck: undefined };
 };
 
 const dependenciesPathsGettersMap: Record<

@@ -25,7 +25,6 @@ import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
-  AQUA_LIB_NPM_DEPENDENCY,
   DOT_BIN_DIR_NAME,
   fluenceNPMDependencies,
   NODE_MODULES_DIR_NAME,
@@ -86,10 +85,9 @@ const installNpmDependency = async ({
       command: "npm",
       args: ["i", `${name}@${version}`],
       flags: { prefix: dependencyTmpPath },
-      message: `Installing ${name}@${version} to ${replaceHomeDir(
+      spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
         dependencyPath
       )}`,
-      printOutput: true,
     });
   } catch (error) {
     commandObj.error(
@@ -121,7 +119,7 @@ export const ensureNpmDependency = async ({
 }: EnsureNpmDependencyArg): Promise<string> => {
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const maybeVersionToInstall = resolveVersionToInstall({
+  const resolveVersionToInstallResult = resolveVersionToInstall({
     name,
     maybeVersion,
     explicitInstallation,
@@ -130,11 +128,14 @@ export const ensureNpmDependency = async ({
     packageManager: "npm",
   });
 
-  const version = await getLatestVersionOfNPMDependency(
-    maybeVersionToInstall === undefined
-      ? name
-      : `${name}@${maybeVersionToInstall}`
-  );
+  const version =
+    "versionToInstall" in resolveVersionToInstallResult
+      ? resolveVersionToInstallResult.versionToInstall
+      : await getLatestVersionOfNPMDependency(
+          resolveVersionToInstallResult.maybeVersionToCheck === undefined
+            ? name
+            : `${name}@${resolveVersionToInstallResult.maybeVersionToCheck}`
+        );
 
   const maybeNpmDependencyInfo = fluenceNPMDependencies[name];
 
@@ -162,19 +163,25 @@ export const ensureNpmDependency = async ({
   });
 
   if (maybeFluenceConfig !== null) {
-    await handleFluenceConfig({
-      fluenceConfig: maybeFluenceConfig,
-      name,
-      packageManager: "npm",
-      versionFromArgs: maybeVersion ?? version,
-    });
+    const versionFromArgs = maybeVersion ?? version;
 
-    await handleLockConfig({
-      maybeFluenceLockConfig,
-      name,
-      version,
-      packageManager: "npm",
-    });
+    if (versionFromArgs !== maybeFluenceConfig?.dependencies?.npm?.[name]) {
+      await handleFluenceConfig({
+        fluenceConfig: maybeFluenceConfig,
+        name,
+        packageManager: "npm",
+        versionFromArgs,
+      });
+    }
+
+    if (version !== maybeFluenceLockConfig?.npm?.[name]) {
+      await handleLockConfig({
+        maybeFluenceLockConfig,
+        name,
+        version,
+        packageManager: "npm",
+      });
+    }
   }
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
@@ -195,47 +202,21 @@ type InstallAllNPMDependenciesArg = {
   force?: boolean | undefined;
 };
 
-export const installAllNPMDependencies = async ({
+export const installAllNPMDependencies = ({
   maybeFluenceConfig,
   maybeFluenceLockConfig,
   force,
-}: InstallAllNPMDependenciesArg): Promise<string[]> => {
-  const dependencyPaths = [];
-
-  let aquaLibIsListedInFluenceYAML = false;
-
-  for (const [name, version] of Object.entries(
-    maybeFluenceConfig?.dependencies?.npm ?? {}
-  )) {
-    assert(name !== undefined && version !== undefined);
-
-    if (name === AQUA_LIB_NPM_DEPENDENCY) {
-      aquaLibIsListedInFluenceYAML = true;
-    }
-
-    dependencyPaths.push(
-      // Not installing dependencies in parallel
-      // for npm logs to be clearly readable
-      // eslint-disable-next-line no-await-in-loop
-      await ensureNpmDependency({
-        nameAndVersion: `${name}@${version}`,
-        maybeFluenceConfig,
-        maybeFluenceLockConfig,
-        force,
-      })
-    );
-  }
-
-  if (!aquaLibIsListedInFluenceYAML) {
-    dependencyPaths.push(
-      await ensureNpmDependency({
-        nameAndVersion: AQUA_LIB_NPM_DEPENDENCY,
-        maybeFluenceConfig,
-        maybeFluenceLockConfig,
-        force,
-      })
-    );
-  }
-
-  return dependencyPaths;
-};
+}: InstallAllNPMDependenciesArg): Promise<string[]> =>
+  Promise.all(
+    Object.entries(maybeFluenceConfig?.dependencies?.npm ?? {}).map(
+      ([name, version]) => {
+        assert(name !== undefined && version !== undefined);
+        return ensureNpmDependency({
+          nameAndVersion: `${name}@${version}`,
+          maybeFluenceConfig,
+          maybeFluenceLockConfig,
+          force,
+        });
+      }
+    )
+  );

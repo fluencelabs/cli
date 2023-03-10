@@ -30,7 +30,7 @@ export type ExecPromiseArg = {
   args?: SpawnParams[1] | undefined;
   flags?: Flags | undefined;
   options?: SpawnParams[2] | undefined;
-  message?: string | undefined;
+  spinnerMessage?: string | undefined;
   timeout?: number | undefined;
   printOutput?: boolean | undefined;
 };
@@ -40,7 +40,7 @@ export const execPromise = ({
   args,
   flags,
   options,
-  message,
+  spinnerMessage,
   timeout,
   printOutput = false,
 }: ExecPromiseArg): Promise<string> => {
@@ -55,8 +55,8 @@ export const execPromise = ({
         "$1<SECRET_KEY_IS_HIDDEN>$2"
       );
 
-  if (typeof message === "string") {
-    startSpinner(message);
+  if (typeof spinnerMessage === "string") {
+    startSpinner(spinnerMessage);
   }
 
   const debugInfo = `Debug info:\n${commandToDisplay}\n`;
@@ -65,7 +65,7 @@ export const execPromise = ({
     const execTimeout =
       timeout !== undefined &&
       setTimeout((): void => {
-        if (typeof message === "string") {
+        if (typeof spinnerMessage === "string") {
           stopSpinner(color.red("Timed out"));
         }
 
@@ -86,38 +86,38 @@ export const execPromise = ({
 
     let stdout = "";
 
-    childProcess.stdout?.on("data", (data): void => {
+    childProcess.stdout?.on("data", (data: string): void => {
       if (printOutput) {
-        process.stdout.write(String(data));
+        process.stdout.write(data);
       }
 
-      stdout = `${stdout}${String(data)}`;
+      stdout = `${stdout}${data}`;
     });
 
     let stderr = "";
 
-    childProcess.stderr?.on("data", (data): void => {
+    childProcess.stderr?.on("data", (data: string): void => {
       if (printOutput) {
-        process.stdout.write(String(data));
+        process.stderr.write(data);
       }
 
-      stderr = `${stderr}${String(data)}`;
+      stderr = `${stderr}${data}`;
     });
 
-    childProcess.on("error", (error): void => {
+    childProcess.on("error", (error: string): void => {
       childProcess.kill();
 
-      if (typeof message === "string") {
+      if (typeof spinnerMessage === "string") {
         stopSpinner(color.red("failed"));
       }
 
-      rej(new Error(`${String(error)}\n${debugInfo}`));
+      rej(new Error(`${printOutput ? "" : stderr}${error}\n${debugInfo}`));
     });
 
     childProcess.on("close", (code): void => {
       childProcess.kill();
 
-      if (typeof message === "string") {
+      if (typeof spinnerMessage === "string") {
         stopSpinner(code === 0 ? "done" : color.red("failed"));
       }
 
@@ -128,21 +128,16 @@ export const execPromise = ({
       if (code !== 0) {
         rej(
           new Error(
-            `process exited${
+            `${printOutput ? "" : stderr}\nprocess exited${
               code === null ? "" : ` with code ${code}`
-            }\n${stderr}${debugInfo}`
+            }\n${debugInfo}`
           )
         );
 
         return;
       }
 
-      if (stdout !== "") {
-        res(stdout);
-        return;
-      }
-
-      res(stderr);
+      res(stdout);
     });
   });
 };
