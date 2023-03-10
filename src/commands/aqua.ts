@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { readdir, readFile, writeFile } from "node:fs/promises";
-import { isAbsolute, join, resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -32,7 +31,6 @@ import {
 import {
   aquaLogLevelsString,
   FLUENCE_CONFIG_FILE_NAME,
-  FS_OPTIONS,
   NO_INPUT_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
@@ -181,19 +179,8 @@ export default class Aqua extends Command {
       maybeFluenceLockConfig
     );
 
-    const compile = async (): Promise<string> => {
-      const result = await aquaCli({ flags: aquaCliFlags }, "Compiling");
-
-      if (
-        !flags["common-js"] &&
-        !aquaCliFlags.js &&
-        aquaCliFlags.output !== undefined
-      ) {
-        await addFileExtensionsInTsFiles(aquaCliFlags.output);
-      }
-
-      return result;
-    };
+    const compile = async (): Promise<string> =>
+      aquaCli({ flags: aquaCliFlags }, "Compiling");
 
     if (!flags.watch) {
       this.log(await compile());
@@ -265,27 +252,4 @@ const resolveAbsoluteAquaPath = async ({
   }
 
   return resolve(pathFromUserInput);
-};
-
-const addFileExtensionsInTsFiles = async (outputDirPath: string) => {
-  const dirContent = await readdir(outputDirPath, FS_OPTIONS);
-
-  await Promise.all(
-    dirContent
-      .filter((file) => file.endsWith(".ts"))
-      .map((fileName) =>
-        (async () => {
-          const filePath = join(outputDirPath, fileName);
-          const content = await readFile(filePath, FS_OPTIONS);
-          return writeFile(
-            filePath,
-            content.replaceAll(
-              // we will do this until we update aqua to generate correct imports for new js-client
-              "@fluencelabs/fluence/dist/internal/compilerSupport/v4'",
-              "@fluencelabs/fluence/dist/internal/compilerSupport/v4.js'"
-            )
-          );
-        })()
-      )
-  );
 };

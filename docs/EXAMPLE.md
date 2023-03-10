@@ -22,7 +22,7 @@
     
     `App.services()` method returns ids of the previously deployed services that you can use in your aqua code (info about previously deployed services is stored at `.fluence/app.yaml`).
 
-1. Run `fluence aqua --old-fluence-js` to compile `src/aqua/main.aqua` to typescript
+1. Run `fluence aqua` to compile `src/aqua/main.aqua` to typescript
 1. Open `src/ts/src/index.ts` example file and uncomment newly generated imports and code that uses those imports
     ```ts
     import { addOne } from "./aqua/main.ts";
