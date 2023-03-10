@@ -280,20 +280,6 @@ export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
   ", "
 )}`;
 
-/**
- * Subject to change after change after DXJ-71
- */
-export const AVM_LOG_LEVELS: Array<LogLevel> = [
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "trace",
-];
-
-export const avmLogLevelsString = AVM_LOG_LEVELS.join(", ");
-export const isAvmLogLevel = getIsStringUnion(AVM_LOG_LEVELS);
-
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";
 
