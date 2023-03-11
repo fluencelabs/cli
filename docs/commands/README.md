@@ -181,15 +181,15 @@ ARGUMENTS
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  --dial-timeout=<value>      [default: 60000] Timeout for js client
+  --dial-timeout=<value>      [default: 60000] Timeout for Fluence js-client
   --network=<network>         [default: testnet] $The network in which the transactions used by the command will be
                               carried out (local, testnet)
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id               Print particle ids when running js client
+  --particle-id               Print particle ids when running Fluence js-client
   --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<value>             Relay for js client to connect to
-  --ttl=<value>               [default: 60000] TTL for js client
+  --relay=<value>             Relay for Fluence js-client to connect to
+  --ttl=<value>               [default: 60000] TTL for Fluence js-client
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -545,7 +545,7 @@ FLAGS
                                 argument names
   --data-path=<path>            Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function
                                 using these argument names
-  --dial-timeout=<value>        [default: 60000] Timeout for js client
+  --dial-timeout=<value>        [default: 60000] Timeout for Fluence js-client
   --import=<path>...            Path to a directory to import from. May be used several times
   --json-service=<path>...      Path to a file that contains a JSON formatted service
   --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
@@ -554,13 +554,13 @@ FLAGS
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
   --off-aqua-logs               Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                 Print particle ids when running js client
+  --particle-id                 Print particle ids when running Fluence js-client
   --plugin=<path>               [experimental] Path to a directory with JS plugins (Read more:
                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                   Prints generated AIR code before function execution
   --quiet                       Print only execution result. Overrides all --log-level-* flags
-  --relay=<value>               Relay for js client to connect to
-  --ttl=<value>                 [default: 60000] TTL for js client
+  --relay=<value>               Relay for Fluence js-client to connect to
+  --ttl=<value>                 [default: 60000] TTL for Fluence js-client
 
 DESCRIPTION
   Run aqua script
@@ -673,13 +673,13 @@ ARGUMENTS
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  --dial-timeout=<value>      [default: 60000] Timeout for js client
+  --dial-timeout=<value>      [default: 60000] Timeout for Fluence js-client
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id               Print particle ids when running js client
+  --particle-id               Print particle ids when running Fluence js-client
   --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<value>             Relay for js client to connect to
-  --ttl=<value>               [default: 60000] TTL for js client
+  --relay=<value>             Relay for Fluence js-client to connect to
+  --ttl=<value>               [default: 60000] TTL for Fluence js-client
 
 DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
@@ -703,15 +703,15 @@ ARGUMENTS
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  --dial-timeout=<value>      [default: 60000] Timeout for js client
+  --dial-timeout=<value>      [default: 60000] Timeout for Fluence js-client
   --host-id=<host-id>         Host id
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id               Print particle ids when running js client
+  --particle-id               Print particle ids when running Fluence js-client
   --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<value>             Relay for js client to connect to
+  --relay=<value>             Relay for Fluence js-client to connect to
   --spell-id=<spell-id>       [default: worker-spell] Spell id
-  --ttl=<value>               [default: 60000] TTL for js client
+  --ttl=<value>               [default: 60000] TTL for Fluence js-client
   --worker-id=<worker-id>     Worker id
 
 DESCRIPTION
@@ -735,13 +735,13 @@ ARGUMENTS
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  --dial-timeout=<value>      [default: 60000] Timeout for js client
+  --dial-timeout=<value>      [default: 60000] Timeout for Fluence js-client
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id               Print particle ids when running js client
+  --particle-id               Print particle ids when running Fluence js-client
   --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<value>             Relay for js client to connect to
-  --ttl=<value>               [default: 60000] TTL for js client
+  --relay=<value>             Relay for Fluence js-client to connect to
+  --ttl=<value>               [default: 60000] TTL for Fluence js-client
 
 DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml

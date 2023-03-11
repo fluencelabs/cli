@@ -220,18 +220,18 @@ export const OFF_AQUA_LOGS_FLAG = {
 
 export const FLUENCE_CLIENT_FLAGS = {
   relay: Flags.string({
-    description: "Relay for js client to connect to",
+    description: "Relay for Fluence js-client to connect to",
   }),
   ttl: Flags.integer({
-    description: "TTL for js client",
+    description: "TTL for Fluence js-client",
     default: 60000,
   }),
   "dial-timeout": Flags.integer({
-    description: "Timeout for js client",
+    description: "Timeout for Fluence js-client",
     default: 60000,
   }),
   "particle-id": Flags.boolean({
-    description: "Print particle ids when running js client",
+    description: "Print particle ids when running Fluence js-client",
   }),
 } as const;
 
