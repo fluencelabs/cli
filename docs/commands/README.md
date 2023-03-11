@@ -173,7 +173,7 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [-k <value>] [--network
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
 
 ARGUMENTS
@@ -181,13 +181,13 @@ ARGUMENTS
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --dial-timeout=<value>      [default: 60000] Timeout for js client
   --network=<network>         [default: testnet] $The network in which the transactions used by the command will be
                               carried out (local, testnet)
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --particle-id               Print particle ids when running js client
+  --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<value>             Relay for js client to connect to
   --ttl=<value>               [default: 60000] TTL for js client
 
@@ -509,16 +509,16 @@ Create provider access token for the deal
 
 ```
 USAGE
-  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [-k <value>] [--network <value>]
+  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
 
 FLAGS
-  -k, --privKey=<value>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --network=<network>    [default: testnet] $The network in which the transactions used by the command will be carried
-                         out (local, testnet)
-  --no-input             Don't interactively ask for any input from the user
+  --network=<network>  [default: testnet] $The network in which the transactions used by the command will be carried out
+                       (local, testnet)
+  --no-input           Don't interactively ask for any input from the user
+  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
 
 DESCRIPTION
   Create provider access token for the deal
@@ -665,19 +665,19 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [-k <value>] [--relay <value>]
-    [--ttl <value>] [--dial-timeout <value>] [--particle-id]
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --dial-timeout=<value>      [default: 60000] Timeout for js client
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --particle-id               Print particle ids when running js client
+  --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<value>             Relay for js client to connect to
   --ttl=<value>               [default: 60000] TTL for js client
 
@@ -695,20 +695,20 @@ Get logs from deployed workers listed in deployed.yaml
 ```
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [-k <value>] [--worker-id <value>] [--host-id <value>] [--spell-id
-    <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--worker-id <value>] [--host-id <value>]
+    [--spell-id <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property of fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --dial-timeout=<value>      [default: 60000] Timeout for js client
   --host-id=<host-id>         Host id
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --particle-id               Print particle ids when running js client
+  --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<value>             Relay for js client to connect to
   --spell-id=<spell-id>       [default: worker-spell] Spell id
   --ttl=<value>               [default: 60000] TTL for js client
@@ -728,18 +728,18 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [-k <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>  Key pair name
-  -k, --privKey=<value>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --dial-timeout=<value>      [default: 60000] Timeout for js client
   --no-input                  Don't interactively ask for any input from the user
   --off-aqua-logs             Turns off logs from Console.print in aqua and from IPFS service
   --particle-id               Print particle ids when running js client
+  --privKey=<value>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<value>             Relay for js client to connect to
   --ttl=<value>               [default: 60000] TTL for js client
 

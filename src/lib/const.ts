@@ -206,7 +206,6 @@ export const NETWORK_FLAG = {
 
 export const PRIV_KEY_FLAG = {
   privKey: Flags.string({
-    char: "k",
     description:
       "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
   }),
