@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 
@@ -25,6 +24,8 @@ import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
+  AQUA_LIB_NPM_DEPENDENCY,
+  AQUA_LIB_RECOMMENDED_VERSION,
   DOT_BIN_DIR_NAME,
   fluenceNPMDependencies,
   NODE_MODULES_DIR_NAME,
@@ -206,17 +207,32 @@ export const installAllNPMDependencies = ({
   maybeFluenceConfig,
   maybeFluenceLockConfig,
   force,
-}: InstallAllNPMDependenciesArg): Promise<string[]> =>
-  Promise.all(
-    Object.entries(maybeFluenceConfig?.dependencies?.npm ?? {}).map(
-      ([name, version]) => {
-        assert(name !== undefined && version !== undefined);
-        return ensureNpmDependency({
-          nameAndVersion: `${name}@${version}`,
-          maybeFluenceConfig,
-          maybeFluenceLockConfig,
-          force,
-        });
-      }
+}: InstallAllNPMDependenciesArg): Promise<string[]> => {
+  const dependenciesToEnsure = Object.entries(
+    maybeFluenceConfig?.dependencies?.npm ?? {}
+  );
+
+  const hasFluenceConfigAquaLibDependency = dependenciesToEnsure.some(
+    ([name]) => name === AQUA_LIB_NPM_DEPENDENCY
+  );
+
+  if (!hasFluenceConfigAquaLibDependency) {
+    // ensure aqua-lib dependency when it's not specified in fluence config
+    // or when running without a project
+    dependenciesToEnsure.push([
+      AQUA_LIB_NPM_DEPENDENCY,
+      AQUA_LIB_RECOMMENDED_VERSION,
+    ]);
+  }
+
+  return Promise.all(
+    dependenciesToEnsure.map(([name, version]) =>
+      ensureNpmDependency({
+        nameAndVersion: `${name}@${version}`,
+        maybeFluenceConfig,
+        maybeFluenceLockConfig,
+        force,
+      })
     )
   );
+};
