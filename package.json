@@ -27,8 +27,8 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && cd tmp && npm init -y && npm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && npm run jest",
-    "pretest": "prettier --check && npm run lint && npm run circular",
+    "pretest": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && prettier --check '*.{ts,js}' && npm run lint && npm run circular",
+    "test": "cd tmp && npm init -y && npm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && npm run jest",
     "prepare": "node -e \"process.env.CI === undefined && require('husky').install()\"",
     "check": "npm run build && npm run lint-fix && npm run circular",
     "circular": "madge --circular --extensions ts ./",
@@ -293,7 +293,8 @@
     "tmp"
   ],
   "lint-staged": {
-    "*.ts": "prettier --write"
+    "*.ts": "prettier --write",
+    "*.js": "prettier --write"
   },
   "directories": {
     "test": "test"

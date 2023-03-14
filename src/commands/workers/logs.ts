@@ -195,8 +195,19 @@ const getLogsArg = async ({
     );
   }
 
+  const workers = // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    Object.entries(dealsOrHosts) as Array<
+      [
+        string,
+        Exclude<
+          (typeof workersConfig)["deals"] | (typeof workersConfig)["hosts"],
+          undefined
+        >[string]
+      ]
+    >;
+
   return {
-    workers: Object.entries(dealsOrHosts)
+    workers: workers
       .filter(([name]) => workersToGetLogsFor.includes(name))
       .map(([name, config]) => ({ name, ...config })),
   };
