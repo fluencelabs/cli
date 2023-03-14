@@ -36,7 +36,7 @@ import {
   getModuleAbsolutePath,
   isUrl,
 } from "../../lib/helpers/downloadFile.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
 

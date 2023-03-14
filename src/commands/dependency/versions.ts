@@ -33,7 +33,7 @@ import {
   MREPL_RECOMMENDED_VERSION,
 } from "../../lib/const.js";
 // import { execPromise } from "../../lib/execPromise.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 
 const NPM_OVERRIDABLE_DEP =
   "npm dependencies that can be overridden with 'fluence dependency npm install <name>@<version>'";

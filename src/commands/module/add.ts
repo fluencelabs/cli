@@ -33,7 +33,7 @@ import {
 } from "../../lib/const.js";
 import { isUrl } from "../../lib/helpers/downloadFile.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
 

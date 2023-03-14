@@ -17,9 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 export type ConfigKeyPair = {
-  peerId: string;
   secretKey: string;
-  publicKey: string;
   name: string;
 };
 
@@ -27,10 +25,8 @@ export const configKeyPairSchema: JSONSchemaType<ConfigKeyPair> = {
   title: "Key Pair",
   type: "object",
   properties: {
-    peerId: { type: "string" },
     secretKey: { type: "string" },
-    publicKey: { type: "string" },
     name: { type: "string" },
   },
-  required: ["peerId", "secretKey", "publicKey", "name"],
+  required: ["secretKey", "name"],
 };

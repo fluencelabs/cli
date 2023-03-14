@@ -16,9 +16,9 @@
 
 import { access, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+// import { performance, PerformanceObserver } from "node:perf_hooks";
 
-import { AvmLoglevel, FluencePeer, KeyPair } from "@fluencelabs/fluence";
-import { callFunctionImpl } from "@fluencelabs/fluence/dist/internal/compilerSupport/v3impl/callFunction.js";
+import { callAquaFunction } from "@fluencelabs/js-peer/dist/compilerSupport/callFunction.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
@@ -46,23 +46,22 @@ import {
 } from "../lib/configs/project/fluenceLock.js";
 import {
   FS_OPTIONS,
-  TIMEOUT_FLAG,
   KEY_PAIR_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
   aquaLogLevelsString,
-  avmLogLevelsString,
-  isAvmLogLevel,
-  AVM_LOG_LEVELS,
   isAquaLogLevel,
   AquaLogLevel,
   AQUA_LOG_LEVELS,
   OFF_AQUA_LOGS_FLAG,
+  FLUENCE_CLIENT_FLAGS,
+  FromFlagsDef,
 } from "../lib/const.js";
 import { getAppJson } from "../lib/deployedApp.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../lib/helpers/jsonStringify.js";
-import { getExistingKeyPairFromFlags } from "../lib/keypairs.js";
-import { initCli } from "../lib/lifecyle.js";
+import { initFluenceClient } from "../lib/jsClient.js";
+import { getExistingKeyPair } from "../lib/keyPairs.js";
+import { initCli } from "../lib/lifeCycle.js";
 import { doRegisterLog } from "../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
@@ -73,25 +72,27 @@ import {
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
 
+// const perfObserver = new PerformanceObserver((items) => {
+//   items.getEntries().forEach((entry) => {
+//     console.log(entry);
+//   });
+// });
+
+// perfObserver.observe({ entryTypes: ["measure"], buffered: true });
+// performance.mark("whole-start");
+
 const FUNC_FLAG_NAME = "func";
 const INPUT_FLAG_NAME = "input";
 // const ON_FLAG_NAME = "on";
 const DATA_FLAG_NAME = "data";
-const JSON_SERVICE = "json-service";
 const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
-const LOG_LEVEL_AVM_FLAG_NAME = "log-level-avm";
-const PRINT_PARTICLE_ID_FLAG_NAME = "print-particle-id";
 
 export default class Run extends BaseCommand<typeof Run> {
   static override description = "Run aqua script";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    relay: Flags.string({
-      description: "Relay node multiaddr",
-      helpValue: "<multiaddr>",
-    }),
-    [DATA_FLAG_NAME]: Flags.string({
+    data: Flags.string({
       description:
         "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<json>",
@@ -111,14 +112,6 @@ export default class Run extends BaseCommand<typeof Run> {
       description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
       helpValue: "<level>",
     }),
-    [LOG_LEVEL_AVM_FLAG_NAME]: Flags.string({
-      description: `Set log level for AquaVM. Must be one of: ${avmLogLevelsString}`,
-      helpValue: "<level>",
-    }),
-    [PRINT_PARTICLE_ID_FLAG_NAME]: Flags.boolean({
-      description:
-        "If set, newly initiated particle ids will be printed to console. Useful to see what particle id is responsible for aqua function",
-    }),
     quiet: Flags.boolean({
       description:
         "Print only execution result. Overrides all --log-level-* flags",
@@ -134,7 +127,7 @@ export default class Run extends BaseCommand<typeof Run> {
       helpValue: "<NAME = value>",
       multiple: true,
     }),
-    [JSON_SERVICE]: Flags.string({
+    "json-service": Flags.string({
       description: "Path to a file that contains a JSON formatted service",
       helpValue: "<path>",
       multiple: true,
@@ -165,8 +158,8 @@ export default class Run extends BaseCommand<typeof Run> {
       description: "Prints generated AIR code before function execution",
     }),
     ...OFF_AQUA_LOGS_FLAG,
-    ...TIMEOUT_FLAG,
     ...KEY_PAIR_FLAG,
+    ...FLUENCE_CLIENT_FLAGS,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -174,28 +167,15 @@ export default class Run extends BaseCommand<typeof Run> {
       await this.parse(Run)
     );
 
-    const inputFlag = flags[INPUT_FLAG_NAME];
-
-    if (typeof inputFlag === "string") {
+    if (typeof flags.input === "string") {
       setProjectRootDir(
-        await recursivelyFindProjectRootDir(resolve(dirname(inputFlag)))
+        await recursivelyFindProjectRootDir(resolve(dirname(flags.input)))
       );
     }
 
-    const marineLogLevel: AvmLoglevel | undefined = await resolveAVMLogLevel({
-      maybeAVMLogLevel: flags[LOG_LEVEL_AVM_FLAG_NAME],
-      isQuite: flags.quiet,
-    });
-
-    const logLevelCompiler: AquaLogLevel | undefined =
-      await resolveAquaLogLevel({
-        maybeAquaLogLevel: flags[LOG_LEVEL_COMPILER_FLAG_NAME],
-        isQuite: flags.quiet,
-      });
-
     if (flags.quiet) {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      this.log = () => {};
+      commandObj.log = () => {};
     }
 
     // if (typeof flags[ON_FLAG_NAME] === "string") {
@@ -207,52 +187,36 @@ export default class Run extends BaseCommand<typeof Run> {
     //       : [...flags.const, onPeerConst];
     // }
 
-    const {
-      const: constants = [],
-      "no-relay": noRelay,
-      "no-xor": noXor,
-      "print-air": printAir,
-      plugin,
-      timeout,
-    } = flags;
-
-    const keyPair = await getExistingKeyPairFromFlags(
-      flags,
-      maybeFluenceConfig
-    );
-
-    if (keyPair instanceof Error) {
-      commandObj.error(keyPair.message);
-    }
-
-    const secretKey = keyPair.secretKey;
+    const logLevelCompiler = await resolveAquaLogLevel({
+      maybeAquaLogLevel: flags["log-level-compiler"],
+      isQuite: flags.quiet,
+    });
 
     const aquaFilePath = await ensureAquaPath({
-      aquaPathFromFlags: flags[INPUT_FLAG_NAME],
+      aquaPathFromFlags: flags.input,
       maybeFluenceConfig,
     });
 
-    const funcCall =
-      flags[FUNC_FLAG_NAME] ??
-      (await input({
-        message: `Enter a function call that you want to execute`,
-        flagName: FUNC_FLAG_NAME,
-      }));
+    const [
+      funcCall,
+      maybeAppConfig,
+      runData,
+      appJsonServicePath,
+      maybeFluenceLockConfig,
+    ] = await Promise.all([
+      flags.func === undefined
+        ? input({
+            message: `Enter a function call that you want to execute`,
+            flagName: FUNC_FLAG_NAME,
+          })
+        : Promise.resolve(flags.func),
+      initReadonlyAppConfig(),
+      getRunData(flags),
+      ensureFluenceTmpAppServiceJsonPath(),
+      initFluenceLockConfig(),
+    ]);
 
-    const maybeAppConfig = await initReadonlyAppConfig();
-
-    const relay =
-      flags.relay ??
-      getRandomRelayAddr(maybeAppConfig?.relays ?? maybeFluenceConfig?.relays);
-
-    const [data, appJsonServicePath, maybeFluenceLockConfig] =
-      await Promise.all([
-        getRunData(flags),
-        ensureFluenceTmpAppServiceJsonPath(),
-        initFluenceLockConfig(),
-      ]);
-
-    const jsonServicePaths = flags[JSON_SERVICE] ?? [];
+    const jsonServicePaths = flags["json-service"] ?? [];
 
     if (maybeAppConfig !== null) {
       await writeFile(
@@ -280,32 +244,21 @@ export default class Run extends BaseCommand<typeof Run> {
           });
 
     const runArgs: RunArgs = {
+      ...flags,
       appJsonServicePath,
       filePath: aquaFilePath,
       imports: aquaImports,
-      constants,
-      data,
+      runData,
       funcCall,
       jsonServicePaths,
-      marineLogLevel,
-      printParticleId: flags[PRINT_PARTICLE_ID_FLAG_NAME],
       logLevelCompiler,
       maybeAppConfig,
       maybeFluenceConfig,
       maybeFluenceLockConfig,
-      noRelay,
-      noXor,
-      plugin,
-      printAir,
-      relay,
-      secretKey,
-      timeout,
-      offAquaLogs: flags["off-aqua-logs"],
     };
 
     const useAquaRun =
-      // for some reason fluence run won't work - using aqua run instead
-      true || typeof flags.plugin === "string" || jsonServicePaths.length > 0;
+      typeof flags.plugin === "string" || jsonServicePaths.length > 0;
 
     const result: unknown = await (useAquaRun
       ? aquaRun(runArgs)
@@ -317,6 +270,9 @@ export default class Run extends BaseCommand<typeof Run> {
     if (!useAquaRun) {
       console.log(stringResult);
     }
+
+    // performance.mark("whole-end");
+    // performance.measure("whole", "whole-start", "whole-end");
   }
 }
 
@@ -353,7 +309,7 @@ const ensureAquaPath = async ({
 
   return input({
     message: "Enter path to the input file or directory",
-    flagName: "input",
+    flagName: INPUT_FLAG_NAME,
   });
 };
 
@@ -432,43 +388,6 @@ const getRunData = async (flags: {
   return dataString === "{}" ? undefined : runData;
 };
 
-type ResolveAVMLogLevelArgs = {
-  maybeAVMLogLevel: string | undefined;
-  isQuite: boolean;
-};
-
-const resolveAVMLogLevel = async ({
-  maybeAVMLogLevel,
-  isQuite,
-}: ResolveAVMLogLevelArgs): Promise<AvmLoglevel | undefined> => {
-  if (isQuite) {
-    return "off";
-  }
-
-  if (maybeAVMLogLevel === undefined) {
-    return undefined;
-  }
-
-  if (isAvmLogLevel(maybeAVMLogLevel)) {
-    return maybeAVMLogLevel;
-  }
-
-  commandObj.warn(
-    `Invalid --${LOG_LEVEL_AVM_FLAG_NAME} flag value: ${maybeAVMLogLevel}. Must be one of: ${avmLogLevelsString}`
-  );
-
-  return list({
-    message: "Select a valid AVM log level",
-    oneChoiceMessage() {
-      throw new Error("Unreachable");
-    },
-    onNoChoices() {
-      throw new Error("Unreachable");
-    },
-    options: AVM_LOG_LEVELS,
-  });
-};
-
 type ResolveAquaLogLevelArgs = {
   maybeAquaLogLevel: string | undefined;
   isQuite: boolean;
@@ -506,51 +425,32 @@ const resolveAquaLogLevel = async ({
   });
 };
 
-type RunArgs = {
+type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
   maybeFluenceConfig: FluenceConfig | null;
   maybeFluenceLockConfig: FluenceLockConfig | null;
   maybeAppConfig: AppConfigReadonly | null;
-  relay: string;
   funcCall: string;
   filePath: string;
-  timeout: number | undefined;
   imports: string[];
   jsonServicePaths: string[];
-  secretKey: string;
-  plugin: string | undefined;
-  constants: Array<string>;
   logLevelCompiler: AquaLogLevel | undefined;
-  marineLogLevel: AvmLoglevel | undefined;
-  printParticleId: boolean;
-  printAir: boolean;
-  data: Data | undefined;
+  runData: Data | undefined;
   appJsonServicePath: string;
-  noXor: boolean;
-  noRelay: boolean;
-  offAquaLogs: boolean;
 };
 
-const aquaRun = async ({
-  maybeFluenceConfig,
-  maybeFluenceLockConfig,
-  maybeAppConfig,
-  relay,
-  funcCall,
-  filePath,
-  timeout,
-  imports,
-  jsonServicePaths,
-  secretKey,
-  plugin,
-  constants,
-  logLevelCompiler,
-  printAir,
-  data,
-  appJsonServicePath,
-  noXor,
-  noRelay,
-}: RunArgs) => {
-  const aquaCli = await initAquaCli(maybeFluenceConfig, maybeFluenceLockConfig);
+const aquaRun = async (args: RunArgs) => {
+  const aquaCli = await initAquaCli(
+    args.maybeFluenceConfig,
+    args.maybeFluenceLockConfig
+  );
+
+  const keyPair = await getExistingKeyPair(args["key-pair-name"]);
+
+  const relay =
+    args.relay ??
+    getRandomRelayAddr(
+      args.maybeAppConfig?.relays ?? args.maybeFluenceConfig?.relays
+    );
 
   let result;
 
@@ -559,96 +459,66 @@ const aquaRun = async ({
       args: ["run"],
       flags: {
         addr: relay,
-        func: funcCall,
-        input: filePath,
-        timeout: timeout,
-        import: imports,
-        "json-service": jsonServicePaths,
-        sk: secretKey,
-        plugin,
-        const: constants,
-        "print-air": printAir,
-        ...(data === undefined ? {} : { data: JSON.stringify(data) }),
-        "log-level": logLevelCompiler,
-        "no-xor": noXor,
-        "no-relay": noRelay,
+        func: args.funcCall,
+        input: args.filePath,
+        timeout: args["dial-timeout"],
+        import: args.imports,
+        "json-service": args.jsonServicePaths,
+        sk: keyPair.secretKey,
+        plugin: args.plugin,
+        const: args.const ?? [],
+        "print-air": args["print-air"],
+        ...(args.runData === undefined
+          ? {}
+          : { data: JSON.stringify(args.runData) }),
+        "log-level": args.logLevelCompiler,
+        "no-xor": args["no-xor"],
+        "no-relay": args["no-relay"],
       },
     });
   } finally {
-    if (maybeAppConfig !== null) {
-      await unlink(appJsonServicePath);
+    if (args.maybeAppConfig !== null) {
+      await unlink(args.appJsonServicePath);
     }
   }
 
   return result;
 };
 
-const fluenceRun = async ({
-  relay,
-  funcCall,
-  filePath,
-  imports,
-  secretKey,
-  constants,
-  logLevelCompiler,
-  marineLogLevel,
-  printParticleId,
-  printAir,
-  timeout,
-  data,
-  noXor,
-  noRelay,
-  offAquaLogs,
-}: RunArgs) => {
-  const fluencePeer = new FluencePeer();
-
-  const [{ functionCall, errors }] = await Promise.all([
+const fluenceRun = async (args: RunArgs) => {
+  const [{ functionCall, errors }, fluenceClient] = await Promise.all([
     compile({
-      funcCall,
-      data,
-      filePath,
-      imports,
-      constants,
-      logLevel: logLevelCompiler,
-      noXor,
-      noRelay,
+      funcCall: args.funcCall,
+      data: args.runData,
+      filePath: args.filePath,
+      imports: args.imports,
+      constants: args.const ?? [],
+      logLevel: args.logLevelCompiler,
+      noXor: args["no-xor"],
+      noRelay: args["no-relay"],
     }),
-    fluencePeer.start({
-      connectTo: relay,
-      ...(typeof marineLogLevel === "string"
-        ? { debug: { marineLogLevel, printParticleId } }
-        : { debug: { printParticleId } }),
-      ...(typeof timeout === "number" ? { defaultTtlMs: timeout } : {}),
-      ...(secretKey === undefined
-        ? {}
-        : {
-            KeyPair: await KeyPair.fromEd25519SK(
-              Buffer.from(secretKey, "base64")
-            ),
-          }),
-    }),
+    initFluenceClient(args, args.maybeFluenceConfig),
   ]);
 
-  doRegisterLog(fluencePeer, offAquaLogs);
+  doRegisterLog(fluenceClient, args["off-aqua-logs"]);
 
   if (errors.length > 0) {
     commandObj.error(errors.join("\n"));
   }
 
-  const { funcDef, script } = functionCall;
-
-  if (printAir) {
-    commandObj.log(script);
+  if (args["print-air"]) {
+    commandObj.log(functionCall.script);
   }
 
-  const result = await callFunctionImpl(
-    funcDef,
-    script,
-    {},
-    fluencePeer,
-    data ?? {}
-  );
+  const result = await callAquaFunction({
+    args: args.runData ?? {},
+    config: {},
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    def: functionCall.funcDef,
+    peer: fluenceClient,
+    script: functionCall.script,
+  });
 
-  await fluencePeer.stop();
+  await fluenceClient.stop();
   return result;
 };

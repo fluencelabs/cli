@@ -26,7 +26,7 @@ import { commandObj } from "../../lib/commandObj.js";
 import type { FluenceConfigReadonly } from "../../lib/configs/project/fluence.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
 import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";

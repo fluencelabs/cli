@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import { KeyPair } from "@fluencelabs/fluence";
+import getRandomValues from "get-random-values";
 
 import type { ConfigKeyPair } from "../configs/keyPair.js";
 
-export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
-  const keyPair = await KeyPair.randomEd25519();
-  return {
-    peerId: keyPair.Libp2pPeerId.toB58String(),
-    secretKey: Buffer.from(keyPair.toEd25519PrivateKey()).toString("base64"),
-    publicKey: Buffer.from(keyPair.Libp2pPeerId.pubKey.bytes).toString(
-      "base64"
-    ),
-    name,
-  };
-};
+const genSecretKey = () => getRandomValues(new Uint8Array(32));
+
+const uint8ArrayToBase64 = (array: Uint8Array) =>
+  Buffer.from(array).toString("base64");
+
+export const generateKeyPair = (name: string): ConfigKeyPair => ({
+  secretKey: uint8ArrayToBase64(genSecretKey()),
+  name,
+});
+
+export const base64ToUint8Array = (base64: string) =>
+  new Uint8Array(Buffer.from(base64, "base64"));

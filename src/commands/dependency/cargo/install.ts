@@ -31,7 +31,7 @@ import {
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
   REQUIRED_RUST_TOOLCHAIN,
 } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifecyle.js";
+import { initCli } from "../../../lib/lifeCycle.js";
 import {
   ensureCargoDependency,
   installAllCargoDependenciesFromFluenceConfig,

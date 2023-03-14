@@ -19,8 +19,8 @@ import { build } from "../lib/build.js";
 import { commandObj } from "../lib/commandObj.js";
 import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../lib/const.js";
-import { getExistingKeyPair } from "../lib/keypairs.js";
-import { initCli } from "../lib/lifecyle.js";
+import { getExistingKeyPair } from "../lib/keyPairs.js";
+import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 
 export default class Build extends BaseCommand<typeof Build> {

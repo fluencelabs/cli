@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import type { AvmLoglevel } from "@fluencelabs/fluence";
 import { Flags } from "@oclif/core";
+import type {
+  Flag,
+  OutputFlags,
+  ParserOutput,
+} from "@oclif/core/lib/interfaces/parser.js";
 
 import { aquaComment, jsComment } from "./helpers/comment.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
@@ -32,8 +36,9 @@ export const MARINE_RECOMMENDED_VERSION = "0.13.0";
 export const MREPL_RECOMMENDED_VERSION = "0.20.0";
 export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
 export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
-export const FLUENCE_JS_RECOMMENDED_VERSION = "0.28.0";
-export const FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION = "1.0.13";
+export const FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION = "0.6.6";
+export const FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION = "0.11.4";
+export const FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION = "1.0.14";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const REQUIRED_RUST_TOOLCHAIN = "nightly-2022-09-15-x86_64";
@@ -170,6 +175,8 @@ export const KEY_PAIR_FLAG = {
   }),
 } as const;
 
+export type KeyPairFlag = FromFlagsDef<typeof KEY_PAIR_FLAG>;
+
 export const NO_INPUT_FLAG_NAME = "no-input";
 export const NO_INPUT_FLAG = {
   [NO_INPUT_FLAG_NAME]: Flags.boolean({
@@ -199,7 +206,6 @@ export const NETWORK_FLAG = {
 
 export const PRIV_KEY_FLAG = {
   privKey: Flags.string({
-    char: "k",
     description:
       "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
   }),
@@ -211,6 +217,39 @@ export const OFF_AQUA_LOGS_FLAG = {
       "Turns off logs from Console.print in aqua and from IPFS service",
   }),
 };
+
+export const FLUENCE_CLIENT_FLAGS = {
+  relay: Flags.string({
+    description: "Relay for Fluence js-client to connect to",
+    helpValue: "<multiaddress>",
+  }),
+  ttl: Flags.integer({
+    description:
+      "Particle Time To Live since 'now'. After that, particle is expired and not processed.",
+    default: 60000,
+    helpValue: "<milliseconds>",
+  }),
+  "dial-timeout": Flags.integer({
+    description: "Timeout for Fluence js-client to connect to relay peer",
+    default: 60000,
+    helpValue: "<milliseconds>",
+  }),
+  "particle-id": Flags.boolean({
+    description: "Print particle ids when running Fluence js-client",
+  }),
+} as const;
+
+export type FluenceClientFlags = FromFlagsDef<typeof FLUENCE_CLIENT_FLAGS>;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type FromFlagsDef<T extends OutputFlags<any>> = Omit<
+  ParserOutput<T, T>["flags"] extends infer S
+    ? {
+        [Property in keyof S]: S[Property] extends Flag<infer F> ? F : never;
+      }
+    : never,
+  "json"
+>;
 
 export const MODULE_TYPE_RUST = "rust";
 export const MODULE_TYPE_COMPILED = "compiled";
@@ -242,21 +281,6 @@ export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
 export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
   ", "
 )}`;
-
-/**
- * Subject to change after change after DXJ-71
- */
-export const AVM_LOG_LEVELS: Array<AvmLoglevel> = [
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "off",
-  "trace",
-];
-
-export const avmLogLevelsString = AVM_LOG_LEVELS.join(", ");
-export const isAvmLogLevel = getIsStringUnion(AVM_LOG_LEVELS);
 
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
   "PACKAGE-NAME | PACKAGE-NAME@VERSION";
@@ -468,7 +492,8 @@ const PEERS = {
 }[process.env[FLUENCE_ENV] as FluenceEnv];
 
 export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
-import { Fluence } from "@fluencelabs/fluence";
+import "@fluencelabs/js-client.node";
+import { Fluence } from "@fluencelabs/js-client.api";
 ${PEERS}
 
 import {
@@ -488,7 +513,7 @@ if (typeof connectTo !== "string") {
 }
 
 const main = async () => {
-  await Fluence.start({ connectTo });
+  await Fluence.connect(connectTo);
 
   const helloWorldResult = await helloWorld("Fluence");
   const helloWorldRemoteResult = await helloWorldRemote("Fluence");

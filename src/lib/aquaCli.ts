@@ -106,7 +106,7 @@ export const initAquaCli = async (
       command: aquaCliPath,
       args,
       flags,
-      message:
+      spinnerMessage:
         message === undefined
           ? undefined
           : getMessageWithKeyValuePairs(message, keyValuePairs),

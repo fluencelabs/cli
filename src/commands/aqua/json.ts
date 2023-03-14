@@ -22,7 +22,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { FS_OPTIONS } from "../../lib/const.js";
 import { jsToAqua } from "../../lib/helpers/jsToAqua.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class Json extends BaseCommand<typeof Json> {

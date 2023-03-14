@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { FluencePeer } from "@fluencelabs/fluence";
+import type { IFluenceClient } from "@fluencelabs/js-client.api";
 
 import { commandObj } from "../commandObj.js";
 import { registerConsole } from "../compiled-aqua/installation-spell/console.js";
 
 export const doRegisterLog = (
-  fluencePeer: FluencePeer,
+  fluenceClient: IFluenceClient,
   offAquaLogs: boolean
 ): void => {
-  registerConsole(fluencePeer, {
+  registerConsole(fluenceClient, {
     print(unknown) {
       if (!offAquaLogs) {
         commandObj.log("log:", unknown);

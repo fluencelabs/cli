@@ -64,7 +64,7 @@ import { commandObj } from "./commandObj.js";
 import { generateKeyPair } from "./helpers/generateKeyPair.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { getKeyPair } from "./keypairs.js";
+import { getKeyPair } from "./keyPairs.js";
 import {
   ensureFluenceAquaServicesPath,
   getCargoTomlPath,
@@ -150,7 +150,7 @@ const resolveServiceInfos = async ({
         return commandObj.error("Aborted");
       }
 
-      keyPair = await generateKeyPair(keyPairName);
+      keyPair = generateKeyPair(keyPairName);
       projectSecretsConfig.keyPairs.push(keyPair);
       await projectSecretsConfig.$commit();
     }

@@ -129,14 +129,17 @@ export async function initCli<
 
   const majorVersion = Number(platform.version.split(".")[0]);
 
-  if (majorVersion < 16 || majorVersion >= 17) {
+  if (majorVersion !== 16) {
     return commandObj.error(
-      `Fluence CLI requires Node.js version "16.x.x"; Detected ${platform.version}. Please use Node.js version 16.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install 16 && nvm use 16 && nvm alias default 16"`
+      `Fluence CLI requires Node.js version "16.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install 16 && nvm use 16 && nvm alias default 16"`
     );
   }
 
-  const userConfig = await ensureUserConfig();
-  const maybeFluenceConfig = await initFluenceConfig();
+  const [userConfig, maybeFluenceConfig] = await Promise.all([
+    ensureUserConfig(),
+    initFluenceConfig(),
+  ]);
+
   await initCountly({ userConfig, maybeFluenceConfig });
 
   return {

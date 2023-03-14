@@ -222,7 +222,7 @@ const remove = (cwd: string) =>
 
 const compileAqua = (cwd: string) =>
   fluence({
-    args: ["aqua", "--old-fluence-js"],
+    args: ["aqua"],
     cwd,
   });
 

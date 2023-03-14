@@ -17,10 +17,9 @@
 import assert from "node:assert";
 import { readFile, writeFile } from "node:fs/promises";
 
-import { FluencePeer, KeyPair } from "@fluencelabs/fluence";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Args, Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -32,7 +31,6 @@ import {
 } from "../../lib/configs/project/fluence.js";
 import {
   KEY_PAIR_FLAG,
-  TIMEOUT_FLAG,
   PRIV_KEY_FLAG,
   NETWORK_FLAG,
   OFF_AQUA_LOGS_FLAG,
@@ -41,15 +39,15 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   MAIN_AQUA_FILE_STATUS_TEXT_COMMENT,
   MAIN_AQUA_FILE_STATUS_TEXT,
+  FLUENCE_CLIENT_FLAGS,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { jsToAqua } from "../../lib/helpers/jsToAqua.js";
-import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initFluenceClient } from "../../lib/jsClient.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { doRegisterLog } from "../../lib/localServices/log.js";
-import { getRandomRelayAddr } from "../../lib/multiaddres.js";
 import {
   ensureFluenceAquaDealPath,
   ensureSrcAquaMainPath,
@@ -57,26 +55,16 @@ import {
 import { confirm } from "../../lib/prompt.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
-const DEFAULT_TTL = 60000;
-
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    relay: Flags.string({
-      description: "Relay node multiaddr",
-      helpValue: "<multiaddr>",
-    }),
-    ...TIMEOUT_FLAG,
-    ttl: Flags.integer({
-      description: `Sets the default TTL for all particles originating from the peer with no TTL specified. If the originating particle's TTL is defined then that value will be used If the option is not set default TTL will be ${DEFAULT_TTL}`,
-      helpValue: "<milliseconds>",
-    }),
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
+    ...FLUENCE_CLIENT_FLAGS,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -90,37 +78,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true
     );
 
-    const defaultKeyPair = await getExistingKeyPairFromFlags(
-      flags,
-      fluenceConfig
-    );
-
-    if (defaultKeyPair instanceof Error) {
-      commandObj.error(defaultKeyPair.message);
-    }
-
-    const secretKey = defaultKeyPair.secretKey;
-
-    const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
-
-    const fluencePeer = new FluencePeer();
-
-    await fluencePeer.start({
-      dialTimeoutMs: flags.timeout ?? DEFAULT_TTL,
-      defaultTtlMs: flags.ttl ?? DEFAULT_TTL,
-      connectTo: relay,
-      ...(secretKey === undefined
-        ? {}
-        : {
-            KeyPair: await KeyPair.fromEd25519SK(
-              Buffer.from(secretKey, "base64")
-            ),
-          }),
-    });
-
-    const offAquaLogs = flags["off-aqua-logs"];
-    doRegisterIpfsClient(fluencePeer, offAquaLogs);
-    doRegisterLog(fluencePeer, offAquaLogs);
+    const fluenceClient = await initFluenceClient(flags, fluenceConfig);
+    doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
+    doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
 
     const chainNetwork = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
@@ -150,7 +110,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       commandObj.error(errorMessages.join("\n"));
     }
 
-    const uploadDeployResult = await upload_deploy(fluencePeer, uploadArg);
+    const uploadDeployResult = await upload_deploy(fluenceClient, uploadArg);
     const deployedConfig = await initNewDeployedConfig();
 
     for (const { name: workerName } of [...uploadArg.workers]) {

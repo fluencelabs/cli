@@ -22,7 +22,7 @@ const color = oclifColor.default;
 import { buildModules } from "./build.js";
 import { commandObj } from "./commandObj.js";
 import type { UploadArgConfig } from "./compiled-aqua/installation-spell/config.js";
-import { spellInstallAirScript } from "./compiled-aqua/installation-spell/spell.js";
+import { spellInstallAirScript } from "./compiled-aqua/installation-spell/spell-air.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { initFluenceLockConfig } from "./configs/project/fluenceLock.js";

@@ -37,7 +37,7 @@ import {
   ensureAquaImports,
   ensureVSCodeSettingsJSON,
 } from "../../lib/helpers/aquaImports.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { getLatestVersionOfNPMDependency } from "../../lib/npm.js";
 import {
   getLatestVersionOfCargoDependency,

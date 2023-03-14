@@ -23,5 +23,4 @@ import { createErrorPromise } from "../dist/countlyInterceptor.js";
 oclif
   .run(process.argv.slice(2), import.meta.url)
   .then(oclif.flush)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  .catch((error) => createErrorPromise(error));
+  .catch(/** @param {unknown} error */ (error) => createErrorPromise(error));

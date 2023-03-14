@@ -29,7 +29,6 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   Template,
-  TEMPLATES,
 } from "../src/lib/const.js";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local, localMultiaddrs } from "../src/lib/localNodes.js";
@@ -72,8 +71,11 @@ export const fluence = async ({
     printOutput: true,
   });
 
-const initFirstTime = async (template: Template) => {
-  const templatePath = path.join("tmp", "templates", template);
+const getInitializedTemplatePath = (template: Template) =>
+  path.join("tmp", "templates", template);
+
+export const initFirstTime = async (template: Template) => {
+  const templatePath = getInitializedTemplatePath(template);
 
   try {
     await access(templatePath);
@@ -108,19 +110,8 @@ const initFirstTime = async (template: Template) => {
   return templatePath;
 };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const initializedTemplates = TEMPLATES.reduce<
-  Partial<Record<Template, Promise<string>>>
->(
-  (acc, val) => ({
-    ...acc,
-    [val]: initFirstTime(val),
-  }),
-  {}
-) as Record<Template, Promise<string>>;
-
 export const init = async (cwd: string, template: Template): Promise<void> => {
-  const templatePath = await initializedTemplates[template];
+  const templatePath = getInitializedTemplatePath(template);
 
   try {
     await rm(cwd, { recursive: true });

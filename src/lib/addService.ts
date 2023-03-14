@@ -27,7 +27,7 @@ import {
   AQUA_NAME_REQUIREMENTS,
   validateAquaName,
 } from "./helpers/downloadFile.js";
-import { getExistingKeyPair } from "./keypairs.js";
+import { getExistingKeyPair } from "./keyPairs.js";
 import type { MarineCLI } from "./marineCli.js";
 import { confirm, input } from "./prompt.js";
 

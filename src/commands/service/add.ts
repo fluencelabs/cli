@@ -25,7 +25,7 @@ import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js"
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
 import { AQUA_NAME_REQUIREMENTS } from "../../lib/helpers/downloadFile.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { input } from "../../lib/prompt.js";
 

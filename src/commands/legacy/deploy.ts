@@ -50,8 +50,8 @@ import {
   moduleToJSONModuleConfig,
 } from "../../lib/helpers/moduleToJSONModuleConfig.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
-import { getExistingKeyPairFromFlags } from "../../lib/keypairs.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { getExistingKeyPairFromFlags } from "../../lib/keyPairs.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import {
   getEvenlyDistributedIds,

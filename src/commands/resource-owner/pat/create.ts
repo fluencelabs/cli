@@ -22,7 +22,7 @@ const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifecyle.js";
+import { initCli } from "../../../lib/lifeCycle.js";
 import { input } from "../../../lib/prompt.js";
 import {
   ensureChainNetwork,

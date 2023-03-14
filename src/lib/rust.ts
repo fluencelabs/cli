@@ -70,7 +70,7 @@ const ensureRust = async (): Promise<void> => {
       options: {
         shell: true,
       },
-      message: "Installing Rust",
+      spinnerMessage: "Installing Rust",
       printOutput: true,
     });
 
@@ -87,7 +87,7 @@ const ensureRust = async (): Promise<void> => {
     await execPromise({
       command: RUSTUP,
       args: ["install", REQUIRED_RUST_TOOLCHAIN],
-      message: `Installing ${color.yellow(
+      spinnerMessage: `Installing ${color.yellow(
         REQUIRED_RUST_TOOLCHAIN
       )} rust toolchain`,
       printOutput: true,
@@ -106,7 +106,9 @@ const ensureRust = async (): Promise<void> => {
     await execPromise({
       command: RUSTUP,
       args: ["target", "add", RUST_WASM32_WASI_TARGET],
-      message: `Adding ${color.yellow(RUST_WASM32_WASI_TARGET)} rust target`,
+      spinnerMessage: `Adding ${color.yellow(
+        RUST_WASM32_WASI_TARGET
+      )} rust target`,
       printOutput: true,
     });
 
@@ -217,7 +219,7 @@ const installCargoDependency = async ({
       version,
       root: dependencyTmpPath,
     },
-    message: `Installing ${name}@${version} to ${replaceHomeDir(
+    spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
       dependencyPath
     )}`,
     printOutput: true,
@@ -244,15 +246,19 @@ export const ensureCargoDependency = async ({
   await ensureRust();
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
+  const resolveVersionToInstallResult = resolveVersionToInstall({
+    name,
+    maybeVersion,
+    explicitInstallation,
+    maybeFluenceLockConfig,
+    maybeFluenceConfig,
+    packageManager: "cargo",
+  });
+
   const version =
-    resolveVersionToInstall({
-      name,
-      maybeVersion,
-      explicitInstallation,
-      maybeFluenceLockConfig,
-      maybeFluenceConfig,
-      packageManager: "cargo",
-    }) ?? (await getLatestVersionOfCargoDependency(name));
+    "versionToInstall" in resolveVersionToInstallResult
+      ? resolveVersionToInstallResult.versionToInstall
+      : await getLatestVersionOfCargoDependency(name);
 
   const maybeCargoDependencyInfo = fluenceCargoDependencies[name];
   const toolchain = toolchainFromArgs ?? maybeCargoDependencyInfo?.toolchain;
@@ -282,19 +288,25 @@ export const ensureCargoDependency = async ({
   });
 
   if (maybeFluenceConfig !== null) {
-    await handleFluenceConfig({
-      fluenceConfig: maybeFluenceConfig,
-      name,
-      packageManager: "cargo",
-      versionFromArgs: maybeVersion ?? version,
-    });
+    const versionFromArgs = maybeVersion ?? version;
 
-    await handleLockConfig({
-      maybeFluenceLockConfig,
-      name,
-      version,
-      packageManager: "cargo",
-    });
+    if (versionFromArgs !== maybeFluenceConfig?.dependencies?.cargo?.[name]) {
+      await handleFluenceConfig({
+        fluenceConfig: maybeFluenceConfig,
+        name,
+        packageManager: "cargo",
+        versionFromArgs,
+      });
+    }
+
+    if (version !== maybeFluenceLockConfig?.cargo?.[name]) {
+      await handleLockConfig({
+        maybeFluenceLockConfig,
+        name,
+        version,
+        packageManager: "cargo",
+      });
+    }
   }
 
   addCountlyLog(`Using ${name}@${version} cargo dependency`);

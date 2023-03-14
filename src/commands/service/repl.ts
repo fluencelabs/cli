@@ -41,7 +41,7 @@ import {
 import { haltCountly } from "../../lib/countly.js";
 import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
-import { initCli } from "../../lib/lifecyle.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import {
   ensureFluenceTmpConfigTomlPath,

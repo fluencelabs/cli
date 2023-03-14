@@ -14,22 +14,34 @@
  * limitations under the License.
  */
 
-import path from "node:path";
-
 import "../src/lib/setupEnvironment.js";
-import { fluence, init } from "./helpers.js";
+import { fluence, initFirstTime } from "./helpers.js";
 
 (async (): Promise<void> => {
   console.log("Setting up tests...");
-  const cwd = path.join("tmp", "installMarine");
-  await init(cwd, "minimal");
 
   await fluence({
     args: ["dep", "i"],
     flags: {
       "no-input": true,
     },
-    cwd,
+    cwd: await initFirstTime("minimal"),
+  });
+
+  await fluence({
+    args: ["dep", "i"],
+    flags: {
+      "no-input": true,
+    },
+    cwd: await initFirstTime("ts"),
+  });
+
+  await fluence({
+    args: ["dep", "i"],
+    flags: {
+      "no-input": true,
+    },
+    cwd: await initFirstTime("js"),
   });
 
   console.log("Tests are ready to run!");

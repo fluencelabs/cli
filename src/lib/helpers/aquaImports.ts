@@ -59,9 +59,7 @@ export async function ensureAquaImports(
 
   const { flags, maybeFluenceConfig, maybeFluenceLockConfig, force } = args;
 
-  let importsFromFluenceConfig: Array<string> = [];
-
-  importsFromFluenceConfig = (
+  const importsFromFluenceConfig = (
     await installAllNPMDependencies({
       maybeFluenceConfig,
       maybeFluenceLockConfig,

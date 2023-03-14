@@ -11,7 +11,7 @@ Prerequisites:
 -   Linux or MacOS (there are currently some bugs on Windows)
 -   [Node.js = 16.x.x](https://nodejs.org/)
 
-To install and try fluence, run:
+To install and try Fluence CLI, run:
 
 ```sh-session
 $ npm install -g @fluencelabs/cli

@@ -32,7 +32,7 @@ import {
   Template,
   TEMPLATES,
   isTemplate,
-  FLUENCE_JS_RECOMMENDED_VERSION,
+  FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION,
   FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
   PACKAGE_JSON_FILE_NAME,
   INDEX_JS_FILE_NAME,
@@ -42,6 +42,7 @@ import {
   TYPESCRIPT_RECOMMENDED_VERSION,
   TS_NODE_RECOMMENDED_VERSION,
   TS_CONFIG_FILE_NAME,
+  FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION,
 } from "../lib/const.js";
 import { execPromise } from "../lib/execPromise.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
@@ -289,7 +290,8 @@ export const initTSorJSProject = async ({
     author: "",
     license: "ISC",
     dependencies: {
-      "@fluencelabs/fluence": FLUENCE_JS_RECOMMENDED_VERSION,
+      "@fluencelabs/js-client.node": FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION,
+      "@fluencelabs/js-client.api": FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION,
       "@fluencelabs/fluence-network-environment":
         FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
       ...(isJS ? {} : { "ts-node": TS_NODE_RECOMMENDED_VERSION }),
@@ -343,6 +345,8 @@ export const initTSorJSProject = async ({
     command: "npm",
     args: ["i"],
     options: { cwd: defaultTSorJSDirPath },
-    message: `Installing npm dependencies for ${isJS ? "JS" : "TS"} project`,
+    spinnerMessage: `Installing npm dependencies for ${
+      isJS ? "JS" : "TS"
+    } project`,
   });
 };

@@ -66,11 +66,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "keyPairs", "defaultKeyPairName"],
 };
 
-const getDefault: GetDefaultConfig<
-  LatestConfig
-> = async (): Promise<LatestConfig> => ({
+const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
   version: 0,
-  keyPairs: [await generateKeyPair(AUTO_GENERATED)],
+  keyPairs: [generateKeyPair(AUTO_GENERATED)],
   defaultKeyPairName: AUTO_GENERATED,
 });
 
