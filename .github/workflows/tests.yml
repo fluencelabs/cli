@@ -18,7 +18,7 @@ on:
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
-        default: "fluencelabs/fluence:minimal"
+        default: "fluencelabs/rust-peer:minimal"
       fluence-js-version:
         description: "@fluencejs/fluence version"
         type: string
