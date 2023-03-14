@@ -118,7 +118,7 @@ export const DOT_BIN_DIR_NAME = ".bin";
 export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
-export const DEPLOYED_CONFIG_FILE_NAME = `deployed.${YAML_EXT}`;
+export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
 export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
@@ -134,7 +134,7 @@ export const DEPLOYED_APP_AQUA_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${AQUA_EXT
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
-export const AQUA_DEALS_FILE_NAME = `deals.${AQUA_EXT}`;
+export const AQUA_WORKERS_FILE_NAME = `workers.${AQUA_EXT}`;
 
 export const GITIGNORE_FILE_NAME = ".gitignore";
 
@@ -353,9 +353,12 @@ export const MAIN_AQUA_FILE_STATUS_TEXT = `export status
 service Console("run-console"):
     print(any: ⊤)
 
+-- example of running a service deployed using 'fluence deal deploy'
+-- with worker 'defaultWorker' which has service 'MyService' with method 'greeting'
+
 func status():
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.defaultWorker.dealId
+    dealId = workersInfo.deals.defaultWorker.dealId
     print = (answer: string, peer: string):
       Console.print([answer, peer])
 
@@ -395,7 +398,7 @@ import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
 import Registry from "${REGISTRY_NPM_DEPENDENCY}/registry-service.aqua"
 import "${SPELL_NPM_DEPENDENCY}/spell_service.aqua"
 
-import "deals.aqua"
+import "${AQUA_WORKERS_FILE_NAME}"
 import "services.aqua"
 
 ${MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT}

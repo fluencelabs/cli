@@ -15,6 +15,7 @@
  */
 
 import assert from "node:assert";
+import { writeFile } from "node:fs/promises";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -34,37 +35,89 @@ import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
 } from "./configs/project/service.js";
-import { FLUENCE_CONFIG_FILE_NAME } from "./const.js";
+import type { WorkersConfigReadonly } from "./configs/project/workers.js";
+import { FLUENCE_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
   getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
+import { jsToAqua } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
-import { projectRootDir } from "./paths.js";
+import { ensureFluenceAquaWorkersPath, projectRootDir } from "./paths.js";
+import { checkboxes } from "./prompt.js";
 
 export const parseWorkers = (workerNamesString: string) =>
   workerNamesString.split(",").map((s) => s.trim());
 
+const handlePreviouslyDeployedWorkers = async (
+  maybeDeployedHostsOrDeals:
+    | WorkersConfigReadonly["deals"]
+    | WorkersConfigReadonly["hosts"]
+    | undefined,
+  workersToDeploy: Array<string>
+) => {
+  if (maybeDeployedHostsOrDeals === undefined) {
+    return workersToDeploy;
+  }
+
+  const previouslyDeployedWorkersNames = Object.keys(maybeDeployedHostsOrDeals);
+
+  const previouslyDeployedWorkersNamesToBeDeployed = workersToDeploy.filter(
+    (workerName) => previouslyDeployedWorkersNames.includes(workerName)
+  );
+
+  if (previouslyDeployedWorkersNamesToBeDeployed.length === 0) {
+    return workersToDeploy;
+  }
+
+  const confirmedWorkersNamesToDeploy = await checkboxes({
+    message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
+    options: previouslyDeployedWorkersNamesToBeDeployed,
+    oneChoiceMessage(workerName) {
+      return `Do you want to redeploy worker ${color.yellow(workerName)}`;
+    },
+    onNoChoices(): Array<string> {
+      return [];
+    },
+  });
+
+  const workerNamesToRemove = previouslyDeployedWorkersNamesToBeDeployed.filter(
+    (workerName) => !confirmedWorkersNamesToDeploy.includes(workerName)
+  );
+
+  if (workerNamesToRemove.length === 0) {
+    return workersToDeploy;
+  }
+
+  return workersToDeploy.filter(
+    (workerName) => !workerNamesToRemove.includes(workerName)
+  );
+};
+
 type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
+  maybeWorkersConfig?: WorkersConfigReadonly;
   hosts?: boolean;
 };
 
 export const prepareForDeploy = async ({
   workerNames: workerNamesString,
   fluenceConfig,
+  maybeWorkersConfig,
   hosts = false,
 }: PrepareForDeployArg): Promise<UploadArgConfig> => {
+  const hostsOrDealsString = hosts ? "hosts" : "deals";
+
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const hostsOrDeals = Object.entries(
-    (hosts ? fluenceConfig.hosts : fluenceConfig.deals) ??
+    fluenceConfig[hostsOrDealsString] ??
       commandObj.error(
         `You must have a ${color.yellow(
-          hosts ? "hosts" : "deals"
+          hostsOrDealsString
         )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
       )
   ) as Array<
@@ -77,17 +130,21 @@ export const prepareForDeploy = async ({
     ]
   >;
 
+  const maybeDeployedHostsOrDeals = (maybeWorkersConfig ?? {})[
+    hostsOrDealsString
+  ];
+
   const workerNamesSet = hostsOrDeals.map(([workerName]) => workerName);
 
-  const workersToHost =
+  const workersToDeploy =
     workerNamesString === undefined
       ? workerNamesSet
       : parseWorkers(workerNamesString);
 
-  if (workersToHost.length === 0) {
+  if (workersToDeploy.length === 0) {
     return commandObj.error(
       `${color.yellow(
-        hosts ? "hosts" : "deals"
+        hostsOrDealsString
       )} record in ${FLUENCE_CONFIG_FILE_NAME} must contain at least one worker name as a key`
     );
   }
@@ -114,7 +171,7 @@ export const prepareForDeploy = async ({
 
   const workersFromFluenceConfigArray = Object.keys(workersFromFluenceConfig);
 
-  const workerNamesNotFoundInWorkersConfig = workersToHost.filter(
+  const workerNamesNotFoundInWorkersConfig = workersToDeploy.filter(
     (workerName) => !workersFromFluenceConfigArray.includes(workerName)
   );
 
@@ -128,7 +185,12 @@ export const prepareForDeploy = async ({
     );
   }
 
-  const workerConfigs = workersToHost.map((workerName) => {
+  const workersToDeployConfirmed = await handlePreviouslyDeployedWorkers(
+    maybeDeployedHostsOrDeals,
+    workersToDeploy
+  );
+
+  const workerConfigs = workersToDeployConfirmed.map((workerName) => {
     const workerConfig = workersFromFluenceConfig[workerName];
 
     assert(
@@ -262,7 +324,7 @@ export const prepareForDeploy = async ({
   await buildModules([...moduleConfigsMap.values()], marineCli);
 
   const workers: UploadArgConfig["workers"] = hostsOrDeals
-    .filter(([workerName]) => workersToHost.includes(workerName))
+    .filter(([workerName]) => workersToDeployConfirmed.includes(workerName))
     .map(([workerName, { peerIds = [] }]) => {
       if (hosts && peerIds.length === 0) {
         commandObj.error(
@@ -356,4 +418,17 @@ export const prepareForDeploy = async ({
       blockchain: { start_block: 0, end_block: 0 },
     },
   };
+};
+
+export const ensureAquaFileWithWorkerInfo = async (
+  workersConfig: WorkersConfigReadonly
+) => {
+  await writeFile(
+    await ensureFluenceAquaWorkersPath(),
+    jsToAqua(
+      { deals: workersConfig.deals, hosts: workersConfig.hosts },
+      "getWorkersInfo"
+    ),
+    FS_OPTIONS
+  );
 };

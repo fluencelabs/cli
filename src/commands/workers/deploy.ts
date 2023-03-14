@@ -21,7 +21,7 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initNewDeployedConfig } from "../../lib/configs/project/deployed.js";
+import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
@@ -29,7 +29,10 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
 } from "../../lib/const.js";
-import { prepareForDeploy } from "../../lib/deployWorkers.js";
+import {
+  ensureAquaFileWithWorkerInfo,
+  prepareForDeploy,
+} from "../../lib/deployWorkers.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
@@ -61,10 +64,13 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
     doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
 
+    const workersConfig = await initNewWorkersConfig();
+
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
       hosts: true,
+      maybeWorkersConfig: workersConfig,
     });
 
     const errorMessages = uploadDeployArg.workers
@@ -96,20 +102,31 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       uploadDeployArg
     );
 
-    const deployedConfig = await initNewDeployedConfig();
+    const timestamp = new Date().toISOString();
 
     const newDeployedWorkers = uploadDeployResult.workers.reduce<
-      Record<string, (typeof deployedConfig.workers)[number]>
+      Exclude<typeof workersConfig.hosts, undefined>
     >(
-      (acc, { name, ...worker }) => ({
-        ...acc,
-        [name]: { ...worker, timestamp: new Date().toISOString() },
-      }),
-      { ...deployedConfig.workers }
+      (acc, { name, ...worker }) => {
+        const peerIds = uploadDeployArg.workers.find(
+          (worker) => worker.name === name
+        )?.hosts;
+
+        if (peerIds === undefined) {
+          throw new Error("Unreachable. Worker not found");
+        }
+
+        return {
+          ...acc,
+          [name]: { ...worker, timestamp, peerIds },
+        };
+      },
+      { ...workersConfig.hosts }
     );
 
-    deployedConfig.workers = newDeployedWorkers;
-    await deployedConfig.$commit();
+    workersConfig.hosts = newDeployedWorkers;
+    await workersConfig.$commit();
+    await ensureAquaFileWithWorkerInfo(workersConfig);
     commandObj.log("Successfully deployed");
   }
 }

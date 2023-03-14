@@ -51,7 +51,7 @@ import {
   ensureDefaultAquaTSPath,
   ensureDefaultJSDirPath,
   ensureDefaultTSDirPath,
-  ensureFluenceAquaDealPath,
+  ensureFluenceAquaWorkersPath,
   ensureFluenceAquaServicesPath,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
@@ -213,7 +213,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   await mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
-  await writeFile(await ensureFluenceAquaDealPath(), "", FS_OPTIONS);
+  await writeFile(await ensureFluenceAquaWorkersPath(), "", FS_OPTIONS);
   const fluenceConfig = maybeFluenceConfig ?? (await initNewFluenceConfig());
 
   switch (template) {
