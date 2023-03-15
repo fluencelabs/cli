@@ -399,6 +399,10 @@ export const prepareForDeploy = async ({
         };
       });
 
+      if (workers.length === 0) {
+        commandObj.error(`You must select at least one worker to deploy`);
+      }
+
       return {
         name: workerName,
         hosts: peerIds,

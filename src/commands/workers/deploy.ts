@@ -18,6 +18,8 @@ import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args } from "@oclif/core";
 
+import assert from "node:assert";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
@@ -112,9 +114,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           (worker) => worker.name === name
         )?.hosts;
 
-        if (peerIds === undefined) {
-          throw new Error("Unreachable. Worker not found");
-        }
+        assert(peerIds !== undefined);
 
         return {
           ...acc,
