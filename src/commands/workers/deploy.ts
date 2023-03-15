@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
+
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args } from "@oclif/core";
-
-import assert from "node:assert";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";

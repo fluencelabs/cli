@@ -25,6 +25,7 @@
 * [`fluence service new [PATH]`](#fluence-service-new-path)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence spell new [PATH]`](#fluence-spell-new-path)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
@@ -659,6 +660,27 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence service repl
+```
+
+## `fluence spell new [PATH]`
+
+Create a new spell template
+
+```
+USAGE
+  $ fluence spell new [PATH] [--no-input]
+
+ARGUMENTS
+  PATH  Module path
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Create a new spell template
+
+EXAMPLES
+  $ fluence spell new
 ```
 
 ## `fluence workers deploy [WORKER-NAMES]`
