@@ -671,7 +671,7 @@ USAGE
   $ fluence spell new [PATH] [--no-input]
 
 ARGUMENTS
-  PATH  Module path
+  PATH  Spell path
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user

@@ -83,6 +83,7 @@ type ConfigV0 = {
     string,
     WorkerInfo & {
       peerIds: Array<string>;
+      relayId: string;
     }
   >;
 };
@@ -132,8 +133,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
             type: "array",
             items: { type: "string" },
           },
+          relayId: { type: "string" },
         },
-        required: [...workerInfoSchema.required, "peerIds"],
+        required: [...workerInfoSchema.required, "peerIds", "relayId"],
       },
       required: [],
       nullable: true,

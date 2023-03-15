@@ -19,6 +19,7 @@ import assert from "node:assert";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args } from "@oclif/core";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -105,28 +106,44 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     const timestamp = new Date().toISOString();
+    const relayId = fluenceClient.getRelayPeerId();
 
-    const newDeployedWorkers = uploadDeployResult.workers.reduce<
-      Exclude<typeof workersConfig.hosts, undefined>
-    >(
-      (acc, { name, ...worker }) => {
-        const peerIds = uploadDeployArg.workers.find(
-          (worker) => worker.name === name
-        )?.hosts;
+    const { newDeployedWorkers, infoToPrint } =
+      uploadDeployResult.workers.reduce<{
+        newDeployedWorkers: Exclude<typeof workersConfig.hosts, undefined>;
+        infoToPrint: Record<string, string[]>;
+      }>(
+        (acc, { name, ...worker }) => {
+          const peerIds = uploadDeployArg.workers.find(
+            (worker) => worker.name === name
+          )?.hosts;
 
-        assert(peerIds !== undefined);
+          assert(peerIds !== undefined);
 
-        return {
-          ...acc,
-          [name]: { ...worker, timestamp, peerIds },
-        };
-      },
-      { ...workersConfig.hosts }
-    );
+          return {
+            newDeployedWorkers: {
+              ...acc.newDeployedWorkers,
+              [name]: { ...worker, timestamp, peerIds, relayId },
+            },
+            infoToPrint: {
+              ...acc.infoToPrint,
+              [name]: peerIds,
+            },
+          };
+        },
+        { newDeployedWorkers: {}, infoToPrint: {} }
+      );
 
-    workersConfig.hosts = newDeployedWorkers;
+    workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
     await workersConfig.$commit();
     await ensureAquaFileWithWorkerInfo(workersConfig);
-    commandObj.log("Successfully deployed");
+
+    commandObj.log(
+      `\n\n${color.yellow("Success!")}\n\nrelay: ${relayId}\n\n${yamlDiffPatch(
+        "",
+        {},
+        { "deployed workers": infoToPrint }
+      )}`
+    );
   }
 }

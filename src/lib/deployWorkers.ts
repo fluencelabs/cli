@@ -345,63 +345,63 @@ export const prepareForDeploy = async ({
         )}`
       );
 
-      const services = workerConfig.services.map((serviceName) => {
-        const maybeServiceConfig = serviceConfigs.find(
-          (c) => c.serviceName === serviceName
-        );
-
-        assert(
-          maybeServiceConfig !== undefined,
-          `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
-            serviceConfigs
-          )}`
-        );
-
-        const { overrideModules, serviceConfig } = maybeServiceConfig;
-
-        const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
-          serviceConfig.modules;
-
-        const modules = [
-          ...Object.entries(restModules),
-          [FACADE_MODULE_NAME, facadeModule] as const,
-        ].map(([name, { get }]) => {
-          const moduleUrlOrAbsolutePath = getUrlOrAbsolutePath(
-            get,
-            serviceConfig.$getDirPath()
+      const services: UploadArgConfig["workers"][number]["config"]["services"] =
+        workerConfig.services.map((serviceName) => {
+          const maybeServiceConfig = serviceConfigs.find(
+            (c) => c.serviceName === serviceName
           );
 
-          const moduleConfig = moduleConfigsMap.get(moduleUrlOrAbsolutePath);
-
           assert(
-            moduleConfig !== undefined,
-            `Unreachable. Module should not be undefined because moduleConfigsMap was created from serviceConfigs.modules. Searching for ${moduleUrlOrAbsolutePath} in ${JSON.stringify(
-              Object.fromEntries(moduleConfigsMap.entries())
+            maybeServiceConfig !== undefined,
+            `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
+              serviceConfigs
             )}`
           );
 
-          const overriddenModuleConfig = {
-            ...moduleConfig,
-            ...overrideModules?.[name],
-          };
+          const { overrideModules, serviceConfig } = maybeServiceConfig;
+
+          const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
+            serviceConfig.modules;
+
+          const modules = [
+            ...Object.entries(restModules),
+            [FACADE_MODULE_NAME, facadeModule] as const,
+          ].map(([name, { get, ...overridesFromService }]) => {
+            const moduleUrlOrAbsolutePath = getUrlOrAbsolutePath(
+              get,
+              serviceConfig.$getDirPath()
+            );
+
+            const moduleConfig = moduleConfigsMap.get(moduleUrlOrAbsolutePath);
+
+            assert(
+              moduleConfig !== undefined,
+              `Unreachable. Module should not be undefined because moduleConfigsMap was created from serviceConfigs.modules. Searching for ${moduleUrlOrAbsolutePath} in ${JSON.stringify(
+                Object.fromEntries(moduleConfigsMap.entries())
+              )}`
+            );
+
+            const overridesFromProject = overrideModules?.[name];
+
+            const overriddenModuleConfig = {
+              ...moduleConfig,
+              ...overridesFromService,
+              ...overridesFromProject,
+            };
+
+            return {
+              wasm: getModuleWasmPath(overriddenModuleConfig),
+              config: JSON.stringify(
+                moduleToJSONModuleConfig(overriddenModuleConfig)
+              ),
+            };
+          });
 
           return {
-            wasm: getModuleWasmPath(overriddenModuleConfig),
-            config: JSON.stringify(
-              moduleToJSONModuleConfig(overriddenModuleConfig)
-            ),
+            name: serviceName,
+            modules,
           };
         });
-
-        return {
-          name: serviceName,
-          modules,
-        };
-      });
-
-      if (workers.length === 0) {
-        commandObj.error(`You must select at least one worker to deploy`);
-      }
 
       return {
         name: workerName,
@@ -412,6 +412,10 @@ export const prepareForDeploy = async ({
         },
       };
     });
+
+  if (workers.length === 0) {
+    commandObj.error(`You must select at least one worker to deploy`);
+  }
 
   return {
     workers,
