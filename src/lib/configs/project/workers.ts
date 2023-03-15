@@ -97,7 +97,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     version: { type: "number", const: 0 },
     deals: {
       type: "object",
-      description: "A map of deployed workers",
+      description: "A map of created deals",
       additionalProperties: {
         ...workerInfoSchema,
         properties: {
