@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.9...fluence-cli-v0.4.0) (2023-03-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* renamed deployed.yaml to workers.yaml, renamed deals.aqua to workers.aqua.
+
+### Features
+
+* allow running `fluence workers logs` without initializing the project, don't show stack trace for expected errors ([#197](https://github.com/fluencelabs/fluence-cli/issues/197)) ([9a5036e](https://github.com/fluencelabs/fluence-cli/commit/9a5036e6f78602d441fd5f15ce436b45332d0cb9))
+* improve service and module removal [fixes DXJ-320] ([#199](https://github.com/fluencelabs/fluence-cli/issues/199)) ([3f7866d](https://github.com/fluencelabs/fluence-cli/commit/3f7866dd0e09acbb2ea3d66ff1cdb9ea9e9516fa))
+* minor improvements and refactoring [fixes DXJ-331] ([#202](https://github.com/fluencelabs/fluence-cli/issues/202)) ([bc12cdc](https://github.com/fluencelabs/fluence-cli/commit/bc12cdcaca7aa06904e7e87e3c7c19a0900a6eec))
+* rename and extend deployed.yaml config [fixes DXJ-343] ([#205](https://github.com/fluencelabs/fluence-cli/issues/205)) ([b8cd0eb](https://github.com/fluencelabs/fluence-cli/commit/b8cd0eb3ac4523ddef30623f5f5d84117564a689))
+* update copyright year ([#200](https://github.com/fluencelabs/fluence-cli/issues/200)) ([72866b5](https://github.com/fluencelabs/fluence-cli/commit/72866b52d076d172cbaeaeecb819d34c07e91e2c))
+* update default fluence env in template ([#194](https://github.com/fluencelabs/fluence-cli/issues/194)) ([75c1f98](https://github.com/fluencelabs/fluence-cli/commit/75c1f9893eaa6efb56b1a3e51dc486ed1bc29329))
+* update fluence js client [fixes DXJ-244 DXJ-330] ([#203](https://github.com/fluencelabs/fluence-cli/issues/203)) ([29e11cd](https://github.com/fluencelabs/fluence-cli/commit/29e11cd9228fec8f3b57aeddd8c25508df3101b7))
+* update marine cli and mrepl  minor versions ([#201](https://github.com/fluencelabs/fluence-cli/issues/201)) ([fd513a8](https://github.com/fluencelabs/fluence-cli/commit/fd513a8c84415e164f0f0064e03b68231834480e))
+
 ## [0.3.9](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.8...fluence-cli-v0.3.9) (2023-03-01)
 
 
