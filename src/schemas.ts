@@ -18,12 +18,12 @@ import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 import { appSchema } from "./lib/configs/project/app.js";
-import { deployedSchema } from "./lib/configs/project/deployed.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { fluenceLockSchema } from "./lib/configs/project/fluenceLock.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
 import { projectSecretsSchema } from "./lib/configs/project/projectSecrets.js";
 import { serviceSchema } from "./lib/configs/project/service.js";
+import { workersSchema } from "./lib/configs/project/workers.js";
 import { userConfigSchema } from "./lib/configs/user/config.js";
 import { userSecretsSchema } from "./lib/configs/user/userSecrets.js";
 import {
@@ -38,7 +38,7 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
   FLUENCE_LOCK_CONFIG_FILE_NAME,
   CONFIG_FILE_NAME,
-  DEPLOYED_CONFIG_FILE_NAME,
+  WORKERS_CONFIG_FILE_NAME,
 } from "./lib/const.js";
 import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
@@ -51,7 +51,7 @@ const schemas = Object.entries({
   [CONFIG_FILE_NAME]: userConfigSchema,
   [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
   [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
-  [DEPLOYED_CONFIG_FILE_NAME]: deployedSchema,
+  [WORKERS_CONFIG_FILE_NAME]: workersSchema,
 });
 
 const main = async (): Promise<void> => {

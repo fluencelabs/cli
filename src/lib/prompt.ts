@@ -186,7 +186,8 @@ const handleList = async <T, U>(
   listOptions: Omit<ListOptions<T, U>, keyof DistinctQuestion>
 ): Promise<{
   choices: Array<{ value: T; name: string } | SeparatorObj>;
-  result?: T | U;
+  result?: T;
+  noChoicesResult?: U;
 }> => {
   const { options, oneChoiceMessage, onNoChoices, flagName } = listOptions;
 
@@ -202,7 +203,7 @@ const handleList = async <T, U>(
       .length === 0
   ) {
     return {
-      result: onNoChoices(),
+      noChoicesResult: onNoChoices(),
       choices,
     };
   }
@@ -227,7 +228,7 @@ const handleList = async <T, U>(
     }
 
     return {
-      result: onNoChoices(),
+      noChoicesResult: onNoChoices(),
       choices,
     };
   }
@@ -243,7 +244,7 @@ export const list = async <T, U>(
   const { options, oneChoiceMessage, onNoChoices, flagName, ...question } =
     listOptions;
 
-  const { choices, result } = await handleList({
+  const { choices, result, noChoicesResult } = await handleList({
     options,
     oneChoiceMessage,
     onNoChoices,
@@ -252,6 +253,10 @@ export const list = async <T, U>(
 
   if (result !== undefined) {
     return result;
+  }
+
+  if (noChoicesResult !== undefined) {
+    return noChoicesResult;
   }
 
   const stringChoice = await prompt({
@@ -277,7 +282,7 @@ export const list = async <T, U>(
 
 export const checkboxes = async <T, U>(
   listOptions: ListOptions<T, U>
-): Promise<Array<T | U>> => {
+): Promise<Array<T> | U> => {
   const {
     options,
     oneChoiceMessage, // used for confirm in case the list contains only one item
@@ -286,7 +291,7 @@ export const checkboxes = async <T, U>(
     ...question
   } = listOptions;
 
-  const { choices, result } = await handleList({
+  const { choices, result, noChoicesResult } = await handleList({
     options,
     oneChoiceMessage,
     onNoChoices,
@@ -295,6 +300,10 @@ export const checkboxes = async <T, U>(
 
   if (result !== undefined) {
     return [result];
+  }
+
+  if (noChoicesResult !== undefined) {
+    return noChoicesResult;
   }
 
   const stringChoices = await prompt({
