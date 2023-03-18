@@ -25,7 +25,6 @@
 * [`fluence service new [PATH]`](#fluence-service-new-path)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
-* [`fluence spell new [PATH]`](#fluence-spell-new-path)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
@@ -68,7 +67,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -166,7 +165,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -237,7 +236,7 @@ ARGUMENTS
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-2022-09-15-x86_64)
+  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-2022-12-01-x86_64)
 
 DESCRIPTION
   Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
@@ -369,7 +368,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -572,7 +571,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -660,27 +659,6 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence service repl
-```
-
-## `fluence spell new [PATH]`
-
-Create a new spell template
-
-```
-USAGE
-  $ fluence spell new [PATH] [--no-input]
-
-ARGUMENTS
-  PATH  Spell path
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Create a new spell template
-
-EXAMPLES
-  $ fluence spell new
 ```
 
 ## `fluence workers deploy [WORKER-NAMES]`
