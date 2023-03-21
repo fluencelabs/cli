@@ -26,7 +26,7 @@ type GenerateServiceInterfaceArg = {
   marineCli: MarineCLI;
 };
 
-export const generateServiceInterface = async ({
+export const generateAquaInterfaceForService = async ({
   serviceId,
   pathToFacadeWasm,
   marineCli,

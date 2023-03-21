@@ -37,25 +37,25 @@ import {
   ConfigValidateFunction,
 } from "../initConfig.js";
 
-import { ConfigV0 as ModuleConfig, moduleProperties } from "./module.js";
+import {
+  OverridableModuleProperties,
+  overridableModuleProperties,
+} from "./module.js";
 
-export type ModuleV0 = {
+export type ServiceModuleV0 = {
   get: string;
-} & Partial<Omit<ModuleConfig, "version">>;
+} & OverridableModuleProperties;
 
-export type Module = ModuleV0;
-
-const moduleSchemaForService: JSONSchemaType<ModuleV0> = {
+const moduleSchemaForService: JSONSchemaType<ServiceModuleV0> = {
   type: "object",
   title: "Module",
   properties: {
-    ...moduleProperties,
     get: {
       type: "string",
       description:
         "Either path to the module directory or URL to the tar.gz archive which contains the content of the module directory",
     },
-    name: { ...moduleProperties.name, nullable: true },
+    ...overridableModuleProperties,
   },
   required: ["get"],
 };
@@ -65,14 +65,17 @@ export const FACADE_MODULE_NAME = "facade";
 export type ConfigV0 = {
   version: 0;
   name: string;
-  modules: { [FACADE_MODULE_NAME]: ModuleV0 } & Record<string, ModuleV0>;
+  modules: { [FACADE_MODULE_NAME]: ServiceModuleV0 } & Record<
+    string,
+    ServiceModuleV0
+  >;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${SERVICE_CONFIG_FILE_NAME}`,
   title: SERVICE_CONFIG_FILE_NAME,
-  description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. For Fluence CLI, **service** - is a directory which contains this config. You can use \`fluence service new\` command to generate a template for new service`,
+  description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use \`fluence service new\` command to generate a template for new service`,
   properties: {
     name: {
       type: "string",

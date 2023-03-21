@@ -35,4 +35,4 @@ src/ts/src/aqua
 src/js/src/aqua
 
 # ignore compiled files
-src/lib/compiled-aqua/installation-spell/air
+src/lib/compiled-aqua

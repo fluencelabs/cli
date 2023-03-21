@@ -1,0 +1,3 @@
+## spells Type
+
+`string[]`

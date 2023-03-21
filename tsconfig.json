@@ -12,6 +12,6 @@
   },
   "include": ["src/**/*"],
   "exclude": ["src/ts/**/*", "src/js/**/*"],
-  "files": ["src/types.d.ts"],
+  "files": ["src/environment.d.ts", "src/types.d.ts"],
   "types": ["node", "jest"]
 }

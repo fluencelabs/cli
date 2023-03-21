@@ -105,7 +105,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       maybeFluenceLockConfig
     );
 
-    const preparedForDeployItems = await prepareForDeploy({
+    const preparedForDeployItems = await prepareForLegacyDeploy({
       fluenceConfig,
       defaultKeyPair,
       marineCli,
@@ -231,7 +231,7 @@ type PreparedForDeploy = Omit<
   deployJSON: DeployJSONConfig;
 };
 
-const prepareForDeploy = async (
+const prepareForLegacyDeploy = async (
   buildArg: BuildArg
 ): Promise<Array<PreparedForDeploy>> => {
   const { fluenceConfig } = buildArg;

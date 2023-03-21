@@ -23,14 +23,11 @@ import chokidar from "chokidar";
 
 import { AquaCompilerFlags, initAquaCli } from "../lib/aquaCli.js";
 import { commandObj } from "../lib/commandObj.js";
-import {
-  defaultFluenceLockConfig,
-  initFluenceLockConfig,
-  initNewFluenceLockConfig,
-} from "../lib/configs/project/fluenceLock.js";
+import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
 import {
   aquaLogLevelsString,
   FLUENCE_CONFIG_FILE_NAME,
+  IMPORT_FLAG,
   NO_INPUT_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
@@ -66,12 +63,7 @@ export default class Aqua extends Command {
       helpValue: "<path>",
       char: "o",
     }),
-    import: Flags.string({
-      description:
-        "Path to a directory to import from. May be used several times",
-      helpValue: "<path>",
-      multiple: true,
-    }),
+    ...IMPORT_FLAG,
     air: Flags.boolean({
       description: "Generate .air file instead of .ts",
     }),
@@ -144,20 +136,11 @@ export default class Aqua extends Command {
         ? maybeFluenceConfig?.aquaOutputJSPath !== undefined
         : false);
 
-    const importFlag =
-      maybeFluenceConfig === null
-        ? await ensureAquaImports({
-            flags,
-            maybeFluenceConfig,
-            maybeFluenceLockConfig: null,
-          })
-        : await ensureAquaImports({
-            flags,
-            maybeFluenceConfig,
-            maybeFluenceLockConfig:
-              maybeFluenceLockConfig ??
-              (await initNewFluenceLockConfig(defaultFluenceLockConfig)),
-          });
+    const importFlag = await ensureAquaImports({
+      flags,
+      maybeFluenceConfig,
+      maybeFluenceLockConfig,
+    });
 
     const aquaCliFlags = {
       input: inputFlag,

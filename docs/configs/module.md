@@ -6,8 +6,8 @@
 
 | Property                            | Type      | Required | Nullable       | Defined by                                                                                                                 |
 | :---------------------------------- | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| [type](#type)                       | `string`  | Optional | cannot be null | [module.yaml](module-properties-type.md "https://fluence.dev/schemas/module.yaml#/properties/type")                        |
 | [name](#name)                       | `string`  | Required | cannot be null | [module.yaml](module-properties-name.md "https://fluence.dev/schemas/module.yaml#/properties/name")                        |
+| [type](#type)                       | `string`  | Optional | cannot be null | [module.yaml](module-properties-type.md "https://fluence.dev/schemas/module.yaml#/properties/type")                        |
 | [maxHeapSize](#maxheapsize)         | `string`  | Optional | cannot be null | [module.yaml](module-properties-maxheapsize.md "https://fluence.dev/schemas/module.yaml#/properties/maxHeapSize")          |
 | [loggerEnabled](#loggerenabled)     | `boolean` | Optional | cannot be null | [module.yaml](module-properties-loggerenabled.md "https://fluence.dev/schemas/module.yaml#/properties/loggerEnabled")      |
 | [loggingMask](#loggingmask)         | `number`  | Optional | cannot be null | [module.yaml](module-properties-loggingmask.md "https://fluence.dev/schemas/module.yaml#/properties/loggingMask")          |
@@ -16,6 +16,24 @@
 | [envs](#envs)                       | `object`  | Optional | cannot be null | [module.yaml](module-properties-environment-variables.md "https://fluence.dev/schemas/module.yaml#/properties/envs")       |
 | [mountedBinaries](#mountedbinaries) | `object`  | Optional | cannot be null | [module.yaml](module-properties-mounted-binaries.md "https://fluence.dev/schemas/module.yaml#/properties/mountedBinaries") |
 | [version](#version)                 | `number`  | Required | cannot be null | [module.yaml](module-properties-version.md "https://fluence.dev/schemas/module.yaml#/properties/version")                  |
+
+## name
+
+"name" property from the Cargo.toml (for module type "rust") or name of the precompiled .wasm file (for module type "compiled")
+
+`name`
+
+*   is required
+
+*   Type: `string`
+
+*   cannot be null
+
+*   defined in: [module.yaml](module-properties-name.md "https://fluence.dev/schemas/module.yaml#/properties/name")
+
+### name Type
+
+`string`
 
 ## type
 
@@ -51,24 +69,6 @@ The default value is:
 ```json
 "compiled"
 ```
-
-## name
-
-"name" property from the Cargo.toml (for module type "rust") or name of the precompiled .wasm file (for module type "compiled")
-
-`name`
-
-*   is required
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [module.yaml](module-properties-name.md "https://fluence.dev/schemas/module.yaml#/properties/name")
-
-### name Type
-
-`string`
 
 ## maxHeapSize
 

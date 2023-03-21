@@ -50,7 +50,7 @@ FLAGS
   --common-js                   Use no extension in generated .ts file
   --const=<NAME=value>...       Constants to be passed to the compiler
   --dry                         Checks if compilation is succeeded, without output
-  --import=<path>...            Path to a directory to import from. May be used several times
+  --import=<path>...            Path to a directory to import aqua files from. May be used several times
   --js                          Generate .js file instead of .ts
   --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
                                 warn, error, off
@@ -68,7 +68,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -166,7 +166,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -175,7 +175,7 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 ```
 USAGE
   $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
-    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
+    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property in fluence.yaml are deployed)
@@ -183,6 +183,7 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>     Key pair name
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
+  --import=<path>...             Path to a directory to import aqua files from. May be used several times
   --network=<network>            [default: testnet] $The network in which the transactions used by the command will be
                                  carried out (local, testnet)
   --no-input                     Don't interactively ask for any input from the user
@@ -369,7 +370,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -548,7 +549,7 @@ FLAGS
   --data-path=<path>             Path to a JSON file in { [argumentName]: argumentValue } format. You can call a
                                  function using these argument names
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...             Path to a directory to import from. May be used several times
+  --import=<path>...             Path to a directory to import aqua files from. May be used several times
   --json-service=<path>...       Path to a file that contains a JSON formatted service
   --log-level-compiler=<level>   Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
                                  info, warn, error, off
@@ -572,7 +573,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.3.9/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.0/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -690,7 +691,7 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -698,6 +699,7 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>     Key pair name
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
+  --import=<path>...             Path to a directory to import aqua files from. May be used several times
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                  Print particle ids when running Fluence js-client
@@ -762,7 +764,7 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--import <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -770,6 +772,7 @@ ARGUMENTS
 FLAGS
   -k, --key-pair-name=<name>     Key pair name
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
+  --import=<path>...             Path to a directory to import aqua files from. May be used several times
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                  Print particle ids when running Fluence js-client

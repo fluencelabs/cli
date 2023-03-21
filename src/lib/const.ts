@@ -44,6 +44,8 @@ export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const REQUIRED_RUST_TOOLCHAIN = "nightly-2022-09-15-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
+export const U32_MAX = 4_294_967_295;
+
 export const CHAIN_NETWORKS = [
   "local",
   "testnet",
@@ -111,6 +113,7 @@ export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
 export const MODULES_DIR_NAME = "modules";
 export const SERVICES_DIR_NAME = "services";
+export const SPELLS_DIR_NAME = "spells";
 export const NPM_DIR_NAME = "npm";
 export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
@@ -127,6 +130,7 @@ export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
 export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
 export const APP_CONFIG_FILE_NAME = `app.${YAML_EXT}`;
 export const DEPENDENCY_CONFIG_FILE_NAME = `dependency.${YAML_EXT}`;
+export const SPELL_CONFIG_FILE_NAME = `spell.${YAML_EXT}`;
 
 const DEPLOYED_APP_FILE_NAME = "deployed.app";
 
@@ -135,6 +139,7 @@ export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
 export const AQUA_WORKERS_FILE_NAME = `workers.${AQUA_EXT}`;
+export const SPELL_AQUA_FILE_NAME = `spell.${AQUA_EXT}`;
 
 export const GITIGNORE_FILE_NAME = ".gitignore";
 
@@ -215,6 +220,15 @@ export const OFF_AQUA_LOGS_FLAG = {
   "off-aqua-logs": Flags.boolean({
     description:
       "Turns off logs from Console.print in aqua and from IPFS service",
+  }),
+};
+
+export const IMPORT_FLAG = {
+  import: Flags.string({
+    description:
+      "Path to a directory to import aqua files from. May be used several times",
+    helpValue: "<path>",
+    multiple: true,
   }),
 };
 
@@ -354,11 +368,11 @@ service Console("run-console"):
     print(any: ⊤)
 
 -- example of running a service deployed using 'fluence deal deploy'
--- with worker 'defaultWorker' which has service 'MyService' with method 'greeting'
+-- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
 func status():
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.defaultWorker.dealId
+    dealId = workersInfo.deals.${DEFAULT_WORKER_NAME}.dealId
     print = (answer: string, peer: string):
       Console.print([answer, peer])
 
@@ -533,3 +547,9 @@ ${TEMPLATE_INDEX_APP_REGISTER_COMMENT}
 main().catch((error) => {
   console.error(error);
 });`;
+
+export const SPELL_AQUA_FILE_CONTENT = `import "@fluencelabs/aqua-lib/builtin.aqua"
+
+func spell():
+    Op.noop()
+`;

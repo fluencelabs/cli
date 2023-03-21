@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload } from "../../lib/compiled-aqua/installation-spell/config.js";
+import { upload } from "../../lib/compiled-aqua/installation-spell/upload.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
+  IMPORT_FLAG,
 } from "../../lib/const.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
+import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -44,6 +45,7 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
+    ...IMPORT_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -60,36 +62,21 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
     const fluenceClient = await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
     doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
+
+    const aquaImports = await ensureAquaImports({
+      maybeFluenceConfig: fluenceConfig,
+      maybeFluenceLockConfig,
+      flags,
+    });
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
+      maybeFluenceLockConfig,
       hosts: true,
+      aquaImports,
     });
-
-    const errorMessages = uploadArg.workers
-      .map<string | null>(({ config: { services }, hosts, name }) => {
-        if (services.length === 0) {
-          return `Worker ${color.yellow(
-            name
-          )} has no services listed in 'workers' property of ${FLUENCE_CONFIG_FILE_NAME}`;
-        }
-
-        if (hosts.length === 0) {
-          return `Worker ${color.yellow(
-            name
-          )} has no peerIds listed in 'hosts' property of ${FLUENCE_CONFIG_FILE_NAME}`;
-        }
-
-        return null;
-      })
-      .filter<string>(
-        (errorMessage): errorMessage is string => errorMessage !== null
-      );
-
-    if (errorMessages.length > 0) {
-      commandObj.error(errorMessages.join("\n"));
-    }
 
     const uploadResult = await upload(fluenceClient, uploadArg);
     commandObj.log(jsonStringify(uploadResult.workers));

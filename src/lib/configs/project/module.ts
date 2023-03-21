@@ -36,10 +36,7 @@ import {
   GetDefaultConfig,
 } from "../initConfig.js";
 
-export type ConfigV0 = {
-  version: 0;
-  name: string;
-  type?: ModuleType;
+export type OverridableModuleProperties = {
   maxHeapSize?: string;
   loggerEnabled?: boolean;
   loggingMask?: number;
@@ -49,18 +46,13 @@ export type ConfigV0 = {
   mountedBinaries?: Record<string, string>;
 };
 
-const modulePropertiesV0 = {
-  type: {
-    type: "string",
-    enum: MODULE_TYPES,
-    nullable: true,
-    default: MODULE_TYPE_COMPILED,
-    description: `Module type "${MODULE_TYPE_COMPILED}" is for the precompiled modules. Module type "${MODULE_TYPE_RUST}" is for the source code written in rust which can be compiled into a Marine module`,
-  },
-  name: {
-    type: "string",
-    description: `"name" property from the Cargo.toml (for module type "${MODULE_TYPE_RUST}") or name of the precompiled .wasm file (for module type "${MODULE_TYPE_COMPILED}")`,
-  },
+export type ConfigV0 = {
+  version: 0;
+  name: string;
+  type?: ModuleType;
+} & OverridableModuleProperties;
+
+const overridableModulePropertiesV0 = {
   maxHeapSize: {
     type: "string",
     nullable: true,
@@ -141,15 +133,28 @@ Please note that Marine adds three additional environment variables. Module envi
     required: [],
     description: `A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl`,
   },
-  version: { type: "number", const: 0 },
 } as const;
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FILE_NAME}`,
   title: MODULE_CONFIG_FILE_NAME,
-  description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). For Fluence CLI, **module** - is a directory which contains this config and either a precompiled .wasm Marine module or a source code of the module written in Rust which can be compiled into a .wasm Marine module. You can use \`fluence module new\` command to generate a template for new module`,
-  properties: modulePropertiesV0,
+  description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`fluence module new\` command to generate a template for new module`,
+  properties: {
+    name: {
+      type: "string",
+      description: `"name" property from the Cargo.toml (for module type "${MODULE_TYPE_RUST}") or name of the precompiled .wasm file (for module type "${MODULE_TYPE_COMPILED}")`,
+    },
+    type: {
+      type: "string",
+      enum: MODULE_TYPES,
+      nullable: true,
+      default: MODULE_TYPE_COMPILED,
+      description: `Module type "${MODULE_TYPE_COMPILED}" is for the precompiled modules. Module type "${MODULE_TYPE_RUST}" is for the source code written in rust which can be compiled into a Marine module`,
+    },
+    ...overridableModulePropertiesV0,
+    version: { type: "number", const: 0 },
+  },
   required: ["version", "name"],
 };
 
@@ -176,12 +181,7 @@ export const initModuleConfig = async (
 ): Promise<InitializedConfig<LatestConfig> | null> =>
   getConfigInitFunction(
     getInitConfigOptions(
-      absolutePath === undefined
-        ? configOrConfigDirPathOrUrl
-        : await ensureModuleAbsolutePath(
-            configOrConfigDirPathOrUrl,
-            absolutePath
-          )
+      await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
 export const initReadonlyModuleConfig = async (
@@ -190,12 +190,7 @@ export const initReadonlyModuleConfig = async (
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
   getReadonlyConfigInitFunction(
     getInitConfigOptions(
-      absolutePath === undefined
-        ? configOrConfigDirPathOrUrl
-        : await ensureModuleAbsolutePath(
-            configOrConfigDirPathOrUrl,
-            absolutePath
-          )
+      await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
 
@@ -217,4 +212,4 @@ export const initNewReadonlyModuleConfig = (
   )();
 
 export const moduleSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
-export const moduleProperties = modulePropertiesV0;
+export const overridableModuleProperties = overridableModulePropertiesV0;

@@ -16,9 +16,27 @@
 
 import { AssertionError } from "node:assert";
 
+/**
+ * Makes all properties in the object to be NOT readonly
+ * Doesn't work recursively
+ *
+ * @example
+ * const readonlyObject: Readonly<{a: number}> = { a: 1 };
+ * const mutableObject: Mutable<typeof readonlyObject> = readonlyObject;
+ * mutableObject.a = 2;
+ */
 export type Mutable<Type> = {
   -readonly [Key in keyof Type]: Type[Key];
 };
+
+/**
+ * Makes particular object properties to be required
+ *
+ * @example
+ * const object: { a?: number, b?: string, c?: boolean } = {};
+ * const requiredObject: WithRequired<typeof object, "a" | "b"> = { a: 1, b: "b" };
+ */
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 
 export type Flags<T extends string> = Record<
   T,

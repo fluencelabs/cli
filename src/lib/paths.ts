@@ -48,6 +48,7 @@ import {
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
   AQUA_WORKERS_FILE_NAME,
+  SPELLS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
@@ -221,6 +222,9 @@ export const ensureFluenceModulesDir = async (): Promise<string> =>
 
 export const ensureFluenceServicesDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureFluenceDir(), SERVICES_DIR_NAME));
+
+export const ensureFluenceSpellsDir = async (): Promise<string> =>
+  ensureDir(path.join(await ensureFluenceDir(), SPELLS_DIR_NAME));
 
 export const ensureFluenceTmpDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureFluenceDir(), TMP_DIR_NAME));

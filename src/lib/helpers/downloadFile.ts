@@ -30,11 +30,13 @@ import {
   MODULE_CONFIG_FILE_NAME,
   MODULE_TYPE_RUST,
   SERVICE_CONFIG_FILE_NAME,
+  SPELL_CONFIG_FILE_NAME,
   WASM_EXT,
 } from "../const.js";
 import {
   ensureFluenceModulesDir,
   ensureFluenceServicesDir,
+  ensureFluenceSpellsDir,
   projectRootDir,
 } from "../paths.js";
 import { input } from "../prompt.js";
@@ -143,11 +145,17 @@ export const downloadModule = async (get: string): Promise<string> =>
 export const downloadService = async (get: string): Promise<string> =>
   downloadAndDecompress(get, await ensureFluenceServicesDir());
 
+export const downloadSpell = async (get: string): Promise<string> =>
+  downloadAndDecompress(get, await ensureFluenceSpellsDir());
+
 export const getModulePathFromUrl = async (get: string): Promise<string> =>
   getDownloadDirPath(get, await ensureFluenceModulesDir());
 
 export const getServicePathFromUrl = async (get: string): Promise<string> =>
   getDownloadDirPath(get, await ensureFluenceServicesDir());
+
+export const getSpellPathFromUrl = async (get: string): Promise<string> =>
+  getDownloadDirPath(get, await ensureFluenceSpellsDir());
 
 export const isUrl = (unknown: string): boolean =>
   unknown.startsWith("http://") || unknown.startsWith("https://");
@@ -184,7 +192,10 @@ const ensureOrGetConfigAbsolutePath =
     downloadOrGetFunction: (get: string) => Promise<string>,
     configName: string
   ) =>
-  async (pathOrUrl: string, absolutePath: string): Promise<string> => {
+  async (
+    pathOrUrl: string,
+    absolutePath: string | undefined
+  ): Promise<string> => {
     const dirOrConfigAbsolutePath = await (async (): Promise<string> => {
       if (isUrl(pathOrUrl)) {
         return downloadOrGetFunction(pathOrUrl);
@@ -192,6 +203,14 @@ const ensureOrGetConfigAbsolutePath =
 
       if (isAbsolute(pathOrUrl)) {
         return pathOrUrl;
+      }
+
+      if (absolutePath === undefined) {
+        throw new Error(
+          `Path ${color.yellow(
+            pathOrUrl
+          )} is not absolute and no absolute path was provided`
+        );
       }
 
       return resolve(absolutePath, pathOrUrl);
@@ -208,6 +227,10 @@ export const ensureServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadService,
   SERVICE_CONFIG_FILE_NAME
 );
+export const ensureSpellAbsolutePath = ensureOrGetConfigAbsolutePath(
+  downloadSpell,
+  SPELL_CONFIG_FILE_NAME
+);
 
 export const getModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
   getModulePathFromUrl,
@@ -216,4 +239,8 @@ export const getModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
 export const getServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   getServicePathFromUrl,
   SERVICE_CONFIG_FILE_NAME
+);
+export const getSpellAbsolutePath = ensureOrGetConfigAbsolutePath(
+  getSpellPathFromUrl,
+  SPELL_CONFIG_FILE_NAME
 );

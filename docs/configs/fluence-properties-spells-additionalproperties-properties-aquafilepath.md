@@ -1,0 +1,3 @@
+## aquaFilePath Type
+
+`string`

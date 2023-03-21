@@ -21,7 +21,11 @@ import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../ajvInstance.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
-import type { FluenceLockConfig } from "../configs/project/fluenceLock.js";
+import {
+  defaultFluenceLockConfig,
+  FluenceLockConfig,
+  initNewFluenceLockConfig,
+} from "../configs/project/fluenceLock.js";
 import {
   DOT_BIN_DIR_NAME,
   FS_OPTIONS,
@@ -34,19 +38,12 @@ import {
   ensureVSCodeSettingsJsonPath,
 } from "../paths.js";
 
-type GetAquaImportsArg =
-  | {
-      maybeFluenceConfig: FluenceConfig;
-      maybeFluenceLockConfig: FluenceLockConfig;
-      force?: boolean;
-      flags?: { import?: string[] | undefined };
-    }
-  | {
-      maybeFluenceConfig: null;
-      maybeFluenceLockConfig: null;
-      force?: boolean;
-      flags?: { import?: string[] | undefined };
-    };
+type GetAquaImportsArg = {
+  maybeFluenceConfig: FluenceConfig | null;
+  maybeFluenceLockConfig: FluenceLockConfig | null;
+  force?: boolean;
+  flags?: { import?: string[] | undefined };
+};
 
 export async function ensureAquaImports(
   args?: GetAquaImportsArg
@@ -62,7 +59,11 @@ export async function ensureAquaImports(
   const importsFromFluenceConfig = (
     await installAllNPMDependencies({
       maybeFluenceConfig,
-      maybeFluenceLockConfig,
+      maybeFluenceLockConfig:
+        maybeFluenceConfig === null
+          ? null
+          : maybeFluenceLockConfig ??
+            (await initNewFluenceLockConfig(defaultFluenceLockConfig)),
       force,
     })
   ).filter(

@@ -46,11 +46,10 @@ export const validateHasDefault = <T>(
 
 export const validateBatch = (
   ...args: Array<ValidationResult>
-): ValidationResult =>
-  args.reduce<ValidationResult>((acc, result): ValidationResult => {
-    if (result === true) {
-      return acc;
-    }
+): ValidationResult => {
+  const errors = args.filter(
+    (result): result is string => typeof result === "string"
+  );
 
-    return `${acc === true ? "" : acc}\n\n${result}`;
-  }, true);
+  return errors.length === 0 ? true : errors.join("\n");
+};
