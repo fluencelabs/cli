@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.0...fluence-cli-v0.4.1) (2023-03-22)
+
+
+### Features
+
+* support spells [fixes DXJ-340 DXJ-341] ([#216](https://github.com/fluencelabs/fluence-cli/issues/216)) ([8fc6eb3](https://github.com/fluencelabs/fluence-cli/commit/8fc6eb34142ab78d560cbb09d5fe17695c444a75))
+* update rust toolchain and marine tool versions ([#207](https://github.com/fluencelabs/fluence-cli/issues/207)) ([a00aec3](https://github.com/fluencelabs/fluence-cli/commit/a00aec3caa4e455584c475fd4a0755d9c5c2d0e4))
+
 ## [0.4.0](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.3.9...fluence-cli-v0.4.0) (2023-03-16)
 
 
