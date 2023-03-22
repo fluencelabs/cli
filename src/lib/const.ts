@@ -548,8 +548,12 @@ main().catch((error) => {
   console.error(error);
 });`;
 
-export const SPELL_AQUA_FILE_CONTENT = `import "@fluencelabs/aqua-lib/builtin.aqua"
+export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
+import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    Op.noop()
+    msg = "Spell is working!"
+    str <- Debug.stringify(msg)
+    Spell "worker-spell"
+    Spell.list_push_string("logs", str)
 `;
