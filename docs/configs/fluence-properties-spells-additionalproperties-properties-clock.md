@@ -32,7 +32,7 @@ How often the spell will be executed. If set to 0, the spell will be executed on
 
 ### periodSec Constraints
 
-**maximum**: the value of this number must smaller than or equal to: `4294967295`
+**maximum**: the value of this number must smaller than or equal to: `3153600000`
 
 **minimum**: the value of this number must greater than or equal to: `0`
 
@@ -74,7 +74,7 @@ An ISO timestamp when the periodic execution should end. If this property or `en
 
 ## startDelaySec
 
-How long to wait before the first execution in seconds. If this property or `startTimestamp` not specified, periodic execution will start immediately. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. This property overrides `startTimestamp` if both are specified
+How long to wait before the first execution in seconds. If this property or `startTimestamp` not specified, periodic execution will start immediately. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. This property conflicts with `startTimestamp`. You can specify only one of them
 
 `startDelaySec`
 
@@ -98,7 +98,7 @@ How long to wait before the first execution in seconds. If this property or `sta
 
 ## endDelaySec
 
-How long to wait before the last execution in seconds. If this property or `endTimestamp` not specified, periodic execution will never end. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. If it is in the past at the moment of spell creation - the spell will never be executed. This property overrides `endTimestamp` if both are specified
+How long to wait before the last execution in seconds. If this property or `endTimestamp` not specified, periodic execution will never end. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. If it is in the past at the moment of spell creation - the spell will never be executed. This property conflicts with `endTimestamp`. You can specify only one of them
 
 `endDelaySec`
 

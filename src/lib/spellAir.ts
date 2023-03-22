@@ -220,37 +220,34 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
               (seq
                (seq
                 (seq
-                 (seq
-                  (new $array-inline-6
+                 (new $array-inline-6
+                  (seq
                    (seq
-                    (seq
-                     (ap "Installing worker for deal" $array-inline-6)
-                     (ap deal_id $array-inline-6)
-                    )
-                    (canon %init_peer_id% $array-inline-6  #array-inline-6-0)
+                    (ap "Installing worker for deal" $array-inline-6)
+                    (ap deal_id $array-inline-6)
                    )
+                   (canon %init_peer_id% $array-inline-6  #array-inline-6-0)
                   )
-                  (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-3)
                  )
-                 (call %init_peer_id% ("debug" "stringify") [#array-inline-6-0] str-2)
+                 (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-3)
                 )
-                (par
-                 (call %init_peer_id% (spell_id-3 "list_push_string") ["logs" str-2])
-                 (seq
-                  (new $array-inline-7
+                (call %init_peer_id% ("debug" "stringify") [#array-inline-6-0] str-2)
+               )
+               (par
+                (call %init_peer_id% (spell_id-3 "list_push_string") ["logs" str-2])
+                (seq
+                 (new $array-inline-7
+                  (seq
                    (seq
-                    (seq
-                     (ap spell_id-3 $array-inline-7)
-                     (ap #array-inline-6-0 $array-inline-7)
-                    )
-                    (canon %init_peer_id% $array-inline-7  #array-inline-7-0)
+                    (ap spell_id-3 $array-inline-7)
+                    (ap #array-inline-6-0 $array-inline-7)
                    )
+                   (canon %init_peer_id% $array-inline-7  #array-inline-7-0)
                   )
-                  (call %init_peer_id% ("run-console" "print") [#array-inline-7-0])
                  )
+                 (call %init_peer_id% ("run-console" "print") [#array-inline-7-0])
                 )
                )
-               (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-4)
               )
               (xor
                (seq
@@ -279,17 +276,17 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                               )
                              )
                             )
-                            (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-5)
+                            (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-4)
                            )
                            (call %init_peer_id% ("debug" "stringify") [#array-inline-8-0] str-3)
                           )
                           (par
-                           (call %init_peer_id% (spell_id-5 "list_push_string") ["logs" str-3])
+                           (call %init_peer_id% (spell_id-4 "list_push_string") ["logs" str-3])
                            (seq
                             (new $array-inline-9
                              (seq
                               (seq
-                               (ap spell_id-5 $array-inline-9)
+                               (ap spell_id-4 $array-inline-9)
                                (ap #array-inline-8-0 $array-inline-9)
                               )
                               (canon %init_peer_id% $array-inline-9  #array-inline-9-0)
@@ -339,29 +336,212 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                 (new $result
                                  (seq
                                   (seq
-                                   (seq
-                                    (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-6)
-                                    (call %init_peer_id% (spell_id-6 "exists") [s-0.$.name!] deployed)
-                                   )
+                                   (call %init_peer_id% ("worker-spell" "get_string") [s-0.$.name!] deployed)
                                    (xor
-                                    (match deployed.$.flag! true
-                                     (xor
-                                      (seq
+                                    (seq
+                                     (seq
+                                      (null)
+                                      (new $res
                                        (seq
-                                        (call %init_peer_id% ("op" "concat_strings") ["blueprint:" s-0.$.name!] concat_strings)
-                                        (call %init_peer_id% (spell_id-6 "get_string") [concat_strings] stored_blueprint)
-                                       )
-                                       (xor
-                                        (match stored_blueprint.$.str! blueprint_id
-                                         (ap true $result)
+                                        (xor
+                                         (match deployed.$.success! true
+                                          (ap deployed.$.absent! $res)
+                                         )
+                                         (ap false $res)
                                         )
-                                        (ap false $result)
+                                        (new $res_test
+                                         (seq
+                                          (seq
+                                           (seq
+                                            (call %init_peer_id% ("math" "add") [0 1] res_incr)
+                                            (fold $res res_fold_var
+                                             (seq
+                                              (seq
+                                               (ap res_fold_var $res_test)
+                                               (canon %init_peer_id% $res_test  #res_iter_canon)
+                                              )
+                                              (xor
+                                               (match #res_iter_canon.length res_incr
+                                                (null)
+                                               )
+                                               (next res_fold_var)
+                                              )
+                                             )
+                                             (never)
+                                            )
+                                           )
+                                           (canon %init_peer_id% $res_test  #res_result_canon)
+                                          )
+                                          (ap #res_result_canon res_gate)
+                                         )
+                                        )
                                        )
                                       )
-                                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
+                                     )
+                                     (match res_gate.$.[0]! true
+                                      (ap false $result)
                                      )
                                     )
-                                    (ap false $result)
+                                    (seq
+                                     (seq
+                                      (ap deployed.$.str! deployed_flat)
+                                      (call %init_peer_id% ("srv" "info") [deployed_flat] info)
+                                     )
+                                     (xor
+                                      (match info.$.blueprint_id! blueprint_id
+                                       (ap true $result)
+                                      )
+                                      (seq
+                                       (seq
+                                        (seq
+                                         (seq
+                                          (seq
+                                           (new $array-inline-10
+                                            (seq
+                                             (seq
+                                              (ap s-0.$.name! $array-inline-10)
+                                              (ap "blueprint changed, need to redeploy" $array-inline-10)
+                                             )
+                                             (canon %init_peer_id% $array-inline-10  #array-inline-10-0)
+                                            )
+                                           )
+                                           (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-5)
+                                          )
+                                          (call %init_peer_id% ("debug" "stringify") [#array-inline-10-0] str-4)
+                                         )
+                                         (par
+                                          (call %init_peer_id% (spell_id-5 "list_push_string") ["logs" str-4])
+                                          (seq
+                                           (new $array-inline-11
+                                            (seq
+                                             (seq
+                                              (ap spell_id-5 $array-inline-11)
+                                              (ap #array-inline-10-0 $array-inline-11)
+                                             )
+                                             (canon %init_peer_id% $array-inline-11  #array-inline-11-0)
+                                            )
+                                           )
+                                           (call %init_peer_id% ("run-console" "print") [#array-inline-11-0])
+                                          )
+                                         )
+                                        )
+                                        (xor
+                                         (seq
+                                          (seq
+                                           (seq
+                                            (seq
+                                             (seq
+                                              (seq
+                                               (seq
+                                                (seq
+                                                 (new $array-inline-12
+                                                  (seq
+                                                   (seq
+                                                    (seq
+                                                     (ap s-0.$.name! $array-inline-12)
+                                                     (ap "removing old service" $array-inline-12)
+                                                    )
+                                                    (ap deployed_flat $array-inline-12)
+                                                   )
+                                                   (canon %init_peer_id% $array-inline-12  #array-inline-12-0)
+                                                  )
+                                                 )
+                                                 (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-6)
+                                                )
+                                                (call %init_peer_id% ("debug" "stringify") [#array-inline-12-0] str-5)
+                                               )
+                                               (par
+                                                (call %init_peer_id% (spell_id-6 "list_push_string") ["logs" str-5])
+                                                (seq
+                                                 (new $array-inline-13
+                                                  (seq
+                                                   (seq
+                                                    (ap spell_id-6 $array-inline-13)
+                                                    (ap #array-inline-12-0 $array-inline-13)
+                                                   )
+                                                   (canon %init_peer_id% $array-inline-13  #array-inline-13-0)
+                                                  )
+                                                 )
+                                                 (call %init_peer_id% ("run-console" "print") [#array-inline-13-0])
+                                                )
+                                               )
+                                              )
+                                              (call %init_peer_id% ("srv" "remove") [deployed_flat])
+                                             )
+                                             (new $array-inline-14
+                                              (seq
+                                               (seq
+                                                (seq
+                                                 (ap s-0.$.name! $array-inline-14)
+                                                 (ap "old service successfully removed" $array-inline-14)
+                                                )
+                                                (ap deployed_flat $array-inline-14)
+                                               )
+                                               (canon %init_peer_id% $array-inline-14  #array-inline-14-0)
+                                              )
+                                             )
+                                            )
+                                            (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-7)
+                                           )
+                                           (call %init_peer_id% ("debug" "stringify") [#array-inline-14-0] str-6)
+                                          )
+                                          (par
+                                           (call %init_peer_id% (spell_id-7 "list_push_string") ["logs" str-6])
+                                           (seq
+                                            (new $array-inline-15
+                                             (seq
+                                              (seq
+                                               (ap spell_id-7 $array-inline-15)
+                                               (ap #array-inline-14-0 $array-inline-15)
+                                              )
+                                              (canon %init_peer_id% $array-inline-15  #array-inline-15-0)
+                                             )
+                                            )
+                                            (call %init_peer_id% ("run-console" "print") [#array-inline-15-0])
+                                           )
+                                          )
+                                         )
+                                         (seq
+                                          (seq
+                                           (seq
+                                            (new $array-inline-16
+                                             (seq
+                                              (seq
+                                               (seq
+                                                (ap "Error removing service" $array-inline-16)
+                                                (ap s-0.$.name! $array-inline-16)
+                                               )
+                                               (ap %last_error% $array-inline-16)
+                                              )
+                                              (canon %init_peer_id% $array-inline-16  #array-inline-16-0)
+                                             )
+                                            )
+                                            (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-8)
+                                           )
+                                           (call %init_peer_id% ("debug" "stringify") [#array-inline-16-0] str-7)
+                                          )
+                                          (par
+                                           (call %init_peer_id% (spell_id-8 "list_push_string") ["logs" str-7])
+                                           (seq
+                                            (new $array-inline-17
+                                             (seq
+                                              (seq
+                                               (ap spell_id-8 $array-inline-17)
+                                               (ap #array-inline-16-0 $array-inline-17)
+                                              )
+                                              (canon %init_peer_id% $array-inline-17  #array-inline-17-0)
+                                             )
+                                            )
+                                            (call %init_peer_id% ("run-console" "print") [#array-inline-17-0])
+                                           )
+                                          )
+                                         )
+                                        )
+                                       )
+                                       (ap false $result)
+                                      )
+                                     )
+                                    )
                                    )
                                   )
                                   (new $result_test
@@ -403,39 +583,39 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                         (seq
                                          (seq
                                           (seq
-                                           (call %init_peer_id% (spell_id-4 "set_string") ["status" "install in progress"])
+                                           (call %init_peer_id% ("worker-spell" "set_string") ["status" "install in progress"])
                                            (call %init_peer_id% ("srv" "create") [blueprint_id] service_id)
                                           )
-                                          (new $array-inline-10
+                                          (new $array-inline-18
                                            (seq
                                             (seq
                                              (seq
-                                              (ap "Created service" $array-inline-10)
-                                              (ap s-0.$.name! $array-inline-10)
+                                              (ap "Created service" $array-inline-18)
+                                              (ap s-0.$.name! $array-inline-18)
                                              )
-                                             (ap service_id $array-inline-10)
+                                             (ap service_id $array-inline-18)
                                             )
-                                            (canon %init_peer_id% $array-inline-10  #array-inline-10-0)
+                                            (canon %init_peer_id% $array-inline-18  #array-inline-18-0)
                                            )
                                           )
                                          )
-                                         (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-7)
+                                         (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-9)
                                         )
-                                        (call %init_peer_id% ("debug" "stringify") [#array-inline-10-0] str-4)
+                                        (call %init_peer_id% ("debug" "stringify") [#array-inline-18-0] str-8)
                                        )
                                        (par
-                                        (call %init_peer_id% (spell_id-7 "list_push_string") ["logs" str-4])
+                                        (call %init_peer_id% (spell_id-9 "list_push_string") ["logs" str-8])
                                         (seq
-                                         (new $array-inline-11
+                                         (new $array-inline-19
                                           (seq
                                            (seq
-                                            (ap spell_id-7 $array-inline-11)
-                                            (ap #array-inline-10-0 $array-inline-11)
+                                            (ap spell_id-9 $array-inline-19)
+                                            (ap #array-inline-18-0 $array-inline-19)
                                            )
-                                           (canon %init_peer_id% $array-inline-11  #array-inline-11-0)
+                                           (canon %init_peer_id% $array-inline-19  #array-inline-19-0)
                                           )
                                          )
-                                         (call %init_peer_id% ("run-console" "print") [#array-inline-11-0])
+                                         (call %init_peer_id% ("run-console" "print") [#array-inline-19-0])
                                         )
                                        )
                                       )
@@ -444,82 +624,82 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                        (seq
                                         (seq
                                          (seq
-                                          (new $array-inline-12
+                                          (new $array-inline-20
                                            (seq
                                             (seq
                                              (seq
                                               (seq
-                                               (ap "Error creating alias for deployed service" $array-inline-12)
-                                               (ap s-0.$.name! $array-inline-12)
+                                               (ap "Error creating alias for deployed service" $array-inline-20)
+                                               (ap s-0.$.name! $array-inline-20)
                                               )
-                                              (ap service_id $array-inline-12)
+                                              (ap service_id $array-inline-20)
                                              )
-                                             (ap %last_error% $array-inline-12)
+                                             (ap %last_error% $array-inline-20)
                                             )
-                                            (canon %init_peer_id% $array-inline-12  #array-inline-12-0)
+                                            (canon %init_peer_id% $array-inline-20  #array-inline-20-0)
                                            )
                                           )
-                                          (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-8)
+                                          (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-10)
                                          )
-                                         (call %init_peer_id% ("debug" "stringify") [#array-inline-12-0] str-5)
+                                         (call %init_peer_id% ("debug" "stringify") [#array-inline-20-0] str-9)
                                         )
                                         (par
-                                         (call %init_peer_id% (spell_id-8 "list_push_string") ["logs" str-5])
+                                         (call %init_peer_id% (spell_id-10 "list_push_string") ["logs" str-9])
                                          (seq
-                                          (new $array-inline-13
+                                          (new $array-inline-21
                                            (seq
                                             (seq
-                                             (ap spell_id-8 $array-inline-13)
-                                             (ap #array-inline-12-0 $array-inline-13)
+                                             (ap spell_id-10 $array-inline-21)
+                                             (ap #array-inline-20-0 $array-inline-21)
                                             )
-                                            (canon %init_peer_id% $array-inline-13  #array-inline-13-0)
+                                            (canon %init_peer_id% $array-inline-21  #array-inline-21-0)
                                            )
                                           )
-                                          (call %init_peer_id% ("run-console" "print") [#array-inline-13-0])
+                                          (call %init_peer_id% ("run-console" "print") [#array-inline-21-0])
                                          )
                                         )
                                        )
                                       )
                                      )
-                                     (call %init_peer_id% (spell_id-4 "set_string") [s-0.$.name! service_id])
+                                     (call %init_peer_id% ("worker-spell" "set_string") [s-0.$.name! service_id])
                                     )
-                                    (call %init_peer_id% ("op" "concat_strings") ["blueprint:" s-0.$.name!] concat_strings-0)
+                                    (call %init_peer_id% ("op" "concat_strings") ["blueprint:" s-0.$.name!] concat_strings)
                                    )
-                                   (call %init_peer_id% (spell_id-4 "set_string") [concat_strings-0 blueprint_id])
+                                   (call %init_peer_id% ("worker-spell" "set_string") [concat_strings blueprint_id])
                                   )
-                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
+                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
                                  )
                                 )
                                )
                                (seq
                                 (seq
                                  (seq
-                                  (new $array-inline-14
+                                  (new $array-inline-22
                                    (seq
                                     (seq
-                                     (ap s-0.$.name! $array-inline-14)
-                                     (ap "service is already deployed, doing nothing" $array-inline-14)
+                                     (ap s-0.$.name! $array-inline-22)
+                                     (ap "service is already deployed, doing nothing" $array-inline-22)
                                     )
-                                    (canon %init_peer_id% $array-inline-14  #array-inline-14-0)
+                                    (canon %init_peer_id% $array-inline-22  #array-inline-22-0)
                                    )
                                   )
-                                  (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-9)
+                                  (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-11)
                                  )
-                                 (call %init_peer_id% ("debug" "stringify") [#array-inline-14-0] str-6)
+                                 (call %init_peer_id% ("debug" "stringify") [#array-inline-22-0] str-10)
                                 )
                                 (par
-                                 (call %init_peer_id% (spell_id-9 "list_push_string") ["logs" str-6])
+                                 (call %init_peer_id% (spell_id-11 "list_push_string") ["logs" str-10])
                                  (seq
-                                  (new $array-inline-15
+                                  (new $array-inline-23
                                    (seq
                                     (seq
-                                     (ap spell_id-9 $array-inline-15)
-                                     (ap #array-inline-14-0 $array-inline-15)
+                                     (ap spell_id-11 $array-inline-23)
+                                     (ap #array-inline-22-0 $array-inline-23)
                                     )
-                                    (canon %init_peer_id% $array-inline-15  #array-inline-15-0)
+                                    (canon %init_peer_id% $array-inline-23  #array-inline-23-0)
                                    )
                                   )
-                                  (call %init_peer_id% ("run-console" "print") [#array-inline-15-0])
+                                  (call %init_peer_id% ("run-console" "print") [#array-inline-23-0])
                                  )
                                 )
                                )
@@ -528,35 +708,35 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                              (seq
                               (seq
                                (seq
-                                (new $array-inline-16
+                                (new $array-inline-24
                                  (seq
                                   (seq
                                    (seq
-                                    (ap "Error deploying service" $array-inline-16)
-                                    (ap s-0.$.name! $array-inline-16)
+                                    (ap "Error deploying service" $array-inline-24)
+                                    (ap s-0.$.name! $array-inline-24)
                                    )
-                                   (ap %last_error% $array-inline-16)
+                                   (ap %last_error% $array-inline-24)
                                   )
-                                  (canon %init_peer_id% $array-inline-16  #array-inline-16-0)
+                                  (canon %init_peer_id% $array-inline-24  #array-inline-24-0)
                                  )
                                 )
-                                (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-10)
+                                (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-12)
                                )
-                               (call %init_peer_id% ("debug" "stringify") [#array-inline-16-0] str-7)
+                               (call %init_peer_id% ("debug" "stringify") [#array-inline-24-0] str-11)
                               )
                               (par
-                               (call %init_peer_id% (spell_id-10 "list_push_string") ["logs" str-7])
+                               (call %init_peer_id% (spell_id-12 "list_push_string") ["logs" str-11])
                                (seq
-                                (new $array-inline-17
+                                (new $array-inline-25
                                  (seq
                                   (seq
-                                   (ap spell_id-10 $array-inline-17)
-                                   (ap #array-inline-16-0 $array-inline-17)
+                                   (ap spell_id-12 $array-inline-25)
+                                   (ap #array-inline-24-0 $array-inline-25)
                                   )
-                                  (canon %init_peer_id% $array-inline-17  #array-inline-17-0)
+                                  (canon %init_peer_id% $array-inline-25  #array-inline-25-0)
                                  )
                                 )
-                                (call %init_peer_id% ("run-console" "print") [#array-inline-17-0])
+                                (call %init_peer_id% ("run-console" "print") [#array-inline-25-0])
                                )
                               )
                              )
@@ -573,37 +753,34 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                             (seq
                              (seq
                               (seq
-                               (seq
-                                (new $array-inline-18
+                               (new $array-inline-26
+                                (seq
                                  (seq
-                                  (seq
-                                   (ap "Deploying spell" $array-inline-18)
-                                   (ap sp-0.$.name! $array-inline-18)
-                                  )
-                                  (canon %init_peer_id% $array-inline-18  #array-inline-18-0)
+                                  (ap "Deploying spell" $array-inline-26)
+                                  (ap sp-0.$.name! $array-inline-26)
                                  )
+                                 (canon %init_peer_id% $array-inline-26  #array-inline-26-0)
                                 )
-                                (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-11)
                                )
-                               (call %init_peer_id% ("debug" "stringify") [#array-inline-18-0] str-8)
+                               (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-13)
                               )
-                              (par
-                               (call %init_peer_id% (spell_id-11 "list_push_string") ["logs" str-8])
-                               (seq
-                                (new $array-inline-19
+                              (call %init_peer_id% ("debug" "stringify") [#array-inline-26-0] str-12)
+                             )
+                             (par
+                              (call %init_peer_id% (spell_id-13 "list_push_string") ["logs" str-12])
+                              (seq
+                               (new $array-inline-27
+                                (seq
                                  (seq
-                                  (seq
-                                   (ap spell_id-11 $array-inline-19)
-                                   (ap #array-inline-18-0 $array-inline-19)
-                                  )
-                                  (canon %init_peer_id% $array-inline-19  #array-inline-19-0)
+                                  (ap spell_id-13 $array-inline-27)
+                                  (ap #array-inline-26-0 $array-inline-27)
                                  )
+                                 (canon %init_peer_id% $array-inline-27  #array-inline-27-0)
                                 )
-                                (call %init_peer_id% ("run-console" "print") [#array-inline-19-0])
                                )
+                               (call %init_peer_id% ("run-console" "print") [#array-inline-27-0])
                               )
                              )
-                             (call %init_peer_id% ("getDataSrv" "spell_id") [] worker_spell-0)
                             )
                             (xor
                              (xor
@@ -612,101 +789,259 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                 (seq
                                  (xor
                                   (seq
-                                   (seq
-                                    (call %init_peer_id% ("getDataSrv" "spell_id") [] worker_spell-1)
-                                    (call %init_peer_id% (worker_spell-1 "exists") [sp-0.$.name!] deployed-0)
-                                   )
+                                   (call %init_peer_id% ("worker-spell" "get_string") [sp-0.$.name!] deployed-0)
                                    (xor
-                                    (match deployed-0.$.flag! true
-                                     (xor
-                                      (seq
+                                    (seq
+                                     (seq
+                                      (null)
+                                      (new $res-0
                                        (seq
-                                        (call %init_peer_id% ("op" "concat_strings") ["script:" sp-0.$.name!] concat_strings-1)
-                                        (call %init_peer_id% (worker_spell-1 "get_string") [concat_strings-1] stored_script)
-                                       )
-                                       (xor
-                                        (seq
-                                         (null)
-                                         (match stored_script.$.str! sp-0.$.script!
-                                          (ap true $result-0)
+                                        (xor
+                                         (match deployed-0.$.success! true
+                                          (ap deployed-0.$.absent! $res-0)
+                                         )
+                                         (ap false $res-0)
+                                        )
+                                        (new $res-0_test
+                                         (seq
+                                          (seq
+                                           (seq
+                                            (call %init_peer_id% ("math" "add") [0 1] res-0_incr)
+                                            (fold $res-0 res-0_fold_var
+                                             (seq
+                                              (seq
+                                               (ap res-0_fold_var $res-0_test)
+                                               (canon %init_peer_id% $res-0_test  #res-0_iter_canon)
+                                              )
+                                              (xor
+                                               (match #res-0_iter_canon.length res-0_incr
+                                                (null)
+                                               )
+                                               (next res-0_fold_var)
+                                              )
+                                             )
+                                             (never)
+                                            )
+                                           )
+                                           (canon %init_peer_id% $res-0_test  #res-0_result_canon)
+                                          )
+                                          (ap #res-0_result_canon res-0_gate)
                                          )
                                         )
+                                       )
+                                      )
+                                     )
+                                     (match res-0_gate.$.[0]! true
+                                      (ap false $result-0)
+                                     )
+                                    )
+                                    (seq
+                                     (seq
+                                      (seq
+                                       (seq
+                                        (seq
+                                         (seq
+                                          (seq
+                                           (ap deployed-0.$.str! deployed-0_flat)
+                                           (call %init_peer_id% ("srv" "info") [deployed-0_flat])
+                                          )
+                                          (call %init_peer_id% (deployed-0_flat "script_cid") [] stored_script)
+                                         )
+                                         (new $array-inline-28
+                                          (seq
+                                           (seq
+                                            (seq
+                                             (seq
+                                              (seq
+                                               (ap deployed-0_flat $array-inline-28)
+                                               (ap "script cid was:" $array-inline-28)
+                                              )
+                                              (ap stored_script.$.v1_str! $array-inline-28)
+                                             )
+                                             (ap "new:" $array-inline-28)
+                                            )
+                                            (ap sp-0.$.script! $array-inline-28)
+                                           )
+                                           (canon %init_peer_id% $array-inline-28  #array-inline-28-0)
+                                          )
+                                         )
+                                        )
+                                        (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-15)
+                                       )
+                                       (call %init_peer_id% ("debug" "stringify") [#array-inline-28-0] str-13)
+                                      )
+                                      (par
+                                       (call %init_peer_id% (spell_id-15 "list_push_string") ["logs" str-13])
+                                       (seq
+                                        (new $array-inline-29
+                                         (seq
+                                          (seq
+                                           (ap spell_id-15 $array-inline-29)
+                                           (ap #array-inline-28-0 $array-inline-29)
+                                          )
+                                          (canon %init_peer_id% $array-inline-29  #array-inline-29-0)
+                                         )
+                                        )
+                                        (call %init_peer_id% ("run-console" "print") [#array-inline-29-0])
+                                       )
+                                      )
+                                     )
+                                     (xor
+                                      (seq
+                                       (null)
+                                       (match stored_script.$.v1_str! sp-0.$.script!
+                                        (ap true $result-0)
+                                       )
+                                      )
+                                      (seq
+                                       (seq
                                         (seq
                                          (seq
                                           (seq
                                            (seq
-                                            (new $array-inline-20
+                                            (seq
                                              (seq
                                               (seq
-                                               (ap sp-0.$.name! $array-inline-20)
-                                               (ap "script mismath, need to redeploy" $array-inline-20)
+                                               (seq
+                                                (seq
+                                                 (seq
+                                                  (seq
+                                                   (new $array-inline-30
+                                                    (seq
+                                                     (seq
+                                                      (ap sp-0.$.name! $array-inline-30)
+                                                      (ap "script changed, need to redeploy" $array-inline-30)
+                                                     )
+                                                     (canon %init_peer_id% $array-inline-30  #array-inline-30-0)
+                                                    )
+                                                   )
+                                                   (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-16)
+                                                  )
+                                                  (call %init_peer_id% ("debug" "stringify") [#array-inline-30-0] str-14)
+                                                 )
+                                                 (par
+                                                  (call %init_peer_id% (spell_id-16 "list_push_string") ["logs" str-14])
+                                                  (seq
+                                                   (new $array-inline-31
+                                                    (seq
+                                                     (seq
+                                                      (ap spell_id-16 $array-inline-31)
+                                                      (ap #array-inline-30-0 $array-inline-31)
+                                                     )
+                                                     (canon %init_peer_id% $array-inline-31  #array-inline-31-0)
+                                                    )
+                                                   )
+                                                   (call %init_peer_id% ("run-console" "print") [#array-inline-31-0])
+                                                  )
+                                                 )
+                                                )
+                                                (new $array-inline-32
+                                                 (seq
+                                                  (seq
+                                                   (seq
+                                                    (ap sp-0.$.name! $array-inline-32)
+                                                    (ap "removing old spell" $array-inline-32)
+                                                   )
+                                                   (ap deployed-0_flat $array-inline-32)
+                                                  )
+                                                  (canon %init_peer_id% $array-inline-32  #array-inline-32-0)
+                                                 )
+                                                )
+                                               )
+                                               (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-17)
                                               )
-                                              (canon %init_peer_id% $array-inline-20  #array-inline-20-0)
+                                              (call %init_peer_id% ("debug" "stringify") [#array-inline-32-0] str-15)
+                                             )
+                                             (par
+                                              (call %init_peer_id% (spell_id-17 "list_push_string") ["logs" str-15])
+                                              (seq
+                                               (new $array-inline-33
+                                                (seq
+                                                 (seq
+                                                  (ap spell_id-17 $array-inline-33)
+                                                  (ap #array-inline-32-0 $array-inline-33)
+                                                 )
+                                                 (canon %init_peer_id% $array-inline-33  #array-inline-33-0)
+                                                )
+                                               )
+                                               (call %init_peer_id% ("run-console" "print") [#array-inline-33-0])
+                                              )
                                              )
                                             )
-                                            (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-13)
+                                            (call %init_peer_id% ("spell" "remove") [deployed-0_flat])
                                            )
-                                           (call %init_peer_id% ("debug" "stringify") [#array-inline-20-0] str-9)
-                                          )
-                                          (par
-                                           (call %init_peer_id% (spell_id-13 "list_push_string") ["logs" str-9])
-                                           (seq
-                                            (new $array-inline-21
+                                           (new $array-inline-34
+                                            (seq
                                              (seq
                                               (seq
-                                               (ap spell_id-13 $array-inline-21)
-                                               (ap #array-inline-20-0 $array-inline-21)
+                                               (ap sp-0.$.name! $array-inline-34)
+                                               (ap "old spell successfully removed" $array-inline-34)
                                               )
-                                              (canon %init_peer_id% $array-inline-21  #array-inline-21-0)
+                                              (ap deployed-0_flat $array-inline-34)
                                              )
+                                             (canon %init_peer_id% $array-inline-34  #array-inline-34-0)
                                             )
-                                            (call %init_peer_id% ("run-console" "print") [#array-inline-21-0])
                                            )
                                           )
+                                          (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-18)
                                          )
-                                         (ap false $result-0)
+                                         (call %init_peer_id% ("debug" "stringify") [#array-inline-34-0] str-16)
+                                        )
+                                        (par
+                                         (call %init_peer_id% (spell_id-18 "list_push_string") ["logs" str-16])
+                                         (seq
+                                          (new $array-inline-35
+                                           (seq
+                                            (seq
+                                             (ap spell_id-18 $array-inline-35)
+                                             (ap #array-inline-34-0 $array-inline-35)
+                                            )
+                                            (canon %init_peer_id% $array-inline-35  #array-inline-35-0)
+                                           )
+                                          )
+                                          (call %init_peer_id% ("run-console" "print") [#array-inline-35-0])
+                                         )
                                         )
                                        )
+                                       (ap false $result-0)
                                       )
-                                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
                                      )
                                     )
-                                    (ap false $result-0)
                                    )
                                   )
                                   (seq
                                    (seq
                                     (seq
                                      (seq
-                                      (new $array-inline-22
+                                      (new $array-inline-36
                                        (seq
                                         (seq
                                          (seq
-                                          (ap "Error check spell deployed" $array-inline-22)
-                                          (ap sp-0.$.name! $array-inline-22)
+                                          (ap "Error check spell deployed" $array-inline-36)
+                                          (ap sp-0.$.name! $array-inline-36)
                                          )
-                                         (ap %last_error% $array-inline-22)
+                                         (ap %last_error% $array-inline-36)
                                         )
-                                        (canon %init_peer_id% $array-inline-22  #array-inline-22-0)
+                                        (canon %init_peer_id% $array-inline-36  #array-inline-36-0)
                                        )
                                       )
-                                      (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-14)
+                                      (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-19)
                                      )
-                                     (call %init_peer_id% ("debug" "stringify") [#array-inline-22-0] str-10)
+                                     (call %init_peer_id% ("debug" "stringify") [#array-inline-36-0] str-17)
                                     )
                                     (par
-                                     (call %init_peer_id% (spell_id-14 "list_push_string") ["logs" str-10])
+                                     (call %init_peer_id% (spell_id-19 "list_push_string") ["logs" str-17])
                                      (seq
-                                      (new $array-inline-23
+                                      (new $array-inline-37
                                        (seq
                                         (seq
-                                         (ap spell_id-14 $array-inline-23)
-                                         (ap #array-inline-22-0 $array-inline-23)
+                                         (ap spell_id-19 $array-inline-37)
+                                         (ap #array-inline-36-0 $array-inline-37)
                                         )
-                                        (canon %init_peer_id% $array-inline-23  #array-inline-23-0)
+                                        (canon %init_peer_id% $array-inline-37  #array-inline-37-0)
                                        )
                                       )
-                                      (call %init_peer_id% ("run-console" "print") [#array-inline-23-0])
+                                      (call %init_peer_id% ("run-console" "print") [#array-inline-37-0])
                                      )
                                     )
                                    )
@@ -752,38 +1087,38 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                        (seq
                                         (seq
                                          (seq
-                                          (new $array-inline-24
+                                          (new $array-inline-38
                                            (seq
                                             (seq
-                                             (ap sp-0.$.name! $array-inline-24)
-                                             (ap "spell is already deployed, checking config and init_data" $array-inline-24)
+                                             (ap sp-0.$.name! $array-inline-38)
+                                             (ap "spell is already deployed, checking config and init_args" $array-inline-38)
                                             )
-                                            (canon %init_peer_id% $array-inline-24  #array-inline-24-0)
+                                            (canon %init_peer_id% $array-inline-38  #array-inline-38-0)
                                            )
                                           )
-                                          (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-15)
+                                          (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-20)
                                          )
-                                         (call %init_peer_id% ("debug" "stringify") [#array-inline-24-0] str-11)
+                                         (call %init_peer_id% ("debug" "stringify") [#array-inline-38-0] str-18)
                                         )
                                         (par
-                                         (call %init_peer_id% (spell_id-15 "list_push_string") ["logs" str-11])
+                                         (call %init_peer_id% (spell_id-20 "list_push_string") ["logs" str-18])
                                          (seq
-                                          (new $array-inline-25
+                                          (new $array-inline-39
                                            (seq
                                             (seq
-                                             (ap spell_id-15 $array-inline-25)
-                                             (ap #array-inline-24-0 $array-inline-25)
+                                             (ap spell_id-20 $array-inline-39)
+                                             (ap #array-inline-38-0 $array-inline-39)
                                             )
-                                            (canon %init_peer_id% $array-inline-25  #array-inline-25-0)
+                                            (canon %init_peer_id% $array-inline-39  #array-inline-39-0)
                                            )
                                           )
-                                          (call %init_peer_id% ("run-console" "print") [#array-inline-25-0])
+                                          (call %init_peer_id% ("run-console" "print") [#array-inline-39-0])
                                          )
                                         )
                                        )
-                                       (call %init_peer_id% ("op" "concat_strings") ["trigger_config:" sp-0.$.name!] concat_strings-2)
+                                       (call %init_peer_id% ("op" "concat_strings") ["trigger_config:" sp-0.$.name!] concat_strings-0)
                                       )
-                                      (call %init_peer_id% (worker_spell-0 "get_string") [concat_strings-2] stored_config)
+                                      (call %init_peer_id% ("worker-spell" "get_string") [concat_strings-0] stored_config)
                                      )
                                      (xor
                                       (seq
@@ -803,32 +1138,32 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                                    (seq
                                                     (seq
                                                      (seq
-                                                      (new $array-inline-26
+                                                      (new $array-inline-40
                                                        (seq
                                                         (seq
-                                                         (ap sp-0.$.name! $array-inline-26)
-                                                         (ap "config mismath, updating config" $array-inline-26)
+                                                         (ap sp-0.$.name! $array-inline-40)
+                                                         (ap "config mismath, updating config" $array-inline-40)
                                                         )
-                                                        (canon %init_peer_id% $array-inline-26  #array-inline-26-0)
+                                                        (canon %init_peer_id% $array-inline-40  #array-inline-40-0)
                                                        )
                                                       )
-                                                      (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-16)
+                                                      (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-21)
                                                      )
-                                                     (call %init_peer_id% ("debug" "stringify") [#array-inline-26-0] str-12)
+                                                     (call %init_peer_id% ("debug" "stringify") [#array-inline-40-0] str-19)
                                                     )
                                                     (par
-                                                     (call %init_peer_id% (spell_id-16 "list_push_string") ["logs" str-12])
+                                                     (call %init_peer_id% (spell_id-21 "list_push_string") ["logs" str-19])
                                                      (seq
-                                                      (new $array-inline-27
+                                                      (new $array-inline-41
                                                        (seq
                                                         (seq
-                                                         (ap spell_id-16 $array-inline-27)
-                                                         (ap #array-inline-26-0 $array-inline-27)
+                                                         (ap spell_id-21 $array-inline-41)
+                                                         (ap #array-inline-40-0 $array-inline-41)
                                                         )
-                                                        (canon %init_peer_id% $array-inline-27  #array-inline-27-0)
+                                                        (canon %init_peer_id% $array-inline-41  #array-inline-41-0)
                                                        )
                                                       )
-                                                      (call %init_peer_id% ("run-console" "print") [#array-inline-27-0])
+                                                      (call %init_peer_id% ("run-console" "print") [#array-inline-41-0])
                                                      )
                                                     )
                                                    )
@@ -836,62 +1171,62 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                                   )
                                                   (call %init_peer_id% ("json" "parse") [config_json.$.contents!] config)
                                                  )
-                                                 (call %init_peer_id% ("srv" "resolve_alias") [sp-0.$.name!] spell_id-12)
+                                                 (call %init_peer_id% ("srv" "resolve_alias") [sp-0.$.name!] spell_id-14)
                                                 )
-                                                (call %init_peer_id% ("spell" "update_trigger_config") [spell_id-12 config])
+                                                (call %init_peer_id% ("spell" "update_trigger_config") [spell_id-14 config])
                                                )
                                                (par
-                                                (call %init_peer_id% ("op" "concat_strings") ["trigger_config:" sp-0.$.name!] concat_strings-3)
+                                                (call %init_peer_id% ("op" "concat_strings") ["trigger_config:" sp-0.$.name!] concat_strings-1)
                                                 (null)
                                                )
                                               )
-                                              (call %init_peer_id% (worker_spell-0 "set_string") [concat_strings-3 sp-0.$.config!])
+                                              (call %init_peer_id% ("worker-spell" "set_string") [concat_strings-1 sp-0.$.config!])
                                              )
-                                             (new $array-inline-28
+                                             (new $array-inline-42
                                               (seq
                                                (seq
-                                                (ap sp-0.$.name! $array-inline-28)
-                                                (ap "config is successfully updated" $array-inline-28)
+                                                (ap sp-0.$.name! $array-inline-42)
+                                                (ap "config successfully updated" $array-inline-42)
                                                )
-                                               (canon %init_peer_id% $array-inline-28  #array-inline-28-0)
+                                               (canon %init_peer_id% $array-inline-42  #array-inline-42-0)
                                               )
                                              )
                                             )
-                                            (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-17)
+                                            (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-22)
                                            )
-                                           (call %init_peer_id% ("debug" "stringify") [#array-inline-28-0] str-13)
+                                           (call %init_peer_id% ("debug" "stringify") [#array-inline-42-0] str-20)
                                           )
                                           (par
-                                           (call %init_peer_id% (spell_id-17 "list_push_string") ["logs" str-13])
+                                           (call %init_peer_id% (spell_id-22 "list_push_string") ["logs" str-20])
                                            (seq
-                                            (new $array-inline-29
+                                            (new $array-inline-43
                                              (seq
                                               (seq
-                                               (ap spell_id-17 $array-inline-29)
-                                               (ap #array-inline-28-0 $array-inline-29)
+                                               (ap spell_id-22 $array-inline-43)
+                                               (ap #array-inline-42-0 $array-inline-43)
                                               )
-                                              (canon %init_peer_id% $array-inline-29  #array-inline-29-0)
+                                              (canon %init_peer_id% $array-inline-43  #array-inline-43-0)
                                              )
                                             )
-                                            (call %init_peer_id% ("run-console" "print") [#array-inline-29-0])
+                                            (call %init_peer_id% ("run-console" "print") [#array-inline-43-0])
                                            )
                                           )
                                          )
-                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
+                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
                                         )
                                        )
                                       )
                                       (call %init_peer_id% ("op" "noop") [])
                                      )
                                     )
-                                    (call %init_peer_id% ("op" "concat_strings") ["init_data:" sp-0.$.name!] concat_strings-4)
+                                    (call %init_peer_id% ("op" "concat_strings") ["init_args:" sp-0.$.name!] concat_strings-2)
                                    )
-                                   (call %init_peer_id% (worker_spell-0 "get_string") [concat_strings-4] stored_init_data)
+                                   (call %init_peer_id% ("worker-spell" "get_string") [concat_strings-2] stored_init_args)
                                   )
                                   (xor
                                    (seq
                                     (null)
-                                    (mismatch stored_init_data.$.str! sp-0.$.init_args!
+                                    (mismatch stored_init_args.$.str! sp-0.$.init_args!
                                      (xor
                                       (seq
                                        (seq
@@ -904,84 +1239,84 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                               (seq
                                                (seq
                                                 (seq
-                                                 (new $array-inline-30
+                                                 (new $array-inline-44
                                                   (seq
                                                    (seq
-                                                    (ap sp-0.$.name! $array-inline-30)
-                                                    (ap "init_data mismath, updating init_data" $array-inline-30)
+                                                    (ap sp-0.$.name! $array-inline-44)
+                                                    (ap "init_args changed, updating" $array-inline-44)
                                                    )
-                                                   (canon %init_peer_id% $array-inline-30  #array-inline-30-0)
+                                                   (canon %init_peer_id% $array-inline-44  #array-inline-44-0)
                                                   )
                                                  )
-                                                 (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-18)
+                                                 (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-23)
                                                 )
-                                                (call %init_peer_id% ("debug" "stringify") [#array-inline-30-0] str-14)
+                                                (call %init_peer_id% ("debug" "stringify") [#array-inline-44-0] str-21)
                                                )
                                                (par
-                                                (call %init_peer_id% (spell_id-18 "list_push_string") ["logs" str-14])
+                                                (call %init_peer_id% (spell_id-23 "list_push_string") ["logs" str-21])
                                                 (seq
-                                                 (new $array-inline-31
+                                                 (new $array-inline-45
                                                   (seq
                                                    (seq
-                                                    (ap spell_id-18 $array-inline-31)
-                                                    (ap #array-inline-30-0 $array-inline-31)
+                                                    (ap spell_id-23 $array-inline-45)
+                                                    (ap #array-inline-44-0 $array-inline-45)
                                                    )
-                                                   (canon %init_peer_id% $array-inline-31  #array-inline-31-0)
+                                                   (canon %init_peer_id% $array-inline-45  #array-inline-45-0)
                                                   )
                                                  )
-                                                 (call %init_peer_id% ("run-console" "print") [#array-inline-31-0])
+                                                 (call %init_peer_id% ("run-console" "print") [#array-inline-45-0])
                                                 )
                                                )
                                               )
-                                              (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.init_args! ipfs] init_data)
+                                              (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.init_args! ipfs] new_init_args)
                                              )
-                                             (call %init_peer_id% (sp-0.$.name! "set_json_fields") [init_data.$.contents!])
+                                             (call %init_peer_id% (sp-0.$.name! "set_json_fields") [new_init_args.$.contents!])
                                             )
                                             (par
-                                             (call %init_peer_id% ("op" "concat_strings") ["init_data:" sp-0.$.name!] concat_strings-5)
+                                             (call %init_peer_id% ("op" "concat_strings") ["init_args:" sp-0.$.name!] concat_strings-3)
                                              (null)
                                             )
                                            )
-                                           (call %init_peer_id% (worker_spell-0 "set_string") [concat_strings-5 sp-0.$.init_args!])
+                                           (call %init_peer_id% ("worker-spell" "set_string") [concat_strings-3 sp-0.$.init_args!])
                                           )
-                                          (new $array-inline-32
+                                          (new $array-inline-46
                                            (seq
                                             (seq
-                                             (ap sp-0.$.name! $array-inline-32)
-                                             (ap "init_data is successfully updated" $array-inline-32)
+                                             (ap sp-0.$.name! $array-inline-46)
+                                             (ap "init_args successfully updated" $array-inline-46)
                                             )
-                                            (canon %init_peer_id% $array-inline-32  #array-inline-32-0)
+                                            (canon %init_peer_id% $array-inline-46  #array-inline-46-0)
                                            )
                                           )
                                          )
-                                         (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-19)
+                                         (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-24)
                                         )
-                                        (call %init_peer_id% ("debug" "stringify") [#array-inline-32-0] str-15)
+                                        (call %init_peer_id% ("debug" "stringify") [#array-inline-46-0] str-22)
                                        )
                                        (par
-                                        (call %init_peer_id% (spell_id-19 "list_push_string") ["logs" str-15])
+                                        (call %init_peer_id% (spell_id-24 "list_push_string") ["logs" str-22])
                                         (seq
-                                         (new $array-inline-33
+                                         (new $array-inline-47
                                           (seq
                                            (seq
-                                            (ap spell_id-19 $array-inline-33)
-                                            (ap #array-inline-32-0 $array-inline-33)
+                                            (ap spell_id-24 $array-inline-47)
+                                            (ap #array-inline-46-0 $array-inline-47)
                                            )
-                                           (canon %init_peer_id% $array-inline-33  #array-inline-33-0)
+                                           (canon %init_peer_id% $array-inline-47  #array-inline-47-0)
                                           )
                                          )
-                                         (call %init_peer_id% ("run-console" "print") [#array-inline-33-0])
+                                         (call %init_peer_id% ("run-console" "print") [#array-inline-47-0])
                                         )
                                        )
                                       )
-                                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
+                                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
                                      )
                                     )
                                    )
                                    (call %init_peer_id% ("op" "noop") [])
                                   )
                                  )
-                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 7])
+                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
                                 )
                                )
                               )
@@ -1001,152 +1336,143 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                            (seq
                                             (seq
                                              (seq
-                                              (seq
-                                               (seq
-                                                (call %init_peer_id% (worker_spell-0 "set_string") ["status" "install in progress"])
-                                                (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.script! ipfs] script)
-                                               )
-                                               (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.config! ipfs] cfg_json)
-                                              )
-                                              (call %init_peer_id% ("json" "parse") [cfg_json.$.contents!] cfg-0)
+                                              (call %init_peer_id% ("worker-spell" "set_string") ["status" "install in progress"])
+                                              (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.script! ipfs] script)
                                              )
-                                             (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.init_args! ipfs] init_args_str)
+                                             (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.config! ipfs] cfg_json)
                                             )
-                                            (call %init_peer_id% ("json" "parse") [init_args_str.$.contents!] init_args)
+                                            (call %init_peer_id% ("json" "parse") [cfg_json.$.contents!] cfg-0)
                                            )
-                                           (call %init_peer_id% ("spell" "install") [script.$.contents! init_args cfg-0] sp_id)
+                                           (call %init_peer_id% ("aqua-ipfs" "cat_from") [sp-0.$.init_args! ipfs] init_args_str)
                                           )
-                                          (new $array-inline-34
-                                           (seq
-                                            (seq
-                                             (seq
-                                              (ap "Installed spell" $array-inline-34)
-                                              (ap sp-0.$.name! $array-inline-34)
-                                             )
-                                             (ap sp_id $array-inline-34)
-                                            )
-                                            (canon %init_peer_id% $array-inline-34  #array-inline-34-0)
-                                           )
-                                          )
+                                          (call %init_peer_id% ("json" "parse") [init_args_str.$.contents!] init_args)
                                          )
-                                         (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-20)
+                                         (call %init_peer_id% ("spell" "install") [script.$.contents! init_args cfg-0] sp_id)
                                         )
-                                        (call %init_peer_id% ("debug" "stringify") [#array-inline-34-0] str-16)
-                                       )
-                                       (par
-                                        (call %init_peer_id% (spell_id-20 "list_push_string") ["logs" str-16])
-                                        (seq
-                                         (new $array-inline-35
+                                        (new $array-inline-48
+                                         (seq
                                           (seq
                                            (seq
-                                            (ap spell_id-20 $array-inline-35)
-                                            (ap #array-inline-34-0 $array-inline-35)
+                                            (ap "Installed spell" $array-inline-48)
+                                            (ap sp-0.$.name! $array-inline-48)
                                            )
-                                           (canon %init_peer_id% $array-inline-35  #array-inline-35-0)
+                                           (ap sp_id $array-inline-48)
                                           )
+                                          (canon %init_peer_id% $array-inline-48  #array-inline-48-0)
                                          )
-                                         (call %init_peer_id% ("run-console" "print") [#array-inline-35-0])
                                         )
                                        )
+                                       (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-25)
                                       )
-                                      (xor
-                                       (call %init_peer_id% ("srv" "add_alias") [sp-0.$.name! sp_id])
-                                       (seq
+                                      (call %init_peer_id% ("debug" "stringify") [#array-inline-48-0] str-23)
+                                     )
+                                     (par
+                                      (call %init_peer_id% (spell_id-25 "list_push_string") ["logs" str-23])
+                                      (seq
+                                       (new $array-inline-49
                                         (seq
                                          (seq
-                                          (new $array-inline-36
-                                           (seq
-                                            (seq
-                                             (seq
-                                              (seq
-                                               (ap "Error creating alias for deployed spell" $array-inline-36)
-                                               (ap sp-0.$.name! $array-inline-36)
-                                              )
-                                              (ap sp_id $array-inline-36)
-                                             )
-                                             (ap %last_error% $array-inline-36)
-                                            )
-                                            (canon %init_peer_id% $array-inline-36  #array-inline-36-0)
-                                           )
-                                          )
-                                          (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-21)
+                                          (ap spell_id-25 $array-inline-49)
+                                          (ap #array-inline-48-0 $array-inline-49)
                                          )
-                                         (call %init_peer_id% ("debug" "stringify") [#array-inline-36-0] str-17)
+                                         (canon %init_peer_id% $array-inline-49  #array-inline-49-0)
                                         )
-                                        (par
-                                         (call %init_peer_id% (spell_id-21 "list_push_string") ["logs" str-17])
+                                       )
+                                       (call %init_peer_id% ("run-console" "print") [#array-inline-49-0])
+                                      )
+                                     )
+                                    )
+                                    (xor
+                                     (call %init_peer_id% ("srv" "add_alias") [sp-0.$.name! sp_id])
+                                     (seq
+                                      (seq
+                                       (seq
+                                        (new $array-inline-50
                                          (seq
-                                          (new $array-inline-37
+                                          (seq
                                            (seq
                                             (seq
-                                             (ap spell_id-21 $array-inline-37)
-                                             (ap #array-inline-36-0 $array-inline-37)
+                                             (ap "Error creating alias for deployed spell" $array-inline-50)
+                                             (ap sp-0.$.name! $array-inline-50)
                                             )
-                                            (canon %init_peer_id% $array-inline-37  #array-inline-37-0)
+                                            (ap sp_id $array-inline-50)
                                            )
+                                           (ap %last_error% $array-inline-50)
                                           )
-                                          (call %init_peer_id% ("run-console" "print") [#array-inline-37-0])
+                                          (canon %init_peer_id% $array-inline-50  #array-inline-50-0)
                                          )
                                         )
+                                        (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-26)
+                                       )
+                                       (call %init_peer_id% ("debug" "stringify") [#array-inline-50-0] str-24)
+                                      )
+                                      (par
+                                       (call %init_peer_id% (spell_id-26 "list_push_string") ["logs" str-24])
+                                       (seq
+                                        (new $array-inline-51
+                                         (seq
+                                          (seq
+                                           (ap spell_id-26 $array-inline-51)
+                                           (ap #array-inline-50-0 $array-inline-51)
+                                          )
+                                          (canon %init_peer_id% $array-inline-51  #array-inline-51-0)
+                                         )
+                                        )
+                                        (call %init_peer_id% ("run-console" "print") [#array-inline-51-0])
                                        )
                                       )
                                      )
-                                     (call %init_peer_id% (worker_spell-0 "set_string") [sp-0.$.name! sp_id])
-                                    )
-                                    (par
-                                     (call %init_peer_id% ("op" "concat_strings") ["script:" sp-0.$.name!] concat_strings-6)
-                                     (null)
                                     )
                                    )
-                                   (call %init_peer_id% (worker_spell-0 "set_string") [concat_strings-6 sp-0.$.script!])
+                                   (call %init_peer_id% ("worker-spell" "set_string") [sp-0.$.name! sp_id])
                                   )
                                   (par
-                                   (call %init_peer_id% ("op" "concat_strings") ["trigger_config:" sp-0.$.name!] concat_strings-7)
+                                   (call %init_peer_id% ("op" "concat_strings") ["trigger_config:" sp-0.$.name!] concat_strings-4)
                                    (null)
                                   )
                                  )
-                                 (call %init_peer_id% (worker_spell-0 "set_string") [concat_strings-7 sp-0.$.config!])
+                                 (call %init_peer_id% ("worker-spell" "set_string") [concat_strings-4 sp-0.$.config!])
                                 )
                                 (par
-                                 (call %init_peer_id% ("op" "concat_strings") ["init_data:" sp-0.$.name!] concat_strings-8)
+                                 (call %init_peer_id% ("op" "concat_strings") ["init_args:" sp-0.$.name!] concat_strings-5)
                                  (null)
                                 )
                                )
-                               (call %init_peer_id% (worker_spell-0 "set_string") [concat_strings-8 sp-0.$.init_args!])
+                               (call %init_peer_id% ("worker-spell" "set_string") [concat_strings-5 sp-0.$.init_args!])
                               )
                              )
                              (seq
                               (seq
                                (seq
-                                (new $array-inline-38
+                                (new $array-inline-52
                                  (seq
                                   (seq
                                    (seq
-                                    (ap "Error deploy spell" $array-inline-38)
-                                    (ap sp-0.$.name! $array-inline-38)
+                                    (ap "Error deploy spell" $array-inline-52)
+                                    (ap sp-0.$.name! $array-inline-52)
                                    )
-                                   (ap %last_error% $array-inline-38)
+                                   (ap %last_error% $array-inline-52)
                                   )
-                                  (canon %init_peer_id% $array-inline-38  #array-inline-38-0)
+                                  (canon %init_peer_id% $array-inline-52  #array-inline-52-0)
                                  )
                                 )
-                                (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-22)
+                                (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-27)
                                )
-                               (call %init_peer_id% ("debug" "stringify") [#array-inline-38-0] str-18)
+                               (call %init_peer_id% ("debug" "stringify") [#array-inline-52-0] str-25)
                               )
                               (par
-                               (call %init_peer_id% (spell_id-22 "list_push_string") ["logs" str-18])
+                               (call %init_peer_id% (spell_id-27 "list_push_string") ["logs" str-25])
                                (seq
-                                (new $array-inline-39
+                                (new $array-inline-53
                                  (seq
                                   (seq
-                                   (ap spell_id-22 $array-inline-39)
-                                   (ap #array-inline-38-0 $array-inline-39)
+                                   (ap spell_id-27 $array-inline-53)
+                                   (ap #array-inline-52-0 $array-inline-53)
                                   )
-                                  (canon %init_peer_id% $array-inline-39  #array-inline-39-0)
+                                  (canon %init_peer_id% $array-inline-53  #array-inline-53-0)
                                  )
                                 )
-                                (call %init_peer_id% ("run-console" "print") [#array-inline-39-0])
+                                (call %init_peer_id% ("run-console" "print") [#array-inline-53-0])
                                )
                               )
                              )
@@ -1155,35 +1481,35 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                            (seq
                             (seq
                              (seq
-                              (new $array-inline-40
+                              (new $array-inline-54
                                (seq
                                 (seq
                                  (seq
-                                  (ap "Error deploying spell" $array-inline-40)
-                                  (ap sp-0.$.name! $array-inline-40)
+                                  (ap "Error deploying spell" $array-inline-54)
+                                  (ap sp-0.$.name! $array-inline-54)
                                  )
-                                 (ap %last_error% $array-inline-40)
+                                 (ap %last_error% $array-inline-54)
                                 )
-                                (canon %init_peer_id% $array-inline-40  #array-inline-40-0)
+                                (canon %init_peer_id% $array-inline-54  #array-inline-54-0)
                                )
                               )
-                              (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-23)
+                              (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-28)
                              )
-                             (call %init_peer_id% ("debug" "stringify") [#array-inline-40-0] str-19)
+                             (call %init_peer_id% ("debug" "stringify") [#array-inline-54-0] str-26)
                             )
                             (par
-                             (call %init_peer_id% (spell_id-23 "list_push_string") ["logs" str-19])
+                             (call %init_peer_id% (spell_id-28 "list_push_string") ["logs" str-26])
                              (seq
-                              (new $array-inline-41
+                              (new $array-inline-55
                                (seq
                                 (seq
-                                 (ap spell_id-23 $array-inline-41)
-                                 (ap #array-inline-40-0 $array-inline-41)
+                                 (ap spell_id-28 $array-inline-55)
+                                 (ap #array-inline-54-0 $array-inline-55)
                                 )
-                                (canon %init_peer_id% $array-inline-41  #array-inline-41-0)
+                                (canon %init_peer_id% $array-inline-55  #array-inline-55-0)
                                )
                               )
-                              (call %init_peer_id% ("run-console" "print") [#array-inline-41-0])
+                              (call %init_peer_id% ("run-console" "print") [#array-inline-55-0])
                              )
                             )
                            )
@@ -1192,71 +1518,71 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                          )
                         )
                        )
-                       (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-24)
+                       (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-29)
                       )
-                      (call %init_peer_id% ("debug" "stringify") ["Installation finished"] str-20)
+                      (call %init_peer_id% ("debug" "stringify") ["Installation finished"] str-27)
                      )
                      (par
-                      (call %init_peer_id% (spell_id-24 "list_push_string") ["logs" str-20])
+                      (call %init_peer_id% (spell_id-29 "list_push_string") ["logs" str-27])
                       (seq
-                       (new $array-inline-42
+                       (new $array-inline-56
                         (seq
                          (seq
-                          (ap spell_id-24 $array-inline-42)
-                          (ap "Installation finished" $array-inline-42)
+                          (ap spell_id-29 $array-inline-56)
+                          (ap "Installation finished" $array-inline-56)
                          )
-                         (canon %init_peer_id% $array-inline-42  #array-inline-42-0)
+                         (canon %init_peer_id% $array-inline-56  #array-inline-56-0)
                         )
                        )
-                       (call %init_peer_id% ("run-console" "print") [#array-inline-42-0])
+                       (call %init_peer_id% ("run-console" "print") [#array-inline-56-0])
                       )
                      )
                     )
-                    (call %init_peer_id% (spell_id-4 "set_string") ["status" "install finished"])
+                    (call %init_peer_id% ("worker-spell" "set_string") ["status" "install finished"])
                    )
-                   (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 8])
+                   (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
                   )
                  )
                  (seq
                   (seq
                    (seq
                     (seq
-                     (new $array-inline-43
+                     (new $array-inline-57
                       (seq
                        (seq
                         (seq
                          (seq
-                          (ap "Error downloading worker definition from IPFS" $array-inline-43)
-                          (ap ipfs $array-inline-43)
+                          (ap "Error downloading worker definition from IPFS" $array-inline-57)
+                          (ap ipfs $array-inline-57)
                          )
-                         (ap worker_def_cid $array-inline-43)
+                         (ap worker_def_cid $array-inline-57)
                         )
-                        (ap json $array-inline-43)
+                        (ap json $array-inline-57)
                        )
-                       (canon %init_peer_id% $array-inline-43  #array-inline-43-0)
+                       (canon %init_peer_id% $array-inline-57  #array-inline-57-0)
                       )
                      )
-                     (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-25)
+                     (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-30)
                     )
-                    (call %init_peer_id% ("debug" "stringify") [#array-inline-43-0] str-21)
+                    (call %init_peer_id% ("debug" "stringify") [#array-inline-57-0] str-28)
                    )
                    (par
-                    (call %init_peer_id% (spell_id-25 "list_push_string") ["logs" str-21])
+                    (call %init_peer_id% (spell_id-30 "list_push_string") ["logs" str-28])
                     (seq
-                     (new $array-inline-44
+                     (new $array-inline-58
                       (seq
                        (seq
-                        (ap spell_id-25 $array-inline-44)
-                        (ap #array-inline-43-0 $array-inline-44)
+                        (ap spell_id-30 $array-inline-58)
+                        (ap #array-inline-57-0 $array-inline-58)
                        )
-                       (canon %init_peer_id% $array-inline-44  #array-inline-44-0)
+                       (canon %init_peer_id% $array-inline-58  #array-inline-58-0)
                       )
                      )
-                     (call %init_peer_id% ("run-console" "print") [#array-inline-44-0])
+                     (call %init_peer_id% ("run-console" "print") [#array-inline-58-0])
                     )
                    )
                   )
-                  (call %init_peer_id% (spell_id-4 "set_string") ["status" "install error"])
+                  (call %init_peer_id% ("worker-spell" "set_string") ["status" "install error"])
                  )
                 )
                )
@@ -1264,68 +1590,68 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                 (seq
                  (seq
                   (seq
-                   (new $array-inline-45
+                   (new $array-inline-59
                     (seq
                      (seq
-                      (ap "Error installing worker" $array-inline-45)
-                      (ap %last_error% $array-inline-45)
+                      (ap "Error installing worker" $array-inline-59)
+                      (ap %last_error% $array-inline-59)
                      )
-                     (canon %init_peer_id% $array-inline-45  #array-inline-45-0)
+                     (canon %init_peer_id% $array-inline-59  #array-inline-59-0)
                     )
                    )
-                   (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-26)
+                   (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-31)
                   )
-                  (call %init_peer_id% ("debug" "stringify") [#array-inline-45-0] str-22)
+                  (call %init_peer_id% ("debug" "stringify") [#array-inline-59-0] str-29)
                  )
                  (par
-                  (call %init_peer_id% (spell_id-26 "list_push_string") ["logs" str-22])
+                  (call %init_peer_id% (spell_id-31 "list_push_string") ["logs" str-29])
                   (seq
-                   (new $array-inline-46
+                   (new $array-inline-60
                     (seq
                      (seq
-                      (ap spell_id-26 $array-inline-46)
-                      (ap #array-inline-45-0 $array-inline-46)
+                      (ap spell_id-31 $array-inline-60)
+                      (ap #array-inline-59-0 $array-inline-60)
                      )
-                     (canon %init_peer_id% $array-inline-46  #array-inline-46-0)
+                     (canon %init_peer_id% $array-inline-60  #array-inline-60-0)
                     )
                    )
-                   (call %init_peer_id% ("run-console" "print") [#array-inline-46-0])
+                   (call %init_peer_id% ("run-console" "print") [#array-inline-60-0])
                   )
                  )
                 )
-                (call %init_peer_id% (spell_id-4 "set_string") ["status" "install error"])
+                (call %init_peer_id% ("worker-spell" "set_string") ["status" "install error"])
                )
               )
              )
              (call %init_peer_id% (spell_id "get_string") ["status"] status)
             )
-            (new $array-inline-47
+            (new $array-inline-61
              (seq
               (seq
-               (ap "Worker installation finished with status" $array-inline-47)
-               (ap status.$.str! $array-inline-47)
+               (ap "Worker installation finished with status" $array-inline-61)
+               (ap status.$.str! $array-inline-61)
               )
-              (canon %init_peer_id% $array-inline-47  #array-inline-47-0)
+              (canon %init_peer_id% $array-inline-61  #array-inline-61-0)
              )
             )
            )
-           (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-27)
+           (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-32)
           )
-          (call %init_peer_id% ("debug" "stringify") [#array-inline-47-0] str-23)
+          (call %init_peer_id% ("debug" "stringify") [#array-inline-61-0] str-30)
          )
          (par
-          (call %init_peer_id% (spell_id-27 "list_push_string") ["logs" str-23])
+          (call %init_peer_id% (spell_id-32 "list_push_string") ["logs" str-30])
           (seq
-           (new $array-inline-48
+           (new $array-inline-62
             (seq
              (seq
-              (ap spell_id-27 $array-inline-48)
-              (ap #array-inline-47-0 $array-inline-48)
+              (ap spell_id-32 $array-inline-62)
+              (ap #array-inline-61-0 $array-inline-62)
              )
-             (canon %init_peer_id% $array-inline-48  #array-inline-48-0)
+             (canon %init_peer_id% $array-inline-62  #array-inline-62-0)
             )
            )
-           (call %init_peer_id% ("run-console" "print") [#array-inline-48-0])
+           (call %init_peer_id% ("run-console" "print") [#array-inline-62-0])
           )
          )
         )
@@ -1417,7 +1743,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                  )
                                  (seq
                                   (call -relay- ("op" "noop") [])
-                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 9])
+                                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 7])
                                  )
                                 )
                                 (call -relay- ("op" "noop") [])
@@ -1428,7 +1754,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                              )
                              (null)
                             )
-                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 10])
+                            (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 8])
                            )
                           )
                           (new $status-0
@@ -1547,7 +1873,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                         )
                        )
                       )
-                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 11])
+                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 9])
                      )
                     )
                     (canon %init_peer_id% $subnetwork_id  #-subnetwork_id-fix-0)
@@ -1556,33 +1882,33 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                   )
                  )
                 )
-                (new $array-inline-49
+                (new $array-inline-63
                  (seq
                   (seq
-                   (ap "Subnet created" $array-inline-49)
-                   (ap -subnetwork_id-flat-0 $array-inline-49)
+                   (ap "Subnet created" $array-inline-63)
+                   (ap -subnetwork_id-flat-0 $array-inline-63)
                   )
-                  (canon %init_peer_id% $array-inline-49  #array-inline-49-0)
+                  (canon %init_peer_id% $array-inline-63  #array-inline-63-0)
                  )
                 )
                )
-               (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-28)
+               (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-33)
               )
-              (call %init_peer_id% ("debug" "stringify") [#array-inline-49-0] str-24)
+              (call %init_peer_id% ("debug" "stringify") [#array-inline-63-0] str-31)
              )
              (par
-              (call %init_peer_id% (spell_id-28 "list_push_string") ["logs" str-24])
+              (call %init_peer_id% (spell_id-33 "list_push_string") ["logs" str-31])
               (seq
-               (new $array-inline-50
+               (new $array-inline-64
                 (seq
                  (seq
-                  (ap spell_id-28 $array-inline-50)
-                  (ap #array-inline-49-0 $array-inline-50)
+                  (ap spell_id-33 $array-inline-64)
+                  (ap #array-inline-63-0 $array-inline-64)
                  )
-                 (canon %init_peer_id% $array-inline-50  #array-inline-50-0)
+                 (canon %init_peer_id% $array-inline-64  #array-inline-64-0)
                 )
                )
-               (call %init_peer_id% ("run-console" "print") [#array-inline-50-0])
+               (call %init_peer_id% ("run-console" "print") [#array-inline-64-0])
               )
              )
             )
@@ -1622,14 +1948,14 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                )
                                (xor
                                 (call %init_peer_id% ("sig" "sign") [bytes-0] sig_result-0)
-                                (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 12])
+                                (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 10])
                                )
                               )
                               (xor
                                (match sig_result-0.$.success! true
                                 (xor
                                  (call -relay- ("registry" "create_record_metadata") [-subnetwork_id-flat-0.$.[0]! %init_peer_id% t-2 "" %init_peer_id% #option-inline-2-0 [] [] sig_result-0.$.signature.[0]!] $result-4)
-                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 13])
+                                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 11])
                                 )
                                )
                                (ap sig_result-0.$.error.[0]! $error-1)
@@ -1661,7 +1987,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                              (call -relay- ("registry" "get_record_bytes") [-result-flat-0.$.[0]! t-1] bytes-1)
                              (xor
                               (call %init_peer_id% ("sig" "sign") [bytes-1] $signature)
-                              (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 14])
+                              (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 12])
                              )
                             )
                             (new $signature_test
@@ -1738,7 +2064,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                         )
                                         (seq
                                          (call -relay- ("op" "noop") [])
-                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 15])
+                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 13])
                                         )
                                        )
                                        (call -relay- ("op" "noop") [])
@@ -1897,7 +2223,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                )
                                (ap false $success)
                               )
-                              (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 16])
+                              (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 14])
                              )
                             )
                             (seq
@@ -1982,7 +2308,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                                         )
                                         (seq
                                          (call -relay- ("op" "noop") [])
-                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 17])
+                                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 15])
                                         )
                                        )
                                        (call -relay- ("op" "noop") [])
@@ -2150,7 +2476,7 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                    )
                   )
                  )
-                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 18])
+                 (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 16])
                 )
                 (xor
                  (match success_gate.$.[0]! true
@@ -2158,116 +2484,116 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
                    (seq
                     (seq
                      (seq
-                      (new $array-inline-51
+                      (new $array-inline-65
                        (seq
                         (seq
-                         (ap "worker successfully registered in registry" $array-inline-51)
-                         (ap success_gate.$.[0]! $array-inline-51)
+                         (ap "worker successfully registered in registry" $array-inline-65)
+                         (ap success_gate.$.[0]! $array-inline-65)
                         )
-                        (canon %init_peer_id% $array-inline-51  #array-inline-51-0)
+                        (canon %init_peer_id% $array-inline-65  #array-inline-65-0)
                        )
                       )
-                      (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-29)
+                      (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-34)
                      )
-                     (call %init_peer_id% ("debug" "stringify") [#array-inline-51-0] str-25)
+                     (call %init_peer_id% ("debug" "stringify") [#array-inline-65-0] str-32)
                     )
                     (par
-                     (call %init_peer_id% (spell_id-29 "list_push_string") ["logs" str-25])
+                     (call %init_peer_id% (spell_id-34 "list_push_string") ["logs" str-32])
                      (seq
-                      (new $array-inline-52
+                      (new $array-inline-66
                        (seq
                         (seq
-                         (ap spell_id-29 $array-inline-52)
-                         (ap #array-inline-51-0 $array-inline-52)
+                         (ap spell_id-34 $array-inline-66)
+                         (ap #array-inline-65-0 $array-inline-66)
                         )
-                        (canon %init_peer_id% $array-inline-52  #array-inline-52-0)
+                        (canon %init_peer_id% $array-inline-66  #array-inline-66-0)
                        )
                       )
-                      (call %init_peer_id% ("run-console" "print") [#array-inline-52-0])
+                      (call %init_peer_id% ("run-console" "print") [#array-inline-66-0])
                      )
                     )
                    )
-                   (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 19])
+                   (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 17])
                   )
                  )
                  (seq
                   (seq
                    (seq
-                    (new $array-inline-53
+                    (new $array-inline-67
                      (seq
                       (seq
                        (seq
-                        (ap "error registering worker" $array-inline-53)
-                        (canon %init_peer_id% $error-0  #push-to-stream-1176)
+                        (ap "error registering worker" $array-inline-67)
+                        (canon %init_peer_id% $error-0  #push-to-stream-1339)
                        )
-                       (ap #push-to-stream-1176 $array-inline-53)
+                       (ap #push-to-stream-1339 $array-inline-67)
                       )
-                      (canon %init_peer_id% $array-inline-53  #array-inline-53-0)
+                      (canon %init_peer_id% $array-inline-67  #array-inline-67-0)
                      )
                     )
-                    (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-30)
+                    (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-35)
                    )
-                   (call %init_peer_id% ("debug" "stringify") [#array-inline-53-0] str-26)
+                   (call %init_peer_id% ("debug" "stringify") [#array-inline-67-0] str-33)
                   )
                   (par
-                   (call %init_peer_id% (spell_id-30 "list_push_string") ["logs" str-26])
+                   (call %init_peer_id% (spell_id-35 "list_push_string") ["logs" str-33])
                    (seq
-                    (new $array-inline-54
+                    (new $array-inline-68
                      (seq
                       (seq
-                       (ap spell_id-30 $array-inline-54)
-                       (ap #array-inline-53-0 $array-inline-54)
+                       (ap spell_id-35 $array-inline-68)
+                       (ap #array-inline-67-0 $array-inline-68)
                       )
-                      (canon %init_peer_id% $array-inline-54  #array-inline-54-0)
+                      (canon %init_peer_id% $array-inline-68  #array-inline-68-0)
                      )
                     )
-                    (call %init_peer_id% ("run-console" "print") [#array-inline-54-0])
+                    (call %init_peer_id% ("run-console" "print") [#array-inline-68-0])
                    )
                   )
                  )
                 )
                )
-               (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 20])
+               (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 18])
               )
              )
              (seq
               (seq
                (seq
-                (new $array-inline-55
+                (new $array-inline-69
                  (seq
                   (seq
                    (seq
-                    (ap "error creating subnetwork" $array-inline-55)
-                    (canon %init_peer_id% $error  #push-to-stream-1194)
+                    (ap "error creating subnetwork" $array-inline-69)
+                    (canon %init_peer_id% $error  #push-to-stream-1357)
                    )
-                   (ap #push-to-stream-1194 $array-inline-55)
+                   (ap #push-to-stream-1357 $array-inline-69)
                   )
-                  (canon %init_peer_id% $array-inline-55  #array-inline-55-0)
+                  (canon %init_peer_id% $array-inline-69  #array-inline-69-0)
                  )
                 )
-                (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-31)
+                (call %init_peer_id% ("getDataSrv" "spell_id") [] spell_id-36)
                )
-               (call %init_peer_id% ("debug" "stringify") [#array-inline-55-0] str-27)
+               (call %init_peer_id% ("debug" "stringify") [#array-inline-69-0] str-34)
               )
               (par
-               (call %init_peer_id% (spell_id-31 "list_push_string") ["logs" str-27])
+               (call %init_peer_id% (spell_id-36 "list_push_string") ["logs" str-34])
                (seq
-                (new $array-inline-56
+                (new $array-inline-70
                  (seq
                   (seq
-                   (ap spell_id-31 $array-inline-56)
-                   (ap #array-inline-55-0 $array-inline-56)
+                   (ap spell_id-36 $array-inline-70)
+                   (ap #array-inline-69-0 $array-inline-70)
                   )
-                  (canon %init_peer_id% $array-inline-56  #array-inline-56-0)
+                  (canon %init_peer_id% $array-inline-70  #array-inline-70-0)
                  )
                 )
-                (call %init_peer_id% ("run-console" "print") [#array-inline-56-0])
+                (call %init_peer_id% ("run-console" "print") [#array-inline-70-0])
                )
               )
              )
             )
            )
-           (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 21])
+           (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 19])
           )
          )
          (call %init_peer_id% ("op" "noop") [])
@@ -2279,5 +2605,5 @@ export const spellInstallAirScript = `; This file is auto-generated. Do not edit
    )
   )
  )
- (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 22])
+ (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 20])
 )`;

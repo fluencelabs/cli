@@ -76,7 +76,7 @@ Name of the Aqua function that you want to use as a spell
 
 ## initArgs
 
-A map of Aqua function arguments names as keys and arguments values as values. They will be passed to the spell function. Also they will be stored in the key-value storage for this particular spell. It's possible to change argument values inside the spell itself if you return a new map of new arguments from the spell function. Also it's possible to update these values from another spell using Spell.set\_string method
+A map of Aqua function arguments names as keys and arguments values as values. They will be passed to the spell function and will be stored in the key-value storage for this particular spell.
 
 `initArgs`
 

@@ -89,7 +89,7 @@ const spellProperties = {
         description:
           "How often the spell will be executed. If set to 0, the spell will be executed only once. If this value not provided at all - the spell will never be executed",
         minimum: 0,
-        maximum: U32_MAX,
+        maximum: MAX_PERIOD_SEC,
         nullable: true,
       },
       startTimestamp: {
@@ -107,7 +107,7 @@ const spellProperties = {
       startDelaySec: {
         type: "number",
         description:
-          "How long to wait before the first execution in seconds. If this property or `startTimestamp` not specified, periodic execution will start immediately. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. This property overrides `startTimestamp` if both are specified",
+          "How long to wait before the first execution in seconds. If this property or `startTimestamp` not specified, periodic execution will start immediately. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. This property conflicts with `startTimestamp`. You can specify only one of them",
         nullable: true,
         minimum: 0,
         maximum: U32_MAX,
@@ -115,7 +115,7 @@ const spellProperties = {
       endDelaySec: {
         type: "number",
         description:
-          "How long to wait before the last execution in seconds. If this property or `endTimestamp` not specified, periodic execution will never end. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. If it is in the past at the moment of spell creation - the spell will never be executed. This property overrides `endTimestamp` if both are specified",
+          "How long to wait before the last execution in seconds. If this property or `endTimestamp` not specified, periodic execution will never end. WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server. If it is in the past at the moment of spell creation - the spell will never be executed. This property conflicts with `endTimestamp`. You can specify only one of them",
         nullable: true,
         minimum: 0,
         maximum: U32_MAX,
@@ -223,7 +223,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
           return `End time must be later than current time. Got: current time ${currentSec}, end time ${endSec}`;
         }
 
-        if (endSec - startSec > MAX_PERIOD_SEC) {
+        if ((config.clock?.periodSec ?? 0) > MAX_PERIOD_SEC) {
           return `Period must be less than ${MAX_PERIOD_YEAR} years (${MAX_PERIOD_SEC} seconds). Got: ${
             endSec - startSec
           } seconds`;
