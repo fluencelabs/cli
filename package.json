@@ -30,7 +30,6 @@
     "pretest": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && prettier --check '*.{ts,js}' && npm run lint && npm run circular",
     "test": "cd tmp && npm init -y && npm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && npm run jest",
     "prepare": "node -e \"process.env.CI === undefined && require('husky').install()\"",
-    "postinstall": "npm run compile-installation-spell",
     "check": "npm run build && npm run lint-fix && npm run circular",
     "circular": "madge --circular --extensions ts ./",
     "pre-commit": "exitzero npm run build && exitzero npm run lint-fix && cd docs/commands && oclif readme --no-aliases && git add README.md",

@@ -117,6 +117,8 @@ jobs:
 
       - run: npm i
 
+      - run: npm run compile-installation-spell-aqua
+
       - name: Set fluence-js version in package.json
         if: inputs.fluence-js-version != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
