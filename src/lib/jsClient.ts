@@ -16,6 +16,7 @@
 
 import { createClient } from "@fluencelabs/js-client.node";
 
+import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import type { FluenceClientFlags, KeyPairFlag } from "./const.js";
 import { base64ToUint8Array } from "./helpers/generateKeyPair.js";
@@ -39,19 +40,24 @@ export const initFluenceClient = async (
     keyPairName ?? maybeFluenceConfig?.keyPairName
   );
 
-  await client.connect(relay, {
-    connectionOptions: {
-      dialTimeoutMs,
-    },
-    debug: {
-      printParticleId,
-    },
-    defaultTtlMs: ttl,
-    keyPair: {
-      source: base64ToUint8Array(keyPair.secretKey),
-      type: "Ed25519",
-    },
-  });
+  try {
+    await client.connect(relay, {
+      connectionOptions: {
+        dialTimeoutMs,
+      },
+      debug: {
+        printParticleId,
+      },
+      defaultTtlMs: ttl,
+      keyPair: {
+        source: base64ToUint8Array(keyPair.secretKey),
+        type: "Ed25519",
+      },
+    });
+  } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    commandObj.error(`Failed to connect to ${relay}. ${e}`);
+  }
 
   return client;
 };

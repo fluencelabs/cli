@@ -22,23 +22,10 @@ const color = oclifColor.default;
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
 
-const printError = (/** @type {Error | CLIError} */ error) => {
-  if (error instanceof CLIError && "message" in error) {
-    return console.error(`${color.red("Error:")} ${error.message}`);
-  }
-
-  if ("stack" in error && error?.stack?.startsWith?.("Error") === true) {
-    return console.error(error.stack);
-  }
-
-  if ("stack" in error || "message" in error) {
-    return console.error(
-      `${color.red("Error:")}\n${error.message ?? ""}\n${error.stack ?? ""}`
-    );
-  }
-
-  return console.error(error);
-};
+const printError = (/** @type {Error | CLIError} */ error) =>
+  error instanceof CLIError && "message" in error
+    ? console.error(`${color.red("Error:")} ${error.message}`)
+    : console.error(error);
 
 const resolveExitCode = (/** @type {Error | CLIError} */ error) => {
   if (
