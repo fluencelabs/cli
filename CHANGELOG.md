@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.1...fluence-cli-v0.4.2) (2023-03-22)
+
+
+### Bug Fixes
+
+* compile installation spell in release action, add better template for spell, improve error messages ([#217](https://github.com/fluencelabs/fluence-cli/issues/217)) ([151e3ff](https://github.com/fluencelabs/fluence-cli/commit/151e3ffe67d9ed68677c93370c826655aeb4e981))
+
 ## [0.4.1](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.0...fluence-cli-v0.4.1) (2023-03-22)
 
 
