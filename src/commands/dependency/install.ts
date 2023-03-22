@@ -92,7 +92,7 @@ export default class Install extends BaseCommand<typeof Install> {
 
     await installAllCargoDependenciesFromFluenceConfig({
       fluenceConfig,
-      fluenceLockConfig: fluenceLockConfig,
+      fluenceLockConfig,
       force: flags.force,
     });
 

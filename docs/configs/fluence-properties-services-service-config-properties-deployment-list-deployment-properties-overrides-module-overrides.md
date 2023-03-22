@@ -6,8 +6,7 @@
 
 | Property                            | Type      | Required | Nullable       | Defined by                                                                                                                                                                                                                                                                                                                                                    |
 | :---------------------------------- | :-------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [type](#type)                       | `string`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-type.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/type")                        |
-| [name](#name)                       | `string`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-name.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/name")                        |
+| [get](#get)                         | `string`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-get.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/get")                          |
 | [maxHeapSize](#maxheapsize)         | `string`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-maxheapsize.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/maxHeapSize")          |
 | [loggerEnabled](#loggerenabled)     | `boolean` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-loggerenabled.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/loggerEnabled")      |
 | [loggingMask](#loggingmask)         | `number`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-loggingmask.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/loggingMask")          |
@@ -15,14 +14,12 @@
 | [preopenedFiles](#preopenedfiles)   | `array`   | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-preopened-files.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/preopenedFiles")   |
 | [envs](#envs)                       | `object`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-environment-variables.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/envs")       |
 | [mountedBinaries](#mountedbinaries) | `object`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-mounted-binaries.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/mountedBinaries") |
-| [version](#version)                 | `number`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/version")                  |
-| [get](#get)                         | `string`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-get.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/get")                          |
 
-## type
+## get
 
-Module type "compiled" is for the precompiled modules. Module type "rust" is for the source code written in rust which can be compiled into a Marine module
+Path to module directory or URL to the tar.gz archive with the module
 
-`type`
+`get`
 
 *   is optional
 
@@ -30,44 +27,9 @@ Module type "compiled" is for the precompiled modules. Module type "rust" is for
 
 *   cannot be null
 
-*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-type.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/type")
+*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-get.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/get")
 
-### type Type
-
-`string`
-
-### type Constraints
-
-**enum**: the value of this property must be equal to one of the following values:
-
-| Value        | Explanation |
-| :----------- | :---------- |
-| `"rust"`     |             |
-| `"compiled"` |             |
-
-### type Default Value
-
-The default value is:
-
-```json
-"compiled"
-```
-
-## name
-
-"name" property from the Cargo.toml (for module type "rust") or name of the precompiled .wasm file (for module type "compiled")
-
-`name`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-name.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/name")
-
-### name Type
+### get Type
 
 `string`
 
@@ -237,47 +199,3 @@ A map of binary executable files that module is allowed to call. Example: curl: 
 ### mountedBinaries Type
 
 `object` ([Mounted binaries](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-mounted-binaries.md))
-
-## version
-
-
-
-`version`
-
-*   is optional
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-0
-```
-
-## get
-
-Path to module directory or URL to the tar.gz archive with the module
-
-`get`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-get.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/get")
-
-### get Type
-
-`string`

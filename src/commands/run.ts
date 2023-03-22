@@ -39,10 +39,8 @@ import {
   FluenceConfigReadonly,
 } from "../lib/configs/project/fluence.js";
 import {
-  defaultFluenceLockConfig,
   FluenceLockConfig,
   initFluenceLockConfig,
-  initNewFluenceLockConfig,
 } from "../lib/configs/project/fluenceLock.js";
 import {
   FS_OPTIONS,
@@ -55,6 +53,7 @@ import {
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CLIENT_FLAGS,
   FromFlagsDef,
+  IMPORT_FLAG,
 } from "../lib/const.js";
 import { getAppJson } from "../lib/deployedApp.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
@@ -102,12 +101,7 @@ export default class Run extends BaseCommand<typeof Run> {
         "Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function using these argument names",
       helpValue: "<path>",
     }),
-    import: Flags.string({
-      description:
-        "Path to a directory to import from. May be used several times",
-      helpValue: "<path>",
-      multiple: true,
-    }),
+    ...IMPORT_FLAG,
     [LOG_LEVEL_COMPILER_FLAG_NAME]: Flags.string({
       description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
       helpValue: "<level>",
@@ -228,20 +222,11 @@ export default class Run extends BaseCommand<typeof Run> {
       jsonServicePaths.push(appJsonServicePath);
     }
 
-    const aquaImports =
-      maybeFluenceConfig === null
-        ? await ensureAquaImports({
-            flags,
-            maybeFluenceConfig,
-            maybeFluenceLockConfig: null,
-          })
-        : await ensureAquaImports({
-            flags,
-            maybeFluenceConfig,
-            maybeFluenceLockConfig:
-              maybeFluenceLockConfig ??
-              (await initNewFluenceLockConfig(defaultFluenceLockConfig)),
-          });
+    const aquaImports = await ensureAquaImports({
+      flags,
+      maybeFluenceConfig,
+      maybeFluenceLockConfig,
+    });
 
     const runArgs: RunArgs = {
       ...flags,
@@ -257,8 +242,12 @@ export default class Run extends BaseCommand<typeof Run> {
       maybeFluenceLockConfig,
     };
 
+    /**
+     * Whether to use `aqua run` or not.
+     * Is currently set to true for all cases because of the bug related to the new fluence js client
+     */
     const useAquaRun =
-      typeof flags.plugin === "string" || jsonServicePaths.length > 0;
+      true || typeof flags.plugin === "string" || jsonServicePaths.length > 0;
 
     const result: unknown = await (useAquaRun
       ? aquaRun(runArgs)

@@ -71,9 +71,13 @@ export default class Remove extends BaseCommand<typeof Remove> {
           workerName,
           {
             ...worker,
-            services: worker.services.filter(
-              (service) => service !== serviceNameToRemove
-            ),
+            ...(worker.services === undefined
+              ? {}
+              : {
+                  services: worker.services.filter(
+                    (service) => service !== serviceNameToRemove
+                  ),
+                }),
           },
         ])
       );

@@ -21,6 +21,7 @@
 | [workers](#workers)                   | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-workers.md "https://fluence.dev/schemas/fluence.yaml#/properties/workers")                   |
 | [deals](#deals)                       | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-deals.md "https://fluence.dev/schemas/fluence.yaml#/properties/deals")                       |
 | [chainNetwork](#chainnetwork)         | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-chainnetwork.md "https://fluence.dev/schemas/fluence.yaml#/properties/chainNetwork")         |
+| [spells](#spells)                     | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-spells.md "https://fluence.dev/schemas/fluence.yaml#/properties/spells")                     |
 
 ## services
 
@@ -330,3 +331,21 @@ The default value is:
 ```json
 "testnet"
 ```
+
+## spells
+
+A map with spell names as keys and spell configs as values
+
+`spells`
+
+*   is optional
+
+*   Type: `object` ([Details](fluence-properties-spells.md))
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-spells.md "https://fluence.dev/schemas/fluence.yaml#/properties/spells")
+
+### spells Type
+
+`object` ([Details](fluence-properties-spells.md))

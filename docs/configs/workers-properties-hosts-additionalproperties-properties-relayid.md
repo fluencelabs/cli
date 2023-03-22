@@ -1,0 +1,3 @@
+## relayId Type
+
+`string`

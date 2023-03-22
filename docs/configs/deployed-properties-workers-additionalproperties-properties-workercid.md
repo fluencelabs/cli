@@ -1,3 +1,0 @@
-## workerCID Type
-
-`string`

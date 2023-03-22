@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args } from "@oclif/core";
@@ -24,6 +22,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -31,11 +30,13 @@ import {
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
+  IMPORT_FLAG,
 } from "../../lib/const.js";
 import {
   ensureAquaFileWithWorkerInfo,
   prepareForDeploy,
 } from "../../lib/deployWorkers.js";
+import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
@@ -50,6 +51,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
+    ...IMPORT_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -68,37 +70,22 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
 
     const workersConfig = await initNewWorkersConfig();
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
+
+    const aquaImports = await ensureAquaImports({
+      maybeFluenceConfig: fluenceConfig,
+      maybeFluenceLockConfig,
+      flags,
+    });
 
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
+      maybeFluenceLockConfig,
       hosts: true,
       maybeWorkersConfig: workersConfig,
+      aquaImports,
     });
-
-    const errorMessages = uploadDeployArg.workers
-      .map<string | null>(({ config: { services }, hosts, name }) => {
-        if (services.length === 0) {
-          return `Worker ${color.yellow(
-            name
-          )} has no services listed in 'workers' property of ${FLUENCE_CONFIG_FILE_NAME}`;
-        }
-
-        if (hosts.length === 0) {
-          return `Worker ${color.yellow(
-            name
-          )} has no peerIds listed in 'hosts' property of ${FLUENCE_CONFIG_FILE_NAME}`;
-        }
-
-        return null;
-      })
-      .filter<string>(
-        (errorMessage): errorMessage is string => errorMessage !== null
-      );
-
-    if (errorMessages.length > 0) {
-      commandObj.error(errorMessages.join("\n"));
-    }
 
     const uploadDeployResult = await upload_deploy(
       fluenceClient,
@@ -111,26 +98,29 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const { newDeployedWorkers, infoToPrint } =
       uploadDeployResult.workers.reduce<{
         newDeployedWorkers: Exclude<typeof workersConfig.hosts, undefined>;
-        infoToPrint: Record<string, string[]>;
+        infoToPrint: Record<
+          string,
+          Array<{
+            workerId: string;
+            hostId: string;
+          }>
+        >;
       }>(
-        (acc, { name, ...worker }) => {
-          const peerIds = uploadDeployArg.workers.find(
-            (worker) => worker.name === name
-          )?.hosts;
-
-          assert(peerIds !== undefined);
-
-          return {
-            newDeployedWorkers: {
-              ...acc.newDeployedWorkers,
-              [name]: { ...worker, timestamp, peerIds, relayId },
-            },
-            infoToPrint: {
-              ...acc.infoToPrint,
-              [name]: peerIds,
-            },
-          };
-        },
+        (acc, { name, ...worker }) => ({
+          newDeployedWorkers: {
+            ...acc.newDeployedWorkers,
+            [name]: { ...worker, timestamp, relayId },
+          },
+          infoToPrint: {
+            ...acc.infoToPrint,
+            [name]: worker.installation_spells.map(
+              ({ host_id, worker_id }) => ({
+                hostId: host_id,
+                workerId: worker_id,
+              })
+            ),
+          },
+        }),
         { newDeployedWorkers: {}, infoToPrint: {} }
       );
 

@@ -44,7 +44,11 @@ const upload = async (
   const ipfsClient = createIPFSClient(multiaddr);
 
   try {
-    const { path: cid } = await ipfsClient.add(content, { pin: true });
+    const { path: cid } = await ipfsClient.add(content, {
+      pin: true,
+      cidVersion: 1,
+    });
+
     await ipfsClient.pin.add(cid);
     log(`did pin ${cid} to ${multiaddr}`);
 

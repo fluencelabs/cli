@@ -47,12 +47,12 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
-import { local } from "../../localNodes.js";
+import { validateBatch } from "../../helpers/validations.js";
+import { local, localMultiaddrs } from "../../localNodes.js";
 import {
   FluenceEnv,
   getPeerId,
   getRandomPeerId,
-  Network,
   NETWORKS,
   Relays,
 } from "../../multiaddres.js";
@@ -64,16 +64,22 @@ import {
 import { FLUENCE_ENV } from "../../setupEnvironment.js";
 import {
   getConfigInitFunction,
-  InitConfigOptions,
   InitializedConfig,
   InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
   Migrations,
   ConfigValidateFunction,
+  InitConfigOptions,
 } from "../initConfig.js";
 
-import { moduleProperties } from "./module.js";
-import type { ModuleV0 as ServiceModuleConfig } from "./service.js";
+import {
+  OverridableModuleProperties,
+  overridableModuleProperties,
+} from "./module.js";
+import {
+  OverridableSpellProperties,
+  overridableSpellProperties,
+} from "./spell.js";
 
 export const MIN_WORKERS = 1;
 export const TARGET_WORKERS = 3;
@@ -105,7 +111,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services"],
 };
 
-export type OverrideModules = Record<string, FluenceConfigModule>;
+export type OverrideModules = Record<string, OverridableModuleProperties>;
 export type ServiceDeployV1 = {
   deployId: string;
   count?: number;
@@ -114,7 +120,6 @@ export type ServiceDeployV1 = {
   overrideModules?: OverrideModules;
   keyPairName?: string;
 };
-export type FluenceConfigModule = Partial<ServiceModuleConfig>;
 
 type ServiceV1 = {
   get: string;
@@ -170,13 +175,12 @@ const configSchemaV1Obj = {
               description:
                 "Module names as keys and overrides for the module config as values",
               properties: {
-                ...moduleProperties,
                 get: {
                   type: "string",
                   nullable: true,
                   description: `Path to module directory or URL to the tar.gz archive with the module`,
                 },
-                name: { ...moduleProperties.name, nullable: true },
+                ...overridableModuleProperties,
               },
               required: [],
               nullable: true,
@@ -230,13 +234,12 @@ const configSchemaV1Obj = {
                     description:
                       "Module names as keys and overrides for the module config as values",
                     properties: {
-                      ...moduleProperties,
                       get: {
                         type: "string",
                         nullable: true,
                         description: `Path to module directory or URL to the tar.gz archive with the module`,
                       },
-                      name: { ...moduleProperties.name, nullable: true },
+                      ...overridableModuleProperties,
                     },
                     required: [],
                     nullable: true,
@@ -292,6 +295,10 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = configSchemaV1Obj;
 
 export const AQUA_INPUT_PATH_PROPERTY = "aquaInputPath";
 
+type FluenceConfigSpell = {
+  get: string;
+} & OverridableSpellProperties;
+
 type ConfigV2 = Omit<ConfigV1, "version"> & {
   version: 2;
   dependencies?: {
@@ -307,7 +314,8 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   workers?: Record<
     string,
     {
-      services: Array<string>;
+      services?: Array<string>;
+      spells?: Array<string>;
     }
   >;
   deals?: Record<
@@ -318,6 +326,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
     }
   >;
   chainNetwork?: ChainNetwork;
+  spells?: Record<string, FluenceConfigSpell>;
 };
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
@@ -414,9 +423,16 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
             description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
             type: "array",
             items: { type: "string" },
+            nullable: true,
+          },
+          spells: {
+            description: `An array of spell names to include in this worker. Spell names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
+            type: "array",
+            items: { type: "string" },
+            nullable: true,
           },
         },
-        required: ["services"],
+        required: [],
       },
       required: [],
     },
@@ -454,6 +470,24 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       default: "testnet",
       nullable: true,
     },
+    spells: {
+      type: "object",
+      nullable: true,
+      description: "A map with spell names as keys and spell configs as values",
+      additionalProperties: {
+        type: "object",
+        description: "Spell config",
+        properties: {
+          get: {
+            type: "string",
+            description: "Path to spell",
+          },
+          ...overridableSpellProperties,
+        },
+        required: ["get"],
+      },
+      required: [],
+    },
   },
 };
 
@@ -482,7 +516,10 @@ const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
   return getRandomPeerId(fluenceEnv);
 };
 
-const DEFAULT_RELAYS_FOR_TEMPLATE: Network = "kras";
+const DEFAULT_RELAYS_FOR_TEMPLATE: Relays =
+  process.env[FLUENCE_ENV] === "local"
+    ? localMultiaddrs
+    : process.env[FLUENCE_ENV];
 
 const initFluenceProject = async (): Promise<ConfigV2> => {
   const srcMainAquaPath = await ensureSrcAquaMainPath();
@@ -594,144 +631,121 @@ type LatestConfig = ConfigV2;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const validateWorkers = (
-  services: FluenceConfig["services"],
-  workers: FluenceConfig["workers"]
-): ReturnType<ConfigValidateFunction<LatestConfig>> => {
-  if (workers === undefined) {
+const checkDuplicatesAndPresence = (
+  fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">,
+  servicesOrSpells: "services" | "spells"
+) => {
+  if (fluenceConfig.workers === undefined) {
     return true;
   }
 
-  const servicesSet = new Set(
-    Object.keys(services ?? {}).flatMap((serviceName) => serviceName)
+  const servicesOrSpellsSet = new Set(
+    Object.keys(fluenceConfig[servicesOrSpells] ?? {}).flatMap(
+      (serviceOrSpellName) => serviceOrSpellName
+    )
   );
 
-  return Object.entries(workers).reduce<string | true>(
+  return Object.entries(fluenceConfig.workers).reduce<string | true>(
     (acc, [workerName, workerConfig]) => {
-      const servicesNotListedInFluenceYAML = workerConfig.services.filter(
-        (serviceName) => !servicesSet.has(serviceName)
+      const workerServicesOrSpells = workerConfig[servicesOrSpells] ?? [];
+      const workerServicesOrSpellsSet = new Set(workerServicesOrSpells);
+
+      const notListedInFluenceYAML = workerServicesOrSpells.filter(
+        (serviceName) => !servicesOrSpellsSet.has(serviceName)
       );
 
-      if (servicesNotListedInFluenceYAML.length === 0) {
-        return acc;
-      }
+      const maybePreviousError = typeof acc === "string" ? acc : null;
 
-      const errorMessage = `Worker ${color.yellow(
-        workerName
-      )} has services that are not listed in ${FLUENCE_CONFIG_FILE_NAME}: ${color.yellow(
-        servicesNotListedInFluenceYAML.join(",")
-      )}`;
+      const maybeNotListedError =
+        notListedInFluenceYAML.length !== 0
+          ? `Worker ${color.yellow(
+              workerName
+            )} has ${servicesOrSpells} that are not listed in ${color.yellow(
+              "services"
+            )} property in ${FLUENCE_CONFIG_FILE_NAME}: ${color.yellow(
+              [...new Set(notListedInFluenceYAML)].join(", ")
+            )}`
+          : null;
 
-      if (typeof acc === "string") {
-        return `${acc}\n${errorMessage}`;
-      }
+      const maybeHasDuplicatesError =
+        workerServicesOrSpellsSet.size !== workerServicesOrSpells.length
+          ? `Worker ${color.yellow(
+              workerName
+            )} has duplicated ${servicesOrSpells} in ${FLUENCE_CONFIG_FILE_NAME}: ${color.yellow(
+              workerServicesOrSpells.filter(
+                (serviceName, index) =>
+                  workerServicesOrSpells.indexOf(serviceName) !== index
+              )
+            )}`
+          : null;
 
-      return errorMessage;
+      const errors = [
+        maybePreviousError,
+        maybeNotListedError,
+        maybeHasDuplicatesError,
+      ].filter((error): error is string => error !== null);
+
+      return errors.length === 0 ? true : errors.join("\n");
     },
     true
   );
 };
 
-const validateHosts = (
-  hosts: FluenceConfig["hosts"],
-  workers: FluenceConfig["workers"]
-): ReturnType<ConfigValidateFunction<LatestConfig>> => {
-  if (hosts === undefined) {
+const validateWorkers = (
+  fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">
+) =>
+  validateBatch(
+    checkDuplicatesAndPresence(fluenceConfig, "services"),
+    checkDuplicatesAndPresence(fluenceConfig, "spells")
+  );
+
+const validateHostsAndDeals = (
+  fluenceConfig: Pick<FluenceConfig, "hosts" | "deals" | "workers">,
+  hostsOrDealsProperty: "hosts" | "deals"
+) => {
+  const hostsOrDeals = fluenceConfig[hostsOrDealsProperty];
+
+  if (hostsOrDeals === undefined) {
     return true;
   }
+
+  const workers = fluenceConfig["workers"];
 
   const workersSet = new Set(
     Object.keys(workers ?? {}).flatMap((serviceName) => serviceName)
   );
 
-  const areWorkerNamesValid = Object.keys(hosts).reduce<string | true>(
-    (acc, workerName) => {
-      if (workersSet.has(workerName)) {
-        return acc;
-      }
+  const workerNamesErrors = Object.keys(hostsOrDeals)
+    .map((workerName) =>
+      workersSet.has(workerName)
+        ? null
+        : `Worker named ${color.yellow(workerName)} listed in ${color.yellow(
+            hostsOrDealsProperty
+          )} property must be listed in ${color.yellow(
+            "workers"
+          )} property in ${FLUENCE_CONFIG_FILE_NAME}`
+    )
+    .filter((error): error is string => error !== null);
 
-      const errorMessage = `No worker named ${color.yellow(
-        workerName
-      )} found in ${FLUENCE_CONFIG_FILE_NAME}`;
-
-      if (typeof acc === "string") {
-        return `${acc}\n${errorMessage}`;
-      }
-
-      return errorMessage;
-    },
-    true
-  );
-
-  if (typeof areWorkerNamesValid === "string") {
-    return areWorkerNamesValid;
-  }
-
-  return true;
+  return workerNamesErrors.length === 0 ? true : workerNamesErrors.join("\n");
 };
 
-const validateDeals = (
-  deals: FluenceConfig["deals"],
-  workers: FluenceConfig["workers"]
-): ReturnType<ConfigValidateFunction<LatestConfig>> => {
-  if (deals === undefined) {
-    return true;
-  }
-
-  const workersSet = new Set(
-    Object.keys(workers ?? {}).flatMap((serviceName) => serviceName)
-  );
-
-  const areWorkerNamesValid = Object.keys(deals).reduce<string | true>(
-    (acc, workerName) => {
-      if (workersSet.has(workerName)) {
-        return acc;
-      }
-
-      const errorMessage = `No worker named ${color.yellow(
-        workerName
-      )} found in ${FLUENCE_CONFIG_FILE_NAME}`;
-
-      if (typeof acc === "string") {
-        return `${acc}\n${errorMessage}`;
-      }
-
-      return errorMessage;
-    },
-    true
-  );
-
-  if (typeof areWorkerNamesValid === "string") {
-    return areWorkerNamesValid;
-  }
-
-  return true;
-};
-
-const validate: ConfigValidateFunction<LatestConfig> = (
-  config
-): ReturnType<ConfigValidateFunction<LatestConfig>> => {
+const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   if (config.services === undefined) {
     return true;
   }
 
-  const workersValidity = validateWorkers(config.services, config.workers);
+  const validity = validateBatch(
+    validateWorkers(config),
+    validateHostsAndDeals(config, "hosts"),
+    validateHostsAndDeals(config, "deals")
+  );
 
-  if (workersValidity !== true) {
-    return workersValidity;
+  if (typeof validity === "string") {
+    return validity;
   }
 
-  const hostsValidity = validateHosts(config.hosts, config.workers);
-
-  if (hostsValidity !== true) {
-    return hostsValidity;
-  }
-
-  const dealsValidity = validateDeals(config.deals, config.workers);
-
-  if (dealsValidity !== true) {
-    return dealsValidity;
-  }
+  // legacy deploy validation
 
   const notUnique: Array<{
     serviceName: string;

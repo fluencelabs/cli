@@ -103,9 +103,9 @@ export const addService = async ({
     fluenceConfig !== undefined &&
     fluenceConfig.workers !== undefined &&
     DEFAULT_WORKER_NAME in fluenceConfig.workers &&
-    fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services.includes(
+    !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services ?? []).includes(
       serviceName
-    ) !== true &&
+    ) &&
     (await confirm({
       message: `Do you want to add service ${color.yellow(
         serviceName
@@ -117,7 +117,7 @@ export const addService = async ({
 
     fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
       ...defaultWorker,
-      services: [...defaultWorker.services, serviceName],
+      services: [...(defaultWorker.services ?? []), serviceName],
     };
 
     await fluenceConfig.$commit();

@@ -168,7 +168,7 @@ const ensureConfigIsValidLatest = async <
     return commandObj.error(
       `Invalid config ${color.yellow(
         configPath
-      )}. Errors: ${maybeValidationError}`
+      )}. Errors:\n${maybeValidationError}`
     );
   }
 

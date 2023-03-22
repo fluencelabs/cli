@@ -38,7 +38,7 @@ import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets.
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
-  ModuleV0,
+  ServiceModuleV0,
   ServiceConfigReadonly,
 } from "../lib/configs/project/service.js";
 import {
@@ -55,7 +55,7 @@ import {
   isUrl,
   validateAquaName,
 } from "../lib/helpers/downloadFile.js";
-import { generateServiceInterface } from "../lib/helpers/generateServiceInterface.js";
+import { generateAquaInterfaceForService } from "../lib/helpers/generateServiceInterface.js";
 import type { MarineCLI } from "../lib/marineCli.js";
 import { confirm } from "../lib/prompt.js";
 
@@ -73,7 +73,7 @@ import {
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
-  moduleConfig: ModuleV0;
+  moduleConfig: ServiceModuleV0;
 };
 type ServiceInfoWithUnresolvedModuleConfigs = Omit<
   ServiceDeployV1,
@@ -337,7 +337,7 @@ export const build = async ({
       await Promise.all(
         Object.entries(serviceNamePathToFacadeMap).map(
           ([serviceId, pathToFacadeWasm]) =>
-            generateServiceInterface({
+            generateAquaInterfaceForService({
               serviceId,
               pathToFacadeWasm,
               marineCli,
@@ -525,17 +525,20 @@ export const buildModules = async (
 };
 
 const overrideModule = (
-  mod: ModuleV0,
+  mod: ServiceModuleV0,
   overrideModules: OverrideModules | undefined,
   moduleName: string
-): ModuleV0 => ({ ...mod, ...overrideModules?.[moduleName] });
+): ServiceModuleV0 => ({ ...mod, ...overrideModules?.[moduleName] });
 
 type GetModuleNamesAndConfigsDefinedInServicesArg = {
   overrideModules: OverrideModules | undefined;
   serviceName: string;
   deployId: string;
   serviceDirPath: string;
-  serviceConfigModules: { facade: ModuleV0 } & Record<string, ModuleV0>;
+  serviceConfigModules: { facade: ServiceModuleV0 } & Record<
+    string,
+    ServiceModuleV0
+  >;
 };
 
 const getModuleNamesAndConfigsDefinedInServices = ({

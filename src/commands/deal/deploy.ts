@@ -28,6 +28,7 @@ import {
   MIN_WORKERS,
   TARGET_WORKERS,
 } from "../../lib/configs/project/fluence.js";
+import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -37,12 +38,14 @@ import {
   DEAL_CONFIG,
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
+  IMPORT_FLAG,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import {
   ensureAquaFileWithWorkerInfo,
   prepareForDeploy,
 } from "../../lib/deployWorkers.js";
+import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
@@ -59,6 +62,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
+    ...IMPORT_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -82,30 +86,21 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     });
 
     const workersConfig = await initNewWorkersConfig();
+    const maybeFluenceLockConfig = await initFluenceLockConfig();
+
+    const aquaImports = await ensureAquaImports({
+      maybeFluenceConfig: fluenceConfig,
+      maybeFluenceLockConfig,
+      flags,
+    });
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       maybeWorkersConfig: workersConfig,
       fluenceConfig,
+      maybeFluenceLockConfig,
+      aquaImports,
     });
-
-    const errorMessages = uploadArg.workers
-      .map<string | null>(({ config: { services }, name }) => {
-        if (services.length === 0) {
-          return `Worker ${color.yellow(
-            name
-          )} has no services listed in 'workers' property in ${FLUENCE_CONFIG_FILE_NAME}`;
-        }
-
-        return null;
-      })
-      .filter<string>(
-        (errorMessage): errorMessage is string => errorMessage !== null
-      );
-
-    if (errorMessages.length > 0) {
-      commandObj.error(errorMessages.join("\n"));
-    }
 
     const uploadDeployResult = await upload_deploy(fluenceClient, uploadArg);
 
