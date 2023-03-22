@@ -70,6 +70,8 @@ jobs:
 
       - run: npm i
 
+      - run: npm run compile-installation-spell-aqua
+
       - run: npm run build
 
       - name: Publish to npm registry
