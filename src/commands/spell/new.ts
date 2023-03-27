@@ -47,7 +47,7 @@ export default class New extends BaseCommand<typeof New> {
     const { args } = await initCli(this, await this.parse(New));
 
     const pathToSpellDir =
-      args.path ?? (await input({ message: "Enter module path" }));
+      args.path ?? (await input({ message: "Enter spell path" }));
 
     await generateNewSpell(pathToSpellDir);
 

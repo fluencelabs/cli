@@ -6,6 +6,7 @@
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
 * [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
@@ -68,7 +69,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.1/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.2/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -166,7 +167,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.1/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.2/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -199,6 +200,36 @@ DESCRIPTION
 
 EXAMPLES
   $ fluence deal deploy
+```
+
+## `fluence deal logs [WORKER-NAMES]`
+
+Get logs from deployed workers for deals listed in workers.yaml
+
+```
+USAGE
+  $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>]
+
+ARGUMENTS
+  WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
+
+FLAGS
+  -k, --key-pair-name=<name>     Key pair name
+  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
+  --no-input                     Don't interactively ask for any input from the user
+  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                  Print particle ids when running Fluence js-client
+  --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
+                                 not processed.
+
+DESCRIPTION
+  Get logs from deployed workers for deals listed in workers.yaml
+
+EXAMPLES
+  $ fluence deal logs
 ```
 
 ## `fluence default peers [NETWORK]`
@@ -370,7 +401,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.1/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.2/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -573,7 +604,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.1/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.2/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -717,29 +748,21 @@ EXAMPLES
 
 ## `fluence workers logs [WORKER-NAMES]`
 
-Get logs from deployed workers listed in workers.yaml
+Get logs from deployed workers for hosts listed in workers.yaml
 
 ```
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--worker-id <value>] [--host-id <value>]
-    [--spell-id <value>] [--deals | --hosts]
+    [--spell-id <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property of fluence.yaml are deployed)
+  WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
 
 FLAGS
   -k, --key-pair-name=<name>     Key pair name
-  --deals                        Get logs from workers deployed with deals (using 'deals' property of fluence.yaml). Use
-                                 this flag if deployed both directly and with deals to distinguish which logs do you
-                                 want to see. If you used only one type of deployment - it will be selected
-                                 automatically by default
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --host-id=<host-id>            Host id
-  --hosts                        Get logs from workers deployed directly without deals (using 'hosts' property of
-                                 fluence.yaml). Use this flag if deployed both directly and with deals to distinguish
-                                 which logs do you want to see. If you used only one type of deployment - it will be
-                                 selected automatically by default
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                  Print particle ids when running Fluence js-client
@@ -751,7 +774,7 @@ FLAGS
   --worker-id=<worker-id>        Worker id
 
 DESCRIPTION
-  Get logs from deployed workers listed in workers.yaml
+  Get logs from deployed workers for hosts listed in workers.yaml
 
 EXAMPLES
   $ fluence workers logs

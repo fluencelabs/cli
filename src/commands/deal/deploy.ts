@@ -23,7 +23,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
+import { upload } from "../../lib/compiled-aqua/installation-spell/upload.js";
 import {
   MIN_WORKERS,
   TARGET_WORKERS,
@@ -49,7 +49,6 @@ import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { doRegisterLog } from "../../lib/localServices/log.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
@@ -78,7 +77,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const fluenceClient = await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
-    doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
 
     const chainNetwork = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
@@ -102,7 +100,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       aquaImports,
     });
 
-    const uploadDeployResult = await upload_deploy(fluenceClient, uploadArg);
+    const uploadResult = await upload(fluenceClient, uploadArg);
 
     const createdDeals: Record<
       string,
@@ -118,13 +116,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       }
     > = {};
 
-    for (const { name: workerName } of [...uploadArg.workers]) {
-      const uploadedWorker = uploadDeployResult.workers.find(
-        (worker) => workerName === worker.name
-      );
-
-      assert(uploadedWorker !== undefined);
-      const { definition: appCID, installation_spells } = uploadedWorker;
+    for (const {
+      name: workerName,
+      definition: appCID,
+    } of uploadResult.workers) {
       const deal = fluenceConfig?.deals?.[workerName];
       assert(deal !== undefined);
       const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
@@ -166,7 +161,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
         workersConfig.deals[workerName] = {
           timestamp: new Date().toISOString(),
-          installation_spells,
           definition: appCID,
           chainNetwork,
           chainNetworkId: DEAL_CONFIG[chainNetwork].chainId,
@@ -196,7 +190,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       }
 
       workersConfig.deals[workerName] = {
-        installation_spells,
         definition: appCID,
         timestamp: new Date().toISOString(),
         dealIdOriginal,

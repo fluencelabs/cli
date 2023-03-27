@@ -223,6 +223,8 @@ export const OFF_AQUA_LOGS_FLAG = {
   }),
 };
 
+export type OffAquaLogsFlag = FromFlagsDef<typeof OFF_AQUA_LOGS_FLAG>;
+
 export const IMPORT_FLAG = {
   import: Flags.string({
     description:
@@ -232,18 +234,21 @@ export const IMPORT_FLAG = {
   }),
 };
 
+export const TTL_FLAG_NAME = "ttl";
+export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
+
 export const FLUENCE_CLIENT_FLAGS = {
   relay: Flags.string({
     description: "Relay for Fluence js-client to connect to",
     helpValue: "<multiaddress>",
   }),
-  ttl: Flags.integer({
+  [TTL_FLAG_NAME]: Flags.integer({
     description:
       "Particle Time To Live since 'now'. After that, particle is expired and not processed.",
     default: 60000,
     helpValue: "<milliseconds>",
   }),
-  "dial-timeout": Flags.integer({
+  [DIAL_TIMEOUT_FLAG_NAME]: Flags.integer({
     description: "Timeout for Fluence js-client to connect to relay peer",
     default: 60000,
     helpValue: "<milliseconds>",

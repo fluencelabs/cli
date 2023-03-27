@@ -15,12 +15,18 @@
  */
 
 import { createClient } from "@fluencelabs/js-client.node";
+import type { FluencePeer } from "@fluencelabs/js-peer/dist/js-peer/FluencePeer.js";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { FluenceClientFlags, KeyPairFlag } from "./const.js";
+import type {
+  FluenceClientFlags,
+  KeyPairFlag,
+  OffAquaLogsFlag,
+} from "./const.js";
 import { base64ToUint8Array } from "./helpers/generateKeyPair.js";
 import { getExistingKeyPair } from "./keyPairs.js";
+import { doRegisterLog } from "./localServices/log.js";
 import { getRandomRelayAddr } from "./multiaddres.js";
 
 export const initFluenceClient = async (
@@ -30,9 +36,10 @@ export const initFluenceClient = async (
     ["dial-timeout"]: dialTimeoutMs,
     ttl,
     "particle-id": printParticleId,
-  }: FluenceClientFlags & KeyPairFlag,
+    "off-aqua-logs": offAquaLogs,
+  }: FluenceClientFlags & KeyPairFlag & OffAquaLogsFlag,
   maybeFluenceConfig: FluenceConfig | null
-) => {
+): Promise<FluencePeer> => {
   const client = createClient();
   const relay = maybeRelay ?? getRandomRelayAddr(maybeFluenceConfig?.relays);
 
@@ -59,5 +66,6 @@ export const initFluenceClient = async (
     commandObj.error(`Failed to connect to ${relay}. ${e}`);
   }
 
+  doRegisterLog(client, offAquaLogs);
   return client;
 };

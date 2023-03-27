@@ -34,11 +34,6 @@ import {
 } from "../initConfig.js";
 
 type WorkerInfo = {
-  installation_spells: {
-    host_id: string;
-    spell_id: string;
-    worker_id: string;
-  }[];
   timestamp: string;
   definition: string;
 };
@@ -46,26 +41,13 @@ type WorkerInfo = {
 const workerInfoSchema = {
   type: "object",
   properties: {
-    installation_spells: {
-      type: "array",
-      description: "A list of installation spells",
-      items: {
-        type: "object",
-        properties: {
-          host_id: { type: "string" },
-          spell_id: { type: "string" },
-          worker_id: { type: "string" },
-        },
-        required: ["host_id", "spell_id", "worker_id"],
-      },
-    },
     definition: { type: "string" },
     timestamp: {
       type: "string",
       description: "ISO timestamp of the time when the worker was deployed",
     },
   },
-  required: ["installation_spells", "timestamp", "definition"],
+  required: ["timestamp", "definition"],
 } as const satisfies JSONSchemaType<WorkerInfo>;
 
 type ConfigV0 = {
@@ -83,6 +65,11 @@ type ConfigV0 = {
     string,
     WorkerInfo & {
       relayId: string;
+      installation_spells: {
+        host_id: string;
+        spell_id: string;
+        worker_id: string;
+      }[];
     }
   >;
 };
@@ -128,9 +115,26 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
         ...workerInfoSchema,
         properties: {
           ...workerInfoSchema.properties,
+          installation_spells: {
+            type: "array",
+            description: "A list of installation spells",
+            items: {
+              type: "object",
+              properties: {
+                host_id: { type: "string" },
+                spell_id: { type: "string" },
+                worker_id: { type: "string" },
+              },
+              required: ["host_id", "spell_id", "worker_id"],
+            },
+          },
           relayId: { type: "string" },
         },
-        required: [...workerInfoSchema.required, "relayId"],
+        required: [
+          ...workerInfoSchema.required,
+          "installation_spells",
+          "relayId",
+        ],
       },
       required: [],
       nullable: true,

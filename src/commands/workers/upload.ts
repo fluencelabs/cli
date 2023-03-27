@@ -34,7 +34,6 @@ import { jsonStringify } from "../../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { doRegisterLog } from "../../lib/localServices/log.js";
 
 export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FILE_NAME}`;
@@ -61,7 +60,6 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
 
     const fluenceClient = await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
-    doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
     const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const aquaImports = await ensureAquaImports({
