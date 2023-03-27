@@ -40,7 +40,6 @@ import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { doRegisterLog } from "../../lib/localServices/log.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FILE_NAME}`;
@@ -67,7 +66,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const fluenceClient = await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
-    doRegisterLog(fluenceClient, flags["off-aqua-logs"]);
 
     const workersConfig = await initNewWorkersConfig();
     const maybeFluenceLockConfig = await initFluenceLockConfig();

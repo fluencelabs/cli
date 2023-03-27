@@ -61,7 +61,6 @@ import { jsonStringify } from "../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../lib/jsClient.js";
 import { getExistingKeyPair } from "../lib/keyPairs.js";
 import { initCli } from "../lib/lifeCycle.js";
-import { doRegisterLog } from "../lib/localServices/log.js";
 import { getRandomRelayAddr } from "../lib/multiaddres.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
@@ -488,8 +487,6 @@ const fluenceRun = async (args: RunArgs) => {
     }),
     initFluenceClient(args, args.maybeFluenceConfig),
   ]);
-
-  doRegisterLog(fluenceClient, args["off-aqua-logs"]);
 
   if (errors.length > 0) {
     commandObj.error(errors.join("\n"));

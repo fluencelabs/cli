@@ -16,14 +16,11 @@
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Args, Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import {
-  get_logs,
-  Get_logsArgApp_workers,
-} from "../../lib/compiled-aqua/installation-spell/cli.js";
+import { get_logs_deal } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -38,10 +35,9 @@ import {
 import { parseWorkers } from "../../lib/deployWorkers.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
-  static override description = `Get logs from deployed workers for hosts listed in ${WORKERS_CONFIG_FILE_NAME}`;
+  static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -49,23 +45,10 @@ export default class Logs extends BaseCommand<typeof Logs> {
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
-    "worker-id": Flags.string({
-      description: "Worker id",
-      helpValue: "<worker-id>",
-    }),
-    "host-id": Flags.string({
-      description: "Host id",
-      helpValue: "<host-id>",
-    }),
-    "spell-id": Flags.string({
-      description: "Spell id",
-      helpValue: "<spell-id>",
-      default: "worker-spell",
-    }),
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Worker names to get logs for (by default all worker names from 'hosts' property of ${WORKERS_CONFIG_FILE_NAME})`,
+      description: `Worker names to get logs for (by default all worker names from 'deals' property of ${WORKERS_CONFIG_FILE_NAME})`,
     }),
   };
   async run(): Promise<void> {
@@ -76,17 +59,17 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
     const fluenceClient = await initFluenceClient(flags, maybeFluenceConfig);
 
-    const logsArg = await getLogsArg({
-      maybeWorkerNamesString: args["WORKER-NAMES"],
-      maybeWorkerId: flags["worker-id"],
-      maybeHostId: flags["host-id"],
-      spellId: flags["spell-id"],
-    });
+    const dealIdWorkerNameMap = await getDealIdWorkerNameMap(
+      args["WORKER-NAMES"]
+    );
 
     let logs;
 
     try {
-      logs = await get_logs(fluenceClient, logsArg);
+      logs = await get_logs_deal(
+        fluenceClient,
+        Object.keys(dealIdWorkerNameMap)
+      );
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${String(
@@ -98,10 +81,10 @@ export default class Logs extends BaseCommand<typeof Logs> {
     commandObj.log(
       logs
         .map(
-          ({ host_id, logs, spell_id, worker_name }) =>
+          ({ host_id, logs, spell_id, deal_id }) =>
             `${color.yellow(
-              worker_name
-            )} (host_id: ${host_id}, spell_id: ${spell_id}):\n\n${logs.join(
+              dealIdWorkerNameMap[deal_id] ?? "Unknown worker"
+            )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${logs.join(
               "\n"
             )}`
         )
@@ -110,63 +93,30 @@ export default class Logs extends BaseCommand<typeof Logs> {
   }
 }
 
-type GetLogsArgArg = {
-  maybeWorkerNamesString: string | undefined;
-  maybeWorkerId: string | undefined;
-  maybeHostId: string | undefined;
-  spellId: string;
-};
-
-const getLogsArg = async ({
-  maybeWorkerNamesString,
-  maybeWorkerId,
-  maybeHostId,
-  spellId,
-}: GetLogsArgArg): Promise<Get_logsArgApp_workers> => {
-  if (maybeWorkerId !== undefined || maybeHostId !== undefined) {
-    const workerId =
-      maybeWorkerId ?? (await input({ message: "Enter worker id" }));
-
-    const hostId = maybeHostId ?? (await input({ message: "Enter host id" }));
-
-    return {
-      workers: [
-        {
-          definition: "",
-          installation_spells: [
-            {
-              worker_id: workerId,
-              host_id: hostId,
-              spell_id: spellId,
-            },
-          ],
-          name: "",
-        },
-      ],
-    };
-  }
-
+const getDealIdWorkerNameMap = async (
+  maybeWorkerNamesString: string | undefined
+): Promise<Record<string, string>> => {
   const maybeWorkersConfig = await initReadonlyWorkersConfig();
 
   if (maybeWorkersConfig === null) {
     return commandObj.error(
       `Wasn't able to find ${color.yellow(
         WORKERS_CONFIG_FILE_NAME
-      )} in ${FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`
+      )} in ${FLUENCE_DIR_NAME} directory. Make sure you have deployed before trying to get logs`
     );
   }
 
   const workersConfig = maybeWorkersConfig;
 
-  const hosts =
-    workersConfig.hosts ??
+  const deals =
+    workersConfig.deals ??
     commandObj.error(
       `No deployed workers found in ${color.yellow(
-        "hosts"
+        "deals"
       )} property in ${color.yellow(workersConfig.$getPath())} file`
     );
 
-  const workerNamesSet = Object.keys(hosts);
+  const workerNamesSet = Object.keys(deals);
 
   const workersToGetLogsFor =
     maybeWorkerNamesString === undefined
@@ -187,9 +137,10 @@ const getLogsArg = async ({
     );
   }
 
-  return {
-    workers: Object.entries(hosts)
-      .filter(([name]) => workersToGetLogsFor.includes(name))
-      .map(([name, config]) => ({ name, ...config })),
-  };
+  return Object.entries(deals)
+    .filter(([name]) => workersToGetLogsFor.includes(name))
+    .reduce<Record<string, string>>((acc, [name, config]) => {
+      acc[config.dealId] = name;
+      return acc;
+    }, {});
 };
