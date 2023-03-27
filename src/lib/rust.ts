@@ -78,7 +78,13 @@ const ensureRust = async (): Promise<void> => {
       commandObj.error(
         `Installed rust without errors but ${color.yellow(
           RUSTUP
-        )} or ${color.yellow(CARGO)} not in PATH`
+        )} or ${color.yellow(
+          CARGO
+        )} not in PATH. Try restarting your terminal, check if ${color.yellow(
+          RUSTUP
+        )} and ${color.yellow(
+          CARGO
+        )} are installed and if they are - run the command again`
       );
     }
   }

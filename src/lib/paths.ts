@@ -183,8 +183,11 @@ export const ensureFluenceJSDeployedAppPath = async (
     DEPLOYED_APP_JS_FILE_NAME
   );
 
+export const getDefaultJSDirPath = (projectRootDir: string): string =>
+  path.join(projectRootDir, SRC_DIR_NAME, JS_DIR_NAME);
+
 export const ensureDefaultJSDirPath = async (): Promise<string> =>
-  ensureDir(path.join(projectRootDir, SRC_DIR_NAME, JS_DIR_NAME));
+  ensureDir(getDefaultJSDirPath(projectRootDir));
 
 export const ensureDefaultAquaJSPath = async (): Promise<string> =>
   ensureDir(
@@ -209,8 +212,11 @@ export const ensureFluenceTSDeployedAppPath = async (
     DEPLOYED_APP_TS_FILE_NAME
   );
 
+export const getDefaultTSDirPath = (projectRootDir: string): string =>
+  path.join(projectRootDir, SRC_DIR_NAME, TS_DIR_NAME);
+
 export const ensureDefaultTSDirPath = async (): Promise<string> =>
-  ensureDir(path.join(projectRootDir, SRC_DIR_NAME, TS_DIR_NAME));
+  ensureDir(getDefaultTSDirPath(projectRootDir));
 
 export const ensureDefaultAquaTSPath = async (): Promise<string> =>
   ensureDir(

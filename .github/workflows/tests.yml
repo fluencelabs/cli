@@ -108,16 +108,21 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
           node-version: "16"
           registry-url: "https://npm.fluence.dev"
-          cache: "npm"
+          cache: "pnpm"
 
-      - run: npm i
+      - run: pnpm i
 
-      - run: npm run compile-installation-spell-aqua
+      - run: pnpm compile-installation-spell-aqua
 
       - name: Set fluence-js version in package.json
         if: inputs.fluence-js-version != 'null'
@@ -180,7 +185,7 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: npm run test
+        run: pnpm test
 
       - name: Cleanup
         if: always()
