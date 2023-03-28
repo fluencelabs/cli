@@ -45,7 +45,7 @@
     "@fluencelabs/js-client.api": "^0.11.4",
     "@fluencelabs/js-client.node": "^0.6.6",
     "@fluencelabs/js-peer": "^0.8.5",
-    "@fluencelabs/marine-js": "^0.3.45",
+    "@fluencelabs/marine-js": "^0.4.0",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.19.4",
     "@oclif/color": "^1.0.4",
