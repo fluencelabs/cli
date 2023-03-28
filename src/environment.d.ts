@@ -16,6 +16,7 @@
 
 import { FluenceEnv } from "../src/lib/multiaddres.js";
 import {
+  CI,
   DEBUG_COUNTLY,
   FLUENCE_ENV,
   FLUENCE_USER_DIR,
@@ -27,6 +28,7 @@ declare global {
       [FLUENCE_ENV]: FluenceEnv;
       [DEBUG_COUNTLY]: "true" | "false";
       [FLUENCE_USER_DIR]?: string;
+      [CI]: "true" | "false";
     }
   }
 }

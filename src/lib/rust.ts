@@ -15,7 +15,8 @@
  */
 
 import assert from "node:assert";
-import path from "node:path";
+import { access } from "node:fs/promises";
+import path, { join } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -31,6 +32,7 @@ import {
 } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
+import { downloadFile } from "./helpers/downloadFile.js";
 import {
   handleFluenceConfig,
   handleInstallation,
@@ -232,6 +234,31 @@ const installCargoDependency = async ({
   });
 };
 
+const downloadPrebuiltCargoDependencies = async (
+  name: string,
+  version: string,
+  dependencyPath: string
+): Promise<void> => {
+  const binaryPath = join(dependencyPath, "bin", name);
+
+  try {
+    await access(binaryPath);
+  } catch {
+    const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-linux-x86_64`;
+
+    console.log(
+      `Downloading prebuilt binary: ${color.yellow(name)}... from ${url}`
+    );
+
+    await downloadFile(binaryPath, url);
+
+    await execPromise({
+      command: "chmod",
+      args: ["+x", binaryPath],
+    });
+  }
+};
+
 type CargoDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
@@ -276,22 +303,26 @@ export const ensureCargoDependency = async ({
       version,
     });
 
-  await handleInstallation({
-    force,
-    dependencyPath,
-    dependencyTmpPath,
-    explicitInstallation,
-    name,
-    version,
-    installDependency: () =>
-      installCargoDependency({
-        dependencyPath,
-        dependencyTmpPath,
-        name,
-        toolchain,
-        version,
-      }),
-  });
+  if (process.env.CI === "true") {
+    await downloadPrebuiltCargoDependencies(name, version, dependencyPath);
+  } else {
+    await handleInstallation({
+      force,
+      dependencyPath,
+      dependencyTmpPath,
+      explicitInstallation,
+      name,
+      version,
+      installDependency: () =>
+        installCargoDependency({
+          dependencyPath,
+          dependencyTmpPath,
+          name,
+          toolchain,
+          version,
+        }),
+    });
+  }
 
   if (maybeFluenceConfig !== null) {
     const versionFromArgs = maybeVersion ?? version;

@@ -24,6 +24,7 @@ export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
 export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
 export const RUN_TESTS_IN_PARALLEL = "RUN_TESTS_IN_PARALLEL";
+export const CI = "CI";
 
 dotenv.config();
 
@@ -72,4 +73,5 @@ const isFluenceEnv = (v: unknown): v is FluenceEnv =>
 setEnvVariable(FLUENCE_ENV, isFluenceEnv, "kras");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
 setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "true");
+setEnvVariable(CI, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

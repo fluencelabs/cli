@@ -46,5 +46,5 @@ import { fluence, initFirstTime } from "./helpers.js";
 
   console.log("Tests are ready to run!");
 })().catch((error) => {
-  throw new Error(String(error));
+  throw error;
 });
