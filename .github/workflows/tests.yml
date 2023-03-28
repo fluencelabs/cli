@@ -182,6 +182,7 @@ jobs:
         uses: fluencelabs/github-actions/pnpm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
+          flags: "-r --registry https://npm.fluence.dev --no-git-checks --tag snapshot -filter '@fluencelabs/*'"
 
       - name: Setup dasel
         if: always()
@@ -196,9 +197,9 @@ jobs:
           ## Used versions
           | name      | version                                                              |
           | --------- | -------------------------------------------------------------------- |
-          | avm       | $(pnpm list --no-color  --json | dasel -p json -m --plain '(?:-=@fluencelabs/avm).version'|
-          | marine-js | $(pnpm list --no-color  --json | dasel -p json -m --plain '(?:-=@fluencelabs/marine-js).version'|
-          | aqua-api  | $(pnpm list --no-color  --json | dasel -p json -m --plain '(?:-=@fluencelabs/aqua-api).version'|
+          | avm       | $(pnpm list --no-color  --json | dasel -p json -m --plain '(?:-=@fluencelabs/avm).version') |
+          | marine-js | $(pnpm list --no-color  --json | dasel -p json -m --plain '(?:-=@fluencelabs/marine-js).version') |
+          | aqua-api  | $(pnpm list --no-color  --json | dasel -p json -m --plain '(?:-=@fluencelabs/aqua-api).version') |
           SNAPSHOT
 
       - name: Dump rust-peer logs
