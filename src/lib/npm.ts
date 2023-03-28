@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { rm } from "node:fs/promises";
-import path from "node:path";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -82,13 +82,20 @@ const installNpmDependency = async ({
   } catch {}
 
   try {
+    await mkdir(dependencyTmpPath, { recursive: true });
+
+    await writeFile(
+      join(dependencyTmpPath, "package.json"),
+      JSON.stringify({ dependencies: { [name]: version } })
+    );
+
     await execPromise({
-      command: "npm",
-      args: ["i", `${name}@${version}`],
-      flags: { prefix: dependencyTmpPath },
+      command: "npx",
+      args: ["pnpm", "i"],
       spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
         dependencyPath
       )}`,
+      options: { cwd: dependencyTmpPath },
     });
   } catch (error) {
     commandObj.error(
@@ -188,8 +195,8 @@ export const ensureNpmDependency = async ({
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 
   return maybeNpmDependencyInfo?.bin === undefined
-    ? path.join(dependencyPath, NODE_MODULES_DIR_NAME)
-    : path.join(
+    ? join(dependencyPath, NODE_MODULES_DIR_NAME)
+    : join(
         dependencyPath,
         NODE_MODULES_DIR_NAME,
         DOT_BIN_DIR_NAME,
