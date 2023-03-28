@@ -179,7 +179,7 @@ jobs:
 
       - name: Publish snapshot
         id: snapshot
-        uses: fluencelabs/github-actions/pnpm-publish-snapshot@FLU-290
+        uses: fluencelabs/github-actions/pnpm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
 
