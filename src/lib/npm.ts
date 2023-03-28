@@ -210,7 +210,7 @@ type InstallAllNPMDependenciesArg = {
   force?: boolean | undefined;
 };
 
-export const installAllNPMDependencies = ({
+export const installAllNPMDependencies = async ({
   maybeFluenceConfig,
   maybeFluenceLockConfig,
   force,
@@ -231,6 +231,8 @@ export const installAllNPMDependencies = ({
       AQUA_LIB_RECOMMENDED_VERSION,
     ]);
   }
+
+  await execPromise({ command: "npx", args: ["pnpm", "--help"] });
 
   return Promise.all(
     dependenciesToEnsure.map(([name, version]) =>
