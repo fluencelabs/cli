@@ -42,7 +42,7 @@ const CARGO_OVERRIDABLE_DEP =
   "cargo dependencies that can be overridden with 'fluence dependency cargo install <name>@<version>'";
 
 export default class Versions extends BaseCommand<typeof Versions> {
-  static override aliases = ["dependency:v", "dep:v"];
+  static override aliases = ["dependency:v", "dep:v", "dep:versions"];
   static override description =
     "Get versions of all currently used dependencies";
   static override examples = ["<%= config.bin %> <%= command.id %>"];

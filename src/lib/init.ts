@@ -44,7 +44,6 @@ import {
   TS_CONFIG_FILE_NAME,
   FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION,
 } from "../lib/const.js";
-import { execPromise } from "../lib/execPromise.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
   ensureDefaultAquaJSPath,
@@ -339,14 +338,4 @@ export const initTSorJSProject = async ({
   }
 
   await fluenceConfig.$commit();
-
-  await execPromise({
-    printOutput: true,
-    command: "npm",
-    args: ["i"],
-    options: { cwd: defaultTSorJSDirPath },
-    spinnerMessage: `Installing npm dependencies for ${
-      isJS ? "JS" : "TS"
-    } project`,
-  });
 };

@@ -27,6 +27,7 @@ import type { Template } from "../src/lib/const.js";
 import { execPromise, ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
 import type { FluenceEnv } from "../src/lib/multiaddres.js";
+import { getDefaultJSDirPath, getDefaultTSDirPath } from "../src/lib/paths.js";
 import {
   FLUENCE_ENV,
   RUN_TESTS_IN_PARALLEL,
@@ -75,6 +76,20 @@ export const initFirstTime = async (template: Template) => {
     await access(templatePath);
   } catch {
     await fluence({ args: ["init", templatePath], flags: { template } });
+
+    if (template === "js") {
+      await execPromise({
+        command: "pnpm",
+        args: ["i"],
+        options: { cwd: getDefaultJSDirPath(templatePath) },
+      });
+    } else if (template === "ts") {
+      await execPromise({
+        command: "pnpm",
+        args: ["i"],
+        options: { cwd: getDefaultTSDirPath(templatePath) },
+      });
+    }
   }
 
   console.log(`Initialized template "${template}"`);

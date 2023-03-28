@@ -29,7 +29,7 @@ import { FLUENCE_ENV } from "./setupEnvironment.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
 export const AQUA_RECOMMENDED_VERSION = "0.10.2";
-export const AQUA_LIB_RECOMMENDED_VERSION = "0.6.0";
+export const AQUA_LIB_RECOMMENDED_VERSION = "0.7.0";
 export const REGISTRY_RECOMMENDED_VERSION = "0.7.1";
 export const SPELL_RECOMMENDED_VERSION = "0.4.0";
 export const MARINE_RECOMMENDED_VERSION = "0.14.0";

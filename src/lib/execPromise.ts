@@ -17,9 +17,15 @@
 import { spawn } from "node:child_process";
 
 import oclifColor from "@oclif/color";
+import { CLIError } from "@oclif/core/lib/errors/index.js";
+
 const color = oclifColor.default;
 
-import { IS_DEVELOPMENT, TIMEOUT_FLAG_NAME } from "./const.js";
+import {
+  IS_DEVELOPMENT,
+  MARINE_CARGO_DEPENDENCY,
+  TIMEOUT_FLAG_NAME,
+} from "./const.js";
 import { Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
@@ -86,22 +92,22 @@ export const execPromise = ({
 
     let stdout = "";
 
-    childProcess.stdout?.on("data", (data: string): void => {
+    childProcess.stdout?.on("data", (data: Buffer): void => {
       if (printOutput) {
         process.stdout.write(data);
       }
 
-      stdout = `${stdout}${data}`;
+      stdout = `${stdout}${data.toString()}`;
     });
 
     let stderr = "";
 
-    childProcess.stderr?.on("data", (data: string): void => {
+    childProcess.stderr?.on("data", (data: Buffer): void => {
       if (printOutput) {
         process.stderr.write(data);
       }
 
-      stderr = `${stderr}${data}`;
+      stderr = `${stderr}${data.toString()}`;
     });
 
     childProcess.on("error", (error: string): void => {
@@ -123,6 +129,20 @@ export const execPromise = ({
 
       if (execTimeout !== false) {
         clearTimeout(execTimeout);
+      }
+
+      if (stderr.includes("linker `cc` not found")) {
+        rej(
+          new CLIError(
+            `\n${color.yellow(MARINE_CARGO_DEPENDENCY)} requires ${color.yellow(
+              "build-essential"
+            )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
+              "sudo apt install build-essential"
+            )}\n`
+          )
+        );
+
+        return;
       }
 
       if (code !== 0) {

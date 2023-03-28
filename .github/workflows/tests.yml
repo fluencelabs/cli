@@ -19,10 +19,6 @@ on:
         description: "rust-peer image tag"
         type: string
         default: "fluencelabs/rust-peer:minimal"
-      fluence-js-version:
-        description: "@fluencejs/fluence version"
-        type: string
-        default: "null"
       aqua-version:
         description: "@fluencejs/aqua version"
         type: string
@@ -108,30 +104,21 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
           node-version: "16"
           registry-url: "https://npm.fluence.dev"
-          cache: "npm"
+          cache: "pnpm"
 
-      - run: npm i
+      - run: pnpm i
 
-      - run: npm run compile-installation-spell-aqua
-
-      - name: Set fluence-js version in package.json
-        if: inputs.fluence-js-version != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/fluence"
-          version: ${{ inputs.fluence-js-version }}
-
-      - name: Set fluence-js version
-        if: inputs.fluence-js-version != 'null'
-        uses: ./.github/actions/replace-const
-        with:
-          key: FLUENCE_JS_RECOMMENDED_VERSION
-          value: ${{ inputs.fluence-js-version }}
+      - run: pnpm compile-installation-spell-aqua
 
       - name: Set aqua version
         if: inputs.aqua-version != 'null'
@@ -180,7 +167,7 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: npm run test
+        run: pnpm test
 
       - name: Cleanup
         if: always()
@@ -192,7 +179,7 @@ jobs:
 
       - name: Publish snapshot
         id: snapshot
-        uses: fluencelabs/github-actions/npm-publish-snapshot@main
+        uses: fluencelabs/github-actions/pnpm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
 
@@ -207,12 +194,11 @@ jobs:
         run: |
           cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
           ## Used versions
-          | name       | version                                                              |
-          | ---------- | -------------------------------------------------------------------- |
-          | avm        | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/avm).version') |
-          | marine-js  | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/marine-js).version') |
-          | fluence-js | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/fluence).version') |
-          | aqua-api   | $(dasel -f package-lock.json -p json -m --plain 'packages.(?:-=node_modules/@fluencelabs/aqua-api).version') |
+          | name      | version                                                              |
+          | --------- | -------------------------------------------------------------------- |
+          | avm       | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/avm).version') |
+          | marine-js | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/marine-js).version') |
+          | aqua-api  | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/aqua-api).version') |
           SNAPSHOT
 
       - name: Dump rust-peer logs
