@@ -34,7 +34,7 @@
     "pre-commit": "exitzero pnpm build && exitzero pnpm lint-fix && cd docs/commands && oclif readme --no-aliases && git add README.md",
     "clean": "shx rm -rf .fluence && shx rm -rf fluence-lock.yaml && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f",
-    "compile-installation-spell-aqua": "./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules",
+    "compile-installation-spell-aqua": "./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules $(npx ts-node ./src/getAquaDependencyImports.ts @fluencelabs/installation-spell)",
     "compile-installation-spell-air": "./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/deal_spell.aqua -o src/lib/compiled-aqua/installation-spell/air --import node_modules --air",
     "compile-installation-spell": "pnpm compile-installation-spell-aqua && pnpm compile-installation-spell-air"
   },

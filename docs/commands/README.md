@@ -354,6 +354,7 @@ DESCRIPTION
 ALIASES
   $ fluence dependency v
   $ fluence dep v
+  $ fluence dep versions
 
 EXAMPLES
   $ fluence dependency versions

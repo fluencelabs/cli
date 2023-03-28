@@ -73,8 +73,8 @@ export async function ensureAquaImports(
 
   return [
     ...defaultImports,
-    ...(flags?.import ?? []),
     ...importsFromFluenceConfig,
+    ...(flags?.import ?? []),
   ];
 }
 
