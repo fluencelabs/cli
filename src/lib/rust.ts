@@ -246,7 +246,7 @@ const downloadPrebuiltCargoDependencies = async (
   } catch {
     const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-linux-x86_64`;
 
-    console.log(
+    commandObj.log(
       `Downloading prebuilt binary: ${color.yellow(name)}... from ${url}`
     );
 
