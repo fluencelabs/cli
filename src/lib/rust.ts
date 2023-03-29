@@ -303,9 +303,14 @@ export const ensureCargoDependency = async ({
       version,
     });
 
-  if (process.env.CI === "true") {
-    await downloadPrebuiltCargoDependencies(name, version, dependencyPath);
-  } else {
+  try {
+    if (process.env.CI === "true") {
+      await downloadPrebuiltCargoDependencies(name, version, dependencyPath);
+    } else {
+      throw new Error("Not in CI");
+    }
+  } catch {
+    // Fallback to normal cargo install if Download fails in CI or if using CLI not in CI
     await handleInstallation({
       force,
       dependencyPath,
