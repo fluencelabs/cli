@@ -16,7 +16,7 @@
 
 import crypto from "node:crypto";
 import fsPromises from "node:fs/promises";
-import { isAbsolute, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -57,14 +57,18 @@ export const getHashOfString = (str: string): Promise<string> => {
   });
 };
 
-const downloadFile = async (path: string, url: string): Promise<string> => {
+export const downloadFile = async (
+  path: string,
+  url: string
+): Promise<string> => {
   const res = await fetch(url);
 
-  if (res.status === 404) {
+  if (!res.ok) {
     return commandObj.error(`Failed when downloading ${color.yellow(url)}`);
   }
 
   const arrayBuffer = await res.arrayBuffer();
+  await fsPromises.mkdir(dirname(path), { recursive: true });
   await fsPromises.writeFile(path, new Uint8Array(arrayBuffer));
   return path;
 };
@@ -131,7 +135,6 @@ const downloadAndDecompress = async (
     return dirPath;
   } catch {}
 
-  await fsPromises.mkdir(dirPath, { recursive: true });
   const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
   await decompress(archivePath, dirPath);
