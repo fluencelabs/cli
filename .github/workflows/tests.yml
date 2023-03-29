@@ -118,8 +118,6 @@ jobs:
 
       - run: pnpm i
 
-      - run: pnpm compile-installation-spell-aqua
-
       - name: Set aqua version
         if: inputs.aqua-version != 'null'
         uses: ./.github/actions/replace-const
