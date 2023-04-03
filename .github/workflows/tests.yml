@@ -170,6 +170,20 @@ jobs:
           key: AQUA_RECOMMENDED_VERSION
           value: ${{ inputs.aqua-version }}
 
+      - name: Set recommended js-client.api version
+        if: inputs.js-client-snapshots != 'null'
+        uses: ./.github/actions/replace-const
+        with:
+          key: FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION
+          value: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
+
+      - name: Set recommended js-client.node version
+        if: inputs.js-client-snapshots != 'null'
+        uses: ./.github/actions/replace-const
+        with:
+          key: FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION
+          value: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
+
       - name: Set recommended marine version
         if: inputs.marine-version != 'null'
         uses: ./.github/actions/replace-const
