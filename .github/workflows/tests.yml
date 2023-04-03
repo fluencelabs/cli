@@ -20,7 +20,11 @@ on:
         type: string
         default: "fluencelabs/rust-peer:minimal"
       aqua-version:
-        description: "@fluencejs/aqua version"
+        description: "@fluencelabs/aqua version"
+        type: string
+        default: "null"
+      marine-js-version:
+        description: "@fluencelabs/marine-js version"
         type: string
         default: "null"
       marine-version:
@@ -37,6 +41,10 @@ on:
         default: "null"
       marine-rs-sdk-test-version:
         description: "marine-rs-sdk-test version"
+        type: string
+        default: "null"
+      js-client-snapshots:
+        description: "js-client snapshots"
         type: string
         default: "null"
     outputs:
@@ -118,14 +126,68 @@ jobs:
 
       - run: pnpm i
 
-      - name: Set aqua version
+      - name: Set js-client.api version
+        if: inputs.js-client-snapshots != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/js-client.api"
+          version: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
+          package-manager: pnpm
+
+      - name: Set js-client.node version
+        if: inputs.js-client-snapshots != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/js-client.node"
+          version: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
+          package-manager: pnpm
+
+      - name: Set js-peer version
+        if: inputs.js-client-snapshots != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/js-peer"
+          version: ${{ fromJson(inputs.js-client-snapshots)['js-peer'] }}
+          package-manager: pnpm
+
+      - name: Set aqua-api version
+        if: inputs.aqua-version != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/aqua-api"
+          version: ${{ inputs.aqua-version }}
+          package-manager: pnpm
+
+      - name: Set marine-js version
+        if: inputs.marine-js-version != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/marine-js"
+          version: ${{ inputs.marine-js-version }}
+          package-manager: pnpm
+
+      - name: Set recommended aqua version
         if: inputs.aqua-version != 'null'
         uses: ./.github/actions/replace-const
         with:
           key: AQUA_RECOMMENDED_VERSION
           value: ${{ inputs.aqua-version }}
 
-      - name: Set marine version
+      - name: Set recommended js-client.api version
+        if: inputs.js-client-snapshots != 'null'
+        uses: ./.github/actions/replace-const
+        with:
+          key: FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION
+          value: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
+
+      - name: Set recommended js-client.node version
+        if: inputs.js-client-snapshots != 'null'
+        uses: ./.github/actions/replace-const
+        with:
+          key: FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION
+          value: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
+
+      - name: Set recommended marine version
         if: inputs.marine-version != 'null'
         uses: ./.github/actions/replace-const
         with:
@@ -133,7 +195,7 @@ jobs:
           value: ${{ inputs.marine-version }}
           cargo: true
 
-      - name: Set mrepl version
+      - name: Set recommended mrepl version
         if: inputs.mrepl-version != 'null'
         uses: ./.github/actions/replace-const
         with:
@@ -141,7 +203,7 @@ jobs:
           value: ${{ inputs.mrepl-version }}
           cargo: true
 
-      - name: Set marine-rs-sdk version
+      - name: Set recommended marine-rs-sdk version
         if: inputs.marine-rs-sdk-version != 'null'
         uses: ./.github/actions/replace-const
         with:
@@ -149,7 +211,7 @@ jobs:
           value: ${{ inputs.marine-rs-sdk-version }}
           cargo: true
 
-      - name: Set marine-rs-sdk-test version
+      - name: Set recommended marine-rs-sdk-test version
         if: inputs.marine-rs-sdk-test-version != 'null'
         uses: ./.github/actions/replace-const
         with:
