@@ -132,6 +132,7 @@ jobs:
         with:
           package: "@fluencelabs/js-client.api"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
+          package-manager: pnpm
 
       - name: Set js-client.node version
         if: inputs.js-client-snapshots != 'null'
@@ -139,6 +140,7 @@ jobs:
         with:
           package: "@fluencelabs/js-client.node"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
+          package-manager: pnpm
 
       - name: Set js-peer version
         if: inputs.js-client-snapshots != 'null'
@@ -146,6 +148,7 @@ jobs:
         with:
           package: "@fluencelabs/js-peer"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-peer'] }}
+          package-manager: pnpm
 
       - name: Set aqua-api version
         if: inputs.aqua-version != 'null'
