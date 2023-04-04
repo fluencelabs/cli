@@ -45,10 +45,7 @@ import {
   generateRegisterApp,
 } from "../../lib/deployedApp.js";
 import { getMessageWithKeyValuePairs } from "../../lib/helpers/getMessageWithKeyValuePairs.js";
-import {
-  JSONModuleConfOld,
-  moduleToJSONModuleConfig,
-} from "../../lib/helpers/moduleToJSONModuleConfig.js";
+import type { JSONModuleConfOld } from "../../lib/helpers/moduleToJSONModuleConfig.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -256,10 +253,7 @@ const prepareForLegacyDeploy = async (
           peerId,
           deployJSON: {
             [DEFAULT_DEPLOY_NAME]: {
-              modules: moduleConfigs.map(
-                (moduleConfig): JSONModuleConfOld =>
-                  moduleToJSONModuleConfig(moduleConfig, true)
-              ),
+              modules: [],
             },
           },
         })

@@ -29,6 +29,34 @@ export type JSONModuleConf = {
   path?: string;
 };
 
+/*
+data ModuleWASIConfig:
+    envs: ?Pairs
+    mapped_dirs: ?Pairs
+    mounted_binaries: ?Pairs
+
+data ModuleConfig:
+    name: string
+    max_heap_size: ?string
+    logger_enabled: ?bool
+    logging_mask: ?i32
+    wasi: ?ModuleWASIConfig
+*/
+
+export type JSONModuleConfWASI = {
+  mapped_dirs?: Record<string, string>;
+  envs?: Record<string, string>;
+};
+
+export type JSONModuleConfCorrect = {
+  name: string;
+  max_heap_size?: string;
+  logger_enabled?: boolean;
+  logging_mask?: number;
+  mounted_binaries?: Record<string, string>;
+  wasi: JSONModuleConfWASI;
+};
+
 export type JSONModuleConfOld = {
   name: string;
   max_heap_size?: string;
@@ -43,16 +71,15 @@ export type JSONModuleConfOld = {
 
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
-): JSONModuleConf;
+): JSONModuleConfCorrect;
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
   isOld: true
-): JSONModuleConfOld;
+): JSONModuleConfCorrect;
 
 export function moduleToJSONModuleConfig(
-  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
-  isOld = false
-): JSONModuleConf | JSONModuleConfOld {
+  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
+): JSONModuleConfCorrect {
   const {
     name,
     loggerEnabled,
@@ -61,17 +88,12 @@ export function moduleToJSONModuleConfig(
     envs,
     maxHeapSize,
     mountedBinaries,
-    preopenedFiles,
-    wasmPath,
   } = moduleConfig;
 
-  const jsonModuleConfig: JSONModuleConf | JSONModuleConfOld = {
+  const jsonModuleConfig: JSONModuleConfCorrect = {
     name,
+    wasi: {},
   };
-
-  if (typeof wasmPath === "string") {
-    jsonModuleConfig.path = wasmPath;
-  }
 
   if (loggerEnabled === true) {
     jsonModuleConfig.logger_enabled = true;
@@ -86,24 +108,15 @@ export function moduleToJSONModuleConfig(
   }
 
   if (volumes !== undefined) {
-    jsonModuleConfig.mapped_dirs = isOld ? Object.entries(volumes) : volumes;
-    jsonModuleConfig.preopened_files = [...new Set(Object.values(volumes))];
-  }
-
-  if (preopenedFiles !== undefined) {
-    jsonModuleConfig.preopened_files = [
-      ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
-    ];
+    jsonModuleConfig.wasi.mapped_dirs = volumes;
   }
 
   if (envs !== undefined) {
-    jsonModuleConfig.envs = isOld ? Object.entries(envs) : envs;
+    jsonModuleConfig.wasi.envs = envs;
   }
 
   if (mountedBinaries !== undefined) {
-    jsonModuleConfig.mounted_binaries = isOld
-      ? Object.entries(mountedBinaries)
-      : mountedBinaries;
+    jsonModuleConfig.mounted_binaries = mountedBinaries;
   }
 
   return jsonModuleConfig;
