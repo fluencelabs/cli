@@ -18,7 +18,11 @@ import { access, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
-import { callAquaFunction } from "@fluencelabs/js-peer/dist/compilerSupport/callFunction.js";
+import {
+  Fluence,
+  FnConfig,
+  callAquaFunction,
+} from "@fluencelabs/js-client.api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
@@ -26,7 +30,7 @@ import type { JSONSchemaType } from "ajv";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { ajv } from "../lib/ajvInstance.js";
-import { compile, Data } from "../lib/aqua.js";
+import { compile } from "../lib/aqua.js";
 import { initAquaCli } from "../lib/aquaCli.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
@@ -246,7 +250,7 @@ export default class Run extends BaseCommand<typeof Run> {
      * Is currently set to true for all cases because of the bug related to the new fluence js client
      */
     const useAquaRun =
-      true || typeof flags.plugin === "string" || jsonServicePaths.length > 0;
+      false || typeof flags.plugin === "string" || jsonServicePaths.length > 0;
 
     const result: unknown = await (useAquaRun
       ? aquaRun(runArgs)
@@ -312,7 +316,7 @@ const validateRunData = ajv.compile(runDataSchema);
 const getRunData = async (flags: {
   data: string | undefined;
   "data-path": string | undefined;
-}): Promise<Data | undefined> => {
+}): Promise<FnConfig | undefined> => {
   const runData: RunData = {};
   const { data, "data-path": dataPath } = flags;
 
@@ -422,11 +426,13 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
   imports: string[];
   jsonServicePaths: string[];
   logLevelCompiler: AquaLogLevel | undefined;
-  runData: Data | undefined;
+  runData: FnConfig | undefined;
   appJsonServicePath: string;
 };
 
 const aquaRun = async (args: RunArgs) => {
+  commandObj.log("using aqua cli run command");
+
   const aquaCli = await initAquaCli(
     args.maybeFluenceConfig,
     args.maybeFluenceLockConfig
@@ -474,7 +480,7 @@ const aquaRun = async (args: RunArgs) => {
 };
 
 const fluenceRun = async (args: RunArgs) => {
-  const [{ functionCall, errors }, fluenceClient] = await Promise.all([
+  const [{ functionCall, errors }] = await Promise.all([
     compile({
       funcCall: args.funcCall,
       data: args.runData,
@@ -501,10 +507,9 @@ const fluenceRun = async (args: RunArgs) => {
     config: {},
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     def: functionCall.funcDef,
-    peer: fluenceClient,
+    peer: await Fluence.getClient(),
     script: functionCall.script,
   });
 
-  await fluenceClient.stop();
   return result;
 };

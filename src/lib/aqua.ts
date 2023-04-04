@@ -24,9 +24,7 @@ import {
   Input,
   Path,
 } from "@fluencelabs/aqua-api/aqua-api.js";
-import type { callAquaFunction } from "@fluencelabs/js-peer/dist/compilerSupport/callFunction.js";
-
-export type Data = Parameters<typeof callAquaFunction>[0]["config"];
+import type { FnConfig } from "@fluencelabs/js-client.api";
 
 type CommonArgs = {
   imports?: string[] | undefined;
@@ -57,7 +55,7 @@ export async function compile(
   arg: {
     filePath: string;
     funcCall: string;
-    data?: Data | undefined;
+    data?: FnConfig | undefined;
   } & CommonArgs
 ): Promise<Required<CompilationResult>>;
 
@@ -75,7 +73,7 @@ export async function compile({
   code?: string;
   filePath?: string;
   funcCall?: string;
-  data?: Data | undefined;
+  data?: FnConfig | undefined;
 } & CommonArgs): Promise<CompilationResult> {
   const config = new AquaConfig(logLevel, constants, noXor, noRelay);
 
