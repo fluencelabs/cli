@@ -44,7 +44,7 @@ export const initFluenceClient = async (
 ): Promise<void> => {
   const relay = maybeRelay ?? getRandomRelayAddr(maybeFluenceConfig?.relays);
 
-  commandObj.log(`Fluence js-client connecting to: ${color.yellow(relay)}`);
+  commandObj.log(`Connecting to: ${color.yellow(relay)}`);
 
   const keyPair = await getExistingKeyPair(
     keyPairName ?? maybeFluenceConfig?.keyPairName
