@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.2...fluence-cli-v0.4.3) (2023-04-05)
+
+
+### Features
+
+* **logs:** Add logs for deals. Improve command descriptions [fixes DXJ-335] ([#219](https://github.com/fluencelabs/fluence-cli/issues/219)) ([7d88b80](https://github.com/fluencelabs/fluence-cli/commit/7d88b80690ff4e2cd3fcd180474f0c9b0287f98b))
+* update fluence js-client and remove legacy deploy tests ([#226](https://github.com/fluencelabs/fluence-cli/issues/226)) ([40ad15b](https://github.com/fluencelabs/fluence-cli/commit/40ad15b33c68164c732b5ade32c211e693f73f83))
+* use pnpm internally and in ci and tests, improve error messages… [fixes FLU-290] ([#221](https://github.com/fluencelabs/fluence-cli/issues/221)) ([8e964a3](https://github.com/fluencelabs/fluence-cli/commit/8e964a34a044c6491212281abdb1afbd0e653df2))
+* use prebuilt marine for tests ([#223](https://github.com/fluencelabs/fluence-cli/issues/223)) ([114aedc](https://github.com/fluencelabs/fluence-cli/commit/114aedc43047a41c7fbbdbfa64aedf63dee20a2b))
+
+
+### Bug Fixes
+
+* **deploy:** correct type for module config ([#227](https://github.com/fluencelabs/fluence-cli/issues/227)) ([0bd1dfb](https://github.com/fluencelabs/fluence-cli/commit/0bd1dfbf306cee4587668f740549ca1b8dbd3e71))
+
 ## [0.4.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.1...fluence-cli-v0.4.2) (2023-03-22)
 
 
