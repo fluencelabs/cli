@@ -16,19 +16,6 @@
 
 import type { ModuleConfigReadonly } from "../configs/project/module.js";
 
-/* eslint-disable camelcase */
-export type JSONModuleConf = {
-  name: string;
-  max_heap_size?: string;
-  logger_enabled?: boolean;
-  logging_mask?: number;
-  mapped_dirs?: Record<string, string>;
-  preopened_files?: Array<string>;
-  envs?: Record<string, string>;
-  mounted_binaries?: Record<string, string>;
-  path?: string;
-};
-
 /*
 data ModuleWASIConfig:
     envs: ?Pairs
@@ -48,7 +35,7 @@ export type JSONModuleConfWASI = {
   envs?: Record<string, string>;
 };
 
-export type JSONModuleConfCorrect = {
+export type JSONModuleConf = {
   name: string;
   max_heap_size?: string;
   logger_enabled?: boolean;
@@ -71,15 +58,15 @@ export type JSONModuleConfOld = {
 
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
-): JSONModuleConfCorrect;
+): JSONModuleConf;
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
   isOld: true
-): JSONModuleConfCorrect;
+): JSONModuleConf;
 
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
-): JSONModuleConfCorrect {
+): JSONModuleConf {
   const {
     name,
     loggerEnabled,
@@ -90,7 +77,7 @@ export function moduleToJSONModuleConfig(
     mountedBinaries,
   } = moduleConfig;
 
-  const jsonModuleConfig: JSONModuleConfCorrect = {
+  const jsonModuleConfig: JSONModuleConf = {
     name,
     wasi: {},
   };

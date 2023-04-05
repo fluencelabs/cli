@@ -235,13 +235,7 @@ const prepareForLegacyDeploy = async (
   const serviceInfos = await build(buildArg);
 
   return serviceInfos.flatMap(
-    ({
-      peerId,
-      peerIds,
-      count,
-      moduleConfigs,
-      ...serviceInfo
-    }): Array<PreparedForDeploy> =>
+    ({ peerId, peerIds, count, ...serviceInfo }): Array<PreparedForDeploy> =>
       getPeerIds({
         peerId: peerIds ?? peerId,
         count,
