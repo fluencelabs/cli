@@ -21,7 +21,7 @@ import type {
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
-import { aquaComment, jsComment } from "./helpers/comment.js";
+import { aquaComment } from "./helpers/comment.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { local } from "./localNodes.js";
 import type { FluenceEnv } from "./multiaddres.js";
@@ -360,13 +360,6 @@ export const fluenceCargoDependencies: Record<
   },
 };
 
-export const MAIN_AQUA_FILE_APP_IMPORT_TEXT = `import App from "deployed.app.aqua"
-export App, addOne`;
-
-export const MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT = aquaComment(
-  MAIN_AQUA_FILE_APP_IMPORT_TEXT
-);
-
 export const MAIN_AQUA_FILE_STATUS_TEXT = `export status
 
 service Console("run-console"):
@@ -399,17 +392,6 @@ export const MAIN_AQUA_FILE_STATUS_TEXT_COMMENT = aquaComment(
   MAIN_AQUA_FILE_STATUS_TEXT
 );
 
-export const MAIN_AQUA_FILE_ADD_ONE = `func addOne(x: u64) -> u64:
-    services <- App.services()
-    on services.adder.default!.peerId:
-        Adder services.adder.default!.serviceId
-        res <- Adder.add_one(x)
-    <- res`;
-
-export const MAIN_AQUA_FILE_ADD_ONE_COMMENT = aquaComment(
-  MAIN_AQUA_FILE_ADD_ONE
-);
-
 export const MAIN_AQUA_FILE_CONTENT = `aqua Main
 
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
@@ -420,10 +402,6 @@ import "${SPELL_NPM_DEPENDENCY}/spell_service.aqua"
 import "${AQUA_WORKERS_FILE_NAME}"
 import "services.aqua"
 
-${MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT}
-
-
-
 -- IMPORTANT: Add exports for all functions that you want to run
 export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
 
@@ -432,12 +410,6 @@ export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
 
 
 ${MAIN_AQUA_FILE_STATUS_TEXT_COMMENT}
-
-
-
-${MAIN_AQUA_FILE_ADD_ONE_COMMENT}
-
-
 
 -- local
 func helloWorld(name: string) -> string:
@@ -481,24 +453,6 @@ func getInfosInParallel(peers: []PeerId) -> []Info:
 export const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
 // @ts-nocheck`;
 
-const TEMPLATE_INDEX_FILE_UNCOMMENT_TEST = "// Uncomment when app is deployed:";
-
-export const TEMPLATE_INDEX_APP_IMPORTS = `${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
-import { addOne } from "./aqua/main.js";
-import { registerApp } from "./aqua/app.js";`;
-
-export const TEMPLATE_INDEX_APP_IMPORTS_COMMENT = jsComment(
-  TEMPLATE_INDEX_APP_IMPORTS
-);
-
-export const TEMPLATE_INDEX_APP_REGISTER = `  ${TEMPLATE_INDEX_FILE_UNCOMMENT_TEST}
-registerApp()
-console.log(await addOne(1))`;
-
-export const TEMPLATE_INDEX_APP_REGISTER_COMMENT = jsComment(
-  TEMPLATE_INDEX_APP_REGISTER
-);
-
 const NODES_CONST = "nodes";
 
 const getPeersImportStatement = (peersToImport: string): string =>
@@ -526,8 +480,6 @@ import {
   getInfosInParallel,
 } from "./aqua/main.js";
 
-${TEMPLATE_INDEX_APP_IMPORTS_COMMENT}
-
 const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
 const connectTo = ${NODES_CONST}[0].multiaddr;
 if (typeof connectTo !== "string") {
@@ -540,12 +492,10 @@ const main = async () => {
   const helloWorldResult = await helloWorld("Fluence");
   const helloWorldRemoteResult = await helloWorldRemote("Fluence");
   const getInfoResult = await getInfo();
-  const getInfosResult = await getInfos(peerIds);
   const getInfosInParallelResult = await getInfosInParallel(peerIds);
 
   console.log(helloWorldResult);
 
-${TEMPLATE_INDEX_APP_REGISTER_COMMENT}
   process.exit(0);
 };
 
