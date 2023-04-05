@@ -24,6 +24,7 @@
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --cache --fix",
+    "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "pnpm compile-installation-spell-aqua && pnpm build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
@@ -42,10 +43,8 @@
     "@fluencelabs/aqua-api": "^0.10.3",
     "@fluencelabs/deal-aurora": "^0.1.8",
     "@fluencelabs/fluence-network-environment": "^1.0.14",
-    "@fluencelabs/js-client.api": "^0.11.4",
-    "@fluencelabs/js-client.node": "^0.6.6",
-    "@fluencelabs/js-peer": "^0.8.5",
-    "@fluencelabs/marine-js": "^0.3.45",
+    "@fluencelabs/js-client.api": "^0.11.6",
+    "@fluencelabs/js-client.node": "^0.6.8",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.19.4",
     "@oclif/color": "^1.0.4",
@@ -108,6 +107,7 @@
     "shx": "^0.3.4",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
+    "ts-prune": "^0.10.3",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"
   },
@@ -123,7 +123,8 @@
     "topicSeparator": " "
   },
   "engines": {
-    "node": "=16"
+    "node": "=16",
+    "pnpm": ">=7"
   },
   "bugs": {
     "url": "https://github.com/fluencelabs/fluence-cli/issues"

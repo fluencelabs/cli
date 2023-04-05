@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { createClient } from "@fluencelabs/js-client.node";
-import type { FluencePeer } from "@fluencelabs/js-peer/dist/js-peer/FluencePeer.js";
+import { Fluence } from "@fluencelabs/js-client.api";
+import "@fluencelabs/js-client.node";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
@@ -39,16 +41,17 @@ export const initFluenceClient = async (
     "off-aqua-logs": offAquaLogs,
   }: FluenceClientFlags & KeyPairFlag & OffAquaLogsFlag,
   maybeFluenceConfig: FluenceConfig | null
-): Promise<FluencePeer> => {
-  const client = createClient();
+): Promise<void> => {
   const relay = maybeRelay ?? getRandomRelayAddr(maybeFluenceConfig?.relays);
+
+  commandObj.log(`Connecting to: ${color.yellow(relay)}`);
 
   const keyPair = await getExistingKeyPair(
     keyPairName ?? maybeFluenceConfig?.keyPairName
   );
 
   try {
-    await client.connect(relay, {
+    await Fluence.connect(relay, {
       connectionOptions: {
         dialTimeoutMs,
       },
@@ -62,10 +65,10 @@ export const initFluenceClient = async (
       },
     });
   } catch (e) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    commandObj.error(`Failed to connect to ${relay}. ${e}`);
+    commandObj.error(
+      `Failed to connect to ${color.yellow(relay)}. ${String(e)}`
+    );
   }
 
-  doRegisterLog(client, offAquaLogs);
-  return client;
+  doRegisterLog(offAquaLogs);
 };

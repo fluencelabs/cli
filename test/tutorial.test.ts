@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-import { cp, readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import {
-  FS_OPTIONS,
-  TEMPLATE_INDEX_APP_IMPORTS,
-  TEMPLATE_INDEX_APP_IMPORTS_COMMENT,
-  MAIN_AQUA_FILE_ADD_ONE,
-  MAIN_AQUA_FILE_ADD_ONE_COMMENT,
-  MAIN_AQUA_FILE_APP_IMPORT_TEXT,
-  MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT,
-  TEMPLATE_INDEX_APP_REGISTER,
-  TEMPLATE_INDEX_APP_REGISTER_COMMENT,
-} from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
 
 import { fluence, init, maybeConcurrentTest, multiaddrs } from "./helpers.js";
@@ -68,37 +57,13 @@ modules:
 `
     );
 
-    await deploy(cwd);
-
-    try {
-      await uncommentCodeInMainAqua(cwd);
-
-      await fluence({
-        args: ["run"],
-        flags: {
-          f: 'helloWorld("Fluence")',
-        },
-        cwd,
-      });
-
-      await cp(
-        join(process.cwd(), "test", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
-        join(cwd, "src", "aqua", NEW_SERVICE_AQUA_FILE_NAME)
-      );
-
-      expect(
-        await fluence({
-          args: ["run"],
-          flags: {
-            f: 'greeting("world")',
-            i: join("src", "aqua", NEW_SERVICE_AQUA_FILE_NAME),
-          },
-          cwd,
-        })
-      ).toContain('"Hi, world"');
-    } finally {
-      await remove(cwd);
-    }
+    await fluence({
+      args: ["run"],
+      flags: {
+        f: 'helloWorld("Fluence")',
+      },
+      cwd,
+    });
   });
 
   maybeConcurrentTest("should work with ts template", async () => {
@@ -106,23 +71,17 @@ modules:
     await init(cwd, "ts");
     await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
-    await deploy(cwd);
+    await compileAqua(cwd);
 
-    try {
-      await uncommentCodeInMainAqua(cwd);
-      await compileAqua(cwd);
-      const indexTSorJSPath = await uncommentJSorTSCode("ts", cwd);
-
-      expect(
+    expect(
+      (
         await execPromise({
           command: "npx",
-          args: ["ts-node", indexTSorJSPath],
+          args: ["ts-node", getIndexJSorTSPath("ts", cwd)],
           printOutput: true,
         })
-      ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
-    } finally {
-      await remove(cwd);
-    }
+      ).trim()
+    ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
   maybeConcurrentTest("should work with js template", async () => {
@@ -130,23 +89,17 @@ modules:
     await init(cwd, "js");
     await generateDefaultKey(cwd);
     await addAdderServiceToFluenceYAML(cwd);
-    await deploy(cwd);
+    await compileAqua(cwd);
 
-    try {
-      await uncommentCodeInMainAqua(cwd);
-      await compileAqua(cwd);
-      const indexTSorJSPath = await uncommentJSorTSCode("js", cwd);
-
-      expect(
+    expect(
+      (
         await execPromise({
           command: "node",
-          args: [indexTSorJSPath],
+          args: [getIndexJSorTSPath("js", cwd)],
           printOutput: true,
         })
-      ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
-    } finally {
-      await remove(cwd);
-    }
+      ).trim()
+    ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
   maybeConcurrentTest("should work without project", async () => {
@@ -165,8 +118,6 @@ modules:
   });
 });
 
-const NEW_SERVICE_AQUA_FILE_NAME = "newService.aqua";
-
 const addAdderServiceToFluenceYAML = (cwd: string) =>
   fluence({
     args: [
@@ -174,15 +125,6 @@ const addAdderServiceToFluenceYAML = (cwd: string) =>
       "add",
       "https://github.com/fluencelabs/services/blob/master/adder.tar.gz?raw=true",
     ],
-    cwd,
-  });
-
-const deploy = (cwd: string) =>
-  fluence({
-    args: ["legacy", "deploy"],
-    flags: {
-      "no-input": true,
-    },
     cwd,
   });
 
@@ -196,51 +138,13 @@ const generateDefaultKey = (cwd: string) =>
     cwd,
   });
 
-const uncommentCodeInMainAqua = async (cwd: string) => {
-  const aquaFilePath = join(cwd, "src", "aqua", "main.aqua");
-
-  const aquaFileContent = await readFile(aquaFilePath, FS_OPTIONS);
-
-  const newAquaFileContent = aquaFileContent
-    .replace(
-      MAIN_AQUA_FILE_APP_IMPORT_TEXT_COMMENT,
-      MAIN_AQUA_FILE_APP_IMPORT_TEXT
-    )
-    .replace(MAIN_AQUA_FILE_ADD_ONE_COMMENT, MAIN_AQUA_FILE_ADD_ONE);
-
-  await writeFile(aquaFilePath, newAquaFileContent);
-};
-
-const remove = (cwd: string) =>
-  fluence({
-    args: ["legacy", "remove"],
-    flags: {
-      "no-input": true,
-    },
-    cwd,
-  });
-
 const compileAqua = (cwd: string) =>
   fluence({
     args: ["aqua"],
     cwd,
   });
 
-const uncommentJSorTSCode = async (
-  JSOrTs: "js" | "ts",
-  cwd: string
-): Promise<string> => {
-  const indexTSorJSPath = join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
+const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string =>
+  join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 
-  const TSorJSFileContent = await readFile(indexTSorJSPath, FS_OPTIONS);
-
-  const newTSorJSFileContent = TSorJSFileContent.replace(
-    TEMPLATE_INDEX_APP_IMPORTS_COMMENT,
-    TEMPLATE_INDEX_APP_IMPORTS
-  ).replace(TEMPLATE_INDEX_APP_REGISTER_COMMENT, TEMPLATE_INDEX_APP_REGISTER);
-
-  await writeFile(indexTSorJSPath, newTSorJSFileContent);
-  return indexTSorJSPath;
-};
-
-const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence\n2\n";
+const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";

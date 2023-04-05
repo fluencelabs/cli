@@ -58,8 +58,8 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
       true
     );
 
-    const fluenceClient = await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
+    await initFluenceClient(flags, fluenceConfig);
+    doRegisterIpfsClient(false);
     const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const aquaImports = await ensureAquaImports({
@@ -76,7 +76,7 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
       aquaImports,
     });
 
-    const uploadResult = await upload(fluenceClient, uploadArg);
+    const uploadResult = await upload(uploadArg);
     commandObj.log(jsonStringify(uploadResult.workers));
   }
 }

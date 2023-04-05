@@ -171,7 +171,6 @@ type TomlModuleConfig = {
   logger_enabled?: boolean;
   logging_mask?: number;
   wasi?: {
-    preopened_files?: Array<string>;
     mapped_dirs?: Record<string, string>;
     envs?: Record<string, string>;
   };
@@ -187,7 +186,6 @@ const ensureModuleConfigsForToml = (
       envs,
       loggerEnabled,
       volumes,
-      preopenedFiles,
       mountedBinaries,
       maxHeapSize,
       loggingMask,
@@ -215,15 +213,6 @@ const ensureModuleConfigsForToml = (
     if (volumes !== undefined) {
       tomlModuleConfig.wasi = {
         mapped_dirs: volumes,
-        preopened_files: [...new Set(Object.values(volumes))],
-      };
-    }
-
-    if (preopenedFiles !== undefined) {
-      tomlModuleConfig.wasi = {
-        preopened_files: [
-          ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
-        ],
       };
     }
 

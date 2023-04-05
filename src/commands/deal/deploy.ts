@@ -75,8 +75,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true
     );
 
-    const fluenceClient = await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
+    await initFluenceClient(flags, fluenceConfig);
+    doRegisterIpfsClient(false);
 
     const chainNetwork = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
@@ -100,7 +100,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       aquaImports,
     });
 
-    const uploadResult = await upload(fluenceClient, uploadArg);
+    const uploadResult = await upload(uploadArg);
 
     const createdDeals: Record<
       string,
