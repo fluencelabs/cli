@@ -21,11 +21,7 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 const color = oclifColor.default;
 
-import {
-  IS_DEVELOPMENT,
-  MARINE_CARGO_DEPENDENCY,
-  TIMEOUT_FLAG_NAME,
-} from "./const.js";
+import { IS_DEVELOPMENT, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
@@ -81,9 +77,7 @@ export const execPromise = ({
           new Error(
             `Execution timed out: command didn't yield any result in ${color.yellow(
               `${timeout}ms`
-            )}\nIt's best to just try again or increase timeout using ${color.yellow(
-              `--${TIMEOUT_FLAG_NAME}`
-            )} flag\n${debugInfo}`
+            )}\n${debugInfo}`
           )
         );
       }, timeout);
