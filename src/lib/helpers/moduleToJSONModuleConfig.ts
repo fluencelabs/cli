@@ -16,17 +16,32 @@
 
 import type { ModuleConfigReadonly } from "../configs/project/module.js";
 
-/* eslint-disable camelcase */
+/*
+data ModuleWASIConfig:
+    envs: ?Pairs
+    mapped_dirs: ?Pairs
+    mounted_binaries: ?Pairs
+
+data ModuleConfig:
+    name: string
+    max_heap_size: ?string
+    logger_enabled: ?bool
+    logging_mask: ?i32
+    wasi: ?ModuleWASIConfig
+*/
+
+export type JSONModuleConfWASI = {
+  mapped_dirs?: Record<string, string>;
+  envs?: Record<string, string>;
+};
+
 export type JSONModuleConf = {
   name: string;
   max_heap_size?: string;
   logger_enabled?: boolean;
   logging_mask?: number;
-  mapped_dirs?: Record<string, string>;
-  preopened_files?: Array<string>;
-  envs?: Record<string, string>;
   mounted_binaries?: Record<string, string>;
-  path?: string;
+  wasi: JSONModuleConfWASI;
 };
 
 export type JSONModuleConfOld = {
@@ -35,7 +50,6 @@ export type JSONModuleConfOld = {
   logger_enabled?: boolean;
   logging_mask?: number;
   mapped_dirs?: Array<[string, string]>;
-  preopened_files?: Array<string>;
   envs?: Array<[string, string]>;
   mounted_binaries?: Array<[string, string]>;
   path?: string;
@@ -47,12 +61,11 @@ export function moduleToJSONModuleConfig(
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
   isOld: true
-): JSONModuleConfOld;
+): JSONModuleConf;
 
 export function moduleToJSONModuleConfig(
-  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
-  isOld = false
-): JSONModuleConf | JSONModuleConfOld {
+  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
+): JSONModuleConf {
   const {
     name,
     loggerEnabled,
@@ -61,17 +74,12 @@ export function moduleToJSONModuleConfig(
     envs,
     maxHeapSize,
     mountedBinaries,
-    preopenedFiles,
-    wasmPath,
   } = moduleConfig;
 
-  const jsonModuleConfig: JSONModuleConf | JSONModuleConfOld = {
+  const jsonModuleConfig: JSONModuleConf = {
     name,
+    wasi: {},
   };
-
-  if (typeof wasmPath === "string") {
-    jsonModuleConfig.path = wasmPath;
-  }
 
   if (loggerEnabled === true) {
     jsonModuleConfig.logger_enabled = true;
@@ -86,24 +94,15 @@ export function moduleToJSONModuleConfig(
   }
 
   if (volumes !== undefined) {
-    jsonModuleConfig.mapped_dirs = isOld ? Object.entries(volumes) : volumes;
-    jsonModuleConfig.preopened_files = [...new Set(Object.values(volumes))];
-  }
-
-  if (preopenedFiles !== undefined) {
-    jsonModuleConfig.preopened_files = [
-      ...new Set([...Object.values(volumes ?? {}), ...preopenedFiles]),
-    ];
+    jsonModuleConfig.wasi.mapped_dirs = volumes;
   }
 
   if (envs !== undefined) {
-    jsonModuleConfig.envs = isOld ? Object.entries(envs) : envs;
+    jsonModuleConfig.wasi.envs = envs;
   }
 
   if (mountedBinaries !== undefined) {
-    jsonModuleConfig.mounted_binaries = isOld
-      ? Object.entries(mountedBinaries)
-      : mountedBinaries;
+    jsonModuleConfig.mounted_binaries = mountedBinaries;
   }
 
   return jsonModuleConfig;
