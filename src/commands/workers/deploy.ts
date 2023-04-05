@@ -66,7 +66,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(flags["off-aqua-logs"]);
+    doRegisterIpfsClient(false);
 
     const workersConfig = await initNewWorkersConfig();
     const maybeFluenceLockConfig = await initFluenceLockConfig();

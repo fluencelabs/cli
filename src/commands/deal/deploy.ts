@@ -76,7 +76,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(flags["off-aqua-logs"]);
+    doRegisterIpfsClient(false);
 
     const chainNetwork = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
