@@ -41,7 +41,6 @@ export type OverridableModuleProperties = {
   loggerEnabled?: boolean;
   loggingMask?: number;
   volumes?: Record<string, string>;
-  preopenedFiles?: Array<string>;
   envs?: Record<string, string>;
   mountedBinaries?: Record<string, string>;
 };
@@ -105,17 +104,7 @@ log::info!(target: "data_cache", "this will print if (loggingMask & 2) != 0");
     nullable: true,
     required: [],
     title: "Volumes",
-    description: `A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file. (This property replaces the legacy "mapped_dirs" property so there is no need to duplicate the same paths in "preopenedFiles" dir)`,
-  },
-  preopenedFiles: {
-    type: "array",
-    title: "Preopened files",
-    description:
-      "A list of files and directories that this module could access with WASI",
-    items: {
-      type: "string",
-    },
-    nullable: true,
+    description: `A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file`,
   },
   envs: {
     type: "object",

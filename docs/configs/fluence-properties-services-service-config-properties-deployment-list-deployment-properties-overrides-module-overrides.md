@@ -11,7 +11,6 @@
 | [loggerEnabled](#loggerenabled)     | `boolean` | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-loggerenabled.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/loggerEnabled")      |
 | [loggingMask](#loggingmask)         | `number`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-loggingmask.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/loggingMask")          |
 | [volumes](#volumes)                 | `object`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-volumes.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/volumes")                  |
-| [preopenedFiles](#preopenedfiles)   | `array`   | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-preopened-files.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/preopenedFiles")   |
 | [envs](#envs)                       | `object`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-environment-variables.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/envs")       |
 | [mountedBinaries](#mountedbinaries) | `object`  | Optional | cannot be null | [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-mounted-binaries.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/mountedBinaries") |
 
@@ -128,7 +127,7 @@ log::info!(target: "data_cache", "this will print if (loggingMask & 2) != 0");
 
 ## volumes
 
-A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file. (This property replaces the legacy "mapped\_dirs" property so there is no need to duplicate the same paths in "preopenedFiles" dir)
+A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file
 
 `volumes`
 
@@ -143,24 +142,6 @@ A map of accessible files and their aliases. Aliases should be used in Marine mo
 ### volumes Type
 
 `object` ([Volumes](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-volumes.md))
-
-## preopenedFiles
-
-A list of files and directories that this module could access with WASI
-
-`preopenedFiles`
-
-*   is optional
-
-*   Type: `string[]`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-services-service-config-properties-deployment-list-deployment-properties-overrides-module-overrides-properties-preopened-files.md "https://fluence.dev/schemas/fluence.yaml#/properties/services/additionalProperties/properties/deploy/items/properties/overrideModules/additionalProperties/properties/preopenedFiles")
-
-### preopenedFiles Type
-
-`string[]`
 
 ## envs
 

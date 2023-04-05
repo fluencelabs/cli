@@ -50,7 +50,6 @@ export type JSONModuleConfOld = {
   logger_enabled?: boolean;
   logging_mask?: number;
   mapped_dirs?: Array<[string, string]>;
-  preopened_files?: Array<string>;
   envs?: Array<[string, string]>;
   mounted_binaries?: Array<[string, string]>;
   path?: string;

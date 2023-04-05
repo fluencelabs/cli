@@ -1,3 +1,0 @@
-## preopenedFiles Type
-
-`string[]`
