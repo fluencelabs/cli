@@ -124,7 +124,7 @@
   },
   "engines": {
     "node": "=16",
-    "pnpm": ">=8"
+    "pnpm": ">=7"
   },
   "bugs": {
     "url": "https://github.com/fluencelabs/fluence-cli/issues"
