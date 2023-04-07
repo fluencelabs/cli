@@ -5,7 +5,8 @@
     "importHelpers": true,
     "outDir": "dist",
     "rootDir": "src",
-    "moduleResolution": "nodenext"
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true
   },
   "ts-node": {
     "esm": true
