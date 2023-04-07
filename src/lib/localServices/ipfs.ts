@@ -16,7 +16,6 @@
 
 import { access, readFile } from "node:fs/promises";
 
-import type { IFluenceClient } from "@fluencelabs/js-client.api";
 import { CID, create, IPFSHTTPClient } from "ipfs-http-client";
 import { Multiaddr, protocols } from "multiaddr";
 
@@ -74,17 +73,14 @@ const upload = async (
   }
 };
 
-export const doRegisterIpfsClient = (
-  fluenceClient: IFluenceClient,
-  offAquaLogs: boolean
-): void => {
+export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
   const log = (msg: unknown) => {
     if (!offAquaLogs) {
       commandObj.log(`ipfs: ${String(msg)}`);
     }
   };
 
-  registerIpfsClient(fluenceClient, {
+  registerIpfsClient({
     async upload(multiaddr, absolutePath) {
       try {
         await access(absolutePath);

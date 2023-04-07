@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Fluence } from "@fluencelabs/js-client.api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args } from "@oclif/core";
@@ -64,8 +65,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true
     );
 
-    const fluenceClient = await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(fluenceClient, flags["off-aqua-logs"]);
+    await initFluenceClient(flags, fluenceConfig);
+    doRegisterIpfsClient(false);
 
     const workersConfig = await initNewWorkersConfig();
     const maybeFluenceLockConfig = await initFluenceLockConfig();
@@ -85,13 +86,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       aquaImports,
     });
 
-    const uploadDeployResult = await upload_deploy(
-      fluenceClient,
-      uploadDeployArg
-    );
-
+    const uploadDeployResult = await upload_deploy(uploadDeployArg);
     const timestamp = new Date().toISOString();
-    const relayId = fluenceClient.getRelayPeerId();
+    const relayId = (await Fluence.getClient()).getRelayPeerId();
 
     const { newDeployedWorkers, infoToPrint } =
       uploadDeployResult.workers.reduce<{

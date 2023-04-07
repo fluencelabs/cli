@@ -74,7 +74,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
       await this.parse(Logs)
     );
 
-    const fluenceClient = await initFluenceClient(flags, maybeFluenceConfig);
+    await initFluenceClient(flags, maybeFluenceConfig);
 
     const logsArg = await getLogsArg({
       maybeWorkerNamesString: args["WORKER-NAMES"],
@@ -86,7 +86,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     let logs;
 
     try {
-      logs = await get_logs(fluenceClient, logsArg);
+      logs = await get_logs(logsArg);
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${String(

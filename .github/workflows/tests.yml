@@ -23,10 +23,6 @@ on:
         description: "@fluencelabs/aqua version"
         type: string
         default: "null"
-      marine-js-version:
-        description: "@fluencelabs/marine-js version"
-        type: string
-        default: "null"
       marine-version:
         description: "marine version"
         type: string
@@ -142,28 +138,12 @@ jobs:
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
           package-manager: pnpm
 
-      - name: Set js-peer version
-        if: inputs.js-client-snapshots != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/js-peer"
-          version: ${{ fromJson(inputs.js-client-snapshots)['js-peer'] }}
-          package-manager: pnpm
-
       - name: Set aqua-api version
         if: inputs.aqua-version != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
           package: "@fluencelabs/aqua-api"
           version: ${{ inputs.aqua-version }}
-          package-manager: pnpm
-
-      - name: Set marine-js version
-        if: inputs.marine-js-version != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/marine-js"
-          version: ${{ inputs.marine-js-version }}
           package-manager: pnpm
 
       - name: Set recommended aqua version
@@ -257,7 +237,6 @@ jobs:
           | name      | version                                                              |
           | --------- | -------------------------------------------------------------------- |
           | avm       | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/avm).version') |
-          | marine-js | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/marine-js).version') |
           | aqua-api  | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/aqua-api).version') |
           SNAPSHOT
 
