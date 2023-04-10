@@ -15,22 +15,12 @@
  */
 
 import fsPromises from "node:fs/promises";
-import path from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../ajvInstance.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
-import {
-  defaultFluenceLockConfig,
-  FluenceLockConfig,
-  initNewFluenceLockConfig,
-} from "../configs/project/fluenceLock.js";
-import {
-  DOT_BIN_DIR_NAME,
-  FS_OPTIONS,
-  NODE_MODULES_DIR_NAME,
-} from "../const.js";
+import { AQUA_NPM_DEPENDENCY, FS_OPTIONS } from "../const.js";
 import { installAllNPMDependencies } from "../npm.js";
 import {
   ensureFluenceAquaDir,
@@ -40,7 +30,6 @@ import {
 
 type GetAquaImportsArg = {
   maybeFluenceConfig: FluenceConfig | null;
-  maybeFluenceLockConfig: FluenceLockConfig | null;
   force?: boolean;
   flags?: { import?: string[] | undefined };
 };
@@ -54,28 +43,18 @@ export async function ensureAquaImports(
     return defaultImports;
   }
 
-  const { flags, maybeFluenceConfig, maybeFluenceLockConfig, force } = args;
+  const { flags, maybeFluenceConfig, force } = args;
 
-  const importsFromFluenceConfig = (
+  const allNpmDependencies = (
     await installAllNPMDependencies({
       maybeFluenceConfig,
-      maybeFluenceLockConfig:
-        maybeFluenceConfig === null
-          ? null
-          : maybeFluenceLockConfig ??
-            (await initNewFluenceLockConfig(defaultFluenceLockConfig)),
       force,
     })
   ).filter(
-    (dependency): boolean =>
-      !dependency.includes(path.join(NODE_MODULES_DIR_NAME, DOT_BIN_DIR_NAME))
+    (dependencyPath): boolean => !dependencyPath.includes(AQUA_NPM_DEPENDENCY)
   );
 
-  return [
-    ...defaultImports,
-    ...importsFromFluenceConfig,
-    ...(flags?.import ?? []),
-  ];
+  return [...(flags?.import ?? []), ...defaultImports, ...allNpmDependencies];
 }
 
 const AQUA_SETTINGS_IMPORTS = "aquaSettings.imports";

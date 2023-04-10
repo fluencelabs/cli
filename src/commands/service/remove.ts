@@ -108,12 +108,12 @@ const getServiceNameToRemove = async (
   }
 
   const servicesAbsolutePathsWithNames = await Promise.all(
-    Object.entries(fluenceConfig.services).map(([name, { get }]) =>
-      (async () =>
+    Object.entries(fluenceConfig.services).map(
+      async ([name, { get }]) =>
         [
           name,
           await getServiceAbsolutePath(get, fluenceConfig.$getDirPath()),
-        ] as const)()
+        ] as const
     )
   );
 

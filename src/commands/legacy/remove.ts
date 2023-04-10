@@ -22,7 +22,6 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { initAquaCli } from "../../lib/aquaCli.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initAppConfig } from "../../lib/configs/project/app.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { TIMEOUT_FLAG } from "../../lib/const.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -67,8 +66,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       return commandObj.error("Aborted");
     }
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
-    const aquaCli = await initAquaCli(fluenceConfig, maybeFluenceLockConfig);
+    const aquaCli = await initAquaCli(fluenceConfig);
 
     await removeApp({
       appConfig,

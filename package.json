@@ -21,12 +21,13 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
+    "before-build": "shx cp package.json src/package.json && ./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules/.pnpm/@fluencelabs+aqua-lib@0.7.0/node_modules $(npx ts-node ./src/getAquaDependencyImports.ts @fluencelabs/installation-spell)",
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --cache --fix",
     "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
-    "prepack": "pnpm compile-installation-spell-aqua && pnpm build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
+    "prepack": "pnpm before-build && pnpm build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test": "shx rm -rf tmp && shx mkdir tmp && npm pack --pack-destination ./tmp && prettier --check '*.{ts,js}' && pnpm lint && pnpm circular && cd tmp && pnpm init && pnpm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
     "prepare": "node -e \"process.env.CI === undefined && require('husky').install()\"",
@@ -34,10 +35,7 @@
     "circular": "madge --circular --extensions ts ./",
     "pre-commit": "exitzero pnpm build && exitzero pnpm lint-fix && cd docs/commands && oclif readme --no-aliases && git add README.md",
     "clean": "shx rm -rf .fluence && shx rm -rf fluence-lock.yaml && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
-    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f",
-    "compile-installation-spell-aqua": "./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules $(npx ts-node ./src/getAquaDependencyImports.ts @fluencelabs/installation-spell)",
-    "compile-installation-spell-air": "./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/deal_spell.aqua -o src/lib/compiled-aqua/installation-spell/air --import node_modules --air",
-    "compile-installation-spell": "pnpm compile-installation-spell-aqua && pnpm compile-installation-spell-air"
+    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f"
   },
   "dependencies": {
     "@fluencelabs/aqua-api": "^0.10.3",

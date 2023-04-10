@@ -23,7 +23,6 @@ import chokidar from "chokidar";
 
 import { AquaCompilerFlags, initAquaCli } from "../lib/aquaCli.js";
 import { commandObj } from "../lib/commandObj.js";
-import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
 import {
   aquaLogLevelsString,
   FLUENCE_CONFIG_FILE_NAME,
@@ -103,8 +102,6 @@ export default class Aqua extends Command {
       await this.parse(Aqua)
     );
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
-
     const inputFlag = await resolveAbsoluteAquaPath({
       maybePathFromFlags: flags.input,
       maybePathFromFluenceYaml: maybeFluenceConfig?.aquaInputPath,
@@ -139,7 +136,6 @@ export default class Aqua extends Command {
     const importFlag = await ensureAquaImports({
       flags,
       maybeFluenceConfig,
-      maybeFluenceLockConfig,
     });
 
     const aquaCliFlags = {
@@ -157,10 +153,7 @@ export default class Aqua extends Command {
       scheduled: flags.scheduled,
     } satisfies AquaCompilerFlags;
 
-    const aquaCli = await initAquaCli(
-      maybeFluenceConfig,
-      maybeFluenceLockConfig
-    );
+    const aquaCli = await initAquaCli(maybeFluenceConfig);
 
     const compile = async (): Promise<string> =>
       aquaCli({ flags: aquaCliFlags }, "Compiling");

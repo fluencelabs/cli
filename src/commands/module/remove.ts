@@ -141,12 +141,12 @@ const getModuleNameToRemove = async (
   }
 
   const serviceModulesAbsolutePathsWithNames = await Promise.all(
-    Object.entries(serviceConfig.modules).map(([name, { get }]) =>
-      (async () =>
+    Object.entries(serviceConfig.modules).map(
+      async ([name, { get }]) =>
         [
           name,
           await getModuleAbsolutePath(get, serviceConfig.$getDirPath()),
-        ] as const)()
+        ] as const
     )
   );
 

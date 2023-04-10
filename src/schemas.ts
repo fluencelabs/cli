@@ -19,7 +19,6 @@ import path from "node:path";
 
 import { appSchema } from "./lib/configs/project/app.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
-import { fluenceLockSchema } from "./lib/configs/project/fluenceLock.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
 import { projectSecretsSchema } from "./lib/configs/project/projectSecrets.js";
 import { serviceSchema } from "./lib/configs/project/service.js";
@@ -37,7 +36,6 @@ import {
   SCHEMAS_DIR_NAME,
   SERVICE_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FILE_NAME,
-  FLUENCE_LOCK_CONFIG_FILE_NAME,
   CONFIG_FILE_NAME,
   WORKERS_CONFIG_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
@@ -46,7 +44,6 @@ import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
 const schemas = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
-  [FLUENCE_LOCK_CONFIG_FILE_NAME]: fluenceLockSchema,
   [APP_CONFIG_FILE_NAME]: appSchema,
   [MODULE_CONFIG_FILE_NAME]: moduleSchema,
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,

@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
+import { join } from "node:path";
+
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
-import { MARINE_CARGO_DEPENDENCY } from "./const.js";
+import {
+  DOT_BIN_DIR_NAME,
+  MARINE_CARGO_DEPENDENCY,
+  NODE_MODULES_DIR_NAME,
+} from "./const.js";
 import { execPromise } from "./execPromise.js";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
 import { ensureCargoDependency } from "./rust.js";
@@ -44,14 +49,19 @@ export type MarineCLI = {
 };
 
 export const initMarineCli = async (
-  maybeFluenceConfig: FluenceConfig | null,
-  maybeFluenceLockConfig: FluenceLockConfig | null
+  maybeFluenceConfig: FluenceConfig | null
 ): Promise<MarineCLI> => {
-  const marineCliPath = await ensureCargoDependency({
+  const marineCLIDirPath = await ensureCargoDependency({
     nameAndVersion: MARINE_CARGO_DEPENDENCY,
-    maybeFluenceLockConfig,
     maybeFluenceConfig,
   });
+
+  const marineCLIPath = join(
+    marineCLIDirPath,
+    NODE_MODULES_DIR_NAME,
+    DOT_BIN_DIR_NAME,
+    "marine"
+  );
 
   return async ({
     args,
@@ -62,7 +72,7 @@ export const initMarineCli = async (
     printOutput = true,
   }): Promise<string> =>
     execPromise({
-      command: marineCliPath,
+      command: marineCLIPath,
       args,
       flags,
       spinnerMessage:

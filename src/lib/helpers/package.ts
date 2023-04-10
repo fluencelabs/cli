@@ -18,14 +18,10 @@ import assert from "node:assert";
 import { access, mkdir, rename } from "node:fs/promises";
 import { join } from "node:path";
 
+import versions from "../../versions.json" assert { type: "json" };
 import { commandObj } from "../commandObj.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
-import {
-  defaultFluenceLockConfig,
-  FluenceLockConfig,
-  initNewReadonlyFluenceLockConfig,
-} from "../configs/project/fluenceLock.js";
-import { fluenceCargoDependencies, fluenceNPMDependencies } from "../const.js";
+import { isFluenceCargoDependency, isFluenceNPMDependency } from "../const.js";
 import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceNpmDir,
@@ -41,89 +37,38 @@ type PackageManager = (typeof packageManagers)[number];
 type HandleFluenceConfigArgs = {
   fluenceConfig: FluenceConfig;
   name: string;
-  versionFromArgs: string;
+  version: string;
   packageManager: PackageManager;
 };
 
 export const handleFluenceConfig = async ({
   fluenceConfig,
   name,
-  versionFromArgs,
+  version,
   packageManager,
 }: HandleFluenceConfigArgs): Promise<void> => {
   if (fluenceConfig.dependencies === undefined) {
     fluenceConfig.dependencies = {};
   }
 
-  if (fluenceConfig.dependencies[packageManager] === undefined) {
-    fluenceConfig.dependencies[packageManager] = {};
-  }
+  const dependenciesForPackageManager =
+    fluenceConfig.dependencies[packageManager] ?? {};
 
-  // Disabled because we made sure it's not undefined above
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  fluenceConfig.dependencies[packageManager]![name] = versionFromArgs;
+  dependenciesForPackageManager[name] = version;
+  fluenceConfig.dependencies[packageManager] = dependenciesForPackageManager;
+
   await fluenceConfig.$commit();
-};
-
-type HandleLockConfigArgs = {
-  maybeFluenceLockConfig: FluenceLockConfig | null;
-  name: string;
-  version: string;
-  packageManager: PackageManager;
-};
-
-export const handleLockConfig = async ({
-  maybeFluenceLockConfig,
-  name,
-  version,
-  packageManager,
-}: HandleLockConfigArgs): Promise<void> => {
-  if (maybeFluenceLockConfig === null) {
-    await initNewReadonlyFluenceLockConfig({
-      ...defaultFluenceLockConfig,
-      [packageManager]: {
-        [name]: version,
-      },
-    });
-
-    return;
-  }
-
-  const fluenceLockConfig = maybeFluenceLockConfig;
-
-  if (fluenceLockConfig[packageManager] === undefined) {
-    fluenceLockConfig[packageManager] = {};
-  }
-
-  // Disabled because we made sure it's not undefined above
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  fluenceLockConfig[packageManager]![name] = version;
-  await fluenceLockConfig.$commit();
-};
-
-const recommendedDependenciesMap: Record<
-  PackageManager,
-  Record<string, { recommendedVersion: string }>
-> = {
-  npm: fluenceNPMDependencies,
-  cargo: fluenceCargoDependencies,
 };
 
 type ResolveVersionArg = {
   name: string;
   maybeVersion: string | undefined;
-  explicitInstallation: boolean;
-  maybeFluenceLockConfig: FluenceLockConfig | null;
-  maybeFluenceConfig: FluenceConfig | null;
   packageManager: PackageManager;
 };
 
 export const resolveVersionToInstall = ({
   name,
   maybeVersion,
-  explicitInstallation,
-  maybeFluenceLockConfig,
-  maybeFluenceConfig,
   packageManager,
 }: ResolveVersionArg):
   | {
@@ -133,45 +78,35 @@ export const resolveVersionToInstall = ({
       maybeVersionToCheck: string | undefined;
     } => {
   if (typeof maybeVersion === "string") {
+    // If first character of the version is not a number, it means this is not an
+    // exact version, so we need to resolve the exact version before installing
+    if (isNaN(Number(maybeVersion[0]))) {
+      return {
+        maybeVersionToCheck: maybeVersion,
+      };
+    }
+
     return {
       versionToInstall: maybeVersion,
     };
   }
 
-  if (explicitInstallation) {
-    const maybeRecommendedVersion =
-      recommendedDependenciesMap[packageManager][name]?.recommendedVersion;
-
-    if (typeof maybeRecommendedVersion === "string") {
-      return {
-        versionToInstall: maybeRecommendedVersion,
-      };
+  const maybeRecommendedVersion = (() => {
+    if (packageManager === "cargo" && isFluenceCargoDependency(name)) {
+      return versions.cargo[name];
+    } else if (packageManager === "npm" && isFluenceNPMDependency(name)) {
+      return versions.npm[name];
+    } else {
+      return undefined;
     }
+  })();
 
-    return { maybeVersionToCheck: undefined };
-  }
-
-  const maybeVersionFromLockConfig =
-    maybeFluenceLockConfig?.[packageManager]?.[name];
-
-  if (typeof maybeVersionFromLockConfig === "string") {
+  if (typeof maybeRecommendedVersion === "string") {
     return {
-      versionToInstall: maybeVersionFromLockConfig,
+      versionToInstall: maybeRecommendedVersion,
     };
   }
 
-  const maybeVersionFromFluenceConfig =
-    maybeFluenceConfig?.dependencies?.[packageManager]?.[name];
-
-  if (typeof maybeVersionFromFluenceConfig === "string") {
-    return {
-      maybeVersionToCheck: maybeVersionFromFluenceConfig,
-    };
-  }
-
-  // this should never happen because we either install a dependency explicitly
-  // or we install it from the lock config or the fluence config
-  // there is no other way to install a dependency
   return { maybeVersionToCheck: undefined };
 };
 

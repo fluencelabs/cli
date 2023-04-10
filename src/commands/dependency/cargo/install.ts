@@ -21,25 +21,19 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { commandObj } from "../../../lib/commandObj.js";
 import {
-  defaultFluenceLockConfig,
-  initFluenceLockConfig,
-  initNewFluenceLockConfig,
-} from "../../../lib/configs/project/fluenceLock.js";
-import {
   CARGO_DIR_NAME,
   FLUENCE_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
-  REQUIRED_RUST_TOOLCHAIN,
 } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import {
   ensureCargoDependency,
-  installAllCargoDependenciesFromFluenceConfig,
+  installAllCargoDependencies,
 } from "../../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
-  static override description = `Install cargo project dependencies (all dependencies are cached inside ${path.join(
+  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside ${path.join(
     FLUENCE_DIR_NAME,
     CARGO_DIR_NAME
   )} directory of the current user)`;
@@ -47,7 +41,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override flags = {
     ...baseFlags,
     toolchain: Flags.string({
-      description: `Rustup toolchain name (such as stable or ${REQUIRED_RUST_TOOLCHAIN})`,
+      description: `Rustup toolchain name`,
       helpValue: "<toolchain_name>",
     }),
     force: Flags.boolean({
@@ -69,17 +63,12 @@ export default class Install extends BaseCommand<typeof Install> {
       true
     );
 
-    const fluenceLockConfig =
-      (await initFluenceLockConfig()) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
-
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
     // if packageNameAndVersion not provided just install all cargo dependencies
     if (packageNameAndVersion === undefined) {
-      await installAllCargoDependenciesFromFluenceConfig({
+      await installAllCargoDependencies({
         fluenceConfig,
-        fluenceLockConfig,
         force: flags.force,
       });
 
@@ -90,8 +79,8 @@ export default class Install extends BaseCommand<typeof Install> {
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,
-      maybeFluenceLockConfig: fluenceLockConfig,
       force: flags.force,
+      toolchain: flags.toolchain,
     });
   }
 }

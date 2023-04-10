@@ -32,8 +32,6 @@ import {
   Template,
   TEMPLATES,
   isTemplate,
-  FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION,
-  FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
   PACKAGE_JSON_FILE_NAME,
   INDEX_JS_FILE_NAME,
   INDEX_TS_FILE_NAME,
@@ -42,7 +40,9 @@ import {
   TYPESCRIPT_RECOMMENDED_VERSION,
   TS_NODE_RECOMMENDED_VERSION,
   TS_CONFIG_FILE_NAME,
-  FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION,
+  JS_CLIENT_NODE_NPM_DEPENDENCY,
+  JS_CLIENT_API_NPM_DEPENDENCY,
+  FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
 } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
@@ -58,6 +58,7 @@ import {
   setProjectRootDir,
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
+import versions from "../versions.json" assert { type: "json" };
 
 import { commandObj, isInteractive } from "./commandObj.js";
 import { ensureVSCodeSettingsJSON } from "./helpers/aquaImports.js";
@@ -289,12 +290,18 @@ export const initTSorJSProject = async ({
     author: "",
     license: "ISC",
     dependencies: {
-      "@fluencelabs/js-client.node": FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION,
-      "@fluencelabs/js-client.api": FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION,
-      "@fluencelabs/fluence-network-environment":
-        FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION,
-      ...(isJS ? {} : { "ts-node": TS_NODE_RECOMMENDED_VERSION }),
-      typescript: TYPESCRIPT_RECOMMENDED_VERSION,
+      [JS_CLIENT_NODE_NPM_DEPENDENCY]:
+        versions.npm[JS_CLIENT_NODE_NPM_DEPENDENCY],
+      [JS_CLIENT_API_NPM_DEPENDENCY]:
+        versions.npm[JS_CLIENT_API_NPM_DEPENDENCY],
+      [FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY]:
+        versions.npm[FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY],
+      ...(isJS
+        ? {}
+        : {
+            "ts-node": TS_NODE_RECOMMENDED_VERSION,
+            typescript: TYPESCRIPT_RECOMMENDED_VERSION,
+          }),
     },
   } as const;
 

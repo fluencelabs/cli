@@ -11,6 +11,7 @@
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
+* [`fluence dependency reset`](#fluence-dependency-reset)
 * [`fluence dependency versions`](#fluence-dependency-versions)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
@@ -255,7 +256,7 @@ EXAMPLES
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
+(For advanced users) Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
 
 ```
 USAGE
@@ -269,10 +270,11 @@ ARGUMENTS
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rustup toolchain name (such as stable or nightly-2022-12-01-x86_64)
+  --toolchain=<toolchain_name>  Rustup toolchain name
 
 DESCRIPTION
-  Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
+  (For advanced users) Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory
+  of the current user)
 
 ALIASES
   $ fluence dependency cargo i
@@ -288,15 +290,11 @@ Install all project dependencies (dependencies are cached inside .fluence direct
 
 ```
 USAGE
-  $ fluence dependency install [--no-input] [--recommended | --latest] [--force]
+  $ fluence dependency install [--no-input] [--force]
 
 FLAGS
-  --force        Force install even if the dependency/dependencies is/are already installed
-  --latest       Set recommended versions of @fluencelabs/aqua, marine and mrepl dependencies and install all
-                 dependencies from fluence.yaml
-  --no-input     Don't interactively ask for any input from the user
-  --recommended  Set latest versions of @fluencelabs/aqua, marine and mrepl dependencies and install all dependencies
-                 from fluence.yaml
+  --force     Force install even if the dependency/dependencies is/are already installed
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
   Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
@@ -311,7 +309,7 @@ EXAMPLES
 
 ## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of the current user)
+(For advanced users) Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of the current user)
 
 ```
 USAGE
@@ -327,7 +325,8 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of the current user)
+  (For advanced users) Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of
+  the current user)
 
 ALIASES
   $ fluence dependency npm i
@@ -335,6 +334,28 @@ ALIASES
 
 EXAMPLES
   $ fluence dependency npm install
+```
+
+## `fluence dependency reset`
+
+Reset all project dependencies to recommended versions for the current Fluence CLI version
+
+```
+USAGE
+  $ fluence dependency reset [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Reset all project dependencies to recommended versions for the current Fluence CLI version
+
+ALIASES
+  $ fluence dependency r
+  $ fluence dep r
+
+EXAMPLES
+  $ fluence dependency reset
 ```
 
 ## `fluence dependency versions`

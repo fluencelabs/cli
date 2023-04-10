@@ -23,7 +23,6 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -69,18 +68,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     doRegisterIpfsClient(false);
 
     const workersConfig = await initNewWorkersConfig();
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const aquaImports = await ensureAquaImports({
       maybeFluenceConfig: fluenceConfig,
-      maybeFluenceLockConfig,
       flags,
     });
 
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
-      maybeFluenceLockConfig,
       hosts: true,
       maybeWorkersConfig: workersConfig,
       aquaImports,

@@ -85,16 +85,15 @@ export const removeApp = async (
   const keyPairsMap = new Map(
     await Promise.all(
       allKeyPairNames.map(
-        (keyPairName): Promise<[string, ConfigKeyPair]> =>
-          (async (): Promise<[string, ConfigKeyPair]> => {
-            const keyPair = await getKeyPair(keyPairName);
+        async (keyPairName): Promise<[string, ConfigKeyPair]> => {
+          const keyPair = await getKeyPair(keyPairName);
 
-            if (keyPair === undefined) {
-              return commandObj.error(`Key-pair ${keyPairName} not found`);
-            }
+          if (keyPair === undefined) {
+            return commandObj.error(`Key-pair ${keyPairName} not found`);
+          }
 
-            return [keyPairName, keyPair];
-          })()
+          return [keyPairName, keyPair];
+        }
       )
     )
   );

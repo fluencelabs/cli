@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { access } from "node:fs/promises";
-import path, { join } from "node:path";
+import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
+import versions from "../versions.json" assert { type: "json" };
+
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
-  BIN_DIR_NAME,
-  fluenceCargoDependencies,
-  REQUIRED_RUST_TOOLCHAIN,
   RUST_WASM32_WASI_TARGET,
+  fluenceCargoDependencies,
+  isFluenceCargoDependency,
 } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
@@ -36,7 +35,6 @@ import { downloadFile } from "./helpers/downloadFile.js";
 import {
   handleFluenceConfig,
   handleInstallation,
-  handleLockConfig,
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   splitPackageNameAndVersion,
@@ -94,9 +92,9 @@ const ensureRust = async (): Promise<void> => {
   if (!(await hasRequiredRustToolchain())) {
     await execPromise({
       command: RUSTUP,
-      args: ["install", REQUIRED_RUST_TOOLCHAIN],
+      args: ["install", versions["rust-toolchain"]],
       spinnerMessage: `Installing ${color.yellow(
-        REQUIRED_RUST_TOOLCHAIN
+        versions["rust-toolchain"]
       )} rust toolchain`,
       printOutput: true,
     });
@@ -104,7 +102,7 @@ const ensureRust = async (): Promise<void> => {
     if (!(await hasRequiredRustToolchain())) {
       commandObj.error(
         `Not able to install ${color.yellow(
-          REQUIRED_RUST_TOOLCHAIN
+          versions["rust-toolchain"]
         )} rust toolchain`
       );
     }
@@ -149,7 +147,7 @@ const isRustInstalled = async (): Promise<boolean> => {
 };
 
 const regExpRecommendedToolchain = new RegExp(
-  `^${REQUIRED_RUST_TOOLCHAIN}.*\\(override\\)$`,
+  `^${versions["rust-toolchain"]}.*\\(override\\)$`,
   "gm"
 );
 
@@ -160,7 +158,7 @@ const hasRequiredRustToolchain = async (): Promise<boolean> => {
   });
 
   const hasRequiredRustToolchain = toolChainList.includes(
-    REQUIRED_RUST_TOOLCHAIN
+    versions["rust-toolchain"]
   );
 
   if (
@@ -169,7 +167,7 @@ const hasRequiredRustToolchain = async (): Promise<boolean> => {
   ) {
     await execPromise({
       command: RUSTUP,
-      args: ["override", "set", REQUIRED_RUST_TOOLCHAIN],
+      args: ["override", "set", versions["rust-toolchain"]],
     });
   }
 
@@ -183,6 +181,15 @@ const hasRequiredRustTarget = async (): Promise<boolean> =>
       args: ["target", "list"],
     })
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
+
+export const getCargoVersionsMap = <T extends keyof typeof versions.cargo>(
+  dependencies: ReadonlyArray<T>
+) =>
+  dependencies.reduce<Record<T, string>>(
+    (acc, dep) => ({ ...acc, [dep]: versions.cargo[dep] }),
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    {} as Record<T, string>
+  );
 
 export const getLatestVersionOfCargoDependency = async (
   name: string
@@ -262,7 +269,6 @@ const downloadPrebuiltCargoDependencies = async (
 type CargoDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
-  maybeFluenceLockConfig: FluenceLockConfig | null;
   force?: boolean;
   toolchain?: string | undefined;
   explicitInstallation?: boolean;
@@ -271,7 +277,6 @@ type CargoDependencyArg = {
 export const ensureCargoDependency = async ({
   nameAndVersion,
   maybeFluenceConfig,
-  maybeFluenceLockConfig,
   force = false,
   toolchain: toolchainFromArgs,
   explicitInstallation = false,
@@ -282,9 +287,6 @@ export const ensureCargoDependency = async ({
   const resolveVersionToInstallResult = resolveVersionToInstall({
     name,
     maybeVersion,
-    explicitInstallation,
-    maybeFluenceLockConfig,
-    maybeFluenceConfig,
     packageManager: "cargo",
   });
 
@@ -293,8 +295,9 @@ export const ensureCargoDependency = async ({
       ? resolveVersionToInstallResult.versionToInstall
       : await getLatestVersionOfCargoDependency(name);
 
-  const maybeCargoDependencyInfo = fluenceCargoDependencies[name];
-  const toolchain = toolchainFromArgs ?? maybeCargoDependencyInfo?.toolchain;
+  const toolchain =
+    toolchainFromArgs ??
+    (name in versions.cargo ? versions["rust-toolchain"] : undefined);
 
   const { dependencyPath, dependencyTmpPath } =
     await resolveDependencyPathAndTmpPath({
@@ -329,58 +332,44 @@ export const ensureCargoDependency = async ({
     });
   }
 
-  if (maybeFluenceConfig !== null) {
-    const versionFromArgs = maybeVersion ?? version;
-
-    if (versionFromArgs !== maybeFluenceConfig?.dependencies?.cargo?.[name]) {
-      await handleFluenceConfig({
-        fluenceConfig: maybeFluenceConfig,
-        name,
-        packageManager: "cargo",
-        versionFromArgs,
-      });
-    }
-
-    if (version !== maybeFluenceLockConfig?.cargo?.[name]) {
-      await handleLockConfig({
-        maybeFluenceLockConfig,
-        name,
-        version,
-        packageManager: "cargo",
-      });
-    }
+  if (
+    maybeFluenceConfig !== null &&
+    version !==
+      (maybeFluenceConfig?.dependencies?.npm?.[name] ??
+        (isFluenceCargoDependency(name) ? versions.cargo[name] : undefined))
+  ) {
+    await handleFluenceConfig({
+      fluenceConfig: maybeFluenceConfig,
+      name,
+      packageManager: "cargo",
+      version,
+    });
   }
 
   addCountlyLog(`Using ${name}@${version} cargo dependency`);
 
-  return maybeCargoDependencyInfo === undefined
-    ? dependencyPath
-    : path.join(dependencyPath, BIN_DIR_NAME, name);
+  return dependencyPath;
 };
 
 type InstallAllDependenciesArg = {
   fluenceConfig: FluenceConfig;
-  fluenceLockConfig: FluenceLockConfig;
   force: boolean;
 };
 
-export const installAllCargoDependenciesFromFluenceConfig = async ({
+export const installAllCargoDependencies = async ({
   fluenceConfig,
-  fluenceLockConfig,
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
-  for (const [name, version] of Object.entries(
-    fluenceConfig?.dependencies?.cargo ?? {}
-  )) {
-    assert(name !== undefined && version !== undefined);
-
+  for (const [name, version] of Object.entries({
+    ...getCargoVersionsMap(fluenceCargoDependencies),
+    ...(fluenceConfig?.dependencies?.cargo ?? {}),
+  })) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable
     // eslint-disable-next-line no-await-in-loop
     await ensureCargoDependency({
       nameAndVersion: `${name}@${version}`,
       maybeFluenceConfig: fluenceConfig,
-      maybeFluenceLockConfig: fluenceLockConfig,
       force,
     });
   }
