@@ -17,11 +17,7 @@
 import { join } from "node:path";
 
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import {
-  DOT_BIN_DIR_NAME,
-  MARINE_CARGO_DEPENDENCY,
-  NODE_MODULES_DIR_NAME,
-} from "./const.js";
+import { BIN_DIR_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { execPromise } from "./execPromise.js";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
 import { ensureCargoDependency } from "./rust.js";
@@ -56,12 +52,7 @@ export const initMarineCli = async (
     maybeFluenceConfig,
   });
 
-  const marineCLIPath = join(
-    marineCLIDirPath,
-    NODE_MODULES_DIR_NAME,
-    DOT_BIN_DIR_NAME,
-    "marine"
-  );
+  const marineCLIPath = join(marineCLIDirPath, BIN_DIR_NAME, "marine");
 
   return async ({
     args,

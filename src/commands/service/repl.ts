@@ -33,11 +33,10 @@ import {
   ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
-  DOT_BIN_DIR_NAME,
+  BIN_DIR_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MREPL_CARGO_DEPENDENCY,
-  NODE_MODULES_DIR_NAME,
   NO_INPUT_FLAG,
 } from "../../lib/const.js";
 import { haltCountly } from "../../lib/countly.js";
@@ -111,12 +110,7 @@ export default class REPL extends Command {
       maybeFluenceConfig,
     });
 
-    const mreplPath = join(
-      mreplDirPath,
-      NODE_MODULES_DIR_NAME,
-      DOT_BIN_DIR_NAME,
-      "mrepl"
-    );
+    const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 
     this.log(`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
