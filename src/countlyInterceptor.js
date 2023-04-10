@@ -17,37 +17,8 @@
 /* eslint-disable no-process-exit */
 
 import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/ClientRequest/index.js";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
-
-const printError = (/** @type {Error | CLIError} */ error) =>
-  error instanceof CLIError && "message" in error
-    ? console.error(`${color.red("Error:")} ${error.message}`)
-    : console.error(error);
-
-const resolveExitCode = (/** @type {Error | CLIError} */ error) => {
-  if (
-    "oclif" in error &&
-    error.oclif?.exit !== undefined &&
-    error.oclif?.exit !== false
-  ) {
-    return error.oclif.exit;
-  }
-
-  return 1;
-};
-
-const handleError = (/** @type {unknown} */ unknownError) => {
-  const error =
-    unknownError instanceof Error
-      ? unknownError
-      : new CLIError(`Error: ${String(unknownError ?? "no error?")}`);
-
-  printError(error);
-  process.exit(resolveExitCode(error));
-};
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -57,9 +28,9 @@ const COUNTLY_REPORT_TIMEOUT = 3000;
 export const isCountlyInitialized = () => Countly.device_id !== undefined;
 
 /**
- * @type {() => void}
+ * @type {() => never}
  */
-let resolveErrorPromise;
+const exitWithCode1 = () => process.exit(1);
 let hasCrashed = false;
 let hasSentCommandEvent = false;
 let hasSessionEnded = false;
@@ -69,51 +40,47 @@ let hasSessionEnded = false;
  */
 let isErrorExpected;
 
-/**
- * some of the errors (e.g. invalid user input) are expected and
- * should not be reported to Countly as crashes
- * @param {unknown} unknown
- * @returns {unknown is Error}
- */
-const getIsErrorExpected = (unknown) =>
-  typeof unknown === "object" && unknown !== null && "oclif" in unknown;
-
 const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
 
 /**
- * @param {Error | unknown} errorOrUnknown
+ * @param {Error | unknown} error
  * @returns {never | Promise<void>}
  */
-export const createErrorPromise = (errorOrUnknown) => {
-  const error =
-    errorOrUnknown instanceof Error
-      ? errorOrUnknown
-      : new Error(String(errorOrUnknown));
-
-  isErrorExpected = getIsErrorExpected(error);
+export const createErrorPromise = (error) => {
+  if (error instanceof CLIError) {
+    console.error(`Error: ${error.message}`);
+  } else {
+    console.error(error);
+  }
 
   if (!isCountlyInitialized()) {
-    return handleError(error);
+    return exitWithCode1();
   }
 
-  if (getIsErrorExpected(error)) {
+  if (error instanceof CLIError) {
+    isErrorExpected = true;
+
     Countly.add_event({
       key: ERROR_HANDLED_BY_OCLIF_KEY,
-      segmentation: { error: error.message, stack: error.stack ?? "" },
+      segmentation: { stack: error.stack },
     });
   } else {
-    Countly.log_error(String(error));
+    isErrorExpected = false;
+
+    Countly.log_error(
+      error instanceof Error
+        ? JSON.stringify(error, Object.getOwnPropertyNames(error))
+        : `Error: ${JSON.stringify(error)}`
+    );
   }
 
-  return new Promise((resolve) => {
-    resolveErrorPromise = () => resolve(handleError(error));
-
+  return new Promise(() => {
     setTimeout(() => {
       console.log(
-        "Wasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/fluence-cli/issues\n"
+        "\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/fluence-cli/issues"
       );
 
-      resolveErrorPromise();
+      exitWithCode1();
     }, COUNTLY_REPORT_TIMEOUT);
   });
 };
@@ -145,7 +112,7 @@ interceptor.on("response", (_response, { url }) => {
     hasCrashed = true;
 
     if (hasSentCommandEvent) {
-      resolveErrorPromise?.();
+      exitWithCode1();
     }
   }
 
@@ -161,7 +128,7 @@ interceptor.on("response", (_response, { url }) => {
     hasSentCommandEvent = true;
 
     if (hasCrashed) {
-      resolveErrorPromise?.();
+      exitWithCode1();
     }
 
     if (hasSessionEnded) {
