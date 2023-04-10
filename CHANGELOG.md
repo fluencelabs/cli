@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.4](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.3...fluence-cli-v0.4.4) (2023-04-10)
+
+
+### Features
+
+* add versions.json ([#228](https://github.com/fluencelabs/fluence-cli/issues/228)) ([db15cc1](https://github.com/fluencelabs/fluence-cli/commit/db15cc1e71a27a69495295c3e3602c7ba23811fe))
+
+
+### Bug Fixes
+
+* **spell:** @fluencelabs/installation-spell 0.5.9 ([#230](https://github.com/fluencelabs/fluence-cli/issues/230)) ([7872b0e](https://github.com/fluencelabs/fluence-cli/commit/7872b0ec4c7f26f7bf99945ae7025dacbf1f5dc7))
+* **tests:** fix smoke aqua test ([#231](https://github.com/fluencelabs/fluence-cli/issues/231)) ([4bc61ac](https://github.com/fluencelabs/fluence-cli/commit/4bc61ac0e47c543ad979210c5d62fce80fc29382))
+
 ## [0.4.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.2...fluence-cli-v0.4.3) (2023-04-05)
 
 
