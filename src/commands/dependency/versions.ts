@@ -18,9 +18,14 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import {
+  fluenceCargoDependencies,
+  fluenceNPMDependencies,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { getNPMVersionsMap } from "../../lib/npm.js";
+import { getCargoVersionsMap } from "../../lib/rust.js";
 import packageJSON from "../../package.json" assert { type: "json" };
-import versions from "../../versions.json" assert { type: "json" };
 
 export default class Versions extends BaseCommand<typeof Versions> {
   static override aliases = ["dependency:v", "dep:v", "dep:versions"];
@@ -43,15 +48,19 @@ export default class Versions extends BaseCommand<typeof Versions> {
         {
           "npm dependencies that can be overridden with 'fluence dependency npm install <name>@<version>'":
             {
-              ...versions.npm,
+              ...getNPMVersionsMap(fluenceNPMDependencies),
               ...maybeFluenceConfig?.dependencies?.npm,
             },
           "cargo dependencies that can be overridden with 'fluence dependency cargo install <name>@<version>'":
             {
-              ...versions.cargo,
+              ...getCargoVersionsMap(fluenceCargoDependencies),
               ...maybeFluenceConfig?.dependencies?.cargo,
             },
-          "internal dependencies": packageJSON.dependencies,
+          "internal dependencies": Object.fromEntries(
+            Object.entries(packageJSON.dependencies).filter(([dep]) =>
+              dep.startsWith("@fluencelabs/")
+            )
+          ),
         }
       )
     );
