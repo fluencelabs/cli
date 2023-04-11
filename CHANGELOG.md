@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.4...fluence-cli-v0.4.5) (2023-04-11)
+
+
+### Features
+
+* remove fluence-lock.yaml, simplify dependency management, use versions.json [fixes DXJ-120 DXJ-265 DXJ-284 DXJ-359 DXJ-361] ([#232](https://github.com/fluencelabs/fluence-cli/issues/232)) ([82a7413](https://github.com/fluencelabs/fluence-cli/commit/82a74137e336204d501fb7b3640efeda6ac440b2))
+
 ## [0.4.4](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.3...fluence-cli-v0.4.4) (2023-04-10)
 
 
