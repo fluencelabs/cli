@@ -14,47 +14,26 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { FLUENCE_DIR_NAME } from "../../lib/const.js";
-import {
-  ensureAquaImports,
-  ensureVSCodeSettingsJSON,
-} from "../../lib/helpers/aquaImports.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { installAllCargoDependencies } from "../../lib/rust.js";
 
-export default class Install extends BaseCommand<typeof Install> {
-  static override aliases = ["dependency:i", "dep:i"];
-  static override description = `Install all project dependencies (dependencies are cached inside ${FLUENCE_DIR_NAME} directory of the current user)`;
+export default class Reset extends BaseCommand<typeof Reset> {
+  static override aliases = ["dependency:r", "dep:r"];
+  static override description = `Reset all project dependencies to recommended versions for the current Fluence CLI version`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    force: Flags.boolean({
-      description:
-        "Force install even if the dependency/dependencies is/are already installed",
-    }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig } = await initCli(
+    const { fluenceConfig } = await initCli(
       this,
-      await this.parse(Install),
+      await this.parse(Reset),
       true
     );
 
-    await ensureVSCodeSettingsJSON({
-      aquaImports: await ensureAquaImports({
-        maybeFluenceConfig: fluenceConfig,
-        force: flags.force,
-      }),
-    });
-
-    await installAllCargoDependencies({
-      fluenceConfig,
-      force: flags.force,
-    });
+    delete fluenceConfig.dependencies;
+    await fluenceConfig.$commit();
 
     commandObj.log("cargo and npm dependencies successfully installed");
   }

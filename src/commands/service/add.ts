@@ -21,7 +21,6 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
 import { AQUA_NAME_REQUIREMENTS } from "../../lib/helpers/downloadFile.js";
@@ -66,12 +65,7 @@ export default class Add extends BaseCommand<typeof Add> {
       commandObj.error(`No service config at ${serviceOrServiceDirPathOrUrl}`);
     }
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
-
-    const marineCli = await initMarineCli(
-      fluenceConfig,
-      maybeFluenceLockConfig
-    );
+    const marineCli = await initMarineCli(fluenceConfig);
 
     await addService({
       serviceName: flags.name ?? serviceConfig.name,

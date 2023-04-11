@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --no-warnings
 
 /**
  * Copyright 2023 Fluence Labs Limited
@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line node/shebang
 import oclif from "@oclif/core";
 
 import { createErrorPromise } from "../dist/countlyInterceptor.js";

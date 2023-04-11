@@ -17,11 +17,13 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 
+import versions from "../versions.json" assert { type: "json" };
+
 import { initNewReadonlyModuleConfig } from "./configs/project/module.js";
 import {
   FS_OPTIONS,
-  MARINE_RS_SDK_TEMPLATE_VERSION,
-  MARINE_RS_SDK_TEST_TEMPLATE_VERSION,
+  MARINE_RS_SDK_CARGO_DEPENDENCY,
+  MARINE_RS_SDK_TEST_CARGO_DEPENDENCY,
 } from "./const.js";
 
 export const generateNewModule = async (
@@ -72,8 +74,8 @@ name = "${name}"
 path = "src/main.rs"
 
 [dependencies]
-marine-rs-sdk = "${MARINE_RS_SDK_TEMPLATE_VERSION}"
+${MARINE_RS_SDK_CARGO_DEPENDENCY} = "${versions.cargo[MARINE_RS_SDK_CARGO_DEPENDENCY]}"
 
 [dev-dependencies]
-marine-rs-sdk-test = "${MARINE_RS_SDK_TEST_TEMPLATE_VERSION}"
+${MARINE_RS_SDK_TEST_CARGO_DEPENDENCY} = "${versions.cargo[MARINE_RS_SDK_TEST_CARGO_DEPENDENCY]}"
 `;

@@ -20,11 +20,6 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import {
-  defaultFluenceLockConfig,
-  initFluenceLockConfig,
-  initNewFluenceLockConfig,
-} from "../../../lib/configs/project/fluenceLock.js";
-import {
   FLUENCE_DIR_NAME,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
@@ -38,7 +33,7 @@ import { ensureNpmDependency } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
-  static override description = `Install npm project dependencies (all dependencies are cached inside ${path.join(
+  static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside ${path.join(
     FLUENCE_DIR_NAME,
     NPM_DIR_NAME
   )} directory of the current user)`;
@@ -52,8 +47,7 @@ export default class Install extends BaseCommand<typeof Install> {
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
-      description:
-        "Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0",
+      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0`,
     }),
   };
 
@@ -66,15 +60,10 @@ export default class Install extends BaseCommand<typeof Install> {
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
-    const fluenceLockConfig =
-      (await initFluenceLockConfig()) ??
-      (await initNewFluenceLockConfig(defaultFluenceLockConfig));
-
     if (packageNameAndVersion !== undefined) {
       await ensureNpmDependency({
         nameAndVersion: packageNameAndVersion,
         maybeFluenceConfig: fluenceConfig,
-        maybeFluenceLockConfig: fluenceLockConfig,
         explicitInstallation: true,
       });
     }
@@ -82,7 +71,6 @@ export default class Install extends BaseCommand<typeof Install> {
     await ensureVSCodeSettingsJSON({
       aquaImports: await ensureAquaImports({
         maybeFluenceConfig: fluenceConfig,
-        maybeFluenceLockConfig: fluenceLockConfig,
         force: flags.force,
       }),
     });

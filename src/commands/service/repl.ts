@@ -16,6 +16,7 @@
 
 import { spawn } from "node:child_process";
 import fsPromises from "node:fs/promises";
+import { join } from "node:path";
 import { cwd } from "node:process";
 
 import stringifyToTOML from "@iarna/toml/stringify.js";
@@ -26,13 +27,13 @@ import { Args, Command } from "@oclif/core";
 import { resolveSingleServiceModuleConfigsAndBuild } from "../../lib/build.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import type { ModuleConfigReadonly } from "../../lib/configs/project/module.js";
 import {
   initReadonlyServiceConfig,
   ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
+  BIN_DIR_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
   MREPL_CARGO_DEPENDENCY,
@@ -79,12 +80,7 @@ export default class REPL extends Command {
       }));
 
     const serviceConfig = await ensureServiceConfig(nameOrPathOrUrl);
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
-
-    const marineCli = await initMarineCli(
-      maybeFluenceConfig,
-      maybeFluenceLockConfig
-    );
+    const marineCli = await initMarineCli(maybeFluenceConfig);
 
     startSpinner("Making sure service and modules are downloaded and built");
 
@@ -109,11 +105,12 @@ export default class REPL extends Command {
       return;
     }
 
-    const mreplPath = await ensureCargoDependency({
+    const mreplDirPath = await ensureCargoDependency({
       nameAndVersion: MREPL_CARGO_DEPENDENCY,
       maybeFluenceConfig,
-      maybeFluenceLockConfig,
     });
+
+    const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 
     this.log(`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

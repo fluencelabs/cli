@@ -43,10 +43,6 @@ import {
   FluenceConfigReadonly,
 } from "../lib/configs/project/fluence.js";
 import {
-  FluenceLockConfig,
-  initFluenceLockConfig,
-} from "../lib/configs/project/fluenceLock.js";
-import {
   FS_OPTIONS,
   KEY_PAIR_FLAG,
   FLUENCE_CONFIG_FILE_NAME,
@@ -194,24 +190,18 @@ export default class Run extends BaseCommand<typeof Run> {
       maybeFluenceConfig,
     });
 
-    const [
-      funcCall,
-      maybeAppConfig,
-      runData,
-      appJsonServicePath,
-      maybeFluenceLockConfig,
-    ] = await Promise.all([
-      flags.func === undefined
-        ? input({
-            message: `Enter a function call that you want to execute`,
-            flagName: FUNC_FLAG_NAME,
-          })
-        : Promise.resolve(flags.func),
-      initReadonlyAppConfig(),
-      getRunData(flags),
-      ensureFluenceTmpAppServiceJsonPath(),
-      initFluenceLockConfig(),
-    ]);
+    const [funcCall, maybeAppConfig, runData, appJsonServicePath] =
+      await Promise.all([
+        flags.func === undefined
+          ? input({
+              message: `Enter a function call that you want to execute`,
+              flagName: FUNC_FLAG_NAME,
+            })
+          : Promise.resolve(flags.func),
+        initReadonlyAppConfig(),
+        getRunData(flags),
+        ensureFluenceTmpAppServiceJsonPath(),
+      ]);
 
     const jsonServicePaths = flags["json-service"] ?? [];
 
@@ -228,7 +218,6 @@ export default class Run extends BaseCommand<typeof Run> {
     const aquaImports = await ensureAquaImports({
       flags,
       maybeFluenceConfig,
-      maybeFluenceLockConfig,
     });
 
     const runArgs: RunArgs = {
@@ -242,7 +231,6 @@ export default class Run extends BaseCommand<typeof Run> {
       logLevelCompiler,
       maybeAppConfig,
       maybeFluenceConfig,
-      maybeFluenceLockConfig,
     };
 
     /**
@@ -419,7 +407,6 @@ const resolveAquaLogLevel = async ({
 
 type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
   maybeFluenceConfig: FluenceConfig | null;
-  maybeFluenceLockConfig: FluenceLockConfig | null;
   maybeAppConfig: AppConfigReadonly | null;
   funcCall: string;
   filePath: string;
@@ -432,12 +419,7 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
 
 const aquaRun = async (args: RunArgs) => {
   commandObj.log("using aqua cli run command");
-
-  const aquaCli = await initAquaCli(
-    args.maybeFluenceConfig,
-    args.maybeFluenceLockConfig
-  );
-
+  const aquaCli = await initAquaCli(args.maybeFluenceConfig);
   const keyPair = await getExistingKeyPair(args["key-pair-name"]);
 
   const relay =

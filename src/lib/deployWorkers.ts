@@ -27,7 +27,6 @@ import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
 import {
   ConfigV0,
   initReadonlyModuleConfig,
@@ -107,7 +106,6 @@ const handlePreviouslyDeployedWorkers = async (
 type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
-  maybeFluenceLockConfig: FluenceLockConfig | null;
   aquaImports: Array<string>;
   maybeWorkersConfig?: WorkersConfigReadonly;
   hosts?: boolean;
@@ -116,7 +114,6 @@ type PrepareForDeployArg = {
 export const prepareForDeploy = async ({
   workerNames: workerNamesString,
   fluenceConfig,
-  maybeFluenceLockConfig,
   aquaImports,
   maybeWorkersConfig,
   hosts = false,
@@ -228,87 +225,83 @@ export const prepareForDeploy = async ({
   ];
 
   const spellConfigs = await Promise.all(
-    spellNames.map((name) =>
-      (async (): Promise<
-        Upload_deployArgConfig["workers"][number]["config"]["spells"][number]
-      > => {
-        const maybeSpell = fluenceConfig.spells?.[name];
+    spellNames.map(async (name) => {
+      const maybeSpell = fluenceConfig.spells?.[name];
 
-        assert(
-          maybeSpell !== undefined,
-          `Unreachable. can't find spell ${name} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in spells property. This has to be checked on config init. Looking for ${name} in ${JSON.stringify(
-            fluenceConfig.spells
-          )}`
+      assert(
+        maybeSpell !== undefined,
+        `Unreachable. can't find spell ${name} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in spells property. This has to be checked on config init. Looking for ${name} in ${JSON.stringify(
+          fluenceConfig.spells
+        )}`
+      );
+
+      const { get, ...spellOverridesFromFluenceConfig } = maybeSpell;
+
+      const spellConfig = await initReadonlySpellConfig(get, projectRootDir);
+
+      if (spellConfig === null) {
+        return commandObj.error(
+          isUrl(get)
+            ? `Downloaded invalid spell ${color.yellow(name)}`
+            : `Invalid spell ${color.yellow(name)} at ${color.yellow(get)}`
         );
+      }
 
-        const { get, ...spellOverridesFromFluenceConfig } = maybeSpell;
+      const overriddenSpellConfig = {
+        ...spellConfig,
+        ...spellOverridesFromFluenceConfig,
+      };
 
-        const spellConfig = await initReadonlySpellConfig(get, projectRootDir);
+      const spellAquaFilePath = resolve(
+        spellConfig.$getDirPath(),
+        spellConfig.aquaFilePath
+      );
 
-        if (spellConfig === null) {
-          return commandObj.error(
-            isUrl(get)
-              ? `Downloaded invalid spell ${color.yellow(name)}`
-              : `Invalid spell ${color.yellow(name)} at ${color.yellow(get)}`
-          );
-        }
+      const { errors, functions } = await compile({
+        filePath: spellAquaFilePath,
+        imports: aquaImports,
+      });
 
-        const overriddenSpellConfig = {
-          ...spellConfig,
-          ...spellOverridesFromFluenceConfig,
-        };
-
-        const spellAquaFilePath = resolve(
-          spellConfig.$getDirPath(),
-          spellConfig.aquaFilePath
+      if (errors.length > 0) {
+        commandObj.error(
+          `Failed to compile aqua file with spell at ${color.yellow(
+            spellAquaFilePath
+          )}:\n\n${errors.join("\n")}`
         );
+      }
 
-        const { errors, functions } = await compile({
-          filePath: spellAquaFilePath,
-          imports: aquaImports,
-        });
+      const { script } = functions[spellConfig.function] ?? {};
 
-        if (errors.length > 0) {
-          commandObj.error(
-            `Failed to compile aqua file with spell at ${color.yellow(
-              spellAquaFilePath
-            )}:\n\n${errors.join("\n")}`
-          );
-        }
+      if (script === undefined) {
+        commandObj.error(
+          `Failed to find spell function ${color.yellow(
+            spellConfig.function
+          )} in aqua file at ${color.yellow(spellAquaFilePath)}`
+        );
+      }
 
-        const { script } = functions[spellConfig.function] ?? {};
-
-        if (script === undefined) {
-          commandObj.error(
-            `Failed to find spell function ${color.yellow(
-              spellConfig.function
-            )} in aqua file at ${color.yellow(spellAquaFilePath)}`
-          );
-        }
-
-        return {
-          name,
-          config: {
-            blockchain: { end_block: 0, start_block: 0 },
-            connections: { connect: false, disconnect: false },
-            clock:
-              overriddenSpellConfig.clock?.periodSec === undefined
-                ? {
-                    start_sec: 0,
-                    end_sec: 0,
-                    period_sec: 0,
-                  }
-                : {
-                    start_sec: resolveStartSec(overriddenSpellConfig),
-                    end_sec: resolveEndSec(overriddenSpellConfig),
-                    period_sec: overriddenSpellConfig.clock.periodSec,
-                  },
-          },
-          script,
-          init_args: overriddenSpellConfig.initArgs ?? {},
-        };
-      })()
-    )
+      return {
+        name,
+        config: {
+          blockchain: { end_block: 0, start_block: 0 },
+          connections: { connect: false, disconnect: false },
+          clock:
+            overriddenSpellConfig.clock?.periodSec === undefined
+              ? {
+                  start_sec: 0,
+                  end_sec: 0,
+                  period_sec: 0,
+                }
+              : {
+                  start_sec: resolveStartSec(overriddenSpellConfig),
+                  end_sec: resolveEndSec(overriddenSpellConfig),
+                  period_sec: overriddenSpellConfig.clock.periodSec,
+                },
+        },
+        script,
+        init_args: overriddenSpellConfig.initArgs ?? {},
+      };
+    })
   );
 
   const serviceNames = [
@@ -318,43 +311,41 @@ export const prepareForDeploy = async ({
   ];
 
   const serviceConfigs = await Promise.all(
-    serviceNames.map((serviceName) =>
-      (async () => {
-        const maybeService = servicesFromFluenceConfig[serviceName];
+    serviceNames.map(async (serviceName) => {
+      const maybeService = servicesFromFluenceConfig[serviceName];
 
-        assert(
-          maybeService !== undefined,
-          `Unreachable. can't find service ${serviceName} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
-            servicesFromFluenceConfig
-          )}`
+      assert(
+        maybeService !== undefined,
+        `Unreachable. can't find service ${serviceName} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
+          servicesFromFluenceConfig
+        )}`
+      );
+
+      const { get, overrideModules } = maybeService;
+
+      const serviceConfig = await initReadonlyServiceConfig(
+        get,
+        projectRootDir
+      );
+
+      if (serviceConfig === null) {
+        return commandObj.error(
+          isUrl(get)
+            ? `Downloaded invalid service ${color.yellow(
+                serviceName
+              )} from ${color.yellow(get)}`
+            : `Invalid service ${color.yellow(serviceName)} at ${color.yellow(
+                get
+              )}`
         );
+      }
 
-        const { get, overrideModules } = maybeService;
-
-        const serviceConfig = await initReadonlyServiceConfig(
-          get,
-          projectRootDir
-        );
-
-        if (serviceConfig === null) {
-          return commandObj.error(
-            isUrl(get)
-              ? `Downloaded invalid service ${color.yellow(
-                  serviceName
-                )} from ${color.yellow(get)}`
-              : `Invalid service ${color.yellow(serviceName)} at ${color.yellow(
-                  get
-                )}`
-          );
-        }
-
-        return {
-          serviceName,
-          overrideModules,
-          serviceConfig,
-        };
-      })()
-    )
+      return {
+        serviceName,
+        overrideModules,
+        serviceConfig,
+      };
+    })
   );
 
   const modulesUrls = [
@@ -370,8 +361,10 @@ export const prepareForDeploy = async ({
   const downloadedModulesMap = new Map<string, string>(
     await Promise.all(
       modulesUrls.map(
-        (url): Promise<[string, string]> =>
-          (async () => [url, await downloadModule(url)])()
+        async (url): Promise<[string, string]> => [
+          url,
+          await downloadModule(url),
+        ]
       )
     )
   );
@@ -395,32 +388,33 @@ export const prepareForDeploy = async ({
   >(
     await Promise.all(
       [...downloadedModulesMap.entries(), ...localModuleAbsolutePaths].map(
-        ([originalGetValue, moduleAbsolutePath]) =>
-          (async (): Promise<[string, InitializedReadonlyConfig<ConfigV0>]> => {
-            const moduleConfig = await initReadonlyModuleConfig(
-              moduleAbsolutePath
+        async ([originalGetValue, moduleAbsolutePath]): Promise<
+          [string, InitializedReadonlyConfig<ConfigV0>]
+        > => {
+          const moduleConfig = await initReadonlyModuleConfig(
+            moduleAbsolutePath
+          );
+
+          if (moduleConfig === null) {
+            return commandObj.error(
+              isUrl(originalGetValue)
+                ? `Downloaded invalid module from ${color.yellow(
+                    originalGetValue
+                  )} to ${moduleAbsolutePath}`
+                : `Invalid module found at ${moduleAbsolutePath}`
             );
+          }
 
-            if (moduleConfig === null) {
-              return commandObj.error(
-                isUrl(originalGetValue)
-                  ? `Downloaded invalid module from ${color.yellow(
-                      originalGetValue
-                    )} to ${moduleAbsolutePath}`
-                  : `Invalid module found at ${moduleAbsolutePath}`
-              );
-            }
-
-            return [
-              isUrl(originalGetValue) ? originalGetValue : moduleAbsolutePath,
-              moduleConfig,
-            ];
-          })()
+          return [
+            isUrl(originalGetValue) ? originalGetValue : moduleAbsolutePath,
+            moduleConfig,
+          ];
+        }
       )
     )
   );
 
-  const marineCli = await initMarineCli(fluenceConfig, maybeFluenceLockConfig);
+  const marineCli = await initMarineCli(fluenceConfig);
 
   await buildModules(
     [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],

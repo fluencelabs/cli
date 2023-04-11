@@ -28,7 +28,6 @@ import {
   MIN_WORKERS,
   TARGET_WORKERS,
 } from "../../lib/configs/project/fluence.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -84,11 +83,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     });
 
     const workersConfig = await initNewWorkersConfig();
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const aquaImports = await ensureAquaImports({
       maybeFluenceConfig: fluenceConfig,
-      maybeFluenceLockConfig,
       flags,
     });
 
@@ -96,7 +93,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       workerNames: args["WORKER-NAMES"],
       maybeWorkersConfig: workersConfig,
       fluenceConfig,
-      maybeFluenceLockConfig,
       aquaImports,
     });
 

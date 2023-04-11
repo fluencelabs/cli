@@ -24,7 +24,6 @@ import camelcase from "camelcase";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
 import { isInteractive } from "../../lib/commandObj.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
@@ -85,12 +84,7 @@ export default class New extends BaseCommand<typeof New> {
     );
 
     if (maybeFluenceConfig !== null) {
-      const maybeFluenceLockConfig = await initFluenceLockConfig();
-
-      const marineCli = await initMarineCli(
-        maybeFluenceConfig,
-        maybeFluenceLockConfig
-      );
+      const marineCli = await initMarineCli(maybeFluenceConfig);
 
       await addService({
         marineCli,

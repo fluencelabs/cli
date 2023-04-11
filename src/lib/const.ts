@@ -28,20 +28,8 @@ import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
-export const AQUA_RECOMMENDED_VERSION = "0.10.2";
-export const AQUA_LIB_RECOMMENDED_VERSION = "0.7.0";
-export const REGISTRY_RECOMMENDED_VERSION = "0.7.1";
-export const SPELL_RECOMMENDED_VERSION = "0.4.0";
-export const MARINE_RECOMMENDED_VERSION = "0.14.0";
-export const MREPL_RECOMMENDED_VERSION = "0.21.0";
-export const MARINE_RS_SDK_TEMPLATE_VERSION = "0.7.1";
-export const MARINE_RS_SDK_TEST_TEMPLATE_VERSION = "0.8.1";
-export const FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION = "0.6.6";
-export const FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION = "0.11.4";
-export const FLUENCE_NETWORK_ENVIRONMENT_RECOMMENDED_VERSION = "1.0.14";
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
-export const REQUIRED_RUST_TOOLCHAIN = "nightly-2022-12-01-x86_64";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const U32_MAX = 4_294_967_295;
@@ -319,46 +307,35 @@ export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
 export const MREPL_CARGO_DEPENDENCY = "mrepl";
+export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
+export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
+
 export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 export const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 export const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
+export const JS_CLIENT_NODE_NPM_DEPENDENCY = "@fluencelabs/js-client.node";
+export const JS_CLIENT_API_NPM_DEPENDENCY = "@fluencelabs/js-client.api";
+export const FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY =
+  "@fluencelabs/fluence-network-environment";
 
-export const fluenceNPMDependencies: Record<
-  string,
-  { recommendedVersion: string; bin?: string }
-> = {
-  [AQUA_NPM_DEPENDENCY]: {
-    recommendedVersion: AQUA_RECOMMENDED_VERSION,
-    bin: "aqua",
-  },
-  [AQUA_LIB_NPM_DEPENDENCY]: {
-    recommendedVersion: AQUA_LIB_RECOMMENDED_VERSION,
-  },
-  [REGISTRY_NPM_DEPENDENCY]: {
-    recommendedVersion: REGISTRY_RECOMMENDED_VERSION,
-  },
-  [SPELL_NPM_DEPENDENCY]: {
-    recommendedVersion: SPELL_RECOMMENDED_VERSION,
-  },
-};
+export const fluenceNPMDependencies = [
+  AQUA_LIB_NPM_DEPENDENCY,
+  AQUA_NPM_DEPENDENCY,
+  REGISTRY_NPM_DEPENDENCY,
+  SPELL_NPM_DEPENDENCY,
+] as const;
 
-export const fluenceCargoDependencies: Record<
-  string,
-  {
-    recommendedVersion: string;
-    toolchain?: string;
-  }
-> = {
-  [MARINE_CARGO_DEPENDENCY]: {
-    recommendedVersion: MARINE_RECOMMENDED_VERSION,
-    toolchain: REQUIRED_RUST_TOOLCHAIN,
-  },
-  [MREPL_CARGO_DEPENDENCY]: {
-    recommendedVersion: MREPL_RECOMMENDED_VERSION,
-    toolchain: REQUIRED_RUST_TOOLCHAIN,
-  },
-};
+export const isFluenceNPMDependency = getIsStringUnion(fluenceNPMDependencies);
+
+export const fluenceCargoDependencies = [
+  MARINE_CARGO_DEPENDENCY,
+  MREPL_CARGO_DEPENDENCY,
+] as const;
+
+export const isFluenceCargoDependency = getIsStringUnion(
+  fluenceCargoDependencies
+);
 
 export const MAIN_AQUA_FILE_STATUS_TEXT = `export status
 

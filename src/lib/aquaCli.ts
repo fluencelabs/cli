@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { join } from "node:path";
+
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { FluenceLockConfig } from "./configs/project/fluenceLock.js";
-import { AQUA_NPM_DEPENDENCY } from "./const.js";
+import { AQUA_NPM_DEPENDENCY, DOT_BIN_DIR_NAME } from "./const.js";
 import { execPromise } from "./execPromise.js";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
 import { ensureNpmDependency } from "./npm.js";
@@ -88,14 +89,14 @@ export type AquaCLI = {
 };
 
 export const initAquaCli = async (
-  maybeFluenceConfig: FluenceConfig | null,
-  maybeFluenceLockConfig: FluenceLockConfig | null
+  maybeFluenceConfig: FluenceConfig | null
 ): Promise<AquaCLI> => {
-  const aquaCliPath = await ensureNpmDependency({
+  const aquaCLIDirPath = await ensureNpmDependency({
     nameAndVersion: AQUA_NPM_DEPENDENCY,
     maybeFluenceConfig,
-    maybeFluenceLockConfig,
   });
+
+  const aquaCLIPath = join(aquaCLIDirPath, DOT_BIN_DIR_NAME, "aqua");
 
   return (aquaCliInput, message, keyValuePairs): Promise<string> => {
     const { args, flags } = aquaCliInput;
@@ -103,7 +104,7 @@ export const initAquaCli = async (
     const timeoutNumber = Number(flags.timeout);
 
     return execPromise({
-      command: aquaCliPath,
+      command: aquaCLIPath,
       args,
       flags,
       spinnerMessage:

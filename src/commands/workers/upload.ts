@@ -19,7 +19,6 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload } from "../../lib/compiled-aqua/installation-spell/upload.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
@@ -60,18 +59,15 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
 
     await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(false);
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
 
     const aquaImports = await ensureAquaImports({
       maybeFluenceConfig: fluenceConfig,
-      maybeFluenceLockConfig,
       flags,
     });
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
-      maybeFluenceLockConfig,
       hosts: true,
       aquaImports,
     });

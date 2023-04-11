@@ -31,7 +31,6 @@ import {
   initNewReadonlyAppConfig,
   ServicesV3,
 } from "../../lib/configs/project/app.js";
-import { initFluenceLockConfig } from "../../lib/configs/project/fluenceLock.js";
 import {
   DEFAULT_DEPLOY_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -94,13 +93,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }
 
     const relay = flags.relay ?? getRandomRelayAddr(fluenceConfig.relays);
-
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
-
-    const marineCli = await initMarineCli(
-      fluenceConfig,
-      maybeFluenceLockConfig
-    );
+    const marineCli = await initMarineCli(fluenceConfig);
 
     const preparedForDeployItems = await prepareForLegacyDeploy({
       fluenceConfig,
@@ -108,7 +101,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       marineCli,
     });
 
-    const aquaCli = await initAquaCli(fluenceConfig, maybeFluenceLockConfig);
+    const aquaCli = await initAquaCli(fluenceConfig);
     const tmpDeployJSONPath = await ensureFluenceTmpDeployJsonPath();
     let appConfig = await initAppConfig();
 

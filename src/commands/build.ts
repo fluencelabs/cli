@@ -17,7 +17,6 @@
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
 import { commandObj } from "../lib/commandObj.js";
-import { initFluenceLockConfig } from "../lib/configs/project/fluenceLock.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../lib/const.js";
 import { getExistingKeyPair } from "../lib/keyPairs.js";
 import { initCli } from "../lib/lifeCycle.js";
@@ -42,12 +41,7 @@ export default class Build extends BaseCommand<typeof Build> {
       commandObj.error(defaultKeyPair.message);
     }
 
-    const maybeFluenceLockConfig = await initFluenceLockConfig();
-
-    const marineCli = await initMarineCli(
-      fluenceConfig,
-      maybeFluenceLockConfig
-    );
+    const marineCli = await initMarineCli(fluenceConfig);
 
     await build({
       fluenceConfig,

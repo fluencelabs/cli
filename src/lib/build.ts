@@ -160,30 +160,27 @@ const resolveServiceInfos = async ({
 
   const serviceConfigs = await Promise.all(
     Object.entries(fluenceConfig.services).map(
-      ([
+      async ([
         serviceName,
         { get, deploy = [{ deployId: DEFAULT_DEPLOY_NAME }], keyPairName },
-      ]): ServiceConfigPromises =>
-        (async (): ServiceConfigPromises => {
-          return {
-            serviceName,
-            deploy,
-            keyPair: await ensureKeyPair(defaultKeyPair, keyPairName),
-            serviceConfig:
-              (await initReadonlyServiceConfig(get, projectRootDir)) ??
-              commandObj.error(
-                `Service ${color.yellow(serviceName)} must have ${color.yellow(
-                  SERVICE_CONFIG_FILE_NAME
-                )}. ${
-                  isUrl(get)
-                    ? `Not able to find it after downloading and decompressing ${color.yellow(
-                        get
-                      )}`
-                    : `Not able to find it at ${color.yellow(get)}`
-                }`
-              ),
-          };
-        })()
+      ]): ServiceConfigPromises => ({
+        serviceName,
+        deploy,
+        keyPair: await ensureKeyPair(defaultKeyPair, keyPairName),
+        serviceConfig:
+          (await initReadonlyServiceConfig(get, projectRootDir)) ??
+          commandObj.error(
+            `Service ${color.yellow(serviceName)} must have ${color.yellow(
+              SERVICE_CONFIG_FILE_NAME
+            )}. ${
+              isUrl(get)
+                ? `Not able to find it after downloading and decompressing ${color.yellow(
+                    get
+                  )}`
+                : `Not able to find it at ${color.yellow(get)}`
+            }`
+          ),
+      })
     )
   );
 
@@ -259,22 +256,23 @@ export const build = async ({
   const mapOfModuleConfigs = new Map(
     await Promise.all(
       [...setOfAllModuleUrlsOrAbsolutePaths].map(
-        (moduleAbsolutePathOrUrl): Promise<[string, ModuleConfigReadonly]> =>
-          (async (): Promise<[string, ModuleConfigReadonly]> => {
-            const maybeModuleConfig = await initReadonlyModuleConfig(
-              moduleAbsolutePathOrUrl
+        async (
+          moduleAbsolutePathOrUrl
+        ): Promise<[string, ModuleConfigReadonly]> => {
+          const maybeModuleConfig = await initReadonlyModuleConfig(
+            moduleAbsolutePathOrUrl
+          );
+
+          if (maybeModuleConfig === null) {
+            return commandObj.error(
+              `Module at: ${color.yellow(
+                moduleAbsolutePathOrUrl
+              )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
             );
+          }
 
-            if (maybeModuleConfig === null) {
-              return commandObj.error(
-                `Module at: ${color.yellow(
-                  moduleAbsolutePathOrUrl
-                )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
-              );
-            }
-
-            return [moduleAbsolutePathOrUrl, maybeModuleConfig];
-          })()
+          return [moduleAbsolutePathOrUrl, maybeModuleConfig];
+        }
       )
     )
   );
@@ -450,8 +448,8 @@ const resolveSingleServiceModuleConfigs = (
   ];
 
   return Promise.all(
-    modulesWithNames.map(([name, { get, ...overridesFromServiceYAML }]) =>
-      (async () => {
+    modulesWithNames.map(
+      async ([name, { get, ...overridesFromServiceYAML }]) => {
         const overridesFromFluenceYAML = overridesFromFluenceYAMLMap?.[name];
 
         const maybeModuleConfig = await initReadonlyModuleConfig(
@@ -471,7 +469,7 @@ const resolveSingleServiceModuleConfigs = (
           ...overridesFromServiceYAML,
           ...overridesFromFluenceYAML,
         };
-      })()
+      }
     )
   );
 };
