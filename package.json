@@ -21,7 +21,7 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "before-build": "shx cp package.json src/package.json && ./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules/.pnpm/@fluencelabs+aqua-lib@0.7.0/node_modules $(npx ts-node ./src/getAquaDependencyImports.ts @fluencelabs/installation-spell)",
+    "before-build": "cp package.json src/package.json && ./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules/.pnpm/@fluencelabs+aqua-lib@0.7.0/node_modules $(npx ts-node ./src/getAquaDependencyImports.ts @fluencelabs/installation-spell)",
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --cache --fix",
