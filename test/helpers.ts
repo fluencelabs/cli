@@ -26,7 +26,7 @@ import {
 } from "@fluencelabs/fluence-network-environment";
 
 import type { Template } from "../src/lib/const.js";
-import { execPromise, ExecPromiseArg } from "../src/lib/execPromise.js";
+import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
 import type { FluenceEnv } from "../src/lib/multiaddres.js";
 import { getDefaultJSDirPath, getDefaultTSDirPath } from "../src/lib/paths.js";
