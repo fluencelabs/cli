@@ -113,7 +113,7 @@ modules:
       },
     });
 
-    const parsedResult: unknown = JSON.parse(result);
+    const parsedResult = JSON.parse(result);
     expect(parsedResult).toHaveProperty("air_version");
   });
 });

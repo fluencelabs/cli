@@ -26,7 +26,7 @@ import type { FluenceConfig } from "./configs/project/fluence.js";
 import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
 import type { KeyPairFlag } from "./const.js";
-import { list, Choices } from "./prompt.js";
+import { list, type Choices } from "./prompt.js";
 
 export const getKeyPair = async (keyPairName: string | undefined) =>
   (await getProjectKeyPair(keyPairName)) ?? (await getUserKeyPair(keyPairName));

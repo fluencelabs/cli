@@ -28,19 +28,19 @@ import {
   validateHasDefault,
   validateBatch,
   validateUnique,
-  ValidationResult,
+  type ValidationResult,
 } from "../../helpers/validations.js";
 import { ensureUserFluenceDir } from "../../paths.js";
 import {
-  GetDefaultConfig,
   getConfigInitFunction,
-  InitConfigOptions,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
+  type GetDefaultConfig,
+  type InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
 } from "../initConfig.js";
-import { ConfigKeyPair, configKeyPairSchema } from "../keyPair.js";
+import { type ConfigKeyPair, configKeyPairSchema } from "../keyPair.js";
 
 type ConfigV0 = {
   version: 0;

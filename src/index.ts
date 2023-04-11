@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
+import "@total-typescript/ts-reset";
+
 export { run } from "@oclif/core";

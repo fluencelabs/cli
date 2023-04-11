@@ -26,7 +26,7 @@ import { commandObj } from "../../lib/commandObj.js";
 import {
   FACADE_MODULE_NAME,
   initServiceConfig,
-  ServiceConfigReadonly,
+  type ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,

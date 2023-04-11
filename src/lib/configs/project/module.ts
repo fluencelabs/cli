@@ -17,7 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  ModuleType,
+  type ModuleType,
   MODULE_CONFIG_FILE_NAME,
   MODULE_TYPES,
   MODULE_TYPE_COMPILED,
@@ -28,12 +28,12 @@ import { ensureModuleAbsolutePath } from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
-  InitConfigOptions,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
-  GetDefaultConfig,
+  type InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
+  type GetDefaultConfig,
 } from "../initConfig.js";
 
 export type OverridableModuleProperties = {

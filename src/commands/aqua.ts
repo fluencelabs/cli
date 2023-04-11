@@ -21,7 +21,7 @@ const color = oclifColor.default;
 import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
 
-import { AquaCompilerFlags, initAquaCli } from "../lib/aquaCli.js";
+import { type AquaCompilerFlags, initAquaCli } from "../lib/aquaCli.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
   aquaLogLevelsString,
@@ -32,7 +32,7 @@ import {
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { projectRootDir, validatePath } from "../lib/paths.js";
-import { input, InputArg } from "../lib/prompt.js";
+import { input, type InputArg } from "../lib/prompt.js";
 
 export default class Aqua extends Command {
   static override description =

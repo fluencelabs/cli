@@ -28,17 +28,17 @@ import {
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
-  InitConfigOptions,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
-  GetDefaultConfig,
-  ConfigValidateFunction,
+  type InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
+  type GetDefaultConfig,
+  type ConfigValidateFunction,
 } from "../initConfig.js";
 
 import {
-  OverridableModuleProperties,
+  type OverridableModuleProperties,
   overridableModuleProperties,
 } from "./module.js";
 

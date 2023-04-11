@@ -20,28 +20,28 @@ import assert from "node:assert";
 import { URL } from "node:url";
 
 import {
-  AquaProxy,
+  type AquaProxy,
+  type Core,
+  type Deal,
+  type DealFactory,
+  type DeveloperFaucet,
+  type ERC20,
   AquaProxy__factory,
-  Core,
   Core__factory,
-  Deal,
-  DealFactory,
   DealFactory__factory,
   Deal__factory,
-  DeveloperFaucet,
   DeveloperFaucet__factory,
-  ERC20,
   ERC20__factory,
 } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";
-import { BytesLike, ethers, providers } from "ethers";
+import { type BytesLike, ethers, providers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import {
+  type ChainNetwork,
   DEAL_CONFIG,
-  ChainNetwork,
   CHAIN_NETWORKS,
   isChainNetwork,
   NETWORK_FLAG_NAME,

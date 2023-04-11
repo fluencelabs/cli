@@ -22,7 +22,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   get_logs,
-  Get_logsArgApp_workers,
+  type Get_logsArgApp_workers,
 } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {

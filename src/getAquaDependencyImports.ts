@@ -35,7 +35,7 @@ const main = async (): Promise<void> => {
     FS_OPTIONS
   );
 
-  const parsedPackageJSON: unknown = JSON.parse(peerDependencyPackageJSON);
+  const parsedPackageJSON = JSON.parse(peerDependencyPackageJSON);
 
   assert(
     typeof parsedPackageJSON === "object" &&

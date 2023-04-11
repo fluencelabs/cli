@@ -20,7 +20,7 @@ import {
   krasnodar,
   stage,
   testNet,
-  Node,
+  type Node,
 } from "@fluencelabs/fluence-network-environment";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;

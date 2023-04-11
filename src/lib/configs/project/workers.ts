@@ -17,20 +17,20 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  ChainNetwork,
+  type ChainNetwork,
   CHAIN_NETWORKS,
   WORKERS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
-  InitConfigOptions,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
-  GetDefaultConfig,
   getConfigInitFunction,
+  type InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
+  type GetDefaultConfig,
 } from "../initConfig.js";
 
 type WorkerInfo = {

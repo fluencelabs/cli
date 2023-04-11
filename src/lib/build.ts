@@ -32,14 +32,14 @@ import type {
 } from "../lib/configs/project/fluence.js";
 import {
   initReadonlyModuleConfig,
-  ModuleConfigReadonly,
+  type ModuleConfigReadonly,
 } from "../lib/configs/project/module.js";
 import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets.js";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
-  ServiceModuleV0,
-  ServiceConfigReadonly,
+  type ServiceModuleV0,
+  type ServiceConfigReadonly,
 } from "../lib/configs/project/service.js";
 import {
   DEFAULT_DEPLOY_NAME,

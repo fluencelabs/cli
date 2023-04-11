@@ -30,12 +30,12 @@ import { validateBatch } from "../../helpers/validations.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
-  InitConfigOptions,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
-  ConfigValidateFunction,
+  type InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
+  type ConfigValidateFunction,
 } from "../initConfig.js";
 
 const MAX_PERIOD_YEAR = 100;

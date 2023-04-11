@@ -16,7 +16,7 @@
 
 import { access, readFile } from "node:fs/promises";
 
-import { CID, create, IPFSHTTPClient } from "ipfs-http-client";
+import { CID, create, type IPFSHTTPClient } from "ipfs-http-client";
 import { Multiaddr, protocols } from "multiaddr";
 
 import { commandObj } from "../commandObj.js";

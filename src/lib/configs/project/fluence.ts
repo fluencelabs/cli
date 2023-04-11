@@ -24,7 +24,7 @@ import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajvInstance.js";
 import {
-  ChainNetwork,
+  type ChainNetwork,
   CHAIN_NETWORKS,
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -38,11 +38,11 @@ import { jsonStringify } from "../../helpers/jsonStringify.js";
 import { validateBatch } from "../../helpers/validations.js";
 import { local, localMultiaddrs } from "../../localNodes.js";
 import {
-  FluenceEnv,
   getPeerId,
   getRandomPeerId,
   NETWORKS,
-  Relays,
+  type FluenceEnv,
+  type Relays,
 } from "../../multiaddres.js";
 import {
   ensureFluenceDir,
@@ -52,20 +52,20 @@ import {
 import { FLUENCE_ENV } from "../../setupEnvironment.js";
 import {
   getConfigInitFunction,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
-  ConfigValidateFunction,
-  InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
+  type ConfigValidateFunction,
+  type InitConfigOptions,
 } from "../initConfig.js";
 
 import {
-  OverridableModuleProperties,
+  type OverridableModuleProperties,
   overridableModuleProperties,
 } from "./module.js";
 import {
-  OverridableSpellProperties,
+  type OverridableSpellProperties,
   overridableSpellProperties,
 } from "./spell.js";
 
@@ -330,7 +330,8 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       type: "object",
       title: "Dependencies",
       nullable: true,
-      description: "A map of dependency versions",
+      description:
+        "(For advanced users) Overrides for the project dependencies",
       properties: {
         npm: {
           type: "object",

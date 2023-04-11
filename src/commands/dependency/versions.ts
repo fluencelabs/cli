@@ -25,7 +25,8 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 import { getNPMVersionsMap } from "../../lib/npm.js";
 import { getCargoVersionsMap } from "../../lib/rust.js";
-import packageJSON from "../../package.copy.json" assert { type: "json" };
+import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
+import JSClientPackageJSON from "../../versions/js-client.package.json" assert { type: "json" };
 
 export default class Versions extends BaseCommand<typeof Versions> {
   static override aliases = ["dependency:v", "dep:v", "dep:versions"];
@@ -56,13 +57,23 @@ export default class Versions extends BaseCommand<typeof Versions> {
               ...getCargoVersionsMap(fluenceCargoDependencies),
               ...maybeFluenceConfig?.dependencies?.cargo,
             },
-          "internal dependencies": Object.fromEntries(
-            Object.entries(packageJSON.dependencies).filter(([dep]) =>
-              dep.startsWith("@fluencelabs/")
-            )
+          "internal dependencies": filterOutNonFluenceDependencies(
+            CLIPackageJSON.dependencies
+          ),
+          "js-client.node dependencies": filterOutNonFluenceDependencies(
+            JSClientPackageJSON.dependencies
           ),
         }
       )
     );
   }
 }
+
+const filterOutNonFluenceDependencies = (
+  dependencies: Record<string, string>
+) =>
+  Object.fromEntries(
+    Object.entries(dependencies).filter(([dep]) =>
+      dep.startsWith("@fluencelabs/")
+    )
+  );

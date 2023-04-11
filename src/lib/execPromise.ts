@@ -22,7 +22,7 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 const color = oclifColor.default;
 
 import { IS_DEVELOPMENT, MARINE_CARGO_DEPENDENCY } from "./const.js";
-import { Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
+import { type Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
 type SpawnParams = Parameters<typeof spawn>;

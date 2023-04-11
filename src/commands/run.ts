@@ -20,8 +20,8 @@ import { dirname, resolve } from "node:path";
 
 import {
   Fluence,
-  FnConfig,
   callAquaFunction,
+  type FnConfig,
 } from "@fluencelabs/js-client.api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -34,13 +34,13 @@ import { compile } from "../lib/aqua.js";
 import { initAquaCli } from "../lib/aquaCli.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
-  AppConfigReadonly,
+  type AppConfigReadonly,
   initReadonlyAppConfig,
 } from "../lib/configs/project/app.js";
 import {
   AQUA_INPUT_PATH_PROPERTY,
-  FluenceConfig,
-  FluenceConfigReadonly,
+  type FluenceConfig,
+  type FluenceConfigReadonly,
 } from "../lib/configs/project/fluence.js";
 import {
   FS_OPTIONS,
@@ -48,12 +48,12 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   aquaLogLevelsString,
   isAquaLogLevel,
-  AquaLogLevel,
   AQUA_LOG_LEVELS,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CLIENT_FLAGS,
-  FromFlagsDef,
   IMPORT_FLAG,
+  type AquaLogLevel,
+  type FromFlagsDef,
 } from "../lib/const.js";
 import { getAppJson } from "../lib/deployedApp.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
@@ -240,9 +240,7 @@ export default class Run extends BaseCommand<typeof Run> {
     const useAquaRun =
       false || typeof flags.plugin === "string" || jsonServicePaths.length > 0;
 
-    const result: unknown = await (useAquaRun
-      ? aquaRun(runArgs)
-      : fluenceRun(runArgs));
+    const result = await (useAquaRun ? aquaRun(runArgs) : fluenceRun(runArgs));
 
     const stringResult =
       typeof result === "string" ? result : jsonStringify(result);

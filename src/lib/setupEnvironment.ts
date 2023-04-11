@@ -18,7 +18,7 @@ import path from "node:path";
 
 import dotenv from "dotenv";
 
-import { FluenceEnv, NETWORKS } from "./multiaddres.js";
+import { type FluenceEnv, NETWORKS } from "./multiaddres.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
@@ -68,7 +68,7 @@ const isAbsolutePath = (v: unknown): v is string =>
   typeof v === "string" && path.isAbsolute(v);
 
 const isFluenceEnv = (v: unknown): v is FluenceEnv =>
-  NETWORKS.some((n) => n === v) || v === "local";
+  typeof v === "string" && [...NETWORKS, "local"].includes(v);
 
 setEnvVariable(FLUENCE_ENV, isFluenceEnv, "kras");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
