@@ -22,7 +22,6 @@ schemas
 .env
 Cargo.lock
 Cargo.toml
-src/package.copy.json
 
 # recommended by Fluence
 .idea
@@ -37,3 +36,4 @@ src/js/src/aqua
 
 # ignore compiled files
 src/lib/compiled-aqua
+src/versions
