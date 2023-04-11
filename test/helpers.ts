@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import "@total-typescript/ts-reset";
+
 import { access, cp, rm } from "node:fs/promises";
 import path from "node:path";
 

@@ -22,14 +22,14 @@ import { Flags } from "@oclif/core";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { AquaCLI, initAquaCli } from "../../lib/aquaCli.js";
-import { build, BuildArg, ServiceInfo } from "../../lib/build.js";
+import { type AquaCLI, initAquaCli } from "../../lib/aquaCli.js";
+import { build, type BuildArg, type ServiceInfo } from "../../lib/build.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import {
-  DeployedServiceConfig,
+  type DeployedServiceConfig,
   initAppConfig,
   initNewReadonlyAppConfig,
-  ServicesV3,
+  type ServicesV3,
 } from "../../lib/configs/project/app.js";
 import {
   DEFAULT_DEPLOY_NAME,
@@ -53,7 +53,7 @@ import {
   getEvenlyDistributedIds,
   getEvenlyDistributedIdsFromTheList,
   getRandomRelayAddr,
-  Relays,
+  type Relays,
 } from "../../lib/multiaddres.js";
 import { ensureFluenceTmpDeployJsonPath } from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
@@ -358,7 +358,7 @@ const deployService = async ({
   }
 
   const firstBraceIndex = [...result].reverse().indexOf("{");
-  const parsedResult: unknown = JSON.parse(result.slice(-firstBraceIndex - 1));
+  const parsedResult = JSON.parse(result.slice(-firstBraceIndex - 1));
 
   if (
     !(

@@ -23,13 +23,13 @@ import Countly from "countly-sdk-nodejs";
 
 import { ajv } from "../lib/ajvInstance.js";
 import {
-  FluenceConfig,
   initNewFluenceConfig,
+  type FluenceConfig,
 } from "../lib/configs/project/fluence.js";
 import {
+  type Template,
   FS_OPTIONS,
   RECOMMENDED_GITIGNORE_CONTENT,
-  Template,
   TEMPLATES,
   isTemplate,
   PACKAGE_JSON_FILE_NAME,

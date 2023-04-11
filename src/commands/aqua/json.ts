@@ -51,7 +51,7 @@ export default class Json extends BaseCommand<typeof Json> {
       FS_OPTIONS
     );
 
-    const parsedContent: unknown = JSON.parse(content);
+    const parsedContent = JSON.parse(content);
 
     if (parsedContent === null || typeof parsedContent !== "object") {
       return commandObj.error("Input file must contain json object");

@@ -28,7 +28,7 @@ import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import {
-  ConfigV0,
+  type ConfigV0,
   initReadonlyModuleConfig,
 } from "./configs/project/module.js";
 import {

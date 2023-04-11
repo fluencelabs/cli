@@ -25,15 +25,18 @@ import platform from "platform";
 
 import {
   commandObj,
-  CommandObj,
   isInteractive,
   setCommandObjAndIsInteractive,
+  type CommandObj,
 } from "./commandObj.js";
-import { FluenceConfig, initFluenceConfig } from "./configs/project/fluence.js";
+import {
+  type FluenceConfig,
+  initFluenceConfig,
+} from "./configs/project/fluence.js";
 import {
   initNewUserConfig,
   initUserConfig,
-  UserConfig,
+  type UserConfig,
 } from "./configs/user/config.js";
 import type { NO_INPUT_FLAG_NAME } from "./const.js";
 import { haltCountly, initCountly } from "./countly.js";

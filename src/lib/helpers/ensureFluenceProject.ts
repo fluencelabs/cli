@@ -16,7 +16,7 @@
 
 import { commandObj, isInteractive } from "../commandObj.js";
 import {
-  FluenceConfig,
+  type FluenceConfig,
   initFluenceConfig,
 } from "../configs/project/fluence.js";
 import { init } from "../init.js";

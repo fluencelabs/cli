@@ -7,7 +7,9 @@
     "rootDir": "src",
     "moduleResolution": "nodenext",
     "module": "nodenext",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "importsNotUsedAsValues": "remove",
+    "verbatimModuleSyntax": true
   },
   "ts-node": {
     "esm": true

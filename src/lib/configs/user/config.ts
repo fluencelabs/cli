@@ -19,13 +19,13 @@ import type { JSONSchemaType } from "ajv";
 import { CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
 import { ensureUserFluenceDir } from "../../paths.js";
 import {
-  GetDefaultConfig,
   getConfigInitFunction,
-  InitConfigOptions,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
+  type GetDefaultConfig,
+  type InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
 } from "../initConfig.js";
 
 type ConfigV0 = {

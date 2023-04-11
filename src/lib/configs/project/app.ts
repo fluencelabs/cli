@@ -19,15 +19,15 @@ import type { JSONSchemaType } from "ajv";
 import { ajv } from "../../ajvInstance.js";
 import { APP_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
-import { NETWORKS, Relays } from "../../multiaddres.js";
+import { NETWORKS, type Relays } from "../../multiaddres.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
-  InitConfigOptions,
-  InitializedConfig,
-  InitializedReadonlyConfig,
   getReadonlyConfigInitFunction,
-  Migrations,
+  type InitConfigOptions,
+  type InitializedConfig,
+  type InitializedReadonlyConfig,
+  type Migrations,
 } from "../initConfig.js";
 
 type DeployedServiceConfigV0 = {

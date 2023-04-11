@@ -19,7 +19,7 @@ import assert from "node:assert";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType, ValidateFunction } from "ajv";
-import inquirer, { Answers, DistinctQuestion } from "inquirer";
+import inquirer, { type Answers, type DistinctQuestion } from "inquirer";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj, isInteractive } from "./commandObj.js";

@@ -30,7 +30,7 @@ import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js"
 import type { ModuleConfigReadonly } from "../../lib/configs/project/module.js";
 import {
   initReadonlyServiceConfig,
-  ServiceConfigReadonly,
+  type ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
   BIN_DIR_NAME,
