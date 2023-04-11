@@ -25,7 +25,7 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 import { getNPMVersionsMap } from "../../lib/npm.js";
 import { getCargoVersionsMap } from "../../lib/rust.js";
-import packageJSON from "../../package.json" assert { type: "json" };
+import packageJSON from "../../package.copy.json" assert { type: "json" };
 
 export default class Versions extends BaseCommand<typeof Versions> {
   static override aliases = ["dependency:v", "dep:v", "dep:versions"];

@@ -22,7 +22,7 @@ schemas
 .env
 Cargo.lock
 Cargo.toml
-src/package.json
+src/package.copy.json
 
 # recommended by Fluence
 .idea
