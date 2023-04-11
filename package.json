@@ -57,7 +57,7 @@
     "countly-sdk-nodejs": "^22.6.0",
     "decompress": "^4.2.1",
     "dotenv": "^16.0.3",
-    "ethers": "^5.7.2",
+    "ethers": "^6.0.0",
     "filenamify": "^5.1.1",
     "get-random-values": "^2.0.0",
     "inquirer": "^9",
