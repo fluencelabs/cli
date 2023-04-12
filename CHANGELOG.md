@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.6](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.5...fluence-cli-v0.4.6) (2023-04-12)
+
+
+### Features
+
+* **aqua:** ensure default imports when initing the project [fixes DXJ-365] ([#236](https://github.com/fluencelabs/fluence-cli/issues/236)) ([e3ab6a3](https://github.com/fluencelabs/fluence-cli/commit/e3ab6a3cc9fcd92ab0b712aaf2930cc1aa598e13))
+* move contracts to aurora testnet ([#237](https://github.com/fluencelabs/fluence-cli/issues/237)) ([f548ef7](https://github.com/fluencelabs/fluence-cli/commit/f548ef710115fa07c03662b244e6f24dac700bd8))
+* mv contracts to aurora testnet ([f548ef7](https://github.com/fluencelabs/fluence-cli/commit/f548ef710115fa07c03662b244e6f24dac700bd8))
+* update dependencies ([#234](https://github.com/fluencelabs/fluence-cli/issues/234)) ([50466f8](https://github.com/fluencelabs/fluence-cli/commit/50466f813c2d88a3ff9f7d606e0e5b8eda395e12))
+
 ## [0.4.5](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.4...fluence-cli-v0.4.5) (2023-04-11)
 
 
