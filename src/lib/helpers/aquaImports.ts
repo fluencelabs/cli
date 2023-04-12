@@ -15,12 +15,13 @@
  */
 
 import fsPromises from "node:fs/promises";
+import { sep } from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../ajvInstance.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
-import { AQUA_NPM_DEPENDENCY, FS_OPTIONS } from "../const.js";
+import { FS_OPTIONS } from "../const.js";
 import { installAllNPMDependencies } from "../npm.js";
 import {
   ensureFluenceAquaDir,
@@ -39,11 +40,7 @@ export async function ensureAquaImports(
 ): Promise<string[]> {
   const defaultImports = [await ensureFluenceAquaDir()];
 
-  if (args === undefined) {
-    return defaultImports;
-  }
-
-  const { flags, maybeFluenceConfig, force } = args;
+  const { flags, maybeFluenceConfig = null, force } = args ?? {};
 
   const allNpmDependencies = (
     await installAllNPMDependencies({
@@ -51,7 +48,7 @@ export async function ensureAquaImports(
       force,
     })
   ).filter(
-    (dependencyPath): boolean => !dependencyPath.includes(AQUA_NPM_DEPENDENCY)
+    (dependencyPath): boolean => !dependencyPath.includes(`${sep}aqua${sep}`)
   );
 
   return [...(flags?.import ?? []), ...defaultImports, ...allNpmDependencies];
