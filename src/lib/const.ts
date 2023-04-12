@@ -69,16 +69,16 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
     chainId: 31_337,
   },
   testnet: {
-    ethereumNodeUrl: "https://polygon-testnet.public.blastapi.io",
-    coreAddress: "0x351D1a2099dA20dc074709265A7aD2E12b91C7a3",
-    dealFactoryAddress: "0x5f6815ff1c371640883e49dDCbf04573B69568Ed",
-    developerFaucetAddress: "0x8459460cfC7B26ab29c487912a7422a54066dA2F",
-    chainId: 80001,
+    ethereumNodeUrl: "https://testnet.aurora.dev",
+    coreAddress: "0x11134d4e7a8Fcb28A7eB4f08bf2FE03b0A96E097",
+    dealFactoryAddress: "0xb497e025D3095A197E30Ca84DEc36a637E649868",
+    developerFaucetAddress: "0xbCec12E243Be086bae044AB7857B4AE5a20dB16C",
+    chainId: 1313161555,
   },
 };
 export const DEAL_RPC_CONFIG = {
   31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
-  80001: DEAL_CONFIG["testnet"].ethereumNodeUrl,
+  1313161555: DEAL_CONFIG["testnet"].ethereumNodeUrl,
 };
 
 export const AQUA_EXT = "aqua";
