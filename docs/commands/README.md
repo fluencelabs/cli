@@ -186,7 +186,7 @@ FLAGS
   -k, --key-pair-name=<name>     Key pair name
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...             Path to a directory to import aqua files from. May be used several times
-  --network=<network>            [default: testnet] $The network in which the transactions used by the command will be
+  --network=<network>            [default: testnet] The network in which the transactions used by the command will be
                                  carried out (local, testnet)
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
@@ -261,6 +261,7 @@ EXAMPLES
 ```
 USAGE
   $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
+    [--global]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -269,6 +270,8 @@ ARGUMENTS
 
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
+  --global                      Will override dependencies in a global user's config.yaml instead of project's
+                                fluence.yaml
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name
 
@@ -313,7 +316,7 @@ EXAMPLES
 
 ```
 USAGE
-  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
+  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
@@ -322,6 +325,7 @@ ARGUMENTS
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
+  --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -342,9 +346,11 @@ Reset all project dependencies to recommended versions for the current Fluence C
 
 ```
 USAGE
-  $ fluence dependency reset [--no-input]
+  $ fluence dependency reset [--no-input] [--global] [--all]
 
 FLAGS
+  --all       Remove all dependencies, not only recommended ones
+  --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -571,7 +577,7 @@ ARGUMENTS
   DEAL-ADDRESS  Deal address
 
 FLAGS
-  --network=<network>  [default: testnet] $The network in which the transactions used by the command will be carried out
+  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
                        (local, testnet)
   --no-input           Don't interactively ask for any input from the user
   --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure

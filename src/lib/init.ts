@@ -61,7 +61,7 @@ import { input, list } from "../lib/prompt.js";
 import versions from "../versions.json" assert { type: "json" };
 
 import { commandObj, isInteractive } from "./commandObj.js";
-import { ensureVSCodeSettingsJSON } from "./helpers/aquaImports.js";
+import { ensureAquaImports } from "./helpers/aquaImports.js";
 
 const selectTemplate = (): Promise<Template> =>
   list({
@@ -195,15 +195,19 @@ type InitArg = {
 };
 
 export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
-  const { template = await selectTemplate(), maybeFluenceConfig } = options;
+  const {
+    template = await selectTemplate(),
+    maybeFluenceConfig,
+    maybeProjectPath,
+  } = options;
 
   Countly.add_event({ key: `init:template:${template}` });
 
   const projectPath =
-    options.maybeProjectPath === undefined && !isInteractive
+    maybeProjectPath === undefined && !isInteractive
       ? process.cwd()
       : path.resolve(
-          options.maybeProjectPath ??
+          maybeProjectPath ??
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory:",
@@ -237,7 +241,12 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   }
 
   await ensureVSCodeRecommendedExtensions();
-  await ensureVSCodeSettingsJSON({ generateSettingsJson: true });
+
+  await ensureAquaImports({
+    generateSettingsJson: true,
+    maybeFluenceConfig: fluenceConfig,
+  });
+
   await ensureGitIgnore();
 
   commandObj.log(

@@ -19,17 +19,19 @@ import path from "node:path";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { commandObj } from "../../../lib/commandObj.js";
 import {
   FLUENCE_DIR_NAME,
+  GLOBAL_FLAG,
+  GLOBAL_FLAG_NAME,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
 } from "../../../lib/const.js";
-import {
-  ensureVSCodeSettingsJSON,
-  ensureAquaImports,
-} from "../../../lib/helpers/aquaImports.js";
 import { initCli } from "../../../lib/lifeCycle.js";
-import { ensureNpmDependency } from "../../../lib/npm.js";
+import {
+  ensureNpmDependency,
+  installAllNPMDependencies,
+} from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
@@ -44,6 +46,7 @@ export default class Install extends BaseCommand<typeof Install> {
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),
+    ...GLOBAL_FLAG,
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
@@ -52,27 +55,35 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig } = await initCli(
+    const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Install),
-      true
+      await this.parse(Install)
     );
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
-    if (packageNameAndVersion !== undefined) {
-      await ensureNpmDependency({
-        nameAndVersion: packageNameAndVersion,
-        maybeFluenceConfig: fluenceConfig,
-        explicitInstallation: true,
+    // if packageNameAndVersion not provided just install all npm dependencies
+    if (packageNameAndVersion === undefined) {
+      await installAllNPMDependencies({
+        maybeFluenceConfig,
+        force: flags.force,
       });
+
+      return commandObj.log("npm dependencies successfully installed");
     }
 
-    await ensureVSCodeSettingsJSON({
-      aquaImports: await ensureAquaImports({
-        maybeFluenceConfig: fluenceConfig,
-        force: flags.force,
-      }),
+    if (!flags.global && maybeFluenceConfig === null) {
+      return commandObj.error(
+        `Not a fluence project. If you wanted to install npm dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`
+      );
+    }
+
+    await ensureNpmDependency({
+      nameAndVersion: packageNameAndVersion,
+      maybeFluenceConfig,
+      explicitInstallation: true,
+      force: flags.force,
+      global: flags.global,
     });
   }
 }

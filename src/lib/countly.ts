@@ -25,17 +25,15 @@ import {
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { UserConfig } from "./configs/user/config.js";
+import { userConfig } from "./configs/user/config.js";
 import { IS_DEVELOPMENT } from "./const.js";
 import { ensureDir, getUserCountlyDir } from "./paths.js";
 
 type InitCountlyArgs = {
-  userConfig: UserConfig;
   maybeFluenceConfig: FluenceConfig | null;
 };
 
 export async function initCountly({
-  userConfig,
   maybeFluenceConfig,
 }: InitCountlyArgs): Promise<void> {
   const userCountlyDir = await getUserCountlyDir();

@@ -189,11 +189,19 @@ export const TIMEOUT_FLAG = {
 export const NETWORK_FLAG_NAME = "network";
 export const NETWORK_FLAG = {
   [NETWORK_FLAG_NAME]: Flags.string({
-    description: `$The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
+    description: `The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
       ", "
     )})`,
     helpValue: "<network>",
     default: "testnet",
+  }),
+};
+
+export const GLOBAL_FLAG_NAME = "global";
+export const GLOBAL_FLAG = {
+  [GLOBAL_FLAG_NAME]: Flags.boolean({
+    aliases: ["g"],
+    description: `Will override dependencies in a global user's ${CONFIG_FILE_NAME} instead of project's ${FLUENCE_CONFIG_FILE_NAME}`,
   }),
 };
 

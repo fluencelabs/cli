@@ -1,0 +1,3 @@
+## aquaImports Type
+
+`string[]`

@@ -18,13 +18,8 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import {
-  fluenceCargoDependencies,
-  fluenceNPMDependencies,
-} from "../../lib/const.js";
+import { resolveDependencies } from "../../lib/helpers/package.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { getNPMVersionsMap } from "../../lib/npm.js";
-import { getCargoVersionsMap } from "../../lib/rust.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
 import JSClientPackageJSON from "../../versions/js-client.package.json" assert { type: "json" };
 
@@ -48,15 +43,9 @@ export default class Versions extends BaseCommand<typeof Versions> {
         {},
         {
           "npm dependencies that can be overridden with 'fluence dependency npm install <name>@<version>'":
-            {
-              ...getNPMVersionsMap(fluenceNPMDependencies),
-              ...maybeFluenceConfig?.dependencies?.npm,
-            },
+            await resolveDependencies("npm", maybeFluenceConfig),
           "cargo dependencies that can be overridden with 'fluence dependency cargo install <name>@<version>'":
-            {
-              ...getCargoVersionsMap(fluenceCargoDependencies),
-              ...maybeFluenceConfig?.dependencies?.cargo,
-            },
+            await resolveDependencies("cargo", maybeFluenceConfig),
           "internal dependencies": filterOutNonFluenceDependencies(
             CLIPackageJSON.dependencies
           ),

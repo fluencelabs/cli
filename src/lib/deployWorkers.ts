@@ -25,6 +25,7 @@ import { compile } from "./aqua.js";
 import { buildModules } from "./build.js";
 import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
+import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import {
@@ -53,7 +54,6 @@ import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js"
 import { initMarineCli } from "./marineCli.js";
 import { ensureFluenceAquaWorkersPath, projectRootDir } from "./paths.js";
 import { checkboxes } from "./prompt.js";
-import { spellInstallAirScript } from "./spellAir.js";
 
 export const parseWorkers = (workerNamesString: string) =>
   workerNamesString.split(",").map((s) => s.trim());
@@ -534,7 +534,7 @@ export const prepareForDeploy = async ({
 
   return {
     workers,
-    installation_script: spellInstallAirScript,
+    installation_script: deal_install_script,
     installation_trigger: {
       clock: { start_sec: 1676293670, end_sec: 0, period_sec: 600 },
       connections: { connect: false, disconnect: false },

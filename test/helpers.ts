@@ -77,7 +77,10 @@ export const initFirstTime = async (template: Template) => {
   try {
     await access(templatePath);
   } catch {
-    await fluence({ args: ["init", templatePath], flags: { template } });
+    await fluence({
+      args: ["init", templatePath],
+      flags: { template, "no-input": true },
+    });
 
     if (template === "js") {
       await execPromise({
