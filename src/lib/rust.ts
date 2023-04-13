@@ -24,19 +24,17 @@ import versions from "../versions.json" assert { type: "json" };
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { userConfig } from "./configs/user/config.js";
-import { RUST_WASM32_WASI_TARGET, isFluenceCargoDependency } from "./const.js";
+import { RUST_WASM32_WASI_TARGET } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import {
-  handleFluenceConfig,
   handleInstallation,
-  handleUserConfig,
   resolveDependencies,
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   splitPackageNameAndVersion,
+  updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
@@ -268,7 +266,7 @@ type CargoDependencyArg = {
 export const ensureCargoDependency = async ({
   nameAndVersion,
   maybeFluenceConfig,
-  global,
+  global = true,
   force = false,
   toolchain: toolchainFromArgs,
   explicitInstallation = false,
@@ -325,31 +323,13 @@ export const ensureCargoDependency = async ({
     });
   }
 
-  if (
-    global === false &&
-    maybeFluenceConfig !== null &&
-    version !==
-      (maybeFluenceConfig?.dependencies?.cargo?.[name] ??
-        (isFluenceCargoDependency(name) ? versions.cargo[name] : undefined))
-  ) {
-    await handleFluenceConfig({
-      fluenceConfig: maybeFluenceConfig,
-      name,
-      packageManager: "cargo",
-      version,
-    });
-  } else if (
-    global === true &&
-    version !==
-      (userConfig.dependencies?.cargo?.[name] ??
-        (isFluenceCargoDependency(name) ? versions.cargo[name] : undefined))
-  ) {
-    await handleUserConfig({
-      name,
-      packageManager: "cargo",
-      version,
-    });
-  }
+  await updateConfigsIfVersionChanged({
+    maybeFluenceConfig,
+    name,
+    version,
+    global,
+    packageManager: "cargo",
+  });
 
   addCountlyLog(`Using ${name}@${version} cargo dependency`);
 

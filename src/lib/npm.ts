@@ -20,12 +20,9 @@ import { join } from "node:path";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import versions from "../versions.json" assert { type: "json" };
-
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { userConfig } from "./configs/user/config.js";
-import { NODE_MODULES_DIR_NAME, isFluenceNPMDependency } from "./const.js";
+import { NODE_MODULES_DIR_NAME } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import {
@@ -33,9 +30,8 @@ import {
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   handleInstallation,
-  handleFluenceConfig,
   resolveDependencies,
-  handleUserConfig,
+  updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
@@ -115,7 +111,7 @@ type EnsureNpmDependencyArg = {
 export const ensureNpmDependency = async ({
   nameAndVersion,
   maybeFluenceConfig,
-  global,
+  global = true,
   force = false,
   explicitInstallation = false,
 }: EnsureNpmDependencyArg): Promise<string> => {
@@ -160,31 +156,13 @@ export const ensureNpmDependency = async ({
       }),
   });
 
-  if (
-    global === false &&
-    maybeFluenceConfig !== null &&
-    version !==
-      (maybeFluenceConfig?.dependencies?.npm?.[name] ??
-        (isFluenceNPMDependency(name) ? versions.npm[name] : undefined))
-  ) {
-    await handleFluenceConfig({
-      fluenceConfig: maybeFluenceConfig,
-      name,
-      packageManager: "npm",
-      version,
-    });
-  } else if (
-    global === true &&
-    version !==
-      (userConfig.dependencies?.npm?.[name] ??
-        (isFluenceNPMDependency(name) ? versions.npm[name] : undefined))
-  ) {
-    await handleUserConfig({
-      name,
-      packageManager: "npm",
-      version,
-    });
-  }
+  await updateConfigsIfVersionChanged({
+    maybeFluenceConfig,
+    name,
+    version,
+    global,
+    packageManager: "npm",
+  });
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 

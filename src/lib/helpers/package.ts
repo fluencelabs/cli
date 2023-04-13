@@ -47,43 +47,56 @@ import { isExactVersion } from "./validations.js";
 const packageManagers = ["npm", "cargo"] as const;
 type PackageManager = (typeof packageManagers)[number];
 
-type HandleFluenceConfigArgs = {
-  fluenceConfig: FluenceConfig;
+type UpdateFluenceConfigIfVersionChangedArgs = {
+  maybeFluenceConfig: FluenceConfig | null;
   name: string;
   version: string;
   packageManager: PackageManager;
 };
 
-export const handleFluenceConfig = async ({
-  fluenceConfig,
+const updateFluenceConfigIfVersionChanged = async ({
+  maybeFluenceConfig,
   name,
   version,
   packageManager,
-}: HandleFluenceConfigArgs): Promise<void> => {
-  if (fluenceConfig.dependencies === undefined) {
-    fluenceConfig.dependencies = {};
+}: UpdateFluenceConfigIfVersionChangedArgs): Promise<void> => {
+  if (
+    maybeFluenceConfig === null ||
+    version === maybeFluenceConfig.dependencies?.[packageManager]?.[name]
+  ) {
+    return;
+  }
+
+  if (maybeFluenceConfig.dependencies === undefined) {
+    maybeFluenceConfig.dependencies = {};
   }
 
   const dependenciesForPackageManager =
-    fluenceConfig.dependencies[packageManager] ?? {};
+    maybeFluenceConfig.dependencies[packageManager] ?? {};
 
   dependenciesForPackageManager[name] = version;
-  fluenceConfig.dependencies[packageManager] = dependenciesForPackageManager;
 
-  await fluenceConfig.$commit();
+  maybeFluenceConfig.dependencies[packageManager] =
+    dependenciesForPackageManager;
+
+  await maybeFluenceConfig.$commit();
 };
 
-type HandleUserConfigArgs = {
+type UpdateUserConfigIfVersionChangedArgs = {
   name: string;
   version: string;
   packageManager: PackageManager;
 };
 
-export const handleUserConfig = async ({
+const updateUserConfigIfVersionChanged = async ({
   name,
   version,
   packageManager,
-}: HandleUserConfigArgs): Promise<void> => {
+}: UpdateUserConfigIfVersionChangedArgs): Promise<void> => {
+  if (version === userConfig.dependencies?.[packageManager]?.[name]) {
+    return;
+  }
+
   if (userConfig.dependencies === undefined) {
     userConfig.dependencies = {};
   }
@@ -95,6 +108,23 @@ export const handleUserConfig = async ({
   userConfig.dependencies[packageManager] = dependenciesForPackageManager;
 
   await userConfig.$commit();
+};
+
+export const updateConfigsIfVersionChanged = async ({
+  global,
+  maybeFluenceConfig,
+  ...restArgs
+}: UpdateFluenceConfigIfVersionChangedArgs & {
+  global: boolean;
+}): Promise<void> => {
+  if (global) {
+    await updateUserConfigIfVersionChanged(restArgs);
+  } else {
+    await updateFluenceConfigIfVersionChanged({
+      maybeFluenceConfig,
+      ...restArgs,
+    });
+  }
 };
 
 type ResolveVersionArg = {
