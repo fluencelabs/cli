@@ -22,6 +22,7 @@ import { resolveDependencies } from "../../lib/helpers/package.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
 import JSClientPackageJSON from "../../versions/js-client.package.json" assert { type: "json" };
+import versions from "../../versions.json" assert { type: "json" };
 
 export default class Versions extends BaseCommand<typeof Versions> {
   static override aliases = ["dependency:v", "dep:v", "dep:versions"];
@@ -42,6 +43,8 @@ export default class Versions extends BaseCommand<typeof Versions> {
         "",
         {},
         {
+          "rust-peer version": versions["rust-peer"],
+          "rust toolchain": versions["rust-toolchain"],
           "npm dependencies that can be overridden with 'fluence dependency npm install <name>@<version>'":
             await resolveDependencies("npm", maybeFluenceConfig),
           "cargo dependencies that can be overridden with 'fluence dependency cargo install <name>@<version>'":
