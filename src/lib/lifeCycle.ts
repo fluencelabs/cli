@@ -138,6 +138,9 @@ export async function initCli<
     );
   }
 
+  // just doing these operations in parallel cause they are independent
+  // only `maybeFluenceConfig` config is destructured cause `ensureUserConfig`
+  // function sets a global singleton that is available everywhere
   const [maybeFluenceConfig] = await Promise.all([
     initFluenceConfig(),
     ensureUserConfig(),
