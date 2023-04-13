@@ -256,7 +256,7 @@ EXAMPLES
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-(For advanced users) Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
+(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo directory)
 
 ```
 USAGE
@@ -264,9 +264,11 @@ USAGE
     [--global]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
-                                       to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: marine@0.12.4
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
+                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
+                                       fluence, latest version cargo is aware of. If you want to install a specific
+                                       version, you can do so by appending @ and the version to the package name. For
+                                       example: marine@0.12.4
 
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
@@ -276,8 +278,8 @@ FLAGS
   --toolchain=<toolchain_name>  Rustup toolchain name
 
 DESCRIPTION
-  (For advanced users) Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory
-  of the current user)
+  (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo
+  directory)
 
 ALIASES
   $ fluence dependency cargo i
@@ -289,7 +291,7 @@ EXAMPLES
 
 ## `fluence dependency install`
 
-Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ```
 USAGE
@@ -300,7 +302,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+  Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ALIASES
   $ fluence dependency i
@@ -312,16 +314,18 @@ EXAMPLES
 
 ## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-(For advanced users) Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of the current user)
+(For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm directory)
 
 ```
 USAGE
   $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
-                                       to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
+                                       fluence.yaml, , user's .fluence/config.yaml, dependency versions recommended by
+                                       fluence, latest version cargo is aware of. If you want to install a specific
+                                       version, you can do so by appending @ and the version to the package name. For
+                                       example: @fluencelabs/aqua-lib@0.6.0
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -329,8 +333,8 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  (For advanced users) Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of
-  the current user)
+  (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm
+  directory)
 
 ALIASES
   $ fluence dependency npm i

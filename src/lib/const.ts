@@ -89,7 +89,7 @@ export const YAML_EXT = "yaml";
 export const WASM_EXT = "wasm";
 export const TOML_EXT = "toml";
 
-export const FLUENCE_DIR_NAME = ".fluence";
+export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const TS_DIR_NAME = "ts";
@@ -302,7 +302,7 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
-.fluence
+${DOT_FLUENCE_DIR_NAME}
 **/node_modules
 **/target/
 .repl_history

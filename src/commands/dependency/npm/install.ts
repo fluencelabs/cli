@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import path, { join } from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { commandObj } from "../../../lib/commandObj.js";
 import {
-  FLUENCE_DIR_NAME,
+  CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
+  DOT_FLUENCE_DIR_NAME,
   GLOBAL_FLAG,
   GLOBAL_FLAG_NAME,
   NPM_DIR_NAME,
@@ -35,10 +37,10 @@ import {
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
-  static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside ${path.join(
-    FLUENCE_DIR_NAME,
+  static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside user's ${path.join(
+    DOT_FLUENCE_DIR_NAME,
     NPM_DIR_NAME
-  )} directory of the current user)`;
+  )} directory)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -50,7 +52,10 @@ export default class Install extends BaseCommand<typeof Install> {
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
-      description: `Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0`,
+      description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FILE_NAME}, , user's ${join(
+        DOT_FLUENCE_DIR_NAME,
+        CONFIG_FILE_NAME
+      )}, dependency versions recommended by fluence, latest version cargo is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0`,
     }),
   };
 

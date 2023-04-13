@@ -101,12 +101,14 @@ type ResolveVersionArg = {
   name: string;
   maybeVersion: string | undefined;
   packageManager: PackageManager;
+  maybeFluenceConfig: FluenceConfig | null;
 };
 
 export const resolveVersionToInstall = ({
   name,
   maybeVersion,
   packageManager,
+  maybeFluenceConfig,
 }: ResolveVersionArg):
   | {
       versionToInstall: string;
@@ -136,9 +138,14 @@ export const resolveVersionToInstall = ({
     }
   })();
 
-  if (typeof maybeRecommendedVersion === "string") {
+  const maybeKnownVersion =
+    maybeFluenceConfig?.dependencies?.[packageManager]?.[name] ??
+    userConfig.dependencies?.[packageManager]?.[name] ??
+    maybeRecommendedVersion;
+
+  if (typeof maybeKnownVersion === "string") {
     return {
-      versionToInstall: maybeRecommendedVersion,
+      versionToInstall: maybeKnownVersion,
     };
   }
 

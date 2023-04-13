@@ -280,6 +280,7 @@ export const ensureCargoDependency = async ({
     name,
     maybeVersion,
     packageManager: "cargo",
+    maybeFluenceConfig,
   });
 
   const version =

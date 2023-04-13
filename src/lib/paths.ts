@@ -36,7 +36,7 @@ import {
   DEPLOY_CONFIG_FILE_NAME,
   EXTENSIONS_JSON_FILE_NAME,
   FLUENCE_CONFIG_FILE_NAME,
-  FLUENCE_DIR_NAME,
+  DOT_FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
   JS_DIR_NAME,
   MODULES_DIR_NAME,
@@ -80,7 +80,7 @@ export const ensureUserFluenceDir = (): Promise<string> => {
     return ensureDir(commandObj.config.configDir);
   }
 
-  return ensureDir(path.join(os.homedir(), FLUENCE_DIR_NAME));
+  return ensureDir(path.join(os.homedir(), DOT_FLUENCE_DIR_NAME));
 };
 
 export const getUserCountlyDir = async (): Promise<string> =>
@@ -151,7 +151,7 @@ export const getCargoTomlPath = (): string =>
 // Project .fluence paths:
 
 export const ensureFluenceDir = async (): Promise<string> =>
-  ensureDir(path.join(projectRootDir, FLUENCE_DIR_NAME));
+  ensureDir(path.join(projectRootDir, DOT_FLUENCE_DIR_NAME));
 
 export const ensureFluenceAquaDir = async (): Promise<string> =>
   ensureDir(path.join(await ensureFluenceDir(), AQUA_DIR_NAME));

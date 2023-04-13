@@ -125,6 +125,7 @@ export const ensureNpmDependency = async ({
     name,
     maybeVersion,
     packageManager: "npm",
+    maybeFluenceConfig,
   });
 
   const version =

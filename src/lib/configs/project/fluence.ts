@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import fsPromises from "node:fs/promises";
-import path from "node:path";
+import path, { join } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -34,6 +34,8 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
   CONFIG_FILE_NAME,
+  DOT_FLUENCE_DIR_NAME,
+  AQUA_DIR_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
@@ -484,7 +486,13 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     },
     aquaImports: {
       type: "array",
-      description: `A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in ${FLUENCE_CONFIG_FILE_NAME}, project's .fluence/aqua dir, npm dependencies from ${FLUENCE_CONFIG_FILE_NAME}, npm dependencies from ~/.fluence/${CONFIG_FILE_NAME}, npm dependencies recommended by fluence`,
+      description: `A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in ${FLUENCE_CONFIG_FILE_NAME}, project's ${join(
+        DOT_FLUENCE_DIR_NAME,
+        AQUA_DIR_NAME
+      )} dir, npm dependencies from ${FLUENCE_CONFIG_FILE_NAME}, npm dependencies from user's ${join(
+        DOT_FLUENCE_DIR_NAME,
+        CONFIG_FILE_NAME
+      )}, npm dependencies recommended by fluence`,
       items: { type: "string" },
       nullable: true,
     },
