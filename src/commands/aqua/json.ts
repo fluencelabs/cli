@@ -20,7 +20,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { FS_OPTIONS } from "../../lib/const.js";
+import { FS_OPTIONS, USE_F64_FLAG } from "../../lib/const.js";
 import { jsToAqua } from "../../lib/helpers/jsToAqua.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -30,6 +30,7 @@ export default class Json extends BaseCommand<typeof Json> {
     "Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into";
   static override flags = {
     ...baseFlags,
+    ...USE_F64_FLAG,
   };
   static override args = {
     FUNC: Args.string({
@@ -44,7 +45,7 @@ export default class Json extends BaseCommand<typeof Json> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(Json));
+    const { args, flags } = await initCli(this, await this.parse(Json));
 
     const content = await readFile(
       args.INPUT ?? (await input({ message: "Enter path to input file" })),
@@ -59,7 +60,8 @@ export default class Json extends BaseCommand<typeof Json> {
 
     const aqua = jsToAqua(
       parsedContent,
-      args.FUNC ?? (await input({ message: "Enter exported function name" }))
+      args.FUNC ?? (await input({ message: "Enter exported function name" })),
+      flags.f64
     );
 
     await writeFile(
