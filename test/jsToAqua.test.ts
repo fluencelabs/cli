@@ -21,19 +21,19 @@ const RETURN_TYPE = "Res";
 
 const obj = [
   {
-    js: { a: 1, b: 2 },
-    value: `${RETURN_TYPE}(a=1.0,b=2.0)`,
+    js: { a: -1, b: 2.2 },
+    value: `${RETURN_TYPE}(a=-1,b=2.2)`,
     type: RETURN_TYPE,
     typeDefs: `data Res:
-    a: f64
+    a: i64
     b: f64`,
   },
   {
     js: { a: { b: [2] }, c: null, d: [], e: [{ f: "4" }, { f: "5" }] },
-    value: `${RETURN_TYPE}(a=${RETURN_TYPE}A(b=[2.0]),c=nil,d=nil,e=[${RETURN_TYPE}E(f="4"),${RETURN_TYPE}E(f="5")])`,
+    value: `${RETURN_TYPE}(a=${RETURN_TYPE}A(b=[2]),c=nil,d=nil,e=[${RETURN_TYPE}E(f="4"),${RETURN_TYPE}E(f="5")])`,
     type: RETURN_TYPE,
     typeDefs: `data ResA:
-    b: []f64
+    b: []u64
 
 data ResE:
     f: string
@@ -56,9 +56,13 @@ describe("Conversion from js to aqua", () => {
     ${undefined}             | ${"nil"}                 | ${"?u8"}        | ${undefined}
     ${[]}                    | ${"nil"}                 | ${"?u8"}        | ${undefined}
     ${{}}                    | ${"nil"}                 | ${"?u8"}        | ${undefined}
-    ${1}                     | ${"1.0"}                 | ${"f64"}        | ${undefined}
+    ${1}                     | ${"1"}                   | ${"u64"}        | ${undefined}
+    ${-1}                    | ${"-1"}                  | ${"i64"}        | ${undefined}
     ${1.234}                 | ${"1.234"}               | ${"f64"}        | ${undefined}
-    ${[1, 2, 3]}             | ${"[1.0,2.0,3.0]"}       | ${"[]f64"}      | ${undefined}
+    ${-1.234}                | ${"-1.234"}              | ${"f64"}        | ${undefined}
+    ${[1, 2, 3]}             | ${"[1,2,3]"}             | ${"[]u64"}      | ${undefined}
+    ${[1, -2, 3]}            | ${"[1,-2,3]"}            | ${"[]i64"}      | ${undefined}
+    ${[1.1, 2, 3]}           | ${"[1.1,2,3]"}           | ${"[]f64"}      | ${undefined}
     ${[["1"], ["2"], ["3"]]} | ${'[["1"],["2"],["3"]]'} | ${"[][]string"} | ${undefined}
     ${obj[0].js}             | ${obj[0].value}          | ${obj[0].type}  | ${obj[0].typeDefs}
     ${obj[1].js}             | ${obj[1].value}          | ${obj[1].type}  | ${obj[1].typeDefs}
@@ -75,4 +79,28 @@ describe("Conversion from js to aqua", () => {
       /* eslint-enable @typescript-eslint/no-unsafe-member-access */
     }
   );
+
+  test("array with different element types throws an error", () => {
+    expect(() => {
+      jsToAquaImpl([1, "2", true], WRAPPER_FUNCTION_NAME, "");
+    }).toThrowError();
+  });
+
+  test("array with the objects that contain numbers with the same element types doesn't throw an error", () => {
+    expect(() => {
+      jsToAquaImpl([{ n: 1 }, { n: 2 }], WRAPPER_FUNCTION_NAME, "");
+    }).not.toThrowError();
+  });
+
+  test("array with the objects that contain numbers with different element types throws an error", () => {
+    expect(() => {
+      jsToAquaImpl([{ n: -1 }, { n: 1.1 }], WRAPPER_FUNCTION_NAME, "");
+    }).toThrowError();
+  });
+
+  test("array with the objects that contain numbers with different element types, but with a f64 flag doesn't throw", () => {
+    expect(() => {
+      jsToAquaImpl([{ n: -1 }, { n: 1 }], WRAPPER_FUNCTION_NAME, "", true);
+    }).not.toThrowError();
+  });
 });
