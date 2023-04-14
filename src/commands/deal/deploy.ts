@@ -146,7 +146,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         });
 
         updatedDeals[workerName] = {
-          deal: getPolygonScanLink(maybePreviouslyDeployedDeal.dealIdOriginal),
+          deal: getLinkToAddress(maybePreviouslyDeployedDeal.dealIdOriginal),
           "old worker definition": maybePreviouslyDeployedDeal.definition,
           "new worker definition": appCID,
         };
@@ -197,7 +197,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       await workersConfig.$commit();
 
       createdDeals[workerName] = {
-        deal: getPolygonScanLink(dealIdOriginal),
+        deal: getLinkToAddress(dealIdOriginal),
         "worker definition": appCID,
       };
     }
@@ -224,5 +224,5 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   }
 }
 
-const getPolygonScanLink = (dealId: string) =>
+const getLinkToAddress = (dealId: string) =>
   `https://explorer.testnet.aurora.dev/address/${dealId}`;
