@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.8](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.7...fluence-cli-v0.4.8) (2023-04-14)
+
+
+### Features
+
+* add -g flag for global dependency management and warn about using dependency overrides [fixes DXJ-362 DXJ-329] ([#238](https://github.com/fluencelabs/fluence-cli/issues/238)) ([31227b7](https://github.com/fluencelabs/fluence-cli/commit/31227b76655ab7c258e155a2d53addfb0acc7fac))
+
 ## [0.4.7](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.6...fluence-cli-v0.4.7) (2023-04-13)
 
 
