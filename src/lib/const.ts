@@ -219,6 +219,13 @@ export const OFF_AQUA_LOGS_FLAG = {
   }),
 };
 
+export const USE_F64_FLAG = {
+  f64: Flags.boolean({
+    description:
+      "Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them. Without this flag, numbers will be converted to u64, i64 or f64 depending on their value",
+  }),
+};
+
 export type OffAquaLogsFlag = FromFlagsDef<typeof OFF_AQUA_LOGS_FLAG>;
 
 export const IMPORT_FLAG = {

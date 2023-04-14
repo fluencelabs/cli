@@ -23,7 +23,11 @@ import { commandObj } from "../commandObj.js";
 import { capitalize } from "./capitilize.js";
 import { cleanAquaName, validateAquaName } from "./downloadFile.js";
 
-export const jsToAqua = (v: unknown, funcNameFromArgs: string): string => {
+export const jsToAqua = (
+  v: unknown,
+  funcNameFromArgs: string,
+  useF64ForAllNumbers = false
+): string => {
   const funcName = camelcase(cleanAquaName(funcNameFromArgs));
   const funcNameValidity = validateAquaName(funcName);
 
@@ -35,7 +39,13 @@ export const jsToAqua = (v: unknown, funcNameFromArgs: string): string => {
     );
   }
 
-  const { type, value, typeDefs } = jsToAquaImpl(v, funcName, "");
+  const { type, value, typeDefs } = jsToAquaImpl(
+    v,
+    funcName,
+    "",
+    useF64ForAllNumbers
+  );
+
   return `${
     typeDefs ?? ""
   }\n\nfunc ${funcName}() -> ${type}:\n    <- ${value}\n`;
@@ -43,10 +53,13 @@ export const jsToAqua = (v: unknown, funcNameFromArgs: string): string => {
 
 const NULL = { type: "?u8", value: "nil" } as const;
 
+const NUMBER_TYPES = ["u64", "i64", "f64"] as const;
+
 export const jsToAquaImpl = (
   v: unknown,
   fieldName: string,
-  currentNesting: string
+  currentNesting: string,
+  useF64ForAllNumbers = false
 ): { type: string; value: string; typeDefs?: string | undefined } => {
   const error = (message: string) =>
     commandObj.error(
@@ -60,11 +73,26 @@ export const jsToAquaImpl = (
   }
 
   if (typeof v === "number") {
+    const isInteger = Number.isInteger(v);
+
+    const type = (() => {
+      if (useF64ForAllNumbers || !isInteger) {
+        return "f64";
+      }
+
+      if (v < 0) {
+        return "i64";
+      }
+
+      return "u64";
+    })();
+
     const stringNumber = v.toString();
-    return {
-      type: "f64",
-      value: stringNumber.includes(".") ? stringNumber : `${stringNumber}.0`,
-    };
+
+    const value =
+      type === "f64" && isInteger ? `${stringNumber}.0` : stringNumber;
+
+    return { type, value };
   }
 
   if (typeof v === "boolean") {
@@ -80,21 +108,47 @@ export const jsToAquaImpl = (
       return NULL;
     }
 
-    const { type, typeDefs } = jsToAquaImpl(v[0], fieldName, currentNesting);
+    const mappedToAqua = v.map((val) =>
+      jsToAquaImpl(val, fieldName, currentNesting, useF64ForAllNumbers)
+    );
+
+    const firstElementType = mappedToAqua[0]?.type ?? NULL.type;
+    const isNumberType = NUMBER_TYPES.includes(firstElementType);
+
+    const type = isNumberType
+      ? mappedToAqua.reduce<string>(
+          (acc, { type }) => {
+            if (!NUMBER_TYPES.includes(type)) {
+              return error("All array elements must be of the same type");
+            }
+
+            if (acc === "f64" || type === "f64") {
+              return "f64";
+            }
+
+            if (acc === "i64" || type === "i64") {
+              return "i64";
+            }
+
+            return "u64";
+          },
+          useF64ForAllNumbers ? "f64" : "u64"
+        )
+      : firstElementType;
+
+    const { typeDefs } = mappedToAqua[0] ?? {};
 
     if (
-      !v.every(
-        (val) => jsToAquaImpl(val, fieldName, currentNesting).type === type
-      )
+      !isNumberType &&
+      (!mappedToAqua.every((val) => val.type === type) ||
+        !mappedToAqua.every((val) => val.typeDefs === typeDefs))
     ) {
       return error("All array elements must be of the same type");
     }
 
     return {
       type: `[]${type}`,
-      value: `[${v
-        .map((val) => jsToAquaImpl(val, fieldName, currentNesting).value)
-        .join(",")}]`,
+      value: `[${mappedToAqua.map(({ value }) => value).join(",")}]`,
       typeDefs,
     };
   }
@@ -122,7 +176,13 @@ export const jsToAquaImpl = (
       entries: string[];
     }>(
       ({ keyTypes, keyDataTypes, entries }, [key, val]) => {
-        const { type, value, typeDefs } = jsToAquaImpl(val, key, nestedType);
+        const { type, value, typeDefs } = jsToAquaImpl(
+          val,
+          key,
+          nestedType,
+          useF64ForAllNumbers
+        );
+
         const camelCasedKey = camelcase(cleanAquaName(key));
         const keyValidity = validateAquaName(camelCasedKey);
 

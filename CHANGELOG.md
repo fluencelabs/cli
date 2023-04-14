@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.7](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.6...fluence-cli-v0.4.7) (2023-04-13)
+
+
+### Features
+
+* improve jsToAqua so numbers can be u64, i64 and f64 ([#239](https://github.com/fluencelabs/fluence-cli/issues/239)) ([e9dbf54](https://github.com/fluencelabs/fluence-cli/commit/e9dbf54759f2adc945bba6f68406fabf9edad2df))
+
 ## [0.4.6](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.5...fluence-cli-v0.4.6) (2023-04-12)
 
 

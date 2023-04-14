@@ -78,7 +78,7 @@ Infers aqua types for an arbitrary json file, generates valid aqua code with a f
 
 ```
 USAGE
-  $ fluence aqua json [FUNC] [INPUT] [OUTPUT] [--no-input]
+  $ fluence aqua json [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
   FUNC    Name of the exported function
@@ -86,6 +86,8 @@ ARGUMENTS
   OUTPUT  Path to for output file
 
 FLAGS
+  --f64       Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
+              Without this flag, numbers will be converted to u64, i64 or f64 depending on their value
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -101,7 +103,7 @@ Infers aqua types for an arbitrary yaml file, generates valid aqua code with a f
 
 ```
 USAGE
-  $ fluence aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input]
+  $ fluence aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
   FUNC    Name of the exported function
@@ -109,6 +111,8 @@ ARGUMENTS
   OUTPUT  Path to for output file
 
 FLAGS
+  --f64       Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
+              Without this flag, numbers will be converted to u64, i64 or f64 depending on their value
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
