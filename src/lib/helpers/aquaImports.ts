@@ -15,7 +15,6 @@
  */
 
 import fsPromises from "node:fs/promises";
-import { sep } from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
@@ -47,14 +46,10 @@ export async function ensureAquaImports({
 }: GetAquaImportsArg): Promise<string[]> {
   const defaultImports = [await ensureFluenceAquaDir()];
 
-  const allNpmDependencies = (
-    await installAllNPMDependencies({
-      maybeFluenceConfig,
-      force,
-    })
-  ).filter(
-    (dependencyPath): boolean => !dependencyPath.includes(`${sep}aqua${sep}`)
-  );
+  const allNpmDependencies = await installAllNPMDependencies({
+    maybeFluenceConfig,
+    force,
+  });
 
   const aquaImports = [
     ...(flags?.import ?? []),
