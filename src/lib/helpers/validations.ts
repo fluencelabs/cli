@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import semver from "semver";
+
 export type ValidationResult = string | true;
 
 export const validateUnique = <T>(
@@ -52,4 +54,21 @@ export const validateBatch = (
   );
 
   return errors.length === 0 ? true : errors.join("\n");
+};
+
+export const isExactVersion = (version: string): boolean =>
+  semver.clean(version) === version;
+
+export const validateAllVersionsAreExact = (
+  versions: Record<string, string>
+): ValidationResult => {
+  const notExactVersions = Object.entries(versions).filter(
+    ([, version]) => !isExactVersion(version)
+  );
+
+  return notExactVersions.length === 0
+    ? true
+    : `The following dependencies don't have exact versions: ${notExactVersions
+        .map(([name, version]) => `${name}: ${version}`)
+        .join(", ")}`;
 };

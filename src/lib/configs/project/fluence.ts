@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import fsPromises from "node:fs/promises";
-import path from "node:path";
+import path, { join } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -33,9 +33,15 @@ import {
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
+  CONFIG_FILE_NAME,
+  DOT_FLUENCE_DIR_NAME,
+  AQUA_DIR_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
-import { validateBatch } from "../../helpers/validations.js";
+import {
+  validateAllVersionsAreExact,
+  validateBatch,
+} from "../../helpers/validations.js";
 import { local, localMultiaddrs } from "../../localNodes.js";
 import {
   getPeerId,
@@ -315,6 +321,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   >;
   chainNetwork?: ChainNetwork;
   spells?: Record<string, FluenceConfigSpell>;
+  aquaImports?: Array<string>;
 };
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
@@ -476,6 +483,18 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
         required: ["get"],
       },
       required: [],
+    },
+    aquaImports: {
+      type: "array",
+      description: `A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in ${FLUENCE_CONFIG_FILE_NAME}, project's ${join(
+        DOT_FLUENCE_DIR_NAME,
+        AQUA_DIR_NAME
+      )} dir, npm dependencies from ${FLUENCE_CONFIG_FILE_NAME}, npm dependencies from user's ${join(
+        DOT_FLUENCE_DIR_NAME,
+        CONFIG_FILE_NAME
+      )}, npm dependencies recommended by fluence`,
+      items: { type: "string" },
+      nullable: true,
     },
   },
 };
@@ -715,7 +734,9 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   const validity = validateBatch(
     validateWorkers(config),
     validateHostsAndDeals(config, "hosts"),
-    validateHostsAndDeals(config, "deals")
+    validateHostsAndDeals(config, "deals"),
+    validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
+    validateAllVersionsAreExact(config.dependencies?.cargo ?? {})
   );
 
   if (typeof validity === "string") {

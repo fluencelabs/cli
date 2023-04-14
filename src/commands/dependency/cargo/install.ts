@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import path, { join } from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
@@ -22,7 +22,11 @@ import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { commandObj } from "../../../lib/commandObj.js";
 import {
   CARGO_DIR_NAME,
-  FLUENCE_DIR_NAME,
+  CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
+  DOT_FLUENCE_DIR_NAME,
+  GLOBAL_FLAG,
+  GLOBAL_FLAG_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
 } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
@@ -33,10 +37,10 @@ import {
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
-  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside ${path.join(
-    FLUENCE_DIR_NAME,
+  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's ${path.join(
+    DOT_FLUENCE_DIR_NAME,
     CARGO_DIR_NAME
-  )} directory of the current user)`;
+  )} directory)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -48,19 +52,21 @@ export default class Install extends BaseCommand<typeof Install> {
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),
+    ...GLOBAL_FLAG,
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
-      description:
-        "Package name. Installs the latest version of the package by default. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: marine@0.12.4",
+      description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FILE_NAME}, user's ${join(
+        DOT_FLUENCE_DIR_NAME,
+        CONFIG_FILE_NAME
+      )}, dependency versions recommended by fluence, latest version cargo is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: marine@0.12.4`,
     }),
   };
 
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig } = await initCli(
+    const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Install),
-      true
+      await this.parse(Install)
     );
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
@@ -68,19 +74,26 @@ export default class Install extends BaseCommand<typeof Install> {
     // if packageNameAndVersion not provided just install all cargo dependencies
     if (packageNameAndVersion === undefined) {
       await installAllCargoDependencies({
-        fluenceConfig,
+        maybeFluenceConfig,
         force: flags.force,
       });
 
       return commandObj.log("cargo dependencies successfully installed");
     }
 
+    if (!flags.global && maybeFluenceConfig === null) {
+      return commandObj.error(
+        `Not a fluence project. If you wanted to install cargo dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`
+      );
+    }
+
     await ensureCargoDependency({
       nameAndVersion: packageNameAndVersion,
-      maybeFluenceConfig: fluenceConfig,
+      maybeFluenceConfig,
       explicitInstallation: true,
       force: flags.force,
       toolchain: flags.toolchain,
+      global: flags.global,
     });
   }
 }

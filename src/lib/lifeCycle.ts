@@ -36,7 +36,7 @@ import {
 import {
   initNewUserConfig,
   initUserConfig,
-  type UserConfig,
+  setUserConfig,
 } from "./configs/user/config.js";
 import type { NO_INPUT_FLAG_NAME } from "./const.js";
 import { haltCountly, initCountly } from "./countly.js";
@@ -50,11 +50,12 @@ import {
 } from "./paths.js";
 import { confirm } from "./prompt.js";
 
-const ensureUserConfig = async (): Promise<UserConfig> => {
-  const userConfig = await initUserConfig();
+const ensureUserConfig = async (): Promise<void> => {
+  const maybeUserConfig = await initUserConfig();
 
-  if (userConfig !== null) {
-    return userConfig;
+  if (maybeUserConfig !== null) {
+    setUserConfig(maybeUserConfig);
+    return;
   }
 
   const newUserConfig = await initNewUserConfig();
@@ -71,11 +72,10 @@ const ensureUserConfig = async (): Promise<UserConfig> => {
     await newUserConfig.$commit();
   }
 
-  return newUserConfig;
+  setUserConfig(newUserConfig);
 };
 
 type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
-  userConfig: UserConfig;
   args: A;
   flags: F;
 };
@@ -138,15 +138,17 @@ export async function initCli<
     );
   }
 
-  const [userConfig, maybeFluenceConfig] = await Promise.all([
-    ensureUserConfig(),
+  // just doing these operations in parallel cause they are independent
+  // only `maybeFluenceConfig` config is destructured cause `ensureUserConfig`
+  // function sets a global singleton that is available everywhere
+  const [maybeFluenceConfig] = await Promise.all([
     initFluenceConfig(),
+    ensureUserConfig(),
   ]);
 
-  await initCountly({ userConfig, maybeFluenceConfig });
+  await initCountly({ maybeFluenceConfig });
 
   return {
-    userConfig,
     args,
     flags,
     ...(requiresFluenceProject

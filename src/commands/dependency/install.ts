@@ -18,17 +18,14 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { FLUENCE_DIR_NAME } from "../../lib/const.js";
-import {
-  ensureAquaImports,
-  ensureVSCodeSettingsJSON,
-} from "../../lib/helpers/aquaImports.js";
+import { DOT_FLUENCE_DIR_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { installAllNPMDependencies } from "../../lib/npm.js";
 import { installAllCargoDependencies } from "../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:i", "dep:i"];
-  static override description = `Install all project dependencies (dependencies are cached inside ${FLUENCE_DIR_NAME} directory of the current user)`;
+  static override description = `Install all project dependencies (dependencies are cached inside user's ${DOT_FLUENCE_DIR_NAME} directory)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -38,21 +35,18 @@ export default class Install extends BaseCommand<typeof Install> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig } = await initCli(
+    const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Install),
-      true
+      await this.parse(Install)
     );
 
-    await ensureVSCodeSettingsJSON({
-      aquaImports: await ensureAquaImports({
-        maybeFluenceConfig: fluenceConfig,
-        force: flags.force,
-      }),
+    await installAllNPMDependencies({
+      maybeFluenceConfig,
+      force: flags.force,
     });
 
     await installAllCargoDependencies({
-      fluenceConfig,
+      maybeFluenceConfig,
       force: flags.force,
     });
 

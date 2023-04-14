@@ -7,6 +7,7 @@
 | Property                          | Type      | Required | Nullable       | Defined by                                                                                                              |
 | :-------------------------------- | :-------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------- |
 | [countlyConsent](#countlyconsent) | `boolean` | Required | cannot be null | [config.yaml](config-properties-countlyconsent.md "https://fluence.dev/schemas/config.yaml#/properties/countlyConsent") |
+| [dependencies](#dependencies)     | `object`  | Optional | cannot be null | [config.yaml](config-properties-dependencies.md "https://fluence.dev/schemas/config.yaml#/properties/dependencies")     |
 | [version](#version)               | `number`  | Required | cannot be null | [config.yaml](config-properties-version.md "https://fluence.dev/schemas/config.yaml#/properties/version")               |
 
 ## countlyConsent
@@ -26,6 +27,24 @@ Weather you consent to send usage data to Countly
 ### countlyConsent Type
 
 `boolean`
+
+## dependencies
+
+(For advanced users) Global overrides of dependencies
+
+`dependencies`
+
+*   is optional
+
+*   Type: `object` ([Details](config-properties-dependencies.md))
+
+*   cannot be null
+
+*   defined in: [config.yaml](config-properties-dependencies.md "https://fluence.dev/schemas/config.yaml#/properties/dependencies")
+
+### dependencies Type
+
+`object` ([Details](config-properties-dependencies.md))
 
 ## version
 

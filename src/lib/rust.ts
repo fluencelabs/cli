@@ -24,20 +24,17 @@ import versions from "../versions.json" assert { type: "json" };
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import {
-  RUST_WASM32_WASI_TARGET,
-  fluenceCargoDependencies,
-  isFluenceCargoDependency,
-} from "./const.js";
+import { RUST_WASM32_WASI_TARGET } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import {
-  handleFluenceConfig,
   handleInstallation,
+  resolveDependencies,
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   splitPackageNameAndVersion,
+  updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
@@ -182,15 +179,6 @@ const hasRequiredRustTarget = async (): Promise<boolean> =>
     })
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
 
-export const getCargoVersionsMap = <T extends keyof typeof versions.cargo>(
-  dependencies: ReadonlyArray<T>
-) =>
-  dependencies.reduce<Record<T, string>>(
-    (acc, dep) => ({ ...acc, [dep]: versions.cargo[dep] }),
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    {} as Record<T, string>
-  );
-
 export const getLatestVersionOfCargoDependency = async (
   name: string
 ): Promise<string> =>
@@ -269,6 +257,7 @@ const downloadPrebuiltCargoDependencies = async (
 type CargoDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
+  global?: boolean;
   force?: boolean;
   toolchain?: string | undefined;
   explicitInstallation?: boolean;
@@ -277,6 +266,7 @@ type CargoDependencyArg = {
 export const ensureCargoDependency = async ({
   nameAndVersion,
   maybeFluenceConfig,
+  global = true,
   force = false,
   toolchain: toolchainFromArgs,
   explicitInstallation = false,
@@ -288,6 +278,7 @@ export const ensureCargoDependency = async ({
     name,
     maybeVersion,
     packageManager: "cargo",
+    maybeFluenceConfig,
   });
 
   const version =
@@ -332,19 +323,13 @@ export const ensureCargoDependency = async ({
     });
   }
 
-  if (
-    maybeFluenceConfig !== null &&
-    version !==
-      (maybeFluenceConfig?.dependencies?.npm?.[name] ??
-        (isFluenceCargoDependency(name) ? versions.cargo[name] : undefined))
-  ) {
-    await handleFluenceConfig({
-      fluenceConfig: maybeFluenceConfig,
-      name,
-      packageManager: "cargo",
-      version,
-    });
-  }
+  await updateConfigsIfVersionChanged({
+    maybeFluenceConfig,
+    name,
+    version,
+    global,
+    packageManager: "cargo",
+  });
 
   addCountlyLog(`Using ${name}@${version} cargo dependency`);
 
@@ -352,24 +337,23 @@ export const ensureCargoDependency = async ({
 };
 
 type InstallAllDependenciesArg = {
-  fluenceConfig: FluenceConfig;
+  maybeFluenceConfig: FluenceConfig | null;
   force: boolean;
 };
 
 export const installAllCargoDependencies = async ({
-  fluenceConfig,
+  maybeFluenceConfig,
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
-  for (const [name, version] of Object.entries({
-    ...getCargoVersionsMap(fluenceCargoDependencies),
-    ...(fluenceConfig?.dependencies?.cargo ?? {}),
-  })) {
+  for (const [name, version] of Object.entries(
+    await resolveDependencies("cargo", maybeFluenceConfig)
+  )) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable
     // eslint-disable-next-line no-await-in-loop
     await ensureCargoDependency({
       nameAndVersion: `${name}@${version}`,
-      maybeFluenceConfig: fluenceConfig,
+      maybeFluenceConfig,
       force,
     });
   }

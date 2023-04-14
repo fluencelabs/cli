@@ -14,35 +14,23 @@
  * limitations under the License.
  */
 
+import { TEMPLATES } from "../src/lib/const.js";
+
 import "../src/lib/setupEnvironment.js";
 import { fluence, initFirstTime } from "./helpers.js";
 
 (async (): Promise<void> => {
   console.log("Setting up tests...");
 
-  await fluence({
-    args: ["dep", "i"],
-    flags: {
-      "no-input": true,
-    },
-    cwd: await initFirstTime("minimal"),
-  });
-
-  await fluence({
-    args: ["dep", "i"],
-    flags: {
-      "no-input": true,
-    },
-    cwd: await initFirstTime("ts"),
-  });
-
-  await fluence({
-    args: ["dep", "i"],
-    flags: {
-      "no-input": true,
-    },
-    cwd: await initFirstTime("js"),
-  });
+  await Promise.all([
+    fluence({
+      args: ["dep", "i"],
+      flags: {
+        "no-input": true,
+      },
+    }),
+    ...TEMPLATES.map((template) => initFirstTime(template)),
+  ]);
 
   console.log("Tests are ready to run!");
 })().catch((error) => {

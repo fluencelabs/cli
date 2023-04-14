@@ -22,6 +22,7 @@
 | [deals](#deals)                       | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-deals.md "https://fluence.dev/schemas/fluence.yaml#/properties/deals")                       |
 | [chainNetwork](#chainnetwork)         | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-chainnetwork.md "https://fluence.dev/schemas/fluence.yaml#/properties/chainNetwork")         |
 | [spells](#spells)                     | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-spells.md "https://fluence.dev/schemas/fluence.yaml#/properties/spells")                     |
+| [aquaImports](#aquaimports)           | `array`  | Optional | cannot be null | [fluence.yaml](fluence-properties-aquaimports.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaImports")           |
 
 ## services
 
@@ -137,7 +138,7 @@ The name of the Key Pair to use. It is resolved in the following order (from the
 
 ## dependencies
 
-A map of dependency versions
+(For advanced users) Overrides for the project dependencies
 
 `dependencies`
 
@@ -349,3 +350,21 @@ A map with spell names as keys and spell configs as values
 ### spells Type
 
 `object` ([Details](fluence-properties-spells.md))
+
+## aquaImports
+
+A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in fluence.yaml, project's .fluence/aqua dir, npm dependencies from fluence.yaml, npm dependencies from user's .fluence/config.yaml, npm dependencies recommended by fluence
+
+`aquaImports`
+
+*   is optional
+
+*   Type: `string[]`
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-aquaimports.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaImports")
+
+### aquaImports Type
+
+`string[]`

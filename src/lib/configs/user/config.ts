@@ -17,6 +17,10 @@
 import type { JSONSchemaType } from "ajv";
 
 import { CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import {
+  validateAllVersionsAreExact,
+  validateBatch,
+} from "../../helpers/validations.js";
 import { ensureUserFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -26,11 +30,16 @@ import {
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
+  type ConfigValidateFunction,
 } from "../initConfig.js";
 
 type ConfigV0 = {
   version: 0;
   countlyConsent: boolean;
+  dependencies?: {
+    npm?: Record<string, string>;
+    cargo?: Record<string, string>;
+  };
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -42,6 +51,28 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     countlyConsent: {
       type: "boolean",
       description: "Weather you consent to send usage data to Countly",
+    },
+    dependencies: {
+      type: "object",
+      description: "(For advanced users) Global overrides of dependencies",
+      properties: {
+        npm: {
+          type: "object",
+          description: "Overrides of npm dependencies",
+          additionalProperties: { type: "string" },
+          nullable: true,
+          required: [],
+        },
+        cargo: {
+          type: "object",
+          description: "Overrides of cargo dependencies",
+          additionalProperties: { type: "string" },
+          nullable: true,
+          required: [],
+        },
+      },
+      nullable: true,
+      required: [],
     },
     version: { type: "number", const: 0 },
   },
@@ -60,12 +91,19 @@ type LatestConfig = ConfigV0;
 export type UserConfig = InitializedConfig<LatestConfig>;
 export type UserConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
+const validate: ConfigValidateFunction<LatestConfig> = (config) =>
+  validateBatch(
+    validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
+    validateAllVersionsAreExact(config.dependencies?.cargo ?? {})
+  );
+
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
   name: CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: ensureUserFluenceDir,
+  validate,
 };
 
 export const initUserConfig = getConfigInitFunction(initConfigOptions);
@@ -77,3 +115,8 @@ export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
 export const userConfigSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export let userConfig: UserConfig;
+
+export const setUserConfig = (newUserConfig: UserConfig) => {
+  userConfig = newUserConfig;
+};

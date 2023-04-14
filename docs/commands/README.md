@@ -190,7 +190,7 @@ FLAGS
   -k, --key-pair-name=<name>     Key pair name
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...             Path to a directory to import aqua files from. May be used several times
-  --network=<network>            [default: testnet] $The network in which the transactions used by the command will be
+  --network=<network>            [default: testnet] The network in which the transactions used by the command will be
                                  carried out (local, testnet)
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
@@ -260,25 +260,30 @@ EXAMPLES
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-(For advanced users) Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory of the current user)
+(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo directory)
 
 ```
 USAGE
   $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
+    [--global]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
-                                       to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: marine@0.12.4
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
+                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
+                                       fluence, latest version cargo is aware of. If you want to install a specific
+                                       version, you can do so by appending @ and the version to the package name. For
+                                       example: marine@0.12.4
 
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
+  --global                      Will override dependencies in a global user's config.yaml instead of project's
+                                fluence.yaml
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rustup toolchain name
 
 DESCRIPTION
-  (For advanced users) Install cargo project dependencies (all dependencies are cached inside .fluence/cargo directory
-  of the current user)
+  (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo
+  directory)
 
 ALIASES
   $ fluence dependency cargo i
@@ -290,7 +295,7 @@ EXAMPLES
 
 ## `fluence dependency install`
 
-Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ```
 USAGE
@@ -301,7 +306,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Install all project dependencies (dependencies are cached inside .fluence directory of the current user)
+  Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ALIASES
   $ fluence dependency i
@@ -313,24 +318,27 @@ EXAMPLES
 
 ## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-(For advanced users) Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of the current user)
+(For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm directory)
 
 ```
 USAGE
-  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force]
+  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs the latest version of the package by default. If you want
-                                       to install a specific version, you can do so by appending @ and the version to
-                                       the package name. For example: @fluencelabs/aqua-lib@0.6.0
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
+                                       fluence.yaml, , user's .fluence/config.yaml, dependency versions recommended by
+                                       fluence, latest version cargo is aware of. If you want to install a specific
+                                       version, you can do so by appending @ and the version to the package name. For
+                                       example: @fluencelabs/aqua-lib@0.6.0
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
+  --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  (For advanced users) Install npm project dependencies (all dependencies are cached inside .fluence/npm directory of
-  the current user)
+  (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm
+  directory)
 
 ALIASES
   $ fluence dependency npm i
@@ -346,9 +354,11 @@ Reset all project dependencies to recommended versions for the current Fluence C
 
 ```
 USAGE
-  $ fluence dependency reset [--no-input]
+  $ fluence dependency reset [--no-input] [--global] [--all]
 
 FLAGS
+  --all       Remove all dependencies, not only recommended ones
+  --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -575,7 +585,7 @@ ARGUMENTS
   DEAL-ADDRESS  Deal address
 
 FLAGS
-  --network=<network>  [default: testnet] $The network in which the transactions used by the command will be carried out
+  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
                        (local, testnet)
   --no-input           Don't interactively ask for any input from the user
   --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure

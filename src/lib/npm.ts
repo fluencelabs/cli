@@ -20,15 +20,9 @@ import { join } from "node:path";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import versions from "../versions.json" assert { type: "json" };
-
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import {
-  NODE_MODULES_DIR_NAME,
-  fluenceNPMDependencies,
-  isFluenceNPMDependency,
-} from "./const.js";
+import { NODE_MODULES_DIR_NAME } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import {
@@ -36,7 +30,8 @@ import {
   resolveDependencyPathAndTmpPath,
   resolveVersionToInstall,
   handleInstallation,
-  handleFluenceConfig,
+  resolveDependencies,
+  updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
@@ -61,15 +56,6 @@ export const getLatestVersionOfNPMDependency = async (
     );
   }
 };
-
-export const getNPMVersionsMap = <T extends keyof typeof versions.npm>(
-  dependencies: ReadonlyArray<T>
-) =>
-  dependencies.reduce<Record<T, string>>(
-    (acc, dep) => ({ ...acc, [dep]: versions.npm[dep] }),
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    {} as Record<T, string>
-  );
 
 type InstallNpmDependencyArg = {
   name: string;
@@ -117,6 +103,7 @@ const installNpmDependency = async ({
 type EnsureNpmDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
+  global?: boolean;
   force?: boolean | undefined;
   explicitInstallation?: boolean;
 };
@@ -124,6 +111,7 @@ type EnsureNpmDependencyArg = {
 export const ensureNpmDependency = async ({
   nameAndVersion,
   maybeFluenceConfig,
+  global = true,
   force = false,
   explicitInstallation = false,
 }: EnsureNpmDependencyArg): Promise<string> => {
@@ -133,6 +121,7 @@ export const ensureNpmDependency = async ({
     name,
     maybeVersion,
     packageManager: "npm",
+    maybeFluenceConfig,
   });
 
   const version =
@@ -167,19 +156,13 @@ export const ensureNpmDependency = async ({
       }),
   });
 
-  if (
-    maybeFluenceConfig !== null &&
-    version !==
-      (maybeFluenceConfig?.dependencies?.npm?.[name] ??
-        (isFluenceNPMDependency(name) ? versions.npm[name] : undefined))
-  ) {
-    await handleFluenceConfig({
-      fluenceConfig: maybeFluenceConfig,
-      name,
-      packageManager: "npm",
-      version,
-    });
-  }
+  await updateConfigsIfVersionChanged({
+    maybeFluenceConfig,
+    name,
+    version,
+    global,
+    packageManager: "npm",
+  });
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 
@@ -191,14 +174,13 @@ type InstallAllNPMDependenciesArg = {
   force?: boolean | undefined;
 };
 
-export const installAllNPMDependencies = ({
+export const installAllNPMDependencies = async ({
   maybeFluenceConfig,
   force,
 }: InstallAllNPMDependenciesArg): Promise<string[]> => {
-  const dependenciesToEnsure = Object.entries({
-    ...getNPMVersionsMap(fluenceNPMDependencies),
-    ...(maybeFluenceConfig?.dependencies?.npm ?? {}),
-  });
+  const dependenciesToEnsure = Object.entries(
+    await resolveDependencies("npm", maybeFluenceConfig)
+  );
 
   return Promise.all(
     dependenciesToEnsure.map(([name, version]) =>

@@ -30,7 +30,7 @@ import {
   PRIV_KEY_FLAG,
   WORKERS_CONFIG_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
-  FLUENCE_DIR_NAME,
+  DOT_FLUENCE_DIR_NAME,
   FLUENCE_CLIENT_FLAGS,
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
@@ -152,7 +152,7 @@ const getLogsArg = async ({
     return commandObj.error(
       `Wasn't able to find ${color.yellow(
         WORKERS_CONFIG_FILE_NAME
-      )} in ${FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`
+      )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`
     );
   }
 
