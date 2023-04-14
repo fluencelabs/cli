@@ -225,4 +225,4 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 }
 
 const getPolygonScanLink = (dealId: string) =>
-  `https://mumbai.polygonscan.com/address/${dealId}`;
+  `https://explorer.testnet.aurora.dev/address/${dealId}`;
