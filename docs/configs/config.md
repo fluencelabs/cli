@@ -4,11 +4,12 @@
 
 # config.yaml Properties
 
-| Property                          | Type      | Required | Nullable       | Defined by                                                                                                              |
-| :-------------------------------- | :-------- | :------- | :------------- | :---------------------------------------------------------------------------------------------------------------------- |
-| [countlyConsent](#countlyconsent) | `boolean` | Required | cannot be null | [config.yaml](config-properties-countlyconsent.md "https://fluence.dev/schemas/config.yaml#/properties/countlyConsent") |
-| [dependencies](#dependencies)     | `object`  | Optional | cannot be null | [config.yaml](config-properties-dependencies.md "https://fluence.dev/schemas/config.yaml#/properties/dependencies")     |
-| [version](#version)               | `number`  | Required | cannot be null | [config.yaml](config-properties-version.md "https://fluence.dev/schemas/config.yaml#/properties/version")               |
+| Property                                    | Type      | Required | Nullable       | Defined by                                                                                                                        |
+| :------------------------------------------ | :-------- | :------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| [countlyConsent](#countlyconsent)           | `boolean` | Required | cannot be null | [config.yaml](config-properties-countlyconsent.md "https://fluence.dev/schemas/config.yaml#/properties/countlyConsent")           |
+| [dependencies](#dependencies)               | `object`  | Optional | cannot be null | [config.yaml](config-properties-dependencies.md "https://fluence.dev/schemas/config.yaml#/properties/dependencies")               |
+| [lastCheckForUpdates](#lastcheckforupdates) | `string`  | Optional | cannot be null | [config.yaml](config-properties-lastcheckforupdates.md "https://fluence.dev/schemas/config.yaml#/properties/lastCheckForUpdates") |
+| [version](#version)                         | `number`  | Required | cannot be null | [config.yaml](config-properties-version.md "https://fluence.dev/schemas/config.yaml#/properties/version")                         |
 
 ## countlyConsent
 
@@ -45,6 +46,24 @@ Weather you consent to send usage data to Countly
 ### dependencies Type
 
 `object` ([Details](config-properties-dependencies.md))
+
+## lastCheckForUpdates
+
+Last time when CLI checked for updates. Updates are checked daily unless this field is set to 'disabled'
+
+`lastCheckForUpdates`
+
+*   is optional
+
+*   Type: `string`
+
+*   cannot be null
+
+*   defined in: [config.yaml](config-properties-lastcheckforupdates.md "https://fluence.dev/schemas/config.yaml#/properties/lastCheckForUpdates")
+
+### lastCheckForUpdates Type
+
+`string`
 
 ## version
 
