@@ -22,6 +22,7 @@ import type {
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 import platform from "platform";
+import semver from "semver";
 
 import {
   commandObj,
@@ -34,15 +35,23 @@ import {
   initFluenceConfig,
 } from "./configs/project/fluence.js";
 import {
+  CHECK_FOR_UPDATES_DISABLED,
   initNewUserConfig,
   initUserConfig,
   setUserConfig,
+  userConfig,
 } from "./configs/user/config.js";
-import type { NO_INPUT_FLAG_NAME } from "./const.js";
-import { haltCountly, initCountly } from "./countly.js";
+import {
+  CHECK_FOR_UPDATES_INTERVAL,
+  SEPARATOR,
+  type NO_INPUT_FLAG_NAME,
+} from "./const.js";
+import { haltCountly, initCountly, logErrorToCountly } from "./countly.js";
 import "./setupEnvironment.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
+import { stringifyUnknown } from "./helpers/jsonStringify.js";
+import { getLatestVersionOfNPMDependency } from "./npm.js";
 import {
   projectRootDir,
   recursivelyFindProjectRootDir,
@@ -147,6 +156,7 @@ export async function initCli<
   ]);
 
   await initCountly({ maybeFluenceConfig });
+  await handleFluenceCLIVersion(maybeFluenceConfig?.cliVersion);
 
   return {
     args,
@@ -161,6 +171,105 @@ export async function initCli<
       : { maybeFluenceConfig }),
   };
 }
+
+const isCheckForUpdatesRequired = async () => {
+  const { lastCheckForUpdates } = userConfig;
+
+  if (lastCheckForUpdates === CHECK_FOR_UPDATES_DISABLED) {
+    return false;
+  }
+
+  const now = new Date();
+  const lastCheckForUpdatesDate = new Date(lastCheckForUpdates ?? 0);
+  const lastCheckForUpdatesMilliseconds = lastCheckForUpdatesDate.getTime();
+
+  if (
+    lastCheckForUpdates === undefined ||
+    Number.isNaN(lastCheckForUpdatesMilliseconds) ||
+    now.getTime() - lastCheckForUpdatesMilliseconds > CHECK_FOR_UPDATES_INTERVAL
+  ) {
+    userConfig.lastCheckForUpdates = now.toISOString();
+    await userConfig.$commit();
+    return true;
+  }
+
+  return false;
+};
+
+const handleFluenceCLIVersion = async (
+  maybeFluenceCLIVersion: string | undefined
+): Promise<void> => {
+  if (
+    typeof maybeFluenceCLIVersion === "string" &&
+    maybeFluenceCLIVersion !== commandObj.config.version
+  ) {
+    const flunenceCLIVersion = maybeFluenceCLIVersion;
+    return commandObj.error(
+      `Current CLI versions is ${color.yellow(
+        commandObj.config.version
+      )}, but this fluence project is compatible only with Fluence CLI version ${color.yellow(
+        flunenceCLIVersion
+      )}\n\nPlease install it with:\n\n${color.yellow(
+        `npm i -g @fluencelabs/cli@${flunenceCLIVersion}`
+      )}\n\nAfter that, run:\n\n${color.yellow(
+        "fluence dep v"
+      )}\n\nto find out which version of rust-peer you need to use to make sure you are running Fluence CLI against the compatible version of rust-peer\n\n`
+    );
+  }
+
+  if (!isInteractive || !(await isCheckForUpdatesRequired())) {
+    return;
+  }
+
+  try {
+    const [stableVersion, unstableVersion] = await Promise.all([
+      getLatestVersionOfNPMDependency("@fluencelabs/cli"),
+      getLatestVersionOfNPMDependency("@fluencelabs/cli@unstable"),
+    ]);
+
+    const isOlderThanStable = semver.lt(
+      commandObj.config.version,
+      stableVersion
+    );
+
+    const isOlderThenUnstable = semver.lt(
+      commandObj.config.version,
+      unstableVersion
+    );
+
+    if (!isOlderThanStable && !isOlderThenUnstable) {
+      return;
+    }
+
+    const version = isOlderThanStable ? stableVersion : unstableVersion;
+
+    commandObj.log(
+      `${SEPARATOR}New ${color.yellow(
+        isOlderThanStable ? "stable" : "unstable"
+      )} version ${color.yellow(
+        version
+      )} of Fluence CLI is available\n\nYou can install it with:\n\n${color.yellow(
+        `npm i -g @fluencelabs/cli@${version}`
+      )}${SEPARATOR}`
+    );
+
+    if (
+      await confirm({
+        message: "Do you want to disable daily updates checking?",
+        default: false,
+      })
+    ) {
+      userConfig.lastCheckForUpdates = CHECK_FOR_UPDATES_DISABLED;
+      await userConfig.$commit();
+
+      commandObj.log(
+        `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`
+      );
+    }
+  } catch (e) {
+    logErrorToCountly(`npm version check failed: ${stringifyUnknown(e)}`);
+  }
+};
 
 export const exitCli = async (): Promise<never> => {
   await haltCountly();

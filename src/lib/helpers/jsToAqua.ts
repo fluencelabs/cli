@@ -22,6 +22,7 @@ import { commandObj } from "../commandObj.js";
 
 import { capitalize } from "./capitilize.js";
 import { cleanAquaName, validateAquaName } from "./downloadFile.js";
+import { stringifyUnknown } from "./jsonStringify.js";
 
 export const jsToAqua = (
   v: unknown,
@@ -65,7 +66,7 @@ export const jsToAquaImpl = (
     commandObj.error(
       `Failed converting to aqua. ${message}. At ${color.yellow(
         currentNesting === "" ? "" : `${currentNesting}.`
-      )}${color.yellow(fieldName)}: ${String(v)}`
+      )}${color.yellow(fieldName)}: ${stringifyUnknown(v)}`
     );
 
   if (typeof v === "string") {

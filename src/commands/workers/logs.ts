@@ -36,6 +36,7 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
 } from "../../lib/const.js";
 import { parseWorkers } from "../../lib/deployWorkers.js";
+import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -89,7 +90,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
       logs = await get_logs(logsArg);
     } catch (e) {
       commandObj.error(
-        `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${String(
+        `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${stringifyUnknown(
           e
         )}`
       );

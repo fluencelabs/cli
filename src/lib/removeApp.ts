@@ -43,6 +43,7 @@ import {
 import { confirm } from "../lib/prompt.js";
 
 import { commandObj, isInteractive } from "./commandObj.js";
+import { stringifyUnknown } from "./helpers/jsonStringify.js";
 
 export const removeApp = async (
   removeAppArg: Readonly<{
@@ -152,7 +153,7 @@ export const removeApp = async (
             keyValuePairs
           );
         } catch (error) {
-          commandObj.warn(`When removing service\n${String(error)}`);
+          commandObj.warn(`When removing service\n${stringifyUnknown(error)}`);
           handleNotRemovedService();
         }
       }

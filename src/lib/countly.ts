@@ -92,6 +92,19 @@ export const addCountlyLog = (message: string): void => {
   Countly.add_log(message);
 };
 
+/**
+ * Add error log
+ * @param message - message to be logged
+ * @returns void
+ */
+export const logErrorToCountly = (message: string): void => {
+  if (!isCountlyInitialized()) {
+    return;
+  }
+
+  Countly.log_error(message);
+};
+
 export const haltCountly = async (): Promise<void> => {
   if (!isCountlyInitialized()) {
     return;

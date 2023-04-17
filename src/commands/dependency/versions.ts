@@ -43,6 +43,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
         "",
         {},
         {
+          "cli version": commandObj.config.version,
           "rust-peer version": versions["rust-peer"],
           "rust toolchain": versions["rust-toolchain"],
           "npm dependencies that can be overridden with 'fluence dependency npm install <name>@<version>'":

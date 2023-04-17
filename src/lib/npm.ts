@@ -25,6 +25,7 @@ import type { FluenceConfig } from "./configs/project/fluence.js";
 import { NODE_MODULES_DIR_NAME } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
+import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import {
   splitPackageNameAndVersion,
   resolveDependencyPathAndTmpPath,
@@ -52,7 +53,7 @@ export const getLatestVersionOfNPMDependency = async (
         name
       )} from npm registry. Please make sure ${color.yellow(
         name
-      )} is spelled correctly\n${String(error)}`
+      )} is spelled correctly\n${stringifyUnknown(error)}`
     );
   }
 };
@@ -95,7 +96,7 @@ const installNpmDependency = async ({
         name
       )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
         `fluence dependency npm install ${name}@<version>`
-      )} command.\n${String(error)}`
+      )} command.\n${stringifyUnknown(error)}`
     );
   }
 };

@@ -23,6 +23,7 @@
 | [chainNetwork](#chainnetwork)         | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-chainnetwork.md "https://fluence.dev/schemas/fluence.yaml#/properties/chainNetwork")         |
 | [spells](#spells)                     | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-spells.md "https://fluence.dev/schemas/fluence.yaml#/properties/spells")                     |
 | [aquaImports](#aquaimports)           | `array`  | Optional | cannot be null | [fluence.yaml](fluence-properties-aquaimports.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaImports")           |
+| [cliVersion](#cliversion)             | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-cliversion.md "https://fluence.dev/schemas/fluence.yaml#/properties/cliVersion")             |
 
 ## services
 
@@ -368,3 +369,21 @@ A list of path to be considered by aqua compiler to be used as imports. First de
 ### aquaImports Type
 
 `string[]`
+
+## cliVersion
+
+The version of the CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components
+
+`cliVersion`
+
+*   is optional
+
+*   Type: `string`
+
+*   cannot be null
+
+*   defined in: [fluence.yaml](fluence-properties-cliversion.md "https://fluence.dev/schemas/fluence.yaml#/properties/cliVersion")
+
+### cliVersion Type
+
+`string`

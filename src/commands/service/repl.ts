@@ -38,6 +38,7 @@ import {
   FS_OPTIONS,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
+  SEPARATOR,
 } from "../../lib/const.js";
 import { haltCountly } from "../../lib/countly.js";
 import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
@@ -112,19 +113,15 @@ export default class REPL extends Command {
 
     const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 
-    this.log(`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Execute ${color.yellow("help")} inside repl to see available commands.
+    this.log(`${SEPARATOR}Execute ${color.yellow(
+      "help"
+    )} inside repl to see available commands.
 Current service <module_name> is: ${color.yellow(facadeModuleConfig.name)}
 Call ${facadeModuleConfig.name} service functions in repl like this:
 
 ${color.yellow(
   `call ${facadeModuleConfig.name} <function_name> [<arg1>, <arg2>]`
-)}
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    `);
+)}${SEPARATOR}}`);
 
     await haltCountly();
 

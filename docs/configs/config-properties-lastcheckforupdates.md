@@ -1,0 +1,3 @@
+## lastCheckForUpdates Type
+
+`string`

@@ -322,6 +322,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   chainNetwork?: ChainNetwork;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
+  cliVersion?: string;
 };
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
@@ -494,6 +495,12 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
         CONFIG_FILE_NAME
       )}, npm dependencies recommended by fluence`,
       items: { type: "string" },
+      nullable: true,
+    },
+    cliVersion: {
+      type: "string",
+      description:
+        "The version of the CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components",
       nullable: true,
     },
   },

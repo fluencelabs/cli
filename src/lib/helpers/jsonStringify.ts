@@ -14,5 +14,29 @@
  * limitations under the License.
  */
 
-export const jsonStringify = (unknown: unknown): string =>
-  JSON.stringify(unknown, null, 2);
+import { CLIError } from "@oclif/core/lib/errors/index.js";
+
+export const jsonStringify = (
+  unknown: unknown,
+  replacer: Parameters<typeof JSON.stringify>[1] = null
+): string => JSON.stringify(unknown, replacer, 2);
+
+export const stringifyUnknown = (unknown: unknown): string => {
+  try {
+    if (unknown instanceof CLIError) {
+      return String(unknown);
+    }
+
+    if (unknown instanceof Error) {
+      return jsonStringify(unknown, Object.getOwnPropertyNames(unknown));
+    }
+
+    if (unknown === undefined) {
+      return "undefined";
+    }
+
+    return jsonStringify(unknown);
+  } catch {
+    return String(unknown);
+  }
+};
