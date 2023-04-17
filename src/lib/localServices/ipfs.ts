@@ -21,6 +21,7 @@ import { Multiaddr, protocols } from "multiaddr";
 
 import { commandObj } from "../commandObj.js";
 import { registerIpfsClient } from "../compiled-aqua/installation-spell/files.js";
+import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
 // !IMPORTANT for some reason when in tsconfig.json "moduleResolution" is set to "nodenext" - "ipfs-http-client" types all become "any"
 // so when working with this module - remove "nodenext" from "moduleResolution" so you can make sure types are correct
@@ -63,20 +64,22 @@ const upload = async (
       }
     } catch (error) {
       commandObj.error(
-        `file ${cid} failed to pin ls to ${multiaddr}. ${String(error)}`
+        `file ${cid} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
+          error
+        )}`
       );
     }
 
     return cid;
   } catch (error) {
-    commandObj.error(`failed to upload: ${String(error)}`);
+    commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
   }
 };
 
 export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
   const log = (msg: unknown) => {
     if (!offAquaLogs) {
-      commandObj.log(`ipfs: ${String(msg)}`);
+      commandObj.log(`ipfs: ${stringifyUnknown(msg)}`);
     }
   };
 
@@ -114,11 +117,13 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
 
         return true;
       } catch (err) {
-        if (String(err).includes(`is not pinned`)) {
+        if (stringifyUnknown(err).includes(`is not pinned`)) {
           return false;
         }
 
-        commandObj.error(`failed to check if ${cid} exists: ${String(err)}`);
+        commandObj.error(
+          `failed to check if ${cid} exists: ${stringifyUnknown(err)}`
+        );
       }
     },
     async remove(multiaddr, cid): Promise<string> {

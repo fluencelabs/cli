@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Flags } from "@oclif/core";
 import type {
   Flag,
@@ -33,6 +35,7 @@ export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const U32_MAX = 4_294_967_295;
+export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
 export const CHAIN_NETWORKS = [
   "local",
@@ -351,6 +354,10 @@ export const fluenceCargoDependencies = [
 export const isFluenceCargoDependency = getIsStringUnion(
   fluenceCargoDependencies
 );
+
+export const SEPARATOR = `\n\n${color.yellow(
+  `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`
+)}\n\n`;
 
 export const MAIN_AQUA_FILE_STATUS_TEXT = `export status
 

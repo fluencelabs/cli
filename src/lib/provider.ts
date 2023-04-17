@@ -50,6 +50,7 @@ import {
   WC_PROJECT_ID,
   WC_METADATA,
 } from "./const.js";
+import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { list } from "./prompt.js";
 
@@ -73,7 +74,10 @@ export const ensureChainNetwork = async ({
     maybeNetworkFromFlags === undefined;
 
   if (!isValidNetworkFromFlags) {
-    commandObj.warn(`Invalid chain network: ${String(maybeNetworkFromFlags)}`);
+    commandObj.warn(
+      `Invalid chain network: ${stringifyUnknown(maybeNetworkFromFlags)}`
+    );
+
     return list({
       message: "Select chain network",
       options: [...CHAIN_NETWORKS],

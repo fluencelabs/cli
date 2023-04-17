@@ -44,6 +44,7 @@ import {
   generateRegisterApp,
 } from "../../lib/deployedApp.js";
 import { getMessageWithKeyValuePairs } from "../../lib/helpers/getMessageWithKeyValuePairs.js";
+import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
 import type { JSONModuleConfOld } from "../../lib/helpers/moduleToJSONModuleConfig.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getExistingKeyPairFromFlags } from "../../lib/keyPairs.js";
@@ -353,7 +354,10 @@ const deployService = async ({
       keyValuePairs
     );
   } catch (error) {
-    commandObj.warn(`Wasn't able to deploy service\n${String(error)}`);
+    commandObj.warn(
+      `Wasn't able to deploy service\n${stringifyUnknown(error)}`
+    );
+
     return null;
   }
 

@@ -50,6 +50,7 @@ import {
   AQUA_WORKERS_FILE_NAME,
   SPELLS_DIR_NAME,
 } from "./const.js";
+import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
@@ -58,7 +59,7 @@ export const validatePath = async (path: string): Promise<string | true> => {
     await fsPromises.access(path);
     return true;
   } catch (error) {
-    return String(error);
+    return stringifyUnknown(error);
   }
 };
 

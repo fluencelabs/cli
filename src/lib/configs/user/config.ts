@@ -33,6 +33,8 @@ import {
   type ConfigValidateFunction,
 } from "../initConfig.js";
 
+export const CHECK_FOR_UPDATES_DISABLED = "disabled";
+
 type ConfigV0 = {
   version: 0;
   countlyConsent: boolean;
@@ -40,6 +42,7 @@ type ConfigV0 = {
     npm?: Record<string, string>;
     cargo?: Record<string, string>;
   };
+  lastCheckForUpdates?: string;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -73,6 +76,11 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       },
       nullable: true,
       required: [],
+    },
+    lastCheckForUpdates: {
+      type: "string",
+      description: `Last time when CLI checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
+      nullable: true,
     },
     version: { type: "number", const: 0 },
   },

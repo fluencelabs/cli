@@ -27,6 +27,7 @@ import type {
   OffAquaLogsFlag,
 } from "./const.js";
 import { base64ToUint8Array } from "./helpers/generateKeyPair.js";
+import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { getExistingKeyPair } from "./keyPairs.js";
 import { doRegisterLog } from "./localServices/log.js";
 import { getRandomRelayAddr } from "./multiaddres.js";
@@ -66,7 +67,7 @@ export const initFluenceClient = async (
     });
   } catch (e) {
     commandObj.error(
-      `Failed to connect to ${color.yellow(relay)}. ${String(e)}`
+      `Failed to connect to ${color.yellow(relay)}. ${stringifyUnknown(e)}`
     );
   }
 

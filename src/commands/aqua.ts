@@ -30,6 +30,7 @@ import {
   NO_INPUT_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
+import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { projectRootDir, validatePath } from "../lib/paths.js";
 import { input, type InputArg } from "../lib/prompt.js";
@@ -122,7 +123,7 @@ export default class Aqua extends Command {
             maybeFluenceConfig?.aquaOutputJSPath,
           inputArg: {
             message:
-              "Enter path to the output directory. Will be created if it doesn't exists",
+              "Enter path to the output directory. Will be created if it doesn't exists (press Enter to use the current working directory)",
             flagName: "output",
           },
         });
@@ -185,7 +186,7 @@ export default class Aqua extends Command {
             watchingNotification();
           })
           .catch((error): void => {
-            commandObj.log(String(error));
+            commandObj.log(stringifyUnknown(error));
             return watchingNotification();
           });
       });
