@@ -229,6 +229,12 @@ export const USE_F64_FLAG = {
   }),
 };
 
+export const NO_BUILD_FLAG = {
+  "no-build": Flags.boolean({
+    description: "Don't build the project before running the command",
+  }),
+};
+
 export type OffAquaLogsFlag = FromFlagsDef<typeof OFF_AQUA_LOGS_FLAG>;
 
 export const IMPORT_FLAG = {

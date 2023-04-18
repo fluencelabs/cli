@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { writeFile } from "node:fs/promises";
+import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -107,6 +107,7 @@ type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
   aquaImports: Array<string>;
+  noBuild: boolean;
   maybeWorkersConfig?: WorkersConfigReadonly;
   hosts?: boolean;
 };
@@ -115,6 +116,7 @@ export const prepareForDeploy = async ({
   workerNames: workerNamesString,
   fluenceConfig,
   aquaImports,
+  noBuild,
   maybeWorkersConfig,
   hosts = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
@@ -414,12 +416,14 @@ export const prepareForDeploy = async ({
     )
   );
 
-  const marineCli = await initMarineCli(fluenceConfig);
+  if (!noBuild) {
+    const marineCli = await initMarineCli(fluenceConfig);
 
-  await buildModules(
-    [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],
-    marineCli
-  );
+    await buildModules(
+      [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],
+      marineCli
+    );
+  }
 
   const workers: Upload_deployArgConfig["workers"] = hostsOrDeals
     .filter(([workerName]) => workersToDeployConfirmed.includes(workerName))
@@ -532,6 +536,8 @@ export const prepareForDeploy = async ({
     commandObj.error(`You must select at least one worker to deploy`);
   }
 
+  await validateWasmExist(workers);
+
   return {
     workers,
     installation_script: deal_install_script,
@@ -541,6 +547,45 @@ export const prepareForDeploy = async ({
       blockchain: { start_block: 0, end_block: 0 },
     },
   };
+};
+
+const validateWasmExist = async (
+  workers: Upload_deployArgConfig["workers"]
+) => {
+  const errors = (
+    await Promise.all(
+      workers
+        .flatMap((worker) =>
+          worker.config.services.map((service) => ({
+            ...service,
+            worker: worker.name,
+          }))
+        )
+        .flatMap((service) =>
+          service.modules.map((module) => ({
+            ...module,
+            service: service.name,
+            worker: service.worker,
+          }))
+        )
+        .map(async ({ wasm, service, worker }) => {
+          try {
+            await access(wasm);
+            return true;
+          } catch (e) {
+            return `wasm at ${color.yellow(wasm)} for service ${color.yellow(
+              service
+            )} in worker ${color.yellow(
+              worker
+            )} does not exist. Make sure you have built it`;
+          }
+        })
+    )
+  ).filter((result): result is string => typeof result === "string");
+
+  if (errors.length > 0) {
+    commandObj.error(errors.join("\n"));
+  }
 };
 
 export const ensureAquaFileWithWorkerInfo = async (

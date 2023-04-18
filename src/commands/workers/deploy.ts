@@ -31,6 +31,7 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
+  NO_BUILD_FLAG,
 } from "../../lib/const.js";
 import {
   ensureAquaFileWithWorkerInfo,
@@ -51,6 +52,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...PRIV_KEY_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,
+    ...NO_BUILD_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -80,6 +82,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       hosts: true,
       maybeWorkersConfig: workersConfig,
       aquaImports,
+      noBuild: flags["no-build"],
     });
 
     const uploadDeployResult = await upload_deploy(uploadDeployArg);
