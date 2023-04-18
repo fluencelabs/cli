@@ -38,6 +38,7 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
+  NO_BUILD_FLAG,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import {
@@ -61,6 +62,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...NETWORK_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,
+    ...NO_BUILD_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -94,6 +96,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       maybeWorkersConfig: workersConfig,
       fluenceConfig,
       aquaImports,
+      noBuild: flags["no-build"],
     });
 
     const uploadResult = await upload(uploadArg);
