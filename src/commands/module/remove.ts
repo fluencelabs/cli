@@ -141,13 +141,12 @@ const getModuleNameToRemove = async (
   }
 
   const serviceModulesAbsolutePathsWithNames = await Promise.all(
-    Object.entries(serviceConfig.modules).map(
-      async ([name, { get }]) =>
-        [
-          name,
-          await getModuleAbsolutePath(get, serviceConfig.$getDirPath()),
-        ] as const
-    )
+    Object.entries(serviceConfig.modules).map(async ([name, { get }]) => {
+      return [
+        name,
+        await getModuleAbsolutePath(get, serviceConfig.$getDirPath()),
+      ] as const;
+    })
   );
 
   const absolutePathRelativeToService = await getModuleAbsolutePath(
@@ -156,9 +155,9 @@ const getModuleNameToRemove = async (
   );
 
   let [moduleNameToRemove] =
-    serviceModulesAbsolutePathsWithNames.find(
-      ([, absolutePath]) => absolutePath === absolutePathRelativeToService
-    ) ?? [];
+    serviceModulesAbsolutePathsWithNames.find(([, absolutePath]) => {
+      return absolutePath === absolutePathRelativeToService;
+    }) ?? [];
 
   if (moduleNameToRemove !== undefined) {
     return moduleNameToRemove;
@@ -170,9 +169,9 @@ const getModuleNameToRemove = async (
   );
 
   [moduleNameToRemove] =
-    serviceModulesAbsolutePathsWithNames.find(
-      ([, absolutePath]) => absolutePath === absolutePathRelativeToCwd
-    ) ?? [];
+    serviceModulesAbsolutePathsWithNames.find(([, absolutePath]) => {
+      return absolutePath === absolutePathRelativeToCwd;
+    }) ?? [];
 
   if (moduleNameToRemove !== undefined) {
     return moduleNameToRemove;

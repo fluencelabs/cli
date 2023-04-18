@@ -98,10 +98,13 @@ export const ensureValidAquaName = async ({
   return stringToValidate;
 };
 
-export const validateAquaName = (text: string): true | string =>
-  /^[a-z]\w*$/.test(text) || AQUA_NAME_REQUIREMENTS;
+export const validateAquaName = (text: string): true | string => {
+  return /^[a-z]\w*$/.test(text) || AQUA_NAME_REQUIREMENTS;
+};
 
-export const cleanAquaName = (text: string): string => text.replace(/\W/g, "");
+export const cleanAquaName = (text: string): string => {
+  return text.replace(/\W/g, "");
+};
 
 const ARCHIVE_FILE = "archive.tar.gz";
 
@@ -142,26 +145,33 @@ const downloadAndDecompress = async (
   return dirPath;
 };
 
-export const downloadModule = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureFluenceModulesDir());
+export const downloadModule = async (get: string): Promise<string> => {
+  return downloadAndDecompress(get, await ensureFluenceModulesDir());
+};
 
-export const downloadService = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureFluenceServicesDir());
+export const downloadService = async (get: string): Promise<string> => {
+  return downloadAndDecompress(get, await ensureFluenceServicesDir());
+};
 
-export const downloadSpell = async (get: string): Promise<string> =>
-  downloadAndDecompress(get, await ensureFluenceSpellsDir());
+export const downloadSpell = async (get: string): Promise<string> => {
+  return downloadAndDecompress(get, await ensureFluenceSpellsDir());
+};
 
-export const getModulePathFromUrl = async (get: string): Promise<string> =>
-  getDownloadDirPath(get, await ensureFluenceModulesDir());
+export const getModulePathFromUrl = async (get: string): Promise<string> => {
+  return getDownloadDirPath(get, await ensureFluenceModulesDir());
+};
 
-export const getServicePathFromUrl = async (get: string): Promise<string> =>
-  getDownloadDirPath(get, await ensureFluenceServicesDir());
+export const getServicePathFromUrl = async (get: string): Promise<string> => {
+  return getDownloadDirPath(get, await ensureFluenceServicesDir());
+};
 
-export const getSpellPathFromUrl = async (get: string): Promise<string> =>
-  getDownloadDirPath(get, await ensureFluenceSpellsDir());
+export const getSpellPathFromUrl = async (get: string): Promise<string> => {
+  return getDownloadDirPath(get, await ensureFluenceSpellsDir());
+};
 
-export const isUrl = (unknown: string): boolean =>
-  unknown.startsWith("http://") || unknown.startsWith("https://");
+export const isUrl = (unknown: string): boolean => {
+  return unknown.startsWith("http://") || unknown.startsWith("https://");
+};
 
 export const getModuleWasmPath = (config: {
   type?: string;
@@ -190,12 +200,11 @@ export const getUrlOrAbsolutePath = (
   return resolve(absolutePath, pathOrUrl);
 };
 
-const ensureOrGetConfigAbsolutePath =
-  (
-    downloadOrGetFunction: (get: string) => Promise<string>,
-    configName: string
-  ) =>
-  async (
+const ensureOrGetConfigAbsolutePath = (
+  downloadOrGetFunction: (get: string) => Promise<string>,
+  configName: string
+) => {
+  return async (
     pathOrUrl: string,
     absolutePath: string | undefined
   ): Promise<string> => {
@@ -221,6 +230,7 @@ const ensureOrGetConfigAbsolutePath =
 
     return getConfigPath(dirOrConfigAbsolutePath, configName).configPath;
   };
+};
 
 export const ensureModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadModule,

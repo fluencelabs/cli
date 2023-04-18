@@ -27,7 +27,9 @@ export const localMultiaddrs: string[] = [
   "/ip4/127.0.0.1/tcp/9996/ws/p2p/12D3KooWPisGn7JhooWhggndz25WM7vQ2JmA121EV8jUDQ5xMovJ",
 ];
 
-export const local: Node[] = localMultiaddrs.map((multiaddr) => ({
-  peerId: getPeerId(multiaddr),
-  multiaddr,
-}));
+export const local: Node[] = localMultiaddrs.map((multiaddr) => {
+  return {
+    peerId: getPeerId(multiaddr),
+    multiaddr,
+  };
+});

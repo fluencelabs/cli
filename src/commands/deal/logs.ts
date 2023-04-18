@@ -78,14 +78,13 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
     commandObj.log(
       logs
-        .map(
-          ({ host_id, logs, spell_id, deal_id }) =>
-            `${color.yellow(
-              dealIdWorkerNameMap[deal_id] ?? "Unknown worker"
-            )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${logs.join(
-              "\n"
-            )}`
-        )
+        .map(({ host_id, logs, spell_id, deal_id }) => {
+          return `${color.yellow(
+            dealIdWorkerNameMap[deal_id] ?? "Unknown worker"
+          )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${logs.join(
+            "\n"
+          )}`;
+        })
         .join("\n\n")
     );
   }
@@ -122,13 +121,17 @@ const getDealIdWorkerNameMap = async (
       : parseWorkers(maybeWorkerNamesString);
 
   const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
-    (workerName) => !workerNamesSet.includes(workerName)
+    (workerName) => {
+      return !workerNamesSet.includes(workerName);
+    }
   );
 
   if (workerNamesNotFoundInWorkersConfig.length !== 0) {
     commandObj.error(
       `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
-        .map((workerName) => color.yellow(workerName))
+        .map((workerName) => {
+          return color.yellow(workerName);
+        })
         .join(", ")} in ${color.yellow(
         WORKERS_CONFIG_FILE_NAME
       )} please check the spelling and try again`
@@ -136,7 +139,9 @@ const getDealIdWorkerNameMap = async (
   }
 
   return Object.entries(deals)
-    .filter(([name]) => workersToGetLogsFor.includes(name))
+    .filter(([name]) => {
+      return workersToGetLogsFor.includes(name);
+    })
     .reduce<Record<string, string>>((acc, [name, config]) => {
       acc[config.dealId] = name;
       return acc;

@@ -100,21 +100,25 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           }>
         >;
       }>(
-        (acc, { name, ...worker }) => ({
-          newDeployedWorkers: {
-            ...acc.newDeployedWorkers,
-            [name]: { ...worker, timestamp, relayId },
-          },
-          infoToPrint: {
-            ...acc.infoToPrint,
-            [name]: worker.installation_spells.map(
-              ({ host_id, worker_id }) => ({
-                hostId: host_id,
-                workerId: worker_id,
-              })
-            ),
-          },
-        }),
+        (acc, { name, ...worker }) => {
+          return {
+            newDeployedWorkers: {
+              ...acc.newDeployedWorkers,
+              [name]: { ...worker, timestamp, relayId },
+            },
+            infoToPrint: {
+              ...acc.infoToPrint,
+              [name]: worker.installation_spells.map(
+                ({ host_id, worker_id }) => {
+                  return {
+                    hostId: host_id,
+                    workerId: worker_id,
+                  };
+                }
+              ),
+            },
+          };
+        },
         { newDeployedWorkers: {}, infoToPrint: {} }
       );
 

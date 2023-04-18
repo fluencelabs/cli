@@ -45,8 +45,8 @@ export const recursivelyFindFile = async (
 
 const recursivelyGetDirFiles = async (
   dirPath: string
-): Promise<Array<string>> =>
-  (
+): Promise<Array<string>> => {
+  return (
     await Promise.all(
       (
         await readdir(dirPath, { withFileTypes: true })
@@ -58,11 +58,13 @@ const recursivelyGetDirFiles = async (
       })
     )
   ).flat();
+};
 
 export const recursivelyFindFileInADir = async (
   dirPath: string,
   fullFileName: string
-) =>
-  (await recursivelyGetDirFiles(dirPath)).filter((filePath) =>
-    filePath.endsWith(fullFileName)
-  );
+) => {
+  return (await recursivelyGetDirFiles(dirPath)).filter((filePath) => {
+    return filePath.endsWith(fullFileName);
+  });
+};

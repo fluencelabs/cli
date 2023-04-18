@@ -148,13 +148,14 @@ export const ensureNpmDependency = async ({
     explicitInstallation,
     name,
     version,
-    installDependency: () =>
-      installNpmDependency({
+    installDependency: () => {
+      return installNpmDependency({
         dependencyPath,
         dependencyTmpPath,
         name,
         version,
-      }),
+      });
+    },
   });
 
   await updateConfigsIfVersionChanged({
@@ -184,12 +185,12 @@ export const installAllNPMDependencies = async ({
   );
 
   return Promise.all(
-    dependenciesToEnsure.map(([name, version]) =>
-      ensureNpmDependency({
+    dependenciesToEnsure.map(([name, version]) => {
+      return ensureNpmDependency({
         nameAndVersion: `${name}@${version}`,
         maybeFluenceConfig,
         force,
-      })
-    )
+      });
+    })
   );
 };

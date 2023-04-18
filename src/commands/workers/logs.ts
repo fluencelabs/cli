@@ -98,14 +98,13 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
     commandObj.log(
       logs
-        .map(
-          ({ host_id, logs, spell_id, worker_name }) =>
-            `${color.yellow(
-              worker_name
-            )} (host_id: ${host_id}, spell_id: ${spell_id}):\n\n${logs.join(
-              "\n"
-            )}`
-        )
+        .map(({ host_id, logs, spell_id, worker_name }) => {
+          return `${color.yellow(
+            worker_name
+          )} (host_id: ${host_id}, spell_id: ${spell_id}):\n\n${logs.join(
+            "\n"
+          )}`;
+        })
         .join("\n\n")
     );
   }
@@ -175,13 +174,17 @@ const getLogsArg = async ({
       : parseWorkers(maybeWorkerNamesString);
 
   const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
-    (workerName) => !workerNamesSet.includes(workerName)
+    (workerName) => {
+      return !workerNamesSet.includes(workerName);
+    }
   );
 
   if (workerNamesNotFoundInWorkersConfig.length !== 0) {
     commandObj.error(
       `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
-        .map((workerName) => color.yellow(workerName))
+        .map((workerName) => {
+          return color.yellow(workerName);
+        })
         .join(", ")} in ${color.yellow(
         WORKERS_CONFIG_FILE_NAME
       )} please check the spelling and try again`
@@ -190,7 +193,11 @@ const getLogsArg = async ({
 
   return {
     workers: Object.entries(hosts)
-      .filter(([name]) => workersToGetLogsFor.includes(name))
-      .map(([name, config]) => ({ name, ...config })),
+      .filter(([name]) => {
+        return workersToGetLogsFor.includes(name);
+      })
+      .map(([name, config]) => {
+        return { name, ...config };
+      }),
   };
 };

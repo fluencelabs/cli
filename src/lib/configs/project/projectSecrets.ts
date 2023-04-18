@@ -70,32 +70,42 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "keyPairs"],
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
-  version: 0,
-  keyPairs: [],
-});
+const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => {
+  return {
+    version: 0,
+    keyPairs: [],
+  };
+};
 
 const migrations: Migrations<Config> = [];
 
-const validate = (config: LatestConfig): ValidationResult =>
-  validateBatch(
+const validate = (config: LatestConfig): ValidationResult => {
+  return validateBatch(
     validateUnique(
       config.keyPairs,
-      ({ name }): string => name,
-      (name): string =>
-        `There are multiple key-pairs with the same name ${color.yellow(name)}`
+      ({ name }): string => {
+        return name;
+      },
+      (name): string => {
+        return `There are multiple key-pairs with the same name ${color.yellow(
+          name
+        )}`;
+      }
     ),
     typeof config.defaultKeyPairName === "string"
       ? validateHasDefault(
           config.keyPairs,
           config.defaultKeyPairName,
-          ({ name }): string => name,
+          ({ name }): string => {
+            return name;
+          },
           `Default key-pair ${color.yellow(
             config.defaultKeyPairName
           )} not found`
         )
       : true
   );
+};
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;

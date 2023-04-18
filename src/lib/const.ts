@@ -460,8 +460,9 @@ export const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
 
 const NODES_CONST = "nodes";
 
-const getPeersImportStatement = (peersToImport: string): string =>
-  `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
+const getPeersImportStatement = (peersToImport: string): string => {
+  return `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
+};
 
 const PEERS = {
   kras: getPeersImportStatement("krasnodar"),

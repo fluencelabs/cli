@@ -67,19 +67,21 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     if (fluenceConfig.workers !== undefined) {
       fluenceConfig.workers = Object.fromEntries(
-        Object.entries(fluenceConfig.workers).map(([workerName, worker]) => [
-          workerName,
-          {
-            ...worker,
-            ...(worker.services === undefined
-              ? {}
-              : {
-                  services: worker.services.filter(
-                    (service) => service !== serviceNameToRemove
-                  ),
-                }),
-          },
-        ])
+        Object.entries(fluenceConfig.workers).map(([workerName, worker]) => {
+          return [
+            workerName,
+            {
+              ...worker,
+              ...(worker.services === undefined
+                ? {}
+                : {
+                    services: worker.services.filter((service) => {
+                      return service !== serviceNameToRemove;
+                    }),
+                  }),
+            },
+          ];
+        })
       );
     }
 
@@ -108,13 +110,12 @@ const getServiceNameToRemove = async (
   }
 
   const servicesAbsolutePathsWithNames = await Promise.all(
-    Object.entries(fluenceConfig.services).map(
-      async ([name, { get }]) =>
-        [
-          name,
-          await getServiceAbsolutePath(get, fluenceConfig.$getDirPath()),
-        ] as const
-    )
+    Object.entries(fluenceConfig.services).map(async ([name, { get }]) => {
+      return [
+        name,
+        await getServiceAbsolutePath(get, fluenceConfig.$getDirPath()),
+      ] as const;
+    })
   );
 
   const absolutePathRelativeToService = await getServiceAbsolutePath(
@@ -123,9 +124,9 @@ const getServiceNameToRemove = async (
   );
 
   let [moduleNameToRemove] =
-    servicesAbsolutePathsWithNames.find(
-      ([, absolutePath]) => absolutePath === absolutePathRelativeToService
-    ) ?? [];
+    servicesAbsolutePathsWithNames.find(([, absolutePath]) => {
+      return absolutePath === absolutePathRelativeToService;
+    }) ?? [];
 
   if (moduleNameToRemove !== undefined) {
     return moduleNameToRemove;
@@ -137,9 +138,9 @@ const getServiceNameToRemove = async (
   );
 
   [moduleNameToRemove] =
-    servicesAbsolutePathsWithNames.find(
-      ([, absolutePath]) => absolutePath === absolutePathRelativeToCwd
-    ) ?? [];
+    servicesAbsolutePathsWithNames.find(([, absolutePath]) => {
+      return absolutePath === absolutePathRelativeToCwd;
+    }) ?? [];
 
   if (moduleNameToRemove !== undefined) {
     return moduleNameToRemove;

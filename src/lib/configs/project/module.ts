@@ -155,50 +155,62 @@ export type ModuleConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const getInitConfigOptions = (
   configPath: string
-): InitConfigOptions<Config, LatestConfig> => ({
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
-  migrations,
-  name: MODULE_CONFIG_FILE_NAME,
-  getSchemaDirPath: ensureFluenceDir,
-  getConfigOrConfigDirPath: (): string => configPath,
-});
+): InitConfigOptions<Config, LatestConfig> => {
+  return {
+    allSchemas: [configSchemaV0],
+    latestSchema: configSchemaV0,
+    migrations,
+    name: MODULE_CONFIG_FILE_NAME,
+    getSchemaDirPath: ensureFluenceDir,
+    getConfigOrConfigDirPath: (): string => {
+      return configPath;
+    },
+  };
+};
 
 export const initModuleConfig = async (
   configOrConfigDirPathOrUrl: string,
   absolutePath?: string | undefined
-): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(
+): Promise<InitializedConfig<LatestConfig> | null> => {
+  return getConfigInitFunction(
     getInitConfigOptions(
       await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
+};
+
 export const initReadonlyModuleConfig = async (
   configOrConfigDirPathOrUrl: string,
   absolutePath?: string | undefined
-): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
+  return getReadonlyConfigInitFunction(
     getInitConfigOptions(
       await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
+};
 
-const getDefault: (name: string) => GetDefaultConfig<LatestConfig> =
-  (name: string): GetDefaultConfig<LatestConfig> =>
-  (): LatestConfig => ({
-    version: 0,
-    type: MODULE_TYPE_RUST,
-    name,
-  });
+const getDefault: (name: string) => GetDefaultConfig<LatestConfig> = (
+  name: string
+): GetDefaultConfig<LatestConfig> => {
+  return (): LatestConfig => {
+    return {
+      version: 0,
+      type: MODULE_TYPE_RUST,
+      name,
+    };
+  };
+};
 
 export const initNewReadonlyModuleConfig = (
   configPath: string,
   name: string
-): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
+  return getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(name)
   )();
+};
 
 export const moduleSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 export const overridableModuleProperties = overridableModulePropertiesV0;

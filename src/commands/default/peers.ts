@@ -70,13 +70,16 @@ export default class Peers extends BaseCommand<typeof Peers> {
   }
 }
 
-const printPeerAddresses = (network: Network) =>
-  commandObj.log(
+const printPeerAddresses = (network: Network) => {
+  return commandObj.log(
     `${color.yellow(network)} multiaddresses:\n\n${{
       kras: krasnodar,
       stage: stage,
       testnet: testNet,
     }[network]
-      .map(({ multiaddr }) => multiaddr)
+      .map(({ multiaddr }) => {
+        return multiaddr;
+      })
       .join("\n")}`
   );
+};

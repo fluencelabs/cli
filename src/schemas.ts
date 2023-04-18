@@ -61,12 +61,11 @@ const main = async (): Promise<void> => {
       `# Fluence CLI Configs
 
 ${schemas
-  .map(
-    ([name, schema]): string =>
-      `## [${name}](./${name.replace(`.${YAML_EXT}`, "")}.md)\n\n${String(
-        schema["description"]
-      )}`
-  )
+  .map(([name, schema]): string => {
+    return `## [${name}](./${name.replace(`.${YAML_EXT}`, "")}.md)\n\n${String(
+      schema["description"]
+    )}`;
+  })
   .join("\n")}`
     );
   }
@@ -74,13 +73,12 @@ ${schemas
   await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
 
   await Promise.all(
-    schemas.map(
-      ([filename, schema]): Promise<void> =>
-        writeFile(
-          path.join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),
-          jsonStringify(schema)
-        )
-    )
+    schemas.map(([filename, schema]): Promise<void> => {
+      return writeFile(
+        path.join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),
+        jsonStringify(schema)
+      );
+    })
   );
 };
 

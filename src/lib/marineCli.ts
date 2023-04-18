@@ -61,8 +61,8 @@ export const initMarineCli = async (
     keyValuePairs,
     cwd,
     printOutput = true,
-  }): Promise<string> =>
-    execPromise({
+  }): Promise<string> => {
+    return execPromise({
       command: marineCLIPath,
       args,
       flags,
@@ -73,4 +73,5 @@ export const initMarineCli = async (
       options: { cwd },
       printOutput,
     });
+  };
 };

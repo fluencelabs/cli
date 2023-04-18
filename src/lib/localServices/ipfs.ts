@@ -29,12 +29,13 @@ import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
 /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
 
-const createIPFSClient = (multiaddr: string) =>
-  create(
+const createIPFSClient = (multiaddr: string) => {
+  return create(
     new Multiaddr(multiaddr)
       .decapsulateCode(protocols.names["p2p"]?.code ?? 421)
       .toOptions()
   );
+};
 
 const upload = async (
   multiaddr: string,

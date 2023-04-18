@@ -60,9 +60,9 @@ export const dealCreate = async ({
 
   const eventTopic = factory.interface.getEventTopic(EVENT_TOPIC_FRAGMENT);
 
-  const log = res.logs.find(
-    (log: { topics: Array<string> }) => log.topics[0] === eventTopic
-  );
+  const log = res.logs.find((log: { topics: Array<string> }) => {
+    return log.topics[0] === eventTopic;
+  });
 
   assert(log !== undefined);
 

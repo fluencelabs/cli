@@ -49,13 +49,16 @@ export type OptionalFlags<T extends string> = Partial<
 
 export const isObject = (
   unknown: unknown
-): unknown is Record<string, unknown> =>
-  unknown !== null && typeof unknown === "object";
+): unknown is Record<string, unknown> => {
+  return unknown !== null && typeof unknown === "object";
+};
 
 export const hasKey = <K extends string>(
   key: K,
   unknown: unknown
-): unknown is Record<K, unknown> => isObject(unknown) && key in unknown;
+): unknown is Record<K, unknown> => {
+  return isObject(unknown) && key in unknown;
+};
 
 /**
  * Asserts unknown value is an object that has the key
@@ -97,6 +100,9 @@ export function assertHasKey<K extends string>(
 export function getIsStringUnion<T extends string>(
   array: ReadonlyArray<T>
 ): (unknown: unknown) => unknown is Array<T>[number] {
-  return (unknown: unknown): unknown is Array<T>[number] =>
-    array.some((v): boolean => v === unknown);
+  return (unknown: unknown): unknown is Array<T>[number] => {
+    return array.some((v): boolean => {
+      return v === unknown;
+    });
+  };
 }

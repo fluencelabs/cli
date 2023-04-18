@@ -78,13 +78,16 @@ export default class New extends BaseCommand<typeof New> {
 
     const validateKeyPairName = async (
       keyPairName: string
-    ): Promise<true | string> =>
-      (flags.user
-        ? await getUserKeyPair(keyPairName)
-        : await getProjectKeyPair(keyPairName)) === undefined ||
-      `Key-pair with name ${color.yellow(
-        keyPairName
-      )} already exists at ${secretsConfigPath}. Please, choose another name.`;
+    ): Promise<true | string> => {
+      return (
+        (flags.user
+          ? await getUserKeyPair(keyPairName)
+          : await getProjectKeyPair(keyPairName)) === undefined ||
+        `Key-pair with name ${color.yellow(
+          keyPairName
+        )} already exists at ${secretsConfigPath}. Please, choose another name.`
+      );
+    };
 
     const keyPairValidationResult = await validateKeyPairName(keyPairName);
 

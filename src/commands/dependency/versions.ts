@@ -64,9 +64,10 @@ export default class Versions extends BaseCommand<typeof Versions> {
 
 const filterOutNonFluenceDependencies = (
   dependencies: Record<string, string>
-) =>
-  Object.fromEntries(
-    Object.entries(dependencies).filter(([dep]) =>
-      dep.startsWith("@fluencelabs/")
-    )
+) => {
+  return Object.fromEntries(
+    Object.entries(dependencies).filter(([dep]) => {
+      return dep.startsWith("@fluencelabs/");
+    })
   );
+};

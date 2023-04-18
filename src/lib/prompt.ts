@@ -111,26 +111,28 @@ type ConfirmArg = DistinctQuestion & {
 export const confirm = ({
   flagName,
   ...question
-}: ConfirmArg): Promise<boolean> =>
-  prompt({
+}: ConfirmArg): Promise<boolean> => {
+  return prompt({
     ...question,
     type: "confirm",
     validateType: validateBooleanPrompt,
     flagName,
   });
+};
 
 export type InputArg = DistinctQuestion & {
   message: string;
   flagName?: string | undefined;
 };
 
-export const input = ({ flagName, ...question }: InputArg): Promise<string> =>
-  prompt({
+export const input = ({ flagName, ...question }: InputArg): Promise<string> => {
+  return prompt({
     ...question,
     type: "input",
     validateType: validateStringPrompt,
     flagName,
   });
+};
 
 type PasswordArg = DistinctQuestion & {
   message: string;
@@ -140,13 +142,14 @@ type PasswordArg = DistinctQuestion & {
 export const password = ({
   flagName,
   ...question
-}: PasswordArg): Promise<string> =>
-  prompt({
+}: PasswordArg): Promise<string> => {
+  return prompt({
     ...question,
     type: "password",
     validateType: validateStringPrompt,
     flagName,
   });
+};
 
 type Separator = typeof inquirer.Separator;
 type SeparatorObj = InstanceType<Separator>;
@@ -192,15 +195,17 @@ const handleList = async <T, U>(
   const { options, oneChoiceMessage, onNoChoices, flagName } = listOptions;
 
   const choices = options.map(
-    (choice): { name: string; value: T } | SeparatorObj =>
-      choice instanceof Separator || typeof choice !== "string"
+    (choice): { name: string; value: T } | SeparatorObj => {
+      return choice instanceof Separator || typeof choice !== "string"
         ? choice
-        : { name: choice, value: choice }
+        : { name: choice, value: choice };
+    }
   );
 
   if (
-    choices.filter((choice): boolean => !(choice instanceof Separator))
-      .length === 0
+    choices.filter((choice): boolean => {
+      return !(choice instanceof Separator);
+    }).length === 0
   ) {
     return {
       noChoicesResult: onNoChoices(),
@@ -263,16 +268,15 @@ export const list = async <T, U>(
     ...question,
     type: "list",
     validateType: validateStringPrompt,
-    choices: choices.map((choice): string | SeparatorObj =>
-      choice instanceof Separator ? choice : choice.name
-    ),
+    choices: choices.map((choice): string | SeparatorObj => {
+      return choice instanceof Separator ? choice : choice.name;
+    }),
     flagName,
   });
 
-  const choice = choices.find(
-    (choice): boolean =>
-      !(choice instanceof Separator) && choice.name === stringChoice
-  );
+  const choice = choices.find((choice): boolean => {
+    return !(choice instanceof Separator) && choice.name === stringChoice;
+  });
 
   assert(choice !== undefined);
   assert(!(choice instanceof Separator));
@@ -310,9 +314,9 @@ export const checkboxes = async <T, U>(
     ...question,
     type: "checkbox",
     validateType: validateArrayOfStringsPrompt,
-    choices: choices.map((choice): string | SeparatorObj =>
-      choice instanceof Separator ? choice : choice.name
-    ),
+    choices: choices.map((choice): string | SeparatorObj => {
+      return choice instanceof Separator ? choice : choice.name;
+    }),
     flagName,
   });
 

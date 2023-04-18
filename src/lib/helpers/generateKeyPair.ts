@@ -18,15 +18,21 @@ import getRandomValues from "get-random-values";
 
 import type { ConfigKeyPair } from "../configs/keyPair.js";
 
-const genSecretKey = () => getRandomValues(new Uint8Array(32));
+const genSecretKey = () => {
+  return getRandomValues(new Uint8Array(32));
+};
 
-const uint8ArrayToBase64 = (array: Uint8Array) =>
-  Buffer.from(array).toString("base64");
+const uint8ArrayToBase64 = (array: Uint8Array) => {
+  return Buffer.from(array).toString("base64");
+};
 
-export const generateKeyPair = (name: string): ConfigKeyPair => ({
-  secretKey: uint8ArrayToBase64(genSecretKey()),
-  name,
-});
+export const generateKeyPair = (name: string): ConfigKeyPair => {
+  return {
+    secretKey: uint8ArrayToBase64(genSecretKey()),
+    name,
+  };
+};
 
-export const base64ToUint8Array = (base64: string) =>
-  new Uint8Array(Buffer.from(base64, "base64"));
+export const base64ToUint8Array = (base64: string) => {
+  return new Uint8Array(Buffer.from(base64, "base64"));
+};

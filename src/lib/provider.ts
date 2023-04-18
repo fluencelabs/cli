@@ -102,10 +102,11 @@ export const ensureChainNetwork = async ({
 export const getSigner = async (
   network: ChainNetwork,
   privKey: BytesLike | undefined
-): Promise<ethers.Signer> =>
-  privKey === undefined
+): Promise<ethers.Signer> => {
+  return privKey === undefined
     ? getWalletConnectProvider(network)
     : getWallet(privKey, network);
+};
 
 const getWalletConnectProvider = async (
   network: ChainNetwork
@@ -165,59 +166,76 @@ const getWalletConnectProvider = async (
   return new providers.Web3Provider(provider).getSigner();
 };
 
-const getWallet = (privKey: BytesLike, network: ChainNetwork): ethers.Wallet =>
-  new ethers.Wallet(
+const getWallet = (
+  privKey: BytesLike,
+  network: ChainNetwork
+): ethers.Wallet => {
+  return new ethers.Wallet(
     privKey,
     new providers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl)
   );
+};
 
 export const getCoreContract = (
   signer: ethers.Signer,
   network: ChainNetwork
-): Core => Core__factory.connect(DEAL_CONFIG[network].coreAddress, signer);
+): Core => {
+  return Core__factory.connect(DEAL_CONFIG[network].coreAddress, signer);
+};
 
 export const getFactoryContract = (
   signer: ethers.Signer,
   network: ChainNetwork
-): DealFactory =>
-  DealFactory__factory.connect(DEAL_CONFIG[network].dealFactoryAddress, signer);
+): DealFactory => {
+  return DealFactory__factory.connect(
+    DEAL_CONFIG[network].dealFactoryAddress,
+    signer
+  );
+};
 
 export const getAquaProxy = (
   address: string,
   provider: ethers.providers.Provider
-): AquaProxy => AquaProxy__factory.connect(address, provider);
+): AquaProxy => {
+  return AquaProxy__factory.connect(address, provider);
+};
 
 export const getDeveloperContract = (
   signer: ethers.Signer,
   network: ChainNetwork
-): DeveloperFaucet =>
-  DeveloperFaucet__factory.connect(
+): DeveloperFaucet => {
+  return DeveloperFaucet__factory.connect(
     DEAL_CONFIG[network].developerFaucetAddress,
     signer
   );
+};
 
 export const getDealContract = (
   dealAddress: string,
   signer: ethers.Signer
-): Deal => Deal__factory.connect(dealAddress, signer);
+): Deal => {
+  return Deal__factory.connect(dealAddress, signer);
+};
 
 export const getUSDContract = async (
   signer: ethers.Signer,
   network: ChainNetwork
-): Promise<ERC20> =>
-  ERC20__factory.connect(
+): Promise<ERC20> => {
+  return ERC20__factory.connect(
     await getDeveloperContract(signer, network).usdToken(),
     signer
   );
+};
 
 export const getFLTContract = async (
   signer: ethers.Signer,
   network: ChainNetwork
-): Promise<ERC20> =>
-  ERC20__factory.connect(
+): Promise<ERC20> => {
+  return ERC20__factory.connect(
     await getDeveloperContract(signer, network).fluenceToken(),
     signer
   );
+};
 
 export const waitTx = async (
   tx: ethers.ContractTransaction

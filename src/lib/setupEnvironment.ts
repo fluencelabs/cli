@@ -61,14 +61,17 @@ const setEnvVariable = <T extends string>(
   process.env[variableName] = resolveEnvVariable(variableName, isValid);
 };
 
-const isTrueOrFalseString = (v: unknown): v is "true" | "false" =>
-  v === "true" || v === "false";
+const isTrueOrFalseString = (v: unknown): v is "true" | "false" => {
+  return v === "true" || v === "false";
+};
 
-const isAbsolutePath = (v: unknown): v is string =>
-  typeof v === "string" && path.isAbsolute(v);
+const isAbsolutePath = (v: unknown): v is string => {
+  return typeof v === "string" && path.isAbsolute(v);
+};
 
-const isFluenceEnv = (v: unknown): v is FluenceEnv =>
-  typeof v === "string" && [...NETWORKS, "local"].includes(v);
+const isFluenceEnv = (v: unknown): v is FluenceEnv => {
+  return typeof v === "string" && [...NETWORKS, "local"].includes(v);
+};
 
 setEnvVariable(FLUENCE_ENV, isFluenceEnv, "kras");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");

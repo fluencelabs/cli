@@ -78,9 +78,9 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
       ADD_PROVIDER_TOKEN_EVENT_TOPIC
     );
 
-    const log = res.logs.find(
-      (log: { topics: Array<string> }) => log.topics[0] === eventTopic
-    );
+    const log = res.logs.find((log: { topics: Array<string> }) => {
+      return log.topics[0] === eventTopic;
+    });
 
     assert(log !== undefined);
     const patId: unknown = deal.interface.parseLog(log).args["id"];

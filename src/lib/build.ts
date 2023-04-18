@@ -163,24 +163,26 @@ const resolveServiceInfos = async ({
       async ([
         serviceName,
         { get, deploy = [{ deployId: DEFAULT_DEPLOY_NAME }], keyPairName },
-      ]): ServiceConfigPromises => ({
-        serviceName,
-        deploy,
-        keyPair: await ensureKeyPair(defaultKeyPair, keyPairName),
-        serviceConfig:
-          (await initReadonlyServiceConfig(get, projectRootDir)) ??
-          commandObj.error(
-            `Service ${color.yellow(serviceName)} must have ${color.yellow(
-              SERVICE_CONFIG_FILE_NAME
-            )}. ${
-              isUrl(get)
-                ? `Not able to find it after downloading and decompressing ${color.yellow(
-                    get
-                  )}`
-                : `Not able to find it at ${color.yellow(get)}`
-            }`
-          ),
-      })
+      ]): ServiceConfigPromises => {
+        return {
+          serviceName,
+          deploy,
+          keyPair: await ensureKeyPair(defaultKeyPair, keyPairName),
+          serviceConfig:
+            (await initReadonlyServiceConfig(get, projectRootDir)) ??
+            commandObj.error(
+              `Service ${color.yellow(serviceName)} must have ${color.yellow(
+                SERVICE_CONFIG_FILE_NAME
+              )}. ${
+                isUrl(get)
+                  ? `Not able to find it after downloading and decompressing ${color.yellow(
+                      get
+                    )}`
+                  : `Not able to find it at ${color.yellow(get)}`
+              }`
+            ),
+        };
+      }
     )
   );
 
@@ -193,8 +195,8 @@ const resolveServiceInfos = async ({
         deploy,
         serviceConfig,
         keyPair,
-      }): Array<Promise<ServiceInfoWithUnresolvedModuleConfigs>> =>
-        deploy.flatMap(
+      }): Array<Promise<ServiceInfoWithUnresolvedModuleConfigs>> => {
+        return deploy.flatMap(
           async ({
             overrideModules,
             keyPairName,
@@ -226,7 +228,8 @@ const resolveServiceInfos = async ({
               ...rest,
             };
           }
-        )
+        );
+      }
     )
   );
 };
@@ -246,10 +249,11 @@ export const build = async ({
       ({
         moduleNamesAndConfigsDefinedInService: modules,
         serviceDirPath,
-      }): Array<string> =>
-        modules.map(({ moduleConfig: { get } }): string =>
-          getUrlOrAbsolutePath(get, serviceDirPath)
-        )
+      }): Array<string> => {
+        return modules.map(({ moduleConfig: { get } }): string => {
+          return getUrlOrAbsolutePath(get, serviceDirPath);
+        });
+      }
     )
   );
 
@@ -334,12 +338,13 @@ export const build = async ({
     ...new Set(
       await Promise.all(
         Object.entries(serviceNamePathToFacadeMap).map(
-          ([serviceId, pathToFacadeWasm]) =>
-            generateAquaInterfaceForService({
+          ([serviceId, pathToFacadeWasm]) => {
+            return generateAquaInterfaceForService({
               serviceId,
               pathToFacadeWasm,
               marineCli,
-            })
+            });
+          }
         )
       )
     ),
@@ -410,11 +415,15 @@ members = []
   const oldCargoWorkspaceMembers = parsedConfig?.workspace?.members ?? [];
 
   const cargoWorkspaceMembersExistance = await Promise.allSettled(
-    oldCargoWorkspaceMembers.map((member) => access(member))
+    oldCargoWorkspaceMembers.map((member) => {
+      return access(member);
+    })
   );
 
   const existingCargoWorkspaceMembers = oldCargoWorkspaceMembers.filter(
-    (_, i) => cargoWorkspaceMembersExistance[i]?.status === "fulfilled"
+    (_, i) => {
+      return cargoWorkspaceMembersExistance[i]?.status === "fulfilled";
+    }
   );
 
   const newConfig = {
@@ -424,9 +433,9 @@ members = []
       members: [
         ...new Set([
           ...existingCargoWorkspaceMembers,
-          ...moduleAbsolutePaths.map((moduleAbsolutePath) =>
-            relative(projectRootDir, moduleAbsolutePath)
-          ),
+          ...moduleAbsolutePaths.map((moduleAbsolutePath) => {
+            return relative(projectRootDir, moduleAbsolutePath);
+          }),
         ]),
       ],
     },
@@ -503,12 +512,14 @@ export const buildModules = async (
   modulesConfigs: ModuleConfigReadonly[],
   marineCli: MarineCLI
 ): Promise<void> => {
-  const rustModuleConfigs = modulesConfigs.filter(
-    ({ type }) => type === MODULE_TYPE_RUST
-  );
+  const rustModuleConfigs = modulesConfigs.filter(({ type }) => {
+    return type === MODULE_TYPE_RUST;
+  });
 
   await updateWorkspaceCargoToml(
-    rustModuleConfigs.map((moduleConfig) => moduleConfig.$getDirPath())
+    rustModuleConfigs.map((moduleConfig) => {
+      return moduleConfig.$getDirPath();
+    })
   );
 
   if (rustModuleConfigs.length === 0) {
@@ -516,7 +527,12 @@ export const buildModules = async (
   }
 
   await marineCli({
-    args: ["build", ...rustModuleConfigs.flatMap(({ name }) => ["-p", name])],
+    args: [
+      "build",
+      ...rustModuleConfigs.flatMap(({ name }) => {
+        return ["-p", name];
+      }),
+    ],
     flags: { release: true },
     cwd: projectRootDir,
   });
@@ -526,7 +542,9 @@ const overrideModule = (
   mod: ServiceModuleV0,
   overrideModules: OverrideModules | undefined,
   moduleName: string
-): ServiceModuleV0 => ({ ...mod, ...overrideModules?.[moduleName] });
+): ServiceModuleV0 => {
+  return { ...mod, ...overrideModules?.[moduleName] };
+};
 
 type GetModuleNamesAndConfigsDefinedInServicesArg = {
   overrideModules: OverrideModules | undefined;
@@ -548,7 +566,9 @@ const getModuleNamesAndConfigsDefinedInServices = ({
 }: GetModuleNamesAndConfigsDefinedInServicesArg): ModuleNameAndConfigDefinedInService[] => {
   const modulesNotFoundInServiceYaml = Object.keys(
     overrideModules ?? {}
-  ).filter((moduleName): boolean => !(moduleName in serviceConfigModules));
+  ).filter((moduleName): boolean => {
+    return !(moduleName in serviceConfigModules);
+  });
 
   if (modulesNotFoundInServiceYaml.length > 0) {
     commandObj.error(
@@ -569,10 +589,12 @@ const getModuleNamesAndConfigsDefinedInServices = ({
 
   return [
     ...Object.entries(otherModules).map(
-      ([moduleName, mod]): ModuleNameAndConfigDefinedInService => ({
-        moduleConfig: overrideModule(mod, overrideModules, moduleName),
-        moduleName,
-      })
+      ([moduleName, mod]): ModuleNameAndConfigDefinedInService => {
+        return {
+          moduleConfig: overrideModule(mod, overrideModules, moduleName),
+          moduleName,
+        };
+      }
     ),
     {
       moduleConfig: overrideModule(

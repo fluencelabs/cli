@@ -59,17 +59,19 @@ export const fluence = async ({
   args = [],
   flags,
   cwd = process.cwd(),
-}: FluenceArg): ReturnType<typeof execPromise> =>
-  execPromise({
+}: FluenceArg): ReturnType<typeof execPromise> => {
+  return execPromise({
     command: pathToFluenceExecutable,
     args,
     flags,
     options: { cwd },
     printOutput: true,
   });
+};
 
-const getInitializedTemplatePath = (template: Template) =>
-  path.join("tmp", "templates", template);
+const getInitializedTemplatePath = (template: Template) => {
+  return path.join("tmp", "templates", template);
+};
 
 export const initFirstTime = async (template: Template) => {
   const templatePath = getInitializedTemplatePath(template);

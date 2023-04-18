@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-const comment =
-  (commentToken: string) =>
-  (text: string): string =>
-    text
+const comment = (commentToken: string) => {
+  return (text: string): string => {
+    return text
       .split("\n")
-      .map((line) =>
-        line === ""
+      .map((line) => {
+        return line === ""
           ? ""
-          : line.replaceAll(
-              /(^|\n)\s*/g,
-              (spaces) => `${spaces}${commentToken} `
-            )
-      )
+          : line.replaceAll(/(^|\n)\s*/g, (spaces) => {
+              return `${spaces}${commentToken} `;
+            });
+      })
       .join("\n");
+  };
+};
 
 export const jsComment = comment("//");
 export const aquaComment = comment("--");

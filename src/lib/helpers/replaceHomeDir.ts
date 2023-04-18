@@ -16,5 +16,6 @@
 
 import replaceHomedir from "replace-homedir";
 
-export const replaceHomeDir = (path: string): string =>
-  replaceHomedir(path, "~");
+export const replaceHomeDir = (path: string): string => {
+  return replaceHomedir(path, "~");
+};

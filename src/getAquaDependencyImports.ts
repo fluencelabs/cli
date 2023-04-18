@@ -44,18 +44,27 @@ const main = async (): Promise<void> => {
   );
 
   const paths = Object.entries(parsedPackageJSON?.dependencies ?? {}).map(
-    ([name, version]) =>
-      `node_modules/.pnpm/${name.replace("/", "+")}@${String(
+    ([name, version]) => {
+      return `node_modules/.pnpm/${name.replace("/", "+")}@${String(
         version
-      )}/node_modules`
+      )}/node_modules`;
+    }
   );
 
-  const validImports = await Promise.allSettled(paths.map((p) => access(p)));
+  const validImports = await Promise.allSettled(
+    paths.map((p) => {
+      return access(p);
+    })
+  );
 
   console.log(
     paths
-      .filter((_, i) => validImports[i]?.status === "fulfilled")
-      .map((p) => `--import ${p}`)
+      .filter((_, i) => {
+        return validImports[i]?.status === "fulfilled";
+      })
+      .map((p) => {
+        return `--import ${p}`;
+      })
       .join(" ")
   );
 };

@@ -73,13 +73,15 @@ export const removeApp = async (
 
   const allKeyPairNames = [
     ...new Set(
-      Object.entries(services).flatMap(
-        ([, servicesByName]): Array<string> =>
-          Object.entries(servicesByName).flatMap(
-            ([, services]): Array<string> =>
-              services.map(({ keyPairName }): string => keyPairName)
-          )
-      )
+      Object.entries(services).flatMap(([, servicesByName]): Array<string> => {
+        return Object.entries(servicesByName).flatMap(
+          ([, services]): Array<string> => {
+            return services.map(({ keyPairName }): string => {
+              return keyPairName;
+            });
+          }
+        );
+      })
     ),
   ];
 
@@ -185,7 +187,9 @@ export const removeApp = async (
     ];
 
     await Promise.allSettled(
-      pathsToRemove.map((path): Promise<void> => fsPromises.unlink(path))
+      pathsToRemove.map((path): Promise<void> => {
+        return fsPromises.unlink(path);
+      })
     );
 
     return null;

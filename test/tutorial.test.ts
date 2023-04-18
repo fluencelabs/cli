@@ -118,8 +118,8 @@ modules:
   });
 });
 
-const addAdderServiceToFluenceYAML = (cwd: string) =>
-  fluence({
+const addAdderServiceToFluenceYAML = (cwd: string) => {
+  return fluence({
     args: [
       "service",
       "add",
@@ -127,9 +127,10 @@ const addAdderServiceToFluenceYAML = (cwd: string) =>
     ],
     cwd,
   });
+};
 
-const generateDefaultKey = (cwd: string) =>
-  fluence({
+const generateDefaultKey = (cwd: string) => {
+  return fluence({
     args: ["key", "new", "default"],
     flags: {
       "no-input": true,
@@ -137,14 +138,17 @@ const generateDefaultKey = (cwd: string) =>
     },
     cwd,
   });
+};
 
-const compileAqua = (cwd: string) =>
-  fluence({
+const compileAqua = (cwd: string) => {
+  return fluence({
     args: ["aqua"],
     cwd,
   });
+};
 
-const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string =>
-  join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
+const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
+  return join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
+};
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";

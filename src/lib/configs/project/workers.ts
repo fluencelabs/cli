@@ -158,9 +158,11 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   getConfigOrConfigDirPath: ensureFluenceDir,
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = () => ({
-  version: 0,
-});
+const getDefault: GetDefaultConfig<LatestConfig> = () => {
+  return {
+    version: 0,
+  };
+};
 
 export const initNewReadonlyWorkersConfig = getReadonlyConfigInitFunction(
   initConfigOptions,

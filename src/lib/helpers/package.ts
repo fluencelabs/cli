@@ -186,8 +186,12 @@ const dependenciesPathsGettersMap: Record<
   PackageManager,
   () => [Promise<string>, Promise<string>]
 > = {
-  npm: () => [ensureUserFluenceNpmDir(), ensureUserFluenceTmpNpmDir()],
-  cargo: () => [ensureUserFluenceCargoDir(), ensureUserFluenceTmpCargoDir()],
+  npm: () => {
+    return [ensureUserFluenceNpmDir(), ensureUserFluenceTmpNpmDir()];
+  },
+  cargo: () => {
+    return [ensureUserFluenceCargoDir(), ensureUserFluenceTmpCargoDir()];
+  },
 };
 
 type ResolveDependencyPathAndTmpPath = {
@@ -286,14 +290,18 @@ export const resolveDependencies = async (
   const recommendedDependencies = (() => {
     if (packageManager === "cargo") {
       return fluenceCargoDependencies.reduce(
-        (acc, dep) => ({ ...acc, [dep]: versions.cargo[dep] }),
+        (acc, dep) => {
+          return { ...acc, [dep]: versions.cargo[dep] };
+        },
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         {} as Record<(typeof fluenceCargoDependencies)[number], string>
       );
     }
 
     return fluenceNPMDependencies.reduce(
-      (acc, dep) => ({ ...acc, [dep]: versions.npm[dep] }),
+      (acc, dep) => {
+        return { ...acc, [dep]: versions.npm[dep] };
+      },
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       {} as Record<(typeof fluenceNPMDependencies)[number], string>
     );

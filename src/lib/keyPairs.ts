@@ -28,8 +28,12 @@ import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
 import type { KeyPairFlag } from "./const.js";
 import { list, type Choices } from "./prompt.js";
 
-export const getKeyPair = async (keyPairName: string | undefined) =>
-  (await getProjectKeyPair(keyPairName)) ?? (await getUserKeyPair(keyPairName));
+export const getKeyPair = async (keyPairName: string | undefined) => {
+  return (
+    (await getProjectKeyPair(keyPairName)) ??
+    (await getUserKeyPair(keyPairName))
+  );
+};
 
 export const getUserKeyPair = async (
   keyPairName: string | undefined
@@ -38,16 +42,18 @@ export const getUserKeyPair = async (
 
   if (keyPairName === undefined) {
     const defaultKeyPair = userSecretsConfig.keyPairs.find(
-      ({ name }): boolean => name === userSecretsConfig.defaultKeyPairName
+      ({ name }): boolean => {
+        return name === userSecretsConfig.defaultKeyPairName;
+      }
     );
 
     assert(defaultKeyPair !== undefined);
     return defaultKeyPair;
   }
 
-  const keyPair = userSecretsConfig.keyPairs.find(
-    ({ name }): boolean => name === keyPairName
-  );
+  const keyPair = userSecretsConfig.keyPairs.find(({ name }): boolean => {
+    return name === keyPairName;
+  });
 
   return keyPair;
 };
@@ -76,17 +82,21 @@ const getExistingUserKeyPair = async (
   const options: Choices<ConfigKeyPair> = [];
 
   const projectKeyPairOptions = readonlyProjectSecretsConfig.keyPairs.map(
-    (value): { value: ConfigKeyPair; name: string } => ({
-      value,
-      name: value.name,
-    })
+    (value): { value: ConfigKeyPair; name: string } => {
+      return {
+        value,
+        name: value.name,
+      };
+    }
   );
 
   const userKeyPairOptions = userSecretsConfig.keyPairs.map(
-    (value): { value: ConfigKeyPair; name: string } => ({
-      value,
-      name: value.name,
-    })
+    (value): { value: ConfigKeyPair; name: string } => {
+      return {
+        value,
+        name: value.name,
+      };
+    }
   );
 
   if (projectKeyPairOptions.length > 0) {
@@ -106,12 +116,14 @@ const getExistingUserKeyPair = async (
   return list({
     message: "Select existing key-pair name",
     options,
-    oneChoiceMessage: (name): string =>
-      `Do you want to use ${color.yellow(name)}`,
-    onNoChoices: (): never =>
-      commandObj.error(
+    oneChoiceMessage: (name): string => {
+      return `Do you want to use ${color.yellow(name)}`;
+    },
+    onNoChoices: (): never => {
+      return commandObj.error(
         "There are no other key-pairs. You need a key-pair to continue"
-      ),
+      );
+    },
   });
 };
 
@@ -121,23 +133,30 @@ export const getProjectKeyPair = async (
   const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
 
   if (keyPairName === undefined) {
-    return projectSecretsConfig.keyPairs.find(
-      ({ name }): boolean => name === projectSecretsConfig.defaultKeyPairName
-    );
+    return projectSecretsConfig.keyPairs.find(({ name }): boolean => {
+      return name === projectSecretsConfig.defaultKeyPairName;
+    });
   }
 
-  return projectSecretsConfig.keyPairs.find(
-    ({ name }): boolean => name === keyPairName
-  );
+  return projectSecretsConfig.keyPairs.find(({ name }): boolean => {
+    return name === keyPairName;
+  });
 };
 
 export const getExistingKeyPair = async (
   keyPairName: string | undefined
-): Promise<ConfigKeyPair> =>
-  (await getProjectKeyPair(keyPairName)) ?? getExistingUserKeyPair(keyPairName);
+): Promise<ConfigKeyPair> => {
+  return (
+    (await getProjectKeyPair(keyPairName)) ??
+    getExistingUserKeyPair(keyPairName)
+  );
+};
 
 export const getExistingKeyPairFromFlags = async (
   flags: KeyPairFlag,
   maybeFluenceConfig: FluenceConfig | null
-): Promise<ConfigKeyPair> =>
-  getExistingKeyPair(flags["key-pair-name"] ?? maybeFluenceConfig?.keyPairName);
+): Promise<ConfigKeyPair> => {
+  return getExistingKeyPair(
+    flags["key-pair-name"] ?? maybeFluenceConfig?.keyPairName
+  );
+};

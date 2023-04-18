@@ -118,62 +118,71 @@ const validate: ConfigValidateFunction<LatestConfig> = (
 
 const getInitConfigOptions = (
   configDirPath: string
-): InitConfigOptions<Config, LatestConfig> => ({
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
-  migrations,
-  name: SERVICE_CONFIG_FILE_NAME,
-  getSchemaDirPath: ensureFluenceDir,
-  getConfigOrConfigDirPath: (): string => configDirPath,
-  validate,
-});
+): InitConfigOptions<Config, LatestConfig> => {
+  return {
+    allSchemas: [configSchemaV0],
+    latestSchema: configSchemaV0,
+    migrations,
+    name: SERVICE_CONFIG_FILE_NAME,
+    getSchemaDirPath: ensureFluenceDir,
+    getConfigOrConfigDirPath: (): string => {
+      return configDirPath;
+    },
+    validate,
+  };
+};
 
 export const initServiceConfig = async (
   configOrConfigDirPathOrUrl: string,
   absolutePath: string
-): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(
+): Promise<InitializedConfig<LatestConfig> | null> => {
+  return getConfigInitFunction(
     getInitConfigOptions(
       await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
+};
 
 export const initReadonlyServiceConfig = async (
   configOrConfigDirPathOrUrl: string,
   absolutePath: string
-): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
+  return getReadonlyConfigInitFunction(
     getInitConfigOptions(
       await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
+};
 
 const getDefault: (
   relativePathToFacade: string,
   name: string
-) => GetDefaultConfig<LatestConfig> =
-  (
-    relativePathToFacade: string,
-    name: string
-  ): GetDefaultConfig<LatestConfig> =>
-  (): LatestConfig => ({
-    version: 0,
-    name,
-    modules: {
-      [FACADE_MODULE_NAME]: {
-        get: relativePathToFacade,
+) => GetDefaultConfig<LatestConfig> = (
+  relativePathToFacade: string,
+  name: string
+): GetDefaultConfig<LatestConfig> => {
+  return (): LatestConfig => {
+    return {
+      version: 0,
+      name,
+      modules: {
+        [FACADE_MODULE_NAME]: {
+          get: relativePathToFacade,
+        },
       },
-    },
-  });
+    };
+  };
+};
 
 export const initNewReadonlyServiceConfig = (
   configPath: string,
   relativePathToFacade: string,
   name: string
-): Promise<InitializedReadonlyConfig<LatestConfig>> =>
-  getReadonlyConfigInitFunction(
+): Promise<InitializedReadonlyConfig<LatestConfig>> => {
+  return getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(relativePathToFacade, name)
   )();
+};
 
 export const serviceSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
