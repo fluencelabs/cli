@@ -26,7 +26,7 @@ import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
-import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT } from "../const.js";
+import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
 import { jsonStringify } from "../helpers/jsonStringify.js";
 import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
@@ -231,7 +231,8 @@ export const getConfigPath = (
   configOrConfigDirPath: string,
   configName: string
 ) => {
-  return configOrConfigDirPath.endsWith(YAML_EXT)
+  return configOrConfigDirPath.endsWith(YAML_EXT) ||
+    configOrConfigDirPath.endsWith(YML_EXT)
     ? {
         configPath: configOrConfigDirPath,
         configDirPath: dirname(configOrConfigDirPath),
@@ -275,10 +276,13 @@ export function getReadonlyConfigInitFunction<
       getSchemaDirPath,
     } = options;
 
-    const { configDirPath, configPath } = getConfigPath(
+    const getConfigPathResult = getConfigPath(
       await getConfigOrConfigDirPath(),
       name
     );
+
+    const { configDirPath } = getConfigPathResult;
+    let { configPath } = getConfigPathResult;
 
     const validateAllConfigVersions = new Ajv.default({
       allowUnionTypes: true,
@@ -304,9 +308,33 @@ export function getReadonlyConfigInitFunction<
     let configString: string;
 
     try {
-      // If config file exists, read it and add schema path comment if it's missing
+      let fileContent: string;
+
+      // try reading config file
+      // if it fails, try replacing .yaml with .yml and vice versa and read again
+      // this way we can support both .yaml and .yml extensions interchangeably
+      try {
+        fileContent = await readFile(configPath, FS_OPTIONS);
+      } catch (e) {
+        const endsWithYaml = configPath.endsWith(`.${YAML_EXT}`);
+        const endsWithYml = configPath.endsWith(`.${YML_EXT}`);
+
+        if (!endsWithYaml && !endsWithYml && getDefaultConfig !== undefined) {
+          throw e;
+        }
+
+        // try reading again by replacing .yaml with .yml or vice versa
+        const newConfigPath = `${configPath.slice(
+          0,
+          -(endsWithYaml ? YAML_EXT : YML_EXT).length
+        )}${endsWithYaml ? YML_EXT : YAML_EXT}`;
+
+        fileContent = await readFile(newConfigPath, FS_OPTIONS);
+        configPath = newConfigPath;
+      }
+
+      // If config file exists, add schema path comment, if it's missing
       // or replace it if it's incorrect
-      const fileContent = await readFile(configPath, FS_OPTIONS);
       const schemaPathComment = await getSchemaPathComment();
 
       configString = fileContent.startsWith(schemaPathCommentStart)
@@ -417,7 +445,7 @@ export function getConfigInitFunction<
   getDefaultConfig?: GetDefaultConfig<LatestConfig>
 ): InitFunction<LatestConfig> {
   return async (): Promise<InitializedConfig<LatestConfig> | null> => {
-    const { configPath } = getConfigPath(
+    let { configPath } = getConfigPath(
       await options.getConfigOrConfigDirPath(),
       options.name
     );
@@ -439,10 +467,9 @@ export function getConfigInitFunction<
       return null;
     }
 
-    initializedConfigs.add(configPath);
-
     const initializedReadonlyConfig = maybeInitializedReadonlyConfig;
-
+    configPath = initializedReadonlyConfig.$getPath();
+    initializedConfigs.add(configPath);
     let configString = initializedReadonlyConfig.$getConfigString();
 
     return {
