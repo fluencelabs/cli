@@ -173,8 +173,8 @@ type TomlModuleConfig = {
 
 const ensureModuleConfigsForToml = (
   moduleConfigs: Array<ModuleConfigReadonly>
-) =>
-  moduleConfigs.map((moduleConfig) => {
+) => {
+  return moduleConfigs.map((moduleConfig) => {
     const {
       name,
       envs,
@@ -220,5 +220,6 @@ const ensureModuleConfigsForToml = (
 
     return tomlModuleConfig;
   });
+};
 
 /* eslint-enable camelcase */

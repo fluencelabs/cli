@@ -156,18 +156,20 @@ export default class Aqua extends Command {
 
     const aquaCli = await initAquaCli(maybeFluenceConfig);
 
-    const compile = async (): Promise<string> =>
-      aquaCli({ flags: aquaCliFlags }, "Compiling");
+    const compile = async (): Promise<string> => {
+      return aquaCli({ flags: aquaCliFlags }, "Compiling");
+    };
 
     if (!flags.watch) {
       this.log(await compile());
       return;
     }
 
-    const watchingNotification = (): void =>
-      this.log(
+    const watchingNotification = (): void => {
+      return this.log(
         `Watching for changes at ${color.yellow(aquaCliFlags.input)}...`
       );
+    };
 
     watchingNotification();
 

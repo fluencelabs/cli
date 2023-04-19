@@ -36,8 +36,13 @@ export const isNetwork = getIsStringUnion(NETWORKS);
 export type FluenceEnv = Network | "local";
 export type Relays = Network | Array<string> | undefined;
 
-const getAddrs = (nodes: Array<Node>): Array<string> =>
-  shuffle(nodes.map(({ multiaddr }): string => multiaddr));
+const getAddrs = (nodes: Array<Node>): Array<string> => {
+  return shuffle(
+    nodes.map(({ multiaddr }): string => {
+      return multiaddr;
+    })
+  );
+};
 
 export const ADDR_MAP: Record<Network, Array<string>> = {
   kras: getAddrs(krasnodar),
@@ -70,7 +75,9 @@ const getRandomArrayItem = <T>(ar: Array<T>): T => {
 
 export const getRandomRelayAddr = (
   maybeRelays: Relays | null | undefined
-): string => getRandomArrayItem(resolveAddrs(maybeRelays));
+): string => {
+  return getRandomArrayItem(resolveAddrs(maybeRelays));
+};
 
 export const getPeerId = (addr: string): string => {
   const id = new Multiaddr(addr).getPeerId();
@@ -84,11 +91,15 @@ export const getPeerId = (addr: string): string => {
   return id;
 };
 
-const getIds = (nodes: Array<string>): Array<string> =>
-  nodes.map((addr): string => getPeerId(addr));
+const getIds = (nodes: Array<string>): Array<string> => {
+  return nodes.map((addr): string => {
+    return getPeerId(addr);
+  });
+};
 
-export const getRandomPeerId = (relays: Relays): string =>
-  getPeerId(getRandomRelayAddr(relays));
+export const getRandomPeerId = (relays: Relays): string => {
+  return getPeerId(getRandomRelayAddr(relays));
+};
 
 export const getEvenlyDistributedIds = (
   relays: Relays,

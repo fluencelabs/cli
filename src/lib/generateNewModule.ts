@@ -64,7 +64,8 @@ pub fn greeting(name: String) -> String {
 }
 `;
 
-const getCargoTomlContent = (name: string): string => `[package]
+const getCargoTomlContent = (name: string): string => {
+  return `[package]
 name = "${name}"
 version = "0.1.0"
 edition = "2018"
@@ -79,3 +80,4 @@ ${MARINE_RS_SDK_CARGO_DEPENDENCY} = "${versions.cargo[MARINE_RS_SDK_CARGO_DEPEND
 [dev-dependencies]
 ${MARINE_RS_SDK_TEST_CARGO_DEPENDENCY} = "${versions.cargo[MARINE_RS_SDK_TEST_CARGO_DEPENDENCY]}"
 `;
+};

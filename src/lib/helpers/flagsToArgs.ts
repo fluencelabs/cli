@@ -36,12 +36,14 @@ export type Flags = Record<
   string | number | boolean | undefined | Array<string | undefined>
 >;
 
-export const flagsToArgs = (flags: Flags): string[] =>
-  Object.entries(flags)
-    .map(
-      ([flagName, flagValue]): Array<string[]> =>
-        Array.isArray(flagValue)
-          ? flagValue.map((value): string[] => flagToArg(flagName, value))
-          : [flagToArg(flagName, flagValue)]
-    )
+export const flagsToArgs = (flags: Flags): string[] => {
+  return Object.entries(flags)
+    .map(([flagName, flagValue]): Array<string[]> => {
+      return Array.isArray(flagValue)
+        ? flagValue.map((value): string[] => {
+            return flagToArg(flagName, value);
+          })
+        : [flagToArg(flagName, flagValue)];
+    })
     .flat(2);
+};

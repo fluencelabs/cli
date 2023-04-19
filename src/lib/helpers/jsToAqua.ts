@@ -62,12 +62,13 @@ export const jsToAquaImpl = (
   currentNesting: string,
   useF64ForAllNumbers = false
 ): { type: string; value: string; typeDefs?: string | undefined } => {
-  const error = (message: string) =>
-    commandObj.error(
+  const error = (message: string) => {
+    return commandObj.error(
       `Failed converting to aqua. ${message}. At ${color.yellow(
         currentNesting === "" ? "" : `${currentNesting}.`
       )}${color.yellow(fieldName)}: ${stringifyUnknown(v)}`
     );
+  };
 
   if (typeof v === "string") {
     return { type: "string", value: `"${v}"` };
@@ -109,9 +110,9 @@ export const jsToAquaImpl = (
       return NULL;
     }
 
-    const mappedToAqua = v.map((val) =>
-      jsToAquaImpl(val, fieldName, currentNesting, useF64ForAllNumbers)
-    );
+    const mappedToAqua = v.map((val) => {
+      return jsToAquaImpl(val, fieldName, currentNesting, useF64ForAllNumbers);
+    });
 
     const firstElementType = mappedToAqua[0]?.type ?? NULL.type;
     const isNumberType = NUMBER_TYPES.includes(firstElementType);
@@ -141,15 +142,23 @@ export const jsToAquaImpl = (
 
     if (
       !isNumberType &&
-      (!mappedToAqua.every((val) => val.type === type) ||
-        !mappedToAqua.every((val) => val.typeDefs === typeDefs))
+      (!mappedToAqua.every((val) => {
+        return val.type === type;
+      }) ||
+        !mappedToAqua.every((val) => {
+          return val.typeDefs === typeDefs;
+        }))
     ) {
       return error("All array elements must be of the same type");
     }
 
     return {
       type: `[]${type}`,
-      value: `[${mappedToAqua.map(({ value }) => value).join(",")}]`,
+      value: `[${mappedToAqua
+        .map(({ value }) => {
+          return value;
+        })
+        .join(",")}]`,
       typeDefs,
     };
   }

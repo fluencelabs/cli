@@ -40,8 +40,8 @@ const SERVICES_FUNCTION_NAME = "services";
 const SERVICE_IDS_ITEM = "ServiceIdsItem";
 const SERVICES_DATA_AQUA_TYPE = "Services";
 
-export const getAppJson = (services: ServicesV3): string =>
-  JSON.stringify(
+export const getAppJson = (services: ServicesV3): string => {
+  return JSON.stringify(
     {
       name: APP_SERVICE_NAME,
       serviceId: APP_SERVICE_NAME,
@@ -55,6 +55,7 @@ export const getAppJson = (services: ServicesV3): string =>
     null,
     2
   );
+};
 
 const generateRegisterAppTSorJS = async ({
   deployedServices,
@@ -180,8 +181,9 @@ export const generateRegisterApp = async ({
   }
 };
 
-const getDeploysDataName = (serviceName: string): string =>
-  `${capitalize(serviceName)}Deploys`;
+const getDeploysDataName = (serviceName: string): string => {
+  return `${capitalize(serviceName)}Deploys`;
+};
 
 export const generateDeployedAppAqua = async (
   services: ServicesV3
@@ -198,23 +200,20 @@ data ${SERVICE_IDS_ITEM}:
   serviceId: string
 
 ${Object.entries(services)
-  .map(
-    ([serviceName, deployments]): string =>
-      `data ${getDeploysDataName(serviceName)}:\n${Object.keys(deployments)
-        .map(
-          (deployName: string): string =>
-            `  ${deployName}: []${SERVICE_IDS_ITEM}`
-        )
-        .join("\n")}`
-  )
+  .map(([serviceName, deployments]): string => {
+    return `data ${getDeploysDataName(serviceName)}:\n${Object.keys(deployments)
+      .map((deployName: string): string => {
+        return `  ${deployName}: []${SERVICE_IDS_ITEM}`;
+      })
+      .join("\n")}`;
+  })
   .join("\n\n")}
 
 data ${SERVICES_DATA_AQUA_TYPE}:
 ${Object.keys(services)
-  .map(
-    (serviceName): string =>
-      `  ${serviceName}: ${getDeploysDataName(serviceName)}`
-  )
+  .map((serviceName): string => {
+    return `  ${serviceName}: ${getDeploysDataName(serviceName)}`;
+  })
   .join("\n")}
 
 service ${APP_SERVICE_NAME}("${APP_SERVICE_NAME}"):

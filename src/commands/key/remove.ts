@@ -98,16 +98,20 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
       keyPairName = await list({
         message: `Select key-pair name to remove at ${secretsConfigPath}`,
-        oneChoiceMessage: (choice: string): string =>
-          `Do you want to remove ${color.yellow(choice)}?`,
-        onNoChoices: (): never =>
-          commandObj.error(
+        oneChoiceMessage: (choice: string): string => {
+          return `Do you want to remove ${color.yellow(choice)}?`;
+        },
+        onNoChoices: (): never => {
+          return commandObj.error(
             `There are no key-pairs to remove at ${secretsConfigPath}`
-          ),
+          );
+        },
         options: (flags.user
           ? userSecretsConfig
           : projectSecretsConfig
-        ).keyPairs.map((value): string => value.name),
+        ).keyPairs.map((value): string => {
+          return value.name;
+        }),
       });
     }
 
@@ -115,23 +119,28 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     if (flags.user) {
       userSecretsConfig.keyPairs = userSecretsConfig.keyPairs.filter(
-        ({ name }): boolean => name !== keyPairName
+        ({ name }): boolean => {
+          return name !== keyPairName;
+        }
       );
 
       if (keyPairName === userSecretsConfig.defaultKeyPairName) {
         if (isInteractive) {
           const newDefaultKeyPairName = await list({
             message: `Select new default key-pair name for user's secrets`,
-            oneChoiceMessage: (choice: string): string =>
-              `Do you want to set ${color.yellow(choice)} as default key-pair?`,
+            oneChoiceMessage: (choice: string): string => {
+              return `Do you want to set ${color.yellow(
+                choice
+              )} as default key-pair?`;
+            },
             onNoChoices: (): never => {
               commandObj.error(
                 "There are no key-pairs to set as default for user's secrets"
               );
             },
-            options: userSecretsConfig.keyPairs.map(
-              (value): string => value.name
-            ),
+            options: userSecretsConfig.keyPairs.map((value): string => {
+              return value.name;
+            }),
           });
 
           assert(typeof newDefaultKeyPairName === "string");
@@ -151,7 +160,9 @@ export default class Remove extends BaseCommand<typeof Remove> {
       await userSecretsConfig.$commit();
     } else {
       projectSecretsConfig.keyPairs = projectSecretsConfig.keyPairs.filter(
-        ({ name }): boolean => name !== keyPairName
+        ({ name }): boolean => {
+          return name !== keyPairName;
+        }
       );
 
       if (projectSecretsConfig.keyPairs.length === 0) {
@@ -160,16 +171,19 @@ export default class Remove extends BaseCommand<typeof Remove> {
         if (isInteractive) {
           const newDefaultKeyPairName = await list({
             message: `Select new default key-pair name for project's secrets`,
-            oneChoiceMessage: (choice: string): string =>
-              `Do you want to set ${color.yellow(choice)} as default key-pair?`,
+            oneChoiceMessage: (choice: string): string => {
+              return `Do you want to set ${color.yellow(
+                choice
+              )} as default key-pair?`;
+            },
             onNoChoices: (): never => {
               commandObj.error(
                 "There are no key-pairs to set as default for project's secrets"
               );
             },
-            options: projectSecretsConfig.keyPairs.map(
-              (value): string => value.name
-            ),
+            options: projectSecretsConfig.keyPairs.map((value): string => {
+              return value.name;
+            }),
           });
 
           assert(typeof newDefaultKeyPairName === "string");

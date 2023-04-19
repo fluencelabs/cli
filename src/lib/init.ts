@@ -63,8 +63,8 @@ import versions from "../versions.json" assert { type: "json" };
 import { commandObj, isInteractive } from "./commandObj.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
 
-const selectTemplate = (): Promise<Template> =>
-  list({
+const selectTemplate = (): Promise<Template> => {
+  return list({
     message: "Select template",
     options: [...TEMPLATES],
     oneChoiceMessage: (): never => {
@@ -74,6 +74,7 @@ const selectTemplate = (): Promise<Template> =>
       throw new Error("Unreachable: no templates");
     },
   });
+};
 
 type EnsureTemplateArg = {
   templateOrUnknown: string | undefined;
@@ -174,7 +175,9 @@ const ensureGitIgnore = async (): Promise<void> => {
     );
 
     const missingGitIgnoreEntries = RECOMMENDED_GITIGNORE_CONTENT.split("\n")
-      .filter((entry): boolean => !currentGitIgnoreEntries.has(entry))
+      .filter((entry): boolean => {
+        return !currentGitIgnoreEntries.has(entry);
+      })
       .join("\n");
 
     newGitIgnoreContent =

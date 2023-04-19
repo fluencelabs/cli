@@ -55,8 +55,11 @@ import { initMarineCli } from "./marineCli.js";
 import { ensureFluenceAquaWorkersPath, projectRootDir } from "./paths.js";
 import { checkboxes } from "./prompt.js";
 
-export const parseWorkers = (workerNamesString: string) =>
-  workerNamesString.split(",").map((s) => s.trim());
+export const parseWorkers = (workerNamesString: string) => {
+  return workerNamesString.split(",").map((s) => {
+    return s.trim();
+  });
+};
 
 const handlePreviouslyDeployedWorkers = async (
   maybeDeployedHostsOrDeals:
@@ -72,7 +75,9 @@ const handlePreviouslyDeployedWorkers = async (
   const previouslyDeployedWorkersNames = Object.keys(maybeDeployedHostsOrDeals);
 
   const previouslyDeployedWorkersNamesToBeDeployed = workersToDeploy.filter(
-    (workerName) => previouslyDeployedWorkersNames.includes(workerName)
+    (workerName) => {
+      return previouslyDeployedWorkersNames.includes(workerName);
+    }
   );
 
   if (previouslyDeployedWorkersNamesToBeDeployed.length === 0) {
@@ -91,16 +96,18 @@ const handlePreviouslyDeployedWorkers = async (
   });
 
   const workerNamesToRemove = previouslyDeployedWorkersNamesToBeDeployed.filter(
-    (workerName) => !confirmedWorkersNamesToDeploy.includes(workerName)
+    (workerName) => {
+      return !confirmedWorkersNamesToDeploy.includes(workerName);
+    }
   );
 
   if (workerNamesToRemove.length === 0) {
     return workersToDeploy;
   }
 
-  return workersToDeploy.filter(
-    (workerName) => !workerNamesToRemove.includes(workerName)
-  );
+  return workersToDeploy.filter((workerName) => {
+    return !workerNamesToRemove.includes(workerName);
+  });
 };
 
 type PrepareForDeployArg = {
@@ -144,7 +151,9 @@ export const prepareForDeploy = async ({
     hostsOrDealsString
   ];
 
-  const workerNamesSet = hostsOrDeals.map(([workerName]) => workerName);
+  const workerNamesSet = hostsOrDeals.map(([workerName]) => {
+    return workerName;
+  });
 
   const workersToDeploy =
     workerNamesString === undefined
@@ -173,13 +182,17 @@ export const prepareForDeploy = async ({
   }
 
   const workerNamesNotFoundInWorkersConfig = workersToDeploy.filter(
-    (workerName) => !workersFromFluenceConfigArray.includes(workerName)
+    (workerName) => {
+      return !workersFromFluenceConfigArray.includes(workerName);
+    }
   );
 
   if (workerNamesNotFoundInWorkersConfig.length !== 0) {
     commandObj.error(
       `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
-        .map((workerName) => color.yellow(workerName))
+        .map((workerName) => {
+          return color.yellow(workerName);
+        })
         .join(", ")} in ${color.yellow(
         FLUENCE_CONFIG_FILE_NAME
       )} please check the spelling and try again`
@@ -222,7 +235,9 @@ export const prepareForDeploy = async ({
 
   const spellNames = [
     ...new Set(
-      workerConfigs.flatMap(({ workerConfig }) => workerConfig.spells ?? [])
+      workerConfigs.flatMap(({ workerConfig }) => {
+        return workerConfig.spells ?? [];
+      })
     ),
   ];
 
@@ -308,7 +323,9 @@ export const prepareForDeploy = async ({
 
   const serviceNames = [
     ...new Set(
-      workerConfigs.flatMap(({ workerConfig }) => workerConfig.services ?? [])
+      workerConfigs.flatMap(({ workerConfig }) => {
+        return workerConfig.services ?? [];
+      })
     ),
   ];
 
@@ -353,36 +370,40 @@ export const prepareForDeploy = async ({
   const modulesUrls = [
     ...new Set(
       serviceConfigs
-        .flatMap(({ serviceConfig }) =>
-          Object.values(serviceConfig.modules).map(({ get }) => get)
-        )
-        .filter((get) => isUrl(get))
+        .flatMap(({ serviceConfig }) => {
+          return Object.values(serviceConfig.modules).map(({ get }) => {
+            return get;
+          });
+        })
+        .filter((get) => {
+          return isUrl(get);
+        })
     ),
   ];
 
   const downloadedModulesMap = new Map<string, string>(
     await Promise.all(
-      modulesUrls.map(
-        async (url): Promise<[string, string]> => [
-          url,
-          await downloadModule(url),
-        ]
-      )
+      modulesUrls.map(async (url): Promise<[string, string]> => {
+        return [url, await downloadModule(url)];
+      })
     )
   );
 
   const localModuleAbsolutePaths = serviceConfigs
-    .flatMap(({ serviceConfig }) =>
-      Object.values(serviceConfig.modules).map(({ get }) => ({
-        get,
-        serviceDirPath: serviceConfig.$getDirPath(),
-      }))
-    )
-    .filter(({ get }) => !isUrl(get))
-    .map(
-      ({ get, serviceDirPath }) =>
-        [get, getUrlOrAbsolutePath(get, serviceDirPath)] as const
-    );
+    .flatMap(({ serviceConfig }) => {
+      return Object.values(serviceConfig.modules).map(({ get }) => {
+        return {
+          get,
+          serviceDirPath: serviceConfig.$getDirPath(),
+        };
+      });
+    })
+    .filter(({ get }) => {
+      return !isUrl(get);
+    })
+    .map(({ get, serviceDirPath }) => {
+      return [get, getUrlOrAbsolutePath(get, serviceDirPath)] as const;
+    });
 
   const moduleAbsolutePathOrURLToModuleConfigsMap = new Map<
     string,
@@ -426,7 +447,9 @@ export const prepareForDeploy = async ({
   }
 
   const workers: Upload_deployArgConfig["workers"] = hostsOrDeals
-    .filter(([workerName]) => workersToDeployConfirmed.includes(workerName))
+    .filter(([workerName]) => {
+      return workersToDeployConfirmed.includes(workerName);
+    })
     .map(([workerName, { peerIds = [] }]) => {
       if (hosts && peerIds.length === 0) {
         commandObj.error(
@@ -449,9 +472,9 @@ export const prepareForDeploy = async ({
 
       const services: Upload_deployArgConfig["workers"][number]["config"]["services"] =
         (workerConfig.services ?? []).map((serviceName) => {
-          const maybeServiceConfig = serviceConfigs.find(
-            (c) => c.serviceName === serviceName
-          );
+          const maybeServiceConfig = serviceConfigs.find((c) => {
+            return c.serviceName === serviceName;
+          });
 
           assert(
             maybeServiceConfig !== undefined,
@@ -510,7 +533,9 @@ export const prepareForDeploy = async ({
         });
 
       const spells = (workerConfig.spells ?? []).map((spellName) => {
-        const maybeSpellConfig = spellConfigs.find((c) => c.name === spellName);
+        const maybeSpellConfig = spellConfigs.find((c) => {
+          return c.name === spellName;
+        });
 
         assert(
           maybeSpellConfig !== undefined,
@@ -555,19 +580,23 @@ const validateWasmExist = async (
   const errors = (
     await Promise.all(
       workers
-        .flatMap((worker) =>
-          worker.config.services.map((service) => ({
-            ...service,
-            worker: worker.name,
-          }))
-        )
-        .flatMap((service) =>
-          service.modules.map((module) => ({
-            ...module,
-            service: service.name,
-            worker: service.worker,
-          }))
-        )
+        .flatMap((worker) => {
+          return worker.config.services.map((service) => {
+            return {
+              ...service,
+              worker: worker.name,
+            };
+          });
+        })
+        .flatMap((service) => {
+          return service.modules.map((module) => {
+            return {
+              ...module,
+              service: service.name,
+              worker: service.worker,
+            };
+          });
+        })
         .map(async ({ wasm, service, worker }) => {
           try {
             await access(wasm);
@@ -581,7 +610,9 @@ const validateWasmExist = async (
           }
         })
     )
-  ).filter((result): result is string => typeof result === "string");
+  ).filter((result): result is string => {
+    return typeof result === "string";
+  });
 
   if (errors.length > 0) {
     commandObj.error(errors.join("\n"));

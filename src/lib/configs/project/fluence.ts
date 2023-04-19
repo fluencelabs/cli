@@ -577,7 +577,9 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
   };
 };
 
-const getDefault = (): Promise<LatestConfig> => initFluenceProject();
+const getDefault = (): Promise<LatestConfig> => {
+  return initFluenceProject();
+};
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
@@ -593,18 +595,20 @@ const migrations: Migrations<Config> = [
     }
 
     const services = config.services.reduce<Record<string, ServiceV1>>(
-      (acc, { name, count = 1 }, i): Record<string, ServiceV1> => ({
-        ...acc,
-        [name]: {
-          get: path.relative(
-            projectRootDir,
-            path.join(projectRootDir, "artifacts", name)
-          ),
-          deploy: [
-            { deployId: `default_${i}`, ...(count > 1 ? { count } : {}) },
-          ],
-        },
-      }),
+      (acc, { name, count = 1 }, i): Record<string, ServiceV1> => {
+        return {
+          ...acc,
+          [name]: {
+            get: path.relative(
+              projectRootDir,
+              path.join(projectRootDir, "artifacts", name)
+            ),
+            deploy: [
+              { deployId: `default_${i}`, ...(count > 1 ? { count } : {}) },
+            ],
+          },
+        };
+      },
       {}
     );
 
@@ -644,7 +648,9 @@ const checkDuplicatesAndPresence = (
 
   const servicesOrSpellsSet = new Set(
     Object.keys(fluenceConfig[servicesOrSpells] ?? {}).flatMap(
-      (serviceOrSpellName) => serviceOrSpellName
+      (serviceOrSpellName) => {
+        return serviceOrSpellName;
+      }
     )
   );
 
@@ -654,7 +660,9 @@ const checkDuplicatesAndPresence = (
       const workerServicesOrSpellsSet = new Set(workerServicesOrSpells);
 
       const notListedInFluenceYAML = workerServicesOrSpells.filter(
-        (serviceName) => !servicesOrSpellsSet.has(serviceName)
+        (serviceName) => {
+          return !servicesOrSpellsSet.has(serviceName);
+        }
       );
 
       const maybePreviousError = typeof acc === "string" ? acc : null;
@@ -675,10 +683,9 @@ const checkDuplicatesAndPresence = (
           ? `Worker ${color.yellow(
               workerName
             )} has duplicated ${servicesOrSpells} in ${FLUENCE_CONFIG_FILE_NAME}: ${color.yellow(
-              workerServicesOrSpells.filter(
-                (serviceName, index) =>
-                  workerServicesOrSpells.indexOf(serviceName) !== index
-              )
+              workerServicesOrSpells.filter((serviceName, index) => {
+                return workerServicesOrSpells.indexOf(serviceName) !== index;
+              })
             )}`
           : null;
 
@@ -686,7 +693,9 @@ const checkDuplicatesAndPresence = (
         maybePreviousError,
         maybeNotListedError,
         maybeHasDuplicatesError,
-      ].filter((error): error is string => error !== null);
+      ].filter((error): error is string => {
+        return error !== null;
+      });
 
       return errors.length === 0 ? true : errors.join("\n");
     },
@@ -696,11 +705,12 @@ const checkDuplicatesAndPresence = (
 
 const validateWorkers = (
   fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">
-) =>
-  validateBatch(
+) => {
+  return validateBatch(
     checkDuplicatesAndPresence(fluenceConfig, "services"),
     checkDuplicatesAndPresence(fluenceConfig, "spells")
   );
+};
 
 const validateHostsAndDeals = (
   fluenceConfig: Pick<FluenceConfig, "hosts" | "deals" | "workers">,
@@ -715,20 +725,24 @@ const validateHostsAndDeals = (
   const workers = fluenceConfig["workers"];
 
   const workersSet = new Set(
-    Object.keys(workers ?? {}).flatMap((serviceName) => serviceName)
+    Object.keys(workers ?? {}).flatMap((serviceName) => {
+      return serviceName;
+    })
   );
 
   const workerNamesErrors = Object.keys(hostsOrDeals)
-    .map((workerName) =>
-      workersSet.has(workerName)
+    .map((workerName) => {
+      return workersSet.has(workerName)
         ? null
         : `Worker named ${color.yellow(workerName)} listed in ${color.yellow(
             hostsOrDealsProperty
           )} property must be listed in ${color.yellow(
             "workers"
-          )} property in ${FLUENCE_CONFIG_FILE_NAME}`
-    )
-    .filter((error): error is string => error !== null);
+          )} property in ${FLUENCE_CONFIG_FILE_NAME}`;
+    })
+    .filter((error): error is string => {
+      return error !== null;
+    });
 
   return workerNamesErrors.length === 0 ? true : workerNamesErrors.join("\n");
 };
@@ -776,10 +790,11 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
 
   if (notUnique.length > 0) {
     return `Deploy ids must be unique. Not unique deploy ids found:\n${notUnique
-      .map(
-        ({ serviceName, notUniqueDeployIds }): string =>
-          `${color.yellow(serviceName)}: ${[...notUniqueDeployIds].join(", ")}`
-      )
+      .map(({ serviceName, notUniqueDeployIds }): string => {
+        return `${color.yellow(serviceName)}: ${[...notUniqueDeployIds].join(
+          ", "
+        )}`;
+      })
       .join("\n")}`;
   }
 
@@ -791,7 +806,9 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV2,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
-  getConfigOrConfigDirPath: () => projectRootDir,
+  getConfigOrConfigDirPath: () => {
+    return projectRootDir;
+  },
   getSchemaDirPath: ensureFluenceDir,
   validate,
 };

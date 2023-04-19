@@ -23,8 +23,8 @@
   "scripts": {
     "before-build": "shx rm -rf ./src/versions && shx mkdir ./src/versions && shx cp ./package.json ./src/versions/cli.package.json && shx cp ./node_modules/@fluencelabs/js-client.node/package.json ./src/versions/js-client.package.json && ./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules/.pnpm/@fluencelabs+aqua-lib@0.7.0/node_modules $(npx ts-node ./src/getAquaDependencyImports.ts @fluencelabs/installation-spell) --no-input",
     "build": "shx rm -rf dist && tsc -b",
-    "lint": "eslint . --ext .ts",
-    "lint-fix": "eslint . --ext .ts --cache --fix",
+    "lint": "eslint . --ext .ts --ext .js",
+    "lint-fix": "eslint . --ext .ts --ext .js --cache --fix",
     "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "pnpm before-build && pnpm build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
@@ -166,6 +166,10 @@
       "unused-imports"
     ],
     "rules": {
+      "arrow-body-style": [
+        "error",
+        "always"
+      ],
       "import/extensions": [
         "error",
         "always"
@@ -293,7 +297,8 @@
   "eslintIgnore": [
     "/dist",
     "/src/ts/**/*",
-    "tmp"
+    "tmp",
+    "resources"
   ],
   "lint-staged": {
     "*.ts": "prettier --write",

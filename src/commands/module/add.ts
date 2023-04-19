@@ -117,11 +117,14 @@ export default class Add extends BaseCommand<typeof Add> {
       );
     }
 
-    const validateModuleName = (name: string): true | string =>
-      !(name in serviceConfig.modules) ||
-      `You already have ${color.yellow(name)} in ${color.yellow(
-        serviceConfig.$getPath()
-      )}`;
+    const validateModuleName = (name: string): true | string => {
+      return (
+        !(name in serviceConfig.modules) ||
+        `You already have ${color.yellow(name)} in ${color.yellow(
+          serviceConfig.$getPath()
+        )}`
+      );
+    };
 
     let moduleName = flags.name ?? moduleConfig.name;
     const moduleNameValidity = validateModuleName(moduleName);

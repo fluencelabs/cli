@@ -87,10 +87,12 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "countlyConsent"],
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => ({
-  version: 0,
-  countlyConsent: false,
-});
+const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => {
+  return {
+    version: 0,
+    countlyConsent: false,
+  };
+};
 
 const migrations: Migrations<Config> = [];
 
@@ -99,11 +101,12 @@ type LatestConfig = ConfigV0;
 export type UserConfig = InitializedConfig<LatestConfig>;
 export type UserConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const validate: ConfigValidateFunction<LatestConfig> = (config) =>
-  validateBatch(
+const validate: ConfigValidateFunction<LatestConfig> = (config) => {
+  return validateBatch(
     validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
     validateAllVersionsAreExact(config.dependencies?.cargo ?? {})
   );
+};
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],

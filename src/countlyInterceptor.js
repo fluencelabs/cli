@@ -25,12 +25,17 @@ const COUNTLY_REPORT_TIMEOUT = 3000;
 /**
  * @type {() => boolean}
  */
-export const isCountlyInitialized = () => Countly.device_id !== undefined;
+export const isCountlyInitialized = () => {
+  return Countly.device_id !== undefined;
+};
 
 /**
  * @type {() => never}
  */
-const exitWithCode1 = () => process.exit(1);
+const exitWithCode1 = () => {
+  return process.exit(1);
+};
+
 let hasCrashed = false;
 let hasSentCommandEvent = false;
 let hasSessionEnded = false;

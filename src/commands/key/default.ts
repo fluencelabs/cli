@@ -88,16 +88,20 @@ export default class Default extends BaseCommand<typeof Default> {
 
       keyPairName = await list({
         message: `Select key-pair name to set as default at ${secretsConfigPath}`,
-        oneChoiceMessage: (choice: string): string =>
-          `Do you want to set ${color.yellow(choice)} as default?`,
-        onNoChoices: (): never =>
-          commandObj.error(
+        oneChoiceMessage: (choice: string): string => {
+          return `Do you want to set ${color.yellow(choice)} as default?`;
+        },
+        onNoChoices: (): never => {
+          return commandObj.error(
             `There are no key-pairs to set as default at ${secretsConfigPath}`
-          ),
+          );
+        },
         options: (flags.user
           ? userSecretsConfig
           : projectSecretsConfig
-        ).keyPairs.map((value): string => value.name),
+        ).keyPairs.map((value): string => {
+          return value.name;
+        }),
       });
     }
 

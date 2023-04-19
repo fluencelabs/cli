@@ -230,8 +230,8 @@ type InitReadonlyFunctionWithDefault<LatestConfig> = () => Promise<
 export const getConfigPath = (
   configOrConfigDirPath: string,
   configName: string
-) =>
-  configOrConfigDirPath.endsWith(YAML_EXT)
+) => {
+  return configOrConfigDirPath.endsWith(YAML_EXT)
     ? {
         configPath: configOrConfigDirPath,
         configDirPath: dirname(configOrConfigDirPath),
@@ -240,6 +240,7 @@ export const getConfigPath = (
         configPath: join(configOrConfigDirPath, configName),
         configDirPath: configOrConfigDirPath,
       };
+};
 
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
@@ -291,13 +292,14 @@ export function getReadonlyConfigInitFunction<
 
     const schemaPathCommentStart = "# yaml-language-server: $schema=";
 
-    const getSchemaPathComment = async (): Promise<string> =>
-      `${schemaPathCommentStart}${await ensureSchema({
+    const getSchemaPathComment = async (): Promise<string> => {
+      return `${schemaPathCommentStart}${await ensureSchema({
         name,
         configDirPath,
         getSchemaDirPath,
         schema: validateLatestConfig.schema,
       })}`;
+    };
 
     let configString: string;
 

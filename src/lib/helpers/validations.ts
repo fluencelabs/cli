@@ -43,32 +43,40 @@ export const validateHasDefault = <T>(
   defaultValue: string,
   getField: (item: T) => string,
   errorText: string
-): ValidationResult =>
-  array.some((item): boolean => getField(item) === defaultValue) || errorText;
+): ValidationResult => {
+  return (
+    array.some((item): boolean => {
+      return getField(item) === defaultValue;
+    }) || errorText
+  );
+};
 
 export const validateBatch = (
   ...args: Array<ValidationResult>
 ): ValidationResult => {
-  const errors = args.filter(
-    (result): result is string => typeof result === "string"
-  );
+  const errors = args.filter((result): result is string => {
+    return typeof result === "string";
+  });
 
   return errors.length === 0 ? true : errors.join("\n");
 };
 
-export const isExactVersion = (version: string): boolean =>
-  semver.clean(version) === version;
+export const isExactVersion = (version: string): boolean => {
+  return semver.clean(version) === version;
+};
 
 export const validateAllVersionsAreExact = (
   versions: Record<string, string>
 ): ValidationResult => {
-  const notExactVersions = Object.entries(versions).filter(
-    ([, version]) => !isExactVersion(version)
-  );
+  const notExactVersions = Object.entries(versions).filter(([, version]) => {
+    return !isExactVersion(version);
+  });
 
   return notExactVersions.length === 0
     ? true
     : `The following dependencies don't have exact versions: ${notExactVersions
-        .map(([name, version]) => `${name}: ${version}`)
+        .map(([name, version]) => {
+          return `${name}: ${version}`;
+        })
         .join(", ")}`;
 };

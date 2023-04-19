@@ -131,34 +131,37 @@ export const ensureVSCodeSettingsJSON = async ({
 
     const newAquaImportPathStartsFromUserFluenceNpmDir = new Set(
       aquaImports
-        .filter((aquaImport): boolean =>
-          aquaImport.startsWith(userFluenceNpmDir)
-        )
-        .map((aquaImport): string =>
-          getUserFluenceNpmImportPathStart(aquaImport)
-        )
+        .filter((aquaImport): boolean => {
+          return aquaImport.startsWith(userFluenceNpmDir);
+        })
+        .map((aquaImport): string => {
+          return getUserFluenceNpmImportPathStart(aquaImport);
+        })
     );
 
     const previousAquaImports = parsedFileContent[AQUA_SETTINGS_IMPORTS] ?? [];
 
     const previousAquaImportsFromUserFluenceNpmDir = previousAquaImports.filter(
-      (aquaImport): boolean => aquaImport.startsWith(userFluenceNpmDir)
+      (aquaImport): boolean => {
+        return aquaImport.startsWith(userFluenceNpmDir);
+      }
     );
 
     const deduplicatedPreviousAquaImportsFromUserFluenceNpmDir =
       previousAquaImportsFromUserFluenceNpmDir.filter(
-        (previousAquaImport): boolean =>
-          !newAquaImportPathStartsFromUserFluenceNpmDir.has(
+        (previousAquaImport): boolean => {
+          return !newAquaImportPathStartsFromUserFluenceNpmDir.has(
             getUserFluenceNpmImportPathStart(previousAquaImport)
-          )
+          );
+        }
       );
 
     parsedFileContent[AQUA_SETTINGS_IMPORTS] = [
       ...new Set([
         ...aquaImports,
-        ...previousAquaImports.filter(
-          (aquaImport): boolean => !aquaImport.startsWith(userFluenceNpmDir)
-        ),
+        ...previousAquaImports.filter((aquaImport): boolean => {
+          return !aquaImport.startsWith(userFluenceNpmDir);
+        }),
         ...deduplicatedPreviousAquaImportsFromUserFluenceNpmDir,
       ]),
     ];
@@ -171,5 +174,6 @@ export const ensureVSCodeSettingsJSON = async ({
   }
 };
 
-const getUserFluenceNpmImportPathStart = (fullPath: string): string =>
-  fullPath.split("/").slice(0, -2).join("/");
+const getUserFluenceNpmImportPathStart = (fullPath: string): string => {
+  return fullPath.split("/").slice(0, -2).join("/");
+};

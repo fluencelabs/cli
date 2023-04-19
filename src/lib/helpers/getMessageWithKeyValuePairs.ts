@@ -19,12 +19,12 @@ import { color } from "@oclif/color";
 export const getMessageWithKeyValuePairs = (
   message: string,
   keyValuePairs: Record<string, string> | undefined
-): string =>
-  `${color.yellow(message)}${
+): string => {
+  return `${color.yellow(message)}${
     keyValuePairs === undefined
       ? ""
-      : Object.entries(keyValuePairs).reduce(
-          (acc, [k, v]): string => `${acc}\n  ${k}: ${v}`,
-          ":"
-        )
+      : Object.entries(keyValuePairs).reduce((acc, [k, v]): string => {
+          return `${acc}\n  ${k}: ${v}`;
+        }, ":")
   }`;
+};

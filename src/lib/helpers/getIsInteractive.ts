@@ -18,4 +18,6 @@ import { IS_TTY, NO_INPUT_FLAG_NAME } from "../const.js";
 
 export const getIsInteractive = (flags: {
   [NO_INPUT_FLAG_NAME]: boolean;
-}): boolean => IS_TTY && !flags[NO_INPUT_FLAG_NAME];
+}): boolean => {
+  return IS_TTY && !flags[NO_INPUT_FLAG_NAME];
+};

@@ -70,14 +70,14 @@ export async function initCountly({
 const dependenciesToSegmentation = (
   dependencies: Record<string, string> | null | undefined,
   prefix: string
-): Record<string, string> =>
-  Object.entries(dependencies ?? {}).reduce(
-    (acc, [dep, version]) => ({
+): Record<string, string> => {
+  return Object.entries(dependencies ?? {}).reduce((acc, [dep, version]) => {
+    return {
       ...acc,
       [`[${prefix}]${dep}`]: version,
-    }),
-    {}
-  );
+    };
+  }, {});
+};
 
 /**
  * Add log that will be sent to Countly together with crash report

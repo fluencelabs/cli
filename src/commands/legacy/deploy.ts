@@ -229,14 +229,14 @@ const prepareForLegacyDeploy = async (
   const serviceInfos = await build(buildArg);
 
   return serviceInfos.flatMap(
-    ({ peerId, peerIds, count, ...serviceInfo }): Array<PreparedForDeploy> =>
-      getPeerIds({
+    ({ peerId, peerIds, count, ...serviceInfo }): Array<PreparedForDeploy> => {
+      return getPeerIds({
         peerId: peerIds ?? peerId,
         count,
         relays: fluenceConfig.relays,
         namedPeerIds: fluenceConfig.peerIds,
-      }).map(
-        (peerId: string): PreparedForDeploy => ({
+      }).map((peerId: string): PreparedForDeploy => {
+        return {
           ...serviceInfo,
           peerId,
           deployJSON: {
@@ -244,8 +244,9 @@ const prepareForLegacyDeploy = async (
               modules: [],
             },
           },
-        })
-      )
+        };
+      });
+    }
   );
 };
 
@@ -262,8 +263,11 @@ const getPeerIds = ({
   relays,
   namedPeerIds = {},
 }: GetPeerIdsArg): Array<string> => {
-  const getNamedPeerIds = (peerIds: Array<string>): string[] =>
-    peerIds.map((peerId): string => namedPeerIds[peerId] ?? peerId);
+  const getNamedPeerIds = (peerIds: Array<string>): string[] => {
+    return peerIds.map((peerId): string => {
+      return namedPeerIds[peerId] ?? peerId;
+    });
+  };
 
   if (peerId === undefined) {
     return getEvenlyDistributedIds(relays, count);

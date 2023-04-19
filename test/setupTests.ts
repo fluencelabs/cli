@@ -29,7 +29,9 @@ import { fluence, initFirstTime } from "./helpers.js";
         "no-input": true,
       },
     }),
-    ...TEMPLATES.map((template) => initFirstTime(template)),
+    ...TEMPLATES.map((template) => {
+      return initFirstTime(template);
+    }),
   ]);
 
   console.log("Tests are ready to run!");

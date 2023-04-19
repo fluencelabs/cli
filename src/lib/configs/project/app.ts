@@ -357,10 +357,12 @@ const migrations: Migrations<Config> = [
           acc[serviceName] = Object.entries(service).reduce<ServicesV3[string]>(
             (acc, [deployId, deploys]): ServicesV3[string] => {
               acc[deployId] = deploys.map(
-                (deploy): ServicesV3[string][string][number] => ({
-                  ...deploy,
-                  keyPairName,
-                })
+                (deploy): ServicesV3[string][string][number] => {
+                  return {
+                    ...deploy,
+                    keyPairName,
+                  };
+                }
               );
 
               return acc;
@@ -392,14 +394,19 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 export const initAppConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyAppConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
-export const initNewAppConfig = (config: LatestConfig): Promise<AppConfig> =>
-  getConfigInitFunction(initConfigOptions, (): LatestConfig => config)();
+
+export const initNewAppConfig = (config: LatestConfig): Promise<AppConfig> => {
+  return getConfigInitFunction(initConfigOptions, (): LatestConfig => {
+    return config;
+  })();
+};
+
 export const initNewReadonlyAppConfig = (
   config: LatestConfig
-): Promise<AppConfigReadonly> =>
-  getReadonlyConfigInitFunction(
-    initConfigOptions,
-    (): LatestConfig => config
-  )();
+): Promise<AppConfigReadonly> => {
+  return getReadonlyConfigInitFunction(initConfigOptions, (): LatestConfig => {
+    return config;
+  })();
+};
 
 export const appSchema: JSONSchemaType<LatestConfig> = configSchemaV3;

@@ -152,7 +152,9 @@ type LatestConfig = ConfigV0;
 export type SpellConfig = InitializedConfig<LatestConfig>;
 export type SpellConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const getDateSec = (date: Date) => Math.round(date.getTime() / 1000);
+const getDateSec = (date: Date) => {
+  return Math.round(date.getTime() / 1000);
+};
 
 export const resolveStartSec = ({ clock }: LatestConfig): number => {
   if (clock === undefined) {
@@ -185,8 +187,8 @@ export const resolveEndSec = ({ clock }: LatestConfig): number => {
 const validate: ConfigValidateFunction<LatestConfig> = async (
   config,
   configPath
-) =>
-  validateBatch(
+) => {
+  return validateBatch(
     config.clock?.startTimestamp !== undefined &&
       config.clock?.startDelaySec !== undefined
       ? `You can't specify both 'startTimestamp' and 'startDelaySec' properties`
@@ -244,51 +246,65 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
       }
     })()
   );
+};
 
 const getInitConfigOptions = (
   configPath: string
-): InitConfigOptions<Config, LatestConfig> => ({
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
-  migrations,
-  validate,
-  name: SPELL_CONFIG_FILE_NAME,
-  getSchemaDirPath: ensureFluenceDir,
-  getConfigOrConfigDirPath: (): string => configPath,
-});
+): InitConfigOptions<Config, LatestConfig> => {
+  return {
+    allSchemas: [configSchemaV0],
+    latestSchema: configSchemaV0,
+    migrations,
+    validate,
+    name: SPELL_CONFIG_FILE_NAME,
+    getSchemaDirPath: ensureFluenceDir,
+    getConfigOrConfigDirPath: (): string => {
+      return configPath;
+    },
+  };
+};
 
 export const initSpellConfig = async (
   configOrConfigDirPathOrUrl: string,
   absolutePath: string
-): Promise<InitializedConfig<LatestConfig> | null> =>
-  getConfigInitFunction(
+): Promise<InitializedConfig<LatestConfig> | null> => {
+  return getConfigInitFunction(
     getInitConfigOptions(
       await ensureSpellAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
+};
+
 export const initReadonlySpellConfig = async (
   configOrConfigDirPathOrUrl: string,
   absolutePath: string
-): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
+  return getReadonlyConfigInitFunction(
     getInitConfigOptions(
       await ensureSpellAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
     )
   )();
+};
 
-const getDefault = (): LatestConfig => ({
-  version: 0,
-  aquaFilePath: "./spell.aqua",
-  function: "spell",
-  clock: {
-    periodSec: 60,
-    endDelaySec: 30 * 60,
-  },
-});
+const getDefault = (): LatestConfig => {
+  return {
+    version: 0,
+    aquaFilePath: "./spell.aqua",
+    function: "spell",
+    clock: {
+      periodSec: 60,
+      endDelaySec: 30 * 60,
+    },
+  };
+};
 
 export const initNewReadonlySpellConfig = (
   configPath: string
-): Promise<InitializedReadonlyConfig<LatestConfig> | null> =>
-  getReadonlyConfigInitFunction(getInitConfigOptions(configPath), getDefault)();
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
+  return getReadonlyConfigInitFunction(
+    getInitConfigOptions(configPath),
+    getDefault
+  )();
+};
 
 export const spellSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

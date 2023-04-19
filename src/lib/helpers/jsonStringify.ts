@@ -19,7 +19,9 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 export const jsonStringify = (
   unknown: unknown,
   replacer: Parameters<typeof JSON.stringify>[1] = null
-): string => JSON.stringify(unknown, replacer, 2);
+): string => {
+  return JSON.stringify(unknown, replacer, 2);
+};
 
 export const stringifyUnknown = (unknown: unknown): string => {
   try {

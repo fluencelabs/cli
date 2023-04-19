@@ -227,5 +227,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   }
 }
 
-const getLinkToAddress = (dealId: string) =>
-  `https://explorer.testnet.aurora.dev/address/${dealId}`;
+const getLinkToAddress = (dealId: string) => {
+  return `https://explorer.testnet.aurora.dev/address/${dealId}`;
+};

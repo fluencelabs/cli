@@ -24,4 +24,8 @@ import { createErrorPromise } from "../dist/countlyInterceptor.js";
 oclif
   .run(process.argv.slice(2), import.meta.url)
   .then(oclif.flush)
-  .catch(/** @param {unknown} error */ (error) => createErrorPromise(error));
+  .catch(
+    /** @param {unknown} error */ (error) => {
+      return createErrorPromise(error);
+    }
+  );

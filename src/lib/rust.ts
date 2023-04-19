@@ -171,18 +171,19 @@ const hasRequiredRustToolchain = async (): Promise<boolean> => {
   return hasRequiredRustToolchain;
 };
 
-const hasRequiredRustTarget = async (): Promise<boolean> =>
-  (
+const hasRequiredRustTarget = async (): Promise<boolean> => {
+  return (
     await execPromise({
       command: RUSTUP,
       args: ["target", "list"],
     })
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
+};
 
 export const getLatestVersionOfCargoDependency = async (
   name: string
-): Promise<string> =>
-  (
+): Promise<string> => {
+  return (
     (
       await execPromise({
         command: CARGO,
@@ -195,6 +196,7 @@ export const getLatestVersionOfCargoDependency = async (
       )}. Please make sure ${color.yellow(name)} is spelled correctly`
     )
   ).trim();
+};
 
 type InstallCargoDependencyArg = {
   toolchain: string | undefined;
@@ -312,14 +314,15 @@ export const ensureCargoDependency = async ({
       explicitInstallation,
       name,
       version,
-      installDependency: () =>
-        installCargoDependency({
+      installDependency: () => {
+        return installCargoDependency({
           dependencyPath,
           dependencyTmpPath,
           name,
           toolchain,
           version,
-        }),
+        });
+      },
     });
   }
 
