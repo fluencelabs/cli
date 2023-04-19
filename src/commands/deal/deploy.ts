@@ -77,7 +77,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(false);
+    doRegisterIpfsClient(true);
 
     const chainNetwork = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
