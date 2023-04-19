@@ -1,0 +1,16 @@
+{
+  "name": "replace-version",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "ncc build index.js"
+  },
+  "author": "Fluence Labs",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@actions/core": "^1.10.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.36.1"
+  }
+}

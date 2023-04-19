@@ -146,58 +146,23 @@ jobs:
           version: ${{ inputs.aqua-version }}
           package-manager: pnpm
 
-      - name: Set recommended aqua version
-        if: inputs.aqua-version != 'null'
-        uses: ./.github/actions/replace-const
+      - name: Update versions.json
+        uses: ./.github/actions/replace-version
         with:
-          key: AQUA_RECOMMENDED_VERSION
-          value: ${{ inputs.aqua-version }}
-
-      - name: Set recommended js-client.api version
-        if: inputs.js-client-snapshots != 'null'
-        uses: ./.github/actions/replace-const
-        with:
-          key: FLUENCE_JS_CLIENT_API_RECOMMENDED_VERSION
-          value: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
-
-      - name: Set recommended js-client.node version
-        if: inputs.js-client-snapshots != 'null'
-        uses: ./.github/actions/replace-const
-        with:
-          key: FLUENCE_JS_CLIENT_NODE_RECOMMENDED_VERSION
-          value: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
-
-      - name: Set recommended marine version
-        if: inputs.marine-version != 'null'
-        uses: ./.github/actions/replace-const
-        with:
-          key: MARINE_RECOMMENDED_VERSION
-          value: ${{ inputs.marine-version }}
-          cargo: true
-
-      - name: Set recommended mrepl version
-        if: inputs.mrepl-version != 'null'
-        uses: ./.github/actions/replace-const
-        with:
-          key: MREPL_RECOMMENDED_VERSION
-          value: ${{ inputs.mrepl-version }}
-          cargo: true
-
-      - name: Set recommended marine-rs-sdk version
-        if: inputs.marine-rs-sdk-version != 'null'
-        uses: ./.github/actions/replace-const
-        with:
-          key: MARINE_RS_SDK_TEMPLATE_VERSION
-          value: ${{ inputs.marine-rs-sdk-version }}
-          cargo: true
-
-      - name: Set recommended marine-rs-sdk-test version
-        if: inputs.marine-rs-sdk-test-version != 'null'
-        uses: ./.github/actions/replace-const
-        with:
-          key: MARINE_RS_SDK_TEST_TEMPLATE_VERSION
-          value: ${{ inputs.marine-rs-sdk-test-version }}
-          cargo: true
+          versions: |
+            {
+              "npm": {
+                "@fluencelabs/aqua": "${{ inputs.aqua-version }}",
+                "@fluencelabs/js-client.api": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.api'] }}",
+                "@fluencelabs/js-client.node": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.node'] }}"
+              },
+              "cargo": {
+                "marine": "${{ inputs.marine-version }}",
+                "mrepl": "${{ inputs.mrepl-version }}",
+                "marine-rs-sdk": "${{ inputs.marine-rs-sdk-version }}",
+                "marine-rs-sdk-test": "${{ inputs.marine-rs-sdk-test-version }}"
+              }
+            }
 
       - name: Run tests
         env:
