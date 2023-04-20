@@ -67,7 +67,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(false);
+    doRegisterIpfsClient(true);
 
     const workersConfig = await initNewWorkersConfig();
 

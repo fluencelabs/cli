@@ -25,3 +25,13 @@ When you contribute, you have to be aware that your contribution is covered by *
 -   Avoid using `this` in commands except for inside `initCli` function. This style is easier to understand and there will be less stuff to refactor if instead of using methods on command object you simply use separate functions which can later be moved outside into a separate module for reuse in other commands
 -   Use `commandObj.error` (or `throw new CLIError`) for human readable errors. They will be reported to analytics as events. Use `throw new Error` (or `assert`) for unexpected errors. They will be reported to analytics as crashes.
 -   Don't use colors inside commands descriptions. They can't be rendered to markdown and they will not be rendered to users of the packaged Fluence CLI anyway, when they run `--help`
+-   To run tests locally you need to do the following:
+    1. Make sure you have docker installed (it's most convenient and reliable if you install Docker Desktop by following the instruction for your operating system on their official website)
+    1. `cd .github/e2e` dir of this repo. Set environment variable for rust peer image. Make sure to use the `rust-peer` from `src/versions.json`.
+       Example in `bash`:
+       `export RUST_PEER_IMAGE="fluencelabs/rust-peer:0.1.8"`
+       Example in `fish`:
+       `export const RUST_PEER_IMAGE="fluencelabs/rust-peer:0.1.8"`))
+    1. run `docker compose up -d`
+    1. `cd` back to repo root dir. Set env variable `FLUENCE_ENV="local"` so tests run against your local peers
+    1. run `pnpm test` which will lint and check the code, build it, package it, prepare the tests and run them

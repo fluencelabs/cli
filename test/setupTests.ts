@@ -25,9 +25,6 @@ import { fluence, initFirstTime } from "./helpers.js";
   await Promise.all([
     fluence({
       args: ["dep", "i"],
-      flags: {
-        "no-input": true,
-      },
     }),
     ...TEMPLATES.map((template) => {
       return initFirstTime(template);

@@ -813,6 +813,17 @@ export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   validate,
 };
 
+export const initFluenceConfigWithPath = async (
+  path: string
+): Promise<InitializedConfig<ConfigV2> | null> => {
+  return getConfigInitFunction({
+    ...initConfigOptions,
+    getConfigOrConfigDirPath: () => {
+      return path;
+    },
+  })();
+};
+
 export const initNewFluenceConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault

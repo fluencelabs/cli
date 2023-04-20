@@ -3,6 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "references": [{ "path": ".." }],
-  "include": ["./**/*.ts"]
+  "include": ["../src/**/*", "../test/**/*"],
+  "references": [{ "path": ".." }]
 }
