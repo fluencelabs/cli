@@ -1,53 +1,57 @@
-const fs = require("fs");
 const core = require("@actions/core");
+const fs = require("fs");
+const path = require("path");
 
-function mergeVersions(fileData, inputVersions) {
-  let mergedVersions = JSON.parse(JSON.stringify(fileData));
-
-  for (const key in inputVersions) {
-    if (inputVersions[key] === null) continue;
-
-    if (typeof inputVersions[key] === "object") {
-      for (const innerKey in inputVersions[key]) {
-        if (inputVersions[key][innerKey] !== null) {
-          mergedVersions[key][innerKey] = inputVersions[key][innerKey];
-        }
-      }
-    } else {
-      mergedVersions[key] = inputVersions[key];
-    }
-  }
-
-  return mergedVersions;
-}
-
-(async () => {
+async function run() {
   try {
-    const fileData = JSON.parse(fs.readFileSync("src/versions.json", "utf8"));
-    const versionsInput = core.getInput("versions");
-    const inputVersions = JSON.parse(versionsInput);
+    const inputVersions = JSON.parse(core.getInput("versions"));
 
-    const mergedVersions = mergeVersions(fileData, inputVersions);
+    const versionsFilePath = path.join(
+      process.env.GITHUB_WORKSPACE,
+      "src",
+      "src/versions.json"
+    );
+    const versionsFileContent = fs.readFileSync(versionsFilePath, "utf-8");
+    const versions = JSON.parse(versionsFileContent);
 
-    let shouldSetCargoRegistryDefault = false;
-    if (inputVersions.cargo) {
-      for (const key in inputVersions.cargo) {
-        if (inputVersions.cargo[key] !== null) {
-          shouldSetCargoRegistryDefault = true;
-          break;
+    let cargoDependencyUpdated = false;
+
+    // Merge inputVersions into versions
+    for (const category in inputVersions) {
+      if (
+        versions.hasOwnProperty(category) &&
+        inputVersions[category] != null
+      ) {
+        for (const component in inputVersions[category]) {
+          if (
+            versions[category].hasOwnProperty(component) &&
+            inputVersions[category][component] !== "null"
+          ) {
+            versions[category][component] = inputVersions[category][component];
+
+            // Check if a cargo dependency was updated
+            if (category === "cargo") {
+              cargoDependencyUpdated = true;
+            }
+          }
         }
       }
     }
 
-    fs.writeFileSync(
-      "src/versions.json",
-      JSON.stringify(mergedVersions, null, 2)
-    );
+    // Save updated versions.json
+    fs.writeFileSync(versionsFilePath, JSON.stringify(versions, null, 2));
 
-    if (shouldSetCargoRegistryDefault) {
+    // Print updated versions.json to stdout
+    console.log("Updated versions.json:");
+    console.log(JSON.stringify(versions, null, 2));
+
+    // Set CARGO_REGISTRY_DEFAULT if cargoDependencyUpdated is true
+    if (cargoDependencyUpdated) {
       core.exportVariable("CARGO_REGISTRY_DEFAULT", "fluence");
     }
   } catch (error) {
     core.setFailed(error.message);
   }
-})();
+}
+
+run();
