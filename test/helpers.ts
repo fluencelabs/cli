@@ -63,7 +63,10 @@ export const fluence = async ({
   return execPromise({
     command: pathToFluenceExecutable,
     args,
-    flags,
+    flags: {
+      "no-input": true,
+      ...flags,
+    },
     options: { cwd },
     printOutput: true,
   });
@@ -104,6 +107,16 @@ export const initFirstTime = async (template: Template) => {
   return templatePath;
 };
 
+const generateDefaultKey = (cwd: string) => {
+  return fluence({
+    args: ["key", "new", "default"],
+    flags: {
+      default: true,
+    },
+    cwd,
+  });
+};
+
 export const init = async (cwd: string, template: Template): Promise<void> => {
   const templatePath = getInitializedTemplatePath(template);
 
@@ -112,6 +125,7 @@ export const init = async (cwd: string, template: Template): Promise<void> => {
   } catch {}
 
   await cp(templatePath, cwd, { recursive: true });
+  await generateDefaultKey(cwd);
 };
 
 export const maybeConcurrentTest = (...args: Parameters<typeof test>): void => {
