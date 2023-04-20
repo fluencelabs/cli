@@ -1,0 +1,12 @@
+name: Replace version
+description: |
+  Replace version in src/versions.json
+
+inputs:
+  versions:
+    type: string
+
+
+runs:
+  using: "node16"
+  main: "dist/index.js"
