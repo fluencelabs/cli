@@ -198,24 +198,28 @@ const isCheckForUpdatesRequired = async () => {
 };
 
 const handleFluenceCLIVersion = async (
-  maybeFluenceCLIVersion: string | undefined
+  maybeCliVersionFromFluenceConfig: string | undefined
 ): Promise<void> => {
+  if (isInteractive && (await isCheckForUpdatesRequired())) {
+    await checkForUpdates();
+  }
+
   if (
-    typeof maybeFluenceCLIVersion === "string" &&
-    maybeFluenceCLIVersion !== commandObj.config.version
+    typeof maybeCliVersionFromFluenceConfig === "string" &&
+    maybeCliVersionFromFluenceConfig !== commandObj.config.version
   ) {
-    const flunenceCLIVersion = maybeFluenceCLIVersion;
+    const cliVersionFromFluenceConfig = maybeCliVersionFromFluenceConfig;
     return commandObj.error(
       `Current CLI versions is ${color.yellow(
         commandObj.config.version
       )}, but this fluence project is compatible with Fluence CLI version ${color.yellow(
-        flunenceCLIVersion
-      )}\n\nEither set ${color.yellow(
+        cliVersionFromFluenceConfig
+      )}\n\nEither change ${color.yellow(
         "cliVersion"
       )} property in ${FLUENCE_CONFIG_FILE_NAME} to ${color.yellow(
         commandObj.config.version
       )}\n\nor install compatible version of cli with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/cli@${flunenceCLIVersion}`
+        `npm i -g @fluencelabs/cli@${cliVersionFromFluenceConfig}`
       )}\n\nAfter that, you can also run:\n\n${color.yellow(
         "fluence dep v"
       )}\n\nto find out which versions of fluence components are used, including ${color.yellow(
@@ -223,11 +227,9 @@ const handleFluenceCLIVersion = async (
       )} image\n\n`
     );
   }
+};
 
-  if (!isInteractive || !(await isCheckForUpdatesRequired())) {
-    return;
-  }
-
+const checkForUpdates = async (): Promise<void> => {
   try {
     const [stableVersion, unstableVersion] = await Promise.all([
       getLatestVersionOfNPMDependency("@fluencelabs/cli"),
