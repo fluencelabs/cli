@@ -2,6 +2,7 @@
   "name": "replace-version",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "ncc build index.js"
   },

@@ -1,57 +1,68 @@
-const core = require("@actions/core");
-const fs = require("fs");
-const path = require("path");
+// @ts-check
+import { exportVariable, getInput, setFailed } from "@actions/core";
+import assert from "assert";
+import { readFileSync, writeFileSync } from "fs";
+import { join } from "path";
 
-async function run() {
-  try {
-    const inputVersions = JSON.parse(core.getInput("versions"));
+try {
+  const inputVersions = JSON.parse(getInput("versions"));
+  assert(typeof inputVersions === "object" && inputVersions !== null);
 
-    const versionsFilePath = path.join(
-      process.env.GITHUB_WORKSPACE,
-      "src",
-      "versions.json"
-    );
-    const versionsFileContent = fs.readFileSync(versionsFilePath, "utf-8");
-    const versions = JSON.parse(versionsFileContent);
+  assert(
+    typeof process.env.GITHUB_WORKSPACE === "string",
+    "GITHUB_WORKSPACE environment variable is not set"
+  );
 
-    let cargoDependencyUpdated = false;
+  const versionsFilePath = join(
+    process.env.GITHUB_WORKSPACE,
+    "src",
+    "versions.json"
+  );
 
-    // Merge inputVersions into versions
-    for (const category in inputVersions) {
+  const versionsFileContent = readFileSync(versionsFilePath, "utf-8");
+  const versions = JSON.parse(versionsFileContent);
+  assert(typeof versions === "object" && versions !== null);
+
+  let cargoDependencyUpdated = false;
+
+  // Merge inputVersions into versions
+  for (const category in inputVersions) {
+    if (
+      !versions.hasOwnProperty(category) ||
+      inputVersions[category] === null
+    ) {
+      continue;
+    }
+
+    for (const component in inputVersions[category]) {
       if (
-        versions.hasOwnProperty(category) &&
-        inputVersions[category] != null
+        !versions[category].hasOwnProperty(component) ||
+        inputVersions[category][component] === "null"
       ) {
-        for (const component in inputVersions[category]) {
-          if (
-            versions[category].hasOwnProperty(component) &&
-            inputVersions[category][component] !== "null"
-          ) {
-            versions[category][component] = inputVersions[category][component];
+        continue;
+      }
 
-            // Check if a cargo dependency was updated
-            if (category === "cargo") {
-              cargoDependencyUpdated = true;
-            }
-          }
-        }
+      versions[category][component] = inputVersions[category][component];
+
+      // Check if a cargo dependency was updated
+      if (category === "cargo") {
+        cargoDependencyUpdated = true;
       }
     }
-
-    // Save updated versions.json
-    fs.writeFileSync(versionsFilePath, JSON.stringify(versions, null, 2));
-
-    // Print updated versions.json to stdout
-    console.log("Updated versions.json:");
-    console.log(JSON.stringify(versions, null, 2));
-
-    // Set CARGO_REGISTRY_DEFAULT if cargoDependencyUpdated is true
-    if (cargoDependencyUpdated) {
-      core.exportVariable("CARGO_REGISTRY_DEFAULT", "fluence");
-    }
-  } catch (error) {
-    core.setFailed(error.message);
   }
-}
 
-run();
+  const newVersionsJSONString = JSON.stringify(versions, null, 2);
+
+  // Save updated versions.json
+  writeFileSync(versionsFilePath, newVersionsJSONString);
+
+  // Print updated versions.json to stdout
+  console.log(`Updated versions.json:\n${newVersionsJSONString}`);
+
+  // Set CARGO_REGISTRY_DEFAULT if cargoDependencyUpdated is true
+  if (cargoDependencyUpdated) {
+    exportVariable("CARGO_REGISTRY_DEFAULT", "fluence");
+  }
+} catch (error) {
+  setFailed(error.message);
+}
