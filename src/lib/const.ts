@@ -89,6 +89,7 @@ export const TS_EXT = "ts";
 export const JS_EXT = "js";
 export const JSON_EXT = "json";
 export const YAML_EXT = "yaml";
+export const YML_EXT = "yml";
 export const WASM_EXT = "wasm";
 export const TOML_EXT = "toml";
 
@@ -113,7 +114,6 @@ export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
 export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
-export const FLUENCE_LOCK_CONFIG_FILE_NAME = `fluence-lock.${YAML_EXT}`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
 export const CONFIG_FILE_NAME = `config.${YAML_EXT}`;
