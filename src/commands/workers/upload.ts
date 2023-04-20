@@ -60,7 +60,7 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
     );
 
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(false);
+    doRegisterIpfsClient(true);
 
     const aquaImports = await ensureAquaImports({
       maybeFluenceConfig: fluenceConfig,
