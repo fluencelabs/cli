@@ -9,7 +9,7 @@ async function run() {
     const versionsFilePath = path.join(
       process.env.GITHUB_WORKSPACE,
       "src",
-      "src/versions.json"
+      "versions.json"
     );
     const versionsFileContent = fs.readFileSync(versionsFilePath, "utf-8");
     const versions = JSON.parse(versionsFileContent);
