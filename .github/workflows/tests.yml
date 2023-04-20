@@ -49,6 +49,7 @@ on:
         value: ${{ jobs.tests.outputs.version }}
 
 env:
+  CI: true
   FORCE_COLOR: true
   RUST_PEER_IMAGE: "${{ inputs.rust-peer-image }}"
 
