@@ -45,6 +45,7 @@ import {
   CHECK_FOR_UPDATES_INTERVAL,
   SEPARATOR,
   type NO_INPUT_FLAG_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
 } from "./const.js";
 import { haltCountly, initCountly, logErrorToCountly } from "./countly.js";
 import "./setupEnvironment.js";
@@ -207,13 +208,19 @@ const handleFluenceCLIVersion = async (
     return commandObj.error(
       `Current CLI versions is ${color.yellow(
         commandObj.config.version
-      )}, but this fluence project is compatible only with Fluence CLI version ${color.yellow(
+      )}, but this fluence project is compatible with Fluence CLI version ${color.yellow(
         flunenceCLIVersion
-      )}\n\nPlease install it with:\n\n${color.yellow(
+      )}\n\nEither set ${color.yellow(
+        "cliVersion"
+      )} property in ${FLUENCE_CONFIG_FILE_NAME} to ${color.yellow(
+        commandObj.config.version
+      )}\n\nor install compatible version of cli with:\n\n${color.yellow(
         `npm i -g @fluencelabs/cli@${flunenceCLIVersion}`
-      )}\n\nAfter that, run:\n\n${color.yellow(
+      )}\n\nAfter that, you can also run:\n\n${color.yellow(
         "fluence dep v"
-      )}\n\nto find out which version of rust-peer you need to use to make sure you are running Fluence CLI against the compatible version of rust-peer\n\n`
+      )}\n\nto find out which versions of fluence components are used, including ${color.yellow(
+        "rust-peer"
+      )} image\n\n`
     );
   }
 

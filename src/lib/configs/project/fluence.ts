@@ -23,6 +23,7 @@ const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajvInstance.js";
+import { commandObj } from "../../commandObj.js";
 import {
   type ChainNetwork,
   CHAIN_NETWORKS,
@@ -556,6 +557,7 @@ const initFluenceProject = async (): Promise<ConfigV2> => {
 
   return {
     version: 2,
+    cliVersion: commandObj.config.version,
     [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
     workers: {
       [DEFAULT_WORKER_NAME]: {
