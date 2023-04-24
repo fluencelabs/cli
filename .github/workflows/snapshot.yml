@@ -34,7 +34,7 @@ on:
     outputs:
       version:
         description: "@fluencelabs/cli version"
-        value: ${{ jobs.snapshot.outputs.version }}
+        value: ${{ fromJson(jobs.snapshot.outputs.version)['cli'] }}
 
 env:
   CI: true
