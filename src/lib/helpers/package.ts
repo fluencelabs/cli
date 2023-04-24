@@ -329,6 +329,18 @@ export const resolveDependencies = async (
       return;
     }
 
+    if (versionToUse === projectDependencyOverrides[name]) {
+      assert(maybeFluenceConfig !== null);
+
+      commandObj.log(
+        color.yellow(
+          `Using version ${versionToUse} of ${name} defined at ${maybeFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You can reset it to the recommended version by running \`fluence dep r\``
+        )
+      );
+
+      return;
+    }
+
     if (versionToUse === userDependencyOverrides[name]) {
       assert(userFluenceConfig !== null);
 
@@ -339,16 +351,6 @@ export const resolveDependencies = async (
       );
 
       return;
-    }
-
-    if (versionToUse === projectDependencyOverrides[name]) {
-      assert(maybeFluenceConfig !== null);
-
-      commandObj.log(
-        color.yellow(
-          `Using version ${versionToUse} of ${name} defined at ${maybeFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You can reset it to the recommended version by running \`fluence dep r\``
-        )
-      );
     }
   });
 
