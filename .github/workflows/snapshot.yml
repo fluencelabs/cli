@@ -149,6 +149,6 @@ jobs:
         run: |
           cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
           ```
-          $(fluence dependency versions)
+          $(npx fluence dependency versions)
           ```
           SNAPSHOT
