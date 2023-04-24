@@ -171,6 +171,15 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: pnpm test
 
+      - name: Print versions to check summary
+        if: always()
+        run: |
+          cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
+          ```
+          $(npx fluence dep v)
+          ```
+          SNAPSHOT
+
       - name: Cleanup
         if: always()
         run: rm -rf tmp ~/.fluence
