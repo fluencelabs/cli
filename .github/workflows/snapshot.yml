@@ -144,19 +144,11 @@ jobs:
           id: ${{ steps.version.outputs.id }}
           set-version: true
 
-      - name: Setup dasel
-        if: always()
-        uses: allejo/setup-dasel@v1
-        with:
-          version: 1.27.3
-
       - name: Print versions to check summary
         if: always()
         run: |
           cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
-          ## Used versions
-          | name      | version                                                              |
-          | --------- | -------------------------------------------------------------------- |
-          | avm       | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/avm).version') |
-          | aqua-api  | $(pnpm list --no-color --json | dasel -p json -m --plain '(?:-=@fluencelabs/aqua-api).version') |
+          ```
+          $(fluence dependency versions)
+          ```
           SNAPSHOT
