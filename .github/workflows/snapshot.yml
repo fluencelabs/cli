@@ -43,10 +43,10 @@ env:
 jobs:
   snapshot:
     name: "Build snapshot"
-    runs-on: ubuntu-latest
+    runs-on: builder
 
     outputs:
-      version: ${{ fromJson(steps.snapshot.outputs.snapshot)['cli'] }}
+      version: ${{ fromJson(steps.snapshot.outputs.snapshots)['cli'] }}
 
     permissions:
       contents: read
