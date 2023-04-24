@@ -1,0 +1,19 @@
+name: "test"
+
+on:
+  pull_request:
+    paths-ignore:
+      - "!**.md"
+  push:
+    branches:
+      - "main"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  fluence-cli:
+    uses: ./.github/workflows/tests.yml
+    with:
+      ref: ${{ github.ref }}
