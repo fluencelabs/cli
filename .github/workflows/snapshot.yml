@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      version: ${{ fromJson(steps.snapshot.outputs.version)['cli'] }}
+      version: ${{ fromJson(steps.snapshot.outputs.snapshot)['cli'] }}
 
     permissions:
       contents: read
