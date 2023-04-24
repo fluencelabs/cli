@@ -34,7 +34,7 @@ on:
     outputs:
       version:
         description: "@fluencelabs/cli version"
-        value: ${{ fromJson(jobs.snapshot.outputs.version)['cli'] }}
+        value: ${{ jobs.snapshot.outputs.version }}
 
 env:
   CI: true
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      version: "${{ steps.snapshot.outputs.version }}"
+      version: ${{ fromJson(steps.snapshot.outputs.version)['cli'] }}
 
     permissions:
       contents: read
