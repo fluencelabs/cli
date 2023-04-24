@@ -66,9 +66,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true
     );
 
-    await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(true);
-
     const workersConfig = await initNewWorkersConfig();
 
     const aquaImports = await ensureAquaImports({
@@ -85,6 +82,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       noBuild: flags["no-build"],
     });
 
+    await initFluenceClient(flags, fluenceConfig);
+    doRegisterIpfsClient(true);
     const uploadDeployResult = await upload_deploy(uploadDeployArg);
     const timestamp = new Date().toISOString();
     const relayId = (await Fluence.getClient()).getRelayPeerId();
