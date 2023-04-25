@@ -149,7 +149,7 @@ jobs:
         run: |
           cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
           ```
-          $(npx fluence dep v)
+          $(pnpx fluence dep v)
           ```
           SNAPSHOT
 
