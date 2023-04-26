@@ -40,7 +40,6 @@ jobs:
   registry:
     needs:
       - fluence-cli
-    uses: fluencelabs/registry/.github/workflows/tests.yml@FLU-314
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      ref: FLU-314
       fluence-cli-version: "${{ needs.fluence-cli.outputs.version }}"

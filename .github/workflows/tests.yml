@@ -175,9 +175,10 @@ jobs:
         if: always()
         run: |
           cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
-          ```
+          ## Used versions
+          \`\`\`
           $(pnpx fluence dep v)
-          ```
+          \`\`\`
           SNAPSHOT
 
       - name: Cleanup
