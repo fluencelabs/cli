@@ -177,7 +177,7 @@ jobs:
           cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
           ## Used versions
           \`\`\`
-          $(pnpx fluence dep v)
+          $(npx fluence dep v)
           \`\`\`
           SNAPSHOT
 
