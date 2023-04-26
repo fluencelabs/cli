@@ -143,13 +143,3 @@ jobs:
         with:
           id: ${{ steps.version.outputs.id }}
           set-version: true
-
-      - name: Print versions to check summary
-        if: always()
-        run: |
-          cat <<SNAPSHOT >> $GITHUB_STEP_SUMMARY
-          ## Used versions
-          \`\`\`
-          $(npx fluence dep v)
-          \`\`\`
-          SNAPSHOT
