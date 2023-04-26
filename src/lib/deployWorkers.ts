@@ -52,6 +52,7 @@ import {
 import { jsToAqua } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
+import { resolvePeerId } from "./multiaddres.js";
 import { ensureFluenceAquaWorkersPath, projectRootDir } from "./paths.js";
 import { checkboxes } from "./prompt.js";
 
@@ -549,7 +550,9 @@ export const prepareForDeploy = async ({
 
       return {
         name: workerName,
-        hosts: peerIds,
+        hosts: peerIds.map((peerId) => {
+          return resolvePeerId(peerId);
+        }),
         config: {
           services,
           spells,
