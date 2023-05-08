@@ -26,13 +26,8 @@ import {
   type DealFactory,
   type DeveloperFaucet,
   type ERC20,
-  AquaProxy__factory,
-  Core__factory,
-  DealFactory__factory,
-  Deal__factory,
-  DeveloperFaucet__factory,
-  ERC20__factory,
 } from "@fluencelabs/deal-aurora";
+import dealPkg from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";
@@ -53,6 +48,15 @@ import {
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { list } from "./prompt.js";
+
+const {
+  AquaProxy__factory,
+  Core__factory,
+  DealFactory__factory,
+  Deal__factory,
+  DeveloperFaucet__factory,
+  ERC20__factory,
+} = dealPkg;
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
