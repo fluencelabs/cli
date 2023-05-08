@@ -58,7 +58,7 @@
     "decompress": "^4.2.1",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
-    "filenamify": "^5.1.1",
+    "filenamify": "^6.0.0",
     "get-random-values": "^2.0.0",
     "inquirer": "^9",
     "ipfs-http-client": "^60.0.0",
