@@ -61,7 +61,7 @@ import { jsonStringify } from "../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../lib/jsClient.js";
 import { getExistingKeyPair } from "../lib/keyPairs.js";
 import { initCli } from "../lib/lifeCycle.js";
-import { getRandomRelayAddr } from "../lib/multiaddres.js";
+import { resolveRelay } from "../lib/multiaddres.js";
 import {
   ensureFluenceTmpAppServiceJsonPath,
   projectRootDir,
@@ -420,11 +420,10 @@ const aquaRun = async (args: RunArgs) => {
   const aquaCli = await initAquaCli(args.maybeFluenceConfig);
   const keyPair = await getExistingKeyPair(args["key-pair-name"]);
 
-  const relay =
-    args.relay ??
-    getRandomRelayAddr(
-      args.maybeAppConfig?.relays ?? args.maybeFluenceConfig?.relays
-    );
+  const relay = resolveRelay(
+    args.relay,
+    args.maybeAppConfig?.relays ?? args.maybeFluenceConfig?.relays
+  );
 
   let result;
 

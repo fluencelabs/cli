@@ -76,9 +76,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true
     );
 
-    await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(true);
-
     const chainNetwork = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
       maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
@@ -99,6 +96,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       noBuild: flags["no-build"],
     });
 
+    await initFluenceClient(flags, fluenceConfig);
+    doRegisterIpfsClient(true);
     const uploadResult = await upload(uploadArg);
 
     const createdDeals: Record<

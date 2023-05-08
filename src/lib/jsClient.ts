@@ -30,7 +30,7 @@ import { base64ToUint8Array } from "./helpers/generateKeyPair.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { getExistingKeyPair } from "./keyPairs.js";
 import { doRegisterLog } from "./localServices/log.js";
-import { getRandomRelayAddr } from "./multiaddres.js";
+import { resolveRelay } from "./multiaddres.js";
 
 export const initFluenceClient = async (
   {
@@ -43,8 +43,7 @@ export const initFluenceClient = async (
   }: FluenceClientFlags & KeyPairFlag & OffAquaLogsFlag,
   maybeFluenceConfig: FluenceConfig | null
 ): Promise<void> => {
-  const relay = maybeRelay ?? getRandomRelayAddr(maybeFluenceConfig?.relays);
-
+  const relay = resolveRelay(maybeRelay, maybeFluenceConfig?.relays);
   commandObj.log(`Connecting to: ${color.yellow(relay)}`);
 
   const keyPair = await getExistingKeyPair(
