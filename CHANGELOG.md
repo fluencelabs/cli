@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.9](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.8...fluence-cli-v0.4.9) (2023-05-08)
+
+
+### Features
+
+* add cliVersion property and check for updates [fixes DXJ-358 DXJ-363] ([#242](https://github.com/fluencelabs/fluence-cli/issues/242)) ([add7abd](https://github.com/fluencelabs/fluence-cli/commit/add7abdadb2c2045e0464b2b9c80ff1675d7f977))
+* allow aliasing of peers, so you can use kras-00 instead of actual peerId or relay address. Init js-client only after validation is done ([#253](https://github.com/fluencelabs/fluence-cli/issues/253)) ([49585f6](https://github.com/fluencelabs/fluence-cli/commit/49585f6779c4d82e7d16f513b86012e34d0c7d2f))
+* easier debugging with arrow-body-style lint rule ([#245](https://github.com/fluencelabs/fluence-cli/issues/245)) ([9279f04](https://github.com/fluencelabs/fluence-cli/commit/9279f04a1c71698e608e757dc3b0a3b7ae5e0265))
+* no-build flag [fixes DXJ-368] ([#244](https://github.com/fluencelabs/fluence-cli/issues/244)) ([f6bcc1b](https://github.com/fluencelabs/fluence-cli/commit/f6bcc1b04568317b5ce22480e79d7438bcbf6922))
+* support .yml extension for configs [fixes DXJ-350] ([#248](https://github.com/fluencelabs/fluence-cli/issues/248)) ([fefd5fc](https://github.com/fluencelabs/fluence-cli/commit/fefd5fcfab7af616f955fc676cfed12b7271a469))
+* **tests:** add workers deploy test, turn off ipfs logs visible by default [fixes DXJ-369] ([#247](https://github.com/fluencelabs/fluence-cli/issues/247)) ([ed63112](https://github.com/fluencelabs/fluence-cli/commit/ed631124fd5e258d289f4f9dec9333bdd6b0b28c))
+
+
+### Bug Fixes
+
+* check dependencies in fluence.yaml first when warning about dependency overrides ([#251](https://github.com/fluencelabs/fluence-cli/issues/251)) ([e4c9f9d](https://github.com/fluencelabs/fluence-cli/commit/e4c9f9d470b0be986355993baad63683ff59eadb))
+* **deps:** update dependency filenamify to v6 ([#250](https://github.com/fluencelabs/fluence-cli/issues/250)) ([b46a472](https://github.com/fluencelabs/fluence-cli/commit/b46a4723a2f0cfcc0a351123c46ed74350c5394d))
+* **spell:** update installation-spell to 0.5.11 ([4749c48](https://github.com/fluencelabs/fluence-cli/commit/4749c480ff6041f275cb236ae32741e90b8241ce))
+* **spell:** update installation-spell to 0.5.11 ([#254](https://github.com/fluencelabs/fluence-cli/issues/254)) ([b1ef46e](https://github.com/fluencelabs/fluence-cli/commit/b1ef46e2bc68a80e886d78af2ef3cd0b08cc0e1b))
+
 ## [0.4.8](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.7...fluence-cli-v0.4.8) (2023-04-14)
 
 

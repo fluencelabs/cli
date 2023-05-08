@@ -3,20 +3,43 @@ name: "e2e"
 on:
   pull_request:
     paths-ignore:
-      - "!**.md"
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot.yml"
+    types:
+      - "labeled"
+      - "synchronize"
+      - "opened"
+      - "reopened"
   push:
     branches:
       - "main"
+    paths-ignore:
+      - "**.md"
+      - ".github/**"
+      - "!.github/workflows/e2e.yml"
+      - "!.github/workflows/snapshot.yml"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
-env:
-  FORCE_COLOR: true
-
 jobs:
   fluence-cli:
-    uses: ./.github/workflows/tests.yml
+    if: >
+      github.event_name == 'push' ||
+      (
+        contains(github.event.pull_request.labels.*.name, 'e2e') &&
+        !github.event.pull_request.head.repo.fork
+      )
+    uses: ./.github/workflows/snapshot.yml
     with:
       ref: ${{ github.ref }}
+
+  registry:
+    needs:
+      - fluence-cli
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    with:
+      fluence-cli-version: "${{ needs.fluence-cli.outputs.version }}"
