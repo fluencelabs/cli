@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.10](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.9...fluence-cli-v0.4.10) (2023-05-08)
+
+
+### Bug Fixes
+
+* fix deal-aurora import ([#255](https://github.com/fluencelabs/fluence-cli/issues/255)) ([4b85a52](https://github.com/fluencelabs/fluence-cli/commit/4b85a52945db7b4ca3a6373b5c0e3c020cd20614))
+
 ## [0.4.9](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.8...fluence-cli-v0.4.9) (2023-05-08)
 
 
