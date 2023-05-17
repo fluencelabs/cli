@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.11](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.10...fluence-cli-v0.4.11) (2023-05-17)
+
+
+### Bug Fixes
+
+* don't auto-pin global dependencies [fixes DXJ-380] ([#257](https://github.com/fluencelabs/fluence-cli/issues/257)) ([237e1bb](https://github.com/fluencelabs/fluence-cli/commit/237e1bbb8781bf6b25d4d22f956c86224b51f02d))
+* don't print undefined for `run` [fixes DXJ-377] ([#258](https://github.com/fluencelabs/fluence-cli/issues/258)) ([7afe968](https://github.com/fluencelabs/fluence-cli/commit/7afe9681c03cdf41191576abdd9fcdf73455ba87))
+* pin @fluencelabs/deal-aurora version ([#260](https://github.com/fluencelabs/fluence-cli/issues/260)) ([68710e6](https://github.com/fluencelabs/fluence-cli/commit/68710e6c46899483676312879ac5bd57d874f416))
+
 ## [0.4.10](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.9...fluence-cli-v0.4.10) (2023-05-08)
 
 
