@@ -64,7 +64,10 @@ export const dealCreate = async ({
     return log.topics[0] === eventTopic;
   });
 
-  assert(log !== undefined);
+  assert(
+    log !== undefined,
+    "DealCreated event not found. Try updating flox to the latest version"
+  );
 
   const dealAddress: unknown =
     factory.interface.parseLog(log).args[DEAL_LOG_ARG_NAME];

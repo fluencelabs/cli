@@ -81,6 +81,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
     });
 
+    const chainNetworkId = DEAL_CONFIG[chainNetwork].chainId;
     const workersConfig = await initNewWorkersConfig();
 
     const aquaImports = await ensureAquaImports({
@@ -123,7 +124,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
 
       const maybePreviouslyDeployedDeal = workersConfig.deals?.[workerName];
-      const chainNetworkId = DEAL_CONFIG[chainNetwork].chainId;
 
       if (maybePreviouslyDeployedDeal !== undefined) {
         if (maybePreviouslyDeployedDeal.definition === appCID) {
@@ -161,7 +161,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           timestamp: new Date().toISOString(),
           definition: appCID,
           chainNetwork,
-          chainNetworkId: DEAL_CONFIG[chainNetwork].chainId,
+          chainNetworkId,
           dealIdOriginal: maybePreviouslyDeployedDeal.dealIdOriginal,
           dealId: maybePreviouslyDeployedDeal.dealId,
         };
