@@ -62,7 +62,11 @@ const updateFluenceConfigIfVersionChanged = async ({
 }: UpdateFluenceConfigIfVersionChangedArgs): Promise<void> => {
   if (
     maybeFluenceConfig === null ||
-    version === maybeFluenceConfig.dependencies?.[packageManager]?.[name]
+    version ===
+      (maybeFluenceConfig.dependencies?.[packageManager]?.[name] ??
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        versions[packageManager][name])
   ) {
     return;
   }
@@ -93,7 +97,13 @@ const updateUserConfigIfVersionChanged = async ({
   version,
   packageManager,
 }: UpdateUserConfigIfVersionChangedArgs): Promise<void> => {
-  if (version === userConfig.dependencies?.[packageManager]?.[name]) {
+  if (
+    version ===
+    (userConfig.dependencies?.[packageManager]?.[name] ??
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      versions[packageManager][name])
+  ) {
     return;
   }
 
@@ -365,7 +375,7 @@ export const resolveDependencies = async (
 
       commandObj.log(
         color.yellow(
-          `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}. You may want to consider adding it to your project's fluence config`
+          `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}, you may want to consider adding it to your project's fluence config`
         )
       );
     }
