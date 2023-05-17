@@ -245,7 +245,7 @@ export default class Run extends BaseCommand<typeof Run> {
     const stringResult =
       typeof result === "string" ? result : jsonStringify(result);
 
-    if (!useAquaRun) {
+    if (!useAquaRun && stringResult !== undefined) {
       console.log(stringResult);
     }
 
