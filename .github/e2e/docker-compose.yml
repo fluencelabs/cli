@@ -6,6 +6,10 @@ networks:
       - subnet: 10.50.10.0/24
 
 services:
+  aurora:
+    image: docker.fluence.dev/aurora:latest
+    ports:
+      - 8545:8545
   ipfs:
     image: ipfs/go-ipfs
     ports:
@@ -26,6 +30,7 @@ services:
       - 9991:9991
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
@@ -53,6 +58,7 @@ services:
       - 9992:9992
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
@@ -79,6 +85,7 @@ services:
       - 9993:9993
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
@@ -105,6 +112,7 @@ services:
       - 9994:9994
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
@@ -131,6 +139,7 @@ services:
       - 9995:9995
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
@@ -157,6 +166,7 @@ services:
       - 9996:9996
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
     command:
       - --aqua-pool-size=2
