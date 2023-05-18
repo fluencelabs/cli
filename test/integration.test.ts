@@ -28,10 +28,18 @@ import { initFluenceConfigWithPath } from "../src/lib/configs/project/fluence.js
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import { DEFAULT_WORKER_NAME, FS_OPTIONS } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
+import { local } from "../src/lib/localNodes.js";
 
-import { fluence, init, maybeConcurrentTest, multiaddrs } from "./helpers.js";
+import {
+  fluence,
+  init,
+  maybeConcurrentTest,
+  multiaddrs,
+  sleep,
+} from "./helpers.js";
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
+const MAX_SECONDS_TO_DEPLOY = 60 * 10;
 
 describe("integration tests", () => {
   beforeAll(() => {
@@ -236,6 +244,146 @@ describe("integration tests", () => {
         return {
           answer: "Hi, fluence",
           peer,
+        };
+      });
+
+      expect(arrayOfResults).toEqual(expected);
+    }
+  );
+
+  maybeConcurrentTest(
+    "should deploy deals with spell and service, resolve and run services on them",
+    async () => {
+      const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
+      await init(cwd, "minimal");
+
+      await writeFile(
+        join(cwd, "src", "aqua", "main.aqua"),
+        await readFile(
+          join("test", "aqua", "runDeployedDeals.aqua"),
+          FS_OPTIONS
+        ),
+        FS_OPTIONS
+      );
+
+      const pathToNewServiceDir = join("src", "services", "newService");
+
+      await fluence({
+        args: ["service", "new", pathToNewServiceDir],
+        cwd,
+      });
+
+      const newServiceConfig = await initServiceConfig(
+        pathToNewServiceDir,
+        cwd
+      );
+
+      assert(newServiceConfig !== null);
+      newServiceConfig.modules.facade.envs = { A: "B" };
+      await newServiceConfig.$commit();
+
+      const pathToNewSpell = join("src", "spells", "newSpell");
+
+      await fluence({
+        args: ["spell", "new", pathToNewSpell],
+        cwd,
+      });
+
+      const fluenceConfig = await initFluenceConfigWithPath(cwd);
+
+      assert(fluenceConfig !== null);
+
+      fluenceConfig.spells = {
+        newSpell: {
+          get: pathToNewSpell,
+        },
+      };
+
+      assert(
+        fluenceConfig.workers !== undefined &&
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined &&
+          fluenceConfig.hosts !== undefined &&
+          fluenceConfig.hosts[DEFAULT_WORKER_NAME] !== undefined
+      );
+
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["newService"];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
+
+      await fluenceConfig.$commit();
+
+      await fluence({
+        args: [
+          "deal",
+          "deploy",
+          "--privKey",
+          "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5",
+          "--network",
+          "local",
+        ],
+        cwd,
+      });
+
+      let currentSecondsWaited = 0;
+      const SECONDS_INTERVAL = 30;
+      let result = "[]";
+
+      while (currentSecondsWaited < MAX_SECONDS_TO_DEPLOY) {
+        await sleep(SECONDS_INTERVAL);
+        currentSecondsWaited = currentSecondsWaited + SECONDS_INTERVAL;
+
+        const res = await fluence({
+          args: ["run"],
+          flags: {
+            f: "status()",
+            quiet: true,
+          },
+          cwd,
+        });
+
+        const parsedRes = JSON.parse(res);
+        assert(Array.isArray(parsedRes));
+
+        if (parsedRes.length === local.length) {
+          result = res;
+          break;
+        }
+      }
+
+      const parsedResult = JSON.parse(result);
+      assert(Array.isArray(parsedResult));
+
+      const arrayOfResults = parsedResult
+        .map((result: unknown) => {
+          assert(
+            typeof result === "object" &&
+              result !== null &&
+              "peer" in result &&
+              "answer" in result &&
+              typeof result.peer === "string" &&
+              typeof result.answer === "string"
+          );
+
+          return {
+            peer: result.peer,
+            answer: result.answer,
+          };
+        })
+        .sort(({ peer: peerA }, { peer: peerB }) => {
+          if (peerA < peerB) {
+            return -1;
+          }
+
+          if (peerA > peerB) {
+            return 1;
+          }
+
+          return 0;
+        });
+
+      const expected = local.map((peer) => {
+        return {
+          answer: "Hi, fluence",
+          peer: peer.peerId,
         };
       });
 

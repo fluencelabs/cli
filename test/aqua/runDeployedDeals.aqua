@@ -1,0 +1,34 @@
+aqua Main
+
+import "@fluencelabs/aqua-lib/builtin.aqua"
+import "@fluencelabs/registry/subnetwork.aqua"
+import Registry from "@fluencelabs/registry/registry-service.aqua"
+import "@fluencelabs/spell/spell_service.aqua"
+import Ipfs from "@fluencelabs/aqua-ipfs/ipfs.aqua"
+
+import "workers.aqua"
+import "services.aqua"
+
+export status
+
+service Console("run-console"):
+    print(any: ⊤)
+
+data Answer:
+    answer: string
+    peer: string
+
+func status() -> *Answer:
+    workersInfo <- getWorkersInfo()
+    dealId = workersInfo.deals.defaultWorker.dealId
+    answers: *Answer
+    on HOST_PEER_ID:
+        workers <- resolveSubnetwork(dealId)
+        for w <- workers! par:
+            on w.metadata.peer_id via w.metadata.relay_id:
+                answer <- NewService.greeting("fluence")
+                answers <<- Answer(answer=answer, peer=w.metadata.relay_id!)
+
+    join answers[workers!.length - 1]
+    par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
+    <- answers

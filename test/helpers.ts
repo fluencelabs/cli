@@ -136,3 +136,9 @@ export const maybeConcurrentTest = (...args: Parameters<typeof test>): void => {
 
   test.concurrent(...args);
 };
+
+export const sleep = (s: number) => {
+  return new Promise<void>((resolve) => {
+    return setTimeout(resolve, s * 1000);
+  });
+};

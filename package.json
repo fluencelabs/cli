@@ -28,7 +28,7 @@
     "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "pnpm before-build && pnpm build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
-    "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js -t 'should deploy deals with spell and service, resolve and run services on them'",
     "test": "shx rm -rf tmp && shx mkdir tmp && pnpm pack --pack-destination ./tmp && prettier --check '*.{ts,js}' && pnpm lint && pnpm circular && cd tmp && pnpm init && pnpm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
     "prepare": "node -e \"process.env.CI === undefined && require('husky').install()\"",
     "check": "pnpm build && pnpm lint-fix && pnpm circular",

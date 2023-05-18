@@ -32,6 +32,7 @@ services:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
       - --aqua-pool-size=2
       - -t=7771
@@ -60,6 +61,7 @@ services:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
       - --aqua-pool-size=2
       - -t=7772
@@ -87,6 +89,7 @@ services:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
       - --aqua-pool-size=2
       - -t=7773
@@ -114,6 +117,7 @@ services:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
       - --aqua-pool-size=2
       - -t=7774
@@ -141,6 +145,7 @@ services:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
       - --aqua-pool-size=2
       - -t=7775
@@ -168,6 +173,7 @@ services:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_NET: local
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
       - --aqua-pool-size=2
       - -t=7776
