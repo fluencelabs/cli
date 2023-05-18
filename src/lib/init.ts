@@ -61,6 +61,8 @@ import { input, list } from "../lib/prompt.js";
 import versions from "../versions.json" assert { type: "json" };
 
 import { commandObj, isInteractive } from "./commandObj.js";
+import { initNewWorkersConfig } from "./configs/project/workers.js";
+import { ensureAquaFileWithWorkerInfo } from "./deployWorkers.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
 
 const selectTemplate = (): Promise<Template> => {
@@ -259,6 +261,9 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
       )}\n`
     )
   );
+
+  const workersConfig = await initNewWorkersConfig();
+  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
 
   return fluenceConfig;
 };

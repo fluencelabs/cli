@@ -2,7 +2,7 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@fluencelabs/aqua-api':
-    specifier: ^0.10.3
+    specifier: ^0.10.6
     version: 0.10.6
   '@fluencelabs/deal-aurora':
     specifier: 0.1.8

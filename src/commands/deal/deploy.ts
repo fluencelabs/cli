@@ -204,7 +204,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       };
     }
 
-    await ensureAquaFileWithWorkerInfo(workersConfig);
+    await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
 
     const createdDealsText =
       Object.values(createdDeals).length === 0

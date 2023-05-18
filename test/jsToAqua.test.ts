@@ -14,58 +14,38 @@
  * limitations under the License.
  */
 
-import { jsToAquaImpl } from "../src/lib/helpers/jsToAqua.js";
+import { jsToAquaImpl, makeOptional } from "../src/lib/helpers/jsToAqua.js";
 
 const WRAPPER_FUNCTION_NAME = "res";
-const RETURN_TYPE = "Res";
 
 const obj = [
+  [1, 2, 3],
+  [1, -2, 3],
+  [1.1, 2, 3],
+  [["1"], ["2"], ["3"]],
+  { a: -1, b: 2.2 },
+  { a: { b: [2] }, c: null, d: [], e: [{ f: "4" }, { f: "5" }] },
   {
-    js: { a: -1, b: 2.2 },
-    value: `${RETURN_TYPE}(a=-1,b=2.2)`,
-    type: RETURN_TYPE,
-    typeDefs: `data Res:
-    a: i64
-    b: f64`,
-  },
-  {
-    js: { a: { b: [2] }, c: null, d: [], e: [{ f: "4" }, { f: "5" }] },
-    value: `${RETURN_TYPE}(a=${RETURN_TYPE}A(b=[2]),c=nil,d=nil,e=[${RETURN_TYPE}E(f="4"),${RETURN_TYPE}E(f="5")])`,
-    type: RETURN_TYPE,
-    typeDefs: `data ResA:
-    b: []u64
-
-data ResE:
-    f: string
-
-data Res:
-    a: ResA
-    c: ?u8
-    d: ?u8
-    e: []ResE`,
+    a: makeOptional(undefined, 1),
+    b: makeOptional(null, 2.2),
+    e: makeOptional([{ f: "4" }, { f: "5" }], [{ f: "5" }]),
   },
 ] as const;
 
 describe("Conversion from js to aqua", () => {
   test.each`
-    js                       | value                    | type            | typeDefs
-    ${"abc"}                 | ${'"abc"'}               | ${"string"}     | ${undefined}
-    ${true}                  | ${"true"}                | ${"bool"}       | ${undefined}
-    ${false}                 | ${"false"}               | ${"bool"}       | ${undefined}
-    ${null}                  | ${"nil"}                 | ${"?u8"}        | ${undefined}
-    ${undefined}             | ${"nil"}                 | ${"?u8"}        | ${undefined}
-    ${[]}                    | ${"nil"}                 | ${"?u8"}        | ${undefined}
-    ${{}}                    | ${"nil"}                 | ${"?u8"}        | ${undefined}
-    ${1}                     | ${"1"}                   | ${"u64"}        | ${undefined}
-    ${-1}                    | ${"-1"}                  | ${"i64"}        | ${undefined}
-    ${1.234}                 | ${"1.234"}               | ${"f64"}        | ${undefined}
-    ${-1.234}                | ${"-1.234"}              | ${"f64"}        | ${undefined}
-    ${[1, 2, 3]}             | ${"[1,2,3]"}             | ${"[]u64"}      | ${undefined}
-    ${[1, -2, 3]}            | ${"[1,-2,3]"}            | ${"[]i64"}      | ${undefined}
-    ${[1.1, 2, 3]}           | ${"[1.1,2,3]"}           | ${"[]f64"}      | ${undefined}
-    ${[["1"], ["2"], ["3"]]} | ${'[["1"],["2"],["3"]]'} | ${"[][]string"} | ${undefined}
-    ${obj[0].js}             | ${obj[0].value}          | ${obj[0].type}  | ${obj[0].typeDefs}
-    ${obj[1].js}             | ${obj[1].value}          | ${obj[1].type}  | ${obj[1].typeDefs}
+    js           | value       | type        | typeDefs
+    ${"abc"}     | ${'"abc"'}  | ${"string"} | ${undefined}
+    ${true}      | ${"true"}   | ${"bool"}   | ${undefined}
+    ${false}     | ${"false"}  | ${"bool"}   | ${undefined}
+    ${null}      | ${"nil"}    | ${"?u8"}    | ${undefined}
+    ${undefined} | ${"nil"}    | ${"?u8"}    | ${undefined}
+    ${[]}        | ${"nil"}    | ${"?u8"}    | ${undefined}
+    ${{}}        | ${"nil"}    | ${"?u8"}    | ${undefined}
+    ${1}         | ${"1"}      | ${"u64"}    | ${undefined}
+    ${-1}        | ${"-1"}     | ${"i64"}    | ${undefined}
+    ${1.234}     | ${"1.234"}  | ${"f64"}    | ${undefined}
+    ${-1.234}    | ${"-1.234"} | ${"f64"}    | ${undefined}
   `(
     "js: $js. value: $value. type: $type. typeDefs: $typeDefs",
     ({ js, value, type, typeDefs }) => {
@@ -79,6 +59,12 @@ describe("Conversion from js to aqua", () => {
       /* eslint-enable @typescript-eslint/no-unsafe-member-access */
     }
   );
+
+  test("Expect objects to match snapshot", () => {
+    obj.forEach((o) => {
+      expect(jsToAquaImpl(o, WRAPPER_FUNCTION_NAME, "")).toMatchSnapshot();
+    });
+  });
 
   test("array with different element types throws an error", () => {
     expect(() => {

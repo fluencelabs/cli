@@ -24,6 +24,43 @@ import { capitalize } from "./capitilize.js";
 import { cleanAquaName, validateAquaName } from "./downloadFile.js";
 import { stringifyUnknown } from "./jsonStringify.js";
 
+const OPTIONAL = "$$optional";
+const IS_NIL = "$$isNil";
+
+/**
+ * This function is used in order to construct optional syntax in js that is converted to optional values in aqua.
+ *
+ * @param v - value to be converted. Can be anything.
+ * @param type - a fallback that is used by jsToAqua function to infer the type of the value if value is missing (is null or undefined)
+ * @returns - js object with special syntax that is converted to optional value in aqua inside jsToAqua function
+ *
+ * @example
+ * const v = makeOptional(1, 1);
+ * // v = { $$optional: 1 }
+ * @example
+ * const v = makeOptional(undefined, 1);
+ * // v = { $$optional: 1, $$isNil: true }
+ * @example
+ * const v = makeOptional(null, 1);
+ * // v = { $$optional: 1, $$isNil: true }
+ */
+export const makeOptional = <T>(
+  v: T | undefined | null,
+  type: T
+): { [OPTIONAL]: T; [IS_NIL]?: boolean } => {
+  const isRepresentedAsNillInAqua = v === undefined || v === null;
+
+  const optional: { [OPTIONAL]: T; [IS_NIL]?: true } = {
+    [OPTIONAL]: isRepresentedAsNillInAqua ? type : v,
+  };
+
+  if (isRepresentedAsNillInAqua) {
+    optional[IS_NIL] = true;
+  }
+
+  return optional;
+};
+
 export const jsToAqua = (
   v: unknown,
   funcNameFromArgs: string,
@@ -48,19 +85,22 @@ export const jsToAqua = (
   );
 
   return `${
-    typeDefs ?? ""
-  }\n\nfunc ${funcName}() -> ${type}:\n    <- ${value}\n`;
+    typeof typeDefs === "string" ? `${typeDefs}\n\n` : ""
+  }func ${funcName}() -> ${type}:\n    <- ${value}\n`;
 };
 
 const NULL = { type: "?u8", value: "nil" } as const;
 
 const NUMBER_TYPES = ["u64", "i64", "f64"] as const;
 
+const INDENTATION = "    ";
+
 export const jsToAquaImpl = (
   v: unknown,
   fieldName: string,
   currentNesting: string,
-  useF64ForAllNumbers = false
+  useF64ForAllNumbers = false,
+  nestingLevel = 0
 ): { type: string; value: string; typeDefs?: string | undefined } => {
   const error = (message: string) => {
     return commandObj.error(
@@ -110,8 +150,16 @@ export const jsToAquaImpl = (
       return NULL;
     }
 
+    const newNestingLevel = nestingLevel === 0 ? 2 : nestingLevel + 1;
+
     const mappedToAqua = v.map((val) => {
-      return jsToAquaImpl(val, fieldName, currentNesting, useF64ForAllNumbers);
+      return jsToAquaImpl(
+        val,
+        fieldName,
+        currentNesting,
+        useF64ForAllNumbers,
+        newNestingLevel
+      );
     });
 
     const firstElementType = mappedToAqua[0]?.type ?? NULL.type;
@@ -152,13 +200,15 @@ export const jsToAquaImpl = (
       return error("All array elements must be of the same type");
     }
 
+    const ind = INDENTATION.repeat(newNestingLevel);
+
     return {
       type: `[]${type}`,
-      value: `[${mappedToAqua
+      value: `[\n${ind}${mappedToAqua
         .map(({ value }) => {
           return value;
         })
-        .join(",")}]`,
+        .join(`,\n${ind}`)}\n${INDENTATION.repeat(nestingLevel)}]`,
       typeDefs,
     };
   }
@@ -180,6 +230,25 @@ export const jsToAquaImpl = (
 
     const nestedType = `${currentNesting}${newName}`;
 
+    if (OPTIONAL in v) {
+      const { type, value, typeDefs } = jsToAquaImpl(
+        v[OPTIONAL],
+        fieldName,
+        currentNesting,
+        useF64ForAllNumbers,
+        nestingLevel
+      );
+
+      return {
+        type: `?${type}`,
+        value: IS_NIL in v && v[IS_NIL] === true ? NULL.value : `?[${value}]`,
+        typeDefs,
+      };
+    }
+
+    const newNestingLevel = nestingLevel === 0 ? 2 : nestingLevel + 1;
+    const ind = INDENTATION.repeat(newNestingLevel);
+
     const { keyTypes, keyDataTypes, entries } = objectEntries.reduce<{
       keyTypes: string[];
       keyDataTypes: string[];
@@ -190,7 +259,8 @@ export const jsToAquaImpl = (
           val,
           key,
           nestedType,
-          useF64ForAllNumbers
+          useF64ForAllNumbers,
+          newNestingLevel
         );
 
         const camelCasedKey = camelcase(cleanAquaName(key));
@@ -204,7 +274,7 @@ export const jsToAquaImpl = (
           keyTypes: [...keyTypes, `    ${camelCasedKey}: ${type}`],
           keyDataTypes:
             typeDefs === undefined ? keyDataTypes : [...keyDataTypes, typeDefs],
-          entries: [...entries, `${camelCasedKey}=${value}`],
+          entries: [...entries, `\n${ind}${camelCasedKey}=${value}`],
         };
       },
       { keyTypes: [], keyDataTypes: [], entries: [] }
@@ -212,7 +282,9 @@ export const jsToAquaImpl = (
 
     return {
       type: nestedType,
-      value: `${nestedType}(${entries.join(",")})`,
+      value: `${nestedType}(${entries.join(",")}\n${INDENTATION.repeat(
+        nestingLevel === 0 ? 1 : nestingLevel
+      )})`,
       typeDefs: `${
         keyDataTypes.length === 0 ? "" : `${keyDataTypes.join("\n\n")}\n\n`
       }data ${nestedType}:\n${keyTypes.join("\n")}`,

@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Conversion from js to aqua Expect objects to match snapshot 1`] = `
+{
+  "type": "[]u64",
+  "typeDefs": undefined,
+  "value": "[
+        1,
+        2,
+        3
+]",
+}
+`;
+
+exports[`Conversion from js to aqua Expect objects to match snapshot 2`] = `
+{
+  "type": "[]i64",
+  "typeDefs": undefined,
+  "value": "[
+        1,
+        -2,
+        3
+]",
+}
+`;
+
+exports[`Conversion from js to aqua Expect objects to match snapshot 3`] = `
+{
+  "type": "[]f64",
+  "typeDefs": undefined,
+  "value": "[
+        1.1,
+        2,
+        3
+]",
+}
+`;
+
+exports[`Conversion from js to aqua Expect objects to match snapshot 4`] = `
+{
+  "type": "[][]string",
+  "typeDefs": undefined,
+  "value": "[
+        [
+            "1"
+        ],
+        [
+            "2"
+        ],
+        [
+            "3"
+        ]
+]",
+}
+`;
+
+exports[`Conversion from js to aqua Expect objects to match snapshot 5`] = `
+{
+  "type": "Res",
+  "typeDefs": "data Res:
+    a: i64
+    b: f64",
+  "value": "Res(
+        a=-1,
+        b=2.2
+    )",
+}
+`;
+
+exports[`Conversion from js to aqua Expect objects to match snapshot 6`] = `
+{
+  "type": "Res",
+  "typeDefs": "data ResA:
+    b: []u64
+
+data ResE:
+    f: string
+
+data Res:
+    a: ResA
+    c: ?u8
+    d: ?u8
+    e: []ResE",
+  "value": "Res(
+        a=ResA(
+            b=[
+                2
+            ]
+        ),
+        c=nil,
+        d=nil,
+        e=[
+            ResE(
+                f="4"
+            ),
+            ResE(
+                f="5"
+            )
+        ]
+    )",
+}
+`;
+
+exports[`Conversion from js to aqua Expect objects to match snapshot 7`] = `
+{
+  "type": "Res",
+  "typeDefs": "data ResE:
+    f: string
+
+data Res:
+    a: ?u64
+    b: ?f64
+    e: ?[]ResE",
+  "value": "Res(
+        a=nil,
+        b=nil,
+        e=?[[
+            ResE(
+                f="4"
+            ),
+            ResE(
+                f="5"
+            )
+        ]]
+    )",
+}
+`;

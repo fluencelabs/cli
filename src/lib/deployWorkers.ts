@@ -27,7 +27,10 @@ import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
+import type {
+  FluenceConfig,
+  FluenceConfigReadonly,
+} from "./configs/project/fluence.js";
 import {
   type ConfigV0,
   initReadonlyModuleConfig,
@@ -41,15 +44,23 @@ import {
   resolveEndSec,
   resolveStartSec,
 } from "./configs/project/spell.js";
-import type { WorkersConfigReadonly } from "./configs/project/workers.js";
-import { FLUENCE_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
+import type {
+  Deals,
+  Hosts,
+  WorkersConfigReadonly,
+} from "./configs/project/workers.js";
+import {
+  DEFAULT_WORKER_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
+  FS_OPTIONS,
+} from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
   getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
-import { jsToAqua } from "./helpers/jsToAqua.js";
+import { jsToAqua, makeOptional } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
@@ -622,13 +633,89 @@ const validateWasmExist = async (
   }
 };
 
+const DEAL_TYPE: Deals[string] = {
+  dealId: "",
+  chainNetwork: "testnet",
+  chainNetworkId: 0,
+  dealIdOriginal: "",
+  definition: "",
+  timestamp: "",
+};
+
+const HOSTS_TYPE: Hosts[string] = {
+  definition: "",
+  installation_spells: [
+    {
+      host_id: "",
+      spell_id: "",
+      worker_id: "",
+    },
+  ],
+  relayId: "",
+  timestamp: "",
+};
+
 export const ensureAquaFileWithWorkerInfo = async (
-  workersConfig: WorkersConfigReadonly
+  workersConfig: WorkersConfigReadonly,
+  fluenceConfig: FluenceConfigReadonly
 ) => {
+  const allWorkerNames = Object.keys(fluenceConfig.workers ?? {});
+
+  const workerNameDealsNills = allWorkerNames.reduce<
+    Record<string, ReturnType<typeof makeOptional<Deals[string]>>>
+  >((acc, workerName) => {
+    acc[workerName] = makeOptional(null, DEAL_TYPE);
+    return acc;
+  }, {});
+
+  const workerDealOptionals = Object.entries(workersConfig.deals ?? {}).reduce<
+    Record<string, ReturnType<typeof makeOptional<Deals[string]>>>
+  >(
+    (acc, [workerName, deal]) => {
+      acc[workerName] = makeOptional<Deals[string]>(deal, DEAL_TYPE);
+      return acc;
+    },
+    { ...workerNameDealsNills }
+  );
+
+  const workerNameHostsNills = allWorkerNames.reduce<
+    Record<string, ReturnType<typeof makeOptional<Hosts[string]>>>
+  >((acc, workerName) => {
+    acc[workerName] = makeOptional(null, HOSTS_TYPE);
+    return acc;
+  }, {});
+
+  const workerHostsOptionals = Object.entries(workersConfig.hosts ?? {}).reduce<
+    Record<string, ReturnType<typeof makeOptional<Hosts[string]>>>
+  >(
+    (acc, [workerName, hosts]) => {
+      acc[workerName] = makeOptional<Hosts[string]>(hosts, HOSTS_TYPE);
+      return acc;
+    },
+    { ...workerNameHostsNills }
+  );
+
   await writeFile(
     await ensureFluenceAquaWorkersPath(),
     jsToAqua(
-      { deals: workersConfig.deals, hosts: workersConfig.hosts },
+      {
+        deals: makeOptional(
+          Object.keys(workerDealOptionals).length === 0
+            ? null
+            : workerDealOptionals,
+          {
+            [DEFAULT_WORKER_NAME]: makeOptional(null, DEAL_TYPE),
+          }
+        ),
+        hosts: makeOptional(
+          Object.keys(workerHostsOptionals).length === 0
+            ? null
+            : workerHostsOptionals,
+          {
+            [DEFAULT_WORKER_NAME]: makeOptional(null, HOSTS_TYPE),
+          }
+        ),
+      },
       "getWorkersInfo"
     ),
     FS_OPTIONS

@@ -50,29 +50,36 @@ const workerInfoSchema = {
   required: ["timestamp", "definition"],
 } as const satisfies JSONSchemaType<WorkerInfo>;
 
+export type Deals = Record<
+  string,
+  WorkerInfo & {
+    dealId: string;
+    dealIdOriginal: string;
+    chainNetwork: ChainNetwork;
+    chainNetworkId: number;
+  }
+>;
+
+export type Hosts = Record<
+  string,
+  WorkerInfo & {
+    relayId: string;
+    installation_spells: {
+      host_id: string;
+      spell_id: string;
+      worker_id: string;
+    }[];
+  }
+>;
+
+export type DealsAndHosts = {
+  deals?: Deals;
+  hosts?: Hosts;
+};
+
 type ConfigV0 = {
   version: 0;
-  deals?: Record<
-    string,
-    WorkerInfo & {
-      dealId: string;
-      dealIdOriginal: string;
-      chainNetwork: ChainNetwork;
-      chainNetworkId: number;
-    }
-  >;
-  hosts?: Record<
-    string,
-    WorkerInfo & {
-      relayId: string;
-      installation_spells: {
-        host_id: string;
-        spell_id: string;
-        worker_id: string;
-      }[];
-    }
-  >;
-};
+} & DealsAndHosts;
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FILE_NAME}`,

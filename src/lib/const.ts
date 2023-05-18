@@ -375,7 +375,7 @@ service Console("run-console"):
 
 func status():
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.${DEFAULT_WORKER_NAME}.dealId
+    dealId = workersInfo.deals!.${DEFAULT_WORKER_NAME}!.dealId
     print = (answer: string, peer: string):
       Console.print([answer, peer])
 
