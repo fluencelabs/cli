@@ -10,6 +10,9 @@ services:
     image: docker.fluence.dev/aurora:latest
     ports:
       - 8545:8545
+    networks:
+      fluence:
+
   ipfs:
     image: ipfs/go-ipfs
     ports:
