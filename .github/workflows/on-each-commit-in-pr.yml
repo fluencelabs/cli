@@ -1,0 +1,41 @@
+name: On each commit in PR
+
+on:
+  pull_request:
+    types:
+      - synchronize
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout fluence-cli
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Install Go package
+        run: go install github.com/grafana/json-schema-docs
+
+      - name: Setup node with self-hosted npm registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          registry-url: "https://npm.fluence.dev"
+          cache: "pnpm"
+
+      - run: pnpm i
+
+      - name: Run on each commit
+        run: pnpm on-each-commit
+
+      - name: Git add and commit
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Auto-generated config documentation" || echo "No changes to commit"
