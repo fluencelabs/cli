@@ -16,19 +16,29 @@
 
 import assert from "node:assert";
 
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 import type { ChainNetwork } from "./const.js";
 import {
   getFactoryContract,
   getSigner,
-  getDealContract,
   waitTx,
   promptConfirmTx,
+  getDealCoreContract,
+  getDealConfigContract,
 } from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
+
+type DealInfo = {
+  core: string;
+  config: string;
+  controller: string;
+  payment: string;
+  statusController: string;
+  workers: string;
+};
 
 type DealCreateArg = {
   chainNetwork: ChainNetwork;
@@ -53,7 +63,8 @@ export const dealCreate = async ({
   const tx = await factory.createDeal(
     BigNumber.from(minWorkers),
     BigNumber.from(targetWorkers),
-    appCID
+    appCID,
+    [] //TODO: get effectors from the project
   );
 
   const res = await waitTx(tx);
@@ -69,11 +80,42 @@ export const dealCreate = async ({
     "DealCreated event not found. Try updating flox to the latest version"
   );
 
-  const dealAddress: unknown =
+  // TODO: check if this is correct
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const dealInfo: DealInfo =
     factory.interface.parseLog(log).args[DEAL_LOG_ARG_NAME];
 
-  assert(typeof dealAddress === "string");
-  return dealAddress;
+  assert(
+    ethers.utils.isAddress(dealInfo.core),
+    "Deal core address is not valid"
+  );
+
+  assert(
+    ethers.utils.isAddress(dealInfo.config),
+    "Deal config address is not valid"
+  );
+
+  assert(
+    ethers.utils.isAddress(dealInfo.controller),
+    "Deal controller address is not valid"
+  );
+
+  assert(
+    ethers.utils.isAddress(dealInfo.payment),
+    "Deal payment address is not valid"
+  );
+
+  assert(
+    ethers.utils.isAddress(dealInfo.statusController),
+    "Deal status controller address is not valid"
+  );
+
+  assert(
+    ethers.utils.isAddress(dealInfo.workers),
+    "Deal workers address is not valid"
+  );
+
+  return dealInfo.core;
 };
 
 type DealUpdateArg = {
@@ -90,11 +132,12 @@ export const dealUpdate = async ({
   appCID,
 }: DealUpdateArg) => {
   const signer = await getSigner(network, privKey);
-  const deal = getDealContract(dealAddress, signer);
+  const core = getDealCoreContract(dealAddress, signer);
+  const config = await getDealConfigContract(core, signer);
 
   promptConfirmTx(privKey);
 
-  const tx = await deal.setAppCID(appCID);
+  const tx = await config.setAppCID(appCID);
   await waitTx(tx);
   return tx;
 };

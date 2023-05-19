@@ -14,90 +14,84 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
+import { assert } from "console";
 
 import { Workers__factory } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
+
 const color = oclifColor.default;
 
-import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifeCycle.js";
-import { input } from "../../../lib/prompt.js";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { initCli } from "../../lib/lifeCycle.js";
+import { input } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,
-  getDealConfigContract,
-  getDealControllerContract,
-  getDealCoreContract,
-  getFLTContract,
+  getMatcherContract,
   getSigner,
   promptConfirmTx,
   waitTx,
-} from "../../../lib/provider.js";
+} from "../../lib/provider.js";
 
-const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
 const PAT_CREATED_EVENT_TOPIC = "PATCreated";
 
-export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
-  static override description = "Create provider access token for the deal";
+export default class Match extends BaseCommand<typeof Match> {
+  static override hidden = true;
+  static override description = "Match deal with resource owners";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
   };
+
   static override args = {
-    [DEAL_ADDRESS_ARG]: Args.string({
+    "DEAL-ADDRESS": Args.string({
       description: "Deal address",
     }),
   };
+
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
-      await this.parse(CreatePAT),
+      await this.parse(Match),
       true
     );
+
+    const dealAddress =
+      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
     const network = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
       maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
     });
 
-    const dealAddress =
-      args[DEAL_ADDRESS_ARG] ??
-      (await input({ message: "Enter deal address" }));
-
     const signer = await getSigner(network, flags.privKey);
-    const core = getDealCoreContract(dealAddress, signer);
-    const config = await getDealConfigContract(core, signer);
-    const controller = await getDealControllerContract(core, signer);
 
-    const flt = await getFLTContract(signer, network);
-
-    const v = await config.requiredStake();
-    const approveTx = await flt.approve(dealAddress, v);
+    const matcher = await getMatcherContract(signer, network);
+    const tx = await matcher.matchWithDeal(dealAddress);
 
     promptConfirmTx(flags.privKey);
-    await waitTx(approveTx);
-
-    const joinTx = await controller.join();
-
-    promptConfirmTx(flags.privKey);
-    const res = await waitTx(joinTx);
+    const res = await waitTx(tx);
 
     const workersInterface = Workers__factory.createInterface();
-
     const eventTopic = workersInterface.getEventTopic(PAT_CREATED_EVENT_TOPIC);
 
-    const log = res.logs.find((log: { topics: Array<string> }) => {
-      return log.topics[0] === eventTopic;
-    });
+    let patCount = 0;
 
-    assert(log !== undefined);
-    const patId: unknown = workersInterface.parseLog(log).args["id"];
+    for (const log of res.logs) {
+      if (log.topics[0] === eventTopic) {
+        const id: unknown = workersInterface.parseLog(log).args["id"];
+        assert(typeof id === "string");
 
-    assert(typeof patId === "string");
+        patCount = patCount + 1;
+      }
+    }
 
-    this.log(`PAT ID: ${color.yellow(patId)}`);
+    this.log(
+      `${color.green(patCount.toString())} workers joined to deal ${color.green(
+        dealAddress
+      )}`
+    );
   }
 }

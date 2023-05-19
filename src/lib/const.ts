@@ -48,7 +48,7 @@ export type ChainNetwork = (typeof CHAIN_NETWORKS)[number];
 
 export type ChainConfig = {
   ethereumNodeUrl: string;
-  coreAddress: string;
+  globalConfig: string;
   dealFactoryAddress: string;
   developerFaucetAddress: string;
   chainId: number;
@@ -66,16 +66,16 @@ export const WC_METADATA = {
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   local: {
     ethereumNodeUrl: "http://127.0.0.1:8545",
-    coreAddress: "0x42e59295F72a5B31884d8532396C0D89732c8e84",
-    dealFactoryAddress: "0xea6777e8c011E7968605fd012A9Dd49401ec386C",
+    globalConfig: "0x42e59295F72a5B31884d8532396C0D89732c8e84",
+    dealFactoryAddress: "0x908aEBfb6051Bca6d1e684586d7760e53C4c736C",
     developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
     chainId: 31_337,
   },
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
-    coreAddress: "0x11134d4e7a8Fcb28A7eB4f08bf2FE03b0A96E097",
+    globalConfig: "0x11134d4e7a8Fcb28A7eB4f08bf2FE03b0A96E097",
     dealFactoryAddress: "0xb497e025D3095A197E30Ca84DEc36a637E649868",
-    developerFaucetAddress: "0xbCec12E243Be086bae044AB7857B4AE5a20dB16C",
+    developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
     chainId: 1313161555,
   },
 };

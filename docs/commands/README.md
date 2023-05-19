@@ -21,6 +21,7 @@
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [PATH]`](#fluence-module-new-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence resource-owner matching join [WORKERS-COUNT]`](#fluence-resource-owner-matching-join-workers-count)
 * [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
@@ -70,7 +71,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.10/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -134,7 +135,7 @@ USAGE
   $ fluence autocomplete [SHELL] [-r]
 
 ARGUMENTS
-  SHELL  shell type
+  SHELL  (zsh|bash|powershell) Shell type
 
 FLAGS
   -r, --refresh-cache  Refresh cache (ignores displaying instructions)
@@ -149,10 +150,12 @@ EXAMPLES
 
   $ fluence autocomplete zsh
 
+  $ fluence autocomplete powershell
+
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.8/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.2.0/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -172,7 +175,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.10/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -438,7 +441,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.10/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -574,6 +577,27 @@ EXAMPLES
   $ fluence module remove
 ```
 
+## `fluence resource-owner matching join [WORKERS-COUNT]`
+
+Join to matching contract
+
+```
+USAGE
+  $ fluence resource-owner matching join [WORKERS-COUNT] [--no-input] [--privKey <value>] [--network <value>]
+
+ARGUMENTS
+  WORKERS-COUNT  Workers to be registered with the matching engine
+
+FLAGS
+  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
+                       (local, testnet)
+  --no-input           Don't interactively ask for any input from the user
+  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+
+DESCRIPTION
+  Join to matching contract
+```
+
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
 Create provider access token for the deal
@@ -641,7 +665,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.10/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 

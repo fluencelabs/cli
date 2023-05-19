@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
-import { Workers__factory } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
@@ -27,34 +24,33 @@ import { initCli } from "../../../lib/lifeCycle.js";
 import { input } from "../../../lib/prompt.js";
 import {
   ensureChainNetwork,
-  getDealConfigContract,
-  getDealControllerContract,
-  getDealCoreContract,
   getFLTContract,
+  getFactoryContract,
+  getMatcherContract,
   getSigner,
   promptConfirmTx,
   waitTx,
 } from "../../../lib/provider.js";
 
-const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
-const PAT_CREATED_EVENT_TOPIC = "PATCreated";
+const WORKERS_COUNT = "WORKERS-COUNT";
 
-export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
-  static override description = "Create provider access token for the deal";
+export default class JoinToMatching extends BaseCommand<typeof JoinToMatching> {
+  static override description = "Join to matching contract";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
   };
   static override args = {
-    [DEAL_ADDRESS_ARG]: Args.string({
-      description: "Deal address",
+    [WORKERS_COUNT]: Args.string({
+      description: "Workers to be registered with the matching engine",
     }),
   };
+
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
-      await this.parse(CreatePAT),
+      await this.parse(JoinToMatching),
       true
     );
 
@@ -63,41 +59,33 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
       maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
     });
 
-    const dealAddress =
-      args[DEAL_ADDRESS_ARG] ??
-      (await input({ message: "Enter deal address" }));
+    const workersCount =
+      args[WORKERS_COUNT] ?? (await input({ message: "Enter workers count" }));
 
     const signer = await getSigner(network, flags.privKey);
-    const core = getDealCoreContract(dealAddress, signer);
-    const config = await getDealConfigContract(core, signer);
-    const controller = await getDealControllerContract(core, signer);
+    const matcher = await getMatcherContract(signer, network);
+    const factory = getFactoryContract(signer, network);
 
-    const flt = await getFLTContract(signer, network);
+    const collateral = await factory.REQUIRED_STAKE();
+    const pricePerEpoch = await factory.PRICE_PER_EPOCH();
 
-    const v = await config.requiredStake();
-    const approveTx = await flt.approve(dealAddress, v);
+    const approveTx = await (
+      await getFLTContract(signer, network)
+    ).approve(matcher.address, collateral.mul(workersCount));
 
     promptConfirmTx(flags.privKey);
     await waitTx(approveTx);
 
-    const joinTx = await controller.join();
+    const tx = await matcher.register(
+      pricePerEpoch,
+      collateral,
+      workersCount,
+      [] // TODO: get effectors from the project
+    );
 
     promptConfirmTx(flags.privKey);
-    const res = await waitTx(joinTx);
+    await waitTx(tx);
 
-    const workersInterface = Workers__factory.createInterface();
-
-    const eventTopic = workersInterface.getEventTopic(PAT_CREATED_EVENT_TOPIC);
-
-    const log = res.logs.find((log: { topics: Array<string> }) => {
-      return log.topics[0] === eventTopic;
-    });
-
-    assert(log !== undefined);
-    const patId: unknown = workersInterface.parseLog(log).args["id"];
-
-    assert(typeof patId === "string");
-
-    this.log(`PAT ID: ${color.yellow(patId)}`);
+    this.log(color.green(`Successfully joined to matching contract`));
   }
 }
