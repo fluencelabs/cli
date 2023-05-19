@@ -13,14 +13,6 @@ jobs:
       - name: Checkout fluence-cli
         uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
-
-      - name: Install Go package
-        run: go install github.com/grafana/json-schema-docs@latest
-
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
