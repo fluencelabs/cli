@@ -18,7 +18,7 @@ on:
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
-        default: "fluencelabs/rust-peer:minimal"
+        default: "fluencelabs/rust-peer:0.1.8"
       aqua-version:
         description: "@fluencelabs/aqua version"
         type: string
@@ -162,6 +162,8 @@ jobs:
             }
 
       - name: Run on each commit
+        env:
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
         if: ${{ github.event_name == 'pull_request' && github.repository == github.event.repository.full_name }}
         run: pnpm on-each-commit
 
