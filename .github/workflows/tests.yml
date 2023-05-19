@@ -59,7 +59,7 @@ jobs:
       version: "${{ steps.snapshot.outputs.version }}"
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
@@ -161,6 +161,10 @@ jobs:
               }
             }
 
+      - name: Run on each commit
+        if: ${{ github.event_name == 'pull_request' && github.repository == github.event.repository.full_name }}
+        run: pnpm on-each-commit
+
       - name: Run tests
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
@@ -178,3 +182,7 @@ jobs:
       - name: Dump rust-peer logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
+
+      - name: Auto-commit
+        if: ${{ github.event_name == 'pull_request' && github.repository == github.event.repository.full_name }}
+        uses: stefanzweifel/git-auto-commit-action@v4
