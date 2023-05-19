@@ -30,9 +30,4 @@ jobs:
       - name: Run on each commit
         run: pnpm on-each-commit
 
-      - name: Git add and commit
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Auto-generated config documentation" || echo "No changes to commit"
+      - uses: stefanzweifel/git-auto-commit-action@v4
