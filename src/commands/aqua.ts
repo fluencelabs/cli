@@ -70,7 +70,7 @@ export default class Aqua extends Command {
       description: "Generate .js file instead of .ts",
     }),
     "old-fluence-js": Flags.boolean({
-      description: "Generate TypeScript or JavaScript files for new JS Client",
+      description: "Generate TypeScript or JavaScript files for old fluence-js",
       default: false,
     }),
     "log-level-compiler": Flags.string({
@@ -160,15 +160,13 @@ export default class Aqua extends Command {
     };
 
     if (!flags.watch) {
-      this.log(await compile());
+      this.log(await compile() );
       return;
     }
 
-    const watchingNotification = (): void => {
-      return this.log(
+    const watchingNotification = (): void => this.log(
         `Watching for changes at ${color.yellow(aquaCliFlags.input)}...`
       );
-    };
 
     watchingNotification();
 
