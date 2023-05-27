@@ -34,7 +34,7 @@
     "check": "pnpm before-build && pnpm build && pnpm lint-fix && pnpm prettier && pnpm circular",
     "circular": "madge --circular --extensions ts ./",
     "on-each-commit": "pnpm check && pnpm gen-config-docs && cd docs/commands && oclif readme --no-aliases",
-    "clean": "shx rm -rf .fluence && shx rm -rf fluence-lock.yaml && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
+    "clean": "shx rm -rf .fluence && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f"
   },
   "dependencies": {
