@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.12](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.11...fluence-cli-v0.4.12) (2023-05-22)
+
+
+### Features
+
+* **installation-spell:** bump to 0.5.12 ([#262](https://github.com/fluencelabs/fluence-cli/issues/262)) ([621f9de](https://github.com/fluencelabs/fluence-cli/commit/621f9de7ccd222c50e0413292632d23f26392678))
+
 ## [0.4.11](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.10...fluence-cli-v0.4.11) (2023-05-17)
 
 

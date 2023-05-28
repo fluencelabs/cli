@@ -1,7 +1,7 @@
 {
   "name": "@fluencelabs/cli",
   "type": "module",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@adobe/jsonschema2md": "^7.1.5",
-    "@fluencelabs/installation-spell": "^0.5.11",
+    "@fluencelabs/installation-spell": "^0.5.12",
     "@swc/core": "^1.3.38",
     "@total-typescript/ts-reset": "^0.4.2",
     "@tsconfig/node16-strictest-esm": "^1.0.3",
