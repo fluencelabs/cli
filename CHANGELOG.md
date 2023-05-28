@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.13](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.12...fluence-cli-v0.4.13) (2023-05-28)
+
+
+### Features
+
+* Update versions.json with new registry version ([ee4e548](https://github.com/fluencelabs/fluence-cli/commit/ee4e548ec1cf31f409fd5a0b3ffb1e5502f6d8bb))
+
 ## [0.4.12](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.11...fluence-cli-v0.4.12) (2023-05-22)
 
 
