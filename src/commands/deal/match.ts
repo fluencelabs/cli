@@ -27,8 +27,8 @@ import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import {
+  GlobalContracts,
   ensureChainNetwork,
-  getMatcherContract,
   getSigner,
   promptConfirmTx,
   waitTx,
@@ -68,7 +68,9 @@ export default class Match extends BaseCommand<typeof Match> {
 
     const signer = await getSigner(network, flags.privKey);
 
-    const matcher = await getMatcherContract(signer, network);
+    const globalContracts = new GlobalContracts(signer, network);
+
+    const matcher = await globalContracts.getMatcher();
     const tx = await matcher.matchWithDeal(dealAddress);
 
     promptConfirmTx(flags.privKey);

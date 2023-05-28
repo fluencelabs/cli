@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@fluencelabs/aqua-api": "^0.10.3",
-    "@fluencelabs/deal-aurora": "file:../deal/aurora/fluencelabs-deal-aurora-0.1.12.tgz",
+    "@fluencelabs/deal-aurora": "0.2.0",
     "@fluencelabs/fluence-network-environment": "^1.0.14",
     "@fluencelabs/js-client.api": "^0.11.6",
     "@fluencelabs/js-client.node": "^0.6.8",

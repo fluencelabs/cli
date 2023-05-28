@@ -20,7 +20,6 @@ import assert from "node:assert";
 import { URL } from "node:url";
 
 import {
-  type AquaProxy,
   type GlobalConfig,
   type DealFactory,
   type DeveloperFaucet,
@@ -58,7 +57,6 @@ import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { list } from "./prompt.js";
 
 const {
-  AquaProxy__factory,
   Core__factory,
   DealFactory__factory,
   GlobalConfig__factory,
@@ -188,101 +186,72 @@ const getWallet = (
   );
 };
 
-export const getGlobalConfig = (
-  signer: ethers.Signer,
-  network: ChainNetwork
-): GlobalConfig => {
-  return GlobalConfig__factory.connect(
-    DEAL_CONFIG[network].globalConfig,
-    signer
-  );
-};
+export class GlobalContracts {
+  constructor(private signer: ethers.Signer, private network: ChainNetwork) {}
 
-export const getFactoryContract = (
-  signer: ethers.Signer,
-  network: ChainNetwork
-): DealFactory => {
-  return DealFactory__factory.connect(
-    DEAL_CONFIG[network].dealFactoryAddress,
-    signer
-  );
-};
+  getGlobalConfig(): GlobalConfig {
+    return GlobalConfig__factory.connect(
+      DEAL_CONFIG[this.network].globalConfig,
+      this.signer
+    );
+  }
 
-export const getAquaProxy = (
-  address: string,
-  provider: ethers.providers.Provider
-): AquaProxy => {
-  return AquaProxy__factory.connect(address, provider);
-};
+  getFactory(): DealFactory {
+    return DealFactory__factory.connect(
+      DEAL_CONFIG[this.network].dealFactoryAddress,
+      this.signer
+    );
+  }
 
-export const getDeveloperContract = (
-  signer: ethers.Signer,
-  network: ChainNetwork
-): DeveloperFaucet => {
-  return DeveloperFaucet__factory.connect(
-    DEAL_CONFIG[network].developerFaucetAddress,
-    signer
-  );
-};
+  getFaucet(): DeveloperFaucet {
+    return DeveloperFaucet__factory.connect(
+      DEAL_CONFIG[this.network].developerFaucetAddress,
+      this.signer
+    );
+  }
 
-export const getDealCoreContract = (
-  dealAddress: string,
-  signer: ethers.Signer
-): Core => {
-  return Core__factory.connect(dealAddress, signer);
-};
+  async getMatcher(): Promise<Matcher> {
+    const config = this.getGlobalConfig();
+    return Matcher__factory.connect(await config.matcher(), this.signer);
+  }
 
-export const getDealWorkersContract = async (
-  core: Core,
-  signer: ethers.Signer
-): Promise<Workers> => {
-  const workersAddress = await core.getWorkers();
-  return Workers__factory.connect(workersAddress, signer);
-};
+  async getTUSD(): Promise<ERC20> {
+    return ERC20__factory.connect(
+      await this.getFaucet().usdToken(),
+      this.signer
+    );
+  }
 
-export const getDealControllerContract = async (
-  core: Core,
-  signer: ethers.Signer
-): Promise<Controller> => {
-  const address = await core.getController();
-  return Controller__factory.connect(address, signer);
-};
+  async getFLT(): Promise<ERC20> {
+    return ERC20__factory.connect(
+      await this.getFaucet().fluenceToken(),
+      this.signer
+    );
+  }
+}
 
-export const getDealConfigContract = async (
-  core: Core,
-  signer: ethers.Signer
-): Promise<Config> => {
-  const configAddress = await core.getConfig();
-  return Config__factory.connect(configAddress, signer);
-};
+export class Deal {
+  private core: Core;
 
-export const getMatcherContract = async (
-  signer: ethers.Signer,
-  network: ChainNetwork
-): Promise<Matcher> => {
-  const config = getGlobalConfig(signer, network);
-  return Matcher__factory.connect(await config.matcher(), signer);
-};
+  constructor(dealAddress: string, private signer: ethers.Signer) {
+    this.core = Core__factory.connect(dealAddress, this.signer);
+  }
 
-export const getUSDContract = async (
-  signer: ethers.Signer,
-  network: ChainNetwork
-): Promise<ERC20> => {
-  return ERC20__factory.connect(
-    await getDeveloperContract(signer, network).usdToken(),
-    signer
-  );
-};
+  async getWorkers(): Promise<Workers> {
+    const workersAddress = await this.core.getWorkers();
+    return Workers__factory.connect(workersAddress, this.signer);
+  }
 
-export const getFLTContract = async (
-  signer: ethers.Signer,
-  network: ChainNetwork
-): Promise<ERC20> => {
-  return ERC20__factory.connect(
-    await getDeveloperContract(signer, network).fluenceToken(),
-    signer
-  );
-};
+  async getController(): Promise<Controller> {
+    const controllerAddress = await this.core.getController();
+    return Controller__factory.connect(controllerAddress, this.signer);
+  }
+
+  async getConfig(): Promise<Config> {
+    const configAddress = await this.core.getConfig();
+    return Config__factory.connect(configAddress, this.signer);
+  }
+}
 
 export const waitTx = async (
   tx: ethers.ContractTransaction

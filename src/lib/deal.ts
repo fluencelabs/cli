@@ -20,12 +20,11 @@ import { BigNumber, ethers } from "ethers";
 
 import type { ChainNetwork } from "./const.js";
 import {
-  getFactoryContract,
+  GlobalContracts,
+  Deal,
   getSigner,
   waitTx,
   promptConfirmTx,
-  getDealCoreContract,
-  getDealConfigContract,
 } from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
@@ -56,7 +55,10 @@ export const dealCreate = async ({
   targetWorkers,
 }: DealCreateArg) => {
   const signer = await getSigner(chainNetwork, privKey);
-  const factory = getFactoryContract(signer, chainNetwork);
+
+  const globalContracts = new GlobalContracts(signer, chainNetwork);
+
+  const factory = globalContracts.getFactory();
 
   promptConfirmTx(privKey);
 
@@ -132,8 +134,9 @@ export const dealUpdate = async ({
   appCID,
 }: DealUpdateArg) => {
   const signer = await getSigner(network, privKey);
-  const core = getDealCoreContract(dealAddress, signer);
-  const config = await getDealConfigContract(core, signer);
+  const deal = new Deal(dealAddress, signer);
+
+  const config = await deal.getConfig();
 
   promptConfirmTx(privKey);
 

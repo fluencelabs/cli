@@ -3,7 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@adobe/jsonschema2md': ^7.1.5
   '@fluencelabs/aqua-api': ^0.10.3
-  '@fluencelabs/deal-aurora': file:../deal/aurora/fluencelabs-deal-aurora-0.1.12.tgz
+  '@fluencelabs/deal-aurora': 0.2.0
   '@fluencelabs/fluence-network-environment': ^1.0.14
   '@fluencelabs/installation-spell': ^0.5.11
   '@fluencelabs/js-client.api': ^0.11.6
@@ -75,7 +75,7 @@ specifiers:
 
 dependencies:
   '@fluencelabs/aqua-api': 0.10.6
-  '@fluencelabs/deal-aurora': file:../deal/aurora/fluencelabs-deal-aurora-0.1.12.tgz_bw273acfmcbqequwr3fu7egt3i
+  '@fluencelabs/deal-aurora': 0.2.0_bw273acfmcbqequwr3fu7egt3i
   '@fluencelabs/fluence-network-environment': 1.0.14
   '@fluencelabs/js-client.api': 0.11.6
   '@fluencelabs/js-client.node': 0.6.8
@@ -1007,6 +1007,35 @@ packages:
 
   /@fluencelabs/avm/0.35.4:
     resolution: {integrity: sha512-J070t5AOYIzQnNcBcYjDPUDzJTcpVboZxcrjGN4qYiOjcrtCtnnXeQKedLuBto5bRztHJdL9BzLLvzcFXhgmFQ==}
+    dev: false
+
+  /@fluencelabs/deal-aurora/0.2.0_bw273acfmcbqequwr3fu7egt3i:
+    resolution: {integrity: sha512-OEHq+WehAtAaLxzQ6NmHxOnu3VyBq+ahbxyWbh/hgZtrzn6PVgFntBG6O+m024mBZZy6RBDPFQ2Mb0a+ptCCzw==}
+    dependencies:
+      '@nomicfoundation/hardhat-toolbox': 1.0.2_bw273acfmcbqequwr3fu7egt3i
+      '@openzeppelin/contracts': 4.8.3
+      '@openzeppelin/contracts-upgradeable': 4.8.3
+      dotenv: 16.0.3
+    transitivePeerDependencies:
+      - '@ethersproject/abi'
+      - '@ethersproject/providers'
+      - '@nomicfoundation/hardhat-chai-matchers'
+      - '@nomicfoundation/hardhat-network-helpers'
+      - '@nomiclabs/hardhat-ethers'
+      - '@nomiclabs/hardhat-etherscan'
+      - '@typechain/ethers-v5'
+      - '@typechain/hardhat'
+      - '@types/chai'
+      - '@types/mocha'
+      - '@types/node'
+      - chai
+      - ethers
+      - hardhat
+      - hardhat-gas-reporter
+      - solidity-coverage
+      - ts-node
+      - typechain
+      - typescript
     dev: false
 
   /@fluencelabs/fluence-network-environment/1.0.14:
@@ -13484,35 +13513,3 @@ packages:
   /zwitch/2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
     dev: true
-
-  file:../deal/aurora/fluencelabs-deal-aurora-0.1.12.tgz_bw273acfmcbqequwr3fu7egt3i:
-    resolution: {integrity: sha512-V42hp22vQtrV9dFgnJDy7lWQriTlDkvjQBgw7VaFGBFx3GB3kgU+fSfL7uOkpzj3RcMoeSrlIdlA1xO7Z2DVvw==, tarball: file:../deal/aurora/fluencelabs-deal-aurora-0.1.12.tgz}
-    id: file:../deal/aurora/fluencelabs-deal-aurora-0.1.12.tgz
-    name: '@fluencelabs/deal-aurora'
-    version: 0.1.12
-    dependencies:
-      '@nomicfoundation/hardhat-toolbox': 1.0.2_bw273acfmcbqequwr3fu7egt3i
-      '@openzeppelin/contracts': 4.8.3
-      '@openzeppelin/contracts-upgradeable': 4.8.3
-      dotenv: 16.0.3
-    transitivePeerDependencies:
-      - '@ethersproject/abi'
-      - '@ethersproject/providers'
-      - '@nomicfoundation/hardhat-chai-matchers'
-      - '@nomicfoundation/hardhat-network-helpers'
-      - '@nomiclabs/hardhat-ethers'
-      - '@nomiclabs/hardhat-etherscan'
-      - '@typechain/ethers-v5'
-      - '@typechain/hardhat'
-      - '@types/chai'
-      - '@types/mocha'
-      - '@types/node'
-      - chai
-      - ethers
-      - hardhat
-      - hardhat-gas-reporter
-      - solidity-coverage
-      - ts-node
-      - typechain
-      - typescript
-    dev: false

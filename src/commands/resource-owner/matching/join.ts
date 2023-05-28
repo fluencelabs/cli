@@ -23,10 +23,8 @@ import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import { input } from "../../../lib/prompt.js";
 import {
+  GlobalContracts,
   ensureChainNetwork,
-  getFLTContract,
-  getFactoryContract,
-  getMatcherContract,
   getSigner,
   promptConfirmTx,
   waitTx,
@@ -63,15 +61,19 @@ export default class JoinToMatching extends BaseCommand<typeof JoinToMatching> {
       args[WORKERS_COUNT] ?? (await input({ message: "Enter workers count" }));
 
     const signer = await getSigner(network, flags.privKey);
-    const matcher = await getMatcherContract(signer, network);
-    const factory = getFactoryContract(signer, network);
+
+    const globalContracts = new GlobalContracts(signer, network);
+    const matcher = await globalContracts.getMatcher();
+    const factory = globalContracts.getFactory();
+    const flt = await globalContracts.getFLT();
 
     const collateral = await factory.REQUIRED_STAKE();
     const pricePerEpoch = await factory.PRICE_PER_EPOCH();
 
-    const approveTx = await (
-      await getFLTContract(signer, network)
-    ).approve(matcher.address, collateral.mul(workersCount));
+    const approveTx = await flt.approve(
+      matcher.address,
+      collateral.mul(workersCount)
+    );
 
     promptConfirmTx(flags.privKey);
     await waitTx(approveTx);

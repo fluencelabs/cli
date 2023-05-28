@@ -26,11 +26,9 @@ import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import { input } from "../../../lib/prompt.js";
 import {
+  Deal,
+  GlobalContracts,
   ensureChainNetwork,
-  getDealConfigContract,
-  getDealControllerContract,
-  getDealCoreContract,
-  getFLTContract,
   getSigner,
   promptConfirmTx,
   waitTx,
@@ -68,11 +66,13 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
       (await input({ message: "Enter deal address" }));
 
     const signer = await getSigner(network, flags.privKey);
-    const core = getDealCoreContract(dealAddress, signer);
-    const config = await getDealConfigContract(core, signer);
-    const controller = await getDealControllerContract(core, signer);
+    const globalContracts = new GlobalContracts(signer, network);
 
-    const flt = await getFLTContract(signer, network);
+    const deal = new Deal(dealAddress, signer);
+    const config = await deal.getConfig();
+    const controller = await deal.getController();
+
+    const flt = await globalContracts.getFLT();
 
     const v = await config.requiredStake();
     const approveTx = await flt.approve(dealAddress, v);
