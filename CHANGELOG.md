@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.14](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.13...fluence-cli-v0.4.14) (2023-05-29)
+
+
+### Features
+
+* **deps:** Update "spell" version in versions.json ([#270](https://github.com/fluencelabs/fluence-cli/issues/270)) ([39a82d0](https://github.com/fluencelabs/fluence-cli/commit/39a82d04471ab58df68c70ee99c7c5132482372f))
+* **deps:** update installation-spell version to 0.5.13 ([#272](https://github.com/fluencelabs/fluence-cli/issues/272)) ([70c89e0](https://github.com/fluencelabs/fluence-cli/commit/70c89e0bea20dece74a6813a31e127032b0c5589))
+
 ## [0.4.13](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.12...fluence-cli-v0.4.13) (2023-05-28)
 
 
