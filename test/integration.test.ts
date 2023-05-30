@@ -335,18 +335,20 @@ describe("integration tests", () => {
           args: ["run"],
           flags: {
             f: "status()",
-            quiet: true,
           },
           cwd,
         });
 
-        const parsedRes = JSON.parse(res);
-        assert(Array.isArray(parsedRes));
+        try {
+          console.log(`RES: ${res}`);
+          const parsedRes = JSON.parse(res);
+          assert(Array.isArray(parsedRes));
 
-        if (parsedRes.length === local.length) {
-          result = res;
-          break;
-        }
+          if (parsedRes.length === local.length) {
+            result = res;
+            break;
+          }
+        } catch {}
       }
 
       const parsedResult = JSON.parse(result);

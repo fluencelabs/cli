@@ -22,10 +22,15 @@ func status() -> *Answer:
     workersInfo <- getWorkersInfo()
     dealId = workersInfo.deals.defaultWorker.dealId
     answers: *Answer
+    Console.print("u!")
     on HOST_PEER_ID:
+        Console.print("run!")
         workers <- resolveSubnetwork(dealId)
+        Console.print(["workers:", workers])
         for w <- workers! par:
+            Console.print("w!")
             on w.metadata.peer_id via w.metadata.relay_id:
+                Console.print("s!")
                 answer <- NewService.greeting("fluence")
                 answers <<- Answer(answer=answer, peer=w.metadata.relay_id!)
 
