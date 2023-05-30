@@ -12,7 +12,7 @@
 
 Additional properties are allowed, as long as they follow this schema:
 
-Service names as keys and Deployment results as values
+Service names as keys and deployment results as values
 
 *   is optional
 

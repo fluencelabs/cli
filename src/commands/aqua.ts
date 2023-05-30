@@ -160,13 +160,15 @@ export default class Aqua extends Command {
     };
 
     if (!flags.watch) {
-      this.log(await compile() );
+      this.log(await compile());
       return;
     }
 
-    const watchingNotification = (): void => this.log(
+    const watchingNotification = (): void => {
+      return this.log(
         `Watching for changes at ${color.yellow(aquaCliFlags.input)}...`
       );
+    };
 
     watchingNotification();
 

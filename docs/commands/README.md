@@ -59,7 +59,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
-  --old-fluence-js              Generate TypeScript or JavaScript files for new JS Client
+  --old-fluence-js              Generate TypeScript or JavaScript files for old fluence-js
   --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
                                 Will ignore other options
 
@@ -70,7 +70,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -174,7 +174,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -440,7 +440,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -643,7 +643,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
