@@ -34,6 +34,7 @@ services:
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://aurora:8545
+      FLUENCE_ENV_CONNECTOR_FROM_BLOCK: 0
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
@@ -63,6 +64,7 @@ services:
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://aurora:8545
+      FLUENCE_ENV_CONNECTOR_FROM_BLOCK: 0
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
@@ -91,6 +93,7 @@ services:
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://aurora:8545
+      FLUENCE_ENV_CONNECTOR_FROM_BLOCK: 0
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
@@ -119,6 +122,7 @@ services:
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://aurora:8545
+      FLUENCE_ENV_CONNECTOR_FROM_BLOCK: 0
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
@@ -147,6 +151,7 @@ services:
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://aurora:8545
+      FLUENCE_ENV_CONNECTOR_FROM_BLOCK: 0
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:
@@ -175,6 +180,7 @@ services:
     environment:
       FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://aurora:8545
+      FLUENCE_ENV_CONNECTOR_FROM_BLOCK: 0
       FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       RUST_LOG: "info,aquamarine=warn,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=debug"
     command:

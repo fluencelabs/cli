@@ -10,9 +10,6 @@ import "services.aqua"
 
 export status
 
-service Console("run-console"):
-    print(any: ⊤)
-
 data Answer:
     answer: string
     peer: string
