@@ -43,7 +43,7 @@ import {
 import { haltCountly } from "../../lib/countly.js";
 import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
-import { initCli } from "../../lib/lifeCycle.js";
+import { exitCli, initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import {
   ensureFluenceTmpConfigTomlPath,
@@ -54,6 +54,12 @@ import { ensureCargoDependency } from "../../lib/rust.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
+/**
+ * This command doesn't extend BaseCommand like other commands do because it
+ * spawns a separate repl process which should keep cli alive
+ * This means we have to manually call exitCli() in all other cases before
+ * the final return statement
+ */
 export default class REPL extends Command {
   static override description =
     "Open service inside repl (downloads and builds modules if necessary)";
@@ -103,6 +109,7 @@ export default class REPL extends Command {
     );
 
     if (!isInteractive) {
+      await exitCli();
       return;
     }
 
