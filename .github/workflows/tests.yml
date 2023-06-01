@@ -18,7 +18,7 @@ on:
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
-        default: "fluencelabs/rust-peer:minimal"
+        default: "docker.fluence.dev/distro:rich_main-3cdbba8-163-1"
       aqua-version:
         description: "@fluencelabs/aqua version"
         type: string
