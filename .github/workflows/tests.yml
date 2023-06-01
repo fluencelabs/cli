@@ -164,7 +164,7 @@ jobs:
       - name: Run on each commit
         env:
           FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
-        if: ${{ github.event_name == 'pull_request' && github.repository == github.event.repository.full_name }}
+        if: ${{ github.event_name == 'pull_request' && github.repository == 'fluencelabs/fluence-cli' }}
         run: pnpm on-each-commit
 
       - name: Run tests
@@ -186,5 +186,5 @@ jobs:
         uses: jwalton/gh-docker-logs@v2
 
       - name: Auto-commit
-        if: ${{ github.event_name == 'pull_request' && github.repository == github.event.repository.full_name }}
+        if: ${{ github.event_name == 'pull_request' && github.repository == 'fluencelabs/fluence-cli' }}
         uses: stefanzweifel/git-auto-commit-action@v4
