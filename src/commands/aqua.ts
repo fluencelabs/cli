@@ -52,10 +52,9 @@ export default class Aqua extends Command {
       char: "w",
     }),
     "common-js": Flags.boolean({
-      description: "Use no extension in generated .ts file",
+      description: "Use no extension in generated .ts file imports",
     }),
     ...NO_INPUT_FLAG,
-
     /* Aqua CLI flags */
     input: Flags.string({
       description:
@@ -77,7 +76,7 @@ export default class Aqua extends Command {
       description: "Generate .js file instead of .ts",
     }),
     "old-fluence-js": Flags.boolean({
-      description: "Generate TypeScript or JavaScript files for new JS Client",
+      description: "Generate TypeScript or JavaScript files for old fluence-js",
       default: false,
     }),
     "log-level-compiler": Flags.string({

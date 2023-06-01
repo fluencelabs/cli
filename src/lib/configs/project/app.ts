@@ -218,7 +218,7 @@ const configSchemaV3: JSONSchemaType<ConfigV3> = {
       additionalProperties: {
         type: "object",
         title: "Deployment results",
-        description: "Service names as keys and Deployment results as values",
+        description: "Service names as keys and deployment results as values",
         additionalProperties: {
           title: "A list of deployed services",
           type: "array",

@@ -49,7 +49,7 @@ FLAGS
                                 absolute. Will be created if it doesn't exists
   -w, --watch                   Watch aqua file or folder for changes and recompile
   --air                         Generate .air file instead of .ts
-  --common-js                   Use no extension in generated .ts file
+  --common-js                   Use no extension in generated .ts file imports
   --const=<NAME=value>...       Constants to be passed to the compiler
   --dry                         Checks if compilation is succeeded, without output
   --import=<path>...            Path to a directory to import aqua files from. May be used several times
@@ -59,7 +59,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
-  --old-fluence-js              Generate TypeScript or JavaScript files for new JS Client
+  --old-fluence-js              Generate TypeScript or JavaScript files for old fluence-js
   --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
                                 Will ignore other options
 
