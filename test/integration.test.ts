@@ -35,11 +35,11 @@ import {
   init,
   maybeConcurrentTest,
   multiaddrs,
-  sleep,
+  sortPeers,
+  assertHasPeer,
 } from "./helpers.js";
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
-const MAX_SECONDS_TO_DEPLOY = 60 * 10;
 
 describe("integration tests", () => {
   beforeAll(() => {
@@ -212,33 +212,7 @@ describe("integration tests", () => {
       const parsedResult = JSON.parse(result);
       assert(Array.isArray(parsedResult));
 
-      const arrayOfResults = parsedResult
-        .map((result: unknown) => {
-          assert(
-            typeof result === "object" &&
-              result !== null &&
-              "peer" in result &&
-              "answer" in result &&
-              typeof result.peer === "string" &&
-              typeof result.answer === "string"
-          );
-
-          return {
-            peer: result.peer,
-            answer: result.answer,
-          };
-        })
-        .sort(({ peer: peerA }, { peer: peerB }) => {
-          if (peerA < peerB) {
-            return -1;
-          }
-
-          if (peerA > peerB) {
-            return 1;
-          }
-
-          return 0;
-        });
+      const arrayOfResults = parsedResult.map(assertHasPeer).sort(sortPeers);
 
       const expected = peers.map((peer) => {
         return {
@@ -323,71 +297,42 @@ describe("integration tests", () => {
         cwd,
       });
 
-      let currentSecondsWaited = 0;
-      const SECONDS_INTERVAL = 30;
       let result = "[]";
 
-      while (currentSecondsWaited < MAX_SECONDS_TO_DEPLOY) {
-        await sleep(SECONDS_INTERVAL);
-        currentSecondsWaited = currentSecondsWaited + SECONDS_INTERVAL;
-
+      // Jest has a global timeout for each test and if it runs out test will fail
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         const res = await fluence({
           args: ["run"],
           flags: {
             f: "status()",
+            quiet: true,
           },
           cwd,
         });
 
-        try {
-          console.log(`RES: ${res}`);
-          const parsedRes = JSON.parse(res);
-          assert(Array.isArray(parsedRes));
+        const parsedRes = JSON.parse(res);
+        assert(Array.isArray(parsedRes));
 
-          if (parsedRes.length === local.length) {
-            result = res;
-            break;
-          }
-        } catch {}
+        if (parsedRes.length === local.length) {
+          result = res;
+          break;
+        }
       }
 
       const parsedResult = JSON.parse(result);
       assert(Array.isArray(parsedResult));
 
-      const arrayOfResults = parsedResult
-        .map((result: unknown) => {
-          assert(
-            typeof result === "object" &&
-              result !== null &&
-              "peer" in result &&
-              "answer" in result &&
-              typeof result.peer === "string" &&
-              typeof result.answer === "string"
-          );
+      const arrayOfResults = parsedResult.map(assertHasPeer).sort(sortPeers);
 
+      const expected = local
+        .map((peer) => {
           return {
-            peer: result.peer,
-            answer: result.answer,
+            answer: "Hi, fluence",
+            peer: peer.peerId,
           };
         })
-        .sort(({ peer: peerA }, { peer: peerB }) => {
-          if (peerA < peerB) {
-            return -1;
-          }
-
-          if (peerA > peerB) {
-            return 1;
-          }
-
-          return 0;
-        });
-
-      const expected = local.map((peer) => {
-        return {
-          answer: "Hi, fluence",
-          peer: peer.peerId,
-        };
-      });
+        .sort(sortPeers);
 
       expect(arrayOfResults).toEqual(expected);
     }
