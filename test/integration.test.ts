@@ -37,7 +37,6 @@ import {
   multiaddrs,
   sortPeers,
   assertHasPeer,
-  sleepSeconds,
 } from "./helpers.js";
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
@@ -285,7 +284,6 @@ describe("integration tests", () => {
       fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
 
       await fluenceConfig.$commit();
-      await sleepSeconds(60);
 
       await fluence({
         args: [
