@@ -3,7 +3,7 @@ networks:
     driver: bridge
     ipam:
       config:
-      - subnet: 10.50.10.0/24
+        - subnet: 10.50.10.0/24
 
 services:
   aurora:

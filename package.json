@@ -25,16 +25,16 @@
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts --ext .js",
     "lint-fix": "eslint . --ext .ts --ext .js --cache --fix",
+    "prettier": "prettier --write .",
     "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
-    "prepack": "pnpm before-build && pnpm build && oclif manifest && cd docs/commands && oclif readme --no-aliases",
+    "prepack": "pnpm before-build && pnpm build",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test": "shx rm -rf tmp && shx mkdir tmp && pnpm pack --pack-destination ./tmp && prettier --check '*.{ts,js}' && pnpm lint && pnpm circular && cd tmp && pnpm init && pnpm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
-    "prepare": "node -e \"process.env.CI === undefined && require('husky').install()\"",
-    "check": "pnpm build && pnpm lint-fix && pnpm circular",
+    "test": "shx rm -rf tmp && shx mkdir tmp && pnpm pack --pack-destination ./tmp && cd tmp && pnpm init && pnpm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
+    "check": "pnpm before-build && pnpm build && pnpm lint-fix && pnpm prettier && pnpm circular",
     "circular": "madge --circular --extensions ts ./",
-    "pre-commit": "exitzero pnpm build && exitzero pnpm lint-fix && cd docs/commands && oclif readme --no-aliases && git add README.md",
-    "clean": "shx rm -rf .fluence && shx rm -rf fluence-lock.yaml && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
+    "on-each-commit": "pnpm check && pnpm gen-config-docs && cd docs/commands && oclif readme --no-aliases",
+    "clean": "shx rm -rf .fluence && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f"
   },
   "dependencies": {
@@ -97,11 +97,8 @@
     "eslint-plugin-license-header": "^0.6.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-unused-imports": "^2",
-    "exitzero": "^1.0.1",
     "globby": "^13",
-    "husky": "^8.0.3",
     "jest": "^29.5.0",
-    "lint-staged": "^13.2.1",
     "madge": "^6.0.0",
     "oclif": "^3.7.3",
     "prettier": "^2.8.4",
@@ -300,10 +297,6 @@
     "tmp",
     "resources"
   ],
-  "lint-staged": {
-    "*.ts": "prettier --write",
-    "*.js": "prettier --write"
-  },
   "directories": {
     "test": "test"
   }
