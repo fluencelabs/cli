@@ -49,7 +49,7 @@ FLAGS
                                 absolute. Will be created if it doesn't exists
   -w, --watch                   Watch aqua file or folder for changes and recompile
   --air                         Generate .air file instead of .ts
-  --common-js                   Use no extension in generated .ts file
+  --common-js                   Use no extension in generated .ts file imports
   --const=<NAME=value>...       Constants to be passed to the compiler
   --dry                         Checks if compilation is succeeded, without output
   --import=<path>...            Path to a directory to import aqua files from. May be used several times
@@ -59,7 +59,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
-  --old-fluence-js              Generate TypeScript or JavaScript files for new JS Client
+  --old-fluence-js              Generate TypeScript or JavaScript files for old fluence-js
   --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
                                 Will ignore other options
 
@@ -70,7 +70,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -134,7 +134,7 @@ USAGE
   $ fluence autocomplete [SHELL] [-r]
 
 ARGUMENTS
-  SHELL  shell type
+  SHELL  (zsh|bash|powershell) Shell type
 
 FLAGS
   -r, --refresh-cache  Refresh cache (ignores displaying instructions)
@@ -149,10 +149,12 @@ EXAMPLES
 
   $ fluence autocomplete zsh
 
+  $ fluence autocomplete powershell
+
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.8/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.2.0/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -172,7 +174,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -438,7 +440,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -641,7 +643,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.11/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 

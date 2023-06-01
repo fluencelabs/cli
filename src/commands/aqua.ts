@@ -31,10 +31,16 @@ import {
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
-import { initCli } from "../lib/lifeCycle.js";
+import { initCli, exitCli } from "../lib/lifeCycle.js";
 import { projectRootDir, validatePath } from "../lib/paths.js";
 import { input, type InputArg } from "../lib/prompt.js";
 
+/**
+ * This command doesn't extend BaseCommand like other commands do because it
+ * has a --watch flag which should keep cli alive
+ * This means we have to manually call exitCli() in all other cases before
+ * the final return statement
+ */
 export default class Aqua extends Command {
   static override description =
     "Compile aqua file or directory that contains your .aqua files";
@@ -46,10 +52,9 @@ export default class Aqua extends Command {
       char: "w",
     }),
     "common-js": Flags.boolean({
-      description: "Use no extension in generated .ts file",
+      description: "Use no extension in generated .ts file imports",
     }),
     ...NO_INPUT_FLAG,
-
     /* Aqua CLI flags */
     input: Flags.string({
       description:
@@ -71,7 +76,7 @@ export default class Aqua extends Command {
       description: "Generate .js file instead of .ts",
     }),
     "old-fluence-js": Flags.boolean({
-      description: "Generate TypeScript or JavaScript files for new JS Client",
+      description: "Generate TypeScript or JavaScript files for old fluence-js",
       default: false,
     }),
     "log-level-compiler": Flags.string({
@@ -162,6 +167,7 @@ export default class Aqua extends Command {
 
     if (!flags.watch) {
       this.log(await compile());
+      await exitCli();
       return;
     }
 

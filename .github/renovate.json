@@ -1,8 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
-  ],
+  "extends": ["config:base"],
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
   "enabledManagers": ["npm", "github-actions"],
@@ -18,9 +16,7 @@
     },
     {
       "matchManagers": ["npm"],
-      "matchPackagePatterns": [
-        "@fluencelabs/.*"
-      ],
+      "matchPackagePatterns": ["@fluencelabs/.*"],
       "semanticCommitType": "fix",
       "semanticCommitScope": "deps",
       "schedule": "at any time"

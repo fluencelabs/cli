@@ -10,7 +10,6 @@ oclif.manifest.json
 
 # for ease of development
 /fluence.yaml
-/fluence-lock.yaml
 /hosts.yaml
 /workers.yaml
 /deals.yaml
