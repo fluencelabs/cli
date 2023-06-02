@@ -1,3 +1,0 @@
-## lastCheckForUpdates Type
-
-`string`

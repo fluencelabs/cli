@@ -15,6 +15,7 @@
  */
 
 import { writeFile, mkdir } from "node:fs/promises";
+import { join } from "node:path";
 
 import { appSchema } from "./lib/configs/project/app.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
@@ -38,11 +39,10 @@ import {
   CONFIG_FILE_NAME,
   WORKERS_CONFIG_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
+  FS_OPTIONS,
 } from "./lib/const.js";
-import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 import { execPromise } from "./lib/execPromise.js";
-import { join } from "node:path";
-import { FS_OPTIONS } from "./lib/const.js";
+import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
 const schemas = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
