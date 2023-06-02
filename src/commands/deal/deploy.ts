@@ -103,7 +103,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const createdDeals: Record<
       string,
-      { deal: string; "worker definition": string }
+      { deal: string; "worker definition": string; timestamp: string }
     > = {};
 
     const updatedDeals: Record<
@@ -187,9 +187,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         workersConfig.deals = {};
       }
 
+      const timestamp = new Date().toISOString();
+
       workersConfig.deals[workerName] = {
         definition: appCID,
-        timestamp: new Date().toISOString(),
+        timestamp,
         dealIdOriginal,
         dealId: dealIdOriginal.slice(2).toLowerCase(),
         chainNetwork,
@@ -201,6 +203,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       createdDeals[workerName] = {
         deal: getLinkToAddress(dealIdOriginal),
         "worker definition": appCID,
+        timestamp,
       };
     }
 
