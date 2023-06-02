@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@fluencelabs/aqua-api':
-    specifier: ^0.10.3
-    version: 0.10.3
+    specifier: 0.11.0
+    version: 0.11.0
   '@fluencelabs/deal-aurora':
     specifier: 0.1.8
     version: 0.1.8(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@16.18.14)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.14.1)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4)
@@ -11,10 +11,10 @@ dependencies:
     specifier: ^1.0.14
     version: 1.0.14
   '@fluencelabs/js-client.api':
-    specifier: ^0.11.6
+    specifier: 0.11.6
     version: 0.11.6
   '@fluencelabs/js-client.node':
-    specifier: ^0.6.8
+    specifier: 0.6.9
     version: 0.6.9(uint8arraylist@2.4.3)
   '@iarna/toml':
     specifier: ^2.2.5
@@ -1013,8 +1013,8 @@ packages:
       '@ethersproject/strings': 5.7.0
     dev: false
 
-  /@fluencelabs/aqua-api@0.10.3:
-    resolution: {integrity: sha512-OBRH6HEJQlD6qqVyit491OsI/Vr3GfSzEaf9GkHe9tOABZsu58gpiTQDFIC/cpmTG1YGq2oZcx9nsyRc5CkNTw==}
+  /@fluencelabs/aqua-api@0.11.0:
+    resolution: {integrity: sha512-uok4GZHW79ehSXTdZTeOOkD4hkGOpjMf2chNUifhpyr5LfuQgumGHv2fN1jSIqEzEYArH2bdwktpXl1TkWZigA==}
     dev: false
 
   /@fluencelabs/aqua-ipfs@0.5.11:
