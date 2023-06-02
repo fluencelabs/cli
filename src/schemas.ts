@@ -110,7 +110,7 @@ ${schemas
           DOCS_CONFIGS_DIR_PATH,
           `${filename.replace(`.${YAML_EXT}`, ".md")}`
         ),
-        md.replace(
+        md.replaceAll(
           `
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|`,
