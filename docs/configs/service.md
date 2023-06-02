@@ -85,13 +85,9 @@ Please note that Marine adds three additional environment variables. Module envi
 
 A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 #### volumes
 
 A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 

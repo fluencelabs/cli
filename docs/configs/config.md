@@ -31,6 +31,4 @@ Overrides of cargo dependencies
 
 Overrides of npm dependencies
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 

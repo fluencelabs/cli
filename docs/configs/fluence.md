@@ -52,22 +52,16 @@ A map of objects with worker names as keys, each object defines a deal
 
 A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ### npm
 
 A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ## hosts
 
 A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ## peerIds
 
@@ -75,27 +69,19 @@ A map of named peerIds. Example:
 
 MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ## services
 
 A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ## spells
 
 A map with spell names as keys and spell configs as values
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ## workers
 
 A Map with worker names as keys and worker configs as values
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 

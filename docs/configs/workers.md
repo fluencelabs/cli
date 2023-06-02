@@ -19,6 +19,4 @@ A map of created deals
 
 A map of deployed workers
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
