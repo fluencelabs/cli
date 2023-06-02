@@ -44,6 +44,8 @@ import {
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
+const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
+
 const schemas = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
   [APP_CONFIG_FILE_NAME]: appSchema,
@@ -73,6 +75,7 @@ ${schemas
   }
 
   await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
+  await mkdir(DOCS_CONFIGS_DIR_PATH, { recursive: true });
 
   const schemasWithPath = schemas.map(([filename, schema]) => {
     return {
@@ -103,7 +106,10 @@ ${schemas
   await Promise.all(
     results.map(({ filename, md }) => {
       return writeFile(
-        join("docs", "configs", `${filename.replace(`.${YAML_EXT}`, ".md")}`),
+        join(
+          DOCS_CONFIGS_DIR_PATH,
+          `${filename.replace(`.${YAML_EXT}`, ".md")}`
+        ),
         md,
         FS_OPTIONS
       );
