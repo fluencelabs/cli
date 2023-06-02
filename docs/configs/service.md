@@ -80,8 +80,6 @@ environment variables accessible by a particular module with standard Rust env A
 
 Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 #### mountedBinaries
 

@@ -15,6 +15,4 @@ Defines what exactly is already deployed and where. This config is automatically
 
 A map of the deployed services
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 

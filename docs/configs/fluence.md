@@ -36,8 +36,6 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 
 A map of objects with worker names as keys, each object defines a deal
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ## dependencies
 

@@ -14,8 +14,6 @@ A result of app deployment. This file is created automatically after successful 
 
 A map of created deals
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
 
 ## hosts
 
