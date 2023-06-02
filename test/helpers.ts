@@ -16,6 +16,7 @@
 
 import "@total-typescript/ts-reset";
 
+import assert from "node:assert";
 import { access, cp, rm } from "node:fs/promises";
 import path from "node:path";
 
@@ -135,4 +136,36 @@ export const maybeConcurrentTest = (...args: Parameters<typeof test>): void => {
   }
 
   test.concurrent(...args);
+};
+
+export const sleepSeconds = (s: number) => {
+  return new Promise<void>((resolve) => {
+    return setTimeout(resolve, s * 1000);
+  });
+};
+
+export const sortPeers = <T extends { peer: string }>(
+  { peer: peerA }: T,
+  { peer: peerB }: T
+) => {
+  if (peerA < peerB) {
+    return -1;
+  }
+
+  if (peerA > peerB) {
+    return 1;
+  }
+
+  return 0;
+};
+
+export const assertHasPeer = (result: unknown) => {
+  assert(
+    typeof result === "object" &&
+      result !== null &&
+      "peer" in result &&
+      typeof result.peer === "string"
+  );
+
+  return { ...result, peer: result.peer };
 };
