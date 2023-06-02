@@ -15,7 +15,6 @@
  */
 
 import { writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 
 import { appSchema } from "./lib/configs/project/app.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
@@ -41,6 +40,9 @@ import {
   SPELL_CONFIG_FILE_NAME,
 } from "./lib/const.js";
 import { jsonStringify } from "./lib/helpers/jsonStringify.js";
+import { execPromise } from "./lib/execPromise.js";
+import { join } from "node:path";
+import { FS_OPTIONS } from "./lib/const.js";
 
 const schemas = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
@@ -57,12 +59,12 @@ const schemas = Object.entries({
 const main = async (): Promise<void> => {
   if (process.argv[2] === "-f") {
     return writeFile(
-      path.join("docs", "configs", "README.md"),
+      join("docs", "configs", "README.md"),
       `# Fluence CLI Configs
 
 ${schemas
   .map(([name, schema]): string => {
-    return `## [${name}](./${name.replace(`.${YAML_EXT}`, "")}.md)\n\n${String(
+    return `## [${name}](./${name.replace(`.${YAML_EXT}`, ".md")})\n\n${String(
       schema["description"]
     )}`;
   })
@@ -72,11 +74,38 @@ ${schemas
 
   await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
 
+  const schemasWithPath = schemas.map(([filename, schema]) => {
+    return {
+      path: join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),
+      filename,
+      schema,
+    };
+  });
+
   await Promise.all(
-    schemas.map(([filename, schema]): Promise<void> => {
+    schemasWithPath.map(({ path, schema }): Promise<void> => {
+      return writeFile(path, jsonStringify(schema), FS_OPTIONS);
+    })
+  );
+
+  const results = await Promise.all(
+    schemasWithPath.map(async ({ path, filename }) => {
+      return {
+        filename,
+        md: await execPromise({
+          command: "json-schema-docs",
+          args: ["-schema", path],
+        }),
+      };
+    })
+  );
+
+  await Promise.all(
+    results.map(({ filename, md }) => {
       return writeFile(
-        path.join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),
-        jsonStringify(schema)
+        join("docs", "configs", `${filename.replace(`.${YAML_EXT}`, ".md")}`),
+        md,
+        FS_OPTIONS
       );
     })
   );
