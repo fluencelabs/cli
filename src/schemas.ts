@@ -17,7 +17,6 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
-import { appSchema } from "./lib/configs/project/app.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
 import { projectSecretsSchema } from "./lib/configs/project/projectSecrets.js";
@@ -27,7 +26,6 @@ import { workersSchema } from "./lib/configs/project/workers.js";
 import { userConfigSchema } from "./lib/configs/user/config.js";
 import { userSecretsSchema } from "./lib/configs/user/userSecrets.js";
 import {
-  APP_CONFIG_FILE_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   JSON_EXT,
   YAML_EXT,
@@ -48,14 +46,13 @@ const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 
 const schemas = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
-  [APP_CONFIG_FILE_NAME]: appSchema,
   [MODULE_CONFIG_FILE_NAME]: moduleSchema,
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
-  [CONFIG_FILE_NAME]: userConfigSchema,
-  [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
-  [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
-  [WORKERS_CONFIG_FILE_NAME]: workersSchema,
   [SPELL_CONFIG_FILE_NAME]: spellSchema,
+  [WORKERS_CONFIG_FILE_NAME]: workersSchema,
+  [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
+  [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
+  [CONFIG_FILE_NAME]: userConfigSchema,
 });
 
 const main = async (): Promise<void> => {
