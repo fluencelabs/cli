@@ -63,12 +63,6 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '^1.13.1'
-      - run: go install github.com/marcusolsson/json-schema-docs@latest
-
       - name: Checkout fluence-cli
         uses: actions/checkout@v3
         with:
@@ -167,12 +161,6 @@ jobs:
               }
             }
 
-      - name: Run on each commit
-        env:
-          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
-        if: ${{ github.event_name == 'pull_request' && github.repository == 'fluencelabs/fluence-cli' }}
-        run: pnpm on-each-commit
-
       - name: Run tests
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
@@ -190,7 +178,3 @@ jobs:
       - name: Dump rust-peer logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
-
-      - name: Auto-commit
-        if: ${{ github.event_name == 'pull_request' && github.repository == 'fluencelabs/fluence-cli' }}
-        uses: stefanzweifel/git-auto-commit-action@v4
