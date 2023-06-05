@@ -9,6 +9,10 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
+env:
+  CI: true
+  FORCE_COLOR: true
+
 jobs:
   docs:
     name: Generate docs
