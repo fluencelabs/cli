@@ -167,6 +167,8 @@ jobs:
         if: ${{ github.event_name == 'pull_request' && github.repository == 'fluencelabs/fluence-cli' }}
         run: pnpm on-each-commit
 
+      - run: ls -alh; ls -alh test
+
       - name: Run tests
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
