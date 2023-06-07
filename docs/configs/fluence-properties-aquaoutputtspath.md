@@ -1,3 +1,0 @@
-## aquaOutputTSPath Type
-
-`string`

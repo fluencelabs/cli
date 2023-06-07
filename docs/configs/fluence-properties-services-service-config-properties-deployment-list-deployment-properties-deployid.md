@@ -1,3 +1,0 @@
-## deployId Type
-
-`string`

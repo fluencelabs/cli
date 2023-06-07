@@ -1,3 +1,0 @@
-## chainNetworkId Type
-
-`number`

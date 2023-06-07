@@ -1,389 +1,87 @@
-## fluence.yaml Type
-
-`object` ([fluence.yaml](fluence.md))
-
-# fluence.yaml Properties
-
-| Property                              | Type     | Required | Nullable       | Defined by                                                                                                                     |
-| :------------------------------------ | :------- | :------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------- |
-| [services](#services)                 | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-services.md "https://fluence.dev/schemas/fluence.yaml#/properties/services")                 |
-| [relays](#relays)                     | Merged   | Optional | can be null    | [fluence.yaml](fluence-properties-relays.md "https://fluence.dev/schemas/fluence.yaml#/properties/relays")                     |
-| [peerIds](#peerids)                   | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-peer-ids.md "https://fluence.dev/schemas/fluence.yaml#/properties/peerIds")                  |
-| [keyPairName](#keypairname)           | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-keypairname.md "https://fluence.dev/schemas/fluence.yaml#/properties/keyPairName")           |
-| [version](#version)                   | `number` | Required | cannot be null | [fluence.yaml](fluence-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/version")                   |
-| [dependencies](#dependencies)         | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-dependencies.md "https://fluence.dev/schemas/fluence.yaml#/properties/dependencies")         |
-| [aquaInputPath](#aquainputpath)       | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-aquainputpath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaInputPath")       |
-| [aquaOutputTSPath](#aquaoutputtspath) | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-aquaoutputtspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaOutputTSPath") |
-| [aquaOutputJSPath](#aquaoutputjspath) | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-aquaoutputjspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaOutputJSPath") |
-| [appTSPath](#apptspath)               | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-apptspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appTSPath")               |
-| [appJSPath](#appjspath)               | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-appjspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appJSPath")               |
-| [hosts](#hosts)                       | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-hosts.md "https://fluence.dev/schemas/fluence.yaml#/properties/hosts")                       |
-| [workers](#workers)                   | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-workers.md "https://fluence.dev/schemas/fluence.yaml#/properties/workers")                   |
-| [deals](#deals)                       | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-deals.md "https://fluence.dev/schemas/fluence.yaml#/properties/deals")                       |
-| [chainNetwork](#chainnetwork)         | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-chainnetwork.md "https://fluence.dev/schemas/fluence.yaml#/properties/chainNetwork")         |
-| [spells](#spells)                     | `object` | Optional | cannot be null | [fluence.yaml](fluence-properties-spells.md "https://fluence.dev/schemas/fluence.yaml#/properties/spells")                     |
-| [aquaImports](#aquaimports)           | `array`  | Optional | cannot be null | [fluence.yaml](fluence-properties-aquaimports.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaImports")           |
-| [cliVersion](#cliversion)             | `string` | Optional | cannot be null | [fluence.yaml](fluence-properties-cliversion.md "https://fluence.dev/schemas/fluence.yaml#/properties/cliVersion")             |
-
-## services
-
-A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config
-
-`services`
-
-*   is optional
-
-*   Type: `object` ([Services](fluence-properties-services.md))
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-services.md "https://fluence.dev/schemas/fluence.yaml#/properties/services")
-
-### services Type
-
-`object` ([Services](fluence-properties-services.md))
-
-## relays
-
-List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: kras
-
-`relays`
-
-*   is optional
-
-*   Type: any of the following: `string` or `array` ([Relays](fluence-properties-relays.md))
-
-*   can be null
-
-*   defined in: [fluence.yaml](fluence-properties-relays.md "https://fluence.dev/schemas/fluence.yaml#/properties/relays")
-
-### relays Type
-
-any of the following: `string` or `array` ([Relays](fluence-properties-relays.md))
-
-one (and only one) of
-
-*   [Network name](fluence-properties-relays-oneof-network-name.md "check type definition")
-
-*   [Multi addresses](fluence-properties-relays-oneof-multi-addresses.md "check type definition")
-
-## peerIds
-
-A map of named peerIds. Example:
-
-MY\_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
-
-`peerIds`
-
-*   is optional
-
-*   Type: `object` ([Peer ids](fluence-properties-peer-ids.md))
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-peer-ids.md "https://fluence.dev/schemas/fluence.yaml#/properties/peerIds")
-
-### peerIds Type
-
-`object` ([Peer ids](fluence-properties-peer-ids.md))
-
-## keyPairName
-
-The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
-
-1.  "defaultKeyPairName" property from user-secrets.yaml
-2.  "defaultKeyPairName" property from project-secrets.yaml
-3.  "keyPairName" property from the top level of fluence.yaml
-4.  "keyPairName" property from the "services" level of fluence.yaml
-5.  "keyPairName" property from the individual "deploy" property item level of fluence.yaml
-
-`keyPairName`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-keypairname.md "https://fluence.dev/schemas/fluence.yaml#/properties/keyPairName")
-
-### keyPairName Type
-
-`string`
-
-## version
-
-
-
-`version`
-
-*   is required
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-version.md "https://fluence.dev/schemas/fluence.yaml#/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-2
-```
-
-## dependencies
-
-(For advanced users) Overrides for the project dependencies
-
-`dependencies`
-
-*   is optional
-
-*   Type: `object` ([Dependencies](fluence-properties-dependencies.md))
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-dependencies.md "https://fluence.dev/schemas/fluence.yaml#/properties/dependencies")
-
-### dependencies Type
-
-`object` ([Dependencies](fluence-properties-dependencies.md))
-
-## aquaInputPath
-
-Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir
-
-`aquaInputPath`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-aquainputpath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaInputPath")
-
-### aquaInputPath Type
-
-`string`
-
-## aquaOutputTSPath
-
-Path to the default compilation target dir from aqua to ts. Must be relative to the project root dir
-
-`aquaOutputTSPath`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-aquaoutputtspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaOutputTSPath")
-
-### aquaOutputTSPath Type
-
-`string`
-
-## aquaOutputJSPath
-
-Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property
-
-`aquaOutputJSPath`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-aquaoutputjspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaOutputJSPath")
-
-### aquaOutputJSPath Type
-
-`string`
-
-## appTSPath
-
-Path to the directory where you want to generate app.ts after deployment. If you run registerApp() function in your typescript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua
-
-`appTSPath`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-apptspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appTSPath")
-
-### appTSPath Type
-
-`string`
-
-## appJSPath
-
-Path to the directory where you want to generate app.js after deployment. If you run registerApp() function in your javascript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua
-
-`appJSPath`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-appjspath.md "https://fluence.dev/schemas/fluence.yaml#/properties/appJSPath")
-
-### appJSPath Type
-
-`string`
-
-## hosts
-
-A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on
-
-`hosts`
-
-*   is optional
-
-*   Type: `object` ([Details](fluence-properties-hosts.md))
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-hosts.md "https://fluence.dev/schemas/fluence.yaml#/properties/hosts")
-
-### hosts Type
-
-`object` ([Details](fluence-properties-hosts.md))
-
-## workers
-
-A Map with worker names as keys and worker configs as values
-
-`workers`
-
-*   is optional
-
-*   Type: `object` ([Details](fluence-properties-workers.md))
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-workers.md "https://fluence.dev/schemas/fluence.yaml#/properties/workers")
-
-### workers Type
-
-`object` ([Details](fluence-properties-workers.md))
+# fluence.yaml
+
+Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use `fluence init` command to generate a template for new Fluence project
+
+## Properties
+
+| Property           | Type                    | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|--------------------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `version`          | number                  | **Yes**  |                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `appJSPath`        | string                  | No       | Path to the directory where you want to generate app.js after deployment. If you run registerApp() function in your javascript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua                                                                                                                                                                                              |
+| `appTSPath`        | string                  | No       | Path to the directory where you want to generate app.ts after deployment. If you run registerApp() function in your typescript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua                                                                                                                                                                                              |
+| `aquaImports`      | string[]                | No       | A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in fluence.yaml, project's .fluence/aqua dir, npm dependencies from fluence.yaml, npm dependencies from user's .fluence/config.yaml, npm dependencies recommended by fluence |
+| `aquaInputPath`    | string                  | No       | Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                     |
+| `aquaOutputJSPath` | string                  | No       | Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property                                                                                                                                                                                                                                                                                          |
+| `aquaOutputTSPath` | string                  | No       | Path to the default compilation target dir from aqua to ts. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                                                 |
+| `chainNetwork`     | string                  | No       | The network in which the transactions will be carried out Possible values are: `local`, `testnet`.                                                                                                                                                                                                                                                                                                                                   |
+| `cliVersion`       | string                  | No       | The version of the CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components                                                                                                                                                                                                                                                                                              |
+| `deals`            | [object](#deals)        | No       | A map of objects with worker names as keys, each object defines a deal                                                                                                                                                                                                                                                                                                                                                               |
+| `dependencies`     | [object](#dependencies) | No       | (For advanced users) Overrides for the project dependencies                                                                                                                                                                                                                                                                                                                                                                          |
+| `hosts`            | [object](#hosts)        | No       | A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on                                                                                                                                                                                                                                                                                                                             |
+| `keyPairName`      | string                  | No       | The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):                                                                                                                                                                                                                                                                                                                    |
+|                    |                         |          | 1. "defaultKeyPairName" property from user-secrets.yaml                                                                                                                                                                                                                                                                                                                                                                              |
+|                    |                         |          | 1. "defaultKeyPairName" property from project-secrets.yaml                                                                                                                                                                                                                                                                                                                                                                           |
+|                    |                         |          | 1. "keyPairName" property from the top level of fluence.yaml                                                                                                                                                                                                                                                                                                                                                                         |
+|                    |                         |          | 1. "keyPairName" property from the "services" level of fluence.yaml                                                                                                                                                                                                                                                                                                                                                                  |
+|                    |                         |          | 1. "keyPairName" property from the individual "deploy" property item level of fluence.yaml                                                                                                                                                                                                                                                                                                                                           |
+| `peerIds`          | [object](#peerids)      | No       | A map of named peerIds. Example:                                                                                                                                                                                                                                                                                                                                                                                                     |
+|                    |                         |          |                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+|                    |                         |          | MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS                                                                                                                                                                                                                                                                                                                                                                        |
+| `relays`           | string, array, or null  | No       | List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: kras                                                                                                                     |
+| `services`         | [object](#services)     | No       | A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config                                                             |
+| `spells`           | [object](#spells)       | No       | A map with spell names as keys and spell configs as values                                                                                                                                                                                                                                                                                                                                                                           |
+| `workers`          | [object](#workers)      | No       | A Map with worker names as keys and worker configs as values                                                                                                                                                                                                                                                                                                                                                                         |
 
 ## deals
 
 A map of objects with worker names as keys, each object defines a deal
 
-`deals`
 
-*   is optional
+## dependencies
 
-*   Type: `object` ([Details](fluence-properties-deals.md))
+(For advanced users) Overrides for the project dependencies
 
-*   cannot be null
+### Properties
 
-*   defined in: [fluence.yaml](fluence-properties-deals.md "https://fluence.dev/schemas/fluence.yaml#/properties/deals")
+| Property | Type             | Required | Description                                                                                                                                |
+|----------|------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `cargo`  | [object](#cargo) | No       | A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL |
+| `npm`    | [object](#npm)   | No       | A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua                                            |
 
-### deals Type
+### cargo
 
-`object` ([Details](fluence-properties-deals.md))
+A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
 
-## chainNetwork
 
-The network in which the transactions will be carried out
+### npm
 
-`chainNetwork`
+A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua
 
-*   is optional
 
-*   Type: `string`
+## hosts
 
-*   cannot be null
+A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on
 
-*   defined in: [fluence.yaml](fluence-properties-chainnetwork.md "https://fluence.dev/schemas/fluence.yaml#/properties/chainNetwork")
 
-### chainNetwork Type
+## peerIds
 
-`string`
+A map of named peerIds. Example:
 
-### chainNetwork Constraints
+MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
 
-**enum**: the value of this property must be equal to one of the following values:
 
-| Value       | Explanation |
-| :---------- | :---------- |
-| `"local"`   |             |
-| `"testnet"` |             |
+## services
 
-### chainNetwork Default Value
+A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config
 
-The default value is:
-
-```json
-"testnet"
-```
 
 ## spells
 
 A map with spell names as keys and spell configs as values
 
-`spells`
 
-*   is optional
+## workers
 
-*   Type: `object` ([Details](fluence-properties-spells.md))
+A Map with worker names as keys and worker configs as values
 
-*   cannot be null
 
-*   defined in: [fluence.yaml](fluence-properties-spells.md "https://fluence.dev/schemas/fluence.yaml#/properties/spells")
-
-### spells Type
-
-`object` ([Details](fluence-properties-spells.md))
-
-## aquaImports
-
-A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in fluence.yaml, project's .fluence/aqua dir, npm dependencies from fluence.yaml, npm dependencies from user's .fluence/config.yaml, npm dependencies recommended by fluence
-
-`aquaImports`
-
-*   is optional
-
-*   Type: `string[]`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-aquaimports.md "https://fluence.dev/schemas/fluence.yaml#/properties/aquaImports")
-
-### aquaImports Type
-
-`string[]`
-
-## cliVersion
-
-The version of the CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components
-
-`cliVersion`
-
-*   is optional
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [fluence.yaml](fluence-properties-cliversion.md "https://fluence.dev/schemas/fluence.yaml#/properties/cliVersion")
-
-### cliVersion Type
-
-`string`

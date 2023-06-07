@@ -1,3 +1,0 @@
-## maxHeapSize Type
-
-`string`

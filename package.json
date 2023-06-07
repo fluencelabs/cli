@@ -35,10 +35,10 @@
     "circular": "madge --circular --extensions ts ./",
     "on-each-commit": "pnpm check && pnpm gen-config-docs && cd docs/commands && oclif readme --no-aliases",
     "clean": "shx rm -rf .fluence && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
-    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && jsonschema2md -d schemas -o docs/configs -h false -f yaml -x schemas -n && ts-node ./src/schemas.ts -f"
+    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && ts-node ./src/schemas.ts -f"
   },
   "dependencies": {
-    "@fluencelabs/aqua-api": "0.11.0",
+    "@fluencelabs/aqua-api": "0.11.1",
     "@fluencelabs/deal-aurora": "0.2.0",
     "@fluencelabs/fluence-network-environment": "^1.0.14",
     "@fluencelabs/js-client.api": "0.11.6",
@@ -74,7 +74,6 @@
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
-    "@adobe/jsonschema2md": "^7.1.5",
     "@fluencelabs/installation-spell": "^0.5.13",
     "@swc/core": "^1.3.38",
     "@total-typescript/ts-reset": "^0.4.2",
@@ -127,7 +126,7 @@
   },
   "engines": {
     "node": "=16",
-    "pnpm": ">=7"
+    "pnpm": ">=8"
   },
   "bugs": {
     "url": "https://github.com/fluencelabs/fluence-cli/issues"

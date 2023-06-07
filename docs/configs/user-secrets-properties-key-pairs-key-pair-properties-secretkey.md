@@ -1,3 +1,0 @@
-## secretKey Type
-
-`string`
