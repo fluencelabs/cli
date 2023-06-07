@@ -5,3 +5,5 @@ tmp
 .fluence
 package-lock.json
 src/lib/compiled-aqua
+pnpm-lock.yaml
+CHANGELOG.md

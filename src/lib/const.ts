@@ -367,9 +367,6 @@ export const SEPARATOR = `\n\n${color.yellow(
 
 export const MAIN_AQUA_FILE_STATUS_TEXT = `export status
 
-service Console("run-console"):
-    print(any: ⊤)
-
 -- example of running a service deployed using 'fluence deal deploy'
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
