@@ -1,3 +1,0 @@
-## aquaImports Type
-
-`string[]`

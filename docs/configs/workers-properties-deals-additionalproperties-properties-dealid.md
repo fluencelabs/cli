@@ -1,3 +1,0 @@
-## dealId Type
-
-`string`

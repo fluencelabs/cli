@@ -1,3 +1,0 @@
-## aquaFilePath Type
-
-`string`

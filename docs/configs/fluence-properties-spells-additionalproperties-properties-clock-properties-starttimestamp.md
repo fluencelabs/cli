@@ -1,3 +1,0 @@
-## startTimestamp Type
-
-`string`

@@ -1,3 +1,0 @@
-## peerId Type
-
-`string`

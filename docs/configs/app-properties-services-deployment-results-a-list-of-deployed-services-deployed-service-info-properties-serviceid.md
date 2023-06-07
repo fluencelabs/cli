@@ -1,3 +1,0 @@
-## serviceId Type
-
-`string`
