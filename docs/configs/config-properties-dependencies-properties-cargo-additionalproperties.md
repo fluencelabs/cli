@@ -1,3 +1,0 @@
-## additionalProperties Type
-
-`string`

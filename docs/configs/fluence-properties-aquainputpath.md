@@ -1,3 +1,0 @@
-## aquaInputPath Type
-
-`string`

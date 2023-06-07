@@ -1,3 +1,0 @@
-## endTimestamp Type
-
-`string`
