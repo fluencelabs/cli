@@ -34,7 +34,6 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm i
-      - run: pnpm before-build
 
       - name: Setup golang
         uses: actions/setup-go@v4
