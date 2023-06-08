@@ -17,7 +17,7 @@ data Answer:
 
 func status() -> *Answer:
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.defaultWorker.dealId
+    dealId = workersInfo.deals!.defaultWorker!.dealId
     answers: *Answer
     workers <- resolveSubnetwork(dealId)
     for w <- workers! par:
