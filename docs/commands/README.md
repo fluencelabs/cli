@@ -38,9 +38,8 @@ Compile aqua file or directory that contains your .aqua files
 
 ```
 USAGE
-  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air]
-    [--js] [--old-fluence-js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry]
-    [--scheduled]
+  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air |
+    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry]
 
 FLAGS
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
@@ -59,9 +58,6 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
-  --old-fluence-js              Generate TypeScript or JavaScript files for old fluence-js
-  --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
-                                Will ignore other options
 
 DESCRIPTION
   Compile aqua file or directory that contains your .aqua files
@@ -602,9 +598,9 @@ Run aqua script
 ```
 USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--quiet] [--plugin <value>] [--const <value>] [--json-service <value>] [-i <value>]
-    [-f <value>] [--no-xor] [--no-relay] [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>]
-    [--dial-timeout <value>] [--particle-id]
+    [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
+    [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id]
 
 FLAGS
   -f, --func=<function-call>     Function call
@@ -618,7 +614,6 @@ FLAGS
                                  function using these argument names
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...             Path to a directory to import aqua files from. May be used several times
-  --json-service=<path>...       Path to a file that contains a JSON formatted service
   --log-level-compiler=<level>   Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
                                  info, warn, error, off
   --no-input                     Don't interactively ask for any input from the user
@@ -626,8 +621,6 @@ FLAGS
   --no-xor                       Do not generate a wrapper that catches and displays errors
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                  Print particle ids when running Fluence js-client
-  --plugin=<path>                [experimental] Path to a directory with JS plugins (Read more:
-                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                    Prints generated AIR code before function execution
   --quiet                        Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
