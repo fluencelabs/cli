@@ -171,6 +171,10 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: pnpm test
 
+      - name: Setup tmate
+        if: always()
+        uses: mxschmitt/action-tmate@v3
+
       - name: Cleanup
         if: always()
         run: rm -rf tmp ~/.fluence
