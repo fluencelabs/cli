@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { access, readdir } from "node:fs/promises";
-import { resolve, dirname, join } from "node:path";
+import { access } from "node:fs/promises";
+import { dirname, join } from "node:path";
 
 export const recursivelyFindFile = async (
   fileName: string,
@@ -41,30 +41,4 @@ export const recursivelyFindFile = async (
       currentDirPath = parentDir;
     }
   }
-};
-
-const recursivelyGetDirFiles = async (
-  dirPath: string
-): Promise<Array<string>> => {
-  return (
-    await Promise.all(
-      (
-        await readdir(dirPath, { withFileTypes: true })
-      ).map((entry) => {
-        const fileOrDirPath = resolve(dirPath, entry.name);
-        return entry.isDirectory()
-          ? recursivelyGetDirFiles(fileOrDirPath)
-          : fileOrDirPath;
-      })
-    )
-  ).flat();
-};
-
-export const recursivelyFindFileInADir = async (
-  dirPath: string,
-  fullFileName: string
-) => {
-  return (await recursivelyGetDirFiles(dirPath)).filter((filePath) => {
-    return filePath.endsWith(fullFileName);
-  });
 };

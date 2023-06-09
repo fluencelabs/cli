@@ -164,11 +164,6 @@ const getDefault: GetDefaultConfig<LatestConfig> = () => {
   };
 };
 
-export const initNewReadonlyWorkersConfig = getReadonlyConfigInitFunction(
-  initConfigOptions,
-  getDefault
-);
-
 export const initNewWorkersConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault
@@ -176,7 +171,5 @@ export const initNewWorkersConfig = getConfigInitFunction(
 
 export const initReadonlyWorkersConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
-
-export const initWorkersConfig = getConfigInitFunction(initConfigOptions);
 
 export const workersSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

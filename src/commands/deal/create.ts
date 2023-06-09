@@ -15,9 +15,9 @@
  */
 
 import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { Flags } from "@oclif/core";
 
-const color = oclifColor.default;
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";

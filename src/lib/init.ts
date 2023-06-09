@@ -268,7 +268,7 @@ type InitTSorJSProjectArg = {
   fluenceConfig: FluenceConfig;
 };
 
-export const initTSorJSProject = async ({
+const initTSorJSProject = async ({
   isJS,
   fluenceConfig,
 }: InitTSorJSProjectArg): Promise<void> => {

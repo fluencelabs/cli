@@ -27,7 +27,6 @@ import {
 import { ensureModuleAbsolutePath } from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
-  getConfigInitFunction,
   getReadonlyConfigInitFunction,
   type InitConfigOptions,
   type InitializedConfig,
@@ -166,17 +165,6 @@ const getInitConfigOptions = (
       return configPath;
     },
   };
-};
-
-export const initModuleConfig = async (
-  configOrConfigDirPathOrUrl: string,
-  absolutePath?: string | undefined
-): Promise<InitializedConfig<LatestConfig> | null> => {
-  return getConfigInitFunction(
-    getInitConfigOptions(
-      await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
-  )();
 };
 
 export const initReadonlyModuleConfig = async (

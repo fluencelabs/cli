@@ -801,7 +801,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   return true;
 };
 
-export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
+const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
   latestSchema: configSchemaV2,
   migrations,
