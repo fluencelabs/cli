@@ -22,14 +22,15 @@ import { fluence, initFirstTime } from "./helpers.js";
 (async (): Promise<void> => {
   console.log("Setting up tests...");
 
-  await Promise.all([
-    fluence({
-      args: ["dep", "i"],
-    }),
-    ...TEMPLATES.map((template) => {
+  await fluence({
+    args: ["dep", "i"],
+  });
+
+  await Promise.all(
+    TEMPLATES.map((template) => {
       return initFirstTime(template);
-    }),
-  ]);
+    })
+  );
 
   console.log("Tests are ready to run!");
 })().catch((error) => {
