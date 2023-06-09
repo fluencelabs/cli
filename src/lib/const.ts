@@ -312,7 +312,6 @@ export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
-export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
 const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
