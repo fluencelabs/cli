@@ -22,10 +22,8 @@ import inquirer from "inquirer";
 
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { ConfigKeyPair } from "./configs/keyPair.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
 import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
-import type { KeyPairFlag } from "./const.js";
 import { list, type Choices } from "./prompt.js";
 
 export const getKeyPair = async (keyPairName: string | undefined) => {
@@ -149,14 +147,5 @@ export const getExistingKeyPair = async (
   return (
     (await getProjectKeyPair(keyPairName)) ??
     getExistingUserKeyPair(keyPairName)
-  );
-};
-
-export const getExistingKeyPairFromFlags = async (
-  flags: KeyPairFlag,
-  maybeFluenceConfig: FluenceConfig | null
-): Promise<ConfigKeyPair> => {
-  return getExistingKeyPair(
-    flags["key-pair-name"] ?? maybeFluenceConfig?.keyPairName
   );
 };

@@ -99,7 +99,6 @@ export const SRC_DIR_NAME = "src";
 export const TS_DIR_NAME = "ts";
 export const JS_DIR_NAME = "js";
 export const TMP_DIR_NAME = "tmp";
-export const TMP_SERVICES_DIR_NAME = "services";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
@@ -109,7 +108,6 @@ export const SPELLS_DIR_NAME = "spells";
 export const NPM_DIR_NAME = "npm";
 export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
-export const DOT_BIN_DIR_NAME = ".bin";
 export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
@@ -119,15 +117,9 @@ export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
 export const CONFIG_FILE_NAME = `config.${YAML_EXT}`;
 export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
 export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
-export const APP_CONFIG_FILE_NAME = `app.${YAML_EXT}`;
-export const DEPENDENCY_CONFIG_FILE_NAME = `dependency.${YAML_EXT}`;
 export const SPELL_CONFIG_FILE_NAME = `spell.${YAML_EXT}`;
 
-const DEPLOYED_APP_FILE_NAME = "deployed.app";
-
-export const DEPLOYED_APP_AQUA_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${AQUA_EXT}`;
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
-export const INTERFACES_AQUA_FILE_NAME = `interfaces.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
 export const AQUA_WORKERS_FILE_NAME = `workers.${AQUA_EXT}`;
 export const SPELL_AQUA_FILE_NAME = `spell.${AQUA_EXT}`;
@@ -138,17 +130,10 @@ export const PACKAGE_JSON_FILE_NAME = `package.${JSON_EXT}`;
 export const TS_CONFIG_FILE_NAME = `tsconfig.${JSON_EXT}`;
 export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
 export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
-export const DEPLOY_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
-export const APP_SERVICE_JSON_FILE_NAME = `app-service.${JSON_EXT}`;
 
-export const APP_TS_FILE_NAME = `app.${TS_EXT}`;
-export const APP_JS_FILE_NAME = `app.${JS_EXT}`;
-export const DEPLOYED_APP_TS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${TS_EXT}`;
-export const DEPLOYED_APP_JS_FILE_NAME = `${DEPLOYED_APP_FILE_NAME}.${JS_EXT}`;
 export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
 export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
 
-export const CRATES_TOML = `.crates.${TOML_EXT}`;
 export const CONFIG_TOML = `Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
@@ -162,7 +147,7 @@ export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
 export const DEFAULT_WORKER_NAME = "defaultWorker";
 
-export const KEY_PAIR_FLAG_NAME = "key-pair-name";
+const KEY_PAIR_FLAG_NAME = "key-pair-name";
 export const KEY_PAIR_FLAG = {
   [KEY_PAIR_FLAG_NAME]: Flags.string({
     char: "k",
@@ -177,15 +162,6 @@ export const NO_INPUT_FLAG_NAME = "no-input";
 export const NO_INPUT_FLAG = {
   [NO_INPUT_FLAG_NAME]: Flags.boolean({
     description: "Don't interactively ask for any input from the user",
-  }),
-} as const;
-
-export const TIMEOUT_FLAG_NAME = "timeout";
-export const TIMEOUT_FLAG = {
-  [TIMEOUT_FLAG_NAME]: Flags.integer({
-    description: "Timeout used for command execution",
-    helpValue: "<milliseconds>",
-    default: 60000,
   }),
 } as const;
 
@@ -234,8 +210,6 @@ export const NO_BUILD_FLAG = {
     description: "Don't build the project before running the command",
   }),
 };
-
-export type OffAquaLogsFlag = FromFlagsDef<typeof OFF_AQUA_LOGS_FLAG>;
 
 export const IMPORT_FLAG = {
   import: Flags.string({
@@ -334,10 +308,9 @@ export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
-export const AQUA_NPM_DEPENDENCY = "@fluencelabs/aqua";
-export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
-export const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
-export const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
+const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
+const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
+const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NODE_NPM_DEPENDENCY = "@fluencelabs/js-client.node";
 export const JS_CLIENT_API_NPM_DEPENDENCY = "@fluencelabs/js-client.api";
 export const FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY =
@@ -345,7 +318,6 @@ export const FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY =
 
 export const fluenceNPMDependencies = [
   AQUA_LIB_NPM_DEPENDENCY,
-  AQUA_NPM_DEPENDENCY,
   REGISTRY_NPM_DEPENDENCY,
   SPELL_NPM_DEPENDENCY,
 ] as const;
@@ -365,7 +337,7 @@ export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`
 )}\n\n`;
 
-export const MAIN_AQUA_FILE_STATUS_TEXT = `export status
+const MAIN_AQUA_FILE_STATUS_TEXT = `export status
 
 -- example of running a service deployed using 'fluence deal deploy'
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
@@ -389,7 +361,7 @@ func status():
     par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
     Console.print("done")`;
 
-export const MAIN_AQUA_FILE_STATUS_TEXT_COMMENT = aquaComment(
+const MAIN_AQUA_FILE_STATUS_TEXT_COMMENT = aquaComment(
   MAIN_AQUA_FILE_STATUS_TEXT
 );
 
@@ -451,7 +423,7 @@ func getInfosInParallel(peers: []PeerId) -> []Info:
     <- infos
 `;
 
-export const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
+const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
 // @ts-nocheck`;
 
 const NODES_CONST = "nodes";

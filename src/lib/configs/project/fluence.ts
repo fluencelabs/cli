@@ -302,8 +302,6 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   [AQUA_INPUT_PATH_PROPERTY]?: string;
   aquaOutputTSPath?: string;
   aquaOutputJSPath?: string;
-  appTSPath?: string;
-  appJSPath?: string;
   hosts?: Record<string, { peerIds: Array<string> }>;
   workers?: Record<
     string,
@@ -376,18 +374,6 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       nullable: true,
       description:
         "Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property",
-    },
-    appTSPath: {
-      type: "string",
-      nullable: true,
-      description:
-        "Path to the directory where you want to generate app.ts after deployment. If you run registerApp() function in your typescript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua",
-    },
-    appJSPath: {
-      type: "string",
-      nullable: true,
-      description:
-        "Path to the directory where you want to generate app.js after deployment. If you run registerApp() function in your javascript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua",
     },
     hosts: {
       description:
@@ -801,7 +787,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   return true;
 };
 
-export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
+const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
   latestSchema: configSchemaV2,
   migrations,

@@ -21,9 +21,10 @@ const color = oclifColor.default;
 import { Command, Flags } from "@oclif/core";
 import chokidar from "chokidar";
 
-import { type AquaCompilerFlags, initAquaCli } from "../lib/aquaCli.js";
+import { compileToFiles, type CompileToFilesArgs } from "../lib/aqua.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
+  AQUA_EXT,
   aquaLogLevelsString,
   FLUENCE_CONFIG_FILE_NAME,
   IMPORT_FLAG,
@@ -42,11 +43,9 @@ import { input, type InputArg } from "../lib/prompt.js";
  * the final return statement
  */
 export default class Aqua extends Command {
-  static override description =
-    "Compile aqua file or directory that contains your .aqua files";
+  static override description = `Compile aqua file or directory that contains your .${AQUA_EXT} files`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
-    /* Fluence CLI flags */
     watch: Flags.boolean({
       description: "Watch aqua file or folder for changes and recompile",
       char: "w",
@@ -55,10 +54,8 @@ export default class Aqua extends Command {
       description: "Use no extension in generated .ts file imports",
     }),
     ...NO_INPUT_FLAG,
-    /* Aqua CLI flags */
     input: Flags.string({
-      description:
-        "Path to an aqua file or an input directory that contains your .aqua files. Must be relative to the current working directory or absolute",
+      description: `Path to an aqua file or an input directory that contains your .${AQUA_EXT} files. Must be relative to the current working directory or absolute`,
       helpValue: "<path>",
       char: "i",
     }),
@@ -71,13 +68,11 @@ export default class Aqua extends Command {
     ...IMPORT_FLAG,
     air: Flags.boolean({
       description: "Generate .air file instead of .ts",
+      exclusive: ["js"],
     }),
     js: Flags.boolean({
       description: "Generate .js file instead of .ts",
-    }),
-    "old-fluence-js": Flags.boolean({
-      description: "Generate TypeScript or JavaScript files for old fluence-js",
-      default: false,
+      exclusive: ["air"],
     }),
     "log-level-compiler": Flags.string({
       description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
@@ -97,10 +92,6 @@ export default class Aqua extends Command {
     dry: Flags.boolean({
       description: "Checks if compilation is succeeded, without output",
     }),
-    scheduled: Flags.boolean({
-      description:
-        "Generate air code for script storage. Without error handling wrappers and hops on relay. Will ignore other options",
-    }),
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -112,8 +103,7 @@ export default class Aqua extends Command {
       maybePathFromFlags: flags.input,
       maybePathFromFluenceYaml: maybeFluenceConfig?.aquaInputPath,
       inputArg: {
-        message:
-          "Enter path to an aqua file or an input directory that contains your .aqua files",
+        message: `Enter path to an aqua file or an input directory that contains your .${AQUA_EXT} files`,
         flagName: "input",
         validate: validatePath,
       },
@@ -144,43 +134,47 @@ export default class Aqua extends Command {
       maybeFluenceConfig,
     });
 
-    const aquaCliFlags = {
-      input: inputFlag,
-      output: outputFlag,
-      js: jsFlag,
-      import: importFlag,
-      "log-level": flags["log-level-compiler"],
-      "no-relay": flags["no-relay"],
-      "no-xor": flags["no-xor"],
-      "old-fluence-js": flags["old-fluence-js"],
-      air: flags.air,
-      const: flags.const,
+    const targetType = resolveTargetType(jsFlag, flags.air);
+
+    const compileCommandArgs: CompileToFilesArgs = {
+      compileArgs: {
+        filePath: inputFlag,
+        constants: flags.const,
+        imports: importFlag,
+        logLevel: flags["log-level-compiler"],
+        noRelay: flags["no-relay"],
+        noXor: flags["no-xor"],
+        targetType,
+      },
+      outputPath: outputFlag,
       dry: flags.dry,
-      scheduled: flags.scheduled,
-    } satisfies AquaCompilerFlags;
-
-    const aquaCli = await initAquaCli(maybeFluenceConfig);
-
-    const compile = async (): Promise<string> => {
-      return aquaCli({ flags: aquaCliFlags }, "Compiling");
     };
 
     if (!flags.watch) {
-      this.log(await compile());
+      await compileToFiles(compileCommandArgs);
+
+      commandObj.log(
+        `Successfully compiled ${color.yellow(
+          compileCommandArgs.compileArgs.filePath
+        )}${
+          compileCommandArgs.outputPath === undefined
+            ? ""
+            : `\nto ${color.yellow(compileCommandArgs.outputPath)}`
+        }`
+      );
+
       await exitCli();
       return;
     }
 
     const watchingNotification = (): void => {
-      return this.log(
-        `Watching for changes at ${color.yellow(aquaCliFlags.input)}...`
-      );
+      return this.log(`Watching for changes at ${color.yellow(inputFlag)}...`);
     };
 
     watchingNotification();
 
     chokidar
-      .watch(aquaCliFlags.input, {
+      .watch(inputFlag, {
         followSymlinks: false,
         usePolling: false,
         interval: 100,
@@ -188,9 +182,8 @@ export default class Aqua extends Command {
         ignoreInitial: true,
       })
       .on("all", (): void => {
-        compile()
-          .then((output): void => {
-            this.log(output);
+        compileToFiles(compileCommandArgs)
+          .then((): void => {
             watchingNotification();
           })
           .catch((error): void => {
@@ -200,6 +193,18 @@ export default class Aqua extends Command {
       });
   }
 }
+
+const resolveTargetType = (js: boolean, air: boolean): "ts" | "js" | "air" => {
+  if (js) {
+    return "js";
+  }
+
+  if (air) {
+    return "air";
+  }
+
+  return "ts";
+};
 
 type ResolveAbsoluteAquaPathArg = {
   maybePathFromFlags: string | undefined;

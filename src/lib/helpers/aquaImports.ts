@@ -93,7 +93,7 @@ type EnsureRecommendedSettings = {
   generateSettingsJson?: boolean;
 };
 
-export const ensureVSCodeSettingsJSON = async ({
+const ensureVSCodeSettingsJSON = async ({
   aquaImports,
   generateSettingsJson = false,
 }: EnsureRecommendedSettings): Promise<void> => {

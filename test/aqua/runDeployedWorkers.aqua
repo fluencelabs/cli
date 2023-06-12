@@ -1,9 +1,6 @@
 aqua Main
 
 import "@fluencelabs/aqua-lib/builtin.aqua"
-import "@fluencelabs/registry/subnetwork.aqua"
-import Registry from "@fluencelabs/registry/registry-service.aqua"
-import "@fluencelabs/spell/spell_service.aqua"
 
 import "workers.aqua"
 import "services.aqua"

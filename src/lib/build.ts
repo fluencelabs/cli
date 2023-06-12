@@ -85,7 +85,7 @@ type ServiceInfoWithUnresolvedModuleConfigs = Omit<
   keyPair: ConfigKeyPair;
 };
 
-export type ServiceInfo = Omit<
+type ServiceInfo = Omit<
   ServiceInfoWithUnresolvedModuleConfigs,
   "moduleNamesAndConfigsDefinedInService" | "serviceDirPath"
 > & {
@@ -234,7 +234,7 @@ const resolveServiceInfos = async ({
   );
 };
 
-export type BuildArg = ResolveServiceInfosArg & {
+type BuildArg = ResolveServiceInfosArg & {
   marineCli: MarineCLI;
 };
 
