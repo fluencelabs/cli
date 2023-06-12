@@ -162,7 +162,7 @@ describe("integration tests", () => {
       const pathToNewSpell = join("src", "spells", "newSpell");
 
       await fluence({
-        args: ["spell", "new", pathToNewSpell],
+        args: ["spell", "new", "newSpell"],
         cwd,
       });
 
@@ -259,7 +259,7 @@ describe("integration tests", () => {
       const pathToNewSpell = join("src", "spells", "newSpell");
 
       await fluence({
-        args: ["spell", "new", pathToNewSpell],
+        args: ["spell", "new", "newSpell"],
         cwd,
       });
 
