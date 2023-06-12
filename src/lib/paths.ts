@@ -20,7 +20,6 @@ import path from "node:path";
 
 import { commandObj } from "./commandObj.js";
 import {
-  APP_SERVICE_JSON_FILE_NAME,
   AQUA_DIR_NAME,
   AQUA_SERVICES_FILE_NAME,
   CARGO_DIR_NAME,
@@ -223,10 +222,6 @@ export const ensureFluenceSpellsDir = async (): Promise<string> => {
 
 const ensureFluenceTmpDir = async (): Promise<string> => {
   return ensureDir(path.join(await ensureFluenceDir(), TMP_DIR_NAME));
-};
-
-export const ensureFluenceTmpAppServiceJsonPath = async (): Promise<string> => {
-  return path.join(await ensureFluenceTmpDir(), APP_SERVICE_JSON_FILE_NAME);
 };
 
 export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {

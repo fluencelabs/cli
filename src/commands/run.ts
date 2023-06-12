@@ -55,7 +55,6 @@ import { jsonStringify } from "../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
 import {
-  ensureFluenceTmpAppServiceJsonPath,
   projectRootDir,
   recursivelyFindProjectRootDir,
   setProjectRootDir,
@@ -172,7 +171,7 @@ export default class Run extends BaseCommand<typeof Run> {
       maybeFluenceConfig,
     });
 
-    const [funcCall, runData, appJsonServicePath] = await Promise.all([
+    const [funcCall, runData] = await Promise.all([
       flags.func === undefined
         ? input({
             message: `Enter a function call that you want to execute`,
@@ -180,7 +179,6 @@ export default class Run extends BaseCommand<typeof Run> {
           })
         : Promise.resolve(flags.func),
       getRunData(flags),
-      ensureFluenceTmpAppServiceJsonPath(),
     ]);
 
     const aquaImports = await ensureAquaImports({
@@ -190,7 +188,6 @@ export default class Run extends BaseCommand<typeof Run> {
 
     const runArgs: RunArgs = {
       ...flags,
-      appJsonServicePath,
       filePath: aquaFilePath,
       imports: aquaImports,
       runData,
@@ -369,7 +366,6 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
   imports: string[];
   logLevelCompiler: AquaLogLevel | undefined;
   runData: FnConfig | undefined;
-  appJsonServicePath: string;
 };
 
 const fluenceRun = async (args: RunArgs) => {

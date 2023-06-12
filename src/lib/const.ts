@@ -118,7 +118,6 @@ export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
 export const CONFIG_FILE_NAME = `config.${YAML_EXT}`;
 export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
 export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
-export const APP_CONFIG_FILE_NAME = `app.${YAML_EXT}`;
 export const SPELL_CONFIG_FILE_NAME = `spell.${YAML_EXT}`;
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
@@ -133,7 +132,6 @@ export const TS_CONFIG_FILE_NAME = `tsconfig.${JSON_EXT}`;
 export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
 export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
 export const DEPLOY_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
-export const APP_SERVICE_JSON_FILE_NAME = `app-service.${JSON_EXT}`;
 
 export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
 export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;

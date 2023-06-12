@@ -331,7 +331,6 @@ const initTSorJSProject = async ({
 
   if (isJS) {
     fluenceConfig.aquaOutputJSPath = defaultAquaTSorJSPathRelative;
-    fluenceConfig.appJSPath = defaultAquaTSorJSPathRelative;
   } else {
     const TS_CONFIG = {
       compilerOptions: {
@@ -353,7 +352,6 @@ const initTSorJSProject = async ({
     );
 
     fluenceConfig.aquaOutputTSPath = defaultAquaTSorJSPathRelative;
-    fluenceConfig.appTSPath = defaultAquaTSorJSPathRelative;
   }
 
   await fluenceConfig.$commit();
