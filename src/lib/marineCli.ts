@@ -23,7 +23,7 @@ import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePai
 import { ensureCargoDependency } from "./rust.js";
 import type { Flags } from "./typeHelpers.js";
 
-export type MarineCliInput =
+type MarineCliInput =
   | {
       args: ["aqua"] | ["aqua", string];
       flags?: never;

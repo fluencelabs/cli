@@ -21,7 +21,7 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "before-build": "shx rm -rf ./src/versions && shx mkdir ./src/versions && shx cp ./package.json ./src/versions/cli.package.json && shx cp ./node_modules/@fluencelabs/js-client.node/package.json ./src/versions/js-client.package.json && shx rm -rf ./src/lib/compiled-aqua && ./bin/dev.js aqua -i node_modules/@fluencelabs/installation-spell/src/aqua/ -o src/lib/compiled-aqua/installation-spell --import node_modules/.pnpm/@fluencelabs+aqua-lib@0.7.0/node_modules $(npx ts-node ./src/getAquaDependencyImports.ts @fluencelabs/installation-spell) --no-input",
+    "before-build": "npx ts-node src/beforeBuild.ts",
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts --ext .js",
     "lint-fix": "eslint . --ext .ts --ext .js --cache --fix",
@@ -35,10 +35,12 @@
     "circular": "madge --circular --extensions ts ./",
     "on-each-commit": "pnpm check && pnpm gen-config-docs && cd docs/commands && oclif readme --no-aliases",
     "clean": "shx rm -rf .fluence && shx rm -rf fluence.yaml && shx rm -rf target && shx rm -rf Cargo.toml && shx rm -rf Cargo.lock && shx rm -rf hosts.yaml && shx rm -rf workers.yaml && shx rm -rf deals.yaml && shx rm -rf src/aqua && shx rm -rf src/ts  && shx rm -rf src/js",
-    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && ts-node ./src/schemas.ts -f"
+    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/schemas.ts && ts-node ./src/schemas.ts -f",
+    "unused-exports": "npx ts-unused-exports tsconfig.json",
+    "upgrade-dependencies": "npx npm-check-updates -u"
   },
   "dependencies": {
-    "@fluencelabs/aqua-api": "0.11.1",
+    "@fluencelabs/aqua-api": "0.11.3",
     "@fluencelabs/deal-aurora": "0.1.8",
     "@fluencelabs/fluence-network-environment": "^1.0.14",
     "@fluencelabs/js-client.api": "0.11.6",

@@ -7,10 +7,6 @@ on:
         description: "Git ref to checkout to"
         type: string
         default: "main"
-      aqua-version:
-        description: "@fluencelabs/aqua version"
-        type: string
-        default: "null"
       marine-version:
         description: "marine version"
         type: string
@@ -121,7 +117,6 @@ jobs:
           versions: |
             {
               "npm": {
-                "@fluencelabs/aqua": "${{ inputs.aqua-version }}",
                 "@fluencelabs/js-client.api": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.api'] }}",
                 "@fluencelabs/js-client.node": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.node'] }}"
               },

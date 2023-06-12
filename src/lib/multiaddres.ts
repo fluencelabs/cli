@@ -126,6 +126,10 @@ const parseNamedPeer = (
   return index;
 };
 
+const getRandomRelayAddr = (maybeRelays: Relays | null | undefined): string => {
+  return getRandomArrayItem(resolveAddrs(maybeRelays));
+};
+
 export const resolveRelay = (
   maybeRelay: string | undefined,
   maybeRelays?: Relays | null | undefined
@@ -141,12 +145,6 @@ export const resolvePeerId = (peerId: string) => {
   return getMaybeNamedNode(peerId)?.peerId ?? peerId;
 };
 
-export const getRandomRelayAddr = (
-  maybeRelays: Relays | null | undefined
-): string => {
-  return getRandomArrayItem(resolveAddrs(maybeRelays));
-};
-
 export const getPeerId = (addr: string): string => {
   const id = new Multiaddr(addr).getPeerId();
 
@@ -159,56 +157,6 @@ export const getPeerId = (addr: string): string => {
   return id;
 };
 
-const getIds = (nodes: Array<string>): Array<string> => {
-  return nodes.map((addr): string => {
-    return getPeerId(addr);
-  });
-};
-
 export const getRandomPeerId = (relays: Relays): string => {
   return getPeerId(getRandomRelayAddr(relays));
-};
-
-export const getEvenlyDistributedIds = (
-  relays: Relays,
-  count = 1
-): Array<string> => {
-  const addrs = resolveAddrs(relays);
-  const ids = getIds(addrs);
-  return getEvenlyDistributedIdsFromTheList(ids, count);
-};
-
-const offsets = new Map<string, number>();
-
-/**
- *
- * @param ids List of ids from which a new list with the same ids is created
- * @param count Amount of the ids to return
- * @returns evenly distributed list of ids
- *
- * ALERT! This function is not pure because it uses `offsets` map to store
- * offsets for each unique collection of ids. Each time the function is executed
- * - offset changes by the `count` number but it never becomes larger then
- * `ids.length`. It's implemented this way because it allows to have even
- * distribution of ids across different deploys of different services
- */
-export const getEvenlyDistributedIdsFromTheList = (
-  ids: Array<string>,
-  count = ids.length
-): Array<string> => {
-  const result: Array<string> = [];
-  const sortedIds = [...ids].sort();
-  const key = JSON.stringify(sortedIds);
-  let offset = offsets.get(key) ?? 0;
-
-  for (let i = 0; i < count; i = i + 1) {
-    const id = ids[(i + offset) % ids.length];
-    assert(typeof id === "string");
-    result.push(id);
-  }
-
-  offset = (offset + count) % ids.length;
-  offsets.set(key, offset);
-
-  return result;
 };

@@ -180,7 +180,7 @@ const hasRequiredRustTarget = async (): Promise<boolean> => {
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
 };
 
-export const getLatestVersionOfCargoDependency = async (
+const getLatestVersionOfCargoDependency = async (
   name: string
 ): Promise<string> => {
   return (
