@@ -5,13 +5,13 @@ import "@fluencelabs/aqua-lib/builtin.aqua"
 import "workers.aqua"
 import "services.aqua"
 
-export status
+export runDeployedServices
 
 data Answer:
     answer: string
     peer: string
 
-func status() -> *Answer:
+func runDeployedServices() -> *Answer:
     workersInfo <- getWorkersInfo()
     installationSpells = workersInfo.hosts!.defaultWorker!.installationSpells
     answers: *Answer
