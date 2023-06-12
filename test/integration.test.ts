@@ -146,7 +146,7 @@ describe("integration tests", () => {
       const pathToNewServiceDir = join("src", "services", "newService");
 
       await fluence({
-        args: ["service", "new", pathToNewServiceDir],
+        args: ["service", "new", "newService"],
         cwd,
       });
 
@@ -243,7 +243,7 @@ describe("integration tests", () => {
       const pathToNewServiceDir = join("src", "services", "newService");
 
       await fluence({
-        args: ["service", "new", pathToNewServiceDir],
+        args: ["service", "new", "newService"],
         cwd,
       });
 

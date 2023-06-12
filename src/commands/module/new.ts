@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+import { join } from "path";
+
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Args } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { ensureSrcModulesDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -28,18 +31,25 @@ export default class New extends BaseCommand<typeof New> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    // path
+    path: Flags.string({
+      description: "Path to module dir (default: src/modules)",
+      helpValue: "<path>",
+    }),
   };
   static override args = {
-    path: Args.string({
-      description: "Module path",
+    name: Args.string({
+      description: "Module name",
     }),
   };
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(New));
+    const { args, flags } = await initCli(this, await this.parse(New));
 
-    const pathToModuleDir =
-      args.path ?? (await input({ message: "Enter module path" }));
+    const moduleName =
+      args.name ?? (await input({ message: "Enter module name" }));
 
+    const pathToModulesDir = flags.path ?? (await ensureSrcModulesDir());
+    const pathToModuleDir = join(pathToModulesDir, moduleName);
     await generateNewModule(pathToModuleDir);
 
     this.log(

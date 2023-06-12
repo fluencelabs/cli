@@ -19,7 +19,7 @@ import { join } from "path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Args } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -30,6 +30,7 @@ import {
   SPELL_AQUA_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { ensureSrcSpellsDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -37,18 +38,24 @@ export default class New extends BaseCommand<typeof New> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    path: Flags.string({
+      description: "Path to spells dir (default: src/spells)",
+      helpValue: "<path>",
+    }),
   };
   static override args = {
-    path: Args.string({
-      description: "Spell path",
+    name: Args.string({
+      description: "Spell name",
     }),
   };
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(New));
 
-    const pathToSpellDir =
-      args.path ?? (await input({ message: "Enter spell path" }));
+    const spellName =
+      args.name ?? (await input({ message: "Enter spell name" }));
 
+    const pathToSpellsDir = await ensureSrcSpellsDir();
+    const pathToSpellDir = join(pathToSpellsDir, spellName);
     await generateNewSpell(pathToSpellDir);
 
     commandObj.log(
