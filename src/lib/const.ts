@@ -108,7 +108,6 @@ export const SPELLS_DIR_NAME = "spells";
 export const NPM_DIR_NAME = "npm";
 export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
-export const DOT_BIN_DIR_NAME = ".bin";
 export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
@@ -131,7 +130,6 @@ export const PACKAGE_JSON_FILE_NAME = `package.${JSON_EXT}`;
 export const TS_CONFIG_FILE_NAME = `tsconfig.${JSON_EXT}`;
 export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
 export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
-export const DEPLOY_CONFIG_FILE_NAME = `deploy.${JSON_EXT}`;
 
 export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
 export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
@@ -425,7 +423,7 @@ func getInfosInParallel(peers: []PeerId) -> []Info:
     <- infos
 `;
 
-export const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
+const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
 // @ts-nocheck`;
 
 const NODES_CONST = "nodes";
