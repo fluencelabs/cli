@@ -50,27 +50,25 @@ const workerInfoSchema = {
   required: ["timestamp", "definition"],
 } as const satisfies JSONSchemaType<WorkerInfo>;
 
-export type Deals = Record<
-  string,
-  WorkerInfo & {
-    dealId: string;
-    dealIdOriginal: string;
-    chainNetwork: ChainNetwork;
-    chainNetworkId: number;
-  }
->;
+export type Deal = WorkerInfo & {
+  dealId: string;
+  dealIdOriginal: string;
+  chainNetwork: ChainNetwork;
+  chainNetworkId: number;
+};
 
-export type Hosts = Record<
-  string,
-  WorkerInfo & {
-    relayId: string;
-    installation_spells: {
-      host_id: string;
-      spell_id: string;
-      worker_id: string;
-    }[];
-  }
->;
+type Deals = Record<string, Deal>;
+
+export type Host = WorkerInfo & {
+  relayId: string;
+  installation_spells: {
+    host_id: string;
+    spell_id: string;
+    worker_id: string;
+  }[];
+};
+
+type Hosts = Record<string, Host>;
 
 export type DealsAndHosts = {
   deals?: Deals;

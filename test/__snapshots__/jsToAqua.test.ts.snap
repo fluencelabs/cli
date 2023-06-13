@@ -1,46 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Conversion from js to aqua Expect objects to match snapshot 1`] = `
-{
-  "type": "[]u64",
-  "typeDefs": undefined,
-  "value": "[
-        1,
-        2,
-        3
-]",
-}
-`;
-
-exports[`Conversion from js to aqua Expect objects to match snapshot 2`] = `
-{
-  "type": "[]i64",
-  "typeDefs": undefined,
-  "value": "[
-        1,
-        -2,
-        3
-]",
-}
-`;
-
-exports[`Conversion from js to aqua Expect objects to match snapshot 3`] = `
-{
-  "type": "[]f64",
-  "typeDefs": undefined,
-  "value": "[
-        1.1,
-        2,
-        3
-]",
-}
-`;
-
-exports[`Conversion from js to aqua Expect objects to match snapshot 4`] = `
-{
-  "type": "[][]string",
-  "typeDefs": undefined,
-  "value": "[
+exports[`Conversion from js to aqua Expect test case to match snapshot: [
+  [
+    "1"
+  ],
+  [
+    "2"
+  ],
+  [
+    "3"
+  ]
+] 1`] = `
+"func res() -> [][]string:
+    <- [
         [
             "1"
         ],
@@ -50,78 +22,197 @@ exports[`Conversion from js to aqua Expect objects to match snapshot 4`] = `
         [
             "3"
         ]
-]",
-}
+    ]
+"
 `;
 
-exports[`Conversion from js to aqua Expect objects to match snapshot 5`] = `
-{
-  "type": "Res",
-  "typeDefs": "data Res:
-    a: i64
-    b: f64",
-  "value": "Res(
-        a=-1,
-        b=2.2
-    )",
-}
+exports[`Conversion from js to aqua Expect test case to match snapshot: [
+  1,
+  -2,
+  3
+] 1`] = `
+"func res() -> []i64:
+    <- [
+        1,
+        -2,
+        3
+    ]
+"
 `;
 
-exports[`Conversion from js to aqua Expect objects to match snapshot 6`] = `
-{
-  "type": "Res",
-  "typeDefs": "data ResA:
-    b: []u64
+exports[`Conversion from js to aqua Expect test case to match snapshot: [
+  1,
+  2,
+  3
+] 1`] = `
+"func res() -> []u64:
+    <- [
+        1,
+        2,
+        3
+    ]
+"
+`;
 
-data ResE:
+exports[`Conversion from js to aqua Expect test case to match snapshot: [
+  1.1,
+  2,
+  3
+] 1`] = `
+"func res() -> []f64:
+    <- [
+        1.1,
+        2,
+        3
+    ]
+"
+`;
+
+exports[`Conversion from js to aqua Expect test case to match snapshot: {
+  "$$optional": 1
+} 1`] = `
+"func res() -> ?u64:
+    <- ?[1]
+"
+`;
+
+exports[`Conversion from js to aqua Expect test case to match snapshot: {
+  "a": {
+    "$$optional": 1,
+    "$$isNil": true
+  },
+  "b": {
+    "$$optional": 1.1,
+    "$$isNil": true
+  },
+  "c": {
+    "$$optional": [
+      {
+        "f": "4"
+      },
+      {
+        "f": "5"
+      }
+    ]
+  },
+  "d": {
+    "$$optional": [
+      {
+        "f": "5"
+      }
+    ],
+    "$$isNil": true
+  }
+} 1`] = `
+"data ResC:
     f: string
 
-data Res:
-    a: ResA
-    c: ?u8
-    d: ?u8
-    e: []ResE",
-  "value": "Res(
-        a=ResA(
-            b=[
-                2
-            ]
-        ),
-        c=nil,
-        d=nil,
-        e=[
-            ResE(
-                f="4"
-            ),
-            ResE(
-                f="5"
-            )
-        ]
-    )",
-}
-`;
-
-exports[`Conversion from js to aqua Expect objects to match snapshot 7`] = `
-{
-  "type": "Res",
-  "typeDefs": "data ResE:
+data ResD:
     f: string
 
 data Res:
     a: ?u64
     b: ?f64
-    e: ?[]ResE",
-  "value": "Res(
+    c: ?[]ResC
+    d: ?[]ResD
+
+func res() -> Res:
+    <- Res(
         a=nil,
         b=nil,
-        e=?[[
-            ResE(
+        c=?[[
+            ResC(
                 f="4"
             ),
-            ResE(
+            ResC(
                 f="5"
             )
-        ]]
-    )",
-}
+        ]],
+        d=nil
+    )
+"
+`;
+
+exports[`Conversion from js to aqua Expect test case to match snapshot: {
+  "a": {
+    "a": [
+      2
+    ]
+  },
+  "b": {
+    "a": -1,
+    "b": 2.2
+  },
+  "c": [
+    {
+      "a": "4"
+    },
+    {
+      "a": "5"
+    }
+  ]
+} 1`] = `
+"data ResA:
+    a: []u64
+
+data ResB:
+    a: i64
+    b: f64
+
+data ResC:
+    a: string
+
+data Res:
+    a: ResA
+    b: ResB
+    c: []ResC
+
+func res() -> Res:
+    <- Res(
+        a=ResA(
+            a=[
+                2
+            ]
+        ),
+        b=ResB(
+            a=-1,
+            b=2.2
+        ),
+        c=[
+            ResC(
+                a="4"
+            ),
+            ResC(
+                a="5"
+            )
+        ]
+    )
+"
+`;
+
+exports[`Conversion from js to aqua Expect test case to match snapshot: {
+  "a": null,
+  "b": [],
+  "d": {}
+} 1`] = `
+"data Res:
+    a: ?u8
+    b: ?u8
+    c: ?u8
+    d: ?u8
+
+func res() -> Res:
+    <- Res(
+        a=nil,
+        b=nil,
+        c=nil,
+        d=nil
+    )
+"
+`;
+
+exports[`Conversion from js to aqua Expect test case to match snapshot: 1 1`] = `
+"func res() -> u64:
+    <- 1
+"
 `;

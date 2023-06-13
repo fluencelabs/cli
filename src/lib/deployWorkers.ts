@@ -45,15 +45,11 @@ import {
   resolveStartSec,
 } from "./configs/project/spell.js";
 import type {
-  Deals,
-  Hosts,
+  Deal,
+  Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import {
-  DEFAULT_WORKER_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
-  FS_OPTIONS,
-} from "./const.js";
+import { FLUENCE_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -633,7 +629,7 @@ const validateWasmExist = async (
   }
 };
 
-const DEAL_TYPE: Deals[string] = {
+const DEAL_TYPE: Deal = {
   dealId: "",
   chainNetwork: "testnet",
   chainNetworkId: 0,
@@ -642,7 +638,7 @@ const DEAL_TYPE: Deals[string] = {
   timestamp: "",
 };
 
-const HOSTS_TYPE: Hosts[string] = {
+const HOSTS_TYPE: Host = {
   definition: "",
   installation_spells: [
     {
@@ -659,65 +655,55 @@ export const ensureAquaFileWithWorkerInfo = async (
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly
 ) => {
-  const allWorkerNames = Object.keys(fluenceConfig.workers ?? {});
-
-  const workerNameDealsNills = allWorkerNames.reduce<
-    Record<string, ReturnType<typeof makeOptional<Deals[string]>>>
-  >((acc, workerName) => {
-    acc[workerName] = makeOptional(null, DEAL_TYPE);
-    return acc;
-  }, {});
-
-  const workerDealOptionals = Object.entries(workersConfig.deals ?? {}).reduce<
-    Record<string, ReturnType<typeof makeOptional<Deals[string]>>>
-  >(
-    (acc, [workerName, deal]) => {
-      acc[workerName] = makeOptional<Deals[string]>(deal, DEAL_TYPE);
-      return acc;
-    },
-    { ...workerNameDealsNills }
+  const dealWorkers = Object.fromEntries(
+    Object.entries({ ...fluenceConfig.workers, ...workersConfig.deals }).map(
+      ([workerName, info]) => {
+        const key = workerName;
+        // if worker was deployed put deal info, otherwise put null
+        const maybeDeal = "dealId" in info ? info : null;
+        const value = makeOptional(maybeDeal, DEAL_TYPE);
+        return [key, value];
+      }
+    )
   );
 
-  const workerNameHostsNills = allWorkerNames.reduce<
-    Record<string, ReturnType<typeof makeOptional<Hosts[string]>>>
-  >((acc, workerName) => {
-    acc[workerName] = makeOptional(null, HOSTS_TYPE);
-    return acc;
-  }, {});
-
-  const workerHostsOptionals = Object.entries(workersConfig.hosts ?? {}).reduce<
-    Record<string, ReturnType<typeof makeOptional<Hosts[string]>>>
-  >(
-    (acc, [workerName, hosts]) => {
-      acc[workerName] = makeOptional<Hosts[string]>(hosts, HOSTS_TYPE);
-      return acc;
-    },
-    { ...workerNameHostsNills }
+  const directHostingWorkers = Object.fromEntries(
+    Object.entries({ ...fluenceConfig.workers, ...workersConfig.hosts }).map(
+      ([workerName, info]) => {
+        const key = workerName;
+        // if worker was deployed put hosts info, otherwise put null
+        const maybeHost = "relayId" in info ? info : null;
+        const value = makeOptional(maybeHost, HOSTS_TYPE);
+        return [key, value];
+      }
+    )
   );
+
+  const hasSomeDealWorkers = Object.keys(dealWorkers).length !== 0;
+
+  const hasSomeDirectHostingWorkers =
+    Object.keys(directHostingWorkers).length !== 0;
+
+  if (!hasSomeDealWorkers && !hasSomeDirectHostingWorkers) {
+    return writeFile(await ensureFluenceAquaWorkersPath(), "", FS_OPTIONS);
+  }
+
+  const workersInfo: {
+    deals?: typeof dealWorkers;
+    hosts?: typeof directHostingWorkers;
+  } = {};
+
+  if (hasSomeDealWorkers) {
+    workersInfo.deals = dealWorkers;
+  }
+
+  if (hasSomeDirectHostingWorkers) {
+    workersInfo.hosts = directHostingWorkers;
+  }
 
   await writeFile(
     await ensureFluenceAquaWorkersPath(),
-    jsToAqua(
-      {
-        deals: makeOptional(
-          Object.keys(workerDealOptionals).length === 0
-            ? null
-            : workerDealOptionals,
-          {
-            [DEFAULT_WORKER_NAME]: makeOptional(null, DEAL_TYPE),
-          }
-        ),
-        hosts: makeOptional(
-          Object.keys(workerHostsOptionals).length === 0
-            ? null
-            : workerHostsOptionals,
-          {
-            [DEFAULT_WORKER_NAME]: makeOptional(null, HOSTS_TYPE),
-          }
-        ),
-      },
-      "getWorkersInfo"
-    ),
+    jsToAqua(workersInfo, "getWorkersInfo"),
     FS_OPTIONS
   );
 };

@@ -13,7 +13,7 @@ data Answer:
 
 func runDeployedServices() -> *Answer:
     workersInfo <- getWorkersInfo()
-    installationSpells = workersInfo.hosts!.defaultWorker!.installationSpells
+    installationSpells = workersInfo.hosts.defaultWorker!.installationSpells
     answers: *Answer
     for s <- installationSpells par:
         on s.workerId via s.hostId:

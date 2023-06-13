@@ -14,38 +14,31 @@
  * limitations under the License.
  */
 
-import { jsToAquaImpl, makeOptional } from "../src/lib/helpers/jsToAqua.js";
+import { stringifyUnknown } from "../src/lib/helpers/jsonStringify.js";
+import {
+  jsToAqua,
+  jsToAquaImpl,
+  makeOptional,
+} from "../src/lib/helpers/jsToAqua.js";
 
 const WRAPPER_FUNCTION_NAME = "res";
 
-const obj = [
-  [1, 2, 3],
-  [1, -2, 3],
-  [1.1, 2, 3],
-  [["1"], ["2"], ["3"]],
-  { a: -1, b: 2.2 },
-  { a: { b: [2] }, c: null, d: [], e: [{ f: "4" }, { f: "5" }] },
-  {
-    a: makeOptional(undefined, 1),
-    b: makeOptional(null, 2.2),
-    e: makeOptional([{ f: "4" }, { f: "5" }], [{ f: "5" }]),
-  },
-] as const;
-
 describe("Conversion from js to aqua", () => {
   test.each`
-    js           | value       | type        | typeDefs
-    ${"abc"}     | ${'"abc"'}  | ${"string"} | ${undefined}
-    ${true}      | ${"true"}   | ${"bool"}   | ${undefined}
-    ${false}     | ${"false"}  | ${"bool"}   | ${undefined}
-    ${null}      | ${"nil"}    | ${"?u8"}    | ${undefined}
-    ${undefined} | ${"nil"}    | ${"?u8"}    | ${undefined}
-    ${[]}        | ${"nil"}    | ${"?u8"}    | ${undefined}
-    ${{}}        | ${"nil"}    | ${"?u8"}    | ${undefined}
-    ${1}         | ${"1"}      | ${"u64"}    | ${undefined}
-    ${-1}        | ${"-1"}     | ${"i64"}    | ${undefined}
-    ${1.234}     | ${"1.234"}  | ${"f64"}    | ${undefined}
-    ${-1.234}    | ${"-1.234"} | ${"f64"}    | ${undefined}
+    js                      | value       | type         | typeDefs
+    ${"abc"}                | ${'"abc"'}  | ${"string"}  | ${undefined}
+    ${true}                 | ${"true"}   | ${"bool"}    | ${undefined}
+    ${false}                | ${"false"}  | ${"bool"}    | ${undefined}
+    ${null}                 | ${"nil"}    | ${"?u8"}     | ${undefined}
+    ${undefined}            | ${"nil"}    | ${"?u8"}     | ${undefined}
+    ${[]}                   | ${"nil"}    | ${"?u8"}     | ${undefined}
+    ${{}}                   | ${"nil"}    | ${"?u8"}     | ${undefined}
+    ${1}                    | ${"1"}      | ${"u64"}     | ${undefined}
+    ${-1}                   | ${"-1"}     | ${"i64"}     | ${undefined}
+    ${1.234}                | ${"1.234"}  | ${"f64"}     | ${undefined}
+    ${-1.234}               | ${"-1.234"} | ${"f64"}     | ${undefined}
+    ${makeOptional(1, 1)}   | ${"?[1]"}   | ${"?u64"}    | ${undefined}
+    ${makeOptional("", "")} | ${'?[""]'}  | ${"?string"} | ${undefined}
   `(
     "js: $js. value: $value. type: $type. typeDefs: $typeDefs",
     ({ js, value, type, typeDefs }) => {
@@ -60,9 +53,35 @@ describe("Conversion from js to aqua", () => {
     }
   );
 
-  test("Expect objects to match snapshot", () => {
-    obj.forEach((o) => {
-      expect(jsToAquaImpl(o, WRAPPER_FUNCTION_NAME, "")).toMatchSnapshot();
+  [
+    1,
+    makeOptional(1, 1),
+    [1, 2, 3],
+    [1, -2, 3],
+    [1.1, 2, 3],
+    [["1"], ["2"], ["3"]],
+    {
+      a: { a: [2] },
+      b: { a: -1, b: 2.2 },
+      c: [{ a: "4" }, { a: "5" }],
+    },
+    {
+      a: null,
+      b: [],
+      c: undefined,
+      d: {},
+    },
+    {
+      a: makeOptional(undefined, 1),
+      b: makeOptional(null, 1.1),
+      c: makeOptional([{ f: "4" }, { f: "5" }], [{ f: "5" }]),
+      d: makeOptional(undefined, [{ f: "5" }]),
+    },
+  ].forEach((testCase) => {
+    test(`Expect test case to match snapshot: ${stringifyUnknown(
+      testCase
+    )}`, () => {
+      expect(jsToAqua(testCase, WRAPPER_FUNCTION_NAME)).toMatchSnapshot();
     });
   });
 
