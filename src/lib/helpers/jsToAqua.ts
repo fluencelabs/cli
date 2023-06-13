@@ -39,8 +39,8 @@ const IS_NIL = "$$isNil";
 type EmptyObject = Record<string, never>;
 
 /**
- * Empty object and empty array are both considered nil in aqua
- * because there is no way to infer a reasonable aqua type from just them
+ * Empty object and empty array are inferred as nil
+ * because there is no way to infer a reasonable aqua type from just an empty object or empty array
  */
 type NilInAqua = undefined | null | EmptyObject | [];
 
@@ -169,9 +169,11 @@ export const jsToAquaImpl = (
     return NIL;
   }
 
-  if (Array.isArray(v)) {
-    const newNestingLevel = nestingLevel + 1;
+  const newNestingLevel = nestingLevel + 1;
+  const prevIndent = INDENTATION.repeat(nestingLevel);
+  const newIndent = INDENTATION.repeat(newNestingLevel);
 
+  if (Array.isArray(v)) {
     const mappedToAqua = v.map((val) => {
       return jsToAquaImpl(
         val,
@@ -220,9 +222,6 @@ export const jsToAquaImpl = (
       return error("All array elements must be of the same type");
     }
 
-    const prevIndent = INDENTATION.repeat(nestingLevel);
-    const newIndent = INDENTATION.repeat(newNestingLevel);
-
     return {
       type: `[]${type}`,
       value: `[\n${newIndent}${mappedToAqua
@@ -262,9 +261,6 @@ export const jsToAquaImpl = (
         typeDefs,
       };
     }
-
-    const newNestingLevel = nestingLevel + 1;
-    const newIndent = INDENTATION.repeat(newNestingLevel);
 
     const { keyTypes, keyDataTypes, entries } = objectEntries.reduce<{
       keyTypes: string[];
