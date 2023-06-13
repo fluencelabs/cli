@@ -45,33 +45,35 @@ const upload = async (
   const ipfsClient = createIPFSClient(multiaddr);
 
   try {
-    const { path: cid } = await ipfsClient.add(content, {
+    const { cid } = await ipfsClient.add(content, {
       pin: true,
       cidVersion: 1,
     });
 
-    await ipfsClient.pin.add(cid);
-    log(`did pin ${cid} to ${multiaddr}`);
+    const cidString = cid.toString();
+
+    await ipfsClient.pin.add(cidString);
+    log(`did pin ${cidString} to ${multiaddr}`);
 
     try {
-      const pinned = ipfsClient.pin.ls({ paths: cid, type: "all" });
+      const pinned = ipfsClient.pin.ls({ paths: cidString, type: "all" });
 
       for await (const r of pinned) {
         if (r.type === "recursive") {
-          log(`file ${cid} pinned to ${multiaddr}`);
+          log(`file ${cidString} pinned to ${multiaddr}`);
         } else {
           log(`pin result type is not recursive. ${r}`);
         }
       }
     } catch (error) {
       commandObj.error(
-        `file ${cid} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
+        `file ${cidString} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
           error
         )}`
       );
     }
 
-    return cid;
+    return cidString;
   } catch (error) {
     commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
   }
@@ -79,39 +81,40 @@ const upload = async (
 
 const dagUpload = async (
   multiaddr: string,
-  content: Parameters<IPFSHTTPClient["add"]>[0],
+  content: Parameters<IPFSHTTPClient["dag"]["put"]>[0],
   log: (msg: unknown) => void
 ) => {
   const ipfsClient = createIPFSClient(multiaddr);
 
   try {
-    const { path: cid } = await ipfsClient.dag.put(content, {
+    const cid = await ipfsClient.dag.put(content, {
       pin: true,
-      cidVersion: 1,
     });
 
-    await ipfsClient.pin.add(cid);
-    log(`did pin ${cid} to ${multiaddr}`);
+    const cidString = cid.toString();
+
+    await ipfsClient.pin.add(cidString);
+    log(`did pin ${cidString} to ${multiaddr}`);
 
     try {
-      const pinned = ipfsClient.pin.ls({ paths: cid, type: "all" });
+      const pinned = ipfsClient.pin.ls({ paths: cidString, type: "all" });
 
       for await (const r of pinned) {
         if (r.type === "recursive") {
-          log(`file ${cid} pinned to ${multiaddr}`);
+          log(`file ${cidString} pinned to ${multiaddr}`);
         } else {
           log(`pin result type is not recursive. ${r}`);
         }
       }
     } catch (error) {
       commandObj.error(
-        `file ${cid} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
+        `file ${cidString} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
           error
         )}`
       );
     }
 
-    return cid;
+    return cidString;
   } catch (error) {
     commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
   }
