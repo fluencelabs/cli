@@ -48,7 +48,7 @@ type NilInAqua = undefined | null | EmptyObject | [];
  * This function is used in order to construct optional syntax in js that is converted to optional values in aqua.
  *
  * @param value - value to be converted. Can be anything.
- * @param valueToInferTypeFrom - a fallback that is used by jsToAqua function to infer the type of the value if value is missing (is null or undefined)
+ * @param valueToInferTypeFrom - a fallback that is used by jsToAqua function to infer the type of the value if value is missing (is null, undefined, empty object or empty array)
  * @returns - js object with special syntax that is converted to optional value in aqua inside jsToAqua function
  *
  * @example

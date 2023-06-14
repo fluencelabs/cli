@@ -629,28 +629,6 @@ const validateWasmExist = async (
   }
 };
 
-const DEAL_TYPE: Deal = {
-  dealId: "",
-  chainNetwork: "testnet",
-  chainNetworkId: 0,
-  dealIdOriginal: "",
-  definition: "",
-  timestamp: "",
-};
-
-const HOSTS_TYPE: Host = {
-  definition: "",
-  installation_spells: [
-    {
-      host_id: "",
-      spell_id: "",
-      worker_id: "",
-    },
-  ],
-  relayId: "",
-  timestamp: "",
-};
-
 export const ensureAquaFileWithWorkerInfo = async (
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly
@@ -661,7 +639,16 @@ export const ensureAquaFileWithWorkerInfo = async (
         const key = workerName;
         // if worker was deployed put deal info, otherwise put null
         const maybeDeal = "dealId" in info ? info : null;
-        const value = makeOptional(maybeDeal, DEAL_TYPE);
+
+        const value = makeOptional(maybeDeal, {
+          dealId: "",
+          chainNetwork: "testnet",
+          chainNetworkId: 0,
+          dealIdOriginal: "",
+          definition: "",
+          timestamp: "",
+        } satisfies Deal);
+
         return [key, value];
       }
     )
@@ -673,7 +660,20 @@ export const ensureAquaFileWithWorkerInfo = async (
         const key = workerName;
         // if worker was deployed put hosts info, otherwise put null
         const maybeHost = "relayId" in info ? info : null;
-        const value = makeOptional(maybeHost, HOSTS_TYPE);
+
+        const value = makeOptional(maybeHost, {
+          definition: "",
+          installation_spells: [
+            {
+              host_id: "",
+              spell_id: "",
+              worker_id: "",
+            },
+          ],
+          relayId: "",
+          timestamp: "",
+        } satisfies Host);
+
         return [key, value];
       }
     )
