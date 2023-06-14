@@ -138,6 +138,18 @@ export const ensureSrcAquaMainPath = async (): Promise<string> => {
   return path.join(await ensureSrcAquaDir(), DEFAULT_SRC_AQUA_FILE_NAME);
 };
 
+export const ensureSrcServicesDir = async (): Promise<string> => {
+  return ensureDir(path.join(projectRootDir, SRC_DIR_NAME, SERVICES_DIR_NAME));
+};
+
+export const ensureSrcModulesDir = async (): Promise<string> => {
+  return ensureDir(path.join(projectRootDir, SRC_DIR_NAME, MODULES_DIR_NAME));
+};
+
+export const ensureSrcSpellsDir = async (): Promise<string> => {
+  return ensureDir(path.join(projectRootDir, SRC_DIR_NAME, SPELLS_DIR_NAME));
+};
+
 const ensureVSCodeDir = async (): Promise<string> => {
   return ensureDir(path.join(projectRootDir, VSCODE_DIR_NAME));
 };

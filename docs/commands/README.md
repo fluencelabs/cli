@@ -19,15 +19,15 @@
 * [`fluence key new [NAME]`](#fluence-key-new-name)
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
-* [`fluence module new [PATH]`](#fluence-module-new-path)
+* [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
-* [`fluence service new [PATH]`](#fluence-service-new-path)
+* [`fluence service new [NAME]`](#fluence-service-new-name)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
-* [`fluence spell new [PATH]`](#fluence-spell-new-path)
+* [`fluence spell new [NAME]`](#fluence-spell-new-name)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
@@ -527,19 +527,20 @@ EXAMPLES
   $ fluence module add
 ```
 
-## `fluence module new [PATH]`
+## `fluence module new [NAME]`
 
 Create new marine module template
 
 ```
 USAGE
-  $ fluence module new [PATH] [--no-input]
+  $ fluence module new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
-  PATH  Module path
+  NAME  Module name
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input     Don't interactively ask for any input from the user
+  --path=<path>  Path to module dir (default: src/modules)
 
 DESCRIPTION
   Create new marine module template
@@ -659,21 +660,20 @@ EXAMPLES
   $ fluence service add
 ```
 
-## `fluence service new [PATH]`
+## `fluence service new [NAME]`
 
 Create new marine service template
 
 ```
 USAGE
-  $ fluence service new [PATH] [--no-input] [--name <value>]
+  $ fluence service new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
-  PATH  Path to a service
+  NAME  Unique service name (must start with a lowercase letter and contain only letters, numbers, and underscores)
 
 FLAGS
-  --name=<name>  Unique service name (must start with a lowercase letter and contain only letters, numbers, and
-                 underscores)
   --no-input     Don't interactively ask for any input from the user
+  --path=<path>  Path to services dir (default: src/services)
 
 DESCRIPTION
   Create new marine service template
@@ -724,19 +724,20 @@ EXAMPLES
   $ fluence service repl
 ```
 
-## `fluence spell new [PATH]`
+## `fluence spell new [NAME]`
 
 Create a new spell template
 
 ```
 USAGE
-  $ fluence spell new [PATH] [--no-input]
+  $ fluence spell new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
-  PATH  Spell path
+  NAME  Spell name
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input     Don't interactively ask for any input from the user
+  --path=<path>  Path to spells dir (default: src/spells)
 
 DESCRIPTION
   Create a new spell template
