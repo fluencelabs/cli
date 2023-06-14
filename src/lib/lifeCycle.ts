@@ -42,6 +42,7 @@ import {
   userConfig,
 } from "./configs/user/config.js";
 import {
+  NODE_JS_MAJOR_VERSION,
   CHECK_FOR_UPDATES_INTERVAL,
   SEPARATOR,
   type NO_INPUT_FLAG_NAME,
@@ -141,9 +142,9 @@ export async function initCli<
 
   const majorVersion = Number(platform.version.split(".")[0]);
 
-  if (majorVersion !== 16) {
+  if (majorVersion !== NODE_JS_MAJOR_VERSION) {
     return commandObj.error(
-      `Fluence CLI requires Node.js version "16.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install 16 && nvm use 16 && nvm alias default 16"`
+      `Fluence CLI requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`
     );
   }
 

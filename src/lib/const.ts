@@ -30,6 +30,8 @@ import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
+export const NODE_JS_MAJOR_VERSION = 18;
+
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
