@@ -21,6 +21,7 @@ import { Multiaddr, protocols } from "multiaddr";
 
 import { commandObj } from "../commandObj.js";
 import { registerIpfsClient } from "../compiled-aqua/installation-spell/files.js";
+import { FS_OPTIONS } from "../const.js";
 import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
 // !IMPORTANT for some reason when in tsconfig.json "moduleResolution" is set to "nodenext" - "ipfs-http-client" types all become "any"
@@ -45,33 +46,76 @@ const upload = async (
   const ipfsClient = createIPFSClient(multiaddr);
 
   try {
-    const { path: cid } = await ipfsClient.add(content, {
+    const { cid } = await ipfsClient.add(content, {
       pin: true,
       cidVersion: 1,
     });
 
-    await ipfsClient.pin.add(cid);
-    log(`did pin ${cid} to ${multiaddr}`);
+    const cidString = cid.toString();
+
+    await ipfsClient.pin.add(cidString);
+    log(`did pin ${cidString} to ${multiaddr}`);
 
     try {
-      const pinned = ipfsClient.pin.ls({ paths: cid, type: "all" });
+      const pinned = ipfsClient.pin.ls({ paths: cidString, type: "all" });
 
       for await (const r of pinned) {
         if (r.type === "recursive") {
-          log(`file ${cid} pinned to ${multiaddr}`);
+          log(`file ${cidString} pinned to ${multiaddr}`);
         } else {
           log(`pin result type is not recursive. ${r}`);
         }
       }
     } catch (error) {
       commandObj.error(
-        `file ${cid} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
+        `file ${cidString} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
           error
         )}`
       );
     }
 
-    return cid;
+    return cidString;
+  } catch (error) {
+    commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
+  }
+};
+
+const dagUpload = async (
+  multiaddr: string,
+  content: Parameters<IPFSHTTPClient["dag"]["put"]>[0],
+  log: (msg: unknown) => void
+) => {
+  const ipfsClient = createIPFSClient(multiaddr);
+
+  try {
+    const cid = await ipfsClient.dag.put(content, {
+      pin: true,
+    });
+
+    const cidString = cid.toString();
+
+    await ipfsClient.pin.add(cidString);
+    log(`did pin ${cidString} to ${multiaddr}`);
+
+    try {
+      const pinned = ipfsClient.pin.ls({ paths: cidString, type: "all" });
+
+      for await (const r of pinned) {
+        if (r.type === "recursive") {
+          log(`file ${cidString} pinned to ${multiaddr}`);
+        } else {
+          log(`pin result type is not recursive. ${r}`);
+        }
+      }
+    } catch (error) {
+      commandObj.error(
+        `file ${cidString} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
+          error
+        )}`
+      );
+    }
+
+    return cidString;
   } catch (error) {
     commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
   }
@@ -99,6 +143,21 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
     },
     async upload_string(multiaddr, string) {
       return upload(multiaddr, Buffer.from(string), log);
+    },
+    async dag_upload(multiaddr, absolutePath) {
+      try {
+        await access(absolutePath);
+      } catch {
+        throw new Error(
+          `Failed IPFS upload. File ${absolutePath} doesn't exist`
+        );
+      }
+
+      const data = await readFile(absolutePath, FS_OPTIONS);
+      return dagUpload(multiaddr, data, log);
+    },
+    async dag_upload_string(multiaddr, string) {
+      return dagUpload(multiaddr, string, log);
     },
     async id(multiaddr): Promise<string> {
       const ipfsClient = createIPFSClient(multiaddr);
