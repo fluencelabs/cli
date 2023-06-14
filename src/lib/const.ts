@@ -349,7 +349,7 @@ data Answer:
 
 func runDeployedServices() -> *Answer:
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals!.defaultWorker!.dealId
+    dealId = workersInfo.deals.defaultWorker!.dealId
     answers: *Answer
     workers <- resolveSubnetwork(dealId)
     for w <- workers! par:
