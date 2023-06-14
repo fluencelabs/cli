@@ -222,8 +222,6 @@ export const jsToAquaImpl = (
       return error("All array elements must be of the same type");
     }
 
-    const ind = INDENTATION.repeat(newNestingLevel);
-
     return {
       type: `[]${type}`,
       value: `[\n${newIndent}${mappedToAqua
