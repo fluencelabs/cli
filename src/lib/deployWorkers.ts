@@ -27,7 +27,10 @@ import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
+import type {
+  FluenceConfig,
+  FluenceConfigReadonly,
+} from "./configs/project/fluence.js";
 import {
   type ConfigV0,
   initReadonlyModuleConfig,
@@ -41,7 +44,11 @@ import {
   resolveEndSec,
   resolveStartSec,
 } from "./configs/project/spell.js";
-import type { WorkersConfigReadonly } from "./configs/project/workers.js";
+import type {
+  Deal,
+  Host,
+  WorkersConfigReadonly,
+} from "./configs/project/workers.js";
 import { FLUENCE_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
 import {
   downloadModule,
@@ -49,7 +56,7 @@ import {
   getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
-import { jsToAqua } from "./helpers/jsToAqua.js";
+import { jsToAqua, makeOptional } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
@@ -623,14 +630,80 @@ const validateWasmExist = async (
 };
 
 export const ensureAquaFileWithWorkerInfo = async (
-  workersConfig: WorkersConfigReadonly
+  workersConfig: WorkersConfigReadonly,
+  fluenceConfig: FluenceConfigReadonly
 ) => {
+  const dealWorkers = Object.fromEntries(
+    Object.entries({ ...fluenceConfig.workers, ...workersConfig.deals }).map(
+      ([workerName, info]) => {
+        const key = workerName;
+        // if worker was deployed put deal info, otherwise put null
+        const maybeDeal = "dealId" in info ? info : null;
+
+        const value = makeOptional(maybeDeal, {
+          dealId: "",
+          chainNetwork: "testnet",
+          chainNetworkId: 0,
+          dealIdOriginal: "",
+          definition: "",
+          timestamp: "",
+        } satisfies Deal);
+
+        return [key, value];
+      }
+    )
+  );
+
+  const directHostingWorkers = Object.fromEntries(
+    Object.entries({ ...fluenceConfig.workers, ...workersConfig.hosts }).map(
+      ([workerName, info]) => {
+        const key = workerName;
+        // if worker was deployed put hosts info, otherwise put null
+        const maybeHost = "relayId" in info ? info : null;
+
+        const value = makeOptional(maybeHost, {
+          definition: "",
+          installation_spells: [
+            {
+              host_id: "",
+              spell_id: "",
+              worker_id: "",
+            },
+          ],
+          relayId: "",
+          timestamp: "",
+        } satisfies Host);
+
+        return [key, value];
+      }
+    )
+  );
+
+  const hasSomeDealWorkers = Object.keys(dealWorkers).length !== 0;
+
+  const hasSomeDirectHostingWorkers =
+    Object.keys(directHostingWorkers).length !== 0;
+
+  if (!hasSomeDealWorkers && !hasSomeDirectHostingWorkers) {
+    return writeFile(await ensureFluenceAquaWorkersPath(), "", FS_OPTIONS);
+  }
+
+  const workersInfo: {
+    deals?: typeof dealWorkers;
+    hosts?: typeof directHostingWorkers;
+  } = {};
+
+  if (hasSomeDealWorkers) {
+    workersInfo.deals = dealWorkers;
+  }
+
+  if (hasSomeDirectHostingWorkers) {
+    workersInfo.hosts = directHostingWorkers;
+  }
+
   await writeFile(
     await ensureFluenceAquaWorkersPath(),
-    jsToAqua(
-      { deals: workersConfig.deals, hosts: workersConfig.hosts },
-      "getWorkersInfo"
-    ),
+    jsToAqua(workersInfo, "getWorkersInfo"),
     FS_OPTIONS
   );
 };

@@ -337,29 +337,29 @@ export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`
 )}\n\n`;
 
-const MAIN_AQUA_FILE_STATUS_TEXT = `export status
-
--- example of running a service deployed using 'fluence deal deploy'
+const MAIN_AQUA_FILE_STATUS_TEXT = `
+-- example of running services deployed using 'fluence deal deploy'
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
-func status():
-    workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.${DEFAULT_WORKER_NAME}.dealId
-    print = (answer: string, peer: string):
-      Console.print([answer, peer])
+export runDeployedServices
 
-    answers: *string
+data Answer:
+    answer: string
+    peer: string
+
+func runDeployedServices() -> *Answer:
+    workersInfo <- getWorkersInfo()
+    dealId = workersInfo.deals.defaultWorker!.dealId
+    answers: *Answer
     workers <- resolveSubnetwork(dealId)
     for w <- workers! par:
         on w.metadata.peer_id via w.metadata.relay_id:
             answer <- MyService.greeting("fluence")
-            answers <<- answer
-            print(answer, w.metadata.peer_id)
+            answers <<- Answer(answer=answer, peer=w.metadata.relay_id!)
 
-    Console.print("getting answers...")
     join answers[workers!.length - 1]
     par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
-    Console.print("done")`;
+    <- answers`;
 
 const MAIN_AQUA_FILE_STATUS_TEXT_COMMENT = aquaComment(
   MAIN_AQUA_FILE_STATUS_TEXT
@@ -369,8 +369,6 @@ export const MAIN_AQUA_FILE_CONTENT = `aqua Main
 
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
-import Registry from "${REGISTRY_NPM_DEPENDENCY}/registry-service.aqua"
-import "${SPELL_NPM_DEPENDENCY}/spell_service.aqua"
 
 import "${AQUA_WORKERS_FILE_NAME}"
 import "services.aqua"

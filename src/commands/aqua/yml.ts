@@ -56,10 +56,6 @@ export default class Yaml extends BaseCommand<typeof Yaml> {
 
     const parsedContent: unknown = parse(content);
 
-    if (parsedContent === null || typeof parsedContent !== "object") {
-      return commandObj.error("Input file must contain json object");
-    }
-
     const aqua = jsToAqua(
       parsedContent,
       args.FUNC ?? (await input({ message: "Enter exported function name" })),

@@ -104,7 +104,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2.2.4
         with:
-          version: 7
+          version: 8
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3

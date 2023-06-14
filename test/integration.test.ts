@@ -203,7 +203,7 @@ describe("integration tests", () => {
       const result = await fluence({
         args: ["run"],
         flags: {
-          f: "status()",
+          f: "runDeployedServices()",
           quiet: true,
         },
         cwd,
@@ -305,7 +305,7 @@ describe("integration tests", () => {
         const res = await fluence({
           args: ["run"],
           flags: {
-            f: "status()",
+            f: "runDeployedServices()",
             quiet: true,
           },
           cwd,

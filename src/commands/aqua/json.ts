@@ -54,10 +54,6 @@ export default class Json extends BaseCommand<typeof Json> {
 
     const parsedContent = JSON.parse(content);
 
-    if (parsedContent === null || typeof parsedContent !== "object") {
-      return commandObj.error("Input file must contain json object");
-    }
-
     const aqua = jsToAqua(
       parsedContent,
       args.FUNC ?? (await input({ message: "Enter exported function name" })),
