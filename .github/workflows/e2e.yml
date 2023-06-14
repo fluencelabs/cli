@@ -43,3 +43,4 @@ jobs:
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       fluence-cli-version: "${{ needs.fluence-cli.outputs.version }}"
+      ref: feat/update-to-node-18
