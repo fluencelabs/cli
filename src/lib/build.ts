@@ -107,11 +107,13 @@ const resolveServiceInfos = async ({
     fluenceConfig.services === undefined ||
     Object.keys(fluenceConfig.services).length === 0
   ) {
-    return commandObj.error(
-      `Use ${color.yellow(
+    commandObj.log(
+      `No services to build. Use ${color.yellow(
         "fluence service add"
       )} command to add services to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
     );
+
+    return [];
   }
 
   type ServiceConfigPromises = Promise<{
@@ -281,9 +283,11 @@ export const build = async ({
     )
   );
 
-  startSpinner("Making sure all services are built");
-  await buildModules([...mapOfModuleConfigs.values()], marineCli);
-  stopSpinner();
+  if (serviceInfos.length > 0) {
+    startSpinner("Making sure all services are built");
+    await buildModules([...mapOfModuleConfigs.values()], marineCli);
+    stopSpinner();
+  }
 
   const serviceNamePathToFacadeMap: Record<string, string> = {};
 
