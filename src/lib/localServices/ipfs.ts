@@ -21,6 +21,7 @@ import { Multiaddr, protocols } from "multiaddr";
 
 import { commandObj } from "../commandObj.js";
 import { registerIpfsClient } from "../compiled-aqua/installation-spell/files.js";
+import { FS_OPTIONS } from "../const.js";
 import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
 // !IMPORTANT for some reason when in tsconfig.json "moduleResolution" is set to "nodenext" - "ipfs-http-client" types all become "any"
@@ -152,11 +153,11 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
         );
       }
 
-      const data = await readFile(absolutePath);
+      const data = await readFile(absolutePath, FS_OPTIONS);
       return dagUpload(multiaddr, data, log);
     },
     async dag_upload_string(multiaddr, string) {
-      return dagUpload(multiaddr, Buffer.from(string), log);
+      return dagUpload(multiaddr, string, log);
     },
     async id(multiaddr): Promise<string> {
       const ipfsClient = createIPFSClient(multiaddr);
