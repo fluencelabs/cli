@@ -629,28 +629,6 @@ const validateWasmExist = async (
   }
 };
 
-const DEAL_TYPE: Deals[string] = {
-  dealId: "",
-  chainNetwork: "testnet",
-  chainNetworkId: 0,
-  dealIdOriginal: "",
-  definition: "",
-  timestamp: "",
-};
-
-const HOSTS_TYPE: Hosts[string] = {
-  definition: "",
-  installation_spells: [
-    {
-      host_id: "",
-      spell_id: "",
-      worker_id: "",
-    },
-  ],
-  relayId: "",
-  timestamp: "",
-};
-
 export const ensureAquaFileWithWorkerInfo = async (
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly
