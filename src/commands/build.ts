@@ -17,7 +17,9 @@
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
 import { commandObj } from "../lib/commandObj.js";
+import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../lib/const.js";
+import { ensureAquaFileWithWorkerInfo } from "../lib/deployWorkers.js";
 import { getExistingKeyPair } from "../lib/keyPairs.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
@@ -48,5 +50,8 @@ export default class Build extends BaseCommand<typeof Build> {
       defaultKeyPair,
       marineCli,
     });
+
+    const workerConfig = await initNewWorkersConfig();
+    await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
   }
 }

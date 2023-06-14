@@ -123,7 +123,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
     await workersConfig.$commit();
-    await ensureAquaFileWithWorkerInfo(workersConfig);
+    await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
 
     commandObj.log(
       `\n\n${color.yellow("Success!")}\n\nrelay: ${relayId}\n\n${yamlDiffPatch(
