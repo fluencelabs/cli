@@ -39,7 +39,7 @@ Compile aqua file or directory that contains your .aqua files
 ```
 USAGE
   $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air |
-    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry]
+    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
 
 FLAGS
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
@@ -58,6 +58,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
+  --tracing                     Compile and run aqua in tracing mode (for debugging purposes)
 
 DESCRIPTION
   Compile aqua file or directory that contains your .aqua files
@@ -178,6 +179,7 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 USAGE
   $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
+    [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property in fluence.yaml are deployed)
@@ -194,6 +196,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile and run aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -211,7 +214,7 @@ Get logs from deployed workers for deals listed in workers.yaml
 ```
 USAGE
   $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
@@ -224,6 +227,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile and run aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -601,7 +605,7 @@ USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
     [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id]
+    [--particle-id] [--tracing]
 
 FLAGS
   -f, --func=<function-call>     Function call
@@ -625,6 +629,7 @@ FLAGS
   --print-air                    Prints generated AIR code before function execution
   --quiet                        Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile and run aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -753,7 +758,7 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -768,6 +773,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile and run aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -786,7 +792,7 @@ Get logs from deployed workers for hosts listed in workers.yaml
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--worker-id <value>] [--host-id <value>]
-    [--spell-id <value>]
+    [--spell-id <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
@@ -801,6 +807,7 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --spell-id=<spell-id>          [default: worker-spell] Spell id
+  --tracing                      Compile and run aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
   --worker-id=<worker-id>        Worker id
@@ -819,7 +826,7 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--import <value>] [--no-build]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -834,6 +841,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile and run aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
