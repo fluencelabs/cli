@@ -19,26 +19,10 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import {
-  type GlobalConfig,
-  type DealFactory,
-  type DeveloperFaucet,
-  type ERC20,
-  type Core,
-  type Matcher,
-  Matcher__factory,
-  Config__factory,
-  type Config,
-  type Workers,
-  Workers__factory,
-  type Controller,
-  Controller__factory,
-} from "@fluencelabs/deal-aurora";
-import dealPkg from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";
-import { type BytesLike, ethers, providers } from "ethers";
+import { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import {
@@ -55,14 +39,6 @@ import {
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { list } from "./prompt.js";
-
-const {
-  Core__factory,
-  DealFactory__factory,
-  GlobalConfig__factory,
-  DeveloperFaucet__factory,
-  ERC20__factory,
-} = dealPkg;
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
@@ -111,7 +87,7 @@ export const ensureChainNetwork = async ({
 
 export const getSigner = async (
   network: ChainNetwork,
-  privKey: BytesLike | undefined
+  privKey: string | undefined
 ): Promise<ethers.Signer> => {
   return privKey === undefined
     ? getWalletConnectProvider(network)
@@ -173,93 +149,26 @@ const getWalletConnectProvider = async (
 
   stopSpinner(`\nWallet ${color.yellow(walletAddress)} connected`);
 
-  return new providers.Web3Provider(provider).getSigner();
+  return new ethers.BrowserProvider(provider).getSigner();
 };
 
-const getWallet = (
-  privKey: BytesLike,
-  network: ChainNetwork
-): ethers.Wallet => {
+const getWallet = (privKey: string, network: ChainNetwork): ethers.Wallet => {
   return new ethers.Wallet(
     privKey,
-    new providers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl)
+    new ethers.JsonRpcProvider(privKey, DEAL_CONFIG[network].ethereumNodeUrl)
   );
 };
 
-export class GlobalContracts {
-  constructor(private signer: ethers.Signer, private network: ChainNetwork) {}
-
-  getGlobalConfig(): GlobalConfig {
-    return GlobalConfig__factory.connect(
-      DEAL_CONFIG[this.network].globalConfig,
-      this.signer
-    );
-  }
-
-  getFactory(): DealFactory {
-    return DealFactory__factory.connect(
-      DEAL_CONFIG[this.network].dealFactoryAddress,
-      this.signer
-    );
-  }
-
-  getFaucet(): DeveloperFaucet {
-    return DeveloperFaucet__factory.connect(
-      DEAL_CONFIG[this.network].developerFaucetAddress,
-      this.signer
-    );
-  }
-
-  async getMatcher(): Promise<Matcher> {
-    const config = this.getGlobalConfig();
-    return Matcher__factory.connect(await config.matcher(), this.signer);
-  }
-
-  async getTUSD(): Promise<ERC20> {
-    return ERC20__factory.connect(
-      await this.getFaucet().usdToken(),
-      this.signer
-    );
-  }
-
-  async getFLT(): Promise<ERC20> {
-    return ERC20__factory.connect(
-      await this.getFaucet().fluenceToken(),
-      this.signer
-    );
-  }
-}
-
-export class Deal {
-  private core: Core;
-
-  constructor(dealAddress: string, private signer: ethers.Signer) {
-    this.core = Core__factory.connect(dealAddress, this.signer);
-  }
-
-  async getWorkers(): Promise<Workers> {
-    const workersAddress = await this.core.getWorkers();
-    return Workers__factory.connect(workersAddress, this.signer);
-  }
-
-  async getController(): Promise<Controller> {
-    const controllerAddress = await this.core.getController();
-    return Controller__factory.connect(controllerAddress, this.signer);
-  }
-
-  async getConfig(): Promise<Config> {
-    const configAddress = await this.core.getConfig();
-    return Config__factory.connect(configAddress, this.signer);
-  }
-}
-
 export const waitTx = async (
-  tx: ethers.ContractTransaction
-): Promise<ethers.ContractReceipt> => {
+  tx: ethers.ContractTransactionResponse
+): Promise<ethers.ContractTransactionReceipt> => {
   startSpinner("Waiting for transaction to be mined...");
 
   const res = await tx.wait();
   stopSpinner();
+
+  assert(res != null, "Transaction hash is not defined");
+  assert(res.status === 1, "Transaction failed");
 
   return res;
 };

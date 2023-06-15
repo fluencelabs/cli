@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DealClient } from "@fluencelabs/deal-client";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
@@ -23,7 +24,6 @@ import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import { input } from "../../../lib/prompt.js";
 import {
-  GlobalContracts,
   ensureChainNetwork,
   getSigner,
   promptConfirmTx,
@@ -62,17 +62,20 @@ export default class JoinToMatching extends BaseCommand<typeof JoinToMatching> {
 
     const signer = await getSigner(network, flags.privKey);
 
-    const globalContracts = new GlobalContracts(signer, network);
+    const dealClient = new DealClient(signer, network);
+
+    const globalContracts = dealClient.getGlobalContracts();
+
     const matcher = await globalContracts.getMatcher();
     const factory = globalContracts.getFactory();
     const flt = await globalContracts.getFLT();
 
-    const collateral = await factory.REQUIRED_STAKE();
+    const collateral = await factory.REQUIRED_COLLATERAL();
     const pricePerEpoch = await factory.PRICE_PER_EPOCH();
 
     const approveTx = await flt.approve(
-      matcher.address,
-      collateral.mul(workersCount)
+      await matcher.getAddress(),
+      collateral + BigInt(workersCount)
     );
 
     promptConfirmTx(flags.privKey);

@@ -16,9 +16,10 @@
 
 import { assert } from "console";
 
+import { DealClient } from "@fluencelabs/deal-client";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
-import { ethers } from "ethers";
+import { isAddress } from "ethers";
 const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
@@ -26,7 +27,6 @@ import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import { input } from "../../../lib/prompt.js";
 import {
-  GlobalContracts,
   ensureChainNetwork,
   getSigner,
   promptConfirmTx,
@@ -80,12 +80,15 @@ export default class SetAccess extends BaseCommand<typeof SetAccess> {
     );
 
     assert(
-      ethers.utils.isAddress(resourceOwner),
+      isAddress(resourceOwner),
       "Invalid input. Enter EVM address of resource owner"
     );
 
     const signer = await getSigner(network, flags.privKey);
-    const globalContracts = new GlobalContracts(signer, network);
+    const dealClient = new DealClient(signer, network);
+
+    const globalContracts = dealClient.getGlobalContracts();
+
     const matcher = await globalContracts.getMatcher();
 
     const tx = await matcher.setWhiteList(resourceOwner, isAddAccess == "true");

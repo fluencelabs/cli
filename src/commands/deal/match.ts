@@ -16,7 +16,11 @@
 
 import { assert } from "console";
 
-import { Workers__factory } from "@fluencelabs/deal-aurora";
+import { DealClient } from "@fluencelabs/deal-client";
+import {
+  WorkersModule__factory,
+  type Matcher,
+} from "@fluencelabs/deal-contracts";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -27,7 +31,6 @@ import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import {
-  GlobalContracts,
   ensureChainNetwork,
   getSigner,
   promptConfirmTx,
@@ -68,22 +71,30 @@ export default class Match extends BaseCommand<typeof Match> {
 
     const signer = await getSigner(network, flags.privKey);
 
-    const globalContracts = new GlobalContracts(signer, network);
+    const dealClient = new DealClient(signer, network);
 
-    const matcher = await globalContracts.getMatcher();
+    const globalContracts = dealClient.getGlobalContracts();
+
+    const matcher: Matcher = await globalContracts.getMatcher();
+
     const tx = await matcher.matchWithDeal(dealAddress);
 
     promptConfirmTx(flags.privKey);
     const res = await waitTx(tx);
 
-    const workersInterface = Workers__factory.createInterface();
-    const eventTopic = workersInterface.getEventTopic(PAT_CREATED_EVENT_TOPIC);
+    const workersInterface = WorkersModule__factory.createInterface();
+
+    const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);
 
     let patCount = 0;
 
     for (const log of res.logs) {
-      if (log.topics[0] === eventTopic) {
-        const id: unknown = workersInterface.parseLog(log).args["id"];
+      if (log.topics[0] === event.topicHash) {
+        const id: unknown = workersInterface.parseLog({
+          topics: [...log.topics],
+          data: log.data,
+        })?.args["id"];
+
         assert(typeof id === "string");
 
         patCount = patCount + 1;

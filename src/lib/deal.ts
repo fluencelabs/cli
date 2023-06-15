@@ -16,16 +16,11 @@
 
 import assert from "node:assert";
 
-import { BigNumber, ethers } from "ethers";
+import { DealClient } from "@fluencelabs/deal-client";
+import { ethers } from "ethers";
 
 import type { ChainNetwork } from "./const.js";
-import {
-  GlobalContracts,
-  Deal,
-  getSigner,
-  waitTx,
-  promptConfirmTx,
-} from "./provider.js";
+import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -56,24 +51,25 @@ export const dealCreate = async ({
 }: DealCreateArg) => {
   const signer = await getSigner(chainNetwork, privKey);
 
-  const globalContracts = new GlobalContracts(signer, chainNetwork);
+  const dealClient = new DealClient(signer, chainNetwork);
+  const globalContracts = dealClient.getGlobalContracts();
 
   const factory = globalContracts.getFactory();
 
   promptConfirmTx(privKey);
 
   const tx = await factory.createDeal(
-    BigNumber.from(minWorkers),
-    BigNumber.from(targetWorkers),
+    minWorkers,
+    targetWorkers,
     appCID,
     [] //TODO: get effectors from the project
   );
 
   const res = await waitTx(tx);
 
-  const eventTopic = factory.interface.getEventTopic(EVENT_TOPIC_FRAGMENT);
+  const eventTopic = factory.interface.getEvent(EVENT_TOPIC_FRAGMENT);
 
-  const log = res.logs.find((log: { topics: Array<string> }) => {
+  const log = res.logs.find((log: ethers.Log) => {
     return log.topics[0] === eventTopic;
   });
 
@@ -85,35 +81,29 @@ export const dealCreate = async ({
   // TODO: check if this is correct
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const dealInfo: DealInfo =
-    factory.interface.parseLog(log).args[DEAL_LOG_ARG_NAME];
+    factory.interface.parseLog(log)?.args[DEAL_LOG_ARG_NAME];
+
+  assert(ethers.isAddress(dealInfo.core), "Deal core address is not valid");
+
+  assert(ethers.isAddress(dealInfo.config), "Deal config address is not valid");
 
   assert(
-    ethers.utils.isAddress(dealInfo.core),
-    "Deal core address is not valid"
-  );
-
-  assert(
-    ethers.utils.isAddress(dealInfo.config),
-    "Deal config address is not valid"
-  );
-
-  assert(
-    ethers.utils.isAddress(dealInfo.controller),
+    ethers.isAddress(dealInfo.controller),
     "Deal controller address is not valid"
   );
 
   assert(
-    ethers.utils.isAddress(dealInfo.payment),
+    ethers.isAddress(dealInfo.payment),
     "Deal payment address is not valid"
   );
 
   assert(
-    ethers.utils.isAddress(dealInfo.statusController),
+    ethers.isAddress(dealInfo.statusController),
     "Deal status controller address is not valid"
   );
 
   assert(
-    ethers.utils.isAddress(dealInfo.workers),
+    ethers.isAddress(dealInfo.workers),
     "Deal workers address is not valid"
   );
 
@@ -134,7 +124,9 @@ export const dealUpdate = async ({
   appCID,
 }: DealUpdateArg) => {
   const signer = await getSigner(network, privKey);
-  const deal = new Deal(dealAddress, signer);
+
+  const dealClient = new DealClient(signer, network);
+  const deal = dealClient.getDeal(dealAddress);
 
   const config = await deal.getConfig();
 
