@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@fluencelabs/aqua-api':
-    specifier: 0.11.3
-    version: 0.11.3
+    specifier: 0.11.6
+    version: 0.11.6
   '@fluencelabs/deal-aurora':
     specifier: 0.1.8
     version: 0.1.8(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.16)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.14.1)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4)
@@ -14,8 +14,8 @@ dependencies:
     specifier: 0.11.6
     version: 0.11.6
   '@fluencelabs/js-client.node':
-    specifier: 0.6.9
-    version: 0.6.9(uint8arraylist@2.4.3)
+    specifier: 0.6.10
+    version: 0.6.10(uint8arraylist@2.4.3)
   '@iarna/toml':
     specifier: ^2.2.5
     version: 2.2.5
@@ -1013,8 +1013,8 @@ packages:
       '@ethersproject/strings': 5.7.0
     dev: false
 
-  /@fluencelabs/aqua-api@0.11.3:
-    resolution: {integrity: sha512-72IeTJDcja6fzp4xjWLMYDNIhmF7xLgJua84GIXOhgkF2kQ9dUpR6wPqU5dauLtikFqZgbUpXG1Ed4Evlzi0HA==}
+  /@fluencelabs/aqua-api@0.11.6:
+    resolution: {integrity: sha512-yeN1oeszuEJvi+41IZD7Eq9FtXBFDxZmSFA37YzII/X5694cQ9qCPu7lIodMfcTydkQQo34YMhr7vTKvKVQ8zw==}
     dev: false
 
   /@fluencelabs/aqua-ipfs@0.5.13:
@@ -1089,13 +1089,13 @@ packages:
       '@fluencelabs/interfaces': 0.7.5
     dev: false
 
-  /@fluencelabs/js-client.node@0.6.9(uint8arraylist@2.4.3):
-    resolution: {integrity: sha512-4sL3Pv04QPURZG4xV7FgNNlrP1FEiQEp74wgycPSbUZ7DMuOUKiz+5g4ghNIHXqoTjAkIJ7/zpaRRSMPIP6gSA==}
+  /@fluencelabs/js-client.node@0.6.10(uint8arraylist@2.4.3):
+    resolution: {integrity: sha512-fJ0wBn4pmaJLCbE6tiSCjDE6WLjpVGwhCxpzwV074PcOb+yWdk1KNFMBnLLloIFlNmXalS6SzFyyMfObTIz3gA==}
     engines: {node: '>=10', pnpm: '>=3'}
     dependencies:
       '@fluencelabs/avm': 0.35.4
       '@fluencelabs/interfaces': 0.7.5
-      '@fluencelabs/js-peer': 0.8.8(uint8arraylist@2.4.3)
+      '@fluencelabs/js-peer': 0.8.9(uint8arraylist@2.4.3)
       '@fluencelabs/marine-js': 0.3.45
       platform: 1.3.6
     transitivePeerDependencies:
@@ -1105,8 +1105,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@fluencelabs/js-peer@0.8.8(uint8arraylist@2.4.3):
-    resolution: {integrity: sha512-yB4BfuIbiwUqZGA9LM85jPCdzbEx4g0bFBNKVaixBriu0rOwxwAfXAVBIqGQ9zfOqFUi/6rqvYW8ama8Lx92SQ==}
+  /@fluencelabs/js-peer@0.8.9(uint8arraylist@2.4.3):
+    resolution: {integrity: sha512-MBv+RcJsXhE33gxZwmLM/M3FNYHaJVmrtHIPtSX+uns4KVnL11uMRa++aACaRJWNhZRWufUQOhw8o0xkFKDPLA==}
     engines: {node: '>=10', pnpm: '>=3'}
     dependencies:
       '@chainsafe/libp2p-noise': 11.0.0

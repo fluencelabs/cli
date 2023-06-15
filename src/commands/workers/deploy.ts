@@ -23,6 +23,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
+import { upload_deploy as upload_deploy_with_tracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -32,6 +33,7 @@ import {
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
   NO_BUILD_FLAG,
+  TRACING_FLAG,
 } from "../../lib/const.js";
 import {
   ensureAquaFileWithWorkerInfo,
@@ -53,6 +55,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
+    ...TRACING_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -84,7 +87,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(true);
-    const uploadDeployResult = await upload_deploy(uploadDeployArg);
+
+    const uploadDeployResult = flags.tracing
+      ? await upload_deploy_with_tracing(uploadDeployArg)
+      : await upload_deploy(uploadDeployArg);
+
     const timestamp = new Date().toISOString();
     const relayId = (await Fluence.getClient()).getRelayPeerId();
 

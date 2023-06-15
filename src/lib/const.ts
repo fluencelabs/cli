@@ -227,6 +227,14 @@ export const IMPORT_FLAG = {
   }),
 };
 
+export const TRACING_FLAG = {
+  tracing: Flags.boolean({
+    description:
+      "Compile and run aqua in tracing mode (for debugging purposes)",
+    default: false,
+  }),
+};
+
 export const TTL_FLAG_NAME = "ttl";
 export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
 

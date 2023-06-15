@@ -49,6 +49,7 @@ import {
   IMPORT_FLAG,
   type AquaLogLevel,
   type FromFlagsDef,
+  TRACING_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../lib/helpers/jsonStringify.js";
@@ -138,6 +139,7 @@ export default class Run extends BaseCommand<typeof Run> {
     ...OFF_AQUA_LOGS_FLAG,
     ...KEY_PAIR_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
+    ...TRACING_FLAG,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -383,6 +385,7 @@ const fluenceRun = async (args: RunArgs) => {
       logLevel: args.logLevelCompiler,
       noXor: args["no-xor"],
       noRelay: args["no-relay"],
+      tracing: args.tracing,
     }),
     initFluenceClient(args, args.maybeFluenceConfig),
   ]);
