@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.16](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.15...fluence-cli-v0.4.16) (2023-06-15)
+
+
+### Bug Fixes
+
+* fix aqua compilation ([ef9128b](https://github.com/fluencelabs/fluence-cli/commit/ef9128b62a441b01e4786aac2323307e1cfee31a))
+* fix aqua compilation flags ([#292](https://github.com/fluencelabs/fluence-cli/issues/292)) ([ef9128b](https://github.com/fluencelabs/fluence-cli/commit/ef9128b62a441b01e4786aac2323307e1cfee31a))
+
 ## [0.4.15](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.14...fluence-cli-v0.4.15) (2023-06-15)
 
 
