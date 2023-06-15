@@ -163,6 +163,7 @@ export type KeyPairFlag = FromFlagsDef<typeof KEY_PAIR_FLAG>;
 export const NO_INPUT_FLAG_NAME = "no-input";
 export const NO_INPUT_FLAG = {
   [NO_INPUT_FLAG_NAME]: Flags.boolean({
+    default: false,
     description: "Don't interactively ask for any input from the user",
   }),
 } as const;
@@ -181,6 +182,7 @@ export const NETWORK_FLAG = {
 export const GLOBAL_FLAG_NAME = "global";
 export const GLOBAL_FLAG = {
   [GLOBAL_FLAG_NAME]: Flags.boolean({
+    default: false,
     aliases: ["g"],
     description: `Will override dependencies in a global user's ${CONFIG_FILE_NAME} instead of project's ${FLUENCE_CONFIG_FILE_NAME}`,
   }),
@@ -195,6 +197,7 @@ export const PRIV_KEY_FLAG = {
 
 export const OFF_AQUA_LOGS_FLAG = {
   "off-aqua-logs": Flags.boolean({
+    default: false,
     description:
       "Turns off logs from Console.print in aqua and from IPFS service",
   }),
@@ -202,6 +205,7 @@ export const OFF_AQUA_LOGS_FLAG = {
 
 export const USE_F64_FLAG = {
   f64: Flags.boolean({
+    default: false,
     description:
       "Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them. Without this flag, numbers will be converted to u64, i64 or f64 depending on their value",
   }),
@@ -209,6 +213,7 @@ export const USE_F64_FLAG = {
 
 export const NO_BUILD_FLAG = {
   "no-build": Flags.boolean({
+    default: false,
     description: "Don't build the project before running the command",
   }),
 };
@@ -242,6 +247,7 @@ export const FLUENCE_CLIENT_FLAGS = {
     helpValue: "<milliseconds>",
   }),
   "particle-id": Flags.boolean({
+    default: false,
     description: "Print particle ids when running Fluence js-client",
   }),
 } as const;

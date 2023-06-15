@@ -30,6 +30,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override flags = {
     ...baseFlags,
     force: Flags.boolean({
+      default: false,
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),

@@ -47,10 +47,12 @@ export default class Aqua extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     watch: Flags.boolean({
+      default: false,
       description: "Watch aqua file or folder for changes and recompile",
       char: "w",
     }),
     "common-js": Flags.boolean({
+      default: false,
       description: "Use no extension in generated .ts file imports",
     }),
     ...NO_INPUT_FLAG,
@@ -67,10 +69,12 @@ export default class Aqua extends Command {
     }),
     ...IMPORT_FLAG,
     air: Flags.boolean({
+      default: false,
       description: "Generate .air file instead of .ts",
       exclusive: ["js"],
     }),
     js: Flags.boolean({
+      default: false,
       description: "Generate .js file instead of .ts",
       exclusive: ["air"],
     }),
@@ -84,12 +88,15 @@ export default class Aqua extends Command {
       multiple: true,
     }),
     "no-relay": Flags.boolean({
+      default: false,
       description: "Do not generate a pass through the relay node",
     }),
     "no-xor": Flags.boolean({
+      default: false,
       description: "Do not generate a wrapper that catches and displays errors",
     }),
     dry: Flags.boolean({
+      default: false,
       description: "Checks if compilation is succeeded, without output",
     }),
   };
@@ -124,7 +131,7 @@ export default class Aqua extends Command {
         });
 
     const jsFlag =
-      flags.js ??
+      flags.js === false ??
       (flags.output === undefined
         ? maybeFluenceConfig?.aquaOutputJSPath !== undefined
         : false);

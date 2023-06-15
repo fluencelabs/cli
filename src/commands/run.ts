@@ -97,6 +97,7 @@ export default class Run extends BaseCommand<typeof Run> {
       helpValue: "<level>",
     }),
     quiet: Flags.boolean({
+      default: false,
       description:
         "Print only execution result. Overrides all --log-level-* flags",
     }),
@@ -123,12 +124,15 @@ export default class Run extends BaseCommand<typeof Run> {
       helpValue: "<function-call>",
     }),
     "no-xor": Flags.boolean({
+      default: false,
       description: "Do not generate a wrapper that catches and displays errors",
     }),
     "no-relay": Flags.boolean({
+      default: false,
       description: "Do not generate a pass through the relay node",
     }),
     "print-air": Flags.boolean({
+      default: false,
       description: "Prints generated AIR code before function execution",
     }),
     ...OFF_AQUA_LOGS_FLAG,
