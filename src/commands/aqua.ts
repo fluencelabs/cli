@@ -131,10 +131,9 @@ export default class Aqua extends Command {
         });
 
     const jsFlag =
-      flags.js === false ??
-      (flags.output === undefined
-        ? maybeFluenceConfig?.aquaOutputJSPath !== undefined
-        : false);
+      flags.js ||
+      (flags.output === undefined &&
+        maybeFluenceConfig?.aquaOutputJSPath !== undefined);
 
     const importFlag = await ensureAquaImports({
       flags,
