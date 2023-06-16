@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -120,6 +121,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
         );
 
   if (
+    existsSync(projectPath) &&
     (await stat(projectPath)).isDirectory() &&
     (await readdir(projectPath)).length > 0
   ) {
