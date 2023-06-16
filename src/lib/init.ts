@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { color } from "@oclif/color";
-import type { JSONSchemaType } from "ajv";
 import Countly from "countly-sdk-nodejs";
 
-import { ajv } from "../lib/ajvInstance.js";
 import {
   initNewFluenceConfig,
   type FluenceConfig,
@@ -50,7 +48,6 @@ import {
   ensureDefaultAquaTSPath,
   ensureDefaultJSDirPath,
   ensureDefaultTSDirPath,
-  ensureFluenceAquaWorkersPath,
   ensureFluenceAquaServicesPath,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
@@ -64,6 +61,7 @@ import { commandObj, isInteractive } from "./commandObj.js";
 import { initNewWorkersConfig } from "./configs/project/workers.js";
 import { ensureAquaFileWithWorkerInfo } from "./deployWorkers.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
+import { jsonStringify } from "./helpers/jsonStringify.js";
 
 const selectTemplate = (): Promise<Template> => {
   return list({
@@ -100,111 +98,13 @@ export const ensureTemplate = ({
   return selectTemplate();
 };
 
-const RECOMMENDATIONS = "recommendations";
-
-type ExtensionsJson = {
-  [RECOMMENDATIONS]?: Array<string>;
-};
-
-const extensionsJsonSchema: JSONSchemaType<ExtensionsJson> = {
-  type: "object",
-  properties: {
-    [RECOMMENDATIONS]: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-  },
-  required: [],
-};
-
-const validateExtensionsJson = ajv.compile(extensionsJsonSchema);
-
-const extensionsConfig: ExtensionsJson = {
-  [RECOMMENDATIONS]: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
-};
-
-const ensureVSCodeRecommendedExtensions = async (): Promise<void> => {
-  const extensionsJsonPath = await ensureVSCodeExtensionsJsonPath();
-
-  let fileContent: string;
-
-  try {
-    fileContent = await readFile(extensionsJsonPath, FS_OPTIONS);
-  } catch {
-    await writeFile(
-      extensionsJsonPath,
-      JSON.stringify(extensionsConfig, null, 2) + "\n",
-      FS_OPTIONS
-    );
-
-    return;
-  }
-
-  let parsedFileContent: unknown;
-
-  try {
-    parsedFileContent = JSON.parse(fileContent);
-  } catch {
-    return;
-  }
-
-  if (validateExtensionsJson(parsedFileContent)) {
-    parsedFileContent[RECOMMENDATIONS] = [
-      ...new Set([
-        ...(parsedFileContent[RECOMMENDATIONS] ?? []),
-        ...(extensionsConfig[RECOMMENDATIONS] ?? []),
-      ]),
-    ];
-
-    await writeFile(
-      extensionsJsonPath,
-      JSON.stringify(parsedFileContent, null, 2) + "\n",
-      FS_OPTIONS
-    );
-  }
-};
-
-const ensureGitIgnore = async (): Promise<void> => {
-  const gitIgnorePath = getGitignorePath();
-  let newGitIgnoreContent: string;
-
-  try {
-    const currentGitIgnoreContent = await readFile(gitIgnorePath, FS_OPTIONS);
-
-    const currentGitIgnoreEntries = new Set(
-      currentGitIgnoreContent.split("\n")
-    );
-
-    const missingGitIgnoreEntries = RECOMMENDED_GITIGNORE_CONTENT.split("\n")
-      .filter((entry): boolean => {
-        return !currentGitIgnoreEntries.has(entry);
-      })
-      .join("\n");
-
-    newGitIgnoreContent =
-      missingGitIgnoreEntries === ""
-        ? currentGitIgnoreContent
-        : `${currentGitIgnoreContent}\n# recommended by Fluence Labs:\n${missingGitIgnoreEntries}\n`;
-  } catch {
-    newGitIgnoreContent = RECOMMENDED_GITIGNORE_CONTENT;
-  }
-
-  return writeFile(gitIgnorePath, newGitIgnoreContent, FS_OPTIONS);
-};
-
 type InitArg = {
-  maybeFluenceConfig?: FluenceConfig | null | undefined;
   maybeProjectPath?: string | undefined;
   template?: Template;
 };
 
 export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
-  const {
-    template = await selectTemplate(),
-    maybeFluenceConfig,
-    maybeProjectPath,
-  } = options;
+  const { template = await selectTemplate(), maybeProjectPath } = options;
 
   Countly.add_event({ key: `init:template:${template}` });
 
@@ -219,11 +119,21 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
             }))
         );
 
+  if (
+    (await stat(projectPath)).isDirectory() &&
+    (await readdir(projectPath)).length > 0
+  ) {
+    return commandObj.error(
+      `Directory ${color.yellow(
+        projectPath
+      )} is not empty. Please, init in an empty directory.`
+    );
+  }
+
   await mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
-  await writeFile(await ensureFluenceAquaWorkersPath(), "", FS_OPTIONS);
-  const fluenceConfig = maybeFluenceConfig ?? (await initNewFluenceConfig());
+  const fluenceConfig = await initNewFluenceConfig();
 
   switch (template) {
     case "minimal":
@@ -245,14 +155,24 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
     }
   }
 
-  await ensureVSCodeRecommendedExtensions();
+  await writeFile(
+    await ensureVSCodeExtensionsJsonPath(),
+    jsonStringify({
+      recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
+    }) + "\n",
+    FS_OPTIONS
+  );
 
   await ensureAquaImports({
     generateSettingsJson: true,
     maybeFluenceConfig: fluenceConfig,
   });
 
-  await ensureGitIgnore();
+  await writeFile(
+    getGitignorePath(),
+    RECOMMENDED_GITIGNORE_CONTENT,
+    FS_OPTIONS
+  );
 
   const workersConfig = await initNewWorkersConfig();
   await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);

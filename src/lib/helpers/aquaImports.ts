@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import { writeFile, readFile } from "node:fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
@@ -102,10 +102,10 @@ const ensureVSCodeSettingsJSON = async ({
   let fileContent: string;
 
   try {
-    fileContent = await fsPromises.readFile(settingsJsonPath, FS_OPTIONS);
+    fileContent = await readFile(settingsJsonPath, FS_OPTIONS);
   } catch {
     if (generateSettingsJson) {
-      await fsPromises.writeFile(
+      await writeFile(
         settingsJsonPath,
         jsonStringify({
           [AQUA_SETTINGS_IMPORTS]: aquaImports,
@@ -166,7 +166,7 @@ const ensureVSCodeSettingsJSON = async ({
       ]),
     ];
 
-    await fsPromises.writeFile(
+    await writeFile(
       settingsJsonPath,
       JSON.stringify(parsedFileContent, null, 2) + "\n",
       FS_OPTIONS

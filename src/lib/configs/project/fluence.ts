@@ -147,7 +147,7 @@ const configSchemaV1Obj = {
     services: {
       title: "Services",
       description:
-        "A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config",
+        "A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config",
       type: "object",
       additionalProperties: {
         title: "Service config",
@@ -270,7 +270,7 @@ const configSchemaV1Obj = {
     peerIds: {
       title: "Peer ids",
       description:
-        "A map of named peerIds. Example:\n\nMY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS",
+        "A map of named peerIds. Example:\nMY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS",
       type: "object",
       nullable: true,
       required: [],
@@ -321,6 +321,19 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
+};
+
+const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
+  type: "object",
+  description: "Spell config",
+  properties: {
+    get: {
+      type: "string",
+      description: "Path to spell",
+    },
+    ...overridableSpellProperties,
+  },
+  required: ["get"],
 };
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
@@ -457,17 +470,9 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       type: "object",
       nullable: true,
       description: "A map with spell names as keys and spell configs as values",
-      additionalProperties: {
-        type: "object",
-        description: "Spell config",
-        properties: {
-          get: {
-            type: "string",
-            description: "Path to spell",
-          },
-          ...overridableSpellProperties,
-        },
-        required: ["get"],
+      additionalProperties: spellSchema,
+      properties: {
+        spell: spellSchema,
       },
       required: [],
     },
@@ -490,7 +495,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       nullable: true,
     },
   },
-};
+} as const;
 
 const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
   if (Array.isArray(relays)) {

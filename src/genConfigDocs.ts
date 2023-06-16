@@ -56,21 +56,6 @@ const schemas = Object.entries({
 });
 
 const main = async (): Promise<void> => {
-  if (process.argv[2] === "-f") {
-    return writeFile(
-      join("docs", "configs", "README.md"),
-      `# Fluence CLI Configs
-
-${schemas
-  .map(([name, schema]): string => {
-    return `## [${name}](./${name.replace(`.${YAML_EXT}`, ".md")})\n\n${String(
-      schema["description"]
-    )}`;
-  })
-  .join("\n")}`
-    );
-  }
-
   await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
   await mkdir(DOCS_CONFIGS_DIR_PATH, { recursive: true });
 
@@ -88,25 +73,16 @@ ${schemas
     })
   );
 
-  const results = await Promise.all(
-    schemasWithPath.map(async ({ path, filename }) => {
-      return {
-        filename,
-        md: await execPromise({
-          command: "json-schema-docs",
-          args: ["-schema", path],
-        }),
-      };
-    })
-  );
-
   await Promise.all(
-    results.map(({ filename, md }) => {
-      return writeFile(
-        join(
-          DOCS_CONFIGS_DIR_PATH,
-          `${filename.replace(`.${YAML_EXT}`, ".md")}`
-        ),
+    schemasWithPath.map(async ({ path, filename }) => {
+      const md = await execPromise({
+        // This is a tool written in Go that is installed in CI and used for generating docs
+        command: "json-schema-docs",
+        args: ["-schema", path],
+      });
+
+      await writeFile(
+        join(DOCS_CONFIGS_DIR_PATH, filename.replace(`.${YAML_EXT}`, ".md")),
         md.replaceAll(
           `
 | Property | Type | Required | Description |
@@ -116,6 +92,20 @@ ${schemas
         FS_OPTIONS
       );
     })
+  );
+
+  await writeFile(
+    join(DOCS_CONFIGS_DIR_PATH, "README.md"),
+    `# Fluence CLI Configs
+
+${schemas
+  .map(([filename, schema]): string => {
+    return `## [${filename}](./${filename.replace(
+      `.${YAML_EXT}`,
+      ".md"
+    )})\n\n${String(schema["description"])}`;
+  })
+  .join("\n")}`
   );
 };
 
