@@ -46,14 +46,20 @@ Service must have a facade module. Each module properties can be overridden by t
 
 environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl
 
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 
 #### mountedBinaries
 
 A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl
 
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 
 #### volumes
 
 A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file
 
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 

@@ -22,8 +22,6 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 |                    |                         |          | 1. "keyPairName" property from the top level of fluence.yaml                                                                                                                                                                                                                                                                                                                                                                         |
 |                    |                         |          | 1. "keyPairName" property from the "services" level of fluence.yaml                                                                                                                                                                                                                                                                                                                                                                  |
 |                    |                         |          | 1. "keyPairName" property from the individual "deploy" property item level of fluence.yaml                                                                                                                                                                                                                                                                                                                                           |
-| `peerIds`          | [object](#peerids)      | No       | A map of named peerIds. Example:                                                                                                                                                                                                                                                                                                                                                                                                     |
-|                    |                         |          | MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS                                                                                                                                                                                                                                                                                                                                                                        |
 | `relays`           | string, array, or null  | No       | List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: kras                                                                                                                     |
 | `services`         | [object](#services)     | No       | A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config                                                                                                                               |
 | `spells`           | [object](#spells)       | No       | A map with spell names as keys and spell configs as values                                                                                                                                                                                                                                                                                                                                                                           |
@@ -33,6 +31,20 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 
 A map of objects with worker names as keys, each object defines a deal
 
+### Properties
+
+| Property     | Type                  | Required | Description |
+|--------------|-----------------------|----------|-------------|
+| `workerName` | [object](#workername) | No       |             |
+
+### workerName
+
+#### Properties
+
+| Property        | Type   | Required | Description                           |
+|-----------------|--------|----------|---------------------------------------|
+| `minWorkers`    | number | No       | Required workers to activate the deal |
+| `targetWorkers` | number | No       | Max workers in the deal               |
 
 ## dependencies
 
@@ -49,27 +61,142 @@ A map of objects with worker names as keys, each object defines a deal
 
 A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
 
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 
 ### npm
 
 A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua
 
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 
 ## hosts
 
 A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on
 
+### Properties
 
-## peerIds
+| Property     | Type                  | Required | Description |
+|--------------|-----------------------|----------|-------------|
+| `workerName` | [object](#workername) | No       |             |
 
-A map of named peerIds. Example:
-MY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS
+### workerName
 
+#### Properties
+
+| Property  | Type     | Required | Description                       |
+|-----------|----------|----------|-----------------------------------|
+| `peerIds` | string[] | **Yes**  | An array of peer IDs to deploy on |
 
 ## services
 
 A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config
 
+### Properties
+
+| Property      | Type                   | Required | Description                                                                                                                                                                                  |
+|---------------|------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `serviceName` | [object](#servicename) | No       | Service names as keys (must start with a lowercase letter and contain only letters numbers and underscores) and Service config (defines where the service is and how to deploy it) as values |
+
+### serviceName
+
+Service names as keys (must start with a lowercase letter and contain only letters numbers and underscores) and Service config (defines where the service is and how to deploy it) as values
+
+#### Properties
+
+| Property          | Type                       | Required | Description                                                                                                       |
+|-------------------|----------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `get`             | string                     | **Yes**  | Path to service directory or URL to the tar.gz archive with the service                                           |
+| `deploy`          | [object](#deploy)[]        | No       | [DEPRECATED!] List of deployments for the particular service                                                      |
+| `keyPairName`     | string                     | No       | The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority): |
+|                   |                            |          | 1. "defaultKeyPairName" property from user-secrets.yaml                                                           |
+|                   |                            |          | 1. "defaultKeyPairName" property from project-secrets.yaml                                                        |
+|                   |                            |          | 1. "keyPairName" property from the top level of fluence.yaml                                                      |
+|                   |                            |          | 1. "keyPairName" property from the "services" level of fluence.yaml                                               |
+|                   |                            |          | 1. "keyPairName" property from the individual "deploy" property item level of fluence.yaml                        |
+| `overrideModules` | [object](#overridemodules) | No       | A map of modules to override                                                                                      |
+
+#### deploy
+
+A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, etc.
+
+##### Properties
+
+| Property          | Type                       | Required | Description                                                                                                                                                                                        |
+|-------------------|----------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `deployId`        | string                     | **Yes**  | This id can be used in Aqua to access actually deployed peer and service ids. The ID must start with a lowercase letter and contain only letters, numbers, and underscores.                        |
+| `count`           | number                     | No       | Number of services to deploy. Default: 1 or if "peerIds" property is provided - exactly the number of peerIds                                                                                      |
+| `keyPairName`     | string                     | No       | The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):                                                                                  |
+|                   |                            |          | 1. "defaultKeyPairName" property from user-secrets.yaml                                                                                                                                            |
+|                   |                            |          | 1. "defaultKeyPairName" property from project-secrets.yaml                                                                                                                                         |
+|                   |                            |          | 1. "keyPairName" property from the top level of fluence.yaml                                                                                                                                       |
+|                   |                            |          | 1. "keyPairName" property from the "services" level of fluence.yaml                                                                                                                                |
+|                   |                            |          | 1. "keyPairName" property from the individual "deploy" property item level of fluence.yaml                                                                                                         |
+| `overrideModules` | [object](#overridemodules) | No       | A map of modules to override                                                                                                                                                                       |
+| `peerId`          | string                     | No       | Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of fluence.yaml are selected for each deploy. Named peerIds can be listed in "peerIds" property of fluence.yaml) |
+| `peerIds`         | string[]                   | No       | Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of fluence.yaml)                                                            |
+
+##### overrideModules
+
+A map of modules to override
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+#### overrideModules
+
+A map of modules to override
+
+##### Properties
+
+| Property     | Type                  | Required | Description                                                        |
+|--------------|-----------------------|----------|--------------------------------------------------------------------|
+| `moduleName` | [object](#modulename) | No       | Module names as keys and overrides for the module config as values |
+
+##### moduleName
+
+Module names as keys and overrides for the module config as values
+
+###### Properties
+
+| Property          | Type                       | Required | Description                                                                                                                                                                                                                                                    |
+|-------------------|----------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `envs`            | [object](#envs)            | No       | environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl |
+| `loggerEnabled`   | boolean                    | No       | Set true to allow module to use the Marine SDK logger                                                                                                                                                                                                          |
+| `loggingMask`     | number                     | No       | manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map                                                                                                                     |
+| `maxHeapSize`     | string                     | No       | Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):                                                                    |
+|                   |                            |          |                                                                                                                                                                                                                                                                |
+|                   |                            |          | K, Kb - kilobyte                                                                                                                                                                                                                                               |
+|                   |                            |          | Ki, KiB - kibibyte                                                                                                                                                                                                                                             |
+|                   |                            |          | M, Mb - megabyte                                                                                                                                                                                                                                               |
+|                   |                            |          | Mi, MiB - mebibyte                                                                                                                                                                                                                                             |
+|                   |                            |          | G, Gb - gigabyte                                                                                                                                                                                                                                               |
+|                   |                            |          | Gi, GiB - gibibyte                                                                                                                                                                                                                                             |
+|                   |                            |          | Current limit is 4 GiB                                                                                                                                                                                                                                         |
+| `mountedBinaries` | [object](#mountedbinaries) | No       | A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl                                                                                                                                                                  |
+| `volumes`         | [object](#volumes)         | No       | A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file                                                                                                             |
+
+###### envs
+
+environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+###### mountedBinaries
+
+A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+###### volumes
+
+A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 
 ## spells
 
@@ -77,11 +204,11 @@ A map with spell names as keys and spell configs as values
 
 ### Properties
 
-| Property | Type             | Required | Description  |
-|----------|------------------|----------|--------------|
-| `spell`  | [object](#spell) | No       | Spell config |
+| Property    | Type                 | Required | Description  |
+|-------------|----------------------|----------|--------------|
+| `spellName` | [object](#spellname) | No       | Spell config |
 
-### spell
+### spellName
 
 Spell config
 
@@ -114,9 +241,27 @@ Trigger the spell execution periodically. If you want to disable this property b
 
 A map of Aqua function arguments names as keys and arguments values as values. They will be passed to the spell function and will be stored in the key-value storage for this particular spell.
 
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
 
 ## workers
 
 A Map with worker names as keys and worker configs as values
 
+### Properties
+
+| Property     | Type                  | Required | Description   |
+|--------------|-----------------------|----------|---------------|
+| `workerName` | [object](#workername) | No       | Worker config |
+
+### workerName
+
+Worker config
+
+#### Properties
+
+| Property   | Type     | Required | Description                                                                                       |
+|------------|----------|----------|---------------------------------------------------------------------------------------------------|
+| `services` | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
+| `spells`   | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
 

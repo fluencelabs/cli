@@ -26,9 +26,19 @@ Defines global config for Fluence CLI
 
 Overrides of cargo dependencies
 
+#### Properties
+
+| Property                | Type   | Required | Description |
+|-------------------------|--------|----------|-------------|
+| `cargo-dependency-name` | string | No       |             |
 
 ### npm
 
 Overrides of npm dependencies
 
+#### Properties
+
+| Property              | Type   | Required | Description |
+|-----------------------|--------|----------|-------------|
+| `npm-dependency-name` | string | No       |             |
 
