@@ -79,6 +79,49 @@ type ConfigV0 = {
   version: 0;
 } & DealsAndHosts;
 
+const hostSchema: JSONSchemaType<Host> = {
+  ...workerInfoSchema,
+  properties: {
+    ...workerInfoSchema.properties,
+    installation_spells: {
+      type: "array",
+      description: "A list of installation spells",
+      items: {
+        type: "object",
+        properties: {
+          host_id: { type: "string" },
+          spell_id: { type: "string" },
+          worker_id: { type: "string" },
+        },
+        required: ["host_id", "spell_id", "worker_id"],
+      },
+    },
+    relayId: { type: "string" },
+  },
+  required: [...workerInfoSchema.required, "installation_spells", "relayId"],
+} as const;
+
+const dealSchema: JSONSchemaType<Deal> = {
+  ...workerInfoSchema,
+  properties: {
+    ...workerInfoSchema.properties,
+    dealId: { type: "string" },
+    dealIdOriginal: { type: "string" },
+    chainNetwork: {
+      type: "string",
+      enum: CHAIN_NETWORKS,
+    },
+    chainNetworkId: { type: "number" },
+  },
+  required: [
+    ...workerInfoSchema.required,
+    "dealId",
+    "dealIdOriginal",
+    "chainNetwork",
+    "chainNetworkId",
+  ],
+} as const;
+
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FILE_NAME}`,
   title: WORKERS_CONFIG_FILE_NAME,
@@ -90,25 +133,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     deals: {
       type: "object",
       description: "A map of created deals",
-      additionalProperties: {
-        ...workerInfoSchema,
-        properties: {
-          ...workerInfoSchema.properties,
-          dealId: { type: "string" },
-          dealIdOriginal: { type: "string" },
-          chainNetwork: {
-            type: "string",
-            enum: CHAIN_NETWORKS,
-          },
-          chainNetworkId: { type: "number" },
-        },
-        required: [
-          ...workerInfoSchema.required,
-          "dealId",
-          "dealIdOriginal",
-          "chainNetwork",
-          "chainNetworkId",
-        ],
+      additionalProperties: dealSchema,
+      properties: {
+        Worker_deployed_using_deals: dealSchema,
       },
       required: [],
       nullable: true,
@@ -116,37 +143,16 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     hosts: {
       type: "object",
       description: "A map of deployed workers",
-      additionalProperties: {
-        ...workerInfoSchema,
-        properties: {
-          ...workerInfoSchema.properties,
-          installation_spells: {
-            type: "array",
-            description: "A list of installation spells",
-            items: {
-              type: "object",
-              properties: {
-                host_id: { type: "string" },
-                spell_id: { type: "string" },
-                worker_id: { type: "string" },
-              },
-              required: ["host_id", "spell_id", "worker_id"],
-            },
-          },
-          relayId: { type: "string" },
-        },
-        required: [
-          ...workerInfoSchema.required,
-          "installation_spells",
-          "relayId",
-        ],
+      additionalProperties: hostSchema,
+      properties: {
+        Worker_deployed_using_direct_hosting: hostSchema,
       },
       required: [],
       nullable: true,
     },
   },
   required: ["version"],
-};
+} as const;
 
 const migrations: Migrations<Config> = [];
 
