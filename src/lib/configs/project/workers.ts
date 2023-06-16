@@ -135,7 +135,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description: "A map of created deals",
       additionalProperties: dealSchema,
       properties: {
-        workerName: dealSchema,
+        Worker_deployed_using_deals: dealSchema,
       },
       required: [],
       nullable: true,
@@ -145,7 +145,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description: "A map of deployed workers",
       additionalProperties: hostSchema,
       properties: {
-        workerName: hostSchema,
+        Worker_deployed_using_direct_hosting: hostSchema,
       },
       required: [],
       nullable: true,

@@ -75,7 +75,7 @@ const overridableModulePropertiesV0 = {
     title: "Volumes",
     additionalProperties: { type: "string" },
     properties: {
-      alias: { type: "string", description: "path" },
+      Alias: { type: "string", description: "path" },
     },
     description:
       "A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file",
@@ -89,7 +89,10 @@ const overridableModulePropertiesV0 = {
       type: "string",
     },
     properties: {
-      ENV_VARIABLE_NAME: { type: "string", description: "env variable value" },
+      Environment_variable_name: {
+        type: "string",
+        description: "Environment variable value",
+      },
     },
     description:
       "environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl",
@@ -101,9 +104,9 @@ const overridableModulePropertiesV0 = {
       type: "string",
     },
     properties: {
-      mountedBinaryName: {
+      Mounted_binary_name: {
         type: "string",
-        description: "path to a mounted binary",
+        description: "Path to a mounted binary",
       },
     },
     nullable: true,

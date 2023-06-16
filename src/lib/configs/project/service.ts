@@ -88,6 +88,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       additionalProperties: moduleSchemaForService,
       properties: {
         [FACADE_MODULE_NAME]: moduleSchemaForService,
+        Other_module_name: moduleSchemaForService,
       },
       required: [FACADE_MODULE_NAME],
     },

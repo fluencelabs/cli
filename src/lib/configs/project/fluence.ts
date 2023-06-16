@@ -143,8 +143,7 @@ const keyPairName = {
 const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
   type: "object",
   title: "Module overrides",
-  description:
-    "Module names as keys and overrides for the module config as values",
+  description: "Overrides for the module config",
   properties: {
     ...overridableModuleProperties,
   },
@@ -155,7 +154,7 @@ const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
 const serviceSchema: JSONSchemaType<ServiceV1> = {
   title: "Service config",
   description:
-    "Service names as keys (must start with a lowercase letter and contain only letters numbers and underscores) and Service config (defines where the service is and how to deploy it) as values",
+    "Service config. Defines where the service is and how to deploy it",
   type: "object",
   properties: {
     get: {
@@ -168,7 +167,7 @@ const serviceSchema: JSONSchemaType<ServiceV1> = {
       description: "A map of modules to override",
       additionalProperties: overrideModulesSchema,
       properties: {
-        moduleName: overrideModulesSchema,
+        Module_name: overrideModulesSchema,
       },
       nullable: true,
       required: [],
@@ -247,7 +246,7 @@ const configSchemaV1Obj = {
       type: "object",
       additionalProperties: serviceSchema,
       properties: {
-        serviceName: serviceSchema,
+        Service_name: serviceSchema,
       },
       required: [],
       nullable: true,
@@ -401,7 +400,10 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
             "A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua",
           additionalProperties: { type: "string" },
           properties: {
-            "npm-dependency-name": { type: "string", description: "version" },
+            npm_dependency_name: {
+              type: "string",
+              description: "npm dependency version",
+            },
           },
           required: [],
         },
@@ -413,7 +415,10 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           required: [],
           additionalProperties: { type: "string" },
           properties: {
-            "cargo-dependency-name": { type: "string", description: "version" },
+            Cargo_dependency_name: {
+              type: "string",
+              description: "cargo dependency version",
+            },
           },
         },
       },
@@ -444,7 +449,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       nullable: true,
       additionalProperties: hostConfigSchema,
       properties: {
-        workerName: hostConfigSchema,
+        Worker_to_host: hostConfigSchema,
       },
       required: [],
     },
@@ -455,7 +460,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       type: "object",
       additionalProperties: workerConfigSchema,
       properties: {
-        workerName: workerConfigSchema,
+        Worker: workerConfigSchema,
       },
       required: [],
     },
@@ -466,7 +471,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       nullable: true,
       additionalProperties: dealSchema,
       properties: {
-        workerName: dealSchema,
+        Worker_to_create_deal_for: dealSchema,
       },
       required: [],
     },
@@ -483,7 +488,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       description: "A map with spell names as keys and spell configs as values",
       additionalProperties: spellSchema,
       properties: {
-        spellName: spellSchema,
+        Spell_name: spellSchema,
       },
       required: [],
     },
