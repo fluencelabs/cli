@@ -16,11 +16,11 @@ A map of created deals
 
 ### Properties
 
-| Property     | Type                  | Required | Description |
-|--------------|-----------------------|----------|-------------|
-| `workerName` | [object](#workername) | No       |             |
+| Property                      | Type                                   | Required | Description |
+|-------------------------------|----------------------------------------|----------|-------------|
+| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       |             |
 
-### workerName
+### Worker_deployed_using_deals
 
 #### Properties
 
@@ -39,11 +39,11 @@ A map of deployed workers
 
 ### Properties
 
-| Property     | Type                  | Required | Description |
-|--------------|-----------------------|----------|-------------|
-| `workerName` | [object](#workername) | No       |             |
+| Property                               | Type                                            | Required | Description |
+|----------------------------------------|-------------------------------------------------|----------|-------------|
+| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       |             |
 
-### workerName
+### Worker_deployed_using_direct_hosting
 
 #### Properties
 

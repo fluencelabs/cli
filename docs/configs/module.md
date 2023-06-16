@@ -29,9 +29,9 @@ environment variables accessible by a particular module with standard Rust env A
 
 ### Properties
 
-| Property            | Type   | Required | Description        |
-|---------------------|--------|----------|--------------------|
-| `ENV_VARIABLE_NAME` | string | No       | env variable value |
+| Property                    | Type   | Required | Description                |
+|-----------------------------|--------|----------|----------------------------|
+| `Environment_variable_name` | string | No       | Environment variable value |
 
 ## mountedBinaries
 
@@ -39,9 +39,9 @@ A map of binary executable files that module is allowed to call. Example: curl: 
 
 ### Properties
 
-| Property            | Type   | Required | Description              |
-|---------------------|--------|----------|--------------------------|
-| `mountedBinaryName` | string | No       | path to a mounted binary |
+| Property              | Type   | Required | Description              |
+|-----------------------|--------|----------|--------------------------|
+| `Mounted_binary_name` | string | No       | Path to a mounted binary |
 
 ## volumes
 
@@ -51,5 +51,5 @@ A map of accessible files and their aliases. Aliases should be used in Marine mo
 
 | Property | Type   | Required | Description |
 |----------|--------|----------|-------------|
-| `alias`  | string | No       | path        |
+| `Alias`  | string | No       | path        |
 

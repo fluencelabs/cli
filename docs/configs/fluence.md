@@ -33,11 +33,11 @@ A map of objects with worker names as keys, each object defines a deal
 
 ### Properties
 
-| Property     | Type                  | Required | Description |
-|--------------|-----------------------|----------|-------------|
-| `workerName` | [object](#workername) | No       |             |
+| Property                    | Type                                 | Required | Description |
+|-----------------------------|--------------------------------------|----------|-------------|
+| `Worker_to_create_deal_for` | [object](#worker_to_create_deal_for) | No       |             |
 
-### workerName
+### Worker_to_create_deal_for
 
 #### Properties
 
@@ -63,9 +63,9 @@ A map of cargo dependency versions. CLI ensures dependencies are installed each 
 
 #### Properties
 
-| Property                | Type   | Required | Description |
-|-------------------------|--------|----------|-------------|
-| `cargo-dependency-name` | string | No       | version     |
+| Property                | Type   | Required | Description              |
+|-------------------------|--------|----------|--------------------------|
+| `Cargo_dependency_name` | string | No       | cargo dependency version |
 
 ### npm
 
@@ -73,9 +73,9 @@ A map of npm dependency versions. CLI ensures dependencies are installed each ti
 
 #### Properties
 
-| Property              | Type   | Required | Description |
-|-----------------------|--------|----------|-------------|
-| `npm-dependency-name` | string | No       | version     |
+| Property              | Type   | Required | Description            |
+|-----------------------|--------|----------|------------------------|
+| `npm_dependency_name` | string | No       | npm dependency version |
 
 ## hosts
 
@@ -83,11 +83,11 @@ A map of objects with worker names as keys, each object defines a list of peer I
 
 ### Properties
 
-| Property     | Type                  | Required | Description |
-|--------------|-----------------------|----------|-------------|
-| `workerName` | [object](#workername) | No       |             |
+| Property         | Type                      | Required | Description |
+|------------------|---------------------------|----------|-------------|
+| `Worker_to_host` | [object](#worker_to_host) | No       |             |
 
-### workerName
+### Worker_to_host
 
 #### Properties
 
@@ -101,13 +101,13 @@ A map with service names as keys and Service configs as values. You can have any
 
 ### Properties
 
-| Property      | Type                   | Required | Description                                                                                                                                                                                  |
-|---------------|------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `serviceName` | [object](#servicename) | No       | Service names as keys (must start with a lowercase letter and contain only letters numbers and underscores) and Service config (defines where the service is and how to deploy it) as values |
+| Property       | Type                    | Required | Description                                                       |
+|----------------|-------------------------|----------|-------------------------------------------------------------------|
+| `Service_name` | [object](#service_name) | No       | Service config. Defines where the service is and how to deploy it |
 
-### serviceName
+### Service_name
 
-Service names as keys (must start with a lowercase letter and contain only letters numbers and underscores) and Service config (defines where the service is and how to deploy it) as values
+Service config. Defines where the service is and how to deploy it
 
 #### Properties
 
@@ -156,13 +156,13 @@ A map of modules to override
 
 ##### Properties
 
-| Property     | Type                  | Required | Description                                                        |
-|--------------|-----------------------|----------|--------------------------------------------------------------------|
-| `moduleName` | [object](#modulename) | No       | Module names as keys and overrides for the module config as values |
+| Property      | Type                   | Required | Description                     |
+|---------------|------------------------|----------|---------------------------------|
+| `Module_name` | [object](#module_name) | No       | Overrides for the module config |
 
-##### moduleName
+##### Module_name
 
-Module names as keys and overrides for the module config as values
+Overrides for the module config
 
 ###### Properties
 
@@ -188,9 +188,9 @@ environment variables accessible by a particular module with standard Rust env A
 
 **Properties**
 
-| Property            | Type   | Required | Description        |
-|---------------------|--------|----------|--------------------|
-| `ENV_VARIABLE_NAME` | string | No       | env variable value |
+| Property                    | Type   | Required | Description                |
+|-----------------------------|--------|----------|----------------------------|
+| `Environment_variable_name` | string | No       | Environment variable value |
 
 ###### mountedBinaries
 
@@ -198,9 +198,9 @@ A map of binary executable files that module is allowed to call. Example: curl: 
 
 **Properties**
 
-| Property            | Type   | Required | Description              |
-|---------------------|--------|----------|--------------------------|
-| `mountedBinaryName` | string | No       | path to a mounted binary |
+| Property              | Type   | Required | Description              |
+|-----------------------|--------|----------|--------------------------|
+| `Mounted_binary_name` | string | No       | Path to a mounted binary |
 
 ###### volumes
 
@@ -210,7 +210,7 @@ A map of accessible files and their aliases. Aliases should be used in Marine mo
 
 | Property | Type   | Required | Description |
 |----------|--------|----------|-------------|
-| `alias`  | string | No       | path        |
+| `Alias`  | string | No       | path        |
 
 ## spells
 
@@ -218,11 +218,11 @@ A map with spell names as keys and spell configs as values
 
 ### Properties
 
-| Property    | Type                 | Required | Description  |
-|-------------|----------------------|----------|--------------|
-| `spellName` | [object](#spellname) | No       | Spell config |
+| Property     | Type                  | Required | Description  |
+|--------------|-----------------------|----------|--------------|
+| `Spell_name` | [object](#spell_name) | No       | Spell config |
 
-### spellName
+### Spell_name
 
 Spell config
 
@@ -264,11 +264,11 @@ A Map with worker names as keys and worker configs as values
 
 ### Properties
 
-| Property     | Type                  | Required | Description   |
-|--------------|-----------------------|----------|---------------|
-| `workerName` | [object](#workername) | No       | Worker config |
+| Property | Type              | Required | Description   |
+|----------|-------------------|----------|---------------|
+| `Worker` | [object](#worker) | No       | Worker config |
 
-### workerName
+### Worker
 
 Worker config
 

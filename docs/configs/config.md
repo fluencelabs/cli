@@ -28,9 +28,9 @@ Overrides of cargo dependencies
 
 #### Properties
 
-| Property                | Type   | Required | Description |
-|-------------------------|--------|----------|-------------|
-| `cargo-dependency-name` | string | No       | version     |
+| Property                | Type   | Required | Description              |
+|-------------------------|--------|----------|--------------------------|
+| `Cargo_dependency_name` | string | No       | cargo dependency version |
 
 ### npm
 
@@ -38,7 +38,7 @@ Overrides of npm dependencies
 
 #### Properties
 
-| Property              | Type   | Required | Description |
-|-----------------------|--------|----------|-------------|
-| `npm-dependency-name` | string | No       | version     |
+| Property              | Type   | Required | Description            |
+|-----------------------|--------|----------|------------------------|
+| `npm_dependency_name` | string | No       | npm dependency version |
 
