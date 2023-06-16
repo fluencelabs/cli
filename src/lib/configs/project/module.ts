@@ -55,7 +55,7 @@ const overridableModulePropertiesV0 = {
     type: "string",
     nullable: true,
     description:
-      "Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):\n\nK, Kb - kilobyte\nKi, KiB - kibibyte\nM, Mb - megabyte\nMi, MiB - mebibyte\nG, Gb - gigabyte\nGi, GiB - gibibyte\nCurrent limit is 4 GiB",
+      "Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):\nK, Kb - kilobyte\nKi, KiB - kibibyte\nM, Mb - megabyte\nMi, MiB - mebibyte\nG, Gb - gigabyte\nGi, GiB - gibibyte\nCurrent limit is 4 GiB",
   },
   loggerEnabled: {
     type: "boolean",
@@ -73,6 +73,10 @@ const overridableModulePropertiesV0 = {
     nullable: true,
     required: [],
     title: "Volumes",
+    additionalProperties: { type: "string" },
+    properties: {
+      alias: { type: "string", description: "path" },
+    },
     description:
       "A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file",
   },
@@ -81,12 +85,27 @@ const overridableModulePropertiesV0 = {
     title: "Environment variables",
     nullable: true,
     required: [],
+    additionalProperties: {
+      type: "string",
+    },
+    properties: {
+      ENV_VARIABLE_NAME: { type: "string", description: "env variable value" },
+    },
     description:
       "environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl",
   },
   mountedBinaries: {
     title: "Mounted binaries",
     type: "object",
+    additionalProperties: {
+      type: "string",
+    },
+    properties: {
+      mountedBinaryName: {
+        type: "string",
+        description: "path to a mounted binary",
+      },
+    },
     nullable: true,
     required: [],
     description:

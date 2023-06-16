@@ -64,7 +64,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
           description: "Overrides of npm dependencies",
           additionalProperties: { type: "string" },
           properties: {
-            "npm-dependency-name": { type: "string" },
+            "npm-dependency-name": { type: "string", description: "version" },
           },
           nullable: true,
           required: [],
@@ -74,7 +74,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
           description: "Overrides of cargo dependencies",
           additionalProperties: { type: "string" },
           properties: {
-            "cargo-dependency-name": { type: "string" },
+            "cargo-dependency-name": { type: "string", description: "version" },
           },
           nullable: true,
           required: [],

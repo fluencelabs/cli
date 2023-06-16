@@ -399,6 +399,10 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           nullable: true,
           description:
             "A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua",
+          additionalProperties: { type: "string" },
+          properties: {
+            "npm-dependency-name": { type: "string", description: "version" },
+          },
           required: [],
         },
         cargo: {
@@ -407,6 +411,10 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           nullable: true,
           description: `A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
           required: [],
+          additionalProperties: { type: "string" },
+          properties: {
+            "cargo-dependency-name": { type: "string", description: "version" },
+          },
         },
       },
       required: [],
