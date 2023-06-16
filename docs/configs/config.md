@@ -30,7 +30,7 @@ Overrides of cargo dependencies
 
 | Property                | Type   | Required | Description |
 |-------------------------|--------|----------|-------------|
-| `cargo-dependency-name` | string | No       |             |
+| `cargo-dependency-name` | string | No       | version     |
 
 ### npm
 
@@ -40,5 +40,5 @@ Overrides of npm dependencies
 
 | Property              | Type   | Required | Description |
 |-----------------------|--------|----------|-------------|
-| `npm-dependency-name` | string | No       |             |
+| `npm-dependency-name` | string | No       | version     |
 

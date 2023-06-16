@@ -12,7 +12,6 @@ Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You c
 | `loggerEnabled`   | boolean                    | No       | Set true to allow module to use the Marine SDK logger                                                                                                                                                                                                          |
 | `loggingMask`     | number                     | No       | manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map                                                                                                                     |
 | `maxHeapSize`     | string                     | No       | Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):                                                                    |
-|                   |                            |          |                                                                                                                                                                                                                                                                |
 |                   |                            |          | K, Kb - kilobyte                                                                                                                                                                                                                                               |
 |                   |                            |          | Ki, KiB - kibibyte                                                                                                                                                                                                                                             |
 |                   |                            |          | M, Mb - megabyte                                                                                                                                                                                                                                               |
@@ -28,20 +27,29 @@ Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You c
 
 environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
+### Properties
+
+| Property            | Type   | Required | Description        |
+|---------------------|--------|----------|--------------------|
+| `ENV_VARIABLE_NAME` | string | No       | env variable value |
 
 ## mountedBinaries
 
 A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
+### Properties
+
+| Property            | Type   | Required | Description              |
+|---------------------|--------|----------|--------------------------|
+| `mountedBinaryName` | string | No       | path to a mounted binary |
 
 ## volumes
 
 A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
+### Properties
+
+| Property | Type   | Required | Description |
+|----------|--------|----------|-------------|
+| `alias`  | string | No       | path        |
 
