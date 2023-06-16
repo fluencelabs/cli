@@ -5,7 +5,7 @@
 Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use `fluence init` command to generate a template for new Fluence project
 ## [module.yaml](./module.md)
 
-Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use `fluence module new` command to generate a template for new module
+Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use 'fluence module new' command to generate a template for new module
 ## [service.yaml](./service.md)
 
 Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use `fluence service new` command to generate a template for new service
