@@ -39,14 +39,10 @@ export default class Init extends BaseCommand<typeof Init> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, args, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Init)
-    );
+    const { flags, args } = await initCli(this, await this.parse(Init));
 
     await init({
       maybeProjectPath: args.path,
-      maybeFluenceConfig,
       template: await ensureTemplate({
         templateOrUnknown: flags.template,
       }),
