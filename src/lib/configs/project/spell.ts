@@ -78,7 +78,7 @@ const spellProperties = {
     description:
       "A map of Aqua function arguments names as keys and arguments values as values. They will be passed to the spell function and will be stored in the key-value storage for this particular spell.",
     nullable: true,
-    property: {
+    properties: {
       Aqua_function_argument_name: {
         description: "Aqua function argument value",
       },
