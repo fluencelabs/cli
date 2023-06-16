@@ -229,8 +229,7 @@ export const IMPORT_FLAG = {
 
 export const TRACING_FLAG = {
   tracing: Flags.boolean({
-    description:
-      "Compile aqua in tracing mode (for debugging purposes)",
+    description: "Compile aqua in tracing mode (for debugging purposes)",
     default: false,
   }),
 };
