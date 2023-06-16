@@ -29,6 +29,7 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   IMPORT_FLAG,
   NO_INPUT_FLAG,
+  TRACING_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
@@ -99,6 +100,7 @@ export default class Aqua extends Command {
       default: false,
       description: "Checks if compilation is succeeded, without output",
     }),
+    ...TRACING_FLAG,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -151,6 +153,7 @@ export default class Aqua extends Command {
         noRelay: flags["no-relay"],
         noXor: flags["no-xor"],
         targetType,
+        tracing: flags.tracing,
       },
       outputPath: outputFlag,
       dry: flags.dry,

@@ -73,11 +73,21 @@ const getAquaDependencyImports = async (
 };
 
 const VERSIONS_DIR_PATH = join("src", "versions");
+const SRC_LIB_PATH = join("src", "lib");
+const COMPILED_AQUA_PATH = join(SRC_LIB_PATH, "compiled-aqua");
 
-const COMPILED_AQUA_PATH = join(
-  "src",
-  "lib",
-  "compiled-aqua",
+const COMPILED_AQUA_WITH_TRACING_PATH = join(
+  SRC_LIB_PATH,
+  "compiled-aqua-with-tracing"
+);
+
+const COMPILED_INSTALLATION_SPELL_AQUA_PATH = join(
+  COMPILED_AQUA_PATH,
+  "installation-spell"
+);
+
+const COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH = join(
+  COMPILED_AQUA_WITH_TRACING_PATH,
   "installation-spell"
 );
 
@@ -88,6 +98,46 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
   "src",
   "aqua"
 );
+
+const compileInstallationSpellAqua = async (tracing = false) => {
+  return Promise.all(
+    ["upload", "cli", "deal_spell", "files"].map(async (fileName) => {
+      const compilationResult = await compile({
+        filePath: join(
+          INSTALLATION_SPELL_AQUA_DIR_PATH,
+          `${fileName}.${AQUA_EXT}`
+        ),
+        imports: [
+          join(
+            "node_modules",
+            ".pnpm",
+            "@fluencelabs+aqua-lib@0.7.0",
+            "node_modules"
+          ),
+          ...(await getAquaDependencyImports(
+            join("@fluencelabs", "installation-spell")
+          )),
+        ],
+        targetType: "ts",
+        tracing,
+      });
+
+      const tsSource = compilationResult.generatedSources[0]?.tsSource;
+      assert(typeof tsSource === "string");
+
+      await writeFile(
+        join(
+          tracing
+            ? COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH
+            : COMPILED_INSTALLATION_SPELL_AQUA_PATH,
+          `${fileName}.ts`
+        ),
+        tsSource,
+        FS_OPTIONS
+      );
+    })
+  );
+};
 
 (async () => {
   try {
@@ -107,39 +157,14 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
     await unlink(COMPILED_AQUA_PATH);
   } catch {}
 
-  await mkdir(COMPILED_AQUA_PATH, { recursive: true });
+  await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_PATH, { recursive: true });
 
-  await Promise.all(
-    ["upload", "cli", "deal_spell", "files"].map(async (fileName) => {
-      const compilationResult = await compile({
-        filePath: join(
-          INSTALLATION_SPELL_AQUA_DIR_PATH,
-          `${fileName}.${AQUA_EXT}`
-        ),
-        imports: [
-          join(
-            "node_modules",
-            ".pnpm",
-            "@fluencelabs+aqua-lib@0.7.0",
-            "node_modules"
-          ),
-          ...(await getAquaDependencyImports(
-            join("@fluencelabs", "installation-spell")
-          )),
-        ],
-        targetType: "ts",
-      });
+  await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH, {
+    recursive: true,
+  });
 
-      const tsSource = compilationResult.generatedSources[0]?.tsSource;
-      assert(typeof tsSource === "string");
-
-      await writeFile(
-        join(COMPILED_AQUA_PATH, `${fileName}.ts`),
-        tsSource,
-        FS_OPTIONS
-      );
-    })
-  );
+  await compileInstallationSpellAqua();
+  await compileInstallationSpellAqua(true);
 })().catch((e) => {
   return console.error(e);
 });

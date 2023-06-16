@@ -40,6 +40,7 @@ type CommonArgs = {
   noRelay?: boolean | undefined;
   noXor?: boolean | undefined;
   targetType?: "ts" | "js" | "air";
+  tracing?: boolean | undefined;
 };
 
 /**
@@ -78,6 +79,7 @@ export async function compile({
   noRelay = false,
   noXor = false,
   targetType = "air",
+  tracing = false,
 }: {
   code?: string;
   filePath?: string;
@@ -93,7 +95,8 @@ export async function compile({
       ts: "typescript",
       js: "javascript",
       air: "air",
-    }[targetType]
+    }[targetType],
+    tracing
   );
 
   if (typeof funcCall === "string" && filePath !== undefined) {

@@ -25,4 +25,5 @@ src/js/src/aqua
 
 # ignore compiled files
 src/lib/compiled-aqua
+src/lib/compiled-aqua-with-tracing
 src/versions
