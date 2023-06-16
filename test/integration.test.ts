@@ -200,32 +200,14 @@ describe("integration tests", () => {
         cwd,
       });
 
-      let result = "[]";
-
-      // Jest has a global timeout for each test and if it runs out test will fail
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        try {
-          const res = await fluence({
-            args: ["run"],
-            flags: {
-              f: "runDeployedServices()",
-              quiet: true,
-            },
-            cwd,
-          });
-
-          const parsedRes = JSON.parse(res);
-          assert(Array.isArray(parsedRes));
-
-          if (parsedRes.length === local.length) {
-            result = res;
-            break;
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
+      const result = await fluence({
+        args: ["run"],
+        flags: {
+          f: "runDeployedServices()",
+          quiet: true,
+        },
+        cwd,
+      });
 
       const parsedResult = JSON.parse(result);
       assert(Array.isArray(parsedResult));
