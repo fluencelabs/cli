@@ -321,7 +321,7 @@ const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
     ...overridableSpellProperties,
   },
   required: ["get"],
-};
+} as const;
 
 const dealSchema: JSONSchemaType<Deal> = {
   type: "object",
