@@ -126,7 +126,6 @@ type ConfigV1 = {
   version: 1;
   services?: Record<string, ServiceV1>;
   relays?: Relays;
-  peerIds?: Record<string, string>;
   keyPairName?: string;
 };
 
@@ -141,23 +140,74 @@ const keyPairName = {
 1. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FILE_NAME}`,
 } as const;
 
-const configSchemaV1Obj = {
+const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
+  type: "object",
+  title: "Module overrides",
+  description: "Overrides for the module config",
+  properties: {
+    ...overridableModuleProperties,
+  },
+  required: [],
+  nullable: true,
+} as const;
+
+const serviceSchema: JSONSchemaType<ServiceV1> = {
+  title: "Service config",
+  description:
+    "Service config. Defines where the service is and how to deploy it",
   type: "object",
   properties: {
-    services: {
-      title: "Services",
-      description:
-        "A map with service names as keys and Service configs as values. You can have any number of services listed here (According to JSON schema they are called 'additionalProperties') as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config",
+    get: {
+      type: "string",
+      description: `Path to service directory or URL to the tar.gz archive with the service`,
+    },
+    overrideModules: {
       type: "object",
-      additionalProperties: {
-        title: "Service config",
-        description:
-          "Service names as keys (must start with a lowercase letter and contain only letters numbers and underscores) and Service config (defines where the service is and how to deploy it) as values",
+      title: "Overrides",
+      description: "A map of modules to override",
+      additionalProperties: overrideModulesSchema,
+      properties: {
+        Module_name: overrideModulesSchema,
+      },
+      nullable: true,
+      required: [],
+    },
+    deploy: {
+      type: "array",
+      title: "Deployment list",
+      nullable: true,
+      description:
+        "[DEPRECATED!] List of deployments for the particular service",
+      items: {
         type: "object",
+        title: "Deployment",
+        description:
+          "A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, etc.",
         properties: {
-          get: {
+          keyPairName,
+          deployId: {
             type: "string",
-            description: `Path to service directory or URL to the tar.gz archive with the service`,
+            description: `This id can be used in Aqua to access actually deployed peer and service ids. The ID must start with a lowercase letter and contain only letters, numbers, and underscores.`,
+          },
+          count: {
+            type: "number",
+            minimum: 1,
+            nullable: true,
+            description: `Number of services to deploy. Default: 1 or if "peerIds" property is provided - exactly the number of peerIds`,
+          },
+          peerId: {
+            type: "string",
+            nullable: true,
+            description: `Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of ${FLUENCE_CONFIG_FILE_NAME} are selected for each deploy. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
+          },
+          peerIds: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+            nullable: true,
+            title: "Peer ids",
+            description: `Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
           },
           overrideModules: {
             type: "object",
@@ -169,11 +219,6 @@ const configSchemaV1Obj = {
               description:
                 "Module names as keys and overrides for the module config as values",
               properties: {
-                get: {
-                  type: "string",
-                  nullable: true,
-                  description: `Path to module directory or URL to the tar.gz archive with the module`,
-                },
                 ...overridableModuleProperties,
               },
               required: [],
@@ -182,72 +227,26 @@ const configSchemaV1Obj = {
             nullable: true,
             required: [],
           },
-          deploy: {
-            type: "array",
-            title: "Deployment list",
-            nullable: true,
-            description: "List of deployments for the particular service",
-            items: {
-              type: "object",
-              title: "Deployment",
-              description:
-                "A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, etc.",
-              properties: {
-                keyPairName,
-                deployId: {
-                  type: "string",
-                  description: `This id can be used in Aqua to access actually deployed peer and service ids. The ID must start with a lowercase letter and contain only letters, numbers, and underscores.`,
-                },
-                count: {
-                  type: "number",
-                  minimum: 1,
-                  nullable: true,
-                  description: `Number of services to deploy. Default: 1 or if "peerIds" property is provided - exactly the number of peerIds`,
-                },
-                peerId: {
-                  type: "string",
-                  nullable: true,
-                  description: `Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of ${FLUENCE_CONFIG_FILE_NAME} are selected for each deploy. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
-                },
-                peerIds: {
-                  type: "array",
-                  items: {
-                    type: "string",
-                  },
-                  nullable: true,
-                  title: "Peer ids",
-                  description: `Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
-                },
-                overrideModules: {
-                  type: "object",
-                  title: "Overrides",
-                  description: "A map of modules to override",
-                  additionalProperties: {
-                    type: "object",
-                    title: "Module overrides",
-                    description:
-                      "Module names as keys and overrides for the module config as values",
-                    properties: {
-                      get: {
-                        type: "string",
-                        nullable: true,
-                        description: `Path to module directory or URL to the tar.gz archive with the module`,
-                      },
-                      ...overridableModuleProperties,
-                    },
-                    required: [],
-                    nullable: true,
-                  },
-                  nullable: true,
-                  required: [],
-                },
-              },
-              required: ["deployId"],
-            },
-          },
-          keyPairName,
         },
-        required: ["get"],
+        required: ["deployId"],
+      },
+    },
+    keyPairName,
+  },
+  required: ["get"],
+} as const;
+
+const configSchemaV1Obj = {
+  type: "object",
+  properties: {
+    services: {
+      title: "Services",
+      description:
+        "A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config",
+      type: "object",
+      additionalProperties: serviceSchema,
+      properties: {
+        Service_name: serviceSchema,
       },
       required: [],
       nullable: true,
@@ -267,18 +266,6 @@ const configSchemaV1Obj = {
       ],
       nullable: true,
     },
-    peerIds: {
-      title: "Peer ids",
-      description:
-        "A map of named peerIds. Example:\n\nMY_PEER: 12D3KooWCMr9mU894i8JXAFqpgoFtx6qnV1LFPSfVc3Y34N4h4LS",
-      type: "object",
-      nullable: true,
-      required: [],
-      additionalProperties: {
-        type: "string",
-        description: "Peer id names as keys and the actual peer ids as values",
-      },
-    },
     keyPairName,
     version: { type: "number", const: 1 },
   },
@@ -293,6 +280,18 @@ type FluenceConfigSpell = {
   get: string;
 } & OverridableSpellProperties;
 
+type Deal = {
+  minWorkers?: number;
+  targetWorkers?: number;
+};
+
+type Worker = {
+  services?: Array<string>;
+  spells?: Array<string>;
+};
+
+type Host = { peerIds: Array<string> };
+
 type ConfigV2 = Omit<ConfigV1, "version"> & {
   version: 2;
   dependencies?: {
@@ -302,27 +301,79 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   [AQUA_INPUT_PATH_PROPERTY]?: string;
   aquaOutputTSPath?: string;
   aquaOutputJSPath?: string;
-  appTSPath?: string;
-  appJSPath?: string;
-  hosts?: Record<string, { peerIds: Array<string> }>;
-  workers?: Record<
-    string,
-    {
-      services?: Array<string>;
-      spells?: Array<string>;
-    }
-  >;
-  deals?: Record<
-    string,
-    {
-      minWorkers?: number;
-      targetWorkers?: number;
-    }
-  >;
+  hosts?: Record<string, Host>;
+  workers?: Record<string, Worker>;
+  deals?: Record<string, Deal>;
   chainNetwork?: ChainNetwork;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
+};
+
+const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
+  type: "object",
+  description: "Spell config",
+  properties: {
+    get: {
+      type: "string",
+      description: "Path to spell",
+    },
+    ...overridableSpellProperties,
+  },
+  required: ["get"],
+} as const;
+
+const dealSchema: JSONSchemaType<Deal> = {
+  type: "object",
+  properties: {
+    minWorkers: {
+      type: "number",
+      description: "Required workers to activate the deal",
+      default: MIN_WORKERS,
+      nullable: true,
+      minimum: 1,
+    },
+    targetWorkers: {
+      type: "number",
+      description: "Max workers in the deal",
+      default: TARGET_WORKERS,
+      nullable: true,
+      minimum: 1,
+    },
+  },
+  required: [],
+} as const;
+
+const workerConfigSchema: JSONSchemaType<Worker> = {
+  type: "object",
+  description: "Worker config",
+  properties: {
+    services: {
+      description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+    },
+    spells: {
+      description: `An array of spell names to include in this worker. Spell names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+    },
+  },
+  required: [],
+} as const;
+
+const hostConfigSchema: JSONSchemaType<Host> = {
+  type: "object",
+  properties: {
+    peerIds: {
+      type: "array",
+      description: "An array of peer IDs to deploy on",
+      items: { type: "string" },
+    },
+  },
+  required: ["peerIds"],
 };
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
@@ -347,6 +398,13 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           nullable: true,
           description:
             "A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua",
+          additionalProperties: { type: "string" },
+          properties: {
+            npm_dependency_name: {
+              type: "string",
+              description: "npm dependency version",
+            },
+          },
           required: [],
         },
         cargo: {
@@ -355,6 +413,13 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           nullable: true,
           description: `A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
           required: [],
+          additionalProperties: { type: "string" },
+          properties: {
+            Cargo_dependency_name: {
+              type: "string",
+              description: "cargo dependency version",
+            },
+          },
         },
       },
       required: [],
@@ -377,33 +442,14 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       description:
         "Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property",
     },
-    appTSPath: {
-      type: "string",
-      nullable: true,
-      description:
-        "Path to the directory where you want to generate app.ts after deployment. If you run registerApp() function in your typescript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua",
-    },
-    appJSPath: {
-      type: "string",
-      nullable: true,
-      description:
-        "Path to the directory where you want to generate app.js after deployment. If you run registerApp() function in your javascript code after initializing FluenceJS client you will be able to access ids of the deployed services in aqua",
-    },
     hosts: {
       description:
         "A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on",
       type: "object",
       nullable: true,
-      additionalProperties: {
-        type: "object",
-        properties: {
-          peerIds: {
-            type: "array",
-            description: "An array of peer IDs to deploy on",
-            items: { type: "string" },
-          },
-        },
-        required: ["peerIds"],
+      additionalProperties: hostConfigSchema,
+      properties: {
+        Worker_to_host: hostConfigSchema,
       },
       required: [],
     },
@@ -412,24 +458,9 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       description:
         "A Map with worker names as keys and worker configs as values",
       type: "object",
-      additionalProperties: {
-        type: "object",
-        description: "Worker config",
-        properties: {
-          services: {
-            description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
-            type: "array",
-            items: { type: "string" },
-            nullable: true,
-          },
-          spells: {
-            description: `An array of spell names to include in this worker. Spell names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
-            type: "array",
-            items: { type: "string" },
-            nullable: true,
-          },
-        },
-        required: [],
+      additionalProperties: workerConfigSchema,
+      properties: {
+        Worker: workerConfigSchema,
       },
       required: [],
     },
@@ -438,25 +469,9 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
         "A map of objects with worker names as keys, each object defines a deal",
       type: "object",
       nullable: true,
-      additionalProperties: {
-        type: "object",
-        properties: {
-          minWorkers: {
-            type: "number",
-            description: "Required workers to activate the deal",
-            default: MIN_WORKERS,
-            nullable: true,
-            minimum: 1,
-          },
-          targetWorkers: {
-            type: "number",
-            description: "Max workers in the deal",
-            default: TARGET_WORKERS,
-            nullable: true,
-            minimum: 1,
-          },
-        },
-        required: [],
+      additionalProperties: dealSchema,
+      properties: {
+        Worker_to_create_deal_for: dealSchema,
       },
       required: [],
     },
@@ -471,17 +486,9 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       type: "object",
       nullable: true,
       description: "A map with spell names as keys and spell configs as values",
-      additionalProperties: {
-        type: "object",
-        description: "Spell config",
-        properties: {
-          get: {
-            type: "string",
-            description: "Path to spell",
-          },
-          ...overridableSpellProperties,
-        },
-        required: ["get"],
+      additionalProperties: spellSchema,
+      properties: {
+        Spell_name: spellSchema,
       },
       required: [],
     },
@@ -504,7 +511,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       nullable: true,
     },
   },
-};
+} as const;
 
 const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
   if (Array.isArray(relays)) {
@@ -801,7 +808,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   return true;
 };
 
-export const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
+const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
   latestSchema: configSchemaV2,
   migrations,

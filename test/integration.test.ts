@@ -146,7 +146,7 @@ describe("integration tests", () => {
       const pathToNewServiceDir = join("src", "services", "newService");
 
       await fluence({
-        args: ["service", "new", pathToNewServiceDir],
+        args: ["service", "new", "newService"],
         cwd,
       });
 
@@ -162,7 +162,7 @@ describe("integration tests", () => {
       const pathToNewSpell = join("src", "spells", "newSpell");
 
       await fluence({
-        args: ["spell", "new", pathToNewSpell],
+        args: ["spell", "new", "newSpell"],
         cwd,
       });
 
@@ -203,7 +203,7 @@ describe("integration tests", () => {
       const result = await fluence({
         args: ["run"],
         flags: {
-          f: "status()",
+          f: "runDeployedServices()",
           quiet: true,
         },
         cwd,
@@ -243,7 +243,7 @@ describe("integration tests", () => {
       const pathToNewServiceDir = join("src", "services", "newService");
 
       await fluence({
-        args: ["service", "new", pathToNewServiceDir],
+        args: ["service", "new", "newService"],
         cwd,
       });
 
@@ -259,7 +259,7 @@ describe("integration tests", () => {
       const pathToNewSpell = join("src", "spells", "newSpell");
 
       await fluence({
-        args: ["spell", "new", pathToNewSpell],
+        args: ["spell", "new", "newSpell"],
         cwd,
       });
 
@@ -305,7 +305,7 @@ describe("integration tests", () => {
         const res = await fluence({
           args: ["run"],
           flags: {
-            f: "status()",
+            f: "runDeployedServices()",
             quiet: true,
           },
           cwd,

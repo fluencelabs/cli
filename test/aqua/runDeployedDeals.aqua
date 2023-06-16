@@ -2,22 +2,19 @@ aqua Main
 
 import "@fluencelabs/aqua-lib/builtin.aqua"
 import "@fluencelabs/registry/subnetwork.aqua"
-import Registry from "@fluencelabs/registry/registry-service.aqua"
-import "@fluencelabs/spell/spell_service.aqua"
-import Ipfs from "@fluencelabs/aqua-ipfs/ipfs.aqua"
 
 import "workers.aqua"
 import "services.aqua"
 
-export status
+export runDeployedServices
 
 data Answer:
     answer: string
     peer: string
 
-func status() -> *Answer:
+func runDeployedServices() -> *Answer:
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.defaultWorker.dealId
+    dealId = workersInfo.deals.defaultWorker!.dealId
     answers: *Answer
     workers <- resolveSubnetwork(dealId)
     for w <- workers! par:

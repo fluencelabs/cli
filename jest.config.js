@@ -20,7 +20,7 @@ export default {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  testPathIgnorePatterns: ["dist"],
+  testPathIgnorePatterns: ["^dist"],
   testEnvironment: "node",
   testTimeout: 600000, // 10 minutes in milliseconds
   transform: {

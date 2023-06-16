@@ -14,41 +14,38 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import { join, relative } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
-import camelcase from "camelcase";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
-import { isInteractive } from "../../lib/commandObj.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
   AQUA_NAME_REQUIREMENTS,
-  cleanAquaName,
   ensureValidAquaName,
-  validateAquaName,
 } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
-import { confirm, input } from "../../lib/prompt.js";
+import { ensureSrcServicesDir, projectRootDir } from "../../lib/paths.js";
+import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = "Create new marine service template";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    name: Flags.string({
-      description: `Unique service name (${AQUA_NAME_REQUIREMENTS})`,
-      helpValue: "<name>",
+    path: Flags.string({
+      description: "Path to services dir (default: src/services)",
+      helpValue: "<path>",
     }),
   };
   static override args = {
-    path: Args.string({
-      description: "Path to a service",
+    name: Args.string({
+      description: `Unique service name (${AQUA_NAME_REQUIREMENTS})`,
     }),
   };
   async run(): Promise<void> {
@@ -57,23 +54,36 @@ export default class New extends BaseCommand<typeof New> {
       await this.parse(New)
     );
 
-    const servicePath =
-      args.path ?? (await input({ message: "Enter service path" }));
-
-    const serviceName = await ensureValidAquaName({
-      stringToValidate: await getServiceName({
-        nameFromFlags: flags.name,
-        servicePath,
-      }),
+    let serviceName = await ensureValidAquaName({
+      stringToValidate:
+        args.name ?? (await input({ message: "Enter service name" })),
       message: "Enter service name",
     });
 
-    const pathToModuleDir = path.join(servicePath, "modules", serviceName);
+    if (serviceName in (maybeFluenceConfig?.services ?? {})) {
+      serviceName = await input({
+        message: serviceAlreadyExistsError(serviceName),
+        validate: (serviceName: string) => {
+          if (serviceName in (maybeFluenceConfig?.services ?? {})) {
+            return serviceAlreadyExistsError(serviceName);
+          }
+
+          return true;
+        },
+      });
+    }
+
+    const servicePath = join(
+      flags.path ?? relative(projectRootDir, await ensureSrcServicesDir()),
+      serviceName
+    );
+
+    const pathToModuleDir = join(servicePath, "modules", serviceName);
     await generateNewModule(pathToModuleDir);
 
     await initNewReadonlyServiceConfig(
       servicePath,
-      path.relative(servicePath, pathToModuleDir),
+      relative(servicePath, pathToModuleDir),
       serviceName
     );
 
@@ -96,41 +106,8 @@ export default class New extends BaseCommand<typeof New> {
   }
 }
 
-type GetServiceNameArg = {
-  nameFromFlags: undefined | string;
-  servicePath: string;
-};
-
-const getServiceName = async ({
-  nameFromFlags,
-  servicePath,
-}: GetServiceNameArg): Promise<string | undefined> => {
-  if (typeof nameFromFlags === "string") {
-    return nameFromFlags;
-  }
-
-  const withoutTrailingSlash = servicePath.replace(/\/$/, "");
-
-  const lastPortionOfPath =
-    withoutTrailingSlash
-      .split(withoutTrailingSlash.includes("/") ? "/" : "\\")
-      .slice(-1)[0] ?? "";
-
-  const cleanLastPortionOfPath = cleanAquaName(lastPortionOfPath);
-  const camelCasedServiceName = camelcase(cleanLastPortionOfPath);
-  const serviceNameValidity = validateAquaName(camelCasedServiceName);
-
-  if (
-    serviceNameValidity !== true ||
-    (isInteractive &&
-      !(await confirm({
-        message: `Do you want to use ${color.yellow(
-          camelCasedServiceName
-        )} as the name of your new service?`,
-      })))
-  ) {
-    return undefined;
-  }
-
-  return camelCasedServiceName;
+const serviceAlreadyExistsError = (serviceName: string) => {
+  return `Service with name ${color.yellow(
+    serviceName
+  )} already exists. Please enter another name`;
 };

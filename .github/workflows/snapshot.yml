@@ -7,10 +7,6 @@ on:
         description: "Git ref to checkout to"
         type: string
         default: "main"
-      aqua-version:
-        description: "@fluencelabs/aqua version"
-        type: string
-        default: "null"
       marine-version:
         description: "marine version"
         type: string
@@ -80,12 +76,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2.2.4
         with:
-          version: 7
+          version: 8
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
           registry-url: "https://npm.fluence.dev"
           cache: "pnpm"
 
@@ -121,7 +117,6 @@ jobs:
           versions: |
             {
               "npm": {
-                "@fluencelabs/aqua": "${{ inputs.aqua-version }}",
                 "@fluencelabs/js-client.api": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.api'] }}",
                 "@fluencelabs/js-client.node": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.node'] }}"
               },

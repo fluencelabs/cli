@@ -121,7 +121,7 @@ const getWalletConnectProvider = async (
     );
   });
 
-  startSpinner(color.yellow("Connecting to wallet..."));
+  color.yellow("Connecting to wallet...");
 
   const session = await provider.connect({
     namespaces: {

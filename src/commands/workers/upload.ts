@@ -19,6 +19,7 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload } from "../../lib/compiled-aqua/installation-spell/upload.js";
+import { upload as uploadWithTracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
@@ -27,6 +28,7 @@ import {
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
   NO_BUILD_FLAG,
+  TRACING_FLAG,
 } from "../../lib/const.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
@@ -46,6 +48,7 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
     ...PRIV_KEY_FLAG,
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
+    ...TRACING_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -75,7 +78,10 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
       noBuild: flags["no-build"],
     });
 
-    const uploadResult = await upload(uploadArg);
+    const uploadResult = flags.tracing
+      ? await uploadWithTracing(uploadArg)
+      : await upload(uploadArg);
+
     commandObj.log(jsonStringify(uploadResult.workers));
   }
 }

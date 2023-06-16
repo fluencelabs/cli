@@ -30,29 +30,18 @@ data ModuleConfig:
     wasi: ?ModuleWASIConfig
 */
 
-export type JSONModuleConfWASI = {
+type JSONModuleConfWASI = {
   mapped_dirs?: Record<string, string>;
   envs?: Record<string, string>;
 };
 
-export type JSONModuleConf = {
+type JSONModuleConf = {
   name: string;
   max_heap_size?: string;
   logger_enabled?: boolean;
   logging_mask?: number;
   mounted_binaries?: Record<string, string>;
   wasi: JSONModuleConfWASI;
-};
-
-export type JSONModuleConfOld = {
-  name: string;
-  max_heap_size?: string;
-  logger_enabled?: boolean;
-  logging_mask?: number;
-  mapped_dirs?: Array<[string, string]>;
-  envs?: Array<[string, string]>;
-  mounted_binaries?: Array<[string, string]>;
-  path?: string;
 };
 
 export function moduleToJSONModuleConfig(

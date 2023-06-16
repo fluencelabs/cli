@@ -62,7 +62,7 @@ const moduleSchemaForService: JSONSchemaType<ServiceModuleV0> = {
 
 export const FACADE_MODULE_NAME = "facade";
 
-export type ConfigV0 = {
+type ConfigV0 = {
   version: 0;
   name: string;
   modules: { [FACADE_MODULE_NAME]: ServiceModuleV0 } & Record<
@@ -88,6 +88,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       additionalProperties: moduleSchemaForService,
       properties: {
         [FACADE_MODULE_NAME]: moduleSchemaForService,
+        Other_module_name: moduleSchemaForService,
       },
       required: [FACADE_MODULE_NAME],
     },

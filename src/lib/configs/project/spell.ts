@@ -58,7 +58,7 @@ type SpellProperties = {
 
 export type OverridableSpellProperties = Partial<SpellProperties>;
 
-export type ConfigV0 = {
+type ConfigV0 = {
   version: 0;
 } & SpellProperties;
 

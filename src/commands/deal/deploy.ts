@@ -24,6 +24,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { upload } from "../../lib/compiled-aqua/installation-spell/upload.js";
+import { upload as uploadWithTracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js";
 import {
   MIN_WORKERS,
   TARGET_WORKERS,
@@ -39,6 +40,7 @@ import {
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
   NO_BUILD_FLAG,
+  TRACING_FLAG,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import {
@@ -63,6 +65,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
+    ...TRACING_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -99,7 +102,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(true);
-    const uploadResult = await upload(uploadArg);
+
+    const uploadResult = flags.tracing
+      ? await uploadWithTracing(uploadArg)
+      : await upload(uploadArg);
 
     const createdDeals: Record<
       string,
@@ -207,7 +213,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       };
     }
 
-    await ensureAquaFileWithWorkerInfo(workersConfig);
+    await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
 
     const createdDealsText =
       Object.values(createdDeals).length === 0

@@ -40,6 +40,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
   static override flags = {
     ...baseFlags,
     user: Flags.boolean({
+      default: false,
       description:
         "Remove key-pair from current user instead of removing key-pair from current project",
     }),
