@@ -83,12 +83,7 @@ const main = async (): Promise<void> => {
 
       await writeFile(
         join(DOCS_CONFIGS_DIR_PATH, filename.replace(`.${YAML_EXT}`, ".md")),
-        md.replaceAll(
-          `
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|`,
-          ""
-        ),
+        md,
         FS_OPTIONS
       );
     })
