@@ -26,7 +26,13 @@ import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
-import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
+import {
+  CLI_NAME,
+  FS_OPTIONS,
+  SCHEMAS_DIR_NAME,
+  YAML_EXT,
+  YML_EXT,
+} from "../const.js";
 import { jsonStringify } from "../helpers/jsonStringify.js";
 import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
@@ -353,7 +359,7 @@ export function getReadonlyConfigInitFunction<
       }
       // If config file doesn't exist, create it with default config and schema path comment
 
-      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
+      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/${CLI_NAME}/tree/main/docs/configs/${name.replace(
         `.${YAML_EXT}`,
         ""
       )}.md`;

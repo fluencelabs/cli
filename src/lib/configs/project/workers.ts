@@ -21,6 +21,7 @@ import {
   CHAIN_NETWORKS,
   WORKERS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
+  CLI_NAME,
 } from "../../const.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
@@ -126,8 +127,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FILE_NAME}`,
   title: WORKERS_CONFIG_FILE_NAME,
   type: "object",
-  description:
-    "A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command",
+  description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
   properties: {
     version: { type: "number", const: 0 },
     deals: {

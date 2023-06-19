@@ -38,6 +38,7 @@ import {
   WORKERS_CONFIG_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
   FS_OPTIONS,
+  CLI_NAME,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/jsonStringify.js";
@@ -91,7 +92,7 @@ const main = async (): Promise<void> => {
 
   await writeFile(
     join(DOCS_CONFIGS_DIR_PATH, "README.md"),
-    `# Fluence CLI Configs
+    `# ${CLI_NAME} Configs
 
 ${schemas
   .map(([filename, schema]): string => {

@@ -16,7 +16,11 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import {
+  CONFIG_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+  CLI_NAME,
+} from "../../const.js";
 import {
   validateAllVersionsAreExact,
   validateBatch,
@@ -49,7 +53,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${CONFIG_FILE_NAME}`,
   title: CONFIG_FILE_NAME,
-  description: "Defines global config for Fluence CLI",
+  description: `Defines global config for ${CLI_NAME}`,
   properties: {
     countlyConsent: {
       type: "boolean",
@@ -91,7 +95,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     },
     lastCheckForUpdates: {
       type: "string",
-      description: `Last time when CLI checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
+      description: `Last time when ${CLI_NAME} checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
       nullable: true,
     },
     version: { type: "number", const: 0 },

@@ -63,10 +63,10 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout fluence-cli
+      - name: Checkout flox
         uses: actions/checkout@v3
         with:
-          repository: fluencelabs/fluence-cli
+          repository: fluencelabs/flox
           ref: ${{ inputs.ref }}
 
       - name: Import secrets

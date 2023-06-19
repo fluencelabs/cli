@@ -17,12 +17,12 @@
 import { TEMPLATES } from "../src/lib/const.js";
 
 import "../src/lib/setupEnvironment.js";
-import { fluence, initFirstTime } from "./helpers.js";
+import { flox, initFirstTime } from "./helpers.js";
 
 (async (): Promise<void> => {
   console.log("Setting up tests...");
 
-  await fluence({
+  await flox({
     args: ["dep", "i"],
   });
 

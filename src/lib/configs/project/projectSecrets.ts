@@ -19,6 +19,7 @@ const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
 import {
+  CLI_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -51,8 +52,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROJECT_SECRETS_CONFIG_FILE_NAME}`,
   title: PROJECT_SECRETS_CONFIG_FILE_NAME,
   type: "object",
-  description:
-    "Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands",
+  description: `Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from \`${CLI_NAME} key\` group of commands`,
   properties: {
     keyPairs: {
       title: "Key Pairs",

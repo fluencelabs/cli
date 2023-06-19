@@ -45,6 +45,7 @@ import {
   NODE_JS_MAJOR_VERSION,
   CHECK_FOR_UPDATES_INTERVAL,
   SEPARATOR,
+  CLI_NAME,
   type NO_INPUT_FLAG_NAME,
 } from "./const.js";
 import { haltCountly, initCountly, logErrorToCountly } from "./countly.js";
@@ -73,7 +74,7 @@ const ensureUserConfig = async (): Promise<void> => {
   if (
     isInteractive &&
     (await confirm({
-      message: `Help me improve Fluence CLI by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
+      message: `Help me improve ${CLI_NAME} by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
         "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data."
       )}\nOK?`,
     }))
@@ -144,7 +145,7 @@ export async function initCli<
 
   if (majorVersion !== NODE_JS_MAJOR_VERSION) {
     return commandObj.error(
-      `Fluence CLI requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`
+      `${CLI_NAME} requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`
     );
   }
 
@@ -157,7 +158,7 @@ export async function initCli<
   ]);
 
   await initCountly({ maybeFluenceConfig });
-  await handleFluenceCLIVersion(maybeFluenceConfig?.cliVersion);
+  await handleFloxVersion(maybeFluenceConfig?.cliVersion);
 
   return {
     args,
@@ -197,24 +198,24 @@ const isCheckForUpdatesRequired = async () => {
   return false;
 };
 
-const handleFluenceCLIVersion = async (
-  maybeFluenceCLIVersion: string | undefined
+const handleFloxVersion = async (
+  maybeFloxVersion: string | undefined
 ): Promise<void> => {
   if (
-    typeof maybeFluenceCLIVersion === "string" &&
-    maybeFluenceCLIVersion !== commandObj.config.version
+    typeof maybeFloxVersion === "string" &&
+    maybeFloxVersion !== commandObj.config.version
   ) {
-    const flunenceCLIVersion = maybeFluenceCLIVersion;
+    const floxVersion = maybeFloxVersion;
     return commandObj.error(
-      `Current CLI versions is ${color.yellow(
+      `Current ${CLI_NAME} versions is ${color.yellow(
         commandObj.config.version
-      )}, but this fluence project is compatible only with Fluence CLI version ${color.yellow(
-        flunenceCLIVersion
+      )}, but this project is compatible only with ${CLI_NAME} version ${color.yellow(
+        floxVersion
       )}\n\nPlease install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/cli@${flunenceCLIVersion}`
+        `npm i -g @fluencelabs/${CLI_NAME}@${floxVersion}`
       )}\n\nAfter that, run:\n\n${color.yellow(
-        "fluence dep v"
-      )}\n\nto find out which version of rust-peer you need to use to make sure you are running Fluence CLI against the compatible version of rust-peer\n\n`
+        `${CLI_NAME} dep v`
+      )}\n\nto find out which version of rust-peer you need to use to make sure you are running ${CLI_NAME} against the compatible version of rust-peer\n\n`
     );
   }
 
@@ -224,8 +225,8 @@ const handleFluenceCLIVersion = async (
 
   try {
     const [stableVersion, unstableVersion] = await Promise.all([
-      getLatestVersionOfNPMDependency("@fluencelabs/cli"),
-      getLatestVersionOfNPMDependency("@fluencelabs/cli@unstable"),
+      getLatestVersionOfNPMDependency(`@fluencelabs/${CLI_NAME}`),
+      getLatestVersionOfNPMDependency(`@fluencelabs/${CLI_NAME}@unstable`),
     ]);
 
     const isOlderThanStable = semver.lt(
@@ -249,8 +250,8 @@ const handleFluenceCLIVersion = async (
         isOlderThanStable ? "stable" : "unstable"
       )} version ${color.yellow(
         version
-      )} of Fluence CLI is available\n\nYou can install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/cli@${version}`
+      )} of ${CLI_NAME} is available\n\nYou can install it with:\n\n${color.yellow(
+        `npm i -g @fluencelabs/${CLI_NAME}@${version}`
       )}${SEPARATOR}`
     );
 
