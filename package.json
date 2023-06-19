@@ -41,7 +41,7 @@
   "dependencies": {
     "@fluencelabs/aqua-api": "0.11.7",
     "@fluencelabs/deal-client": "file:fluencelabs-deal-client-1.0.0.tgz",
-    "@fluencelabs/deal-contracts": "file:fluencelabs-deal-contracts-0.2.0.tgz",
+    "@fluencelabs/deal-types": "file:fluencelabs-deal-types-0.0.1.tgz",
     "@fluencelabs/fluence-network-environment": "^1.0.14",
     "@fluencelabs/js-client.api": "0.11.6",
     "@fluencelabs/js-client.node": "0.6.10",

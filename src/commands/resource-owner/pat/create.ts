@@ -16,10 +16,10 @@
 
 import assert from "node:assert";
 
-import { WorkersModule__factory } from "@fluencelabs/deal-contracts";
+import { DealClient } from "@fluencelabs/deal-client";
+import { WorkersModule__factory } from "@fluencelabs/deal-types";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
-import { DealClient } from "@fluencelabs/deal-client";
 import type { ethers } from "ethers";
 const color = oclifColor.default;
 
@@ -74,6 +74,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const deal = dealClient.getDeal(dealAddress);
 
     const config = await deal.getConfigModule();
+    const workersModule = await deal.getWorkersModule();
 
     const flt = await globalContracts.getFLT();
 
@@ -83,7 +84,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     promptConfirmTx(flags.privKey);
     await waitTx(approveTx);
 
-    const joinTx = await controller.join();
+    const joinTx = await workersModule.join();
 
     promptConfirmTx(flags.privKey);
     const res = await waitTx(joinTx);

@@ -128,7 +128,7 @@ export const dealUpdate = async ({
   const dealClient = new DealClient(signer, network);
   const deal = dealClient.getDeal(dealAddress);
 
-  const config = await deal.getConfig();
+  const config = await deal.getConfigModule();
 
   promptConfirmTx(privKey);
 
