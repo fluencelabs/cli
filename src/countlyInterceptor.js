@@ -20,8 +20,6 @@ import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/C
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
 
-import CLIPackageJSON from "./versions/cli.package.json" assert { type: "json" };
-
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
 /**
@@ -84,7 +82,7 @@ export const createErrorPromise = (error) => {
   return new Promise(() => {
     setTimeout(() => {
       console.log(
-        `\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/${CLIPackageJSON.oclif.bin}/issues`
+        `\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/flox/issues`
       );
 
       exitWithCode1();

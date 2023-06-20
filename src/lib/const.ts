@@ -23,8 +23,6 @@ import type {
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
-import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
-
 import { aquaComment } from "./helpers/comment.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { local } from "./localNodes.js";
@@ -32,8 +30,7 @@ import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
-export const CLI_NAME = CLIPackageJSON.oclif.bin;
-
+export const CLI_NAME = "flox";
 export const NODE_JS_MAJOR_VERSION = 18;
 
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
