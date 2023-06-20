@@ -17,7 +17,6 @@
 import assert from "node:assert";
 
 import { DealClient } from "@fluencelabs/deal-client";
-import { WorkersModule__factory } from "@fluencelabs/deal-types";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 import type { ethers } from "ethers";

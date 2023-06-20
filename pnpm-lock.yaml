@@ -11,9 +11,6 @@ dependencies:
   '@fluencelabs/deal-client':
     specifier: file:fluencelabs-deal-client-1.0.0.tgz
     version: file:fluencelabs-deal-client-1.0.0.tgz
-  '@fluencelabs/deal-types':
-    specifier: file:fluencelabs-deal-types-0.0.1.tgz
-    version: file:fluencelabs-deal-types-0.0.1.tgz
   '@fluencelabs/fluence-network-environment':
     specifier: ^1.0.14
     version: 1.0.14
@@ -66,8 +63,8 @@ dependencies:
     specifier: ^16.0.3
     version: 16.0.3
   ethers:
-    specifier: ^6.5.1
-    version: 6.5.1
+    specifier: 6.6.0
+    version: 6.6.0
   filenamify:
     specifier: ^6.0.0
     version: 6.0.0
@@ -1268,7 +1265,7 @@ packages:
       jest-regex-util: 29.4.3
       jest-util: 29.5.0
       micromatch: 4.0.5
-      pirates: 4.0.5
+      pirates: 4.0.6
       slash: 3.0.0
       write-file-atomic: 4.0.2
     transitivePeerDependencies:
@@ -3943,8 +3940,8 @@ packages:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
     engines: {node: '>= 0.4'}
 
-  /aws-sdk@2.1399.0:
-    resolution: {integrity: sha512-u9G78zs4vN/jl/AI+wNA0qnId2bUmXaCUrzRjTqN8/MWMda7igXmWHbcLmUC3BKmQPrp3EzgC+jBzFWoz5QL9A==}
+  /aws-sdk@2.1400.0:
+    resolution: {integrity: sha512-pHv+EqLINYk9VZZE9cbd+LxNPNeGdNz/QlUdZdpAaWpy4hQeCxvxpzO/38B6nomhEq/1U58+wZF7BRehOCUO5g==}
     engines: {node: '>= 10.0.0'}
     dependencies:
       buffer: 4.9.2
@@ -4258,7 +4255,7 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001504
+      caniuse-lite: 1.0.30001505
       electron-to-chromium: 1.4.434
       node-releases: 2.0.12
       update-browserslist-db: 1.0.11(browserslist@4.21.9)
@@ -4512,8 +4509,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: false
 
-  /caniuse-lite@1.0.30001504:
-    resolution: {integrity: sha512-5uo7eoOp2mKbWyfMXnGO9rJWOGU8duvzEiYITW+wivukL7yHH4gX9yuRaobu6El4jPxo6jKZfG+N6fB621GD/Q==}
+  /caniuse-lite@1.0.30001505:
+    resolution: {integrity: sha512-jaAOR5zVtxHfL0NjZyflVTtXm3D3J9P15zSJ7HmQF8dSKGA6tqzQq+0ZI3xkjyQj46I4/M0K2GbMpcAFOcbr3A==}
     dev: true
 
   /cardinal@2.1.1:
@@ -6358,22 +6355,6 @@ packages:
       create-hash: 1.2.0
       ethereum-cryptography: 0.1.3
       rlp: 2.2.7
-    dev: false
-
-  /ethers@6.5.1:
-    resolution: {integrity: sha512-jDpCnUGcyn39hnRUEtrulDZOtJcIPEz4Whccl3N9qhwdLsn1ELuDM9TgGgGJq6ph0p8/Uri+Wezmo/r69E+xkA==}
-    engines: {node: '>=14.0.0'}
-    dependencies:
-      '@adraffy/ens-normalize': 1.9.2
-      '@noble/hashes': 1.1.2
-      '@noble/secp256k1': 1.7.1
-      '@types/node': 18.15.13
-      aes-js: 4.0.0-beta.5
-      tslib: 2.4.0
-      ws: 8.5.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
     dev: false
 
   /ethers@6.6.0:
@@ -10579,7 +10560,7 @@ packages:
       '@oclif/plugin-help': 5.2.9(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       '@oclif/plugin-not-found': 2.3.23(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       '@oclif/plugin-warn-if-update-available': 2.0.39(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
-      aws-sdk: 2.1399.0
+      aws-sdk: 2.1400.0
       concurrently: 7.6.0
       debug: 4.3.4(supports-color@8.1.1)
       find-yarn-workspace-root: 2.0.0
@@ -11090,8 +11071,8 @@ packages:
       thread-stream: 0.15.2
     dev: false
 
-  /pirates@4.0.5:
-    resolution: {integrity: sha512-8V9+HQPupnaXMA23c5hvl69zXvTwTzyAYasnkb0Tts4XvO4CliqONMOnvlq26rkhLC3nWDFBJf73LU1e1VZLaQ==}
+  /pirates@4.0.6:
+    resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
     dev: true
 
@@ -14126,23 +14107,11 @@ packages:
     dev: true
 
   file:fluencelabs-deal-client-1.0.0.tgz:
-    resolution: {integrity: sha512-7edw/h+IuraKRPpU3Q6MyogkccvLjWu5lmNEF4L6DTNjrcXw8H65Lse8gZhkXeiwfH/1isuu2MD2Qd0gjkgeCQ==, tarball: file:fluencelabs-deal-client-1.0.0.tgz}
+    resolution: {integrity: sha512-4LvK0pwRcvDf3WzVDUVQxtVNCTHdih6t3QEMG/04ISa6q/PSYy0ai99rYqA5AvGow+3yUazKMO8Jyidt4M0ukA==, tarball: file:fluencelabs-deal-client-1.0.0.tgz}
     name: '@fluencelabs/deal-client'
     version: 1.0.0
     dependencies:
-      '@fluencelabs/deal-types': file:fluencelabs-deal-types-0.0.1.tgz
       '@tsconfig/node16-strictest-esm': 1.0.3
-      ethers: 6.5.1
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
-  file:fluencelabs-deal-types-0.0.1.tgz:
-    resolution: {integrity: sha512-9LYQBwOcVrQ9xCbjRraeyXtDIYyn7Z3A7f8w8rBBnVwqHuHDNeu2U7HE8wkUsdukA+4Ga+B56u/PMkeev0TEwg==, tarball: file:fluencelabs-deal-types-0.0.1.tgz}
-    name: '@fluencelabs/deal-types'
-    version: 0.0.1
-    dependencies:
       ethers: 6.6.0
     transitivePeerDependencies:
       - bufferutil

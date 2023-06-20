@@ -41,7 +41,6 @@
   "dependencies": {
     "@fluencelabs/aqua-api": "0.11.7",
     "@fluencelabs/deal-client": "file:fluencelabs-deal-client-1.0.0.tgz",
-    "@fluencelabs/deal-types": "file:fluencelabs-deal-types-0.0.1.tgz",
     "@fluencelabs/fluence-network-environment": "^1.0.14",
     "@fluencelabs/js-client.api": "0.11.6",
     "@fluencelabs/js-client.node": "0.6.10",
@@ -59,7 +58,7 @@
     "countly-sdk-nodejs": "^22.6.0",
     "decompress": "^4.2.1",
     "dotenv": "^16.0.3",
-    "ethers": "^6.5.1",
+    "ethers": "6.6.0",
     "filenamify": "^6.0.0",
     "get-random-values": "^2.0.0",
     "inquirer": "^9",
