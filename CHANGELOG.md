@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.17](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.16...fluence-cli-v0.4.17) (2023-06-16)
+
+
+### Features
+
+* add tracing for aqua [fixes DXJ-392] ([#290](https://github.com/fluencelabs/fluence-cli/issues/290)) ([865879b](https://github.com/fluencelabs/fluence-cli/commit/865879beccb93a3aca354cda4ce78c4dabb1b441))
+
+
+### Bug Fixes
+
+* fix init and docs [fixes DXJ-342] ([#294](https://github.com/fluencelabs/fluence-cli/issues/294)) ([eb99d9f](https://github.com/fluencelabs/fluence-cli/commit/eb99d9f77e223075d04ac20bd5efe4e9945f0a6d))
+
 ## [0.4.16](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.15...fluence-cli-v0.4.16) (2023-06-15)
 
 

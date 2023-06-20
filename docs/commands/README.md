@@ -70,12 +70,16 @@ EXAMPLES
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.12/dist/commands/aqua.ts)_
 =======
 _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/aqua.ts)_
 >>>>>>> main
 =======
 _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.16/dist/commands/aqua.ts)_
+>>>>>>> main
+=======
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/aqua.ts)_
 >>>>>>> main
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
@@ -178,7 +182,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.16/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/build.ts)_
 
 
 ## `fluence deal deploy [WORKER-NAMES]`
@@ -450,12 +454,16 @@ EXAMPLES
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 _See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.12/dist/commands/init.ts)_
 =======
 _See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/init.ts)_
 >>>>>>> main
 =======
 _See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.16/dist/commands/init.ts)_
+>>>>>>> main
+=======
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/init.ts)_
 >>>>>>> main
 
 ## `fluence key default [NAME]`
@@ -681,12 +689,16 @@ EXAMPLES
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.12/dist/commands/run.ts)_
 =======
 _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/run.ts)_
 >>>>>>> main
 =======
 _See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.16/dist/commands/run.ts)_
+>>>>>>> main
+=======
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/run.ts)_
 >>>>>>> main
 
 ## `fluence service add [PATH | URL]`
