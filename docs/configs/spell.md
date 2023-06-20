@@ -1,6 +1,6 @@
 # spell.yaml
 
-Defines a spell. You can use `fluence spell new` command to generate a template for new spell
+Defines a spell. You can use `flox spell new` command to generate a template for new spell
 
 ## Properties
 
