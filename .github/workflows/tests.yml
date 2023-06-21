@@ -39,8 +39,8 @@ on:
         description: "js-client snapshots"
         type: string
         default: "null"
-      aqua-api-version:
-        description: "aqua-api version"
+      aqua-snapshots:
+        description: "aqua snapshots"
         type: string
         default: "null"
 
@@ -136,11 +136,11 @@ jobs:
           package-manager: pnpm
 
       - name: Set aqua-api version
-        if: inputs.aqua-api-version != 'null'
+        if: inputs.aqua-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
           package: "@fluencelabs/aqua-api"
-          version: ${{ inputs.aqua-api-version }}
+          version: "${{ fromJson(inputs.aqua-snapshots)['api'] }}",
           package-manager: pnpm
 
       - name: Update versions.json
