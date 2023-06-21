@@ -8,13 +8,14 @@
  * Aqua version: 0.11.7
  *
  */
-import type { IFluenceClient as IFluenceClient$$, CallParams as CallParams$$ } from '@fluencelabs/js-client.api';
+import type {
+  IFluenceClient as IFluenceClient$$,
+  CallParams as CallParams$$,
+} from "@fluencelabs/js-client.api";
 import {
-    v5_callFunction as callFunction$$,
-    v5_registerService as registerService$$,
-} from '@fluencelabs/js-client.api';
-    
-
+  v5_callFunction as callFunction$$,
+  v5_registerService as registerService$$,
+} from "@fluencelabs/js-client.api";
 
 // Services
 
@@ -438,286 +439,318 @@ export const upload_deploy_script = `
                      )
                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
                     )
-    `
-export type Upload_deployArgConfig = { installation_script: string; installation_trigger: { blockchain: { end_block: number; start_block: number; }; clock: { end_sec: number; period_sec: number; start_sec: number; }; connections: { connect: boolean; disconnect: boolean; }; }; workers: { config: { services: { modules: { config: string; wasm: string; }[]; name: string; }[]; spells: { config: { blockchain: { end_block: number; start_block: number; }; clock: { end_sec: number; period_sec: number; start_sec: number; }; connections: { connect: boolean; disconnect: boolean; }; }; init_args: any; name: string; script: string; }[]; }; hosts: string[]; name: string; }[]; } 
-export type Upload_deployResult = { workers: { definition: string; installation_spells: { host_id: string; spell_id: string; worker_id: string; }[]; name: string; }[]; }
+    `;
+export type Upload_deployArgConfig = {
+  installation_script: string;
+  installation_trigger: {
+    blockchain: { end_block: number; start_block: number };
+    clock: { end_sec: number; period_sec: number; start_sec: number };
+    connections: { connect: boolean; disconnect: boolean };
+  };
+  workers: {
+    config: {
+      services: { modules: { config: string; wasm: string }[]; name: string }[];
+      spells: {
+        config: {
+          blockchain: { end_block: number; start_block: number };
+          clock: { end_sec: number; period_sec: number; start_sec: number };
+          connections: { connect: boolean; disconnect: boolean };
+        };
+        init_args: any;
+        name: string;
+        script: string;
+      }[];
+    };
+    hosts: string[];
+    name: string;
+  }[];
+};
+export type Upload_deployResult = {
+  workers: {
+    definition: string;
+    installation_spells: {
+      host_id: string;
+      spell_id: string;
+      worker_id: string;
+    }[];
+    name: string;
+  }[];
+};
 export function upload_deploy(
-    config_: Upload_deployArgConfig,
-    config?: {ttl?: number}
+  config_: Upload_deployArgConfig,
+  config?: { ttl?: number }
 ): Promise<Upload_deployResult>;
 
 export function upload_deploy(
-    peer: IFluenceClient$$,
-    config_: Upload_deployArgConfig,
-    config?: {ttl?: number}
+  peer: IFluenceClient$$,
+  config_: Upload_deployArgConfig,
+  config?: { ttl?: number }
 ): Promise<Upload_deployResult>;
 
 export function upload_deploy(...args: any) {
-
-
-    return callFunction$$(
-        args,
-        {
-    "functionName" : "upload_deploy",
-    "arrow" : {
-        "tag" : "arrow",
-        "domain" : {
-            "tag" : "labeledProduct",
-            "fields" : {
-                "config" : {
-                    "tag" : "struct",
-                    "name" : "LocalAppDeployConfig",
-                    "fields" : {
-                        "installation_script" : {
-                            "tag" : "scalar",
-                            "name" : "string"
+  return callFunction$$(
+    args,
+    {
+      functionName: "upload_deploy",
+      arrow: {
+        tag: "arrow",
+        domain: {
+          tag: "labeledProduct",
+          fields: {
+            config: {
+              tag: "struct",
+              name: "LocalAppDeployConfig",
+              fields: {
+                installation_script: {
+                  tag: "scalar",
+                  name: "string",
+                },
+                installation_trigger: {
+                  tag: "struct",
+                  name: "TriggerConfig",
+                  fields: {
+                    blockchain: {
+                      tag: "struct",
+                      name: "BlockChainConfig",
+                      fields: {
+                        end_block: {
+                          tag: "scalar",
+                          name: "u32",
                         },
-                        "installation_trigger" : {
-                            "tag" : "struct",
-                            "name" : "TriggerConfig",
-                            "fields" : {
-                                "blockchain" : {
-                                    "tag" : "struct",
-                                    "name" : "BlockChainConfig",
-                                    "fields" : {
-                                        "end_block" : {
-                                            "tag" : "scalar",
-                                            "name" : "u32"
-                                        },
-                                        "start_block" : {
-                                            "tag" : "scalar",
-                                            "name" : "u32"
-                                        }
-                                    }
-                                },
-                                "clock" : {
-                                    "tag" : "struct",
-                                    "name" : "ClockConfig",
-                                    "fields" : {
-                                        "end_sec" : {
-                                            "tag" : "scalar",
-                                            "name" : "u32"
-                                        },
-                                        "period_sec" : {
-                                            "tag" : "scalar",
-                                            "name" : "u32"
-                                        },
-                                        "start_sec" : {
-                                            "tag" : "scalar",
-                                            "name" : "u32"
-                                        }
-                                    }
-                                },
-                                "connections" : {
-                                    "tag" : "struct",
-                                    "name" : "ConnectionPoolConfig",
-                                    "fields" : {
-                                        "connect" : {
-                                            "tag" : "scalar",
-                                            "name" : "bool"
-                                        },
-                                        "disconnect" : {
-                                            "tag" : "scalar",
-                                            "name" : "bool"
-                                        }
-                                    }
-                                }
-                            }
+                        start_block: {
+                          tag: "scalar",
+                          name: "u32",
                         },
-                        "workers" : {
-                            "tag" : "array",
-                            "type" : {
-                                "tag" : "struct",
-                                "name" : "LocalWorkerDeployConfig",
-                                "fields" : {
-                                    "config" : {
-                                        "tag" : "struct",
-                                        "name" : "LocalWorkerConfig",
-                                        "fields" : {
-                                            "services" : {
-                                                "tag" : "array",
-                                                "type" : {
-                                                    "tag" : "struct",
-                                                    "name" : "LocalService",
-                                                    "fields" : {
-                                                        "modules" : {
-                                                            "tag" : "array",
-                                                            "type" : {
-                                                                "tag" : "struct",
-                                                                "name" : "LocalModule",
-                                                                "fields" : {
-                                                                    "config" : {
-                                                                        "tag" : "scalar",
-                                                                        "name" : "string"
-                                                                    },
-                                                                    "wasm" : {
-                                                                        "tag" : "scalar",
-                                                                        "name" : "string"
-                                                                    }
-                                                                }
-                                                            }
-                                                        },
-                                                        "name" : {
-                                                            "tag" : "scalar",
-                                                            "name" : "string"
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            "spells" : {
-                                                "tag" : "array",
-                                                "type" : {
-                                                    "tag" : "struct",
-                                                    "name" : "LocalSpell",
-                                                    "fields" : {
-                                                        "config" : {
-                                                            "tag" : "struct",
-                                                            "name" : "TriggerConfig",
-                                                            "fields" : {
-                                                                "blockchain" : {
-                                                                    "tag" : "struct",
-                                                                    "name" : "BlockChainConfig",
-                                                                    "fields" : {
-                                                                        "end_block" : {
-                                                                            "tag" : "scalar",
-                                                                            "name" : "u32"
-                                                                        },
-                                                                        "start_block" : {
-                                                                            "tag" : "scalar",
-                                                                            "name" : "u32"
-                                                                        }
-                                                                    }
-                                                                },
-                                                                "clock" : {
-                                                                    "tag" : "struct",
-                                                                    "name" : "ClockConfig",
-                                                                    "fields" : {
-                                                                        "end_sec" : {
-                                                                            "tag" : "scalar",
-                                                                            "name" : "u32"
-                                                                        },
-                                                                        "period_sec" : {
-                                                                            "tag" : "scalar",
-                                                                            "name" : "u32"
-                                                                        },
-                                                                        "start_sec" : {
-                                                                            "tag" : "scalar",
-                                                                            "name" : "u32"
-                                                                        }
-                                                                    }
-                                                                },
-                                                                "connections" : {
-                                                                    "tag" : "struct",
-                                                                    "name" : "ConnectionPoolConfig",
-                                                                    "fields" : {
-                                                                        "connect" : {
-                                                                            "tag" : "scalar",
-                                                                            "name" : "bool"
-                                                                        },
-                                                                        "disconnect" : {
-                                                                            "tag" : "scalar",
-                                                                            "name" : "bool"
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        },
-                                                        "init_args" : {
-                                                            "tag" : "topType"
-                                                        },
-                                                        "name" : {
-                                                            "tag" : "scalar",
-                                                            "name" : "string"
-                                                        },
-                                                        "script" : {
-                                                            "tag" : "scalar",
-                                                            "name" : "string"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                      },
+                    },
+                    clock: {
+                      tag: "struct",
+                      name: "ClockConfig",
+                      fields: {
+                        end_sec: {
+                          tag: "scalar",
+                          name: "u32",
+                        },
+                        period_sec: {
+                          tag: "scalar",
+                          name: "u32",
+                        },
+                        start_sec: {
+                          tag: "scalar",
+                          name: "u32",
+                        },
+                      },
+                    },
+                    connections: {
+                      tag: "struct",
+                      name: "ConnectionPoolConfig",
+                      fields: {
+                        connect: {
+                          tag: "scalar",
+                          name: "bool",
+                        },
+                        disconnect: {
+                          tag: "scalar",
+                          name: "bool",
+                        },
+                      },
+                    },
+                  },
+                },
+                workers: {
+                  tag: "array",
+                  type: {
+                    tag: "struct",
+                    name: "LocalWorkerDeployConfig",
+                    fields: {
+                      config: {
+                        tag: "struct",
+                        name: "LocalWorkerConfig",
+                        fields: {
+                          services: {
+                            tag: "array",
+                            type: {
+                              tag: "struct",
+                              name: "LocalService",
+                              fields: {
+                                modules: {
+                                  tag: "array",
+                                  type: {
+                                    tag: "struct",
+                                    name: "LocalModule",
+                                    fields: {
+                                      config: {
+                                        tag: "scalar",
+                                        name: "string",
+                                      },
+                                      wasm: {
+                                        tag: "scalar",
+                                        name: "string",
+                                      },
                                     },
-                                    "hosts" : {
-                                        "tag" : "array",
-                                        "type" : {
-                                            "tag" : "scalar",
-                                            "name" : "string"
-                                        }
+                                  },
+                                },
+                                name: {
+                                  tag: "scalar",
+                                  name: "string",
+                                },
+                              },
+                            },
+                          },
+                          spells: {
+                            tag: "array",
+                            type: {
+                              tag: "struct",
+                              name: "LocalSpell",
+                              fields: {
+                                config: {
+                                  tag: "struct",
+                                  name: "TriggerConfig",
+                                  fields: {
+                                    blockchain: {
+                                      tag: "struct",
+                                      name: "BlockChainConfig",
+                                      fields: {
+                                        end_block: {
+                                          tag: "scalar",
+                                          name: "u32",
+                                        },
+                                        start_block: {
+                                          tag: "scalar",
+                                          name: "u32",
+                                        },
+                                      },
                                     },
-                                    "name" : {
-                                        "tag" : "scalar",
-                                        "name" : "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                                    clock: {
+                                      tag: "struct",
+                                      name: "ClockConfig",
+                                      fields: {
+                                        end_sec: {
+                                          tag: "scalar",
+                                          name: "u32",
+                                        },
+                                        period_sec: {
+                                          tag: "scalar",
+                                          name: "u32",
+                                        },
+                                        start_sec: {
+                                          tag: "scalar",
+                                          name: "u32",
+                                        },
+                                      },
+                                    },
+                                    connections: {
+                                      tag: "struct",
+                                      name: "ConnectionPoolConfig",
+                                      fields: {
+                                        connect: {
+                                          tag: "scalar",
+                                          name: "bool",
+                                        },
+                                        disconnect: {
+                                          tag: "scalar",
+                                          name: "bool",
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                                init_args: {
+                                  tag: "topType",
+                                },
+                                name: {
+                                  tag: "scalar",
+                                  name: "string",
+                                },
+                                script: {
+                                  tag: "scalar",
+                                  name: "string",
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      hosts: {
+                        tag: "array",
+                        type: {
+                          tag: "scalar",
+                          name: "string",
+                        },
+                      },
+                      name: {
+                        tag: "scalar",
+                        name: "string",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-        "codomain" : {
-            "tag" : "unlabeledProduct",
-            "items" : [
-                {
-                    "tag" : "struct",
-                    "name" : "DeployedAppWorkers",
-                    "fields" : {
-                        "workers" : {
-                            "tag" : "array",
-                            "type" : {
-                                "tag" : "struct",
-                                "name" : "DeployedWorkers",
-                                "fields" : {
-                                    "definition" : {
-                                        "tag" : "scalar",
-                                        "name" : "string"
-                                    },
-                                    "installation_spells" : {
-                                        "tag" : "array",
-                                        "type" : {
-                                            "tag" : "struct",
-                                            "name" : "DeployedSpell",
-                                            "fields" : {
-                                                "host_id" : {
-                                                    "tag" : "scalar",
-                                                    "name" : "string"
-                                                },
-                                                "spell_id" : {
-                                                    "tag" : "scalar",
-                                                    "name" : "string"
-                                                },
-                                                "worker_id" : {
-                                                    "tag" : "scalar",
-                                                    "name" : "string"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "name" : {
-                                        "tag" : "scalar",
-                                        "name" : "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            ]
-        }
+        codomain: {
+          tag: "unlabeledProduct",
+          items: [
+            {
+              tag: "struct",
+              name: "DeployedAppWorkers",
+              fields: {
+                workers: {
+                  tag: "array",
+                  type: {
+                    tag: "struct",
+                    name: "DeployedWorkers",
+                    fields: {
+                      definition: {
+                        tag: "scalar",
+                        name: "string",
+                      },
+                      installation_spells: {
+                        tag: "array",
+                        type: {
+                          tag: "struct",
+                          name: "DeployedSpell",
+                          fields: {
+                            host_id: {
+                              tag: "scalar",
+                              name: "string",
+                            },
+                            spell_id: {
+                              tag: "scalar",
+                              name: "string",
+                            },
+                            worker_id: {
+                              tag: "scalar",
+                              name: "string",
+                            },
+                          },
+                        },
+                      },
+                      name: {
+                        tag: "scalar",
+                        name: "string",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      names: {
+        relay: "-relay-",
+        getDataSrv: "getDataSrv",
+        callbackSrv: "callbackSrv",
+        responseSrv: "callbackSrv",
+        responseFnName: "response",
+        errorHandlingSrv: "errorHandlingSrv",
+        errorFnName: "error",
+      },
     },
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        upload_deploy_script
-    )
+    upload_deploy_script
+  );
 }
 
 export const get_logs_script = `
@@ -789,128 +822,152 @@ export const get_logs_script = `
                      )
                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
                     )
-    `
-export type Get_logsArgApp_workers = { workers: { definition: string; installation_spells: { host_id: string; spell_id: string; worker_id: string; }[]; name: string; }[]; } 
+    `;
+export type Get_logsArgApp_workers = {
+  workers: {
+    definition: string;
+    installation_spells: {
+      host_id: string;
+      spell_id: string;
+      worker_id: string;
+    }[];
+    name: string;
+  }[];
+};
 
 export function get_logs(
-    app_workers: Get_logsArgApp_workers,
-    config?: {ttl?: number}
-): Promise<{ host_id: string; logs: string[]; spell_id: string; worker_id: string; worker_name: string; }[]>;
+  app_workers: Get_logsArgApp_workers,
+  config?: { ttl?: number }
+): Promise<
+  {
+    host_id: string;
+    logs: string[];
+    spell_id: string;
+    worker_id: string;
+    worker_name: string;
+  }[]
+>;
 
 export function get_logs(
-    peer: IFluenceClient$$,
-    app_workers: Get_logsArgApp_workers,
-    config?: {ttl?: number}
-): Promise<{ host_id: string; logs: string[]; spell_id: string; worker_id: string; worker_name: string; }[]>;
+  peer: IFluenceClient$$,
+  app_workers: Get_logsArgApp_workers,
+  config?: { ttl?: number }
+): Promise<
+  {
+    host_id: string;
+    logs: string[];
+    spell_id: string;
+    worker_id: string;
+    worker_name: string;
+  }[]
+>;
 
 export function get_logs(...args: any) {
-
-
-    return callFunction$$(
-        args,
-        {
-    "functionName" : "get_logs",
-    "arrow" : {
-        "tag" : "arrow",
-        "domain" : {
-            "tag" : "labeledProduct",
-            "fields" : {
-                "app_workers" : {
-                    "tag" : "struct",
-                    "name" : "DeployedAppWorkers",
-                    "fields" : {
-                        "workers" : {
-                            "tag" : "array",
-                            "type" : {
-                                "tag" : "struct",
-                                "name" : "DeployedWorkers",
-                                "fields" : {
-                                    "definition" : {
-                                        "tag" : "scalar",
-                                        "name" : "string"
-                                    },
-                                    "installation_spells" : {
-                                        "tag" : "array",
-                                        "type" : {
-                                            "tag" : "struct",
-                                            "name" : "DeployedSpell",
-                                            "fields" : {
-                                                "host_id" : {
-                                                    "tag" : "scalar",
-                                                    "name" : "string"
-                                                },
-                                                "spell_id" : {
-                                                    "tag" : "scalar",
-                                                    "name" : "string"
-                                                },
-                                                "worker_id" : {
-                                                    "tag" : "scalar",
-                                                    "name" : "string"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "name" : {
-                                        "tag" : "scalar",
-                                        "name" : "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+  return callFunction$$(
+    args,
+    {
+      functionName: "get_logs",
+      arrow: {
+        tag: "arrow",
+        domain: {
+          tag: "labeledProduct",
+          fields: {
+            app_workers: {
+              tag: "struct",
+              name: "DeployedAppWorkers",
+              fields: {
+                workers: {
+                  tag: "array",
+                  type: {
+                    tag: "struct",
+                    name: "DeployedWorkers",
+                    fields: {
+                      definition: {
+                        tag: "scalar",
+                        name: "string",
+                      },
+                      installation_spells: {
+                        tag: "array",
+                        type: {
+                          tag: "struct",
+                          name: "DeployedSpell",
+                          fields: {
+                            host_id: {
+                              tag: "scalar",
+                              name: "string",
+                            },
+                            spell_id: {
+                              tag: "scalar",
+                              name: "string",
+                            },
+                            worker_id: {
+                              tag: "scalar",
+                              name: "string",
+                            },
+                          },
+                        },
+                      },
+                      name: {
+                        tag: "scalar",
+                        name: "string",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-        "codomain" : {
-            "tag" : "unlabeledProduct",
-            "items" : [
-                {
-                    "tag" : "array",
-                    "type" : {
-                        "tag" : "struct",
-                        "name" : "LogDirect",
-                        "fields" : {
-                            "worker_id" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            },
-                            "worker_name" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            },
-                            "host_id" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            },
-                            "logs" : {
-                                "tag" : "array",
-                                "type" : {
-                                    "tag" : "scalar",
-                                    "name" : "string"
-                                }
-                            },
-                            "spell_id" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            }
-                        }
-                    }
-                }
-            ]
-        }
+        codomain: {
+          tag: "unlabeledProduct",
+          items: [
+            {
+              tag: "array",
+              type: {
+                tag: "struct",
+                name: "LogDirect",
+                fields: {
+                  worker_id: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                  worker_name: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                  host_id: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                  logs: {
+                    tag: "array",
+                    type: {
+                      tag: "scalar",
+                      name: "string",
+                    },
+                  },
+                  spell_id: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      names: {
+        relay: "-relay-",
+        getDataSrv: "getDataSrv",
+        callbackSrv: "callbackSrv",
+        responseSrv: "callbackSrv",
+        responseFnName: "response",
+        errorHandlingSrv: "errorHandlingSrv",
+        errorFnName: "error",
+      },
     },
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        get_logs_script
-    )
+    get_logs_script
+  );
 }
 
 export const get_logs_deal_script = `
@@ -1262,91 +1319,104 @@ export const get_logs_deal_script = `
                      )
                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
                     )
-    `
- 
+    `;
 
 export function get_logs_deal(
-    deals: string[],
-    config?: {ttl?: number}
-): Promise<{ deal_id: string; host_id: string; logs: string[]; spell_id: string; worker_id: string; }[]>;
+  deals: string[],
+  config?: { ttl?: number }
+): Promise<
+  {
+    deal_id: string;
+    host_id: string;
+    logs: string[];
+    spell_id: string;
+    worker_id: string;
+  }[]
+>;
 
 export function get_logs_deal(
-    peer: IFluenceClient$$,
-    deals: string[],
-    config?: {ttl?: number}
-): Promise<{ deal_id: string; host_id: string; logs: string[]; spell_id: string; worker_id: string; }[]>;
+  peer: IFluenceClient$$,
+  deals: string[],
+  config?: { ttl?: number }
+): Promise<
+  {
+    deal_id: string;
+    host_id: string;
+    logs: string[];
+    spell_id: string;
+    worker_id: string;
+  }[]
+>;
 
 export function get_logs_deal(...args: any) {
-
-
-    return callFunction$$(
-        args,
-        {
-    "functionName" : "get_logs_deal",
-    "arrow" : {
-        "tag" : "arrow",
-        "domain" : {
-            "tag" : "labeledProduct",
-            "fields" : {
-                "deals" : {
-                    "tag" : "array",
-                    "type" : {
-                        "tag" : "scalar",
-                        "name" : "string"
-                    }
-                }
-            }
+  return callFunction$$(
+    args,
+    {
+      functionName: "get_logs_deal",
+      arrow: {
+        tag: "arrow",
+        domain: {
+          tag: "labeledProduct",
+          fields: {
+            deals: {
+              tag: "array",
+              type: {
+                tag: "scalar",
+                name: "string",
+              },
+            },
+          },
         },
-        "codomain" : {
-            "tag" : "unlabeledProduct",
-            "items" : [
-                {
-                    "tag" : "array",
-                    "type" : {
-                        "tag" : "struct",
-                        "name" : "LogDeal",
-                        "fields" : {
-                            "worker_id" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            },
-                            "host_id" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            },
-                            "logs" : {
-                                "tag" : "array",
-                                "type" : {
-                                    "tag" : "scalar",
-                                    "name" : "string"
-                                }
-                            },
-                            "deal_id" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            },
-                            "spell_id" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            }
-                        }
-                    }
-                }
-            ]
-        }
+        codomain: {
+          tag: "unlabeledProduct",
+          items: [
+            {
+              tag: "array",
+              type: {
+                tag: "struct",
+                name: "LogDeal",
+                fields: {
+                  worker_id: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                  host_id: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                  logs: {
+                    tag: "array",
+                    type: {
+                      tag: "scalar",
+                      name: "string",
+                    },
+                  },
+                  deal_id: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                  spell_id: {
+                    tag: "scalar",
+                    name: "string",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      names: {
+        relay: "-relay-",
+        getDataSrv: "getDataSrv",
+        callbackSrv: "callbackSrv",
+        responseSrv: "callbackSrv",
+        responseFnName: "response",
+        errorHandlingSrv: "errorHandlingSrv",
+        errorFnName: "error",
+      },
     },
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        get_logs_deal_script
-    )
+    get_logs_deal_script
+  );
 }
 
 /* eslint-enable */

@@ -63,3 +63,4 @@ A map of deployed workers
 | `host_id`   | string | **Yes**  |             |
 | `spell_id`  | string | **Yes**  |             |
 | `worker_id` | string | **Yes**  |             |
+

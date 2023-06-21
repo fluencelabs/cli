@@ -8,94 +8,99 @@
  * Aqua version: 0.11.7
  *
  */
-import type { IFluenceClient as IFluenceClient$$, CallParams as CallParams$$ } from '@fluencelabs/js-client.api';
+import type {
+  IFluenceClient as IFluenceClient$$,
+  CallParams as CallParams$$,
+} from "@fluencelabs/js-client.api";
 import {
-    v5_callFunction as callFunction$$,
-    v5_registerService as registerService$$,
-} from '@fluencelabs/js-client.api';
-    
-
+  v5_callFunction as callFunction$$,
+  v5_registerService as registerService$$,
+} from "@fluencelabs/js-client.api";
 
 // Services
 
 export interface ScopeDef {
-    get_peer_id: (callParams: CallParams$$<null>) => string | Promise<string>;
+  get_peer_id: (callParams: CallParams$$<null>) => string | Promise<string>;
 }
 export function registerScope(service: ScopeDef): void;
 export function registerScope(serviceId: string, service: ScopeDef): void;
 export function registerScope(peer: IFluenceClient$$, service: ScopeDef): void;
-export function registerScope(peer: IFluenceClient$$, serviceId: string, service: ScopeDef): void;
-       
+export function registerScope(
+  peer: IFluenceClient$$,
+  serviceId: string,
+  service: ScopeDef
+): void;
 
 export function registerScope(...args: any) {
-    registerService$$(
-        args,
-        {
-    "defaultServiceId" : "scope",
-    "functions" : {
-        "tag" : "labeledProduct",
-        "fields" : {
-            "get_peer_id" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "nil"
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    ]
-                }
-            }
-        }
-    }
+  registerService$$(args, {
+    defaultServiceId: "scope",
+    functions: {
+      tag: "labeledProduct",
+      fields: {
+        get_peer_id: {
+          tag: "arrow",
+          domain: {
+            tag: "nil",
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "string",
+              },
+            ],
+          },
+        },
+      },
+    },
+  });
 }
-    );
-}
-      
-
 
 export interface PeerTimeTruncDef {
-    timestamp_sec: (callParams: CallParams$$<null>) => number | Promise<number>;
+  timestamp_sec: (callParams: CallParams$$<null>) => number | Promise<number>;
 }
 export function registerPeerTimeTrunc(service: PeerTimeTruncDef): void;
-export function registerPeerTimeTrunc(serviceId: string, service: PeerTimeTruncDef): void;
-export function registerPeerTimeTrunc(peer: IFluenceClient$$, service: PeerTimeTruncDef): void;
-export function registerPeerTimeTrunc(peer: IFluenceClient$$, serviceId: string, service: PeerTimeTruncDef): void;
-       
+export function registerPeerTimeTrunc(
+  serviceId: string,
+  service: PeerTimeTruncDef
+): void;
+export function registerPeerTimeTrunc(
+  peer: IFluenceClient$$,
+  service: PeerTimeTruncDef
+): void;
+export function registerPeerTimeTrunc(
+  peer: IFluenceClient$$,
+  serviceId: string,
+  service: PeerTimeTruncDef
+): void;
 
 export function registerPeerTimeTrunc(...args: any) {
-    registerService$$(
-        args,
-        {
-    "defaultServiceId" : "peer",
-    "functions" : {
-        "tag" : "labeledProduct",
-        "fields" : {
-            "timestamp_sec" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "nil"
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "u32"
-                        }
-                    ]
-                }
-            }
-        }
-    }
+  registerService$$(args, {
+    defaultServiceId: "peer",
+    functions: {
+      tag: "labeledProduct",
+      fields: {
+        timestamp_sec: {
+          tag: "arrow",
+          domain: {
+            tag: "nil",
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "u32",
+              },
+            ],
+          },
+        },
+      },
+    },
+  });
 }
-    );
-}
-      
+
 // Functions
 export const deal_install_script = `
                     (xor
@@ -4312,66 +4317,63 @@ export const deal_install_script = `
                      )
                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 30])
                     )
-    `
- 
+    `;
 
 export function deal_install(
-    ipfs: string,
-    worker_def_cid: string,
-    deal_id: string,
-    config?: {ttl?: number}
+  ipfs: string,
+  worker_def_cid: string,
+  deal_id: string,
+  config?: { ttl?: number }
 ): Promise<void>;
 
 export function deal_install(
-    peer: IFluenceClient$$,
-    ipfs: string,
-    worker_def_cid: string,
-    deal_id: string,
-    config?: {ttl?: number}
+  peer: IFluenceClient$$,
+  ipfs: string,
+  worker_def_cid: string,
+  deal_id: string,
+  config?: { ttl?: number }
 ): Promise<void>;
 
 export function deal_install(...args: any) {
-
-
-    return callFunction$$(
-        args,
-        {
-    "functionName" : "deal_install",
-    "arrow" : {
-        "tag" : "arrow",
-        "domain" : {
-            "tag" : "labeledProduct",
-            "fields" : {
-                "ipfs" : {
-                    "tag" : "scalar",
-                    "name" : "string"
-                },
-                "worker_def_cid" : {
-                    "tag" : "scalar",
-                    "name" : "string"
-                },
-                "deal_id" : {
-                    "tag" : "scalar",
-                    "name" : "string"
-                }
-            }
+  return callFunction$$(
+    args,
+    {
+      functionName: "deal_install",
+      arrow: {
+        tag: "arrow",
+        domain: {
+          tag: "labeledProduct",
+          fields: {
+            ipfs: {
+              tag: "scalar",
+              name: "string",
+            },
+            worker_def_cid: {
+              tag: "scalar",
+              name: "string",
+            },
+            deal_id: {
+              tag: "scalar",
+              name: "string",
+            },
+          },
         },
-        "codomain" : {
-            "tag" : "nil"
-        }
+        codomain: {
+          tag: "nil",
+        },
+      },
+      names: {
+        relay: "-relay-",
+        getDataSrv: "getDataSrv",
+        callbackSrv: "callbackSrv",
+        responseSrv: "callbackSrv",
+        responseFnName: "response",
+        errorHandlingSrv: "errorHandlingSrv",
+        errorFnName: "error",
+      },
     },
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        deal_install_script
-    )
+    deal_install_script
+  );
 }
 
 export const resolve_workers_script = `
@@ -4680,54 +4682,51 @@ export const resolve_workers_script = `
                      )
                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
                     )
-    `
- 
+    `;
 
 export function resolve_workers(
-    deal_id: string,
-    config?: {ttl?: number}
+  deal_id: string,
+  config?: { ttl?: number }
 ): Promise<void>;
 
 export function resolve_workers(
-    peer: IFluenceClient$$,
-    deal_id: string,
-    config?: {ttl?: number}
+  peer: IFluenceClient$$,
+  deal_id: string,
+  config?: { ttl?: number }
 ): Promise<void>;
 
 export function resolve_workers(...args: any) {
-
-
-    return callFunction$$(
-        args,
-        {
-    "functionName" : "resolve_workers",
-    "arrow" : {
-        "tag" : "arrow",
-        "domain" : {
-            "tag" : "labeledProduct",
-            "fields" : {
-                "deal_id" : {
-                    "tag" : "scalar",
-                    "name" : "string"
-                }
-            }
+  return callFunction$$(
+    args,
+    {
+      functionName: "resolve_workers",
+      arrow: {
+        tag: "arrow",
+        domain: {
+          tag: "labeledProduct",
+          fields: {
+            deal_id: {
+              tag: "scalar",
+              name: "string",
+            },
+          },
         },
-        "codomain" : {
-            "tag" : "nil"
-        }
+        codomain: {
+          tag: "nil",
+        },
+      },
+      names: {
+        relay: "-relay-",
+        getDataSrv: "getDataSrv",
+        callbackSrv: "callbackSrv",
+        responseSrv: "callbackSrv",
+        responseFnName: "response",
+        errorHandlingSrv: "errorHandlingSrv",
+        errorFnName: "error",
+      },
     },
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        resolve_workers_script
-    )
+    resolve_workers_script
+  );
 }
 
 export const create_sub_script = `
@@ -5071,70 +5070,68 @@ export const create_sub_script = `
                      )
                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
                     )
-    `
- 
-export type Create_subResult = [string | null, string[]]
+    `;
+
+export type Create_subResult = [string | null, string[]];
 export function create_sub(
-    deal_id: string,
-    config?: {ttl?: number}
+  deal_id: string,
+  config?: { ttl?: number }
 ): Promise<Create_subResult>;
 
 export function create_sub(
-    peer: IFluenceClient$$,
-    deal_id: string,
-    config?: {ttl?: number}
+  peer: IFluenceClient$$,
+  deal_id: string,
+  config?: { ttl?: number }
 ): Promise<Create_subResult>;
 
 export function create_sub(...args: any) {
-
-
-    return callFunction$$(
-        args,
-        {
-    "functionName" : "create_sub",
-    "arrow" : {
-        "tag" : "arrow",
-        "domain" : {
-            "tag" : "labeledProduct",
-            "fields" : {
-                "deal_id" : {
-                    "tag" : "scalar",
-                    "name" : "string"
-                }
-            }
+  return callFunction$$(
+    args,
+    {
+      functionName: "create_sub",
+      arrow: {
+        tag: "arrow",
+        domain: {
+          tag: "labeledProduct",
+          fields: {
+            deal_id: {
+              tag: "scalar",
+              name: "string",
+            },
+          },
         },
-        "codomain" : {
-            "tag" : "unlabeledProduct",
-            "items" : [
-                {
-                    "tag" : "option",
-                    "type" : {
-                        "tag" : "scalar",
-                        "name" : "string"
-                    }
-                },
-                {
-                    "tag" : "array",
-                    "type" : {
-                        "tag" : "scalar",
-                        "name" : "string"
-                    }
-                }
-            ]
-        }
+        codomain: {
+          tag: "unlabeledProduct",
+          items: [
+            {
+              tag: "option",
+              type: {
+                tag: "scalar",
+                name: "string",
+              },
+            },
+            {
+              tag: "array",
+              type: {
+                tag: "scalar",
+                name: "string",
+              },
+            },
+          ],
+        },
+      },
+      names: {
+        relay: "-relay-",
+        getDataSrv: "getDataSrv",
+        callbackSrv: "callbackSrv",
+        responseSrv: "callbackSrv",
+        responseFnName: "response",
+        errorHandlingSrv: "errorHandlingSrv",
+        errorFnName: "error",
+      },
     },
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        create_sub_script
-    )
+    create_sub_script
+  );
 }
 
 /* eslint-enable */

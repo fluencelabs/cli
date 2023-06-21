@@ -41,3 +41,4 @@ Overrides of npm dependencies
 | Property              | Type   | Required | Description            |
 |-----------------------|--------|----------|------------------------|
 | `npm_dependency_name` | string | No       | npm dependency version |
+
