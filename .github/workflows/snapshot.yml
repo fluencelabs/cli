@@ -112,7 +112,7 @@ jobs:
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
           package: "@fluencelabs/aqua-api"
-          version: "${{ fromJson(inputs.aqua-snapshots)['api'] }}",
+          version: "${{ fromJson(inputs.aqua-snapshots)['api'] }}"
           package-manager: pnpm
 
       - name: Update versions.json
