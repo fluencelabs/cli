@@ -98,11 +98,6 @@ export const dealCreate = async ({
   );
 
   assert(
-    ethers.utils.isAddress(dealInfo.controller),
-    "Deal controller address is not valid"
-  );
-
-  assert(
     ethers.utils.isAddress(dealInfo.payment),
     "Deal payment address is not valid"
   );
