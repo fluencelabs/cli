@@ -75,9 +75,9 @@ export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
   },
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
-    globalConfig: "",
-    dealFactoryAddress: "",
-    developerFaucetAddress: "",
+    globalConfig: "0x20E8423dD4eCEd52D2Df7f4BC1B8d1f2aa922E23",
+    dealFactoryAddress: "0x635809FaB850e274C0EDc985885E51B5D6bD0524",
+    developerFaucetAddress: "0x11efBD5532e19583f97ef2129d64eBa9A138214c",
     chainId: 1313161555,
   },
 };
