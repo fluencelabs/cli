@@ -16,7 +16,7 @@
 
 import { assert } from "console";
 
-import { Workers__factory } from "@fluencelabs/deal-aurora";
+import { WorkersModule__factory } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -76,7 +76,7 @@ export default class Match extends BaseCommand<typeof Match> {
     promptConfirmTx(flags.privKey);
     const res = await waitTx(tx);
 
-    const workersInterface = Workers__factory.createInterface();
+    const workersInterface = WorkersModule__factory.createInterface();
     const eventTopic = workersInterface.getEventTopic(PAT_CREATED_EVENT_TOPIC);
 
     let patCount = 0;

@@ -27,12 +27,10 @@ import {
   type Core,
   type Matcher,
   Matcher__factory,
-  Config__factory,
-  type Config,
-  type Workers,
-  Workers__factory,
-  type Controller,
-  Controller__factory,
+  ConfigModule__factory,
+  type ConfigModule,
+  type WorkersModule,
+  WorkersModule__factory,
 } from "@fluencelabs/deal-aurora";
 import dealPkg from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
@@ -237,19 +235,14 @@ export class Deal {
     this.core = Core__factory.connect(dealAddress, this.signer);
   }
 
-  async getWorkers(): Promise<Workers> {
-    const workersAddress = await this.core.getWorkers();
-    return Workers__factory.connect(workersAddress, this.signer);
+  async getWorkers(): Promise<WorkersModule> {
+    const workersAddress = await this.core.workersModule();
+    return WorkersModule__factory.connect(workersAddress, this.signer);
   }
 
-  async getController(): Promise<Controller> {
-    const controllerAddress = await this.core.getController();
-    return Controller__factory.connect(controllerAddress, this.signer);
-  }
-
-  async getConfig(): Promise<Config> {
-    const configAddress = await this.core.getConfig();
-    return Config__factory.connect(configAddress, this.signer);
+  async getConfig(): Promise<ConfigModule> {
+    const configAddress = await this.core.configModule();
+    return ConfigModule__factory.connect(configAddress, this.signer);
   }
 }
 

@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 
-import { Workers__factory } from "@fluencelabs/deal-aurora";
+import { WorkersModule__factory } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
@@ -70,22 +70,22 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
 
     const deal = new Deal(dealAddress, signer);
     const config = await deal.getConfig();
-    const controller = await deal.getController();
+    const workersModule = await deal.getWorkers();
 
     const flt = await globalContracts.getFLT();
 
-    const v = await config.requiredStake();
+    const v = await config.requiredCollateral();
     const approveTx = await flt.approve(dealAddress, v);
 
     promptConfirmTx(flags.privKey);
     await waitTx(approveTx);
 
-    const joinTx = await controller.join();
+    const joinTx = await workersModule.join();
 
     promptConfirmTx(flags.privKey);
     const res = await waitTx(joinTx);
 
-    const workersInterface = Workers__factory.createInterface();
+    const workersInterface = WorkersModule__factory.createInterface();
 
     const eventTopic = workersInterface.getEventTopic(PAT_CREATED_EVENT_TOPIC);
 

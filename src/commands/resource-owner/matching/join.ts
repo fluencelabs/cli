@@ -67,7 +67,7 @@ export default class JoinToMatching extends BaseCommand<typeof JoinToMatching> {
     const factory = globalContracts.getFactory();
     const flt = await globalContracts.getFLT();
 
-    const collateral = await factory.REQUIRED_STAKE();
+    const collateral = await factory.REQUIRED_COLLATERAL();
     const pricePerEpoch = await factory.PRICE_PER_EPOCH();
 
     const approveTx = await flt.approve(
