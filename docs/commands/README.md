@@ -172,7 +172,6 @@ EXAMPLES
 
 _See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/build.ts)_
 
-
 ## `fluence deal deploy [WORKER-NAMES]`
 
 Deploy workers according to deal in 'deals' property in fluence.yaml

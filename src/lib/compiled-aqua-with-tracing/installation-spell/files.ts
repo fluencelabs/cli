@@ -8,294 +8,339 @@
  * Aqua version: 0.11.7
  *
  */
-import type { IFluenceClient as IFluenceClient$$, CallParams as CallParams$$ } from '@fluencelabs/js-client.api';
+import type {
+  IFluenceClient as IFluenceClient$$,
+  CallParams as CallParams$$,
+} from "@fluencelabs/js-client.api";
 import {
-    v5_callFunction as callFunction$$,
-    v5_registerService as registerService$$,
-} from '@fluencelabs/js-client.api';
-    
-
+  v5_callFunction as callFunction$$,
+  v5_registerService as registerService$$,
+} from "@fluencelabs/js-client.api";
 
 // Services
 
 export interface IpfsClientDef {
-    dag_upload: (multiaddr: string, path: string, callParams: CallParams$$<'multiaddr' | 'path'>) => string | Promise<string>;
-    dag_upload_string: (multiaddr: string, contents: string, callParams: CallParams$$<'multiaddr' | 'contents'>) => string | Promise<string>;
-    exists: (multiaddr: string, cid: string, callParams: CallParams$$<'multiaddr' | 'cid'>) => boolean | Promise<boolean>;
-    id: (multiaddr: string, callParams: CallParams$$<'multiaddr'>) => string | Promise<string>;
-    remove: (multiaddr: string, cid: string, callParams: CallParams$$<'multiaddr' | 'cid'>) => string | Promise<string>;
-    upload: (multiaddr: string, path: string, callParams: CallParams$$<'multiaddr' | 'path'>) => string | Promise<string>;
-    upload_string: (multiaddr: string, contents: string, callParams: CallParams$$<'multiaddr' | 'contents'>) => string | Promise<string>;
+  dag_upload: (
+    multiaddr: string,
+    path: string,
+    callParams: CallParams$$<"multiaddr" | "path">
+  ) => string | Promise<string>;
+  dag_upload_string: (
+    multiaddr: string,
+    contents: string,
+    callParams: CallParams$$<"multiaddr" | "contents">
+  ) => string | Promise<string>;
+  exists: (
+    multiaddr: string,
+    cid: string,
+    callParams: CallParams$$<"multiaddr" | "cid">
+  ) => boolean | Promise<boolean>;
+  id: (
+    multiaddr: string,
+    callParams: CallParams$$<"multiaddr">
+  ) => string | Promise<string>;
+  remove: (
+    multiaddr: string,
+    cid: string,
+    callParams: CallParams$$<"multiaddr" | "cid">
+  ) => string | Promise<string>;
+  upload: (
+    multiaddr: string,
+    path: string,
+    callParams: CallParams$$<"multiaddr" | "path">
+  ) => string | Promise<string>;
+  upload_string: (
+    multiaddr: string,
+    contents: string,
+    callParams: CallParams$$<"multiaddr" | "contents">
+  ) => string | Promise<string>;
 }
 export function registerIpfsClient(service: IpfsClientDef): void;
-export function registerIpfsClient(serviceId: string, service: IpfsClientDef): void;
-export function registerIpfsClient(peer: IFluenceClient$$, service: IpfsClientDef): void;
-export function registerIpfsClient(peer: IFluenceClient$$, serviceId: string, service: IpfsClientDef): void;
-       
+export function registerIpfsClient(
+  serviceId: string,
+  service: IpfsClientDef
+): void;
+export function registerIpfsClient(
+  peer: IFluenceClient$$,
+  service: IpfsClientDef
+): void;
+export function registerIpfsClient(
+  peer: IFluenceClient$$,
+  serviceId: string,
+  service: IpfsClientDef
+): void;
 
 export function registerIpfsClient(...args: any) {
-    registerService$$(
-        args,
-        {
-    "defaultServiceId" : "ipfs_client",
-    "functions" : {
-        "tag" : "labeledProduct",
-        "fields" : {
-            "dag_upload" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "multiaddr" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "path" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    ]
-                }
+  registerService$$(args, {
+    defaultServiceId: "ipfs_client",
+    functions: {
+      tag: "labeledProduct",
+      fields: {
+        dag_upload: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              multiaddr: {
+                tag: "scalar",
+                name: "string",
+              },
+              path: {
+                tag: "scalar",
+                name: "string",
+              },
             },
-            "dag_upload_string" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "multiaddr" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "contents" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    ]
-                }
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "string",
+              },
+            ],
+          },
+        },
+        dag_upload_string: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              multiaddr: {
+                tag: "scalar",
+                name: "string",
+              },
+              contents: {
+                tag: "scalar",
+                name: "string",
+              },
             },
-            "exists" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "multiaddr" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "cid" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "bool"
-                        }
-                    ]
-                }
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "string",
+              },
+            ],
+          },
+        },
+        exists: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              multiaddr: {
+                tag: "scalar",
+                name: "string",
+              },
+              cid: {
+                tag: "scalar",
+                name: "string",
+              },
             },
-            "id" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "multiaddr" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    ]
-                }
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "bool",
+              },
+            ],
+          },
+        },
+        id: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              multiaddr: {
+                tag: "scalar",
+                name: "string",
+              },
             },
-            "remove" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "multiaddr" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "cid" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    ]
-                }
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "string",
+              },
+            ],
+          },
+        },
+        remove: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              multiaddr: {
+                tag: "scalar",
+                name: "string",
+              },
+              cid: {
+                tag: "scalar",
+                name: "string",
+              },
             },
-            "upload" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "multiaddr" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "path" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    ]
-                }
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "string",
+              },
+            ],
+          },
+        },
+        upload: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              multiaddr: {
+                tag: "scalar",
+                name: "string",
+              },
+              path: {
+                tag: "scalar",
+                name: "string",
+              },
             },
-            "upload_string" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "multiaddr" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "contents" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    ]
-                }
-            }
-        }
-    }
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "string",
+              },
+            ],
+          },
+        },
+        upload_string: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              multiaddr: {
+                tag: "scalar",
+                name: "string",
+              },
+              contents: {
+                tag: "scalar",
+                name: "string",
+              },
+            },
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "scalar",
+                name: "string",
+              },
+            ],
+          },
+        },
+      },
+    },
+  });
 }
-    );
-}
-      
-
 
 export interface FileSystemDef {
-    list: (directory: string, callParams: CallParams$$<'directory'>) => string[] | Promise<string[]>;
-    list_ext: (directory: string, ext: string, callParams: CallParams$$<'directory' | 'ext'>) => string[] | Promise<string[]>;
+  list: (
+    directory: string,
+    callParams: CallParams$$<"directory">
+  ) => string[] | Promise<string[]>;
+  list_ext: (
+    directory: string,
+    ext: string,
+    callParams: CallParams$$<"directory" | "ext">
+  ) => string[] | Promise<string[]>;
 }
 export function registerFileSystem(service: FileSystemDef): void;
-export function registerFileSystem(serviceId: string, service: FileSystemDef): void;
-export function registerFileSystem(peer: IFluenceClient$$, service: FileSystemDef): void;
-export function registerFileSystem(peer: IFluenceClient$$, serviceId: string, service: FileSystemDef): void;
-       
+export function registerFileSystem(
+  serviceId: string,
+  service: FileSystemDef
+): void;
+export function registerFileSystem(
+  peer: IFluenceClient$$,
+  service: FileSystemDef
+): void;
+export function registerFileSystem(
+  peer: IFluenceClient$$,
+  serviceId: string,
+  service: FileSystemDef
+): void;
 
 export function registerFileSystem(...args: any) {
-    registerService$$(
-        args,
-        {
-    "defaultServiceId" : "file_system",
-    "functions" : {
-        "tag" : "labeledProduct",
-        "fields" : {
-            "list" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "directory" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
-                },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "array",
-                            "type" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            }
-                        }
-                    ]
-                }
+  registerService$$(args, {
+    defaultServiceId: "file_system",
+    functions: {
+      tag: "labeledProduct",
+      fields: {
+        list: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              directory: {
+                tag: "scalar",
+                name: "string",
+              },
             },
-            "list_ext" : {
-                "tag" : "arrow",
-                "domain" : {
-                    "tag" : "labeledProduct",
-                    "fields" : {
-                        "directory" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        },
-                        "ext" : {
-                            "tag" : "scalar",
-                            "name" : "string"
-                        }
-                    }
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "array",
+                type: {
+                  tag: "scalar",
+                  name: "string",
                 },
-                "codomain" : {
-                    "tag" : "unlabeledProduct",
-                    "items" : [
-                        {
-                            "tag" : "array",
-                            "type" : {
-                                "tag" : "scalar",
-                                "name" : "string"
-                            }
-                        }
-                    ]
-                }
-            }
-        }
-    }
+              },
+            ],
+          },
+        },
+        list_ext: {
+          tag: "arrow",
+          domain: {
+            tag: "labeledProduct",
+            fields: {
+              directory: {
+                tag: "scalar",
+                name: "string",
+              },
+              ext: {
+                tag: "scalar",
+                name: "string",
+              },
+            },
+          },
+          codomain: {
+            tag: "unlabeledProduct",
+            items: [
+              {
+                tag: "array",
+                type: {
+                  tag: "scalar",
+                  name: "string",
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  });
 }
-    );
-}
-      
+
 // Functions
 export const upload_script_script = `
                     (xor
@@ -329,66 +374,63 @@ export const upload_script_script = `
                      )
                      (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
                     )
-    `
- 
+    `;
 
 export function upload_script(
-    ipfs: string,
-    path: string,
-    config?: {ttl?: number}
+  ipfs: string,
+  path: string,
+  config?: { ttl?: number }
 ): Promise<string>;
 
 export function upload_script(
-    peer: IFluenceClient$$,
-    ipfs: string,
-    path: string,
-    config?: {ttl?: number}
+  peer: IFluenceClient$$,
+  ipfs: string,
+  path: string,
+  config?: { ttl?: number }
 ): Promise<string>;
 
 export function upload_script(...args: any) {
-
-
-    return callFunction$$(
-        args,
-        {
-    "functionName" : "upload_script",
-    "arrow" : {
-        "tag" : "arrow",
-        "domain" : {
-            "tag" : "labeledProduct",
-            "fields" : {
-                "ipfs" : {
-                    "tag" : "scalar",
-                    "name" : "string"
-                },
-                "path" : {
-                    "tag" : "scalar",
-                    "name" : "string"
-                }
-            }
+  return callFunction$$(
+    args,
+    {
+      functionName: "upload_script",
+      arrow: {
+        tag: "arrow",
+        domain: {
+          tag: "labeledProduct",
+          fields: {
+            ipfs: {
+              tag: "scalar",
+              name: "string",
+            },
+            path: {
+              tag: "scalar",
+              name: "string",
+            },
+          },
         },
-        "codomain" : {
-            "tag" : "unlabeledProduct",
-            "items" : [
-                {
-                    "tag" : "scalar",
-                    "name" : "string"
-                }
-            ]
-        }
+        codomain: {
+          tag: "unlabeledProduct",
+          items: [
+            {
+              tag: "scalar",
+              name: "string",
+            },
+          ],
+        },
+      },
+      names: {
+        relay: "-relay-",
+        getDataSrv: "getDataSrv",
+        callbackSrv: "callbackSrv",
+        responseSrv: "callbackSrv",
+        responseFnName: "response",
+        errorHandlingSrv: "errorHandlingSrv",
+        errorFnName: "error",
+      },
     },
-    "names" : {
-        "relay" : "-relay-",
-        "getDataSrv" : "getDataSrv",
-        "callbackSrv" : "callbackSrv",
-        "responseSrv" : "callbackSrv",
-        "responseFnName" : "response",
-        "errorHandlingSrv" : "errorHandlingSrv",
-        "errorFnName" : "error"
-    }
-},
-        upload_script_script
-    )
+    upload_script_script
+  );
 }
 
 /* eslint-enable */
