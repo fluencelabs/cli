@@ -36,6 +36,7 @@ export default class Default extends BaseCommand<typeof Default> {
   static override flags = {
     ...baseFlags,
     user: Flags.boolean({
+      default: false,
       description:
         "Set default key-pair for current user instead of current project",
     }),

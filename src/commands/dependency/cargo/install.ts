@@ -49,6 +49,7 @@ export default class Install extends BaseCommand<typeof Install> {
       helpValue: "<toolchain_name>",
     }),
     force: Flags.boolean({
+      default: false,
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),

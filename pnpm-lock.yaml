@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   '@fluencelabs/aqua-api':
-    specifier: 0.11.1
-    version: 0.11.1
+    specifier: 0.11.7
+    version: 0.11.7
   '@fluencelabs/deal-aurora':
     specifier: file:fluencelabs-deal-aurora-0.2.0.tgz
-    version: file:fluencelabs-deal-aurora-0.2.0.tgz(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@16.18.14)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4)
+    version: file:fluencelabs-deal-aurora-0.2.0.tgz(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.13)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4)
   '@fluencelabs/fluence-network-environment':
     specifier: ^1.0.14
     version: 1.0.14
@@ -18,8 +18,8 @@ dependencies:
     specifier: 0.11.6
     version: 0.11.6
   '@fluencelabs/js-client.node':
-    specifier: 0.6.9
-    version: 0.6.9(uint8arraylist@2.4.3)
+    specifier: 0.6.10
+    version: 0.6.10(uint8arraylist@2.4.3)
   '@iarna/toml':
     specifier: ^2.2.5
     version: 2.2.5
@@ -31,19 +31,19 @@ dependencies:
     version: 1.0.4
   '@oclif/core':
     specifier: ^2.8.0
-    version: 2.8.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+    version: 2.8.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
   '@oclif/plugin-autocomplete':
     specifier: ^2.1.8
-    version: 2.1.8(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+    version: 2.1.8(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
   '@oclif/plugin-help':
     specifier: ^5.2.9
-    version: 5.2.9(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+    version: 5.2.9(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
   '@oclif/plugin-not-found':
     specifier: ^2.3.23
-    version: 2.3.23(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+    version: 2.3.23(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
   '@walletconnect/universal-provider':
     specifier: ^2.4.7
-    version: 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
+    version: 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
   ajv:
     specifier: ^8.12.0
     version: 8.12.0
@@ -110,7 +110,7 @@ dependencies:
 
 devDependencies:
   '@fluencelabs/installation-spell':
-    specifier: ^0.5.13
+    specifier: ^0.5.15
     version: 0.5.15
   '@swc/core':
     specifier: ^1.3.38
@@ -143,8 +143,8 @@ devDependencies:
     specifier: ^4.17.6
     version: 4.17.6
   '@types/node':
-    specifier: ^16.18.14
-    version: 16.18.14
+    specifier: ^18.16.13
+    version: 18.16.13
   '@types/platform':
     specifier: ^1.3.4
     version: 1.3.4
@@ -180,13 +180,13 @@ devDependencies:
     version: 13.0.0
   jest:
     specifier: ^29.5.0
-    version: 29.5.0(@types/node@16.18.14)(ts-node@10.9.1)
+    version: 29.5.0(@types/node@18.16.13)(ts-node@10.9.1)
   madge:
     specifier: ^6.0.0
     version: 6.0.0
   oclif:
     specifier: ^3.7.3
-    version: 3.7.3(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+    version: 3.7.3(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
   prettier:
     specifier: ^2.8.4
     version: 2.8.4
@@ -198,7 +198,7 @@ devDependencies:
     version: 29.1.0(@babel/core@7.22.5)(jest@29.5.0)(typescript@5.0.4)
   ts-node:
     specifier: ^10.9.1
-    version: 10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+    version: 10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
   ts-prune:
     specifier: ^0.10.3
     version: 0.10.3
@@ -605,13 +605,13 @@ packages:
     resolution: {integrity: sha512-NEl5aIv6muz9OL+dsa3INEU89JX0NViBxOy7NwwG8eNRPUDHo5E3ZTMSHXQpVx1K/ofoNS4ANO9xwezY6ss5GA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/crypto': 1.0.17
+      '@libp2p/crypto': 1.0.8(uint8arraylist@2.4.3)
       '@libp2p/interface-connection-encrypter': 3.0.6
       '@libp2p/interface-keys': 1.0.7
       '@libp2p/interface-metrics': 4.0.8
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/logger': 2.1.1
-      '@libp2p/peer-id': 2.0.4
+      '@libp2p/peer-id': 2.0.1
       '@stablelib/chacha20poly1305': 1.0.1
       '@stablelib/hkdf': 1.0.1
       '@stablelib/sha256': 1.0.1
@@ -623,7 +623,7 @@ packages:
       it-stream-types: 1.0.5
       protons-runtime: 4.0.2(uint8arraylist@2.4.3)
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -719,10 +719,24 @@ packages:
       ethereumjs-util: 7.1.5
     dev: false
 
+  /@ethereumjs/common@2.6.5:
+    resolution: {integrity: sha512-lRyVQOeCDaIVtgfbowla32pzeDv2Obr8oR8Put5RdUBNRGr1VGPGQNGP6elWIpgK3YdpzqTOh4GyUGOureVeeA==}
+    dependencies:
+      crc-32: 1.2.2
+      ethereumjs-util: 7.1.5
+    dev: false
+
   /@ethereumjs/tx@3.3.2:
     resolution: {integrity: sha512-6AaJhwg4ucmwTvw/1qLaZUX5miWrwZ4nLOUsKyb/HtzS3BMw/CasKhdi1ims9mBKeK9sOJCH4qGKOBGyJCeeog==}
     dependencies:
       '@ethereumjs/common': 2.5.0
+      ethereumjs-util: 7.1.5
+    dev: false
+
+  /@ethereumjs/tx@3.5.2:
+    resolution: {integrity: sha512-gQDNJWKrSDGu2w7w0PzVXVBNMzb7wwdDOmOqczmhNjqFxFuIbhVJDwiGEnxFNC2/b8ifcZzY7MLcluizohRzNw==}
+    dependencies:
+      '@ethereumjs/common': 2.6.5
       ethereumjs-util: 7.1.5
     dev: false
 
@@ -1041,8 +1055,8 @@ packages:
       '@ethersproject/strings': 5.7.0
     dev: false
 
-  /@fluencelabs/aqua-api@0.11.1:
-    resolution: {integrity: sha512-wY1m0gJf2bxDppjG972NeHfQ3IGboxksb49a2N3J9ERFUTUoZ8VajganMS0cb7ijHocWJoGQ5x2BTknr4jfqzg==}
+  /@fluencelabs/aqua-api@0.11.7:
+    resolution: {integrity: sha512-iGL7uvFqPRF4i7qtHeePNNv5V8DofliuI5PWwQD9tAeYkgdfkdFKcwnctaQSVJvXBdw/EhckVyP4aJHr4DsgOw==}
     dev: false
 
   /@fluencelabs/aqua-ipfs@0.5.13:
@@ -1088,13 +1102,13 @@ packages:
       '@fluencelabs/interfaces': 0.7.5
     dev: false
 
-  /@fluencelabs/js-client.node@0.6.9(uint8arraylist@2.4.3):
-    resolution: {integrity: sha512-4sL3Pv04QPURZG4xV7FgNNlrP1FEiQEp74wgycPSbUZ7DMuOUKiz+5g4ghNIHXqoTjAkIJ7/zpaRRSMPIP6gSA==}
+  /@fluencelabs/js-client.node@0.6.10(uint8arraylist@2.4.3):
+    resolution: {integrity: sha512-fJ0wBn4pmaJLCbE6tiSCjDE6WLjpVGwhCxpzwV074PcOb+yWdk1KNFMBnLLloIFlNmXalS6SzFyyMfObTIz3gA==}
     engines: {node: '>=10', pnpm: '>=3'}
     dependencies:
       '@fluencelabs/avm': 0.35.4
       '@fluencelabs/interfaces': 0.7.5
-      '@fluencelabs/js-peer': 0.8.8(uint8arraylist@2.4.3)
+      '@fluencelabs/js-peer': 0.8.9(uint8arraylist@2.4.3)
       '@fluencelabs/marine-js': 0.3.45
       platform: 1.3.6
     transitivePeerDependencies:
@@ -1104,8 +1118,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@fluencelabs/js-peer@0.8.8(uint8arraylist@2.4.3):
-    resolution: {integrity: sha512-yB4BfuIbiwUqZGA9LM85jPCdzbEx4g0bFBNKVaixBriu0rOwxwAfXAVBIqGQ9zfOqFUi/6rqvYW8ama8Lx92SQ==}
+  /@fluencelabs/js-peer@0.8.9(uint8arraylist@2.4.3):
+    resolution: {integrity: sha512-MBv+RcJsXhE33gxZwmLM/M3FNYHaJVmrtHIPtSX+uns4KVnL11uMRa++aACaRJWNhZRWufUQOhw8o0xkFKDPLA==}
     engines: {node: '>=10', pnpm: '>=3'}
     dependencies:
       '@chainsafe/libp2p-noise': 11.0.0
@@ -1257,7 +1271,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       chalk: 4.1.2
       jest-message-util: 29.5.0
       jest-util: 29.5.0
@@ -1278,14 +1292,14 @@ packages:
       '@jest/test-result': 29.5.0
       '@jest/transform': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.8.0
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.5.0
-      jest-config: 29.5.0(@types/node@16.18.14)(ts-node@10.9.1)
+      jest-config: 29.5.0(@types/node@18.16.13)(ts-node@10.9.1)
       jest-haste-map: 29.5.0
       jest-message-util: 29.5.0
       jest-regex-util: 29.4.3
@@ -1312,7 +1326,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       jest-mock: 29.5.0
     dev: true
 
@@ -1339,7 +1353,7 @@ packages:
     dependencies:
       '@jest/types': 29.5.0
       '@sinonjs/fake-timers': 10.3.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       jest-message-util: 29.5.0
       jest-mock: 29.5.0
       jest-util: 29.5.0
@@ -1372,7 +1386,7 @@ packages:
       '@jest/transform': 29.5.0
       '@jest/types': 29.5.0
       '@jridgewell/trace-mapping': 0.3.18
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       chalk: 4.1.2
       collect-v8-coverage: 1.0.1
       exit: 0.1.2
@@ -1460,7 +1474,7 @@ packages:
       '@jest/schemas': 29.4.3
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       '@types/yargs': 17.0.24
       chalk: 4.1.2
     dev: true
@@ -1542,14 +1556,14 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-keys': 1.0.7
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@noble/ed25519': 1.7.3
       '@noble/secp256k1': 1.7.1
-      multiformats: 11.0.2
+      multiformats: 11.0.1
       node-forge: 1.3.1
       protons-runtime: 5.0.0(uint8arraylist@2.4.3)
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     dev: false
 
   /@libp2p/crypto@1.0.8(uint8arraylist@2.4.3):
@@ -1563,7 +1577,7 @@ packages:
       multiformats: 10.0.3
       node-forge: 1.3.1
       protons-runtime: 4.0.2(uint8arraylist@2.4.3)
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     transitivePeerDependencies:
       - uint8arraylist
     dev: false
@@ -1572,7 +1586,7 @@ packages:
     resolution: {integrity: sha512-e2vLstKkYlAG2PZe6SEBpnnP2Y/ej6URue+zAiyjJPuXoOGNzHyLaqcv7MKye171OEf9dg5wv1gFphWcUJJbSA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@multiformats/multiaddr': 12.1.3
     transitivePeerDependencies:
       - supports-color
@@ -1582,7 +1596,7 @@ packages:
     resolution: {integrity: sha512-LwyYBN/aSa3IPCe7gBxffx/vaC0rFxAXlCbx4QGaWGtg6qK80Ouj89LEDWb3HkMbecNVWaV4TEqJIM5WnAAx1Q==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       it-stream-types: 1.0.5
       uint8arraylist: 2.4.3
     dev: false
@@ -1592,8 +1606,8 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-connection': 4.0.0
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interface-peer-id': 2.0.1
+      '@libp2p/interfaces': 3.3.1
       '@multiformats/multiaddr': 12.1.3
     transitivePeerDependencies:
       - supports-color
@@ -1603,9 +1617,9 @@ packages:
     resolution: {integrity: sha512-JiI9xVPkiSgW9hkvHWA4e599OLPNSACrpgtx6UffHG9N+Jpt0IOmM4iLic8bSIYkZJBOQFG1Sv/gVNB98Uq0Nw==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/interfaces': 3.3.2
-      '@multiformats/multiaddr': 11.6.1
+      '@libp2p/interface-peer-id': 2.0.1
+      '@libp2p/interfaces': 3.3.1
+      '@multiformats/multiaddr': 11.3.0
       it-stream-types: 1.0.5
       uint8arraylist: 2.4.3
     transitivePeerDependencies:
@@ -1629,8 +1643,8 @@ packages:
     resolution: {integrity: sha512-ytknMbuuNW72LYMmTP7wFGP5ZTaUSGBCmV9f+uQ55XPcFHtKXLtKWVU/HE8IqPmwtyU8AO7veGoJ/qStMHNRVA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interface-peer-id': 2.0.1
+      '@libp2p/interfaces': 3.3.1
       '@multiformats/multiaddr': 12.1.3
       it-stream-types: 2.0.1
       uint8arraylist: 2.4.3
@@ -1643,8 +1657,8 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-peer-info': 1.0.10
-      '@libp2p/interfaces': 3.3.2
-      multiformats: 11.0.2
+      '@libp2p/interfaces': 3.3.1
+      multiformats: 11.0.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1654,10 +1668,10 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-peer-discovery': 2.0.0
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/interface-peer-info': 1.0.10
-      '@libp2p/interfaces': 3.3.2
-      multiformats: 11.0.2
+      '@libp2p/interfaces': 3.3.1
+      multiformats: 11.0.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1684,13 +1698,13 @@ packages:
       '@libp2p/interface-dht': 2.0.3
       '@libp2p/interface-keychain': 2.0.5
       '@libp2p/interface-metrics': 4.0.8
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/interface-peer-info': 1.0.10
       '@libp2p/interface-peer-routing': 1.1.1
       '@libp2p/interface-peer-store': 1.2.9
       '@libp2p/interface-pubsub': 4.0.1
       '@libp2p/interface-registrar': 2.0.12
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@multiformats/multiaddr': 12.1.3
     transitivePeerDependencies:
       - supports-color
@@ -1710,7 +1724,7 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-peer-info': 1.0.10
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1720,7 +1734,7 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-peer-info': 1.0.10
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1729,7 +1743,7 @@ packages:
     resolution: {integrity: sha512-k01hKHTAZWMOiBC+yyFsmBguEMvhPkXnQtqLtFqga2fVZu8Zve7zFAtQYLhQjeJ4/apeFtO6ddTS8mCE6hl4OA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      multiformats: 11.0.2
+      multiformats: 11.0.1
     dev: false
 
   /@libp2p/interface-peer-id@2.0.2:
@@ -1753,9 +1767,9 @@ packages:
     resolution: {integrity: sha512-/XEhwob9qXjdmI8PBcc+qFin32xmtyoC58nRpq8RliqHY5uOVWiHfZoNtdOXIsNvzVvq5FqlHOWt71ofxXTtlg==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/interface-peer-info': 1.0.10
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1764,10 +1778,10 @@ packages:
     resolution: {integrity: sha512-jAAlbP1NXpEJOG6Dbr0QdP71TBYjHBc/65Ulwdn4J4f04PW1bI4JIMQeq6+/sLfaGVryvvUT/a52io8UUtB21Q==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/interface-peer-info': 1.0.10
       '@libp2p/interface-record': 2.0.7
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@multiformats/multiaddr': 12.1.3
     transitivePeerDependencies:
       - supports-color
@@ -1777,7 +1791,7 @@ packages:
     resolution: {integrity: sha512-jNvBK3O1JPJqSiDN2vkb+PV8bTPnYdP54nxsLtut1BWukNm610lwzwleV7CetFI4bJCn6g+BgBvvq8fdADy0tA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@multiformats/multiaddr': 12.1.3
     transitivePeerDependencies:
       - supports-color
@@ -1801,8 +1815,8 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-connection': 5.1.1
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interface-peer-id': 2.0.1
+      '@libp2p/interfaces': 3.3.1
       it-pushable: 3.1.3
       uint8arraylist: 2.4.3
     transitivePeerDependencies:
@@ -1813,7 +1827,7 @@ packages:
     resolution: {integrity: sha512-AFPytZWI+p8FJWP0xuK5zbSjalLAOIMzEed2lBKdRWvdGBQUHt9ENLTkfkI9G7p/Pp3hlhVzzBXdIErKd+0GxQ==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       uint8arraylist: 2.4.3
     dev: false
 
@@ -1822,7 +1836,7 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-connection': 5.1.1
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1832,7 +1846,7 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/interface-connection': 4.0.0
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       it-stream-types: 1.0.5
     transitivePeerDependencies:
       - supports-color
@@ -1844,7 +1858,7 @@ packages:
     dependencies:
       '@libp2p/interface-connection': 4.0.0
       '@libp2p/interface-stream-muxer': 3.0.6
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@multiformats/multiaddr': 12.1.3
       it-stream-types: 1.0.5
     transitivePeerDependencies:
@@ -1890,7 +1904,7 @@ packages:
       it-stream-types: 1.0.5
       rate-limiter-flexible: 2.4.1
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
       varint: 6.0.0
     transitivePeerDependencies:
       - supports-color
@@ -1900,7 +1914,7 @@ packages:
     resolution: {integrity: sha512-iSNqr8jXvOrkNTyA43h/ARs4wd0Rd55/D6oFRndLcV4yQSUMmfjl7dUcbC5MAw+5/sgskfDx9TMawSwNq47Qwg==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@libp2p/logger': 2.1.1
       abortable-iterator: 5.0.1
       it-first: 3.0.2
@@ -1912,7 +1926,7 @@ packages:
       it-reader: 6.0.4
       it-stream-types: 2.0.1
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1921,32 +1935,32 @@ packages:
     resolution: {integrity: sha512-3vRVMWVRCF6dVs/1/CHbw4YSv83bcqjZuAt9ZQHW85vn6OfHNFQesOHWT1TbRBuL8TSb//IwJkOfTAVLd6Mymw==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/peer-id': 2.0.4
+      '@libp2p/interface-peer-id': 2.0.1
+      '@libp2p/peer-id': 2.0.1
     dev: false
 
   /@libp2p/peer-id-factory@2.0.1:
     resolution: {integrity: sha512-CRJmqwNQhDC51sQ9lf6EqEY8HuywwymMVffL2kIYI5ts5k+6gvIXzoSxLf3V3o+OxcroXG4KG0uGxxAi5DUXSA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/crypto': 1.0.17
+      '@libp2p/crypto': 1.0.8(uint8arraylist@2.4.3)
       '@libp2p/interface-keys': 1.0.7
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/peer-id': 2.0.4
-      multiformats: 11.0.2
+      '@libp2p/interface-peer-id': 2.0.1
+      '@libp2p/peer-id': 2.0.1
+      multiformats: 11.0.1
       protons-runtime: 4.0.2(uint8arraylist@2.4.3)
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     dev: false
 
   /@libp2p/peer-id@2.0.1:
     resolution: {integrity: sha512-uGIR4rS+j+IzzIu0kih4MonZEfRmjGNfXaSPMIFOeMxZItZT6TIpxoVNYxHl4YtneSFKzlLnf9yx9EhRcyfy8Q==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
-      '@libp2p/interfaces': 3.3.2
-      multiformats: 11.0.2
-      uint8arrays: 4.0.4
+      '@libp2p/interface-peer-id': 2.0.1
+      '@libp2p/interfaces': 3.3.1
+      multiformats: 11.0.1
+      uint8arrays: 4.0.3
     dev: false
 
   /@libp2p/peer-id@2.0.4:
@@ -1964,16 +1978,16 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@libp2p/crypto': 1.0.17
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/interface-record': 2.0.7
-      '@libp2p/interfaces': 3.3.2
-      '@libp2p/peer-id': 2.0.4
+      '@libp2p/interfaces': 3.3.1
+      '@libp2p/peer-id': 2.0.1
       '@libp2p/utils': 3.0.12
       '@multiformats/multiaddr': 12.1.3
       protons-runtime: 5.0.0(uint8arraylist@2.4.3)
       uint8-varint: 1.0.6
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1982,25 +1996,25 @@ packages:
     resolution: {integrity: sha512-yw7XbeJ5k880PpkDV/HcSZtj0vQ0ShPbnCzVHc1hW0JS/g1vhpSooAZOf3w65obUoFhUwccnSZ4HSLBSpQqOaA==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/interface-peer-info': 1.0.10
       '@libp2p/interface-peer-store': 1.2.9
       '@libp2p/interface-record': 2.0.7
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@libp2p/logger': 2.1.1
-      '@libp2p/peer-id': 2.0.4
+      '@libp2p/peer-id': 2.0.1
       '@libp2p/peer-record': 5.0.4
-      '@multiformats/multiaddr': 11.6.1
+      '@multiformats/multiaddr': 11.3.0
       interface-datastore: 7.0.4
       it-all: 2.0.1
       it-filter: 2.0.2
       it-foreach: 1.0.1
-      it-map: 2.0.1
+      it-map: 2.0.0
       mortice: 3.0.1
-      multiformats: 11.0.2
+      multiformats: 11.0.1
       protons-runtime: 5.0.0(uint8arraylist@2.4.3)
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -2021,7 +2035,7 @@ packages:
       '@achingbrain/ip-address': 8.1.0
       '@libp2p/interface-connection': 5.1.1
       '@libp2p/interface-peer-store': 2.0.4
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@libp2p/logger': 2.1.1
       '@multiformats/multiaddr': 12.1.3
       abortable-iterator: 5.0.1
@@ -2039,11 +2053,11 @@ packages:
     dependencies:
       '@libp2p/interface-connection': 3.0.8
       '@libp2p/interface-transport': 2.1.3
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@libp2p/logger': 2.1.1
       '@libp2p/utils': 3.0.12
       '@multiformats/mafmt': 11.1.2
-      '@multiformats/multiaddr': 11.6.1
+      '@multiformats/multiaddr': 11.3.0
       '@multiformats/multiaddr-to-uri': 9.0.7
       abortable-iterator: 4.0.3
       it-ws: 5.0.6
@@ -2108,8 +2122,8 @@ packages:
       '@chainsafe/is-ip': 2.0.1
       dns-over-http-resolver: 2.1.1
       err-code: 3.0.1
-      multiformats: 11.0.2
-      uint8arrays: 4.0.4
+      multiformats: 11.0.1
+      uint8arrays: 4.0.3
       varint: 6.0.0
     transitivePeerDependencies:
       - supports-color
@@ -2360,7 +2374,7 @@ packages:
       hardhat: 2.15.0(ts-node@10.9.1)(typescript@5.0.4)
     dev: false
 
-  /@nomicfoundation/hardhat-toolbox@1.0.2(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@16.18.14)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4):
+  /@nomicfoundation/hardhat-toolbox@1.0.2(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.13)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4):
     resolution: {integrity: sha512-8CEgWSKUK2aMit+76Sez8n7UB0Ze1lwT+LcWxj4EFP30lQWOwOws048t6MTPfThH0BlSWjC6hJRr0LncIkc1Sw==}
     peerDependencies:
       '@ethersproject/abi': ^5.4.7
@@ -2393,13 +2407,13 @@ packages:
       '@typechain/hardhat': 6.1.6(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@typechain/ethers-v5@10.2.1)(ethers@5.7.2)(hardhat@2.15.0)(typechain@8.2.0)
       '@types/chai': 4.3.5
       '@types/mocha': 9.1.1
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       chai: 4.3.7
       ethers: 5.7.2
       hardhat: 2.15.0(ts-node@10.9.1)(typescript@5.0.4)
       hardhat-gas-reporter: 1.0.9(hardhat@2.15.0)
       solidity-coverage: 0.7.22
-      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       typechain: 8.2.0(typescript@5.0.4)
       typescript: 5.0.4
     dev: false
@@ -2761,7 +2775,7 @@ packages:
       supports-color: 8.1.1
       tslib: 2.5.0
 
-  /@oclif/core@2.8.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /@oclif/core@2.8.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-A2wHItFrD/WOw5bJ6Mtv9MD7If0bsKNR0pwEY0me+fo4HSXlJOtgYGqmzb8t8akX3DUUT7XsjPajsoHLkIJyvg==}
     engines: {node: '>=14.0.0'}
     dependencies:
@@ -2789,7 +2803,7 @@ packages:
       strip-ansi: 6.0.1
       supports-color: 8.1.1
       supports-hyperlinks: 2.3.0
-      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       tslib: 2.5.0
       widest-line: 3.1.0
       wordwrap: 1.0.0
@@ -2800,7 +2814,7 @@ packages:
       - '@types/node'
       - typescript
 
-  /@oclif/core@2.8.7(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /@oclif/core@2.8.7(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-WTZUFgANYGyHQOmGc2YsczEdqdlG2/ZEfqksHnuYbz3egozpka/R9LrFwNfWPZETi9ydzcjDWwJKUGQmJG3ixA==}
     engines: {node: '>=14.0.0'}
     dependencies:
@@ -2828,7 +2842,7 @@ packages:
       strip-ansi: 6.0.1
       supports-color: 8.1.1
       supports-hyperlinks: 2.3.0
-      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       tslib: 2.5.0
       widest-line: 3.1.0
       wordwrap: 1.0.0
@@ -2840,11 +2854,11 @@ packages:
       - typescript
     dev: true
 
-  /@oclif/plugin-autocomplete@2.1.8(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /@oclif/plugin-autocomplete@2.1.8(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-7eUfez+AV5ukiBCuX4iP7L1UW1gY9Ju0+NIi1155klNWPuIjzQGifBQt0Fd8piTaPTkWg/sJUAPvYSxoYBJSOA==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       chalk: 4.1.2
       debug: 4.3.4(supports-color@8.1.1)
       fs-extra: 9.1.0
@@ -2856,23 +2870,23 @@ packages:
       - typescript
     dev: false
 
-  /@oclif/plugin-help@5.2.9(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /@oclif/plugin-help@5.2.9(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-0J3oowPURZJ4Dn1p1WpQ46E4+CoV20KTn1cvsNiDl6Hmbw+qoljKQnArJJzNFeZQxWo4R7/S42PrzKJTVYh68Q==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
       - '@types/node'
       - typescript
 
-  /@oclif/plugin-not-found@2.3.23(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /@oclif/plugin-not-found@2.3.23(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-UZM8aolxXvqwH8WcmJxRNASDWgMoSQm/pgCdkc1AGCRevYc8+LBSO+U6nLWq+Dx8H/dn9RyIv5oiUIOGkKDlZA==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/color': 1.0.4
-      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       fast-levenshtein: 3.0.0
       lodash: 4.17.21
     transitivePeerDependencies:
@@ -2881,11 +2895,11 @@ packages:
       - '@types/node'
       - typescript
 
-  /@oclif/plugin-warn-if-update-available@2.0.39(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /@oclif/plugin-warn-if-update-available@2.0.39(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-tfuXUn7pxMImw5rbZaHi2yhNDsE9p1Z+pUJd6Q+NkMYRe9woIun2DWXGgVp3bfHIok/3dZ3MplGSdgyHzFiPdA==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/core': 2.8.7(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@oclif/core': 2.8.7(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       chalk: 4.1.2
       debug: 4.3.4(supports-color@8.1.1)
       fs-extra: 9.1.0
@@ -3626,13 +3640,13 @@ packages:
   /@types/bn.js@4.11.6:
     resolution: {integrity: sha512-pqr857jrp2kPuO9uRjZ3PwnJTjoQy+fcdxvBTvHm6dkmEL9q+hDD/2j/0ELOBPtPnS8LjCX0gI9nbl8lVkadpg==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: false
 
   /@types/bn.js@5.1.1:
     resolution: {integrity: sha512-qNrYbZqMx0uJAfKnKclPh+dTwK33KfLHYqtyODwd5HnXOjnkhc4qgn3BrK6RWyGZm5+sIFE7Q7Vz6QQtJB7w7g==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: false
 
   /@types/cacheable-request@6.0.3:
@@ -3640,7 +3654,7 @@ packages:
     dependencies:
       '@types/http-cache-semantics': 4.0.1
       '@types/keyv': 3.1.4
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       '@types/responselike': 1.0.0
 
   /@types/chai-as-promised@7.1.5:
@@ -3663,12 +3677,12 @@ packages:
   /@types/cli-progress@3.11.0:
     resolution: {integrity: sha512-XhXhBv1R/q2ahF3BM7qT5HLzJNlIL0wbcGyZVjqOTqAybAnsLisd7gy1UCyIqpL+5Iv6XhlSyzjLCnI2sIdbCg==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
 
   /@types/concat-stream@1.6.1:
     resolution: {integrity: sha512-eHE4cQPoj6ngxBZMvVf6Hw7Mh4jMW4U9lpGmS5GBPB9RYxlFg+CHaVN7ErNY4W9XfLIEn20b4VDYaIrbq0q4uA==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: false
 
   /@types/debug@4.1.8:
@@ -3680,7 +3694,7 @@ packages:
   /@types/decompress@4.2.4:
     resolution: {integrity: sha512-/C8kTMRTNiNuWGl5nEyKbPiMv6HA+0RbEXzFhFBEzASM6+oa4tJro9b8nj7eRlOFfuLdzUU+DS/GPDlvvzMOhA==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: true
 
   /@types/expect@1.20.4:
@@ -3697,20 +3711,20 @@ packages:
   /@types/form-data@0.0.33:
     resolution: {integrity: sha512-8BSvG1kGm83cyJITQMZSulnl6QV8jqAGreJsc5tPu1Jq0vTSOiY/k24Wx82JRpWwZSqrala6sd5rWi6aNXvqcw==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: false
 
   /@types/glob@7.2.0:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
-      '@types/minimatch': 3.0.5
-      '@types/node': 16.18.14
+      '@types/minimatch': 5.1.2
+      '@types/node': 18.16.13
     dev: false
 
   /@types/graceful-fs@4.1.6:
     resolution: {integrity: sha512-Sig0SNORX9fdW+bQuTEovKj3uHcUL6LQKbCrrqb1X7J6/ReAbhCXRAhc+SMejhLELFj2QcyuxmUooZ4bt5ReSw==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: true
 
   /@types/http-cache-semantics@4.0.1:
@@ -3719,7 +3733,7 @@ packages:
   /@types/iarna__toml@2.0.2:
     resolution: {integrity: sha512-Q3obxKhBLVVbEQ8zsAmsQVobAAZhi8dFFFjF0q5xKXiaHvH8IkSxcbM27e46M9feUMieR03SPpmp5CtaNzpdBg==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: true
 
   /@types/inquirer@9.0.0:
@@ -3763,7 +3777,7 @@ packages:
   /@types/keyv@3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
 
   /@types/lodash-es@4.17.6:
     resolution: {integrity: sha512-R+zTeVUKDdfoRxpAryaQNRKk3105Rrgx2CFRClIgRGaqDTdjsm8h6IYA8ir584W3ePzkZfst5xIgDwYrlh9HLg==}
@@ -3781,6 +3795,10 @@ packages:
 
   /@types/minimatch@3.0.5:
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
+
+  /@types/minimatch@5.1.2:
+    resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
+    dev: false
 
   /@types/mocha@9.1.1:
     resolution: {integrity: sha512-Z61JK7DKDtdKTWwLeElSEBcWGRLY8g95ic5FoQqI9CMx0ns/Ghep3B4DfcEimiKMvtamNVULVNKEsiwV3aQmXw==}
@@ -3802,12 +3820,8 @@ packages:
     resolution: {integrity: sha512-qjd88DrCxupx/kJD5yQgZdcYKZKSIGBVDIBE1/LTGcNm3d2Np/jxojkdePDdfnBHJc5W7vSMpbJ1aB7p/Py69A==}
     dev: true
 
-  /@types/node@16.18.14:
-    resolution: {integrity: sha512-wvzClDGQXOCVNU4APPopC2KtMYukaF1MN/W3xAmslx22Z4/IF1/izDMekuyoUlwfnDHYCIZGaj7jMwnJKBTxKw==}
-
   /@types/node@18.16.13:
     resolution: {integrity: sha512-uZRomboV1vBL61EBXneL4j9/hEn+1Yqa4LQdpGrKmXFyJmVfWc9JV9+yb2AlnOnuaDnb2PDO3hC6/LKmzJxP1A==}
-    dev: false
 
   /@types/node@8.10.66:
     resolution: {integrity: sha512-tktOkFUA4kXx2hhhrB8bIFb5TbwzS4uOhKEmwiD+NoiL0qtP2OQ9mFldbgD4dV1djrlBYP6eBuQZiWjuHUpqFw==}
@@ -3824,7 +3838,7 @@ packages:
   /@types/pbkdf2@3.1.0:
     resolution: {integrity: sha512-Cf63Rv7jCQ0LaL8tNXmEyqTHuIJxRdlS5vMh1mj5voN4+QFhVZnlZruezqpWYDiJ8UTzhP0VmeLXCmBk66YrMQ==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: false
 
   /@types/platform@1.3.4:
@@ -3841,14 +3855,14 @@ packages:
   /@types/readable-stream@2.3.15:
     resolution: {integrity: sha512-oM5JSKQCcICF1wvGgmecmHldZ48OZamtMxcGGVICOJA8o8cahXC1zEVAif8iwoc5j8etxFaRFnf095+CDsuoFQ==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       safe-buffer: 5.1.2
     dev: false
 
   /@types/responselike@1.0.0:
     resolution: {integrity: sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
 
   /@types/retry@0.12.1:
     resolution: {integrity: sha512-xoDlM2S4ortawSWORYqsdU+2rxdh4LRW9ytc3zmT37RIKQh6IHyKwwtKhKis9ah8ol07DCkZxPt8BBvPjC6v4g==}
@@ -3857,7 +3871,7 @@ packages:
   /@types/secp256k1@4.0.3:
     resolution: {integrity: sha512-Da66lEIFeIz9ltsdMZcpQvmrmmoqrfju8pm1BH8WbYjZSwUgCwXLb9C+9XYogwBITnbsSaMdVPb2ekf7TV+03w==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: false
 
   /@types/semver@7.3.13:
@@ -3871,14 +3885,14 @@ packages:
   /@types/through@0.0.30:
     resolution: {integrity: sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: true
 
   /@types/vinyl@2.0.7:
     resolution: {integrity: sha512-4UqPv+2567NhMQuMLdKAyK4yzrfCqwaTt6bLhHEs8PFcxbHILsrxaY63n4wgE/BRLDWDQeI+WcTmkXKExh9hQg==}
     dependencies:
       '@types/expect': 1.20.4
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
     dev: true
 
   /@types/yargs-parser@21.0.0:
@@ -4089,10 +4103,10 @@ packages:
       eslint-visitor-keys: 3.4.1
     dev: true
 
-  /@walletconnect/core@2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4):
+  /@walletconnect/core@2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4):
     resolution: {integrity: sha512-w92NrtziqrWs070HJICGh80Vp60PaXu06OjNvOnVZEorbTipCWx4xxgcC2NhsT4TCQ8r1FOut6ahLe1PILuRsg==}
     dependencies:
-      '@walletconnect/heartbeat': 1.2.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@walletconnect/heartbeat': 1.2.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       '@walletconnect/jsonrpc-provider': 1.0.13
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/jsonrpc-ws-connection': 1.0.11
@@ -4102,8 +4116,8 @@ packages:
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
-      '@walletconnect/utils': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/utils': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
       events: 3.3.0
       lodash.isequal: 4.5.0
       pino: 7.11.0
@@ -4132,14 +4146,14 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@walletconnect/heartbeat@1.2.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /@walletconnect/heartbeat@1.2.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-0vbzTa/ARrpmMmOD+bQMxPvFYKtOLQZObgZakrYr0aODiMOO71CmPVNV2eAqXnw9rMmcP+z91OybLeIFlwTjjA==}
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/time': 1.0.2
       chai: 4.3.7
       mocha: 10.2.0
-      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       tslib: 1.14.1
     transitivePeerDependencies:
       - '@swc/core'
@@ -4242,18 +4256,18 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@walletconnect/sign-client@2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4):
+  /@walletconnect/sign-client@2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4):
     resolution: {integrity: sha512-x5uxnHQkNSn0QNXUdPEfwy4o1Vyi2QIWkDGUh+pfSP4s2vN0+IJAcwqBqkPn+zJ1X7eKYLs+v0ih1eieciYMPA==}
     dependencies:
-      '@walletconnect/core': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/core': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
       '@walletconnect/events': 1.0.1
-      '@walletconnect/heartbeat': 1.2.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@walletconnect/heartbeat': 1.2.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       '@walletconnect/jsonrpc-provider': 1.0.13
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.0.1
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
-      '@walletconnect/utils': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/utils': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
       events: 3.3.0
       pino: 7.11.0
     transitivePeerDependencies:
@@ -4273,11 +4287,11 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@walletconnect/types@2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4):
+  /@walletconnect/types@2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4):
     resolution: {integrity: sha512-1VaPdPJrE+UrEjAhK5bdxq2+MTo3DvUMmQeNUsp3vUGhocQXB9hJQQ1rYBknYYSyDu2rTksGCQ4nv3ZOqfxvHw==}
     dependencies:
       '@walletconnect/events': 1.0.1
-      '@walletconnect/heartbeat': 1.2.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@walletconnect/heartbeat': 1.2.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       '@walletconnect/jsonrpc-types': 1.0.3
       '@walletconnect/keyvaluestorage': 1.0.2(lokijs@1.5.12)
       '@walletconnect/logger': 2.0.1
@@ -4291,7 +4305,7 @@ packages:
       - typescript
     dev: false
 
-  /@walletconnect/universal-provider@2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4):
+  /@walletconnect/universal-provider@2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4):
     resolution: {integrity: sha512-xlefq2ahAsH3SpcsofWQQ5JT3Tz9NLAViA8FW07PHhfuf9p7OLp+Mu1wKxQEoBilyvfYRF4R5MTyTPy1wqJiRA==}
     dependencies:
       '@walletconnect/jsonrpc-http-connection': 1.0.7
@@ -4299,9 +4313,9 @@ packages:
       '@walletconnect/jsonrpc-types': 1.0.3
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.0.1
-      '@walletconnect/sign-client': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
-      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
-      '@walletconnect/utils': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/sign-client': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/utils': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
       eip1193-provider: 1.0.1
       events: 3.3.0
       pino: 7.11.0
@@ -4318,7 +4332,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@walletconnect/utils@2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4):
+  /@walletconnect/utils@2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4):
     resolution: {integrity: sha512-t3kW0qLClnejTTKg3y/o/MmJb5ZDGfD13YT9Nw56Up3qq/pwVfTtWjt8vJOQWMIm0hZgjgESivcf6/wuu3/Oqw==}
     dependencies:
       '@stablelib/chacha20poly1305': 1.0.1
@@ -4330,7 +4344,7 @@ packages:
       '@walletconnect/relay-api': 1.0.9
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@16.18.14)(lokijs@1.5.12)(typescript@5.0.4)
+      '@walletconnect/types': 2.4.7(@swc/core@1.3.38)(@types/node@18.16.13)(lokijs@1.5.12)(typescript@5.0.4)
       '@walletconnect/window-getters': 1.0.1
       '@walletconnect/window-metadata': 1.0.1
       detect-browser: 5.3.0
@@ -4391,6 +4405,7 @@ packages:
 
   /abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
+    dev: true
 
   /abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -4525,6 +4540,11 @@ packages:
 
   /ansi-colors@4.1.1:
     resolution: {integrity: sha512-JoX0apGbHaUJBNl6yF+p6JAFYZ666/hhCGKN5t9QFjbJQKUU/g8MNbFDbvfrgKXvI1QpZplPOnwIo99lX/AAmA==}
+    engines: {node: '>=6'}
+    dev: false
+
+  /ansi-colors@4.1.3:
+    resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
     engines: {node: '>=6'}
     dev: false
 
@@ -6097,12 +6117,12 @@ packages:
       it-all: 2.0.1
       it-drain: 2.0.1
       it-filter: 2.0.2
-      it-map: 2.0.1
+      it-map: 2.0.0
       it-merge: 2.0.1
       it-pipe: 2.0.5
       it-pushable: 3.1.3
       it-take: 2.0.1
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -6142,7 +6162,7 @@ packages:
       supports-color:
         optional: true
     dependencies:
-      ms: 2.1.3
+      ms: 2.1.1
       supports-color: 6.0.0
     dev: false
 
@@ -6725,7 +6745,7 @@ packages:
     resolution: {integrity: sha512-yjNnPr315/FjS4zIsUxYguYUPP2e1NK4d7E7ZOLiyYCcbFBiTMyID+2wvm2w6+pZ/odMA7cRkjhsPbltwBOrLg==}
     engines: {node: '>=8.6'}
     dependencies:
-      ansi-colors: 4.1.1
+      ansi-colors: 4.1.3
     dev: false
 
   /env-paths@2.2.1:
@@ -7792,6 +7812,15 @@ packages:
       mime-types: 2.1.35
     dev: false
 
+  /form-data@2.5.1:
+    resolution: {integrity: sha512-m21N3WOmEEURgk6B9GLOE4RuWOFf28Lhh9qGYeNlGq4VDXUlJy2th2slBNU8Gp8EzloYZOibZJ7t5ecIrFSjVA==}
+    engines: {node: '>= 0.12'}
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      mime-types: 2.1.35
+    dev: false
+
   /formdata-polyfill@4.0.10:
     resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
     engines: {node: '>=12.20.0'}
@@ -8131,7 +8160,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: false
@@ -8432,14 +8461,14 @@ packages:
       mnemonist: 0.38.5
       mocha: 10.2.0
       p-map: 4.0.0
-      qs: 6.11.0
+      qs: 6.11.2
       raw-body: 2.5.2
       resolve: 1.17.0
       semver: 6.3.0
       solc: 0.7.3(debug@4.3.4)
-      source-map-support: 0.5.13
+      source-map-support: 0.5.21
       stacktrace-parser: 0.1.10
-      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       tsort: 0.0.1
       typescript: 5.0.4
       undici: 5.22.1
@@ -9429,7 +9458,7 @@ packages:
       it-stream-types: 1.0.5
       uint8-varint: 1.0.6
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     dev: false
 
   /it-length-prefixed@9.0.1:
@@ -9440,7 +9469,7 @@ packages:
       it-stream-types: 2.0.1
       uint8-varint: 1.0.6
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     dev: false
 
   /it-map@2.0.0:
@@ -9561,7 +9590,7 @@ packages:
       event-iterator: 2.0.0
       iso-url: 1.2.1
       it-stream-types: 1.0.5
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
       ws: 8.13.0
     transitivePeerDependencies:
       - bufferutil
@@ -9603,7 +9632,7 @@ packages:
       '@jest/expect': 29.5.0
       '@jest/test-result': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       chalk: 4.1.2
       co: 4.6.0
       dedent: 0.7.0
@@ -9623,7 +9652,7 @@ packages:
       - supports-color
     dev: true
 
-  /jest-cli@29.5.0(@types/node@16.18.14)(ts-node@10.9.1):
+  /jest-cli@29.5.0(@types/node@18.16.13)(ts-node@10.9.1):
     resolution: {integrity: sha512-L1KcP1l4HtfwdxXNFCL5bmUbLQiKrakMUriBEcc1Vfz6gx31ORKdreuWvmQVBit+1ss9NNR3yxjwfwzZNdQXJw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
@@ -9640,7 +9669,7 @@ packages:
       exit: 0.1.2
       graceful-fs: 4.2.11
       import-local: 3.1.0
-      jest-config: 29.5.0(@types/node@16.18.14)(ts-node@10.9.1)
+      jest-config: 29.5.0(@types/node@18.16.13)(ts-node@10.9.1)
       jest-util: 29.5.0
       jest-validate: 29.5.0
       prompts: 2.4.2
@@ -9651,7 +9680,7 @@ packages:
       - ts-node
     dev: true
 
-  /jest-config@29.5.0(@types/node@16.18.14)(ts-node@10.9.1):
+  /jest-config@29.5.0(@types/node@18.16.13)(ts-node@10.9.1):
     resolution: {integrity: sha512-kvDUKBnNJPNBmFFOhDbm59iu1Fii1Q6SxyhXfvylq3UTHbg6o7j/g8k2dZyXWLvfdKB1vAPxNZnMgtKJcmu3kA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     peerDependencies:
@@ -9666,7 +9695,7 @@ packages:
       '@babel/core': 7.22.5
       '@jest/test-sequencer': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       babel-jest: 29.5.0(@babel/core@7.22.5)
       chalk: 4.1.2
       ci-info: 3.8.0
@@ -9686,7 +9715,7 @@ packages:
       pretty-format: 29.5.0
       slash: 3.0.0
       strip-json-comments: 3.1.1
-      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      ts-node: 10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -9726,7 +9755,7 @@ packages:
       '@jest/environment': 29.5.0
       '@jest/fake-timers': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       jest-mock: 29.5.0
       jest-util: 29.5.0
     dev: true
@@ -9742,7 +9771,7 @@ packages:
     dependencies:
       '@jest/types': 29.5.0
       '@types/graceful-fs': 4.1.6
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -9793,7 +9822,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       jest-util: 29.5.0
     dev: true
 
@@ -9848,7 +9877,7 @@ packages:
       '@jest/test-result': 29.5.0
       '@jest/transform': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       chalk: 4.1.2
       emittery: 0.13.1
       graceful-fs: 4.2.11
@@ -9879,7 +9908,7 @@ packages:
       '@jest/test-result': 29.5.0
       '@jest/transform': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       chalk: 4.1.2
       cjs-module-lexer: 1.2.3
       collect-v8-coverage: 1.0.1
@@ -9934,7 +9963,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       chalk: 4.1.2
       ci-info: 3.8.0
       graceful-fs: 4.2.11
@@ -9959,7 +9988,7 @@ packages:
     dependencies:
       '@jest/test-result': 29.5.0
       '@jest/types': 29.5.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.13.1
@@ -9971,13 +10000,13 @@ packages:
     resolution: {integrity: sha512-NcrQnevGoSp4b5kg+akIpthoAFHxPBcb5P6mYPY0fUNT+sSvmtu6jlkEle3anczUKIKEbMxFimk9oTP/tpIPgA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       jest-util: 29.5.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
 
-  /jest@29.5.0(@types/node@16.18.14)(ts-node@10.9.1):
+  /jest@29.5.0(@types/node@18.16.13)(ts-node@10.9.1):
     resolution: {integrity: sha512-juMg3he2uru1QoXX078zTa7pO85QyB9xajZc6bU+d9yEGwrKX6+vGmJQ3UdVZsvTEUARIdObzH68QItim6OSSQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
@@ -9990,7 +10019,7 @@ packages:
       '@jest/core': 29.5.0(ts-node@10.9.1)
       '@jest/types': 29.5.0
       import-local: 3.1.0
-      jest-cli: 29.5.0(@types/node@16.18.14)(ts-node@10.9.1)
+      jest-cli: 29.5.0(@types/node@18.16.13)(ts-node@10.9.1)
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
@@ -10244,7 +10273,7 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@achingbrain/nat-port-mapper': 1.0.9
-      '@libp2p/crypto': 1.0.17
+      '@libp2p/crypto': 1.0.8(uint8arraylist@2.4.3)
       '@libp2p/interface-address-manager': 2.0.5
       '@libp2p/interface-connection': 3.0.8
       '@libp2p/interface-connection-encrypter': 3.0.6
@@ -10254,7 +10283,7 @@ packages:
       '@libp2p/interface-libp2p': 1.3.3
       '@libp2p/interface-metrics': 4.0.8
       '@libp2p/interface-peer-discovery': 1.1.1
-      '@libp2p/interface-peer-id': 2.0.2
+      '@libp2p/interface-peer-id': 2.0.1
       '@libp2p/interface-peer-info': 1.0.10
       '@libp2p/interface-peer-routing': 1.1.1
       '@libp2p/interface-peer-store': 1.2.9
@@ -10262,18 +10291,18 @@ packages:
       '@libp2p/interface-registrar': 2.0.12
       '@libp2p/interface-stream-muxer': 3.0.6
       '@libp2p/interface-transport': 2.1.3
-      '@libp2p/interfaces': 3.3.2
+      '@libp2p/interfaces': 3.3.1
       '@libp2p/logger': 2.1.1
       '@libp2p/multistream-select': 3.1.9
       '@libp2p/peer-collections': 3.0.2
-      '@libp2p/peer-id': 2.0.4
+      '@libp2p/peer-id': 2.0.1
       '@libp2p/peer-id-factory': 2.0.1
       '@libp2p/peer-record': 5.0.4
       '@libp2p/peer-store': 6.0.4
       '@libp2p/tracked-map': 3.0.3
       '@libp2p/utils': 3.0.12
       '@multiformats/mafmt': 11.1.2
-      '@multiformats/multiaddr': 11.6.1
+      '@multiformats/multiaddr': 11.3.0
       abortable-iterator: 4.0.3
       any-signal: 3.0.1
       datastore-core: 8.0.4
@@ -10288,14 +10317,14 @@ packages:
       it-foreach: 1.0.1
       it-handshake: 4.1.3
       it-length-prefixed: 8.0.4
-      it-map: 2.0.1
+      it-map: 2.0.0
       it-merge: 2.0.1
       it-pair: 2.0.6
       it-pipe: 2.0.5
       it-sort: 2.0.1
       it-stream-types: 1.0.5
       merge-options: 3.0.4
-      multiformats: 11.0.2
+      multiformats: 11.0.1
       node-forge: 1.3.1
       p-fifo: 1.0.0
       p-retry: 5.1.2
@@ -10308,7 +10337,7 @@ packages:
       set-delayed-interval: 1.0.0
       timeout-abort-controller: 3.0.0
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
       wherearewe: 2.0.1
       xsalsa20: 1.2.0
     transitivePeerDependencies:
@@ -11367,7 +11396,7 @@ packages:
     resolution: {integrity: sha512-4GUt3kSEYmk4ITxzB/b9vaIDfUVWN/Ml1Fwl11IlnIG2iaJ9O6WXZ9SrYM9NLI8OCBieN2Y8SWC2oJV0RQ7qYg==}
     hasBin: true
     dependencies:
-      abbrev: 1.1.1
+      abbrev: 1.0.9
     dev: false
 
   /nopt@5.0.0:
@@ -11670,15 +11699,15 @@ packages:
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dev: false
 
-  /oclif@3.7.3(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /oclif@3.7.3(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-yQ85UkSJAsDIRx0DXrp287GyvsBc2piyk3a8wup8/T+wxmsdEvWW+SaDWIQfpHNzMHYHrGus0hGW2ZwNvcNgjg==}
     engines: {node: '>=12.0.0'}
     hasBin: true
     dependencies:
-      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
-      '@oclif/plugin-help': 5.2.9(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
-      '@oclif/plugin-not-found': 2.3.23(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
-      '@oclif/plugin-warn-if-update-available': 2.0.39(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4)
+      '@oclif/core': 2.8.0(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
+      '@oclif/plugin-help': 5.2.9(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
+      '@oclif/plugin-not-found': 2.3.23(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
+      '@oclif/plugin-warn-if-update-available': 2.0.39(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4)
       aws-sdk: 2.1402.0
       concurrently: 7.6.0
       debug: 4.3.4(supports-color@8.1.1)
@@ -12459,7 +12488,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       long: 5.2.3
     dev: false
 
@@ -12531,6 +12560,13 @@ packages:
 
   /qs@6.11.0:
     resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
+    engines: {node: '>=0.6'}
+    dependencies:
+      side-channel: 1.0.4
+    dev: false
+
+  /qs@6.11.2:
+    resolution: {integrity: sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==}
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.4
@@ -13008,7 +13044,7 @@ packages:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
     hasBin: true
     dependencies:
-      glob: 7.2.3
+      glob: 7.2.0
     dev: false
 
   /rimraf@3.0.2:
@@ -13189,6 +13225,7 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: true
 
   /send@0.18.0:
     resolution: {integrity: sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==}
@@ -13452,7 +13489,7 @@ packages:
       pify: 4.0.1
       recursive-readdir: 2.2.3
       sc-istanbul: 0.4.6
-      semver: 7.5.2
+      semver: 7.4.0
       shelljs: 0.8.5
       web3-utils: 1.10.0
     transitivePeerDependencies:
@@ -13485,6 +13522,14 @@ packages:
     dependencies:
       buffer-from: 1.1.2
       source-map: 0.6.1
+    dev: true
+
+  /source-map-support@0.5.21:
+    resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
+    dependencies:
+      buffer-from: 1.1.2
+      source-map: 0.6.1
+    dev: false
 
   /source-map@0.2.0:
     resolution: {integrity: sha512-CBdZ2oa/BHhS4xj5DlhjWNHcan57/5YuvfdLf17iVmIpd9KRm+DFLmC6nBNj+6Ua7Kt3TmOjDpQT1aTYOQtoUA==}
@@ -14034,11 +14079,11 @@ packages:
       '@types/qs': 6.9.7
       caseless: 0.12.0
       concat-stream: 1.6.2
-      form-data: 2.3.3
+      form-data: 2.5.1
       http-basic: 8.1.3
       http-response-object: 3.0.2
       promise: 8.3.0
-      qs: 6.11.0
+      qs: 6.11.2
     dev: false
 
   /thread-stream@0.15.2:
@@ -14195,7 +14240,7 @@ packages:
       '@babel/core': 7.22.5
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 29.5.0(@types/node@16.18.14)(ts-node@10.9.1)
+      jest: 29.5.0(@types/node@18.16.13)(ts-node@10.9.1)
       jest-util: 29.5.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -14212,7 +14257,7 @@ packages:
       code-block-writer: 11.0.3
     dev: true
 
-  /ts-node@10.9.1(@swc/core@1.3.38)(@types/node@16.18.14)(typescript@5.0.4):
+  /ts-node@10.9.1(@swc/core@1.3.38)(@types/node@18.16.13)(typescript@5.0.4):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -14232,7 +14277,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 16.18.14
+      '@types/node': 18.16.13
       acorn: 8.9.0
       acorn-walk: 8.2.0
       arg: 4.1.3
@@ -14478,14 +14523,14 @@ packages:
       byte-access: 1.0.1
       longbits: 1.1.0
       uint8arraylist: 2.4.3
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     dev: false
 
   /uint8arraylist@2.4.3:
     resolution: {integrity: sha512-oEVZr4/GrH87K0kjNce6z8pSCzLEPqHNLNR5sj8cJOySrTP8Vb/pMIbZKLJGhQKxm1TiZ31atNrpn820Pyqpow==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      uint8arrays: 4.0.4
+      uint8arrays: 4.0.3
     dev: false
 
   /uint8arrays@3.1.1:
@@ -14498,7 +14543,7 @@ packages:
     resolution: {integrity: sha512-b+aKlI2oTnxnfeSQWV1sMacqSNxqhtXySaH6bflvONGxF8V/fT3ZlYH7z2qgGfydsvpVo4JUgM/Ylyfl2YouCg==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      multiformats: 11.0.2
+      multiformats: 11.0.1
     dev: false
 
   /uint8arrays@4.0.4:
@@ -15087,8 +15132,8 @@ packages:
     resolution: {integrity: sha512-Y9vYLRKP7VU7Cgq6wG1jFaG2k3/eIuiTKAG8RAuQnb6Cd9k5BRqTm5uPIiSo0AP/u11jDomZ8j7+WEgkU9+Btw==}
     engines: {node: '>=8.0.0'}
     dependencies:
-      '@ethereumjs/common': 2.5.0
-      '@ethereumjs/tx': 3.3.2
+      '@ethereumjs/common': 2.6.5
+      '@ethereumjs/tx': 3.5.2
       crypto-browserify: 3.12.0
       eth-lib: 0.2.8
       ethereumjs-util: 7.1.5
@@ -16127,13 +16172,13 @@ packages:
       wrap-ansi: 2.1.0
     dev: true
 
-  file:fluencelabs-deal-aurora-0.2.0.tgz(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@16.18.14)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4):
+  file:fluencelabs-deal-aurora-0.2.0.tgz(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.13)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4):
     resolution: {integrity: sha512-0F40rMQQfD4lDBt9ONOGN1q7U6CbmvYJ2kzoM87KEYNFUKKyHdAsWdLKd9irjd3dwdXp63FjHIvDgUjLThg8AQ==, tarball: file:fluencelabs-deal-aurora-0.2.0.tgz}
     id: file:fluencelabs-deal-aurora-0.2.0.tgz
     name: '@fluencelabs/deal-aurora'
     version: 0.2.0
     dependencies:
-      '@nomicfoundation/hardhat-toolbox': 1.0.2(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@16.18.14)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4)
+      '@nomicfoundation/hardhat-toolbox': 1.0.2(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.13)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.15.0)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4)
       '@openzeppelin/contracts': 4.9.2
       '@openzeppelin/contracts-upgradeable': 4.9.2
       dotenv: 16.0.3

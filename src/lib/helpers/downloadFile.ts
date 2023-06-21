@@ -41,7 +41,7 @@ import {
 } from "../paths.js";
 import { input } from "../prompt.js";
 
-export const getHashOfString = (str: string): Promise<string> => {
+const getHashOfString = (str: string): Promise<string> => {
   const md5Hash = crypto.createHash("md5");
   return new Promise((resolve): void => {
     md5Hash.on("readable", (): void => {
@@ -149,24 +149,20 @@ export const downloadModule = async (get: string): Promise<string> => {
   return downloadAndDecompress(get, await ensureFluenceModulesDir());
 };
 
-export const downloadService = async (get: string): Promise<string> => {
+const downloadService = async (get: string): Promise<string> => {
   return downloadAndDecompress(get, await ensureFluenceServicesDir());
 };
 
-export const downloadSpell = async (get: string): Promise<string> => {
+const downloadSpell = async (get: string): Promise<string> => {
   return downloadAndDecompress(get, await ensureFluenceSpellsDir());
 };
 
-export const getModulePathFromUrl = async (get: string): Promise<string> => {
+const getModulePathFromUrl = async (get: string): Promise<string> => {
   return getDownloadDirPath(get, await ensureFluenceModulesDir());
 };
 
-export const getServicePathFromUrl = async (get: string): Promise<string> => {
+const getServicePathFromUrl = async (get: string): Promise<string> => {
   return getDownloadDirPath(get, await ensureFluenceServicesDir());
-};
-
-export const getSpellPathFromUrl = async (get: string): Promise<string> => {
-  return getDownloadDirPath(get, await ensureFluenceSpellsDir());
 };
 
 export const isUrl = (unknown: string): boolean => {
@@ -252,8 +248,4 @@ export const getModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
 export const getServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   getServicePathFromUrl,
   SERVICE_CONFIG_FILE_NAME
-);
-export const getSpellAbsolutePath = ensureOrGetConfigAbsolutePath(
-  getSpellPathFromUrl,
-  SPELL_CONFIG_FILE_NAME
 );

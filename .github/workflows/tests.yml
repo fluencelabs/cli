@@ -19,10 +19,6 @@ on:
         description: "rust-peer image tag"
         type: string
         default: "fluencelabs/rust-peer:minimal"
-      aqua-version:
-        description: "@fluencelabs/aqua version"
-        type: string
-        default: "null"
       marine-version:
         description: "marine version"
         type: string
@@ -41,6 +37,10 @@ on:
         default: "null"
       js-client-snapshots:
         description: "js-client snapshots"
+        type: string
+        default: "null"
+      aqua-api-version:
+        description: "aqua-api version"
         type: string
         default: "null"
 
@@ -108,12 +108,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2.2.4
         with:
-          version: 7
+          version: 8
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
           registry-url: "https://npm.fluence.dev"
           cache: "pnpm"
 
@@ -136,11 +136,11 @@ jobs:
           package-manager: pnpm
 
       - name: Set aqua-api version
-        if: inputs.aqua-version != 'null'
+        if: inputs.aqua-api-version != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
           package: "@fluencelabs/aqua-api"
-          version: ${{ inputs.aqua-version }}
+          version: ${{ inputs.aqua-api-version }}
           package-manager: pnpm
 
       - name: Update versions.json
@@ -149,7 +149,6 @@ jobs:
           versions: |
             {
               "npm": {
-                "@fluencelabs/aqua": "${{ inputs.aqua-version }}",
                 "@fluencelabs/js-client.api": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.api'] }}",
                 "@fluencelabs/js-client.node": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.node'] }}"
               },

@@ -19,16 +19,16 @@
 * [`fluence key new [NAME]`](#fluence-key-new-name)
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
-* [`fluence module new [PATH]`](#fluence-module-new-path)
+* [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence resource-owner matching join [WORKERS-COUNT]`](#fluence-resource-owner-matching-join-workers-count)
 * [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
-* [`fluence service new [PATH]`](#fluence-service-new-path)
+* [`fluence service new [NAME]`](#fluence-service-new-name)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
-* [`fluence spell new [PATH]`](#fluence-spell-new-path)
+* [`fluence spell new [NAME]`](#fluence-spell-new-name)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
@@ -39,9 +39,8 @@ Compile aqua file or directory that contains your .aqua files
 
 ```
 USAGE
-  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air]
-    [--js] [--old-fluence-js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry]
-    [--scheduled]
+  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air |
+    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
 
 FLAGS
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
@@ -60,9 +59,7 @@ FLAGS
   --no-input                    Don't interactively ask for any input from the user
   --no-relay                    Do not generate a pass through the relay node
   --no-xor                      Do not generate a wrapper that catches and displays errors
-  --old-fluence-js              Generate TypeScript or JavaScript files for old fluence-js
-  --scheduled                   Generate air code for script storage. Without error handling wrappers and hops on relay.
-                                Will ignore other options
+  --tracing                     Compile aqua in tracing mode (for debugging purposes)
 
 DESCRIPTION
   Compile aqua file or directory that contains your .aqua files
@@ -71,7 +68,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -173,7 +170,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/build.ts)_
 
 
 ## `fluence deal deploy [WORKER-NAMES]`
@@ -184,6 +181,7 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 USAGE
   $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
+    [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property in fluence.yaml are deployed)
@@ -200,6 +198,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -217,7 +216,7 @@ Get logs from deployed workers for deals listed in workers.yaml
 ```
 USAGE
   $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
@@ -230,6 +229,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -440,7 +440,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -533,19 +533,20 @@ EXAMPLES
   $ fluence module add
 ```
 
-## `fluence module new [PATH]`
+## `fluence module new [NAME]`
 
 Create new marine module template
 
 ```
 USAGE
-  $ fluence module new [PATH] [--no-input]
+  $ fluence module new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
-  PATH  Module path
+  NAME  Module name
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input     Don't interactively ask for any input from the user
+  --path=<path>  Path to module dir (default: src/modules)
 
 DESCRIPTION
   Create new marine module template
@@ -625,9 +626,9 @@ Run aqua script
 ```
 USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--quiet] [--plugin <value>] [--const <value>] [--json-service <value>] [-i <value>]
-    [-f <value>] [--no-xor] [--no-relay] [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>]
-    [--dial-timeout <value>] [--particle-id]
+    [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
+    [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [--tracing]
 
 FLAGS
   -f, --func=<function-call>     Function call
@@ -641,7 +642,6 @@ FLAGS
                                  function using these argument names
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...             Path to a directory to import aqua files from. May be used several times
-  --json-service=<path>...       Path to a file that contains a JSON formatted service
   --log-level-compiler=<level>   Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
                                  info, warn, error, off
   --no-input                     Don't interactively ask for any input from the user
@@ -649,11 +649,10 @@ FLAGS
   --no-xor                       Do not generate a wrapper that catches and displays errors
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                  Print particle ids when running Fluence js-client
-  --plugin=<path>                [experimental] Path to a directory with JS plugins (Read more:
-                                 https://fluence.dev/docs/aqua-book/aqua-cli/plugins)
   --print-air                    Prints generated AIR code before function execution
   --quiet                        Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -664,7 +663,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -689,21 +688,20 @@ EXAMPLES
   $ fluence service add
 ```
 
-## `fluence service new [PATH]`
+## `fluence service new [NAME]`
 
 Create new marine service template
 
 ```
 USAGE
-  $ fluence service new [PATH] [--no-input] [--name <value>]
+  $ fluence service new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
-  PATH  Path to a service
+  NAME  Unique service name (must start with a lowercase letter and contain only letters, numbers, and underscores)
 
 FLAGS
-  --name=<name>  Unique service name (must start with a lowercase letter and contain only letters, numbers, and
-                 underscores)
   --no-input     Don't interactively ask for any input from the user
+  --path=<path>  Path to services dir (default: src/services)
 
 DESCRIPTION
   Create new marine service template
@@ -754,19 +752,20 @@ EXAMPLES
   $ fluence service repl
 ```
 
-## `fluence spell new [PATH]`
+## `fluence spell new [NAME]`
 
 Create a new spell template
 
 ```
 USAGE
-  $ fluence spell new [PATH] [--no-input]
+  $ fluence spell new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
-  PATH  Spell path
+  NAME  Spell name
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input     Don't interactively ask for any input from the user
+  --path=<path>  Path to spells dir (default: src/spells)
 
 DESCRIPTION
   Create a new spell template
@@ -782,7 +781,7 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -797,6 +796,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 
@@ -815,7 +815,7 @@ Get logs from deployed workers for hosts listed in workers.yaml
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--worker-id <value>] [--host-id <value>]
-    [--spell-id <value>]
+    [--spell-id <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
@@ -830,6 +830,7 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --spell-id=<spell-id>          [default: worker-spell] Spell id
+  --tracing                      Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
   --worker-id=<worker-id>        Worker id
@@ -848,7 +849,7 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--import <value>] [--no-build]
+    [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -863,6 +864,7 @@ FLAGS
   --particle-id                  Print particle ids when running Fluence js-client
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
                                  not processed.
 

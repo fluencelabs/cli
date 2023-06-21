@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.4.17](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.16...fluence-cli-v0.4.17) (2023-06-16)
+
+
+### Features
+
+* add tracing for aqua [fixes DXJ-392] ([#290](https://github.com/fluencelabs/fluence-cli/issues/290)) ([865879b](https://github.com/fluencelabs/fluence-cli/commit/865879beccb93a3aca354cda4ce78c4dabb1b441))
+
+
+### Bug Fixes
+
+* fix init and docs [fixes DXJ-342] ([#294](https://github.com/fluencelabs/fluence-cli/issues/294)) ([eb99d9f](https://github.com/fluencelabs/fluence-cli/commit/eb99d9f77e223075d04ac20bd5efe4e9945f0a6d))
+
+## [0.4.16](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.15...fluence-cli-v0.4.16) (2023-06-15)
+
+
+### Bug Fixes
+
+* fix aqua compilation ([ef9128b](https://github.com/fluencelabs/fluence-cli/commit/ef9128b62a441b01e4786aac2323307e1cfee31a))
+* fix aqua compilation flags ([#292](https://github.com/fluencelabs/fluence-cli/issues/292)) ([ef9128b](https://github.com/fluencelabs/fluence-cli/commit/ef9128b62a441b01e4786aac2323307e1cfee31a))
+
+## [0.4.15](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.14...fluence-cli-v0.4.15) (2023-06-15)
+
+
+### Features
+
+* ask names instead of path for new services, modules and spells [fixes DXJ-385] ([#287](https://github.com/fluencelabs/fluence-cli/issues/287)) ([21f4ba2](https://github.com/fluencelabs/fluence-cli/commit/21f4ba230037a9b6c33c7b373cf2131e1b9e202c))
+* auto-commit ([#263](https://github.com/fluencelabs/fluence-cli/issues/263)) ([1221d0f](https://github.com/fluencelabs/fluence-cli/commit/1221d0fee6f83c818d616770e954e63463d418da))
+* deal deploy e2e [fixes DXJ-379] ([#276](https://github.com/fluencelabs/fluence-cli/issues/276)) ([4fe7579](https://github.com/fluencelabs/fluence-cli/commit/4fe7579420162260d26f005f1b26b7a712c20017))
+* **docs:** new config docs [fixes DXJ-168] ([#278](https://github.com/fluencelabs/fluence-cli/issues/278)) ([5325e86](https://github.com/fluencelabs/fluence-cli/commit/5325e86246ca0ac083820c0f8f51df98b59d5ec3))
+* **ipfs:** add dag upload [fixes DXJ-390] ([#288](https://github.com/fluencelabs/fluence-cli/issues/288)) ([47755de](https://github.com/fluencelabs/fluence-cli/commit/47755de155686afcb2401df167e774d591b6afaf))
+* migrate to NodeJS version 18 [fixes DXJ-384] ([#286](https://github.com/fluencelabs/fluence-cli/issues/286)) ([659f00f](https://github.com/fluencelabs/fluence-cli/commit/659f00f30eed9c6d1106839c45408aef8f6494ee))
+* remove aqua cli dependency and legacy deploy [fixes DXJ-391] ([#283](https://github.com/fluencelabs/fluence-cli/issues/283)) ([7536772](https://github.com/fluencelabs/fluence-cli/commit/753677270e74d8fc070b16f6c3bf65468a87fd68))
+* update deployed workers structure in aqua to use optional values [fixes DXJ-382] ([#279](https://github.com/fluencelabs/fluence-cli/issues/279)) ([377fd86](https://github.com/fluencelabs/fluence-cli/commit/377fd862dceb19dc9014728563d742bb34f52451))
+
+
+### Bug Fixes
+
+* aqua compilation hanging with Countly on ([#274](https://github.com/fluencelabs/fluence-cli/issues/274)) ([84c33a2](https://github.com/fluencelabs/fluence-cli/commit/84c33a2bf49def8f0e8c55406545570f4c8cbc88))
+* set bool flags as false by default ([#289](https://github.com/fluencelabs/fluence-cli/issues/289)) ([99bb8a6](https://github.com/fluencelabs/fluence-cli/commit/99bb8a67715811acbc477dd8f25438f73f61a081))
+
 ## [0.4.14](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.13...fluence-cli-v0.4.14) (2023-05-29)
 
 

@@ -9,18 +9,8 @@ oclif.manifest.json
 .eslintcache
 
 # for ease of development
-/fluence.yaml
-/hosts.yaml
-/workers.yaml
-/deals.yaml
-src/aqua
-src/services
-src/ts
-src/js
 schemas
 .env
-Cargo.lock
-Cargo.toml
 
 # recommended by Fluence
 .idea
@@ -35,4 +25,5 @@ src/js/src/aqua
 
 # ignore compiled files
 src/lib/compiled-aqua
+src/lib/compiled-aqua-with-tracing
 src/versions

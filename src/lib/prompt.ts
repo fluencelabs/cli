@@ -25,8 +25,7 @@ import { ajv } from "./ajvInstance.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const.js";
 
-export const Separator = inquirer.Separator;
-
+const Separator = inquirer.Separator;
 const NAME = "NAME";
 
 const validateBooleanPrompt = ajv.compile({

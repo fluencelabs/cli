@@ -36,6 +36,7 @@ export default class Reset extends BaseCommand<typeof Reset> {
     ...baseFlags,
     ...GLOBAL_FLAG,
     all: Flags.boolean({
+      default: false,
       description: "Remove all dependencies, not only recommended ones",
     }),
   };

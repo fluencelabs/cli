@@ -27,7 +27,6 @@ import {
 import { ensureModuleAbsolutePath } from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
-  getConfigInitFunction,
   getReadonlyConfigInitFunction,
   type InitConfigOptions,
   type InitializedConfig,
@@ -55,14 +54,8 @@ const overridableModulePropertiesV0 = {
   maxHeapSize: {
     type: "string",
     nullable: true,
-    description: `Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):\n
-K, Kb - kilobyte\n
-Ki, KiB - kibibyte\n
-M, Mb - megabyte\n
-Mi, MiB - mebibyte\n
-G, Gb - gigabyte\n
-Gi, GiB - gibibyte\n
-Current limit is 4 GiB`,
+    description:
+      "Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):\nK, Kb - kilobyte\nKi, KiB - kibibyte\nM, Mb - megabyte\nMi, MiB - mebibyte\nG, Gb - gigabyte\nGi, GiB - gibibyte\nCurrent limit is 4 GiB",
   },
   loggerEnabled: {
     type: "boolean",
@@ -72,55 +65,54 @@ Current limit is 4 GiB`,
   loggingMask: {
     type: "number",
     nullable: true,
-    description: `Used for logging management. Example:
-\`\`\`rust
-const TARGET_MAP: [(&str, i64); 4] = [
-("instruction", 1 << 1),
-("data_cache", 1 << 2),
-("next_peer_pks", 1 << 3),
-("subtree_complete", 1 << 4),
-];
-pub fn main() {
-use std::collections::HashMap;
-use std::iter::FromIterator;
-
-let target_map = HashMap::from_iter(TARGET_MAP.iter().cloned());
-
-marine_rs_sdk::WasmLoggerBuilder::new()
-    .with_target_map(target_map)
-    .build()
-    .unwrap();
-}
-#[marine]
-pub fn foo() {
-log::info!(target: "instruction", "this will print if (loggingMask & 1) != 0");
-log::info!(target: "data_cache", "this will print if (loggingMask & 2) != 0");
-}
-\`\`\`
-`,
+    description:
+      "manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map",
   },
   volumes: {
     type: "object",
     nullable: true,
     required: [],
     title: "Volumes",
-    description: `A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file`,
+    additionalProperties: { type: "string" },
+    properties: {
+      Alias: { type: "string", description: "path" },
+    },
+    description:
+      "A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file",
   },
   envs: {
     type: "object",
     title: "Environment variables",
     nullable: true,
     required: [],
-    description: `environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME).
-
-Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl`,
+    additionalProperties: {
+      type: "string",
+    },
+    properties: {
+      Environment_variable_name: {
+        type: "string",
+        description: "Environment variable value",
+      },
+    },
+    description:
+      "environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl",
   },
   mountedBinaries: {
     title: "Mounted binaries",
     type: "object",
+    additionalProperties: {
+      type: "string",
+    },
+    properties: {
+      Mounted_binary_name: {
+        type: "string",
+        description: "Path to a mounted binary",
+      },
+    },
     nullable: true,
     required: [],
-    description: `A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl`,
+    description:
+      "A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl",
   },
 } as const;
 
@@ -128,7 +120,8 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FILE_NAME}`,
   title: MODULE_CONFIG_FILE_NAME,
-  description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`fluence module new\` command to generate a template for new module`,
+  description:
+    "Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use 'fluence module new' command to generate a template for new module",
   properties: {
     name: {
       type: "string",
@@ -166,17 +159,6 @@ const getInitConfigOptions = (
       return configPath;
     },
   };
-};
-
-export const initModuleConfig = async (
-  configOrConfigDirPathOrUrl: string,
-  absolutePath?: string | undefined
-): Promise<InitializedConfig<LatestConfig> | null> => {
-  return getConfigInitFunction(
-    getInitConfigOptions(
-      await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
-  )();
 };
 
 export const initReadonlyModuleConfig = async (

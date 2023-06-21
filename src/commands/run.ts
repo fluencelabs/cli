@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { access, readFile, unlink, writeFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
@@ -31,12 +31,7 @@ import type { JSONSchemaType } from "ajv";
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { ajv } from "../lib/ajvInstance.js";
 import { compile } from "../lib/aqua.js";
-import { initAquaCli } from "../lib/aquaCli.js";
 import { commandObj } from "../lib/commandObj.js";
-import {
-  type AppConfigReadonly,
-  initReadonlyAppConfig,
-} from "../lib/configs/project/app.js";
 import {
   AQUA_INPUT_PATH_PROPERTY,
   type FluenceConfig,
@@ -54,16 +49,13 @@ import {
   IMPORT_FLAG,
   type AquaLogLevel,
   type FromFlagsDef,
+  TRACING_FLAG,
 } from "../lib/const.js";
-import { getAppJson } from "../lib/deployedApp.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../lib/jsClient.js";
-import { getExistingKeyPair } from "../lib/keyPairs.js";
 import { initCli } from "../lib/lifeCycle.js";
-import { resolveRelay } from "../lib/multiaddres.js";
 import {
-  ensureFluenceTmpAppServiceJsonPath,
   projectRootDir,
   recursivelyFindProjectRootDir,
   setProjectRootDir,
@@ -106,23 +98,14 @@ export default class Run extends BaseCommand<typeof Run> {
       helpValue: "<level>",
     }),
     quiet: Flags.boolean({
+      default: false,
       description:
         "Print only execution result. Overrides all --log-level-* flags",
-    }),
-    plugin: Flags.string({
-      description:
-        "[experimental] Path to a directory with JS plugins (Read more: https://fluence.dev/docs/aqua-book/aqua-cli/plugins)",
-      helpValue: "<path>",
     }),
     const: Flags.string({
       description:
         'Constant that will be used in the aqua code that you run (example of aqua code: SOME_CONST ?= "default_value"). Constant name must be upper cased.',
       helpValue: "<NAME = value>",
-      multiple: true,
-    }),
-    "json-service": Flags.string({
-      description: "Path to a file that contains a JSON formatted service",
-      helpValue: "<path>",
       multiple: true,
     }),
     // TODO: DXJ-207
@@ -142,17 +125,21 @@ export default class Run extends BaseCommand<typeof Run> {
       helpValue: "<function-call>",
     }),
     "no-xor": Flags.boolean({
+      default: false,
       description: "Do not generate a wrapper that catches and displays errors",
     }),
     "no-relay": Flags.boolean({
+      default: false,
       description: "Do not generate a pass through the relay node",
     }),
     "print-air": Flags.boolean({
+      default: false,
       description: "Prints generated AIR code before function execution",
     }),
     ...OFF_AQUA_LOGS_FLAG,
     ...KEY_PAIR_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
+    ...TRACING_FLAG,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -190,30 +177,15 @@ export default class Run extends BaseCommand<typeof Run> {
       maybeFluenceConfig,
     });
 
-    const [funcCall, maybeAppConfig, runData, appJsonServicePath] =
-      await Promise.all([
-        flags.func === undefined
-          ? input({
-              message: `Enter a function call that you want to execute`,
-              flagName: FUNC_FLAG_NAME,
-            })
-          : Promise.resolve(flags.func),
-        initReadonlyAppConfig(),
-        getRunData(flags),
-        ensureFluenceTmpAppServiceJsonPath(),
-      ]);
-
-    const jsonServicePaths = flags["json-service"] ?? [];
-
-    if (maybeAppConfig !== null) {
-      await writeFile(
-        appJsonServicePath,
-        getAppJson(maybeAppConfig.services),
-        FS_OPTIONS
-      );
-
-      jsonServicePaths.push(appJsonServicePath);
-    }
+    const [funcCall, runData] = await Promise.all([
+      flags.func === undefined
+        ? input({
+            message: `Enter a function call that you want to execute`,
+            flagName: FUNC_FLAG_NAME,
+          })
+        : Promise.resolve(flags.func),
+      getRunData(flags),
+    ]);
 
     const aquaImports = await ensureAquaImports({
       flags,
@@ -222,30 +194,20 @@ export default class Run extends BaseCommand<typeof Run> {
 
     const runArgs: RunArgs = {
       ...flags,
-      appJsonServicePath,
       filePath: aquaFilePath,
       imports: aquaImports,
       runData,
       funcCall,
-      jsonServicePaths,
       logLevelCompiler,
-      maybeAppConfig,
       maybeFluenceConfig,
     };
 
-    /**
-     * Whether to use `aqua run` or not.
-     * Is currently set to true for all cases because of the bug related to the new fluence js client
-     */
-    const useAquaRun =
-      false || typeof flags.plugin === "string" || jsonServicePaths.length > 0;
-
-    const result = await (useAquaRun ? aquaRun(runArgs) : fluenceRun(runArgs));
+    const result = await fluenceRun(runArgs);
 
     const stringResult =
       typeof result === "string" ? result : jsonStringify(result);
 
-    if (!useAquaRun && stringResult !== undefined) {
+    if (stringResult !== undefined) {
       console.log(stringResult);
     }
 
@@ -405,57 +367,11 @@ const resolveAquaLogLevel = async ({
 
 type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
   maybeFluenceConfig: FluenceConfig | null;
-  maybeAppConfig: AppConfigReadonly | null;
   funcCall: string;
   filePath: string;
   imports: string[];
-  jsonServicePaths: string[];
   logLevelCompiler: AquaLogLevel | undefined;
   runData: FnConfig | undefined;
-  appJsonServicePath: string;
-};
-
-const aquaRun = async (args: RunArgs) => {
-  commandObj.log("using aqua cli run command");
-  const aquaCli = await initAquaCli(args.maybeFluenceConfig);
-  const keyPair = await getExistingKeyPair(args["key-pair-name"]);
-
-  const relay = resolveRelay(
-    args.relay,
-    args.maybeAppConfig?.relays ?? args.maybeFluenceConfig?.relays
-  );
-
-  let result;
-
-  try {
-    result = await aquaCli({
-      args: ["run"],
-      flags: {
-        addr: relay,
-        func: args.funcCall,
-        input: args.filePath,
-        timeout: args["dial-timeout"],
-        import: args.imports,
-        "json-service": args.jsonServicePaths,
-        sk: keyPair.secretKey,
-        plugin: args.plugin,
-        const: args.const ?? [],
-        "print-air": args["print-air"],
-        ...(args.runData === undefined
-          ? {}
-          : { data: JSON.stringify(args.runData) }),
-        "log-level": args.logLevelCompiler,
-        "no-xor": args["no-xor"],
-        "no-relay": args["no-relay"],
-      },
-    });
-  } finally {
-    if (args.maybeAppConfig !== null) {
-      await unlink(args.appJsonServicePath);
-    }
-  }
-
-  return result;
 };
 
 const fluenceRun = async (args: RunArgs) => {
@@ -469,6 +385,7 @@ const fluenceRun = async (args: RunArgs) => {
       logLevel: args.logLevelCompiler,
       noXor: args["no-xor"],
       noRelay: args["no-relay"],
+      tracing: args.tracing,
     }),
     initFluenceClient(args, args.maybeFluenceConfig),
   ]);

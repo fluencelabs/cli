@@ -24,6 +24,7 @@ import {
   get_logs,
   type Get_logsArgApp_workers,
 } from "../../lib/compiled-aqua/installation-spell/cli.js";
+import { get_logs as get_logs_with_tracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -34,6 +35,7 @@ import {
   FLUENCE_CLIENT_FLAGS,
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
+  TRACING_FLAG,
 } from "../../lib/const.js";
 import { parseWorkers } from "../../lib/deployWorkers.js";
 import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
@@ -63,6 +65,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
       helpValue: "<spell-id>",
       default: "worker-spell",
     }),
+    ...TRACING_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -87,7 +90,9 @@ export default class Logs extends BaseCommand<typeof Logs> {
     let logs;
 
     try {
-      logs = await get_logs(logsArg);
+      logs = flags.tracing
+        ? await get_logs_with_tracing(logsArg)
+        : await get_logs(logsArg);
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${stringifyUnknown(
