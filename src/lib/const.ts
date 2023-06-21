@@ -377,13 +377,12 @@ func status():
       Console.print([answer, peer])
 
     answers: *string
-    on HOST_PEER_ID:
-        workers <- resolveSubnetwork(dealId)
-        for w <- workers! par:
-            on w.metadata.peer_id via w.metadata.relay_id:
-                answer <- MyService.greeting("fluence")
-                answers <<- answer
-                print(answer, w.metadata.peer_id)
+    workers <- resolveSubnetwork(dealId)
+    for w <- workers! par:
+        on w.metadata.peer_id via w.metadata.relay_id:
+            answer <- MyService.greeting("fluence")
+            answers <<- answer
+            print(answer, w.metadata.peer_id)
 
     Console.print("getting answers...")
     join answers[workers!.length - 1]

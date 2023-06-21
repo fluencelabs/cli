@@ -1,3 +1,0 @@
-## spells Type
-
-`string[]`

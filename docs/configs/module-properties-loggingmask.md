@@ -1,3 +1,0 @@
-## loggingMask Type
-
-`number`

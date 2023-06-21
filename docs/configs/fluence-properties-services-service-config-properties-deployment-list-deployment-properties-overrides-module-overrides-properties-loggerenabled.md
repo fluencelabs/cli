@@ -1,3 +1,0 @@
-## loggerEnabled Type
-
-`boolean`

@@ -1,73 +1,21 @@
-## user-secrets.yaml Type
+# user-secrets.yaml
 
-`object` ([user-secrets.yaml](user-secrets.md))
+Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `fluence key` group of commands with `--user` flag
 
-# user-secrets.yaml Properties
+## Properties
 
-| Property                                  | Type     | Required | Nullable       | Defined by                                                                                                                                        |
-| :---------------------------------------- | :------- | :------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [defaultKeyPairName](#defaultkeypairname) | `string` | Required | cannot be null | [user-secrets.yaml](user-secrets-properties-defaultkeypairname.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/defaultKeyPairName") |
-| [keyPairs](#keypairs)                     | `array`  | Required | cannot be null | [user-secrets.yaml](user-secrets-properties-key-pairs.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/keyPairs")                    |
-| [version](#version)                       | `number` | Required | cannot be null | [user-secrets.yaml](user-secrets-properties-version.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/version")                       |
-
-## defaultKeyPairName
-
-
-
-`defaultKeyPairName`
-
-*   is required
-
-*   Type: `string`
-
-*   cannot be null
-
-*   defined in: [user-secrets.yaml](user-secrets-properties-defaultkeypairname.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/defaultKeyPairName")
-
-### defaultKeyPairName Type
-
-`string`
+| Property             | Type                  | Required | Description |
+|----------------------|-----------------------|----------|-------------|
+| `defaultKeyPairName` | string                | **Yes**  |             |
+| `keyPairs`           | [object](#keypairs)[] | **Yes**  |             |
+| `version`            | number                | **Yes**  |             |
 
 ## keyPairs
 
+### Properties
 
+| Property    | Type   | Required | Description |
+|-------------|--------|----------|-------------|
+| `name`      | string | **Yes**  |             |
+| `secretKey` | string | **Yes**  |             |
 
-`keyPairs`
-
-*   is required
-
-*   Type: `object[]` ([Key Pair](user-secrets-properties-key-pairs-key-pair.md))
-
-*   cannot be null
-
-*   defined in: [user-secrets.yaml](user-secrets-properties-key-pairs.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/keyPairs")
-
-### keyPairs Type
-
-`object[]` ([Key Pair](user-secrets-properties-key-pairs-key-pair.md))
-
-## version
-
-
-
-`version`
-
-*   is required
-
-*   Type: `number`
-
-*   cannot be null
-
-*   defined in: [user-secrets.yaml](user-secrets-properties-version.md "https://fluence.dev/schemas/user-secrets.yaml#/properties/version")
-
-### version Type
-
-`number`
-
-### version Constraints
-
-**constant**: the value of this property must be equal to:
-
-```json
-0
-```

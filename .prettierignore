@@ -7,3 +7,4 @@ package-lock.json
 src/lib/compiled-aqua
 pnpm-lock.yaml
 CHANGELOG.md
+.github/workflows
