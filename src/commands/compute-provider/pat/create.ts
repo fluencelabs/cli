@@ -16,10 +16,7 @@
 
 import assert from "node:assert";
 
-import {
-  DealClient,
-  WorkersModule__factory,
-} from "@fluencelabs/deal-contracts";
+import { DealClient, WorkersModule__factory } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
@@ -100,10 +97,12 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
 
     assert(log !== undefined);
 
-    const patId: unknown = workersInterface.parseLog({
-      topics: [...log.topics],
-      data: log.data,
-    })?.args["id"];
+    const patId: unknown = workersInterface
+      .parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      ?.args.getValue("id");
 
     assert(typeof patId === "string");
 

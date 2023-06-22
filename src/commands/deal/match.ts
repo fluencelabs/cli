@@ -20,7 +20,7 @@ import {
   DealClient,
   WorkersModule__factory,
   type Matcher,
-} from "@fluencelabs/deal-contracts";
+} from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -90,10 +90,12 @@ export default class Match extends BaseCommand<typeof Match> {
 
     for (const log of res.logs) {
       if (log.topics[0] === event.topicHash) {
-        const id: unknown = workersInterface.parseLog({
-          topics: [...log.topics],
-          data: log.data,
-        })?.args["id"];
+        const id: unknown = workersInterface
+          .parseLog({
+            topics: [...log.topics],
+            data: log.data,
+          })
+          ?.args.getValue("id");
 
         assert(typeof id === "string");
 

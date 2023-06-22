@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /**
  * Copyright 2023 Fluence Labs Limited
  *
@@ -16,7 +19,7 @@
 
 import assert from "node:assert";
 
-import { DealClient } from "@fluencelabs/deal-contracts";
+import { DealClient } from "@fluencelabs/deal-aurora";
 import ethers = require("ethers");
 
 import type { ChainNetwork } from "./const.js";
@@ -27,11 +30,10 @@ const DEAL_LOG_ARG_NAME = "deal";
 
 type DealInfo = {
   core: string;
-  config: string;
-  controller: string;
-  payment: string;
-  statusController: string;
-  workers: string;
+  configModule: string;
+  paymentModule: string;
+  statusModule: string;
+  workersModule: string;
 };
 
 type DealCreateArg = {
@@ -78,51 +80,54 @@ export const dealCreate = async ({
     "DealCreated event not found. Try updating flox to the latest version"
   );
 
-  const dealInfo: unknown = factory.interface.parseLog({
+  const dealInfoEvent: ethers.Result = factory.interface.parseLog({
     data: log.data,
     topics: [...log.topics],
   })?.args[DEAL_LOG_ARG_NAME];
 
-  assertDealInfoIsValid(dealInfo);
+  const dealInfo = parseDealInfo(dealInfoEvent);
   return dealInfo.core;
 };
 
-function assertDealInfoIsValid(
-  dealInfo: unknown
-): asserts dealInfo is DealInfo {
-  assert(
-    typeof dealInfo === "object" && dealInfo !== null,
-    "Deal info must be an object"
-  );
+function parseDealInfo(dealInfoEvent: ethers.Result): DealInfo {
+  const core = dealInfoEvent.getValue("core");
+  assert(ethers.isAddress(core), "Deal core address is not valid");
 
-  assert("core" in dealInfo);
-  assert("config" in dealInfo);
-  assert("controller" in dealInfo);
-  assert("payment" in dealInfo);
-  assert("statusController" in dealInfo);
-  assert("workers" in dealInfo);
-  assert(ethers.isAddress(dealInfo.core), "Deal core address is not valid");
-  assert(ethers.isAddress(dealInfo.config), "Deal config address is not valid");
+  const configModule = dealInfoEvent.getValue("configModule");
 
   assert(
-    ethers.isAddress(dealInfo.controller),
-    "Deal controller address is not valid"
+    ethers.isAddress(configModule),
+    "Deal config module address is not valid"
   );
 
-  assert(
-    ethers.isAddress(dealInfo.payment),
-    "Deal payment address is not valid"
-  );
+  const paymentModule = dealInfoEvent.getValue("paymentModule");
 
   assert(
-    ethers.isAddress(dealInfo.statusController),
-    "Deal status controller address is not valid"
+    ethers.isAddress(paymentModule),
+    "Deal payment module address is not valid"
   );
 
+  const statusModule = dealInfoEvent.getValue("statusModule");
+
   assert(
-    ethers.isAddress(dealInfo.workers),
-    "Deal workers address is not valid"
+    ethers.isAddress(statusModule),
+    "Deal status module address is not valid"
   );
+
+  const workersModule = dealInfoEvent.getValue("workersModule");
+
+  assert(
+    ethers.isAddress(workersModule),
+    "Deal workers module address is not valid"
+  );
+
+  return {
+    core,
+    configModule,
+    paymentModule,
+    statusModule,
+    workersModule,
+  };
 }
 
 type DealUpdateArg = {

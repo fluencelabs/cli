@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-contracts";
+import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
@@ -32,8 +32,10 @@ import {
 
 const WORKERS_COUNT = "WORKERS-COUNT";
 
-export default class JoinToMatching extends BaseCommand<typeof JoinToMatching> {
-  static override description = "Join to matching contract";
+export default class RegistrationInMatcher extends BaseCommand<
+  typeof RegistrationInMatcher
+> {
+  static override description = "Registration in matching contract";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
@@ -48,7 +50,7 @@ export default class JoinToMatching extends BaseCommand<typeof JoinToMatching> {
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
-      await this.parse(JoinToMatching),
+      await this.parse(RegistrationInMatcher),
       true
     );
 
@@ -75,7 +77,7 @@ export default class JoinToMatching extends BaseCommand<typeof JoinToMatching> {
 
     const approveTx = await flt.approve(
       await matcher.getAddress(),
-      collateral + BigInt(workersCount)
+      collateral * BigInt(workersCount)
     );
 
     promptConfirmTx(flags.privKey);

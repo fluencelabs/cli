@@ -155,7 +155,7 @@ const getWalletConnectProvider = async (
 const getWallet = (privKey: string, network: ChainNetwork): ethers.Wallet => {
   return new ethers.Wallet(
     privKey,
-    new ethers.JsonRpcProvider(privKey, DEAL_CONFIG[network].ethereumNodeUrl)
+    new ethers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl)
   );
 };
 
