@@ -18,7 +18,7 @@ on:
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
-        default: "docker.fluence.dev/nox:ipfs_aquavm-0-39-1_2346_1"
+        default: "docker.fluence.dev/nox:minimal_aquavm-0-39-1"
       marine-version:
         description: "marine version"
         type: string
