@@ -197,8 +197,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -228,8 +228,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
@@ -630,8 +630,8 @@ FLAGS
   --quiet                        Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Run aqua script
@@ -774,8 +774,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
@@ -808,8 +808,8 @@ FLAGS
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --spell-id=<spell-id>          [default: worker-spell] Spell id
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
   --worker-id=<worker-id>        Worker id
 
 DESCRIPTION
@@ -842,8 +842,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml
