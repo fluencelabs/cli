@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-client";
+import { DealClient } from "@fluencelabs/deal-contracts";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;

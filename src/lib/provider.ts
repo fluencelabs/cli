@@ -22,7 +22,7 @@ import { URL } from "node:url";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";
-import { ethers } from "ethers";
+import ethers = require("ethers");
 
 import { commandObj } from "./commandObj.js";
 import {

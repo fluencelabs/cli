@@ -16,10 +16,10 @@
 
 import { assert } from "console";
 
-import { DealClient } from "@fluencelabs/deal-client";
+import { DealClient } from "@fluencelabs/deal-contracts";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
-import { isAddress } from "ethers";
+import ethers = require("ethers");
 const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
@@ -80,7 +80,7 @@ export default class SetAccess extends BaseCommand<typeof SetAccess> {
     );
 
     assert(
-      isAddress(resourceOwner),
+      ethers.isAddress(resourceOwner),
       "Invalid input. Enter EVM address of resource owner"
     );
 

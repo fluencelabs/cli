@@ -16,8 +16,8 @@
 
 import assert from "node:assert";
 
-import { DealClient } from "@fluencelabs/deal-client";
-import { ethers } from "ethers";
+import { DealClient } from "@fluencelabs/deal-contracts";
+import ethers = require("ethers");
 
 import type { ChainNetwork } from "./const.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
@@ -69,8 +69,8 @@ export const dealCreate = async ({
 
   const eventTopic = factory.interface.getEvent(EVENT_TOPIC_FRAGMENT);
 
-  const log = res.logs.find((log: ethers.Log) => {
-    return log.topics[0] === eventTopic;
+  const log = res.logs.find((log) => {
+    return log.topics[0] === eventTopic.topicHash;
   });
 
   assert(
@@ -78,13 +78,30 @@ export const dealCreate = async ({
     "DealCreated event not found. Try updating flox to the latest version"
   );
 
-  // TODO: check if this is correct
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const dealInfo: DealInfo =
-    factory.interface.parseLog(log)?.args[DEAL_LOG_ARG_NAME];
+  const dealInfo: unknown = factory.interface.parseLog({
+    data: log.data,
+    topics: [...log.topics],
+  })?.args[DEAL_LOG_ARG_NAME];
 
+  assertDealInfoIsValid(dealInfo);
+  return dealInfo.core;
+};
+
+function assertDealInfoIsValid(
+  dealInfo: unknown
+): asserts dealInfo is DealInfo {
+  assert(
+    typeof dealInfo === "object" && dealInfo !== null,
+    "Deal info must be an object"
+  );
+
+  assert("core" in dealInfo);
+  assert("config" in dealInfo);
+  assert("controller" in dealInfo);
+  assert("payment" in dealInfo);
+  assert("statusController" in dealInfo);
+  assert("workers" in dealInfo);
   assert(ethers.isAddress(dealInfo.core), "Deal core address is not valid");
-
   assert(ethers.isAddress(dealInfo.config), "Deal config address is not valid");
 
   assert(
@@ -106,9 +123,7 @@ export const dealCreate = async ({
     ethers.isAddress(dealInfo.workers),
     "Deal workers address is not valid"
   );
-
-  return dealInfo.core;
-};
+}
 
 type DealUpdateArg = {
   network: ChainNetwork;

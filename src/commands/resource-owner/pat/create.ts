@@ -16,10 +16,12 @@
 
 import assert from "node:assert";
 
-import { DealClient } from "@fluencelabs/deal-client";
+import {
+  DealClient,
+  WorkersModule__factory,
+} from "@fluencelabs/deal-contracts";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
-import type { ethers } from "ethers";
 const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
@@ -92,7 +94,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
 
     const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);
 
-    const log = res.logs.find((log: ethers.Log) => {
+    const log = res.logs.find((log) => {
       return log.topics[0] === event.topicHash;
     });
 
