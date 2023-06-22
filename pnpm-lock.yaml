@@ -16142,7 +16142,7 @@ packages:
     dev: true
 
   file:fluencelabs-deal-aurora-0.2.0.tgz(@nomicfoundation/hardhat-chai-matchers@2.0.1)(@nomicfoundation/hardhat-ethers@3.0.2)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomicfoundation/hardhat-verify@1.0.2)(@typechain/ethers-v6@0.4.0)(@typechain/hardhat@8.0.0)(@types/chai@4.3.5)(@types/mocha@10.0.1)(@types/node@18.16.18)(chai@4.3.7)(ethers@6.6.0)(hardhat-gas-reporter@1.0.9)(hardhat@2.16.0)(solidity-coverage@0.8.2)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.1.3):
-    resolution: {integrity: sha512-48+xnuLQyXDOUEkU+fvd+1qzakj/JjvGvMUX0lE+KzNIBk+ERvaPhY1cm/4mdlD0i7tv5wzv2AVO0Txhzjexzw==, tarball: file:fluencelabs-deal-aurora-0.2.0.tgz}
+    resolution: {integrity: sha512-VwN8UgBdLLDkk4LSgg5YZRceoqhUW9iN4IhWCXVJ3nYYplUn96O5mwbXorqNWqpHUIvw5HQZjpzh3xeNR7X4sQ==, tarball: file:fluencelabs-deal-aurora-0.2.0.tgz}
     id: file:fluencelabs-deal-aurora-0.2.0.tgz
     name: '@fluencelabs/deal-aurora'
     version: 0.2.0
