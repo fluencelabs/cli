@@ -11,11 +11,11 @@ dependencies:
     specifier: ^1.0.14
     version: 1.0.14
   '@fluencelabs/js-client.api':
-    specifier: 0.11.6
-    version: 0.11.6
+    specifier: 0.11.7
+    version: 0.11.7
   '@fluencelabs/js-client.node':
-    specifier: 0.6.10
-    version: 0.6.10(uint8arraylist@2.4.3)
+    specifier: 0.6.11
+    version: 0.6.11(uint8arraylist@2.4.3)
   '@iarna/toml':
     specifier: ^2.2.5
     version: 2.2.5
@@ -1031,10 +1031,6 @@ packages:
     resolution: {integrity: sha512-reVMySt1gSA7HENOm+UHuKAF9VFvyUydHMDgsuWuh/pEpOh+YP2V4IxzlhUd8zSMXpTOt4zGrT4f1C0w/3zfyQ==}
     dev: true
 
-  /@fluencelabs/avm@0.35.4:
-    resolution: {integrity: sha512-J070t5AOYIzQnNcBcYjDPUDzJTcpVboZxcrjGN4qYiOjcrtCtnnXeQKedLuBto5bRztHJdL9BzLLvzcFXhgmFQ==}
-    dev: false
-
   /@fluencelabs/deal-aurora@0.1.8(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.16)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.14.1)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.0.4):
     resolution: {integrity: sha512-h2L3F67AsFxJy+mBAAUy8gMUGf85sgT3kuLhqEstdbQ20ASjxrSsXmyVZeVQLUx4nR1ygbGll9Y+FmRFgpNwMQ==}
     dependencies:
@@ -1077,25 +1073,25 @@ packages:
       '@fluencelabs/spell': 0.5.15
     dev: true
 
-  /@fluencelabs/interfaces@0.7.5:
-    resolution: {integrity: sha512-R7VZ7iLc0to579HZ+O5rgJbbgBDvJgTk4UgvjgoMlTEEL9TdN7xlcro7nun6evUSodagkOT8cfCbCeNdbx2qkQ==}
+  /@fluencelabs/interfaces@0.7.6:
+    resolution: {integrity: sha512-W4KLstnXVt7AKdygkdKOI5BDYI6V3Ij47culs1hEz1wMH+1J54OsU43yBYM3JwKs1FBLSTyj5dYYxgkzeFXtOA==}
     engines: {node: '>=10', pnpm: '>=3'}
     dev: false
 
-  /@fluencelabs/js-client.api@0.11.6:
-    resolution: {integrity: sha512-PdoCqTuyegj9HRkdGXTT8MzNe1fptiTSu0dHewo/nuiEs51pYOvShNod/CL6Adjh7Ak4OQe7nm/brEXBxXgRCg==}
+  /@fluencelabs/js-client.api@0.11.7:
+    resolution: {integrity: sha512-yC+aTeuIgqhgNaU1EiMBYE6clF+2Gw9mmaDStLoHAQ+YI0mquIED+IDSMmFHuucBds9wPRvVV6NIMK6ULUNDlA==}
     engines: {node: '>=10', pnpm: '>=3'}
     dependencies:
-      '@fluencelabs/interfaces': 0.7.5
+      '@fluencelabs/interfaces': 0.7.6
     dev: false
 
-  /@fluencelabs/js-client.node@0.6.10(uint8arraylist@2.4.3):
-    resolution: {integrity: sha512-fJ0wBn4pmaJLCbE6tiSCjDE6WLjpVGwhCxpzwV074PcOb+yWdk1KNFMBnLLloIFlNmXalS6SzFyyMfObTIz3gA==}
+  /@fluencelabs/js-client.node@0.6.11(uint8arraylist@2.4.3):
+    resolution: {integrity: sha512-4UjP3L/LKOfPsVV8M0nqHL+XM5u7vTWEiX8yrcGg9k4E36cLKj6pBrNvzbsMTEDzA/QLe9sF66DLyzJEOBTp1A==}
     engines: {node: '>=10', pnpm: '>=3'}
     dependencies:
-      '@fluencelabs/avm': 0.35.4
-      '@fluencelabs/interfaces': 0.7.5
-      '@fluencelabs/js-peer': 0.8.9(uint8arraylist@2.4.3)
+      '@fluencelabs/avm': '@github.com/fluencelabs/js-client/raw/feat/add-signatures/avm-0.39.1-feat-VM-276-aquavm-keypair-e2816f6-1588-1.0.tgz'
+      '@fluencelabs/interfaces': 0.7.6
+      '@fluencelabs/js-peer': 0.8.10(uint8arraylist@2.4.3)
       '@fluencelabs/marine-js': 0.3.45
       platform: 1.3.6
     transitivePeerDependencies:
@@ -1105,13 +1101,13 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@fluencelabs/js-peer@0.8.9(uint8arraylist@2.4.3):
-    resolution: {integrity: sha512-MBv+RcJsXhE33gxZwmLM/M3FNYHaJVmrtHIPtSX+uns4KVnL11uMRa++aACaRJWNhZRWufUQOhw8o0xkFKDPLA==}
+  /@fluencelabs/js-peer@0.8.10(uint8arraylist@2.4.3):
+    resolution: {integrity: sha512-nH+SqWxn6CAIfNdDlwhgJsyEf5ZIuj/xS0nL2e/Q/4auz8IbzpD6AnZFiX+elhoQPJYWLMTc2StKDSi2u0kDyQ==}
     engines: {node: '>=10', pnpm: '>=3'}
     dependencies:
       '@chainsafe/libp2p-noise': 11.0.0
-      '@fluencelabs/avm': 0.35.4
-      '@fluencelabs/interfaces': 0.7.5
+      '@fluencelabs/avm': '@github.com/fluencelabs/js-client/raw/feat/add-signatures/avm-0.39.1-feat-VM-276-aquavm-keypair-e2816f6-1588-1.0.tgz'
+      '@fluencelabs/interfaces': 0.7.6
       '@fluencelabs/marine-js': 0.3.45
       '@libp2p/crypto': 1.0.8(uint8arraylist@2.4.3)
       '@libp2p/interface-connection': 3.0.8
@@ -16006,3 +16002,9 @@ packages:
       taketalk: 1.0.0
       wrap-ansi: 2.1.0
     dev: true
+
+  '@github.com/fluencelabs/js-client/raw/feat/add-signatures/avm-0.39.1-feat-VM-276-aquavm-keypair-e2816f6-1588-1.0.tgz':
+    resolution: {tarball: https://github.com/fluencelabs/js-client/raw/feat/add-signatures/avm-0.39.1-feat-VM-276-aquavm-keypair-e2816f6-1588-1.0.tgz}
+    name: '@fluencelabs/avm'
+    version: 0.39.1-feat-VM-276-aquavm-keypair-e2816f6-1588-1.0
+    dev: false
