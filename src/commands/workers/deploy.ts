@@ -90,7 +90,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const uploadDeployResult = flags.tracing
       ? await upload_deploy_with_tracing(uploadDeployArg)
-      : await upload_deploy(uploadDeployArg, { ttl: 120_000 });
+      : await upload_deploy(uploadDeployArg);
 
     const timestamp = new Date().toISOString();
     const relayId = (await Fluence.getClient()).getRelayPeerId();
