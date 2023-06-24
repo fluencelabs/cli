@@ -1,6 +1,8 @@
 # Commands
 <!-- commands -->
+* [`fluence air beautify`](#fluence-air-beautify)
 * [`fluence aqua`](#fluence-aqua)
+* [`fluence aqua beautify [PATH]`](#fluence-aqua-beautify-path)
 * [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
 * [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
@@ -31,6 +33,26 @@
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
+
+## `fluence air beautify`
+
+Reads an AIR script from standard input and prints it in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+
+```
+USAGE
+  $ fluence air beautify [--no-input] [-i <value>]
+
+FLAGS
+  -i, --input=<path>  Path to an AIR file. Must be relative to the current working directory or absolute
+  --no-input          Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Reads an AIR script from standard input and prints it in human-readable Python-like representation. This
+  representation cannot be executed and is intended to be read by mere mortals.
+
+ALIASES
+  $ fluence air b
+```
 
 ## `fluence aqua`
 
@@ -68,6 +90,39 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/aqua.ts)_
+
+## `fluence aqua beautify [PATH]`
+
+Compiles Aqua function and prints AIR in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+
+```
+USAGE
+  $ fluence aqua beautify [PATH] [--no-input] [-f <value>] [-i <value>] [--import <value>] [--log-level-compiler
+    <value>] [--const <value>] [--no-relay] [--no-xor] [--tracing]
+
+ARGUMENTS
+  PATH  Path to aqua script
+
+FLAGS
+  -f, --func=<function-call>    Function to compile
+  -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
+                                relative to the current working directory or absolute
+  --const=<NAME=value>...       Constants to be passed to the compiler
+  --import=<path>...            Path to a directory to import aqua files from. May be used several times
+  --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
+                                warn, error, off
+  --no-input                    Don't interactively ask for any input from the user
+  --no-relay                    Do not generate a pass through the relay node
+  --no-xor                      Do not generate a wrapper that catches and displays errors
+  --tracing                     Compile aqua in tracing mode (for debugging purposes)
+
+DESCRIPTION
+  Compiles Aqua function and prints AIR in human-readable Python-like representation. This representation cannot be
+  executed and is intended to be read by mere mortals.
+
+ALIASES
+  $ fluence aqua b
+```
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
