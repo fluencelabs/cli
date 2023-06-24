@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { isAbsolute, resolve } from "node:path";
-
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Command, Flags } from "@oclif/core";
@@ -26,7 +24,6 @@ import { commandObj } from "../lib/commandObj.js";
 import {
   AQUA_EXT,
   aquaLogLevelsString,
-  FLUENCE_CONFIG_FILE_NAME,
   IMPORT_FLAG,
   NO_INPUT_FLAG,
   TRACING_FLAG,
@@ -34,8 +31,7 @@ import {
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
 import { initCli, exitCli } from "../lib/lifeCycle.js";
-import { projectRootDir, validatePath } from "../lib/paths.js";
-import { input, type InputArg } from "../lib/prompt.js";
+import { resolveAbsoluteAquaPath, validatePath } from "../lib/paths.js";
 
 /**
  * This command doesn't extend BaseCommand like other commands do because it
@@ -213,42 +209,4 @@ const resolveTargetType = (js: boolean, air: boolean): "ts" | "js" | "air" => {
   }
 
   return "ts";
-};
-
-type ResolveAbsoluteAquaPathArg = {
-  maybePathFromFlags: string | undefined;
-  maybePathFromFluenceYaml: string | undefined;
-  inputArg: InputArg;
-};
-
-const resolveAbsoluteAquaPath = async ({
-  maybePathFromFlags,
-  maybePathFromFluenceYaml,
-  inputArg,
-}: ResolveAbsoluteAquaPathArg) => {
-  if (maybePathFromFlags !== undefined) {
-    if (isAbsolute(maybePathFromFlags)) {
-      return maybePathFromFlags;
-    }
-
-    return resolve(maybePathFromFlags);
-  }
-
-  if (maybePathFromFluenceYaml !== undefined) {
-    if (isAbsolute(maybePathFromFluenceYaml)) {
-      return commandObj.error(
-        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FILE_NAME} must not be absolute, but should be relative to the project root directory`
-      );
-    }
-
-    return resolve(projectRootDir, maybePathFromFluenceYaml);
-  }
-
-  const pathFromUserInput = await input(inputArg);
-
-  if (isAbsolute(pathFromUserInput)) {
-    return pathFromUserInput;
-  }
-
-  return resolve(pathFromUserInput);
 };
