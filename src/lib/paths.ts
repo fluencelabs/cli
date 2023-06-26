@@ -16,7 +16,7 @@
 
 import fsPromises from "node:fs/promises";
 import os from "node:os";
-import path, { isAbsolute, resolve } from "node:path";
+import path from "node:path";
 
 import { commandObj } from "./commandObj.js";
 import {
@@ -45,7 +45,6 @@ import {
 } from "./const.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
-import { input, type InputArg } from "./prompt.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
@@ -239,42 +238,4 @@ const ensureFluenceTmpDir = async (): Promise<string> => {
 
 export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
   return path.join(await ensureFluenceTmpDir(), CONFIG_TOML);
-};
-
-type ResolveAbsoluteAquaPathArg = {
-  maybePathFromFlags: string | undefined;
-  maybePathFromFluenceYaml: string | undefined;
-  inputArg: InputArg;
-};
-
-export const resolveAbsoluteAquaPath = async ({
-  maybePathFromFlags,
-  maybePathFromFluenceYaml,
-  inputArg,
-}: ResolveAbsoluteAquaPathArg) => {
-  if (maybePathFromFlags !== undefined) {
-    if (isAbsolute(maybePathFromFlags)) {
-      return maybePathFromFlags;
-    }
-
-    return resolve(maybePathFromFlags);
-  }
-
-  if (maybePathFromFluenceYaml !== undefined) {
-    if (isAbsolute(maybePathFromFluenceYaml)) {
-      return commandObj.error(
-        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FILE_NAME} must not be absolute, but should be relative to the project root directory`
-      );
-    }
-
-    return resolve(projectRootDir, maybePathFromFluenceYaml);
-  }
-
-  const pathFromUserInput = await input(inputArg);
-
-  if (isAbsolute(pathFromUserInput)) {
-    return pathFromUserInput;
-  }
-
-  return resolve(pathFromUserInput);
 };
