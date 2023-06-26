@@ -78,6 +78,8 @@ const INPUT_FLAG_NAME = "input";
 const DATA_FLAG_NAME = "data";
 const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
 
+const FUNC_CALL_EXAMPLE = 'funcName("stringArg")';
+
 export default class Run extends BaseCommand<typeof Run> {
   static override description = "Run aqua script";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
@@ -122,7 +124,7 @@ export default class Run extends BaseCommand<typeof Run> {
     }),
     [FUNC_FLAG_NAME]: Flags.string({
       char: "f",
-      description: "Function call",
+      description: `Function call. Example: ${FUNC_CALL_EXAMPLE}`,
       helpValue: "<function-call>",
     }),
     "no-xor": Flags.boolean({
@@ -189,7 +191,7 @@ export default class Run extends BaseCommand<typeof Run> {
       flags.func === undefined
         ? input({
             message: `Enter a function call that you want to execute. Example: ${color.yellow(
-              'func("arg")'
+              FUNC_CALL_EXAMPLE
             )}`,
             flagName: FUNC_FLAG_NAME,
           })
