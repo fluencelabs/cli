@@ -35,7 +35,7 @@
 
 ## `fluence air beautify [PATH]`
 
-Reads an AIR script from standard input and prints it in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
 
 ```
 USAGE
@@ -48,8 +48,8 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Reads an AIR script from standard input and prints it in human-readable Python-like representation. This
-  representation cannot be executed and is intended to be read by mere mortals.
+  Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended
+  to be read by mere mortals.
 
 ALIASES
   $ fluence air b
