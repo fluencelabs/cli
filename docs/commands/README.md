@@ -632,7 +632,7 @@ USAGE
 
 FLAGS
   -b, --print-beautified-air     Prints beautified AIR code before function execution
-  -f, --func=<function-call>     Function call
+  -f, --func=<function-call>     Function call. Example: funcName("stringArg")
   -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>     Key pair name
   --const=<NAME = value>...      Constant that will be used in the aqua code that you run (example of aqua code:
