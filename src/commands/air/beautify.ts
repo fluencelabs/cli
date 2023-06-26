@@ -28,7 +28,7 @@ import { input } from "../../lib/prompt.js";
 export default class Beautify extends BaseCommand<typeof Beautify> {
   static override aliases = ["air:b"];
   static override description =
-    "Reads an AIR script from standard input and prints it in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.";
+    "Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.";
   static override flags = {
     ...baseFlags,
   };
