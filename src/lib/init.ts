@@ -16,7 +16,7 @@
 
 import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
-import path, { join, relative } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 import { color } from "@oclif/color";
 import Countly from "countly-sdk-nodejs";
@@ -115,7 +115,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   const projectPath =
     options.maybeProjectPath === undefined && !isInteractive
       ? process.cwd()
-      : path.resolve(
+      : resolve(
           options.maybeProjectPath ??
             (await input({
               message:
@@ -237,7 +237,7 @@ const initTSorJSProject = async ({
     ? await ensureDefaultAquaJSPath()
     : await ensureDefaultAquaTSPath();
 
-  const defaultAquaTSorJSPathRelative = path.relative(
+  const defaultAquaTSorJSPathRelative = relative(
     projectRootDir,
     defaultAquaTSorJSPath
   );
@@ -254,7 +254,7 @@ const initTSorJSProject = async ({
     description: "",
     main: indexFileName,
     scripts: {
-      start: `${isJS ? "node" : "ts-node"} ${path.join(
+      start: `${isJS ? "node" : "ts-node"} ${join(
         SRC_DIR_NAME,
         indexFileName
       )}`,
@@ -279,13 +279,13 @@ const initTSorJSProject = async ({
   } as const;
 
   await writeFile(
-    path.join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
+    join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
     JSON.stringify(PACKAGE_JSON, null, 2) + "\n",
     FS_OPTIONS
   );
 
   await writeFile(
-    path.join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
+    join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
     TEMPLATE_INDEX_FILE_CONTENT,
     FS_OPTIONS
   );
@@ -307,7 +307,7 @@ const initTSorJSProject = async ({
     };
 
     await writeFile(
-      path.join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
+      join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
       JSON.stringify(TS_CONFIG),
       FS_OPTIONS
     );
