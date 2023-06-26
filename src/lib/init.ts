@@ -159,7 +159,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
         serviceName,
         fluenceConfig,
         marineCli: await initMarineCli(fluenceConfig),
-        pathOrUrl: servicePath,
+        pathOrUrl: relative(projectRootDir, servicePath),
         interactive: false,
       });
 
