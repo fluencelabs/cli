@@ -18,6 +18,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
+import { beautify } from "@fluencelabs/air-beautify-wasm";
 import {
   Fluence,
   callAquaFunction,
@@ -135,6 +136,13 @@ export default class Run extends BaseCommand<typeof Run> {
     "print-air": Flags.boolean({
       default: false,
       description: "Prints generated AIR code before function execution",
+      exclusive: ["print-beautified-air"],
+    }),
+    "print-beautified-air": Flags.boolean({
+      default: false,
+      description: "Prints beautified AIR code before function execution",
+      char: "b",
+      exclusive: ["print-air"],
     }),
     ...OFF_AQUA_LOGS_FLAG,
     ...KEY_PAIR_FLAG,
@@ -398,6 +406,8 @@ const fluenceRun = async (args: RunArgs) => {
 
   if (args["print-air"]) {
     commandObj.log(functionCall.script);
+  } else if (args["print-beautified-air"]) {
+    commandObj.log(beautify(functionCall.script));
   }
 
   const result = await callAquaFunction({
