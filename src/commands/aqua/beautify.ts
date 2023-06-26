@@ -38,12 +38,12 @@ const FUNC_FLAG_NAME = "func";
 export default class Beautify extends BaseCommand<typeof Beautify> {
   static override aliases = ["aqua:b"];
   static override description =
-    "Compiles Aqua function and prints AIR in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.";
+    "Compiles Aqua function call and prints AIR in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.";
   static override flags = {
     ...baseFlags,
     [FUNC_FLAG_NAME]: Flags.string({
       char: "f",
-      description: "Function to compile",
+      description: "Function call to compile",
       helpValue: "<function-call>",
     }),
     input: Flags.string({
@@ -86,7 +86,9 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
     const func =
       flags.func === undefined
         ? await input({
-            message: `Enter a name of the function that you want to compile`,
+            message: `Enter a function call that you want to compile. Example: ${color.yellow(
+              'func("arg")'
+            )}`,
             flagName: FUNC_FLAG_NAME,
           })
         : flags.func;
@@ -108,6 +110,7 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
 
     const result = await compile({
       filePath: inputFlag,
+      funcCall: func,
       constants: flags.const,
       imports: importFlag,
       logLevel: flags["log-level-compiler"],
@@ -116,16 +119,10 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
       tracing: flags.tracing,
     });
 
-    const aquaFunc = result.functions[func];
-
-    if (aquaFunc === undefined) {
-      return commandObj.error(
-        `Function ${color.yellow(
-          func
-        )} is not found in the aqua script at ${color.yellow(inputFlag)}`
-      );
+    if (result.errors.length > 0) {
+      return commandObj.error(result.errors.join("\n"));
     }
 
-    commandObj.log(beautify(aquaFunc.script));
+    commandObj.log(beautify(result.functionCall.script));
   }
 }

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import assert from "assert";
 import { readFile } from "fs/promises";
 
 import { beautify } from "@fluencelabs/air-beautify-wasm";
-import { Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { FS_OPTIONS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { input } from "../../lib/prompt.js";
 
 export default class Beautify extends BaseCommand<typeof Beautify> {
   static override aliases = ["air:b"];
@@ -31,7 +31,9 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
     "Reads an AIR script from standard input and prints it in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.";
   static override flags = {
     ...baseFlags,
-    input: Flags.string({
+  };
+  static override args = {
+    PATH: Args.string({
       description: `Path to an AIR file. Must be relative to the current working directory or absolute`,
       helpValue: "<path>",
       char: "i",
@@ -39,9 +41,15 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Beautify));
-    assert(flags.input !== undefined);
-    const air = await readFile(flags.input, FS_OPTIONS);
+    const { args } = await initCli(this, await this.parse(Beautify));
+
+    const inputArg =
+      args.PATH ??
+      (await input({
+        message: `Enter a path to an AIR file`,
+      }));
+
+    const air = await readFile(inputArg, FS_OPTIONS);
     commandObj.log(beautify(air));
   }
 }

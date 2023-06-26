@@ -180,7 +180,9 @@ export default class Run extends BaseCommand<typeof Run> {
     const [funcCall, runData] = await Promise.all([
       flags.func === undefined
         ? input({
-            message: `Enter a function call that you want to execute`,
+            message: `Enter a function call that you want to execute. Example: ${color.yellow(
+              'func("arg")'
+            )}`,
             flagName: FUNC_FLAG_NAME,
           })
         : Promise.resolve(flags.func),
