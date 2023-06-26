@@ -2,7 +2,6 @@
 <!-- commands -->
 * [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
 * [`fluence aqua`](#fluence-aqua)
-* [`fluence aqua beautify [PATH]`](#fluence-aqua-beautify-path)
 * [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
 * [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
@@ -92,39 +91,6 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/aqua.ts)_
-
-## `fluence aqua beautify [PATH]`
-
-Compiles Aqua function call and prints AIR in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
-
-```
-USAGE
-  $ fluence aqua beautify [PATH] [--no-input] [-f <value>] [-i <value>] [--import <value>] [--log-level-compiler
-    <value>] [--const <value>] [--no-relay] [--no-xor] [--tracing]
-
-ARGUMENTS
-  PATH  Path to aqua script
-
-FLAGS
-  -f, --func=<function-call>    Function call to compile
-  -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
-                                relative to the current working directory or absolute
-  --const=<NAME=value>...       Constants to be passed to the compiler
-  --import=<path>...            Path to a directory to import aqua files from. May be used several times
-  --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
-                                warn, error, off
-  --no-input                    Don't interactively ask for any input from the user
-  --no-relay                    Do not generate a pass through the relay node
-  --no-xor                      Do not generate a wrapper that catches and displays errors
-  --tracing                     Compile aqua in tracing mode (for debugging purposes)
-
-DESCRIPTION
-  Compiles Aqua function call and prints AIR in human-readable Python-like representation. This representation cannot be
-  executed and is intended to be read by mere mortals.
-
-ALIASES
-  $ fluence aqua b
-```
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -661,10 +627,11 @@ Run aqua script
 USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
-    [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [--tracing]
 
 FLAGS
+  -b, --print-beautified-air     Prints beautified AIR code before function execution
   -f, --func=<function-call>     Function call
   -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>     Key pair name
