@@ -1,6 +1,6 @@
 # Commands
 <!-- commands -->
-* [`fluence air beautify`](#fluence-air-beautify)
+* [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence aqua beautify [PATH]`](#fluence-aqua-beautify-path)
 * [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
@@ -34,17 +34,19 @@
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
 
-## `fluence air beautify`
+## `fluence air beautify [PATH]`
 
 Reads an AIR script from standard input and prints it in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
 
 ```
 USAGE
-  $ fluence air beautify [--no-input] [-i <value>]
+  $ fluence air beautify [PATH] [--no-input]
+
+ARGUMENTS
+  PATH  Path to an AIR file. Must be relative to the current working directory or absolute
 
 FLAGS
-  -i, --input=<path>  Path to an AIR file. Must be relative to the current working directory or absolute
-  --no-input          Don't interactively ask for any input from the user
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
   Reads an AIR script from standard input and prints it in human-readable Python-like representation. This
@@ -93,7 +95,7 @@ _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/bl
 
 ## `fluence aqua beautify [PATH]`
 
-Compiles Aqua function and prints AIR in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+Compiles Aqua function call and prints AIR in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
 
 ```
 USAGE
@@ -104,7 +106,7 @@ ARGUMENTS
   PATH  Path to aqua script
 
 FLAGS
-  -f, --func=<function-call>    Function to compile
+  -f, --func=<function-call>    Function call to compile
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
                                 relative to the current working directory or absolute
   --const=<NAME=value>...       Constants to be passed to the compiler
@@ -117,7 +119,7 @@ FLAGS
   --tracing                     Compile aqua in tracing mode (for debugging purposes)
 
 DESCRIPTION
-  Compiles Aqua function and prints AIR in human-readable Python-like representation. This representation cannot be
+  Compiles Aqua function call and prints AIR in human-readable Python-like representation. This representation cannot be
   executed and is intended to be read by mere mortals.
 
 ALIASES
