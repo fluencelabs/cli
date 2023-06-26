@@ -229,23 +229,8 @@ describe("integration tests", () => {
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
-      await init(cwd, "minimal");
-
-      await writeFile(
-        join(cwd, "src", "aqua", "main.aqua"),
-        await readFile(
-          join("test", "aqua", "runDeployedDeals.aqua"),
-          FS_OPTIONS
-        ),
-        FS_OPTIONS
-      );
-
-      const pathToNewServiceDir = join("src", "services", "newService");
-
-      await fluence({
-        args: ["service", "new", "newService"],
-        cwd,
-      });
+      await init(cwd, "quickstart");
+      const pathToNewServiceDir = join("src", "services", "myService");
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
@@ -280,7 +265,7 @@ describe("integration tests", () => {
           fluenceConfig.hosts[DEFAULT_WORKER_NAME] !== undefined
       );
 
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["newService"];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["myService"];
       fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
 
       await fluenceConfig.$commit();
