@@ -18,6 +18,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
+import { beautify } from "@fluencelabs/air-beautify-wasm";
 import {
   Fluence,
   callAquaFunction,
@@ -77,6 +78,8 @@ const INPUT_FLAG_NAME = "input";
 const DATA_FLAG_NAME = "data";
 const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
 
+const FUNC_CALL_EXAMPLE = 'funcName("stringArg")';
+
 export default class Run extends BaseCommand<typeof Run> {
   static override description = "Run aqua script";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
@@ -121,7 +124,7 @@ export default class Run extends BaseCommand<typeof Run> {
     }),
     [FUNC_FLAG_NAME]: Flags.string({
       char: "f",
-      description: "Function call",
+      description: `Function call. Example: ${FUNC_CALL_EXAMPLE}`,
       helpValue: "<function-call>",
     }),
     "no-xor": Flags.boolean({
@@ -135,6 +138,13 @@ export default class Run extends BaseCommand<typeof Run> {
     "print-air": Flags.boolean({
       default: false,
       description: "Prints generated AIR code before function execution",
+      exclusive: ["print-beautified-air"],
+    }),
+    "print-beautified-air": Flags.boolean({
+      default: false,
+      description: "Prints beautified AIR code before function execution",
+      char: "b",
+      exclusive: ["print-air"],
     }),
     ...OFF_AQUA_LOGS_FLAG,
     ...KEY_PAIR_FLAG,
@@ -180,7 +190,9 @@ export default class Run extends BaseCommand<typeof Run> {
     const [funcCall, runData] = await Promise.all([
       flags.func === undefined
         ? input({
-            message: `Enter a function call that you want to execute`,
+            message: `Enter a function call that you want to execute. Example: ${color.yellow(
+              FUNC_CALL_EXAMPLE
+            )}`,
             flagName: FUNC_FLAG_NAME,
           })
         : Promise.resolve(flags.func),
@@ -396,6 +408,8 @@ const fluenceRun = async (args: RunArgs) => {
 
   if (args["print-air"]) {
     commandObj.log(functionCall.script);
+  } else if (args["print-beautified-air"]) {
+    commandObj.log(beautify(functionCall.script));
   }
 
   const result = await callAquaFunction({
