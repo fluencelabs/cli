@@ -122,7 +122,7 @@ describe("integration tests", () => {
       flags: {
         f: "identify()",
         i: join("test", "aqua", "smoke.aqua"),
-        relay: `'${relay}'`,
+        relay,
         quiet: true,
       },
     });
