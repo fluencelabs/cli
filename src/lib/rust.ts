@@ -333,7 +333,8 @@ export const ensureCargoDependency = async ({
       throw new Error("Not working. Fallback to normal installation");
     }
   } catch {
-    // Fallback to normal cargo install if Download fails in CI or if using CLI not in CI
+    // Fallback to normal cargo install if no pre-built binary to download
+    // or if downloaded binary is not working
     await handleInstallation({
       force,
       dependencyPath,
