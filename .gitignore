@@ -9,7 +9,8 @@ oclif.manifest.json
 .eslintcache
 
 # for ease of development
-schemas
+/schemas
+/.fluence-dev-project
 .env
 
 # recommended by Fluence

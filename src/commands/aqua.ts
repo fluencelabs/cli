@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute, resolve } from "path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -26,10 +26,10 @@ import { commandObj } from "../lib/commandObj.js";
 import {
   AQUA_EXT,
   aquaLogLevelsString,
-  FLUENCE_CONFIG_FILE_NAME,
   IMPORT_FLAG,
   NO_INPUT_FLAG,
   TRACING_FLAG,
+  FLUENCE_CONFIG_FILE_NAME,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";

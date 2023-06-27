@@ -1,5 +1,6 @@
 # Commands
 <!-- commands -->
+* [`flox air beautify [PATH]`](#flox-air-beautify-path)
 * [`flox aqua`](#flox-aqua)
 * [`flox aqua json [FUNC] [INPUT] [OUTPUT]`](#flox-aqua-json-func-input-output)
 * [`flox aqua yml [FUNC] [INPUT] [OUTPUT]`](#flox-aqua-yml-func-input-output)
@@ -31,6 +32,28 @@
 * [`flox workers deploy [WORKER-NAMES]`](#flox-workers-deploy-worker-names)
 * [`flox workers logs [WORKER-NAMES]`](#flox-workers-logs-worker-names)
 * [`flox workers upload [WORKER-NAMES]`](#flox-workers-upload-worker-names)
+
+## `flox air beautify [PATH]`
+
+Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+
+```
+USAGE
+  $ flox air beautify [PATH] [--no-input]
+
+ARGUMENTS
+  PATH  Path to an AIR file. Must be relative to the current working directory or absolute
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended
+  to be read by mere mortals.
+
+ALIASES
+  $ flox air b
+```
 
 ## `flox aqua`
 
@@ -67,7 +90,7 @@ EXAMPLES
   $ flox aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/aqua.ts)_
 
 ## `flox aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -169,7 +192,7 @@ EXAMPLES
   $ flox build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/build.ts)_
 
 ## `flox deal deploy [WORKER-NAMES]`
 
@@ -428,7 +451,7 @@ ARGUMENTS
   PATH  Project path
 
 FLAGS
-  -t, --template=<value>  Template to use for the project. One of: minimal, ts, js
+  -t, --template=<value>  Template to use for the project. One of: quickstart, minimal, ts, js
   --no-input              Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -438,7 +461,7 @@ EXAMPLES
   $ flox init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/init.ts)_
 
 ## `flox key default [NAME]`
 
@@ -603,12 +626,13 @@ Run aqua script
 ```
 USAGE
   $ flox run [--no-input] [--data <value>] [--data-path <value>] [--import <value>] [--log-level-compiler
-    <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air]
+    <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air | -b]
     [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
     [--tracing]
 
 FLAGS
-  -f, --func=<function-call>     Function call
+  -b, --print-beautified-air     Prints beautified AIR code before function execution
+  -f, --func=<function-call>     Function call. Example: funcName("stringArg")
   -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>     Key pair name
   --const=<NAME = value>...      Constant that will be used in the aqua code that you run (example of aqua code:
@@ -640,7 +664,7 @@ EXAMPLES
   $ flox run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/run.ts)_
 
 ## `flox service add [PATH | URL]`
 

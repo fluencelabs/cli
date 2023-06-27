@@ -74,7 +74,7 @@ export default class New extends BaseCommand<typeof New> {
     }
 
     const servicePath = join(
-      flags.path ?? relative(projectRootDir, await ensureSrcServicesDir()),
+      flags.path ?? (await ensureSrcServicesDir()),
       serviceName
     );
 
@@ -99,7 +99,7 @@ export default class New extends BaseCommand<typeof New> {
       await addService({
         marineCli,
         serviceName,
-        pathOrUrl: servicePath,
+        pathOrUrl: relative(projectRootDir, servicePath),
         fluenceConfig: maybeFluenceConfig,
       });
     }
