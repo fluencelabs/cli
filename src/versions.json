@@ -1,6 +1,6 @@
 {
   "rust-peer": "fluencelabs/rust-peer:0.1.8",
-  "rust-toolchain": "nightly-2022-12-01-x86_64",
+  "rust-toolchain": "nightly-2023-06-14-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.7.1",
     "@fluencelabs/spell": "0.5.13",
