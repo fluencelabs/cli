@@ -14,7 +14,7 @@ on:
       run-tests-in-parallel:
         description: "Whether to run tests in parallel or synchronously"
         type: string
-        default: "false"
+        default: "true"
       rust-peer-image:
         description: "rust-peer image tag"
         type: string
