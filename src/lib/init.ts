@@ -16,7 +16,7 @@
 
 import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { join, relative, resolve } from "node:path";
 
 import { color } from "@oclif/color";
 import Countly from "countly-sdk-nodejs";
@@ -43,6 +43,7 @@ import {
   JS_CLIENT_API_NPM_DEPENDENCY,
   FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
   CLI_NAME,
+  getMainAquaFileContent,
 } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
@@ -51,6 +52,7 @@ import {
   ensureDefaultJSDirPath,
   ensureDefaultTSDirPath,
   ensureFluenceAquaServicesPath,
+  ensureSrcServicesDir,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
   projectRootDir,
@@ -59,11 +61,16 @@ import {
 import { input, list } from "../lib/prompt.js";
 import versions from "../versions.json" assert { type: "json" };
 
+import { addService } from "./addService.js";
 import { commandObj, isInteractive } from "./commandObj.js";
+import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfig } from "./configs/project/workers.js";
 import { ensureAquaFileWithWorkerInfo } from "./deployWorkers.js";
+import { generateNewModule } from "./generateNewModule.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
+import { initMarineCli } from "./marineCli.js";
+import { ensureSrcAquaMainPath } from "./paths.js";
 
 const selectTemplate = (): Promise<Template> => {
   return list({
@@ -106,15 +113,11 @@ type InitArg = {
 };
 
 export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
-  const { template = await selectTemplate(), maybeProjectPath } = options;
-
-  Countly.add_event({ key: `init:template:${template}` });
-
   const projectPath =
-    maybeProjectPath === undefined && !isInteractive
+    options.maybeProjectPath === undefined && !isInteractive
       ? process.cwd()
-      : path.resolve(
-          maybeProjectPath ??
+      : resolve(
+          options.maybeProjectPath ??
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory:",
@@ -133,12 +136,37 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
     );
   }
 
+  const { template = await selectTemplate() } = options;
+  Countly.add_event({ key: `init:template:${template}` });
   await mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
 
   switch (template) {
+    case "quickstart": {
+      const serviceName = "myService";
+      const servicePath = join(await ensureSrcServicesDir(), serviceName);
+      const pathToModuleDir = join(servicePath, "modules", serviceName);
+      await generateNewModule(pathToModuleDir);
+
+      await initNewReadonlyServiceConfig(
+        servicePath,
+        relative(servicePath, pathToModuleDir),
+        serviceName
+      );
+
+      await addService({
+        serviceName,
+        fluenceConfig,
+        marineCli: await initMarineCli(fluenceConfig),
+        pathOrUrl: relative(projectRootDir, servicePath),
+        interactive: false,
+      });
+
+      break;
+    }
+
     case "minimal":
       break;
 
@@ -157,6 +185,12 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
       return _exhaustiveCheck;
     }
   }
+
+  await writeFile(
+    await ensureSrcAquaMainPath(),
+    getMainAquaFileContent(template !== "quickstart"),
+    FS_OPTIONS
+  );
 
   await writeFile(
     await ensureVSCodeExtensionsJsonPath(),
@@ -204,7 +238,7 @@ const initTSorJSProject = async ({
     ? await ensureDefaultAquaJSPath()
     : await ensureDefaultAquaTSPath();
 
-  const defaultAquaTSorJSPathRelative = path.relative(
+  const defaultAquaTSorJSPathRelative = relative(
     projectRootDir,
     defaultAquaTSorJSPath
   );
@@ -221,7 +255,7 @@ const initTSorJSProject = async ({
     description: "",
     main: indexFileName,
     scripts: {
-      start: `${isJS ? "node" : "ts-node"} ${path.join(
+      start: `${isJS ? "node" : "ts-node"} ${join(
         SRC_DIR_NAME,
         indexFileName
       )}`,
@@ -246,13 +280,13 @@ const initTSorJSProject = async ({
   } as const;
 
   await writeFile(
-    path.join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
+    join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
     JSON.stringify(PACKAGE_JSON, null, 2) + "\n",
     FS_OPTIONS
   );
 
   await writeFile(
-    path.join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
+    join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
     TEMPLATE_INDEX_FILE_CONTENT,
     FS_OPTIONS
   );
@@ -274,7 +308,7 @@ const initTSorJSProject = async ({
     };
 
     await writeFile(
-      path.join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
+      join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
       JSON.stringify(TS_CONFIG),
       FS_OPTIONS
     );

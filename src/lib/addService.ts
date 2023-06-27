@@ -36,6 +36,7 @@ type AddServiceArg = {
   pathOrUrl: string;
   fluenceConfig: FluenceConfig;
   marineCli: MarineCLI;
+  interactive?: boolean;
 };
 
 export const addService = async ({
@@ -43,6 +44,7 @@ export const addService = async ({
   pathOrUrl,
   fluenceConfig,
   marineCli,
+  interactive = true,
 }: AddServiceArg): Promise<string> => {
   let serviceName = serviceNameFromArgs;
 
@@ -92,36 +94,46 @@ export const addService = async ({
   await build({ marineCli, fluenceConfig, defaultKeyPair });
   await fluenceConfig.$commit();
 
-  commandObj.log(
-    `Added ${color.yellow(serviceName)} to ${color.yellow(
-      FLUENCE_CONFIG_FILE_NAME
-    )}`
-  );
+  if (interactive) {
+    commandObj.log(
+      `Added ${color.yellow(serviceName)} to ${color.yellow(
+        FLUENCE_CONFIG_FILE_NAME
+      )}`
+    );
+  }
 
   if (
-    isInteractive &&
-    fluenceConfig !== undefined &&
-    fluenceConfig.workers !== undefined &&
-    DEFAULT_WORKER_NAME in fluenceConfig.workers &&
-    !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services ?? []).includes(
-      serviceName
-    ) &&
-    (await confirm({
-      message: `Do you want to add service ${color.yellow(
+    !(
+      isInteractive &&
+      fluenceConfig !== undefined &&
+      fluenceConfig.workers !== undefined &&
+      DEFAULT_WORKER_NAME in fluenceConfig.workers &&
+      !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services ?? []).includes(
         serviceName
-      )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
-    }))
+      ) &&
+      (interactive
+        ? await confirm({
+            message: `Do you want to add service ${color.yellow(
+              serviceName
+            )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
+          })
+        : true)
+    )
   ) {
-    const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
-    assert(defaultWorker !== undefined);
+    return serviceName;
+  }
 
-    fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
-      ...defaultWorker,
-      services: [...(defaultWorker.services ?? []), serviceName],
-    };
+  const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
+  assert(defaultWorker !== undefined);
 
-    await fluenceConfig.$commit();
+  fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
+    ...defaultWorker,
+    services: [...(defaultWorker.services ?? []), serviceName],
+  };
 
+  await fluenceConfig.$commit();
+
+  if (interactive) {
     commandObj.log(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
         DEFAULT_WORKER_NAME

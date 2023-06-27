@@ -1,7 +1,7 @@
 {
   "name": "@fluencelabs/flox",
   "type": "module",
-  "version": "0.4.17",
+  "version": "0.4.18",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
@@ -39,6 +39,7 @@
     "upgrade-dependencies": "npx npm-check-updates -u"
   },
   "dependencies": {
+    "@fluencelabs/air-beautify-wasm": "0.3.0",
     "@fluencelabs/aqua-api": "0.11.7",
     "@fluencelabs/deal-aurora": "0.1.8",
     "@fluencelabs/fluence-network-environment": "^1.0.14",
@@ -47,7 +48,7 @@
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.19.4",
     "@oclif/color": "^1.0.4",
-    "@oclif/core": "^2.8.0",
+    "@oclif/core": "2.8.0",
     "@oclif/plugin-autocomplete": "^2.1.8",
     "@oclif/plugin-help": "^5.2.9",
     "@oclif/plugin-not-found": "^2.3.23",

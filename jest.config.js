@@ -22,7 +22,7 @@ export default {
   },
   testPathIgnorePatterns: ["^dist"],
   testEnvironment: "node",
-  testTimeout: 600000, // 10 minutes in milliseconds
+  testTimeout: 300000, // 5 minutes in milliseconds
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",

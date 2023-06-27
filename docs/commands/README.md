@@ -1,38 +1,61 @@
 # Commands
 <!-- commands -->
-* [`flox aqua`](#flox-aqua)
-* [`flox aqua json [FUNC] [INPUT] [OUTPUT]`](#flox-aqua-json-func-input-output)
-* [`flox aqua yml [FUNC] [INPUT] [OUTPUT]`](#flox-aqua-yml-func-input-output)
-* [`flox autocomplete [SHELL]`](#flox-autocomplete-shell)
-* [`flox build`](#flox-build)
-* [`flox deal deploy [WORKER-NAMES]`](#flox-deal-deploy-worker-names)
-* [`flox deal logs [WORKER-NAMES]`](#flox-deal-logs-worker-names)
-* [`flox default peers [NETWORK]`](#flox-default-peers-network)
-* [`flox dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#flox-dependency-cargo-install-package-name--package-nameversion)
-* [`flox dependency install`](#flox-dependency-install)
-* [`flox dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#flox-dependency-npm-install-package-name--package-nameversion)
-* [`flox dependency reset`](#flox-dependency-reset)
-* [`flox dependency versions`](#flox-dependency-versions)
-* [`flox help [COMMANDS]`](#flox-help-commands)
-* [`flox init [PATH]`](#flox-init-path)
-* [`flox key default [NAME]`](#flox-key-default-name)
-* [`flox key new [NAME]`](#flox-key-new-name)
-* [`flox key remove [NAME]`](#flox-key-remove-name)
-* [`flox module add [PATH | URL]`](#flox-module-add-path--url)
-* [`flox module new [NAME]`](#flox-module-new-name)
-* [`flox module remove [NAME | PATH | URL]`](#flox-module-remove-name--path--url)
-* [`flox resource-owner pat create [DEAL-ADDRESS]`](#flox-resource-owner-pat-create-deal-address)
-* [`flox run`](#flox-run)
-* [`flox service add [PATH | URL]`](#flox-service-add-path--url)
-* [`flox service new [NAME]`](#flox-service-new-name)
-* [`flox service remove [NAME | PATH | URL]`](#flox-service-remove-name--path--url)
-* [`flox service repl [NAME | PATH | URL]`](#flox-service-repl-name--path--url)
-* [`flox spell new [NAME]`](#flox-spell-new-name)
-* [`flox workers deploy [WORKER-NAMES]`](#flox-workers-deploy-worker-names)
-* [`flox workers logs [WORKER-NAMES]`](#flox-workers-logs-worker-names)
-* [`flox workers upload [WORKER-NAMES]`](#flox-workers-upload-worker-names)
+* [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
+* [`fluence aqua`](#fluence-aqua)
+* [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
+* [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
+* [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence build`](#fluence-build)
+* [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
+* [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
+* [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
+* [`fluence dependency install`](#fluence-dependency-install)
+* [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
+* [`fluence dependency reset`](#fluence-dependency-reset)
+* [`fluence dependency versions`](#fluence-dependency-versions)
+* [`fluence help [COMMANDS]`](#fluence-help-commands)
+* [`fluence init [PATH]`](#fluence-init-path)
+* [`fluence key default [NAME]`](#fluence-key-default-name)
+* [`fluence key new [NAME]`](#fluence-key-new-name)
+* [`fluence key remove [NAME]`](#fluence-key-remove-name)
+* [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
+* [`fluence module new [NAME]`](#fluence-module-new-name)
+* [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
+* [`fluence run`](#fluence-run)
+* [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
+* [`fluence service new [NAME]`](#fluence-service-new-name)
+* [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
+* [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence spell new [NAME]`](#fluence-spell-new-name)
+* [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
+* [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
+* [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
 
-## `flox aqua`
+## `fluence air beautify [PATH]`
+
+Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+
+```
+USAGE
+  $ fluence air beautify [PATH] [--no-input]
+
+ARGUMENTS
+  PATH  Path to an AIR file. Must be relative to the current working directory or absolute
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended
+  to be read by mere mortals.
+
+ALIASES
+  $ fluence air b
+```
+
+## `fluence aqua`
 
 Compile aqua file or directory that contains your .aqua files
 
@@ -67,7 +90,7 @@ EXAMPLES
   $ flox aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/aqua.ts)_
 
 ## `flox aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -169,7 +192,7 @@ EXAMPLES
   $ flox build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/build.ts)_
 
 ## `flox deal deploy [WORKER-NAMES]`
 
@@ -428,7 +451,7 @@ ARGUMENTS
   PATH  Project path
 
 FLAGS
-  -t, --template=<value>  Template to use for the project. One of: minimal, ts, js
+  -t, --template=<value>  Template to use for the project. One of: quickstart, minimal, ts, js
   --no-input              Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -438,7 +461,7 @@ EXAMPLES
   $ flox init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/init.ts)_
 
 ## `flox key default [NAME]`
 
@@ -602,13 +625,14 @@ Run aqua script
 
 ```
 USAGE
-  $ flox run [--no-input] [--data <value>] [--data-path <value>] [--import <value>] [--log-level-compiler
-    <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air]
-    [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
-    [--tracing]
+  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
+    [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
+    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [--tracing]
 
 FLAGS
-  -f, --func=<function-call>     Function call
+  -b, --print-beautified-air     Prints beautified AIR code before function execution
+  -f, --func=<function-call>     Function call. Example: funcName("stringArg")
   -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>     Key pair name
   --const=<NAME = value>...      Constant that will be used in the aqua code that you run (example of aqua code:
@@ -640,7 +664,7 @@ EXAMPLES
   $ flox run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.4.17/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/run.ts)_
 
 ## `flox service add [PATH | URL]`
 
