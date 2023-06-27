@@ -120,9 +120,9 @@ describe("integration tests", () => {
     const result = await fluence({
       args: ["run"],
       flags: {
+        relay,
         f: "identify()",
         i: join("test", "aqua", "smoke.aqua"),
-        relay,
         quiet: true,
       },
     });
