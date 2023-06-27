@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.18](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.17...fluence-cli-v0.4.18) (2023-06-26)
+
+
+### Features
+
+* add air beautify [fixes DXJ-386] ([#303](https://github.com/fluencelabs/fluence-cli/issues/303)) ([8d91b33](https://github.com/fluencelabs/fluence-cli/commit/8d91b33676a11e426c222d15af2a284057919ee5))
+* automatically add spell to fluence.yaml upon creation [fixes DXJ-395] ([#304](https://github.com/fluencelabs/fluence-cli/issues/304)) ([22609ea](https://github.com/fluencelabs/fluence-cli/commit/22609ea2a6fa1d505f0397286d7312531f3b0bdd))
+
 ## [0.4.17](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.16...fluence-cli-v0.4.17) (2023-06-16)
 
 

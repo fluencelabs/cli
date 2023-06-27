@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isAbsolute, relative, resolve } from "node:path";
 import { cwd } from "node:process";
 
 import { Args, Flags } from "@oclif/core";
@@ -23,9 +24,13 @@ import { addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
-import { AQUA_NAME_REQUIREMENTS } from "../../lib/helpers/downloadFile.js";
+import {
+  AQUA_NAME_REQUIREMENTS,
+  isUrl,
+} from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
+import { projectRootDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 const PATH_OR_URL = "PATH | URL";
@@ -69,9 +74,21 @@ export default class Add extends BaseCommand<typeof Add> {
 
     await addService({
       serviceName: flags.name ?? serviceConfig.name,
-      pathOrUrl: serviceOrServiceDirPathOrUrl,
+      pathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
       fluenceConfig,
       marineCli,
     });
   }
 }
+
+const resolveServicePathOrUrl = (serviceOrServiceDirPathOrUrl: string) => {
+  if (isUrl(serviceOrServiceDirPathOrUrl)) {
+    return serviceOrServiceDirPathOrUrl;
+  }
+
+  if (isAbsolute(serviceOrServiceDirPathOrUrl)) {
+    return relative(projectRootDir, serviceOrServiceDirPathOrUrl);
+  }
+
+  return relative(projectRootDir, resolve(serviceOrServiceDirPathOrUrl));
+};
