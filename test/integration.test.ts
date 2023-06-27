@@ -114,12 +114,15 @@ describe("integration tests", () => {
   });
 
   maybeConcurrentTest("should work without project", async () => {
+    const relay = multiaddrs[0]?.multiaddr;
+    assert(typeof relay === "string");
+
     const result = await fluence({
       args: ["run"],
       flags: {
         f: "identify()",
         i: join("test", "aqua", "smoke.aqua"),
-        relay: multiaddrs[0]?.multiaddr,
+        relay: `'${relay}'`,
         quiet: true,
       },
     });
