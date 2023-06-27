@@ -100,7 +100,6 @@ export const addService = async ({
 
   if (
     isInteractive &&
-    fluenceConfig !== undefined &&
     fluenceConfig.workers !== undefined &&
     DEFAULT_WORKER_NAME in fluenceConfig.workers &&
     !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services ?? []).includes(

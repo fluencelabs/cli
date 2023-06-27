@@ -1,5 +1,6 @@
 # Commands
 <!-- commands -->
+* [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
 * [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
@@ -31,6 +32,28 @@
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
+
+## `fluence air beautify [PATH]`
+
+Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+
+```
+USAGE
+  $ fluence air beautify [PATH] [--no-input]
+
+ARGUMENTS
+  PATH  Path to an AIR file. Must be relative to the current working directory or absolute
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended
+  to be read by mere mortals.
+
+ALIASES
+  $ fluence air b
+```
 
 ## `fluence aqua`
 
@@ -604,11 +627,12 @@ Run aqua script
 USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
-    [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [--tracing]
 
 FLAGS
-  -f, --func=<function-call>     Function call
+  -b, --print-beautified-air     Prints beautified AIR code before function execution
+  -f, --func=<function-call>     Function call. Example: funcName("stringArg")
   -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>     Key pair name
   --const=<NAME = value>...      Constant that will be used in the aqua code that you run (example of aqua code:
