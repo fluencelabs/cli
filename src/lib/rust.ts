@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { access } from "node:fs/promises";
+import { access, unlink } from "node:fs/promises";
+import { arch, platform } from "node:os";
 import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -24,7 +25,11 @@ import versions from "../versions.json" assert { type: "json" };
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { RUST_WASM32_WASI_TARGET } from "./const.js";
+import {
+  MARINE_CARGO_DEPENDENCY,
+  MREPL_CARGO_DEPENDENCY,
+  RUST_WASM32_WASI_TARGET,
+} from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
@@ -241,7 +246,7 @@ const downloadPrebuiltCargoDependencies = async (
   try {
     await access(binaryPath);
   } catch {
-    const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-linux-x86_64`;
+    const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-${platform()}-x86_64`;
 
     commandObj.log(
       `Downloading prebuilt binary: ${color.yellow(name)}... from ${url}`
@@ -300,10 +305,32 @@ export const ensureCargoDependency = async ({
     });
 
   try {
-    if (process.env.CI === "true") {
+    if (
+      force ||
+      ![MARINE_CARGO_DEPENDENCY, MREPL_CARGO_DEPENDENCY].includes(name)
+    ) {
+      throw new Error("Install using cargo");
+    }
+
+    if (["darwin", "linux"].includes(platform()) && arch() === "x64") {
       await downloadPrebuiltCargoDependencies(name, version, dependencyPath);
     } else {
-      throw new Error("Not in CI");
+      throw new Error("Unsupported platform. Use cargo");
+    }
+
+    try {
+      // check binary is working
+      const helpText = await execPromise({
+        command: join(dependencyPath, "bin", name),
+        args: ["--help"],
+      });
+
+      if (!helpText.includes(version)) {
+        throw new Error("Version mismatch");
+      }
+    } catch {
+      await unlink(dependencyPath);
+      throw new Error("Not working. Fallback to normal installation");
     }
   } catch {
     // Fallback to normal cargo install if Download fails in CI or if using CLI not in CI

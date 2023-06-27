@@ -32,7 +32,7 @@ export default class Install extends BaseCommand<typeof Install> {
     force: Flags.boolean({
       default: false,
       description:
-        "Force install even if the dependency/dependencies is/are already installed",
+        "Force install using cargo even if the dependency/dependencies is/are already installed",
     }),
   };
   async run(): Promise<void> {
