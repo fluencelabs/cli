@@ -451,7 +451,7 @@ ARGUMENTS
   PATH  Project path
 
 FLAGS
-  -t, --template=<value>  Template to use for the project. One of: minimal, ts, js
+  -t, --template=<value>  Template to use for the project. One of: quickstart, minimal, ts, js
   --no-input              Don't interactively ask for any input from the user
 
 DESCRIPTION
