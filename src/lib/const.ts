@@ -281,7 +281,7 @@ export const TOKENS_STRING = TOKENS.join(", ");
 export type Token = (typeof TOKENS)[number];
 export const isToken = getIsStringUnion(TOKENS);
 
-export const TEMPLATES = ["minimal", "ts", "js"] as const;
+export const TEMPLATES = ["quickstart", "minimal", "ts", "js"] as const;
 export type Template = (typeof TEMPLATES)[number];
 export const isTemplate = getIsStringUnion(TEMPLATES);
 
@@ -352,7 +352,7 @@ export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`
 )}\n\n`;
 
-const MAIN_AQUA_FILE_STATUS_TEXT = `
+const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using 'fluence deal deploy'
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
@@ -376,11 +376,14 @@ func runDeployedServices() -> *Answer:
     par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
     <- answers`;
 
-const MAIN_AQUA_FILE_STATUS_TEXT_COMMENT = aquaComment(
-  MAIN_AQUA_FILE_STATUS_TEXT
+const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
+  RUN_DEPLOYED_SERVICE_AQUA
 );
 
-export const MAIN_AQUA_FILE_CONTENT = `aqua Main
+export const getMainAquaFileContent = (
+  commentOutRunDeployedServicesAqua: boolean
+) => {
+  return `aqua Main
 
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
@@ -395,7 +398,11 @@ export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
 -- https://fluence.dev
 
 
-${MAIN_AQUA_FILE_STATUS_TEXT_COMMENT}
+${
+  commentOutRunDeployedServicesAqua
+    ? RUN_DEPLOYED_SERVICE_AQUA_COMMENT
+    : RUN_DEPLOYED_SERVICE_AQUA
+}
 
 -- local
 func helloWorld(name: string) -> string:
@@ -435,6 +442,7 @@ func getInfosInParallel(peers: []PeerId) -> []Info:
 
     <- infos
 `;
+};
 
 const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
 // @ts-nocheck`;
