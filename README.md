@@ -27,8 +27,8 @@ USAGE
 
 ## Documentation
 
-1. [A complete list of commands together with usage examples](./docs/commands/README.md) 
-1. [Documentation for all flox configs](./docs/configs/README.md) 
+1. [A complete list of commands together with usage examples](./docs/commands/README.md)
+1. [Documentation for all flox configs](./docs/configs/README.md)
 1. [Environment variables that affect flox and are important for flox maintainers](./example.env)
 
 ## Support
