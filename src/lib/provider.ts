@@ -19,6 +19,10 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
+import {
+  type ChainNetwork,
+  CHAIN_NETWORKS,
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";
@@ -26,9 +30,7 @@ import ethers = require("ethers");
 
 import { commandObj } from "./commandObj.js";
 import {
-  type ChainNetwork,
   DEAL_CONFIG,
-  CHAIN_NETWORKS,
   isChainNetwork,
   NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /**
  * Copyright 2023 Fluence Labs Limited
  *
@@ -17,12 +14,16 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import assert from "node:assert";
 
 import { DealClient } from "@fluencelabs/deal-aurora";
+import { type ChainNetwork } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import ethers = require("ethers");
 
-import type { ChainNetwork } from "./const.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";

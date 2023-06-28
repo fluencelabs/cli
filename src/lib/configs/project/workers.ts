@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { JSONSchemaType } from "ajv";
-
 import {
   type ChainNetwork,
   CHAIN_NETWORKS,
-  WORKERS_CONFIG_FILE_NAME,
-  TOP_LEVEL_SCHEMA_ID,
-} from "../../const.js";
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
+import type { JSONSchemaType } from "ajv";
+
+import { WORKERS_CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getReadonlyConfigInitFunction,

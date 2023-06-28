@@ -18,14 +18,16 @@ import assert from "node:assert";
 import fsPromises from "node:fs/promises";
 import path, { join } from "node:path";
 
+import {
+  type ChainNetwork,
+  CHAIN_NETWORKS,
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
 import { ajv } from "../../ajvInstance.js";
 import {
-  type ChainNetwork,
-  CHAIN_NETWORKS,
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,

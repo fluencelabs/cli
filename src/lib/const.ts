@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  type ChainNetwork,
+  CHAIN_NETWORKS,
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
@@ -39,14 +43,7 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
-export const CHAIN_NETWORKS = [
-  "local",
-  "testnet",
-  //  "mainnet"
-] as const;
-
 export const isChainNetwork = getIsStringUnion(CHAIN_NETWORKS);
-export type ChainNetwork = (typeof CHAIN_NETWORKS)[number];
 
 export type ChainConfig = {
   ethereumNodeUrl: string;
@@ -63,13 +60,21 @@ export const WC_METADATA = {
   icons: [],
 };
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
-  local: {
-    ethereumNodeUrl: "http://127.0.0.1:8545",
-    chainId: 31_337,
+  kras: {
+    ethereumNodeUrl: "https://testnet.aurora.dev",
+    chainId: 1313161555,
+  },
+  stage: {
+    ethereumNodeUrl: "https://testnet.aurora.dev",
+    chainId: 1313161555,
   },
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
     chainId: 1313161555,
+  },
+  local: {
+    ethereumNodeUrl: "http://127.0.0.1:8545",
+    chainId: 31_337,
   },
 };
 export const DEAL_RPC_CONFIG = {
