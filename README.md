@@ -27,7 +27,9 @@ USAGE
 
 ## Documentation
 
-A complete list of commands together with usage examples is available [here](./docs/commands/README.md). Documentation for all configs that flox uses can be found [here](./docs/configs/README.md).
+1. [A complete list of commands together with usage examples](./docs/commands/README.md) 
+1. [Documentation for all flox configs](./docs/configs/README.md) 
+1. [Environment variables that affect flox and are important for flox maintainers](./example.env)
 
 ## Support
 
