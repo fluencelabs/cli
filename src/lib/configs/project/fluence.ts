@@ -15,7 +15,6 @@
  */
 
 import assert from "node:assert";
-import fsPromises from "node:fs/promises";
 import path, { join } from "node:path";
 
 import {
@@ -30,8 +29,6 @@ import { ajv } from "../../ajvInstance.js";
 import {
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FILE_NAME,
-  FS_OPTIONS,
-  MAIN_AQUA_FILE_CONTENT,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
@@ -546,26 +543,12 @@ const DEFAULT_RELAYS_FOR_TEMPLATE: Relays =
     : process.env[FLUENCE_ENV];
 
 const initFluenceProject = async (): Promise<ConfigV2> => {
-  const srcMainAquaPath = await ensureSrcAquaMainPath();
-
-  try {
-    await fsPromises.access(srcMainAquaPath);
-  } catch {
-    await fsPromises.writeFile(
-      srcMainAquaPath,
-      MAIN_AQUA_FILE_CONTENT,
-      FS_OPTIONS
-    );
-  }
-
-  const srcMainAquaPathRelative = path.relative(
-    projectRootDir,
-    srcMainAquaPath
-  );
-
   return {
     version: 2,
-    [AQUA_INPUT_PATH_PROPERTY]: srcMainAquaPathRelative,
+    [AQUA_INPUT_PATH_PROPERTY]: path.relative(
+      projectRootDir,
+      await ensureSrcAquaMainPath()
+    ),
     workers: {
       [DEFAULT_WORKER_NAME]: {
         services: [],

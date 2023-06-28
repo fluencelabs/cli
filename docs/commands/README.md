@@ -1,10 +1,13 @@
 # Commands
 <!-- commands -->
+* [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
 * [`fluence aqua`](#fluence-aqua)
 * [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
 * [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
+* [`fluence compute-provider matching registration [WORKERS-COUNT]`](#fluence-compute-provider-matching-registration-workers-count)
+* [`fluence compute-provider pat create [DEAL-ADDRESS]`](#fluence-compute-provider-pat-create-deal-address)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
 * [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
@@ -21,8 +24,6 @@
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
-* [`fluence resource-owner matching join [WORKERS-COUNT]`](#fluence-resource-owner-matching-join-workers-count)
-* [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
 * [`fluence service new [NAME]`](#fluence-service-new-name)
@@ -32,6 +33,28 @@
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
+
+## `fluence air beautify [PATH]`
+
+Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
+
+```
+USAGE
+  $ fluence air beautify [PATH] [--no-input]
+
+ARGUMENTS
+  PATH  Path to an AIR file. Must be relative to the current working directory or absolute
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended
+  to be read by mere mortals.
+
+ALIASES
+  $ fluence air b
+```
 
 ## `fluence aqua`
 
@@ -68,19 +91,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.12/dist/commands/aqua.ts)_
-=======
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/aqua.ts)_
->>>>>>> main
-=======
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.16/dist/commands/aqua.ts)_
->>>>>>> main
-=======
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/aqua.ts)_
->>>>>>> main
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -144,7 +155,7 @@ USAGE
   $ fluence autocomplete [SHELL] [-r]
 
 ARGUMENTS
-  SHELL  shell type
+  SHELL  (zsh|bash|powershell) Shell type
 
 FLAGS
   -r, --refresh-cache  Refresh cache (ignores displaying instructions)
@@ -159,10 +170,12 @@ EXAMPLES
 
   $ fluence autocomplete zsh
 
+  $ fluence autocomplete powershell
+
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.8/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.0/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -182,8 +195,49 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/build.ts)_
 
+## `fluence compute-provider matching registration [WORKERS-COUNT]`
+
+Registration in matching contract
+
+```
+USAGE
+  $ fluence compute-provider matching registration [WORKERS-COUNT] [--no-input] [--privKey <value>] [--network <value>]
+
+ARGUMENTS
+  WORKERS-COUNT  Workers to be registered with the matching engine
+
+FLAGS
+  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
+                       (kras, stage, testnet, local)
+  --no-input           Don't interactively ask for any input from the user
+  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+
+DESCRIPTION
+  Registration in matching contract
+```
+
+## `fluence compute-provider pat create [DEAL-ADDRESS]`
+
+Create provider access token for the deal
+
+```
+USAGE
+  $ fluence compute-provider pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+
+FLAGS
+  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
+                       (kras, stage, testnet, local)
+  --no-input           Don't interactively ask for any input from the user
+  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+
+DESCRIPTION
+  Create provider access token for the deal
+```
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -203,7 +257,7 @@ FLAGS
   --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...             Path to a directory to import aqua files from. May be used several times
   --network=<network>            [default: testnet] The network in which the transactions used by the command will be
-                                 carried out (local, testnet)
+                                 carried out (kras, stage, testnet, local)
   --no-build                     Don't build the project before running the command
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
@@ -428,7 +482,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.9/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.10/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -442,7 +496,7 @@ ARGUMENTS
   PATH  Project path
 
 FLAGS
-  -t, --template=<value>  Template to use for the project. One of: minimal, ts, js
+  -t, --template=<value>  Template to use for the project. One of: quickstart, minimal, ts, js
   --no-input              Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -452,19 +506,7 @@ EXAMPLES
   $ fluence init
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.12/dist/commands/init.ts)_
-=======
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/init.ts)_
->>>>>>> main
-=======
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.16/dist/commands/init.ts)_
->>>>>>> main
-=======
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/init.ts)_
->>>>>>> main
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -601,48 +643,6 @@ EXAMPLES
   $ fluence module remove
 ```
 
-## `fluence resource-owner matching join [WORKERS-COUNT]`
-
-Join to matching contract
-
-```
-USAGE
-  $ fluence resource-owner matching join [WORKERS-COUNT] [--no-input] [--privKey <value>] [--network <value>]
-
-ARGUMENTS
-  WORKERS-COUNT  Workers to be registered with the matching engine
-
-FLAGS
-  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
-                       (local, testnet)
-  --no-input           Don't interactively ask for any input from the user
-  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-
-DESCRIPTION
-  Join to matching contract
-```
-
-## `fluence resource-owner pat create [DEAL-ADDRESS]`
-
-Create provider access token for the deal
-
-```
-USAGE
-  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
-
-FLAGS
-  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
-                       (local, testnet)
-  --no-input           Don't interactively ask for any input from the user
-  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-
-DESCRIPTION
-  Create provider access token for the deal
-```
-
 ## `fluence run`
 
 Run aqua script
@@ -651,11 +651,12 @@ Run aqua script
 USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
-    [--print-air] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [--tracing]
 
 FLAGS
-  -f, --func=<function-call>     Function call
+  -b, --print-beautified-air     Prints beautified AIR code before function execution
+  -f, --func=<function-call>     Function call. Example: funcName("stringArg")
   -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>     Key pair name
   --const=<NAME = value>...      Constant that will be used in the aqua code that you run (example of aqua code:
@@ -687,19 +688,7 @@ EXAMPLES
   $ fluence run
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.12/dist/commands/run.ts)_
-=======
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.14/dist/commands/run.ts)_
->>>>>>> main
-=======
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.16/dist/commands/run.ts)_
->>>>>>> main
-=======
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.17/dist/commands/run.ts)_
->>>>>>> main
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.18/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
