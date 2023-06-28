@@ -58,7 +58,7 @@ const getHashOfString = (str: string): Promise<string> => {
 };
 
 export const downloadFile = async (
-  path: string,
+  outputPath: string,
   url: string
 ): Promise<string> => {
   const res = await fetch(url);
@@ -68,9 +68,9 @@ export const downloadFile = async (
   }
 
   const arrayBuffer = await res.arrayBuffer();
-  await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, new Uint8Array(arrayBuffer));
-  return path;
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, new Uint8Array(arrayBuffer));
+  return outputPath;
 };
 
 type EnsureValidAquaNameArg = {
@@ -141,7 +141,7 @@ const downloadAndDecompress = async (
   const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
   await decompress(archivePath, dirPath);
-  await rm(archivePath, { force: true, recursive: true });
+  await rm(archivePath, { force: true });
   return dirPath;
 };
 

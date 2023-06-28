@@ -204,19 +204,19 @@ const dependenciesPathsGettersMap: Record<
   },
 };
 
-type ResolveDependencyPathAndTmpPath = {
+type ResolveDependencyDirPathAndTmpPath = {
   name: string;
   version: string;
   packageManager: PackageManager;
 };
 
-export const resolveDependencyPathAndTmpPath = async ({
+export const resolveDependencyDirPathAndTmpPath = async ({
   name,
   version,
   packageManager,
-}: ResolveDependencyPathAndTmpPath): Promise<{
-  dependencyTmpPath: string;
-  dependencyPath: string;
+}: ResolveDependencyDirPathAndTmpPath): Promise<{
+  dependencyTmpDirPath: string;
+  dependencyDirPath: string;
 }> => {
   const [depDirPath, depTmpDirPath] = await Promise.all(
     dependenciesPathsGettersMap[packageManager]()
@@ -224,16 +224,16 @@ export const resolveDependencyPathAndTmpPath = async ({
 
   const dependencyPathEnding = join(...name.split("/"), version);
   return {
-    dependencyTmpPath: join(depTmpDirPath, dependencyPathEnding),
-    dependencyPath: join(depDirPath, dependencyPathEnding),
+    dependencyTmpDirPath: join(depTmpDirPath, dependencyPathEnding),
+    dependencyDirPath: join(depDirPath, dependencyPathEnding),
   };
 };
 
 type HandleInstallationArg = {
   force: boolean;
   installDependency: () => Promise<void>;
-  dependencyPath: string;
-  dependencyTmpPath: string;
+  dependencyDirPath: string;
+  dependencyTmpDirPath: string;
   name: string;
   version: string;
   explicitInstallation: boolean;
@@ -242,18 +242,18 @@ type HandleInstallationArg = {
 export const handleInstallation = async ({
   force,
   installDependency,
-  dependencyPath,
-  dependencyTmpPath,
+  dependencyDirPath,
+  dependencyTmpDirPath,
   explicitInstallation,
   name,
   version,
 }: HandleInstallationArg): Promise<void> => {
   const installAndMoveToDependencyPath = async (): Promise<void> => {
-    await rm(dependencyTmpPath, { recursive: true, force: true });
+    await rm(dependencyTmpDirPath, { recursive: true, force: true });
     await installDependency();
-    await rm(dependencyPath, { recursive: true, force: true });
-    await mkdir(dependencyPath, { recursive: true });
-    await rename(dependencyTmpPath, dependencyPath);
+    await rm(dependencyDirPath, { recursive: true, force: true });
+    await mkdir(dependencyDirPath, { recursive: true });
+    await rename(dependencyTmpDirPath, dependencyDirPath);
   };
 
   if (force) {
@@ -262,7 +262,7 @@ export const handleInstallation = async ({
     try {
       // if dependency is already installed it will be there
       // so there is no need to install
-      await access(dependencyPath);
+      await access(dependencyDirPath);
     } catch {
       await installAndMoveToDependencyPath();
     }
@@ -271,7 +271,7 @@ export const handleInstallation = async ({
   if (explicitInstallation) {
     commandObj.log(
       `Successfully installed ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
+        dependencyDirPath
       )}`
     );
   }
