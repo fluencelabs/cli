@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { access, mkdir, rename } from "node:fs/promises";
+import { access, mkdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -249,7 +249,9 @@ export const handleInstallation = async ({
   version,
 }: HandleInstallationArg): Promise<void> => {
   const installAndMoveToDependencyPath = async (): Promise<void> => {
+    await rm(dependencyTmpPath, { recursive: true, force: true });
     await installDependency();
+    await rm(dependencyPath, { recursive: true, force: true });
     await mkdir(dependencyPath, { recursive: true });
     await rename(dependencyTmpPath, dependencyPath);
   };
@@ -259,6 +261,7 @@ export const handleInstallation = async ({
   } else {
     try {
       // if dependency is already installed it will be there
+      // so there is no need to install
       await access(dependencyPath);
     } catch {
       await installAndMoveToDependencyPath();

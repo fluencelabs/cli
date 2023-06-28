@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { access, unlink } from "node:fs/promises";
+import { access, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 
@@ -329,7 +329,7 @@ export const ensureCargoDependency = async ({
         throw new Error("Version mismatch");
       }
     } catch {
-      await unlink(dependencyPath);
+      await rm(dependencyPath, { recursive: true, force: true });
       throw new Error("Not working. Fallback to normal installation");
     }
   } catch {

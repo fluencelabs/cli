@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { extname, join, parse } from "node:path";
 
 import {
@@ -171,10 +171,7 @@ export const compileToFiles = async ({
     `outputPath type is "${typeof outputPath}", but it should be of type "string", because it's not dry run`
   );
 
-  try {
-    await unlink(outputPath);
-  } catch {}
-
+  await rm(outputPath, { recursive: true, force: true });
   await mkdir(outputPath, { recursive: true });
 
   if (compileArgs.targetType === "ts") {

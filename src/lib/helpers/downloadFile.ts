@@ -15,7 +15,7 @@
  */
 
 import crypto from "node:crypto";
-import fsPromises from "node:fs/promises";
+import { access, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -68,8 +68,8 @@ export const downloadFile = async (
   }
 
   const arrayBuffer = await res.arrayBuffer();
-  await fsPromises.mkdir(dirname(path), { recursive: true });
-  await fsPromises.writeFile(path, new Uint8Array(arrayBuffer));
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, new Uint8Array(arrayBuffer));
   return path;
 };
 
@@ -134,14 +134,14 @@ const downloadAndDecompress = async (
   const dirPath = await getDownloadDirPath(get, pathStart);
 
   try {
-    await fsPromises.access(dirPath);
+    await access(dirPath);
     return dirPath;
   } catch {}
 
   const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
   await decompress(archivePath, dirPath);
-  await fsPromises.unlink(archivePath);
+  await rm(archivePath, { force: true, recursive: true });
   return dirPath;
 };
 
