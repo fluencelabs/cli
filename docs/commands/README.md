@@ -326,7 +326,7 @@ USAGE
   $ fluence dependency install [--no-input] [--force]
 
 FLAGS
-  --force     Force install using cargo even if the dependency/dependencies is/are already installed
+  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
