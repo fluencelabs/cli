@@ -214,7 +214,7 @@ const handleFluenceCLIVersion = async (
         `npm i -g @fluencelabs/cli@${flunenceCLIVersion}`
       )}\n\nAfter that, run:\n\n${color.yellow(
         "fluence dep v"
-      )}\n\nto find out which version of rust-peer you need to use to make sure you are running Fluence CLI against the compatible version of rust-peer\n\n`
+      )}\n\nto find out which version of nox you need to use to make sure you are running Fluence CLI against the compatible version of nox\n\n`
     );
   }
 
