@@ -1,5 +1,5 @@
 {
-  "rust-peer": "fluencelabs/rust-peer:0.1.8",
+  "nox": "fluencelabs/nox:0.1.24",
   "rust-toolchain": "nightly-2023-06-14-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.7.1",
