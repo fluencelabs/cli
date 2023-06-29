@@ -43,6 +43,7 @@ import {
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+import { hasKey, isObject } from "./typeHelpers.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -299,19 +300,28 @@ const tryDownloadingBinary = async ({
     return `Failed to make ${name}@${version} executable by running chmod +x '${binaryPath}'`;
   }
 
-  // try {
-  //   // check binary is working
-  //   const helpText = await execPromise({
-  //     command: binaryPath,
-  //     args: ["--help"],
-  //   });
+  try {
+    // check binary is working
+    const helpText = await execPromise({
+      command: binaryPath,
+      args: ["--help"],
+    });
 
-  //   if (!helpText.includes(version)) {
-  //     return `Downloaded ${name}@${version} binary at ${binaryPath} --help message does not contain the ${version} version it is supposed to contain:\n result of --help execution is: ${helpText}`;
-  //   }
-  // } catch (e) {
-  //   return `Failed to run ${name}@${version} binary at ${binaryPath}`;
-  // }
+    if (!helpText.includes(version)) {
+      return `Downloaded ${name}@${version} binary at ${binaryPath} --help message does not contain the ${version} version it is supposed to contain:\n result of --help execution is: ${helpText}`;
+    }
+  } catch (e) {
+    if (
+      isObject(e) &&
+      hasKey("message", e) &&
+      typeof e["message"] === "string" &&
+      e["message"].includes(version)
+    ) {
+      return true;
+    }
+
+    return `Failed to run ${name}@${version} binary at ${binaryPath}`;
+  }
 
   return true;
 };
