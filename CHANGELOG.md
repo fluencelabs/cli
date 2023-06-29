@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.19](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.18...fluence-cli-v0.4.19) (2023-06-29)
+
+
+### Features
+
+* Add quickstart template [fixes DXJ-399] ([#306](https://github.com/fluencelabs/fluence-cli/issues/306)) ([7cb925e](https://github.com/fluencelabs/fluence-cli/commit/7cb925ef6ab6152abb36905449aba79987f0695a))
+* recursive aqua file compilation [fixes DXJ-400] ([#311](https://github.com/fluencelabs/fluence-cli/issues/311)) ([3bb3720](https://github.com/fluencelabs/fluence-cli/commit/3bb3720c27b15c65f8bdf9bee2167ebbee377ef6))
+* use binary marine and mrepl releases for linux x86_64 and darwin x86_64 [fixes DXJ-121, DXJ-147] ([#307](https://github.com/fluencelabs/fluence-cli/issues/307)) ([a5180b4](https://github.com/fluencelabs/fluence-cli/commit/a5180b43c6acff1aa054cc30bc6a1754075dfcdc))
+
 ## [0.4.18](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.17...fluence-cli-v0.4.18) (2023-06-26)
 
 
