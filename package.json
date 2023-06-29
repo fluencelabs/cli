@@ -46,7 +46,7 @@
     "@fluencelabs/js-client.api": "0.11.6",
     "@fluencelabs/js-client.node": "0.6.10",
     "@iarna/toml": "^2.2.5",
-    "@mswjs/interceptors": "^0.19.4",
+    "@mswjs/interceptors": "^0.23.0",
     "@oclif/color": "^1.0.4",
     "@oclif/core": "2.8.0",
     "@oclif/plugin-autocomplete": "^2.1.8",
