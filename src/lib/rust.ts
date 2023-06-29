@@ -384,8 +384,8 @@ export const ensureCargoDependency = async ({
       version,
       installDependency: () => {
         return installCargoDependency({
-          dependencyDirPath: dependencyDirPath,
-          dependencyTmpDirPath: dependencyTmpDirPath,
+          dependencyDirPath,
+          dependencyTmpDirPath,
           name,
           toolchain,
           version,
