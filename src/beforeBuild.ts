@@ -15,14 +15,7 @@
  */
 
 import assert from "node:assert";
-import {
-  access,
-  cp,
-  mkdir,
-  readFile,
-  unlink,
-  writeFile,
-} from "node:fs/promises";
+import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, sep } from "node:path";
 
 import { compile } from "./lib/aqua.js";
@@ -140,12 +133,8 @@ const compileInstallationSpellAqua = async (tracing = false) => {
 };
 
 (async () => {
-  try {
-    await unlink(VERSIONS_DIR_PATH);
-  } catch {}
-
+  await rm(VERSIONS_DIR_PATH, { recursive: true, force: true });
   await mkdir(VERSIONS_DIR_PATH, { recursive: true });
-
   await cp("package.json", join(VERSIONS_DIR_PATH, "cli.package.json"));
 
   await cp(
@@ -153,10 +142,7 @@ const compileInstallationSpellAqua = async (tracing = false) => {
     join(VERSIONS_DIR_PATH, "js-client.package.json")
   );
 
-  try {
-    await unlink(COMPILED_AQUA_PATH);
-  } catch {}
-
+  await rm(COMPILED_AQUA_PATH, { recursive: true, force: true });
   await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_PATH, { recursive: true });
 
   await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH, {
