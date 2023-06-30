@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-  "enabledManagers": ["npm", "github-actions"],
+  "enabledManagers": ["cargo", "npm", "docker", "github-actions"],
   "schedule": "every weekend",
   "packageRules": [
     {
@@ -15,15 +15,37 @@
       "prPriority": 1
     },
     {
-      "matchManagers": ["npm"],
-      "matchPackagePatterns": ["@fluencelabs/.*"],
-      "semanticCommitType": "fix",
-      "semanticCommitScope": "deps",
-      "schedule": "at any time"
-    },
-    {
       "matchDepTypes": ["devDependencies"],
       "prPriority": -1
+    }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"nox\": \"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "docker",
+      "schedule": ["at any time"],
+      "semanticCommitType": "chore"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
+      "datasourceTemplate": "npm",
+      "schedule": ["at any time"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"cargo\":\\s*\\{[^}]*\"(?<depName>[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
+      "datasourceTemplate": "crate",
+      "schedule": ["at any time"],
+      "semanticCommitType": "fix"
     }
   ]
 }
