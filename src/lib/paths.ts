@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import { access, mkdir } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -49,7 +49,7 @@ import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
   try {
-    await fsPromises.access(path);
+    await access(path);
     return true;
   } catch (error) {
     return stringifyUnknown(error);
@@ -57,7 +57,7 @@ export const validatePath = async (path: string): Promise<string | true> => {
 };
 
 export const ensureDir = async (dirPath: string): Promise<string> => {
-  await fsPromises.mkdir(dirPath, { recursive: true });
+  await mkdir(dirPath, { recursive: true });
   return dirPath;
 };
 

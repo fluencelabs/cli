@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -28,7 +27,7 @@ import { execPromise } from "./execPromise.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import {
   splitPackageNameAndVersion,
-  resolveDependencyPathAndTmpPath,
+  resolveDependencyDirPathAndTmpPath,
   resolveVersionToInstall,
   handleInstallation,
   resolveDependencies,
@@ -61,37 +60,29 @@ export const getLatestVersionOfNPMDependency = async (
 type InstallNpmDependencyArg = {
   name: string;
   version: string;
-  dependencyTmpPath: string;
-  dependencyPath: string;
+  dependencyTmpDirPath: string;
+  dependencyDirPath: string;
 };
 
 const installNpmDependency = async ({
-  dependencyPath,
-  dependencyTmpPath,
+  dependencyDirPath,
+  dependencyTmpDirPath,
   name,
   version,
 }: InstallNpmDependencyArg): Promise<void> => {
   try {
-    // cleanup before installation
-    await Promise.allSettled([
-      rm(dependencyTmpPath, { recursive: true }),
-      rm(dependencyPath, { recursive: true }),
-    ]);
-  } catch {}
-
-  try {
     await execPromise({
       command: "npm",
       args: ["i", `${name}@${version}`],
-      flags: { prefix: dependencyTmpPath },
+      flags: { prefix: dependencyTmpDirPath },
       spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
+        dependencyDirPath
       )}`,
     });
   } catch (error) {
     commandObj.error(
       `Not able to install ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
+        dependencyDirPath
       )}. Please make sure ${color.yellow(
         name
       )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
@@ -134,8 +125,8 @@ export const ensureNpmDependency = async ({
             : `${name}@${resolveVersionToInstallResult.maybeVersionToCheck}`
         );
 
-  const { dependencyPath, dependencyTmpPath } =
-    await resolveDependencyPathAndTmpPath({
+  const { dependencyDirPath, dependencyTmpDirPath } =
+    await resolveDependencyDirPathAndTmpPath({
       name,
       packageManager: "npm",
       version,
@@ -143,15 +134,15 @@ export const ensureNpmDependency = async ({
 
   await handleInstallation({
     force,
-    dependencyPath,
-    dependencyTmpPath,
+    dependencyDirPath,
+    dependencyTmpDirPath,
     explicitInstallation,
     name,
     version,
     installDependency: () => {
       return installNpmDependency({
-        dependencyPath,
-        dependencyTmpPath,
+        dependencyDirPath,
+        dependencyTmpDirPath,
         name,
         version,
       });
@@ -168,7 +159,7 @@ export const ensureNpmDependency = async ({
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 
-  return join(dependencyPath, NODE_MODULES_DIR_NAME);
+  return join(dependencyDirPath, NODE_MODULES_DIR_NAME);
 };
 
 type InstallAllNPMDependenciesArg = {
