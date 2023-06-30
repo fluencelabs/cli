@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.19...fluence-cli-v0.5.0) (2023-06-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **js-client:** update js-client.api to 0.12.0, js-client.node 0.7.0 (https://github.com/fluencelabs/fluence-cli/pull/301)
+
+### Features
+
+* **js-client:** update js-client.api to 0.12.0, js-client.node 0.7.0 (https://github.com/fluencelabs/fluence-cli/pull/301) ([1eb87a2](https://github.com/fluencelabs/fluence-cli/commit/1eb87a24d2e97a33fca9cebd1357207da5b876fd))
+
 ## [0.4.19](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.18...fluence-cli-v0.4.19) (2023-06-29)
 
 
