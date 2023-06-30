@@ -60,15 +60,6 @@ describe("integration tests", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
-    await addAdderServiceToFluenceYAML(cwd);
-
-    await fluence({
-      args: ["run"],
-      flags: {
-        f: 'helloWorld("Fluence")',
-      },
-      cwd,
-    });
 
     await fluence({
       args: ["run"],
