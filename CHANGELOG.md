@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.0...fluence-cli-v0.5.1) (2023-07-03)
+
+
+### Features
+
+* update some remaining node16 mentions and pin dependencies ([#314](https://github.com/fluencelabs/fluence-cli/issues/314)) ([ce25a71](https://github.com/fluencelabs/fluence-cli/commit/ce25a71ac1b9a72ffd05ce946d1367eca94de46d))
+
 ## [0.5.0](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.19...fluence-cli-v0.5.0) (2023-06-30)
 
 
