@@ -90,7 +90,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.19/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.5.0/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -192,7 +192,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.19/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.5.0/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -220,8 +220,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -251,8 +251,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
@@ -461,7 +461,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.19/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.5.0/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -654,8 +654,8 @@ FLAGS
   --quiet                        Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Run aqua script
@@ -664,7 +664,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.4.19/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/fluence-cli/blob/v0.5.0/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -798,8 +798,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
@@ -832,8 +832,8 @@ FLAGS
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --spell-id=<spell-id>          [default: worker-spell] Spell id
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
   --worker-id=<worker-id>        Worker id
 
 DESCRIPTION
@@ -866,8 +866,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml

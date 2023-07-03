@@ -18,7 +18,7 @@ $ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
 $ fluence
-@fluencelabs/cli/0.0.0 linux-x64 node-v16.14.0
+@fluencelabs/cli/0.0.0 linux-x64 node-v18.16.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
