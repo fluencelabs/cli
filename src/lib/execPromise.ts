@@ -21,7 +21,7 @@ const color = oclifColor.default;
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 import { isInteractive } from "./commandObj.js";
-import { IS_DEVELOPMENT, MARINE_CARGO_DEPENDENCY } from "./const.js";
+import { MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { type Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
@@ -56,14 +56,9 @@ export const execPromise = async ({
   const fullCommand = [command, ...allArgs].join(" ");
 
   const getCommandFailedMessage = (code: number | null = null) => {
-    return `Command: ${color.yellow(
-      IS_DEVELOPMENT
-        ? fullCommand
-        : fullCommand.replace(
-            /([\S\s]*--sk ).*([\S\s]*)/,
-            "$1<SECRET_KEY_IS_HIDDEN>$2"
-          )
-    )} ${code === null ? "failed" : `exited with code ${code}`}`;
+    return `Command: ${color.yellow(fullCommand)} ${
+      code === null ? "failed" : `exited with code ${code}`
+    }`;
   };
 
   if (typeof spinnerMessage === "string") {
