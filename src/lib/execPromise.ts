@@ -56,9 +56,10 @@ export const execPromise = async ({
   const fullCommand = [command, ...allArgs].join(" ");
 
   const getCommandFailedMessage = (code: number | null = null) => {
-    return `Command: ${color.yellow(fullCommand)} ${
-      code === null ? "failed" : `exited with code ${code}`
-    }`;
+    const exitCodeMessage =
+      code === null ? "failed" : `exited with code ${code}`;
+
+    return `Command: ${color.yellow(fullCommand)} ${exitCodeMessage}`;
   };
 
   if (typeof spinnerMessage === "string") {
