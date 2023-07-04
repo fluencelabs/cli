@@ -301,6 +301,15 @@ const tryDownloadingBinary = async ({
   }
 
   try {
+    await execPromise({
+      command: "chmod",
+      args: ["+x", binaryPath],
+    });
+  } catch {
+    return `Failed to make ${name}@${version} executable by running chmod +x '${binaryPath}'`;
+  }
+
+  try {
     // check binary is working
     const helpText = await execPromise({
       command: binaryPath,
