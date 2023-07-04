@@ -106,13 +106,3 @@ export function getIsStringUnion<T extends string>(
     });
   };
 }
-
-export function isObjectWithStringMessage(
-  unknown: unknown
-): unknown is { message: string } {
-  return (
-    isObject(unknown) &&
-    hasKey("message", unknown) &&
-    typeof unknown["message"] === "string"
-  );
-}

@@ -22,7 +22,6 @@ import { BIN_DIR_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { execPromise } from "./execPromise.js";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
 import { ensureCargoDependency } from "./rust.js";
-import { isObjectWithStringMessage } from "./typeHelpers.js";
 import { type Flags } from "./typeHelpers.js";
 
 type MarineCliInput =
@@ -79,7 +78,7 @@ export const initMarineCli = async (
         printOutput,
       });
     } catch (e) {
-      if (isObjectWithStringMessage(e)) {
+      if (e instanceof Error) {
         return commandObj.error(e.message);
       }
 

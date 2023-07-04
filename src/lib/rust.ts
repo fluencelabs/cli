@@ -44,7 +44,6 @@ import {
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { isObjectWithStringMessage } from "./typeHelpers.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -297,7 +296,7 @@ const tryDownloadingBinary = async ({
     stopSpinner();
   } catch (e) {
     stopSpinner("failed");
-    const error = isObjectWithStringMessage(e) ? e.message : jsonStringify(e);
+    const error = e instanceof Error ? e.message : jsonStringify(e);
     return `Failed to download ${name}@${version} from ${url}. Error: ${error}`;
   }
 
@@ -312,7 +311,7 @@ const tryDownloadingBinary = async ({
       return `Downloaded ${name}@${version} binary at ${binaryPath} --help message does not contain the ${version} version it is supposed to contain:\n result of --help execution is: ${helpText}`;
     }
   } catch (e) {
-    if (isObjectWithStringMessage(e) && e.message.includes(version)) {
+    if (e instanceof Error && e.message.includes(version)) {
       return true;
     }
 
