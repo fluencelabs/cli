@@ -73,7 +73,7 @@ export const execPromise = async ({
   const result = await new Promise<
     | { errorMessage: string }
     | { expectedErrorMessage: string }
-    | { success: string }
+    | { stdout: string }
   >((res): void => {
     const execTimeout =
       timeout !== undefined &&
@@ -83,12 +83,13 @@ export const execPromise = async ({
         }
 
         childProcess.kill();
+        const commandFailedMessage = getCommandFailedMessage();
 
-        res({
-          errorMessage: `${getCommandFailedMessage()}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
-            `${timeout}ms`
-          )}`,
-        });
+        const errorMessage = `${commandFailedMessage}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
+          `${timeout}ms`
+        )}`;
+
+        res({ errorMessage });
       }, timeout);
 
     const childProcess = spawn(command, allArgs, options ?? {});
@@ -120,11 +121,11 @@ export const execPromise = async ({
         stopSpinner(color.red("failed"));
       }
 
+      const commandFailedMessage = getCommandFailedMessage();
+      const errorMessage = getErrorMessage(printOutput, stderr);
+
       res({
-        errorMessage: `${getCommandFailedMessage()}${getErrorMessage(
-          printOutput,
-          stderr
-        )}${error}`,
+        errorMessage: `${commandFailedMessage}${errorMessage}${error}`,
       });
     });
 
@@ -140,15 +141,15 @@ export const execPromise = async ({
       }
 
       if (stderr.includes("linker `cc` not found")) {
-        res({
-          expectedErrorMessage: `\n${color.yellow(
-            MARINE_CARGO_DEPENDENCY
-          )} requires ${color.yellow(
-            "build-essential"
-          )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
-            "sudo apt install build-essential"
-          )}\n`,
-        });
+        const expectedErrorMessage = `\n${color.yellow(
+          MARINE_CARGO_DEPENDENCY
+        )} requires ${color.yellow(
+          "build-essential"
+        )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
+          "sudo apt install build-essential"
+        )}\n`;
+
+        res({ expectedErrorMessage });
 
         return;
       }
@@ -162,7 +163,7 @@ export const execPromise = async ({
         });
       }
 
-      res({ success: stdout });
+      res({ stdout });
     });
   });
 
@@ -174,5 +175,5 @@ export const execPromise = async ({
     throw new Error(result.errorMessage);
   }
 
-  return result.success;
+  return result.stdout;
 };
