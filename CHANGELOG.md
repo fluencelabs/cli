@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.1...fluence-cli-v0.5.2) (2023-07-04)
+
+
+### Features
+
+* do not remove output dir when compiling aqua [fixes DXJ-403] ([#318](https://github.com/fluencelabs/fluence-cli/issues/318)) ([8decf46](https://github.com/fluencelabs/fluence-cli/commit/8decf464f46ed8057dac44324c5beb60711500ff))
+* improve cli output when building project [fixes DXJ-406] ([#317](https://github.com/fluencelabs/fluence-cli/issues/317)) ([1da1fb0](https://github.com/fluencelabs/fluence-cli/commit/1da1fb058137e067723d8ee2ef5a7911c15bef36))
+
 ## [0.5.1](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.0...fluence-cli-v0.5.1) (2023-07-03)
 
 
