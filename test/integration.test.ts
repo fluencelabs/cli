@@ -47,6 +47,7 @@ describe("integration tests", () => {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       {
         log(msg: string) {
+          // eslint-disable-next-line no-console
           console.log(msg);
         },
         error(msg: string) {

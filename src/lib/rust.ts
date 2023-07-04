@@ -33,6 +33,7 @@ import {
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
+import { jsonStringify } from "./helpers/jsonStringify.js";
 import {
   handleInstallation,
   resolveDependencies,
@@ -43,7 +44,6 @@ import {
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { hasKey, isObject } from "./typeHelpers.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -285,10 +285,19 @@ const tryDownloadingBinary = async ({
 
   const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-${platformToUse}-x86_64`;
 
+  startSpinner(
+    `Downloading ${name}@${version} binary to ${replaceHomeDir(
+      dependencyDirPath
+    )}`
+  );
+
   try {
     await downloadFile(binaryPath, url);
-  } catch {
-    return `Failed to download ${name}@${version} from ${url}`;
+    stopSpinner();
+  } catch (e) {
+    stopSpinner("failed");
+    const error = e instanceof Error ? e.message : jsonStringify(e);
+    return `Failed to download ${name}@${version} from ${url}. Error: ${error}`;
   }
 
   try {
@@ -311,12 +320,7 @@ const tryDownloadingBinary = async ({
       return `Downloaded ${name}@${version} binary at ${binaryPath} --help message does not contain the ${version} version it is supposed to contain:\n result of --help execution is: ${helpText}`;
     }
   } catch (e) {
-    if (
-      isObject(e) &&
-      hasKey("message", e) &&
-      typeof e["message"] === "string" &&
-      e["message"].includes(version)
-    ) {
+    if (e instanceof Error && e.message.includes(version)) {
       return true;
     }
 
@@ -369,10 +373,6 @@ export const ensureCargoDependency = async ({
       version,
     });
 
-  startSpinner(
-    `Installing ${name}@${version} to ${replaceHomeDir(dependencyDirPath)}`
-  );
-
   const maybeErrorMessage = await tryDownloadingBinary({
     name,
     version,
@@ -403,8 +403,6 @@ export const ensureCargoDependency = async ({
       },
     });
   }
-
-  stopSpinner();
 
   await updateConfigsIfVersionChanged({
     maybeFluenceConfig,

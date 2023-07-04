@@ -16,12 +16,13 @@
 
 import { join } from "node:path";
 
+import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { BIN_DIR_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { execPromise } from "./execPromise.js";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
 import { ensureCargoDependency } from "./rust.js";
-import type { Flags } from "./typeHelpers.js";
+import { type Flags } from "./typeHelpers.js";
 
 type MarineCliInput =
   | {
@@ -62,16 +63,26 @@ export const initMarineCli = async (
     cwd,
     printOutput = true,
   }): Promise<string> => {
-    return execPromise({
-      command: marineCLIPath,
-      args,
-      flags,
-      spinnerMessage:
+    try {
+      const spinnerMessage =
         message === undefined
           ? undefined
-          : getMessageWithKeyValuePairs(message, keyValuePairs),
-      options: { cwd },
-      printOutput,
-    });
+          : getMessageWithKeyValuePairs(message, keyValuePairs);
+
+      return await execPromise({
+        command: marineCLIPath,
+        args,
+        flags,
+        spinnerMessage,
+        options: { cwd },
+        printOutput,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        return commandObj.error(e.message);
+      }
+
+      throw e;
+    }
   };
 };
