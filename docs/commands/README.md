@@ -398,17 +398,19 @@ EXAMPLES
 
 ## `fluence dependency versions`
 
-Get versions of all currently used dependencies
+Get versions of all dependencies
 
 ```
 USAGE
-  $ fluence dependency versions [--no-input]
+  $ fluence dependency versions [--no-input] [--default]
 
 FLAGS
+  --default   Display default npm and cargo dependencies and their versions for current CLI version. Default npm
+              dependencies are always available to be imported in Aqua
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Get versions of all currently used dependencies
+  Get versions of all dependencies
 
 ALIASES
   $ fluence dependency v
