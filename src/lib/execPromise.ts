@@ -154,7 +154,7 @@ export const execPromise = async ({
     });
   });
 
-  if (result instanceof CLIError || result instanceof Error) {
+  if (result instanceof Error) {
     throw result;
   }
 
