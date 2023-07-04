@@ -33,6 +33,7 @@ import {
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
+import { jsonStringify } from "./helpers/jsonStringify.js";
 import {
   handleInstallation,
   resolveDependencies,
@@ -43,7 +44,7 @@ import {
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { hasKey, isObject } from "./typeHelpers.js";
+import { isObjectWithStringMessage } from "./typeHelpers.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -286,7 +287,7 @@ const tryDownloadingBinary = async ({
   const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-${platformToUse}-x86_64`;
 
   startSpinner(
-    `Trying to download pre-built ${name}@${version} binary to ${replaceHomeDir(
+    `Downloading ${name}@${version} binary to ${replaceHomeDir(
       dependencyDirPath
     )}`
   );
@@ -294,18 +295,10 @@ const tryDownloadingBinary = async ({
   try {
     await downloadFile(binaryPath, url);
     stopSpinner();
-  } catch {
+  } catch (e) {
     stopSpinner("failed");
-    return `Failed to download ${name}@${version} from ${url}`;
-  }
-
-  try {
-    await execPromise({
-      command: "chmod",
-      args: ["+x", binaryPath],
-    });
-  } catch {
-    return `Failed to make ${name}@${version} executable by running chmod +x '${binaryPath}'`;
+    const error = isObjectWithStringMessage(e) ? e.message : jsonStringify(e);
+    return `Failed to download ${name}@${version} from ${url}. Error: ${error}`;
   }
 
   try {
@@ -319,12 +312,7 @@ const tryDownloadingBinary = async ({
       return `Downloaded ${name}@${version} binary at ${binaryPath} --help message does not contain the ${version} version it is supposed to contain:\n result of --help execution is: ${helpText}`;
     }
   } catch (e) {
-    if (
-      isObject(e) &&
-      hasKey("message", e) &&
-      typeof e["message"] === "string" &&
-      e["message"].includes(version)
-    ) {
+    if (isObjectWithStringMessage(e) && e.message.includes(version)) {
       return true;
     }
 

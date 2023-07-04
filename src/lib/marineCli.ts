@@ -22,7 +22,8 @@ import { BIN_DIR_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { execPromise } from "./execPromise.js";
 import { getMessageWithKeyValuePairs } from "./helpers/getMessageWithKeyValuePairs.js";
 import { ensureCargoDependency } from "./rust.js";
-import { isObject, type Flags, hasKey } from "./typeHelpers.js";
+import { isObjectWithStringMessage } from "./typeHelpers.js";
+import { type Flags } from "./typeHelpers.js";
 
 type MarineCliInput =
   | {
@@ -64,24 +65,22 @@ export const initMarineCli = async (
     printOutput = true,
   }): Promise<string> => {
     try {
+      const spinnerMessage =
+        message === undefined
+          ? undefined
+          : getMessageWithKeyValuePairs(message, keyValuePairs);
+
       return await execPromise({
         command: marineCLIPath,
         args,
         flags,
-        spinnerMessage:
-          message === undefined
-            ? undefined
-            : getMessageWithKeyValuePairs(message, keyValuePairs),
+        spinnerMessage,
         options: { cwd },
         printOutput,
       });
     } catch (e) {
-      if (
-        isObject(e) &&
-        hasKey("message", e) &&
-        typeof e["message"] === "string"
-      ) {
-        return commandObj.error(e["message"]);
+      if (isObjectWithStringMessage(e)) {
+        return commandObj.error(e.message);
       }
 
       throw e;

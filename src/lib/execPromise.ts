@@ -70,11 +70,7 @@ export const execPromise = async ({
     startSpinner(spinnerMessage);
   }
 
-  const result = await new Promise<
-    | { errorMessage: string }
-    | { expectedErrorMessage: string }
-    | { stdout: string }
-  >((res): void => {
+  const result = await new Promise<CLIError | Error | string>((res): void => {
     const execTimeout =
       timeout !== undefined &&
       setTimeout((): void => {
@@ -85,11 +81,13 @@ export const execPromise = async ({
         childProcess.kill();
         const commandFailedMessage = getCommandFailedMessage();
 
-        const errorMessage = `${commandFailedMessage}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
-          `${timeout}ms`
-        )}`;
-
-        res({ errorMessage });
+        res(
+          new Error(
+            `${commandFailedMessage}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
+              `${timeout}ms`
+            )}`
+          )
+        );
       }, timeout);
 
     const childProcess = spawn(command, allArgs, options ?? {});
@@ -123,10 +121,7 @@ export const execPromise = async ({
 
       const commandFailedMessage = getCommandFailedMessage();
       const errorMessage = getErrorMessage(printOutput, stderr);
-
-      res({
-        errorMessage: `${commandFailedMessage}${errorMessage}${error}`,
-      });
+      res(new Error(`${commandFailedMessage}${errorMessage}${error}`));
     });
 
     childProcess.on("close", (code): void => {
@@ -149,31 +144,23 @@ export const execPromise = async ({
           "sudo apt install build-essential"
         )}\n`;
 
-        res({ expectedErrorMessage });
-
+        res(new CLIError(expectedErrorMessage));
         return;
       }
 
       if (code !== 0) {
-        res({
-          errorMessage: `${getCommandFailedMessage(code)}${getErrorMessage(
-            printOutput,
-            stderr
-          )}`,
-        });
+        const commandFailedMessage = getCommandFailedMessage(code);
+        const errorMessage = getErrorMessage(printOutput, stderr);
+        res(new Error(`${commandFailedMessage}${errorMessage}`));
       }
 
-      res({ stdout });
+      res(stdout);
     });
   });
 
-  if ("expectedErrorMessage" in result) {
-    throw new CLIError(result.expectedErrorMessage);
+  if (result instanceof CLIError || result instanceof Error) {
+    throw result;
   }
 
-  if ("errorMessage" in result) {
-    throw new Error(result.errorMessage);
-  }
-
-  return result.stdout;
+  return result;
 };
