@@ -53,8 +53,10 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
  */
 export const createErrorPromise = (error) => {
   if (error instanceof CLIError) {
+    // eslint-disable-next-line no-console
     console.error(`Error: ${error.message}`);
   } else {
+    // eslint-disable-next-line no-console
     console.error(error);
   }
 
@@ -81,6 +83,7 @@ export const createErrorPromise = (error) => {
 
   return new Promise(() => {
     setTimeout(() => {
+      // eslint-disable-next-line no-console
       console.log(
         "\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/fluence-cli/issues"
       );

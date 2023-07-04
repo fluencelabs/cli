@@ -164,6 +164,9 @@
       "unused-imports"
     ],
     "rules": {
+      "no-console": [
+        "error"
+      ],
       "arrow-body-style": [
         "error",
         "always"

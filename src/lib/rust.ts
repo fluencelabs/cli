@@ -285,9 +285,17 @@ const tryDownloadingBinary = async ({
 
   const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-${platformToUse}-x86_64`;
 
+  startSpinner(
+    `Trying to download pre-built ${name}@${version} binary to ${replaceHomeDir(
+      dependencyDirPath
+    )}`
+  );
+
   try {
     await downloadFile(binaryPath, url);
+    stopSpinner();
   } catch {
+    stopSpinner("failed");
     return `Failed to download ${name}@${version} from ${url}`;
   }
 
@@ -369,10 +377,6 @@ export const ensureCargoDependency = async ({
       version,
     });
 
-  startSpinner(
-    `Installing ${name}@${version} to ${replaceHomeDir(dependencyDirPath)}`
-  );
-
   const maybeErrorMessage = await tryDownloadingBinary({
     name,
     version,
@@ -403,8 +407,6 @@ export const ensureCargoDependency = async ({
       },
     });
   }
-
-  stopSpinner();
 
   await updateConfigsIfVersionChanged({
     maybeFluenceConfig,

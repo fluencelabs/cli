@@ -26,6 +26,7 @@ import {
   testNet,
 } from "@fluencelabs/fluence-network-environment";
 
+import { commandObj } from "../src/lib/commandObj.js";
 import type { Template } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
@@ -103,8 +104,7 @@ export const initFirstTime = async (template: Template) => {
     }
   }
 
-  console.log(`Initialized template "${template}"`);
-
+  commandObj.log(`Initialized template "${template}"`);
   return templatePath;
 };
 

@@ -17,15 +17,19 @@
 import { spawn } from "node:child_process";
 
 import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
-const color = oclifColor.default;
-
+import { isInteractive } from "./commandObj.js";
 import { IS_DEVELOPMENT, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { type Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
 type SpawnParams = Parameters<typeof spawn>;
+
+const getErrorMessage = (printOutput: boolean, stderr: string) => {
+  return printOutput ? "" : `. Reason:\n${stderr}`;
+};
 
 export type ExecPromiseArg = {
   command: SpawnParams[0];
@@ -37,33 +41,40 @@ export type ExecPromiseArg = {
   printOutput?: boolean | undefined;
 };
 
-export const execPromise = ({
+export const execPromise = async ({
   command,
   args,
   flags,
   options,
   spinnerMessage,
   timeout,
-  printOutput = false,
+  printOutput: printOutputArg = false,
 }: ExecPromiseArg): Promise<string> => {
+  const printOutput = isInteractive ? printOutputArg : false;
   const flagArgs = flags === undefined ? [] : flagsToArgs(flags);
   const allArgs = [...(args ?? []), ...flagArgs];
   const fullCommand = [command, ...allArgs].join(" ");
 
-  const commandToDisplay = IS_DEVELOPMENT
-    ? fullCommand
-    : fullCommand.replace(
-        /([\S\s]*--sk ).*([\S\s]*)/,
-        "$1<SECRET_KEY_IS_HIDDEN>$2"
-      );
+  const getCommandFailedMessage = (code: number | null = null) => {
+    return `Command: ${color.yellow(
+      IS_DEVELOPMENT
+        ? fullCommand
+        : fullCommand.replace(
+            /([\S\s]*--sk ).*([\S\s]*)/,
+            "$1<SECRET_KEY_IS_HIDDEN>$2"
+          )
+    )} ${code === null ? "failed" : `exited with code ${code}`}`;
+  };
 
   if (typeof spinnerMessage === "string") {
     startSpinner(spinnerMessage);
   }
 
-  const debugInfo = `Debug info:\n${commandToDisplay}\n`;
-
-  return new Promise<string>((res, rej): void => {
+  const result = await new Promise<
+    | { errorMessage: string }
+    | { expectedErrorMessage: string }
+    | { success: string }
+  >((res): void => {
     const execTimeout =
       timeout !== undefined &&
       setTimeout((): void => {
@@ -73,13 +84,11 @@ export const execPromise = ({
 
         childProcess.kill();
 
-        rej(
-          new Error(
-            `Execution timed out: command didn't yield any result in ${color.yellow(
-              `${timeout}ms`
-            )}\n${debugInfo}`
-          )
-        );
+        res({
+          errorMessage: `${getCommandFailedMessage()}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
+            `${timeout}ms`
+          )}`,
+        });
       }, timeout);
 
     const childProcess = spawn(command, allArgs, options ?? {});
@@ -111,7 +120,12 @@ export const execPromise = ({
         stopSpinner(color.red("failed"));
       }
 
-      rej(new Error(`${printOutput ? "" : stderr}${error}\n${debugInfo}`));
+      res({
+        errorMessage: `${getCommandFailedMessage()}${getErrorMessage(
+          printOutput,
+          stderr
+        )}${error}`,
+      });
     });
 
     childProcess.on("close", (code): void => {
@@ -126,32 +140,39 @@ export const execPromise = ({
       }
 
       if (stderr.includes("linker `cc` not found")) {
-        rej(
-          new CLIError(
-            `\n${color.yellow(MARINE_CARGO_DEPENDENCY)} requires ${color.yellow(
-              "build-essential"
-            )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
-              "sudo apt install build-essential"
-            )}\n`
-          )
-        );
+        res({
+          expectedErrorMessage: `\n${color.yellow(
+            MARINE_CARGO_DEPENDENCY
+          )} requires ${color.yellow(
+            "build-essential"
+          )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
+            "sudo apt install build-essential"
+          )}\n`,
+        });
 
         return;
       }
 
       if (code !== 0) {
-        rej(
-          new Error(
-            `${printOutput ? "" : stderr}\nprocess exited${
-              code === null ? "" : ` with code ${code}`
-            }\n${debugInfo}`
-          )
-        );
-
-        return;
+        res({
+          errorMessage: `${getCommandFailedMessage(code)}${getErrorMessage(
+            printOutput,
+            stderr
+          )}`,
+        });
       }
 
-      res(stdout);
+      res({ success: stdout });
     });
   });
+
+  if ("expectedErrorMessage" in result) {
+    throw new CLIError(result.expectedErrorMessage);
+  }
+
+  if ("errorMessage" in result) {
+    throw new Error(result.errorMessage);
+  }
+
+  return result.success;
 };
