@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, parse } from "node:path";
 
 import {
