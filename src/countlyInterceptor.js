@@ -16,7 +16,8 @@
 
 /* eslint-disable no-process-exit */
 
-import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/ClientRequest/index.js";
+// eslint-disable-next-line import/extensions
+import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
 
@@ -106,7 +107,7 @@ const EVENTS_URL_PART = "/i?events=";
 const interceptor = new ClientRequestInterceptor();
 interceptor.apply();
 
-interceptor.on("response", (_response, { url }) => {
+interceptor.on("response", ({ request: { url } }) => {
   if (typeof url !== "string") {
     return;
   }
