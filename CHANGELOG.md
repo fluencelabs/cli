@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.2...fluence-cli-v0.5.3) (2023-07-05)
+
+
+### Features
+
+* print default dependencies and their versions when using `default` flag [fixes DXJ-398] ([#316](https://github.com/fluencelabs/fluence-cli/issues/316)) ([6f22700](https://github.com/fluencelabs/fluence-cli/commit/6f22700c67b15e8219dd5af0da0d6106850ad414))
+* update dependencies ([#320](https://github.com/fluencelabs/fluence-cli/issues/320)) ([f11224e](https://github.com/fluencelabs/fluence-cli/commit/f11224ed1f812a07f065772879ea7fd22af2f400))
+
 ## [0.5.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.1...fluence-cli-v0.5.2) (2023-07-04)
 
 
