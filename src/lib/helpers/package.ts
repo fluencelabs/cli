@@ -296,30 +296,27 @@ export const splitPackageNameAndVersion = (
   return [packageName, version];
 };
 
+export const getRecommendedDependencies = (packageManager: PackageManager) => {
+  const versionsPerPackageManager =
+    packageManager === "cargo" ? versions.cargo : versions.npm;
+
+  const defaultDependencies =
+    packageManager === "cargo"
+      ? fluenceCargoDependencies
+      : fluenceNPMDependencies;
+
+  return Object.fromEntries(
+    Object.entries(versionsPerPackageManager).filter(([dependencyName]) => {
+      return defaultDependencies.includes(dependencyName);
+    })
+  );
+};
+
 export const resolveDependencies = async (
   packageManager: PackageManager,
   maybeFluenceConfig: FluenceConfigReadonly | null
 ) => {
-  const recommendedDependencies = (() => {
-    if (packageManager === "cargo") {
-      return fluenceCargoDependencies.reduce(
-        (acc, dep) => {
-          return { ...acc, [dep]: versions.cargo[dep] };
-        },
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        {} as Record<(typeof fluenceCargoDependencies)[number], string>
-      );
-    }
-
-    return fluenceNPMDependencies.reduce(
-      (acc, dep) => {
-        return { ...acc, [dep]: versions.npm[dep] };
-      },
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      {} as Record<(typeof fluenceNPMDependencies)[number], string>
-    );
-  })();
-
+  const recommendedDependencies = getRecommendedDependencies(packageManager);
   const userFluenceConfig = await initReadonlyUserConfig();
 
   const userDependencyOverrides =
