@@ -20,6 +20,7 @@ import "../src/lib/setupEnvironment.js";
 import { fluence, initFirstTime } from "./helpers.js";
 
 (async (): Promise<void> => {
+  // eslint-disable-next-line no-console
   console.log("Setting up tests...");
 
   await fluence({
@@ -32,6 +33,7 @@ import { fluence, initFirstTime } from "./helpers.js";
     })
   );
 
+  // eslint-disable-next-line no-console
   console.log("Tests are ready to run!");
 })().catch((error) => {
   throw error;

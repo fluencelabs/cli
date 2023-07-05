@@ -16,7 +16,8 @@
 
 /* eslint-disable no-process-exit */
 
-import { ClientRequestInterceptor } from "@mswjs/interceptors/lib/interceptors/ClientRequest/index.js";
+// eslint-disable-next-line import/extensions
+import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import Countly from "countly-sdk-nodejs";
 
@@ -53,8 +54,10 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
  */
 export const createErrorPromise = (error) => {
   if (error instanceof CLIError) {
+    // eslint-disable-next-line no-console
     console.error(`Error: ${error.message}`);
   } else {
+    // eslint-disable-next-line no-console
     console.error(error);
   }
 
@@ -81,6 +84,7 @@ export const createErrorPromise = (error) => {
 
   return new Promise(() => {
     setTimeout(() => {
+      // eslint-disable-next-line no-console
       console.log(
         "\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/fluence-cli/issues"
       );
@@ -103,7 +107,7 @@ const EVENTS_URL_PART = "/i?events=";
 const interceptor = new ClientRequestInterceptor();
 interceptor.apply();
 
-interceptor.on("response", (_response, { url }) => {
+interceptor.on("response", ({ request: { url } }) => {
   if (typeof url !== "string") {
     return;
   }

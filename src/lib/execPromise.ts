@@ -17,15 +17,19 @@
 import { spawn } from "node:child_process";
 
 import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
-const color = oclifColor.default;
-
-import { IS_DEVELOPMENT, MARINE_CARGO_DEPENDENCY } from "./const.js";
+import { isInteractive } from "./commandObj.js";
+import { MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { type Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
 type SpawnParams = Parameters<typeof spawn>;
+
+const getErrorMessage = (printOutput: boolean, stderr: string) => {
+  return printOutput ? "" : `. Reason:\n${stderr}`;
+};
 
 export type ExecPromiseArg = {
   command: SpawnParams[0];
@@ -37,33 +41,32 @@ export type ExecPromiseArg = {
   printOutput?: boolean | undefined;
 };
 
-export const execPromise = ({
+export const execPromise = async ({
   command,
   args,
   flags,
   options,
   spinnerMessage,
   timeout,
-  printOutput = false,
+  printOutput: printOutputArg = false,
 }: ExecPromiseArg): Promise<string> => {
+  const printOutput = isInteractive ? printOutputArg : false;
   const flagArgs = flags === undefined ? [] : flagsToArgs(flags);
   const allArgs = [...(args ?? []), ...flagArgs];
   const fullCommand = [command, ...allArgs].join(" ");
 
-  const commandToDisplay = IS_DEVELOPMENT
-    ? fullCommand
-    : fullCommand.replace(
-        /([\S\s]*--sk ).*([\S\s]*)/,
-        "$1<SECRET_KEY_IS_HIDDEN>$2"
-      );
+  const getCommandFailedMessage = (code: number | null = null) => {
+    const exitCodeMessage =
+      code === null ? "failed" : `exited with code ${code}`;
+
+    return `Command: ${color.yellow(fullCommand)} ${exitCodeMessage}`;
+  };
 
   if (typeof spinnerMessage === "string") {
     startSpinner(spinnerMessage);
   }
 
-  const debugInfo = `Debug info:\n${commandToDisplay}\n`;
-
-  return new Promise<string>((res, rej): void => {
+  const result = await new Promise<CLIError | Error | string>((res): void => {
     const execTimeout =
       timeout !== undefined &&
       setTimeout((): void => {
@@ -72,12 +75,13 @@ export const execPromise = ({
         }
 
         childProcess.kill();
+        const commandFailedMessage = getCommandFailedMessage();
 
-        rej(
+        res(
           new Error(
-            `Execution timed out: command didn't yield any result in ${color.yellow(
+            `${commandFailedMessage}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
               `${timeout}ms`
-            )}\n${debugInfo}`
+            )}`
           )
         );
       }, timeout);
@@ -111,7 +115,9 @@ export const execPromise = ({
         stopSpinner(color.red("failed"));
       }
 
-      rej(new Error(`${printOutput ? "" : stderr}${error}\n${debugInfo}`));
+      const commandFailedMessage = getCommandFailedMessage();
+      const errorMessage = getErrorMessage(printOutput, stderr);
+      res(new Error(`${commandFailedMessage}${errorMessage}${error}`));
     });
 
     childProcess.on("close", (code): void => {
@@ -126,32 +132,31 @@ export const execPromise = ({
       }
 
       if (stderr.includes("linker `cc` not found")) {
-        rej(
-          new CLIError(
-            `\n${color.yellow(MARINE_CARGO_DEPENDENCY)} requires ${color.yellow(
-              "build-essential"
-            )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
-              "sudo apt install build-essential"
-            )}\n`
-          )
-        );
+        const expectedErrorMessage = `\n${color.yellow(
+          MARINE_CARGO_DEPENDENCY
+        )} requires ${color.yellow(
+          "build-essential"
+        )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
+          "sudo apt install build-essential"
+        )}\n`;
 
+        res(new CLIError(expectedErrorMessage));
         return;
       }
 
       if (code !== 0) {
-        rej(
-          new Error(
-            `${printOutput ? "" : stderr}\nprocess exited${
-              code === null ? "" : ` with code ${code}`
-            }\n${debugInfo}`
-          )
-        );
-
-        return;
+        const commandFailedMessage = getCommandFailedMessage(code);
+        const errorMessage = getErrorMessage(printOutput, stderr);
+        res(new Error(`${commandFailedMessage}${errorMessage}`));
       }
 
       res(stdout);
     });
   });
+
+  if (result instanceof Error) {
+    throw result;
+  }
+
+  return result;
 };

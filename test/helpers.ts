@@ -103,8 +103,8 @@ export const initFirstTime = async (template: Template) => {
     }
   }
 
+  // eslint-disable-next-line no-console
   console.log(`Initialized template "${template}"`);
-
   return templatePath;
 };
 

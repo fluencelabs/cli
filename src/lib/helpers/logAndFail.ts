@@ -15,6 +15,7 @@
  */
 
 export const logAndFail = (unknown: unknown): never => {
+  // eslint-disable-next-line no-console
   console.log(unknown);
   throw new Error("Failed after console.log");
 };
