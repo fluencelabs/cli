@@ -23,8 +23,10 @@ import assert from "node:assert";
 import { DealClient } from "@fluencelabs/deal-aurora";
 import { type ChainNetwork } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import ethers = require("ethers");
+import { CID } from "ipfs-http-client";
 
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
+import { commandObj } from "./commandObj.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -58,13 +60,17 @@ export const dealCreate = async ({
   const globalContracts = dealClient.getGlobalContracts();
 
   const factory = globalContracts.getFactory();
+  const bytesCid = CID.parse(appCID).bytes;
 
   promptConfirmTx(privKey);
 
   const tx = await factory.createDeal(
     minWorkers,
     targetWorkers,
-    appCID,
+    {
+      prefixes: bytesCid.slice(0, 4),
+      hash: bytesCid.slice(4),
+    },
     [] //TODO: get effectors from the project
   );
 
@@ -151,9 +157,17 @@ export const dealUpdate = async ({
 
   const config = await deal.getConfigModule();
 
+  const bytesCid = CID.parse(appCID).bytes;
+
   promptConfirmTx(privKey);
 
-  const tx = await config.setAppCID(appCID);
+  commandObj.log(`${bytesCid.length}`);
+
+  const tx = await config.setAppCID({
+    prefixes: bytesCid.slice(0, 4),
+    hash: bytesCid.slice(4),
+  });
+
   await waitTx(tx);
   return tx;
 };
