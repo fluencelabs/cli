@@ -1,51 +1,70 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
+  "enabledManagers": ["npm", "regex", "github-actions"],
+  "schedule": "every weekend",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-  "enabledManagers": ["cargo", "npm", "docker", "github-actions"],
-  "schedule": "every weekend",
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["major"],
-      "prConcurrentLimit": 1
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "prPriority": 1
-    },
-    {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
-    }
-  ],
   "regexManagers": [
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"nox\": \"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\""
-      ],
-      "datasourceTemplate": "docker",
-      "schedule": ["at any time"],
-      "semanticCommitType": "chore"
+      "matchStrings": ["\"nox\": \"fluencelabs/(?<depName>nox):(?<currentValue>[^\"\n]+)\""],
+      "datasourceTemplate": "docker"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "npm",
-      "schedule": ["at any time"],
-      "semanticCommitType": "fix"
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>aqua-lib)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"cargo\":\\s*\\{[^}]*\"(?<depName>[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "crate",
-      "schedule": ["at any time"],
-      "semanticCommitType": "fix"
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>spell)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>registry)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.api)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.node)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>fluence-network-environment)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "crate"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>mrepl)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "crate"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "crate"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk-test)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "crate"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"rust-toolchain\": \"(?<depName>nightly)-(?<currentValue>[^\"\n]+)-x86_64\""],
+      "datasourceTemplate": "rust-version"
     }
   ]
 }
