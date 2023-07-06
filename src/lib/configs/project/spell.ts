@@ -289,9 +289,9 @@ export const initReadonlySpellConfig = async (
 
 const getDefault = (): string => {
   return `aquaFilePath: "./spell.aqua"
-function: "spell"
+function: spell
 clock:
-  periodSec: 60,
+  periodSec: 60
   endDelaySec: ${30 * 60}
 version: 0`;
 };
