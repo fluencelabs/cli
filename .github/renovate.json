@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-  "enabledManagers": ["npm", "github-actions"],
+  "enabledManagers": ["regex", "npm", "github-actions"],
   "schedule": "every weekend",
   "packageRules": [
     {
