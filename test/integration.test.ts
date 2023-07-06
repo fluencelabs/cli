@@ -255,9 +255,7 @@ describe("integration tests", () => {
 
       assert(
         fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined &&
-          fluenceConfig.hosts !== undefined &&
-          fluenceConfig.hosts[DEFAULT_WORKER_NAME] !== undefined
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined
       );
 
       fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["myService"];
