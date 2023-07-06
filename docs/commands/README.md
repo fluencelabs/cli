@@ -90,7 +90,7 @@ EXAMPLES
   $ flox aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/aqua.ts)_
 
 ## `flox aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -169,6 +169,8 @@ EXAMPLES
 
   $ flox autocomplete zsh
 
+  $ flox autocomplete powershell
+
   $ flox autocomplete --refresh-cache
 ```
 
@@ -192,7 +194,7 @@ EXAMPLES
   $ flox build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/build.ts)_
 
 ## `flox deal deploy [WORKER-NAMES]`
 
@@ -402,7 +404,7 @@ Get versions of all dependencies
 
 ```
 USAGE
-  $ flox dependency versions [--no-input]
+  $ flox dependency versions [--no-input] [--default]
 
 FLAGS
   --default   Display default npm and cargo dependencies and their versions for current CLI version. Default npm
@@ -463,7 +465,7 @@ EXAMPLES
   $ flox init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/init.ts)_
 
 ## `flox key default [NAME]`
 
@@ -666,7 +668,7 @@ EXAMPLES
   $ flox run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.4.18/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/run.ts)_
 
 ## `flox service add [PATH | URL]`
 
