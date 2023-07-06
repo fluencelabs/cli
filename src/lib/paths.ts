@@ -28,7 +28,7 @@ import {
   COUNTLY_DIR_NAME,
   DEFAULT_SRC_AQUA_FILE_NAME,
   EXTENSIONS_JSON_FILE_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
   JS_DIR_NAME,
@@ -113,7 +113,7 @@ export const recursivelyFindProjectRootDir = async (
   initialPath: string
 ): Promise<string> => {
   const fluenceConfigPath = await recursivelyFindFile(
-    FLUENCE_CONFIG_FILE_NAME,
+    FLUENCE_CONFIG_FULL_FILE_NAME,
     initialPath
   );
 

@@ -190,9 +190,7 @@ type BaseConfig = { version: number } & Record<string, unknown>;
 export type Migrations<Config> = Array<
   (config: Config) => Config | Promise<Config>
 >;
-export type GetDefaultConfig<LatestConfig> = () =>
-  | LatestConfig
-  | Promise<LatestConfig>;
+export type GetDefaultConfig = () => string | Promise<string>;
 type GetPath = () => string | Promise<string>;
 
 export type ConfigValidateFunction<LatestConfig> = (
@@ -255,7 +253,7 @@ export function getReadonlyConfigInitFunction<
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
+  getDefaultConfig?: GetDefaultConfig
 ): InitReadonlyFunctionWithDefault<LatestConfig>;
 
 export function getReadonlyConfigInitFunction<
@@ -263,7 +261,7 @@ export function getReadonlyConfigInitFunction<
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
+  getDefaultConfig?: GetDefaultConfig
 ): InitReadonlyFunction<LatestConfig> {
   return async (): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
     const {
@@ -276,9 +274,11 @@ export function getReadonlyConfigInitFunction<
       getSchemaDirPath,
     } = options;
 
+    const configFullName = `${name}.${YAML_EXT}`;
+
     const getConfigPathResult = getConfigPath(
       await getConfigOrConfigDirPath(),
-      name
+      configFullName
     );
 
     const { configDirPath } = getConfigPathResult;
@@ -353,24 +353,8 @@ export function getReadonlyConfigInitFunction<
       }
       // If config file doesn't exist, create it with default config and schema path comment
 
-      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${name.replace(
-        `.${YAML_EXT}`,
-        ""
-      )}.md`;
-
       const schemaPathComment = await getSchemaPathComment();
-
-      const description =
-        typeof latestSchema["description"] === "string"
-          ? `\n\n# ${latestSchema["description"]}`
-          : "";
-
-      configString = yamlDiffPatch(
-        `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
-        {},
-        await getDefaultConfig()
-      );
-
+      configString = `${schemaPathComment}\n\n${await getDefaultConfig()}`;
       await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
     }
 
@@ -434,7 +418,7 @@ export function getConfigInitFunction<
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig: GetDefaultConfig<LatestConfig>
+  getDefaultConfig: GetDefaultConfig
 ): InitFunctionWithDefault<LatestConfig>;
 
 export function getConfigInitFunction<
@@ -442,12 +426,14 @@ export function getConfigInitFunction<
   LatestConfig extends BaseConfig
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
+  getDefaultConfig?: GetDefaultConfig
 ): InitFunction<LatestConfig> {
   return async (): Promise<InitializedConfig<LatestConfig> | null> => {
+    const configFullName = `${options.name}.${YAML_EXT}`;
+
     let { configPath } = getConfigPath(
       await options.getConfigOrConfigDirPath(),
-      options.name
+      configFullName
     );
 
     if (initializedConfigs.has(configPath)) {

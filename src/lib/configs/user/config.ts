@@ -16,7 +16,11 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { CONFIG_FILE_NAME, TOP_LEVEL_SCHEMA_ID } from "../../const.js";
+import {
+  GLOBAL_CONFIG_FILE_NAME,
+  GLOBAL_CONFIG_FULL_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+} from "../../const.js";
 import {
   validateAllVersionsAreExact,
   validateBatch,
@@ -47,8 +51,8 @@ type ConfigV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${CONFIG_FILE_NAME}`,
-  title: CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${GLOBAL_CONFIG_FULL_FILE_NAME}`,
+  title: GLOBAL_CONFIG_FULL_FILE_NAME,
   description: "Defines global config for Fluence CLI",
   properties: {
     countlyConsent: {
@@ -99,11 +103,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "countlyConsent"],
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => {
-  return {
-    version: 0,
-    countlyConsent: false,
-  };
+const getDefault: GetDefaultConfig = () => {
+  return `countlyConsent: false,
+version: 0`;
 };
 
 const migrations: Migrations<Config> = [];
@@ -124,7 +126,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
-  name: CONFIG_FILE_NAME,
+  name: GLOBAL_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: ensureUserFluenceDir,
   validate,
 };

@@ -163,6 +163,10 @@
       "unused-imports"
     ],
     "rules": {
+      "eqeqeq": [
+        "error",
+        "always"
+      ],
       "no-console": [
         "error"
       ],

@@ -49,7 +49,7 @@ import type {
   Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import { FLUENCE_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
+import { FS_OPTIONS } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -143,7 +143,9 @@ export const prepareForDeploy = async ({
       commandObj.error(
         `You must have a ${color.yellow(
           hostsOrDealsString
-        )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
+        )} property in ${color.yellow(
+          fluenceConfig.$getPath()
+        )} that contains a record with at least one worker name as a key`
       )
   ) as Array<
     [
@@ -172,7 +174,7 @@ export const prepareForDeploy = async ({
     return commandObj.error(
       `${color.yellow(
         hostsOrDealsString
-      )} record in ${FLUENCE_CONFIG_FILE_NAME} must contain at least one worker name as a key`
+      )} record in ${fluenceConfig.$getPath()} must contain at least one worker name as a key`
     );
   }
 
@@ -185,7 +187,7 @@ export const prepareForDeploy = async ({
     return commandObj.error(
       `You must have a ${color.yellow(
         "workers"
-      )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
+      )} property in ${fluenceConfig.$getPath()} that contains a record with at least one worker name as a key`
     );
   }
 
@@ -202,7 +204,7 @@ export const prepareForDeploy = async ({
           return color.yellow(workerName);
         })
         .join(", ")} in ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
+        fluenceConfig.$getPath()
       )} please check the spelling and try again`
     );
   }
@@ -229,7 +231,7 @@ export const prepareForDeploy = async ({
       return commandObj.error(
         `All workers must have at least one service or spell. Worker ${color.yellow(
           workerName
-        )} listed in ${FLUENCE_CONFIG_FILE_NAME} ${color.yellow(
+        )} listed in ${fluenceConfig.$getPath()} ${color.yellow(
           "workers"
         )} property does not have any spells or services`
       );
@@ -255,7 +257,7 @@ export const prepareForDeploy = async ({
 
       assert(
         maybeSpell !== undefined,
-        `Unreachable. can't find spell ${name} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in spells property. This has to be checked on config init. Looking for ${name} in ${JSON.stringify(
+        `Unreachable. can't find spell ${name} from workers property in ${fluenceConfig.$getPath()} in spells property. This has to be checked on config init. Looking for ${name} in ${JSON.stringify(
           fluenceConfig.spells
         )}`
       );
@@ -343,7 +345,7 @@ export const prepareForDeploy = async ({
 
       assert(
         maybeService !== undefined,
-        `Unreachable. can't find service ${serviceName} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
+        `Unreachable. can't find service ${serviceName} from workers property in ${fluenceConfig.$getPath()} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
           servicesFromFluenceConfig
         )}`
       );
@@ -465,7 +467,7 @@ export const prepareForDeploy = async ({
             "peerIds"
           )} property in ${color.yellow(
             `hosts.${workerName}`
-          )} property in ${FLUENCE_CONFIG_FILE_NAME}`
+          )} property in ${fluenceConfig.$getPath()}`
         );
       }
 

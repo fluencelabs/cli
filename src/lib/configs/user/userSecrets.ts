@@ -22,6 +22,7 @@ import {
   AUTO_GENERATED,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
+  USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
 import { generateKeyPair } from "../../helpers/generateKeyPair.js";
 import {
@@ -50,8 +51,8 @@ type ConfigV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${USER_SECRETS_CONFIG_FILE_NAME}`,
-  title: USER_SECRETS_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${USER_SECRETS_CONFIG_FULL_FILE_NAME}`,
+  title: USER_SECRETS_CONFIG_FULL_FILE_NAME,
   description:
     "Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `fluence key` group of commands with `--user` flag",
   properties: {
@@ -66,12 +67,10 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "keyPairs", "defaultKeyPairName"],
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => {
-  return {
-    version: 0,
-    keyPairs: [generateKeyPair(AUTO_GENERATED)],
-    defaultKeyPairName: AUTO_GENERATED,
-  };
+const getDefault: GetDefaultConfig = () => {
+  return `keyPairs: ${JSON.stringify([generateKeyPair(AUTO_GENERATED)])}
+defaultKeyPairName: ${AUTO_GENERATED}
+version: 0`;
 };
 
 const migrations: Migrations<Config> = [];

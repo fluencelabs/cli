@@ -22,8 +22,8 @@ import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { commandObj } from "../../../lib/commandObj.js";
 import {
   CARGO_DIR_NAME,
-  CONFIG_FILE_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
+  GLOBAL_CONFIG_FULL_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   GLOBAL_FLAG,
   GLOBAL_FLAG_NAME,
@@ -57,9 +57,9 @@ export default class Install extends BaseCommand<typeof Install> {
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
-      description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FILE_NAME}, user's ${join(
+      description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FULL_FILE_NAME}, user's ${join(
         DOT_FLUENCE_DIR_NAME,
-        CONFIG_FILE_NAME
+        GLOBAL_CONFIG_FULL_FILE_NAME
       )}, dependency versions recommended by fluence, latest version cargo is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: marine@0.12.4`,
     }),
   };

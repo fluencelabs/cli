@@ -23,7 +23,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
-import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   isUrl,
@@ -36,7 +36,7 @@ import { input } from "../../lib/prompt.js";
 const PATH_OR_URL = "PATH | URL";
 
 export default class Add extends BaseCommand<typeof Add> {
-  static override description = `Add service to ${FLUENCE_CONFIG_FILE_NAME}`;
+  static override description = `Add service to ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

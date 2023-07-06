@@ -25,8 +25,8 @@ import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
-  PROJECT_SECRETS_CONFIG_FILE_NAME,
-  USER_SECRETS_CONFIG_FILE_NAME,
+  PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
+  USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
@@ -35,7 +35,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { list } from "../../lib/prompt.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
+  static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FULL_FILE_NAME} or ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

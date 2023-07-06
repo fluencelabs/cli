@@ -20,8 +20,9 @@ import { dirname, resolve } from "path";
 import type { JSONSchemaType } from "ajv";
 
 import {
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
+  SPELL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   U32_MAX,
 } from "../../const.js";
@@ -82,7 +83,7 @@ const spellProperties = {
   clock: {
     type: "object",
     nullable: true,
-    description: `Trigger the spell execution periodically. If you want to disable this property by overriding it in ${FLUENCE_CONFIG_FILE_NAME} - pass empty config for it like this: \`clock: {}\``,
+    description: `Trigger the spell execution periodically. If you want to disable this property by overriding it in ${FLUENCE_CONFIG_FULL_FILE_NAME} - pass empty config for it like this: \`clock: {}\``,
     properties: {
       periodSec: {
         type: "number",
@@ -139,8 +140,8 @@ export const overridableSpellProperties = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${SPELL_CONFIG_FILE_NAME}`,
-  title: SPELL_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${SPELL_CONFIG_FULL_FILE_NAME}`,
+  title: SPELL_CONFIG_FULL_FILE_NAME,
   description: `Defines a spell. You can use \`fluence spell new\` command to generate a template for new spell`,
   properties: spellProperties,
   required: ["version", "function", "aquaFilePath"],
@@ -286,16 +287,13 @@ export const initReadonlySpellConfig = async (
   )();
 };
 
-const getDefault = (): LatestConfig => {
-  return {
-    version: 0,
-    aquaFilePath: "./spell.aqua",
-    function: "spell",
-    clock: {
-      periodSec: 60,
-      endDelaySec: 30 * 60,
-    },
-  };
+const getDefault = (): string => {
+  return `aquaFilePath: "./spell.aqua"
+function: "spell"
+clock:
+  periodSec: 60,
+  endDelaySec: ${30 * 60}
+version: 0`;
 };
 
 export const initNewReadonlySpellConfig = (

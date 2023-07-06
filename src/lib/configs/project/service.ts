@@ -17,8 +17,9 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
+  SERVICE_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
 import {
@@ -73,13 +74,13 @@ type ConfigV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${SERVICE_CONFIG_FILE_NAME}`,
-  title: SERVICE_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${SERVICE_CONFIG_FULL_FILE_NAME}`,
+  title: SERVICE_CONFIG_FULL_FILE_NAME,
   description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use \`fluence service new\` command to generate a template for new service`,
   properties: {
     name: {
       type: "string",
-      description: `Service name. Currently it is used for the service name only when you add service to ${FLUENCE_CONFIG_FILE_NAME} using "add" command. But this name can be overridden to any other with the --name flag or manually in ${FLUENCE_CONFIG_FILE_NAME}`,
+      description: `Service name. Currently it is used for the service name only when you add service to ${FLUENCE_CONFIG_FULL_FILE_NAME} using "add" command. But this name can be overridden to any other with the --name flag or manually in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
     },
     modules: {
       title: "Modules",
@@ -158,20 +159,16 @@ export const initReadonlyServiceConfig = async (
 const getDefault: (
   relativePathToFacade: string,
   name: string
-) => GetDefaultConfig<LatestConfig> = (
+) => GetDefaultConfig = (
   relativePathToFacade: string,
   name: string
-): GetDefaultConfig<LatestConfig> => {
-  return (): LatestConfig => {
-    return {
-      version: 0,
-      name,
-      modules: {
-        [FACADE_MODULE_NAME]: {
-          get: relativePathToFacade,
-        },
-      },
-    };
+): GetDefaultConfig => {
+  return () => {
+    return `name: ${name}
+modules:
+  ${FACADE_MODULE_NAME}:
+    get: ${relativePathToFacade}
+version: 0`;
   };
 };
 

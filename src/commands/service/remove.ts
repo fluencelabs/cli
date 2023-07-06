@@ -24,7 +24,7 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { FluenceConfigReadonly } from "../../lib/configs/project/fluence.js";
-import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
 import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -32,14 +32,14 @@ import { input } from "../../lib/prompt.js";
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static override description = `Remove service from ${FLUENCE_CONFIG_FILE_NAME} services property and from all of the workers`;
+  static override description = `Remove service from ${FLUENCE_CONFIG_FULL_FILE_NAME} services property and from all of the workers`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
-      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
+      description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME}, path to a service or url to .tar.gz archive`,
     }),
   };
   async run(): Promise<void> {
@@ -53,7 +53,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
         message: `Enter service name from ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
+          fluenceConfig.$getPath()
         )}, path to a service or url to .tar.gz archive`,
       }));
 
@@ -89,7 +89,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     this.log(
       `Removed service ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
+        fluenceConfig.$getPath()
       )}`
     );
   }

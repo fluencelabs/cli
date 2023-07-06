@@ -29,7 +29,7 @@ import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js"
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
-  WORKERS_CONFIG_FILE_NAME,
+  WORKERS_CONFIG_FULL_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
   DOT_FLUENCE_DIR_NAME,
   FLUENCE_CLIENT_FLAGS,
@@ -44,7 +44,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
-  static override description = `Get logs from deployed workers for hosts listed in ${WORKERS_CONFIG_FILE_NAME}`;
+  static override description = `Get logs from deployed workers for hosts listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -69,7 +69,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Worker names to get logs for (by default all worker names from 'hosts' property of ${WORKERS_CONFIG_FILE_NAME})`,
+      description: `Worker names to get logs for (by default all worker names from 'hosts' property of ${WORKERS_CONFIG_FULL_FILE_NAME})`,
     }),
   };
   async run(): Promise<void> {
@@ -156,7 +156,7 @@ const getLogsArg = async ({
   if (maybeWorkersConfig === null) {
     return commandObj.error(
       `Wasn't able to find ${color.yellow(
-        WORKERS_CONFIG_FILE_NAME
+        WORKERS_CONFIG_FULL_FILE_NAME
       )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`
     );
   }
@@ -191,7 +191,7 @@ const getLogsArg = async ({
           return color.yellow(workerName);
         })
         .join(", ")} in ${color.yellow(
-        WORKERS_CONFIG_FILE_NAME
+        workersConfig.$getPath()
       )} please check the spelling and try again`
     );
   }

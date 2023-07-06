@@ -19,8 +19,9 @@ import type { JSONSchemaType } from "ajv";
 import {
   type ChainNetwork,
   CHAIN_NETWORKS,
-  WORKERS_CONFIG_FILE_NAME,
+  WORKERS_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
+  WORKERS_CONFIG_FILE_NAME,
 } from "../../const.js";
 import { ensureFluenceDir } from "../../paths.js";
 import {
@@ -123,8 +124,8 @@ const dealSchema: JSONSchemaType<Deal> = {
 } as const;
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FILE_NAME}`,
-  title: WORKERS_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
+  title: WORKERS_CONFIG_FULL_FILE_NAME,
   type: "object",
   description:
     "A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command",
@@ -169,10 +170,8 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   getConfigOrConfigDirPath: ensureFluenceDir,
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = () => {
-  return {
-    version: 0,
-  };
+const getDefault: GetDefaultConfig = () => {
+  return `version: 0`;
 };
 
 export const initNewWorkersConfig = getConfigInitFunction(
