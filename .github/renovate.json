@@ -8,43 +8,63 @@
   "regexManagers": [
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"nox\": \"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\""
-      ],
+      "matchStrings": ["\"nox\": \"fluencelabs/(?<depName>nox):(?<currentValue>[^\"\n]+)\""],
       "datasourceTemplate": "docker"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"npm\":\\s*\\{(?<depName>.*):\\s*\"(?<currentValue>[^\"\n]+)\""
-      ],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>aqua-lib)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"cargo\":\\s*\\{(?<depName>.*):\\s*\"(?<currentValue>[^\"\n]+)\""
-      ],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>spell)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>registry)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.api)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.node)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>fluence-network-environment)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
       "datasourceTemplate": "crate"
-    }
-  ],
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["major"],
-      "prConcurrentLimit": 1
     },
     {
-      "matchManagers": ["github-actions"],
-      "prPriority": 1
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>mrepl)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "crate"
     },
     {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "crate"
     },
     {
-      "matchPaths": ["^src/versions\\.json$"],
-      "semanticCommitType": "fix",
-      "schedule": ["at any time"]
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk-test)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "datasourceTemplate": "crate"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": ["\"rust-toolchain\": \"(?<depName>nightly)-(?<currentValue>[^\"\n]+)-x86_64\""],
+      "datasourceTemplate": "rust-version"
     }
   ]
 }
