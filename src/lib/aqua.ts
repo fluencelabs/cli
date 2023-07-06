@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, parse } from "node:path";
 
 import {
@@ -25,6 +25,7 @@ import {
   Call,
   Input,
   Path,
+  GeneratedSource,
 } from "@fluencelabs/aqua-api/aqua-api.js";
 import type { FnConfig } from "@fluencelabs/js-client.api";
 import oclifColor from "@oclif/color";
@@ -117,6 +118,43 @@ export async function compile({
   return Aqua.compile(new Path(filePath), imports, config);
 }
 
+const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
+  const files = await readdir(dirPath);
+
+  const pathsWithStats = await Promise.all(
+    files.map(async (fileName) => {
+      const filePath = join(dirPath, fileName);
+      const stats = await stat(filePath);
+      return [filePath, stats] as const;
+    })
+  );
+
+  return (
+    await Promise.all(
+      pathsWithStats
+        .filter(([path, stats]) => {
+          return stats.isDirectory() || extname(path).toLowerCase() === ".aqua";
+        })
+        .map(([path, stats]): Promise<string[]> => {
+          return stats.isDirectory()
+            ? getAquaFilesRecursively(path)
+            : Promise.resolve([path]);
+        })
+    )
+  ).flat();
+};
+
+const writeFileAndMakeSureDirExists = async (
+  filePath: string,
+  data: string
+) => {
+  const dirPath = parse(filePath).dir;
+  await mkdir(dirPath, { recursive: true });
+  await writeFile(filePath, data, FS_OPTIONS);
+};
+
+const EMPTY_GENERATED_SOURCE: Omit<GeneratedSource, "name"> = {};
+
 export type CompileToFilesArgs = {
   compileArgs: Omit<Parameters<typeof compile>[0], "funcCall">;
   outputPath: string | undefined;
@@ -128,35 +166,48 @@ export const compileToFiles = async ({
   outputPath,
   dry = false,
 }: CompileToFilesArgs): Promise<void> => {
-  const res = (await stat(compileArgs.filePath)).isDirectory()
+  const isInputPathADirectory = (
+    await stat(compileArgs.filePath)
+  ).isDirectory();
+
+  const compilationResultsWithFilePaths = isInputPathADirectory
     ? await Promise.all(
         (
-          await readdir(compileArgs.filePath)
-        )
-          .map((fileName) => {
-            return join(compileArgs.filePath, fileName);
-          })
-          .filter((filePath) => {
-            return extname(filePath).toLowerCase() === ".aqua";
-          })
-          .map(async (filePath) => {
-            return [
-              await compile({ ...compileArgs, filePath }),
-              filePath,
-            ] as const;
-          })
+          await getAquaFilesRecursively(compileArgs.filePath)
+        ).map(async (aquaFilePath) => {
+          return {
+            compilationResult: await compile({
+              ...compileArgs,
+              filePath: aquaFilePath,
+            }),
+            aquaFilePath,
+          };
+        })
       )
-    : [[await compile(compileArgs), compileArgs.filePath] as const];
+    : [
+        {
+          compilationResult: await compile(compileArgs),
+          aquaFilePath: compileArgs.filePath,
+        },
+      ];
 
-  const resultsWithErrors = res.filter(([r]) => {
-    return r.errors.length !== 0;
-  });
+  if (compilationResultsWithFilePaths.length === 0) {
+    return commandObj.error(`No aqua files found at ${compileArgs.filePath}`);
+  }
+
+  const resultsWithErrors = compilationResultsWithFilePaths.filter(
+    ({ compilationResult }) => {
+      return compilationResult.errors.length !== 0;
+    }
+  );
 
   if (resultsWithErrors.length !== 0) {
     return commandObj.error(
       resultsWithErrors
-        .map(([r, filePath]) => {
-          return `${color.yellow(filePath)}\n\n${r.errors.join("\n")}`;
+        .map(({ compilationResult, aquaFilePath }) => {
+          return `${color.yellow(
+            aquaFilePath
+          )}\n\n${compilationResult.errors.join("\n")}`;
         })
         .join("\n\n")
     );
@@ -171,85 +222,57 @@ export const compileToFiles = async ({
     `outputPath type is "${typeof outputPath}", but it should be of type "string", because it's not dry run`
   );
 
-  try {
-    await unlink(outputPath);
-  } catch {}
-
   await mkdir(outputPath, { recursive: true });
 
-  if (compileArgs.targetType === "ts") {
-    await Promise.all(
-      res.map(([r]) => {
-        const generatedSource = r.generatedSources[0];
-
-        assert(
-          generatedSource !== undefined,
-          "generatedSource must be defined"
-        );
-
-        const { name, tsSource } = generatedSource;
-        assert(typeof tsSource === "string", "tsSource must be a string");
-
-        const parsedPath = parse(name);
-        const fileNameWithoutExt = parsedPath.name;
-
-        return writeFile(
-          join(outputPath, `${fileNameWithoutExt}.${TS_EXT}`),
-          tsSource,
-          FS_OPTIONS
-        );
-      })
-    );
-
-    return;
-  }
-
-  if (compileArgs.targetType === "js") {
-    await Promise.all(
-      res.map(async ([r]) => {
-        const generatedSource = r.generatedSources[0];
-
-        assert(
-          generatedSource !== undefined,
-          "generatedSource must be defined"
-        );
-
-        const { name, jsSource, tsTypes } = generatedSource;
-        assert(typeof jsSource === "string", "jsSource must be a string");
-        assert(typeof tsTypes === "string", "tsTypes must be a string");
-
-        const parsedPath = parse(name);
-        const fileNameWithoutExt = parsedPath.name;
-
-        await writeFile(
-          join(outputPath, `${fileNameWithoutExt}.${JS_EXT}`),
-          jsSource,
-          FS_OPTIONS
-        );
-
-        await writeFile(
-          join(outputPath, `${fileNameWithoutExt}.d.${TS_EXT}`),
-          tsTypes,
-          FS_OPTIONS
-        );
-      })
-    );
-
-    return;
-  }
+  const inputDirPath = isInputPathADirectory
+    ? compileArgs.filePath
+    : parse(compileArgs.filePath).dir;
 
   await Promise.all(
-    res.flatMap(([r, filePath]) => {
-      const parsedPath = parse(filePath);
-      const fileNameWithoutExt = parsedPath.name;
+    compilationResultsWithFilePaths.flatMap(
+      ({ compilationResult, aquaFilePath }) => {
+        const generatedSource =
+          compilationResult.generatedSources[0] ?? EMPTY_GENERATED_SOURCE;
 
-      return Object.entries(r.functions).map(([name, { script }]) => {
-        return writeFile(
-          join(outputPath, `${fileNameWithoutExt}.${name}.air`),
-          script,
-          FS_OPTIONS
+        const parsedPath = parse(aquaFilePath);
+        const fileNameWithoutExt = parsedPath.name;
+        const dirPath = parsedPath.dir;
+        const finalOutputDirPath = dirPath.replace(inputDirPath, outputPath);
+
+        if (compileArgs.targetType === "ts") {
+          assert(typeof generatedSource.tsSource === "string");
+          return [
+            writeFileAndMakeSureDirExists(
+              join(finalOutputDirPath, `${fileNameWithoutExt}.${TS_EXT}`),
+              generatedSource.tsSource
+            ),
+          ];
+        }
+
+        if (compileArgs.targetType === "js") {
+          assert(typeof generatedSource.jsSource === "string");
+          assert(typeof generatedSource.tsTypes === "string");
+          return [
+            writeFileAndMakeSureDirExists(
+              join(finalOutputDirPath, `${fileNameWithoutExt}.${JS_EXT}`),
+              generatedSource.jsSource
+            ),
+            writeFileAndMakeSureDirExists(
+              join(finalOutputDirPath, `${fileNameWithoutExt}.d.${TS_EXT}`),
+              generatedSource.tsTypes
+            ),
+          ];
+        }
+
+        return Object.entries(compilationResult.functions).map(
+          ([name, { script }]) => {
+            return writeFileAndMakeSureDirExists(
+              join(finalOutputDirPath, `${fileNameWithoutExt}.${name}.air`),
+              script
+            );
+          }
         );
-      });
-    })
+      }
+    )
   );
 };

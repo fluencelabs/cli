@@ -105,4 +105,4 @@ ${schemas
   );
 };
 
-main().catch(console.error);
+void main();

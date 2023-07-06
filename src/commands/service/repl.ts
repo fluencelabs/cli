@@ -15,7 +15,7 @@
  */
 
 import { spawn } from "node:child_process";
-import fsPromises from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { cwd } from "node:process";
 
@@ -102,7 +102,7 @@ export default class REPL extends Command {
 
     const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
 
-    await fsPromises.writeFile(
+    await writeFile(
       fluenceTmpConfigTomlPath,
       stringifyToTOML({ module: ensureModuleConfigsForToml(moduleConfigs) }),
       FS_OPTIONS

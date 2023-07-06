@@ -220,6 +220,9 @@ export default class Run extends BaseCommand<typeof Run> {
       typeof result === "string" ? result : jsonStringify(result);
 
     if (stringResult !== undefined) {
+      // If `--quite` flag is used then commandObj.log does nothing
+      // So we use console.log here instead
+      // eslint-disable-next-line no-console
       console.log(stringResult);
     }
 

@@ -47,6 +47,7 @@ describe("integration tests", () => {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       {
         log(msg: string) {
+          // eslint-disable-next-line no-console
           console.log(msg);
         },
         error(msg: string) {
@@ -61,14 +62,6 @@ describe("integration tests", () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
-
-    await flox({
-      args: ["run"],
-      flags: {
-        f: 'helloWorld("Fluence")',
-      },
-      cwd,
-    });
 
     await flox({
       args: ["run"],

@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.5.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.2...fluence-cli-v0.5.3) (2023-07-05)
+
+
+### Features
+
+* print default dependencies and their versions when using `default` flag [fixes DXJ-398] ([#316](https://github.com/fluencelabs/fluence-cli/issues/316)) ([6f22700](https://github.com/fluencelabs/fluence-cli/commit/6f22700c67b15e8219dd5af0da0d6106850ad414))
+* update dependencies ([#320](https://github.com/fluencelabs/fluence-cli/issues/320)) ([f11224e](https://github.com/fluencelabs/fluence-cli/commit/f11224ed1f812a07f065772879ea7fd22af2f400))
+
+## [0.5.2](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.1...fluence-cli-v0.5.2) (2023-07-04)
+
+
+### Features
+
+* do not remove output dir when compiling aqua [fixes DXJ-403] ([#318](https://github.com/fluencelabs/fluence-cli/issues/318)) ([8decf46](https://github.com/fluencelabs/fluence-cli/commit/8decf464f46ed8057dac44324c5beb60711500ff))
+* improve cli output when building project [fixes DXJ-406] ([#317](https://github.com/fluencelabs/fluence-cli/issues/317)) ([1da1fb0](https://github.com/fluencelabs/fluence-cli/commit/1da1fb058137e067723d8ee2ef5a7911c15bef36))
+
+## [0.5.1](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.0...fluence-cli-v0.5.1) (2023-07-03)
+
+
+### Features
+
+* update some remaining node16 mentions and pin dependencies ([#314](https://github.com/fluencelabs/fluence-cli/issues/314)) ([ce25a71](https://github.com/fluencelabs/fluence-cli/commit/ce25a71ac1b9a72ffd05ce946d1367eca94de46d))
+
+## [0.5.0](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.19...fluence-cli-v0.5.0) (2023-06-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **js-client:** update js-client.api to 0.12.0, js-client.node 0.7.0 (https://github.com/fluencelabs/fluence-cli/pull/301)
+
+### Features
+
+* **js-client:** update js-client.api to 0.12.0, js-client.node 0.7.0 (https://github.com/fluencelabs/fluence-cli/pull/301) ([1eb87a2](https://github.com/fluencelabs/fluence-cli/commit/1eb87a24d2e97a33fca9cebd1357207da5b876fd))
+
+## [0.4.19](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.18...fluence-cli-v0.4.19) (2023-06-29)
+
+
+### Features
+
+* Add quickstart template [fixes DXJ-399] ([#306](https://github.com/fluencelabs/fluence-cli/issues/306)) ([7cb925e](https://github.com/fluencelabs/fluence-cli/commit/7cb925ef6ab6152abb36905449aba79987f0695a))
+* recursive aqua file compilation [fixes DXJ-400] ([#311](https://github.com/fluencelabs/fluence-cli/issues/311)) ([3bb3720](https://github.com/fluencelabs/fluence-cli/commit/3bb3720c27b15c65f8bdf9bee2167ebbee377ef6))
+* use binary marine and mrepl releases for linux x86_64 and darwin x86_64 [fixes DXJ-121, DXJ-147] ([#307](https://github.com/fluencelabs/fluence-cli/issues/307)) ([a5180b4](https://github.com/fluencelabs/fluence-cli/commit/a5180b43c6acff1aa054cc30bc6a1754075dfcdc))
+
 ## [0.4.18](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.4.17...fluence-cli-v0.4.18) (2023-06-26)
 
 

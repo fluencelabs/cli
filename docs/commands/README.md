@@ -154,7 +154,7 @@ USAGE
   $ flox autocomplete [SHELL] [-r]
 
 ARGUMENTS
-  SHELL  shell type
+  SHELL  (zsh|bash|powershell) Shell type
 
 FLAGS
   -r, --refresh-cache  Refresh cache (ignores displaying instructions)
@@ -172,7 +172,7 @@ EXAMPLES
   $ flox autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.1.8/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.1/src/commands/autocomplete/index.ts)_
 
 ## `flox build`
 
@@ -220,8 +220,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -251,8 +251,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
@@ -398,17 +398,19 @@ EXAMPLES
 
 ## `flox dependency versions`
 
-Get versions of all currently used dependencies
+Get versions of all dependencies
 
 ```
 USAGE
   $ flox dependency versions [--no-input]
 
 FLAGS
+  --default   Display default npm and cargo dependencies and their versions for current CLI version. Default npm
+              dependencies are always available to be imported in Aqua
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Get versions of all currently used dependencies
+  Get versions of all dependencies
 
 ALIASES
   $ flox dependency v
@@ -437,7 +439,7 @@ DESCRIPTION
   Display help for flox.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.9/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.11/src/commands/help.ts)_
 
 ## `flox init [PATH]`
 
@@ -654,8 +656,8 @@ FLAGS
   --quiet                        Print only execution result. Overrides all --log-level-* flags
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Run aqua script
@@ -798,8 +800,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
@@ -832,8 +834,8 @@ FLAGS
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --spell-id=<spell-id>          [default: worker-spell] Spell id
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
   --worker-id=<worker-id>        Worker id
 
 DESCRIPTION
@@ -866,8 +868,8 @@ FLAGS
   --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 60000] Particle Time To Live since 'now'. After that, particle is expired and
-                                 not processed.
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
 
 DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml

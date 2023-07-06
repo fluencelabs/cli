@@ -18,7 +18,7 @@ $ npm install -g @fluencelabs/flox
 $ flox COMMAND
 running command...
 $ flox
-@fluencelabs/flox/0.0.0 linux-x64 node-v16.14.0
+@fluencelabs/flox/0.0.0 linux-x64 node-v18.16.0
 $ flox --help [COMMAND]
 USAGE
   $ flox COMMAND
