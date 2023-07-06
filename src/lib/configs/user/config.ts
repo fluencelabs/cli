@@ -104,7 +104,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 };
 
 const getDefault: GetDefaultConfig = () => {
-  return `countlyConsent: false,
+  return `countlyConsent: false
 version: 0`;
 };
 
