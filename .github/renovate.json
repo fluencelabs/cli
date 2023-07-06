@@ -1,10 +1,33 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
+  "enabledManagers": ["npm", "regex", "github-actions"],
+  "schedule": "every weekend",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-  "enabledManagers": ["regex", "npm", "github-actions"],
-  "schedule": "every weekend",
+  "regexManagers": [
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"nox\": \"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{(?<depName>.*):\\s*\"(?<currentValue>[^\"\n]+)\""
+      ],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"cargo\":\\s*\\{(?<depName>.*):\\s*\"(?<currentValue>[^\"\n]+)\""
+      ],
+      "datasourceTemplate": "crate"
+    }
+  ],
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
@@ -22,29 +45,6 @@
       "matchPaths": ["^src/versions\\.json$"],
       "semanticCommitType": "fix",
       "schedule": ["at any time"]
-    }
-  ],
-  "regexManagers": [
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"nox\": \"(?<depName>[^\"]+):(?<currentValue>[^\"]+)\""
-      ],
-      "datasourceTemplate": "docker"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"cargo\":\\s*\\{[^}]*\"(?<depName>[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "crate"
     }
   ]
 }
