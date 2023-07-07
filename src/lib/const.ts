@@ -518,31 +518,3 @@ func spell():
     Spell "worker-spell"
     Spell.list_push_string("logs", str)
 `;
-
-const getConfigHeaderComments = (
-  configName: string,
-  configDescription: string,
-  schemaPath: string
-) => {
-  return `# yaml-language-server: $schema=${schemaPath}
-# ${configDescription}
-# Documentation: https://github.com/fluencelabs/fluence-cli/tree/main/docs/configs/${configName}.md
-`;
-};
-
-export const FLUENCE_CONFIG_SHARED_TEMPLATE = `${getConfigHeaderComments(
-  FLUENCE_CONFIG_FILE_NAME,
-  "Fluence config",
-  "."
-)}
-
-version: 2
-aquaInputPath: src/aqua/main.aqua
-deals:
-  defaultWorker:
-    minWorkers: 1
-    targetWorkers: 3
-workers:
-  defaultWorker:
-    services: []
-`;
