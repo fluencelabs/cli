@@ -8,62 +8,86 @@
   "regexManagers": [
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"nox\": \"fluencelabs/(?<depName>nox):(?<currentValue>[^\"\n]+)\""],
+      "matchStrings": [
+        "\"nox\": \"fluencelabs/(?<depName>nox):(?<currentValue>[^\"\n]+)\""
+      ],
       "datasourceTemplate": "docker"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>aqua-lib)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>aqua-lib)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>spell)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>spell)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>registry)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>registry)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.api)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.api)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.node)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.node)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>fluence-network-environment)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>fluence-network-environment)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"cargo\":\\s*\\{[^}]*\"(?<depName>marine)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "crate"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>mrepl)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"cargo\":\\s*\\{[^}]*\"(?<depName>mrepl)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "crate"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "crate"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk-test)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"],
+      "matchStrings": [
+        "\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk-test)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
       "datasourceTemplate": "crate"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": ["\"rust-toolchain\": \"(?<depName>nightly)-(?<currentValue>[^\"\n]+)-x86_64\""],
+      "matchStrings": [
+        "\"rust-toolchain\": \"(?<depName>nightly)-(?<currentValue>[^\"\n]+)-x86_64\""
+      ],
       "datasourceTemplate": "rust-version"
     }
   ]
