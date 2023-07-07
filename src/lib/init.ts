@@ -258,6 +258,7 @@ const initTSorJSProject = async ({
         SRC_DIR_NAME,
         indexFileName
       )}`,
+      ...(isJS ? {} : { build: "tsc -b" }),
     },
     keywords: ["fluence"],
     author: "",
@@ -300,6 +301,7 @@ const initTSorJSProject = async ({
         strict: true,
         skipLibCheck: true,
         moduleResolution: "nodenext",
+        outDir: "dist",
       },
       "ts-node": {
         esm: true,
@@ -307,8 +309,8 @@ const initTSorJSProject = async ({
     };
 
     await writeFile(
-      join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
-      JSON.stringify(TS_CONFIG),
+      join(defaultTSorJSDirPath, TS_CONFIG_FILE_NAME),
+      jsonStringify(TS_CONFIG),
       FS_OPTIONS
     );
 
