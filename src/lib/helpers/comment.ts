@@ -31,4 +31,3 @@ const comment = (commentToken: string) => {
 
 export const jsComment = comment("//");
 export const aquaComment = comment("--");
-export const yamlComment = comment("#");

@@ -41,7 +41,6 @@ import {
   MARINE_CARGO_DEPENDENCY,
   FLUENCE_CONFIG_FILE_NAME,
 } from "../../const.js";
-import { yamlComment } from "../../helpers/comment.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
   validateAllVersionsAreExact,
@@ -552,168 +551,6 @@ const getConfigOrConfigDirPath = () => {
 };
 
 const getDefaultConfig = async (): Promise<string> => {
-  const commentedOutPart = yamlComment(`# A full config reference:
-
-# A map with service names as keys and service configs as values.
-# Service names must start with a lowercase letter and contain only letters numbers and underscores.
-# You can use \`fluence service new\` or \`fluence service add\` command to add a service
-services:
-  myService: # service name
-    # Path to service directory, service config or URL to the tar.gz archive that contains the service
-    get: "src/services/myService"
-    # The name of the Key Pair to use for this service
-    keyPairName: default
-    # A map of modules that you want to override for this service
-    overrideModules:
-      moduleName: # module name
-        # environment variables accessible by a particular module
-        # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
-        # Module environment variables could be examined with repl
-        envs:
-          ENV_VARIABLE: "env variable string value"
-
-        # Set true to allow module to use the Marine SDK logger
-        loggerEnabled: true
-
-        # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
-        loggingMask: 1
-
-        # Max size of the heap that a module can allocate in format:
-        # [number][whitespace?][specificator?]
-        # where ? is an optional field and specificator is one from the following (case-insensitive):
-        # K, Kb - kilobyte
-        # Ki, KiB - kibibyte
-        # M, Mb - megabyte
-        # Mi, MiB - mebibyte
-        # G, Gb - gigabyte
-        # Gi, GiB - gibibyte
-        # Current limit is 4 GiB
-        maxHeapSize: 1Kib
-
-        # A map of binary executable files that module is allowed to call
-        mountedBinaries:
-          curl: "/usr/bin/curl"
-
-        # A map of accessible files and their aliases.
-        # Aliases should be used in Marine module development because it's hard to know the full path to a file
-        volumes:
-          alias: "some/alias/path"
-
-
-# A map with spell names as keys and spell configs as values
-spells:
-  mySpell: # spell name
-    # Path to spell config or directory with spell config
-    get: "src/spells/mySpell"
-
-    # overrides for the spell:
-
-    # Path to Aqua file which contains an Aqua function that you want to use as a spell
-    aquaFilePath: "src/spells/mySpell/spell.aqua"
-    # Name of the Aqua function that you want to use as a spell
-    function: main
-    # A map of Aqua function arguments names as keys and arguments values as values.
-    # These arguments will be passed to the spell function and will be stored in the key-value storage for this particular spell.
-    initArgs:
-      someArg: someArgStringValue
-    # Trigger the spell execution periodically
-    # If you want to disable this property by overriding it
-    # pass an empty config for it like this: \`clock: {}\`
-    clock:
-      # How often the spell will be executed.
-      # If set to 0, the spell will be executed only once.
-      # If this value not provided at all - the spell will never be executed
-      periodSec: 3
-      # How long to wait before the first execution in seconds.
-      # If this property or \`startTimestamp\` not specified, periodic execution will start immediately.
-      # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
-      # If it is set to 0 - the spell will never be executed
-      # This property conflicts with \`startTimestamp\`. You can specify only one of them
-      startDelaySec: 1
-      # An ISO timestamp when the periodic execution should start.
-      # If this property or \`startDelaySec\` not specified, periodic execution will start immediately.
-      startTimestamp: '2023-07-06T23:59:59Z'
-      # How long to wait before the last execution in seconds.
-      # If this property or \`endTimestamp\` not specified, periodic execution will never end.
-      # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
-      # If it is in the past at the moment of spell creation - the spell will never be executed.
-      # This property conflicts with \`endTimestamp\`. You can specify only one of them
-      endDelaySec: 0
-      # An ISO timestamp when the periodic execution should end.
-      # If this property or \`endDelaySec\` not specified, periodic execution will never end.
-      # If it is in the past at the moment of spell creation on Rust peer - the spell will never be executed
-      endTimestamp: '2023-07-06T23:59:59Z'
-
-
-# A list of paths to be considered by aqua compiler to be used as imports.
-# First dependency in the list has the highest priority
-#
-# Priority of imports is considered in the following order:
-# 1. imports from --import flags,
-# 2. imports from aquaImports property in ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# 3. project's ${join(DOT_FLUENCE_DIR_NAME, AQUA_DIR_NAME)} dir
-# 4. npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# 5. npm dependencies from user's ${join(
-    DOT_FLUENCE_DIR_NAME,
-    GLOBAL_CONFIG_FULL_FILE_NAME
-  )}
-# 6. npm dependencies recommended by fluence
-aquaImports:
-  - "./node_modules"
-
-
-# Path to the default compilation target dir from aqua to ts
-# Must be relative to the project root dir
-aquaOutputTSPath: "src/ts/src/aqua"
-
-
-# Path to the default compilation target dir from aqua to js
-# Must be relative to the project root dir
-# Overrides 'aquaOutputTSPath' property
-aquaOutputJSPath: "src/js/src/aqua"
-
-
-# The network in which the transactions will be carried out
-chainNetwork: ${CHAIN_NETWORKS[0]} # default: ${DEFAULT_CHAIN_NETWORK}
-
-
-# The version of the CLI that is compatible with this project.
-# You can set this to enforce a particular set of versions of all fluence components
-cliVersion: ${CLIPackageJSON.version}
-
-
-# (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies
-# You can check out current project dependencies using \`fluence dep v\` command
-dependencies:
-  # A map of npm dependency versions
-  # CLI ensures dependencies are installed each time you run aqua
-  # There are also some dependencies that are installed by default (e.g. @fluencelabs/aqua-lib)
-  # You can check default dependencies using \`fluence dep v --default\`
-  npm:
-    "@fluencelabs/aqua-lib": ${versions.npm["@fluencelabs/aqua-lib"]}
-
-  # A map of cargo dependency versions
-  # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
-  cargo:
-    ${MARINE_CARGO_DEPENDENCY}: ${versions.cargo.marine}
-
-
-# The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
-# 1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FULL_FILE_NAME}
-# 2. "defaultKeyPairName" property from ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
-# 3. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# 4. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# 5. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-keyPairName: ${AUTO_GENERATED}
-
-
-# if you want to deploy your services to specific peerIds. Soon it will be deprecated in favor of \`deals\` property
-hosts:
-  ${DEFAULT_WORKER_NAME}: # worker name
-    peerIds:
-      - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
-`);
-
   return `# Defines Fluence Project
 # Most importantly - what exactly you want to deploy and how
 # You can use \`fluence init\` command to generate a template for new Fluence project
@@ -745,31 +582,166 @@ relays: ${jsonStringify(DEFAULT_RELAYS_FOR_TEMPLATE)} # default: kras
 # config version
 version: 2
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-${commentedOutPart}
+# # A map with service names as keys and service configs as values.
+# # Service names must start with a lowercase letter and contain only letters numbers and underscores.
+# # You can use \`fluence service new\` or \`fluence service add\` command to add a service
+# services:
+#   myService: # service name
+#     # Path to service directory, service config or URL to the tar.gz archive that contains the service
+#     get: "src/services/myService"
+#     # The name of the Key Pair to use for this service
+#     keyPairName: default
+#     # A map of modules that you want to override for this service
+#     overrideModules:
+#       moduleName: # module name
+#         # environment variables accessible by a particular module
+#         # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
+#         # Module environment variables could be examined with repl
+#         envs:
+#           ENV_VARIABLE: "env variable string value"
+#
+#         # Set true to allow module to use the Marine SDK logger
+#         loggerEnabled: true
+#
+#         # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
+#         loggingMask: 1
+#
+#         # Max size of the heap that a module can allocate in format:
+#         # [number][whitespace?][specificator?]
+#         # where ? is an optional field and specificator is one from the following (case-insensitive):
+#         # K, Kb - kilobyte
+#         # Ki, KiB - kibibyte
+#         # M, Mb - megabyte
+#         # Mi, MiB - mebibyte
+#         # G, Gb - gigabyte
+#         # Gi, GiB - gibibyte
+#         # Current limit is 4 GiB
+#         maxHeapSize: 1KiB
+#
+#         # A map of binary executable files that module is allowed to call
+#         mountedBinaries:
+#           curl: "/usr/bin/curl"
+#
+#         # A map of accessible files and their aliases.
+#         # Aliases should be used in Marine module development because it's hard to know the full path to a file
+#         volumes:
+#           alias: "some/alias/path"
+#
+#
+# # A map with spell names as keys and spell configs as values
+# spells:
+#   mySpell: # spell name
+#     # Path to spell config or directory with spell config
+#     get: "src/spells/mySpell"
+#
+#     # overrides for the spell:
+#
+#     # Path to Aqua file which contains an Aqua function that you want to use as a spell
+#     aquaFilePath: "src/spells/mySpell/spell.aqua"
+#     # Name of the Aqua function that you want to use as a spell
+#     function: main
+#     # A map of Aqua function arguments names as keys and arguments values as values.
+#     # These arguments will be passed to the spell function and will be stored in the key-value storage for this particular spell.
+#     initArgs:
+#       someArg: someArgStringValue
+#     # Trigger the spell execution periodically
+#     # If you want to disable this property by overriding it
+#     # pass an empty config for it like this: \`clock: {}\`
+#     clock:
+#       # How often the spell will be executed.
+#       # If set to 0, the spell will be executed only once.
+#       # If this value not provided at all - the spell will never be executed
+#       periodSec: 3
+#       # How long to wait before the first execution in seconds.
+#       # If this property or \`startTimestamp\` not specified, periodic execution will start immediately.
+#       # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
+#       # If it is set to 0 - the spell will never be executed
+#       # This property conflicts with \`startTimestamp\`. You can specify only one of them
+#       startDelaySec: 1
+#       # An ISO timestamp when the periodic execution should start.
+#       # If this property or \`startDelaySec\` not specified, periodic execution will start immediately.
+#       startTimestamp: '2023-07-06T23:59:59Z'
+#       # How long to wait before the last execution in seconds.
+#       # If this property or \`endTimestamp\` not specified, periodic execution will never end.
+#       # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
+#       # If it is in the past at the moment of spell creation - the spell will never be executed.
+#       # This property conflicts with \`endTimestamp\`. You can specify only one of them
+#       endDelaySec: 0
+#       # An ISO timestamp when the periodic execution should end.
+#       # If this property or \`endDelaySec\` not specified, periodic execution will never end.
+#       # If it is in the past at the moment of spell creation on Rust peer - the spell will never be executed
+#       endTimestamp: '2023-07-06T23:59:59Z'
+#
+#
+# # A list of paths to be considered by aqua compiler to be used as imports.
+# # First dependency in the list has the highest priority
+# #
+# # Priority of imports is considered in the following order:
+# # 1. imports from --import flags,
+# # 2. imports from aquaImports property in ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 3. project's ${join(DOT_FLUENCE_DIR_NAME, AQUA_DIR_NAME)} dir
+# # 4. npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 5. npm dependencies from user's ${join(
+    DOT_FLUENCE_DIR_NAME,
+    GLOBAL_CONFIG_FULL_FILE_NAME
+  )}
+# # 6. npm dependencies recommended by fluence
+# aquaImports:
+#   - "./node_modules"
+#
+#
+# # Path to the default compilation target dir from aqua to ts
+# # Must be relative to the project root dir
+# aquaOutputTSPath: "src/ts/src/aqua"
+#
+#
+# # Path to the default compilation target dir from aqua to js
+# # Must be relative to the project root dir
+# # Overrides 'aquaOutputTSPath' property
+# aquaOutputJSPath: "src/js/src/aqua"
+#
+#
+# # The network in which the transactions will be carried out
+# chainNetwork: ${CHAIN_NETWORKS[0]} # default: ${DEFAULT_CHAIN_NETWORK}
+#
+#
+# # The version of the CLI that is compatible with this project.
+# # You can set this to enforce a particular set of versions of all fluence components
+# cliVersion: ${CLIPackageJSON.version}
+#
+#
+# # (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies
+# # You can check out current project dependencies using \`fluence dep v\` command
+# dependencies:
+#   # A map of npm dependency versions
+#   # CLI ensures dependencies are installed each time you run aqua
+#   # There are also some dependencies that are installed by default (e.g. @fluencelabs/aqua-lib)
+#   # You can check default dependencies using \`fluence dep v --default\`
+#   # use \`fluence dep npm i\` to install project npm dependencies
+#   npm:
+#     "@fluencelabs/aqua-lib": ${versions.npm["@fluencelabs/aqua-lib"]}
+#
+#   # A map of cargo dependency versions
+#   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
+#   # use \`fluence dep cargo i\` to install project cargo dependencies
+#   cargo:
+#     ${MARINE_CARGO_DEPENDENCY}: ${versions.cargo.marine}
+#
+#
+# # The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
+# # 1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FULL_FILE_NAME}
+# # 2. "defaultKeyPairName" property from ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+# # 3. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 4. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 5. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# keyPairName: ${AUTO_GENERATED}
+#
+#
+# # if you want to deploy your services to specific peerIds. Soon it will be deprecated in favor of \`deals\` property
+# hosts:
+#   ${DEFAULT_WORKER_NAME}: # worker name
+#     peerIds:
+#       - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
 `;
 };
 

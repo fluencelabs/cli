@@ -164,11 +164,61 @@ const getDefault: (
   name: string
 ): GetDefaultConfig => {
   return () => {
-    return `name: ${name}
+    return `# Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services),
+# most importantly the modules that the service consists of.
+# You can use \`fluence service new\` command to generate a template for new service
+
+# Service name.
+# Currently it is used for the service name only when you add service to fluence.yaml using "add" command.
+# But this name can be overridden to any other with the --name flag or manually in fluence.yaml
+name: ${name}
+
+# A map of modules that the service consists of.
+# Service must have a facade module. Each module properties can be overridden
 modules:
-  ${FACADE_MODULE_NAME}:
-    get: ${relativePathToFacade}
-version: 0`;
+  facade: # module name
+    # Either path to the module directory or
+    # URL to the tar.gz archive which contains the content of the module directory
+    get: "${relativePathToFacade}"
+
+    # You can override module configuration here:
+
+#     # environment variables accessible by a particular module
+#     # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
+#     # Module environment variables could be examined with repl
+#     envs:
+#       ENV_VARIABLE: "env variable string value"
+#
+#     # Set true to allow module to use the Marine SDK logger
+#     loggerEnabled: true
+#
+#     # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
+#     loggingMask: 1
+#
+#     # Max size of the heap that a module can allocate in format:
+#     # [number][whitespace?][specificator?]
+#     # where ? is an optional field and specificator is one from the following (case-insensitive):
+#     # K, Kb - kilobyte
+#     # Ki, KiB - kibibyte
+#     # M, Mb - megabyte
+#     # Mi, MiB - mebibyte
+#     # G, Gb - gigabyte
+#     # Gi, GiB - gibibyte
+#     # Current limit is 4 GiB
+#     maxHeapSize: 1KiB
+#
+#     # A map of binary executable files that module is allowed to call
+#     mountedBinaries:
+#       curl: "/usr/bin/curl"
+#
+#     # A map of accessible files and their aliases.
+#     # Aliases should be used in Marine module development because it's hard to know the full path to a file
+#     volumes:
+#       alias: "some/alias/path"
+
+# config version
+version: 0
+`;
   };
 };
 

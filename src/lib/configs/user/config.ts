@@ -104,8 +104,35 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 };
 
 const getDefault: GetDefaultConfig = () => {
-  return `countlyConsent: false
-version: 0`;
+  return `# Defines global config for Fluence CLI
+
+# Weather you consent to send usage data to Countly
+countlyConsent: false
+
+# config version
+version: 0
+
+# # Last time when CLI checked for updates.
+# # Updates are checked daily unless this field is set to 'disabled'
+# lastCheckForUpdates: 2023-07-07T09:31:00.961Z
+
+# # (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies globally
+# # You can check out current project dependencies using \`fluence dep v\` command
+# dependencies:
+#   # A map of npm dependency versions
+#   # CLI ensures dependencies are installed each time you run aqua
+#   # There are also some dependencies that are installed by default (e.g. @fluencelabs/aqua-lib)
+#   # You can check default dependencies using \`fluence dep v --default\`
+#   # use \`fluence dep npm i --global\` to install global npm dependencies
+#   npm:
+#     "@fluencelabs/aqua-lib": 0.7.1
+#
+#   # A map of cargo dependency versions
+#   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
+#   # use \`fluence dep cargo i --global\` to install global cargo dependencies
+#   cargo:
+#     marine: 0.14.0
+`;
 };
 
 const migrations: Migrations<Config> = [];

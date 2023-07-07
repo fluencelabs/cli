@@ -546,5 +546,3 @@ workers:
   defaultWorker:
     services: []
 `;
-
-export const FLUENCE_CONFIG_TEMPLATE = ``;

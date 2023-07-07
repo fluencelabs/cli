@@ -72,8 +72,25 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 };
 
 const getDefault: GetDefaultConfig = () => {
-  return `keyPairs: []
-version: 0`;
+  return `# Defines project's secret keys that are used only in the scope of this particular Fluence project.
+# You can manage project's keys using commands from \`fluence key\` group of commands
+
+# Key Pairs available for your fluence project
+keyPairs:
+  [
+#    {
+#      name: myKeyPair,
+#      secretKey: y5MU5/jpyGGDFlDdJa+UCSkWKNr8iGtb6bRiytc/M54=
+#    }
+  ]
+
+# Key pair with this name will be used for the deployment by default.
+# You can override it with flags or by using keyPair properties in fluence.yaml
+# defaultKeyPairName: myKeyPair
+
+# config version
+version: 0
+`;
 };
 
 const migrations: Migrations<Config> = [];

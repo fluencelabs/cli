@@ -68,9 +68,21 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 };
 
 const getDefault: GetDefaultConfig = () => {
-  return `keyPairs: ${JSON.stringify([generateKeyPair(AUTO_GENERATED)])}
-defaultKeyPairName: ${AUTO_GENERATED}
-version: 0`;
+  const { secretKey, name } = generateKeyPair(AUTO_GENERATED);
+  return `# Defines user's secret keys that can be used across different Fluence projects.
+# You can manage user's keys using commands from \`fluence key\` group of commands with \`--user\` flag
+
+# user's key pairs
+keyPairs:
+  - name: ${name}
+    secretKey: ${secretKey}
+
+# Key pair with this name will be used for the deployment by default.
+defaultKeyPairName: ${name}
+
+# config version
+version: 0
+`;
 };
 
 const migrations: Migrations<Config> = [];
