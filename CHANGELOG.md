@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.3...fluence-cli-v0.5.4) (2023-07-07)
+
+
+### Features
+
+* improve ts template [DXJ-405] ([#329](https://github.com/fluencelabs/fluence-cli/issues/329)) ([d82e147](https://github.com/fluencelabs/fluence-cli/commit/d82e1473f08b1352819afe3a78a5292030b4ea35))
+
 ## [0.5.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.2...fluence-cli-v0.5.3) (2023-07-05)
 
 
