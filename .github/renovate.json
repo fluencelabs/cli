@@ -16,7 +16,7 @@
     {
       "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>[\\w.-]+)\": \"(?<currentValue>[^\"\n]+)\""
+        "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
       ],
       "datasourceTemplate": "npm"
     },
@@ -26,23 +26,18 @@
         "\"cargo\":\\s*\\{[^}]*\"(?<depName>[\\w.-]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],
       "datasourceTemplate": "crate"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"rust-toolchain\": \"(?<depName>nightly)-(?<currentValue>[^\"\n]+)-x86_64\""
-      ],
-      "datasourceTemplate": "rust-version"
     }
   ],
   "packageRules": [
     {
       "paths": ["src/versions.json"],
-      "schedule": ["at any time"]
+      "schedule": ["at any time"],
+      "prPriority": 5
     },
     {
       "matchPackagePrefixes": ["@fluencelabs/"],
-      "schedule": ["at any time"]
+      "schedule": ["at any time"],
+      "prPriority": 5
     }
   ]
 }
