@@ -6,8 +6,8 @@ networks:
         - subnet: 10.50.10.0/24
 
 services:
-  aurora-deal:
-    image: ${AURORA_DEAL_IMAGE}
+  deal-aurora:
+    image: ${DEAL_AURORA_IMAGE}
     ports:
       - 8545:8545
     networks:
