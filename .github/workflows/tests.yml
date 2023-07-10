@@ -19,6 +19,10 @@ on:
         description: "nox image tag"
         type: string
         default: "fluencelabs/nox:unstable_minimal"
+      deal-aurora-image:
+        description: "deal-aurora image tag"
+        type: string
+        default: "docker.fluence.dev/deal-aurora:latest"
       marine-version:
         description: "marine version"
         type: string
@@ -43,11 +47,16 @@ on:
         description: "aqua snapshots"
         type: string
         default: "null"
+      deal-aurora-version:
+        description: "deal-aurora version"
+        type: string
+        default: "null"
 
 env:
   CI: true
   FORCE_COLOR: true
   NOX_IMAGE: "${{ inputs.nox-image }}"
+  DEAL_AURORA_IMAGE: "${{ inputs.deal-aurora-image }}"
 
 jobs:
   tests:
@@ -141,6 +150,14 @@ jobs:
         with:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['api'] }}"
+          package-manager: pnpm
+
+      - name: Set deal-aurora version
+        if: inputs.deal-aurora-version != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/deal-aurora"
+          version: "${{ inputs.deal-aurora-version }}"
           package-manager: pnpm
 
       - name: Update versions.json

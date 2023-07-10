@@ -6,8 +6,8 @@ networks:
         - subnet: 10.50.10.0/24
 
 services:
-  aurora:
-    image: docker.fluence.dev/aurora:main-9e7523f-4-1
+  deal-aurora:
+    image: ${DEAL_AURORA_IMAGE}
     ports:
       - 8545:8545
     networks:

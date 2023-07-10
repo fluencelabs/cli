@@ -40,7 +40,6 @@ jobs:
   registry:
     needs:
       - flox
-    uses: fluencelabs/registry/.github/workflows/tests.yml@FLU-353
+    uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      ref: FLU-353
       flox-version: "${{ needs.flox.outputs.version }}"
