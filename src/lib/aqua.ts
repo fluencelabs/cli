@@ -240,7 +240,10 @@ export const compileToFiles = async ({
         const finalOutputDirPath = dirPath.replace(inputDirPath, outputPath);
 
         if (compileArgs.targetType === "ts") {
-          assert(typeof generatedSource.tsSource === "string");
+          if (generatedSource.tsSource === undefined) {
+            return [];
+          }
+
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${TS_EXT}`),
@@ -250,8 +253,13 @@ export const compileToFiles = async ({
         }
 
         if (compileArgs.targetType === "js") {
-          assert(typeof generatedSource.jsSource === "string");
-          assert(typeof generatedSource.tsTypes === "string");
+          if (
+            generatedSource.jsSource === undefined ||
+            generatedSource.tsTypes === undefined
+          ) {
+            return [];
+          }
+
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${JS_EXT}`),
