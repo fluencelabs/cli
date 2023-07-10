@@ -48,6 +48,7 @@ import {
   MODULE_CONFIG_FILE_NAME,
   MODULE_TYPE_RUST,
   SERVICE_CONFIG_FILE_NAME,
+  CLI_NAME,
 } from "../lib/const.js";
 import {
   getUrlOrAbsolutePath,
@@ -109,7 +110,7 @@ const resolveServiceInfos = async ({
   ) {
     commandObj.log(
       `No services to build. Use ${color.yellow(
-        "fluence service add"
+        `${CLI_NAME} service add`
       )} command to add services to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
     );
 

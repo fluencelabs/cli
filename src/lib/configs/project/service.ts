@@ -17,6 +17,7 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
+  CLI_NAME,
   FLUENCE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -75,7 +76,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${SERVICE_CONFIG_FILE_NAME}`,
   title: SERVICE_CONFIG_FILE_NAME,
-  description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use \`fluence service new\` command to generate a template for new service`,
+  description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use \`${CLI_NAME} service new\` command to generate a template for new service`,
   properties: {
     name: {
       type: "string",

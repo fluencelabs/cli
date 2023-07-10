@@ -33,6 +33,7 @@ import {
   CONFIG_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   AQUA_DIR_NAME,
+  CLI_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
@@ -238,8 +239,7 @@ const configSchemaV1Obj = {
   properties: {
     services: {
       title: "Services",
-      description:
-        "A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config",
+      description: `A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use \`${CLI_NAME} service add\` command to add a service to this config`,
       type: "object",
       additionalProperties: serviceSchema,
       properties: {
@@ -377,8 +377,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
   ...configSchemaV1Obj,
   $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FILE_NAME}`,
   title: FLUENCE_CONFIG_FILE_NAME,
-  description:
-    "Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use `fluence init` command to generate a template for new Fluence project",
+  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV1Obj.properties,
     version: { type: "number", const: 2 },
@@ -393,8 +392,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           type: "object",
           title: "npm dependencies",
           nullable: true,
-          description:
-            "A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua",
+          description: `A map of npm dependency versions. ${CLI_NAME} ensures dependencies are installed each time you run aqua`,
           additionalProperties: { type: "string" },
           properties: {
             npm_dependency_name: {
@@ -408,7 +406,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           type: "object",
           title: "Cargo dependencies",
           nullable: true,
-          description: `A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
+          description: `A map of cargo dependency versions. ${CLI_NAME} ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
           required: [],
           additionalProperties: { type: "string" },
           properties: {
@@ -503,8 +501,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     },
     cliVersion: {
       type: "string",
-      description:
-        "The version of the CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components",
+      description: `The version of the ${CLI_NAME} that is compatible with this project. Set this to enforce a particular set of versions of all fluence components`,
       nullable: true,
     },
   },

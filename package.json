@@ -1,18 +1,18 @@
 {
-  "name": "@fluencelabs/cli",
+  "name": "@fluencelabs/flox",
   "type": "module",
   "version": "0.5.3",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
-    "fluence": "bin/run.js"
+    "flox": "bin/run.js"
   },
-  "homepage": "https://github.com/fluencelabs/fluence-cli",
+  "homepage": "https://github.com/fluencelabs/flox",
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fluencelabs/fluence-cli.git"
+    "url": "git+https://github.com/fluencelabs/flox.git"
   },
   "files": [
     "/bin",
@@ -30,7 +30,7 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "pnpm before-build && pnpm build",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test": "shx rm -rf tmp && shx mkdir tmp && pnpm pack --pack-destination ./tmp && cd tmp && pnpm init && pnpm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
+    "test": "shx rm -rf tmp && shx mkdir tmp && pnpm pack --pack-destination ./tmp && cd tmp && pnpm init && pnpm i ./fluencelabs-flox-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
     "check": "pnpm before-build && pnpm build && pnpm lint-fix && pnpm prettier && pnpm circular",
     "circular": "madge --circular --extensions ts ./",
     "on-each-commit": "pnpm check && pnpm gen-config-docs && cd docs/commands && oclif readme --no-aliases",
@@ -110,7 +110,7 @@
     "typescript": "5.1.6"
   },
   "oclif": {
-    "bin": "fluence",
+    "bin": "flox",
     "dirname": "fluence",
     "commands": "./dist/commands",
     "topics": {
@@ -130,7 +130,7 @@
     "pnpm": ">=8"
   },
   "bugs": {
-    "url": "https://github.com/fluencelabs/fluence-cli/issues"
+    "url": "https://github.com/fluencelabs/flox/issues"
   },
   "keywords": [
     "oclif"

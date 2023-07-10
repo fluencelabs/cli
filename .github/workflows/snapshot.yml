@@ -1,4 +1,4 @@
-name: Build fluence-cli snapshot
+name: Build flox snapshot
 
 on:
   workflow_call:
@@ -33,7 +33,7 @@ on:
         default: "null"
     outputs:
       version:
-        description: "@fluencelabs/cli version"
+        description: "@fluencelabs/flox version"
         value: ${{ jobs.snapshot.outputs.version }}
 
 env:
@@ -46,17 +46,17 @@ jobs:
     runs-on: builder
 
     outputs:
-      version: ${{ fromJson(steps.snapshot.outputs.snapshots)['cli'] }}
+      version: ${{ fromJson(steps.snapshot.outputs.snapshots)['flox'] }}
 
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - name: Checkout fluence-cli
+      - name: Checkout flox
         uses: actions/checkout@v3
         with:
-          repository: fluencelabs/fluence-cli
+          repository: fluencelabs/flox
           ref: ${{ inputs.ref }}
 
       - name: Import secrets

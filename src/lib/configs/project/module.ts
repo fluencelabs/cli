@@ -23,6 +23,7 @@ import {
   MODULE_TYPE_COMPILED,
   MODULE_TYPE_RUST,
   TOP_LEVEL_SCHEMA_ID,
+  CLI_NAME,
 } from "../../const.js";
 import { ensureModuleAbsolutePath } from "../../helpers/downloadFile.js";
 import { ensureFluenceDir } from "../../paths.js";
@@ -120,8 +121,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FILE_NAME}`,
   title: MODULE_CONFIG_FILE_NAME,
-  description:
-    "Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use 'fluence module new' command to generate a template for new module",
+  description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`${CLI_NAME} module new\` command to generate a template for new module`,
   properties: {
     name: {
       type: "string",

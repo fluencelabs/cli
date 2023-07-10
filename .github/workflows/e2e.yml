@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  fluence-cli:
+  flox:
     if: >
       github.event_name == 'push' ||
       (
@@ -39,7 +39,8 @@ jobs:
 
   registry:
     needs:
-      - fluence-cli
-    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+      - flox
+    uses: fluencelabs/registry/.github/workflows/tests.yml@FLU-353
     with:
-      fluence-cli-version: "${{ needs.fluence-cli.outputs.version }}"
+      ref: FLU-353
+      flox-version: "${{ needs.flox.outputs.version }}"

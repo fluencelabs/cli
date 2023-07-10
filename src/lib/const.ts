@@ -30,6 +30,7 @@ import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
+export const CLI_NAME = "flox";
 export const NODE_JS_MAJOR_VERSION = 18;
 
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
@@ -59,10 +60,9 @@ export type ChainConfig = {
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
 export const WC_PROJECT_ID = "70c1c5ed2a23e7383313de1044ddce7e";
 export const WC_METADATA = {
-  name: "Fluence CLI",
-  description:
-    "Fluence CLI is designed to be the only tool that you need to manage the life cycle of applications written on Fluence.",
-  url: "https://github.com/fluencelabs/fluence-cli",
+  name: CLI_NAME,
+  description: `${CLI_NAME} is designed to be the only tool that you need to manage the life cycle of applications written on Fluence.`,
+  url: `https://github.com/fluencelabs/${CLI_NAME}`,
   icons: [],
 };
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
@@ -353,7 +353,7 @@ export const SEPARATOR = `\n\n${color.yellow(
 )}\n\n`;
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
--- example of running services deployed using 'fluence deal deploy'
+-- example of running services deployed using 'flox deal deploy'
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices
