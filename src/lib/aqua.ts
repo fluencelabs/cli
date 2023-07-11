@@ -222,7 +222,6 @@ export const compileToFiles = async ({
     `outputPath type is "${typeof outputPath}", but it should be of type "string", because it's not dry run`
   );
 
-  await rm(outputPath, { recursive: true, force: true });
   await mkdir(outputPath, { recursive: true });
 
   const inputDirPath = isInputPathADirectory
