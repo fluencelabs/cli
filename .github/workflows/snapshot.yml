@@ -60,7 +60,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.1
+        uses: hashicorp/vault-action@v2.7.2
         id: secrets
         with:
           url: https://vault.fluence.dev

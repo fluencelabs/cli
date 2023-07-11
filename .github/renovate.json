@@ -16,79 +16,28 @@
     {
       "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>aqua-lib)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+        "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
       ],
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>spell)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>registry)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.api)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>js-client.node)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"@fluencelabs/(?<depName>fluence-network-environment)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "npm"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"cargo\":\\s*\\{[^}]*\"(?<depName>marine)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+        "\"cargo\":\\s*\\{[^}]*\"(?<depName>[\\w.-]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],
       "datasourceTemplate": "crate"
+    }
+  ],
+  "packageRules": [
+    {
+      "paths": ["src/versions.json"],
+      "schedule": ["at any time"],
+      "prPriority": 5
     },
     {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"cargo\":\\s*\\{[^}]*\"(?<depName>mrepl)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "crate"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "crate"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"cargo\":\\s*\\{[^}]*\"(?<depName>marine-rs-sdk-test)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "crate"
-    },
-    {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"rust-toolchain\": \"(?<depName>nightly)-(?<currentValue>[^\"\n]+)-x86_64\""
-      ],
-      "datasourceTemplate": "rust-version"
+      "matchPackagePrefixes": ["@fluencelabs/"],
+      "schedule": ["at any time"],
+      "prPriority": 5
     }
   ]
 }
