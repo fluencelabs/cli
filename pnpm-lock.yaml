@@ -15,8 +15,8 @@ dependencies:
     specifier: 0.1.8
     version: 0.1.8(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.13)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.16.1)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.1.6)
   '@fluencelabs/fluence-network-environment':
-    specifier: 1.1.1
-    version: 1.1.1
+    specifier: 1.1.2
+    version: 1.1.2
   '@fluencelabs/js-client.api':
     specifier: 0.12.0
     version: 0.12.0
@@ -1115,8 +1115,8 @@ packages:
       - typescript
     dev: false
 
-  /@fluencelabs/fluence-network-environment@1.1.1:
-    resolution: {integrity: sha512-l1ERLJx0Y22bGqVt0GTMkbYWNtoS9XxO/gj5h9j844jMnJly7AdBZ84IY5xzQdLw+wZcpcpkM7i19u1zR8VI8w==}
+  /@fluencelabs/fluence-network-environment@1.1.2:
+    resolution: {integrity: sha512-1Bp2gBy3oMEILMynFpOIFK/q2Pj792xpnb3AJs5QcTQAaHz9V2nrEI8OOPwBAFTmjmLBirXBqQQX63O+ePH7yg==}
     dev: false
 
   /@fluencelabs/installation-spell@0.5.15:
