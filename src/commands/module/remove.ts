@@ -60,7 +60,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Remove)
+      await this.parse(Remove),
     );
 
     const serviceNameOrPath =
@@ -70,7 +70,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
           maybeFluenceConfig === null
             ? `Enter path to the service directory`
             : `Enter service name from ${color.yellow(
-                maybeFluenceConfig.$getPath()
+                maybeFluenceConfig.$getPath(),
               )} or path to the service directory`,
       }));
 
@@ -85,21 +85,21 @@ export default class Remove extends BaseCommand<typeof Remove> {
     if (isUrl(serviceOrServiceDirPathOrUrl)) {
       return commandObj.error(
         `Can't modify downloaded service ${color.yellow(
-          serviceOrServiceDirPathOrUrl
-        )}`
+          serviceOrServiceDirPathOrUrl,
+        )}`,
       );
     }
 
     const serviceConfig = await initServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      cwd()
+      cwd(),
     );
 
     if (serviceConfig === null) {
       return commandObj.error(
         `Can't find service config at ${color.yellow(
-          serviceOrServiceDirPathOrUrl
-        )}`
+          serviceOrServiceDirPathOrUrl,
+        )}`,
       );
     }
 
@@ -107,21 +107,21 @@ export default class Remove extends BaseCommand<typeof Remove> {
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
         message: `Enter module name from ${color.yellow(
-          serviceConfig.$getPath()
+          serviceConfig.$getPath(),
         )}, path to a module or url to .tar.gz archive`,
       }));
 
     if (nameOrPathOrUrl === FACADE_MODULE_NAME) {
       return commandObj.error(
         `Each service must have a facade module, if you want to change it either override it in ${color.yellow(
-          FLUENCE_CONFIG_FULL_FILE_NAME
-        )} or replace it manually in ${serviceConfig.$getPath()}`
+          FLUENCE_CONFIG_FULL_FILE_NAME,
+        )} or replace it manually in ${serviceConfig.$getPath()}`,
       );
     }
 
     const moduleNameToRemove = await getModuleNameToRemove(
       nameOrPathOrUrl,
-      serviceConfig
+      serviceConfig,
     );
 
     delete serviceConfig.modules[moduleNameToRemove];
@@ -129,15 +129,15 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     commandObj.log(
       `Removed module ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
-        serviceConfig.$getPath()
-      )}`
+        serviceConfig.$getPath(),
+      )}`,
     );
   }
 }
 
 const getModuleNameToRemove = async (
   nameOrPathOrUrl: string,
-  serviceConfig: ServiceConfigReadonly
+  serviceConfig: ServiceConfigReadonly,
 ): Promise<string> => {
   if (nameOrPathOrUrl in serviceConfig.modules) {
     return nameOrPathOrUrl;
@@ -149,12 +149,12 @@ const getModuleNameToRemove = async (
         name,
         await getModuleAbsolutePath(get, serviceConfig.$getDirPath()),
       ] as const;
-    })
+    }),
   );
 
   const absolutePathRelativeToService = await getModuleAbsolutePath(
     nameOrPathOrUrl,
-    serviceConfig.$getDirPath()
+    serviceConfig.$getDirPath(),
   );
 
   let [moduleNameToRemove] =
@@ -168,7 +168,7 @@ const getModuleNameToRemove = async (
 
   const absolutePathRelativeToCwd = await getModuleAbsolutePath(
     nameOrPathOrUrl,
-    cwd()
+    cwd(),
   );
 
   [moduleNameToRemove] =
@@ -182,7 +182,7 @@ const getModuleNameToRemove = async (
 
   return commandObj.error(
     `There is no module ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
-      serviceConfig.$getPath()
-    )}`
+      serviceConfig.$getPath(),
+    )}`,
   );
 };

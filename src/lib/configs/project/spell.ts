@@ -188,7 +188,7 @@ export const resolveEndSec = ({ clock }: LatestConfig): number => {
 
 const validate: ConfigValidateFunction<LatestConfig> = async (
   config,
-  configPath
+  configPath,
 ) => {
   return validateBatch(
     config.clock?.startTimestamp !== undefined &&
@@ -246,12 +246,12 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
       } catch {
         return `Aqua file '${config.aquaFilePath}' doesn't exist`;
       }
-    })()
+    })(),
   );
 };
 
 const getInitConfigOptions = (
-  configPath: string
+  configPath: string,
 ): InitConfigOptions<Config, LatestConfig> => {
   return {
     allSchemas: [configSchemaV0],
@@ -268,23 +268,23 @@ const getInitConfigOptions = (
 
 export const initSpellConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath: string
+  absolutePath: string,
 ): Promise<InitializedConfig<LatestConfig> | null> => {
   return getConfigInitFunction(
     getInitConfigOptions(
-      await ensureSpellAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
+      await ensureSpellAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
+    ),
   )();
 };
 
 export const initReadonlySpellConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath: string
+  absolutePath: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(
-      await ensureSpellAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
+      await ensureSpellAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
+    ),
   )();
 };
 
@@ -338,11 +338,11 @@ version: 0
 };
 
 export const initNewReadonlySpellConfig = (
-  configPath: string
+  configPath: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
-    getDefault
+    getDefault,
   )();
 };
 

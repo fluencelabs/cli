@@ -69,7 +69,7 @@ await mkdir(DOCS_CONFIGS_DIR_PATH, { recursive: true });
 await Promise.all(
   configsInfo.map(({ schemaPath, schema }): Promise<void> => {
     return writeFile(schemaPath, jsonStringify(schema), FS_OPTIONS);
-  })
+  }),
 );
 
 await Promise.all(
@@ -81,7 +81,7 @@ await Promise.all(
     });
 
     await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
-  })
+  }),
 );
 
 await writeFile(
@@ -91,8 +91,8 @@ await writeFile(
 ${configsInfo
   .map(({ fullFileName, schema, docFileName }): string => {
     return `## [${fullFileName}](./${docFileName})\n\n${String(
-      schema["description"]
+      schema["description"],
     )}`;
   })
-  .join("\n")}`
+  .join("\n")}`,
 );

@@ -59,7 +59,7 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(UPLOAD),
-      true
+      true,
     );
 
     await initFluenceClient(flags, fluenceConfig);

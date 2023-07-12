@@ -183,7 +183,7 @@ export const NETWORK_FLAG_NAME = "network";
 export const NETWORK_FLAG = {
   [NETWORK_FLAG_NAME]: Flags.string({
     description: `The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
-      ", "
+      ", ",
     )})`,
     helpValue: "<network>",
     default: DEFAULT_CHAIN_NETWORK,
@@ -310,7 +310,7 @@ export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
 export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
 
 export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
-  ", "
+  ", ",
 )}`;
 
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
@@ -356,11 +356,11 @@ export const fluenceCargoDependencies = [
 ] as const;
 
 export const isFluenceCargoDependency = getIsStringUnion(
-  fluenceCargoDependencies
+  fluenceCargoDependencies,
 );
 
 export const SEPARATOR = `\n\n${color.yellow(
-  `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`
+  `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
 )}\n\n`;
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
@@ -388,11 +388,11 @@ func runDeployedServices() -> *Answer:
     <- answers`;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
-  RUN_DEPLOYED_SERVICE_AQUA
+  RUN_DEPLOYED_SERVICE_AQUA,
 );
 
 export const getMainAquaFileContent = (
-  commentOutRunDeployedServicesAqua: boolean
+  commentOutRunDeployedServicesAqua: boolean,
 ) => {
   return `aqua Main
 

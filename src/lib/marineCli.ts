@@ -41,12 +41,12 @@ export type MarineCLI = {
       keyValuePairs?: Record<string, string>;
       cwd?: string;
       printOutput?: boolean;
-    } & MarineCliInput
+    } & MarineCliInput,
   ): Promise<string>;
 };
 
 export const initMarineCli = async (
-  maybeFluenceConfig: FluenceConfig | null
+  maybeFluenceConfig: FluenceConfig | null,
 ): Promise<MarineCLI> => {
   const marineCLIDirPath = await ensureCargoDependency({
     nameAndVersion: MARINE_CARGO_DEPENDENCY,

@@ -54,7 +54,7 @@ describe("integration tests", () => {
           throw new CLIError(msg);
         },
       } as CommandObj,
-      false
+      false,
     );
   });
 
@@ -85,7 +85,7 @@ describe("integration tests", () => {
           args: ["ts-node", getIndexJSorTSPath("ts", cwd)],
           printOutput: true,
         })
-      ).trim()
+      ).trim(),
     ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
@@ -102,7 +102,7 @@ describe("integration tests", () => {
           args: [getIndexJSorTSPath("js", cwd)],
           printOutput: true,
         })
-      ).trim()
+      ).trim(),
     ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
@@ -134,9 +134,9 @@ describe("integration tests", () => {
         join(cwd, "src", "aqua", "main.aqua"),
         await readFile(
           join("test", "aqua", "runDeployedWorkers.aqua"),
-          FS_OPTIONS
+          FS_OPTIONS,
         ),
-        FS_OPTIONS
+        FS_OPTIONS,
       );
 
       const pathToNewServiceDir = join("src", "services", "newService");
@@ -148,7 +148,7 @@ describe("integration tests", () => {
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
-        cwd
+        cwd,
       );
 
       assert(newServiceConfig !== null);
@@ -186,7 +186,7 @@ describe("integration tests", () => {
 
       assert(
         fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
       );
 
       fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["newService"];
@@ -220,7 +220,7 @@ describe("integration tests", () => {
       });
 
       expect(arrayOfResults).toEqual(expected);
-    }
+    },
   );
 
   maybeConcurrentTest(
@@ -232,7 +232,7 @@ describe("integration tests", () => {
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
-        cwd
+        cwd,
       );
 
       assert(newServiceConfig !== null);
@@ -258,7 +258,7 @@ describe("integration tests", () => {
 
       assert(
         fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
       );
 
       fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["myService"];
@@ -316,7 +316,7 @@ describe("integration tests", () => {
         .sort(sortPeers);
 
       expect(arrayOfResults).toEqual(expected);
-    }
+    },
   );
 });
 

@@ -16,7 +16,7 @@
 
 const flagToArg = (
   flagName: string,
-  flagValue: string | number | boolean | undefined
+  flagValue: string | number | boolean | undefined,
 ): string[] => {
   if (flagValue === undefined || flagValue === false) {
     return [];

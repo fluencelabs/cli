@@ -96,9 +96,9 @@ const validate = (config: LatestConfig): ValidationResult => {
       },
       (name): string => {
         return `There are multiple key-pairs with the same name ${color.yellow(
-          name
+          name,
         )}`;
-      }
+      },
     ),
     validateHasDefault(
       config.keyPairs,
@@ -106,8 +106,8 @@ const validate = (config: LatestConfig): ValidationResult => {
       ({ name }): string => {
         return name;
       },
-      `Default key-pair ${color.yellow(config.defaultKeyPairName)} not found`
-    )
+      `Default key-pair ${color.yellow(config.defaultKeyPairName)} not found`,
+    ),
   );
 };
 
@@ -127,10 +127,10 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initUserSecretsConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const initReadonlyUserSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const userSecretsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

@@ -146,7 +146,7 @@ export type UserConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   return validateBatch(
     validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
-    validateAllVersionsAreExact(config.dependencies?.cargo ?? {})
+    validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
 };
 
@@ -162,7 +162,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 export const initUserConfig = getConfigInitFunction(initConfigOptions);
 export const initNewUserConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);

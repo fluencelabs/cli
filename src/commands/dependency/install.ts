@@ -38,7 +38,7 @@ export default class Install extends BaseCommand<typeof Install> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Install)
+      await this.parse(Install),
     );
 
     await installAllNPMDependencies({

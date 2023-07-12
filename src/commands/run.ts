@@ -153,12 +153,12 @@ export default class Run extends BaseCommand<typeof Run> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Run)
+      await this.parse(Run),
     );
 
     if (typeof flags.input === "string") {
       setProjectRootDir(
-        await recursivelyFindProjectRootDir(resolve(dirname(flags.input)))
+        await recursivelyFindProjectRootDir(resolve(dirname(flags.input))),
       );
     }
 
@@ -190,7 +190,7 @@ export default class Run extends BaseCommand<typeof Run> {
       flags.func === undefined
         ? input({
             message: `Enter a function call that you want to execute. Example: ${color.yellow(
-              FUNC_CALL_EXAMPLE
+              FUNC_CALL_EXAMPLE,
             )}`,
             flagName: FUNC_FLAG_NAME,
           })
@@ -246,7 +246,7 @@ const ensureAquaPath = async ({
   if (typeof maybeFluenceConfig?.aquaInputPath === "string") {
     const aquaInputPath = resolve(
       projectRootDir,
-      maybeFluenceConfig.aquaInputPath
+      maybeFluenceConfig.aquaInputPath,
     );
 
     try {
@@ -255,8 +255,8 @@ const ensureAquaPath = async ({
     } catch {
       commandObj.warn(
         `Invalid ${color.yellow(
-          `${AQUA_INPUT_PATH_PROPERTY}: ${aquaInputPath}`
-        )} in ${color.yellow(maybeFluenceConfig.$getPath())}`
+          `${AQUA_INPUT_PATH_PROPERTY}: ${aquaInputPath}`,
+        )} in ${color.yellow(maybeFluenceConfig.$getPath())}`,
       );
     }
   }
@@ -289,7 +289,7 @@ const getRunData = async (flags: {
       data = await readFile(dataPath, FS_OPTIONS);
     } catch {
       commandObj.error(
-        `Can't read ${color.yellow(dataPath)}: No such file or directory`
+        `Can't read ${color.yellow(dataPath)}: No such file or directory`,
       );
     }
 
@@ -304,8 +304,8 @@ const getRunData = async (flags: {
     if (!validateRunData(parsedData)) {
       commandObj.error(
         `Invalid ${color.yellow(dataPath)}: ${JSON.stringify(
-          validateRunData.errors
-        )}`
+          validateRunData.errors,
+        )}`,
       );
     }
 
@@ -327,7 +327,9 @@ const getRunData = async (flags: {
 
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(validateRunData.errors)}`
+        `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(
+          validateRunData.errors,
+        )}`,
       );
     }
 
@@ -364,7 +366,7 @@ const resolveAquaLogLevel = async ({
   }
 
   commandObj.warn(
-    `Invalid --${LOG_LEVEL_COMPILER_FLAG_NAME} flag value: ${maybeAquaLogLevel}. Must be one of: ${aquaLogLevelsString}`
+    `Invalid --${LOG_LEVEL_COMPILER_FLAG_NAME} flag value: ${maybeAquaLogLevel}. Must be one of: ${aquaLogLevelsString}`,
   );
 
   return list({

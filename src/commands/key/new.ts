@@ -56,7 +56,7 @@ export default class New extends BaseCommand<typeof New> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(New)
+      await this.parse(New),
     );
 
     if (!flags.user && maybeFluenceConfig === null) {
@@ -67,7 +67,7 @@ export default class New extends BaseCommand<typeof New> {
     const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
-      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
+      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath(),
     );
 
     const enterKeyPairNameMessage = `Enter key-pair name to generate at ${secretsConfigPath}`;
@@ -79,14 +79,14 @@ export default class New extends BaseCommand<typeof New> {
       }));
 
     const validateKeyPairName = async (
-      keyPairName: string
+      keyPairName: string,
     ): Promise<true | string> => {
       return (
         (flags.user
           ? await getUserKeyPair(keyPairName)
           : await getProjectKeyPair(keyPairName)) === undefined ||
         `Key-pair with name ${color.yellow(
-          keyPairName
+          keyPairName,
         )} already exists at ${secretsConfigPath}. Please, choose another name.`
       );
     };
@@ -115,7 +115,7 @@ export default class New extends BaseCommand<typeof New> {
       (isInteractive
         ? await confirm({
             message: `Do you want to set ${color.yellow(
-              keyPairName
+              keyPairName,
             )} as default key-pair for ${secretsConfigPath}`,
           })
         : false)
@@ -133,8 +133,8 @@ export default class New extends BaseCommand<typeof New> {
 
     this.log(
       `Key-pair with name ${color.yellow(
-        keyPairName
-      )} successfully generated and saved to ${secretsConfigPath}`
+        keyPairName,
+      )} successfully generated and saved to ${secretsConfigPath}`,
     );
   }
 }

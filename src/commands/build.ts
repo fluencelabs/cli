@@ -34,7 +34,7 @@ export default class Build extends BaseCommand<typeof Build> {
     const { fluenceConfig } = await initCli(
       this,
       await this.parse(Build),
-      true
+      true,
     );
 
     const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);

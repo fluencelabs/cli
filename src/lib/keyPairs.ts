@@ -34,7 +34,7 @@ export const getKeyPair = async (keyPairName: string | undefined) => {
 };
 
 export const getUserKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair | undefined> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig();
 
@@ -42,7 +42,7 @@ export const getUserKeyPair = async (
     const defaultKeyPair = userSecretsConfig.keyPairs.find(
       ({ name }): boolean => {
         return name === userSecretsConfig.defaultKeyPairName;
-      }
+      },
     );
 
     assert(defaultKeyPair !== undefined);
@@ -57,7 +57,7 @@ export const getUserKeyPair = async (
 };
 
 const getExistingUserKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair> => {
   const keyPair = await getUserKeyPair(keyPairName);
 
@@ -85,7 +85,7 @@ const getExistingUserKeyPair = async (
         value,
         name: value.name,
       };
-    }
+    },
   );
 
   const userKeyPairOptions = userSecretsConfig.keyPairs.map(
@@ -94,20 +94,20 @@ const getExistingUserKeyPair = async (
         value,
         name: value.name,
       };
-    }
+    },
   );
 
   if (projectKeyPairOptions.length > 0) {
     options.push(
       new inquirer.Separator("Project key-pairs:"),
-      ...projectKeyPairOptions
+      ...projectKeyPairOptions,
     );
   }
 
   if (userKeyPairOptions.length > 0) {
     options.push(
       new inquirer.Separator("User key-pairs:"),
-      ...userKeyPairOptions
+      ...userKeyPairOptions,
     );
   }
 
@@ -119,14 +119,14 @@ const getExistingUserKeyPair = async (
     },
     onNoChoices: (): never => {
       return commandObj.error(
-        "There are no other key-pairs. You need a key-pair to continue"
+        "There are no other key-pairs. You need a key-pair to continue",
       );
     },
   });
 };
 
 export const getProjectKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair | undefined> => {
   const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
 
@@ -142,7 +142,7 @@ export const getProjectKeyPair = async (
 };
 
 export const getExistingKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair> => {
   return (
     (await getProjectKeyPair(keyPairName)) ??

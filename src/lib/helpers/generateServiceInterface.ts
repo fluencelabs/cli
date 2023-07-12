@@ -42,7 +42,7 @@ export const generateAquaInterfaceForService = async ({
 
   assert(
     interfaceDeclaration !== undefined,
-    `Failed to generate service interface for ${pathToFacadeWasm}`
+    `Failed to generate service interface for ${pathToFacadeWasm}`,
   );
 
   const declarations = interfaceDeclaration.split(SERVICE);
@@ -50,7 +50,7 @@ export const generateAquaInterfaceForService = async ({
 
   if (serviceName === undefined || rest.length === 0) {
     throw new Error(
-      `Failed to generate service interface for ${pathToFacadeWasm}`
+      `Failed to generate service interface for ${pathToFacadeWasm}`,
     );
   }
 

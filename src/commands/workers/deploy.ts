@@ -66,7 +66,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(Deploy),
-      true
+      true,
     );
 
     const workersConfig = await initNewWorkersConfig();
@@ -120,12 +120,12 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
                     hostId: host_id,
                     workerId: worker_id,
                   };
-                }
+                },
               ),
             },
           };
         },
-        { newDeployedWorkers: {}, infoToPrint: {} }
+        { newDeployedWorkers: {}, infoToPrint: {} },
       );
 
     workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
@@ -136,8 +136,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       `\n\n${color.yellow("Success!")}\n\nrelay: ${relayId}\n\n${yamlDiffPatch(
         "",
         {},
-        { "deployed workers": infoToPrint }
-      )}`
+        { "deployed workers": infoToPrint },
+      )}`,
     );
   }
 }

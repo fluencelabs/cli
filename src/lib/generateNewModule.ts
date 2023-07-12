@@ -27,7 +27,7 @@ import {
 } from "./const.js";
 
 export const generateNewModule = async (
-  pathToModuleDir: string
+  pathToModuleDir: string,
 ): Promise<void> => {
   await mkdir(pathToModuleDir, { recursive: true });
   const name = path.basename(pathToModuleDir);
@@ -37,13 +37,13 @@ export const generateNewModule = async (
   await writeFile(
     path.join(newModuleSrcDirPath, "main.rs"),
     MAIN_RS_CONTENT,
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
   await writeFile(
     path.join(pathToModuleDir, "Cargo.toml"),
     getCargoTomlContent(name),
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
   await initNewReadonlyModuleConfig(pathToModuleDir, name);

@@ -497,10 +497,10 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       type: "array",
       description: `A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in ${FLUENCE_CONFIG_FULL_FILE_NAME}, project's ${join(
         DOT_FLUENCE_DIR_NAME,
-        AQUA_DIR_NAME
+        AQUA_DIR_NAME,
       )} dir, npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}, npm dependencies from user's ${join(
         DOT_FLUENCE_DIR_NAME,
-        GLOBAL_CONFIG_FULL_FILE_NAME
+        GLOBAL_CONFIG_FULL_FILE_NAME,
       )}, npm dependencies recommended by fluence`,
       items: { type: "string" },
       nullable: true,
@@ -519,7 +519,7 @@ const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
 
     assert(
       firstRelay !== undefined,
-      `relays array is empty in ${FLUENCE_CONFIG_FULL_FILE_NAME}`
+      `relays array is empty in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
     );
 
     return getPeerId(firstRelay);
@@ -680,7 +680,7 @@ version: 2
 # # 4. npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
 # # 5. npm dependencies from user's ${join(
     DOT_FLUENCE_DIR_NAME,
-    GLOBAL_CONFIG_FULL_FILE_NAME
+    GLOBAL_CONFIG_FULL_FILE_NAME,
   )}
 # # 6. npm dependencies recommended by fluence
 # aquaImports:
@@ -755,8 +755,8 @@ const migrations: Migrations<Config> = [
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
         `Migration error. Errors: ${jsonStringify(
-          validateConfigSchemaV0.errors
-        )}`
+          validateConfigSchemaV0.errors,
+        )}`,
       );
     }
 
@@ -767,7 +767,7 @@ const migrations: Migrations<Config> = [
           [name]: {
             get: path.relative(
               projectRootDir,
-              path.join(projectRootDir, "artifacts", name)
+              path.join(projectRootDir, "artifacts", name),
             ),
             deploy: [
               { deployId: `default_${i}`, ...(count > 1 ? { count } : {}) },
@@ -775,7 +775,7 @@ const migrations: Migrations<Config> = [
           },
         };
       },
-      {}
+      {},
     );
 
     return {
@@ -787,8 +787,8 @@ const migrations: Migrations<Config> = [
     if (!validateConfigSchemaV1(config)) {
       throw new Error(
         `Migration error. Errors: ${jsonStringify(
-          validateConfigSchemaV1.errors
-        )}`
+          validateConfigSchemaV1.errors,
+        )}`,
       );
     }
 
@@ -809,7 +809,7 @@ export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const checkDuplicatesAndPresence = (
   fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">,
-  servicesOrSpells: "services" | "spells"
+  servicesOrSpells: "services" | "spells",
 ) => {
   if (fluenceConfig.workers === undefined) {
     return true;
@@ -819,8 +819,8 @@ const checkDuplicatesAndPresence = (
     Object.keys(fluenceConfig[servicesOrSpells] ?? {}).flatMap(
       (serviceOrSpellName) => {
         return serviceOrSpellName;
-      }
-    )
+      },
+    ),
   );
 
   return Object.entries(fluenceConfig.workers).reduce<string | true>(
@@ -831,7 +831,7 @@ const checkDuplicatesAndPresence = (
       const notListedInFluenceYAML = workerServicesOrSpells.filter(
         (serviceName) => {
           return !servicesOrSpellsSet.has(serviceName);
-        }
+        },
       );
 
       const maybePreviousError = typeof acc === "string" ? acc : null;
@@ -839,22 +839,22 @@ const checkDuplicatesAndPresence = (
       const maybeNotListedError =
         notListedInFluenceYAML.length !== 0
           ? `Worker ${color.yellow(
-              workerName
+              workerName,
             )} has ${servicesOrSpells} that are not listed in ${color.yellow(
-              "services"
+              "services",
             )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
-              [...new Set(notListedInFluenceYAML)].join(", ")
+              [...new Set(notListedInFluenceYAML)].join(", "),
             )}`
           : null;
 
       const maybeHasDuplicatesError =
         workerServicesOrSpellsSet.size !== workerServicesOrSpells.length
           ? `Worker ${color.yellow(
-              workerName
+              workerName,
             )} has duplicated ${servicesOrSpells} in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
               workerServicesOrSpells.filter((serviceName, index) => {
                 return workerServicesOrSpells.indexOf(serviceName) !== index;
-              })
+              }),
             )}`
           : null;
 
@@ -868,22 +868,22 @@ const checkDuplicatesAndPresence = (
 
       return errors.length === 0 ? true : errors.join("\n");
     },
-    true
+    true,
   );
 };
 
 const validateWorkers = (
-  fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">
+  fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">,
 ) => {
   return validateBatch(
     checkDuplicatesAndPresence(fluenceConfig, "services"),
-    checkDuplicatesAndPresence(fluenceConfig, "spells")
+    checkDuplicatesAndPresence(fluenceConfig, "spells"),
   );
 };
 
 const validateHostsAndDeals = (
   fluenceConfig: Pick<FluenceConfig, "hosts" | "deals" | "workers">,
-  hostsOrDealsProperty: "hosts" | "deals"
+  hostsOrDealsProperty: "hosts" | "deals",
 ) => {
   const hostsOrDeals = fluenceConfig[hostsOrDealsProperty];
 
@@ -896,7 +896,7 @@ const validateHostsAndDeals = (
   const workersSet = new Set(
     Object.keys(workers ?? {}).flatMap((serviceName) => {
       return serviceName;
-    })
+    }),
   );
 
   const workerNamesErrors = Object.keys(hostsOrDeals)
@@ -904,9 +904,9 @@ const validateHostsAndDeals = (
       return workersSet.has(workerName)
         ? null
         : `Worker named ${color.yellow(workerName)} listed in ${color.yellow(
-            hostsOrDealsProperty
+            hostsOrDealsProperty,
           )} property must be listed in ${color.yellow(
-            "workers"
+            "workers",
           )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
     })
     .filter((error): error is string => {
@@ -926,7 +926,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     validateHostsAndDeals(config, "hosts"),
     validateHostsAndDeals(config, "deals"),
     validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
-    validateAllVersionsAreExact(config.dependencies?.cargo ?? {})
+    validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
 
   if (typeof validity === "string") {
@@ -961,7 +961,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     return `Deploy ids must be unique. Not unique deploy ids found:\n${notUnique
       .map(({ serviceName, notUniqueDeployIds }): string => {
         return `${color.yellow(serviceName)}: ${[...notUniqueDeployIds].join(
-          ", "
+          ", ",
         )}`;
       })
       .join("\n")}`;
@@ -981,7 +981,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 };
 
 export const initFluenceConfigWithPath = async (
-  path: string
+  path: string,
 ): Promise<InitializedConfig<ConfigV2> | null> => {
   return getConfigInitFunction({
     ...initConfigOptions,
@@ -993,7 +993,7 @@ export const initFluenceConfigWithPath = async (
 
 export const initNewFluenceConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =

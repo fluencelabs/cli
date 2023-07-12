@@ -52,7 +52,7 @@ const ensureRust = async (): Promise<void> => {
   if (!(await isRustInstalled())) {
     if (commandObj.config.windows) {
       commandObj.error(
-        "Rust needs to be installed. Please visit https://www.rust-lang.org/tools/install for installation instructions"
+        "Rust needs to be installed. Please visit https://www.rust-lang.org/tools/install for installation instructions",
       );
     }
 
@@ -81,14 +81,14 @@ const ensureRust = async (): Promise<void> => {
     if (!(await isRustInstalled())) {
       commandObj.error(
         `Installed rust without errors but ${color.yellow(
-          RUSTUP
+          RUSTUP,
         )} or ${color.yellow(
-          CARGO
+          CARGO,
         )} not in PATH. Try restarting your terminal, check if ${color.yellow(
-          RUSTUP
+          RUSTUP,
         )} and ${color.yellow(
-          CARGO
-        )} are installed and if they are - run the command again`
+          CARGO,
+        )} are installed and if they are - run the command again`,
       );
     }
   }
@@ -98,7 +98,7 @@ const ensureRust = async (): Promise<void> => {
       command: RUSTUP,
       args: ["install", versions["rust-toolchain"]],
       spinnerMessage: `Installing ${color.yellow(
-        versions["rust-toolchain"]
+        versions["rust-toolchain"],
       )} rust toolchain`,
       printOutput: true,
     });
@@ -106,8 +106,8 @@ const ensureRust = async (): Promise<void> => {
     if (!(await hasRequiredRustToolchain())) {
       commandObj.error(
         `Not able to install ${color.yellow(
-          versions["rust-toolchain"]
-        )} rust toolchain`
+          versions["rust-toolchain"],
+        )} rust toolchain`,
       );
     }
   }
@@ -117,7 +117,7 @@ const ensureRust = async (): Promise<void> => {
       command: RUSTUP,
       args: ["target", "add", RUST_WASM32_WASI_TARGET],
       spinnerMessage: `Adding ${color.yellow(
-        RUST_WASM32_WASI_TARGET
+        RUST_WASM32_WASI_TARGET,
       )} rust target`,
       printOutput: true,
     });
@@ -125,8 +125,8 @@ const ensureRust = async (): Promise<void> => {
     if (!(await hasRequiredRustTarget())) {
       commandObj.error(
         `Not able to install ${color.yellow(
-          RUST_WASM32_WASI_TARGET
-        )} rust target`
+          RUST_WASM32_WASI_TARGET,
+        )} rust target`,
       );
     }
   }
@@ -152,7 +152,7 @@ const isRustInstalled = async (): Promise<boolean> => {
 
 const regExpRecommendedToolchain = new RegExp(
   `^${versions["rust-toolchain"]}.*\\(override\\)$`,
-  "gm"
+  "gm",
 );
 
 const hasRequiredRustToolchain = async (): Promise<boolean> => {
@@ -162,7 +162,7 @@ const hasRequiredRustToolchain = async (): Promise<boolean> => {
   });
 
   const hasRequiredRustToolchain = toolChainList.includes(
-    versions["rust-toolchain"]
+    versions["rust-toolchain"],
   );
 
   if (
@@ -188,7 +188,7 @@ const hasRequiredRustTarget = async (): Promise<boolean> => {
 };
 
 const getLatestVersionOfCargoDependency = async (
-  name: string
+  name: string,
 ): Promise<string> => {
   return (
     (
@@ -199,8 +199,8 @@ const getLatestVersionOfCargoDependency = async (
     ).split('"')[1] ??
     commandObj.error(
       `Not able to find the latest version of ${color.yellow(
-        name
-      )}. Please make sure ${color.yellow(name)} is spelled correctly`
+        name,
+      )}. Please make sure ${color.yellow(name)} is spelled correctly`,
     )
   ).trim();
 };
@@ -232,7 +232,7 @@ const installCargoDependency = async ({
       root: dependencyTmpDirPath,
     },
     spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
-      dependencyDirPath
+      dependencyDirPath,
     )}`,
     printOutput: true,
   });
@@ -287,8 +287,8 @@ const tryDownloadingBinary = async ({
 
   startSpinner(
     `Downloading ${name}@${version} binary to ${replaceHomeDir(
-      dependencyDirPath
-    )}`
+      dependencyDirPath,
+    )}`,
   );
 
   try {
@@ -382,7 +382,7 @@ export const ensureCargoDependency = async ({
 
   if (typeof maybeErrorMessage === "string") {
     commandObj.warn(
-      `Using cargo to install ${name}@${version} instead of using downloaded pre-built binary. Reason: ${maybeErrorMessage}`
+      `Using cargo to install ${name}@${version} instead of using downloaded pre-built binary. Reason: ${maybeErrorMessage}`,
     );
 
     await handleInstallation({
@@ -427,7 +427,7 @@ export const installAllCargoDependencies = async ({
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
-    await resolveDependencies("cargo", maybeFluenceConfig)
+    await resolveDependencies("cargo", maybeFluenceConfig),
   )) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable

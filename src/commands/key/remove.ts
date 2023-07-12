@@ -53,7 +53,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Remove)
+      await this.parse(Remove),
     );
 
     if (!flags.user && maybeFluenceConfig === null) {
@@ -64,13 +64,13 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
-      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
+      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath(),
     );
 
     let keyPairName = args.name;
 
     const validateKeyPairName = async (
-      keyPairName: string | undefined
+      keyPairName: string | undefined,
     ): Promise<true | string> => {
       if (keyPairName === undefined) {
         return "Key-pair name must be selected";
@@ -81,14 +81,14 @@ export default class Remove extends BaseCommand<typeof Remove> {
           ? await getUserKeyPair(keyPairName)
           : await getProjectKeyPair(keyPairName)) !== undefined ||
         `Key-pair with name ${color.yellow(
-          keyPairName
+          keyPairName,
         )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
       );
     };
 
     if (flags.user && userSecretsConfig.keyPairs.length === 1) {
       return commandObj.error(
-        `There is only one key-pair in ${secretsConfigPath} and it can't be removed, because having at least one user's key-pair is required.`
+        `There is only one key-pair in ${secretsConfigPath} and it can't be removed, because having at least one user's key-pair is required.`,
       );
     }
 
@@ -104,7 +104,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
         },
         onNoChoices: (): never => {
           return commandObj.error(
-            `There are no key-pairs to remove at ${secretsConfigPath}`
+            `There are no key-pairs to remove at ${secretsConfigPath}`,
           );
         },
         options: (flags.user
@@ -122,7 +122,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       userSecretsConfig.keyPairs = userSecretsConfig.keyPairs.filter(
         ({ name }): boolean => {
           return name !== keyPairName;
-        }
+        },
       );
 
       if (keyPairName === userSecretsConfig.defaultKeyPairName) {
@@ -131,12 +131,12 @@ export default class Remove extends BaseCommand<typeof Remove> {
             message: `Select new default key-pair name for user's secrets`,
             oneChoiceMessage: (choice: string): string => {
               return `Do you want to set ${color.yellow(
-                choice
+                choice,
               )} as default key-pair?`;
             },
             onNoChoices: (): never => {
               commandObj.error(
-                "There are no key-pairs to set as default for user's secrets"
+                "There are no key-pairs to set as default for user's secrets",
               );
             },
             options: userSecretsConfig.keyPairs.map((value): string => {
@@ -163,7 +163,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       projectSecretsConfig.keyPairs = projectSecretsConfig.keyPairs.filter(
         ({ name }): boolean => {
           return name !== keyPairName;
-        }
+        },
       );
 
       if (projectSecretsConfig.keyPairs.length === 0) {
@@ -174,12 +174,12 @@ export default class Remove extends BaseCommand<typeof Remove> {
             message: `Select new default key-pair name for project's secrets`,
             oneChoiceMessage: (choice: string): string => {
               return `Do you want to set ${color.yellow(
-                choice
+                choice,
               )} as default key-pair?`;
             },
             onNoChoices: (): never => {
               commandObj.error(
-                "There are no key-pairs to set as default for project's secrets"
+                "There are no key-pairs to set as default for project's secrets",
               );
             },
             options: projectSecretsConfig.keyPairs.map((value): string => {
@@ -207,8 +207,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     this.log(
       `Key-pair with name ${color.yellow(
-        keyPairName
-      )} successfully removed from ${secretsConfigPath}`
+        keyPairName,
+      )} successfully removed from ${secretsConfigPath}`,
     );
   }
 }

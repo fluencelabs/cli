@@ -75,7 +75,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig, args } = await initCli(
       this,
-      await this.parse(Logs)
+      await this.parse(Logs),
     );
 
     await initFluenceClient(flags, maybeFluenceConfig);
@@ -96,8 +96,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${stringifyUnknown(
-          e
-        )}`
+          e,
+        )}`,
       );
     }
 
@@ -105,12 +105,12 @@ export default class Logs extends BaseCommand<typeof Logs> {
       logs
         .map(({ host_id, logs, spell_id, worker_name }) => {
           return `${color.yellow(
-            worker_name
+            worker_name,
           )} (host_id: ${host_id}, spell_id: ${spell_id}):\n\n${logs.join(
-            "\n"
+            "\n",
           )}`;
         })
-        .join("\n\n")
+        .join("\n\n"),
     );
   }
 }
@@ -156,8 +156,8 @@ const getLogsArg = async ({
   if (maybeWorkersConfig === null) {
     return commandObj.error(
       `Wasn't able to find ${color.yellow(
-        WORKERS_CONFIG_FULL_FILE_NAME
-      )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`
+        WORKERS_CONFIG_FULL_FILE_NAME,
+      )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`,
     );
   }
 
@@ -167,8 +167,8 @@ const getLogsArg = async ({
     workersConfig.hosts ??
     commandObj.error(
       `No deployed workers found in ${color.yellow(
-        "hosts"
-      )} property in ${color.yellow(workersConfig.$getPath())} file`
+        "hosts",
+      )} property in ${color.yellow(workersConfig.$getPath())} file`,
     );
 
   const workerNamesSet = Object.keys(hosts);
@@ -181,7 +181,7 @@ const getLogsArg = async ({
   const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
     (workerName) => {
       return !workerNamesSet.includes(workerName);
-    }
+    },
   );
 
   if (workerNamesNotFoundInWorkersConfig.length !== 0) {
@@ -191,8 +191,8 @@ const getLogsArg = async ({
           return color.yellow(workerName);
         })
         .join(", ")} in ${color.yellow(
-        workersConfig.$getPath()
-      )} please check the spelling and try again`
+        workersConfig.$getPath(),
+      )} please check the spelling and try again`,
     );
   }
 
