@@ -21,6 +21,7 @@ import type { JSONSchemaType } from "ajv";
 
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
+  CLI_NAME,
   SPELL_CONFIG_FILE_NAME,
   SPELL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -142,7 +143,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${SPELL_CONFIG_FULL_FILE_NAME}`,
   title: SPELL_CONFIG_FULL_FILE_NAME,
-  description: `Defines a spell. You can use \`fluence spell new\` command to generate a template for new spell`,
+  description: `Defines a spell. You can use \`${CLI_NAME} spell new\` command to generate a template for new spell`,
   properties: spellProperties,
   required: ["version", "function", "aquaFilePath"],
 };

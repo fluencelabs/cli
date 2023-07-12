@@ -20,6 +20,7 @@ import type { JSONSchemaType } from "ajv";
 
 import {
   AUTO_GENERATED,
+  CLI_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
@@ -53,8 +54,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${USER_SECRETS_CONFIG_FULL_FILE_NAME}`,
   title: USER_SECRETS_CONFIG_FULL_FILE_NAME,
-  description:
-    "Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `fluence key` group of commands with `--user` flag",
+  description: `Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from \`${CLI_NAME} key\` group of commands with \`--user\` flag`,
   properties: {
     defaultKeyPairName: { type: "string" },
     keyPairs: {

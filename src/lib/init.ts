@@ -42,6 +42,7 @@ import {
   JS_CLIENT_NODE_NPM_DEPENDENCY,
   JS_CLIENT_API_NPM_DEPENDENCY,
   FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
+  CLI_NAME,
   getMainAquaFileContent,
 } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
@@ -215,7 +216,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
 
   commandObj.log(
     color.magentaBright(
-      `\nSuccessfully initialized Fluence project template at ${replaceHomeDir(
+      `\nSuccessfully initialized ${CLI_NAME} project template at ${replaceHomeDir(
         projectPath
       )}\n`
     )
@@ -258,6 +259,7 @@ const initTSorJSProject = async ({
         SRC_DIR_NAME,
         indexFileName
       )}`,
+      ...(isJS ? {} : { build: "tsc -b" }),
     },
     keywords: ["fluence"],
     author: "",
@@ -300,6 +302,7 @@ const initTSorJSProject = async ({
         strict: true,
         skipLibCheck: true,
         moduleResolution: "nodenext",
+        outDir: "dist",
       },
       "ts-node": {
         esm: true,
@@ -307,8 +310,8 @@ const initTSorJSProject = async ({
     };
 
     await writeFile(
-      join(defaultTSorJSDirPath, SRC_DIR_NAME, TS_CONFIG_FILE_NAME),
-      JSON.stringify(TS_CONFIG),
+      join(defaultTSorJSDirPath, TS_CONFIG_FILE_NAME),
+      jsonStringify(TS_CONFIG),
       FS_OPTIONS
     );
 

@@ -15,10 +15,15 @@ on:
         description: "Whether to run tests in parallel or synchronously"
         type: string
         default: "true"
-      rust-peer-image:
-        description: "rust-peer image tag"
+      nox-image:
+        description: "nox image tag"
         type: string
         default: "fluencelabs/nox:unstable_minimal"
+      deal-aurora-image:
+        description: "deal-aurora image tag"
+        type: string
+        # default: "docker.fluence.dev/deal-aurora:latest"
+        default: "docker.fluence.dev/aurora:main-9e7523f-4-1"
       marine-version:
         description: "marine version"
         type: string
@@ -43,11 +48,16 @@ on:
         description: "aqua snapshots"
         type: string
         default: "null"
+      deal-aurora-version:
+        description: "deal-aurora version"
+        type: string
+        default: "null"
 
 env:
   CI: true
   FORCE_COLOR: true
-  RUST_PEER_IMAGE: "${{ inputs.rust-peer-image }}"
+  NOX_IMAGE: "${{ inputs.nox-image }}"
+  DEAL_AURORA_IMAGE: "${{ inputs.deal-aurora-image }}"
 
 jobs:
   tests:
@@ -63,14 +73,14 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout fluence-cli
+      - name: Checkout flox
         uses: actions/checkout@v3
         with:
-          repository: fluencelabs/fluence-cli
+          repository: fluencelabs/flox
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.1
+        uses: hashicorp/vault-action@v2.7.2
         id: secrets
         with:
           url: https://vault.fluence.dev
@@ -93,10 +103,10 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Pull rust-peer image
-        run: docker pull ${{ env.RUST_PEER_IMAGE }}
+      - name: Pull nox image
+        run: docker pull ${{ env.NOX_IMAGE }}
 
-      - name: Run rust-peer
+      - name: Run nox network
         uses: isbang/compose-action@v1.4.1
         with:
           compose-file: ".github/e2e/docker-compose.yml"
@@ -143,6 +153,14 @@ jobs:
           version: "${{ fromJson(inputs.aqua-snapshots)['api'] }}"
           package-manager: pnpm
 
+      - name: Set deal-aurora version
+        if: inputs.deal-aurora-version != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/deal-aurora"
+          version: "${{ inputs.deal-aurora-version }}"
+          package-manager: pnpm
+
       - name: Update versions.json
         uses: ./.github/actions/replace-version
         with:
@@ -174,6 +192,6 @@ jobs:
         if: always()
         run: rm -rf tmp ~/.fluence
 
-      - name: Dump rust-peer logs
+      - name: Dump nox logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
