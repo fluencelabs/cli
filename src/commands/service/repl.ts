@@ -34,7 +34,7 @@ import {
 } from "../../lib/configs/project/service.js";
 import {
   BIN_DIR_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
@@ -69,7 +69,7 @@ export default class REPL extends Command {
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
-      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
+      description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME}, path to a service or url to .tar.gz archive`,
     }),
   };
   async run(): Promise<void> {
@@ -81,9 +81,12 @@ export default class REPL extends Command {
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
-        message: `Enter service name from ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )}, path to a service or url to .tar.gz archive`,
+        message:
+          maybeFluenceConfig === null
+            ? `Enter path to a service or url to .tar.gz archive`
+            : `Enter service name from ${color.yellow(
+                maybeFluenceConfig.$getPath()
+              )}, path to a service or url to .tar.gz archive`,
       }));
 
     const serviceConfig = await ensureServiceConfig(nameOrPathOrUrl);

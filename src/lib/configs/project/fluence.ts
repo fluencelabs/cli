@@ -20,19 +20,26 @@ import path, { join } from "node:path";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
+import { parse } from "yaml";
 
+import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
+import versions from "../../../versions.json" assert { type: "json" };
 import { ajv } from "../../ajvInstance.js";
 import {
+  DEFAULT_CHAIN_NETWORK,
+  AUTO_GENERATED,
   type ChainNetwork,
   CHAIN_NETWORKS,
   DEFAULT_WORKER_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
-  PROJECT_SECRETS_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-  USER_SECRETS_CONFIG_FILE_NAME,
-  CONFIG_FILE_NAME,
+  USER_SECRETS_CONFIG_FULL_FILE_NAME,
+  GLOBAL_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   AQUA_DIR_NAME,
+  MARINE_CARGO_DEPENDENCY,
+  FLUENCE_CONFIG_FILE_NAME,
   CLI_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
@@ -72,7 +79,6 @@ import {
   type OverridableSpellProperties,
   overridableSpellProperties,
 } from "./spell.js";
-
 export const MIN_WORKERS = 1;
 export const TARGET_WORKERS = 3;
 
@@ -131,11 +137,11 @@ const keyPairName = {
   type: "string",
   nullable: true,
   description: `The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
-1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FILE_NAME}
-1. "defaultKeyPairName" property from ${PROJECT_SECRETS_CONFIG_FILE_NAME}
-1. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FILE_NAME}
-1. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FILE_NAME}
-1. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FILE_NAME}`,
+1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FULL_FILE_NAME}
+1. "defaultKeyPairName" property from ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+1. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+1. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+1. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
 } as const;
 
 const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
@@ -196,7 +202,7 @@ const serviceSchema: JSONSchemaType<ServiceV1> = {
           peerId: {
             type: "string",
             nullable: true,
-            description: `Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of ${FLUENCE_CONFIG_FILE_NAME} are selected for each deploy. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
+            description: `Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of ${FLUENCE_CONFIG_FULL_FILE_NAME} are selected for each deploy. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FULL_FILE_NAME})`,
           },
           peerIds: {
             type: "array",
@@ -205,7 +211,7 @@ const serviceSchema: JSONSchemaType<ServiceV1> = {
             },
             nullable: true,
             title: "Peer ids",
-            description: `Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FILE_NAME})`,
+            description: `Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FULL_FILE_NAME})`,
           },
           overrideModules: {
             type: "object",
@@ -346,13 +352,13 @@ const workerConfigSchema: JSONSchemaType<Worker> = {
   description: "Worker config",
   properties: {
     services: {
-      description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
+      description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
       type: "array",
       items: { type: "string" },
       nullable: true,
     },
     spells: {
-      description: `An array of spell names to include in this worker. Spell names must be listed in ${FLUENCE_CONFIG_FILE_NAME}`,
+      description: `An array of spell names to include in this worker. Spell names must be listed in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
       type: "array",
       items: { type: "string" },
       nullable: true,
@@ -375,8 +381,8 @@ const hostConfigSchema: JSONSchemaType<Host> = {
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
   ...configSchemaV1Obj,
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FILE_NAME}`,
-  title: FLUENCE_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FULL_FILE_NAME,
   description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV1Obj.properties,
@@ -489,12 +495,12 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     },
     aquaImports: {
       type: "array",
-      description: `A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in ${FLUENCE_CONFIG_FILE_NAME}, project's ${join(
+      description: `A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in ${FLUENCE_CONFIG_FULL_FILE_NAME}, project's ${join(
         DOT_FLUENCE_DIR_NAME,
         AQUA_DIR_NAME
-      )} dir, npm dependencies from ${FLUENCE_CONFIG_FILE_NAME}, npm dependencies from user's ${join(
+      )} dir, npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}, npm dependencies from user's ${join(
         DOT_FLUENCE_DIR_NAME,
-        CONFIG_FILE_NAME
+        GLOBAL_CONFIG_FULL_FILE_NAME
       )}, npm dependencies recommended by fluence`,
       items: { type: "string" },
       nullable: true,
@@ -513,7 +519,7 @@ const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
 
     assert(
       firstRelay !== undefined,
-      `relays array is empty in ${FLUENCE_CONFIG_FILE_NAME}`
+      `relays array is empty in ${FLUENCE_CONFIG_FULL_FILE_NAME}`
     );
 
     return getPeerId(firstRelay);
@@ -537,39 +543,212 @@ const DEFAULT_RELAYS_FOR_TEMPLATE: Relays =
     ? localMultiaddrs
     : process.env[FLUENCE_ENV];
 
-const initFluenceProject = async (): Promise<ConfigV2> => {
-  return {
-    version: 2,
-    [AQUA_INPUT_PATH_PROPERTY]: path.relative(
-      projectRootDir,
-      await ensureSrcAquaMainPath()
-    ),
-    workers: {
-      [DEFAULT_WORKER_NAME]: {
-        services: [],
-      },
-    },
-    deals: {
-      [DEFAULT_WORKER_NAME]: {
-        minWorkers: MIN_WORKERS,
-        targetWorkers: TARGET_WORKERS,
-      },
-    },
-    hosts: {
-      [DEFAULT_WORKER_NAME]: {
-        peerIds: [getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)],
-      },
-    },
-    relays: DEFAULT_RELAYS_FOR_TEMPLATE,
-  };
+const getConfigOrConfigDirPath = () => {
+  return projectRootDir;
 };
 
-const getDefault = (): Promise<LatestConfig> => {
-  return initFluenceProject();
+const getDefaultConfig = async (): Promise<string> => {
+  return `# Defines Fluence Project
+# Most importantly - what exactly you want to deploy and how
+# You can use \`fluence init\` command to generate a template for new Fluence project
+
+# A map with worker names as keys and worker configs as values
+workers:
+  ${DEFAULT_WORKER_NAME}: # worker name
+    services: [] # list of service names to be deployed to this worker
+    spells: [] # list of spell names to be deployed to this worker
+
+
+# A map with worker names as keys and deals as values
+deals:
+  ${DEFAULT_WORKER_NAME}: # worker name
+    minWorkers: ${MIN_WORKERS} # required amount of workers to activate the deal
+    targetWorkers: ${TARGET_WORKERS} # max amount of workers in the deal
+
+
+# Path to the aqua file or directory with aqua files that you want to compile by default.
+# Must be relative to the project root dir
+aquaInputPath: ${path.relative(projectRootDir, await ensureSrcAquaMainPath())}
+
+
+# nox multiaddresses that will be used by cli to connect to the Fluence network.
+# can be a list of multiaddresses or a name of the network.
+relays: ${jsonStringify(DEFAULT_RELAYS_FOR_TEMPLATE)} # default: kras
+
+
+# config version
+version: 2
+
+# # A map with service names as keys and service configs as values.
+# # Service names must start with a lowercase letter and contain only letters numbers and underscores.
+# # You can use \`fluence service new\` or \`fluence service add\` command to add a service
+# services:
+#   myService: # service name
+#     # Path to service directory, service config or URL to the tar.gz archive that contains the service
+#     get: "src/services/myService"
+#     # The name of the Key Pair to use for this service
+#     keyPairName: default
+#     # A map of modules that you want to override for this service
+#     overrideModules:
+#       moduleName: # module name
+#         # environment variables accessible by a particular module
+#         # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
+#         # Module environment variables could be examined with repl
+#         envs:
+#           ENV_VARIABLE: "env variable string value"
+#
+#         # Set true to allow module to use the Marine SDK logger
+#         loggerEnabled: true
+#
+#         # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
+#         loggingMask: 1
+#
+#         # Max size of the heap that a module can allocate in format:
+#         # [number][whitespace?][specificator?]
+#         # where ? is an optional field and specificator is one from the following (case-insensitive):
+#         # K, Kb - kilobyte
+#         # Ki, KiB - kibibyte
+#         # M, Mb - megabyte
+#         # Mi, MiB - mebibyte
+#         # G, Gb - gigabyte
+#         # Gi, GiB - gibibyte
+#         # Current limit is 4 GiB
+#         maxHeapSize: 1KiB
+#
+#         # A map of binary executable files that module is allowed to call
+#         mountedBinaries:
+#           curl: "/usr/bin/curl"
+#
+#         # A map of accessible files and their aliases.
+#         # Aliases should be used in Marine module development because it's hard to know the full path to a file
+#         volumes:
+#           alias: "some/alias/path"
+#
+#
+# # A map with spell names as keys and spell configs as values
+# spells:
+#   mySpell: # spell name
+#     # Path to spell config or directory with spell config
+#     get: "src/spells/mySpell"
+#
+#     # overrides for the spell:
+#
+#     # Path to Aqua file which contains an Aqua function that you want to use as a spell
+#     aquaFilePath: "src/spells/mySpell/spell.aqua"
+#     # Name of the Aqua function that you want to use as a spell
+#     function: main
+#     # A map of Aqua function arguments names as keys and arguments values as values.
+#     # These arguments will be passed to the spell function and will be stored in the key-value storage for this particular spell.
+#     initArgs:
+#       someArg: someArgStringValue
+#     # Trigger the spell execution periodically
+#     # If you want to disable this property by overriding it
+#     # pass an empty config for it like this: \`clock: {}\`
+#     clock:
+#       # How often the spell will be executed.
+#       # If set to 0, the spell will be executed only once.
+#       # If this value not provided at all - the spell will never be executed
+#       periodSec: 3
+#       # How long to wait before the first execution in seconds.
+#       # If this property or \`startTimestamp\` not specified, periodic execution will start immediately.
+#       # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
+#       # If it is set to 0 - the spell will never be executed
+#       # This property conflicts with \`startTimestamp\`. You can specify only one of them
+#       startDelaySec: 1
+#       # An ISO timestamp when the periodic execution should start.
+#       # If this property or \`startDelaySec\` not specified, periodic execution will start immediately.
+#       startTimestamp: '2023-07-06T23:59:59Z'
+#       # How long to wait before the last execution in seconds.
+#       # If this property or \`endTimestamp\` not specified, periodic execution will never end.
+#       # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
+#       # If it is in the past at the moment of spell creation - the spell will never be executed.
+#       # This property conflicts with \`endTimestamp\`. You can specify only one of them
+#       endDelaySec: 0
+#       # An ISO timestamp when the periodic execution should end.
+#       # If this property or \`endDelaySec\` not specified, periodic execution will never end.
+#       # If it is in the past at the moment of spell creation on Rust peer - the spell will never be executed
+#       endTimestamp: '2023-07-06T23:59:59Z'
+#
+#
+# # A list of paths to be considered by aqua compiler to be used as imports.
+# # First dependency in the list has the highest priority
+# #
+# # Priority of imports is considered in the following order:
+# # 1. imports from --import flags,
+# # 2. imports from aquaImports property in ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 3. project's ${join(DOT_FLUENCE_DIR_NAME, AQUA_DIR_NAME)} dir
+# # 4. npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 5. npm dependencies from user's ${join(
+    DOT_FLUENCE_DIR_NAME,
+    GLOBAL_CONFIG_FULL_FILE_NAME
+  )}
+# # 6. npm dependencies recommended by fluence
+# aquaImports:
+#   - "./node_modules"
+#
+#
+# # Path to the default compilation target dir from aqua to ts
+# # Must be relative to the project root dir
+# aquaOutputTSPath: "src/ts/src/aqua"
+#
+#
+# # Path to the default compilation target dir from aqua to js
+# # Must be relative to the project root dir
+# # Overrides 'aquaOutputTSPath' property
+# aquaOutputJSPath: "src/js/src/aqua"
+#
+#
+# # The network in which the transactions will be carried out
+# chainNetwork: ${CHAIN_NETWORKS[0]} # default: ${DEFAULT_CHAIN_NETWORK}
+#
+#
+# # The version of the CLI that is compatible with this project.
+# # You can set this to enforce a particular set of versions of all fluence components
+# cliVersion: ${CLIPackageJSON.version}
+#
+#
+# # (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies
+# # You can check out current project dependencies using \`fluence dep v\` command
+# dependencies:
+#   # A map of npm dependency versions
+#   # CLI ensures dependencies are installed each time you run aqua
+#   # There are also some dependencies that are installed by default (e.g. @fluencelabs/aqua-lib)
+#   # You can check default dependencies using \`fluence dep v --default\`
+#   # use \`fluence dep npm i\` to install project npm dependencies
+#   npm:
+#     "@fluencelabs/aqua-lib": ${versions.npm["@fluencelabs/aqua-lib"]}
+#
+#   # A map of cargo dependency versions
+#   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
+#   # use \`fluence dep cargo i\` to install project cargo dependencies
+#   cargo:
+#     ${MARINE_CARGO_DEPENDENCY}: ${versions.cargo.marine}
+#
+#
+# # The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
+# # 1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FULL_FILE_NAME}
+# # 2. "defaultKeyPairName" property from ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+# # 3. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 4. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# # 5. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
+# keyPairName: ${AUTO_GENERATED}
+#
+#
+# # if you want to deploy your services to specific peerIds. Soon it will be deprecated in favor of \`deals\` property
+# hosts:
+#   ${DEFAULT_WORKER_NAME}: # worker name
+#     peerIds:
+#       - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
+`;
+};
+
+const getDefault = (): Promise<string> => {
+  return getDefaultConfig();
 };
 
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
+const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 
 const migrations: Migrations<Config> = [
   (config: Config): ConfigV1 => {
@@ -613,9 +792,12 @@ const migrations: Migrations<Config> = [
       );
     }
 
+    const parsedConfig: unknown = parse(await getDefaultConfig());
+    assert(validateConfigSchemaV2(parsedConfig));
+
     return {
       ...config,
-      ...(await initFluenceProject()),
+      ...parsedConfig,
     };
   },
 ];
@@ -660,7 +842,7 @@ const checkDuplicatesAndPresence = (
               workerName
             )} has ${servicesOrSpells} that are not listed in ${color.yellow(
               "services"
-            )} property in ${FLUENCE_CONFIG_FILE_NAME}: ${color.yellow(
+            )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
               [...new Set(notListedInFluenceYAML)].join(", ")
             )}`
           : null;
@@ -669,7 +851,7 @@ const checkDuplicatesAndPresence = (
         workerServicesOrSpellsSet.size !== workerServicesOrSpells.length
           ? `Worker ${color.yellow(
               workerName
-            )} has duplicated ${servicesOrSpells} in ${FLUENCE_CONFIG_FILE_NAME}: ${color.yellow(
+            )} has duplicated ${servicesOrSpells} in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
               workerServicesOrSpells.filter((serviceName, index) => {
                 return workerServicesOrSpells.indexOf(serviceName) !== index;
               })
@@ -725,7 +907,7 @@ const validateHostsAndDeals = (
             hostsOrDealsProperty
           )} property must be listed in ${color.yellow(
             "workers"
-          )} property in ${FLUENCE_CONFIG_FILE_NAME}`;
+          )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
     })
     .filter((error): error is string => {
       return error !== null;
@@ -793,9 +975,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV2,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
-  getConfigOrConfigDirPath: () => {
-    return projectRootDir;
-  },
+  getConfigOrConfigDirPath,
   getSchemaDirPath: ensureFluenceDir,
   validate,
 };

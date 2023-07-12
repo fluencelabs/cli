@@ -20,9 +20,10 @@ import { dirname, resolve } from "path";
 import type { JSONSchemaType } from "ajv";
 
 import {
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   CLI_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
+  SPELL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   U32_MAX,
 } from "../../const.js";
@@ -83,7 +84,7 @@ const spellProperties = {
   clock: {
     type: "object",
     nullable: true,
-    description: `Trigger the spell execution periodically. If you want to disable this property by overriding it in ${FLUENCE_CONFIG_FILE_NAME} - pass empty config for it like this: \`clock: {}\``,
+    description: `Trigger the spell execution periodically. If you want to disable this property by overriding it in ${FLUENCE_CONFIG_FULL_FILE_NAME} - pass empty config for it like this: \`clock: {}\``,
     properties: {
       periodSec: {
         type: "number",
@@ -140,8 +141,8 @@ export const overridableSpellProperties = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${SPELL_CONFIG_FILE_NAME}`,
-  title: SPELL_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${SPELL_CONFIG_FULL_FILE_NAME}`,
+  title: SPELL_CONFIG_FULL_FILE_NAME,
   description: `Defines a spell. You can use \`${CLI_NAME} spell new\` command to generate a template for new spell`,
   properties: spellProperties,
   required: ["version", "function", "aquaFilePath"],
@@ -287,16 +288,53 @@ export const initReadonlySpellConfig = async (
   )();
 };
 
-const getDefault = (): LatestConfig => {
-  return {
-    version: 0,
-    aquaFilePath: "./spell.aqua",
-    function: "spell",
-    clock: {
-      periodSec: 60,
-      endDelaySec: 30 * 60,
-    },
-  };
+const getDefault = (): string => {
+  return `# Defines a spell. You can use \`fluence spell new\` command to generate a template for new spell
+
+# Path to Aqua file which contains an Aqua function that you want to use as a spell
+aquaFilePath: "./spell.aqua"
+
+# Name of the Aqua function that you want to use as a spell
+function: spell
+
+# # These arguments will be passed to the spell function and will be stored in the key-value storage for this particular spell.
+# initArgs:
+#   someArg: someArgStringValue
+
+# Trigger the spell execution periodically
+# If you want to disable this property by overriding it
+# pass an empty config for it like this: \`clock: {}\`
+clock:
+  # How often the spell will be executed.
+  # If set to 0, the spell will be executed only once.
+  # If this value not provided at all - the spell will never be executed
+  periodSec: 60
+  # How long to wait before the last execution in seconds.
+  # If this property or \`endTimestamp\` not specified, periodic execution will never end.
+  # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
+  # If it is in the past at the moment of spell creation - the spell will never be executed.
+  # This property conflicts with \`endTimestamp\`. You can specify only one of them
+  endDelaySec: 1800
+
+#   # other 'clock' properties:
+
+#   # How long to wait before the first execution in seconds.
+#   # If this property or \`startTimestamp\` not specified, periodic execution will start immediately.
+#   # WARNING! Currently your computer's clock is used to determine a final timestamp that is sent to the server.
+#   # If it is set to 0 - the spell will never be executed
+#   # This property conflicts with \`startTimestamp\`. You can specify only one of them
+#   startDelaySec: 1
+#   # An ISO timestamp when the periodic execution should start.
+#   # If this property or \`startDelaySec\` not specified, periodic execution will start immediately.
+#   startTimestamp: '2023-07-06T23:59:59Z'
+#   # An ISO timestamp when the periodic execution should end.
+#   # If this property or \`endDelaySec\` not specified, periodic execution will never end.
+#   # If it is in the past at the moment of spell creation on Rust peer - the spell will never be executed
+#   endTimestamp: '2023-07-06T23:59:59Z'
+
+# config version
+version: 0
+`;
 };
 
 export const initNewReadonlySpellConfig = (

@@ -43,11 +43,10 @@ import {
 } from "../lib/configs/project/service.js";
 import {
   DEFAULT_DEPLOY_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
   FS_OPTIONS,
-  MODULE_CONFIG_FILE_NAME,
+  MODULE_CONFIG_FULL_FILE_NAME,
   MODULE_TYPE_RUST,
-  SERVICE_CONFIG_FILE_NAME,
+  SERVICE_CONFIG_FULL_FILE_NAME,
   CLI_NAME,
 } from "../lib/const.js";
 import {
@@ -111,7 +110,7 @@ const resolveServiceInfos = async ({
     commandObj.log(
       `No services to build. Use ${color.yellow(
         `${CLI_NAME} service add`
-      )} command to add services to ${color.yellow(FLUENCE_CONFIG_FILE_NAME)}`
+      )} command to add services to ${color.yellow(fluenceConfig.$getPath())}`
     );
 
     return [];
@@ -175,7 +174,7 @@ const resolveServiceInfos = async ({
             (await initReadonlyServiceConfig(get, projectRootDir)) ??
             commandObj.error(
               `Service ${color.yellow(serviceName)} must have ${color.yellow(
-                SERVICE_CONFIG_FILE_NAME
+                SERVICE_CONFIG_FULL_FILE_NAME
               )}. ${
                 isUrl(get)
                   ? `Not able to find it after downloading and decompressing ${color.yellow(
@@ -226,6 +225,7 @@ const resolveServiceInfos = async ({
                   serviceConfigModules: serviceConfig.modules,
                   serviceDirPath,
                   serviceName,
+                  fluenceConfigPath: fluenceConfig.$getPath(),
                 }),
               keyPair: await ensureKeyPair(keyPair, keyPairName),
               ...rest,
@@ -274,7 +274,7 @@ export const build = async ({
             return commandObj.error(
               `Module at: ${color.yellow(
                 moduleAbsolutePathOrUrl
-              )} doesn't have ${color.yellow(MODULE_CONFIG_FILE_NAME)}`
+              )} doesn't have ${color.yellow(MODULE_CONFIG_FULL_FILE_NAME)}`
             );
           }
 
@@ -560,6 +560,7 @@ type GetModuleNamesAndConfigsDefinedInServicesArg = {
     string,
     ServiceModuleV0
   >;
+  fluenceConfigPath: string;
 };
 
 const getModuleNamesAndConfigsDefinedInServices = ({
@@ -568,6 +569,7 @@ const getModuleNamesAndConfigsDefinedInServices = ({
   deployId,
   serviceDirPath,
   serviceConfigModules,
+  fluenceConfigPath,
 }: GetModuleNamesAndConfigsDefinedInServicesArg): ModuleNameAndConfigDefinedInService[] => {
   const modulesNotFoundInServiceYaml = Object.keys(
     overrideModules ?? {}
@@ -577,7 +579,7 @@ const getModuleNamesAndConfigsDefinedInServices = ({
 
   if (modulesNotFoundInServiceYaml.length > 0) {
     commandObj.error(
-      `${color.yellow(FLUENCE_CONFIG_FILE_NAME)} has service ${color.yellow(
+      `${color.yellow(fluenceConfigPath)} has service ${color.yellow(
         serviceName
       )} with deployId ${color.yellow(
         deployId

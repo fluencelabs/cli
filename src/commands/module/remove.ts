@@ -29,8 +29,8 @@ import {
   type ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
-  FLUENCE_CONFIG_FILE_NAME,
-  SERVICE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  SERVICE_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import {
   getModuleAbsolutePath,
@@ -43,18 +43,18 @@ import { hasKey } from "../../lib/typeHelpers.js";
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static override description = `Remove module from ${SERVICE_CONFIG_FILE_NAME}`;
+  static override description = `Remove module from ${SERVICE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
     service: Flags.directory({
-      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME} or path to the service directory`,
+      description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME} or path to the service directory`,
       helpValue: "<name | path>",
     }),
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
-      description: `Module name from ${SERVICE_CONFIG_FILE_NAME}, path to a module or url to .tar.gz archive`,
+      description: `Module name from ${SERVICE_CONFIG_FULL_FILE_NAME}, path to a module or url to .tar.gz archive`,
     }),
   };
   async run(): Promise<void> {
@@ -63,20 +63,15 @@ export default class Remove extends BaseCommand<typeof Remove> {
       await this.parse(Remove)
     );
 
-    const nameOrPathOrUrl =
-      args[NAME_OR_PATH_OR_URL] ??
-      (await input({
-        message: `Enter module name from ${color.yellow(
-          SERVICE_CONFIG_FILE_NAME
-        )}, path to a module or url to .tar.gz archive`,
-      }));
-
     const serviceNameOrPath =
       flags.service ??
       (await input({
-        message: `Enter service name from ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )} or path to the service directory`,
+        message:
+          maybeFluenceConfig === null
+            ? `Enter path to the service directory`
+            : `Enter service name from ${color.yellow(
+                maybeFluenceConfig.$getPath()
+              )} or path to the service directory`,
       }));
 
     let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
@@ -108,10 +103,18 @@ export default class Remove extends BaseCommand<typeof Remove> {
       );
     }
 
+    const nameOrPathOrUrl =
+      args[NAME_OR_PATH_OR_URL] ??
+      (await input({
+        message: `Enter module name from ${color.yellow(
+          serviceConfig.$getPath()
+        )}, path to a module or url to .tar.gz archive`,
+      }));
+
     if (nameOrPathOrUrl === FACADE_MODULE_NAME) {
       return commandObj.error(
         `Each service must have a facade module, if you want to change it either override it in ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
+          FLUENCE_CONFIG_FULL_FILE_NAME
         )} or replace it manually in ${serviceConfig.$getPath()}`
       );
     }

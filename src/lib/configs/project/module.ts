@@ -18,11 +18,12 @@ import type { JSONSchemaType } from "ajv";
 
 import {
   type ModuleType,
-  MODULE_CONFIG_FILE_NAME,
+  MODULE_CONFIG_FULL_FILE_NAME,
   MODULE_TYPES,
   MODULE_TYPE_COMPILED,
   MODULE_TYPE_RUST,
   TOP_LEVEL_SCHEMA_ID,
+  MODULE_CONFIG_FILE_NAME,
   CLI_NAME,
 } from "../../const.js";
 import { ensureModuleAbsolutePath } from "../../helpers/downloadFile.js";
@@ -119,8 +120,8 @@ const overridableModulePropertiesV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FILE_NAME}`,
-  title: MODULE_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FULL_FILE_NAME}`,
+  title: MODULE_CONFIG_FULL_FILE_NAME,
   description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`${CLI_NAME} module new\` command to generate a template for new module`,
   properties: {
     name: {
@@ -172,15 +173,53 @@ export const initReadonlyModuleConfig = async (
   )();
 };
 
-const getDefault: (name: string) => GetDefaultConfig<LatestConfig> = (
+const getDefault: (name: string) => GetDefaultConfig = (
   name: string
-): GetDefaultConfig<LatestConfig> => {
-  return (): LatestConfig => {
-    return {
-      version: 0,
-      type: MODULE_TYPE_RUST,
-      name,
-    };
+): GetDefaultConfig => {
+  return () => {
+    return `# Module type "rust" is for the source code written in rust which can be compiled into a Marine module
+# Module type "compiled" is for the precompiled modules.
+type: ${MODULE_TYPE_RUST} # default: "compiled"
+
+# "name" property from the Cargo.toml (for module type "rust")
+# or name of the precompiled .wasm file (for module type "compiled")
+name: ${name}
+
+# config versions
+version: 0
+
+# # environment variables accessible by a particular module
+# # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
+# # Module environment variables could be examined with repl
+# envs:
+#   ENV_VARIABLE: "env variable string value"
+#
+# # Set true to allow module to use the Marine SDK logger
+# loggerEnabled: true
+#
+# # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
+# loggingMask: 1
+#
+# # Max size of the heap that a module can allocate in format:
+# # [number][whitespace?][specificator?]
+# # where ? is an optional field and specificator is one from the following (case-insensitive):
+# # K, Kb - kilobyte
+# # Ki, KiB - kibibyte
+# # M, Mb - megabyte
+# # Mi, MiB - mebibyte
+# # G, Gb - gigabyte
+# # Gi, GiB - gibibyte
+# # Current limit is 4 GiB
+# maxHeapSize: 1KiB
+#
+# # A map of binary executable files that module is allowed to call
+# mountedBinaries:
+#   curl: "/usr/bin/curl"
+#
+# # A map of accessible files and their aliases.
+# # Aliases should be used in Marine module development because it's hard to know the full path to a file
+# volumes:
+#   alias: "some/alias/path"`;
   };
 };
 

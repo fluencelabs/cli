@@ -161,7 +161,7 @@ const getWalletConnectProvider = async (
   const walletAddress =
     session?.namespaces["eip155"]?.accounts[0]?.split(":")[2];
 
-  if (walletAddress == null) {
+  if (walletAddress === null) {
     throw new Error("Wallet address is not defined");
   }
 

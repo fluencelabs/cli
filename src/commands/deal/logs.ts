@@ -26,7 +26,7 @@ import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js"
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
-  WORKERS_CONFIG_FILE_NAME,
+  WORKERS_CONFIG_FULL_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
   DOT_FLUENCE_DIR_NAME,
   FLUENCE_CLIENT_FLAGS,
@@ -40,7 +40,7 @@ import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
-  static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FILE_NAME}`;
+  static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -52,7 +52,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Worker names to get logs for (by default all worker names from 'deals' property of ${WORKERS_CONFIG_FILE_NAME})`,
+      description: `Worker names to get logs for (by default all worker names from 'deals' property of ${WORKERS_CONFIG_FULL_FILE_NAME})`,
     }),
   };
   async run(): Promise<void> {
@@ -103,7 +103,7 @@ const getDealIdWorkerNameMap = async (
   if (maybeWorkersConfig === null) {
     return commandObj.error(
       `Wasn't able to find ${color.yellow(
-        WORKERS_CONFIG_FILE_NAME
+        WORKERS_CONFIG_FULL_FILE_NAME
       )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed before trying to get logs`
     );
   }
@@ -138,7 +138,7 @@ const getDealIdWorkerNameMap = async (
           return color.yellow(workerName);
         })
         .join(", ")} in ${color.yellow(
-        WORKERS_CONFIG_FILE_NAME
+        workersConfig.$getPath()
       )} please check the spelling and try again`
     );
   }

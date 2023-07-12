@@ -27,10 +27,10 @@ import fetch from "node-fetch";
 import { commandObj } from "../commandObj.js";
 import { getConfigPath } from "../configs/initConfig.js";
 import {
-  MODULE_CONFIG_FILE_NAME,
+  MODULE_CONFIG_FULL_FILE_NAME,
   MODULE_TYPE_RUST,
-  SERVICE_CONFIG_FILE_NAME,
-  SPELL_CONFIG_FILE_NAME,
+  SERVICE_CONFIG_FULL_FILE_NAME,
+  SPELL_CONFIG_FULL_FILE_NAME,
   WASM_EXT,
 } from "../const.js";
 import {
@@ -230,22 +230,22 @@ const ensureOrGetConfigAbsolutePath = (
 
 export const ensureModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadModule,
-  MODULE_CONFIG_FILE_NAME
+  MODULE_CONFIG_FULL_FILE_NAME
 );
 export const ensureServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadService,
-  SERVICE_CONFIG_FILE_NAME
+  SERVICE_CONFIG_FULL_FILE_NAME
 );
 export const ensureSpellAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadSpell,
-  SPELL_CONFIG_FILE_NAME
+  SPELL_CONFIG_FULL_FILE_NAME
 );
 
 export const getModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
   getModulePathFromUrl,
-  MODULE_CONFIG_FILE_NAME
+  MODULE_CONFIG_FULL_FILE_NAME
 );
 export const getServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   getServicePathFromUrl,
-  SERVICE_CONFIG_FILE_NAME
+  SERVICE_CONFIG_FULL_FILE_NAME
 );

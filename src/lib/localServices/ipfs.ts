@@ -197,7 +197,7 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
         const rm = ipfsClient.block.rm(CID.parse(cid), { force: true });
 
         for await (const r of rm) {
-          if (r.error != null) {
+          if (r.error !== null) {
             log(`block rm failed. ${r.error}`);
           }
         }

@@ -18,14 +18,14 @@ import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
 import { commandObj } from "../lib/commandObj.js";
 import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
-import { FLUENCE_CONFIG_FILE_NAME } from "../lib/const.js";
+import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../lib/deployWorkers.js";
 import { getExistingKeyPair } from "../lib/keyPairs.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 
 export default class Build extends BaseCommand<typeof Build> {
-  static override description = `Build all application services, described in ${FLUENCE_CONFIG_FILE_NAME} and generate aqua interfaces for them`;
+  static override description = `Build all application services, described in ${FLUENCE_CONFIG_FULL_FILE_NAME} and generate aqua interfaces for them`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

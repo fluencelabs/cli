@@ -41,7 +41,6 @@ import {
 import {
   FS_OPTIONS,
   KEY_PAIR_FLAG,
-  FLUENCE_CONFIG_FILE_NAME,
   aquaLogLevelsString,
   isAquaLogLevel,
   AQUA_LOG_LEVELS,
@@ -255,9 +254,9 @@ const ensureAquaPath = async ({
       return aquaInputPath;
     } catch {
       commandObj.warn(
-        `Invalid ${color.yellow(AQUA_INPUT_PATH_PROPERTY)} in ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )}: ${aquaInputPath}`
+        `Invalid ${color.yellow(
+          `${AQUA_INPUT_PATH_PROPERTY}: ${aquaInputPath}`
+        )} in ${color.yellow(maybeFluenceConfig.$getPath())}`
       );
     }
   }

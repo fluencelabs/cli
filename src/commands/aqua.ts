@@ -29,7 +29,7 @@ import {
   IMPORT_FLAG,
   NO_INPUT_FLAG,
   TRACING_FLAG,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
@@ -237,7 +237,7 @@ const resolveAbsoluteAquaPath = async ({
   if (maybePathFromFluenceYaml !== undefined) {
     if (isAbsolute(maybePathFromFluenceYaml)) {
       return commandObj.error(
-        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FILE_NAME} must not be absolute, but should be relative to the project root directory`
+        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FULL_FILE_NAME} must not be absolute, but should be relative to the project root directory`
       );
     }
 
