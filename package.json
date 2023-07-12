@@ -63,7 +63,7 @@
     "filenamify": "6.0.0",
     "get-random-values": "2.1.0",
     "inquirer": "9.2.7",
-    "ipfs-http-client": "60.0.0",
+    "ipfs-http-client": "60.0.1",
     "lodash-es": "4.17.21",
     "lokijs": "1.5.12",
     "multiaddr": "10.0.1",
