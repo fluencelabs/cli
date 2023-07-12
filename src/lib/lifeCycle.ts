@@ -75,7 +75,7 @@ const ensureUserConfig = async (): Promise<void> => {
     isInteractive &&
     (await confirm({
       message: `Help me improve ${CLI_NAME} by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
-        "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data."
+        "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data.",
       )}\nOK?`,
     }))
   ) {
@@ -94,7 +94,7 @@ type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
 type ParserOutputWithNoInputFlag<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 > = ParserOutput<F, F2, A> & {
   flags: {
     [NO_INPUT_FLAG_NAME]: boolean;
@@ -104,30 +104,30 @@ type ParserOutputWithNoInputFlag<
 export async function initCli<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 >(
   commandObj: CommandObj,
   parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject?: false
+  requiresFluenceProject?: false,
 ): Promise<CommonReturn<A, F> & { maybeFluenceConfig: FluenceConfig | null }>;
 export async function initCli<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 >(
   commandObj: CommandObj,
   parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject: true
+  requiresFluenceProject: true,
 ): Promise<CommonReturn<A, F> & { fluenceConfig: FluenceConfig }>;
 
 export async function initCli<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 >(
   commandObjFromArgs: CommandObj,
   { args, flags }: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject = false
+  requiresFluenceProject = false,
 ): Promise<
   CommonReturn<A, F> & {
     fluenceConfig?: FluenceConfig | null;
@@ -145,7 +145,7 @@ export async function initCli<
 
   if (majorVersion !== NODE_JS_MAJOR_VERSION) {
     return commandObj.error(
-      `${CLI_NAME} requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`
+      `${CLI_NAME} requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`,
     );
   }
 
@@ -199,7 +199,7 @@ const isCheckForUpdatesRequired = async () => {
 };
 
 const handleFloxVersion = async (
-  maybeFloxVersion: string | undefined
+  maybeFloxVersion: string | undefined,
 ): Promise<void> => {
   if (
     typeof maybeFloxVersion === "string" &&
@@ -208,14 +208,14 @@ const handleFloxVersion = async (
     const floxVersion = maybeFloxVersion;
     return commandObj.error(
       `Current ${CLI_NAME} versions is ${color.yellow(
-        commandObj.config.version
+        commandObj.config.version,
       )}, but this project is compatible only with ${CLI_NAME} version ${color.yellow(
-        floxVersion
+        floxVersion,
       )}\n\nPlease install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/${CLI_NAME}@${floxVersion}`
+        `npm i -g @fluencelabs/${CLI_NAME}@${floxVersion}`,
       )}\n\nAfter that, run:\n\n${color.yellow(
-        `${CLI_NAME} dep v`
-      )}\n\nto find out which version of rust-peer you need to use to make sure you are running ${CLI_NAME} against the compatible version of rust-peer\n\n`
+        `${CLI_NAME} dep v`,
+      )}\n\nto find out which version of rust-peer you need to use to make sure you are running ${CLI_NAME} against the compatible version of rust-peer\n\n`,
     );
   }
 
@@ -231,12 +231,12 @@ const handleFloxVersion = async (
 
     const isOlderThanStable = semver.lt(
       commandObj.config.version,
-      stableVersion
+      stableVersion,
     );
 
     const isOlderThenUnstable = semver.lt(
       commandObj.config.version,
-      unstableVersion
+      unstableVersion,
     );
 
     if (!isOlderThanStable && !isOlderThenUnstable) {
@@ -247,12 +247,12 @@ const handleFloxVersion = async (
 
     commandObj.log(
       `${SEPARATOR}New ${color.yellow(
-        isOlderThanStable ? "stable" : "unstable"
+        isOlderThanStable ? "stable" : "unstable",
       )} version ${color.yellow(
-        version
+        version,
       )} of ${CLI_NAME} is available\n\nYou can install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/${CLI_NAME}@${version}`
-      )}${SEPARATOR}`
+        `npm i -g @fluencelabs/${CLI_NAME}@${version}`,
+      )}${SEPARATOR}`,
     );
 
     if (
@@ -265,7 +265,7 @@ const handleFloxVersion = async (
       await userConfig.$commit();
 
       commandObj.log(
-        `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`
+        `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`,
       );
     }
   } catch (e) {

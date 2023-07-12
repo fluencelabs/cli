@@ -76,7 +76,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(Deploy),
-      true
+      true,
     );
 
     const chainNetwork = await ensureChainNetwork({
@@ -135,15 +135,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         if (maybePreviouslyDeployedDeal.definition === appCID) {
           commandObj.log(
             `\nWorker ${color.yellow(
-              workerName
-            )} didn't change. Skipping deal update`
+              workerName,
+            )} didn't change. Skipping deal update`,
           );
 
           continue;
         }
 
         commandObj.log(
-          `\nUpdating deal for worker ${color.yellow(workerName)}\n`
+          `\nUpdating deal for worker ${color.yellow(workerName)}\n`,
         );
 
         await dealUpdate({
@@ -178,7 +178,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       }
 
       commandObj.log(
-        `\nCreating deal for worker ${color.yellow(workerName)}\n`
+        `\nCreating deal for worker ${color.yellow(workerName)}\n`,
       );
 
       const dealIdOriginal = await dealCreate({
@@ -230,7 +230,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }
 
     commandObj.log(
-      `\n\n${color.yellow("Success!")}${createdDealsText}${updatedDealsText}`
+      `\n\n${color.yellow("Success!")}${createdDealsText}${updatedDealsText}`,
     );
   }
 }

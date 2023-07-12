@@ -21,7 +21,7 @@ export type ValidationResult = string | true;
 export const validateUnique = <T>(
   array: Array<T>,
   getField: (item: T) => string,
-  getError: (notUniqueField: string) => string
+  getError: (notUniqueField: string) => string,
 ): ValidationResult => {
   const set = new Set();
 
@@ -42,7 +42,7 @@ export const validateHasDefault = <T>(
   array: Array<T>,
   defaultValue: string,
   getField: (item: T) => string,
-  errorText: string
+  errorText: string,
 ): ValidationResult => {
   return (
     array.some((item): boolean => {
@@ -66,7 +66,7 @@ export const isExactVersion = (version: string): boolean => {
 };
 
 export const validateAllVersionsAreExact = (
-  versions: Record<string, string>
+  versions: Record<string, string>,
 ): ValidationResult => {
   const notExactVersions = Object.entries(versions).filter(([, version]) => {
     return !isExactVersion(version);

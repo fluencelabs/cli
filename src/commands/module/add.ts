@@ -61,7 +61,7 @@ export default class Add extends BaseCommand<typeof Add> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Add)
+      await this.parse(Add),
     );
 
     const modulePathOrUrl =
@@ -75,8 +75,8 @@ export default class Add extends BaseCommand<typeof Add> {
     if (moduleConfig === null) {
       return commandObj.error(
         `${color.yellow(
-          MODULE_CONFIG_FULL_FILE_NAME
-        )} not found for ${modulePathOrUrl}`
+          MODULE_CONFIG_FULL_FILE_NAME,
+        )} not found for ${modulePathOrUrl}`,
       );
     }
 
@@ -87,7 +87,7 @@ export default class Add extends BaseCommand<typeof Add> {
           maybeFluenceConfig === null
             ? `Enter path to the service directory`
             : `Enter service name from ${color.yellow(
-                maybeFluenceConfig.$getPath()
+                maybeFluenceConfig.$getPath(),
               )} or path to the service directory`,
       }));
 
@@ -102,21 +102,21 @@ export default class Add extends BaseCommand<typeof Add> {
     if (isUrl(serviceOrServiceDirPathOrUrl)) {
       return commandObj.error(
         `Can't modify downloaded service ${color.yellow(
-          serviceOrServiceDirPathOrUrl
-        )}`
+          serviceOrServiceDirPathOrUrl,
+        )}`,
       );
     }
 
     const serviceConfig = await initServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      cwd()
+      cwd(),
     );
 
     if (serviceConfig === null) {
       return commandObj.error(
         `Can't find service config at ${color.yellow(
-          serviceOrServiceDirPathOrUrl
-        )}`
+          serviceOrServiceDirPathOrUrl,
+        )}`,
       );
     }
 
@@ -124,7 +124,7 @@ export default class Add extends BaseCommand<typeof Add> {
       return (
         !(name in serviceConfig.modules) ||
         `You already have ${color.yellow(name)} in ${color.yellow(
-          serviceConfig.$getPath()
+          serviceConfig.$getPath(),
         )}`
       );
     };
@@ -154,8 +154,8 @@ export default class Add extends BaseCommand<typeof Add> {
 
     this.log(
       `Added ${color.yellow(moduleName)} to ${color.yellow(
-        replaceHomeDir(serviceConfig.$getPath())
-      )}`
+        replaceHomeDir(serviceConfig.$getPath()),
+      )}`,
     );
   }
 }

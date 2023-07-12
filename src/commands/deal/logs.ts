@@ -58,13 +58,13 @@ export default class Logs extends BaseCommand<typeof Logs> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig, args } = await initCli(
       this,
-      await this.parse(Logs)
+      await this.parse(Logs),
     );
 
     await initFluenceClient(flags, maybeFluenceConfig);
 
     const dealIdWorkerNameMap = await getDealIdWorkerNameMap(
-      args["WORKER-NAMES"]
+      args["WORKER-NAMES"],
     );
 
     let logs;
@@ -76,8 +76,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${stringifyUnknown(
-          e
-        )}`
+          e,
+        )}`,
       );
     }
 
@@ -85,26 +85,26 @@ export default class Logs extends BaseCommand<typeof Logs> {
       logs
         .map(({ host_id, logs, spell_id, deal_id }) => {
           return `${color.yellow(
-            dealIdWorkerNameMap[deal_id] ?? "Unknown worker"
+            dealIdWorkerNameMap[deal_id] ?? "Unknown worker",
           )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${logs.join(
-            "\n"
+            "\n",
           )}`;
         })
-        .join("\n\n")
+        .join("\n\n"),
     );
   }
 }
 
 const getDealIdWorkerNameMap = async (
-  maybeWorkerNamesString: string | undefined
+  maybeWorkerNamesString: string | undefined,
 ): Promise<Record<string, string>> => {
   const maybeWorkersConfig = await initReadonlyWorkersConfig();
 
   if (maybeWorkersConfig === null) {
     return commandObj.error(
       `Wasn't able to find ${color.yellow(
-        WORKERS_CONFIG_FULL_FILE_NAME
-      )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed before trying to get logs`
+        WORKERS_CONFIG_FULL_FILE_NAME,
+      )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed before trying to get logs`,
     );
   }
 
@@ -114,8 +114,8 @@ const getDealIdWorkerNameMap = async (
     workersConfig.deals ??
     commandObj.error(
       `No deployed workers found in ${color.yellow(
-        "deals"
-      )} property in ${color.yellow(workersConfig.$getPath())} file`
+        "deals",
+      )} property in ${color.yellow(workersConfig.$getPath())} file`,
     );
 
   const workerNamesSet = Object.keys(deals);
@@ -128,7 +128,7 @@ const getDealIdWorkerNameMap = async (
   const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
     (workerName) => {
       return !workerNamesSet.includes(workerName);
-    }
+    },
   );
 
   if (workerNamesNotFoundInWorkersConfig.length !== 0) {
@@ -138,8 +138,8 @@ const getDealIdWorkerNameMap = async (
           return color.yellow(workerName);
         })
         .join(", ")} in ${color.yellow(
-        workersConfig.$getPath()
-      )} please check the spelling and try again`
+        workersConfig.$getPath(),
+      )} please check the spelling and try again`,
     );
   }
 

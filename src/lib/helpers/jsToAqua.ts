@@ -63,7 +63,7 @@ type NilInAqua = undefined | null | EmptyObject | [];
  */
 export const makeOptional = <T>(
   value: T | NilInAqua,
-  valueToInferTypeFrom: T
+  valueToInferTypeFrom: T,
 ): { [OPTIONAL]: T; [IS_NIL]?: boolean } => {
   const optional: { [OPTIONAL]: T; [IS_NIL]?: true } = {
     [OPTIONAL]: isNilInAqua(value) ? valueToInferTypeFrom : value,
@@ -88,7 +88,7 @@ const isNilInAqua = <T>(v: T | NilInAqua): v is NilInAqua => {
 export const jsToAqua = (
   v: unknown,
   funcNameFromArgs: string,
-  useF64ForAllNumbers = false
+  useF64ForAllNumbers = false,
 ): string => {
   const funcName = camelcase(cleanAquaName(funcNameFromArgs));
   const funcNameValidity = validateAquaName(funcName);
@@ -96,8 +96,8 @@ export const jsToAqua = (
   if (typeof funcNameValidity === "string") {
     return commandObj.error(
       `Failed converting object to aqua. ${color.yellow(
-        funcNameFromArgs
-      )} ${funcNameValidity}`
+        funcNameFromArgs,
+      )} ${funcNameValidity}`,
     );
   }
 
@@ -105,7 +105,7 @@ export const jsToAqua = (
     v,
     funcName,
     "",
-    useF64ForAllNumbers
+    useF64ForAllNumbers,
   );
 
   return `${
@@ -124,13 +124,13 @@ export const jsToAquaImpl = (
   fieldName: string,
   currentNesting: string,
   useF64ForAllNumbers = false,
-  nestingLevel = 1
+  nestingLevel = 1,
 ): { type: string; value: string; typeDefs?: string | undefined } => {
   const error = (message: string) => {
     return commandObj.error(
       `Failed converting to aqua. ${message}. At ${color.yellow(
-        currentNesting === "" ? "" : `${currentNesting}.`
-      )}${color.yellow(fieldName)}: ${stringifyUnknown(v)}`
+        currentNesting === "" ? "" : `${currentNesting}.`,
+      )}${color.yellow(fieldName)}: ${stringifyUnknown(v)}`,
     );
   };
 
@@ -180,7 +180,7 @@ export const jsToAquaImpl = (
         fieldName,
         currentNesting,
         useF64ForAllNumbers,
-        newNestingLevel
+        newNestingLevel,
       );
     });
 
@@ -204,7 +204,7 @@ export const jsToAquaImpl = (
 
             return "u64";
           },
-          useF64ForAllNumbers ? "f64" : "u64"
+          useF64ForAllNumbers ? "f64" : "u64",
         )
       : firstElementType;
 
@@ -239,7 +239,7 @@ export const jsToAquaImpl = (
 
     if (!/^[A-Z]\w*$/.test(newName)) {
       return error(
-        "Name must start with a letter and contain only letters, numbers and underscores"
+        "Name must start with a letter and contain only letters, numbers and underscores",
       );
     }
 
@@ -252,7 +252,7 @@ export const jsToAquaImpl = (
         fieldName,
         currentNesting,
         useF64ForAllNumbers,
-        nestingLevel
+        nestingLevel,
       );
 
       return {
@@ -273,7 +273,7 @@ export const jsToAquaImpl = (
           key,
           nestedType,
           useF64ForAllNumbers,
-          newNestingLevel
+          newNestingLevel,
         );
 
         const camelCasedKey = camelcase(cleanAquaName(key));
@@ -290,13 +290,13 @@ export const jsToAquaImpl = (
           entries: [...entries, `\n${newIndent}${camelCasedKey}=${value}`],
         };
       },
-      { keyTypes: [], keyDataTypes: [], entries: [] }
+      { keyTypes: [], keyDataTypes: [], entries: [] },
     );
 
     return {
       type: nestedType,
       value: `${nestedType}(${entries.join(",")}\n${INDENTATION.repeat(
-        nestingLevel
+        nestingLevel,
       )})`,
       typeDefs: `${
         keyDataTypes.length === 0 ? "" : `${keyDataTypes.join("\n\n")}\n\n`

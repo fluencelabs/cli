@@ -49,7 +49,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(ChangeApp),
-      true
+      true,
     );
 
     const tx = await dealUpdate({

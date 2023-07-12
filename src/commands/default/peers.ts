@@ -76,6 +76,6 @@ const printPeerAddresses = (network: Network) => {
       .map(({ multiaddr }) => {
         return multiaddr;
       })
-      .join("\n")}`
+      .join("\n")}`,
   );
 };

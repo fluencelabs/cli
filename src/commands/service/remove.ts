@@ -46,20 +46,20 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const { args, fluenceConfig } = await initCli(
       this,
       await this.parse(Remove),
-      true
+      true,
     );
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
         message: `Enter service name from ${color.yellow(
-          fluenceConfig.$getPath()
+          fluenceConfig.$getPath(),
         )}, path to a service or url to .tar.gz archive`,
       }));
 
     const serviceNameToRemove = await getServiceNameToRemove(
       nameOrPathOrUrl,
-      fluenceConfig
+      fluenceConfig,
     );
 
     assert(fluenceConfig.services !== undefined);
@@ -81,7 +81,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
                   }),
             },
           ];
-        })
+        }),
       );
     }
 
@@ -89,19 +89,19 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     this.log(
       `Removed service ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
-        fluenceConfig.$getPath()
-      )}`
+        fluenceConfig.$getPath(),
+      )}`,
     );
   }
 }
 
 const getServiceNameToRemove = async (
   nameOrPathOrUrl: string,
-  fluenceConfig: FluenceConfigReadonly
+  fluenceConfig: FluenceConfigReadonly,
 ): Promise<string> => {
   if (fluenceConfig.services === undefined) {
     return commandObj.error(
-      `There are no services in ${color.yellow(fluenceConfig.$getPath())}`
+      `There are no services in ${color.yellow(fluenceConfig.$getPath())}`,
     );
   }
 
@@ -115,12 +115,12 @@ const getServiceNameToRemove = async (
         name,
         await getServiceAbsolutePath(get, fluenceConfig.$getDirPath()),
       ] as const;
-    })
+    }),
   );
 
   const absolutePathRelativeToService = await getServiceAbsolutePath(
     nameOrPathOrUrl,
-    fluenceConfig.$getDirPath()
+    fluenceConfig.$getDirPath(),
   );
 
   let [moduleNameToRemove] =
@@ -134,7 +134,7 @@ const getServiceNameToRemove = async (
 
   const absolutePathRelativeToCwd = await getServiceAbsolutePath(
     nameOrPathOrUrl,
-    cwd()
+    cwd(),
   );
 
   [moduleNameToRemove] =
@@ -148,7 +148,7 @@ const getServiceNameToRemove = async (
 
   return commandObj.error(
     `There is no service ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
-      fluenceConfig.$getPath()
-    )}`
+      fluenceConfig.$getPath(),
+    )}`,
   );
 };

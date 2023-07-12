@@ -53,7 +53,7 @@ type FloxArg = {
 
 const pathToFluenceExecutable = path.join(
   process.cwd(),
-  path.join("tmp", "node_modules", "@fluencelabs", CLI_NAME, "bin", "run.js")
+  path.join("tmp", "node_modules", "@fluencelabs", CLI_NAME, "bin", "run.js"),
 );
 
 export const flox = async ({
@@ -146,7 +146,7 @@ export const sleepSeconds = (s: number) => {
 
 export const sortPeers = <T extends { peer: string }>(
   { peer: peerA }: T,
-  { peer: peerB }: T
+  { peer: peerB }: T,
 ) => {
   if (peerA < peerB) {
     return -1;
@@ -164,7 +164,7 @@ export const assertHasPeer = (result: unknown) => {
     typeof result === "object" &&
       result !== null &&
       "peer" in result &&
-      typeof result.peer === "string"
+      typeof result.peer === "string",
   );
 
   return { ...result, peer: result.peer };

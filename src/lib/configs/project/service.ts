@@ -108,7 +108,7 @@ export type ServiceConfig = InitializedConfig<LatestConfig>;
 export type ServiceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const validate: ConfigValidateFunction<LatestConfig> = (
-  config
+  config,
 ): ReturnType<ConfigValidateFunction<LatestConfig>> => {
   const validity = validateAquaName(config.name);
 
@@ -120,7 +120,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (
 };
 
 const getInitConfigOptions = (
-  configDirPath: string
+  configDirPath: string,
 ): InitConfigOptions<Config, LatestConfig> => {
   return {
     allSchemas: [configSchemaV0],
@@ -137,32 +137,32 @@ const getInitConfigOptions = (
 
 export const initServiceConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath: string
+  absolutePath: string,
 ): Promise<InitializedConfig<LatestConfig> | null> => {
   return getConfigInitFunction(
     getInitConfigOptions(
-      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
+      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
+    ),
   )();
 };
 
 export const initReadonlyServiceConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath: string
+  absolutePath: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(
-      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
+      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
+    ),
   )();
 };
 
 const getDefault: (
   relativePathToFacade: string,
-  name: string
+  name: string,
 ) => GetDefaultConfig = (
   relativePathToFacade: string,
-  name: string
+  name: string,
 ): GetDefaultConfig => {
   return () => {
     return `# Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services),
@@ -226,11 +226,11 @@ version: 0
 export const initNewReadonlyServiceConfig = (
   configPath: string,
   relativePathToFacade: string,
-  name: string
+  name: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig>> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
-    getDefault(relativePathToFacade, name)
+    getDefault(relativePathToFacade, name),
   )();
 };
 

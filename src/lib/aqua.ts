@@ -56,17 +56,17 @@ type CommonArgs = {
  * @param arg Compilation config
  */
 export async function compile(
-  arg: { code: string } & CommonArgs
+  arg: { code: string } & CommonArgs,
 ): Promise<CompilationResult>;
 export async function compile(
-  arg: { filePath: string } & CommonArgs
+  arg: { filePath: string } & CommonArgs,
 ): Promise<CompilationResult>;
 export async function compile(
   arg: {
     filePath: string;
     funcCall: string;
     data?: FnConfig | undefined;
-  } & CommonArgs
+  } & CommonArgs,
 ): Promise<Required<CompilationResult>>;
 
 export async function compile({
@@ -97,14 +97,14 @@ export async function compile({
       js: "javascript",
       air: "air",
     }[targetType],
-    tracing
+    tracing,
   );
 
   if (typeof funcCall === "string" && filePath !== undefined) {
     const result = await Aqua.compile(
       new Call(funcCall, data, new Input(filePath)),
       imports,
-      config
+      config,
     );
 
     return result;
@@ -126,7 +126,7 @@ const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
       const filePath = join(dirPath, fileName);
       const stats = await stat(filePath);
       return [filePath, stats] as const;
-    })
+    }),
   );
 
   return (
@@ -139,14 +139,14 @@ const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
           return stats.isDirectory()
             ? getAquaFilesRecursively(path)
             : Promise.resolve([path]);
-        })
+        }),
     )
   ).flat();
 };
 
 const writeFileAndMakeSureDirExists = async (
   filePath: string,
-  data: string
+  data: string,
 ) => {
   const dirPath = parse(filePath).dir;
   await mkdir(dirPath, { recursive: true });
@@ -172,17 +172,17 @@ export const compileToFiles = async ({
 
   const compilationResultsWithFilePaths = isInputPathADirectory
     ? await Promise.all(
-        (
-          await getAquaFilesRecursively(compileArgs.filePath)
-        ).map(async (aquaFilePath) => {
-          return {
-            compilationResult: await compile({
-              ...compileArgs,
-              filePath: aquaFilePath,
-            }),
-            aquaFilePath,
-          };
-        })
+        (await getAquaFilesRecursively(compileArgs.filePath)).map(
+          async (aquaFilePath) => {
+            return {
+              compilationResult: await compile({
+                ...compileArgs,
+                filePath: aquaFilePath,
+              }),
+              aquaFilePath,
+            };
+          },
+        ),
       )
     : [
         {
@@ -198,7 +198,7 @@ export const compileToFiles = async ({
   const resultsWithErrors = compilationResultsWithFilePaths.filter(
     ({ compilationResult }) => {
       return compilationResult.errors.length !== 0;
-    }
+    },
   );
 
   if (resultsWithErrors.length !== 0) {
@@ -206,10 +206,10 @@ export const compileToFiles = async ({
       resultsWithErrors
         .map(({ compilationResult, aquaFilePath }) => {
           return `${color.yellow(
-            aquaFilePath
+            aquaFilePath,
           )}\n\n${compilationResult.errors.join("\n")}`;
         })
-        .join("\n\n")
+        .join("\n\n"),
     );
   }
 
@@ -219,7 +219,7 @@ export const compileToFiles = async ({
 
   assert(
     typeof outputPath === "string",
-    `outputPath type is "${typeof outputPath}", but it should be of type "string", because it's not dry run`
+    `outputPath type is "${typeof outputPath}", but it should be of type "string", because it's not dry run`,
   );
 
   await mkdir(outputPath, { recursive: true });
@@ -247,7 +247,7 @@ export const compileToFiles = async ({
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${TS_EXT}`),
-              generatedSource.tsSource
+              generatedSource.tsSource,
             ),
           ];
         }
@@ -263,11 +263,11 @@ export const compileToFiles = async ({
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${JS_EXT}`),
-              generatedSource.jsSource
+              generatedSource.jsSource,
             ),
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.d.${TS_EXT}`),
-              generatedSource.tsTypes
+              generatedSource.tsTypes,
             ),
           ];
         }
@@ -276,11 +276,11 @@ export const compileToFiles = async ({
           ([name, { script }]) => {
             return writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${name}.air`),
-              script
+              script,
             );
-          }
+          },
         );
-      }
-    )
+      },
+    ),
   );
 };

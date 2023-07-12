@@ -104,9 +104,9 @@ const validate = (config: LatestConfig): ValidationResult => {
       },
       (name): string => {
         return `There are multiple key-pairs with the same name ${color.yellow(
-          name
+          name,
         )}`;
-      }
+      },
     ),
     typeof config.defaultKeyPairName === "string"
       ? validateHasDefault(
@@ -116,10 +116,10 @@ const validate = (config: LatestConfig): ValidationResult => {
             return name;
           },
           `Default key-pair ${color.yellow(
-            config.defaultKeyPairName
-          )} not found`
+            config.defaultKeyPairName,
+          )} not found`,
         )
-      : true
+      : true,
   );
 };
 
@@ -140,11 +140,11 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initProjectSecretsConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const initReadonlyProjectSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const projectSecretsSchema: JSONSchemaType<LatestConfig> =
   configSchemaV0;

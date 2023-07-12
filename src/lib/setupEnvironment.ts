@@ -29,13 +29,13 @@ dotenv.config();
 
 const resolveEnvVariable = <T>(
   variableName: string,
-  isValid: (v: unknown) => v is T
+  isValid: (v: unknown) => v is T,
 ): T => {
   const variable = process.env[variableName];
 
   if (!isValid(variable)) {
     throw new Error(
-      `Invalid environment variable: ${variableName}="${String(variable)}"`
+      `Invalid environment variable: ${variableName}="${String(variable)}"`,
     );
   }
 
@@ -45,7 +45,7 @@ const resolveEnvVariable = <T>(
 const setEnvVariable = <T extends string>(
   variableName: string,
   isValid: (v: unknown) => v is T,
-  defaultVariable?: T
+  defaultVariable?: T,
 ) => {
   const variable = process.env[variableName];
 

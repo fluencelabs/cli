@@ -53,7 +53,7 @@ export const dealCreate = async ({
   const tx = await factory.createDeal(
     BigNumber.from(minWorkers),
     BigNumber.from(targetWorkers),
-    appCID
+    appCID,
   );
 
   const res = await waitTx(tx);
@@ -66,7 +66,7 @@ export const dealCreate = async ({
 
   assert(
     log !== undefined,
-    "DealCreated event not found. Try updating flox to the latest version"
+    "DealCreated event not found. Try updating flox to the latest version",
   );
 
   const dealAddress: unknown =

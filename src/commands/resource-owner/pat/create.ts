@@ -52,7 +52,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(CreatePAT),
-      true
+      true,
     );
 
     const network = await ensureChainNetwork({
@@ -75,7 +75,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const res = await waitTx(await deal.createProviderToken(approveTx.hash));
 
     const eventTopic = deal.interface.getEventTopic(
-      ADD_PROVIDER_TOKEN_EVENT_TOPIC
+      ADD_PROVIDER_TOKEN_EVENT_TOPIC,
     );
 
     const log = res.logs.find((log: { topics: Array<string> }) => {

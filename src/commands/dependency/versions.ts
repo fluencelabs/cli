@@ -43,7 +43,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Versions)
+      await this.parse(Versions),
     );
 
     if (flags.default) {
@@ -57,8 +57,8 @@ export default class Versions extends BaseCommand<typeof Versions> {
               getRecommendedDependencies("npm"),
             "default cargo dependencies. Can be overridden with 'fluence dependency cargo install <name>@<version>'":
               getRecommendedDependencies("cargo"),
-          }
-        )
+          },
+        ),
       );
     }
 
@@ -75,23 +75,23 @@ export default class Versions extends BaseCommand<typeof Versions> {
           [`cargo dependencies that can be overridden with \`${CLI_NAME} dependency cargo install <name>@<version>\``]:
             await resolveDependencies("cargo", maybeFluenceConfig),
           "internal dependencies": filterOutNonFluenceDependencies(
-            CLIPackageJSON.dependencies
+            CLIPackageJSON.dependencies,
           ),
           "js-client.node dependencies": filterOutNonFluenceDependencies(
-            JSClientPackageJSON.dependencies
+            JSClientPackageJSON.dependencies,
           ),
-        }
-      )
+        },
+      ),
     );
   }
 }
 
 const filterOutNonFluenceDependencies = (
-  dependencies: Record<string, string>
+  dependencies: Record<string, string>,
 ) => {
   return Object.fromEntries(
     Object.entries(dependencies).filter(([dep]) => {
       return dep.startsWith("@fluencelabs/");
-    })
+    }),
   );
 };

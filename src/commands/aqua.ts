@@ -105,7 +105,7 @@ export default class Aqua extends Command {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Aqua)
+      await this.parse(Aqua),
     );
 
     const inputFlag = await resolveAbsoluteAquaPath({
@@ -164,12 +164,12 @@ export default class Aqua extends Command {
 
       commandObj.log(
         `Successfully compiled ${color.yellow(
-          compileCommandArgs.compileArgs.filePath
+          compileCommandArgs.compileArgs.filePath,
         )}${
           compileCommandArgs.outputPath === undefined
             ? ""
             : `\nto ${color.yellow(compileCommandArgs.outputPath)}`
-        }`
+        }`,
       );
 
       await exitCli();
@@ -237,7 +237,7 @@ const resolveAbsoluteAquaPath = async ({
   if (maybePathFromFluenceYaml !== undefined) {
     if (isAbsolute(maybePathFromFluenceYaml)) {
       return commandObj.error(
-        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FULL_FILE_NAME} must not be absolute, but should be relative to the project root directory`
+        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FULL_FILE_NAME} must not be absolute, but should be relative to the project root directory`,
       );
     }
 

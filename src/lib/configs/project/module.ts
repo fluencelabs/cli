@@ -148,7 +148,7 @@ export type ModuleConfig = InitializedConfig<LatestConfig>;
 export type ModuleConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const getInitConfigOptions = (
-  configPath: string
+  configPath: string,
 ): InitConfigOptions<Config, LatestConfig> => {
   return {
     allSchemas: [configSchemaV0],
@@ -164,17 +164,17 @@ const getInitConfigOptions = (
 
 export const initReadonlyModuleConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath?: string | undefined
+  absolutePath?: string | undefined,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(
-      await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
+      await ensureModuleAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
+    ),
   )();
 };
 
 const getDefault: (name: string) => GetDefaultConfig = (
-  name: string
+  name: string,
 ): GetDefaultConfig => {
   return () => {
     return `# Module type "rust" is for the source code written in rust which can be compiled into a Marine module
@@ -225,11 +225,11 @@ version: 0
 
 export const initNewReadonlyModuleConfig = (
   configPath: string,
-  name: string
+  name: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
-    getDefault(name)
+    getDefault(name),
   )();
 };
 

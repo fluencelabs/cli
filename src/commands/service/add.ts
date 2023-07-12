@@ -54,7 +54,7 @@ export default class Add extends BaseCommand<typeof Add> {
     const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Add),
-      true
+      true,
     );
 
     const serviceOrServiceDirPathOrUrl =
@@ -63,7 +63,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     const serviceConfig = await initReadonlyServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      cwd()
+      cwd(),
     );
 
     if (serviceConfig === null) {

@@ -30,7 +30,7 @@ import { flox, initFirstTime } from "./helpers.js";
   await Promise.all(
     TEMPLATES.map((template) => {
       return initFirstTime(template);
-    })
+    }),
   );
 
   // eslint-disable-next-line no-console

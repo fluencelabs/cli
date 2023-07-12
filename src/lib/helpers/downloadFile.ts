@@ -59,7 +59,7 @@ const getHashOfString = (str: string): Promise<string> => {
 
 export const downloadFile = async (
   outputPath: string,
-  url: string
+  url: string,
 ): Promise<string> => {
   const res = await fetch(url);
 
@@ -110,7 +110,7 @@ const ARCHIVE_FILE = "archive.tar.gz";
 
 const getDownloadDirPath = async (
   get: string,
-  pathStart: string
+  pathStart: string,
 ): Promise<string> => {
   const hash = await getHashOfString(get);
   const cleanPrefix = get.replace(".tar.gz?raw=true", "");
@@ -129,7 +129,7 @@ const getDownloadDirPath = async (
 
 const downloadAndDecompress = async (
   get: string,
-  pathStart: string
+  pathStart: string,
 ): Promise<string> => {
   const dirPath = await getDownloadDirPath(get, pathStart);
 
@@ -183,7 +183,7 @@ export const getModuleWasmPath = (config: {
 
 export const getUrlOrAbsolutePath = (
   pathOrUrl: string,
-  absolutePath: string
+  absolutePath: string,
 ): string => {
   if (isUrl(pathOrUrl)) {
     return pathOrUrl;
@@ -198,11 +198,11 @@ export const getUrlOrAbsolutePath = (
 
 const ensureOrGetConfigAbsolutePath = (
   downloadOrGetFunction: (get: string) => Promise<string>,
-  configName: string
+  configName: string,
 ) => {
   return async (
     pathOrUrl: string,
-    absolutePath: string | undefined
+    absolutePath: string | undefined,
   ): Promise<string> => {
     const dirOrConfigAbsolutePath = await (async (): Promise<string> => {
       if (isUrl(pathOrUrl)) {
@@ -216,8 +216,8 @@ const ensureOrGetConfigAbsolutePath = (
       if (absolutePath === undefined) {
         throw new Error(
           `Path ${color.yellow(
-            pathOrUrl
-          )} is not absolute and no absolute path was provided`
+            pathOrUrl,
+          )} is not absolute and no absolute path was provided`,
         );
       }
 
@@ -230,22 +230,22 @@ const ensureOrGetConfigAbsolutePath = (
 
 export const ensureModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadModule,
-  MODULE_CONFIG_FULL_FILE_NAME
+  MODULE_CONFIG_FULL_FILE_NAME,
 );
 export const ensureServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadService,
-  SERVICE_CONFIG_FULL_FILE_NAME
+  SERVICE_CONFIG_FULL_FILE_NAME,
 );
 export const ensureSpellAbsolutePath = ensureOrGetConfigAbsolutePath(
   downloadSpell,
-  SPELL_CONFIG_FULL_FILE_NAME
+  SPELL_CONFIG_FULL_FILE_NAME,
 );
 
 export const getModuleAbsolutePath = ensureOrGetConfigAbsolutePath(
   getModulePathFromUrl,
-  MODULE_CONFIG_FULL_FILE_NAME
+  MODULE_CONFIG_FULL_FILE_NAME,
 );
 export const getServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   getServicePathFromUrl,
-  SERVICE_CONFIG_FULL_FILE_NAME
+  SERVICE_CONFIG_FULL_FILE_NAME,
 );

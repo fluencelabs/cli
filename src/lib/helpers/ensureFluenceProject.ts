@@ -43,7 +43,7 @@ export const ensureFluenceProject = async (): Promise<FluenceConfig> => {
 
   if (!doInit) {
     commandObj.error(
-      "Initialized fluence project is required in order to continue"
+      "Initialized fluence project is required in order to continue",
     );
   }
 

@@ -213,7 +213,7 @@ version: 0
 
 export const initNewWorkersConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 
 export const initReadonlyWorkersConfig =

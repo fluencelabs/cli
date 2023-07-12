@@ -80,9 +80,9 @@ export const execPromise = async ({
         res(
           new Error(
             `${commandFailedMessage}. Reason: Execution timed out: command didn't yield any result in ${color.yellow(
-              `${timeout}ms`
-            )}`
-          )
+              `${timeout}ms`,
+            )}`,
+          ),
         );
       }, timeout);
 
@@ -133,11 +133,11 @@ export const execPromise = async ({
 
       if (stderr.includes("linker `cc` not found")) {
         const expectedErrorMessage = `\n${color.yellow(
-          MARINE_CARGO_DEPENDENCY
+          MARINE_CARGO_DEPENDENCY,
         )} requires ${color.yellow(
-          "build-essential"
+          "build-essential",
         )} to be installed. Please install it and try again.\nOn debian-based systems (e.g. Ubuntu) you can install it using this command:\n\n${color.yellow(
-          "sudo apt install build-essential"
+          "sudo apt install build-essential",
         )}\n`;
 
         res(new CLIError(expectedErrorMessage));
