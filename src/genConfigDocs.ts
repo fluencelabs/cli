@@ -63,31 +63,30 @@ const configsInfo = Object.entries({
   };
 });
 
-const main = async (): Promise<void> => {
-  await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
-  await mkdir(DOCS_CONFIGS_DIR_PATH, { recursive: true });
+await mkdir(SCHEMAS_DIR_NAME, { recursive: true });
+await mkdir(DOCS_CONFIGS_DIR_PATH, { recursive: true });
 
-  await Promise.all(
-    configsInfo.map(({ schemaPath, schema }): Promise<void> => {
-      return writeFile(schemaPath, jsonStringify(schema), FS_OPTIONS);
-    })
-  );
+await Promise.all(
+  configsInfo.map(({ schemaPath, schema }): Promise<void> => {
+    return writeFile(schemaPath, jsonStringify(schema), FS_OPTIONS);
+  })
+);
 
-  await Promise.all(
-    configsInfo.map(async ({ schemaPath, docFileName }) => {
-      const md = await execPromise({
-        // This is a tool written in Go that is installed in CI and used for generating docs
-        command: "json-schema-docs",
-        args: ["-schema", schemaPath],
-      });
+await Promise.all(
+  configsInfo.map(async ({ schemaPath, docFileName }) => {
+    const md = await execPromise({
+      // This is a tool written in Go that is installed in CI and used for generating docs
+      command: "json-schema-docs",
+      args: ["-schema", schemaPath],
+    });
 
-      await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
-    })
-  );
+    await writeFile(join(DOCS_CONFIGS_DIR_PATH, docFileName), md, FS_OPTIONS);
+  })
+);
 
-  await writeFile(
-    join(DOCS_CONFIGS_DIR_PATH, "README.md"),
-    `# ${CLI_NAME} Configs
+await writeFile(
+  join(DOCS_CONFIGS_DIR_PATH, "README.md"),
+  `# ${CLI_NAME} Configs
 
 ${configsInfo
   .map(({ fullFileName, schema, docFileName }): string => {
@@ -96,7 +95,4 @@ ${configsInfo
     )}`;
   })
   .join("\n")}`
-  );
-};
-
-void main();
+);
