@@ -23,7 +23,7 @@ const color = oclifColor.default;
 
 import { compile } from "./aqua.js";
 import { buildModules } from "./build.js";
-import { commandObj } from "./commandObj.js";
+import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
@@ -92,16 +92,18 @@ const handlePreviouslyDeployedWorkers = async (
     return workersToDeploy;
   }
 
-  const confirmedWorkersNamesToDeploy = await checkboxes({
-    message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
-    options: previouslyDeployedWorkersNamesToBeDeployed,
-    oneChoiceMessage(workerName) {
-      return `Do you want to redeploy worker ${color.yellow(workerName)}`;
-    },
-    onNoChoices(): Array<string> {
-      return [];
-    },
-  });
+  const confirmedWorkersNamesToDeploy = isInteractive
+    ? await checkboxes({
+        message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
+        options: previouslyDeployedWorkersNamesToBeDeployed,
+        oneChoiceMessage(workerName) {
+          return `Do you want to redeploy worker ${color.yellow(workerName)}`;
+        },
+        onNoChoices(): Array<string> {
+          return [];
+        },
+      })
+    : previouslyDeployedWorkersNamesToBeDeployed;
 
   const workerNamesToRemove = previouslyDeployedWorkersNamesToBeDeployed.filter(
     (workerName) => {
