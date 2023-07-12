@@ -51,7 +51,7 @@ export default class New extends BaseCommand<typeof New> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(New)
+      await this.parse(New),
     );
 
     let serviceName = await ensureValidAquaName({
@@ -75,7 +75,7 @@ export default class New extends BaseCommand<typeof New> {
 
     const servicePath = join(
       flags.path ?? (await ensureSrcServicesDir()),
-      serviceName
+      serviceName,
     );
 
     const pathToModuleDir = join(servicePath, "modules", serviceName);
@@ -84,13 +84,13 @@ export default class New extends BaseCommand<typeof New> {
     await initNewReadonlyServiceConfig(
       servicePath,
       relative(servicePath, pathToModuleDir),
-      serviceName
+      serviceName,
     );
 
     this.log(
       `Successfully generated template for new service at ${color.yellow(
-        servicePath
-      )}`
+        servicePath,
+      )}`,
     );
 
     if (maybeFluenceConfig !== null) {
@@ -108,6 +108,6 @@ export default class New extends BaseCommand<typeof New> {
 
 const serviceAlreadyExistsError = (serviceName: string) => {
   return `Service with name ${color.yellow(
-    serviceName
+    serviceName,
   )} already exists. Please enter another name`;
 };

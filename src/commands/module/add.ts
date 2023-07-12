@@ -27,9 +27,9 @@ import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
 import { initServiceConfig } from "../../lib/configs/project/service.js";
 import {
-  FLUENCE_CONFIG_FILE_NAME,
-  MODULE_CONFIG_FILE_NAME,
-  SERVICE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  MODULE_CONFIG_FULL_FILE_NAME,
+  SERVICE_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { isUrl } from "../../lib/helpers/downloadFile.js";
 import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
@@ -40,7 +40,7 @@ import { hasKey } from "../../lib/typeHelpers.js";
 const PATH_OR_URL = "PATH | URL";
 
 export default class Add extends BaseCommand<typeof Add> {
-  static override description = `Add module to ${SERVICE_CONFIG_FILE_NAME}`;
+  static override description = `Add module to ${SERVICE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -49,7 +49,7 @@ export default class Add extends BaseCommand<typeof Add> {
       helpValue: "<name>",
     }),
     service: Flags.directory({
-      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME} or path to the service config or directory that contains ${SERVICE_CONFIG_FILE_NAME}`,
+      description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME} or path to the service config or directory that contains ${SERVICE_CONFIG_FULL_FILE_NAME}`,
       helpValue: "<name | path>",
     }),
   };
@@ -61,7 +61,7 @@ export default class Add extends BaseCommand<typeof Add> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Add)
+      await this.parse(Add),
     );
 
     const modulePathOrUrl =
@@ -75,17 +75,20 @@ export default class Add extends BaseCommand<typeof Add> {
     if (moduleConfig === null) {
       return commandObj.error(
         `${color.yellow(
-          MODULE_CONFIG_FILE_NAME
-        )} not found for ${modulePathOrUrl}`
+          MODULE_CONFIG_FULL_FILE_NAME,
+        )} not found for ${modulePathOrUrl}`,
       );
     }
 
     const serviceNameOrPath =
       flags.service ??
       (await input({
-        message: `Enter service name from ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )} or path to the service directory`,
+        message:
+          maybeFluenceConfig === null
+            ? `Enter path to the service directory`
+            : `Enter service name from ${color.yellow(
+                maybeFluenceConfig.$getPath(),
+              )} or path to the service directory`,
       }));
 
     let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
@@ -99,21 +102,21 @@ export default class Add extends BaseCommand<typeof Add> {
     if (isUrl(serviceOrServiceDirPathOrUrl)) {
       return commandObj.error(
         `Can't modify downloaded service ${color.yellow(
-          serviceOrServiceDirPathOrUrl
-        )}`
+          serviceOrServiceDirPathOrUrl,
+        )}`,
       );
     }
 
     const serviceConfig = await initServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      cwd()
+      cwd(),
     );
 
     if (serviceConfig === null) {
       return commandObj.error(
         `Can't find service config at ${color.yellow(
-          serviceOrServiceDirPathOrUrl
-        )}`
+          serviceOrServiceDirPathOrUrl,
+        )}`,
       );
     }
 
@@ -121,7 +124,7 @@ export default class Add extends BaseCommand<typeof Add> {
       return (
         !(name in serviceConfig.modules) ||
         `You already have ${color.yellow(name)} in ${color.yellow(
-          serviceConfig.$getPath()
+          serviceConfig.$getPath(),
         )}`
       );
     };
@@ -151,8 +154,8 @@ export default class Add extends BaseCommand<typeof Add> {
 
     this.log(
       `Added ${color.yellow(moduleName)} to ${color.yellow(
-        replaceHomeDir(serviceConfig.$getPath())
-      )}`
+        replaceHomeDir(serviceConfig.$getPath()),
+      )}`,
     );
   }
 }

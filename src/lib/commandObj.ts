@@ -23,7 +23,7 @@ export let isInteractive: boolean;
 
 export const setCommandObjAndIsInteractive = (
   newCommandObj: CommandObj,
-  newIsInteractive: boolean
+  newIsInteractive: boolean,
 ): void => {
   commandObj = newCommandObj;
   isInteractive = newIsInteractive;

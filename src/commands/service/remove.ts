@@ -24,7 +24,7 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { FluenceConfigReadonly } from "../../lib/configs/project/fluence.js";
-import { FLUENCE_CONFIG_FILE_NAME } from "../../lib/const.js";
+import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
 import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -32,34 +32,34 @@ import { input } from "../../lib/prompt.js";
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static override description = `Remove service from ${FLUENCE_CONFIG_FILE_NAME} services property and from all of the workers`;
+  static override description = `Remove service from ${FLUENCE_CONFIG_FULL_FILE_NAME} services property and from all of the workers`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
-      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
+      description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME}, path to a service or url to .tar.gz archive`,
     }),
   };
   async run(): Promise<void> {
     const { args, fluenceConfig } = await initCli(
       this,
       await this.parse(Remove),
-      true
+      true,
     );
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
         message: `Enter service name from ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
+          fluenceConfig.$getPath(),
         )}, path to a service or url to .tar.gz archive`,
       }));
 
     const serviceNameToRemove = await getServiceNameToRemove(
       nameOrPathOrUrl,
-      fluenceConfig
+      fluenceConfig,
     );
 
     assert(fluenceConfig.services !== undefined);
@@ -81,7 +81,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
                   }),
             },
           ];
-        })
+        }),
       );
     }
 
@@ -89,19 +89,19 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     this.log(
       `Removed service ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )}`
+        fluenceConfig.$getPath(),
+      )}`,
     );
   }
 }
 
 const getServiceNameToRemove = async (
   nameOrPathOrUrl: string,
-  fluenceConfig: FluenceConfigReadonly
+  fluenceConfig: FluenceConfigReadonly,
 ): Promise<string> => {
   if (fluenceConfig.services === undefined) {
     return commandObj.error(
-      `There are no services in ${color.yellow(fluenceConfig.$getPath())}`
+      `There are no services in ${color.yellow(fluenceConfig.$getPath())}`,
     );
   }
 
@@ -115,12 +115,12 @@ const getServiceNameToRemove = async (
         name,
         await getServiceAbsolutePath(get, fluenceConfig.$getDirPath()),
       ] as const;
-    })
+    }),
   );
 
   const absolutePathRelativeToService = await getServiceAbsolutePath(
     nameOrPathOrUrl,
-    fluenceConfig.$getDirPath()
+    fluenceConfig.$getDirPath(),
   );
 
   let [moduleNameToRemove] =
@@ -134,7 +134,7 @@ const getServiceNameToRemove = async (
 
   const absolutePathRelativeToCwd = await getServiceAbsolutePath(
     nameOrPathOrUrl,
-    cwd()
+    cwd(),
   );
 
   [moduleNameToRemove] =
@@ -148,7 +148,7 @@ const getServiceNameToRemove = async (
 
   return commandObj.error(
     `There is no service ${color.yellow(nameOrPathOrUrl)} in ${color.yellow(
-      fluenceConfig.$getPath()
-    )}`
+      fluenceConfig.$getPath(),
+    )}`,
   );
 };

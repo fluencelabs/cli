@@ -19,8 +19,10 @@ const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
 import {
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  CLI_NAME,
   PROJECT_SECRETS_CONFIG_FILE_NAME,
+  PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
 import {
@@ -48,11 +50,10 @@ type ConfigV0 = {
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROJECT_SECRETS_CONFIG_FILE_NAME}`,
-  title: PROJECT_SECRETS_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`,
+  title: PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   type: "object",
-  description:
-    "Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands",
+  description: `Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from \`${CLI_NAME} key\` group of commands`,
   properties: {
     keyPairs: {
       title: "Key Pairs",
@@ -63,18 +64,33 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     defaultKeyPairName: {
       type: "string",
       nullable: true,
-      description: `Key pair with this name will be used for the deployment by default. You can override it with flags or by using keyPair properties in ${FLUENCE_CONFIG_FILE_NAME}`,
+      description: `Key pair with this name will be used for the deployment by default. You can override it with flags or by using keyPair properties in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
     },
     version: { type: "number", const: 0 },
   },
   required: ["version", "keyPairs"],
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => {
-  return {
-    version: 0,
-    keyPairs: [],
-  };
+const getDefault: GetDefaultConfig = () => {
+  return `# Defines project's secret keys that are used only in the scope of this particular Fluence project.
+# You can manage project's keys using commands from \`fluence key\` group of commands
+
+# Key Pairs available for your fluence project
+keyPairs:
+  [
+#    {
+#      name: myKeyPair,
+#      secretKey: y5MU5/jpyGGDFlDdJa+UCSkWKNr8iGtb6bRiytc/M54=
+#    }
+  ]
+
+# Key pair with this name will be used for the deployment by default.
+# You can override it with flags or by using keyPair properties in fluence.yaml
+# defaultKeyPairName: myKeyPair
+
+# config version
+version: 0
+`;
 };
 
 const migrations: Migrations<Config> = [];
@@ -88,9 +104,9 @@ const validate = (config: LatestConfig): ValidationResult => {
       },
       (name): string => {
         return `There are multiple key-pairs with the same name ${color.yellow(
-          name
+          name,
         )}`;
-      }
+      },
     ),
     typeof config.defaultKeyPairName === "string"
       ? validateHasDefault(
@@ -100,10 +116,10 @@ const validate = (config: LatestConfig): ValidationResult => {
             return name;
           },
           `Default key-pair ${color.yellow(
-            config.defaultKeyPairName
-          )} not found`
+            config.defaultKeyPairName,
+          )} not found`,
         )
-      : true
+      : true,
   );
 };
 
@@ -124,11 +140,11 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initProjectSecretsConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const initReadonlyProjectSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const projectSecretsSchema: JSONSchemaType<LatestConfig> =
   configSchemaV0;

@@ -76,7 +76,7 @@ const prompt = async <T, U extends { [NAME]: T }>({
     flagName === undefined
       ? ""
       : `\nTry using ${color.yellow(
-          `--${flagName}`
+          `--${flagName}`,
         )} flag and make sure you use it correctly.`;
 
   const advice = `${promptMessageWarning}${flagAdvice}`;
@@ -88,8 +88,8 @@ const prompt = async <T, U extends { [NAME]: T }>({
   if (!isInteractive) {
     return commandObj.error(
       `Can't prompt when in non-interactive mode or when ${color.yellow(
-        `--${NO_INPUT_FLAG_NAME}`
-      )} is set.${advice}`
+        `--${NO_INPUT_FLAG_NAME}`,
+      )} is set.${advice}`,
     );
   }
 
@@ -185,7 +185,7 @@ type ListOptions<T, U> = DistinctQuestion & {
 };
 
 const handleList = async <T, U>(
-  listOptions: Omit<ListOptions<T, U>, keyof DistinctQuestion>
+  listOptions: Omit<ListOptions<T, U>, keyof DistinctQuestion>,
 ): Promise<{
   choices: Array<{ value: T; name: string } | SeparatorObj>;
   result?: T;
@@ -198,7 +198,7 @@ const handleList = async <T, U>(
       return choice instanceof Separator || typeof choice !== "string"
         ? choice
         : { name: choice, value: choice };
-    }
+    },
   );
 
   if (
@@ -243,7 +243,7 @@ const handleList = async <T, U>(
 };
 
 export const list = async <T, U>(
-  listOptions: ListOptions<T, U>
+  listOptions: ListOptions<T, U>,
 ): Promise<T | U> => {
   const { options, oneChoiceMessage, onNoChoices, flagName, ...question } =
     listOptions;
@@ -284,7 +284,7 @@ export const list = async <T, U>(
 };
 
 export const checkboxes = async <T, U>(
-  listOptions: ListOptions<T, U>
+  listOptions: ListOptions<T, U>,
 ): Promise<Array<T> | U> => {
   const {
     options,

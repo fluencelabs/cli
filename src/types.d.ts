@@ -19,7 +19,7 @@ declare module "replace-homedir" {
   export = replaceHomedir;
   declare function replaceHomedir(
     filepath: string,
-    replacement: string
+    replacement: string,
   ): string;
 }
 

@@ -21,8 +21,8 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { commandObj } from "../../../lib/commandObj.js";
 import {
-  CONFIG_FILE_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
+  GLOBAL_CONFIG_FULL_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   GLOBAL_FLAG,
   GLOBAL_FLAG_NAME,
@@ -39,7 +39,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
   static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside user's ${path.join(
     DOT_FLUENCE_DIR_NAME,
-    NPM_DIR_NAME
+    NPM_DIR_NAME,
   )} directory)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
@@ -53,9 +53,9 @@ export default class Install extends BaseCommand<typeof Install> {
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
-      description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FILE_NAME}, , user's ${join(
+      description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FULL_FILE_NAME}, , user's ${join(
         DOT_FLUENCE_DIR_NAME,
-        CONFIG_FILE_NAME
+        GLOBAL_CONFIG_FULL_FILE_NAME,
       )}, dependency versions recommended by fluence, latest version cargo is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0`,
     }),
   };
@@ -63,7 +63,7 @@ export default class Install extends BaseCommand<typeof Install> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Install)
+      await this.parse(Install),
     );
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
@@ -80,7 +80,7 @@ export default class Install extends BaseCommand<typeof Install> {
 
     if (!flags.global && maybeFluenceConfig === null) {
       return commandObj.error(
-        `Not a fluence project. If you wanted to install npm dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`
+        `Not a fluence project. If you wanted to install npm dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`,
       );
     }
 

@@ -17,8 +17,10 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  CLI_NAME,
   SERVICE_CONFIG_FILE_NAME,
+  SERVICE_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
 import {
@@ -73,13 +75,13 @@ type ConfigV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${SERVICE_CONFIG_FILE_NAME}`,
-  title: SERVICE_CONFIG_FILE_NAME,
-  description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use \`fluence service new\` command to generate a template for new service`,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${SERVICE_CONFIG_FULL_FILE_NAME}`,
+  title: SERVICE_CONFIG_FULL_FILE_NAME,
+  description: `Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use \`${CLI_NAME} service new\` command to generate a template for new service`,
   properties: {
     name: {
       type: "string",
-      description: `Service name. Currently it is used for the service name only when you add service to ${FLUENCE_CONFIG_FILE_NAME} using "add" command. But this name can be overridden to any other with the --name flag or manually in ${FLUENCE_CONFIG_FILE_NAME}`,
+      description: `Service name. Currently it is used for the service name only when you add service to ${FLUENCE_CONFIG_FULL_FILE_NAME} using "add" command. But this name can be overridden to any other with the --name flag or manually in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
     },
     modules: {
       title: "Modules",
@@ -106,7 +108,7 @@ export type ServiceConfig = InitializedConfig<LatestConfig>;
 export type ServiceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const validate: ConfigValidateFunction<LatestConfig> = (
-  config
+  config,
 ): ReturnType<ConfigValidateFunction<LatestConfig>> => {
   const validity = validateAquaName(config.name);
 
@@ -118,7 +120,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (
 };
 
 const getInitConfigOptions = (
-  configDirPath: string
+  configDirPath: string,
 ): InitConfigOptions<Config, LatestConfig> => {
   return {
     allSchemas: [configSchemaV0],
@@ -135,54 +137,100 @@ const getInitConfigOptions = (
 
 export const initServiceConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath: string
+  absolutePath: string,
 ): Promise<InitializedConfig<LatestConfig> | null> => {
   return getConfigInitFunction(
     getInitConfigOptions(
-      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
+      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
+    ),
   )();
 };
 
 export const initReadonlyServiceConfig = async (
   configOrConfigDirPathOrUrl: string,
-  absolutePath: string
+  absolutePath: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(
-      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath)
-    )
+      await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
+    ),
   )();
 };
 
 const getDefault: (
   relativePathToFacade: string,
-  name: string
-) => GetDefaultConfig<LatestConfig> = (
+  name: string,
+) => GetDefaultConfig = (
   relativePathToFacade: string,
-  name: string
-): GetDefaultConfig<LatestConfig> => {
-  return (): LatestConfig => {
-    return {
-      version: 0,
-      name,
-      modules: {
-        [FACADE_MODULE_NAME]: {
-          get: relativePathToFacade,
-        },
-      },
-    };
+  name: string,
+): GetDefaultConfig => {
+  return () => {
+    return `# Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services),
+# most importantly the modules that the service consists of.
+# You can use \`fluence service new\` command to generate a template for new service
+
+# Service name.
+# Currently it is used for the service name only when you add service to fluence.yaml using "add" command.
+# But this name can be overridden to any other with the --name flag or manually in fluence.yaml
+name: ${name}
+
+# A map of modules that the service consists of.
+# Service must have a facade module. Each module properties can be overridden
+modules:
+  facade: # module name
+    # Either path to the module directory or
+    # URL to the tar.gz archive which contains the content of the module directory
+    get: "${relativePathToFacade}"
+
+    # You can override module configuration here:
+
+#     # environment variables accessible by a particular module
+#     # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
+#     # Module environment variables could be examined with repl
+#     envs:
+#       ENV_VARIABLE: "env variable string value"
+#
+#     # Set true to allow module to use the Marine SDK logger
+#     loggerEnabled: true
+#
+#     # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
+#     loggingMask: 1
+#
+#     # Max size of the heap that a module can allocate in format:
+#     # [number][whitespace?][specificator?]
+#     # where ? is an optional field and specificator is one from the following (case-insensitive):
+#     # K, Kb - kilobyte
+#     # Ki, KiB - kibibyte
+#     # M, Mb - megabyte
+#     # Mi, MiB - mebibyte
+#     # G, Gb - gigabyte
+#     # Gi, GiB - gibibyte
+#     # Current limit is 4 GiB
+#     maxHeapSize: 1KiB
+#
+#     # A map of binary executable files that module is allowed to call
+#     mountedBinaries:
+#       curl: "/usr/bin/curl"
+#
+#     # A map of accessible files and their aliases.
+#     # Aliases should be used in Marine module development because it's hard to know the full path to a file
+#     volumes:
+#       alias: "some/alias/path"
+
+# config version
+version: 0
+`;
   };
 };
 
 export const initNewReadonlyServiceConfig = (
   configPath: string,
   relativePathToFacade: string,
-  name: string
+  name: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig>> => {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(configPath),
-    getDefault(relativePathToFacade, name)
+    getDefault(relativePathToFacade, name),
   )();
 };
 

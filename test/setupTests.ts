@@ -17,20 +17,20 @@
 import { TEMPLATES } from "../src/lib/const.js";
 
 import "../src/lib/setupEnvironment.js";
-import { fluence, initFirstTime } from "./helpers.js";
+import { flox, initFirstTime } from "./helpers.js";
 
 (async (): Promise<void> => {
   // eslint-disable-next-line no-console
   console.log("Setting up tests...");
 
-  await fluence({
+  await flox({
     args: ["dep", "i"],
   });
 
   await Promise.all(
     TEMPLATES.map((template) => {
       return initFirstTime(template);
-    })
+    }),
   );
 
   // eslint-disable-next-line no-console

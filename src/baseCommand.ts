@@ -35,7 +35,7 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
   protected args!: Args<T>;
 
   protected override async finally(
-    maybeError: Error | undefined
+    maybeError: Error | undefined,
   ): Promise<unknown> {
     // called after run and catch regardless of whether or not the command errored
     if (maybeError === undefined) {

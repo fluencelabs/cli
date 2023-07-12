@@ -56,11 +56,11 @@ export async function initCountly({
         platform: commandObj.config.platform,
         ...dependenciesToSegmentation(
           maybeFluenceConfig?.dependencies?.npm,
-          "npm"
+          "npm",
         ),
         ...dependenciesToSegmentation(
           maybeFluenceConfig?.dependencies?.cargo,
-          "cargo"
+          "cargo",
         ),
       },
     });
@@ -69,7 +69,7 @@ export async function initCountly({
 
 const dependenciesToSegmentation = (
   dependencies: Record<string, string> | null | undefined,
-  prefix: string
+  prefix: string,
 ): Record<string, string> => {
   return Object.entries(dependencies ?? {}).reduce((acc, [dep, version]) => {
     return {

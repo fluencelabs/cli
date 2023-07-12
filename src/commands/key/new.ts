@@ -23,8 +23,8 @@ import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
-  PROJECT_SECRETS_CONFIG_FILE_NAME,
-  USER_SECRETS_CONFIG_FILE_NAME,
+  PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
+  USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { generateKeyPair } from "../../lib/helpers/generateKeyPair.js";
@@ -34,7 +34,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
-  static override description = `Generate key-pair and store it in ${USER_SECRETS_CONFIG_FILE_NAME} or ${PROJECT_SECRETS_CONFIG_FILE_NAME}`;
+  static override description = `Generate key-pair and store it in ${USER_SECRETS_CONFIG_FULL_FILE_NAME} or ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -56,7 +56,7 @@ export default class New extends BaseCommand<typeof New> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(New)
+      await this.parse(New),
     );
 
     if (!flags.user && maybeFluenceConfig === null) {
@@ -67,7 +67,7 @@ export default class New extends BaseCommand<typeof New> {
     const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
-      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
+      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath(),
     );
 
     const enterKeyPairNameMessage = `Enter key-pair name to generate at ${secretsConfigPath}`;
@@ -79,14 +79,14 @@ export default class New extends BaseCommand<typeof New> {
       }));
 
     const validateKeyPairName = async (
-      keyPairName: string
+      keyPairName: string,
     ): Promise<true | string> => {
       return (
         (flags.user
           ? await getUserKeyPair(keyPairName)
           : await getProjectKeyPair(keyPairName)) === undefined ||
         `Key-pair with name ${color.yellow(
-          keyPairName
+          keyPairName,
         )} already exists at ${secretsConfigPath}. Please, choose another name.`
       );
     };
@@ -115,7 +115,7 @@ export default class New extends BaseCommand<typeof New> {
       (isInteractive
         ? await confirm({
             message: `Do you want to set ${color.yellow(
-              keyPairName
+              keyPairName,
             )} as default key-pair for ${secretsConfigPath}`,
           })
         : false)
@@ -133,8 +133,8 @@ export default class New extends BaseCommand<typeof New> {
 
     this.log(
       `Key-pair with name ${color.yellow(
-        keyPairName
-      )} successfully generated and saved to ${secretsConfigPath}`
+        keyPairName,
+      )} successfully generated and saved to ${secretsConfigPath}`,
     );
   }
 }

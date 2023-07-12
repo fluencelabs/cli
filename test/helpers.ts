@@ -26,7 +26,7 @@ import {
   testNet,
 } from "@fluencelabs/fluence-network-environment";
 
-import type { Template } from "../src/lib/const.js";
+import { CLI_NAME, type Template } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
 import type { FluenceEnv } from "../src/lib/multiaddres.js";
@@ -45,7 +45,7 @@ export const multiaddrs = {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
 }[process.env[FLUENCE_ENV] as FluenceEnv];
 
-type FluenceArg = {
+type FloxArg = {
   args?: ExecPromiseArg["args"];
   flags?: ExecPromiseArg["flags"];
   cwd?: string;
@@ -53,14 +53,14 @@ type FluenceArg = {
 
 const pathToFluenceExecutable = path.join(
   process.cwd(),
-  path.join("tmp", "node_modules", "@fluencelabs", "cli", "bin", "run.js")
+  path.join("tmp", "node_modules", "@fluencelabs", CLI_NAME, "bin", "run.js"),
 );
 
-export const fluence = async ({
+export const flox = async ({
   args = [],
   flags,
   cwd = process.cwd(),
-}: FluenceArg): ReturnType<typeof execPromise> => {
+}: FloxArg): ReturnType<typeof execPromise> => {
   return execPromise({
     command: pathToFluenceExecutable,
     args,
@@ -83,7 +83,7 @@ export const initFirstTime = async (template: Template) => {
   try {
     await access(templatePath);
   } catch {
-    await fluence({
+    await flox({
       args: ["init", templatePath],
       flags: { template, "no-input": true },
     });
@@ -109,7 +109,7 @@ export const initFirstTime = async (template: Template) => {
 };
 
 const generateDefaultKey = (cwd: string) => {
-  return fluence({
+  return flox({
     args: ["key", "new", "default"],
     flags: {
       default: true,
@@ -146,7 +146,7 @@ export const sleepSeconds = (s: number) => {
 
 export const sortPeers = <T extends { peer: string }>(
   { peer: peerA }: T,
-  { peer: peerB }: T
+  { peer: peerB }: T,
 ) => {
   if (peerA < peerB) {
     return -1;
@@ -164,7 +164,7 @@ export const assertHasPeer = (result: unknown) => {
     typeof result === "object" &&
       result !== null &&
       "peer" in result &&
-      typeof result.peer === "string"
+      typeof result.peer === "string",
   );
 
   return { ...result, peer: result.peer };

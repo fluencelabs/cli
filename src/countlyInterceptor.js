@@ -78,7 +78,7 @@ export const createErrorPromise = (error) => {
     Countly.log_error(
       error instanceof Error
         ? JSON.stringify(error, Object.getOwnPropertyNames(error))
-        : `Error: ${JSON.stringify(error)}`
+        : `Error: ${JSON.stringify(error)}`,
     );
   }
 
@@ -86,7 +86,7 @@ export const createErrorPromise = (error) => {
     setTimeout(() => {
       // eslint-disable-next-line no-console
       console.log(
-        "\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/fluence-cli/issues"
+        `\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/flox/issues`,
       );
 
       exitWithCode1();

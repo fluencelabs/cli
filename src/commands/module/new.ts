@@ -54,8 +54,8 @@ export default class New extends BaseCommand<typeof New> {
 
     this.log(
       `Successfully generated template for new module at ${color.yellow(
-        pathToModuleDir
-      )}`
+        pathToModuleDir,
+      )}`,
     );
   }
 }

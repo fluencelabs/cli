@@ -42,7 +42,7 @@ const ADDR_MAP: Record<Network, Array<Node>> = {
 };
 
 const resolveAddrs = (
-  maybeRelays: Relays | null | undefined
+  maybeRelays: Relays | null | undefined,
 ): Array<string> => {
   if (maybeRelays === undefined || maybeRelays === null) {
     return ADDR_MAP.kras.map((node) => {
@@ -75,7 +75,7 @@ const getRandomArrayItem = <T>(ar: Array<T>): T => {
  * @returns undefined if name is not in format `networkName-index` or Node if it is
  */
 const getMaybeNamedNode = (
-  maybeRelayName: string | undefined
+  maybeRelayName: string | undefined,
 ): undefined | Node => {
   if (maybeRelayName === undefined) {
     return undefined;
@@ -96,7 +96,7 @@ const getMaybeNamedNode = (
 
   if (typeof parseResult === "string") {
     commandObj.error(
-      `Can't parse address ${color.yellow(maybeRelayName)}: ${parseResult}`
+      `Can't parse address ${color.yellow(maybeRelayName)}: ${parseResult}`,
     );
   }
 
@@ -105,11 +105,11 @@ const getMaybeNamedNode = (
 
 const parseNamedPeer = (
   indexString: string | undefined,
-  networkName: Network
+  networkName: Network,
 ): number | string => {
   if (indexString === undefined) {
     return `You must specify peer index after dash (e.g. ${color.yellow(
-      `${networkName}-0`
+      `${networkName}-0`,
     )})`;
   }
 
@@ -132,7 +132,7 @@ const getRandomRelayAddr = (maybeRelays: Relays | null | undefined): string => {
 
 export const resolveRelay = (
   maybeRelay: string | undefined,
-  maybeRelays?: Relays | null | undefined
+  maybeRelays?: Relays | null | undefined,
 ) => {
   return (
     getMaybeNamedNode(maybeRelay)?.multiaddr ??
@@ -150,7 +150,7 @@ export const getPeerId = (addr: string): string => {
 
   if (id === null) {
     return commandObj.error(
-      `Can't extract peer id from multiaddr ${color.yellow(addr)}`
+      `Can't extract peer id from multiaddr ${color.yellow(addr)}`,
     );
   }
 

@@ -51,7 +51,7 @@ export default class Create extends BaseCommand<typeof Create> {
     const { flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Create),
-      true
+      true,
     );
 
     const dealAddress = await dealCreate({
