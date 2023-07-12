@@ -18,12 +18,9 @@ on:
       nox-image:
         description: "nox image tag"
         type: string
-        default: "fluencelabs/nox:unstable_minimal"
       deal-aurora-image:
         description: "deal-aurora image tag"
         type: string
-        # default: "docker.fluence.dev/deal-aurora:latest"
-        default: "docker.fluence.dev/aurora:main-9e7523f-4-1"
       marine-version:
         description: "marine version"
         type: string
