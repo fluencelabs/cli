@@ -16,11 +16,9 @@
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
-import { commandObj } from "../lib/commandObj.js";
 import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
 import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../lib/deployWorkers.js";
-import { getExistingKeyPair } from "../lib/keyPairs.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 
@@ -37,20 +35,8 @@ export default class Build extends BaseCommand<typeof Build> {
       true,
     );
 
-    const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);
-
-    if (defaultKeyPair instanceof Error) {
-      commandObj.error(defaultKeyPair.message);
-    }
-
     const marineCli = await initMarineCli(fluenceConfig);
-
-    await build({
-      fluenceConfig,
-      defaultKeyPair,
-      marineCli,
-    });
-
+    await build({ fluenceConfig, marineCli });
     const workerConfig = await initNewWorkersConfig();
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
   }

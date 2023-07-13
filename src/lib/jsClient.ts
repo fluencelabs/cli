@@ -39,10 +39,7 @@ export const initFluenceClient = async (
 ): Promise<void> => {
   const relay = resolveRelay(maybeRelay, maybeFluenceConfig?.relays);
   commandObj.log(`Connecting to: ${color.yellow(relay)}`);
-
-  const keyPair = await getExistingKeyPair(
-    keyPairName ?? maybeFluenceConfig?.keyPairName,
-  );
+  const keyPair = await getExistingKeyPair(keyPairName);
 
   try {
     await Fluence.connect(relay, {
