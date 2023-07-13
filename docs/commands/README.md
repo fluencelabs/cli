@@ -90,7 +90,7 @@ EXAMPLES
   $ flox aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.5.4/dist/commands/aqua.ts)_
 
 ## `flox aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -194,7 +194,7 @@ EXAMPLES
   $ flox build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.5.4/dist/commands/build.ts)_
 
 ## `flox deal deploy [WORKER-NAMES]`
 
@@ -465,7 +465,7 @@ EXAMPLES
   $ flox init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.5.4/dist/commands/init.ts)_
 
 ## `flox key default [NAME]`
 
@@ -668,7 +668,7 @@ EXAMPLES
   $ flox run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.5.4/dist/commands/run.ts)_
 
 ## `flox service add [PATH | URL]`
 
