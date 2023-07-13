@@ -26,13 +26,6 @@ import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecre
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
 import { list, type Choices } from "./prompt.js";
 
-export const getKeyPair = async (keyPairName: string | undefined) => {
-  return (
-    (await getProjectKeyPair(keyPairName)) ??
-    (await getUserKeyPair(keyPairName))
-  );
-};
-
 export const getUserKeyPair = async (
   keyPairName: string | undefined,
 ): Promise<ConfigKeyPair | undefined> => {

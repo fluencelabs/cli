@@ -27,7 +27,6 @@ import {
   AQUA_NAME_REQUIREMENTS,
   validateAquaName,
 } from "./helpers/downloadFile.js";
-import { getExistingKeyPair } from "./keyPairs.js";
 import type { MarineCLI } from "./marineCli.js";
 import { confirm, input } from "./prompt.js";
 
@@ -85,13 +84,7 @@ export const addService = async ({
     },
   };
 
-  const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);
-
-  if (defaultKeyPair instanceof Error) {
-    commandObj.error(defaultKeyPair.message);
-  }
-
-  await build({ marineCli, fluenceConfig, defaultKeyPair });
+  await build({ marineCli, fluenceConfig });
   await fluenceConfig.$commit();
 
   if (interactive) {

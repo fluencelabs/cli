@@ -24,17 +24,14 @@ import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
-import type { ConfigKeyPair } from "../lib/configs/keyPair.js";
 import type {
   FluenceConfigReadonly,
   OverrideModules,
-  ServiceDeployV1,
 } from "../lib/configs/project/fluence.js";
 import {
   initReadonlyModuleConfig,
   type ModuleConfigReadonly,
 } from "../lib/configs/project/module.js";
-import { initProjectSecretsConfig } from "../lib/configs/project/projectSecrets.js";
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
@@ -42,7 +39,6 @@ import {
   type ServiceConfigReadonly,
 } from "../lib/configs/project/service.js";
 import {
-  DEFAULT_DEPLOY_NAME,
   FS_OPTIONS,
   MODULE_CONFIG_FULL_FILE_NAME,
   MODULE_TYPE_RUST,
@@ -53,18 +49,14 @@ import {
   getUrlOrAbsolutePath,
   getModuleWasmPath,
   isUrl,
-  validateAquaName,
 } from "../lib/helpers/downloadFile.js";
 import { generateAquaInterfaceForService } from "../lib/helpers/generateServiceInterface.js";
 import type { MarineCLI } from "../lib/marineCli.js";
-import { confirm } from "../lib/prompt.js";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
-import { generateKeyPair } from "./helpers/generateKeyPair.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { getKeyPair } from "./keyPairs.js";
 import {
   ensureFluenceAquaServicesPath,
   getCargoTomlPath,
@@ -75,14 +67,10 @@ type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
   moduleConfig: ServiceModuleV0;
 };
-type ServiceInfoWithUnresolvedModuleConfigs = Omit<
-  ServiceDeployV1,
-  "overrideModules" | "keyPairName"
-> & {
+type ServiceInfoWithUnresolvedModuleConfigs = {
   serviceName: string;
   serviceDirPath: string;
   moduleNamesAndConfigsDefinedInService: Array<ModuleNameAndConfigDefinedInService>;
-  keyPair: ConfigKeyPair;
 };
 
 type ServiceInfo = Omit<
@@ -94,12 +82,10 @@ type ServiceInfo = Omit<
 
 type ResolveServiceInfosArg = {
   fluenceConfig: FluenceConfigReadonly;
-  defaultKeyPair: ConfigKeyPair;
 };
 
 const resolveServiceInfos = async ({
   fluenceConfig,
-  defaultKeyPair,
 }: ResolveServiceInfosArg): Promise<
   ServiceInfoWithUnresolvedModuleConfigs[]
 > => {
@@ -119,57 +105,15 @@ const resolveServiceInfos = async ({
   type ServiceConfigPromises = Promise<{
     serviceName: string;
     serviceConfig: ServiceConfigReadonly;
-    deploy: Array<ServiceDeployV1>;
-    keyPair: ConfigKeyPair;
   }>;
 
   startSpinner("Making sure all services are downloaded");
 
-  const projectSecretsConfig = await initProjectSecretsConfig();
-
-  const ensureKeyPair = async (
-    defaultKeyPair: ConfigKeyPair,
-    keyPairName: string | undefined,
-  ): Promise<ConfigKeyPair> => {
-    if (keyPairName === undefined) {
-      return defaultKeyPair;
-    }
-
-    let keyPair = await getKeyPair(keyPairName);
-
-    if (keyPair === undefined) {
-      stopSpinner("paused");
-
-      commandObj.warn(`Key pair ${color.yellow(keyPairName)} not found`);
-
-      const doGenerate = await confirm({
-        message: `Do you want to generate new key-pair ${color.yellow(
-          keyPairName,
-        )} for your project?`,
-      });
-
-      if (!doGenerate) {
-        return commandObj.error("Aborted");
-      }
-
-      keyPair = generateKeyPair(keyPairName);
-      projectSecretsConfig.keyPairs.push(keyPair);
-      await projectSecretsConfig.$commit();
-    }
-
-    return keyPair;
-  };
-
   const serviceConfigs = await Promise.all(
     Object.entries(fluenceConfig.services).map(
-      async ([
-        serviceName,
-        { get, deploy = [{ deployId: DEFAULT_DEPLOY_NAME }], keyPairName },
-      ]): ServiceConfigPromises => {
+      async ([serviceName, { get }]): ServiceConfigPromises => {
         return {
           serviceName,
-          deploy,
-          keyPair: await ensureKeyPair(defaultKeyPair, keyPairName),
           serviceConfig:
             (await initReadonlyServiceConfig(get, projectRootDir)) ??
             commandObj.error(
@@ -191,49 +135,16 @@ const resolveServiceInfos = async ({
   stopSpinner();
 
   return Promise.all(
-    serviceConfigs.flatMap(
-      ({
+    serviceConfigs.flatMap(({ serviceName, serviceConfig }) => {
+      const serviceDirPath = serviceConfig.$getDirPath();
+
+      return {
         serviceName,
-        deploy,
-        serviceConfig,
-        keyPair,
-      }): Array<Promise<ServiceInfoWithUnresolvedModuleConfigs>> => {
-        return deploy.flatMap(
-          async ({
-            overrideModules,
-            keyPairName,
-            ...rest
-          }): Promise<ServiceInfoWithUnresolvedModuleConfigs> => {
-            const { deployId } = rest;
-            const deployIdValidity = validateAquaName(deployId);
-
-            if (deployIdValidity !== true) {
-              return commandObj.error(
-                `deployId ${color.yellow(deployId)} ${deployIdValidity}`,
-              );
-            }
-
-            const serviceDirPath = serviceConfig.$getDirPath();
-
-            return {
-              serviceName,
-              serviceDirPath,
-              moduleNamesAndConfigsDefinedInService:
-                getModuleNamesAndConfigsDefinedInServices({
-                  deployId,
-                  overrideModules,
-                  serviceConfigModules: serviceConfig.modules,
-                  serviceDirPath,
-                  serviceName,
-                  fluenceConfigPath: fluenceConfig.$getPath(),
-                }),
-              keyPair: await ensureKeyPair(keyPair, keyPairName),
-              ...rest,
-            };
-          },
-        );
-      },
-    ),
+        serviceDirPath,
+        moduleNamesAndConfigsDefinedInService:
+          getModuleNamesAndConfigsDefinedInServices(serviceConfig.modules),
+      };
+    }),
   );
 };
 
@@ -543,54 +454,13 @@ export const buildModules = async (
   });
 };
 
-const overrideModule = (
-  mod: ServiceModuleV0,
-  overrideModules: OverrideModules | undefined,
-  moduleName: string,
-): ServiceModuleV0 => {
-  return { ...mod, ...overrideModules?.[moduleName] };
-};
-
 type GetModuleNamesAndConfigsDefinedInServicesArg = {
-  overrideModules: OverrideModules | undefined;
-  serviceName: string;
-  deployId: string;
-  serviceDirPath: string;
-  serviceConfigModules: { facade: ServiceModuleV0 } & Record<
-    string,
-    ServiceModuleV0
-  >;
-  fluenceConfigPath: string;
-};
+  facade: ServiceModuleV0;
+} & Record<string, ServiceModuleV0>;
 
-const getModuleNamesAndConfigsDefinedInServices = ({
-  overrideModules,
-  serviceName,
-  deployId,
-  serviceDirPath,
-  serviceConfigModules,
-  fluenceConfigPath,
-}: GetModuleNamesAndConfigsDefinedInServicesArg): ModuleNameAndConfigDefinedInService[] => {
-  const modulesNotFoundInServiceYaml = Object.keys(
-    overrideModules ?? {},
-  ).filter((moduleName): boolean => {
-    return !(moduleName in serviceConfigModules);
-  });
-
-  if (modulesNotFoundInServiceYaml.length > 0) {
-    commandObj.error(
-      `${color.yellow(fluenceConfigPath)} has service ${color.yellow(
-        serviceName,
-      )} with deployId ${color.yellow(
-        deployId,
-      )} that has moduleOverrides for modules that don't exist in the service ${color.yellow(
-        serviceDirPath,
-      )}. Please make sure ${color.yellow(
-        modulesNotFoundInServiceYaml.join(", "),
-      )} spelled correctly `,
-    );
-  }
-
+const getModuleNamesAndConfigsDefinedInServices = (
+  serviceConfigModules: GetModuleNamesAndConfigsDefinedInServicesArg,
+): ModuleNameAndConfigDefinedInService[] => {
   const { [FACADE_MODULE_NAME]: facadeModule, ...otherModules } =
     serviceConfigModules;
 
@@ -598,17 +468,13 @@ const getModuleNamesAndConfigsDefinedInServices = ({
     ...Object.entries(otherModules).map(
       ([moduleName, mod]): ModuleNameAndConfigDefinedInService => {
         return {
-          moduleConfig: overrideModule(mod, overrideModules, moduleName),
+          moduleConfig: mod,
           moduleName,
         };
       },
     ),
     {
-      moduleConfig: overrideModule(
-        facadeModule,
-        overrideModules,
-        FACADE_MODULE_NAME,
-      ),
+      moduleConfig: facadeModule,
       moduleName: FACADE_MODULE_NAME,
     },
   ];

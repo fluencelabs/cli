@@ -27,14 +27,11 @@ import versions from "../../../versions.json" assert { type: "json" };
 import { ajv } from "../../ajvInstance.js";
 import {
   DEFAULT_CHAIN_NETWORK,
-  AUTO_GENERATED,
   type ChainNetwork,
   CHAIN_NETWORKS,
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
-  PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-  USER_SECRETS_CONFIG_FULL_FILE_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   AQUA_DIR_NAME,
@@ -110,39 +107,17 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 };
 
 export type OverrideModules = Record<string, OverridableModuleProperties>;
-export type ServiceDeployV1 = {
-  deployId: string;
-  count?: number;
-  peerId?: string;
-  peerIds?: Array<string>;
-  overrideModules?: OverrideModules;
-  keyPairName?: string;
-};
 
 type ServiceV1 = {
   get: string;
   overrideModules?: OverrideModules;
-  deploy?: Array<ServiceDeployV1>;
-  keyPairName?: string;
 };
 
 type ConfigV1 = {
   version: 1;
   services?: Record<string, ServiceV1>;
   relays?: Relays;
-  keyPairName?: string;
 };
-
-const keyPairName = {
-  type: "string",
-  nullable: true,
-  description: `The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
-1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FULL_FILE_NAME}
-1. "defaultKeyPairName" property from ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
-1. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-1. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-1. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-} as const;
 
 const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
   type: "object",
@@ -176,66 +151,6 @@ const serviceSchema: JSONSchemaType<ServiceV1> = {
       nullable: true,
       required: [],
     },
-    deploy: {
-      type: "array",
-      title: "Deployment list",
-      nullable: true,
-      description:
-        "[DEPRECATED!] List of deployments for the particular service",
-      items: {
-        type: "object",
-        title: "Deployment",
-        description:
-          "A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, etc.",
-        properties: {
-          keyPairName,
-          deployId: {
-            type: "string",
-            description: `This id can be used in Aqua to access actually deployed peer and service ids. The ID must start with a lowercase letter and contain only letters, numbers, and underscores.`,
-          },
-          count: {
-            type: "number",
-            minimum: 1,
-            nullable: true,
-            description: `Number of services to deploy. Default: 1 or if "peerIds" property is provided - exactly the number of peerIds`,
-          },
-          peerId: {
-            type: "string",
-            nullable: true,
-            description: `Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of ${FLUENCE_CONFIG_FULL_FILE_NAME} are selected for each deploy. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FULL_FILE_NAME})`,
-          },
-          peerIds: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-            nullable: true,
-            title: "Peer ids",
-            description: `Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of ${FLUENCE_CONFIG_FULL_FILE_NAME})`,
-          },
-          overrideModules: {
-            type: "object",
-            title: "Overrides",
-            description: "A map of modules to override",
-            additionalProperties: {
-              type: "object",
-              title: "Module overrides",
-              description:
-                "Module names as keys and overrides for the module config as values",
-              properties: {
-                ...overridableModuleProperties,
-              },
-              required: [],
-              nullable: true,
-            },
-            nullable: true,
-            required: [],
-          },
-        },
-        required: ["deployId"],
-      },
-    },
-    keyPairName,
   },
   required: ["get"],
 } as const;
@@ -269,7 +184,6 @@ const configSchemaV1Obj = {
       ],
       nullable: true,
     },
-    keyPairName,
     version: { type: "number", const: 1 },
   },
   required: ["version"],
@@ -586,8 +500,6 @@ version: 2
 #   myService: # service name
 #     # Path to service directory, service config or URL to the tar.gz archive that contains the service
 #     get: "src/services/myService"
-#     # The name of the Key Pair to use for this service
-#     keyPairName: default
 #     # A map of modules that you want to override for this service
 #     overrideModules:
 #       moduleName: # module name
@@ -724,16 +636,6 @@ version: 2
 #   cargo:
 #     ${MARINE_CARGO_DEPENDENCY}: ${versions.cargo.marine}
 #
-#
-# # The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):
-# # 1. "defaultKeyPairName" property from ${USER_SECRETS_CONFIG_FULL_FILE_NAME}
-# # 2. "defaultKeyPairName" property from ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
-# # 3. "keyPairName" property from the top level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# # 4. "keyPairName" property from the "services" level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# # 5. "keyPairName" property from the individual "deploy" property item level of ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# keyPairName: ${AUTO_GENERATED}
-#
-#
 # # if you want to deploy your services to specific peerIds. Soon it will be deprecated in favor of \`deals\` property
 # hosts:
 #   ${DEFAULT_WORKER_NAME}: # worker name
@@ -761,7 +663,7 @@ const migrations: Migrations<Config> = [
     }
 
     const services = config.services.reduce<Record<string, ServiceV1>>(
-      (acc, { name, count = 1 }, i): Record<string, ServiceV1> => {
+      (acc, { name }): Record<string, ServiceV1> => {
         return {
           ...acc,
           [name]: {
@@ -769,9 +671,6 @@ const migrations: Migrations<Config> = [
               projectRootDir,
               path.join(projectRootDir, "artifacts", name),
             ),
-            deploy: [
-              { deployId: `default_${i}`, ...(count > 1 ? { count } : {}) },
-            ],
           },
         };
       },
@@ -931,40 +830,6 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
 
   if (typeof validity === "string") {
     return validity;
-  }
-
-  // legacy deploy validation
-
-  const notUnique: Array<{
-    serviceName: string;
-    notUniqueDeployIds: Set<string>;
-  }> = [];
-
-  for (const [serviceName, { deploy }] of Object.entries(config.services)) {
-    const deployIds = new Set<string>();
-    const notUniqueDeployIds = new Set<string>();
-
-    for (const { deployId } of deploy ?? []) {
-      if (deployIds.has(deployId)) {
-        notUniqueDeployIds.add(deployId);
-      }
-
-      deployIds.add(deployId);
-    }
-
-    if (notUniqueDeployIds.size > 0) {
-      notUnique.push({ serviceName, notUniqueDeployIds });
-    }
-  }
-
-  if (notUnique.length > 0) {
-    return `Deploy ids must be unique. Not unique deploy ids found:\n${notUnique
-      .map(({ serviceName, notUniqueDeployIds }): string => {
-        return `${color.yellow(serviceName)}: ${[...notUniqueDeployIds].join(
-          ", ",
-        )}`;
-      })
-      .join("\n")}`;
   }
 
   return true;
