@@ -464,9 +464,9 @@ const getModuleNamesAndConfigsDefinedInServices = (
 
   return [
     ...Object.entries(otherModules).map(
-      ([moduleName, mod]): ModuleNameAndConfigDefinedInService => {
+      ([moduleName, moduleConfig]): ModuleNameAndConfigDefinedInService => {
         return {
-          moduleConfig: mod,
+          moduleConfig,
           moduleName,
         };
       },
