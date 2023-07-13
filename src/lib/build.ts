@@ -136,11 +136,9 @@ const resolveServiceInfos = async ({
 
   return Promise.all(
     serviceConfigs.map(({ serviceName, serviceConfig }) => {
-      const serviceDirPath = serviceConfig.$getDirPath();
-
       return {
         serviceName,
-        serviceDirPath,
+        serviceDirPath: serviceConfig.$getDirPath(),
         moduleNamesAndConfigsDefinedInService:
           getModuleNamesAndConfigsDefinedInServices(serviceConfig.modules),
       };
