@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.4](https://github.com/fluencelabs/flox/compare/flox-v0.5.3...flox-v0.5.4) (2023-07-13)
+
+
+### Features
+
+* `fluence deal deploy --no-input` to update deal without asking [DXJ-410] ([#328](https://github.com/fluencelabs/flox/issues/328)) ([f35ccc6](https://github.com/fluencelabs/flox/commit/f35ccc6a9cbd8f0c728cfd9300ea1fc12484855b))
+* add examples and comments to configs [DXJ-334] ([#327](https://github.com/fluencelabs/flox/issues/327)) ([09d28d6](https://github.com/fluencelabs/flox/commit/09d28d66e66990ac6a59e263111b75c918b3054e))
+* improve ts template [DXJ-405] ([#329](https://github.com/fluencelabs/flox/issues/329)) ([d82e147](https://github.com/fluencelabs/flox/commit/d82e1473f08b1352819afe3a78a5292030b4ea35))
+* remove legacy deploy remains ([#349](https://github.com/fluencelabs/flox/issues/349)) ([82171cb](https://github.com/fluencelabs/flox/commit/82171cb6fffb1a22bb6256b8154e8522170c2148))
+* rename to flox [DXJ-381] ([#298](https://github.com/fluencelabs/flox/issues/298)) ([ff5bd0d](https://github.com/fluencelabs/flox/commit/ff5bd0d0d7c17814fbef1148f6e0fc911a4f9eeb))
+
+
+### Bug Fixes
+
+* **deps:** update dependency ipfs-http-client to v60.0.1 ([#335](https://github.com/fluencelabs/flox/issues/335)) ([97a4d5b](https://github.com/fluencelabs/flox/commit/97a4d5b8359555e844828a4f5ddfeeeb4fccd941))
+* **deps:** update dependency semver to v7.5.4 ([#336](https://github.com/fluencelabs/flox/issues/336)) ([56dcb3b](https://github.com/fluencelabs/flox/commit/56dcb3b2210bf0a4c81fde9d18ac712973ae66f6))
+* skip generating js and ts files instead of throwing for aqua files that don't export anything ([#341](https://github.com/fluencelabs/flox/issues/341)) ([6fdeb4e](https://github.com/fluencelabs/flox/commit/6fdeb4e23625fae2f4ce9d9b2bbddc1a032f0f47))
+
 ## [0.5.3](https://github.com/fluencelabs/fluence-cli/compare/fluence-cli-v0.5.2...fluence-cli-v0.5.3) (2023-07-05)
 
 
