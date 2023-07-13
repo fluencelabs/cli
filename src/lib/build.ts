@@ -135,7 +135,7 @@ const resolveServiceInfos = async ({
   stopSpinner();
 
   return Promise.all(
-    serviceConfigs.flatMap(({ serviceName, serviceConfig }) => {
+    serviceConfigs.map(({ serviceName, serviceConfig }) => {
       const serviceDirPath = serviceConfig.$getDirPath();
 
       return {
