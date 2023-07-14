@@ -1,6 +1,6 @@
 # project-secrets.yaml
 
-Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `Fluence CLI key` group of commands
+Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands
 
 ## Properties
 

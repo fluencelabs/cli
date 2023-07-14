@@ -1,6 +1,6 @@
 # workers.yaml
 
-A result of app deployment. This file is created automatically after successful deployment using `Fluence CLI workers deploy` command
+A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command
 
 ## Properties
 

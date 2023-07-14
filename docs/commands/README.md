@@ -1,45 +1,45 @@
 # Commands
 <!-- commands -->
-* [`Fluence CLI air beautify [PATH]`](#Fluence CLI-air-beautify-path)
-* [`Fluence CLI aqua`](#Fluence CLI-aqua)
-* [`Fluence CLI aqua json [FUNC] [INPUT] [OUTPUT]`](#Fluence CLI-aqua-json-func-input-output)
-* [`Fluence CLI aqua yml [FUNC] [INPUT] [OUTPUT]`](#Fluence CLI-aqua-yml-func-input-output)
-* [`Fluence CLI autocomplete [SHELL]`](#Fluence CLI-autocomplete-shell)
-* [`Fluence CLI build`](#Fluence CLI-build)
-* [`Fluence CLI deal deploy [WORKER-NAMES]`](#Fluence CLI-deal-deploy-worker-names)
-* [`Fluence CLI deal logs [WORKER-NAMES]`](#Fluence CLI-deal-logs-worker-names)
-* [`Fluence CLI default peers [NETWORK]`](#Fluence CLI-default-peers-network)
-* [`Fluence CLI dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#Fluence CLI-dependency-cargo-install-package-name--package-nameversion)
-* [`Fluence CLI dependency install`](#Fluence CLI-dependency-install)
-* [`Fluence CLI dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#Fluence CLI-dependency-npm-install-package-name--package-nameversion)
-* [`Fluence CLI dependency reset`](#Fluence CLI-dependency-reset)
-* [`Fluence CLI dependency versions`](#Fluence CLI-dependency-versions)
-* [`Fluence CLI help [COMMANDS]`](#Fluence CLI-help-commands)
-* [`Fluence CLI init [PATH]`](#Fluence CLI-init-path)
-* [`Fluence CLI key default [NAME]`](#Fluence CLI-key-default-name)
-* [`Fluence CLI key new [NAME]`](#Fluence CLI-key-new-name)
-* [`Fluence CLI key remove [NAME]`](#Fluence CLI-key-remove-name)
-* [`Fluence CLI module add [PATH | URL]`](#Fluence CLI-module-add-path--url)
-* [`Fluence CLI module new [NAME]`](#Fluence CLI-module-new-name)
-* [`Fluence CLI module remove [NAME | PATH | URL]`](#Fluence CLI-module-remove-name--path--url)
-* [`Fluence CLI resource-owner pat create [DEAL-ADDRESS]`](#Fluence CLI-resource-owner-pat-create-deal-address)
-* [`Fluence CLI run`](#Fluence CLI-run)
-* [`Fluence CLI service add [PATH | URL]`](#Fluence CLI-service-add-path--url)
-* [`Fluence CLI service new [NAME]`](#Fluence CLI-service-new-name)
-* [`Fluence CLI service remove [NAME | PATH | URL]`](#Fluence CLI-service-remove-name--path--url)
-* [`Fluence CLI service repl [NAME | PATH | URL]`](#Fluence CLI-service-repl-name--path--url)
-* [`Fluence CLI spell new [NAME]`](#Fluence CLI-spell-new-name)
-* [`Fluence CLI workers deploy [WORKER-NAMES]`](#Fluence CLI-workers-deploy-worker-names)
-* [`Fluence CLI workers logs [WORKER-NAMES]`](#Fluence CLI-workers-logs-worker-names)
-* [`Fluence CLI workers upload [WORKER-NAMES]`](#Fluence CLI-workers-upload-worker-names)
+* [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
+* [`fluence aqua`](#fluence-aqua)
+* [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
+* [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
+* [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence build`](#fluence-build)
+* [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
+* [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
+* [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
+* [`fluence dependency install`](#fluence-dependency-install)
+* [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
+* [`fluence dependency reset`](#fluence-dependency-reset)
+* [`fluence dependency versions`](#fluence-dependency-versions)
+* [`fluence help [COMMANDS]`](#fluence-help-commands)
+* [`fluence init [PATH]`](#fluence-init-path)
+* [`fluence key default [NAME]`](#fluence-key-default-name)
+* [`fluence key new [NAME]`](#fluence-key-new-name)
+* [`fluence key remove [NAME]`](#fluence-key-remove-name)
+* [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
+* [`fluence module new [NAME]`](#fluence-module-new-name)
+* [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
+* [`fluence run`](#fluence-run)
+* [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
+* [`fluence service new [NAME]`](#fluence-service-new-name)
+* [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
+* [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence spell new [NAME]`](#fluence-spell-new-name)
+* [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
+* [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
+* [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
 
-## `Fluence CLI air beautify [PATH]`
+## `fluence air beautify [PATH]`
 
 Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
 
 ```
 USAGE
-  $ Fluence CLI air beautify [PATH] [--no-input]
+  $ fluence air beautify [PATH] [--no-input]
 
 ARGUMENTS
   PATH  Path to an AIR file. Must be relative to the current working directory or absolute
@@ -52,17 +52,17 @@ DESCRIPTION
   to be read by mere mortals.
 
 ALIASES
-  $ Fluence CLI air b
+  $ fluence air b
 ```
 
-## `Fluence CLI aqua`
+## `fluence aqua`
 
 Compile aqua file or directory that contains your .aqua files
 
 ```
 USAGE
-  $ Fluence CLI aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air | --js]
-    [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
+  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air |
+    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
 
 FLAGS
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
@@ -87,18 +87,18 @@ DESCRIPTION
   Compile aqua file or directory that contains your .aqua files
 
 EXAMPLES
-  $ Fluence CLI aqua
+  $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/Fluence CLI/blob/v0.5.3/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/aqua.ts)_
 
-## `Fluence CLI aqua json [FUNC] [INPUT] [OUTPUT]`
+## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
 Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
-  $ Fluence CLI aqua json [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua json [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
   FUNC    Name of the exported function
@@ -117,13 +117,13 @@ DESCRIPTION
   what they translate into
 ```
 
-## `Fluence CLI aqua yml [FUNC] [INPUT] [OUTPUT]`
+## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
 
 Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
-  $ Fluence CLI aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
   FUNC    Name of the exported function
@@ -142,16 +142,16 @@ DESCRIPTION
   what they translate into
 
 ALIASES
-  $ Fluence CLI aqua yaml
+  $ fluence aqua yaml
 ```
 
-## `Fluence CLI autocomplete [SHELL]`
+## `fluence autocomplete [SHELL]`
 
 display autocomplete installation instructions
 
 ```
 USAGE
-  $ Fluence CLI autocomplete [SHELL] [-r]
+  $ fluence autocomplete [SHELL] [-r]
 
 ARGUMENTS
   SHELL  (zsh|bash|powershell) Shell type
@@ -163,26 +163,26 @@ DESCRIPTION
   display autocomplete installation instructions
 
 EXAMPLES
-  $ Fluence CLI autocomplete
+  $ fluence autocomplete
 
-  $ Fluence CLI autocomplete bash
+  $ fluence autocomplete bash
 
-  $ Fluence CLI autocomplete zsh
+  $ fluence autocomplete zsh
 
-  $ Fluence CLI autocomplete powershell
+  $ fluence autocomplete powershell
 
-  $ Fluence CLI autocomplete --refresh-cache
+  $ fluence autocomplete --refresh-cache
 ```
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.1/src/commands/autocomplete/index.ts)_
 
-## `Fluence CLI build`
+## `fluence build`
 
 Build all application services, described in fluence.yaml and generate aqua interfaces for them
 
 ```
 USAGE
-  $ Fluence CLI build [--no-input]
+  $ fluence build [--no-input]
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
@@ -191,18 +191,18 @@ DESCRIPTION
   Build all application services, described in fluence.yaml and generate aqua interfaces for them
 
 EXAMPLES
-  $ Fluence CLI build
+  $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/Fluence CLI/blob/v0.5.3/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/build.ts)_
 
-## `Fluence CLI deal deploy [WORKER-NAMES]`
+## `fluence deal deploy [WORKER-NAMES]`
 
 Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ Fluence CLI deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
     [--tracing]
 
@@ -229,16 +229,16 @@ DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
 
 EXAMPLES
-  $ Fluence CLI deal deploy
+  $ fluence deal deploy
 ```
 
-## `Fluence CLI deal logs [WORKER-NAMES]`
+## `fluence deal logs [WORKER-NAMES]`
 
 Get logs from deployed workers for deals listed in workers.yaml
 
 ```
 USAGE
-  $ Fluence CLI deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+  $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--tracing]
 
 ARGUMENTS
@@ -260,16 +260,16 @@ DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
 
 EXAMPLES
-  $ Fluence CLI deal logs
+  $ fluence deal logs
 ```
 
-## `Fluence CLI default peers [NETWORK]`
+## `fluence default peers [NETWORK]`
 
 Print default Fluence network peer addresses
 
 ```
 USAGE
-  $ Fluence CLI default peers [NETWORK] [--no-input]
+  $ fluence default peers [NETWORK] [--no-input]
 
 ARGUMENTS
   NETWORK  Network to use. One of kras, stage, testnet
@@ -281,17 +281,17 @@ DESCRIPTION
   Print default Fluence network peer addresses
 
 EXAMPLES
-  $ Fluence CLI default peers
+  $ fluence default peers
 ```
 
-## `Fluence CLI dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo directory)
 
 ```
 USAGE
-  $ Fluence CLI dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
-  [--global]
+  $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
+    [--global]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -312,20 +312,20 @@ DESCRIPTION
   directory)
 
 ALIASES
-  $ Fluence CLI dependency cargo i
-  $ Fluence CLI dep cargo i
+  $ fluence dependency cargo i
+  $ fluence dep cargo i
 
 EXAMPLES
-  $ Fluence CLI dependency cargo install
+  $ fluence dependency cargo install
 ```
 
-## `Fluence CLI dependency install`
+## `fluence dependency install`
 
 Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ```
 USAGE
-  $ Fluence CLI dependency install [--no-input] [--force]
+  $ fluence dependency install [--no-input] [--force]
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -335,20 +335,20 @@ DESCRIPTION
   Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ALIASES
-  $ Fluence CLI dependency i
-  $ Fluence CLI dep i
+  $ fluence dependency i
+  $ fluence dep i
 
 EXAMPLES
-  $ Fluence CLI dependency install
+  $ fluence dependency install
 ```
 
-## `Fluence CLI dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm directory)
 
 ```
 USAGE
-  $ Fluence CLI dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
+  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -367,20 +367,20 @@ DESCRIPTION
   directory)
 
 ALIASES
-  $ Fluence CLI dependency npm i
-  $ Fluence CLI dep npm i
+  $ fluence dependency npm i
+  $ fluence dep npm i
 
 EXAMPLES
-  $ Fluence CLI dependency npm install
+  $ fluence dependency npm install
 ```
 
-## `Fluence CLI dependency reset`
+## `fluence dependency reset`
 
 Reset all project dependencies to recommended versions for the current Fluence CLI version
 
 ```
 USAGE
-  $ Fluence CLI dependency reset [--no-input] [--global] [--all]
+  $ fluence dependency reset [--no-input] [--global] [--all]
 
 FLAGS
   --all       Remove all dependencies, not only recommended ones
@@ -391,20 +391,20 @@ DESCRIPTION
   Reset all project dependencies to recommended versions for the current Fluence CLI version
 
 ALIASES
-  $ Fluence CLI dependency r
-  $ Fluence CLI dep r
+  $ fluence dependency r
+  $ fluence dep r
 
 EXAMPLES
-  $ Fluence CLI dependency reset
+  $ fluence dependency reset
 ```
 
-## `Fluence CLI dependency versions`
+## `fluence dependency versions`
 
 Get versions of all dependencies
 
 ```
 USAGE
-  $ Fluence CLI dependency versions [--no-input] [--default]
+  $ fluence dependency versions [--no-input] [--default]
 
 FLAGS
   --default   Display default npm and cargo dependencies and their versions for current CLI version. Default npm
@@ -415,21 +415,21 @@ DESCRIPTION
   Get versions of all dependencies
 
 ALIASES
-  $ Fluence CLI dependency v
-  $ Fluence CLI dep v
-  $ Fluence CLI dep versions
+  $ fluence dependency v
+  $ fluence dep v
+  $ fluence dep versions
 
 EXAMPLES
-  $ Fluence CLI dependency versions
+  $ fluence dependency versions
 ```
 
-## `Fluence CLI help [COMMANDS]`
+## `fluence help [COMMANDS]`
 
-Display help for Fluence CLI.
+Display help for fluence.
 
 ```
 USAGE
-  $ Fluence CLI help [COMMANDS] [-n]
+  $ fluence help [COMMANDS] [-n]
 
 ARGUMENTS
   COMMANDS  Command to show help for.
@@ -438,18 +438,18 @@ FLAGS
   -n, --nested-commands  Include all nested commands in the output.
 
 DESCRIPTION
-  Display help for Fluence CLI.
+  Display help for fluence.
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.11/src/commands/help.ts)_
 
-## `Fluence CLI init [PATH]`
+## `fluence init [PATH]`
 
 Initialize fluence project
 
 ```
 USAGE
-  $ Fluence CLI init [PATH] [--no-input] [-t <value>]
+  $ fluence init [PATH] [--no-input] [-t <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -462,18 +462,18 @@ DESCRIPTION
   Initialize fluence project
 
 EXAMPLES
-  $ Fluence CLI init
+  $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/Fluence CLI/blob/v0.5.3/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/init.ts)_
 
-## `Fluence CLI key default [NAME]`
+## `fluence key default [NAME]`
 
 Set default key-pair for user or project
 
 ```
 USAGE
-  $ Fluence CLI key default [NAME] [--no-input] [--user]
+  $ fluence key default [NAME] [--no-input] [--user]
 
 ARGUMENTS
   NAME  Key-pair name
@@ -486,16 +486,16 @@ DESCRIPTION
   Set default key-pair for user or project
 
 EXAMPLES
-  $ Fluence CLI key default
+  $ fluence key default
 ```
 
-## `Fluence CLI key new [NAME]`
+## `fluence key new [NAME]`
 
 Generate key-pair and store it in user-secrets.yaml or project-secrets.yaml
 
 ```
 USAGE
-  $ Fluence CLI key new [NAME] [--no-input] [--user] [--default]
+  $ fluence key new [NAME] [--no-input] [--user] [--default]
 
 ARGUMENTS
   NAME  Key-pair name
@@ -509,16 +509,16 @@ DESCRIPTION
   Generate key-pair and store it in user-secrets.yaml or project-secrets.yaml
 
 EXAMPLES
-  $ Fluence CLI key new
+  $ fluence key new
 ```
 
-## `Fluence CLI key remove [NAME]`
+## `fluence key remove [NAME]`
 
 Remove key-pair from user-secrets.yaml or project-secrets.yaml
 
 ```
 USAGE
-  $ Fluence CLI key remove [NAME] [--no-input] [--user]
+  $ fluence key remove [NAME] [--no-input] [--user]
 
 ARGUMENTS
   NAME  Key-pair name
@@ -531,16 +531,16 @@ DESCRIPTION
   Remove key-pair from user-secrets.yaml or project-secrets.yaml
 
 EXAMPLES
-  $ Fluence CLI key remove
+  $ fluence key remove
 ```
 
-## `Fluence CLI module add [PATH | URL]`
+## `fluence module add [PATH | URL]`
 
 Add module to service.yaml
 
 ```
 USAGE
-  $ Fluence CLI module add [PATH | URL] [--no-input] [--name <value>] [--service <value>]
+  $ fluence module add [PATH | URL] [--no-input] [--name <value>] [--service <value>]
 
 ARGUMENTS
   PATH | URL  Path to a module or url to .tar.gz archive
@@ -555,16 +555,16 @@ DESCRIPTION
   Add module to service.yaml
 
 EXAMPLES
-  $ Fluence CLI module add
+  $ fluence module add
 ```
 
-## `Fluence CLI module new [NAME]`
+## `fluence module new [NAME]`
 
 Create new marine module template
 
 ```
 USAGE
-  $ Fluence CLI module new [NAME] [--no-input] [--path <value>]
+  $ fluence module new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
   NAME  Module name
@@ -577,16 +577,16 @@ DESCRIPTION
   Create new marine module template
 
 EXAMPLES
-  $ Fluence CLI module new
+  $ fluence module new
 ```
 
-## `Fluence CLI module remove [NAME | PATH | URL]`
+## `fluence module remove [NAME | PATH | URL]`
 
 Remove module from service.yaml
 
 ```
 USAGE
-  $ Fluence CLI module remove [NAME | PATH | URL] [--no-input] [--service <value>]
+  $ fluence module remove [NAME | PATH | URL] [--no-input] [--service <value>]
 
 ARGUMENTS
   NAME | PATH | URL  Module name from service.yaml, path to a module or url to .tar.gz archive
@@ -599,16 +599,16 @@ DESCRIPTION
   Remove module from service.yaml
 
 EXAMPLES
-  $ Fluence CLI module remove
+  $ fluence module remove
 ```
 
-## `Fluence CLI resource-owner pat create [DEAL-ADDRESS]`
+## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
 Create provider access token for the deal
 
 ```
 USAGE
-  $ Fluence CLI resource-owner pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
+  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -623,16 +623,16 @@ DESCRIPTION
   Create provider access token for the deal
 ```
 
-## `Fluence CLI run`
+## `fluence run`
 
 Run aqua script
 
 ```
 USAGE
-  $ Fluence CLI run [--no-input] [--data <value>] [--data-path <value>] [--import <value>] [--log-level-compiler
-    <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air | -b]
-    [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
-    [--tracing]
+  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
+    [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
+    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [--tracing]
 
 FLAGS
   -b, --print-beautified-air     Prints beautified AIR code before function execution
@@ -665,18 +665,18 @@ DESCRIPTION
   Run aqua script
 
 EXAMPLES
-  $ Fluence CLI run
+  $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/Fluence CLI/blob/v0.5.3/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/run.ts)_
 
-## `Fluence CLI service add [PATH | URL]`
+## `fluence service add [PATH | URL]`
 
 Add service to fluence.yaml
 
 ```
 USAGE
-  $ Fluence CLI service add [PATH | URL] [--no-input] [--name <value>]
+  $ fluence service add [PATH | URL] [--no-input] [--name <value>]
 
 ARGUMENTS
   PATH | URL  Path to a service or url to .tar.gz archive
@@ -690,16 +690,16 @@ DESCRIPTION
   Add service to fluence.yaml
 
 EXAMPLES
-  $ Fluence CLI service add
+  $ fluence service add
 ```
 
-## `Fluence CLI service new [NAME]`
+## `fluence service new [NAME]`
 
 Create new marine service template
 
 ```
 USAGE
-  $ Fluence CLI service new [NAME] [--no-input] [--path <value>]
+  $ fluence service new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
   NAME  Unique service name (must start with a lowercase letter and contain only letters, numbers, and underscores)
@@ -712,16 +712,16 @@ DESCRIPTION
   Create new marine service template
 
 EXAMPLES
-  $ Fluence CLI service new
+  $ fluence service new
 ```
 
-## `Fluence CLI service remove [NAME | PATH | URL]`
+## `fluence service remove [NAME | PATH | URL]`
 
 Remove service from fluence.yaml services property and from all of the workers
 
 ```
 USAGE
-  $ Fluence CLI service remove [NAME | PATH | URL] [--no-input]
+  $ fluence service remove [NAME | PATH | URL] [--no-input]
 
 ARGUMENTS
   NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
@@ -733,16 +733,16 @@ DESCRIPTION
   Remove service from fluence.yaml services property and from all of the workers
 
 EXAMPLES
-  $ Fluence CLI service remove
+  $ fluence service remove
 ```
 
-## `Fluence CLI service repl [NAME | PATH | URL]`
+## `fluence service repl [NAME | PATH | URL]`
 
 Open service inside repl (downloads and builds modules if necessary)
 
 ```
 USAGE
-  $ Fluence CLI service repl [NAME | PATH | URL] [--no-input]
+  $ fluence service repl [NAME | PATH | URL] [--no-input]
 
 ARGUMENTS
   NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
@@ -754,16 +754,16 @@ DESCRIPTION
   Open service inside repl (downloads and builds modules if necessary)
 
 EXAMPLES
-  $ Fluence CLI service repl
+  $ fluence service repl
 ```
 
-## `Fluence CLI spell new [NAME]`
+## `fluence spell new [NAME]`
 
 Create a new spell template
 
 ```
 USAGE
-  $ Fluence CLI spell new [NAME] [--no-input] [--path <value>]
+  $ fluence spell new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
   NAME  Spell name
@@ -776,16 +776,16 @@ DESCRIPTION
   Create a new spell template
 
 EXAMPLES
-  $ Fluence CLI spell new
+  $ fluence spell new
 ```
 
-## `Fluence CLI workers deploy [WORKER-NAMES]`
+## `fluence workers deploy [WORKER-NAMES]`
 
 Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ Fluence CLI workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
     <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
@@ -809,16 +809,16 @@ DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 EXAMPLES
-  $ Fluence CLI workers deploy
+  $ fluence workers deploy
 ```
 
-## `Fluence CLI workers logs [WORKER-NAMES]`
+## `fluence workers logs [WORKER-NAMES]`
 
 Get logs from deployed workers for hosts listed in workers.yaml
 
 ```
 USAGE
-  $ Fluence CLI workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+  $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--worker-id <value>] [--host-id <value>]
     [--spell-id <value>] [--tracing]
 
@@ -844,16 +844,16 @@ DESCRIPTION
   Get logs from deployed workers for hosts listed in workers.yaml
 
 EXAMPLES
-  $ Fluence CLI workers logs
+  $ fluence workers logs
 ```
 
-## `Fluence CLI workers upload [WORKER-NAMES]`
+## `fluence workers upload [WORKER-NAMES]`
 
 Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ Fluence CLI workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+  $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
@@ -877,6 +877,6 @@ DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 EXAMPLES
-  $ Fluence CLI workers upload
+  $ fluence workers upload
 ```
 <!-- commandsstop -->
