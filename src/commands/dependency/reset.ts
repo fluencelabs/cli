@@ -21,7 +21,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { userConfig } from "../../lib/configs/user/config.js";
 import {
-  CLI_NAME,
+  CLI_NAME_FULL,
   GLOBAL_FLAG,
   GLOBAL_FLAG_NAME,
   fluenceCargoDependencies,
@@ -31,7 +31,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
   static override aliases = ["dependency:r", "dep:r"];
-  static override description = `Reset all project dependencies to recommended versions for the current ${CLI_NAME} version`;
+  static override description = `Reset all project dependencies to recommended versions for the current ${CLI_NAME_FULL} version`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

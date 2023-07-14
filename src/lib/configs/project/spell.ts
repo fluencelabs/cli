@@ -20,8 +20,8 @@ import { dirname, resolve } from "path";
 import type { JSONSchemaType } from "ajv";
 
 import {
-  FLUENCE_CONFIG_FULL_FILE_NAME,
   CLI_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
   SPELL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,

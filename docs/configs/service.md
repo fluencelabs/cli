@@ -1,6 +1,6 @@
 # service.yaml
 
-Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use `flox service new` command to generate a template for new service
+Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), most importantly the modules that the service consists of. You can use `fluence service new` command to generate a template for new service
 
 ## Properties
 

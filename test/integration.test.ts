@@ -31,7 +31,7 @@ import { execPromise } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
 
 import {
-  flox,
+  fluence,
   init,
   maybeConcurrentTest,
   multiaddrs,
@@ -63,7 +63,7 @@ describe("integration tests", () => {
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
 
-    await flox({
+    await fluence({
       args: ["run"],
       flags: {
         f: 'helloWorld("Fluence")',
@@ -110,7 +110,7 @@ describe("integration tests", () => {
     const relay = multiaddrs[0]?.multiaddr;
     assert(typeof relay === "string");
 
-    const result = await flox({
+    const result = await fluence({
       args: ["run"],
       flags: {
         relay,
@@ -141,7 +141,7 @@ describe("integration tests", () => {
 
       const pathToNewServiceDir = join("src", "services", "newService");
 
-      await flox({
+      await fluence({
         args: ["service", "new", "newService"],
         cwd,
       });
@@ -157,7 +157,7 @@ describe("integration tests", () => {
 
       const pathToNewSpell = join("src", "spells", "newSpell");
 
-      await flox({
+      await fluence({
         args: ["spell", "new", "newSpell"],
         cwd,
       });
@@ -193,12 +193,12 @@ describe("integration tests", () => {
       fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
       await fluenceConfig.$commit();
 
-      await flox({
+      await fluence({
         args: ["workers", "deploy"],
         cwd,
       });
 
-      const result = await flox({
+      const result = await fluence({
         args: ["run"],
         flags: {
           f: "runDeployedServices()",
@@ -241,7 +241,7 @@ describe("integration tests", () => {
 
       const pathToNewSpell = join("src", "spells", "newSpell");
 
-      await flox({
+      await fluence({
         args: ["spell", "new", "newSpell"],
         cwd,
       });
@@ -266,7 +266,7 @@ describe("integration tests", () => {
 
       await fluenceConfig.$commit();
 
-      await flox({
+      await fluence({
         args: [
           "deal",
           "deploy",
@@ -283,7 +283,7 @@ describe("integration tests", () => {
       // Jest has a global timeout for each test and if it runs out test will fail
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const res = await flox({
+        const res = await fluence({
           args: ["run"],
           flags: {
             f: "runDeployedServices()",
@@ -321,7 +321,7 @@ describe("integration tests", () => {
 });
 
 const addAdderServiceToFluenceYAML = (cwd: string) => {
-  return flox({
+  return fluence({
     args: [
       "service",
       "add",
@@ -332,7 +332,7 @@ const addAdderServiceToFluenceYAML = (cwd: string) => {
 };
 
 const compileAqua = (cwd: string) => {
-  return flox({
+  return fluence({
     args: ["aqua"],
     cwd,
   });

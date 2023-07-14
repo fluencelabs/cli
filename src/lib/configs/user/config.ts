@@ -20,7 +20,7 @@ import {
   GLOBAL_CONFIG_FILE_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-  CLI_NAME,
+  CLI_NAME_FULL,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
@@ -54,7 +54,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${GLOBAL_CONFIG_FULL_FILE_NAME}`,
   title: GLOBAL_CONFIG_FULL_FILE_NAME,
-  description: `Defines global config for ${CLI_NAME}`,
+  description: `Defines global config for ${CLI_NAME_FULL}`,
   properties: {
     countlyConsent: {
       type: "boolean",
@@ -96,7 +96,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     },
     lastCheckForUpdates: {
       type: "string",
-      description: `Last time when ${CLI_NAME} checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
+      description: `Last time when ${CLI_NAME_FULL} checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
       nullable: true,
     },
     version: { type: "number", const: 0 },

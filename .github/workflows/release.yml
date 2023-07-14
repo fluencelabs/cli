@@ -15,8 +15,8 @@ jobs:
     outputs:
       releases-created: ${{ steps.release.outputs.releases_created }}
 
-      flox-release-created: ${{ steps.release.outputs['release_created'] }}
-      flox-tag-name: ${{ steps.release.outputs['tag_name'] }}
+      fluence-cli-release-created: ${{ steps.release.outputs['release_created'] }}
+      fluence-cli-tag-name: ${{ steps.release.outputs['tag_name'] }}
 
     steps:
       - name: Run release-please
@@ -34,8 +34,8 @@ jobs:
           RELEASE_PLEASE_OUTPUT: ${{ toJSON(steps.release.outputs) }}
         run: echo "${RELEASE_PLEASE_OUTPUT}" | jq
 
-  flox:
-    if: needs.release-please.outputs.flox-release-created
+  fluence-cli:
+    if: needs.release-please.outputs.fluence-cli-release-created
     runs-on: ubuntu-latest
     needs:
       - release-please
@@ -85,7 +85,7 @@ jobs:
 
     needs:
       - release-please
-      - flox
+      - fluence-cli
 
     permissions:
       contents: read

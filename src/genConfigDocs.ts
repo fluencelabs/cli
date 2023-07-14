@@ -38,7 +38,7 @@ import {
   SPELL_CONFIG_FILE_NAME,
   FS_OPTIONS,
   YAML_EXT,
-  CLI_NAME,
+  CLI_NAME_FULL,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/jsonStringify.js";
@@ -86,7 +86,7 @@ await Promise.all(
 
 await writeFile(
   join(DOCS_CONFIGS_DIR_PATH, "README.md"),
-  `# ${CLI_NAME} Configs
+  `# ${CLI_NAME_FULL} Configs
 
 ${configsInfo
   .map(({ fullFileName, schema, docFileName }): string => {

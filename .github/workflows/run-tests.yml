@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  flox:
+  fluence-cli:
     uses: ./.github/workflows/tests.yml
     with:
       ref: ${{ github.ref }}

@@ -86,7 +86,7 @@ export const createErrorPromise = (error) => {
     setTimeout(() => {
       // eslint-disable-next-line no-console
       console.log(
-        `\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/flox/issues`,
+        `\nWasn't able to report this crash to Fluence Team. Please report it manually to https://github.com/fluencelabs/cli/issues`,
       );
 
       exitWithCode1();

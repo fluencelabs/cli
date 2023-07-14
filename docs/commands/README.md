@@ -1,45 +1,45 @@
 # Commands
 <!-- commands -->
-* [`flox air beautify [PATH]`](#flox-air-beautify-path)
-* [`flox aqua`](#flox-aqua)
-* [`flox aqua json [FUNC] [INPUT] [OUTPUT]`](#flox-aqua-json-func-input-output)
-* [`flox aqua yml [FUNC] [INPUT] [OUTPUT]`](#flox-aqua-yml-func-input-output)
-* [`flox autocomplete [SHELL]`](#flox-autocomplete-shell)
-* [`flox build`](#flox-build)
-* [`flox deal deploy [WORKER-NAMES]`](#flox-deal-deploy-worker-names)
-* [`flox deal logs [WORKER-NAMES]`](#flox-deal-logs-worker-names)
-* [`flox default peers [NETWORK]`](#flox-default-peers-network)
-* [`flox dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#flox-dependency-cargo-install-package-name--package-nameversion)
-* [`flox dependency install`](#flox-dependency-install)
-* [`flox dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#flox-dependency-npm-install-package-name--package-nameversion)
-* [`flox dependency reset`](#flox-dependency-reset)
-* [`flox dependency versions`](#flox-dependency-versions)
-* [`flox help [COMMANDS]`](#flox-help-commands)
-* [`flox init [PATH]`](#flox-init-path)
-* [`flox key default [NAME]`](#flox-key-default-name)
-* [`flox key new [NAME]`](#flox-key-new-name)
-* [`flox key remove [NAME]`](#flox-key-remove-name)
-* [`flox module add [PATH | URL]`](#flox-module-add-path--url)
-* [`flox module new [NAME]`](#flox-module-new-name)
-* [`flox module remove [NAME | PATH | URL]`](#flox-module-remove-name--path--url)
-* [`flox resource-owner pat create [DEAL-ADDRESS]`](#flox-resource-owner-pat-create-deal-address)
-* [`flox run`](#flox-run)
-* [`flox service add [PATH | URL]`](#flox-service-add-path--url)
-* [`flox service new [NAME]`](#flox-service-new-name)
-* [`flox service remove [NAME | PATH | URL]`](#flox-service-remove-name--path--url)
-* [`flox service repl [NAME | PATH | URL]`](#flox-service-repl-name--path--url)
-* [`flox spell new [NAME]`](#flox-spell-new-name)
-* [`flox workers deploy [WORKER-NAMES]`](#flox-workers-deploy-worker-names)
-* [`flox workers logs [WORKER-NAMES]`](#flox-workers-logs-worker-names)
-* [`flox workers upload [WORKER-NAMES]`](#flox-workers-upload-worker-names)
+* [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
+* [`fluence aqua`](#fluence-aqua)
+* [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
+* [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
+* [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
+* [`fluence build`](#fluence-build)
+* [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
+* [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
+* [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
+* [`fluence dependency install`](#fluence-dependency-install)
+* [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
+* [`fluence dependency reset`](#fluence-dependency-reset)
+* [`fluence dependency versions`](#fluence-dependency-versions)
+* [`fluence help [COMMANDS]`](#fluence-help-commands)
+* [`fluence init [PATH]`](#fluence-init-path)
+* [`fluence key default [NAME]`](#fluence-key-default-name)
+* [`fluence key new [NAME]`](#fluence-key-new-name)
+* [`fluence key remove [NAME]`](#fluence-key-remove-name)
+* [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
+* [`fluence module new [NAME]`](#fluence-module-new-name)
+* [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence resource-owner pat create [DEAL-ADDRESS]`](#fluence-resource-owner-pat-create-deal-address)
+* [`fluence run`](#fluence-run)
+* [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
+* [`fluence service new [NAME]`](#fluence-service-new-name)
+* [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
+* [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence spell new [NAME]`](#fluence-spell-new-name)
+* [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
+* [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
+* [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
 
-## `flox air beautify [PATH]`
+## `fluence air beautify [PATH]`
 
 Prints AIR script in human-readable Python-like representation. This representation cannot be executed and is intended to be read by mere mortals.
 
 ```
 USAGE
-  $ flox air beautify [PATH] [--no-input]
+  $ fluence air beautify [PATH] [--no-input]
 
 ARGUMENTS
   PATH  Path to an AIR file. Must be relative to the current working directory or absolute
@@ -52,17 +52,17 @@ DESCRIPTION
   to be read by mere mortals.
 
 ALIASES
-  $ flox air b
+  $ fluence air b
 ```
 
-## `flox aqua`
+## `fluence aqua`
 
 Compile aqua file or directory that contains your .aqua files
 
 ```
 USAGE
-  $ flox aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air | --js]
-    [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
+  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air |
+    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
 
 FLAGS
   -i, --input=<path>            Path to an aqua file or an input directory that contains your .aqua files. Must be
@@ -87,18 +87,18 @@ DESCRIPTION
   Compile aqua file or directory that contains your .aqua files
 
 EXAMPLES
-  $ flox aqua
+  $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/aqua.ts)_
 
-## `flox aqua json [FUNC] [INPUT] [OUTPUT]`
+## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
 Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
-  $ flox aqua json [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua json [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
   FUNC    Name of the exported function
@@ -117,13 +117,13 @@ DESCRIPTION
   what they translate into
 ```
 
-## `flox aqua yml [FUNC] [INPUT] [OUTPUT]`
+## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
 
 Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
-  $ flox aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
   FUNC    Name of the exported function
@@ -142,16 +142,16 @@ DESCRIPTION
   what they translate into
 
 ALIASES
-  $ flox aqua yaml
+  $ fluence aqua yaml
 ```
 
-## `flox autocomplete [SHELL]`
+## `fluence autocomplete [SHELL]`
 
 display autocomplete installation instructions
 
 ```
 USAGE
-  $ flox autocomplete [SHELL] [-r]
+  $ fluence autocomplete [SHELL] [-r]
 
 ARGUMENTS
   SHELL  (zsh|bash|powershell) Shell type
@@ -163,26 +163,26 @@ DESCRIPTION
   display autocomplete installation instructions
 
 EXAMPLES
-  $ flox autocomplete
+  $ fluence autocomplete
 
-  $ flox autocomplete bash
+  $ fluence autocomplete bash
 
-  $ flox autocomplete zsh
+  $ fluence autocomplete zsh
 
-  $ flox autocomplete powershell
+  $ fluence autocomplete powershell
 
-  $ flox autocomplete --refresh-cache
+  $ fluence autocomplete --refresh-cache
 ```
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.1/src/commands/autocomplete/index.ts)_
 
-## `flox build`
+## `fluence build`
 
 Build all application services, described in fluence.yaml and generate aqua interfaces for them
 
 ```
 USAGE
-  $ flox build [--no-input]
+  $ fluence build [--no-input]
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
@@ -191,18 +191,18 @@ DESCRIPTION
   Build all application services, described in fluence.yaml and generate aqua interfaces for them
 
 EXAMPLES
-  $ flox build
+  $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/build.ts)_
 
-## `flox deal deploy [WORKER-NAMES]`
+## `fluence deal deploy [WORKER-NAMES]`
 
 Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ flox deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--network
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
     [--tracing]
 
@@ -229,16 +229,16 @@ DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
 
 EXAMPLES
-  $ flox deal deploy
+  $ fluence deal deploy
 ```
 
-## `flox deal logs [WORKER-NAMES]`
+## `fluence deal logs [WORKER-NAMES]`
 
 Get logs from deployed workers for deals listed in workers.yaml
 
 ```
 USAGE
-  $ flox deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+  $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--tracing]
 
 ARGUMENTS
@@ -260,16 +260,16 @@ DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
 
 EXAMPLES
-  $ flox deal logs
+  $ fluence deal logs
 ```
 
-## `flox default peers [NETWORK]`
+## `fluence default peers [NETWORK]`
 
 Print default Fluence network peer addresses
 
 ```
 USAGE
-  $ flox default peers [NETWORK] [--no-input]
+  $ fluence default peers [NETWORK] [--no-input]
 
 ARGUMENTS
   NETWORK  Network to use. One of kras, stage, testnet
@@ -281,17 +281,17 @@ DESCRIPTION
   Print default Fluence network peer addresses
 
 EXAMPLES
-  $ flox default peers
+  $ fluence default peers
 ```
 
-## `flox dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo directory)
 
 ```
 USAGE
-  $ flox dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
-  [--global]
+  $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
+    [--global]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -312,20 +312,20 @@ DESCRIPTION
   directory)
 
 ALIASES
-  $ flox dependency cargo i
-  $ flox dep cargo i
+  $ fluence dependency cargo i
+  $ fluence dep cargo i
 
 EXAMPLES
-  $ flox dependency cargo install
+  $ fluence dependency cargo install
 ```
 
-## `flox dependency install`
+## `fluence dependency install`
 
 Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ```
 USAGE
-  $ flox dependency install [--no-input] [--force]
+  $ fluence dependency install [--no-input] [--force]
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -335,20 +335,20 @@ DESCRIPTION
   Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ALIASES
-  $ flox dependency i
-  $ flox dep i
+  $ fluence dependency i
+  $ fluence dep i
 
 EXAMPLES
-  $ flox dependency install
+  $ fluence dependency install
 ```
 
-## `flox dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm directory)
 
 ```
 USAGE
-  $ flox dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
+  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -367,20 +367,20 @@ DESCRIPTION
   directory)
 
 ALIASES
-  $ flox dependency npm i
-  $ flox dep npm i
+  $ fluence dependency npm i
+  $ fluence dep npm i
 
 EXAMPLES
-  $ flox dependency npm install
+  $ fluence dependency npm install
 ```
 
-## `flox dependency reset`
+## `fluence dependency reset`
 
-Reset all project dependencies to recommended versions for the current flox version
+Reset all project dependencies to recommended versions for the current Fluence CLI version
 
 ```
 USAGE
-  $ flox dependency reset [--no-input] [--global] [--all]
+  $ fluence dependency reset [--no-input] [--global] [--all]
 
 FLAGS
   --all       Remove all dependencies, not only recommended ones
@@ -388,23 +388,23 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Reset all project dependencies to recommended versions for the current flox version
+  Reset all project dependencies to recommended versions for the current Fluence CLI version
 
 ALIASES
-  $ flox dependency r
-  $ flox dep r
+  $ fluence dependency r
+  $ fluence dep r
 
 EXAMPLES
-  $ flox dependency reset
+  $ fluence dependency reset
 ```
 
-## `flox dependency versions`
+## `fluence dependency versions`
 
 Get versions of all dependencies
 
 ```
 USAGE
-  $ flox dependency versions [--no-input] [--default]
+  $ fluence dependency versions [--no-input] [--default]
 
 FLAGS
   --default   Display default npm and cargo dependencies and their versions for current CLI version. Default npm
@@ -415,21 +415,21 @@ DESCRIPTION
   Get versions of all dependencies
 
 ALIASES
-  $ flox dependency v
-  $ flox dep v
-  $ flox dep versions
+  $ fluence dependency v
+  $ fluence dep v
+  $ fluence dep versions
 
 EXAMPLES
-  $ flox dependency versions
+  $ fluence dependency versions
 ```
 
-## `flox help [COMMANDS]`
+## `fluence help [COMMANDS]`
 
-Display help for flox.
+Display help for fluence.
 
 ```
 USAGE
-  $ flox help [COMMANDS] [-n]
+  $ fluence help [COMMANDS] [-n]
 
 ARGUMENTS
   COMMANDS  Command to show help for.
@@ -438,18 +438,18 @@ FLAGS
   -n, --nested-commands  Include all nested commands in the output.
 
 DESCRIPTION
-  Display help for flox.
+  Display help for fluence.
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.11/src/commands/help.ts)_
 
-## `flox init [PATH]`
+## `fluence init [PATH]`
 
 Initialize fluence project
 
 ```
 USAGE
-  $ flox init [PATH] [--no-input] [-t <value>]
+  $ fluence init [PATH] [--no-input] [-t <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -462,18 +462,18 @@ DESCRIPTION
   Initialize fluence project
 
 EXAMPLES
-  $ flox init
+  $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/init.ts)_
 
-## `flox key default [NAME]`
+## `fluence key default [NAME]`
 
 Set default key-pair for user or project
 
 ```
 USAGE
-  $ flox key default [NAME] [--no-input] [--user]
+  $ fluence key default [NAME] [--no-input] [--user]
 
 ARGUMENTS
   NAME  Key-pair name
@@ -486,16 +486,16 @@ DESCRIPTION
   Set default key-pair for user or project
 
 EXAMPLES
-  $ flox key default
+  $ fluence key default
 ```
 
-## `flox key new [NAME]`
+## `fluence key new [NAME]`
 
 Generate key-pair and store it in user-secrets.yaml or project-secrets.yaml
 
 ```
 USAGE
-  $ flox key new [NAME] [--no-input] [--user] [--default]
+  $ fluence key new [NAME] [--no-input] [--user] [--default]
 
 ARGUMENTS
   NAME  Key-pair name
@@ -509,16 +509,16 @@ DESCRIPTION
   Generate key-pair and store it in user-secrets.yaml or project-secrets.yaml
 
 EXAMPLES
-  $ flox key new
+  $ fluence key new
 ```
 
-## `flox key remove [NAME]`
+## `fluence key remove [NAME]`
 
 Remove key-pair from user-secrets.yaml or project-secrets.yaml
 
 ```
 USAGE
-  $ flox key remove [NAME] [--no-input] [--user]
+  $ fluence key remove [NAME] [--no-input] [--user]
 
 ARGUMENTS
   NAME  Key-pair name
@@ -531,16 +531,16 @@ DESCRIPTION
   Remove key-pair from user-secrets.yaml or project-secrets.yaml
 
 EXAMPLES
-  $ flox key remove
+  $ fluence key remove
 ```
 
-## `flox module add [PATH | URL]`
+## `fluence module add [PATH | URL]`
 
 Add module to service.yaml
 
 ```
 USAGE
-  $ flox module add [PATH | URL] [--no-input] [--name <value>] [--service <value>]
+  $ fluence module add [PATH | URL] [--no-input] [--name <value>] [--service <value>]
 
 ARGUMENTS
   PATH | URL  Path to a module or url to .tar.gz archive
@@ -555,16 +555,16 @@ DESCRIPTION
   Add module to service.yaml
 
 EXAMPLES
-  $ flox module add
+  $ fluence module add
 ```
 
-## `flox module new [NAME]`
+## `fluence module new [NAME]`
 
 Create new marine module template
 
 ```
 USAGE
-  $ flox module new [NAME] [--no-input] [--path <value>]
+  $ fluence module new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
   NAME  Module name
@@ -577,16 +577,16 @@ DESCRIPTION
   Create new marine module template
 
 EXAMPLES
-  $ flox module new
+  $ fluence module new
 ```
 
-## `flox module remove [NAME | PATH | URL]`
+## `fluence module remove [NAME | PATH | URL]`
 
 Remove module from service.yaml
 
 ```
 USAGE
-  $ flox module remove [NAME | PATH | URL] [--no-input] [--service <value>]
+  $ fluence module remove [NAME | PATH | URL] [--no-input] [--service <value>]
 
 ARGUMENTS
   NAME | PATH | URL  Module name from service.yaml, path to a module or url to .tar.gz archive
@@ -599,16 +599,16 @@ DESCRIPTION
   Remove module from service.yaml
 
 EXAMPLES
-  $ flox module remove
+  $ fluence module remove
 ```
 
-## `flox resource-owner pat create [DEAL-ADDRESS]`
+## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
 Create provider access token for the deal
 
 ```
 USAGE
-  $ flox resource-owner pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
+  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -623,16 +623,16 @@ DESCRIPTION
   Create provider access token for the deal
 ```
 
-## `flox run`
+## `fluence run`
 
 Run aqua script
 
 ```
 USAGE
-  $ flox run [--no-input] [--data <value>] [--data-path <value>] [--import <value>] [--log-level-compiler
-    <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay] [--print-air | -b]
-    [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id]
-    [--tracing]
+  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
+    [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
+    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [--tracing]
 
 FLAGS
   -b, --print-beautified-air     Prints beautified AIR code before function execution
@@ -665,18 +665,18 @@ DESCRIPTION
   Run aqua script
 
 EXAMPLES
-  $ flox run
+  $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/flox/blob/v0.5.3/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.5.3/dist/commands/run.ts)_
 
-## `flox service add [PATH | URL]`
+## `fluence service add [PATH | URL]`
 
 Add service to fluence.yaml
 
 ```
 USAGE
-  $ flox service add [PATH | URL] [--no-input] [--name <value>]
+  $ fluence service add [PATH | URL] [--no-input] [--name <value>]
 
 ARGUMENTS
   PATH | URL  Path to a service or url to .tar.gz archive
@@ -690,16 +690,16 @@ DESCRIPTION
   Add service to fluence.yaml
 
 EXAMPLES
-  $ flox service add
+  $ fluence service add
 ```
 
-## `flox service new [NAME]`
+## `fluence service new [NAME]`
 
 Create new marine service template
 
 ```
 USAGE
-  $ flox service new [NAME] [--no-input] [--path <value>]
+  $ fluence service new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
   NAME  Unique service name (must start with a lowercase letter and contain only letters, numbers, and underscores)
@@ -712,16 +712,16 @@ DESCRIPTION
   Create new marine service template
 
 EXAMPLES
-  $ flox service new
+  $ fluence service new
 ```
 
-## `flox service remove [NAME | PATH | URL]`
+## `fluence service remove [NAME | PATH | URL]`
 
 Remove service from fluence.yaml services property and from all of the workers
 
 ```
 USAGE
-  $ flox service remove [NAME | PATH | URL] [--no-input]
+  $ fluence service remove [NAME | PATH | URL] [--no-input]
 
 ARGUMENTS
   NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
@@ -733,16 +733,16 @@ DESCRIPTION
   Remove service from fluence.yaml services property and from all of the workers
 
 EXAMPLES
-  $ flox service remove
+  $ fluence service remove
 ```
 
-## `flox service repl [NAME | PATH | URL]`
+## `fluence service repl [NAME | PATH | URL]`
 
 Open service inside repl (downloads and builds modules if necessary)
 
 ```
 USAGE
-  $ flox service repl [NAME | PATH | URL] [--no-input]
+  $ fluence service repl [NAME | PATH | URL] [--no-input]
 
 ARGUMENTS
   NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
@@ -754,16 +754,16 @@ DESCRIPTION
   Open service inside repl (downloads and builds modules if necessary)
 
 EXAMPLES
-  $ flox service repl
+  $ fluence service repl
 ```
 
-## `flox spell new [NAME]`
+## `fluence spell new [NAME]`
 
 Create a new spell template
 
 ```
 USAGE
-  $ flox spell new [NAME] [--no-input] [--path <value>]
+  $ fluence spell new [NAME] [--no-input] [--path <value>]
 
 ARGUMENTS
   NAME  Spell name
@@ -776,16 +776,16 @@ DESCRIPTION
   Create a new spell template
 
 EXAMPLES
-  $ flox spell new
+  $ fluence spell new
 ```
 
-## `flox workers deploy [WORKER-NAMES]`
+## `fluence workers deploy [WORKER-NAMES]`
 
 Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ flox workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--relay
     <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
@@ -809,16 +809,16 @@ DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 EXAMPLES
-  $ flox workers deploy
+  $ fluence workers deploy
 ```
 
-## `flox workers logs [WORKER-NAMES]`
+## `fluence workers logs [WORKER-NAMES]`
 
 Get logs from deployed workers for hosts listed in workers.yaml
 
 ```
 USAGE
-  $ flox workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+  $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--worker-id <value>] [--host-id <value>]
     [--spell-id <value>] [--tracing]
 
@@ -844,16 +844,16 @@ DESCRIPTION
   Get logs from deployed workers for hosts listed in workers.yaml
 
 EXAMPLES
-  $ flox workers logs
+  $ fluence workers logs
 ```
 
-## `flox workers upload [WORKER-NAMES]`
+## `fluence workers upload [WORKER-NAMES]`
 
 Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ flox workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+  $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
     [--particle-id] [-k <value>] [--off-aqua-logs] [--privKey <value>] [--import <value>] [--no-build] [--tracing]
 
 ARGUMENTS
@@ -877,6 +877,6 @@ DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 EXAMPLES
-  $ flox workers upload
+  $ fluence workers upload
 ```
 <!-- commandsstop -->

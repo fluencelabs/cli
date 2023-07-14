@@ -19,7 +19,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CLI_NAME } from "../../lib/const.js";
+import { CLI_NAME_FULL, CLI_NAME } from "../../lib/const.js";
 import {
   getRecommendedDependencies,
   resolveDependencies,
@@ -67,7 +67,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
         "",
         {},
         {
-          [`${CLI_NAME} version`]: commandObj.config.version,
+          [`${CLI_NAME_FULL} version`]: commandObj.config.version,
           "nox version": versions["nox"],
           "rust toolchain": versions["rust-toolchain"],
           [`npm dependencies that can be overridden with \`${CLI_NAME} dependency npm install <name>@<version>\``]:
