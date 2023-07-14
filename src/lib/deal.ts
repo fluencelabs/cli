@@ -18,7 +18,7 @@ import assert from "node:assert";
 
 import { BigNumber } from "ethers";
 
-import type { ChainNetwork } from "./const.js";
+import { CLI_NAME_FULL, type ChainNetwork } from "./const.js";
 import {
   getFactoryContract,
   getSigner,
@@ -66,7 +66,7 @@ export const dealCreate = async ({
 
   assert(
     log !== undefined,
-    "DealCreated event not found. Try updating flox to the latest version",
+    `DealCreated event not found. Try updating ${CLI_NAME_FULL} to the latest version`,
   );
 
   const dealAddress: unknown =

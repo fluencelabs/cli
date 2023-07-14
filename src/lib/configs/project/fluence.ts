@@ -37,6 +37,7 @@ import {
   AQUA_DIR_NAME,
   MARINE_CARGO_DEPENDENCY,
   FLUENCE_CONFIG_FILE_NAME,
+  CLI_NAME_FULL,
   CLI_NAME,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
@@ -312,7 +313,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           type: "object",
           title: "npm dependencies",
           nullable: true,
-          description: `A map of npm dependency versions. ${CLI_NAME} ensures dependencies are installed each time you run aqua`,
+          description: `A map of npm dependency versions. ${CLI_NAME_FULL} ensures dependencies are installed each time you run aqua`,
           additionalProperties: { type: "string" },
           properties: {
             npm_dependency_name: {
@@ -326,7 +327,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
           type: "object",
           title: "Cargo dependencies",
           nullable: true,
-          description: `A map of cargo dependency versions. ${CLI_NAME} ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
+          description: `A map of cargo dependency versions. ${CLI_NAME_FULL} ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL`,
           required: [],
           additionalProperties: { type: "string" },
           properties: {
@@ -421,7 +422,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     },
     cliVersion: {
       type: "string",
-      description: `The version of the ${CLI_NAME} that is compatible with this project. Set this to enforce a particular set of versions of all fluence components`,
+      description: `The version of the ${CLI_NAME_FULL} that is compatible with this project. Set this to enforce a particular set of versions of all fluence components`,
       nullable: true,
     },
   },

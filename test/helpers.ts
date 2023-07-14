@@ -26,7 +26,7 @@ import {
   testNet,
 } from "@fluencelabs/fluence-network-environment";
 
-import { CLI_NAME, type Template } from "../src/lib/const.js";
+import { PACKAGE_NAME, type Template } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
 import type { FluenceEnv } from "../src/lib/multiaddres.js";
@@ -53,10 +53,10 @@ type FloxArg = {
 
 const pathToFluenceExecutable = path.join(
   process.cwd(),
-  path.join("tmp", "node_modules", "@fluencelabs", CLI_NAME, "bin", "run.js"),
+  path.join("tmp", "node_modules", ...PACKAGE_NAME.split("/"), "bin", "run.js"),
 );
 
-export const flox = async ({
+export const fluence = async ({
   args = [],
   flags,
   cwd = process.cwd(),
@@ -83,7 +83,7 @@ export const initFirstTime = async (template: Template) => {
   try {
     await access(templatePath);
   } catch {
-    await flox({
+    await fluence({
       args: ["init", templatePath],
       flags: { template, "no-input": true },
     });
@@ -109,7 +109,7 @@ export const initFirstTime = async (template: Template) => {
 };
 
 const generateDefaultKey = (cwd: string) => {
-  return flox({
+  return fluence({
     args: ["key", "new", "default"],
     flags: {
       default: true,

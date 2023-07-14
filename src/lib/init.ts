@@ -42,7 +42,7 @@ import {
   JS_CLIENT_NODE_NPM_DEPENDENCY,
   JS_CLIENT_API_NPM_DEPENDENCY,
   FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
-  CLI_NAME,
+  CLI_NAME_FULL,
   getMainAquaFileContent,
 } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
@@ -216,7 +216,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
 
   commandObj.log(
     color.magentaBright(
-      `\nSuccessfully initialized ${CLI_NAME} project template at ${replaceHomeDir(
+      `\nSuccessfully initialized ${CLI_NAME_FULL} project template at ${replaceHomeDir(
         projectPath,
       )}\n`,
     ),

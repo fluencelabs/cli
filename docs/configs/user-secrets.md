@@ -1,6 +1,6 @@
 # user-secrets.yaml
 
-Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `flox key` group of commands with `--user` flag
+Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `Fluence CLI key` group of commands with `--user` flag
 
 ## Properties
 

@@ -45,8 +45,10 @@ import {
   NODE_JS_MAJOR_VERSION,
   CHECK_FOR_UPDATES_INTERVAL,
   SEPARATOR,
-  CLI_NAME,
+  CLI_NAME_FULL,
   type NO_INPUT_FLAG_NAME,
+  CLI_NAME,
+  PACKAGE_NAME,
 } from "./const.js";
 import { haltCountly, initCountly, logErrorToCountly } from "./countly.js";
 import "./setupEnvironment.js";
@@ -74,7 +76,7 @@ const ensureUserConfig = async (): Promise<void> => {
   if (
     isInteractive &&
     (await confirm({
-      message: `Help me improve ${CLI_NAME} by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
+      message: `Help me improve ${CLI_NAME_FULL} by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
         "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data.",
       )}\nOK?`,
     }))
@@ -145,7 +147,7 @@ export async function initCli<
 
   if (majorVersion !== NODE_JS_MAJOR_VERSION) {
     return commandObj.error(
-      `${CLI_NAME} requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`,
+      `${CLI_NAME_FULL} requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`,
     );
   }
 
@@ -199,23 +201,23 @@ const isCheckForUpdatesRequired = async () => {
 };
 
 const handleFloxVersion = async (
-  maybeFloxVersion: string | undefined,
+  maybeCliVersion: string | undefined,
 ): Promise<void> => {
   if (
-    typeof maybeFloxVersion === "string" &&
-    maybeFloxVersion !== commandObj.config.version
+    typeof maybeCliVersion === "string" &&
+    maybeCliVersion !== commandObj.config.version
   ) {
-    const floxVersion = maybeFloxVersion;
+    const cliVersion = maybeCliVersion;
     return commandObj.error(
-      `Current ${CLI_NAME} versions is ${color.yellow(
+      `Current ${CLI_NAME_FULL} versions is ${color.yellow(
         commandObj.config.version,
-      )}, but this project is compatible only with ${CLI_NAME} version ${color.yellow(
-        floxVersion,
+      )}, but this project is compatible only with ${CLI_NAME_FULL} version ${color.yellow(
+        cliVersion,
       )}\n\nPlease install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/${CLI_NAME}@${floxVersion}`,
+        `npm i -g ${PACKAGE_NAME}@${cliVersion}`,
       )}\n\nAfter that, run:\n\n${color.yellow(
         `${CLI_NAME} dep v`,
-      )}\n\nto find out which version of rust-peer you need to use to make sure you are running ${CLI_NAME} against the compatible version of rust-peer\n\n`,
+      )}\n\nto find out which version of rust-peer you need to use to make sure you are running ${CLI_NAME_FULL} against the compatible version of rust-peer\n\n`,
     );
   }
 
@@ -225,8 +227,8 @@ const handleFloxVersion = async (
 
   try {
     const [stableVersion, unstableVersion] = await Promise.all([
-      getLatestVersionOfNPMDependency(`@fluencelabs/${CLI_NAME}`),
-      getLatestVersionOfNPMDependency(`@fluencelabs/${CLI_NAME}@unstable`),
+      getLatestVersionOfNPMDependency(`${PACKAGE_NAME}`),
+      getLatestVersionOfNPMDependency(`${PACKAGE_NAME}@unstable`),
     ]);
 
     const isOlderThanStable = semver.lt(
@@ -250,8 +252,8 @@ const handleFloxVersion = async (
         isOlderThanStable ? "stable" : "unstable",
       )} version ${color.yellow(
         version,
-      )} of ${CLI_NAME} is available\n\nYou can install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/${CLI_NAME}@${version}`,
+      )} of ${CLI_NAME_FULL} is available\n\nYou can install it with:\n\n${color.yellow(
+        `npm i -g ${PACKAGE_NAME}@${version}`,
       )}${SEPARATOR}`,
     );
 

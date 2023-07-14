@@ -1,6 +1,6 @@
 # module.yaml
 
-Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use `flox module new` command to generate a template for new module
+Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use `Fluence CLI module new` command to generate a template for new module
 
 ## Properties
 
