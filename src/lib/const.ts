@@ -321,13 +321,14 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
-${DOT_FLUENCE_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/**/*
+!/${DOT_FLUENCE_DIR_NAME}/${WORKERS_CONFIG_FULL_FILE_NAME}
 **/node_modules
 **/target/
 .repl_history
-.vscode/settings.json
-src/ts/src/aqua
-src/js/src/aqua`;
+/.vscode/settings.json
+/src/ts/src/aqua
+/src/js/src/aqua`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";

@@ -22,7 +22,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
-import { initProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
+import { initNewProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
   PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
@@ -61,7 +61,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }
 
     const userSecretsConfig = await initUserSecretsConfig();
-    const projectSecretsConfig = await initProjectSecretsConfig();
+    const projectSecretsConfig = await initNewProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
       (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath(),

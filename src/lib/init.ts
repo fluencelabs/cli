@@ -124,16 +124,20 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
             })),
         );
 
-  if (
-    existsSync(projectPath) &&
-    (await stat(projectPath)).isDirectory() &&
-    (await readdir(projectPath)).length > 0
-  ) {
-    return commandObj.error(
-      `Directory ${color.yellow(
-        projectPath,
-      )} is not empty. Please, init in an empty directory.`,
-    );
+  if (existsSync(projectPath) && (await stat(projectPath)).isDirectory()) {
+    const directoryContent = await readdir(projectPath);
+    const isNonEmptyDir = directoryContent.length > 0;
+
+    const dirHasOnlyGitInside =
+      directoryContent.length === 1 && directoryContent[0] === ".git";
+
+    if (isNonEmptyDir && !dirHasOnlyGitInside) {
+      return commandObj.error(
+        `Directory ${color.yellow(
+          projectPath,
+        )} is not empty. Please, init in an empty directory.`,
+      );
+    }
   }
 
   const { template = await selectTemplate() } = options;
@@ -142,6 +146,12 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
+
+  await writeFile(
+    getGitignorePath(),
+    RECOMMENDED_GITIGNORE_CONTENT,
+    FS_OPTIONS,
+  );
 
   switch (template) {
     case "quickstart": {
@@ -204,12 +214,6 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
     generateSettingsJson: true,
     maybeFluenceConfig: fluenceConfig,
   });
-
-  await writeFile(
-    getGitignorePath(),
-    RECOMMENDED_GITIGNORE_CONTENT,
-    FS_OPTIONS,
-  );
 
   const workersConfig = await initNewWorkersConfig();
   await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);

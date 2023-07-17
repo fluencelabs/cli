@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { writeFile, readFile } from "node:fs/promises";
+import { writeFile, readFile, access } from "node:fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
@@ -24,7 +24,7 @@ import type { FluenceConfig } from "../configs/project/fluence.js";
 import { FS_OPTIONS } from "../const.js";
 import { installAllNPMDependencies } from "../npm.js";
 import {
-  ensureFluenceAquaDir,
+  getFluenceAquaDir,
   ensureUserFluenceNpmDir,
   ensureVSCodeSettingsJsonPath,
 } from "../paths.js";
@@ -44,7 +44,13 @@ export async function ensureAquaImports({
   force,
   generateSettingsJson = false,
 }: GetAquaImportsArg): Promise<string[]> {
-  const defaultImports = [await ensureFluenceAquaDir()];
+  const fluenceAquaDirPath = getFluenceAquaDir();
+  const defaultImports = [];
+
+  try {
+    await access(fluenceAquaDirPath);
+    defaultImports.push(fluenceAquaDirPath);
+  } catch {}
 
   const allNpmDependencies = await installAllNPMDependencies({
     maybeFluenceConfig,

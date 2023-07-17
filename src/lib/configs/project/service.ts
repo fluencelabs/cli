@@ -27,7 +27,7 @@ import {
   ensureServiceAbsolutePath,
   validateAquaName,
 } from "../../helpers/downloadFile.js";
-import { ensureFluenceDir } from "../../paths.js";
+import { getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -127,7 +127,7 @@ const getInitConfigOptions = (
     latestSchema: configSchemaV0,
     migrations,
     name: SERVICE_CONFIG_FILE_NAME,
-    getSchemaDirPath: ensureFluenceDir,
+    getSchemaDirPath: getFluenceDir,
     getConfigOrConfigDirPath: (): string => {
       return configDirPath;
     },
