@@ -564,14 +564,15 @@ Create new marine module template
 
 ```
 USAGE
-  $ fluence module new [NAME] [--no-input] [--path <value>]
+  $ fluence module new [NAME] [--no-input] [--path <value>] [--service <value>]
 
 ARGUMENTS
   NAME  Module name
 
 FLAGS
-  --no-input     Don't interactively ask for any input from the user
-  --path=<path>  Path to module dir (default: src/modules)
+  --no-input                        Don't interactively ask for any input from the user
+  --path=<path>                     Path to module dir (default: src/modules)
+  --service=<name | relative_path>  Name or relative path to the service to add the created module to
 
 DESCRIPTION
   Create new marine module template
