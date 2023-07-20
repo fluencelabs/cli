@@ -75,7 +75,7 @@ export default class New extends BaseCommand<typeof New> {
     const pathToModuleDir = join(pathToModulesDir, moduleName);
     await generateNewModule(pathToModuleDir);
 
-    this.log(
+    commandObj.log(
       `Successfully generated template for new module at ${color.yellow(
         pathToModuleDir,
       )}`,

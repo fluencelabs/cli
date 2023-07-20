@@ -123,7 +123,7 @@ export default class REPL extends Command {
 
     const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 
-    this.log(`${SEPARATOR}Execute ${color.yellow(
+    commandObj.logToStderr(`${SEPARATOR}Execute ${color.yellow(
       "help",
     )} inside repl to see available commands.
 Current service <module_name> is: ${color.yellow(facadeModuleConfig.name)}

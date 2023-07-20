@@ -133,7 +133,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       if (maybePreviouslyDeployedDeal !== undefined) {
         if (maybePreviouslyDeployedDeal.definition === appCID) {
-          commandObj.log(
+          commandObj.logToStderr(
             `\nWorker ${color.yellow(
               workerName,
             )} didn't change. Skipping deal update`,
@@ -142,7 +142,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           continue;
         }
 
-        commandObj.log(
+        commandObj.logToStderr(
           `\nUpdating deal for worker ${color.yellow(workerName)}\n`,
         );
 
@@ -177,7 +177,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         continue;
       }
 
-      commandObj.log(
+      commandObj.logToStderr(
         `\nCreating deal for worker ${color.yellow(workerName)}\n`,
       );
 

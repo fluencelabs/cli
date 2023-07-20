@@ -62,6 +62,8 @@ export default class Create extends BaseCommand<typeof Create> {
       }),
     });
 
-    commandObj.log(`Deal contract created: ${color.yellow(dealAddress)}`);
+    commandObj.logToStderr(
+      `Deal contract created: ${color.yellow(dealAddress)}`,
+    );
   }
 }

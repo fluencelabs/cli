@@ -214,7 +214,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   const workersConfig = await initNewWorkersConfig();
   await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
 
-  commandObj.log(
+  commandObj.logToStderr(
     color.magentaBright(
       `\nSuccessfully initialized ${CLI_NAME_FULL} project template at ${replaceHomeDir(
         projectPath,
