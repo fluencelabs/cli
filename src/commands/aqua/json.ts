@@ -67,6 +67,6 @@ export default class Json extends BaseCommand<typeof Json> {
       FS_OPTIONS,
     );
 
-    commandObj.log("Done!");
+    commandObj.logToStderr("Done!");
   }
 }

@@ -162,7 +162,7 @@ export default class Aqua extends Command {
     if (!flags.watch) {
       await compileToFiles(compileCommandArgs);
 
-      commandObj.log(
+      commandObj.logToStderr(
         `Successfully compiled ${color.yellow(
           compileCommandArgs.compileArgs.filePath,
         )}${
@@ -196,7 +196,7 @@ export default class Aqua extends Command {
             watchingNotification();
           })
           .catch((error): void => {
-            commandObj.log(stringifyUnknown(error));
+            commandObj.logToStderr(stringifyUnknown(error));
             return watchingNotification();
           });
       });

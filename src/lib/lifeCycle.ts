@@ -247,7 +247,7 @@ const handleFloxVersion = async (
 
     const version = isOlderThanStable ? stableVersion : unstableVersion;
 
-    commandObj.log(
+    commandObj.logToStderr(
       `${SEPARATOR}New ${color.yellow(
         isOlderThanStable ? "stable" : "unstable",
       )} version ${color.yellow(
@@ -266,7 +266,7 @@ const handleFloxVersion = async (
       userConfig.lastCheckForUpdates = CHECK_FOR_UPDATES_DISABLED;
       await userConfig.$commit();
 
-      commandObj.log(
+      commandObj.logToStderr(
         `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`,
       );
     }

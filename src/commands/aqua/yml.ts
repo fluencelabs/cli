@@ -69,6 +69,6 @@ export default class Yaml extends BaseCommand<typeof Yaml> {
       FS_OPTIONS,
     );
 
-    commandObj.log("Done!");
+    commandObj.logToStderr("Done!");
   }
 }
