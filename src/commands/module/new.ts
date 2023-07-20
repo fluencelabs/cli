@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import { join } from "path";
+import { join, relative } from "path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { ensureServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
+import { isUrl } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { ensureSrcModulesDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
@@ -31,10 +34,14 @@ export default class New extends BaseCommand<typeof New> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    // path
     path: Flags.string({
       description: "Path to module dir (default: src/modules)",
       helpValue: "<path>",
+    }),
+    service: Flags.string({
+      description:
+        "Name or relative path to the service to add the created module to",
+      helpValue: "<name | relative_path>",
     }),
   };
   static override args = {
@@ -43,10 +50,26 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(New));
+    const { args, flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(New),
+    );
+
+    if (typeof args.name === "string") {
+      const moduleNameValidity = validateModuleName(args.name);
+
+      if (moduleNameValidity !== true) {
+        commandObj.warn(moduleNameValidity);
+        args.name = undefined;
+      }
+    }
 
     const moduleName =
-      args.name ?? (await input({ message: "Enter module name" }));
+      args.name ??
+      (await input({
+        message: "Enter module name",
+        validate: validateModuleName,
+      }));
 
     const pathToModulesDir = flags.path ?? (await ensureSrcModulesDir());
     const pathToModuleDir = join(pathToModulesDir, moduleName);
@@ -57,5 +80,45 @@ export default class New extends BaseCommand<typeof New> {
         pathToModuleDir,
       )}`,
     );
+
+    if (flags.service === undefined) {
+      return;
+    }
+
+    if (isUrl(flags.service)) {
+      return commandObj.error(
+        "Can't update service by URL. Please, specify service name or path to the service config",
+      );
+    }
+
+    const serviceConfig = await ensureServiceConfig(
+      flags.service,
+      maybeFluenceConfig,
+    );
+
+    serviceConfig.modules[moduleName] = {
+      get: relative(serviceConfig.$getDirPath(), pathToModuleDir),
+    };
+
+    await serviceConfig.$commit();
+
+    commandObj.log(
+      `Added module ${color.yellow(
+        pathToModuleDir,
+      )} to service ${serviceConfig.$getPath()}`,
+    );
   }
 }
+
+const validateModuleName = (name: string): string | true => {
+  if (
+    name.length === 0 ||
+    name.includes(" ") ||
+    name.includes("\\") ||
+    name.includes("/")
+  ) {
+    return "Module name cannot be empty, contain spaces or slashes";
+  }
+
+  return true;
+};

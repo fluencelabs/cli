@@ -25,7 +25,7 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
-import { initServiceConfig } from "../../lib/configs/project/service.js";
+import { ensureServiceConfig } from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   MODULE_CONFIG_FULL_FILE_NAME,
@@ -107,18 +107,10 @@ export default class Add extends BaseCommand<typeof Add> {
       );
     }
 
-    const serviceConfig = await initServiceConfig(
+    const serviceConfig = await ensureServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      cwd(),
+      maybeFluenceConfig,
     );
-
-    if (serviceConfig === null) {
-      return commandObj.error(
-        `Can't find service config at ${color.yellow(
-          serviceOrServiceDirPathOrUrl,
-        )}`,
-      );
-    }
 
     const validateModuleName = (name: string): true | string => {
       return (
