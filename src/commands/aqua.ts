@@ -177,7 +177,9 @@ export default class Aqua extends Command {
     }
 
     const watchingNotification = (): void => {
-      return this.log(`Watching for changes at ${color.yellow(inputFlag)}...`);
+      return commandObj.logToStderr(
+        `Watching for changes at ${color.yellow(inputFlag)}...`,
+      );
     };
 
     watchingNotification();
