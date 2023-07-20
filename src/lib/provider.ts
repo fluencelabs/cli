@@ -134,7 +134,7 @@ const getWalletConnectProvider = async (
     url.searchParams.set(RELAY_QUERY_PARAM_NAME, bridge);
     url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
 
-    commandObj.log(
+    commandObj.logToStderr(
       `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
     );
   });
@@ -254,6 +254,6 @@ export const waitTx = async (
 
 export const promptConfirmTx = (privKey: string | undefined) => {
   if (privKey === undefined) {
-    commandObj.log(`Confirm transaction in your wallet...`);
+    commandObj.logToStderr(`Confirm transaction in your wallet...`);
   }
 };

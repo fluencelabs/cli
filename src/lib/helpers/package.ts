@@ -344,7 +344,7 @@ export const resolveDependencies = async (
     if (versionToUse === projectDependencyOverrides[name]) {
       assert(maybeFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
           `Using version ${versionToUse} of ${name} defined at ${maybeFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You can reset it to the recommended version by running \`${CLI_NAME} dep r\``,
         ),
@@ -356,7 +356,7 @@ export const resolveDependencies = async (
     if (versionToUse === userDependencyOverrides[name]) {
       assert(userFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
           `Using version ${versionToUse} of ${name} defined at ${userFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}. You can reset it to the recommended version by running \`${CLI_NAME} dep r -g\``,
         ),
@@ -375,7 +375,7 @@ export const resolveDependencies = async (
     ) {
       assert(userFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
           `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}, you may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}`,
         ),

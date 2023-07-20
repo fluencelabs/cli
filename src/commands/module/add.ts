@@ -152,7 +152,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     await serviceConfig.$commit();
 
-    this.log(
+    commandObj.log(
       `Added ${color.yellow(moduleName)} to ${color.yellow(
         replaceHomeDir(serviceConfig.$getPath()),
       )}`,

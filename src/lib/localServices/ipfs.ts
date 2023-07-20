@@ -124,7 +124,7 @@ const dagUpload = async (
 export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
   const log = (msg: unknown) => {
     if (!offAquaLogs) {
-      commandObj.log(`ipfs: ${stringifyUnknown(msg)}`);
+      commandObj.logToStderr(`ipfs: ${stringifyUnknown(msg)}`);
     }
   };
 

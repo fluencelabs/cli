@@ -116,7 +116,7 @@ export default class Default extends BaseCommand<typeof Default> {
       await projectSecretsConfig.$commit();
     }
 
-    this.log(
+    commandObj.log(
       `Key-pair with name ${color.yellow(
         keyPairName,
       )} successfully set as default at ${secretsConfigPath}`,
