@@ -18,10 +18,10 @@ import assert from "node:assert";
 import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import compile from "@fluencelabs/aqua-api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { compile } from "./aqua.js";
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
