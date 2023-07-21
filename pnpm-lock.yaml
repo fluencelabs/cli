@@ -9,7 +9,7 @@ dependencies:
     specifier: 0.3.1
     version: 0.3.1
   '@fluencelabs/aqua-api':
-    specifier: file:fluencelabs-aqua-api-0.11.8.tgz
+    specifier: file:./fluencelabs-aqua-api-0.11.8.tgz
     version: file:fluencelabs-aqua-api-0.11.8.tgz
   '@fluencelabs/deal-aurora':
     specifier: 0.1.8
