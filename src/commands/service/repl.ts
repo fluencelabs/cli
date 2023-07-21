@@ -36,6 +36,7 @@ import {
   BIN_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
+  MARINE_BUILD_ARGS,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SEPARATOR,
@@ -66,6 +67,7 @@ export default class REPL extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,
+    ...MARINE_BUILD_ARGS,
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
@@ -73,7 +75,7 @@ export default class REPL extends Command {
     }),
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
+    const { args, flags, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(REPL),
     );
@@ -99,6 +101,7 @@ export default class REPL extends Command {
         serviceConfig,
         maybeFluenceConfig,
         marineCli,
+        flags["marine-build-args"],
       );
 
     stopSpinner();
