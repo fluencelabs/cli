@@ -36,8 +36,8 @@ dependencies:
     specifier: 2.8.11
     version: 2.8.11(@swc/core@1.3.68)(@types/node@18.16.19)(typescript@5.1.6)
   '@oclif/plugin-autocomplete':
-    specifier: 2.3.1
-    version: 2.3.1(@swc/core@1.3.68)(@types/node@18.16.19)(typescript@5.1.6)
+    specifier: 2.3.3
+    version: 2.3.3(@swc/core@1.3.68)(@types/node@18.16.19)(typescript@5.1.6)
   '@oclif/plugin-help':
     specifier: 5.2.11
     version: 5.2.11(@swc/core@1.3.68)(@types/node@18.16.19)(typescript@5.1.6)
@@ -2867,8 +2867,8 @@ packages:
       - '@types/node'
       - typescript
 
-  /@oclif/plugin-autocomplete@2.3.1(@swc/core@1.3.68)(@types/node@18.16.19)(typescript@5.1.6):
-    resolution: {integrity: sha512-UGkw6UObfkDdM/cwr16iEJW8OKLb4X8ZLG5Lc596Dl6WgW0GnzZjVQIu126koNt1T3jp9Oo9rrT26LbxtdryoQ==}
+  /@oclif/plugin-autocomplete@2.3.3(@swc/core@1.3.68)(@types/node@18.16.19)(typescript@5.1.6):
+    resolution: {integrity: sha512-4/7l3YrACS7KfONoams7+xAbVfo7tje0t2Qp84/KAUpY1Yb/11AMPHtzgoRp5A5Y3OFPmLCfRF1YUydz+jGuwg==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/core': 2.8.11(@swc/core@1.3.68)(@types/node@18.16.19)(typescript@5.1.6)
