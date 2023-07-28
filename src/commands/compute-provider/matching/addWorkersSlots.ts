@@ -92,7 +92,7 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
     promptConfirmTx(flags.privKey);
     await waitTx(approveTx);
 
-    const multihash = digest.decode(base58.base58btc.decode(peerId));
+    const multihash = digest.decode(base58.base58btc.decode("z" + peerId));
     const tx = await matcher.addWorkersSlots(
       multihash.digest.subarray(4),
       workersCount
