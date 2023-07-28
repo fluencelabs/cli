@@ -19,13 +19,13 @@ import {
   CHAIN_NETWORKS,
 } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import type { JSONSchemaType } from "ajv";
+
 import {
   WORKERS_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
 } from "../../const.js";
-
 import { ensureFluenceDir } from "../../paths.js";
 import {
   getReadonlyConfigInitFunction,

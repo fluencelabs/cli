@@ -169,7 +169,7 @@ export const waitTx = async (
   const res = await tx.wait();
   stopSpinner();
 
-  assert(res != null, "Transaction hash is not defined");
+  assert(res !== null, "Transaction hash is not defined");
   assert(res.status === 1, "Transaction failed");
 
   return res;
