@@ -33,7 +33,7 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
+import { DealClient } from "@fluencelabs/deal-aurora/dist/src";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 

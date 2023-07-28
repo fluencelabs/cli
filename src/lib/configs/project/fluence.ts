@@ -18,9 +18,9 @@ import assert from "node:assert";
 import path, { join } from "node:path";
 
 import {
-  type ChainNetwork,
-  CHAIN_NETWORKS,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
+  type ContractsENV,
+  CONTRACTS_ENV
+} from "@fluencelabs/deal-aurora/dist/src/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
@@ -224,7 +224,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   hosts?: Record<string, Host>;
   workers?: Record<string, Worker>;
   deals?: Record<string, Deal>;
-  chainNetwork?: ChainNetwork;
+  chainNetwork?: ContractsENV;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
@@ -396,7 +396,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     chainNetwork: {
       type: "string",
       description: "The network in which the transactions will be carried out",
-      enum: CHAIN_NETWORKS,
+      enum: CONTRACTS_ENV,
       default: "testnet",
       nullable: true,
     },
@@ -614,7 +614,7 @@ version: 2
 #
 #
 # # The network in which the transactions will be carried out
-# chainNetwork: ${CHAIN_NETWORKS[0]} # default: ${DEFAULT_CHAIN_NETWORK}
+# chainNetwork: ${CONTRACTS_ENV[0]} # default: ${DEFAULT_CHAIN_NETWORK}
 #
 #
 # # The version of the CLI that is compatible with this project.

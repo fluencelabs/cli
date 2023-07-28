@@ -15,9 +15,9 @@
  */
 
 import {
-  type ChainNetwork,
-  CHAIN_NETWORKS,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
+  type ContractsENV,
+  CONTRACTS_ENV
+} from "@fluencelabs/deal-aurora/dist/src/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
@@ -47,9 +47,9 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
-export const DEFAULT_CHAIN_NETWORK = CHAIN_NETWORKS[1];
+export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[1];
 
-export const isChainNetwork = getIsStringUnion(CHAIN_NETWORKS);
+export const isChainNetwork = getIsStringUnion(CONTRACTS_ENV);
 
 export type ChainConfig = {
   ethereumNodeUrl: string;
@@ -64,7 +64,7 @@ export const WC_METADATA = {
   url: GITHUB_REPO_NAME,
   icons: [],
 };
-export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
+export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
     chainId: 1313161555,
@@ -173,7 +173,7 @@ export const NO_INPUT_FLAG = {
 export const NETWORK_FLAG_NAME = "network";
 export const NETWORK_FLAG = {
   [NETWORK_FLAG_NAME]: Flags.string({
-    description: `The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
+    description: `The network in which the transactions used by the command will be carried out (${CONTRACTS_ENV.join(
       ", ",
     )})`,
     helpValue: "<network>",

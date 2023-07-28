@@ -34,12 +34,12 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
+import { DealClient } from "@fluencelabs/deal-aurora/dist/src";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
-import * as base58 from "multiformats/bases/base58.js";
-import * as digest from "multiformats/hashes/digest.js";
+import * as base58 from "multiformats/bases/base58";
+import * as digest from "multiformats/hashes/digest";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";

@@ -20,8 +20,7 @@
 
 import assert from "node:assert";
 
-import { DealClient } from "@fluencelabs/deal-aurora";
-import { type ChainNetwork } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import { DealClient } from "@fluencelabs/deal-aurora/dist/src";
 import ethers = require("ethers");
 import { CID } from "ipfs-http-client";
 
@@ -32,6 +31,7 @@ import {
   waitTx,
   promptConfirmTx,
 } from "./provider.js";
+import type { ContractsENV } from "@fluencelabs/deal-aurora/dist/src/client/config.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -45,7 +45,7 @@ type DealInfo = {
 };
 
 type DealCreateArg = {
-  chainNetwork: ChainNetwork;
+  chainNetwork: ContractsENV;
   privKey: string | undefined;
   appCID: string;
   minWorkers: number;
@@ -143,7 +143,7 @@ function parseDealInfo(dealInfoEvent: ethers.Result): DealInfo {
 }
 
 type DealUpdateArg = {
-  network: ChainNetwork;
+  network: ContractsENV;
   privKey: string | undefined;
   dealAddress: string;
   appCID: string;

@@ -15,9 +15,9 @@
  */
 
 import {
-  type ChainNetwork,
-  CHAIN_NETWORKS,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
+  type ContractsENV,
+  CONTRACTS_ENV
+} from "@fluencelabs/deal-aurora/dist/src/client/config.js";
 import type { JSONSchemaType } from "ajv";
 
 import {
@@ -57,7 +57,7 @@ const workerInfoSchema = {
 export type Deal = WorkerInfo & {
   dealId: string;
   dealIdOriginal: string;
-  chainNetwork: ChainNetwork;
+  chainNetwork: ContractsENV;
   chainNetworkId: number;
 };
 
@@ -113,7 +113,7 @@ const dealSchema: JSONSchemaType<Deal> = {
     dealIdOriginal: { type: "string" },
     chainNetwork: {
       type: "string",
-      enum: CHAIN_NETWORKS,
+      enum: CONTRACTS_ENV,
     },
     chainNetworkId: { type: "number" },
   },

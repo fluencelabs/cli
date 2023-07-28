@@ -180,7 +180,7 @@ devDependencies:
     version: 2.0.0(@typescript-eslint/eslint-plugin@5.61.0)(eslint@8.44.0)
   globby:
     specifier: '13'
-    version: 13.0.0
+    version: 13.2.2
   jest:
     specifier: 29.6.1
     version: 29.6.1(@types/node@18.16.19)(ts-node@10.9.1)
@@ -4315,7 +4315,6 @@ packages:
 
   /abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
-    dev: true
 
   /abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -5808,7 +5807,7 @@ packages:
       supports-color:
         optional: true
     dependencies:
-      ms: 2.1.1
+      ms: 2.1.3
       supports-color: 6.0.0
     dev: false
 
@@ -6318,7 +6317,7 @@ packages:
     dependencies:
       bn.js: 4.12.0
       brorand: 1.1.0
-      hash.js: 1.1.3
+      hash.js: 1.1.7
       hmac-drbg: 1.0.1
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
@@ -7633,7 +7632,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: false
@@ -7747,8 +7746,8 @@ packages:
       merge2: 1.4.1
       slash: 3.0.0
 
-  /globby@13.0.0:
-    resolution: {integrity: sha512-peWsS6/uJ4lRXg7qK11lnkMTIdoDp35bpJzpR3vpRNFkP1qMNsM7OQvUqwe6r+9RCT6VpEAhL9DDrK/jD0PGvw==}
+  /globby@13.2.2:
+    resolution: {integrity: sha512-Y1zNGV+pzQdh7H39l9zgB4PJqjRNqydvdYCDG4HFXM4XuvSaQQlEc91IU1yALL8gUTDomgBAfz3XJdmUS+oo0w==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
       dir-glob: 3.0.1
@@ -8010,7 +8009,7 @@ packages:
   /hmac-drbg@1.0.1:
     resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
     dependencies:
-      hash.js: 1.1.3
+      hash.js: 1.1.7
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
     dev: false
@@ -10715,7 +10714,7 @@ packages:
     resolution: {integrity: sha512-4GUt3kSEYmk4ITxzB/b9vaIDfUVWN/Ml1Fwl11IlnIG2iaJ9O6WXZ9SrYM9NLI8OCBieN2Y8SWC2oJV0RQ7qYg==}
     hasBin: true
     dependencies:
-      abbrev: 1.0.9
+      abbrev: 1.1.1
     dev: false
 
   /nopt@5.0.0:
@@ -12232,7 +12231,7 @@ packages:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
     hasBin: true
     dependencies:
-      glob: 7.2.0
+      glob: 7.2.3
     dev: false
 
   /rimraf@3.0.2:
@@ -14352,7 +14351,7 @@ packages:
     dev: true
 
   file:fluencelabs-deal-aurora-0.2.4.tgz(@nomicfoundation/hardhat-chai-matchers@2.0.1)(@nomicfoundation/hardhat-ethers@3.0.4)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomicfoundation/hardhat-verify@1.0.4)(@typechain/ethers-v6@0.4.3)(@typechain/hardhat@8.0.3)(@types/chai@4.3.5)(@types/mocha@10.0.1)(@types/node@18.16.19)(chai@4.3.7)(ethers@6.6.0)(hardhat-gas-reporter@1.0.9)(hardhat@2.17.0)(solidity-coverage@0.8.4)(ts-node@10.9.1)(typechain@8.3.1)(typescript@5.1.6):
-    resolution: {integrity: sha512-t9C6KPtVpbChMBDoTtc6WkFmXnIi+2Z0Zhu5lrcJr4SwwMYqZqwokHaEMRlzJpLYVZ5c7jicqXw79RH0yGnzMA==, tarball: file:fluencelabs-deal-aurora-0.2.4.tgz}
+    resolution: {integrity: sha512-3O+952cpLD+G1F0d7tsRe0KkDyN28cGSYGyW7Kd/NzuJQ6hamrMFf7EbnJg8JMpjxJPijocOVmxUlzvvU4bn5g==, tarball: file:fluencelabs-deal-aurora-0.2.4.tgz}
     id: file:fluencelabs-deal-aurora-0.2.4.tgz
     name: '@fluencelabs/deal-aurora'
     version: 0.2.4

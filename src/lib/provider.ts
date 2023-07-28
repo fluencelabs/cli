@@ -20,9 +20,9 @@ import assert from "node:assert";
 import { URL } from "node:url";
 
 import {
-  type ChainNetwork,
-  CHAIN_NETWORKS,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
+  type ContractsENV,
+  CONTRACTS_ENV
+} from "@fluencelabs/deal-aurora/dist/src/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";
@@ -50,13 +50,13 @@ const DEFAULT_NETWORK = "testnet";
 
 type EnsureChainNetworkArg = {
   maybeNetworkFromFlags: string | undefined;
-  maybeDealsConfigNetwork: ChainNetwork | undefined;
+  maybeDealsConfigNetwork: ContractsENV | undefined;
 };
 
 export const ensureChainNetwork = async ({
   maybeNetworkFromFlags,
   maybeDealsConfigNetwork,
-}: EnsureChainNetworkArg): Promise<ChainNetwork> => {
+}: EnsureChainNetworkArg): Promise<ContractsENV> => {
   const isValidNetworkFromFlags =
     isChainNetwork(maybeNetworkFromFlags) ||
     maybeNetworkFromFlags === undefined;
@@ -68,7 +68,7 @@ export const ensureChainNetwork = async ({
 
     return list({
       message: "Select chain network",
-      options: [...CHAIN_NETWORKS],
+      options: [...CONTRACTS_ENV],
       oneChoiceMessage(chainNetwork) {
         return `Do you want to use ${color.yellow(
           chainNetwork,
@@ -88,7 +88,7 @@ export const ensureChainNetwork = async ({
 };
 
 export const getSigner = async (
-  network: ChainNetwork,
+  network: ContractsENV,
   privKey: string | undefined
 ): Promise<ethers.Signer> => {
   return privKey === undefined
@@ -97,7 +97,7 @@ export const getSigner = async (
 };
 
 const getWalletConnectProvider = async (
-  network: ChainNetwork,
+  network: ContractsENV,
 ): Promise<ethers.Signer> => {
   const provider = await UniversalProvider.init({
     projectId: WC_PROJECT_ID,
@@ -154,7 +154,7 @@ const getWalletConnectProvider = async (
   return new ethers.BrowserProvider(provider).getSigner();
 };
 
-const getWallet = (privKey: string, network: ChainNetwork): ethers.Wallet => {
+const getWallet = (privKey: string, network: ContractsENV): ethers.Wallet => {
   return new ethers.Wallet(
     privKey,
     new ethers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl)
