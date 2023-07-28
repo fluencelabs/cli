@@ -60,14 +60,6 @@ export const WC_METADATA = {
   icons: [],
 };
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
-  kras: {
-    ethereumNodeUrl: "https://testnet.aurora.dev",
-    chainId: 1313161555,
-  },
-  stage: {
-    ethereumNodeUrl: "https://testnet.aurora.dev",
-    chainId: 1313161555,
-  },
   testnet: {
     ethereumNodeUrl: "https://testnet.aurora.dev",
     chainId: 1313161555,

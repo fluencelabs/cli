@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * Copyright 2023 Fluence Labs Limited
  *
@@ -16,13 +19,11 @@
 
 import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
-import { Args } from "@oclif/core";
 const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
-import { input } from "../../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getSigner,
@@ -30,27 +31,20 @@ import {
   waitTx,
 } from "../../../lib/provider.js";
 
-const WORKERS_COUNT = "WORKERS-COUNT";
-
-export default class RegistrationInMatcher extends BaseCommand<
-  typeof RegistrationInMatcher
+export default class RegisterInMatcher extends BaseCommand<
+  typeof RegisterInMatcher
 > {
-  static override description = "Registration in matching contract";
+  static override description = "Register in matching contract";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
   };
-  static override args = {
-    [WORKERS_COUNT]: Args.string({
-      description: "Workers to be registered with the matching engine",
-    }),
-  };
 
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
+    const { flags, fluenceConfig } = await initCli(
       this,
-      await this.parse(RegistrationInMatcher),
+      await this.parse(RegisterInMatcher),
       true
     );
 
@@ -58,9 +52,6 @@ export default class RegistrationInMatcher extends BaseCommand<
       maybeNetworkFromFlags: flags.network,
       maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
     });
-
-    const workersCount =
-      args[WORKERS_COUNT] ?? (await input({ message: "Enter workers count" }));
 
     const signer = await getSigner(network, flags.privKey);
 
@@ -75,19 +66,11 @@ export default class RegistrationInMatcher extends BaseCommand<
     const collateral = await factory.REQUIRED_COLLATERAL();
     const pricePerEpoch = await factory.PRICE_PER_EPOCH();
 
-    const approveTx = await flt.approve(
-      await matcher.getAddress(),
-      collateral * BigInt(workersCount)
-    );
-
-    promptConfirmTx(flags.privKey);
-    await waitTx(approveTx);
-
-    const tx = await matcher.register(
+    const tx = await matcher.registerComputeProvider(
       pricePerEpoch,
       collateral,
-      workersCount,
-      [] // TODO: get effectors from the project
+      await flt.getAddress(),
+      []
     );
 
     promptConfirmTx(flags.privKey);

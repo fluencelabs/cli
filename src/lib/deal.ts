@@ -169,5 +169,6 @@ export const dealUpdate = async ({
   });
 
   await waitTx(tx);
+
   return tx;
 };

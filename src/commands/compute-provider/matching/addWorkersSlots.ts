@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * Copyright 2023 Fluence Labs Limited
  *
@@ -14,12 +18,12 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
-import { DealClient, WorkersModule__factory } from "@fluencelabs/deal-aurora";
+import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
+import * as digest from "multiformats/hashes/digest";
+import * as base58 from "multiformats/bases/base58";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
@@ -31,26 +35,32 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../../lib/provider.js";
+import { ethers } from "ethers";
 
-const DEAL_ADDRESS_ARG = "DEAL-ADDRESS";
-const PAT_CREATED_EVENT_TOPIC = "PATCreated";
+const WORKERS_COUNT = "WORKERS-COUNT";
+const PEER_ID = "PEER-ID";
 
-export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
-  static override description = "Create provider access token for the deal";
+export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
+  static override description =
+    "Add worker slots to matching contract for peerId";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
   };
   static override args = {
-    [DEAL_ADDRESS_ARG]: Args.string({
-      description: "Deal address",
+    [PEER_ID]: Args.string({
+      description: "PeerId of the workers",
+    }),
+    [WORKERS_COUNT]: Args.string({
+      description: "Workers to be registered with the matching engine",
     }),
   };
+
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
-      await this.parse(CreatePAT),
+      await this.parse(AddWorkerSlots),
       true
     );
 
@@ -59,53 +69,38 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
       maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
     });
 
-    const dealAddress =
-      args[DEAL_ADDRESS_ARG] ??
-      (await input({ message: "Enter deal address" }));
+    const workersCount =
+      args[WORKERS_COUNT] ?? (await input({ message: "Enter workers count" }));
+
+    const peerId = args[PEER_ID] ?? (await input({ message: "Enter peerId" }));
 
     const signer = await getSigner(network, flags.privKey);
 
     const dealClient = new DealClient(signer, network);
 
     const globalContracts = dealClient.getGlobalContracts();
-
-    const deal = dealClient.getDeal(dealAddress);
-
-    const config = await deal.getConfigModule();
-    const workersModule = await deal.getWorkersModule();
-
+    const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
+    const factory = globalContracts.getFactory();
+    const collateral = await factory.REQUIRED_COLLATERAL();
 
-    const v = await config.requiredCollateral();
-    const approveTx = await flt.approve(dealAddress, v);
+    const approveTx = await flt.approve(
+      await matcher.getAddress(),
+      collateral * BigInt(workersCount)
+    );
 
     promptConfirmTx(flags.privKey);
     await waitTx(approveTx);
 
-    const joinTx = await workersModule.join();
+    const multihash = digest.decode(base58.base58btc.decode(peerId));
+    const tx = await matcher.addWorkersSlots(
+      multihash.digest.subarray(4),
+      workersCount
+    );
 
     promptConfirmTx(flags.privKey);
-    const res = await waitTx(joinTx);
+    await waitTx(tx);
 
-    const workersInterface = WorkersModule__factory.createInterface();
-
-    const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);
-
-    const log = res.logs.find((log) => {
-      return log.topics[0] === event.topicHash;
-    });
-
-    assert(log !== undefined);
-
-    const patId: unknown = workersInterface
-      .parseLog({
-        topics: [...log.topics],
-        data: log.data,
-      })
-      ?.args.getValue("id");
-
-    assert(typeof patId === "string");
-
-    this.log(`PAT ID: ${color.yellow(patId)}`);
+    this.log(color.green(`Successfully joined to matching contract`));
   }
 }
