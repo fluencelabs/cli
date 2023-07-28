@@ -19,10 +19,7 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import {
-  type ContractsENV,
-  CONTRACTS_ENV
-} from "@fluencelabs/deal-aurora/dist/src/client/config.js";
+import { type ContractsENV, CONTRACTS_ENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";

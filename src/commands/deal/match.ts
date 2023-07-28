@@ -20,7 +20,7 @@ import {
   DealClient,
   WorkersModule__factory,
   type Matcher,
-} from "@fluencelabs/deal-aurora/dist/src";
+} from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 
