@@ -33,7 +33,7 @@ register({
   project: path.join(
     path.dirname(url.fileURLToPath(import.meta.url)),
     "..",
-    "tsconfig.json"
+    "tsconfig.json",
   ),
   transpileOnly: true,
   swc: true,

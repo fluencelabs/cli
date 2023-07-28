@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { access, mkdir, rename } from "node:fs/promises";
+import { access, mkdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -29,6 +29,8 @@ import type {
 } from "../configs/project/fluence.js";
 import { initReadonlyUserConfig, userConfig } from "../configs/user/config.js";
 import {
+  CLI_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
   fluenceCargoDependencies,
   fluenceNPMDependencies,
   isFluenceCargoDependency,
@@ -204,36 +206,36 @@ const dependenciesPathsGettersMap: Record<
   },
 };
 
-type ResolveDependencyPathAndTmpPath = {
+type ResolveDependencyDirPathAndTmpPath = {
   name: string;
   version: string;
   packageManager: PackageManager;
 };
 
-export const resolveDependencyPathAndTmpPath = async ({
+export const resolveDependencyDirPathAndTmpPath = async ({
   name,
   version,
   packageManager,
-}: ResolveDependencyPathAndTmpPath): Promise<{
-  dependencyTmpPath: string;
-  dependencyPath: string;
+}: ResolveDependencyDirPathAndTmpPath): Promise<{
+  dependencyTmpDirPath: string;
+  dependencyDirPath: string;
 }> => {
   const [depDirPath, depTmpDirPath] = await Promise.all(
-    dependenciesPathsGettersMap[packageManager]()
+    dependenciesPathsGettersMap[packageManager](),
   );
 
   const dependencyPathEnding = join(...name.split("/"), version);
   return {
-    dependencyTmpPath: join(depTmpDirPath, dependencyPathEnding),
-    dependencyPath: join(depDirPath, dependencyPathEnding),
+    dependencyTmpDirPath: join(depTmpDirPath, dependencyPathEnding),
+    dependencyDirPath: join(depDirPath, dependencyPathEnding),
   };
 };
 
 type HandleInstallationArg = {
   force: boolean;
   installDependency: () => Promise<void>;
-  dependencyPath: string;
-  dependencyTmpPath: string;
+  dependencyDirPath: string;
+  dependencyTmpDirPath: string;
   name: string;
   version: string;
   explicitInstallation: boolean;
@@ -242,16 +244,18 @@ type HandleInstallationArg = {
 export const handleInstallation = async ({
   force,
   installDependency,
-  dependencyPath,
-  dependencyTmpPath,
+  dependencyDirPath,
+  dependencyTmpDirPath,
   explicitInstallation,
   name,
   version,
 }: HandleInstallationArg): Promise<void> => {
   const installAndMoveToDependencyPath = async (): Promise<void> => {
+    await rm(dependencyTmpDirPath, { recursive: true, force: true });
     await installDependency();
-    await mkdir(dependencyPath, { recursive: true });
-    await rename(dependencyTmpPath, dependencyPath);
+    await rm(dependencyDirPath, { recursive: true, force: true });
+    await mkdir(dependencyDirPath, { recursive: true });
+    await rename(dependencyTmpDirPath, dependencyDirPath);
   };
 
   if (force) {
@@ -259,7 +263,8 @@ export const handleInstallation = async ({
   } else {
     try {
       // if dependency is already installed it will be there
-      await access(dependencyPath);
+      // so there is no need to install
+      await access(dependencyDirPath);
     } catch {
       await installAndMoveToDependencyPath();
     }
@@ -268,14 +273,14 @@ export const handleInstallation = async ({
   if (explicitInstallation) {
     commandObj.log(
       `Successfully installed ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
-      )}`
+        dependencyDirPath,
+      )}`,
     );
   }
 };
 
 export const splitPackageNameAndVersion = (
-  packageNameAndMaybeVersion: string
+  packageNameAndMaybeVersion: string,
 ): [string] | [string, string] => {
   const hasVersion = /.+@.+/.test(packageNameAndMaybeVersion);
 
@@ -293,30 +298,27 @@ export const splitPackageNameAndVersion = (
   return [packageName, version];
 };
 
+export const getRecommendedDependencies = (packageManager: PackageManager) => {
+  const versionsPerPackageManager =
+    packageManager === "cargo" ? versions.cargo : versions.npm;
+
+  const defaultDependencies =
+    packageManager === "cargo"
+      ? fluenceCargoDependencies
+      : fluenceNPMDependencies;
+
+  return Object.fromEntries(
+    Object.entries(versionsPerPackageManager).filter(([dependencyName]) => {
+      return defaultDependencies.includes(dependencyName);
+    }),
+  );
+};
+
 export const resolveDependencies = async (
   packageManager: PackageManager,
-  maybeFluenceConfig: FluenceConfigReadonly | null
+  maybeFluenceConfig: FluenceConfigReadonly | null,
 ) => {
-  const recommendedDependencies = (() => {
-    if (packageManager === "cargo") {
-      return fluenceCargoDependencies.reduce(
-        (acc, dep) => {
-          return { ...acc, [dep]: versions.cargo[dep] };
-        },
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        {} as Record<(typeof fluenceCargoDependencies)[number], string>
-      );
-    }
-
-    return fluenceNPMDependencies.reduce(
-      (acc, dep) => {
-        return { ...acc, [dep]: versions.npm[dep] };
-      },
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      {} as Record<(typeof fluenceNPMDependencies)[number], string>
-    );
-  })();
-
+  const recommendedDependencies = getRecommendedDependencies(packageManager);
   const userFluenceConfig = await initReadonlyUserConfig();
 
   const userDependencyOverrides =
@@ -342,10 +344,10 @@ export const resolveDependencies = async (
     if (versionToUse === projectDependencyOverrides[name]) {
       assert(maybeFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
-          `Using version ${versionToUse} of ${name} defined at ${maybeFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You can reset it to the recommended version by running \`fluence dep r\``
-        )
+          `Using version ${versionToUse} of ${name} defined at ${maybeFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You can reset it to the recommended version by running \`${CLI_NAME} dep r\``,
+        ),
       );
 
       return;
@@ -354,10 +356,10 @@ export const resolveDependencies = async (
     if (versionToUse === userDependencyOverrides[name]) {
       assert(userFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
-          `Using version ${versionToUse} of ${name} defined at ${userFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You may want to consider adding it to your project's fluence config. You can reset it to the recommended version by running \`fluence dep r -g\``
-        )
+          `Using version ${versionToUse} of ${name} defined at ${userFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}. You can reset it to the recommended version by running \`${CLI_NAME} dep r -g\``,
+        ),
       );
 
       return;
@@ -373,10 +375,10 @@ export const resolveDependencies = async (
     ) {
       assert(userFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
-          `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}, you may want to consider adding it to your project's fluence config`
-        )
+          `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}, you may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}`,
+        ),
       );
     }
   });

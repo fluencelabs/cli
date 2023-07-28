@@ -22,12 +22,11 @@ const color = oclifColor.default;
 import { build } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { DEFAULT_WORKER_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
+import { DEFAULT_WORKER_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   validateAquaName,
 } from "./helpers/downloadFile.js";
-import { getExistingKeyPair } from "./keyPairs.js";
 import type { MarineCLI } from "./marineCli.js";
 import { confirm, input } from "./prompt.js";
 
@@ -62,7 +61,7 @@ export const addService = async ({
     return (
       !(name in (fluenceConfig?.services ?? {})) ||
       `You already have ${color.yellow(name)} in ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
+        fluenceConfig.$getPath(),
       )}`
     );
   };
@@ -85,20 +84,14 @@ export const addService = async ({
     },
   };
 
-  const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);
-
-  if (defaultKeyPair instanceof Error) {
-    commandObj.error(defaultKeyPair.message);
-  }
-
-  await build({ marineCli, fluenceConfig, defaultKeyPair });
+  await build({ marineCli, fluenceConfig });
   await fluenceConfig.$commit();
 
   if (interactive) {
     commandObj.log(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )}`
+        fluenceConfig.$getPath(),
+      )}`,
     );
   }
 
@@ -109,12 +102,12 @@ export const addService = async ({
       fluenceConfig.workers !== undefined &&
       DEFAULT_WORKER_NAME in fluenceConfig.workers &&
       !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services ?? []).includes(
-        serviceName
+        serviceName,
       ) &&
       (interactive
         ? await confirm({
             message: `Do you want to add service ${color.yellow(
-              serviceName
+              serviceName,
             )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
           })
         : true)
@@ -136,8 +129,8 @@ export const addService = async ({
   if (interactive) {
     commandObj.log(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
-        DEFAULT_WORKER_NAME
-      )}`
+        DEFAULT_WORKER_NAME,
+      )}`,
     );
   }
 

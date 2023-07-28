@@ -15,31 +15,24 @@
  */
 
 import assert from "node:assert";
-import {
-  access,
-  cp,
-  mkdir,
-  readFile,
-  unlink,
-  writeFile,
-} from "node:fs/promises";
+import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, sep } from "node:path";
 
 import { compile } from "./lib/aqua.js";
 import { AQUA_EXT, FS_OPTIONS } from "./lib/const.js";
 
 const getAquaDependencyImports = async (
-  peerDependency: string
+  peerDependency: string,
 ): Promise<Array<string>> => {
   const peerDependencyPackageJSONPath = join(
     "node_modules",
     peerDependency,
-    "package.json"
+    "package.json",
   );
 
   const peerDependencyPackageJSON = await readFile(
     peerDependencyPackageJSONPath,
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
   const parsedPackageJSON = JSON.parse(peerDependencyPackageJSON);
@@ -47,7 +40,7 @@ const getAquaDependencyImports = async (
   assert(
     typeof parsedPackageJSON === "object" &&
       parsedPackageJSON !== null &&
-      "dependencies" in parsedPackageJSON
+      "dependencies" in parsedPackageJSON,
   );
 
   const paths = Object.entries(parsedPackageJSON?.dependencies ?? {}).map(
@@ -56,15 +49,15 @@ const getAquaDependencyImports = async (
         "node_modules",
         ".pnpm",
         `${name.replace(sep, "+")}@${String(version)}`,
-        "node_modules"
+        "node_modules",
       );
-    }
+    },
   );
 
   const validImports = await Promise.allSettled(
     paths.map((p) => {
       return access(p);
-    })
+    }),
   );
 
   return paths.filter((_, i) => {
@@ -78,17 +71,17 @@ const COMPILED_AQUA_PATH = join(SRC_LIB_PATH, "compiled-aqua");
 
 const COMPILED_AQUA_WITH_TRACING_PATH = join(
   SRC_LIB_PATH,
-  "compiled-aqua-with-tracing"
+  "compiled-aqua-with-tracing",
 );
 
 const COMPILED_INSTALLATION_SPELL_AQUA_PATH = join(
   COMPILED_AQUA_PATH,
-  "installation-spell"
+  "installation-spell",
 );
 
 const COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH = join(
   COMPILED_AQUA_WITH_TRACING_PATH,
-  "installation-spell"
+  "installation-spell",
 );
 
 const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
@@ -96,7 +89,7 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
   "@fluencelabs",
   "installation-spell",
   "src",
-  "aqua"
+  "aqua",
 );
 
 const compileInstallationSpellAqua = async (tracing = false) => {
@@ -105,17 +98,17 @@ const compileInstallationSpellAqua = async (tracing = false) => {
       const compilationResult = await compile({
         filePath: join(
           INSTALLATION_SPELL_AQUA_DIR_PATH,
-          `${fileName}.${AQUA_EXT}`
+          `${fileName}.${AQUA_EXT}`,
         ),
         imports: [
           join(
             "node_modules",
             ".pnpm",
             "@fluencelabs+aqua-lib@0.7.0",
-            "node_modules"
+            "node_modules",
           ),
           ...(await getAquaDependencyImports(
-            join("@fluencelabs", "installation-spell")
+            join("@fluencelabs", "installation-spell"),
           )),
         ],
         targetType: "ts",
@@ -130,41 +123,30 @@ const compileInstallationSpellAqua = async (tracing = false) => {
           tracing
             ? COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH
             : COMPILED_INSTALLATION_SPELL_AQUA_PATH,
-          `${fileName}.ts`
+          `${fileName}.ts`,
         ),
         tsSource,
-        FS_OPTIONS
+        FS_OPTIONS,
       );
-    })
+    }),
   );
 };
 
-(async () => {
-  try {
-    await unlink(VERSIONS_DIR_PATH);
-  } catch {}
+await rm(VERSIONS_DIR_PATH, { recursive: true, force: true });
+await mkdir(VERSIONS_DIR_PATH, { recursive: true });
+await cp("package.json", join(VERSIONS_DIR_PATH, "cli.package.json"));
 
-  await mkdir(VERSIONS_DIR_PATH, { recursive: true });
+await cp(
+  join("node_modules", "@fluencelabs", "js-client.node", "package.json"),
+  join(VERSIONS_DIR_PATH, "js-client.package.json"),
+);
 
-  await cp("package.json", join(VERSIONS_DIR_PATH, "cli.package.json"));
+await rm(COMPILED_AQUA_PATH, { recursive: true, force: true });
+await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_PATH, { recursive: true });
 
-  await cp(
-    join("node_modules", "@fluencelabs", "js-client.node", "package.json"),
-    join(VERSIONS_DIR_PATH, "js-client.package.json")
-  );
-
-  try {
-    await unlink(COMPILED_AQUA_PATH);
-  } catch {}
-
-  await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_PATH, { recursive: true });
-
-  await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH, {
-    recursive: true,
-  });
-
-  await compileInstallationSpellAqua();
-  await compileInstallationSpellAqua(true);
-})().catch((e) => {
-  return console.error(e);
+await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH, {
+  recursive: true,
 });
+
+await compileInstallationSpellAqua();
+await compileInstallationSpellAqua(true);

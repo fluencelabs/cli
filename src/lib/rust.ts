@@ -15,6 +15,7 @@
  */
 
 import { access } from "node:fs/promises";
+import { arch, platform } from "node:os";
 import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -24,19 +25,25 @@ import versions from "../versions.json" assert { type: "json" };
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { RUST_WASM32_WASI_TARGET } from "./const.js";
+import {
+  MARINE_CARGO_DEPENDENCY,
+  MREPL_CARGO_DEPENDENCY,
+  RUST_WASM32_WASI_TARGET,
+} from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
+import { jsonStringify } from "./helpers/jsonStringify.js";
 import {
   handleInstallation,
   resolveDependencies,
-  resolveDependencyPathAndTmpPath,
+  resolveDependencyDirPathAndTmpPath,
   resolveVersionToInstall,
   splitPackageNameAndVersion,
   updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -45,7 +52,7 @@ const ensureRust = async (): Promise<void> => {
   if (!(await isRustInstalled())) {
     if (commandObj.config.windows) {
       commandObj.error(
-        "Rust needs to be installed. Please visit https://www.rust-lang.org/tools/install for installation instructions"
+        "Rust needs to be installed. Please visit https://www.rust-lang.org/tools/install for installation instructions",
       );
     }
 
@@ -74,14 +81,14 @@ const ensureRust = async (): Promise<void> => {
     if (!(await isRustInstalled())) {
       commandObj.error(
         `Installed rust without errors but ${color.yellow(
-          RUSTUP
+          RUSTUP,
         )} or ${color.yellow(
-          CARGO
+          CARGO,
         )} not in PATH. Try restarting your terminal, check if ${color.yellow(
-          RUSTUP
+          RUSTUP,
         )} and ${color.yellow(
-          CARGO
-        )} are installed and if they are - run the command again`
+          CARGO,
+        )} are installed and if they are - run the command again`,
       );
     }
   }
@@ -91,7 +98,7 @@ const ensureRust = async (): Promise<void> => {
       command: RUSTUP,
       args: ["install", versions["rust-toolchain"]],
       spinnerMessage: `Installing ${color.yellow(
-        versions["rust-toolchain"]
+        versions["rust-toolchain"],
       )} rust toolchain`,
       printOutput: true,
     });
@@ -99,8 +106,8 @@ const ensureRust = async (): Promise<void> => {
     if (!(await hasRequiredRustToolchain())) {
       commandObj.error(
         `Not able to install ${color.yellow(
-          versions["rust-toolchain"]
-        )} rust toolchain`
+          versions["rust-toolchain"],
+        )} rust toolchain`,
       );
     }
   }
@@ -110,7 +117,7 @@ const ensureRust = async (): Promise<void> => {
       command: RUSTUP,
       args: ["target", "add", RUST_WASM32_WASI_TARGET],
       spinnerMessage: `Adding ${color.yellow(
-        RUST_WASM32_WASI_TARGET
+        RUST_WASM32_WASI_TARGET,
       )} rust target`,
       printOutput: true,
     });
@@ -118,8 +125,8 @@ const ensureRust = async (): Promise<void> => {
     if (!(await hasRequiredRustTarget())) {
       commandObj.error(
         `Not able to install ${color.yellow(
-          RUST_WASM32_WASI_TARGET
-        )} rust target`
+          RUST_WASM32_WASI_TARGET,
+        )} rust target`,
       );
     }
   }
@@ -145,7 +152,7 @@ const isRustInstalled = async (): Promise<boolean> => {
 
 const regExpRecommendedToolchain = new RegExp(
   `^${versions["rust-toolchain"]}.*\\(override\\)$`,
-  "gm"
+  "gm",
 );
 
 const hasRequiredRustToolchain = async (): Promise<boolean> => {
@@ -155,7 +162,7 @@ const hasRequiredRustToolchain = async (): Promise<boolean> => {
   });
 
   const hasRequiredRustToolchain = toolChainList.includes(
-    versions["rust-toolchain"]
+    versions["rust-toolchain"],
   );
 
   if (
@@ -181,7 +188,7 @@ const hasRequiredRustTarget = async (): Promise<boolean> => {
 };
 
 const getLatestVersionOfCargoDependency = async (
-  name: string
+  name: string,
 ): Promise<string> => {
   return (
     (
@@ -192,8 +199,8 @@ const getLatestVersionOfCargoDependency = async (
     ).split('"')[1] ??
     commandObj.error(
       `Not able to find the latest version of ${color.yellow(
-        name
-      )}. Please make sure ${color.yellow(name)} is spelled correctly`
+        name,
+      )}. Please make sure ${color.yellow(name)} is spelled correctly`,
     )
   ).trim();
 };
@@ -202,16 +209,16 @@ type InstallCargoDependencyArg = {
   toolchain: string | undefined;
   name: string;
   version: string;
-  dependencyTmpPath: string;
-  dependencyPath: string;
+  dependencyTmpDirPath: string;
+  dependencyDirPath: string;
 };
 
 const installCargoDependency = async ({
   toolchain,
   name,
   version,
-  dependencyPath,
-  dependencyTmpPath,
+  dependencyDirPath,
+  dependencyTmpDirPath,
 }: InstallCargoDependencyArg) => {
   await execPromise({
     command: CARGO,
@@ -222,38 +229,105 @@ const installCargoDependency = async ({
     ],
     flags: {
       version,
-      root: dependencyTmpPath,
+      root: dependencyTmpDirPath,
     },
     spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
-      dependencyPath
+      dependencyDirPath,
     )}`,
     printOutput: true,
   });
 };
 
-const downloadPrebuiltCargoDependencies = async (
-  name: string,
-  version: string,
-  dependencyPath: string
-): Promise<void> => {
-  const binaryPath = join(dependencyPath, "bin", name);
+type TryDownloadingBinaryArg = {
+  name: string;
+  version: string;
+  dependencyDirPath: string;
+  force: boolean;
+};
+
+/**
+ * Attempts to download pre-built binary from github releases
+ * @return true if binary was downloaded successfully and is working. Otherwise returns error message
+ */
+const tryDownloadingBinary = async ({
+  name,
+  version,
+  dependencyDirPath,
+  force,
+}: TryDownloadingBinaryArg): Promise<string | true> => {
+  if (![MARINE_CARGO_DEPENDENCY, MREPL_CARGO_DEPENDENCY].includes(name)) {
+    return 'Only "marine" and "mrepl" cargo dependencies can be downloaded as pre-built binaries';
+  }
+
+  const binaryPath = join(dependencyDirPath, "bin", name);
+
+  if (force) {
+    return "`--force` flag was used";
+  }
 
   try {
     await access(binaryPath);
-  } catch {
-    const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-linux-x86_64`;
+    // if binary is already downloaded we assume it is working
+    return true;
+  } catch {}
 
-    commandObj.log(
-      `Downloading prebuilt binary: ${color.yellow(name)}... from ${url}`
-    );
+  const platformToUse = platform();
 
+  if (
+    !(
+      (["darwin", "linux"].includes(platformToUse) && arch() === "x64") ||
+      // works using rosetta
+      (platformToUse === "darwin" && arch() === "arm64")
+    )
+  ) {
+    return 'Pre-built binaries are only available for "x64" linux and macos platforms';
+  }
+
+  const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-${platformToUse}-x86_64`;
+
+  startSpinner(
+    `Downloading ${name}@${version} binary to ${replaceHomeDir(
+      dependencyDirPath,
+    )}`,
+  );
+
+  try {
     await downloadFile(binaryPath, url);
+    stopSpinner();
+  } catch (e) {
+    stopSpinner("failed");
+    const error = e instanceof Error ? e.message : jsonStringify(e);
+    return `Failed to download ${name}@${version} from ${url}. Error: ${error}`;
+  }
 
+  try {
     await execPromise({
       command: "chmod",
       args: ["+x", binaryPath],
     });
+  } catch {
+    return `Failed to make ${name}@${version} executable by running chmod +x '${binaryPath}'`;
   }
+
+  try {
+    // check binary is working
+    const helpText = await execPromise({
+      command: binaryPath,
+      args: ["--help"],
+    });
+
+    if (!helpText.includes(version)) {
+      return `Downloaded ${name}@${version} binary at ${binaryPath} --help message does not contain the ${version} version it is supposed to contain:\n result of --help execution is: ${helpText}`;
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message.includes(version)) {
+      return true;
+    }
+
+    return `Failed to run ${name}@${version} binary at ${binaryPath}`;
+  }
+
+  return true;
 };
 
 type CargoDependencyArg = {
@@ -292,32 +366,36 @@ export const ensureCargoDependency = async ({
     toolchainFromArgs ??
     (name in versions.cargo ? versions["rust-toolchain"] : undefined);
 
-  const { dependencyPath, dependencyTmpPath } =
-    await resolveDependencyPathAndTmpPath({
+  const { dependencyDirPath, dependencyTmpDirPath } =
+    await resolveDependencyDirPathAndTmpPath({
       name,
       packageManager: "cargo",
       version,
     });
 
-  try {
-    if (process.env.CI === "true") {
-      await downloadPrebuiltCargoDependencies(name, version, dependencyPath);
-    } else {
-      throw new Error("Not in CI");
-    }
-  } catch {
-    // Fallback to normal cargo install if Download fails in CI or if using CLI not in CI
+  const maybeErrorMessage = await tryDownloadingBinary({
+    name,
+    version,
+    dependencyDirPath,
+    force,
+  });
+
+  if (typeof maybeErrorMessage === "string") {
+    commandObj.warn(
+      `Using cargo to install ${name}@${version} instead of using downloaded pre-built binary. Reason: ${maybeErrorMessage}`,
+    );
+
     await handleInstallation({
       force,
-      dependencyPath,
-      dependencyTmpPath,
+      dependencyDirPath,
+      dependencyTmpDirPath,
       explicitInstallation,
       name,
       version,
       installDependency: () => {
         return installCargoDependency({
-          dependencyPath,
-          dependencyTmpPath,
+          dependencyDirPath,
+          dependencyTmpDirPath,
           name,
           toolchain,
           version,
@@ -336,7 +414,7 @@ export const ensureCargoDependency = async ({
 
   addCountlyLog(`Using ${name}@${version} cargo dependency`);
 
-  return dependencyPath;
+  return dependencyDirPath;
 };
 
 type InstallAllDependenciesArg = {
@@ -349,7 +427,7 @@ export const installAllCargoDependencies = async ({
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
-    await resolveDependencies("cargo", maybeFluenceConfig)
+    await resolveDependencies("cargo", maybeFluenceConfig),
   )) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable

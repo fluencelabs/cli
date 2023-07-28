@@ -10,13 +10,13 @@ try {
 
   assert(
     typeof process.env.GITHUB_WORKSPACE === "string",
-    "GITHUB_WORKSPACE environment variable is not set"
+    "GITHUB_WORKSPACE environment variable is not set",
   );
 
   const versionsFilePath = join(
     process.env.GITHUB_WORKSPACE,
     "src",
-    "versions.json"
+    "versions.json",
   );
 
   const versionsFileContent = readFileSync(versionsFilePath, "utf-8");

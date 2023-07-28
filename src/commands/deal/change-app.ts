@@ -49,7 +49,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(ChangeApp),
-      true
+      true,
     );
 
     const tx = await dealUpdate({
@@ -65,6 +65,6 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
       privKey: flags.privKey,
     });
 
-    commandObj.log(`Tx hash: ${color.yellow(tx.hash)}`);
+    commandObj.logToStderr(`Tx hash: ${color.yellow(tx.hash)}`);
   }
 }

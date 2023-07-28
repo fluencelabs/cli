@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import versions from "../versions.json" assert { type: "json" };
@@ -27,24 +27,23 @@ import {
 } from "./const.js";
 
 export const generateNewModule = async (
-  pathToModuleDir: string
+  pathToModuleDir: string,
 ): Promise<void> => {
-  await fsPromises.mkdir(pathToModuleDir, { recursive: true });
+  await mkdir(pathToModuleDir, { recursive: true });
   const name = path.basename(pathToModuleDir);
-
   const newModuleSrcDirPath = path.join(pathToModuleDir, "src");
-  await fsPromises.mkdir(newModuleSrcDirPath, { recursive: true });
+  await mkdir(newModuleSrcDirPath, { recursive: true });
 
-  await fsPromises.writeFile(
+  await writeFile(
     path.join(newModuleSrcDirPath, "main.rs"),
     MAIN_RS_CONTENT,
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
-  await fsPromises.writeFile(
+  await writeFile(
     path.join(pathToModuleDir, "Cargo.toml"),
     getCargoTomlContent(name),
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
   await initNewReadonlyModuleConfig(pathToModuleDir, name);

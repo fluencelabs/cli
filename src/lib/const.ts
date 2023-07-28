@@ -34,6 +34,10 @@ import type { FluenceEnv } from "./multiaddres.js";
 import { FLUENCE_ENV } from "./setupEnvironment.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
+export const CLI_NAME = "fluence";
+export const CLI_NAME_FULL = "Fluence CLI";
+export const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
+export const PACKAGE_NAME = "@fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
@@ -42,6 +46,8 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
+
+export const DEFAULT_CHAIN_NETWORK = CHAIN_NETWORKS[1];
 
 export const isChainNetwork = getIsStringUnion(CHAIN_NETWORKS);
 
@@ -53,10 +59,9 @@ export type ChainConfig = {
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
 export const WC_PROJECT_ID = "70c1c5ed2a23e7383313de1044ddce7e";
 export const WC_METADATA = {
-  name: "Fluence CLI",
-  description:
-    "Fluence CLI is designed to be the only tool that you need to manage the life cycle of applications written on Fluence.",
-  url: "https://github.com/fluencelabs/fluence-cli",
+  name: CLI_NAME,
+  description: `${CLI_NAME_FULL} is designed to be the only tool that you need to manage the life cycle of applications written on Fluence.`,
+  url: GITHUB_REPO_NAME,
   icons: [],
 };
 export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
@@ -100,14 +105,23 @@ export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
 
-export const FLUENCE_CONFIG_FILE_NAME = `fluence.${YAML_EXT}`;
-export const WORKERS_CONFIG_FILE_NAME = `workers.${YAML_EXT}`;
-export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets.${YAML_EXT}`;
-export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets.${YAML_EXT}`;
-export const CONFIG_FILE_NAME = `config.${YAML_EXT}`;
-export const MODULE_CONFIG_FILE_NAME = `module.${YAML_EXT}`;
-export const SERVICE_CONFIG_FILE_NAME = `service.${YAML_EXT}`;
-export const SPELL_CONFIG_FILE_NAME = `spell.${YAML_EXT}`;
+export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
+export const WORKERS_CONFIG_FILE_NAME = `workers`;
+export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets`;
+export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets`;
+export const GLOBAL_CONFIG_FILE_NAME = `config`;
+export const MODULE_CONFIG_FILE_NAME = `module`;
+export const SERVICE_CONFIG_FILE_NAME = `service`;
+export const SPELL_CONFIG_FILE_NAME = `spell`;
+
+export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const WORKERS_CONFIG_FULL_FILE_NAME = `${WORKERS_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const PROJECT_SECRETS_FULL_CONFIG_FILE_NAME = `${PROJECT_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const USER_SECRETS_CONFIG_FULL_FILE_NAME = `${USER_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const GLOBAL_CONFIG_FULL_FILE_NAME = `${GLOBAL_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const MODULE_CONFIG_FULL_FILE_NAME = `${MODULE_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const SERVICE_CONFIG_FULL_FILE_NAME = `${SERVICE_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT}`;
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
@@ -160,10 +174,10 @@ export const NETWORK_FLAG_NAME = "network";
 export const NETWORK_FLAG = {
   [NETWORK_FLAG_NAME]: Flags.string({
     description: `The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
-      ", "
+      ", ",
     )})`,
     helpValue: "<network>",
-    default: "testnet",
+    default: DEFAULT_CHAIN_NETWORK,
   }),
 };
 
@@ -172,7 +186,7 @@ export const GLOBAL_FLAG = {
   [GLOBAL_FLAG_NAME]: Flags.boolean({
     default: false,
     aliases: ["g"],
-    description: `Will override dependencies in a global user's ${CONFIG_FILE_NAME} instead of project's ${FLUENCE_CONFIG_FILE_NAME}`,
+    description: `Will override dependencies in a global user's ${GLOBAL_CONFIG_FULL_FILE_NAME} instead of project's ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
   }),
 };
 
@@ -233,7 +247,7 @@ export const FLUENCE_CLIENT_FLAGS = {
   [TTL_FLAG_NAME]: Flags.integer({
     description:
       "Particle Time To Live since 'now'. After that, particle is expired and not processed.",
-    default: 60000,
+    default: 120_000,
     helpValue: "<milliseconds>",
   }),
   [DIAL_TIMEOUT_FLAG_NAME]: Flags.integer({
@@ -287,7 +301,7 @@ export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
 export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
 
 export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
-  ", "
+  ", ",
 )}`;
 
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
@@ -333,15 +347,15 @@ export const fluenceCargoDependencies = [
 ] as const;
 
 export const isFluenceCargoDependency = getIsStringUnion(
-  fluenceCargoDependencies
+  fluenceCargoDependencies,
 );
 
 export const SEPARATOR = `\n\n${color.yellow(
-  `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`
+  `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
 )}\n\n`;
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
--- example of running services deployed using 'fluence deal deploy'
+-- example of running services deployed using \`${CLI_NAME} deal deploy\`
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices
@@ -365,11 +379,11 @@ func runDeployedServices() -> *Answer:
     <- answers`;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
-  RUN_DEPLOYED_SERVICE_AQUA
+  RUN_DEPLOYED_SERVICE_AQUA,
 );
 
 export const getMainAquaFileContent = (
-  commentOutRunDeployedServicesAqua: boolean
+  commentOutRunDeployedServicesAqua: boolean,
 ) => {
   return `aqua Main
 

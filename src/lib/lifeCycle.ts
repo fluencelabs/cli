@@ -45,7 +45,10 @@ import {
   NODE_JS_MAJOR_VERSION,
   CHECK_FOR_UPDATES_INTERVAL,
   SEPARATOR,
+  CLI_NAME_FULL,
   type NO_INPUT_FLAG_NAME,
+  CLI_NAME,
+  PACKAGE_NAME,
 } from "./const.js";
 import { haltCountly, initCountly, logErrorToCountly } from "./countly.js";
 import "./setupEnvironment.js";
@@ -73,8 +76,8 @@ const ensureUserConfig = async (): Promise<void> => {
   if (
     isInteractive &&
     (await confirm({
-      message: `Help me improve Fluence CLI by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
-        "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data."
+      message: `Help me improve ${CLI_NAME_FULL} by sending anonymous usage data. I don't collect IDs, names, or other personal data.\n${color.gray(
+        "Metrics will help the developers know which features are useful so they can prioritize what to work on next. Fluence Labs hosts a Countly instance to record anonymous usage data.",
       )}\nOK?`,
     }))
   ) {
@@ -93,7 +96,7 @@ type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
 type ParserOutputWithNoInputFlag<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 > = ParserOutput<F, F2, A> & {
   flags: {
     [NO_INPUT_FLAG_NAME]: boolean;
@@ -103,30 +106,30 @@ type ParserOutputWithNoInputFlag<
 export async function initCli<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 >(
   commandObj: CommandObj,
   parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject?: false
+  requiresFluenceProject?: false,
 ): Promise<CommonReturn<A, F> & { maybeFluenceConfig: FluenceConfig | null }>;
 export async function initCli<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 >(
   commandObj: CommandObj,
   parserOutput: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject: true
+  requiresFluenceProject: true,
 ): Promise<CommonReturn<A, F> & { fluenceConfig: FluenceConfig }>;
 
 export async function initCli<
   F extends FlagOutput,
   F2 extends FlagOutput,
-  A extends ArgOutput
+  A extends ArgOutput,
 >(
   commandObjFromArgs: CommandObj,
   { args, flags }: ParserOutputWithNoInputFlag<F, F2, A>,
-  requiresFluenceProject = false
+  requiresFluenceProject = false,
 ): Promise<
   CommonReturn<A, F> & {
     fluenceConfig?: FluenceConfig | null;
@@ -144,7 +147,7 @@ export async function initCli<
 
   if (majorVersion !== NODE_JS_MAJOR_VERSION) {
     return commandObj.error(
-      `Fluence CLI requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`
+      `${CLI_NAME_FULL} requires Node.js version "${NODE_JS_MAJOR_VERSION}.x.x"; Detected ${platform.version}.\nYou can use https://nvm.sh utility to set Node.js version: "nvm install ${NODE_JS_MAJOR_VERSION} && nvm use ${NODE_JS_MAJOR_VERSION} && nvm alias default ${NODE_JS_MAJOR_VERSION}"`,
     );
   }
 
@@ -157,7 +160,7 @@ export async function initCli<
   ]);
 
   await initCountly({ maybeFluenceConfig });
-  await handleFluenceCLIVersion(maybeFluenceConfig?.cliVersion);
+  await handleFloxVersion(maybeFluenceConfig?.cliVersion);
 
   return {
     args,
@@ -197,24 +200,26 @@ const isCheckForUpdatesRequired = async () => {
   return false;
 };
 
-const handleFluenceCLIVersion = async (
-  maybeFluenceCLIVersion: string | undefined
+const handleFloxVersion = async (
+  maybeCliVersion: string | undefined,
 ): Promise<void> => {
+  const currentVersion = commandObj.config.version;
+
   if (
-    typeof maybeFluenceCLIVersion === "string" &&
-    maybeFluenceCLIVersion !== commandObj.config.version
+    typeof maybeCliVersion === "string" &&
+    maybeCliVersion !== currentVersion
   ) {
-    const flunenceCLIVersion = maybeFluenceCLIVersion;
+    const cliVersion = maybeCliVersion;
     return commandObj.error(
-      `Current CLI versions is ${color.yellow(
-        commandObj.config.version
-      )}, but this fluence project is compatible only with Fluence CLI version ${color.yellow(
-        flunenceCLIVersion
+      `Current ${CLI_NAME_FULL} versions is ${color.yellow(
+        currentVersion,
+      )}, but this project is compatible only with ${CLI_NAME_FULL} version ${color.yellow(
+        cliVersion,
       )}\n\nPlease install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/cli@${flunenceCLIVersion}`
+        `npm i -g ${PACKAGE_NAME}@${cliVersion}`,
       )}\n\nAfter that, run:\n\n${color.yellow(
-        "fluence dep v"
-      )}\n\nto find out which version of rust-peer you need to use to make sure you are running Fluence CLI against the compatible version of rust-peer\n\n`
+        `${CLI_NAME} dep v`,
+      )}\n\nto find out which version of rust-peer you need to use to make sure you are running ${CLI_NAME_FULL} against the compatible version of rust-peer\n\n`,
     );
   }
 
@@ -224,34 +229,29 @@ const handleFluenceCLIVersion = async (
 
   try {
     const [stableVersion, unstableVersion] = await Promise.all([
-      getLatestVersionOfNPMDependency("@fluencelabs/cli"),
-      getLatestVersionOfNPMDependency("@fluencelabs/cli@unstable"),
+      getLatestVersionOfNPMDependency(`${PACKAGE_NAME}`),
+      getLatestVersionOfNPMDependency(`${PACKAGE_NAME}@unstable`),
     ]);
 
-    const isOlderThanStable = semver.lt(
-      commandObj.config.version,
-      stableVersion
-    );
+    const isOlderThanStable = semver.lt(currentVersion, stableVersion);
+    const isStable = semver.eq(currentVersion, stableVersion);
+    const isOlderThenUnstable = semver.lt(currentVersion, unstableVersion);
+    const hasUpdates = isOlderThanStable || isOlderThenUnstable;
 
-    const isOlderThenUnstable = semver.lt(
-      commandObj.config.version,
-      unstableVersion
-    );
-
-    if (!isOlderThanStable && !isOlderThenUnstable) {
+    if (isStable || !hasUpdates) {
       return;
     }
 
     const version = isOlderThanStable ? stableVersion : unstableVersion;
 
-    commandObj.log(
+    commandObj.logToStderr(
       `${SEPARATOR}New ${color.yellow(
-        isOlderThanStable ? "stable" : "unstable"
+        isOlderThanStable ? "stable" : "unstable",
       )} version ${color.yellow(
-        version
-      )} of Fluence CLI is available\n\nYou can install it with:\n\n${color.yellow(
-        `npm i -g @fluencelabs/cli@${version}`
-      )}${SEPARATOR}`
+        version,
+      )} of ${CLI_NAME_FULL} is available\n\nYou can install it with:\n\n${color.yellow(
+        `npm i -g ${PACKAGE_NAME}@${version}`,
+      )}${SEPARATOR}`,
     );
 
     if (
@@ -263,8 +263,8 @@ const handleFluenceCLIVersion = async (
       userConfig.lastCheckForUpdates = CHECK_FOR_UPDATES_DISABLED;
       await userConfig.$commit();
 
-      commandObj.log(
-        `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`
+      commandObj.logToStderr(
+        `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`,
       );
     }
   } catch (e) {

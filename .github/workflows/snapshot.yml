@@ -56,11 +56,11 @@ jobs:
       - name: Checkout fluence-cli
         uses: actions/checkout@v3
         with:
-          repository: fluencelabs/fluence-cli
+          repository: fluencelabs/cli
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v2.7.2
         id: secrets
         with:
           url: https://vault.fluence.dev

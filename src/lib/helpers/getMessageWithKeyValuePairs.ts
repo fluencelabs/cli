@@ -18,7 +18,7 @@ import { color } from "@oclif/color";
 
 export const getMessageWithKeyValuePairs = (
   message: string,
-  keyValuePairs: Record<string, string> | undefined
+  keyValuePairs: Record<string, string> | undefined,
 ): string => {
   return `${color.yellow(message)}${
     keyValuePairs === undefined

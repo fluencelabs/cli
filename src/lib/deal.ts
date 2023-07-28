@@ -25,7 +25,12 @@ import { type ChainNetwork } from "@fluencelabs/deal-aurora/dist/client/config.j
 import ethers = require("ethers");
 import { CID } from "ipfs-http-client";
 
-import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
+import { CLI_NAME_FULL } from "./const.js";
+import {
+  getSigner,
+  waitTx,
+  promptConfirmTx,
+} from "./provider.js";
 import { commandObj } from "./commandObj.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
@@ -84,7 +89,7 @@ export const dealCreate = async ({
 
   assert(
     log !== undefined,
-    "DealCreated event not found. Try updating flox to the latest version"
+    `DealCreated event not found. Try updating ${CLI_NAME_FULL} to the latest version`,
   );
 
   const dealInfoEvent: ethers.Result = factory.interface.parseLog({

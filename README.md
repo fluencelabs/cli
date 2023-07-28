@@ -18,7 +18,7 @@ $ npm install -g @fluencelabs/cli
 $ fluence COMMAND
 running command...
 $ fluence
-@fluencelabs/cli/0.0.0 linux-x64 node-v16.14.0
+@fluencelabs/cli/0.0.0 linux-x64 node-v18.16.0
 $ fluence --help [COMMAND]
 USAGE
   $ fluence COMMAND
@@ -27,11 +27,13 @@ USAGE
 
 ## Documentation
 
-A complete list of commands together with usage examples is available [here](./docs/commands/README.md). Documentation for all configs that Fluence CLI uses can be found [here](./docs/configs/README.md).
+1. [A complete list of commands together with usage examples](./docs/commands/README.md)
+1. [Documentation for all Fluence CLI configs](./docs/configs/README.md)
+1. [Environment variables that affect Fluence CLI and are important for Fluence CLI maintainers](./example.env)
 
 ## Support
 
-Please, file an [issue](https://github.com/fluencelabs/fluence-cli/issues) if you find a bug. You can also contact us at [Discord](https://discord.com/invite/5qSnPZKh7u) or [Telegram](https://t.me/fluence_project). We will do our best to resolve the issue ASAP.
+Please, file an [issue](https://github.com/fluencelabs/cli/issues) if you find a bug. You can also contact us at [Discord](https://discord.com/invite/5qSnPZKh7u) or [Telegram](https://t.me/fluence_project). We will do our best to resolve the issue ASAP.
 
 ## Contributing
 

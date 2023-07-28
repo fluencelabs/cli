@@ -49,7 +49,7 @@ export default class Default extends BaseCommand<typeof Default> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Default)
+      await this.parse(Default),
     );
 
     if (!flags.user && maybeFluenceConfig === null) {
@@ -60,13 +60,13 @@ export default class Default extends BaseCommand<typeof Default> {
     const projectSecretsConfig = await initProjectSecretsConfig();
 
     const secretsConfigPath = replaceHomeDir(
-      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath()
+      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath(),
     );
 
     let keyPairName = args.name;
 
     const validateKeyPairName = async (
-      keyPairName: string | undefined
+      keyPairName: string | undefined,
     ): Promise<true | string> => {
       if (keyPairName === undefined) {
         return "Key-pair name must be selected";
@@ -77,7 +77,7 @@ export default class Default extends BaseCommand<typeof Default> {
           ? await getUserKeyPair(keyPairName)
           : await getProjectKeyPair(keyPairName)) !== undefined ||
         `Key-pair with name ${color.yellow(
-          keyPairName
+          keyPairName,
         )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
       );
     };
@@ -94,7 +94,7 @@ export default class Default extends BaseCommand<typeof Default> {
         },
         onNoChoices: (): never => {
           return commandObj.error(
-            `There are no key-pairs to set as default at ${secretsConfigPath}`
+            `There are no key-pairs to set as default at ${secretsConfigPath}`,
           );
         },
         options: (flags.user
@@ -116,10 +116,10 @@ export default class Default extends BaseCommand<typeof Default> {
       await projectSecretsConfig.$commit();
     }
 
-    this.log(
+    commandObj.log(
       `Key-pair with name ${color.yellow(
-        keyPairName
-      )} successfully set as default at ${secretsConfigPath}`
+        keyPairName,
+      )} successfully set as default at ${secretsConfigPath}`,
     );
   }
 }

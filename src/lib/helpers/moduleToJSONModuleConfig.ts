@@ -45,15 +45,15 @@ type JSONModuleConf = {
 };
 
 export function moduleToJSONModuleConfig(
-  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
+  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
 ): JSONModuleConf;
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
-  isOld: true
+  isOld: true,
 ): JSONModuleConf;
 
 export function moduleToJSONModuleConfig(
-  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined }
+  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
 ): JSONModuleConf {
   const {
     name,

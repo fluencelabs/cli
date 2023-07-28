@@ -22,7 +22,7 @@ import { commandObj } from "../commandObj.js";
 const SPINNER = color.yellow("#");
 
 export const startSpinner = (message: string) => {
-  commandObj.log(`${SPINNER} ${message}...`);
+  commandObj.logToStderr(`${SPINNER} ${message}...`);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

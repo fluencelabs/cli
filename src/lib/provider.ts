@@ -63,7 +63,7 @@ export const ensureChainNetwork = async ({
 
   if (!isValidNetworkFromFlags) {
     commandObj.warn(
-      `Invalid chain network: ${stringifyUnknown(maybeNetworkFromFlags)}`
+      `Invalid chain network: ${stringifyUnknown(maybeNetworkFromFlags)}`,
     );
 
     return list({
@@ -71,7 +71,7 @@ export const ensureChainNetwork = async ({
       options: [...CHAIN_NETWORKS],
       oneChoiceMessage(chainNetwork) {
         return `Do you want to use ${color.yellow(
-          chainNetwork
+          chainNetwork,
         )} chain network?`;
       },
       onNoChoices() {
@@ -97,7 +97,7 @@ export const getSigner = async (
 };
 
 const getWalletConnectProvider = async (
-  network: ChainNetwork
+  network: ChainNetwork,
 ): Promise<ethers.Signer> => {
   const provider = await UniversalProvider.init({
     projectId: WC_PROJECT_ID,
@@ -118,8 +118,8 @@ const getWalletConnectProvider = async (
     url.searchParams.set(RELAY_QUERY_PARAM_NAME, bridge);
     url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
 
-    commandObj.log(
-      `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`
+    commandObj.logToStderr(
+      `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
     );
   });
 
@@ -145,7 +145,7 @@ const getWalletConnectProvider = async (
   const walletAddress =
     session?.namespaces["eip155"]?.accounts[0]?.split(":")[2];
 
-  if (walletAddress == null) {
+  if (walletAddress === null) {
     throw new Error("Wallet address is not defined");
   }
 
@@ -177,6 +177,6 @@ export const waitTx = async (
 
 export const promptConfirmTx = (privKey: string | undefined) => {
   if (privKey === undefined) {
-    commandObj.log(`Confirm transaction in your wallet...`);
+    commandObj.logToStderr(`Confirm transaction in your wallet...`);
   }
 };

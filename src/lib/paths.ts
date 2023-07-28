@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import fsPromises from "node:fs/promises";
+import { access, mkdir } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -28,7 +28,7 @@ import {
   COUNTLY_DIR_NAME,
   DEFAULT_SRC_AQUA_FILE_NAME,
   EXTENSIONS_JSON_FILE_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
   JS_DIR_NAME,
@@ -49,7 +49,7 @@ import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
   try {
-    await fsPromises.access(path);
+    await access(path);
     return true;
   } catch (error) {
     return stringifyUnknown(error);
@@ -57,7 +57,7 @@ export const validatePath = async (path: string): Promise<string | true> => {
 };
 
 export const ensureDir = async (dirPath: string): Promise<string> => {
-  await fsPromises.mkdir(dirPath, { recursive: true });
+  await mkdir(dirPath, { recursive: true });
   return dirPath;
 };
 
@@ -81,13 +81,13 @@ export const getUserCountlyDir = async (): Promise<string> => {
   return path.join(
     await ensureUserFluenceDir(),
     COUNTLY_DIR_NAME,
-    COUNTLY_DIR_NAME
+    COUNTLY_DIR_NAME,
   );
 };
 
 export const ensureUserFluenceTmpNpmDir = async (): Promise<string> => {
   return ensureDir(
-    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, NPM_DIR_NAME)
+    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, NPM_DIR_NAME),
   );
 };
 
@@ -97,7 +97,7 @@ export const ensureUserFluenceNpmDir = async (): Promise<string> => {
 
 export const ensureUserFluenceTmpCargoDir = async (): Promise<string> => {
   return ensureDir(
-    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, CARGO_DIR_NAME)
+    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, CARGO_DIR_NAME),
   );
 };
 
@@ -110,11 +110,11 @@ export const ensureUserFluenceCargoDir = async (): Promise<string> => {
 const initialCwd = process.cwd();
 
 export const recursivelyFindProjectRootDir = async (
-  initialPath: string
+  initialPath: string,
 ): Promise<string> => {
   const fluenceConfigPath = await recursivelyFindFile(
-    FLUENCE_CONFIG_FILE_NAME,
-    initialPath
+    FLUENCE_CONFIG_FULL_FILE_NAME,
+    initialPath,
   );
 
   if (fluenceConfigPath === null) {
@@ -200,7 +200,7 @@ export const ensureDefaultJSDirPath = async (): Promise<string> => {
 
 export const ensureDefaultAquaJSPath = async (): Promise<string> => {
   return ensureDir(
-    path.join(await ensureDefaultJSDirPath(), SRC_DIR_NAME, AQUA_DIR_NAME)
+    path.join(await ensureDefaultJSDirPath(), SRC_DIR_NAME, AQUA_DIR_NAME),
   );
 };
 
@@ -216,7 +216,7 @@ export const ensureDefaultTSDirPath = async (): Promise<string> => {
 
 export const ensureDefaultAquaTSPath = async (): Promise<string> => {
   return ensureDir(
-    path.join(await ensureDefaultTSDirPath(), SRC_DIR_NAME, AQUA_DIR_NAME)
+    path.join(await ensureDefaultTSDirPath(), SRC_DIR_NAME, AQUA_DIR_NAME),
   );
 };
 

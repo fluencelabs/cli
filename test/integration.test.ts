@@ -47,13 +47,14 @@ describe("integration tests", () => {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       {
         log(msg: string) {
+          // eslint-disable-next-line no-console
           console.log(msg);
         },
         error(msg: string) {
           throw new CLIError(msg);
         },
       } as CommandObj,
-      false
+      false,
     );
   });
 
@@ -61,14 +62,6 @@ describe("integration tests", () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
-
-    await fluence({
-      args: ["run"],
-      flags: {
-        f: 'helloWorld("Fluence")',
-      },
-      cwd,
-    });
 
     await fluence({
       args: ["run"],
@@ -92,7 +85,7 @@ describe("integration tests", () => {
           args: ["ts-node", getIndexJSorTSPath("ts", cwd)],
           printOutput: true,
         })
-      ).trim()
+      ).trim(),
     ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
@@ -109,7 +102,7 @@ describe("integration tests", () => {
           args: [getIndexJSorTSPath("js", cwd)],
           printOutput: true,
         })
-      ).trim()
+      ).trim(),
     ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
@@ -141,9 +134,9 @@ describe("integration tests", () => {
         join(cwd, "src", "aqua", "main.aqua"),
         await readFile(
           join("test", "aqua", "runDeployedWorkers.aqua"),
-          FS_OPTIONS
+          FS_OPTIONS,
         ),
-        FS_OPTIONS
+        FS_OPTIONS,
       );
 
       const pathToNewServiceDir = join("src", "services", "newService");
@@ -155,7 +148,7 @@ describe("integration tests", () => {
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
-        cwd
+        cwd,
       );
 
       assert(newServiceConfig !== null);
@@ -179,23 +172,25 @@ describe("integration tests", () => {
         },
       };
 
-      assert(
-        fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined &&
-          fluenceConfig.hosts !== undefined &&
-          fluenceConfig.hosts[DEFAULT_WORKER_NAME] !== undefined
-      );
-
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["newService"];
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
-
       const peers = [
         "12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR",
         "12D3KooWQdpukY3p2DhDfUfDgphAqsGu5ZUrmQ4mcHSGrRag6gQK",
         "12D3KooWRT8V5awYdEZm6aAV9HWweCEbhWd7df4wehqHZXAB7yMZ",
       ];
 
-      fluenceConfig.hosts[DEFAULT_WORKER_NAME].peerIds = peers;
+      fluenceConfig.hosts = {
+        [DEFAULT_WORKER_NAME]: {
+          peerIds: peers,
+        },
+      };
+
+      assert(
+        fluenceConfig.workers !== undefined &&
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
+      );
+
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["newService"];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
       await fluenceConfig.$commit();
 
       await fluence({
@@ -225,7 +220,7 @@ describe("integration tests", () => {
       });
 
       expect(arrayOfResults).toEqual(expected);
-    }
+    },
   );
 
   maybeConcurrentTest(
@@ -237,7 +232,7 @@ describe("integration tests", () => {
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
-        cwd
+        cwd,
       );
 
       assert(newServiceConfig !== null);
@@ -263,9 +258,7 @@ describe("integration tests", () => {
 
       assert(
         fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined &&
-          fluenceConfig.hosts !== undefined &&
-          fluenceConfig.hosts[DEFAULT_WORKER_NAME] !== undefined
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
       );
 
       fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["myService"];
@@ -323,7 +316,7 @@ describe("integration tests", () => {
         .sort(sortPeers);
 
       expect(arrayOfResults).toEqual(expected);
-    }
+    },
   );
 });
 

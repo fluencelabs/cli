@@ -28,7 +28,7 @@ export default class Init extends BaseCommand<typeof Init> {
     ...baseFlags,
     template: Flags.string({
       description: `Template to use for the project. One of: ${TEMPLATES.join(
-        ", "
+        ", ",
       )}`,
       char: "t",
     }),

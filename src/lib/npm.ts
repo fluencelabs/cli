@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
@@ -28,7 +27,7 @@ import { execPromise } from "./execPromise.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import {
   splitPackageNameAndVersion,
-  resolveDependencyPathAndTmpPath,
+  resolveDependencyDirPathAndTmpPath,
   resolveVersionToInstall,
   handleInstallation,
   resolveDependencies,
@@ -37,7 +36,7 @@ import {
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
 export const getLatestVersionOfNPMDependency = async (
-  name: string
+  name: string,
 ): Promise<string> => {
   try {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -50,10 +49,10 @@ export const getLatestVersionOfNPMDependency = async (
   } catch (error) {
     commandObj.error(
       `Failed to get latest version of ${color.yellow(
-        name
+        name,
       )} from npm registry. Please make sure ${color.yellow(
-        name
-      )} is spelled correctly\n${stringifyUnknown(error)}`
+        name,
+      )} is spelled correctly\n${stringifyUnknown(error)}`,
     );
   }
 };
@@ -61,42 +60,34 @@ export const getLatestVersionOfNPMDependency = async (
 type InstallNpmDependencyArg = {
   name: string;
   version: string;
-  dependencyTmpPath: string;
-  dependencyPath: string;
+  dependencyTmpDirPath: string;
+  dependencyDirPath: string;
 };
 
 const installNpmDependency = async ({
-  dependencyPath,
-  dependencyTmpPath,
+  dependencyDirPath,
+  dependencyTmpDirPath,
   name,
   version,
 }: InstallNpmDependencyArg): Promise<void> => {
   try {
-    // cleanup before installation
-    await Promise.allSettled([
-      rm(dependencyTmpPath, { recursive: true }),
-      rm(dependencyPath, { recursive: true }),
-    ]);
-  } catch {}
-
-  try {
     await execPromise({
       command: "npm",
       args: ["i", `${name}@${version}`],
-      flags: { prefix: dependencyTmpPath },
+      flags: { prefix: dependencyTmpDirPath },
       spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
+        dependencyDirPath,
       )}`,
     });
   } catch (error) {
     commandObj.error(
       `Not able to install ${name}@${version} to ${replaceHomeDir(
-        dependencyPath
+        dependencyDirPath,
       )}. Please make sure ${color.yellow(
-        name
+        name,
       )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
-        `fluence dependency npm install ${name}@<version>`
-      )} command.\n${stringifyUnknown(error)}`
+        `fluence dependency npm install ${name}@<version>`,
+      )} command.\n${stringifyUnknown(error)}`,
     );
   }
 };
@@ -131,11 +122,11 @@ export const ensureNpmDependency = async ({
       : await getLatestVersionOfNPMDependency(
           resolveVersionToInstallResult.maybeVersionToCheck === undefined
             ? name
-            : `${name}@${resolveVersionToInstallResult.maybeVersionToCheck}`
+            : `${name}@${resolveVersionToInstallResult.maybeVersionToCheck}`,
         );
 
-  const { dependencyPath, dependencyTmpPath } =
-    await resolveDependencyPathAndTmpPath({
+  const { dependencyDirPath, dependencyTmpDirPath } =
+    await resolveDependencyDirPathAndTmpPath({
       name,
       packageManager: "npm",
       version,
@@ -143,15 +134,15 @@ export const ensureNpmDependency = async ({
 
   await handleInstallation({
     force,
-    dependencyPath,
-    dependencyTmpPath,
+    dependencyDirPath,
+    dependencyTmpDirPath,
     explicitInstallation,
     name,
     version,
     installDependency: () => {
       return installNpmDependency({
-        dependencyPath,
-        dependencyTmpPath,
+        dependencyDirPath,
+        dependencyTmpDirPath,
         name,
         version,
       });
@@ -168,7 +159,7 @@ export const ensureNpmDependency = async ({
 
   addCountlyLog(`Using ${name}@${version} npm dependency`);
 
-  return join(dependencyPath, NODE_MODULES_DIR_NAME);
+  return join(dependencyDirPath, NODE_MODULES_DIR_NAME);
 };
 
 type InstallAllNPMDependenciesArg = {
@@ -181,7 +172,7 @@ export const installAllNPMDependencies = async ({
   force,
 }: InstallAllNPMDependenciesArg): Promise<string[]> => {
   const dependenciesToEnsure = Object.entries(
-    await resolveDependencies("npm", maybeFluenceConfig)
+    await resolveDependencies("npm", maybeFluenceConfig),
   );
 
   return Promise.all(
@@ -191,6 +182,6 @@ export const installAllNPMDependencies = async ({
         maybeFluenceConfig,
         force,
       });
-    })
+    }),
   );
 };

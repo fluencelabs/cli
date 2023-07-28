@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  krasnodar,
-  stage,
-  testNet,
-} from "@fluencelabs/fluence-network-environment";
+import { kras, stage, testNet } from "@fluencelabs/fluence-network-environment";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args } from "@oclif/core";
@@ -73,13 +69,13 @@ export default class Peers extends BaseCommand<typeof Peers> {
 const printPeerAddresses = (network: Network) => {
   return commandObj.log(
     `${color.yellow(network)} multiaddresses:\n\n${{
-      kras: krasnodar,
-      stage: stage,
+      kras,
+      stage,
       testnet: testNet,
     }[network]
       .map(({ multiaddr }) => {
         return multiaddr;
       })
-      .join("\n")}`
+      .join("\n")}`,
   );
 };

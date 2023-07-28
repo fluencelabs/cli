@@ -11,17 +11,11 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 | `aquaInputPath`    | string                  | No       | Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                     |
 | `aquaOutputJSPath` | string                  | No       | Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property                                                                                                                                                                                                                                                                                          |
 | `aquaOutputTSPath` | string                  | No       | Path to the default compilation target dir from aqua to ts. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                                                 |
-| `chainNetwork`     | string                  | No       | The network in which the transactions will be carried out Possible values are: `kras`, `stage`, `testnet`, `local`.                                                                                                                                                                                                                                                                                                                  |
-| `cliVersion`       | string                  | No       | The version of the CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components                                                                                                                                                                                                                                                                                              |
+| `chainNetwork`     | string                  | No       | The network in which the transactions will be carried out Possible values are: `local`, `testnet`.                                                                                                                                                                                                                                                                                                                                   |
+| `cliVersion`       | string                  | No       | The version of the Fluence CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components                                                                                                                                                                                                                                                                                      |
 | `deals`            | [object](#deals)        | No       | A map of objects with worker names as keys, each object defines a deal                                                                                                                                                                                                                                                                                                                                                               |
 | `dependencies`     | [object](#dependencies) | No       | (For advanced users) Overrides for the project dependencies                                                                                                                                                                                                                                                                                                                                                                          |
 | `hosts`            | [object](#hosts)        | No       | A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on                                                                                                                                                                                                                                                                                                                             |
-| `keyPairName`      | string                  | No       | The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):                                                                                                                                                                                                                                                                                                                    |
-|                    |                         |          | 1. "defaultKeyPairName" property from user-secrets.yaml                                                                                                                                                                                                                                                                                                                                                                              |
-|                    |                         |          | 1. "defaultKeyPairName" property from project-secrets.yaml                                                                                                                                                                                                                                                                                                                                                                           |
-|                    |                         |          | 1. "keyPairName" property from the top level of fluence.yaml                                                                                                                                                                                                                                                                                                                                                                         |
-|                    |                         |          | 1. "keyPairName" property from the "services" level of fluence.yaml                                                                                                                                                                                                                                                                                                                                                                  |
-|                    |                         |          | 1. "keyPairName" property from the individual "deploy" property item level of fluence.yaml                                                                                                                                                                                                                                                                                                                                           |
 | `relays`           | string, array, or null  | No       | List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: kras                                                                                                                     |
 | `services`         | [object](#services)     | No       | A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config                                                                                                                               |
 | `spells`           | [object](#spells)       | No       | A map with spell names as keys and spell configs as values                                                                                                                                                                                                                                                                                                                                                                           |
@@ -52,14 +46,14 @@ A map of objects with worker names as keys, each object defines a deal
 
 ### Properties
 
-| Property | Type             | Required | Description                                                                                                                                |
-|----------|------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `cargo`  | [object](#cargo) | No       | A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL |
-| `npm`    | [object](#npm)   | No       | A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua                                            |
+| Property | Type             | Required | Description                                                                                                                                        |
+|----------|------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `cargo`  | [object](#cargo) | No       | A map of cargo dependency versions. Fluence CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL |
+| `npm`    | [object](#npm)   | No       | A map of npm dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua                                            |
 
 ### cargo
 
-A map of cargo dependency versions. CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
+A map of cargo dependency versions. Fluence CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
 
 #### Properties
 
@@ -69,7 +63,7 @@ A map of cargo dependency versions. CLI ensures dependencies are installed each 
 
 ### npm
 
-A map of npm dependency versions. CLI ensures dependencies are installed each time you run aqua
+A map of npm dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua
 
 #### Properties
 
@@ -111,44 +105,10 @@ Service config. Defines where the service is and how to deploy it
 
 #### Properties
 
-| Property          | Type                       | Required | Description                                                                                                       |
-|-------------------|----------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `get`             | string                     | **Yes**  | Path to service directory or URL to the tar.gz archive with the service                                           |
-| `deploy`          | [object](#deploy)[]        | No       | [DEPRECATED!] List of deployments for the particular service                                                      |
-| `keyPairName`     | string                     | No       | The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority): |
-|                   |                            |          | 1. "defaultKeyPairName" property from user-secrets.yaml                                                           |
-|                   |                            |          | 1. "defaultKeyPairName" property from project-secrets.yaml                                                        |
-|                   |                            |          | 1. "keyPairName" property from the top level of fluence.yaml                                                      |
-|                   |                            |          | 1. "keyPairName" property from the "services" level of fluence.yaml                                               |
-|                   |                            |          | 1. "keyPairName" property from the individual "deploy" property item level of fluence.yaml                        |
-| `overrideModules` | [object](#overridemodules) | No       | A map of modules to override                                                                                      |
-
-#### deploy
-
-A small config for a particular deployment. You can have specific overrides for each and specific deployment properties like count, etc.
-
-##### Properties
-
-| Property          | Type                       | Required | Description                                                                                                                                                                                        |
-|-------------------|----------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `deployId`        | string                     | **Yes**  | This id can be used in Aqua to access actually deployed peer and service ids. The ID must start with a lowercase letter and contain only letters, numbers, and underscores.                        |
-| `count`           | number                     | No       | Number of services to deploy. Default: 1 or if "peerIds" property is provided - exactly the number of peerIds                                                                                      |
-| `keyPairName`     | string                     | No       | The name of the Key Pair to use. It is resolved in the following order (from the lowest to the highest priority):                                                                                  |
-|                   |                            |          | 1. "defaultKeyPairName" property from user-secrets.yaml                                                                                                                                            |
-|                   |                            |          | 1. "defaultKeyPairName" property from project-secrets.yaml                                                                                                                                         |
-|                   |                            |          | 1. "keyPairName" property from the top level of fluence.yaml                                                                                                                                       |
-|                   |                            |          | 1. "keyPairName" property from the "services" level of fluence.yaml                                                                                                                                |
-|                   |                            |          | 1. "keyPairName" property from the individual "deploy" property item level of fluence.yaml                                                                                                         |
-| `overrideModules` | [object](#overridemodules) | No       | A map of modules to override                                                                                                                                                                       |
-| `peerId`          | string                     | No       | Peer id or peer id name to deploy to. Default: Peer ids from the "relay" property of fluence.yaml are selected for each deploy. Named peerIds can be listed in "peerIds" property of fluence.yaml) |
-| `peerIds`         | string[]                   | No       | Peer ids or peer id names to deploy to. Overrides "peerId" property. Named peerIds can be listed in "peerIds" property of fluence.yaml)                                                            |
-
-##### overrideModules
-
-A map of modules to override
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
+| Property          | Type                       | Required | Description                                                             |
+|-------------------|----------------------------|----------|-------------------------------------------------------------------------|
+| `get`             | string                     | **Yes**  | Path to service directory or URL to the tar.gz archive with the service |
+| `overrideModules` | [object](#overridemodules) | No       | A map of modules to override                                            |
 
 #### overrideModules
 

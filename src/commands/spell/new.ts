@@ -53,7 +53,7 @@ export default class New extends BaseCommand<typeof New> {
   async run(): Promise<void> {
     const { args, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(New)
+      await this.parse(New),
     );
 
     const spellName =
@@ -65,8 +65,8 @@ export default class New extends BaseCommand<typeof New> {
 
     commandObj.log(
       `Successfully generated template for new spell at ${color.yellow(
-        pathToSpellDir
-      )}`
+        pathToSpellDir,
+      )}`,
     );
 
     if (maybeFluenceConfig === null) {
@@ -91,11 +91,11 @@ export default class New extends BaseCommand<typeof New> {
         fluenceConfig.workers !== undefined &&
         DEFAULT_WORKER_NAME in fluenceConfig.workers &&
         !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.spells ?? []).includes(
-          spellName
+          spellName,
         ) &&
         (await confirm({
           message: `Do you want to add spell ${color.yellow(
-            spellName
+            spellName,
           )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
         }))
       )
@@ -114,7 +114,9 @@ export default class New extends BaseCommand<typeof New> {
     await fluenceConfig.$commit();
 
     commandObj.log(
-      `Added ${color.yellow(spellName)} to ${color.yellow(DEFAULT_WORKER_NAME)}`
+      `Added ${color.yellow(spellName)} to ${color.yellow(
+        DEFAULT_WORKER_NAME,
+      )}`,
     );
   }
 }
@@ -125,7 +127,7 @@ const generateNewSpell = async (pathToSpellDir: string) => {
   await writeFile(
     join(pathToSpellDir, SPELL_AQUA_FILE_NAME),
     SPELL_AQUA_FILE_CONTENT,
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
   await initNewReadonlySpellConfig(pathToSpellDir);

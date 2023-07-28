@@ -50,7 +50,7 @@ describe("Conversion from js to aqua", () => {
       expect(res.type).toStrictEqual(type);
       expect(res.typeDefs).toStrictEqual(typeDefs);
       /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-    }
+    },
   );
 
   [
@@ -79,7 +79,7 @@ describe("Conversion from js to aqua", () => {
     },
   ].forEach((testCase) => {
     test(`Expect test case to match snapshot: ${stringifyUnknown(
-      testCase
+      testCase,
     )}`, () => {
       expect(jsToAqua(testCase, WRAPPER_FUNCTION_NAME)).toMatchSnapshot();
     });

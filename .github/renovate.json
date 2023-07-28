@@ -1,29 +1,43 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
+  "enabledManagers": ["npm", "regex", "github-actions"],
+  "schedule": "every weekend",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-  "enabledManagers": ["npm", "github-actions"],
-  "schedule": "every weekend",
+  "regexManagers": [
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"nox\": \"fluencelabs/(?<depName>nox):(?<currentValue>[^\"\n]+)\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+      ],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "fileMatch": ["^src/versions\\.json$"],
+      "matchStrings": [
+        "\"cargo\":\\s*\\{[^}]*\"(?<depName>[\\w.-]+)\": \"(?<currentValue>[^\"\n]+)\""
+      ],
+      "datasourceTemplate": "crate"
+    }
+  ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["major"],
-      "prConcurrentLimit": 1
+      "paths": ["src/versions.json"],
+      "schedule": ["at any time"],
+      "prPriority": 5
     },
     {
-      "matchManagers": ["github-actions"],
-      "prPriority": 1
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchPackagePatterns": ["@fluencelabs/.*"],
-      "semanticCommitType": "fix",
-      "semanticCommitScope": "deps",
-      "schedule": "at any time"
-    },
-    {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
+      "matchPackagePrefixes": ["@fluencelabs/"],
+      "schedule": ["at any time"],
+      "prPriority": 5
     }
   ]
 }

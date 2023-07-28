@@ -29,7 +29,7 @@ import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
   NO_BUILD_FLAG,
@@ -45,7 +45,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FILE_NAME}`;
+  static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -59,14 +59,14 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all workers from 'hosts' property in ${FLUENCE_CONFIG_FILE_NAME} are deployed)`,
+      description: `Names of workers to deploy (by default all workers from 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(Deploy),
-      true
+      true,
     );
 
     const workersConfig = await initNewWorkersConfig();
@@ -120,12 +120,12 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
                     hostId: host_id,
                     workerId: worker_id,
                   };
-                }
+                },
               ),
             },
           };
         },
-        { newDeployedWorkers: {}, infoToPrint: {} }
+        { newDeployedWorkers: {}, infoToPrint: {} },
       );
 
     workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
@@ -136,8 +136,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       `\n\n${color.yellow("Success!")}\n\nrelay: ${relayId}\n\n${yamlDiffPatch(
         "",
         {},
-        { "deployed workers": infoToPrint }
-      )}`
+        { "deployed workers": infoToPrint },
+      )}`,
     );
   }
 }

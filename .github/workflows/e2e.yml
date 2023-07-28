@@ -42,4 +42,4 @@ jobs:
       - fluence-cli
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
-      fluence-cli-version: "${{ needs.fluence-cli.outputs.version }}"
+      flox-version: "${{ needs.fluence-cli.outputs.version }}"
