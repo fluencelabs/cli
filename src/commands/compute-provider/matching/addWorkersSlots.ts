@@ -22,8 +22,8 @@ import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
-import * as digest from "multiformats/hashes/digest";
 import * as base58 from "multiformats/bases/base58";
+import * as digest from "multiformats/hashes/digest";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
@@ -35,7 +35,6 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../../lib/provider.js";
-import { ethers } from "ethers";
 
 const WORKERS_COUNT = "WORKERS-COUNT";
 const PEER_ID = "PEER-ID";
@@ -93,6 +92,7 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
     await waitTx(approveTx);
 
     const multihash = digest.decode(base58.base58btc.decode("z" + peerId));
+
     const tx = await matcher.addWorkersSlots(
       multihash.digest.subarray(4),
       workersCount
