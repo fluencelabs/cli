@@ -71,9 +71,9 @@ export default class Versions extends BaseCommand<typeof Versions> {
           "nox version": versions["nox"],
           "rust toolchain": versions["rust-toolchain"],
           [`npm dependencies that can be overridden with \`${CLI_NAME} dependency npm install <name>@<version>\``]:
-            await resolveDependencies("npm", maybeFluenceConfig),
+            await resolveDependencies("npm", maybeFluenceConfig, true),
           [`cargo dependencies that can be overridden with \`${CLI_NAME} dependency cargo install <name>@<version>\``]:
-            await resolveDependencies("cargo", maybeFluenceConfig),
+            await resolveDependencies("cargo", maybeFluenceConfig, true),
           "internal dependencies": filterOutNonFluenceDependencies(
             CLIPackageJSON.dependencies,
           ),
