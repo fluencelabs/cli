@@ -18,7 +18,7 @@ import assert from "node:assert";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, parse } from "node:path";
 
-import compile from "@fluencelabs/aqua-api";
+import { compileFromPath } from "@fluencelabs/aqua-api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
@@ -61,12 +61,12 @@ const writeFileAndMakeSureDirExists = async (
 };
 
 const EMPTY_GENERATED_SOURCE: Omit<
-  Awaited<ReturnType<typeof compile>>["generatedSources"][number],
+  Awaited<ReturnType<typeof compileFromPath>>["generatedSources"][number],
   "name"
 > = {};
 
 export type CompileToFilesArgs = {
-  compileArgs: Omit<Parameters<typeof compile>[0], "funcCall">;
+  compileArgs: Omit<Parameters<typeof compileFromPath>[0], "funcCall">;
   outputPath: string | undefined;
   dry?: boolean;
 };
@@ -85,7 +85,7 @@ export const compileToFiles = async ({
         (await getAquaFilesRecursively(compileArgs.filePath)).map(
           async (aquaFilePath) => {
             return {
-              compilationResult: await compile({
+              compilationResult: await compileFromPath({
                 ...compileArgs,
                 filePath: aquaFilePath,
               }),
@@ -96,7 +96,7 @@ export const compileToFiles = async ({
       )
     : [
         {
-          compilationResult: await compile(compileArgs),
+          compilationResult: await compileFromPath(compileArgs),
           aquaFilePath: compileArgs.filePath,
         },
       ];

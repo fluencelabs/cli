@@ -18,7 +18,7 @@ import assert from "node:assert";
 import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import compile from "@fluencelabs/aqua-api";
+import { compileFromPath } from "@fluencelabs/aqua-api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
@@ -286,7 +286,7 @@ export const prepareForDeploy = async ({
         spellConfig.aquaFilePath,
       );
 
-      const { errors, functions } = await compile({
+      const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,
         imports: aquaImports,
       });

@@ -9,8 +9,8 @@ dependencies:
     specifier: 0.3.1
     version: 0.3.1
   '@fluencelabs/aqua-api':
-    specifier: https://github.com/fluencelabs/cli/raw/update-aqua/fluencelabs-aqua-api.tgz
-    version: '@github.com/fluencelabs/cli/raw/update-aqua/fluencelabs-aqua-api.tgz'
+    specifier: ./fluencelabs-aqua-api-0.11.8.tgz
+    version: file:fluencelabs-aqua-api-0.11.8.tgz
   '@fluencelabs/deal-aurora':
     specifier: 0.1.8
     version: 0.1.8(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.16.19)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.16.1)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.2.0)(typescript@5.1.6)
@@ -15894,8 +15894,8 @@ packages:
       wrap-ansi: 2.1.0
     dev: true
 
-  '@github.com/fluencelabs/cli/raw/update-aqua/fluencelabs-aqua-api.tgz':
-    resolution: {tarball: https://github.com/fluencelabs/cli/raw/update-aqua/fluencelabs-aqua-api.tgz}
+  file:fluencelabs-aqua-api-0.11.8.tgz:
+    resolution: {integrity: sha512-i0sK/9S/rI17ycGWea7q9AK15mgrnSn8dlYDAB6XL03h9YgJ6h6B0VGbwT3FMTMbv2VXUU4QzRu0yh3Y/m4XaQ==, tarball: file:fluencelabs-aqua-api-0.11.8.tgz}
     name: '@fluencelabs/aqua-api'
     version: 0.11.8
     dev: false

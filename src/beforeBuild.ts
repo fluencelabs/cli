@@ -18,7 +18,7 @@ import assert from "node:assert";
 import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, sep } from "node:path";
 
-import compile from "@fluencelabs/aqua-api";
+import { compileFromPath } from "@fluencelabs/aqua-api";
 
 import { AQUA_EXT, FS_OPTIONS } from "./lib/const.js";
 
@@ -96,7 +96,7 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
 const compileInstallationSpellAqua = async (tracing = false) => {
   return Promise.all(
     ["upload", "cli", "deal_spell", "files"].map(async (fileName) => {
-      const compilationResult = await compile({
+      const compilationResult = await compileFromPath({
         filePath: join(
           INSTALLATION_SPELL_AQUA_DIR_PATH,
           `${fileName}.${AQUA_EXT}`,

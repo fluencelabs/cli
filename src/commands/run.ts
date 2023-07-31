@@ -19,7 +19,7 @@ import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
 import { beautify } from "@fluencelabs/air-beautify-wasm";
-import compile from "@fluencelabs/aqua-api";
+import { compileAquaCallFromPath } from "@fluencelabs/aqua-api";
 import { Fluence, callAquaFunction } from "@fluencelabs/js-client.api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -390,7 +390,7 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
 
 const fluenceRun = async (args: RunArgs) => {
   const [{ functionCall, errors }] = await Promise.all([
-    compile({
+    compileAquaCallFromPath({
       funcCall: args.funcCall,
       data: args.runData,
       filePath: args.filePath,
