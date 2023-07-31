@@ -317,6 +317,7 @@ export const getRecommendedDependencies = (packageManager: PackageManager) => {
 export const resolveDependencies = async (
   packageManager: PackageManager,
   maybeFluenceConfig: FluenceConfigReadonly | null,
+  doWarn = false,
 ) => {
   const recommendedDependencies = getRecommendedDependencies(packageManager);
   const userFluenceConfig = await initReadonlyUserConfig();
@@ -332,6 +333,10 @@ export const resolveDependencies = async (
     ...userDependencyOverrides,
     ...projectDependencyOverrides,
   };
+
+  if (!doWarn) {
+    return finalDependencies;
+  }
 
   // Warn about overridden recommended dependencies
   Object.entries(recommendedDependencies).forEach(([name, defaultVersion]) => {
