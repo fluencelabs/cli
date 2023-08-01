@@ -24,7 +24,7 @@ import {
   WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
 } from "../../const.js";
-import { ensureFluenceDir } from "../../paths.js";
+import { getFluenceDir } from "../../paths.js";
 import {
   getReadonlyConfigInitFunction,
   getConfigInitFunction,
@@ -167,7 +167,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: WORKERS_CONFIG_FILE_NAME,
-  getConfigOrConfigDirPath: ensureFluenceDir,
+  getConfigOrConfigDirPath: getFluenceDir,
 };
 
 const getDefault: GetDefaultConfig = () => {
