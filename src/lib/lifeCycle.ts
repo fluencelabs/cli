@@ -203,14 +203,16 @@ const isCheckForUpdatesRequired = async () => {
 const handleFloxVersion = async (
   maybeCliVersion: string | undefined,
 ): Promise<void> => {
+  const currentVersion = commandObj.config.version;
+
   if (
     typeof maybeCliVersion === "string" &&
-    maybeCliVersion !== commandObj.config.version
+    maybeCliVersion !== currentVersion
   ) {
     const cliVersion = maybeCliVersion;
     return commandObj.error(
       `Current ${CLI_NAME_FULL} versions is ${color.yellow(
-        commandObj.config.version,
+        currentVersion,
       )}, but this project is compatible only with ${CLI_NAME_FULL} version ${color.yellow(
         cliVersion,
       )}\n\nPlease install it with:\n\n${color.yellow(
@@ -231,23 +233,18 @@ const handleFloxVersion = async (
       getLatestVersionOfNPMDependency(`${PACKAGE_NAME}@unstable`),
     ]);
 
-    const isOlderThanStable = semver.lt(
-      commandObj.config.version,
-      stableVersion,
-    );
+    const isOlderThanStable = semver.lt(currentVersion, stableVersion);
+    const isStable = semver.eq(currentVersion, stableVersion);
+    const isOlderThenUnstable = semver.lt(currentVersion, unstableVersion);
+    const hasUpdates = isOlderThanStable || isOlderThenUnstable;
 
-    const isOlderThenUnstable = semver.lt(
-      commandObj.config.version,
-      unstableVersion,
-    );
-
-    if (!isOlderThanStable && !isOlderThenUnstable) {
+    if (isStable || !hasUpdates) {
       return;
     }
 
     const version = isOlderThanStable ? stableVersion : unstableVersion;
 
-    commandObj.log(
+    commandObj.logToStderr(
       `${SEPARATOR}New ${color.yellow(
         isOlderThanStable ? "stable" : "unstable",
       )} version ${color.yellow(
@@ -266,7 +263,7 @@ const handleFloxVersion = async (
       userConfig.lastCheckForUpdates = CHECK_FOR_UPDATES_DISABLED;
       await userConfig.$commit();
 
-      commandObj.log(
+      commandObj.logToStderr(
         `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`,
       );
     }

@@ -205,7 +205,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       await projectSecretsConfig.$commit();
     }
 
-    this.log(
+    commandObj.log(
       `Key-pair with name ${color.yellow(
         keyPairName,
       )} successfully removed from ${secretsConfigPath}`,

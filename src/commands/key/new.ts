@@ -131,7 +131,7 @@ export default class New extends BaseCommand<typeof New> {
       ? userSecretsConfig.$commit()
       : projectSecretsConfig.$commit());
 
-    this.log(
+    commandObj.log(
       `Key-pair with name ${color.yellow(
         keyPairName,
       )} successfully generated and saved to ${secretsConfigPath}`,

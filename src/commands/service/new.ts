@@ -22,6 +22,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
@@ -87,7 +88,7 @@ export default class New extends BaseCommand<typeof New> {
       serviceName,
     );
 
-    this.log(
+    commandObj.log(
       `Successfully generated template for new service at ${color.yellow(
         servicePath,
       )}`,

@@ -87,7 +87,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     await fluenceConfig.$commit();
 
-    this.log(
+    commandObj.log(
       `Removed service ${color.yellow(nameOrPathOrUrl)} from ${color.yellow(
         fluenceConfig.$getPath(),
       )}`,

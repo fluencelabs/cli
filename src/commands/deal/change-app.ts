@@ -65,6 +65,6 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
       privKey: flags.privKey,
     });
 
-    commandObj.log(`Tx hash: ${color.yellow(tx.hash)}`);
+    commandObj.logToStderr(`Tx hash: ${color.yellow(tx.hash)}`);
   }
 }

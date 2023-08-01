@@ -55,7 +55,7 @@ export default class Install extends BaseCommand<typeof Install> {
       force: flags.force,
     });
 
-    commandObj.log("cargo and npm dependencies successfully installed");
+    commandObj.logToStderr("cargo and npm dependencies successfully installed");
 
     if (maybeFluenceConfig !== null) {
       const fluenceConfig = maybeFluenceConfig;

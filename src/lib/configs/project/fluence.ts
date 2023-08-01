@@ -226,6 +226,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
+  marineBuildArgs?: string;
 };
 
 const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
@@ -418,6 +419,11 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
         GLOBAL_CONFIG_FULL_FILE_NAME,
       )}, npm dependencies recommended by fluence`,
       items: { type: "string" },
+      nullable: true,
+    },
+    marineBuildArgs: {
+      type: "string",
+      description: `\`cargo build\` arguments to pass to marine build command`,
       nullable: true,
     },
     cliVersion: {
