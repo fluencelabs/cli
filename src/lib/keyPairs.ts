@@ -72,7 +72,7 @@ const getExistingUserKeyPair = async (
 
   const options: Choices<ConfigKeyPair> = [];
 
-  const projectKeyPairOptions = readonlyProjectSecretsConfig.keyPairs.map(
+  const projectKeyPairOptions = readonlyProjectSecretsConfig?.keyPairs.map(
     (value): { value: ConfigKeyPair; name: string } => {
       return {
         value,
@@ -90,7 +90,7 @@ const getExistingUserKeyPair = async (
     },
   );
 
-  if (projectKeyPairOptions.length > 0) {
+  if (projectKeyPairOptions !== undefined && projectKeyPairOptions.length > 0) {
     options.push(
       new inquirer.Separator("Project key-pairs:"),
       ...projectKeyPairOptions,
@@ -122,6 +122,10 @@ export const getProjectKeyPair = async (
   keyPairName: string | undefined,
 ): Promise<ConfigKeyPair | undefined> => {
   const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
+
+  if (projectSecretsConfig === null) {
+    return;
+  }
 
   if (keyPairName === undefined) {
     return projectSecretsConfig.keyPairs.find(({ name }): boolean => {

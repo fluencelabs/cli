@@ -54,8 +54,8 @@ import {
   type Relays,
 } from "../../multiaddres.js";
 import {
-  ensureFluenceDir,
   ensureSrcAquaMainPath,
+  getFluenceDir,
   projectRootDir,
 } from "../../paths.js";
 import { FLUENCE_ENV } from "../../setupEnvironment.js";
@@ -860,7 +860,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath,
-  getSchemaDirPath: ensureFluenceDir,
+  getSchemaDirPath: getFluenceDir,
   validate,
 };
 
