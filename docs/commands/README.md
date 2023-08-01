@@ -329,13 +329,11 @@ Install all project dependencies (dependencies are cached inside user's .fluence
 
 ```
 USAGE
-  $ fluence dependency install [--no-input] [--force] [--marine-build-args <value>]
+  $ fluence dependency install [--no-input] [--force]
 
 FLAGS
-  --force                           Force install even if the dependency/dependencies is/are already installed
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
-  --no-input                        Don't interactively ask for any input from the user
+  --force     Force install even if the dependency/dependencies is/are already installed
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
   Install all project dependencies (dependencies are cached inside user's .fluence directory)
