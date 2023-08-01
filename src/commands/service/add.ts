@@ -23,7 +23,10 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
-import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
+import {
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  MARINE_BUILD_ARGS,
+} from "../../lib/const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   isUrl,
@@ -44,6 +47,7 @@ export default class Add extends BaseCommand<typeof Add> {
       description: `Override service name (${AQUA_NAME_REQUIREMENTS})`,
       helpValue: "<name>",
     }),
+    ...MARINE_BUILD_ARGS,
   };
   static override args = {
     [PATH_OR_URL]: Args.string({
@@ -77,6 +81,7 @@ export default class Add extends BaseCommand<typeof Add> {
       pathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
       fluenceConfig,
       marineCli,
+      marineBuildArgs: flags["marine-build-args"],
     });
   }
 }

@@ -248,6 +248,13 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const MARINE_BUILD_ARGS = {
+  "marine-build-args": Flags.string({
+    description: `\`cargo build\` flags and args to pass to marine build. Overrides 'marineBuildArgs' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+    helpValue: "<--flag arg>",
+  }),
+};
+
 export const TTL_FLAG_NAME = "ttl";
 export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
 

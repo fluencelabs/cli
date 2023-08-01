@@ -31,7 +31,7 @@ type MarineCliInput =
     }
   | {
       args: ["build", ...("-p" | string)[]];
-      flags: Flags<"release">;
+      flags?: Flags<"release">;
     };
 
 export type MarineCLI = {
