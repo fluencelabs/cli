@@ -35,6 +35,7 @@ type AddServiceArg = {
   pathOrUrl: string;
   fluenceConfig: FluenceConfig;
   marineCli: MarineCLI;
+  marineBuildArgs?: string | undefined;
   interactive?: boolean;
 };
 
@@ -43,6 +44,7 @@ export const addService = async ({
   pathOrUrl,
   fluenceConfig,
   marineCli,
+  marineBuildArgs,
   interactive = true,
 }: AddServiceArg): Promise<string> => {
   let serviceName = serviceNameFromArgs;
@@ -84,7 +86,7 @@ export const addService = async ({
     },
   };
 
-  await build({ marineCli, fluenceConfig });
+  await build({ marineCli, fluenceConfig, marineBuildArgs });
   await fluenceConfig.$commit();
 
   if (interactive) {
