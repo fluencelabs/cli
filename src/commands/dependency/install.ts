@@ -20,7 +20,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { build } from "../../lib/build.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
-import { DOT_FLUENCE_DIR_NAME } from "../../lib/const.js";
+import { DOT_FLUENCE_DIR_NAME, MARINE_BUILD_ARGS } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
@@ -38,6 +38,7 @@ export default class Install extends BaseCommand<typeof Install> {
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),
+    ...MARINE_BUILD_ARGS,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -62,7 +63,12 @@ export default class Install extends BaseCommand<typeof Install> {
       const workerConfig = await initNewWorkersConfig();
       await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
       const marineCli = await initMarineCli(fluenceConfig);
-      await build({ fluenceConfig, marineCli });
+
+      await build({
+        fluenceConfig,
+        marineCli,
+        marineBuildArgs: flags["marine-build-args"],
+      });
     }
   }
 }
