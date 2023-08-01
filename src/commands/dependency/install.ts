@@ -17,13 +17,9 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { build } from "../../lib/build.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import { DOT_FLUENCE_DIR_NAME, MARINE_BUILD_ARGS } from "../../lib/const.js";
-import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { initMarineCli } from "../../lib/marineCli.js";
 import { installAllNPMDependencies } from "../../lib/npm.js";
 import { installAllCargoDependencies } from "../../lib/rust.js";
 
@@ -57,18 +53,5 @@ export default class Install extends BaseCommand<typeof Install> {
     });
 
     commandObj.logToStderr("cargo and npm dependencies successfully installed");
-
-    if (maybeFluenceConfig !== null) {
-      const fluenceConfig = maybeFluenceConfig;
-      const workerConfig = await initNewWorkersConfig();
-      await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
-      const marineCli = await initMarineCli(fluenceConfig);
-
-      await build({
-        fluenceConfig,
-        marineCli,
-        marineBuildArgs: flags["marine-build-args"],
-      });
-    }
   }
 }
