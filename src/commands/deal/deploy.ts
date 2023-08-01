@@ -41,6 +41,7 @@ import {
   IMPORT_FLAG,
   NO_BUILD_FLAG,
   TRACING_FLAG,
+  MARINE_BUILD_ARGS,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import {
@@ -66,6 +67,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
+    ...MARINE_BUILD_ARGS,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -98,6 +100,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       fluenceConfig,
       aquaImports,
       noBuild: flags["no-build"],
+      marineBuildArgs: flags["marine-build-args"],
     });
 
     await initFluenceClient(flags, fluenceConfig);

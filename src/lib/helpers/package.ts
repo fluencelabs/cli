@@ -27,7 +27,11 @@ import type {
   FluenceConfig,
   FluenceConfigReadonly,
 } from "../configs/project/fluence.js";
-import { initReadonlyUserConfig, userConfig } from "../configs/user/config.js";
+import {
+  initReadonlyUserConfig,
+  userConfig,
+  type UserConfigReadonly,
+} from "../configs/user/config.js";
 import {
   CLI_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -317,6 +321,7 @@ export const getRecommendedDependencies = (packageManager: PackageManager) => {
 export const resolveDependencies = async (
   packageManager: PackageManager,
   maybeFluenceConfig: FluenceConfigReadonly | null,
+  doWarn = false,
 ) => {
   const recommendedDependencies = getRecommendedDependencies(packageManager);
   const userFluenceConfig = await initReadonlyUserConfig();
@@ -333,6 +338,37 @@ export const resolveDependencies = async (
     ...projectDependencyOverrides,
   };
 
+  if (doWarn) {
+    warnAboutOverriddenDependencies({
+      recommendedDependencies,
+      finalDependencies,
+      projectDependencyOverrides,
+      maybeFluenceConfig,
+      userDependencyOverrides,
+      userFluenceConfig,
+    });
+  }
+
+  return finalDependencies;
+};
+
+type WarnAboutOverriddenDependenciesArg = {
+  recommendedDependencies: Record<string, string>;
+  finalDependencies: Record<string, string>;
+  projectDependencyOverrides: Record<string, string>;
+  maybeFluenceConfig: FluenceConfigReadonly | null;
+  userDependencyOverrides: Record<string, string>;
+  userFluenceConfig: UserConfigReadonly | null;
+};
+
+function warnAboutOverriddenDependencies({
+  recommendedDependencies,
+  finalDependencies,
+  projectDependencyOverrides,
+  maybeFluenceConfig,
+  userDependencyOverrides,
+  userFluenceConfig,
+}: WarnAboutOverriddenDependenciesArg) {
   // Warn about overridden recommended dependencies
   Object.entries(recommendedDependencies).forEach(([name, defaultVersion]) => {
     const versionToUse = finalDependencies[name];
@@ -382,6 +418,4 @@ export const resolveDependencies = async (
       );
     }
   });
-
-  return finalDependencies;
-};
+}

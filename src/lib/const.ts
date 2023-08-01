@@ -153,6 +153,8 @@ export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
 export const CONFIG_TOML = `Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
+export const README_MD_FILE_NAME = `README.md`;
+
 export const FS_OPTIONS = {
   encoding: "utf8",
 } as const;
@@ -248,6 +250,13 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const MARINE_BUILD_ARGS = {
+  "marine-build-args": Flags.string({
+    description: `\`cargo build\` flags and args to pass to marine build. Overrides 'marineBuildArgs' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+    helpValue: "<--flag arg>",
+  }),
+};
+
 export const TTL_FLAG_NAME = "ttl";
 export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
 
@@ -321,13 +330,14 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
-${DOT_FLUENCE_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 **/node_modules
 **/target/
 .repl_history
-.vscode/settings.json
-src/ts/src/aqua
-src/js/src/aqua`;
+/.vscode/settings.json
+/src/ts/src/aqua
+/src/js/src/aqua`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
@@ -521,3 +531,105 @@ func spell():
     Spell "worker-spell"
     Spell.list_push_string("logs", str)
 `;
+
+const QUICKSTART_README = `# Fluence Quickstart Template
+
+## Usage
+
+\`\`\`sh
+# You can deploy right away with an example worker that contains an example service
+fluence deal deploy
+
+# Run the deployed code
+fluence run -f 'runDeployedServices()'
+\`\`\`
+`;
+
+const MINIMAL_README = `# Fluence Minimal Template
+
+## Usage
+
+\`\`\`sh
+# Generate a service template and add it to the default worker
+fluence service new myService
+
+# Deploy the default worker
+fluence deal deploy
+
+# Uncomment \`runDeployedServices\` aqua function in \`src/aqua/main.aqua\` and run it
+fluence run -f 'runDeployedServices()'
+\`\`\`
+`;
+
+const TS_README = `# Fluence TypeScript Template
+
+## Usage
+
+\`\`\`sh
+# Compile example aqua code to TypeScript
+fluence aqua
+
+# \`cd\` into \`ts\` directory
+cd src/ts
+
+# Install dependencies
+npm i
+
+# Run example code
+npm start
+
+# You can also deploy deal and run the deployed code
+
+# Generate a service template and add it to the default worker
+fluence service new myService
+
+# Deploy the default worker
+fluence deal deploy
+
+# Uncomment \`runDeployedServices\` aqua function in \`src/aqua/main.aqua\` and compile it
+fluence aqua
+
+# Import \`runDeployedServices\` function in \`src/ts/src/index.ts\` and run it
+npm start
+\`\`\`
+`;
+
+const JS_README = `# Fluence JavaScript Template
+
+## Usage
+
+\`\`\`sh
+# Compile example aqua code to JavaScript
+fluence aqua
+
+# \`cd\` into \`js\` directory
+cd src/js
+
+# Install dependencies
+npm i
+
+# Run example code
+npm start
+
+# You can also deploy deal and run the deployed code
+
+# Generate a service template and add it to the default worker
+fluence service new myService
+
+# Deploy the default worker
+fluence deal deploy
+
+# Uncomment \`runDeployedServices\` aqua function in \`src/aqua/main.aqua\` and compile it
+fluence aqua
+
+# Import \`runDeployedServices\` function in \`src/ts/src/index.js\` and run it
+npm start
+\`\`\`
+`;
+
+export const READMEs: Record<Template, string> = {
+  quickstart: QUICKSTART_README,
+  minimal: MINIMAL_README,
+  ts: TS_README,
+  js: JS_README,
+};

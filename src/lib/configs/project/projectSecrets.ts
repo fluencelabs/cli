@@ -31,7 +31,7 @@ import {
   validateUnique,
   type ValidationResult,
 } from "../../helpers/validations.js";
-import { ensureFluenceDir } from "../../paths.js";
+import { getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -134,17 +134,19 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: PROJECT_SECRETS_CONFIG_FILE_NAME,
-  getConfigOrConfigDirPath: ensureFluenceDir,
+  getConfigOrConfigDirPath: getFluenceDir,
   validate,
 };
 
-export const initProjectSecretsConfig = getConfigInitFunction(
+export const initNewProjectSecretsConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault,
 );
-export const initReadonlyProjectSecretsConfig = getReadonlyConfigInitFunction(
-  initConfigOptions,
-  getDefault,
-);
+export const initNewReadonlyProjectSecretsConfig =
+  getReadonlyConfigInitFunction(initConfigOptions, getDefault);
+
+export const initReadonlyProjectSecretsConfig =
+  getReadonlyConfigInitFunction(initConfigOptions);
+
 export const projectSecretsSchema: JSONSchemaType<LatestConfig> =
   configSchemaV0;
