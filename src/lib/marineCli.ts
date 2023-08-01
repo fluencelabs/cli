@@ -30,7 +30,7 @@ type MarineCliInput =
       flags?: never;
     }
   | {
-      args: ["build", ...("-p" | string)[]];
+      args: ["build", ...string[]];
       flags: Flags<"release">;
     };
 
