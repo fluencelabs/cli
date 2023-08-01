@@ -125,6 +125,7 @@ type PrepareForDeployArg = {
   fluenceConfig: FluenceConfig;
   aquaImports: Array<string>;
   noBuild: boolean;
+  marineBuildArgs: undefined | string;
   maybeWorkersConfig?: WorkersConfigReadonly;
   hosts?: boolean;
 };
@@ -134,6 +135,7 @@ export const prepareForDeploy = async ({
   fluenceConfig,
   aquaImports,
   noBuild,
+  marineBuildArgs,
   maybeWorkersConfig,
   hosts = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
@@ -455,6 +457,8 @@ export const prepareForDeploy = async ({
     await buildModules(
       [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],
       marineCli,
+      marineBuildArgs,
+      fluenceConfig,
     );
   }
 

@@ -29,7 +29,7 @@ import {
 } from "../../const.js";
 import { ensureSpellAbsolutePath } from "../../helpers/downloadFile.js";
 import { validateBatch } from "../../helpers/validations.js";
-import { ensureFluenceDir } from "../../paths.js";
+import { getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -259,7 +259,7 @@ const getInitConfigOptions = (
     migrations,
     validate,
     name: SPELL_CONFIG_FILE_NAME,
-    getSchemaDirPath: ensureFluenceDir,
+    getSchemaDirPath: getFluenceDir,
     getConfigOrConfigDirPath: (): string => {
       return configPath;
     },

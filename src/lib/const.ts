@@ -248,6 +248,13 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const MARINE_BUILD_ARGS = {
+  "marine-build-args": Flags.string({
+    description: `\`cargo build\` flags and args to pass to marine build. Overrides 'marineBuildArgs' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+    helpValue: "<--flag arg>",
+  }),
+};
+
 export const TTL_FLAG_NAME = "ttl";
 export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
 
@@ -321,13 +328,14 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
-${DOT_FLUENCE_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 **/node_modules
 **/target/
 .repl_history
-.vscode/settings.json
-src/ts/src/aqua
-src/js/src/aqua`;
+/.vscode/settings.json
+/src/ts/src/aqua
+/src/js/src/aqua`;
 
 export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
