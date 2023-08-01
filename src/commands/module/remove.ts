@@ -25,7 +25,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   FACADE_MODULE_NAME,
-  initServiceConfig,
+  ensureServiceConfig,
   type ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
 import {
@@ -90,18 +90,10 @@ export default class Remove extends BaseCommand<typeof Remove> {
       );
     }
 
-    const serviceConfig = await initServiceConfig(
+    const serviceConfig = await ensureServiceConfig(
       serviceOrServiceDirPathOrUrl,
-      cwd(),
+      maybeFluenceConfig,
     );
-
-    if (serviceConfig === null) {
-      return commandObj.error(
-        `Can't find service config at ${color.yellow(
-          serviceOrServiceDirPathOrUrl,
-        )}`,
-      );
-    }
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
