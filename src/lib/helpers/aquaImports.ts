@@ -48,8 +48,10 @@ export async function ensureAquaImports({
   const defaultImports = [];
 
   try {
-    await access(fluenceAquaDirPath);
-    defaultImports.push(fluenceAquaDirPath);
+    if (maybeFluenceConfig !== null) {
+      await access(fluenceAquaDirPath);
+      defaultImports.push(fluenceAquaDirPath);
+    }
   } catch {}
 
   const allNpmDependencies = await installAllNPMDependencies({
