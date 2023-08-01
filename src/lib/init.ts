@@ -58,7 +58,7 @@ import {
   projectRootDir,
   setProjectRootDir,
 } from "../lib/paths.js";
-import { input, list } from "../lib/prompt.js";
+import { confirm, input, list } from "../lib/prompt.js";
 import versions from "../versions.json" assert { type: "json" };
 
 import { addService } from "./addService.js";
@@ -124,20 +124,12 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
             })),
         );
 
-  if (existsSync(projectPath) && (await stat(projectPath)).isDirectory()) {
-    const directoryContent = await readdir(projectPath);
-    const isNonEmptyDir = directoryContent.length > 0;
-
-    const dirHasOnlyGitInside =
-      directoryContent.length === 1 && directoryContent[0] === ".git";
-
-    if (isNonEmptyDir && !dirHasOnlyGitInside) {
-      return commandObj.error(
-        `Directory ${color.yellow(
-          projectPath,
-        )} is not empty. Please, init in an empty directory.`,
-      );
-    }
+  if (!(await shouldInit(projectPath))) {
+    commandObj.error(
+      `Directory ${color.yellow(
+        projectPath,
+      )} is not empty. Please, init in an empty directory.`,
+    );
   }
 
   const { template = await selectTemplate() } = options;
@@ -227,6 +219,48 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   );
 
   return fluenceConfig;
+};
+
+const shouldInit = async (projectPath: string): Promise<boolean> => {
+  if (!isInteractive) {
+    return true;
+  }
+
+  const pathDoesNotExists = !existsSync(projectPath);
+
+  if (pathDoesNotExists) {
+    return true;
+  }
+
+  const pathIsNotADirectory = !(await stat(projectPath)).isDirectory();
+
+  if (pathIsNotADirectory) {
+    return true;
+  }
+
+  const directoryContent = await readdir(projectPath);
+  const pathIsEmptyDir = directoryContent.length === 0;
+
+  if (pathIsEmptyDir) {
+    return true;
+  }
+
+  const dirHasOnlyGitInside =
+    directoryContent.length === 1 && directoryContent[0] === ".git";
+
+  if (dirHasOnlyGitInside) {
+    return true;
+  }
+
+  const hasUserConfirmedInitInNonEmptyDir = await confirm({
+    message: `Directory ${color.yellow(projectPath)} is not empty. Proceed?`,
+  });
+
+  if (hasUserConfirmedInitInNonEmptyDir) {
+    return true;
+  }
+
+  return false;
 };
 
 type InitTSorJSProjectArg = {
