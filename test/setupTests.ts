@@ -28,7 +28,7 @@ import { fluence, initFirstTime } from "./helpers.js";
   });
 
   await fluence({
-    args: ["kew", "new", "default", "--default", "--user"],
+    args: ["key", "new", "default", "--default", "--user"],
   });
 
   await Promise.all(
