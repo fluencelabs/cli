@@ -32,7 +32,7 @@ import {
   ensureServiceAbsolutePath,
   validateAquaName,
 } from "../../helpers/downloadFile.js";
-import { getFluenceDir, ensureFluenceDir, projectRootDir } from "../../paths.js";
+import { getFluenceDir, projectRootDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
