@@ -68,8 +68,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        - os: windows-latest
-        - os: ubuntu-latest
+        os:
+          - windows-latest
+          - ubuntu-latest
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
