@@ -62,8 +62,14 @@ env:
 jobs:
   tests:
     name: "Run tests"
-    runs-on: builder
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        - os: windows-latest
+        - os: ubuntu-latest
 
     outputs:
       version: "${{ steps.snapshot.outputs.version }}"
