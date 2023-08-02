@@ -27,9 +27,10 @@ import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
-import type {
-  FluenceConfig,
-  FluenceConfigReadonly,
+import {
+  type FluenceConfig,
+  type FluenceConfigReadonly,
+  assertIsArrayWithHostsOrDeals,
 } from "./configs/project/fluence.js";
 import {
   type ConfigV0,
@@ -141,7 +142,6 @@ export const prepareForDeploy = async ({
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
   const hostsOrDealsString = hosts ? "hosts" : "deals";
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const hostsOrDeals = Object.entries(
     fluenceConfig[hostsOrDealsString] ??
       commandObj.error(
@@ -151,15 +151,9 @@ export const prepareForDeploy = async ({
           fluenceConfig.$getPath(),
         )} that contains a record with at least one worker name as a key`,
       ),
-  ) as Array<
-    [
-      string,
-      (
-        | (typeof fluenceConfig.hosts)[keyof typeof fluenceConfig.hosts]
-        | (typeof fluenceConfig.deals)[keyof typeof fluenceConfig.deals]
-      ),
-    ]
-  >;
+  );
+
+  assertIsArrayWithHostsOrDeals(hostsOrDeals);
 
   const maybeDeployedHostsOrDeals = (maybeWorkersConfig ?? {})[
     hostsOrDealsString
@@ -466,7 +460,9 @@ export const prepareForDeploy = async ({
     .filter(([workerName]) => {
       return workersToDeployConfirmed.includes(workerName);
     })
-    .map(([workerName, { peerIds = [] }]) => {
+    .map(([workerName, hostsOrDeals]) => {
+      const peerIds = "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
+
       if (hosts && peerIds.length === 0) {
         commandObj.error(
           `You must have at least one peerId listed in ${color.yellow(

@@ -263,6 +263,8 @@ const dealSchema: JSONSchemaType<Deal> = {
   required: [],
 } as const;
 
+const validateDealSchema = ajv.compile(dealSchema);
+
 const workerConfigSchema: JSONSchemaType<Worker> = {
   type: "object",
   description: "Worker config",
@@ -294,6 +296,16 @@ const hostConfigSchema: JSONSchemaType<Host> = {
   },
   required: ["peerIds"],
 };
+
+const validateHostsSchema = ajv.compile(hostConfigSchema);
+
+export function assertIsArrayWithHostsOrDeals(
+  unknownArr: [string, unknown][],
+): asserts unknownArr is [string, Host | Deal][] {
+  unknownArr.forEach(([, unknown]) => {
+    assert(validateHostsSchema(unknown) || validateDealSchema(unknown));
+  });
+}
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
   ...configSchemaV1Obj,
