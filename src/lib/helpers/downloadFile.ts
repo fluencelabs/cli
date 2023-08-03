@@ -169,14 +169,14 @@ export const isUrl = (unknown: string): boolean => {
   return unknown.startsWith("http://") || unknown.startsWith("https://");
 };
 
-export const getModuleWasmPath = (config: {
+export const getModuleWasmPath = (moduleConfig: {
   type?: string;
   name: string;
   $getDirPath: () => string;
 }): string => {
-  const fileName = `${config.name}.${WASM_EXT}`;
-  const configDirName = config.$getDirPath();
-  return config.type === MODULE_TYPE_RUST
+  const fileName = `${moduleConfig.name}.${WASM_EXT}`;
+  const configDirName = moduleConfig.$getDirPath();
+  return moduleConfig.type === MODULE_TYPE_RUST
     ? resolve(projectRootDir, "target", "wasm32-wasi", "release", fileName)
     : resolve(configDirName, fileName);
 };

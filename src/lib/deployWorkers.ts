@@ -57,6 +57,7 @@ import {
   getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
+import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import { jsToAqua, makeOptional } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
@@ -172,7 +173,7 @@ export const prepareForDeploy = async ({
     return commandObj.error(
       `${color.yellow(
         hostsOrDealsString,
-      )} record in ${fluenceConfig.$getPath()} must contain at least one worker name as a key`,
+      )} property in ${fluenceConfig.$getPath()} must contain at least one worker name as a key`,
     );
   }
 
@@ -453,6 +454,34 @@ export const prepareForDeploy = async ({
       marineCli,
       marineBuildArgs,
       fluenceConfig,
+    );
+
+    const serviceNamePathToFacadeMap: Record<string, string> =
+      Object.fromEntries(
+        serviceConfigs.map(({ serviceName, serviceConfig }) => {
+          const { get } = serviceConfig.modules[FACADE_MODULE_NAME];
+
+          const urlOrAbsolutePath = getUrlOrAbsolutePath(
+            get,
+            serviceConfig.$getDirPath(),
+          );
+
+          const moduleConfig =
+            moduleAbsolutePathOrURLToModuleConfigsMap.get(urlOrAbsolutePath);
+
+          assert(
+            moduleConfig !== undefined,
+            `Unreachable. Module config for ${urlOrAbsolutePath} can't be undefined`,
+          );
+
+          return [serviceName, getModuleWasmPath(moduleConfig)];
+        }),
+      );
+
+    await updateAquaServiceInterfaceFile(
+      serviceNamePathToFacadeMap,
+      fluenceConfig.services,
+      marineCli,
     );
   }
 

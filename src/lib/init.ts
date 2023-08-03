@@ -173,13 +173,18 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   switch (template) {
     case "quickstart": {
       const serviceName = "myService";
-      const servicePath = join(await ensureSrcServicesDir(), serviceName);
-      const pathToModuleDir = join(servicePath, "modules", serviceName);
+
+      const absoluteServicePath = join(
+        await ensureSrcServicesDir(),
+        serviceName,
+      );
+
+      const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
       await generateNewModule(pathToModuleDir);
 
       await initNewReadonlyServiceConfig(
-        servicePath,
-        relative(servicePath, pathToModuleDir),
+        absoluteServicePath,
+        relative(absoluteServicePath, pathToModuleDir),
         serviceName,
       );
 
@@ -187,7 +192,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
         serviceName,
         fluenceConfig,
         marineCli: await initMarineCli(fluenceConfig),
-        pathOrUrl: relative(projectRootDir, servicePath),
+        absolutePathOrUrl: absoluteServicePath,
         interactive: false,
       });
 
