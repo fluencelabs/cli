@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@fluencelabs/air-beautify-wasm':
-    specifier: 0.3.1
-    version: 0.3.1
+    specifier: 0.3.2
+    version: 0.3.2
   '@fluencelabs/aqua-api':
     specifier: 0.11.7
     version: 0.11.7
@@ -1065,8 +1065,8 @@ packages:
       '@ethersproject/strings': 5.7.0
     dev: false
 
-  /@fluencelabs/air-beautify-wasm@0.3.1:
-    resolution: {integrity: sha512-qGs7FoJfDRerRIcgpvxTMlzCIHbtc5wXttbMuSiq3om7uAcRclKcJ0bZZjCt2MMP1J22ZzNvx7RMmOEfQUjdzQ==}
+  /@fluencelabs/air-beautify-wasm@0.3.2:
+    resolution: {integrity: sha512-etKIoqZgbCSVcWTdHSZB1n7vFUra1rrqH1sqSb2sJv8jevxWsEx0Igf99AUcqPWIHuSF/geT60BA3FdwCu6lVA==}
     dev: false
 
   /@fluencelabs/aqua-api@0.11.7:
