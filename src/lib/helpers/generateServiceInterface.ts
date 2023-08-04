@@ -98,7 +98,7 @@ export const updateAquaServiceInterfaceFile = async (
         return serviceNamesFromFluenceConfig.has(serviceId);
       });
 
-  const setOfServiceIdsFromPreviouslyGeneratedInterfaces = new Set(
+  const serviceIdsFromPreviouslyGeneratedInterfaces = new Set(
     previouslyGeneratedInterfacesWithIdsPresentInFluenceConfig.map(
       ({ serviceId }) => {
         return serviceId;
@@ -125,7 +125,7 @@ export const updateAquaServiceInterfaceFile = async (
 
   const newServiceInterfaces = Object.entries(generatedServiceInterfaceMap)
     .filter(([serviceId]) => {
-      return !setOfServiceIdsFromPreviouslyGeneratedInterfaces.has(serviceId);
+      return !serviceIdsFromPreviouslyGeneratedInterfaces.has(serviceId);
     })
     .map(([, serviceDefinition]) => {
       return serviceDefinition;
