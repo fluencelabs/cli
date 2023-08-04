@@ -179,7 +179,8 @@ version: 0
 
 # # A map of created deals
 # deals:
-#   defaultWorker: # worker name
+#   # worker name
+#   defaultWorker:
 #     # worker CID
 #     definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
 #     # ISO timestamp of the time when the worker was deployed
@@ -195,7 +196,8 @@ version: 0
 
 # # A map of deployed workers
 # hosts:
-#   defaultWorker: # worker name
+#   # worker name
+#   defaultWorker:
 #     # worker CID
 #     definition: bafkreicoctafgctpxf7jk4nynpnma4wdxpcecjtspsjmuidmag6enctnqa
 #     # worker installation spells

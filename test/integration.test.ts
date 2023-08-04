@@ -139,12 +139,29 @@ describe("integration tests", () => {
         FS_OPTIONS,
       );
 
-      const pathToNewServiceDir = join("src", "services", "newService");
+      const NEW_SERVICE_NAME = "newService";
+
+      const pathToNewServiceDir = join("src", "services", NEW_SERVICE_NAME);
 
       await fluence({
-        args: ["service", "new", "newService"],
+        args: ["service", "new", NEW_SERVICE_NAME],
         cwd,
       });
+
+      const readInterfacesFile = async () => {
+        return readFile(
+          join(cwd, ".fluence", "aqua", "services.aqua"),
+          FS_OPTIONS,
+        );
+      };
+
+      let interfacesFileContent = await readInterfacesFile();
+
+      const NEW_SERVICE_INTERFACE = `service NewService("${NEW_SERVICE_NAME}"):
+  greeting(name: string) -> string
+`;
+
+      expect(interfacesFileContent).toBe(NEW_SERVICE_INTERFACE);
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
@@ -155,10 +172,26 @@ describe("integration tests", () => {
       newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
-      const pathToNewSpell = join("src", "spells", "newSpell");
+      const NEW_SPELL_NAME = "newSpell";
+
+      const pathToNewSpell = join("src", "spells", NEW_SPELL_NAME);
+
+      const NEW_SERVICE_2_NAME = "newService2";
 
       await fluence({
-        args: ["spell", "new", "newSpell"],
+        args: ["service", "new", NEW_SERVICE_2_NAME],
+        cwd,
+      });
+
+      interfacesFileContent = await readInterfacesFile();
+
+      expect(interfacesFileContent).toBe(`${NEW_SERVICE_INTERFACE}
+service NewService2("${NEW_SERVICE_2_NAME}"):
+  greeting(name: string) -> string
+`);
+
+      await fluence({
+        args: ["spell", "new", NEW_SPELL_NAME],
         cwd,
       });
 
@@ -189,8 +222,8 @@ describe("integration tests", () => {
           fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
       );
 
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["newService"];
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = [NEW_SERVICE_NAME];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
 
       await fluence({

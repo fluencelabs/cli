@@ -15,10 +15,14 @@
  */
 
 import assert from "node:assert";
+import { readFile, writeFile } from "node:fs/promises";
 
+import type { FluenceConfig } from "../configs/project/fluence.js";
+import { FS_OPTIONS } from "../const.js";
 import type { MarineCLI } from "../marineCli.js";
+import { ensureFluenceAquaServicesPath } from "../paths.js";
 
-const SERVICE = "service ";
+const SERVICE_DEFINITION_SEPARATOR = "\n\n";
 
 type GenerateServiceInterfaceArg = {
   serviceId: string;
@@ -26,7 +30,7 @@ type GenerateServiceInterfaceArg = {
   marineCli: MarineCLI;
 };
 
-export const generateAquaInterfaceForService = async ({
+const generateAquaInterfaceForService = async ({
   serviceId,
   pathToFacadeWasm,
   marineCli,
@@ -34,6 +38,7 @@ export const generateAquaInterfaceForService = async ({
   const interfaceDeclaration = (
     await marineCli({
       args: ["aqua", pathToFacadeWasm],
+      flags: { service: serviceId, id: serviceId },
       printOutput: false,
     })
   )
@@ -45,15 +50,103 @@ export const generateAquaInterfaceForService = async ({
     `Failed to generate service interface for ${pathToFacadeWasm}`,
   );
 
-  const declarations = interfaceDeclaration.split(SERVICE);
-  const [serviceName, ...rest] = declarations.pop()?.split(":") ?? [];
+  return interfaceDeclaration;
+};
 
-  if (serviceName === undefined || rest.length === 0) {
-    throw new Error(
-      `Failed to generate service interface for ${pathToFacadeWasm}`,
+const getServiceIdFromServiceInterface = (serviceDefinition: string) => {
+  const serviceId = serviceDefinition.split('"')[1];
+
+  assert(
+    serviceId !== undefined,
+    `Failed to parse service id from service definition: ${serviceDefinition}`,
+  );
+
+  return serviceId;
+};
+
+export const updateAquaServiceInterfaceFile = async (
+  serviceNamePathToFacadeMap: Record<string, string>,
+  servicesFromFluenceConfig: FluenceConfig["services"],
+  marineCli: MarineCLI,
+) => {
+  let previouslyGeneratedInterfacesStr = "";
+
+  try {
+    previouslyGeneratedInterfacesStr = await readFile(
+      await ensureFluenceAquaServicesPath(),
+      FS_OPTIONS,
     );
-  }
+  } catch {}
 
-  declarations.push(`${serviceName}("${serviceId}"):${rest.join(":")}`);
-  return declarations.join(SERVICE);
+  const previouslyGeneratedInterfaces = previouslyGeneratedInterfacesStr
+    .trim()
+    .split(SERVICE_DEFINITION_SEPARATOR)
+    .map((serviceDefinition) => {
+      return serviceDefinition.trim();
+    })
+    .filter((serviceDefinition) => {
+      return serviceDefinition !== "";
+    });
+
+  const serviceNamesFromFluenceConfig = new Set(
+    Object.keys(servicesFromFluenceConfig ?? {}),
+  );
+
+  const previouslyGeneratedInterfacesWithIdsPresentInFluenceConfig =
+    previouslyGeneratedInterfaces
+      .map((serviceDefinition) => {
+        return {
+          serviceId: getServiceIdFromServiceInterface(serviceDefinition),
+          serviceDefinition,
+        };
+      })
+      .filter(({ serviceId }) => {
+        return serviceNamesFromFluenceConfig.has(serviceId);
+      });
+
+  const serviceIdsFromPreviouslyGeneratedInterfaces = new Set(
+    previouslyGeneratedInterfacesWithIdsPresentInFluenceConfig.map(
+      ({ serviceId }) => {
+        return serviceId;
+      },
+    ),
+  );
+
+  const generatedServiceInterfaceMap = Object.fromEntries(
+    await Promise.all(
+      Object.entries(serviceNamePathToFacadeMap).map(
+        async ([serviceId, pathToFacadeWasm]) => {
+          return [
+            serviceId,
+            await generateAquaInterfaceForService({
+              serviceId,
+              pathToFacadeWasm,
+              marineCli,
+            }),
+          ] as const;
+        },
+      ),
+    ),
+  );
+
+  const newServiceInterfaces = Object.entries(generatedServiceInterfaceMap)
+    .filter(([serviceId]) => {
+      return !serviceIdsFromPreviouslyGeneratedInterfaces.has(serviceId);
+    })
+    .map(([, serviceDefinition]) => {
+      return serviceDefinition;
+    });
+
+  const serviceInterfacesToWrite =
+    previouslyGeneratedInterfacesWithIdsPresentInFluenceConfig
+      .map(({ serviceId, serviceDefinition }) => {
+        return generatedServiceInterfaceMap[serviceId] ?? serviceDefinition;
+      })
+      .concat(newServiceInterfaces);
+
+  await writeFile(
+    await ensureFluenceAquaServicesPath(),
+    `${serviceInterfacesToWrite.join(SERVICE_DEFINITION_SEPARATOR)}\n`,
+    FS_OPTIONS,
+  );
 };

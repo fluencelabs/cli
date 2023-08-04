@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { join, relative } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -31,7 +31,7 @@ import {
 } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
-import { ensureSrcServicesDir, projectRootDir } from "../../lib/paths.js";
+import { ensureSrcServicesDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -74,23 +74,22 @@ export default class New extends BaseCommand<typeof New> {
       });
     }
 
-    const servicePath = join(
-      flags.path ?? (await ensureSrcServicesDir()),
-      serviceName,
+    const absoluteServicePath = resolve(
+      join(flags.path ?? (await ensureSrcServicesDir()), serviceName),
     );
 
-    const pathToModuleDir = join(servicePath, "modules", serviceName);
+    const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
     await generateNewModule(pathToModuleDir);
 
     await initNewReadonlyServiceConfig(
-      servicePath,
-      relative(servicePath, pathToModuleDir),
+      absoluteServicePath,
+      relative(absoluteServicePath, pathToModuleDir),
       serviceName,
     );
 
     commandObj.log(
       `Successfully generated template for new service at ${color.yellow(
-        servicePath,
+        absoluteServicePath,
       )}`,
     );
 
@@ -100,7 +99,7 @@ export default class New extends BaseCommand<typeof New> {
       await addService({
         marineCli,
         serviceName,
-        pathOrUrl: relative(projectRootDir, servicePath),
+        absolutePathOrUrl: absoluteServicePath,
         fluenceConfig: maybeFluenceConfig,
       });
     }

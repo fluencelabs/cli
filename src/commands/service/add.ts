@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isAbsolute, relative, resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 import { cwd } from "node:process";
 
 import { Args, Flags } from "@oclif/core";
@@ -33,7 +33,6 @@ import {
 } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
-import { projectRootDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 const PATH_OR_URL = "PATH | URL";
@@ -71,14 +70,16 @@ export default class Add extends BaseCommand<typeof Add> {
     );
 
     if (serviceConfig === null) {
-      commandObj.error(`No service config at ${serviceOrServiceDirPathOrUrl}`);
+      commandObj.error(
+        `No service config found at ${serviceOrServiceDirPathOrUrl}`,
+      );
     }
 
     const marineCli = await initMarineCli(fluenceConfig);
 
     await addService({
       serviceName: flags.name ?? serviceConfig.name,
-      pathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
+      absolutePathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
       fluenceConfig,
       marineCli,
       marineBuildArgs: flags["marine-build-args"],
@@ -87,13 +88,12 @@ export default class Add extends BaseCommand<typeof Add> {
 }
 
 const resolveServicePathOrUrl = (serviceOrServiceDirPathOrUrl: string) => {
-  if (isUrl(serviceOrServiceDirPathOrUrl)) {
+  if (
+    isUrl(serviceOrServiceDirPathOrUrl) ||
+    isAbsolute(serviceOrServiceDirPathOrUrl)
+  ) {
     return serviceOrServiceDirPathOrUrl;
   }
 
-  if (isAbsolute(serviceOrServiceDirPathOrUrl)) {
-    return relative(projectRootDir, serviceOrServiceDirPathOrUrl);
-  }
-
-  return relative(projectRootDir, resolve(serviceOrServiceDirPathOrUrl));
+  return resolve(serviceOrServiceDirPathOrUrl);
 };

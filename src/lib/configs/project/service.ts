@@ -169,7 +169,9 @@ export const ensureServiceConfig = async (
 
   if (serviceConfig === null) {
     return commandObj.error(
-      `No service config at ${color.yellow(serviceOrServiceDirPathOrUrl)}`,
+      `No service config found at ${color.yellow(
+        serviceOrServiceDirPathOrUrl,
+      )}`,
     );
   }
 
@@ -207,7 +209,8 @@ name: ${name}
 # A map of modules that the service consists of.
 # Service must have a facade module. Each module properties can be overridden
 modules:
-  facade: # module name
+# # module name
+  facade:
     # Either path to the module directory or
     # URL to the tar.gz archive which contains the content of the module directory
     get: "${relativePathToFacade}"

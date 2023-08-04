@@ -193,6 +193,10 @@ export const ensureFluenceAquaDir = async (): Promise<string> => {
   return ensureDir(getFluenceAquaDir());
 };
 
+export const getFluenceAquaServicesPath = (): string => {
+  return path.join(getFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
+};
+
 export const ensureFluenceAquaServicesPath = async (): Promise<string> => {
   return path.join(await ensureFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
 };
