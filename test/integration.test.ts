@@ -139,12 +139,12 @@ describe("integration tests", () => {
         FS_OPTIONS,
       );
 
-      const SERVICE_1_ID = "newService";
+      const NEW_SERVICE_NAME = "newService";
 
-      const pathToNewServiceDir = join("src", "services", SERVICE_1_ID);
+      const pathToNewServiceDir = join("src", "services", NEW_SERVICE_NAME);
 
       await fluence({
-        args: ["service", "new", SERVICE_1_ID],
+        args: ["service", "new", NEW_SERVICE_NAME],
         cwd,
       });
 
@@ -157,11 +157,11 @@ describe("integration tests", () => {
 
       let interfacesFileContent = await readInterfacesFile();
 
-      const SERVICE_1_INTERFACE = `service NewService("newService"):
+      const NEW_SERVICE_INTERFACE = `service NewService("${NEW_SERVICE_NAME}"):
   greeting(name: string) -> string
 `;
 
-      expect(interfacesFileContent).toBe(SERVICE_1_INTERFACE);
+      expect(interfacesFileContent).toBe(NEW_SERVICE_INTERFACE);
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
@@ -172,28 +172,38 @@ describe("integration tests", () => {
       newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
-      const SERVICE_2_ID = "newService2";
+      const NEW_SPELL_NAME = "newSpell";
+
+      const pathToNewSpell = join("src", "spells", NEW_SPELL_NAME);
+
+      const NEW_SERVICE_2_NAME = "newService2";
 
       await fluence({
-        args: ["service", "new", SERVICE_2_ID],
+        args: ["service", "new", NEW_SERVICE_2_NAME],
         cwd,
       });
 
       interfacesFileContent = await readInterfacesFile();
 
-      expect(interfacesFileContent).toBe(`${SERVICE_1_INTERFACE}
-service NewService2("newService2"):
+      expect(interfacesFileContent).toBe(`${NEW_SERVICE_INTERFACE}
+service NewService2("${NEW_SERVICE_2_NAME}"):
   greeting(name: string) -> string
 `);
 
       await fluence({
-        args: ["spell", "new", "newSpell"],
+        args: ["spell", "new", NEW_SPELL_NAME],
         cwd,
       });
 
       const fluenceConfig = await initFluenceConfigWithPath(cwd);
 
       assert(fluenceConfig !== null);
+
+      fluenceConfig.spells = {
+        newSpell: {
+          get: pathToNewSpell,
+        },
+      };
 
       const peers = [
         "12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR",
@@ -207,6 +217,13 @@ service NewService2("newService2"):
         },
       };
 
+      assert(
+        fluenceConfig.workers !== undefined &&
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
+      );
+
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = [NEW_SERVICE_NAME];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
 
       await fluence({
