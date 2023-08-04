@@ -80,7 +80,13 @@ export const updateAquaServiceInterfaceFile = async (
 
   const previouslyGeneratedInterfaces = previouslyGeneratedInterfacesStr
     .trim()
-    .split(SERVICE_DEFINITION_SEPARATOR);
+    .split(SERVICE_DEFINITION_SEPARATOR)
+    .map((serviceDefinition) => {
+      return serviceDefinition.trim();
+    })
+    .filter((serviceDefinition) => {
+      return serviceDefinition !== "";
+    });
 
   const serviceNamesFromFluenceConfig = new Set(
     Object.keys(servicesFromFluenceConfig ?? {}),
