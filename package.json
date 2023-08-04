@@ -76,7 +76,7 @@
   },
   "devDependencies": {
     "@fluencelabs/installation-spell": "0.5.16",
-    "@swc/core": "1.3.73",
+    "@swc/core": "1.3.74",
     "@total-typescript/ts-reset": "0.4.2",
     "@tsconfig/node18-strictest-esm": "1.0.1",
     "@types/chokidar": "2.1.3",
