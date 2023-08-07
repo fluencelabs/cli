@@ -12,7 +12,7 @@ dependencies:
     specifier: 0.11.7
     version: 0.11.7
   '@fluencelabs/deal-aurora':
-    specifier: ^0.1.8
+    specifier: 0.1.8
     version: 0.1.8(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.17.2)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.17.1)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.3.1)(typescript@5.1.6)
   '@fluencelabs/fluence-network-environment':
     specifier: ^1.1.2
