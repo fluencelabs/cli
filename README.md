@@ -14,7 +14,11 @@ Prerequisites:
 To install and try Fluence CLI, run:
 
 ```sh-session
+# to make sure ALL the dependencies are installed correctly
+# please use npm to install the CLI instead of pnpm or yarn
+
 $ npm install -g @fluencelabs/cli
+
 $ fluence COMMAND
 running command...
 $ fluence

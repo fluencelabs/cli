@@ -35,7 +35,7 @@ jobs:
           registry-url: "https://npm.fluence.dev"
           cache: "pnpm"
 
-      - run: pnpm i
+      - run: pnpm shrinkwrap-install
 
       - name: Setup golang
         uses: actions/setup-go@v4
