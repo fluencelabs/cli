@@ -33,4 +33,4 @@ When you contribute, you have to be aware that your contribution is covered by *
     1. run `docker compose up -d`
     1. `cd` back to repo root dir. Set env variable `FLUENCE_ENV="local"` so tests run against your local peers
     1. run `pnpm test` which will lint and check the code, build it, package it, prepare the tests and run them
--   After installing dependencies use `pnpm shrinkwrap-install` to lock dependency versions for those who will install cli. Without that minor versions of transient dependencies can be resolved differently for the end users which can sometimes lead to unexpected bugs. This is recommended approach for CLIs. If you don't do it - CI will do it for you when generating docs
+-   To update or install npm dependencies - just change package.json manually and let the CI do the updating properly. CI does `npm shrinkwrap` and `pnpm import` for you so all transient dependency versions can be locked and minor versions patched for the end users while still giving the CLI developers and CI itself a way to install dependencies more quickly using pnpm
