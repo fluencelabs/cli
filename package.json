@@ -31,7 +31,7 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "pnpm before-build && pnpm build",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test": "shx rm -rf tmp && shx mkdir tmp && pnpm pack --pack-destination ./tmp && cd tmp && pnpm init && pnpm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
+    "test": "shx rm -rf tmp && shx mkdir tmp && pnpm pack --pack-destination ./tmp && cd tmp && pnpm init && npm i ./fluencelabs-cli-${npm_package_version}.tgz && cd .. && ts-node ./test/setupTests.ts && pnpm jest",
     "check": "pnpm before-build && pnpm build && pnpm lint-fix && pnpm prettier && pnpm circular",
     "circular": "madge --circular --extensions ts ./",
     "on-each-commit": "pnpm check && pnpm gen-config-docs && cd docs/commands && oclif readme --no-aliases",
