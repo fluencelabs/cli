@@ -42,7 +42,7 @@
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "^0.3.2",
     "@fluencelabs/aqua-api": "0.11.7",
-    "@fluencelabs/deal-aurora": "^0.1.8",
+    "@fluencelabs/deal-aurora": "0.1.8",
     "@fluencelabs/fluence-network-environment": "^1.1.2",
     "@fluencelabs/js-client.api": "^0.12.0",
     "@fluencelabs/js-client.node": "^0.7.0",
