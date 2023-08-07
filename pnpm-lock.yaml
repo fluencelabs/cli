@@ -6,207 +6,207 @@ settings:
 
 dependencies:
   '@fluencelabs/air-beautify-wasm':
-    specifier: ^0.3.2
+    specifier: 0.3.2
     version: 0.3.2
   '@fluencelabs/aqua-api':
-    specifier: ^0.11.7
+    specifier: 0.11.7
     version: 0.11.7
   '@fluencelabs/deal-aurora':
-    specifier: ^0.1.8
+    specifier: 0.1.8
     version: 0.1.8(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@nomicfoundation/hardhat-chai-matchers@1.0.6)(@nomicfoundation/hardhat-network-helpers@1.0.8)(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(@typechain/ethers-v5@10.2.1)(@typechain/hardhat@6.1.6)(@types/chai@4.3.5)(@types/mocha@9.1.1)(@types/node@18.17.2)(chai@4.3.7)(ethers@5.7.2)(hardhat-gas-reporter@1.0.9)(hardhat@2.17.1)(solidity-coverage@0.7.22)(ts-node@10.9.1)(typechain@8.3.1)(typescript@5.1.6)
   '@fluencelabs/fluence-network-environment':
-    specifier: ^1.1.2
+    specifier: 1.1.2
     version: 1.1.2
   '@fluencelabs/js-client.api':
-    specifier: ^0.12.0
+    specifier: 0.12.0
     version: 0.12.0
   '@fluencelabs/js-client.node':
-    specifier: ^0.7.0
+    specifier: 0.7.0
     version: 0.7.0(uint8arraylist@2.4.3)
   '@iarna/toml':
-    specifier: ^2.2.5
+    specifier: 2.2.5
     version: 2.2.5
   '@mswjs/interceptors':
-    specifier: ^0.23.0
+    specifier: 0.23.0
     version: 0.23.0
   '@oclif/color':
-    specifier: ^1.0.10
+    specifier: 1.0.10
     version: 1.0.10
   '@oclif/core':
-    specifier: ^2.11.5
+    specifier: 2.11.5
     version: 2.11.5(@swc/core@1.3.74)(@types/node@18.17.2)(typescript@5.1.6)
   '@oclif/plugin-autocomplete':
-    specifier: ^2.3.3
+    specifier: 2.3.3
     version: 2.3.3(@swc/core@1.3.74)(@types/node@18.17.2)(typescript@5.1.6)
   '@oclif/plugin-help':
-    specifier: ^5.2.15
+    specifier: 5.2.15
     version: 5.2.15(@swc/core@1.3.74)(@types/node@18.17.2)(typescript@5.1.6)
   '@oclif/plugin-not-found':
-    specifier: ^2.3.34
+    specifier: 2.3.34
     version: 2.3.34(@swc/core@1.3.74)(@types/node@18.17.2)(typescript@5.1.6)
   '@walletconnect/universal-provider':
-    specifier: ^2.4.7
+    specifier: 2.4.7
     version: 2.4.7(@swc/core@1.3.74)(@types/node@18.17.2)(lokijs@1.5.12)(typescript@5.1.6)
   ajv:
-    specifier: ^8.12.0
+    specifier: 8.12.0
     version: 8.12.0
   camelcase:
-    specifier: ^7.0.1
+    specifier: 7.0.1
     version: 7.0.1
   chokidar:
-    specifier: ^3.5.3
+    specifier: 3.5.3
     version: 3.5.3
   countly-sdk-nodejs:
-    specifier: ^22.6.0
+    specifier: 22.6.0
     version: 22.6.0
   decompress:
-    specifier: ^4.2.1
+    specifier: 4.2.1
     version: 4.2.1
   dotenv:
-    specifier: ^16.3.1
+    specifier: 16.3.1
     version: 16.3.1
   ethers:
-    specifier: ^5.7.2
+    specifier: 5.7.2
     version: 5.7.2
   filenamify:
-    specifier: ^6.0.0
+    specifier: 6.0.0
     version: 6.0.0
   get-random-values:
-    specifier: ^2.1.0
+    specifier: 2.1.0
     version: 2.1.0
   inquirer:
-    specifier: ^9.2.9
+    specifier: 9.2.9
     version: 9.2.9
   ipfs-http-client:
-    specifier: ^60.0.1
+    specifier: 60.0.1
     version: 60.0.1
   lodash-es:
-    specifier: ^4.17.21
+    specifier: 4.17.21
     version: 4.17.21
   lokijs:
-    specifier: ^1.5.12
+    specifier: 1.5.12
     version: 1.5.12
   multiaddr:
-    specifier: ^10.0.1
+    specifier: 10.0.1
     version: 10.0.1(node-fetch@3.3.2)
   node-fetch:
-    specifier: ^3.3.2
+    specifier: 3.3.2
     version: 3.3.2
   platform:
-    specifier: ^1.3.6
+    specifier: 1.3.6
     version: 1.3.6
   replace-homedir:
-    specifier: ^2.0.0
+    specifier: 2.0.0
     version: 2.0.0
   semver:
-    specifier: ^7.5.4
+    specifier: 7.5.4
     version: 7.5.4
   yaml:
-    specifier: ^2.3.1
+    specifier: 2.3.1
     version: 2.3.1
   yaml-diff-patch:
-    specifier: ^2.0.0
+    specifier: 2.0.0
     version: 2.0.0
 
 devDependencies:
   '@fluencelabs/installation-spell':
-    specifier: ^0.5.16
+    specifier: 0.5.16
     version: 0.5.16
   '@swc/core':
-    specifier: ^1.3.74
+    specifier: 1.3.74
     version: 1.3.74
   '@total-typescript/ts-reset':
-    specifier: ^0.4.2
+    specifier: 0.4.2
     version: 0.4.2
   '@tsconfig/node18-strictest-esm':
-    specifier: ^1.0.1
+    specifier: 1.0.1
     version: 1.0.1
   '@types/chokidar':
-    specifier: ^2.1.3
+    specifier: 2.1.3
     version: 2.1.3
   '@types/decompress':
-    specifier: ^4.2.4
+    specifier: 4.2.4
     version: 4.2.4
   '@types/filenamify':
-    specifier: ^2.0.2
+    specifier: 2.0.2
     version: 2.0.2
   '@types/iarna__toml':
-    specifier: ^2.0.2
+    specifier: 2.0.2
     version: 2.0.2
   '@types/inquirer':
-    specifier: ^9.0.3
+    specifier: 9.0.3
     version: 9.0.3
   '@types/jest':
-    specifier: ^29.5.3
+    specifier: 29.5.3
     version: 29.5.3
   '@types/lodash-es':
-    specifier: ^4.17.8
+    specifier: 4.17.8
     version: 4.17.8
   '@types/node':
-    specifier: ^18.17.2
+    specifier: 18.17.2
     version: 18.17.2
   '@types/platform':
-    specifier: ^1.3.4
+    specifier: 1.3.4
     version: 1.3.4
   '@types/semver':
-    specifier: ^7.5.0
+    specifier: 7.5.0
     version: 7.5.0
   '@typescript-eslint/eslint-plugin':
-    specifier: ^6.2.1
+    specifier: 6.2.1
     version: 6.2.1(@typescript-eslint/parser@6.2.1)(eslint@8.46.0)(typescript@5.1.6)
   '@typescript-eslint/parser':
-    specifier: ^6.2.1
+    specifier: 6.2.1
     version: 6.2.1(eslint@8.46.0)(typescript@5.1.6)
   eslint:
-    specifier: ^8.46.0
+    specifier: 8.46.0
     version: 8.46.0
   eslint-config-prettier:
-    specifier: ^8.9.0
+    specifier: 8.9.0
     version: 8.9.0(eslint@8.46.0)
   eslint-plugin-import:
-    specifier: ^2.28.0
+    specifier: 2.28.0
     version: 2.28.0(@typescript-eslint/parser@6.2.1)(eslint@8.46.0)
   eslint-plugin-license-header:
-    specifier: ^0.6.0
+    specifier: 0.6.0
     version: 0.6.0
   eslint-plugin-node:
-    specifier: ^11.1.0
+    specifier: 11.1.0
     version: 11.1.0(eslint@8.46.0)
   eslint-plugin-unused-imports:
-    specifier: ^3.0.0
+    specifier: 3.0.0
     version: 3.0.0(@typescript-eslint/eslint-plugin@6.2.1)(eslint@8.46.0)
   globby:
-    specifier: ^13
+    specifier: '13'
     version: 13.0.0
   jest:
-    specifier: ^29.6.2
+    specifier: 29.6.2
     version: 29.6.2(@types/node@18.17.2)(ts-node@10.9.1)
   madge:
-    specifier: ^6.1.0
+    specifier: 6.1.0
     version: 6.1.0(typescript@5.1.6)
   oclif:
-    specifier: ^3.11.0
+    specifier: 3.11.0
     version: 3.11.0(@swc/core@1.3.74)(@types/node@18.17.2)(typescript@5.1.6)
   prettier:
-    specifier: ^3.0.0
+    specifier: 3.0.0
     version: 3.0.0
   shx:
-    specifier: ^0.3.4
+    specifier: 0.3.4
     version: 0.3.4
   ts-jest:
-    specifier: ^29.1.1
+    specifier: 29.1.1
     version: 29.1.1(@babel/core@7.22.9)(jest@29.6.2)(typescript@5.1.6)
   ts-node:
-    specifier: ^10.9.1
+    specifier: 10.9.1
     version: 10.9.1(@swc/core@1.3.74)(@types/node@18.17.2)(typescript@5.1.6)
   ts-prune:
-    specifier: ^0.10.3
+    specifier: 0.10.3
     version: 0.10.3
   tslib:
-    specifier: ^2.6.1
+    specifier: 2.6.1
     version: 2.6.1
   typescript:
-    specifier: ^5.1.6
+    specifier: 5.1.6
     version: 5.1.6
 
 packages:
@@ -255,7 +255,7 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       '@jridgewell/gen-mapping': 0.3.3
-      '@jridgewell/trace-mapping': 0.3.18
+      '@jridgewell/trace-mapping': 0.3.19
     dev: true
 
   /@babel/code-frame@7.22.5:
@@ -299,7 +299,7 @@ packages:
     dependencies:
       '@babel/types': 7.22.5
       '@jridgewell/gen-mapping': 0.3.3
-      '@jridgewell/trace-mapping': 0.3.18
+      '@jridgewell/trace-mapping': 0.3.19
       jsesc: 2.5.2
     dev: true
 
@@ -1422,7 +1422,7 @@ packages:
       '@jest/test-result': 29.6.2
       '@jest/transform': 29.6.2
       '@jest/types': 29.6.1
-      '@jridgewell/trace-mapping': 0.3.18
+      '@jridgewell/trace-mapping': 0.3.19
       '@types/node': 18.17.2
       chalk: 4.1.2
       collect-v8-coverage: 1.0.2
@@ -1456,7 +1456,7 @@ packages:
     resolution: {integrity: sha512-oA+I2SHHQGxDCZpbrsCQSoMLb3Bz547JnM+jUr9qEbuw0vQlWZfpPS7CO9J7XiwKicEz9OFn/IYoLkkiUD7bzA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.18
+      '@jridgewell/trace-mapping': 0.3.19
       callsites: 3.1.0
       graceful-fs: 4.2.11
     dev: true
@@ -1487,7 +1487,7 @@ packages:
     dependencies:
       '@babel/core': 7.22.9
       '@jest/types': 29.6.1
-      '@jridgewell/trace-mapping': 0.3.18
+      '@jridgewell/trace-mapping': 0.3.19
       babel-plugin-istanbul: 6.1.1
       chalk: 4.1.2
       convert-source-map: 2.0.0
@@ -1522,12 +1522,7 @@ packages:
     dependencies:
       '@jridgewell/set-array': 1.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
-      '@jridgewell/trace-mapping': 0.3.18
-    dev: true
-
-  /@jridgewell/resolve-uri@3.1.0:
-    resolution: {integrity: sha512-F2msla3tad+Mfht5cJq7LSXcdudKTWCVYUgw6pLFOOHSTtZlj6SWNYAp+AhuqLmWdBO2X5hPrLcu8cVP8fy28w==}
-    engines: {node: '>=6.0.0'}
+      '@jridgewell/trace-mapping': 0.3.19
     dev: true
 
   /@jridgewell/resolve-uri@3.1.1:
@@ -1539,18 +1534,14 @@ packages:
     engines: {node: '>=6.0.0'}
     dev: true
 
-  /@jridgewell/sourcemap-codec@1.4.14:
-    resolution: {integrity: sha512-XPSJHWmi394fuUuzDnGz1wiKqWfo1yXecHQMRf2l6hztTO+nPru658AyDngaBe7isIxEkRsPR3FZh+s7iVa4Uw==}
-    dev: true
-
   /@jridgewell/sourcemap-codec@1.4.15:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
 
-  /@jridgewell/trace-mapping@0.3.18:
-    resolution: {integrity: sha512-w+niJYzMHdd7USdiH2U6869nqhD2nbfZXND5Yp93qIbEmnDNk7PD48o+YchRVpzMU7M6jVCbenTR7PA1FLQ9pA==}
+  /@jridgewell/trace-mapping@0.3.19:
+    resolution: {integrity: sha512-kf37QtfW+Hwx/buWGMPcR60iF9ziHa6r/CZJIHbmcm4+0qrXiVdxegAH0F6yddEVQ7zdkjcGCgCzUu+BcbhQxw==}
     dependencies:
-      '@jridgewell/resolve-uri': 3.1.0
-      '@jridgewell/sourcemap-codec': 1.4.14
+      '@jridgewell/resolve-uri': 3.1.1
+      '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
 
   /@jridgewell/trace-mapping@0.3.9:
@@ -6171,6 +6162,7 @@ packages:
 
   /debuglog@1.0.1:
     resolution: {integrity: sha512-syBZ+rnAK3EgMsH2aYEOLUW7mZSY9Gb+0wUMCFsZvcmiz+HigA0LOcq/HoQqVuGG+EKykunc7QG2bzrponfaSw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     dev: true
 
   /decamelize@1.2.0:
@@ -6652,6 +6644,7 @@ packages:
 
   /eip1193-provider@1.0.1:
     resolution: {integrity: sha512-kSuqwQ26d7CzuS/t3yRXo2Su2cVH0QfvyKbr2H7Be7O5YDyIq4hQGCNTo5wRdP07bt+E2R/8nPCzey4ojBHf7g==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     dependencies:
       '@json-rpc-tools/provider': 1.7.6
     transitivePeerDependencies:
@@ -8975,6 +8968,7 @@ packages:
   /ipfs-http-client@60.0.1:
     resolution: {integrity: sha512-amwM5TNuf077J+/q27jPHfatC05vJuIbX6ZnlYLjc2QsjOCKsORNBqV3brNw7l+fPrijV1yrwEDLG3JEnKsfMw==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    deprecated: js-IPFS has been deprecated in favour of Helia - please see https://github.com/ipfs/js-ipfs/issues/4336 for details
     dependencies:
       '@ipld/dag-cbor': 9.0.3
       '@ipld/dag-json': 10.1.2
@@ -14780,7 +14774,7 @@ packages:
     resolution: {integrity: sha512-6z3GW9x8G1gd+JIIgQQQxXuiJtCXeAjp6RaPEPLv62mH3iPHPxV6W3robxtCzNErRo6ZwTmzWhsbNvjyEBKzKA==}
     engines: {node: '>=10.12.0'}
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.18
+      '@jridgewell/trace-mapping': 0.3.19
       '@types/istanbul-lib-coverage': 2.0.4
       convert-source-map: 1.9.0
     dev: true
