@@ -3094,9 +3094,7 @@
       "version": "0.5.16",
       "dev": true,
       "license": "Apache-2.0",
-      "workspaces": [
-        "../spell"
-      ],
+      "workspaces": ["../spell"],
       "dependencies": {
         "@fluencelabs/aqua-ipfs": "0.5.17",
         "@fluencelabs/aqua-lib": "0.7.1",
@@ -16470,9 +16468,7 @@
     },
     "node_modules/.pnpm/concat-stream@1.6.2/node_modules/concat-stream": {
       "version": "1.6.2",
-      "engines": [
-        "node >= 0.8"
-      ],
+      "engines": ["node >= 0.8"],
       "license": "MIT",
       "peer": true,
       "dependencies": {
@@ -21801,9 +21797,7 @@
     },
     "node_modules/.pnpm/extsprintf@1.3.0/node_modules/extsprintf": {
       "version": "1.3.0",
-      "engines": [
-        "node >=0.6.0"
-      ],
+      "engines": ["node >=0.6.0"],
       "license": "MIT"
     },
     "node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal": {
@@ -30414,9 +30408,7 @@
     "node_modules/.pnpm/jsonparse@1.3.1/node_modules/jsonparse": {
       "version": "1.3.1",
       "dev": true,
-      "engines": [
-        "node >= 0.2.0"
-      ],
+      "engines": ["node >= 0.2.0"],
       "license": "MIT",
       "devDependencies": {
         "tap": "~0.3.3",
@@ -46253,9 +46245,7 @@
     },
     "node_modules/.pnpm/verror@1.10.0/node_modules/verror": {
       "version": "1.10.0",
-      "engines": [
-        "node >=0.6.0"
-      ],
+      "engines": ["node >=0.6.0"],
       "license": "MIT",
       "dependencies": {
         "assert-plus": "^1.0.0",
