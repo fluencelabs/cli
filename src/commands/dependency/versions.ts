@@ -19,7 +19,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CLI_NAME } from "../../lib/const.js";
+import { CLI_NAME_FULL, CLI_NAME } from "../../lib/const.js";
 import {
   getRecommendedDependencies,
   resolveDependencies,
@@ -43,7 +43,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Versions)
+      await this.parse(Versions),
     );
 
     if (flags.default) {
@@ -57,8 +57,8 @@ export default class Versions extends BaseCommand<typeof Versions> {
               getRecommendedDependencies("npm"),
             "default cargo dependencies. Can be overridden with 'fluence dependency cargo install <name>@<version>'":
               getRecommendedDependencies("cargo"),
-          }
-        )
+          },
+        ),
       );
     }
 
@@ -67,31 +67,31 @@ export default class Versions extends BaseCommand<typeof Versions> {
         "",
         {},
         {
-          [`${CLI_NAME} version`]: commandObj.config.version,
+          [`${CLI_NAME_FULL} version`]: commandObj.config.version,
           "nox version": versions["nox"],
           "rust toolchain": versions["rust-toolchain"],
           [`npm dependencies that can be overridden with \`${CLI_NAME} dependency npm install <name>@<version>\``]:
-            await resolveDependencies("npm", maybeFluenceConfig),
+            await resolveDependencies("npm", maybeFluenceConfig, true),
           [`cargo dependencies that can be overridden with \`${CLI_NAME} dependency cargo install <name>@<version>\``]:
-            await resolveDependencies("cargo", maybeFluenceConfig),
+            await resolveDependencies("cargo", maybeFluenceConfig, true),
           "internal dependencies": filterOutNonFluenceDependencies(
-            CLIPackageJSON.dependencies
+            CLIPackageJSON.dependencies,
           ),
           "js-client.node dependencies": filterOutNonFluenceDependencies(
-            JSClientPackageJSON.dependencies
+            JSClientPackageJSON.dependencies,
           ),
-        }
-      )
+        },
+      ),
     );
   }
 }
 
 const filterOutNonFluenceDependencies = (
-  dependencies: Record<string, string>
+  dependencies: Record<string, string>,
 ) => {
   return Object.fromEntries(
     Object.entries(dependencies).filter(([dep]) => {
       return dep.startsWith("@fluencelabs/");
-    })
+    }),
   );
 };

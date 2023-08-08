@@ -26,17 +26,37 @@ import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
-import {
-  CLI_NAME,
-  FS_OPTIONS,
-  SCHEMAS_DIR_NAME,
-  YAML_EXT,
-  YML_EXT,
-} from "../const.js";
+import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
 import { jsonStringify } from "../helpers/jsonStringify.js";
 import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
+
+type AjvErrors =
+  | Ajv.ErrorObject<string, Record<string, unknown>, unknown>[]
+  | null
+  | undefined;
+
+const validationErrorToString = (errors: AjvErrors) => {
+  if (errors === null || errors === undefined) {
+    return "";
+  }
+
+  return (
+    "Errors:\n\n" +
+    errors
+      .filter(({ instancePath }) => {
+        return instancePath !== "";
+      })
+      .map(({ instancePath, params, message }) => {
+        const paramsMessage = yamlDiffPatch("", {}, params);
+        return `${color.yellow(instancePath)} ${
+          message ?? ""
+        }\n${paramsMessage}`;
+      })
+      .join("\n")
+  );
+};
 
 type EnsureSchemaArg = {
   name: string;
@@ -53,7 +73,7 @@ const ensureSchema = async ({
 }: EnsureSchemaArg): Promise<string> => {
   const schemaDir = join(
     getSchemaDirPath === undefined ? configDirPath : await getSchemaDirPath(),
-    SCHEMAS_DIR_NAME
+    SCHEMAS_DIR_NAME,
   );
 
   await mkdir(schemaDir, { recursive: true });
@@ -72,7 +92,7 @@ const ensureSchema = async ({
 
 type MigrateConfigOptions<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 > = {
   configString: string;
   migrations: Migrations<Config>;
@@ -84,7 +104,7 @@ type MigrateConfigOptions<
 
 const migrateConfig = async <
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >({
   configString,
   migrations,
@@ -106,7 +126,7 @@ const migrateConfig = async <
   const migratedConfigString = yamlDiffPatch(
     configString,
     parse(configString),
-    migratedConfig
+    migratedConfig,
   );
 
   const latestConfig: unknown = parse(migratedConfigString);
@@ -114,8 +134,8 @@ const migrateConfig = async <
   if (!validateLatestConfig(latestConfig)) {
     return commandObj.error(
       `Couldn't migrate config ${color.yellow(
-        configPath
-      )}. Errors: ${jsonStringify(validateLatestConfig.errors)}`
+        configPath,
+      )}. ${validationErrorToString(validateLatestConfig.errors)}`,
     );
   }
 
@@ -125,8 +145,8 @@ const migrateConfig = async <
   if (typeof maybeValidationError === "string") {
     return commandObj.error(
       `Invalid config ${color.yellow(
-        configPath
-      )} after successful migration. Config after migration looks like this:\n\n${migratedConfigString}\n\nErrors: ${maybeValidationError}`
+        configPath,
+      )} after successful migration. Config after migration looks like this:\n\n${migratedConfigString}\n\nErrors: ${maybeValidationError}`,
     );
   }
 
@@ -142,7 +162,7 @@ const migrateConfig = async <
 
 type EnsureConfigOptions<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 > = {
   configPath: string;
   validateLatestConfig: ValidateFunction<LatestConfig>;
@@ -152,7 +172,7 @@ type EnsureConfigOptions<
 
 const ensureConfigIsValidLatest = async <
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >({
   configPath,
   validateLatestConfig,
@@ -161,9 +181,9 @@ const ensureConfigIsValidLatest = async <
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     return commandObj.error(
-      `Invalid config ${color.yellow(configPath)}. Errors: ${jsonStringify(
-        validateLatestConfig.errors
-      )}`
+      `Invalid config ${color.yellow(configPath)}. ${validationErrorToString(
+        validateLatestConfig.errors,
+      )}`,
     );
   }
 
@@ -173,8 +193,8 @@ const ensureConfigIsValidLatest = async <
   if (typeof maybeValidationError === "string") {
     return commandObj.error(
       `Invalid config ${color.yellow(
-        configPath
-      )}. Errors:\n${maybeValidationError}`
+        configPath,
+      )}. Errors:\n${maybeValidationError}`,
     );
   }
 
@@ -196,19 +216,17 @@ type BaseConfig = { version: number } & Record<string, unknown>;
 export type Migrations<Config> = Array<
   (config: Config) => Config | Promise<Config>
 >;
-export type GetDefaultConfig<LatestConfig> = () =>
-  | LatestConfig
-  | Promise<LatestConfig>;
+export type GetDefaultConfig = () => string | Promise<string>;
 type GetPath = () => string | Promise<string>;
 
 export type ConfigValidateFunction<LatestConfig> = (
   config: LatestConfig,
-  configPath: string
+  configPath: string,
 ) => ValidationResult | Promise<ValidationResult>;
 
 export type InitConfigOptions<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 > = {
   allSchemas: Array<JSONSchemaType<Config>>;
   latestSchema: JSONSchemaType<LatestConfig>;
@@ -235,7 +253,7 @@ type InitReadonlyFunctionWithDefault<LatestConfig> = () => Promise<
 
 export const getConfigPath = (
   configOrConfigDirPath: string,
-  configName: string
+  configName: string,
 ) => {
   return configOrConfigDirPath.endsWith(YAML_EXT) ||
     configOrConfigDirPath.endsWith(YML_EXT)
@@ -251,25 +269,25 @@ export const getConfigPath = (
 
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: undefined
+  getDefaultConfig?: undefined,
 ): InitReadonlyFunction<LatestConfig>;
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
+  getDefaultConfig?: GetDefaultConfig,
 ): InitReadonlyFunctionWithDefault<LatestConfig>;
 
 export function getReadonlyConfigInitFunction<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
+  getDefaultConfig?: GetDefaultConfig,
 ): InitReadonlyFunction<LatestConfig> {
   return async (): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
     const {
@@ -282,9 +300,11 @@ export function getReadonlyConfigInitFunction<
       getSchemaDirPath,
     } = options;
 
+    const configFullName = `${name}.${YAML_EXT}`;
+
     const getConfigPathResult = getConfigPath(
       await getConfigOrConfigDirPath(),
-      name
+      configFullName,
     );
 
     const { configDirPath } = getConfigPathResult;
@@ -332,7 +352,7 @@ export function getReadonlyConfigInitFunction<
         // try reading again by replacing .yaml with .yml or vice versa
         const newConfigPath = `${configPath.slice(
           0,
-          -(endsWithYaml ? YAML_EXT : YML_EXT).length
+          -(endsWithYaml ? YAML_EXT : YML_EXT).length,
         )}${endsWithYaml ? YML_EXT : YAML_EXT}`;
 
         fileContent = await readFile(newConfigPath, FS_OPTIONS);
@@ -359,24 +379,8 @@ export function getReadonlyConfigInitFunction<
       }
       // If config file doesn't exist, create it with default config and schema path comment
 
-      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/${CLI_NAME}/tree/main/docs/configs/${name.replace(
-        `.${YAML_EXT}`,
-        ""
-      )}.md`;
-
       const schemaPathComment = await getSchemaPathComment();
-
-      const description =
-        typeof latestSchema["description"] === "string"
-          ? `\n\n# ${latestSchema["description"]}`
-          : "";
-
-      configString = yamlDiffPatch(
-        `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
-        {},
-        await getDefaultConfig()
-      );
-
+      configString = `${schemaPathComment}\n\n${await getDefaultConfig()}`;
       await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
     }
 
@@ -384,9 +388,9 @@ export function getReadonlyConfigInitFunction<
 
     if (!validateAllConfigVersions(config)) {
       return commandObj.error(
-        `Invalid config at ${color.yellow(configPath)}. Errors: ${jsonStringify(
-          validateAllConfigVersions.errors
-        )}`
+        `Invalid config at ${color.yellow(
+          configPath,
+        )}. ${validationErrorToString(validateAllConfigVersions.errors)}`,
       );
     }
 
@@ -430,43 +434,45 @@ const initializedConfigs = new Set<string>();
 
 export function getConfigInitFunction<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: never
+  getDefaultConfig?: never,
 ): InitFunction<LatestConfig>;
 export function getConfigInitFunction<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig: GetDefaultConfig<LatestConfig>
+  getDefaultConfig: GetDefaultConfig,
 ): InitFunctionWithDefault<LatestConfig>;
 
 export function getConfigInitFunction<
   Config extends BaseConfig,
-  LatestConfig extends BaseConfig
+  LatestConfig extends BaseConfig,
 >(
   options: InitConfigOptions<Config, LatestConfig>,
-  getDefaultConfig?: GetDefaultConfig<LatestConfig>
+  getDefaultConfig?: GetDefaultConfig,
 ): InitFunction<LatestConfig> {
   return async (): Promise<InitializedConfig<LatestConfig> | null> => {
+    const configFullName = `${options.name}.${YAML_EXT}`;
+
     let { configPath } = getConfigPath(
       await options.getConfigOrConfigDirPath(),
-      options.name
+      configFullName,
     );
 
     if (initializedConfigs.has(configPath)) {
       throw new Error(
         `Mutable config ${replaceHomeDir(
-          configPath
-        )} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`
+          configPath,
+        )} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`,
       );
     }
 
     const maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
       options,
-      getDefaultConfig
+      getDefaultConfig,
     )();
 
     if (maybeInitializedReadonlyConfig === null) {
@@ -484,10 +490,10 @@ export function getConfigInitFunction<
         if (!initializedReadonlyConfig.$validateLatest(this)) {
           throw new Error(
             `Couldn't save config ${color.yellow(
-              configPath
-            )}. Errors: ${jsonStringify(
-              initializedReadonlyConfig.$validateLatest.errors
-            )}`
+              configPath,
+            )}. ${validationErrorToString(
+              initializedReadonlyConfig.$validateLatest.errors,
+            )}`,
           );
         }
 
@@ -505,7 +511,7 @@ export function getConfigInitFunction<
         const newConfigString = `${yamlDiffPatch(
           configString,
           parse(configString),
-          config
+          config,
         ).trim()}\n`;
 
         if (configString !== newConfigString) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { join, relative } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
@@ -22,6 +22,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { addService } from "../../lib/addService.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import {
@@ -30,7 +31,7 @@ import {
 } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
-import { ensureSrcServicesDir, projectRootDir } from "../../lib/paths.js";
+import { ensureSrcServicesDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -51,7 +52,7 @@ export default class New extends BaseCommand<typeof New> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(New)
+      await this.parse(New),
     );
 
     let serviceName = await ensureValidAquaName({
@@ -73,24 +74,23 @@ export default class New extends BaseCommand<typeof New> {
       });
     }
 
-    const servicePath = join(
-      flags.path ?? (await ensureSrcServicesDir()),
-      serviceName
+    const absoluteServicePath = resolve(
+      join(flags.path ?? (await ensureSrcServicesDir()), serviceName),
     );
 
-    const pathToModuleDir = join(servicePath, "modules", serviceName);
+    const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
     await generateNewModule(pathToModuleDir);
 
     await initNewReadonlyServiceConfig(
-      servicePath,
-      relative(servicePath, pathToModuleDir),
-      serviceName
+      absoluteServicePath,
+      relative(absoluteServicePath, pathToModuleDir),
+      serviceName,
     );
 
-    this.log(
+    commandObj.log(
       `Successfully generated template for new service at ${color.yellow(
-        servicePath
-      )}`
+        absoluteServicePath,
+      )}`,
     );
 
     if (maybeFluenceConfig !== null) {
@@ -99,7 +99,7 @@ export default class New extends BaseCommand<typeof New> {
       await addService({
         marineCli,
         serviceName,
-        pathOrUrl: relative(projectRootDir, servicePath),
+        absolutePathOrUrl: absoluteServicePath,
         fluenceConfig: maybeFluenceConfig,
       });
     }
@@ -108,6 +108,6 @@ export default class New extends BaseCommand<typeof New> {
 
 const serviceAlreadyExistsError = (serviceName: string) => {
   return `Service with name ${color.yellow(
-    serviceName
+    serviceName,
   )} already exists. Please enter another name`;
 };

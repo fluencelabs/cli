@@ -27,5 +27,5 @@ oclif
   .catch(
     /** @param {unknown} error */ (error) => {
       return createErrorPromise(error);
-    }
+    },
   );

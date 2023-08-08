@@ -23,13 +23,14 @@ const color = oclifColor.default;
 
 import { compile } from "./aqua.js";
 import { buildModules } from "./build.js";
-import { commandObj } from "./commandObj.js";
+import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
-import type {
-  FluenceConfig,
-  FluenceConfigReadonly,
+import {
+  type FluenceConfig,
+  type FluenceConfigReadonly,
+  assertIsArrayWithHostsOrDeals,
 } from "./configs/project/fluence.js";
 import {
   type ConfigV0,
@@ -49,13 +50,14 @@ import type {
   Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import { FLUENCE_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
+import { FS_OPTIONS } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
   getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
+import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import { jsToAqua, makeOptional } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
@@ -74,7 +76,7 @@ const handlePreviouslyDeployedWorkers = async (
     | WorkersConfigReadonly["deals"]
     | WorkersConfigReadonly["hosts"]
     | undefined,
-  workersToDeploy: Array<string>
+  workersToDeploy: Array<string>,
 ) => {
   if (maybeDeployedHostsOrDeals === undefined) {
     return workersToDeploy;
@@ -85,28 +87,30 @@ const handlePreviouslyDeployedWorkers = async (
   const previouslyDeployedWorkersNamesToBeDeployed = workersToDeploy.filter(
     (workerName) => {
       return previouslyDeployedWorkersNames.includes(workerName);
-    }
+    },
   );
 
   if (previouslyDeployedWorkersNamesToBeDeployed.length === 0) {
     return workersToDeploy;
   }
 
-  const confirmedWorkersNamesToDeploy = await checkboxes({
-    message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
-    options: previouslyDeployedWorkersNamesToBeDeployed,
-    oneChoiceMessage(workerName) {
-      return `Do you want to redeploy worker ${color.yellow(workerName)}`;
-    },
-    onNoChoices(): Array<string> {
-      return [];
-    },
-  });
+  const confirmedWorkersNamesToDeploy = isInteractive
+    ? await checkboxes({
+        message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
+        options: previouslyDeployedWorkersNamesToBeDeployed,
+        oneChoiceMessage(workerName) {
+          return `Do you want to redeploy worker ${color.yellow(workerName)}`;
+        },
+        onNoChoices(): Array<string> {
+          return [];
+        },
+      })
+    : previouslyDeployedWorkersNamesToBeDeployed;
 
   const workerNamesToRemove = previouslyDeployedWorkersNamesToBeDeployed.filter(
     (workerName) => {
       return !confirmedWorkersNamesToDeploy.includes(workerName);
-    }
+    },
   );
 
   if (workerNamesToRemove.length === 0) {
@@ -123,6 +127,7 @@ type PrepareForDeployArg = {
   fluenceConfig: FluenceConfig;
   aquaImports: Array<string>;
   noBuild: boolean;
+  marineBuildArgs: undefined | string;
   maybeWorkersConfig?: WorkersConfigReadonly;
   hosts?: boolean;
 };
@@ -132,28 +137,24 @@ export const prepareForDeploy = async ({
   fluenceConfig,
   aquaImports,
   noBuild,
+  marineBuildArgs,
   maybeWorkersConfig,
   hosts = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
   const hostsOrDealsString = hosts ? "hosts" : "deals";
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const hostsOrDeals = Object.entries(
     fluenceConfig[hostsOrDealsString] ??
       commandObj.error(
         `You must have a ${color.yellow(
-          hostsOrDealsString
-        )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
-      )
-  ) as Array<
-    [
-      string,
-      (
-        | (typeof fluenceConfig.hosts)[keyof typeof fluenceConfig.hosts]
-        | (typeof fluenceConfig.deals)[keyof typeof fluenceConfig.deals]
-      )
-    ]
-  >;
+          hostsOrDealsString,
+        )} property in ${color.yellow(
+          fluenceConfig.$getPath(),
+        )} that contains a record with at least one worker name as a key`,
+      ),
+  );
+
+  assertIsArrayWithHostsOrDeals(hostsOrDeals);
 
   const maybeDeployedHostsOrDeals = (maybeWorkersConfig ?? {})[
     hostsOrDealsString
@@ -171,8 +172,8 @@ export const prepareForDeploy = async ({
   if (workersToDeploy.length === 0) {
     return commandObj.error(
       `${color.yellow(
-        hostsOrDealsString
-      )} record in ${FLUENCE_CONFIG_FILE_NAME} must contain at least one worker name as a key`
+        hostsOrDealsString,
+      )} property in ${fluenceConfig.$getPath()} must contain at least one worker name as a key`,
     );
   }
 
@@ -184,15 +185,15 @@ export const prepareForDeploy = async ({
   if (workersFromFluenceConfigArray.length === 0) {
     return commandObj.error(
       `You must have a ${color.yellow(
-        "workers"
-      )} property in ${FLUENCE_CONFIG_FILE_NAME} that contains a record with at least one worker name as a key`
+        "workers",
+      )} property in ${fluenceConfig.$getPath()} that contains a record with at least one worker name as a key`,
     );
   }
 
   const workerNamesNotFoundInWorkersConfig = workersToDeploy.filter(
     (workerName) => {
       return !workersFromFluenceConfigArray.includes(workerName);
-    }
+    },
   );
 
   if (workerNamesNotFoundInWorkersConfig.length !== 0) {
@@ -202,14 +203,14 @@ export const prepareForDeploy = async ({
           return color.yellow(workerName);
         })
         .join(", ")} in ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )} please check the spelling and try again`
+        fluenceConfig.$getPath(),
+      )} please check the spelling and try again`,
     );
   }
 
   const workersToDeployConfirmed = await handlePreviouslyDeployedWorkers(
     maybeDeployedHostsOrDeals,
-    workersToDeploy
+    workersToDeploy,
   );
 
   const workerConfigs = workersToDeployConfirmed.map((workerName) => {
@@ -218,8 +219,8 @@ export const prepareForDeploy = async ({
     assert(
       workerConfig !== undefined,
       `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
-        workersFromFluenceConfig
-      )}`
+        workersFromFluenceConfig,
+      )}`,
     );
 
     if (
@@ -228,10 +229,10 @@ export const prepareForDeploy = async ({
     ) {
       return commandObj.error(
         `All workers must have at least one service or spell. Worker ${color.yellow(
-          workerName
-        )} listed in ${FLUENCE_CONFIG_FILE_NAME} ${color.yellow(
-          "workers"
-        )} property does not have any spells or services`
+          workerName,
+        )} listed in ${fluenceConfig.$getPath()} ${color.yellow(
+          "workers",
+        )} property does not have any spells or services`,
       );
     }
 
@@ -245,7 +246,7 @@ export const prepareForDeploy = async ({
     ...new Set(
       workerConfigs.flatMap(({ workerConfig }) => {
         return workerConfig.spells ?? [];
-      })
+      }),
     ),
   ];
 
@@ -255,9 +256,9 @@ export const prepareForDeploy = async ({
 
       assert(
         maybeSpell !== undefined,
-        `Unreachable. can't find spell ${name} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in spells property. This has to be checked on config init. Looking for ${name} in ${JSON.stringify(
-          fluenceConfig.spells
-        )}`
+        `Unreachable. can't find spell ${name} from workers property in ${fluenceConfig.$getPath()} in spells property. This has to be checked on config init. Looking for ${name} in ${JSON.stringify(
+          fluenceConfig.spells,
+        )}`,
       );
 
       const { get, ...spellOverridesFromFluenceConfig } = maybeSpell;
@@ -268,7 +269,7 @@ export const prepareForDeploy = async ({
         return commandObj.error(
           isUrl(get)
             ? `Downloaded invalid spell ${color.yellow(name)}`
-            : `Invalid spell ${color.yellow(name)} at ${color.yellow(get)}`
+            : `Invalid spell ${color.yellow(name)} at ${color.yellow(get)}`,
         );
       }
 
@@ -279,7 +280,7 @@ export const prepareForDeploy = async ({
 
       const spellAquaFilePath = resolve(
         spellConfig.$getDirPath(),
-        spellConfig.aquaFilePath
+        spellConfig.aquaFilePath,
       );
 
       const { errors, functions } = await compile({
@@ -290,8 +291,8 @@ export const prepareForDeploy = async ({
       if (errors.length > 0) {
         commandObj.error(
           `Failed to compile aqua file with spell at ${color.yellow(
-            spellAquaFilePath
-          )}:\n\n${errors.join("\n")}`
+            spellAquaFilePath,
+          )}:\n\n${errors.join("\n")}`,
         );
       }
 
@@ -300,8 +301,8 @@ export const prepareForDeploy = async ({
       if (script === undefined) {
         commandObj.error(
           `Failed to find spell function ${color.yellow(
-            spellConfig.function
-          )} in aqua file at ${color.yellow(spellAquaFilePath)}`
+            spellConfig.function,
+          )} in aqua file at ${color.yellow(spellAquaFilePath)}`,
         );
       }
 
@@ -326,14 +327,14 @@ export const prepareForDeploy = async ({
         script,
         init_args: overriddenSpellConfig.initArgs ?? {},
       };
-    })
+    }),
   );
 
   const serviceNames = [
     ...new Set(
       workerConfigs.flatMap(({ workerConfig }) => {
         return workerConfig.services ?? [];
-      })
+      }),
     ),
   ];
 
@@ -343,27 +344,27 @@ export const prepareForDeploy = async ({
 
       assert(
         maybeService !== undefined,
-        `Unreachable. can't find service ${serviceName} from workers property in ${FLUENCE_CONFIG_FILE_NAME} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
-          servicesFromFluenceConfig
-        )}`
+        `Unreachable. can't find service ${serviceName} from workers property in ${fluenceConfig.$getPath()} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
+          servicesFromFluenceConfig,
+        )}`,
       );
 
       const { get, overrideModules } = maybeService;
 
       const serviceConfig = await initReadonlyServiceConfig(
         get,
-        projectRootDir
+        projectRootDir,
       );
 
       if (serviceConfig === null) {
         return commandObj.error(
           isUrl(get)
             ? `Downloaded invalid service ${color.yellow(
-                serviceName
+                serviceName,
               )} from ${color.yellow(get)}`
             : `Invalid service ${color.yellow(serviceName)} at ${color.yellow(
-                get
-              )}`
+                get,
+              )}`,
         );
       }
 
@@ -372,7 +373,7 @@ export const prepareForDeploy = async ({
         overrideModules,
         serviceConfig,
       };
-    })
+    }),
   );
 
   const modulesUrls = [
@@ -385,7 +386,7 @@ export const prepareForDeploy = async ({
         })
         .filter((get) => {
           return isUrl(get);
-        })
+        }),
     ),
   ];
 
@@ -393,8 +394,8 @@ export const prepareForDeploy = async ({
     await Promise.all(
       modulesUrls.map(async (url): Promise<[string, string]> => {
         return [url, await downloadModule(url)];
-      })
-    )
+      }),
+    ),
   );
 
   const localModuleAbsolutePaths = serviceConfigs
@@ -423,16 +424,16 @@ export const prepareForDeploy = async ({
           [string, InitializedReadonlyConfig<ConfigV0>]
         > => {
           const moduleConfig = await initReadonlyModuleConfig(
-            moduleAbsolutePath
+            moduleAbsolutePath,
           );
 
           if (moduleConfig === null) {
             return commandObj.error(
               isUrl(originalGetValue)
                 ? `Downloaded invalid module from ${color.yellow(
-                    originalGetValue
+                    originalGetValue,
                   )} to ${moduleAbsolutePath}`
-                : `Invalid module found at ${moduleAbsolutePath}`
+                : `Invalid module found at ${moduleAbsolutePath}`,
             );
           }
 
@@ -440,9 +441,9 @@ export const prepareForDeploy = async ({
             isUrl(originalGetValue) ? originalGetValue : moduleAbsolutePath,
             moduleConfig,
           ];
-        }
-      )
-    )
+        },
+      ),
+    ),
   );
 
   if (!noBuild) {
@@ -450,7 +451,37 @@ export const prepareForDeploy = async ({
 
     await buildModules(
       [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],
-      marineCli
+      marineCli,
+      marineBuildArgs,
+      fluenceConfig,
+    );
+
+    const serviceNamePathToFacadeMap: Record<string, string> =
+      Object.fromEntries(
+        serviceConfigs.map(({ serviceName, serviceConfig }) => {
+          const { get } = serviceConfig.modules[FACADE_MODULE_NAME];
+
+          const urlOrAbsolutePath = getUrlOrAbsolutePath(
+            get,
+            serviceConfig.$getDirPath(),
+          );
+
+          const moduleConfig =
+            moduleAbsolutePathOrURLToModuleConfigsMap.get(urlOrAbsolutePath);
+
+          assert(
+            moduleConfig !== undefined,
+            `Unreachable. Module config for ${urlOrAbsolutePath} can't be undefined`,
+          );
+
+          return [serviceName, getModuleWasmPath(moduleConfig)];
+        }),
+      );
+
+    await updateAquaServiceInterfaceFile(
+      serviceNamePathToFacadeMap,
+      fluenceConfig.services,
+      marineCli,
     );
   }
 
@@ -458,14 +489,16 @@ export const prepareForDeploy = async ({
     .filter(([workerName]) => {
       return workersToDeployConfirmed.includes(workerName);
     })
-    .map(([workerName, { peerIds = [] }]) => {
+    .map(([workerName, hostsOrDeals]) => {
+      const peerIds = "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
+
       if (hosts && peerIds.length === 0) {
         commandObj.error(
           `You must have at least one peerId listed in ${color.yellow(
-            "peerIds"
+            "peerIds",
           )} property in ${color.yellow(
-            `hosts.${workerName}`
-          )} property in ${FLUENCE_CONFIG_FILE_NAME}`
+            `hosts.${workerName}`,
+          )} property in ${fluenceConfig.$getPath()}`,
         );
       }
 
@@ -474,8 +507,8 @@ export const prepareForDeploy = async ({
       assert(
         workerConfig !== undefined,
         `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
-          workersFromFluenceConfig
-        )}`
+          workersFromFluenceConfig,
+        )}`,
       );
 
       const services: Upload_deployArgConfig["workers"][number]["config"]["services"] =
@@ -487,8 +520,8 @@ export const prepareForDeploy = async ({
           assert(
             maybeServiceConfig !== undefined,
             `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
-              serviceConfigs
-            )}`
+              serviceConfigs,
+            )}`,
           );
 
           const { overrideModules, serviceConfig } = maybeServiceConfig;
@@ -502,20 +535,20 @@ export const prepareForDeploy = async ({
           ].map(([name, { get, ...overridesFromService }]) => {
             const moduleUrlOrAbsolutePath = getUrlOrAbsolutePath(
               get,
-              serviceConfig.$getDirPath()
+              serviceConfig.$getDirPath(),
             );
 
             const moduleConfig = moduleAbsolutePathOrURLToModuleConfigsMap.get(
-              moduleUrlOrAbsolutePath
+              moduleUrlOrAbsolutePath,
             );
 
             assert(
               moduleConfig !== undefined,
               `Unreachable. Module should not be undefined because moduleConfigsMap was created from serviceConfigs.modules. Searching for ${moduleUrlOrAbsolutePath} in ${JSON.stringify(
                 Object.fromEntries(
-                  moduleAbsolutePathOrURLToModuleConfigsMap.entries()
-                )
-              )}`
+                  moduleAbsolutePathOrURLToModuleConfigsMap.entries(),
+                ),
+              )}`,
             );
 
             const overridesFromProject = overrideModules?.[name];
@@ -529,7 +562,7 @@ export const prepareForDeploy = async ({
             return {
               wasm: getModuleWasmPath(overriddenModuleConfig),
               config: JSON.stringify(
-                moduleToJSONModuleConfig(overriddenModuleConfig)
+                moduleToJSONModuleConfig(overriddenModuleConfig),
               ),
             };
           });
@@ -548,8 +581,8 @@ export const prepareForDeploy = async ({
         assert(
           maybeSpellConfig !== undefined,
           `Unreachable. Spell should not be undefined because spellConfigs where created from workerConfig.spells. Looking for ${spellName} in ${JSON.stringify(
-            spellConfigs
-          )}`
+            spellConfigs,
+          )}`,
         );
 
         return maybeSpellConfig;
@@ -585,7 +618,7 @@ export const prepareForDeploy = async ({
 };
 
 const validateWasmExist = async (
-  workers: Upload_deployArgConfig["workers"]
+  workers: Upload_deployArgConfig["workers"],
 ) => {
   const errors = (
     await Promise.all(
@@ -613,12 +646,12 @@ const validateWasmExist = async (
             return true;
           } catch (e) {
             return `wasm at ${color.yellow(wasm)} for service ${color.yellow(
-              service
+              service,
             )} in worker ${color.yellow(
-              worker
+              worker,
             )} does not exist. Make sure you have built it`;
           }
-        })
+        }),
     )
   ).filter((result): result is string => {
     return typeof result === "string";
@@ -631,7 +664,7 @@ const validateWasmExist = async (
 
 export const ensureAquaFileWithWorkerInfo = async (
   workersConfig: WorkersConfigReadonly,
-  fluenceConfig: FluenceConfigReadonly
+  fluenceConfig: FluenceConfigReadonly,
 ) => {
   const dealWorkers = Object.fromEntries(
     Object.entries({ ...fluenceConfig.workers, ...workersConfig.deals }).map(
@@ -650,8 +683,8 @@ export const ensureAquaFileWithWorkerInfo = async (
         } satisfies Deal);
 
         return [key, value];
-      }
-    )
+      },
+    ),
   );
 
   const directHostingWorkers = Object.fromEntries(
@@ -675,8 +708,8 @@ export const ensureAquaFileWithWorkerInfo = async (
         } satisfies Host);
 
         return [key, value];
-      }
-    )
+      },
+    ),
   );
 
   const hasSomeDealWorkers = Object.keys(dealWorkers).length !== 0;
@@ -704,6 +737,6 @@ export const ensureAquaFileWithWorkerInfo = async (
   await writeFile(
     await ensureFluenceAquaWorkersPath(),
     jsToAqua(workersInfo, "getWorkersInfo"),
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 };

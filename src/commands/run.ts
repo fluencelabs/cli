@@ -41,7 +41,6 @@ import {
 import {
   FS_OPTIONS,
   KEY_PAIR_FLAG,
-  FLUENCE_CONFIG_FILE_NAME,
   aquaLogLevelsString,
   isAquaLogLevel,
   AQUA_LOG_LEVELS,
@@ -154,18 +153,20 @@ export default class Run extends BaseCommand<typeof Run> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Run)
+      await this.parse(Run),
     );
 
     if (typeof flags.input === "string") {
       setProjectRootDir(
-        await recursivelyFindProjectRootDir(resolve(dirname(flags.input)))
+        await recursivelyFindProjectRootDir(resolve(dirname(flags.input))),
       );
     }
 
     if (flags.quiet) {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       commandObj.log = () => {};
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      commandObj.logToStderr = () => {};
     }
 
     // if (typeof flags[ON_FLAG_NAME] === "string") {
@@ -191,7 +192,7 @@ export default class Run extends BaseCommand<typeof Run> {
       flags.func === undefined
         ? input({
             message: `Enter a function call that you want to execute. Example: ${color.yellow(
-              FUNC_CALL_EXAMPLE
+              FUNC_CALL_EXAMPLE,
             )}`,
             flagName: FUNC_FLAG_NAME,
           })
@@ -247,7 +248,7 @@ const ensureAquaPath = async ({
   if (typeof maybeFluenceConfig?.aquaInputPath === "string") {
     const aquaInputPath = resolve(
       projectRootDir,
-      maybeFluenceConfig.aquaInputPath
+      maybeFluenceConfig.aquaInputPath,
     );
 
     try {
@@ -255,9 +256,9 @@ const ensureAquaPath = async ({
       return aquaInputPath;
     } catch {
       commandObj.warn(
-        `Invalid ${color.yellow(AQUA_INPUT_PATH_PROPERTY)} in ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )}: ${aquaInputPath}`
+        `Invalid ${color.yellow(
+          `${AQUA_INPUT_PATH_PROPERTY}: ${aquaInputPath}`,
+        )} in ${color.yellow(maybeFluenceConfig.$getPath())}`,
       );
     }
   }
@@ -290,7 +291,7 @@ const getRunData = async (flags: {
       data = await readFile(dataPath, FS_OPTIONS);
     } catch {
       commandObj.error(
-        `Can't read ${color.yellow(dataPath)}: No such file or directory`
+        `Can't read ${color.yellow(dataPath)}: No such file or directory`,
       );
     }
 
@@ -305,8 +306,8 @@ const getRunData = async (flags: {
     if (!validateRunData(parsedData)) {
       commandObj.error(
         `Invalid ${color.yellow(dataPath)}: ${JSON.stringify(
-          validateRunData.errors
-        )}`
+          validateRunData.errors,
+        )}`,
       );
     }
 
@@ -328,7 +329,9 @@ const getRunData = async (flags: {
 
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(validateRunData.errors)}`
+        `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(
+          validateRunData.errors,
+        )}`,
       );
     }
 
@@ -365,7 +368,7 @@ const resolveAquaLogLevel = async ({
   }
 
   commandObj.warn(
-    `Invalid --${LOG_LEVEL_COMPILER_FLAG_NAME} flag value: ${maybeAquaLogLevel}. Must be one of: ${aquaLogLevelsString}`
+    `Invalid --${LOG_LEVEL_COMPILER_FLAG_NAME} flag value: ${maybeAquaLogLevel}. Must be one of: ${aquaLogLevelsString}`,
   );
 
   return list({
@@ -390,20 +393,17 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
 };
 
 const fluenceRun = async (args: RunArgs) => {
-  const [{ functionCall, errors }] = await Promise.all([
-    compile({
-      funcCall: args.funcCall,
-      data: args.runData,
-      filePath: args.filePath,
-      imports: args.imports,
-      constants: args.const ?? [],
-      logLevel: args.logLevelCompiler,
-      noXor: args["no-xor"],
-      noRelay: args["no-relay"],
-      tracing: args.tracing,
-    }),
-    initFluenceClient(args, args.maybeFluenceConfig),
-  ]);
+  const { functionCall, errors } = await compile({
+    funcCall: args.funcCall,
+    data: args.runData,
+    filePath: args.filePath,
+    imports: args.imports,
+    constants: args.const ?? [],
+    logLevel: args.logLevelCompiler,
+    noXor: args["no-xor"],
+    noRelay: args["no-relay"],
+    tracing: args.tracing,
+  });
 
   if (errors.length > 0) {
     commandObj.error(errors.join("\n"));
@@ -414,6 +414,8 @@ const fluenceRun = async (args: RunArgs) => {
   } else if (args["print-beautified-air"]) {
     commandObj.log(beautify(functionCall.script));
   }
+
+  await initFluenceClient(args, args.maybeFluenceConfig);
 
   const result = await callAquaFunction({
     args: args.runData ?? {},

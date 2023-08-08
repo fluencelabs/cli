@@ -15,35 +15,45 @@
  */
 
 import assert from "node:assert";
+import { relative } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { build } from "./build.js";
+import { resolveSingleServiceModuleConfigsAndBuild } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { DEFAULT_WORKER_NAME, FLUENCE_CONFIG_FILE_NAME } from "./const.js";
+import { initReadonlyModuleConfig } from "./configs/project/module.js";
+import {
+  FACADE_MODULE_NAME,
+  initReadonlyServiceConfig,
+} from "./configs/project/service.js";
+import { DEFAULT_WORKER_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
+  getModuleWasmPath,
   validateAquaName,
 } from "./helpers/downloadFile.js";
-import { getExistingKeyPair } from "./keyPairs.js";
+import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import type { MarineCLI } from "./marineCli.js";
+import { projectRootDir } from "./paths.js";
 import { confirm, input } from "./prompt.js";
 
 type AddServiceArg = {
   serviceName: string;
-  pathOrUrl: string;
+  absolutePathOrUrl: string;
   fluenceConfig: FluenceConfig;
   marineCli: MarineCLI;
+  marineBuildArgs?: string | undefined;
   interactive?: boolean;
 };
 
 export const addService = async ({
   serviceName: serviceNameFromArgs,
-  pathOrUrl,
+  absolutePathOrUrl,
   fluenceConfig,
   marineCli,
+  marineBuildArgs,
   interactive = true,
 }: AddServiceArg): Promise<string> => {
   let serviceName = serviceNameFromArgs;
@@ -62,7 +72,7 @@ export const addService = async ({
     return (
       !(name in (fluenceConfig?.services ?? {})) ||
       `You already have ${color.yellow(name)} in ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
+        fluenceConfig.$getPath(),
       )}`
     );
   };
@@ -81,24 +91,53 @@ export const addService = async ({
   fluenceConfig.services = {
     ...fluenceConfig.services,
     [serviceName]: {
-      get: pathOrUrl,
+      get: relative(projectRootDir, absolutePathOrUrl),
     },
   };
 
-  const defaultKeyPair = await getExistingKeyPair(fluenceConfig.keyPairName);
+  const serviceConfig = await initReadonlyServiceConfig(
+    absolutePathOrUrl,
+    projectRootDir,
+  );
 
-  if (defaultKeyPair instanceof Error) {
-    commandObj.error(defaultKeyPair.message);
+  if (serviceConfig === null) {
+    return commandObj.error(
+      `Service config not found at ${color.yellow(absolutePathOrUrl)}`,
+    );
   }
 
-  await build({ marineCli, fluenceConfig, defaultKeyPair });
+  await resolveSingleServiceModuleConfigsAndBuild(
+    serviceConfig,
+    fluenceConfig,
+    marineCli,
+    marineBuildArgs,
+  );
+
+  const facadeModuleConfig = await initReadonlyModuleConfig(
+    serviceConfig.modules[FACADE_MODULE_NAME].get,
+    serviceConfig.$getDirPath(),
+  );
+
+  assert(
+    facadeModuleConfig !== null,
+    "Unreachable. Facade module is always present in service config",
+  );
+
+  await updateAquaServiceInterfaceFile(
+    {
+      [serviceName]: getModuleWasmPath(facadeModuleConfig),
+    },
+    fluenceConfig.services,
+    marineCli,
+  );
+
   await fluenceConfig.$commit();
 
   if (interactive) {
     commandObj.log(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
-        FLUENCE_CONFIG_FILE_NAME
-      )}`
+        fluenceConfig.$getPath(),
+      )}`,
     );
   }
 
@@ -109,12 +148,12 @@ export const addService = async ({
       fluenceConfig.workers !== undefined &&
       DEFAULT_WORKER_NAME in fluenceConfig.workers &&
       !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services ?? []).includes(
-        serviceName
+        serviceName,
       ) &&
       (interactive
         ? await confirm({
             message: `Do you want to add service ${color.yellow(
-              serviceName
+              serviceName,
             )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
           })
         : true)
@@ -136,8 +175,8 @@ export const addService = async ({
   if (interactive) {
     commandObj.log(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
-        DEFAULT_WORKER_NAME
-      )}`
+        DEFAULT_WORKER_NAME,
+      )}`,
     );
   }
 

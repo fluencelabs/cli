@@ -35,14 +35,11 @@ export const initFluenceClient = async (
     ttl,
     "particle-id": printParticleId,
   }: FluenceClientFlags & KeyPairFlag,
-  maybeFluenceConfig: FluenceConfig | null
+  maybeFluenceConfig: FluenceConfig | null,
 ): Promise<void> => {
   const relay = resolveRelay(maybeRelay, maybeFluenceConfig?.relays);
-  commandObj.log(`Connecting to: ${color.yellow(relay)}`);
-
-  const keyPair = await getExistingKeyPair(
-    keyPairName ?? maybeFluenceConfig?.keyPairName
-  );
+  commandObj.logToStderr(`Connecting to: ${color.yellow(relay)}`);
+  const keyPair = await getExistingKeyPair(keyPairName);
 
   try {
     await Fluence.connect(relay, {
@@ -60,7 +57,7 @@ export const initFluenceClient = async (
     });
   } catch (e) {
     commandObj.error(
-      `Failed to connect to ${color.yellow(relay)}. ${stringifyUnknown(e)}`
+      `Failed to connect to ${color.yellow(relay)}. ${stringifyUnknown(e)}`,
     );
   }
 };

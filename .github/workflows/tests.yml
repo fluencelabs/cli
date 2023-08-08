@@ -68,10 +68,10 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout flox
+      - name: Checkout fluence-cli
         uses: actions/checkout@v3
         with:
-          repository: fluencelabs/flox
+          repository: fluencelabs/cli
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
@@ -143,7 +143,7 @@ jobs:
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
           package: "@fluencelabs/aqua-api"
-          version: "${{ fromJson(inputs.aqua-snapshots)['api'] }}"
+          version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: pnpm
 
       - name: Set deal-aurora version

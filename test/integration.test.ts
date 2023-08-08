@@ -31,7 +31,7 @@ import { execPromise } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
 
 import {
-  flox,
+  fluence,
   init,
   maybeConcurrentTest,
   multiaddrs,
@@ -54,7 +54,7 @@ describe("integration tests", () => {
           throw new CLIError(msg);
         },
       } as CommandObj,
-      false
+      false,
     );
   });
 
@@ -63,7 +63,7 @@ describe("integration tests", () => {
     await init(cwd, "minimal");
     await addAdderServiceToFluenceYAML(cwd);
 
-    await flox({
+    await fluence({
       args: ["run"],
       flags: {
         f: 'helloWorld("Fluence")',
@@ -85,7 +85,7 @@ describe("integration tests", () => {
           args: ["ts-node", getIndexJSorTSPath("ts", cwd)],
           printOutput: true,
         })
-      ).trim()
+      ).trim(),
     ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
@@ -102,7 +102,7 @@ describe("integration tests", () => {
           args: [getIndexJSorTSPath("js", cwd)],
           printOutput: true,
         })
-      ).trim()
+      ).trim(),
     ).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
   });
 
@@ -110,7 +110,7 @@ describe("integration tests", () => {
     const relay = multiaddrs[0]?.multiaddr;
     assert(typeof relay === "string");
 
-    const result = await flox({
+    const result = await fluence({
       args: ["run"],
       flags: {
         relay,
@@ -134,31 +134,64 @@ describe("integration tests", () => {
         join(cwd, "src", "aqua", "main.aqua"),
         await readFile(
           join("test", "aqua", "runDeployedWorkers.aqua"),
-          FS_OPTIONS
+          FS_OPTIONS,
         ),
-        FS_OPTIONS
+        FS_OPTIONS,
       );
 
-      const pathToNewServiceDir = join("src", "services", "newService");
+      const NEW_SERVICE_NAME = "newService";
 
-      await flox({
-        args: ["service", "new", "newService"],
+      const pathToNewServiceDir = join("src", "services", NEW_SERVICE_NAME);
+
+      await fluence({
+        args: ["service", "new", NEW_SERVICE_NAME],
         cwd,
       });
 
+      const readInterfacesFile = async () => {
+        return readFile(
+          join(cwd, ".fluence", "aqua", "services.aqua"),
+          FS_OPTIONS,
+        );
+      };
+
+      let interfacesFileContent = await readInterfacesFile();
+
+      const NEW_SERVICE_INTERFACE = `service NewService("${NEW_SERVICE_NAME}"):
+  greeting(name: string) -> string
+`;
+
+      expect(interfacesFileContent).toBe(NEW_SERVICE_INTERFACE);
+
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
-        cwd
+        cwd,
       );
 
       assert(newServiceConfig !== null);
       newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
-      const pathToNewSpell = join("src", "spells", "newSpell");
+      const NEW_SPELL_NAME = "newSpell";
 
-      await flox({
-        args: ["spell", "new", "newSpell"],
+      const pathToNewSpell = join("src", "spells", NEW_SPELL_NAME);
+
+      const NEW_SERVICE_2_NAME = "newService2";
+
+      await fluence({
+        args: ["service", "new", NEW_SERVICE_2_NAME],
+        cwd,
+      });
+
+      interfacesFileContent = await readInterfacesFile();
+
+      expect(interfacesFileContent).toBe(`${NEW_SERVICE_INTERFACE}
+service NewService2("${NEW_SERVICE_2_NAME}"):
+  greeting(name: string) -> string
+`);
+
+      await fluence({
+        args: ["spell", "new", NEW_SPELL_NAME],
         cwd,
       });
 
@@ -172,31 +205,33 @@ describe("integration tests", () => {
         },
       };
 
-      assert(
-        fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined &&
-          fluenceConfig.hosts !== undefined &&
-          fluenceConfig.hosts[DEFAULT_WORKER_NAME] !== undefined
-      );
-
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["newService"];
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
-
       const peers = [
         "12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR",
         "12D3KooWQdpukY3p2DhDfUfDgphAqsGu5ZUrmQ4mcHSGrRag6gQK",
         "12D3KooWRT8V5awYdEZm6aAV9HWweCEbhWd7df4wehqHZXAB7yMZ",
       ];
 
-      fluenceConfig.hosts[DEFAULT_WORKER_NAME].peerIds = peers;
+      fluenceConfig.hosts = {
+        [DEFAULT_WORKER_NAME]: {
+          peerIds: peers,
+        },
+      };
+
+      assert(
+        fluenceConfig.workers !== undefined &&
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
+      );
+
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = [NEW_SERVICE_NAME];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
 
-      await flox({
+      await fluence({
         args: ["workers", "deploy"],
         cwd,
       });
 
-      const result = await flox({
+      const result = await fluence({
         args: ["run"],
         flags: {
           f: "runDeployedServices()",
@@ -218,7 +253,7 @@ describe("integration tests", () => {
       });
 
       expect(arrayOfResults).toEqual(expected);
-    }
+    },
   );
 
   maybeConcurrentTest(
@@ -230,7 +265,7 @@ describe("integration tests", () => {
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
-        cwd
+        cwd,
       );
 
       assert(newServiceConfig !== null);
@@ -239,7 +274,7 @@ describe("integration tests", () => {
 
       const pathToNewSpell = join("src", "spells", "newSpell");
 
-      await flox({
+      await fluence({
         args: ["spell", "new", "newSpell"],
         cwd,
       });
@@ -256,9 +291,7 @@ describe("integration tests", () => {
 
       assert(
         fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined &&
-          fluenceConfig.hosts !== undefined &&
-          fluenceConfig.hosts[DEFAULT_WORKER_NAME] !== undefined
+          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
       );
 
       fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["myService"];
@@ -266,7 +299,7 @@ describe("integration tests", () => {
 
       await fluenceConfig.$commit();
 
-      await flox({
+      await fluence({
         args: [
           "deal",
           "deploy",
@@ -283,7 +316,7 @@ describe("integration tests", () => {
       // Jest has a global timeout for each test and if it runs out test will fail
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const res = await flox({
+        const res = await fluence({
           args: ["run"],
           flags: {
             f: "runDeployedServices()",
@@ -316,12 +349,12 @@ describe("integration tests", () => {
         .sort(sortPeers);
 
       expect(arrayOfResults).toEqual(expected);
-    }
+    },
   );
 });
 
 const addAdderServiceToFluenceYAML = (cwd: string) => {
-  return flox({
+  return fluence({
     args: [
       "service",
       "add",
@@ -332,7 +365,7 @@ const addAdderServiceToFluenceYAML = (cwd: string) => {
 };
 
 const compileAqua = (cwd: string) => {
-  return flox({
+  return fluence({
     args: ["aqua"],
     cwd,
   });

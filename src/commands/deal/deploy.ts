@@ -36,11 +36,12 @@ import {
   NETWORK_FLAG,
   OFF_AQUA_LOGS_FLAG,
   DEAL_CONFIG,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
   NO_BUILD_FLAG,
   TRACING_FLAG,
+  MARINE_BUILD_ARGS,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import {
@@ -54,7 +55,7 @@ import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FILE_NAME}`;
+  static override description = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -66,17 +67,18 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
+    ...MARINE_BUILD_ARGS,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all deals from 'deals' property in ${FLUENCE_CONFIG_FILE_NAME} are deployed)`,
+      description: `Names of workers to deploy (by default all deals from 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(Deploy),
-      true
+      true,
     );
 
     const chainNetwork = await ensureChainNetwork({
@@ -98,6 +100,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       fluenceConfig,
       aquaImports,
       noBuild: flags["no-build"],
+      marineBuildArgs: flags["marine-build-args"],
     });
 
     await initFluenceClient(flags, fluenceConfig);
@@ -133,17 +136,17 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       if (maybePreviouslyDeployedDeal !== undefined) {
         if (maybePreviouslyDeployedDeal.definition === appCID) {
-          commandObj.log(
+          commandObj.logToStderr(
             `\nWorker ${color.yellow(
-              workerName
-            )} didn't change. Skipping deal update`
+              workerName,
+            )} didn't change. Skipping deal update`,
           );
 
           continue;
         }
 
-        commandObj.log(
-          `\nUpdating deal for worker ${color.yellow(workerName)}\n`
+        commandObj.logToStderr(
+          `\nUpdating deal for worker ${color.yellow(workerName)}\n`,
         );
 
         await dealUpdate({
@@ -177,8 +180,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         continue;
       }
 
-      commandObj.log(
-        `\nCreating deal for worker ${color.yellow(workerName)}\n`
+      commandObj.logToStderr(
+        `\nCreating deal for worker ${color.yellow(workerName)}\n`,
       );
 
       const dealIdOriginal = await dealCreate({
@@ -230,7 +233,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }
 
     commandObj.log(
-      `\n\n${color.yellow("Success!")}${createdDealsText}${updatedDealsText}`
+      `\n\n${color.yellow("Success!")}${createdDealsText}${updatedDealsText}`,
     );
   }
 }

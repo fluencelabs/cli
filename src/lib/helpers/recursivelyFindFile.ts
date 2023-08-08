@@ -19,7 +19,7 @@ import { dirname, join } from "node:path";
 
 export const recursivelyFindFile = async (
   fileName: string,
-  dirPath: string
+  dirPath: string,
 ): Promise<null | string> => {
   let currentDirPath = dirPath;
 

@@ -23,6 +23,7 @@ import {
   CLI_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
+  USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
 import { generateKeyPair } from "../../helpers/generateKeyPair.js";
 import {
@@ -51,8 +52,8 @@ type ConfigV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${USER_SECRETS_CONFIG_FILE_NAME}`,
-  title: USER_SECRETS_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${USER_SECRETS_CONFIG_FULL_FILE_NAME}`,
+  title: USER_SECRETS_CONFIG_FULL_FILE_NAME,
   description: `Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from \`${CLI_NAME} key\` group of commands with \`--user\` flag`,
   properties: {
     defaultKeyPairName: { type: "string" },
@@ -66,12 +67,22 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "keyPairs", "defaultKeyPairName"],
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = (): LatestConfig => {
-  return {
-    version: 0,
-    keyPairs: [generateKeyPair(AUTO_GENERATED)],
-    defaultKeyPairName: AUTO_GENERATED,
-  };
+const getDefault: GetDefaultConfig = () => {
+  const { secretKey, name } = generateKeyPair(AUTO_GENERATED);
+  return `# Defines user's secret keys that can be used across different Fluence projects.
+# You can manage user's keys using commands from \`fluence key\` group of commands with \`--user\` flag
+
+# user's key pairs
+keyPairs:
+  - name: ${name}
+    secretKey: ${secretKey}
+
+# Key pair with this name will be used for the deployment by default.
+defaultKeyPairName: ${name}
+
+# config version
+version: 0
+`;
 };
 
 const migrations: Migrations<Config> = [];
@@ -85,9 +96,9 @@ const validate = (config: LatestConfig): ValidationResult => {
       },
       (name): string => {
         return `There are multiple key-pairs with the same name ${color.yellow(
-          name
+          name,
         )}`;
-      }
+      },
     ),
     validateHasDefault(
       config.keyPairs,
@@ -95,8 +106,8 @@ const validate = (config: LatestConfig): ValidationResult => {
       ({ name }): string => {
         return name;
       },
-      `Default key-pair ${color.yellow(config.defaultKeyPairName)} not found`
-    )
+      `Default key-pair ${color.yellow(config.defaultKeyPairName)} not found`,
+    ),
   );
 };
 
@@ -116,10 +127,10 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initUserSecretsConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const initReadonlyUserSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 export const userSecretsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

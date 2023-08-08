@@ -1,4 +1,4 @@
-name: Build flox snapshot
+name: Build fluence-cli snapshot
 
 on:
   workflow_call:
@@ -33,7 +33,7 @@ on:
         default: "null"
     outputs:
       version:
-        description: "@fluencelabs/flox version"
+        description: "@fluencelabs/cli version"
         value: ${{ jobs.snapshot.outputs.version }}
 
 env:
@@ -46,17 +46,17 @@ jobs:
     runs-on: builder
 
     outputs:
-      version: ${{ fromJson(steps.snapshot.outputs.snapshots)['flox'] }}
+      version: ${{ fromJson(steps.snapshot.outputs.snapshots)['cli'] }}
 
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - name: Checkout flox
+      - name: Checkout fluence-cli
         uses: actions/checkout@v3
         with:
-          repository: fluencelabs/flox
+          repository: fluencelabs/cli
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
@@ -112,7 +112,7 @@ jobs:
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
           package: "@fluencelabs/aqua-api"
-          version: "${{ fromJson(inputs.aqua-snapshots)['api'] }}"
+          version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: pnpm
 
       - name: Update versions.json

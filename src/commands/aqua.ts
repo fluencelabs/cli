@@ -29,7 +29,7 @@ import {
   IMPORT_FLAG,
   NO_INPUT_FLAG,
   TRACING_FLAG,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
@@ -105,7 +105,7 @@ export default class Aqua extends Command {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Aqua)
+      await this.parse(Aqua),
     );
 
     const inputFlag = await resolveAbsoluteAquaPath({
@@ -162,14 +162,14 @@ export default class Aqua extends Command {
     if (!flags.watch) {
       await compileToFiles(compileCommandArgs);
 
-      commandObj.log(
+      commandObj.logToStderr(
         `Successfully compiled ${color.yellow(
-          compileCommandArgs.compileArgs.filePath
+          compileCommandArgs.compileArgs.filePath,
         )}${
           compileCommandArgs.outputPath === undefined
             ? ""
             : `\nto ${color.yellow(compileCommandArgs.outputPath)}`
-        }`
+        }`,
       );
 
       await exitCli();
@@ -177,7 +177,9 @@ export default class Aqua extends Command {
     }
 
     const watchingNotification = (): void => {
-      return this.log(`Watching for changes at ${color.yellow(inputFlag)}...`);
+      return commandObj.logToStderr(
+        `Watching for changes at ${color.yellow(inputFlag)}...`,
+      );
     };
 
     watchingNotification();
@@ -196,7 +198,7 @@ export default class Aqua extends Command {
             watchingNotification();
           })
           .catch((error): void => {
-            commandObj.log(stringifyUnknown(error));
+            commandObj.logToStderr(stringifyUnknown(error));
             return watchingNotification();
           });
       });
@@ -237,7 +239,7 @@ const resolveAbsoluteAquaPath = async ({
   if (maybePathFromFluenceYaml !== undefined) {
     if (isAbsolute(maybePathFromFluenceYaml)) {
       return commandObj.error(
-        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FILE_NAME} must not be absolute, but should be relative to the project root directory`
+        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FULL_FILE_NAME} must not be absolute, but should be relative to the project root directory`,
       );
     }
 

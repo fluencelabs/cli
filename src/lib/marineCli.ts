@@ -27,11 +27,11 @@ import { type Flags } from "./typeHelpers.js";
 type MarineCliInput =
   | {
       args: ["aqua"] | ["aqua", string];
-      flags?: never;
+      flags?: Flags<"id" | "service">;
     }
   | {
-      args: ["build", ...("-p" | string)[]];
-      flags: Flags<"release">;
+      args: ["build", ...string[]];
+      flags?: Flags<"release">;
     };
 
 export type MarineCLI = {
@@ -41,12 +41,12 @@ export type MarineCLI = {
       keyValuePairs?: Record<string, string>;
       cwd?: string;
       printOutput?: boolean;
-    } & MarineCliInput
+    } & MarineCliInput,
   ): Promise<string>;
 };
 
 export const initMarineCli = async (
-  maybeFluenceConfig: FluenceConfig | null
+  maybeFluenceConfig: FluenceConfig | null,
 ): Promise<MarineCLI> => {
   const marineCLIDirPath = await ensureCargoDependency({
     nameAndVersion: MARINE_CARGO_DEPENDENCY,

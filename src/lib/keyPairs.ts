@@ -26,15 +26,8 @@ import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecre
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
 import { list, type Choices } from "./prompt.js";
 
-export const getKeyPair = async (keyPairName: string | undefined) => {
-  return (
-    (await getProjectKeyPair(keyPairName)) ??
-    (await getUserKeyPair(keyPairName))
-  );
-};
-
 export const getUserKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair | undefined> => {
   const userSecretsConfig = await initReadonlyUserSecretsConfig();
 
@@ -42,7 +35,7 @@ export const getUserKeyPair = async (
     const defaultKeyPair = userSecretsConfig.keyPairs.find(
       ({ name }): boolean => {
         return name === userSecretsConfig.defaultKeyPairName;
-      }
+      },
     );
 
     assert(defaultKeyPair !== undefined);
@@ -57,7 +50,7 @@ export const getUserKeyPair = async (
 };
 
 const getExistingUserKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair> => {
   const keyPair = await getUserKeyPair(keyPairName);
 
@@ -79,13 +72,13 @@ const getExistingUserKeyPair = async (
 
   const options: Choices<ConfigKeyPair> = [];
 
-  const projectKeyPairOptions = readonlyProjectSecretsConfig.keyPairs.map(
+  const projectKeyPairOptions = readonlyProjectSecretsConfig?.keyPairs.map(
     (value): { value: ConfigKeyPair; name: string } => {
       return {
         value,
         name: value.name,
       };
-    }
+    },
   );
 
   const userKeyPairOptions = userSecretsConfig.keyPairs.map(
@@ -94,20 +87,20 @@ const getExistingUserKeyPair = async (
         value,
         name: value.name,
       };
-    }
+    },
   );
 
-  if (projectKeyPairOptions.length > 0) {
+  if (projectKeyPairOptions !== undefined && projectKeyPairOptions.length > 0) {
     options.push(
       new inquirer.Separator("Project key-pairs:"),
-      ...projectKeyPairOptions
+      ...projectKeyPairOptions,
     );
   }
 
   if (userKeyPairOptions.length > 0) {
     options.push(
       new inquirer.Separator("User key-pairs:"),
-      ...userKeyPairOptions
+      ...userKeyPairOptions,
     );
   }
 
@@ -119,16 +112,20 @@ const getExistingUserKeyPair = async (
     },
     onNoChoices: (): never => {
       return commandObj.error(
-        "There are no other key-pairs. You need a key-pair to continue"
+        "There are no other key-pairs. You need a key-pair to continue",
       );
     },
   });
 };
 
 export const getProjectKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair | undefined> => {
   const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
+
+  if (projectSecretsConfig === null) {
+    return;
+  }
 
   if (keyPairName === undefined) {
     return projectSecretsConfig.keyPairs.find(({ name }): boolean => {
@@ -142,7 +139,7 @@ export const getProjectKeyPair = async (
 };
 
 export const getExistingKeyPair = async (
-  keyPairName: string | undefined
+  keyPairName: string | undefined,
 ): Promise<ConfigKeyPair> => {
   return (
     (await getProjectKeyPair(keyPairName)) ??

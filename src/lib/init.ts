@@ -42,8 +42,9 @@ import {
   JS_CLIENT_NODE_NPM_DEPENDENCY,
   JS_CLIENT_API_NPM_DEPENDENCY,
   FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
-  CLI_NAME,
+  CLI_NAME_FULL,
   getMainAquaFileContent,
+  READMEs,
 } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
@@ -57,8 +58,9 @@ import {
   getGitignorePath,
   projectRootDir,
   setProjectRootDir,
+  getREADMEPath,
 } from "../lib/paths.js";
-import { input, list } from "../lib/prompt.js";
+import { confirm, input, list } from "../lib/prompt.js";
 import versions from "../versions.json" assert { type: "json" };
 
 import { addService } from "./addService.js";
@@ -99,8 +101,8 @@ export const ensureTemplate = ({
   if (typeof templateOrUnknown === "string") {
     commandObj.warn(
       `Unknown template: ${color.yellow(
-        templateOrUnknown
-      )}. Available templates: ${TEMPLATES.join(", ")}`
+        templateOrUnknown,
+      )}. Available templates: ${TEMPLATES.join(", ")}`,
     );
   }
 
@@ -121,18 +123,14 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory:",
-            }))
+            })),
         );
 
-  if (
-    existsSync(projectPath) &&
-    (await stat(projectPath)).isDirectory() &&
-    (await readdir(projectPath)).length > 0
-  ) {
-    return commandObj.error(
+  if (!(await shouldInit(projectPath))) {
+    commandObj.error(
       `Directory ${color.yellow(
-        projectPath
-      )} is not empty. Please, init in an empty directory.`
+        projectPath,
+      )} is not empty. Please, init in an empty directory.`,
     );
   }
 
@@ -143,24 +141,58 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
 
+  await writeFile(
+    await ensureSrcAquaMainPath(),
+    getMainAquaFileContent(template !== "quickstart"),
+    FS_OPTIONS,
+  );
+
+  await writeFile(
+    await ensureVSCodeExtensionsJsonPath(),
+    jsonStringify({
+      recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
+    }) + "\n",
+    FS_OPTIONS,
+  );
+
+  await ensureAquaImports({
+    generateSettingsJson: true,
+    maybeFluenceConfig: fluenceConfig,
+  });
+
+  await writeFile(
+    getGitignorePath(),
+    RECOMMENDED_GITIGNORE_CONTENT,
+    FS_OPTIONS,
+  );
+
+  const workersConfig = await initNewWorkersConfig();
+  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+  await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
+
   switch (template) {
     case "quickstart": {
       const serviceName = "myService";
-      const servicePath = join(await ensureSrcServicesDir(), serviceName);
-      const pathToModuleDir = join(servicePath, "modules", serviceName);
+
+      const absoluteServicePath = join(
+        await ensureSrcServicesDir(),
+        serviceName,
+      );
+
+      const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
       await generateNewModule(pathToModuleDir);
 
       await initNewReadonlyServiceConfig(
-        servicePath,
-        relative(servicePath, pathToModuleDir),
-        serviceName
+        absoluteServicePath,
+        relative(absoluteServicePath, pathToModuleDir),
+        serviceName,
       );
 
       await addService({
         serviceName,
         fluenceConfig,
         marineCli: await initMarineCli(fluenceConfig),
-        pathOrUrl: relative(projectRootDir, servicePath),
+        absolutePathOrUrl: absoluteServicePath,
         interactive: false,
       });
 
@@ -186,43 +218,57 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
     }
   }
 
-  await writeFile(
-    await ensureSrcAquaMainPath(),
-    getMainAquaFileContent(template !== "quickstart"),
-    FS_OPTIONS
-  );
-
-  await writeFile(
-    await ensureVSCodeExtensionsJsonPath(),
-    jsonStringify({
-      recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
-    }) + "\n",
-    FS_OPTIONS
-  );
-
-  await ensureAquaImports({
-    generateSettingsJson: true,
-    maybeFluenceConfig: fluenceConfig,
-  });
-
-  await writeFile(
-    getGitignorePath(),
-    RECOMMENDED_GITIGNORE_CONTENT,
-    FS_OPTIONS
-  );
-
-  const workersConfig = await initNewWorkersConfig();
-  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
-
-  commandObj.log(
+  commandObj.logToStderr(
     color.magentaBright(
-      `\nSuccessfully initialized ${CLI_NAME} project template at ${replaceHomeDir(
-        projectPath
-      )}\n`
-    )
+      `\nSuccessfully initialized ${CLI_NAME_FULL} project template at ${replaceHomeDir(
+        projectPath,
+      )}\n`,
+    ),
   );
 
   return fluenceConfig;
+};
+
+const shouldInit = async (projectPath: string): Promise<boolean> => {
+  if (!isInteractive) {
+    return true;
+  }
+
+  const pathDoesNotExists = !existsSync(projectPath);
+
+  if (pathDoesNotExists) {
+    return true;
+  }
+
+  const pathIsNotADirectory = !(await stat(projectPath)).isDirectory();
+
+  if (pathIsNotADirectory) {
+    return true;
+  }
+
+  const directoryContent = await readdir(projectPath);
+  const pathIsEmptyDir = directoryContent.length === 0;
+
+  if (pathIsEmptyDir) {
+    return true;
+  }
+
+  const dirHasOnlyGitInside =
+    directoryContent.length === 1 && directoryContent[0] === ".git";
+
+  if (dirHasOnlyGitInside) {
+    return true;
+  }
+
+  const hasUserConfirmedInitInNonEmptyDir = await confirm({
+    message: `Directory ${color.yellow(projectPath)} is not empty. Proceed?`,
+  });
+
+  if (hasUserConfirmedInitInNonEmptyDir) {
+    return true;
+  }
+
+  return false;
 };
 
 type InitTSorJSProjectArg = {
@@ -240,7 +286,7 @@ const initTSorJSProject = async ({
 
   const defaultAquaTSorJSPathRelative = relative(
     projectRootDir,
-    defaultAquaTSorJSPath
+    defaultAquaTSorJSPath,
   );
 
   const defaultTSorJSDirPath = isJS
@@ -257,7 +303,7 @@ const initTSorJSProject = async ({
     scripts: {
       start: `${isJS ? "node" : "ts-node"} ${join(
         SRC_DIR_NAME,
-        indexFileName
+        indexFileName,
       )}`,
       ...(isJS ? {} : { build: "tsc -b" }),
     },
@@ -283,13 +329,13 @@ const initTSorJSProject = async ({
   await writeFile(
     join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
     JSON.stringify(PACKAGE_JSON, null, 2) + "\n",
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
   await writeFile(
     join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
     TEMPLATE_INDEX_FILE_CONTENT,
-    FS_OPTIONS
+    FS_OPTIONS,
   );
 
   if (isJS) {
@@ -312,7 +358,7 @@ const initTSorJSProject = async ({
     await writeFile(
       join(defaultTSorJSDirPath, TS_CONFIG_FILE_NAME),
       jsonStringify(TS_CONFIG),
-      FS_OPTIONS
+      FS_OPTIONS,
     );
 
     fluenceConfig.aquaOutputTSPath = defaultAquaTSorJSPathRelative;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { writeFile, readFile } from "node:fs/promises";
+import { writeFile, readFile, access } from "node:fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
@@ -24,7 +24,7 @@ import type { FluenceConfig } from "../configs/project/fluence.js";
 import { FS_OPTIONS } from "../const.js";
 import { installAllNPMDependencies } from "../npm.js";
 import {
-  ensureFluenceAquaDir,
+  getFluenceAquaDir,
   ensureUserFluenceNpmDir,
   ensureVSCodeSettingsJsonPath,
 } from "../paths.js";
@@ -44,7 +44,15 @@ export async function ensureAquaImports({
   force,
   generateSettingsJson = false,
 }: GetAquaImportsArg): Promise<string[]> {
-  const defaultImports = [await ensureFluenceAquaDir()];
+  const fluenceAquaDirPath = getFluenceAquaDir();
+  const defaultImports = [];
+
+  try {
+    if (maybeFluenceConfig !== null) {
+      await access(fluenceAquaDirPath);
+      defaultImports.push(fluenceAquaDirPath);
+    }
+  } catch {}
 
   const allNpmDependencies = await installAllNPMDependencies({
     maybeFluenceConfig,
@@ -110,7 +118,7 @@ const ensureVSCodeSettingsJSON = async ({
         jsonStringify({
           [AQUA_SETTINGS_IMPORTS]: aquaImports,
         }) + "\n",
-        FS_OPTIONS
+        FS_OPTIONS,
       );
     }
 
@@ -136,7 +144,7 @@ const ensureVSCodeSettingsJSON = async ({
         })
         .map((aquaImport): string => {
           return getUserFluenceNpmImportPathStart(aquaImport);
-        })
+        }),
     );
 
     const previousAquaImports = parsedFileContent[AQUA_SETTINGS_IMPORTS] ?? [];
@@ -144,16 +152,16 @@ const ensureVSCodeSettingsJSON = async ({
     const previousAquaImportsFromUserFluenceNpmDir = previousAquaImports.filter(
       (aquaImport): boolean => {
         return aquaImport.startsWith(userFluenceNpmDir);
-      }
+      },
     );
 
     const deduplicatedPreviousAquaImportsFromUserFluenceNpmDir =
       previousAquaImportsFromUserFluenceNpmDir.filter(
         (previousAquaImport): boolean => {
           return !newAquaImportPathStartsFromUserFluenceNpmDir.has(
-            getUserFluenceNpmImportPathStart(previousAquaImport)
+            getUserFluenceNpmImportPathStart(previousAquaImport),
           );
-        }
+        },
       );
 
     parsedFileContent[AQUA_SETTINGS_IMPORTS] = [
@@ -169,7 +177,7 @@ const ensureVSCodeSettingsJSON = async ({
     await writeFile(
       settingsJsonPath,
       JSON.stringify(parsedFileContent, null, 2) + "\n",
-      FS_OPTIONS
+      FS_OPTIONS,
     );
   }
 };

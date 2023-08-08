@@ -36,7 +36,7 @@ import {
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
 export const getLatestVersionOfNPMDependency = async (
-  name: string
+  name: string,
 ): Promise<string> => {
   try {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -49,10 +49,10 @@ export const getLatestVersionOfNPMDependency = async (
   } catch (error) {
     commandObj.error(
       `Failed to get latest version of ${color.yellow(
-        name
+        name,
       )} from npm registry. Please make sure ${color.yellow(
-        name
-      )} is spelled correctly\n${stringifyUnknown(error)}`
+        name,
+      )} is spelled correctly\n${stringifyUnknown(error)}`,
     );
   }
 };
@@ -76,18 +76,18 @@ const installNpmDependency = async ({
       args: ["i", `${name}@${version}`],
       flags: { prefix: dependencyTmpDirPath },
       spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
-        dependencyDirPath
+        dependencyDirPath,
       )}`,
     });
   } catch (error) {
     commandObj.error(
       `Not able to install ${name}@${version} to ${replaceHomeDir(
-        dependencyDirPath
+        dependencyDirPath,
       )}. Please make sure ${color.yellow(
-        name
+        name,
       )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
-        `fluence dependency npm install ${name}@<version>`
-      )} command.\n${stringifyUnknown(error)}`
+        `fluence dependency npm install ${name}@<version>`,
+      )} command.\n${stringifyUnknown(error)}`,
     );
   }
 };
@@ -122,7 +122,7 @@ export const ensureNpmDependency = async ({
       : await getLatestVersionOfNPMDependency(
           resolveVersionToInstallResult.maybeVersionToCheck === undefined
             ? name
-            : `${name}@${resolveVersionToInstallResult.maybeVersionToCheck}`
+            : `${name}@${resolveVersionToInstallResult.maybeVersionToCheck}`,
         );
 
   const { dependencyDirPath, dependencyTmpDirPath } =
@@ -172,7 +172,7 @@ export const installAllNPMDependencies = async ({
   force,
 }: InstallAllNPMDependenciesArg): Promise<string[]> => {
   const dependenciesToEnsure = Object.entries(
-    await resolveDependencies("npm", maybeFluenceConfig)
+    await resolveDependencies("npm", maybeFluenceConfig),
   );
 
   return Promise.all(
@@ -182,6 +182,6 @@ export const installAllNPMDependencies = async ({
         maybeFluenceConfig,
         force,
       });
-    })
+    }),
   );
 };

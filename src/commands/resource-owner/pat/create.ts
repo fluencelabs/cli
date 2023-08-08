@@ -21,6 +21,7 @@ import { Args } from "@oclif/core";
 const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
+import { commandObj } from "../../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import { input } from "../../../lib/prompt.js";
@@ -52,7 +53,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(CreatePAT),
-      true
+      true,
     );
 
     const network = await ensureChainNetwork({
@@ -75,7 +76,7 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const res = await waitTx(await deal.createProviderToken(approveTx.hash));
 
     const eventTopic = deal.interface.getEventTopic(
-      ADD_PROVIDER_TOKEN_EVENT_TOPIC
+      ADD_PROVIDER_TOKEN_EVENT_TOPIC,
     );
 
     const log = res.logs.find((log: { topics: Array<string> }) => {
@@ -86,6 +87,6 @@ export default class CreatePAT extends BaseCommand<typeof CreatePAT> {
     const patId: unknown = deal.interface.parseLog(log).args["id"];
     assert(typeof patId === "string");
 
-    this.log(`PAT ID: ${color.yellow(patId)}`);
+    commandObj.log(`PAT ID: ${color.yellow(patId)}`);
   }
 }

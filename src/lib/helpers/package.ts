@@ -27,7 +27,11 @@ import type {
   FluenceConfig,
   FluenceConfigReadonly,
 } from "../configs/project/fluence.js";
-import { initReadonlyUserConfig, userConfig } from "../configs/user/config.js";
+import {
+  initReadonlyUserConfig,
+  userConfig,
+  type UserConfigReadonly,
+} from "../configs/user/config.js";
 import {
   CLI_NAME,
   FLUENCE_CONFIG_FILE_NAME,
@@ -221,7 +225,7 @@ export const resolveDependencyDirPathAndTmpPath = async ({
   dependencyDirPath: string;
 }> => {
   const [depDirPath, depTmpDirPath] = await Promise.all(
-    dependenciesPathsGettersMap[packageManager]()
+    dependenciesPathsGettersMap[packageManager](),
   );
 
   const dependencyPathEnding = join(...name.split("/"), version);
@@ -273,14 +277,14 @@ export const handleInstallation = async ({
   if (explicitInstallation) {
     commandObj.log(
       `Successfully installed ${name}@${version} to ${replaceHomeDir(
-        dependencyDirPath
-      )}`
+        dependencyDirPath,
+      )}`,
     );
   }
 };
 
 export const splitPackageNameAndVersion = (
-  packageNameAndMaybeVersion: string
+  packageNameAndMaybeVersion: string,
 ): [string] | [string, string] => {
   const hasVersion = /.+@.+/.test(packageNameAndMaybeVersion);
 
@@ -310,13 +314,14 @@ export const getRecommendedDependencies = (packageManager: PackageManager) => {
   return Object.fromEntries(
     Object.entries(versionsPerPackageManager).filter(([dependencyName]) => {
       return defaultDependencies.includes(dependencyName);
-    })
+    }),
   );
 };
 
 export const resolveDependencies = async (
   packageManager: PackageManager,
-  maybeFluenceConfig: FluenceConfigReadonly | null
+  maybeFluenceConfig: FluenceConfigReadonly | null,
+  doWarn = false,
 ) => {
   const recommendedDependencies = getRecommendedDependencies(packageManager);
   const userFluenceConfig = await initReadonlyUserConfig();
@@ -333,6 +338,37 @@ export const resolveDependencies = async (
     ...projectDependencyOverrides,
   };
 
+  if (doWarn) {
+    warnAboutOverriddenDependencies({
+      recommendedDependencies,
+      finalDependencies,
+      projectDependencyOverrides,
+      maybeFluenceConfig,
+      userDependencyOverrides,
+      userFluenceConfig,
+    });
+  }
+
+  return finalDependencies;
+};
+
+type WarnAboutOverriddenDependenciesArg = {
+  recommendedDependencies: Record<string, string>;
+  finalDependencies: Record<string, string>;
+  projectDependencyOverrides: Record<string, string>;
+  maybeFluenceConfig: FluenceConfigReadonly | null;
+  userDependencyOverrides: Record<string, string>;
+  userFluenceConfig: UserConfigReadonly | null;
+};
+
+function warnAboutOverriddenDependencies({
+  recommendedDependencies,
+  finalDependencies,
+  projectDependencyOverrides,
+  maybeFluenceConfig,
+  userDependencyOverrides,
+  userFluenceConfig,
+}: WarnAboutOverriddenDependenciesArg) {
   // Warn about overridden recommended dependencies
   Object.entries(recommendedDependencies).forEach(([name, defaultVersion]) => {
     const versionToUse = finalDependencies[name];
@@ -344,10 +380,10 @@ export const resolveDependencies = async (
     if (versionToUse === projectDependencyOverrides[name]) {
       assert(maybeFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
-          `Using version ${versionToUse} of ${name} defined at ${maybeFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You can reset it to the recommended version by running \`${CLI_NAME} dep r\``
-        )
+          `Using version ${versionToUse} of ${name} defined at ${maybeFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You can reset it to the recommended version by running \`${CLI_NAME} dep r\``,
+        ),
       );
 
       return;
@@ -356,10 +392,10 @@ export const resolveDependencies = async (
     if (versionToUse === userDependencyOverrides[name]) {
       assert(userFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
-          `Using version ${versionToUse} of ${name} defined at ${userFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}. You can reset it to the recommended version by running \`${CLI_NAME} dep r -g\``
-        )
+          `Using version ${versionToUse} of ${name} defined at ${userFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}. You can reset it to the recommended version by running \`${CLI_NAME} dep r -g\``,
+        ),
       );
 
       return;
@@ -375,13 +411,11 @@ export const resolveDependencies = async (
     ) {
       assert(userFluenceConfig !== null);
 
-      commandObj.log(
+      commandObj.logToStderr(
         color.yellow(
-          `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}, you may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}`
-        )
+          `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}, you may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}`,
+        ),
       );
     }
   });
-
-  return finalDependencies;
-};
+}

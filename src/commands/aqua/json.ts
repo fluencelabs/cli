@@ -49,7 +49,7 @@ export default class Json extends BaseCommand<typeof Json> {
 
     const content = await readFile(
       args.INPUT ?? (await input({ message: "Enter path to input file" })),
-      FS_OPTIONS
+      FS_OPTIONS,
     );
 
     const parsedContent = JSON.parse(content);
@@ -57,16 +57,16 @@ export default class Json extends BaseCommand<typeof Json> {
     const aqua = jsToAqua(
       parsedContent,
       args.FUNC ?? (await input({ message: "Enter exported function name" })),
-      flags.f64
+      flags.f64,
     );
 
     await writeFile(
       args.OUTPUT ??
         (await input({ message: "Enter path for an output file" })),
       aqua,
-      FS_OPTIONS
+      FS_OPTIONS,
     );
 
-    commandObj.log("Done!");
+    commandObj.logToStderr("Done!");
   }
 }

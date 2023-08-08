@@ -21,7 +21,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { userConfig } from "../../lib/configs/user/config.js";
 import {
-  CLI_NAME,
+  CLI_NAME_FULL,
   GLOBAL_FLAG,
   GLOBAL_FLAG_NAME,
   fluenceCargoDependencies,
@@ -31,7 +31,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
   static override aliases = ["dependency:r", "dep:r"];
-  static override description = `Reset all project dependencies to recommended versions for the current ${CLI_NAME} version`;
+  static override description = `Reset all project dependencies to recommended versions for the current ${CLI_NAME_FULL} version`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -44,12 +44,12 @@ export default class Reset extends BaseCommand<typeof Reset> {
   async run(): Promise<void> {
     const { maybeFluenceConfig, flags } = await initCli(
       this,
-      await this.parse(Reset)
+      await this.parse(Reset),
     );
 
     if (flags.global) {
       const removedDependencies = removeRecommendedDependencies(
-        userConfig.dependencies
+        userConfig.dependencies,
       );
 
       if (flags.all || removedDependencies === undefined) {
@@ -61,13 +61,13 @@ export default class Reset extends BaseCommand<typeof Reset> {
       await userConfig.$commit();
 
       return commandObj.log(
-        "successfully reset user's global dependency versions"
+        "successfully reset user's global dependency versions",
       );
     }
 
     if (maybeFluenceConfig !== null) {
       const removedDependencies = removeRecommendedDependencies(
-        maybeFluenceConfig.dependencies
+        maybeFluenceConfig.dependencies,
       );
 
       if (flags.all || removedDependencies === undefined) {
@@ -82,7 +82,7 @@ export default class Reset extends BaseCommand<typeof Reset> {
     }
 
     commandObj.error(
-      `Not a fluence project. If you wanted to reset global dependencies, use --${GLOBAL_FLAG_NAME} flag for that`
+      `Not a fluence project. If you wanted to reset global dependencies, use --${GLOBAL_FLAG_NAME} flag for that`,
     );
   }
 }

@@ -79,7 +79,7 @@ export const ensureChainNetwork = async ({
 
   if (!isValidNetworkFromFlags) {
     commandObj.warn(
-      `Invalid chain network: ${stringifyUnknown(maybeNetworkFromFlags)}`
+      `Invalid chain network: ${stringifyUnknown(maybeNetworkFromFlags)}`,
     );
 
     return list({
@@ -87,7 +87,7 @@ export const ensureChainNetwork = async ({
       options: [...CHAIN_NETWORKS],
       oneChoiceMessage(chainNetwork) {
         return `Do you want to use ${color.yellow(
-          chainNetwork
+          chainNetwork,
         )} chain network?`;
       },
       onNoChoices() {
@@ -105,7 +105,7 @@ export const ensureChainNetwork = async ({
 
 export const getSigner = async (
   network: ChainNetwork,
-  privKey: BytesLike | undefined
+  privKey: BytesLike | undefined,
 ): Promise<ethers.Signer> => {
   return privKey === undefined
     ? getWalletConnectProvider(network)
@@ -113,7 +113,7 @@ export const getSigner = async (
 };
 
 const getWalletConnectProvider = async (
-  network: ChainNetwork
+  network: ChainNetwork,
 ): Promise<ethers.Signer> => {
   const provider = await UniversalProvider.init({
     projectId: WC_PROJECT_ID,
@@ -134,8 +134,8 @@ const getWalletConnectProvider = async (
     url.searchParams.set(RELAY_QUERY_PARAM_NAME, bridge);
     url.searchParams.set(KEY_QUERY_PARAM_NAME, key);
 
-    commandObj.log(
-      `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`
+    commandObj.logToStderr(
+      `To approve transactions to your wallet using metamask, open the following url:\n\n${url.toString()}\n\nor go to ${CLI_CONNECTOR_URL} and enter the following connection string there:\n\n${uri}\n`,
     );
   });
 
@@ -161,7 +161,7 @@ const getWalletConnectProvider = async (
   const walletAddress =
     session?.namespaces["eip155"]?.accounts[0]?.split(":")[2];
 
-  if (walletAddress == null) {
+  if (walletAddress === null) {
     throw new Error("Wallet address is not defined");
   }
 
@@ -172,77 +172,77 @@ const getWalletConnectProvider = async (
 
 const getWallet = (
   privKey: BytesLike,
-  network: ChainNetwork
+  network: ChainNetwork,
 ): ethers.Wallet => {
   return new ethers.Wallet(
     privKey,
-    new providers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl)
+    new providers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl),
   );
 };
 
 export const getCoreContract = (
   signer: ethers.Signer,
-  network: ChainNetwork
+  network: ChainNetwork,
 ): Core => {
   return Core__factory.connect(DEAL_CONFIG[network].coreAddress, signer);
 };
 
 export const getFactoryContract = (
   signer: ethers.Signer,
-  network: ChainNetwork
+  network: ChainNetwork,
 ): DealFactory => {
   return DealFactory__factory.connect(
     DEAL_CONFIG[network].dealFactoryAddress,
-    signer
+    signer,
   );
 };
 
 export const getAquaProxy = (
   address: string,
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
 ): AquaProxy => {
   return AquaProxy__factory.connect(address, provider);
 };
 
 export const getDeveloperContract = (
   signer: ethers.Signer,
-  network: ChainNetwork
+  network: ChainNetwork,
 ): DeveloperFaucet => {
   return DeveloperFaucet__factory.connect(
     DEAL_CONFIG[network].developerFaucetAddress,
-    signer
+    signer,
   );
 };
 
 export const getDealContract = (
   dealAddress: string,
-  signer: ethers.Signer
+  signer: ethers.Signer,
 ): Deal => {
   return Deal__factory.connect(dealAddress, signer);
 };
 
 export const getUSDContract = async (
   signer: ethers.Signer,
-  network: ChainNetwork
+  network: ChainNetwork,
 ): Promise<ERC20> => {
   return ERC20__factory.connect(
     await getDeveloperContract(signer, network).usdToken(),
-    signer
+    signer,
   );
 };
 
 export const getFLTContract = async (
   signer: ethers.Signer,
-  network: ChainNetwork
+  network: ChainNetwork,
 ): Promise<ERC20> => {
   return ERC20__factory.connect(
     await getDeveloperContract(signer, network).fluenceToken(),
-    signer
+    signer,
   );
 };
 
 export const waitTx = async (
-  tx: ethers.ContractTransaction
+  tx: ethers.ContractTransaction,
 ): Promise<ethers.ContractReceipt> => {
   startSpinner("Waiting for transaction to be mined...");
 
@@ -254,6 +254,6 @@ export const waitTx = async (
 
 export const promptConfirmTx = (privKey: string | undefined) => {
   if (privKey === undefined) {
-    commandObj.log(`Confirm transaction in your wallet...`);
+    commandObj.logToStderr(`Confirm transaction in your wallet...`);
   }
 };

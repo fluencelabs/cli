@@ -34,14 +34,14 @@ const createIPFSClient = (multiaddr: string) => {
   return create(
     new Multiaddr(multiaddr)
       .decapsulateCode(protocols.names["p2p"]?.code ?? 421)
-      .toOptions()
+      .toOptions(),
   );
 };
 
 const upload = async (
   multiaddr: string,
   content: Parameters<IPFSHTTPClient["add"]>[0],
-  log: (msg: unknown) => void
+  log: (msg: unknown) => void,
 ) => {
   const ipfsClient = createIPFSClient(multiaddr);
 
@@ -69,8 +69,8 @@ const upload = async (
     } catch (error) {
       commandObj.error(
         `file ${cidString} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
-          error
-        )}`
+          error,
+        )}`,
       );
     }
 
@@ -83,7 +83,7 @@ const upload = async (
 const dagUpload = async (
   multiaddr: string,
   content: Parameters<IPFSHTTPClient["dag"]["put"]>[0],
-  log: (msg: unknown) => void
+  log: (msg: unknown) => void,
 ) => {
   const ipfsClient = createIPFSClient(multiaddr);
 
@@ -110,8 +110,8 @@ const dagUpload = async (
     } catch (error) {
       commandObj.error(
         `file ${cidString} failed to pin ls to ${multiaddr}. ${stringifyUnknown(
-          error
-        )}`
+          error,
+        )}`,
       );
     }
 
@@ -124,7 +124,7 @@ const dagUpload = async (
 export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
   const log = (msg: unknown) => {
     if (!offAquaLogs) {
-      commandObj.log(`ipfs: ${stringifyUnknown(msg)}`);
+      commandObj.logToStderr(`ipfs: ${stringifyUnknown(msg)}`);
     }
   };
 
@@ -134,7 +134,7 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
         await access(absolutePath);
       } catch {
         throw new Error(
-          `Failed IPFS upload. File ${absolutePath} doesn't exist`
+          `Failed IPFS upload. File ${absolutePath} doesn't exist`,
         );
       }
 
@@ -149,7 +149,7 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
         await access(absolutePath);
       } catch {
         throw new Error(
-          `Failed IPFS upload. File ${absolutePath} doesn't exist`
+          `Failed IPFS upload. File ${absolutePath} doesn't exist`,
         );
       }
 
@@ -182,7 +182,7 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
         }
 
         commandObj.error(
-          `failed to check if ${cid} exists: ${stringifyUnknown(err)}`
+          `failed to check if ${cid} exists: ${stringifyUnknown(err)}`,
         );
       }
     },
@@ -197,7 +197,7 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
         const rm = ipfsClient.block.rm(CID.parse(cid), { force: true });
 
         for await (const r of rm) {
-          if (r.error != null) {
+          if (r.error !== null) {
             log(`block rm failed. ${r.error}`);
           }
         }

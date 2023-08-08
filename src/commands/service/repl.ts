@@ -34,14 +34,16 @@ import {
 } from "../../lib/configs/project/service.js";
 import {
   BIN_DIR_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
+  MARINE_BUILD_ARGS,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SEPARATOR,
 } from "../../lib/const.js";
 import { haltCountly } from "../../lib/countly.js";
 import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
+import { updateAquaServiceInterfaceFile } from "../../lib/helpers/generateServiceInterface.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { exitCli, initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
@@ -66,24 +68,28 @@ export default class REPL extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,
+    ...MARINE_BUILD_ARGS,
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
-      description: `Service name from ${FLUENCE_CONFIG_FILE_NAME}, path to a service or url to .tar.gz archive`,
+      description: `Service name from ${FLUENCE_CONFIG_FULL_FILE_NAME}, path to a service or url to .tar.gz archive`,
     }),
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
+    const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(REPL)
+      await this.parse(REPL),
     );
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
       (await input({
-        message: `Enter service name from ${color.yellow(
-          FLUENCE_CONFIG_FILE_NAME
-        )}, path to a service or url to .tar.gz archive`,
+        message:
+          maybeFluenceConfig === null
+            ? `Enter path to a service or url to .tar.gz archive`
+            : `Enter service name from ${color.yellow(
+                maybeFluenceConfig.$getPath(),
+              )}, path to a service or url to .tar.gz archive`,
       }));
 
     const serviceConfig = await ensureServiceConfig(nameOrPathOrUrl);
@@ -95,8 +101,20 @@ export default class REPL extends Command {
       await resolveSingleServiceModuleConfigsAndBuild(
         serviceConfig,
         maybeFluenceConfig,
-        marineCli
+        marineCli,
+        flags["marine-build-args"],
       );
+
+    const isServiceListedInFluenceConfig =
+      maybeFluenceConfig?.services?.[nameOrPathOrUrl] !== undefined;
+
+    if (isServiceListedInFluenceConfig) {
+      await updateAquaServiceInterfaceFile(
+        { [nameOrPathOrUrl]: getModuleWasmPath(facadeModuleConfig) },
+        maybeFluenceConfig?.services,
+        marineCli,
+      );
+    }
 
     stopSpinner();
 
@@ -105,7 +123,7 @@ export default class REPL extends Command {
     await writeFile(
       fluenceTmpConfigTomlPath,
       stringifyToTOML({ module: ensureModuleConfigsForToml(moduleConfigs) }),
-      FS_OPTIONS
+      FS_OPTIONS,
     );
 
     if (!isInteractive) {
@@ -120,14 +138,14 @@ export default class REPL extends Command {
 
     const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 
-    this.log(`${SEPARATOR}Execute ${color.yellow(
-      "help"
+    commandObj.logToStderr(`${SEPARATOR}Execute ${color.yellow(
+      "help",
     )} inside repl to see available commands.
 Current service <module_name> is: ${color.yellow(facadeModuleConfig.name)}
 Call ${facadeModuleConfig.name} service functions in repl like this:
 
 ${color.yellow(
-  `call ${facadeModuleConfig.name} <function_name> [<arg1>, <arg2>]`
+  `call ${facadeModuleConfig.name} <function_name> [<arg1>, <arg2>]`,
 )}${SEPARATOR}}`);
 
     await haltCountly();
@@ -140,7 +158,7 @@ ${color.yellow(
 }
 
 const ensureServiceConfig = async (
-  nameOrPathOrUrl: string
+  nameOrPathOrUrl: string,
 ): Promise<ServiceConfigReadonly> => {
   const fluenceConfig = await initReadonlyFluenceConfig();
 
@@ -151,13 +169,15 @@ const ensureServiceConfig = async (
     serviceOrServiceDirPathOrUrl,
     typeof fluenceConfig?.services?.[nameOrPathOrUrl]?.get === "string"
       ? projectRootDir
-      : cwd()
+      : cwd(),
   );
 
   if (readonlyServiceConfig === null) {
     stopSpinner(color.red("error"));
     return commandObj.error(
-      `No service config at ${color.yellow(serviceOrServiceDirPathOrUrl)}`
+      `No service config found at ${color.yellow(
+        serviceOrServiceDirPathOrUrl,
+      )}`,
     );
   }
 
@@ -179,7 +199,7 @@ type TomlModuleConfig = {
 };
 
 const ensureModuleConfigsForToml = (
-  moduleConfigs: Array<ModuleConfigReadonly>
+  moduleConfigs: Array<ModuleConfigReadonly>,
 ) => {
   return moduleConfigs.map((moduleConfig) => {
     const {

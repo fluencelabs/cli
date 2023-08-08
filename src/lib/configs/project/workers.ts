@@ -19,11 +19,12 @@ import type { JSONSchemaType } from "ajv";
 import {
   type ChainNetwork,
   CHAIN_NETWORKS,
-  WORKERS_CONFIG_FILE_NAME,
+  WORKERS_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
+  WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
 } from "../../const.js";
-import { ensureFluenceDir } from "../../paths.js";
+import { getFluenceDir } from "../../paths.js";
 import {
   getReadonlyConfigInitFunction,
   getConfigInitFunction,
@@ -124,8 +125,8 @@ const dealSchema: JSONSchemaType<Deal> = {
 } as const;
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FILE_NAME}`,
-  title: WORKERS_CONFIG_FILE_NAME,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
+  title: WORKERS_CONFIG_FULL_FILE_NAME,
   type: "object",
   description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
   properties: {
@@ -166,18 +167,55 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   latestSchema: configSchemaV0,
   migrations,
   name: WORKERS_CONFIG_FILE_NAME,
-  getConfigOrConfigDirPath: ensureFluenceDir,
+  getConfigOrConfigDirPath: getFluenceDir,
 };
 
-const getDefault: GetDefaultConfig<LatestConfig> = () => {
-  return {
-    version: 0,
-  };
+const getDefault: GetDefaultConfig = () => {
+  return `# A result of app deployment.
+# This file is updated automatically after successful deployment using \`fluence workers deploy\` command
+
+# config version
+version: 0
+
+# # A map of created deals
+# deals:
+#   # worker name
+#   defaultWorker:
+#     # worker CID
+#     definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
+#     # ISO timestamp of the time when the worker was deployed
+#     timestamp: 2023-07-07T11:23:52.353Z
+#     # deal ID used in aqua to resolve workers
+#     dealId: 799c4beb18ae084d57a90582c2cb8bb19098139e
+#     # original deal ID that you get after signing the contract
+#     dealIdOriginal: "0x799C4BEB18Ae084D57a90582c2Cb8Bb19098139E"
+#     # network name that was used when deploying worker
+#     chainNetwork: testnet
+#     # network ID that was used when deploying worker
+#     chainNetworkId: 1313161555
+
+# # A map of deployed workers
+# hosts:
+#   # worker name
+#   defaultWorker:
+#     # worker CID
+#     definition: bafkreicoctafgctpxf7jk4nynpnma4wdxpcecjtspsjmuidmag6enctnqa
+#     # worker installation spells
+#     # host_id and worker_id can be used to access the worker
+#     installation_spells:
+#       - host_id: 12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR
+#         spell_id: 9dbe4003-1232-4a20-9d52-5651c5cf4c5c
+#         worker_id: 12D3KooWLBQAdDFXz9vWnmgs6MyMfo25bhUTUEiLPsG94ppYq35w
+#     # ISO timestamp of the time when the worker was deployed
+#     timestamp: 2023-07-07T11:39:57.610Z
+#     # relay that was used when connecting to the network
+#     relayId: 12D3KooWPisGn7JhooWhggndz25WM7vQ2JmA121EV8jUDQ5xMovJ
+`;
 };
 
 export const initNewWorkersConfig = getConfigInitFunction(
   initConfigOptions,
-  getDefault
+  getDefault,
 );
 
 export const initReadonlyWorkersConfig =
