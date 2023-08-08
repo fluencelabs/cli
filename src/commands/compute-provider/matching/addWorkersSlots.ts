@@ -93,18 +93,22 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
     await waitTx(approveTx);
 
     const multihash = digest.decode(base58.base58btc.decode("z" + peerId));
+    const bytes = multihash.bytes.subarray(6);
 
-    const tx = await matcher.addWorkersSlots(
-      multihash.bytes.subarray(4),
-      workersCount,
-    );
-
+    const tx = await matcher.addWorkersSlots(bytes, workersCount);
     promptConfirmTx(flags.privKey);
     await waitTx(tx);
 
+    const provider = await signer.getAddress();
+    const free = await matcher.getFreeWorkersSolts(provider, bytes);
+
     this.log(
       color.green(
-        `Successfully added ${workersCount} worker slots to compute peer ${peerId}`,
+        `Added ${color.bold(
+          workersCount,
+        )} worker slots. Compute peer ${color.bold(
+          peerId,
+        )} now has ${color.bold(free)} free worker slots.`,
       ),
     );
   }
