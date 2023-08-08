@@ -119,7 +119,7 @@ jobs:
 
       - name: Run nox network
         run: |
-          docker compose -f .github/e2e/docker-compose.yml up -d
+          docker-compose -f .github/e2e/docker-compose.yml up -d
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -208,4 +208,4 @@ jobs:
       - name: Post Run nox network
         if: always()
         run: |
-          docker compose -f .github/e2e/docker-compose.yml down --volumes
+          docker-compose -f .github/e2e/docker-compose.yml down --volumes
