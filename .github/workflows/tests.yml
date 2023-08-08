@@ -18,10 +18,13 @@ on:
       nox-image:
         description: "nox image tag"
         type: string
+        # default is set in .github/e2e/docker-compose.yml
         default: "null"
       deal-aurora-image:
         description: "deal-aurora image tag"
         type: string
+        # default is set in .github/e2e/docker-compose.yml
+        default: "null"
       marine-version:
         description: "marine version"
         type: string
@@ -94,6 +97,7 @@ jobs:
 
       - name: Set nox version
         run: |
+          # set nox image
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
@@ -109,6 +113,25 @@ jobs:
 
           echo "nox image used for tests is $nox"
           echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
+
+          # set deal-aurora
+          case ${{ inputs.deal-aurora-image }} in
+          # if deal-aurora image is not passed from e2e set
+          'null')
+          ;;
+          # else set nox image to snapshot passed from e2e
+          *)
+            nox=${{ inputs.nox-image }}
+          ;;
+          esac
+
+      - name: Set deal-aurora version
+        if: ${{ inputs.deal-aurora-image != 'null' }}
+        run: |
+          deal-aurora=${{ inputs.deal-aurora-image }}
+
+          echo "deal-aurora image used for tests is $deal-aurora"
+          echo "DEAL_AURORA_IMAGE=${deal-aurora}" >> $GITHUB_ENV
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
