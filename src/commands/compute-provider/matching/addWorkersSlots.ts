@@ -61,7 +61,7 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(AddWorkerSlots),
-      true
+      true,
     );
 
     const network = await ensureChainNetwork({
@@ -81,12 +81,12 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
-    const factory = globalContracts.getFactory();
+    const factory = await globalContracts.getFactory();
     const collateral = await factory.REQUIRED_COLLATERAL();
 
     const approveTx = await flt.approve(
       await matcher.getAddress(),
-      collateral * BigInt(workersCount)
+      collateral * BigInt(workersCount),
     );
 
     promptConfirmTx(flags.privKey);
@@ -96,12 +96,16 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
 
     const tx = await matcher.addWorkersSlots(
       multihash.bytes.subarray(4),
-      workersCount
+      workersCount,
     );
 
     promptConfirmTx(flags.privKey);
     await waitTx(tx);
 
-    this.log(color.green(`Successfully added ${workersCount} worker slots to compute peer ${peerId}`));
+    this.log(
+      color.green(
+        `Successfully added ${workersCount} worker slots to compute peer ${peerId}`,
+      ),
+    );
   }
 }

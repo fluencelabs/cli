@@ -42,7 +42,7 @@ export default class RegisterInMatcher extends BaseCommand<
     const { flags, fluenceConfig } = await initCli(
       this,
       await this.parse(RegisterInMatcher),
-      true
+      true,
     );
 
     const network = await ensureChainNetwork({
@@ -57,7 +57,7 @@ export default class RegisterInMatcher extends BaseCommand<
     const globalContracts = dealClient.getGlobalContracts();
 
     const matcher = await globalContracts.getMatcher();
-    const factory = globalContracts.getFactory();
+    const factory = await globalContracts.getFactory();
     const flt = await globalContracts.getFLT();
 
     const collateral = await factory.REQUIRED_COLLATERAL();
@@ -67,7 +67,7 @@ export default class RegisterInMatcher extends BaseCommand<
       pricePerEpoch,
       collateral,
       await flt.getAddress(),
-      []
+      [],
     );
 
     promptConfirmTx(flags.privKey);

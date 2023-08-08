@@ -26,11 +26,7 @@ import { CID } from "ipfs-http-client";
 
 import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL } from "./const.js";
-import {
-  getSigner,
-  waitTx,
-  promptConfirmTx,
-} from "./provider.js";
+import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 import { type ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
@@ -64,7 +60,7 @@ export const dealCreate = async ({
   const dealClient = new DealClient(signer, chainNetwork);
   const globalContracts = dealClient.getGlobalContracts();
 
-  const factory = globalContracts.getFactory();
+  const factory = await globalContracts.getFactory();
   const bytesCid = CID.parse(appCID).bytes;
 
   promptConfirmTx(privKey);
@@ -76,7 +72,7 @@ export const dealCreate = async ({
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
     },
-    [] //TODO: get effectors from the project
+    [], //TODO: get effectors from the project
   );
 
   const res = await waitTx(tx);
@@ -109,28 +105,28 @@ function parseDealInfo(dealInfoEvent: ethers.Result): DealInfo {
 
   assert(
     ethers.isAddress(configModule),
-    "Deal config module address is not valid"
+    "Deal config module address is not valid",
   );
 
   const paymentModule = dealInfoEvent.getValue("paymentModule");
 
   assert(
     ethers.isAddress(paymentModule),
-    "Deal payment module address is not valid"
+    "Deal payment module address is not valid",
   );
 
   const statusModule = dealInfoEvent.getValue("statusModule");
 
   assert(
     ethers.isAddress(statusModule),
-    "Deal status module address is not valid"
+    "Deal status module address is not valid",
   );
 
   const workersModule = dealInfoEvent.getValue("workersModule");
 
   assert(
     ethers.isAddress(workersModule),
-    "Deal workers module address is not valid"
+    "Deal workers module address is not valid",
   );
 
   return {
