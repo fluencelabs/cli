@@ -18,6 +18,7 @@ on:
       nox-image:
         description: "nox image tag"
         type: string
+        default: "null"
       deal-aurora-image:
         description: "deal-aurora image tag"
         type: string
@@ -95,7 +96,7 @@ jobs:
         run: |
           case ${{ inputs.nox-image }} in
           # if nox image is not passed from e2e read from versions.json
-          '') nox="$(jq .nox src/versions.json -r)" ;;
+          'null') nox="$(jq .nox src/versions.json -r)" ;;
           # else set nox image to snapshot passed from e2e
           *) nox=${{ inputs.nox-image }} ;;
           esac
