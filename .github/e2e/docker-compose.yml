@@ -8,6 +8,7 @@ networks:
 services:
   deal-aurora:
     image: ${DEAL_AURORA_IMAGE:-docker.fluence.dev/aurora:main-9e7523f-4-1}"
+    pull_policy: always
     ports:
       - 8545:8545
     networks:
@@ -15,6 +16,7 @@ services:
 
   ipfs:
     image: ipfs/go-ipfs
+    pull_policy: always
     ports:
       - 5001:5001
       - 4001:4001
@@ -28,6 +30,7 @@ services:
 
   nox-1:
     image: ${NOX_IMAGE:-fluencelabs/nox:unstable_minimal}"
+    pull_policy: always
     ports:
       - 7771:7771
       - 9991:9991
@@ -59,6 +62,7 @@ services:
 
   nox-2:
     image: ${NOX_IMAGE:-fluencelabs/nox:unstable_minimal}"
+    pull_policy: always
     ports:
       - 7772:7772
       - 9992:9992
@@ -89,6 +93,7 @@ services:
 
   nox-3:
     image: ${NOX_IMAGE:-fluencelabs/nox:unstable_minimal}"
+    pull_policy: always
     ports:
       - 7773:7773
       - 9993:9993
@@ -119,6 +124,7 @@ services:
 
   nox-4:
     image: ${NOX_IMAGE:-fluencelabs/nox:unstable_minimal}"
+    pull_policy: always
     ports:
       - 7774:7774
       - 9994:9994
@@ -149,6 +155,7 @@ services:
 
   nox-5:
     image: ${NOX_IMAGE:-fluencelabs/nox:unstable_minimal}"
+    pull_policy: always
     ports:
       - 7775:7775
       - 9995:9995
@@ -179,6 +186,7 @@ services:
 
   nox-6:
     image: ${NOX_IMAGE:-fluencelabs/nox:unstable_minimal}"
+    pull_policy: always
     ports:
       - 7776:7776
       - 9996:9996

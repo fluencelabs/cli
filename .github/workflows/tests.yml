@@ -115,7 +115,6 @@ jobs:
         uses: isbang/compose-action@v1.4.1
         with:
           compose-file: ".github/e2e/docker-compose.yml"
-          up-flags: "--pull=always"
           down-flags: "--volumes"
 
       - name: Setup Rust toolchain
