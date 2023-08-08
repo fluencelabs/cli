@@ -111,11 +111,15 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
+      # - name: Run nox network
+      #   uses: isbang/compose-action@v1.5.1
+      #   with:
+      #     compose-file: ".github/e2e/docker-compose.yml"
+      #     down-flags: "--volumes"
+
       - name: Run nox network
-        uses: isbang/compose-action@v1.5.1
-        with:
-          compose-flags: "-f .github/e2e/docker-compose.yml"
-          down-flags: "--volumes"
+        run: |
+          docker compose -f .github/e2e/docker-compose.yml up -d
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -200,3 +204,8 @@ jobs:
       - name: Dump nox logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
+
+      - name: Post Run nox network
+        if: always()
+        run: |
+          docker compose -f .github/e2e/docker-compose.yml down --volumes
