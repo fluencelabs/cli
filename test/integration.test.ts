@@ -316,14 +316,18 @@ service NewService2("${NEW_SERVICE_2_NAME}"):
       // Jest has a global timeout for each test and if it runs out test will fail
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const res = await fluence({
-          args: ["run"],
-          flags: {
-            f: "runDeployedServices()",
-            quiet: true,
-          },
-          cwd,
-        });
+        let res = '[]'
+        try {
+          res = await fluence({
+            args: ["run"],
+            flags: {
+              f: "runDeployedServices()",
+              quiet: true,
+            },
+            cwd,
+          });
+        } catch {
+        }
 
         const parsedRes = JSON.parse(res);
         assert(Array.isArray(parsedRes));
