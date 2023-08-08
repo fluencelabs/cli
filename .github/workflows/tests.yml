@@ -114,21 +114,10 @@ jobs:
           echo "nox image used for tests is $nox"
           echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
 
-          # set deal-aurora
-          case ${{ inputs.deal-aurora-image }} in
-          # if deal-aurora image is not passed from e2e set
-          'null')
-          ;;
-          # else set nox image to snapshot passed from e2e
-          *)
-            nox=${{ inputs.nox-image }}
-          ;;
-          esac
-
       - name: Set deal-aurora version
-        if: ${{ inputs.deal-aurora-image != 'null' }}
+        if: inputs.deal-aurora-image != 'null'
         run: |
-          deal-aurora=${{ inputs.deal-aurora-image }}
+          deal-aurora='${{ inputs.deal-aurora-image }}'
 
           echo "deal-aurora image used for tests is $deal-aurora"
           echo "DEAL_AURORA_IMAGE=${deal-aurora}" >> $GITHUB_ENV
