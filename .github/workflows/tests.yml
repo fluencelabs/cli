@@ -93,7 +93,11 @@ jobs:
 
       - name: Use nox version from version.json file
         run: |
-          nox="$(jq .nox src/versions.json -r)"
+          case ${{ inputs.nox-image }} in
+          '') nox="$(jq .nox src/versions.json -r)" ;;
+          *) nox=${{ inputs.nox-image }} ;;
+          esac
+
           echo "nox image used for tests is $nox"
           echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
 
