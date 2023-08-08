@@ -414,7 +414,7 @@ import "${AQUA_WORKERS_FILE_NAME}"
 import "services.aqua"
 
 -- IMPORTANT: Add exports for all functions that you want to run
-export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
+export helloWorld, helloWorldRemote, getInfo, getInfos
 
 -- DOCUMENTATION:
 -- https://fluence.dev
