@@ -114,7 +114,7 @@ jobs:
       - name: Run nox network
         uses: isbang/compose-action@v1.5.1
         with:
-          compose-file: ".github/e2e/docker-compose.yml"
+          compose-flags: "-f .github/e2e/docker-compose.yml"
           down-flags: "--volumes"
 
       - name: Setup Rust toolchain
