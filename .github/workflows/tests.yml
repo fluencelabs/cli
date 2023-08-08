@@ -107,7 +107,7 @@ jobs:
         run: docker pull ${{ env.NOX_IMAGE }}
 
       - name: Run nox network
-        uses: isbang/compose-action@v1.4.1
+        uses: isbang/compose-action@v1.5.1
         with:
           compose-file: ".github/e2e/docker-compose.yml"
           down-flags: "--volumes"
