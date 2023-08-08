@@ -482,7 +482,6 @@ import {
   helloWorldRemote,
   getInfo,
   getInfos,
-  getInfosInParallel,
 } from "./aqua/main.js";
 
 const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
@@ -497,7 +496,6 @@ const main = async () => {
   const helloWorldResult = await helloWorld("Fluence");
   const helloWorldRemoteResult = await helloWorldRemote("Fluence");
   const getInfoResult = await getInfo();
-  const getInfosInParallelResult = await getInfosInParallel(peerIds);
 
   console.log(helloWorldResult);
 
