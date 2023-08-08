@@ -99,8 +99,7 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
     promptConfirmTx(flags.privKey);
     await waitTx(tx);
 
-    const provider = await signer.getAddress();
-    const free = await matcher.getFreeWorkersSolts(provider, bytes);
+    const free = await matcher.getFreeWorkersSolts(bytes);
 
     this.log(
       color.green(
