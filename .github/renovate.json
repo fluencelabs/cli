@@ -9,9 +9,18 @@
     {
       "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
-        "\"nox\": \"fluencelabs/(?<depName>nox):(?<currentValue>[^\"\n]+)\""
+        "\"nox\": \"fluencelabs/(?<lookupName>[^:]+):(?<currentValue>[^\"\n]+)\""
       ],
-      "datasourceTemplate": "docker"
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "nox"
+    },
+    {
+      "fileMatch": ["^.github/e2e/docker-compose\\.yml$"],
+      "matchStrings": [
+        "image:\\s+\"${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "nox"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
@@ -36,6 +45,13 @@
     },
     {
       "matchPackagePrefixes": ["@fluencelabs/"],
+      "schedule": ["at any time"],
+      "prPriority": 5
+    },
+    {
+      "matchManagers": ["regex"],
+      "matchDepNames": ["nox"],
+      "groupName": "nox",
       "schedule": ["at any time"],
       "prPriority": 5
     }
