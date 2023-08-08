@@ -15,11 +15,9 @@ func runDeployedServices() -> *Answer:
     workersInfo <- getWorkersInfo()
     installationSpells = workersInfo.hosts.defaultWorker!.installationSpells
     answers: *Answer
-    for s <- installationSpells par:
+    for s <- installationSpells:
         on s.workerId via s.hostId:
             answer <- NewService.greeting("fluence")
             answers <<- Answer(answer=answer, peer=s.hostId)
 
-    join answers[installationSpells.length - 1]
-    par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
     <- answers

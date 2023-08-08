@@ -391,13 +391,11 @@ func runDeployedServices() -> *Answer:
     dealId = workersInfo.deals.defaultWorker!.dealId
     answers: *Answer
     workers <- resolveSubnetwork(dealId)
-    for w <- workers! par:
+    for w <- workers!:
         on w.metadata.peer_id via w.metadata.relay_id:
             answer <- MyService.greeting("fluence")
             answers <<- Answer(answer=answer, peer=w.metadata.relay_id!)
 
-    join answers[workers!.length - 1]
-    par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
     <- answers`;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
@@ -452,18 +450,6 @@ func getInfos(peers: []PeerId) -> []Info:
     for p <- peers:
         on p:
             infos <- Peer.identify()
-    <- infos
-
--- parallel computation
-func getInfosInParallel(peers: []PeerId) -> []Info:
-    infos: *Info
-    for p <- peers par:
-        on p:
-            infos <- Peer.identify()
-
-    join infos[Op.array_length(peers) - 1] -- "-1" because it's 0-based
-    par Peer.timeout(PARTICLE_TTL / 2, "")
-
     <- infos
 `;
 };
