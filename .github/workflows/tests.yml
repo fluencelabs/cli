@@ -91,6 +91,12 @@ jobs:
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
             kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
 
+      - name: Use nox version from version.json file
+        run: |
+          nox="$(jq .nox src/versions.json -r)"
+          echo "nox image uses for tests is $nox"
+          echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
+
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
