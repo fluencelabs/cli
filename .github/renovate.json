@@ -7,9 +7,7 @@
   "semanticCommitScope": "deps",
   "regexManagers": [
     {
-      "fileMatch": [
-        "^src/versions\\.json$"
-      ],
+      "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
         "\"nox\": \"fluencelabs/(?<lookupName>[^:]+):(?<currentValue>[^\"\n]+)\""
       ],
@@ -17,9 +15,7 @@
       "depNameTemplate": "nox"
     },
     {
-      "fileMatch": [
-        "^.github/e2e/docker-compose\\.yml$",
-      ],
+      "fileMatch": ["^.github/e2e/docker-compose\\.yml$"],
       "matchStrings": [
         "image:\\s+\"${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
       ],
@@ -58,6 +54,6 @@
       "groupName": "nox",
       "schedule": ["at any time"],
       "prPriority": 5
-    },
+    }
   ]
 }
