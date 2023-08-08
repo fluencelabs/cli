@@ -117,10 +117,10 @@ jobs:
       - name: Set deal-aurora version
         if: inputs.deal-aurora-image != 'null'
         run: |
-          deal-aurora='${{ inputs.deal-aurora-image }}'
+          deal_aurora=${{ inputs.deal-aurora-image }}
 
-          echo "deal-aurora image used for tests is $deal-aurora"
-          echo "DEAL_AURORA_IMAGE=${deal-aurora}" >> $GITHUB_ENV
+          echo "deal-aurora image used for tests is $deal_aurora"
+          echo "DEAL_AURORA_IMAGE=${deal_aurora}" >> $GITHUB_ENV
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
