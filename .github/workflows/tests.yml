@@ -18,12 +18,13 @@ on:
       nox-image:
         description: "nox image tag"
         type: string
-        default: "fluencelabs/nox:unstable_minimal"
+        # default is set in .github/e2e/docker-compose.yml
+        default: "null"
       deal-aurora-image:
         description: "deal-aurora image tag"
         type: string
-        # default: "docker.fluence.dev/deal-aurora:latest"
-        default: "docker.fluence.dev/aurora:main-9e7523f-4-1"
+        # default is set in .github/e2e/docker-compose.yml
+        default: "null"
       marine-version:
         description: "marine version"
         type: string
@@ -56,8 +57,6 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
-  NOX_IMAGE: "${{ inputs.nox-image }}"
-  DEAL_AURORA_IMAGE: "${{ inputs.deal-aurora-image }}"
 
 jobs:
   tests:
@@ -96,6 +95,33 @@ jobs:
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
             kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
 
+      - name: Set nox version
+        run: |
+          # set nox image
+          case ${{ inputs.nox-image }} in
+          # if nox image is not passed from e2e read from versions.json
+          'null')
+            nox="$(jq .nox src/versions.json -r)"
+            # use minimal image
+            nox="${nox//nox:/nox:minimal_}"
+          ;;
+          # else set nox image to snapshot passed from e2e
+          *)
+            nox=${{ inputs.nox-image }}
+          ;;
+          esac
+
+          echo "nox image used for tests is $nox"
+          echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
+
+      - name: Set deal-aurora version
+        if: inputs.deal-aurora-image != 'null'
+        run: |
+          deal-aurora='${{ inputs.deal-aurora-image }}'
+
+          echo "deal-aurora image used for tests is $deal-aurora"
+          echo "DEAL_AURORA_IMAGE=${deal-aurora}" >> $GITHUB_ENV
+
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -103,14 +129,15 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Pull nox image
-        run: docker pull ${{ env.NOX_IMAGE }}
+      # - name: Run nox network
+      #   uses: isbang/compose-action@v1.5.1
+      #   with:
+      #     compose-file: ".github/e2e/docker-compose.yml"
+      #     down-flags: "--volumes"
 
       - name: Run nox network
-        uses: isbang/compose-action@v1.5.1
-        with:
-          compose-file: ".github/e2e/docker-compose.yml"
-          down-flags: "--volumes"
+        run: |
+          docker-compose -f .github/e2e/docker-compose.yml up -d
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -195,3 +222,8 @@ jobs:
       - name: Dump nox logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
+
+      - name: Post Run nox network
+        if: always()
+        run: |
+          docker-compose -f .github/e2e/docker-compose.yml down --volumes
