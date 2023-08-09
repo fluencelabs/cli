@@ -29,7 +29,7 @@ services:
         ipv4_address: 10.50.10.100
 
   nox-1:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.0}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.1}"
     pull_policy: always
     ports:
       - 7771:7771
@@ -61,7 +61,7 @@ services:
         ipv4_address: 10.50.10.10
 
   nox-2:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.0}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.1}"
     pull_policy: always
     ports:
       - 7772:7772
@@ -92,7 +92,7 @@ services:
         ipv4_address: 10.50.10.20
 
   nox-3:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.0}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.1}"
     pull_policy: always
     ports:
       - 7773:7773
@@ -123,7 +123,7 @@ services:
         ipv4_address: 10.50.10.30
 
   nox-4:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.0}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.1}"
     pull_policy: always
     ports:
       - 7774:7774
@@ -154,7 +154,7 @@ services:
         ipv4_address: 10.50.10.40
 
   nox-5:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.0}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.1}"
     pull_policy: always
     ports:
       - 7775:7775
@@ -185,7 +185,7 @@ services:
         ipv4_address: 10.50.10.50
 
   nox-6:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.0}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.1}"
     pull_policy: always
     ports:
       - 7776:7776
