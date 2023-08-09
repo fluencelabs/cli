@@ -35,7 +35,7 @@ jobs:
           registry-url: "https://npm.fluence.dev"
           cache: "pnpm"
 
-      - run: pnpm i
+      - run: yarn install
 
       - name: Setup golang
         uses: actions/setup-go@v4
@@ -46,7 +46,7 @@ jobs:
       - name: Run on each commit
         env:
           FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
-        run: pnpm on-each-commit
+        run: yarn on-each-commit
 
       - name: Auto-commit
         uses: stefanzweifel/git-auto-commit-action@v4

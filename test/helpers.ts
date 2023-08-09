@@ -15,9 +15,9 @@
  */
 
 import "@total-typescript/ts-reset";
-
 import assert from "node:assert";
 import { access, cp, rm, writeFile } from "node:fs/promises";
+import { arch, platform } from "node:os";
 import path from "node:path";
 
 import {
@@ -53,7 +53,7 @@ type CliArg = {
 
 const pathToFluenceExecutable = path.join(
   process.cwd(),
-  path.join("tmp", "linux-x64", CLI_NAME, "bin", CLI_NAME),
+  path.join("tmp", `${platform()}-${arch()}`, CLI_NAME, "bin", CLI_NAME),
 );
 
 export const fluence = async ({

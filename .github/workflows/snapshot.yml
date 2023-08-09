@@ -89,7 +89,7 @@ jobs:
           registry-url: "https://npm.fluence.dev"
           cache: "pnpm"
 
-      - run: pnpm i
+      - run: yarn install
 
       - name: Set js-client.api version
         if: inputs.js-client-snapshots != 'null'

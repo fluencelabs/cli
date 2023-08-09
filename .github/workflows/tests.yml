@@ -154,7 +154,7 @@ jobs:
           registry-url: "https://npm.fluence.dev"
           cache: "pnpm"
 
-      - run: pnpm i
+      - run: yarn install
 
       - name: Set js-client.api version
         if: inputs.js-client-snapshots != 'null'
@@ -213,7 +213,7 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: pnpm test
+        run: yarn test-linux-x64
 
       - name: Cleanup
         if: always()

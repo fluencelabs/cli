@@ -32,4 +32,4 @@ When you contribute, you have to be aware that your contribution is covered by *
        `export const RUST_PEER_IMAGE="fluencelabs/nox:minimal"`))
     1. run `docker compose up -d`
     1. `cd` back to repo root dir. Set env variable `FLUENCE_ENV="local"` so tests run against your local peers
-    1. run `yarn test` which will lint and check the code, build it, package it, prepare the tests and run them
+    1. run `yarn test-linux-x64` or `yarn test-darwin-arm64` which will lint and check the code, build it, package it, prepare the tests and run them
