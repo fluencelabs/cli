@@ -21,7 +21,7 @@
     {
       "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
-        "\"(?<depName>@fluencelabs\/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\""
+        "\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],
       "matchStringsStrategy": "any",
       "datasourceTemplate": "npm"
