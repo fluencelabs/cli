@@ -43,6 +43,7 @@ import {
 } from "../../lib/const.js";
 import { haltCountly } from "../../lib/countly.js";
 import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
+import { updateAquaServiceInterfaceFile } from "../../lib/helpers/generateServiceInterface.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { exitCli, initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
@@ -104,6 +105,17 @@ export default class REPL extends Command {
         flags["marine-build-args"],
       );
 
+    const isServiceListedInFluenceConfig =
+      maybeFluenceConfig?.services?.[nameOrPathOrUrl] !== undefined;
+
+    if (isServiceListedInFluenceConfig) {
+      await updateAquaServiceInterfaceFile(
+        { [nameOrPathOrUrl]: getModuleWasmPath(facadeModuleConfig) },
+        maybeFluenceConfig?.services,
+        marineCli,
+      );
+    }
+
     stopSpinner();
 
     const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
@@ -163,7 +175,9 @@ const ensureServiceConfig = async (
   if (readonlyServiceConfig === null) {
     stopSpinner(color.red("error"));
     return commandObj.error(
-      `No service config at ${color.yellow(serviceOrServiceDirPathOrUrl)}`,
+      `No service config found at ${color.yellow(
+        serviceOrServiceDirPathOrUrl,
+      )}`,
     );
   }
 

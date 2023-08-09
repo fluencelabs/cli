@@ -50,18 +50,14 @@ import {
   getModuleWasmPath,
   isUrl,
 } from "../lib/helpers/downloadFile.js";
-import { generateAquaInterfaceForService } from "../lib/helpers/generateServiceInterface.js";
 import type { MarineCLI } from "../lib/marineCli.js";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
+import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import {
-  ensureFluenceAquaServicesPath,
-  getCargoTomlPath,
-  projectRootDir,
-} from "./paths.js";
+import { getCargoTomlPath, projectRootDir } from "./paths.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -256,27 +252,10 @@ export const build = async ({
     },
   );
 
-  // generate interfaces for all services
-  const serviceInterfaces = [
-    ...new Set(
-      await Promise.all(
-        Object.entries(serviceNamePathToFacadeMap).map(
-          ([serviceId, pathToFacadeWasm]) => {
-            return generateAquaInterfaceForService({
-              serviceId,
-              pathToFacadeWasm,
-              marineCli,
-            });
-          },
-        ),
-      ),
-    ),
-  ];
-
-  await writeFile(
-    await ensureFluenceAquaServicesPath(),
-    `${serviceInterfaces.join("\n\n")}\n`,
-    FS_OPTIONS,
+  await updateAquaServiceInterfaceFile(
+    serviceNamePathToFacadeMap,
+    resolveDeployInfosArg.fluenceConfig.services,
+    marineCli,
   );
 
   return serviceInfoWithModuleConfigs;

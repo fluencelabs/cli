@@ -44,6 +44,7 @@ import {
   FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
   CLI_NAME_FULL,
   getMainAquaFileContent,
+  READMEs,
 } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
@@ -57,6 +58,7 @@ import {
   getGitignorePath,
   projectRootDir,
   setProjectRootDir,
+  getREADMEPath,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import versions from "../versions.json" assert { type: "json" };
@@ -140,21 +142,49 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   const fluenceConfig = await initNewFluenceConfig();
 
   await writeFile(
+    await ensureSrcAquaMainPath(),
+    getMainAquaFileContent(template !== "quickstart"),
+    FS_OPTIONS,
+  );
+
+  await writeFile(
+    await ensureVSCodeExtensionsJsonPath(),
+    jsonStringify({
+      recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
+    }) + "\n",
+    FS_OPTIONS,
+  );
+
+  await ensureAquaImports({
+    generateSettingsJson: true,
+    maybeFluenceConfig: fluenceConfig,
+  });
+
+  await writeFile(
     getGitignorePath(),
     RECOMMENDED_GITIGNORE_CONTENT,
     FS_OPTIONS,
   );
 
+  const workersConfig = await initNewWorkersConfig();
+  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+  await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
+
   switch (template) {
     case "quickstart": {
       const serviceName = "myService";
-      const servicePath = join(await ensureSrcServicesDir(), serviceName);
-      const pathToModuleDir = join(servicePath, "modules", serviceName);
+
+      const absoluteServicePath = join(
+        await ensureSrcServicesDir(),
+        serviceName,
+      );
+
+      const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
       await generateNewModule(pathToModuleDir);
 
       await initNewReadonlyServiceConfig(
-        servicePath,
-        relative(servicePath, pathToModuleDir),
+        absoluteServicePath,
+        relative(absoluteServicePath, pathToModuleDir),
         serviceName,
       );
 
@@ -162,7 +192,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
         serviceName,
         fluenceConfig,
         marineCli: await initMarineCli(fluenceConfig),
-        pathOrUrl: relative(projectRootDir, servicePath),
+        absolutePathOrUrl: absoluteServicePath,
         interactive: false,
       });
 
@@ -187,28 +217,6 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
       return _exhaustiveCheck;
     }
   }
-
-  await writeFile(
-    await ensureSrcAquaMainPath(),
-    getMainAquaFileContent(template !== "quickstart"),
-    FS_OPTIONS,
-  );
-
-  await writeFile(
-    await ensureVSCodeExtensionsJsonPath(),
-    jsonStringify({
-      recommendations: ["redhat.vscode-yaml", "FluenceLabs.aqua"],
-    }) + "\n",
-    FS_OPTIONS,
-  );
-
-  await ensureAquaImports({
-    generateSettingsJson: true,
-    maybeFluenceConfig: fluenceConfig,
-  });
-
-  const workersConfig = await initNewWorkersConfig();
-  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
 
   commandObj.logToStderr(
     color.magentaBright(

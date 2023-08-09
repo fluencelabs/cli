@@ -27,10 +27,10 @@ import { type Flags } from "./typeHelpers.js";
 type MarineCliInput =
   | {
       args: ["aqua"] | ["aqua", string];
-      flags?: never;
+      flags?: Flags<"id" | "service">;
     }
   | {
-      args: ["build", ...("-p" | string)[]];
+      args: ["build", ...string[]];
       flags?: Flags<"release">;
     };
 

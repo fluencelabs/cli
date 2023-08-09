@@ -42,6 +42,7 @@ import {
   VSCODE_DIR_NAME,
   AQUA_WORKERS_FILE_NAME,
   SPELLS_DIR_NAME,
+  README_MD_FILE_NAME,
 } from "./const.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
@@ -170,6 +171,10 @@ export const getCargoTomlPath = (): string => {
   return path.join(projectRootDir, CARGO_TOML);
 };
 
+export const getREADMEPath = (): string => {
+  return path.join(projectRootDir, README_MD_FILE_NAME);
+};
+
 // Project .fluence paths:
 
 export const getFluenceDir = (): string => {
@@ -186,6 +191,10 @@ export const getFluenceAquaDir = (): string => {
 
 export const ensureFluenceAquaDir = async (): Promise<string> => {
   return ensureDir(getFluenceAquaDir());
+};
+
+export const getFluenceAquaServicesPath = (): string => {
+  return path.join(getFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
 };
 
 export const ensureFluenceAquaServicesPath = async (): Promise<string> => {

@@ -389,20 +389,17 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
 };
 
 const fluenceRun = async (args: RunArgs) => {
-  const [{ functionCall, errors }] = await Promise.all([
-    compileAquaCallFromPath({
-      funcCall: args.funcCall,
-      data: args.runData,
-      filePath: args.filePath,
-      imports: args.imports,
-      constants: args.const ?? [],
-      logLevel: args.logLevelCompiler,
-      noXor: args["no-xor"],
-      noRelay: args["no-relay"],
-      tracing: args.tracing,
-    }),
-    initFluenceClient(args, args.maybeFluenceConfig),
-  ]);
+  const { functionCall, errors } = await compileAquaCallFromPath({
+    funcCall: args.funcCall,
+    data: args.runData,
+    filePath: args.filePath,
+    imports: args.imports,
+    constants: args.const ?? [],
+    logLevel: args.logLevelCompiler,
+    noXor: args["no-xor"],
+    noRelay: args["no-relay"],
+    tracing: args.tracing,
+  });
 
   if (errors.length > 0) {
     commandObj.error(errors.join("\n"));
@@ -413,6 +410,8 @@ const fluenceRun = async (args: RunArgs) => {
   } else if (args["print-beautified-air"]) {
     commandObj.log(beautify(functionCall.script));
   }
+
+  await initFluenceClient(args, args.maybeFluenceConfig);
 
   const result = await callAquaFunction({
     args: args.runData ?? {},

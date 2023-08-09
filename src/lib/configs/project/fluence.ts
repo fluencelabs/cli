@@ -263,6 +263,8 @@ const dealSchema: JSONSchemaType<Deal> = {
   required: [],
 } as const;
 
+const validateDealSchema = ajv.compile(dealSchema);
+
 const workerConfigSchema: JSONSchemaType<Worker> = {
   type: "object",
   description: "Worker config",
@@ -294,6 +296,16 @@ const hostConfigSchema: JSONSchemaType<Host> = {
   },
   required: ["peerIds"],
 };
+
+const validateHostsSchema = ajv.compile(hostConfigSchema);
+
+export function assertIsArrayWithHostsOrDeals(
+  unknownArr: [string, unknown][],
+): asserts unknownArr is [string, Host | Deal][] {
+  unknownArr.forEach(([, unknown]) => {
+    assert(validateHostsSchema(unknown) || validateDealSchema(unknown));
+  });
+}
 
 const configSchemaV2: JSONSchemaType<ConfigV2> = {
   ...configSchemaV1Obj,
@@ -475,14 +487,16 @@ const getDefaultConfig = async (): Promise<string> => {
 
 # A map with worker names as keys and worker configs as values
 workers:
-  ${DEFAULT_WORKER_NAME}: # worker name
+# # worker name
+  ${DEFAULT_WORKER_NAME}:
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 
 
 # A map with worker names as keys and deals as values
 deals:
-  ${DEFAULT_WORKER_NAME}: # worker name
+# # worker name
+  ${DEFAULT_WORKER_NAME}:
     minWorkers: ${MIN_WORKERS} # required amount of workers to activate the deal
     targetWorkers: ${TARGET_WORKERS} # max amount of workers in the deal
 
@@ -504,12 +518,14 @@ version: 2
 # # Service names must start with a lowercase letter and contain only letters numbers and underscores.
 # # You can use \`fluence service new\` or \`fluence service add\` command to add a service
 # services:
-#   myService: # service name
+#   # service name
+#   myService:
 #     # Path to service directory, service config or URL to the tar.gz archive that contains the service
 #     get: "src/services/myService"
 #     # A map of modules that you want to override for this service
 #     overrideModules:
-#       moduleName: # module name
+#       # module name
+#       moduleName:
 #         # environment variables accessible by a particular module
 #         # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
 #         # Module environment variables could be examined with repl
@@ -546,7 +562,8 @@ version: 2
 #
 # # A map with spell names as keys and spell configs as values
 # spells:
-#   mySpell: # spell name
+#   # spell name
+#   mySpell:
 #     # Path to spell config or directory with spell config
 #     get: "src/spells/mySpell"
 #
@@ -645,7 +662,8 @@ version: 2
 #
 # # if you want to deploy your services to specific peerIds. Soon it will be deprecated in favor of \`deals\` property
 # hosts:
-#   ${DEFAULT_WORKER_NAME}: # worker name
+#   # worker name
+#   ${DEFAULT_WORKER_NAME}:
 #     peerIds:
 #       - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
 `;
