@@ -9,7 +9,7 @@
     {
       "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
-        "\"nox\": \"fluencelabs/(?<lookupName>[^:]+):(?<currentValue>[^\"\n]+)\""
+        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
       ],
       "datasourceTemplate": "docker",
       "depNameTemplate": "nox"
