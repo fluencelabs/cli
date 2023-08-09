@@ -15,55 +15,11 @@
  */
 
 import assert from "node:assert";
-import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { join, sep } from "node:path";
+import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import { compile } from "./lib/aqua.js";
 import { AQUA_EXT, FS_OPTIONS } from "./lib/const.js";
-
-const getAquaDependencyImports = async (
-  peerDependency: string,
-): Promise<Array<string>> => {
-  const peerDependencyPackageJSONPath = join(
-    "node_modules",
-    peerDependency,
-    "package.json",
-  );
-
-  const peerDependencyPackageJSON = await readFile(
-    peerDependencyPackageJSONPath,
-    FS_OPTIONS,
-  );
-
-  const parsedPackageJSON = JSON.parse(peerDependencyPackageJSON);
-
-  assert(
-    typeof parsedPackageJSON === "object" &&
-      parsedPackageJSON !== null &&
-      "dependencies" in parsedPackageJSON,
-  );
-
-  const paths = Object.entries(parsedPackageJSON?.dependencies ?? {}).map(
-    ([name, version]) => {
-      return join(
-        "node_modules",
-        ".pnpm",
-        `${name.replace(sep, "+")}@${String(version)}`,
-        "node_modules",
-      );
-    },
-  );
-
-  const validImports = await Promise.allSettled(
-    paths.map((p) => {
-      return access(p);
-    }),
-  );
-
-  return paths.filter((_, i) => {
-    return validImports[i]?.status === "fulfilled";
-  });
-};
 
 const VERSIONS_DIR_PATH = join("src", "versions");
 const SRC_LIB_PATH = join("src", "lib");
@@ -100,17 +56,7 @@ const compileInstallationSpellAqua = async (tracing = false) => {
           INSTALLATION_SPELL_AQUA_DIR_PATH,
           `${fileName}.${AQUA_EXT}`,
         ),
-        imports: [
-          join(
-            "node_modules",
-            ".pnpm",
-            "@fluencelabs+aqua-lib@0.7.0",
-            "node_modules",
-          ),
-          ...(await getAquaDependencyImports(
-            join("@fluencelabs", "installation-spell"),
-          )),
-        ],
+        imports: ["node_modules"],
         targetType: "ts",
         tracing,
       });

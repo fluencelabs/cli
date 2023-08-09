@@ -17,7 +17,7 @@
 import "@total-typescript/ts-reset";
 
 import assert from "node:assert";
-import { access, cp, rm } from "node:fs/promises";
+import { access, cp, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -26,7 +26,7 @@ import {
   testNet,
 } from "@fluencelabs/fluence-network-environment";
 
-import { PACKAGE_NAME, type Template } from "../src/lib/const.js";
+import { CLI_NAME, type Template } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { local } from "../src/lib/localNodes.js";
 import type { FluenceEnv } from "../src/lib/multiaddres.js";
@@ -45,7 +45,7 @@ export const multiaddrs = {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
 }[process.env[FLUENCE_ENV] as FluenceEnv];
 
-type FloxArg = {
+type CliArg = {
   args?: ExecPromiseArg["args"];
   flags?: ExecPromiseArg["flags"];
   cwd?: string;
@@ -53,14 +53,14 @@ type FloxArg = {
 
 const pathToFluenceExecutable = path.join(
   process.cwd(),
-  path.join("tmp", "node_modules", ...PACKAGE_NAME.split("/"), "bin", "run.js"),
+  path.join("tmp", "linux-x64", CLI_NAME, "bin", CLI_NAME),
 );
 
 export const fluence = async ({
   args = [],
   flags,
   cwd = process.cwd(),
-}: FloxArg): ReturnType<typeof execPromise> => {
+}: CliArg): ReturnType<typeof execPromise> => {
   return execPromise({
     command: pathToFluenceExecutable,
     args,
@@ -88,17 +88,24 @@ export const initFirstTime = async (template: Template) => {
       flags: { template, "no-input": true },
     });
 
-    if (template === "js") {
+    if (template === "js" || template === "ts") {
+      const cwd =
+        template === "js"
+          ? getDefaultJSDirPath(templatePath)
+          : getDefaultTSDirPath(templatePath);
+
+      await writeFile(path.join(cwd, "yarn.lock"), "");
+
       await execPromise({
-        command: "pnpm",
-        args: ["i"],
-        options: { cwd: getDefaultJSDirPath(templatePath) },
+        command: "yarn",
+        args: [],
+        options: { cwd },
       });
-    } else if (template === "ts") {
+
       await execPromise({
-        command: "pnpm",
-        args: ["i"],
-        options: { cwd: getDefaultTSDirPath(templatePath) },
+        command: "yarn",
+        args: ["install"],
+        options: { cwd },
       });
     }
   }

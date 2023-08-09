@@ -9,7 +9,8 @@
     "module": "nodenext",
     "resolveJsonModule": true,
     "importsNotUsedAsValues": "remove",
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "lib": ["es2023"]
   },
   "ts-node": {
     "esm": true

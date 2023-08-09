@@ -131,7 +131,10 @@ export const execPromise = async ({
         clearTimeout(execTimeout);
       }
 
-      if (stderr.includes("linker `cc` not found")) {
+      if (
+        stderr.includes("linker `cc` not found") ||
+        stderr.includes("linking with `cc` failed")
+      ) {
         const expectedErrorMessage = `\n${color.yellow(
           MARINE_CARGO_DEPENDENCY,
         )} requires ${color.yellow(

@@ -22,9 +22,9 @@ import {
   testNet,
   type Node,
 } from "@fluencelabs/fluence-network-environment";
+import { multiaddr } from "@multiformats/multiaddr";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Multiaddr } from "multiaddr";
 
 import { commandObj } from "./commandObj.js";
 import { getIsStringUnion } from "./typeHelpers.js";
@@ -146,7 +146,7 @@ export const resolvePeerId = (peerId: string) => {
 };
 
 export const getPeerId = (addr: string): string => {
-  const id = new Multiaddr(addr).getPeerId();
+  const id = multiaddr(addr).getPeerId();
 
   if (id === null) {
     return commandObj.error(

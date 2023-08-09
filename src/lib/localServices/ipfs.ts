@@ -16,8 +16,8 @@
 
 import { access, readFile } from "node:fs/promises";
 
+import { multiaddr, protocols } from "@multiformats/multiaddr";
 import { CID, create, type IPFSHTTPClient } from "ipfs-http-client";
-import { Multiaddr, protocols } from "multiaddr";
 
 import { commandObj } from "../commandObj.js";
 import { registerIpfsClient } from "../compiled-aqua/installation-spell/files.js";
@@ -30,11 +30,9 @@ import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
 /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
 
-const createIPFSClient = (multiaddr: string) => {
+const createIPFSClient = (multiaddrString: string) => {
   return create(
-    new Multiaddr(multiaddr)
-      .decapsulateCode(protocols.names["p2p"]?.code ?? 421)
-      .toOptions(),
+    multiaddr(multiaddrString).decapsulateCode(protocols(421).code).toOptions(),
   );
 };
 

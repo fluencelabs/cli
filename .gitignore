@@ -28,3 +28,12 @@ src/js/src/aqua
 src/lib/compiled-aqua
 src/lib/compiled-aqua-with-tracing
 src/versions
+
+# yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
