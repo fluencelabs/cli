@@ -17,8 +17,9 @@
     {
       "fileMatch": ["^\\.github/e2e/docker-compose\\.yml$"],
       "matchStrings": [
-        "image:\\s+\"${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
+        "\\s+image:\\s+\"${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
       ],
+      "matchStringsStrategy": "any",
       "datasourceTemplate": "docker",
       "depNameTemplate": "nox"
     },
@@ -27,10 +28,12 @@
       "matchStrings": [
         "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
       ],
+      "matchStringsStrategy": "any",
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
+      "matchStringsStrategy": "any",
       "matchStrings": [
         "\"cargo\":\\s*\\{[^}]*\"(?<depName>[\\w.-]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],
