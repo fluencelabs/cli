@@ -7,19 +7,14 @@
   "semanticCommitScope": "deps",
   "regexManagers": [
     {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
+      "fileMatch": [
+        "^src/versions\\.json$",
+        "^\\.github/e2e/docker-compose\\.yml$"
       ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "nox"
-    },
-    {
-      "fileMatch": ["^\\.github/e2e/docker-compose\\.yml$"],
       "matchStrings": [
-        "\\s+image:\\s+\"\\${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
+        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n",
+        "image:\\s+\"\\${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
       ],
-      "matchStringsStrategy": "any",
       "datasourceTemplate": "docker",
       "depNameTemplate": "nox"
     },
