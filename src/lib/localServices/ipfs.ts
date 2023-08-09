@@ -32,7 +32,9 @@ import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
 const createIPFSClient = (multiaddrString: string) => {
   return create(
-    multiaddr(multiaddrString).decapsulateCode(protocols(421).code).toOptions(),
+    multiaddr(multiaddrString)
+      .decapsulateCode(protocols("p2p").code)
+      .toOptions(),
   );
 };
 
