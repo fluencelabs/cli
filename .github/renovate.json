@@ -15,7 +15,7 @@
       "depNameTemplate": "nox"
     },
     {
-      "fileMatch": ["^.github/e2e/docker-compose\\.yml$"],
+      "fileMatch": ["^\\.github/e2e/docker-compose\\.yml$"],
       "matchStrings": [
         "image:\\s+\"${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
       ],
