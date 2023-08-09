@@ -7,36 +7,31 @@
   "semanticCommitScope": "deps",
   "regexManagers": [
     {
-      "fileMatch": ["^src/versions\\.json$"],
-      "matchStrings": [
-        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
+      "fileMatch": [
+        "^src/versions\\.json$",
+        "^\\.github/e2e/docker-compose\\.yml$"
       ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "nox"
-    },
-    {
-      "fileMatch": ["^\\.github/e2e/docker-compose\\.yml$"],
       "matchStrings": [
-        "\\s+image:\\s+\"${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
+        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n",
+        "image:\\s+\"\\${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
       ],
-      "matchStringsStrategy": "any",
       "datasourceTemplate": "docker",
       "depNameTemplate": "nox"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
-        "\"npm\":\\s*\\{[^}]*\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\"[^}]*\\}"
+        "\"(?<depName>@fluencelabs/[^\"]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],
       "matchStringsStrategy": "any",
       "datasourceTemplate": "npm"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
-      "matchStringsStrategy": "any",
       "matchStrings": [
-        "\"cargo\":\\s*\\{[^}]*\"(?<depName>[\\w.-]+)\": \"(?<currentValue>[^\"\n]+)\""
+        "\"(?<depName>[marine|mrepl|marine\\-rs\\-sdk|marine\\-rs\\-sdk\\-test]+)\": \"(?<currentValue>[^\"\n]+)\""
       ],
+      "matchStringsStrategy": "any",
       "datasourceTemplate": "crate"
     }
   ],
