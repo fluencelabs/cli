@@ -209,7 +209,8 @@ USAGE
     [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Names of workers to deploy (by default all deals from 'deals' property in fluence.yaml are deployed)
+  WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
+                'deals' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>        Key pair name
@@ -799,7 +800,8 @@ USAGE
     [--marine-build-args <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
+  WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
+                'hosts' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --key-pair-name=<name>        Key pair name

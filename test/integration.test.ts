@@ -139,12 +139,10 @@ describe("integration tests", () => {
         FS_OPTIONS,
       );
 
-      const NEW_SERVICE_NAME = "newService";
-
-      const pathToNewServiceDir = join("src", "services", NEW_SERVICE_NAME);
+      const pathToNewServiceDir = join("src", "services", WD_NEW_SERVICE_NAME);
 
       await fluence({
-        args: ["service", "new", NEW_SERVICE_NAME],
+        args: ["service", "new", WD_NEW_SERVICE_NAME],
         cwd,
       });
 
@@ -157,11 +155,7 @@ describe("integration tests", () => {
 
       let interfacesFileContent = await readInterfacesFile();
 
-      const NEW_SERVICE_INTERFACE = `service NewService("${NEW_SERVICE_NAME}"):
-  greeting(name: string) -> string
-`;
-
-      expect(interfacesFileContent).toBe(NEW_SERVICE_INTERFACE);
+      expect(interfacesFileContent).toBe(`${WD_NEW_SERVICE_INTERFACE}\n`);
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
@@ -176,19 +170,34 @@ describe("integration tests", () => {
 
       const pathToNewSpell = join("src", "spells", NEW_SPELL_NAME);
 
-      const NEW_SERVICE_2_NAME = "newService2";
+      // update first service module source code so it contains a struct
+
+      await writeFile(
+        join(
+          join(cwd, "src", "services", WD_NEW_SERVICE_NAME),
+          join("modules", WD_NEW_SERVICE_NAME, "src", "main.rs"),
+        ),
+        WD_MAIN_RS_CONTENT,
+        FS_OPTIONS,
+      );
 
       await fluence({
-        args: ["service", "new", NEW_SERVICE_2_NAME],
+        args: ["service", "new", WD_NEW_SERVICE_2_NAME],
         cwd,
       });
 
       interfacesFileContent = await readInterfacesFile();
 
-      expect(interfacesFileContent).toBe(`${NEW_SERVICE_INTERFACE}
-service NewService2("${NEW_SERVICE_2_NAME}"):
-  greeting(name: string) -> string
-`);
+      expect(interfacesFileContent).toBe(WD_SERVICE_INTERFACES);
+
+      await fluence({
+        args: ["build"],
+        cwd,
+      });
+
+      interfacesFileContent = await readInterfacesFile();
+
+      expect(interfacesFileContent).toBe(WD_UPDATED_SERVICE_INTERFACES);
 
       await fluence({
         args: ["spell", "new", NEW_SPELL_NAME],
@@ -222,7 +231,10 @@ service NewService2("${NEW_SERVICE_2_NAME}"):
           fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
       );
 
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = [NEW_SERVICE_NAME];
+      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = [
+        WD_NEW_SERVICE_2_NAME,
+      ];
+
       fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
 
@@ -378,3 +390,53 @@ const compileAqua = (cwd: string) => {
 const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
   return join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 };
+
+const WD_MAIN_RS_CONTENT = `#![allow(non_snake_case)]
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
+
+module_manifest!();
+
+pub fn main() {}
+
+#[marine]
+pub struct MyStruct {
+    a: i32,
+    b: i32,
+}
+
+#[marine]
+pub fn greeting() -> MyStruct {
+  MyStruct{
+    a: 1,
+    b: 2,
+  }
+}
+`;
+
+const WD_NEW_SERVICE_NAME = "newService";
+
+const WD_NEW_SERVICE_INTERFACE = `service NewService("${WD_NEW_SERVICE_NAME}"):
+  greeting(name: string) -> string`;
+
+const WD_NEW_SERVICE_2_NAME = "newService2";
+
+const WD_NEW_SERVICE_2_INTERFACE = `service NewService2("${WD_NEW_SERVICE_2_NAME}"):
+  greeting(name: string) -> string`;
+
+const WD_SERVICE_INTERFACES = `${WD_NEW_SERVICE_INTERFACE}
+
+
+${WD_NEW_SERVICE_2_INTERFACE}
+`;
+
+const WD_UPDATED_SERVICE_INTERFACES = `data MyStruct:
+  a: i32
+  b: i32
+
+service NewService("${WD_NEW_SERVICE_NAME}"):
+  greeting() -> MyStruct
+
+
+${WD_NEW_SERVICE_2_INTERFACE}
+`;
