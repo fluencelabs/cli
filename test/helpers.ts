@@ -16,7 +16,7 @@
 
 import "@total-typescript/ts-reset";
 import assert from "node:assert";
-import { access, cp, rm, writeFile } from "node:fs/promises";
+import { access, cp, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import path from "node:path";
 
@@ -94,16 +94,16 @@ export const initFirstTime = async (template: Template) => {
           ? getDefaultJSDirPath(templatePath)
           : getDefaultTSDirPath(templatePath);
 
-      await writeFile(path.join(cwd, "yarn.lock"), "");
+      // await writeFile(path.join(cwd, "yarn.lock"), "");
+
+      // await execPromise({
+      //   command: "yarn",
+      //   args: [],
+      //   options: { cwd },
+      // });
 
       await execPromise({
-        command: "yarn",
-        args: [],
-        options: { cwd },
-      });
-
-      await execPromise({
-        command: "yarn",
+        command: "npm",
         args: ["install"],
         options: { cwd },
       });
