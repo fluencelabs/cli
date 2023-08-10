@@ -2,7 +2,7 @@
   "name": "@fluencelabs/cli",
   "packageManager": "yarn@3.6.1",
   "type": "module",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "^0.3.2",
-    "@fluencelabs/aqua-api": "0.11.7",
+    "@fluencelabs/aqua-api": "0.11.10",
     "@fluencelabs/deal-aurora": "0.1.8",
     "@fluencelabs/fluence-network-environment": "^1.1.2",
     "@fluencelabs/js-client.api": "^0.12.0",

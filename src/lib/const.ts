@@ -391,13 +391,11 @@ func runDeployedServices() -> *Answer:
     dealId = workersInfo.deals.defaultWorker!.dealId
     answers: *Answer
     workers <- resolveSubnetwork(dealId)
-    for w <- workers! par:
+    for w <- workers!:
         on w.metadata.peer_id via w.metadata.relay_id:
             answer <- MyService.greeting("fluence")
             answers <<- Answer(answer=answer, peer=w.metadata.relay_id!)
 
-    join answers[workers!.length - 1]
-    par Peer.timeout(PARTICLE_TTL / 2, "TIMED OUT")
     <- answers`;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
@@ -416,7 +414,7 @@ import "${AQUA_WORKERS_FILE_NAME}"
 import "services.aqua"
 
 -- IMPORTANT: Add exports for all functions that you want to run
-export helloWorld, helloWorldRemote, getInfo, getInfos, getInfosInParallel
+export helloWorld, helloWorldRemote, getInfo, getInfos
 
 -- DOCUMENTATION:
 -- https://fluence.dev
@@ -453,18 +451,6 @@ func getInfos(peers: []PeerId) -> []Info:
         on p:
             infos <- Peer.identify()
     <- infos
-
--- parallel computation
-func getInfosInParallel(peers: []PeerId) -> []Info:
-    infos: *Info
-    for p <- peers par:
-        on p:
-            infos <- Peer.identify()
-
-    join infos[Op.array_length(peers) - 1] -- "-1" because it's 0-based
-    par Peer.timeout(PARTICLE_TTL / 2, "")
-
-    <- infos
 `;
 };
 
@@ -496,7 +482,6 @@ import {
   helloWorldRemote,
   getInfo,
   getInfos,
-  getInfosInParallel,
 } from "./aqua/main.js";
 
 const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
@@ -511,7 +496,6 @@ const main = async () => {
   const helloWorldResult = await helloWorld("Fluence");
   const helloWorldRemoteResult = await helloWorldRemote("Fluence");
   const getInfoResult = await getInfo();
-  const getInfosInParallelResult = await getInfosInParallel(peerIds);
 
   console.log(helloWorldResult);
 
