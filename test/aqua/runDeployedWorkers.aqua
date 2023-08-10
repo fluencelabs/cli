@@ -17,7 +17,7 @@ func runDeployedServices() -> *Answer:
     answers: *Answer
     for s <- installationSpells:
         on s.workerId via s.hostId:
-            answer <- NewService.greeting("fluence")
+            answer <- NewService2.greeting("fluence")
             answers <<- Answer(answer=answer, peer=s.hostId)
 
     <- answers
