@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.6.0...fluence-cli-v0.6.1) (2023-08-10)
+
+
+### Bug Fixes
+
+* fix service interface generation [fixes DXJ-445] ([#400](https://github.com/fluencelabs/cli/issues/400)) ([bb104d6](https://github.com/fluencelabs/cli/commit/bb104d6061937a6bca379dbd631b6512605c2c82))
+
 ## [0.6.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.5.4...fluence-cli-v0.6.0) (2023-08-09)
 
 
