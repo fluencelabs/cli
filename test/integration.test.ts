@@ -408,7 +408,7 @@ pub fn greeting() -> MyStruct {
 const WD_NEW_SERVICE_NAME = "newService";
 
 const WD_NEW_SERVICE_INTERFACE = `service NewService("${WD_NEW_SERVICE_NAME}"):
-greeting(name: string) -> string
+  greeting(name: string) -> string
 `;
 
 const WD_NEW_SERVICE_2_NAME = "newService2";
