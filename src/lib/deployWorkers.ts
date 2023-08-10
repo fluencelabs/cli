@@ -96,7 +96,7 @@ const handlePreviouslyDeployedWorkers = async (
 
   const confirmedWorkersNamesToDeploy = isInteractive
     ? await checkboxes({
-        message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
+        message: `These are workers that were previously deployed. Please select the ones you want to redeploy.`,
         options: previouslyDeployedWorkersNamesToBeDeployed,
         oneChoiceMessage(workerName) {
           return `Do you want to redeploy worker ${color.yellow(workerName)}`;

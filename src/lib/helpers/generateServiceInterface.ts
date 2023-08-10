@@ -22,7 +22,7 @@ import { FS_OPTIONS } from "../const.js";
 import type { MarineCLI } from "../marineCli.js";
 import { ensureFluenceAquaServicesPath } from "../paths.js";
 
-const SERVICE_DEFINITION_SEPARATOR = "\n\n";
+const SERVICE_DEFINITION_SEPARATOR = "\n\n\n";
 
 type GenerateServiceInterfaceArg = {
   serviceId: string;
@@ -53,12 +53,21 @@ const generateAquaInterfaceForService = async ({
   return interfaceDeclaration;
 };
 
-const getServiceIdFromServiceInterface = (serviceDefinition: string) => {
+const getServiceIdFromServiceInterface = (dataAndServiceDefinition: string) => {
+  const dataAndServiceDefinitionAr = dataAndServiceDefinition.split("\n\n");
+  const serviceDefinition = dataAndServiceDefinitionAr.pop();
+
+  assert(
+    serviceDefinition !== undefined &&
+      serviceDefinition.trim().startsWith("service"),
+    `Failed to parse service definition from ${dataAndServiceDefinition}`,
+  );
+
   const serviceId = serviceDefinition.split('"')[1];
 
   assert(
     serviceId !== undefined,
-    `Failed to parse service id from service definition: ${serviceDefinition}`,
+    `Failed to parse service id from service definition: ${dataAndServiceDefinition}`,
   );
 
   return serviceId;
