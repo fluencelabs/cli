@@ -155,7 +155,7 @@ describe("integration tests", () => {
 
       let interfacesFileContent = await readInterfacesFile();
 
-      expect(interfacesFileContent).toBe(WD_NEW_SERVICE_INTERFACE);
+      expect(interfacesFileContent).toBe(`${WD_NEW_SERVICE_INTERFACE}\n`);
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
@@ -183,6 +183,15 @@ describe("integration tests", () => {
 
       await fluence({
         args: ["service", "new", WD_NEW_SERVICE_2_NAME],
+        cwd,
+      });
+
+      interfacesFileContent = await readInterfacesFile();
+
+      expect(interfacesFileContent).toBe(WD_SERVICE_INTERFACES);
+
+      await fluence({
+        args: ["build"],
         cwd,
       });
 
@@ -408,10 +417,18 @@ pub fn greeting() -> MyStruct {
 const WD_NEW_SERVICE_NAME = "newService";
 
 const WD_NEW_SERVICE_INTERFACE = `service NewService("${WD_NEW_SERVICE_NAME}"):
-  greeting(name: string) -> string
-`;
+  greeting(name: string) -> string`;
 
 const WD_NEW_SERVICE_2_NAME = "newService2";
+
+const WD_NEW_SERVICE_2_INTERFACE = `service NewService2("${WD_NEW_SERVICE_2_NAME}"):
+  greeting(name: string) -> string`;
+
+const WD_SERVICE_INTERFACES = `${WD_NEW_SERVICE_INTERFACE}
+
+
+${WD_NEW_SERVICE_2_INTERFACE}
+`;
 
 const WD_UPDATED_SERVICE_INTERFACES = `data MyStruct:
   a: i32
@@ -421,6 +438,5 @@ service NewService("${WD_NEW_SERVICE_NAME}"):
   greeting() -> MyStruct
 
 
-service NewService2("${WD_NEW_SERVICE_2_NAME}"):
-  greeting(name: string) -> string
+${WD_NEW_SERVICE_2_INTERFACE}
 `;
