@@ -232,7 +232,7 @@ describe("integration tests", () => {
       );
 
       fluenceConfig.workers[DEFAULT_WORKER_NAME].services = [
-        WD_NEW_SERVICE_NAME,
+        WD_NEW_SERVICE_2_NAME,
       ];
 
       fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = [NEW_SPELL_NAME];
