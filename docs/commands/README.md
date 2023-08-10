@@ -800,7 +800,7 @@ USAGE
     [--marine-build-args <value>]
 
 ARGUMENTS
-  WORKER-NAMES  Comma separated names of workers to deploy. Example: worker1,worker2 (by default all workers from
+  WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
                 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
