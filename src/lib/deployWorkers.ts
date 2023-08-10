@@ -18,10 +18,10 @@ import assert from "node:assert";
 import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import { compileFromPath } from "@fluencelabs/aqua-api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { compile } from "./aqua.js";
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
@@ -96,7 +96,7 @@ const handlePreviouslyDeployedWorkers = async (
 
   const confirmedWorkersNamesToDeploy = isInteractive
     ? await checkboxes({
-        message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
+        message: `There are workers that were deployed previously. Please select the ones you want to redeploy.`,
         options: previouslyDeployedWorkersNamesToBeDeployed,
         oneChoiceMessage(workerName) {
           return `Do you want to redeploy worker ${color.yellow(workerName)}`;
@@ -283,7 +283,7 @@ export const prepareForDeploy = async ({
         spellConfig.aquaFilePath,
       );
 
-      const { errors, functions } = await compile({
+      const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,
         imports: aquaImports,
       });

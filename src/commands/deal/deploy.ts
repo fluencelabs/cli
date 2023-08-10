@@ -71,7 +71,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all deals from 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
+      description: `Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
