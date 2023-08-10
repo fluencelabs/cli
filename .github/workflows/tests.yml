@@ -142,19 +142,17 @@ jobs:
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2.4.0
-        with:
-          version: 8
-
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
         with:
           node-version: "18"
           registry-url: "https://npm.fluence.dev"
-          cache: "pnpm"
+          cache: "yarn"
 
-      - run: yarn install
+      - name: Run yarn install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
 
       - name: Set js-client.api version
         if: inputs.js-client-snapshots != 'null'
@@ -162,7 +160,7 @@ jobs:
         with:
           package: "@fluencelabs/js-client.api"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
-          package-manager: pnpm
+          package-manager: yarn
 
       - name: Set js-client.node version
         if: inputs.js-client-snapshots != 'null'
@@ -170,7 +168,7 @@ jobs:
         with:
           package: "@fluencelabs/js-client.node"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
-          package-manager: pnpm
+          package-manager: yarn
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -178,7 +176,7 @@ jobs:
         with:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
-          package-manager: pnpm
+          package-manager: yarn
 
       - name: Set deal-aurora version
         if: inputs.deal-aurora-version != 'null'
@@ -186,7 +184,7 @@ jobs:
         with:
           package: "@fluencelabs/deal-aurora"
           version: "${{ inputs.deal-aurora-version }}"
-          package-manager: pnpm
+          package-manager: yarn
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -213,7 +211,9 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: yarn test-linux-x64
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: test-linux-x64
 
       - name: Cleanup
         if: always()
