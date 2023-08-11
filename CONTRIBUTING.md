@@ -25,11 +25,5 @@ When you contribute, you have to be aware that your contribution is covered by *
 -   Don't use colors inside commands descriptions. They can't be rendered to markdown and they will not be rendered to users of the packaged Fluence CLI anyway, when they run `--help`
 -   To run tests locally you need to do the following:
     1. Make sure you have docker installed (it's most convenient and reliable if you install Docker Desktop by following the instruction for your operating system on their official website)
-    1. `cd .github/e2e` dir of this repo. Set environment variable for rust peer image. Make sure to use the `nox` from `src/versions.json`.
-       Example in `bash`:
-       `export RUST_PEER_IMAGE="fluencelabs/nox:minimal"`
-       Example in `fish`:
-       `export const RUST_PEER_IMAGE="fluencelabs/nox:minimal"`))
     1. run `docker compose up -d`
-    1. `cd` back to repo root dir. Set env variable `FLUENCE_ENV="local"` so tests run against your local peers
-    1. run `yarn test-linux-x64` or `yarn test-darwin-arm64` which will lint and check the code, build it, package it, prepare the tests and run them
+    1. run `FLUENCE_ENV=local yarn test-linux-x64` or `FLUENCE_ENV=local yarn test-darwin-arm64` which will lint and check the code, build it, package it, prepare the tests and run them

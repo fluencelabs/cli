@@ -1019,10 +1019,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/avm@npm:0.40.0":
-  version: 0.40.0
-  resolution: "@fluencelabs/avm@npm:0.40.0"
-  checksum: ededa17d337a50ad95a5b80af0d3bc9d68bf6ef06c336135f4b6c4e56bfb0f90d9bb95e2c44e1034f332379c52f1a7e22b192de5ee8f5035741b1cfd06a533ec
+"@fluencelabs/avm@npm:0.43.1":
+  version: 0.43.1
+  resolution: "@fluencelabs/avm@npm:0.43.1"
+  checksum: e36d860d5d8eadf158c4bc0de654b5e0b15d054385eb5e7a47634969e652d69e1f4ebf943f68ee10cb3e9d7589aad0f6cb05365c8c343e89e158890793159cde
   languageName: node
   linkType: hard
 
@@ -1035,8 +1035,8 @@ __metadata:
     "@fluencelabs/deal-aurora": 0.1.8
     "@fluencelabs/fluence-network-environment": ^1.1.2
     "@fluencelabs/installation-spell": ^0.5.16
-    "@fluencelabs/js-client.api": ^0.12.0
-    "@fluencelabs/js-client.node": ^0.7.0
+    "@fluencelabs/js-client.api": ^0.12.1
+    "@fluencelabs/js-client.node": ^0.7.1
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.23.0
     "@multiformats/multiaddr": ^12.1.6
@@ -1133,42 +1133,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/interfaces@npm:0.8.0":
-  version: 0.8.0
-  resolution: "@fluencelabs/interfaces@npm:0.8.0"
-  checksum: 09498e636c5a3a42b9812d83a7b181332256ba3c7e749f2c5f2f59c3164c9da40d35f13bc7488542c00fc643925f7d6d2f0d7e9bde5150d5eef5b384f042c0e5
+"@fluencelabs/interfaces@npm:0.8.1":
+  version: 0.8.1
+  resolution: "@fluencelabs/interfaces@npm:0.8.1"
+  checksum: 72ad5adbef8ce3b9355b43a7c973ef4f469163aac46fed51c99d3dfe8ea40bad334029f32778462f1602997231e02ba9206fdebfbf4e49886887e703fb9bc431
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client.api@npm:^0.12.0":
-  version: 0.12.0
-  resolution: "@fluencelabs/js-client.api@npm:0.12.0"
+"@fluencelabs/js-client.api@npm:^0.12.1":
+  version: 0.12.1
+  resolution: "@fluencelabs/js-client.api@npm:0.12.1"
   dependencies:
-    "@fluencelabs/interfaces": 0.8.0
-  checksum: 11ab945a6d1cdd26819676894ec3aa399759f7d255f8359c86e324a2a65563fa010bd5cc759122a7c01d98c7997099e12390a0a05eb7bc1bcad1edbc4cd543ef
+    "@fluencelabs/interfaces": 0.8.1
+  checksum: 1488fbd49b713314dfd0e85decb485478f2e7cf91161d364536eb46fba3d7a5e94ebafe7f4ef7905e7274b70cabfc9e0f9c2e10e86cb564c4b9f29fede36f6ce
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client.node@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "@fluencelabs/js-client.node@npm:0.7.0"
+"@fluencelabs/js-client.node@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "@fluencelabs/js-client.node@npm:0.7.1"
   dependencies:
-    "@fluencelabs/avm": 0.40.0
-    "@fluencelabs/interfaces": 0.8.0
-    "@fluencelabs/js-peer": 0.9.0
+    "@fluencelabs/avm": 0.43.1
+    "@fluencelabs/interfaces": 0.8.1
+    "@fluencelabs/js-peer": 0.9.1
     "@fluencelabs/marine-js": 0.3.45
     platform: 1.3.6
-  checksum: 7a89cb5a455099732f66e035e2271b4ea88837ac62b0e39373be0262a26b13de2ede8961b674bfa7bd55c7f103576d4812c16713b61422e31489177248acba5b
+  checksum: 34f9bb461c5c8d0a566341341a87f8cd49e0b8fabd9f422484ab3a8f940d7fc14cca36512315d659baa618864473b917a8b1f76ef41f4485b94ce9b5f9e58220
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-peer@npm:0.9.0":
-  version: 0.9.0
-  resolution: "@fluencelabs/js-peer@npm:0.9.0"
+"@fluencelabs/js-peer@npm:0.9.1":
+  version: 0.9.1
+  resolution: "@fluencelabs/js-peer@npm:0.9.1"
   dependencies:
     "@chainsafe/libp2p-noise": 11.0.0
-    "@fluencelabs/avm": 0.40.0
-    "@fluencelabs/interfaces": 0.8.0
+    "@fluencelabs/avm": 0.43.1
+    "@fluencelabs/interfaces": 0.8.1
     "@fluencelabs/marine-js": 0.3.45
     "@libp2p/crypto": 1.0.8
     "@libp2p/interface-connection": 3.0.8
@@ -1195,7 +1195,7 @@ __metadata:
     ts-pattern: 3.3.3
     uint8arrays: 4.0.3
     uuid: 8.3.2
-  checksum: 41be96e44d64954a288e372a4ad39ef254a340cd102ffc84613b58a79b5cead4ead0024dc298f147fa7c224e137124551edc6513193a500d1bcf555f29c2a9ae
+  checksum: 49a4014deee782e97a1f2918aa74ecf4e2022cdf70870eeeb4cc692751edaa8203a88cea3094f59896cca22052ef5ae2eb45c2c66ce6bd5c7f2ce99d2a94f7a7
   languageName: node
   linkType: hard
 
