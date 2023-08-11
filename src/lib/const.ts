@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type ContractsENV, CONTRACTS_ENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import { DEAL_CONFIG } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
@@ -44,7 +44,7 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
-export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[1];
+export const DEFAULT_CHAIN_NETWORK = CHAIN_NETWORKS["testnet"];
 
 export const isChainNetwork = getIsStringUnion(CONTRACTS_ENV);
 
