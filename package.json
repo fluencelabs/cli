@@ -51,7 +51,7 @@
     "@oclif/core": "2.11.5",
     "@oclif/plugin-autocomplete": "2.3.3",
     "@oclif/plugin-help": "5.2.15",
-    "@oclif/plugin-not-found": "2.3.34",
+    "@oclif/plugin-not-found": "2.3.37",
     "@walletconnect/universal-provider": "2.4.7",
     "ajv": "8.12.0",
     "camelcase": "7.0.1",
