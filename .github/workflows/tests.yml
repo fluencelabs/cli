@@ -147,7 +147,7 @@ jobs:
         with:
           node-version: "18"
           registry-url: "https://npm.fluence.dev"
-          # cache: "yarn"
+          cache: "yarn"
 
       - run: yarn install
 
