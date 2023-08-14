@@ -142,3 +142,4 @@ jobs:
         with:
           id: ${{ steps.version.outputs.id }}
           package-manager: yarn npm
+          flags: --tag snapshot
