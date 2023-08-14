@@ -132,6 +132,8 @@ jobs:
               }
             }
 
+      - run: yarn config set "npmPublishRegistry" "https://npm.fluence.dev"
+
       - name: Generate snapshot version
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
