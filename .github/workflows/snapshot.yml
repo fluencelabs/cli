@@ -46,7 +46,7 @@ jobs:
     runs-on: builder
 
     outputs:
-      version: ${{ fromJson(steps.snapshot.outputs.snapshots)['cli'] }}
+      version: ${{ steps.snapshot.outputs.version }}
 
     permissions:
       contents: read
@@ -87,7 +87,7 @@ jobs:
         with:
           node-version: "18"
           registry-url: "https://npm.fluence.dev"
-          cache: "pnpm"
+          cache: "yarn"
 
       - run: yarn install
 
@@ -97,7 +97,7 @@ jobs:
         with:
           package: "@fluencelabs/js-client.api"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
-          package-manager: pnpm
+          package-manager: yarn
 
       - name: Set js-client.node version
         if: inputs.js-client-snapshots != 'null'
@@ -105,7 +105,7 @@ jobs:
         with:
           package: "@fluencelabs/js-client.node"
           version: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
-          package-manager: pnpm
+          package-manager: yarn
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
@@ -113,7 +113,7 @@ jobs:
         with:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
-          package-manager: pnpm
+          package-manager: yarn
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
@@ -132,13 +132,20 @@ jobs:
               }
             }
 
+      - name: Configure yarn to publish to private registry
+        run: |
+          yarn config set npmRegistryServer "https://npm.fluence.dev"
+          yarn config set npmAlwaysAuth true
+          yarn config set npmAuthToken $NODE_AUTH_TOKEN
+
       - name: Generate snapshot version
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
       - name: Publish snapshot
         id: snapshot
-        uses: fluencelabs/github-actions/pnpm-publish-snapshot@main
+        uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
-          set-version: true
+          package-manager: yarn npm
+          flags: --tag snapshot
