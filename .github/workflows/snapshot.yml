@@ -46,7 +46,7 @@ jobs:
     runs-on: builder
 
     outputs:
-      version: ${{ fromJson(steps.snapshot.outputs.snapshots)['cli'] }}
+      version: ${{ steps.snapshot.outputs.version }}
 
     permissions:
       contents: read
