@@ -208,9 +208,7 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: test-linux-x64
+        run: yarn test-linux-x64
 
       - name: Cleanup
         if: always()
