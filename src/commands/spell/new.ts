@@ -51,7 +51,7 @@ export default class New extends BaseCommand<typeof New> {
     }),
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
+    const { args, maybeFluenceConfig, flags } = await initCli(
       this,
       await this.parse(New),
     );
@@ -59,7 +59,7 @@ export default class New extends BaseCommand<typeof New> {
     const spellName =
       args.name ?? (await input({ message: "Enter spell name" }));
 
-    const pathToSpellsDir = await ensureSrcSpellsDir();
+    const pathToSpellsDir = flags.path ?? (await ensureSrcSpellsDir());
     const pathToSpellDir = join(pathToSpellsDir, spellName);
     await generateNewSpell(pathToSpellDir);
 

@@ -18,18 +18,19 @@ import assert from "node:assert";
 import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import { compileFromPath } from "@fluencelabs/aqua-api";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { compile } from "./aqua.js";
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
-import type {
-  FluenceConfig,
-  FluenceConfigReadonly,
+import {
+  type FluenceConfig,
+  type FluenceConfigReadonly,
+  assertIsArrayWithHostsOrDeals,
 } from "./configs/project/fluence.js";
 import {
   type ConfigV0,
@@ -56,6 +57,7 @@ import {
   getUrlOrAbsolutePath,
   isUrl,
 } from "./helpers/downloadFile.js";
+import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import { jsToAqua, makeOptional } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
@@ -94,7 +96,7 @@ const handlePreviouslyDeployedWorkers = async (
 
   const confirmedWorkersNamesToDeploy = isInteractive
     ? await checkboxes({
-        message: `These are the workers that were previously deployed. Please select the ones you want to redeploy.`,
+        message: `There are workers that were deployed previously. Please select the ones you want to redeploy.`,
         options: previouslyDeployedWorkersNamesToBeDeployed,
         oneChoiceMessage(workerName) {
           return `Do you want to redeploy worker ${color.yellow(workerName)}`;
@@ -125,6 +127,7 @@ type PrepareForDeployArg = {
   fluenceConfig: FluenceConfig;
   aquaImports: Array<string>;
   noBuild: boolean;
+  marineBuildArgs: undefined | string;
   maybeWorkersConfig?: WorkersConfigReadonly;
   hosts?: boolean;
 };
@@ -134,12 +137,12 @@ export const prepareForDeploy = async ({
   fluenceConfig,
   aquaImports,
   noBuild,
+  marineBuildArgs,
   maybeWorkersConfig,
   hosts = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
   const hostsOrDealsString = hosts ? "hosts" : "deals";
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const hostsOrDeals = Object.entries(
     fluenceConfig[hostsOrDealsString] ??
       commandObj.error(
@@ -149,15 +152,9 @@ export const prepareForDeploy = async ({
           fluenceConfig.$getPath(),
         )} that contains a record with at least one worker name as a key`,
       ),
-  ) as Array<
-    [
-      string,
-      (
-        | (typeof fluenceConfig.hosts)[keyof typeof fluenceConfig.hosts]
-        | (typeof fluenceConfig.deals)[keyof typeof fluenceConfig.deals]
-      ),
-    ]
-  >;
+  );
+
+  assertIsArrayWithHostsOrDeals(hostsOrDeals);
 
   const maybeDeployedHostsOrDeals = (maybeWorkersConfig ?? {})[
     hostsOrDealsString
@@ -176,7 +173,7 @@ export const prepareForDeploy = async ({
     return commandObj.error(
       `${color.yellow(
         hostsOrDealsString,
-      )} record in ${fluenceConfig.$getPath()} must contain at least one worker name as a key`,
+      )} property in ${fluenceConfig.$getPath()} must contain at least one worker name as a key`,
     );
   }
 
@@ -286,7 +283,7 @@ export const prepareForDeploy = async ({
         spellConfig.aquaFilePath,
       );
 
-      const { errors, functions } = await compile({
+      const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,
         imports: aquaImports,
       });
@@ -455,6 +452,36 @@ export const prepareForDeploy = async ({
     await buildModules(
       [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],
       marineCli,
+      marineBuildArgs,
+      fluenceConfig,
+    );
+
+    const serviceNamePathToFacadeMap: Record<string, string> =
+      Object.fromEntries(
+        serviceConfigs.map(({ serviceName, serviceConfig }) => {
+          const { get } = serviceConfig.modules[FACADE_MODULE_NAME];
+
+          const urlOrAbsolutePath = getUrlOrAbsolutePath(
+            get,
+            serviceConfig.$getDirPath(),
+          );
+
+          const moduleConfig =
+            moduleAbsolutePathOrURLToModuleConfigsMap.get(urlOrAbsolutePath);
+
+          assert(
+            moduleConfig !== undefined,
+            `Unreachable. Module config for ${urlOrAbsolutePath} can't be undefined`,
+          );
+
+          return [serviceName, getModuleWasmPath(moduleConfig)];
+        }),
+      );
+
+    await updateAquaServiceInterfaceFile(
+      serviceNamePathToFacadeMap,
+      fluenceConfig.services,
+      marineCli,
     );
   }
 
@@ -462,7 +489,9 @@ export const prepareForDeploy = async ({
     .filter(([workerName]) => {
       return workersToDeployConfirmed.includes(workerName);
     })
-    .map(([workerName, { peerIds = [] }]) => {
+    .map(([workerName, hostsOrDeals]) => {
+      const peerIds = "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
+
       if (hosts && peerIds.length === 0) {
         commandObj.error(
           `You must have at least one peerId listed in ${color.yellow(

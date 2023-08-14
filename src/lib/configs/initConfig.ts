@@ -32,6 +32,32 @@ import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
+type AjvErrors =
+  | Ajv.ErrorObject<string, Record<string, unknown>, unknown>[]
+  | null
+  | undefined;
+
+const validationErrorToString = (errors: AjvErrors) => {
+  if (errors === null || errors === undefined) {
+    return "";
+  }
+
+  return (
+    "Errors:\n\n" +
+    errors
+      .filter(({ instancePath }) => {
+        return instancePath !== "";
+      })
+      .map(({ instancePath, params, message }) => {
+        const paramsMessage = yamlDiffPatch("", {}, params);
+        return `${color.yellow(instancePath)} ${
+          message ?? ""
+        }\n${paramsMessage}`;
+      })
+      .join("\n")
+  );
+};
+
 type EnsureSchemaArg = {
   name: string;
   configDirPath: string;
@@ -109,7 +135,7 @@ const migrateConfig = async <
     return commandObj.error(
       `Couldn't migrate config ${color.yellow(
         configPath,
-      )}. Errors: ${jsonStringify(validateLatestConfig.errors)}`,
+      )}. ${validationErrorToString(validateLatestConfig.errors)}`,
     );
   }
 
@@ -155,7 +181,7 @@ const ensureConfigIsValidLatest = async <
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     return commandObj.error(
-      `Invalid config ${color.yellow(configPath)}. Errors: ${jsonStringify(
+      `Invalid config ${color.yellow(configPath)}. ${validationErrorToString(
         validateLatestConfig.errors,
       )}`,
     );
@@ -362,9 +388,9 @@ export function getReadonlyConfigInitFunction<
 
     if (!validateAllConfigVersions(config)) {
       return commandObj.error(
-        `Invalid config at ${color.yellow(configPath)}. Errors: ${jsonStringify(
-          validateAllConfigVersions.errors,
-        )}`,
+        `Invalid config at ${color.yellow(
+          configPath,
+        )}. ${validationErrorToString(validateAllConfigVersions.errors)}`,
       );
     }
 
@@ -465,7 +491,7 @@ export function getConfigInitFunction<
           throw new Error(
             `Couldn't save config ${color.yellow(
               configPath,
-            )}. Errors: ${jsonStringify(
+            )}. ${validationErrorToString(
               initializedReadonlyConfig.$validateLatest.errors,
             )}`,
           );

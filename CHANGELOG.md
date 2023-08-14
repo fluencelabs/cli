@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.6.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.6.0...fluence-cli-v0.6.1) (2023-08-10)
+
+
+### Bug Fixes
+
+* fix service interface generation [fixes DXJ-445] ([#400](https://github.com/fluencelabs/cli/issues/400)) ([bb104d6](https://github.com/fluencelabs/cli/commit/bb104d6061937a6bca379dbd631b6512605c2c82))
+
+## [0.6.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.5.4...fluence-cli-v0.6.0) (2023-08-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update js-client.api to 0.12.1 and js-client.node to 0.7.1
+
+### Features
+
+* `fluence run` first compile aqua then connect to the network [fixes DXJ-440] ([#387](https://github.com/fluencelabs/cli/issues/387)) ([cf23b52](https://github.com/fluencelabs/cli/commit/cf23b52e9477448805c92a6e81fe7c26a51b6325))
+* add READMEs [fixes DXJ-430] ([#375](https://github.com/fluencelabs/cli/issues/375)) ([c86dfb5](https://github.com/fluencelabs/cli/commit/c86dfb59049ac948494cd29de89e6f015a6a8741))
+* improve config error messages [fixes DXJ-428] ([#372](https://github.com/fluencelabs/cli/issues/372)) ([cdf732d](https://github.com/fluencelabs/cli/commit/cdf732d1de99f8c07178147304dde69befb5c406))
+* improve module new command [fixes DXJ-414] ([#359](https://github.com/fluencelabs/cli/issues/359)) ([52818dd](https://github.com/fluencelabs/cli/commit/52818dd5032557899e335b572af921d57e78111b))
+* Leave only workers.yaml, services.aqua, workers.aqua under version control in .fluence dir [fixes DXJ-412] ([#352](https://github.com/fluencelabs/cli/issues/352)) ([c58611d](https://github.com/fluencelabs/cli/commit/c58611d5ed37b375d882d748b2a06b0d5521f78a))
+* remove par ([#391](https://github.com/fluencelabs/cli/issues/391)) ([722ddfa](https://github.com/fluencelabs/cli/commit/722ddfab8b9ae696c43dc0ea9dd582d85e1fedc2))
+* show dependency override warnings only in `dep v` command [fixes DXJ-427] ([#371](https://github.com/fluencelabs/cli/issues/371)) ([d84800d](https://github.com/fluencelabs/cli/commit/d84800d706ccbc5bf8839073cf483cdafe89977c))
+* support cargo args for marine build [fixes DXJ-418] ([#360](https://github.com/fluencelabs/cli/issues/360)) ([edb5ed7](https://github.com/fluencelabs/cli/commit/edb5ed74a210af847b8c96630489deb931bab68f))
+* update aqua ([#361](https://github.com/fluencelabs/cli/issues/361)) ([b8dc50c](https://github.com/fluencelabs/cli/commit/b8dc50c5e247245c640fcbb1d01200b55e2e3406))
+* update aqua interfaces of the services that cli builds, improve config comments [fixes DXJ-435] ([#380](https://github.com/fluencelabs/cli/issues/380)) ([a34d162](https://github.com/fluencelabs/cli/commit/a34d1624625715f2a2ac73f48b4068fa0af42185))
+* update dependencies ([#374](https://github.com/fluencelabs/cli/issues/374)) ([fe7feee](https://github.com/fluencelabs/cli/commit/fe7feeee4d317d9e9610acd9365571e12ee38851))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/air-beautify-wasm to v0.3.1 ([#355](https://github.com/fluencelabs/cli/issues/355)) ([94011ab](https://github.com/fluencelabs/cli/commit/94011ab90682e6a94bc1cc2b63ece69172cffc5c))
+* **deps:** update dependency @fluencelabs/air-beautify-wasm to v0.3.2 ([#381](https://github.com/fluencelabs/cli/issues/381)) ([a69890e](https://github.com/fluencelabs/cli/commit/a69890ed04c6958d542006755ddc78d4c84b6438))
+* **deps:** update js-client.api to 0.12.1 and js-client.node to 0.7.1 ([9309ffa](https://github.com/fluencelabs/cli/commit/9309ffa930c8ecb9bc3ad9bbba3d54e990964a30))
+* don't ask to update if already up to date on the latest version [fixes DXJ-411] ([#357](https://github.com/fluencelabs/cli/issues/357)) ([a35e53d](https://github.com/fluencelabs/cli/commit/a35e53d98e39408d54792e511ac32fd2a75ed7db))
+* fix spell new --path not working [fixes DXJ-419] ([#370](https://github.com/fluencelabs/cli/issues/370)) ([c5cd522](https://github.com/fluencelabs/cli/commit/c5cd5223a0aa42369603ff35cd55d4bb29b51512))
+* log info messages and warnings to stderr [fixes DXJ-416] ([#358](https://github.com/fluencelabs/cli/issues/358)) ([6156b56](https://github.com/fluencelabs/cli/commit/6156b5619d067a8888fa75f455683eb50f410696))
+
 ## [0.5.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.5.3...fluence-cli-v0.5.4) (2023-07-14)
 
 

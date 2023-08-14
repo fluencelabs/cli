@@ -27,11 +27,11 @@ import { type Flags } from "./typeHelpers.js";
 type MarineCliInput =
   | {
       args: ["aqua"] | ["aqua", string];
-      flags?: never;
+      flags?: Flags<"id" | "service">;
     }
   | {
-      args: ["build", ...("-p" | string)[]];
-      flags: Flags<"release">;
+      args: ["build", ...string[]];
+      flags?: Flags<"release">;
     };
 
 export type MarineCLI = {

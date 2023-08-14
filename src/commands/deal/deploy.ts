@@ -41,6 +41,7 @@ import {
   IMPORT_FLAG,
   NO_BUILD_FLAG,
   TRACING_FLAG,
+  MARINE_BUILD_ARGS,
 } from "../../lib/const.js";
 import { dealCreate, dealUpdate } from "../../lib/deal.js";
 import {
@@ -66,10 +67,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
+    ...MARINE_BUILD_ARGS,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Names of workers to deploy (by default all deals from 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
+      description: `Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
     }),
   };
   async run(): Promise<void> {
@@ -98,6 +100,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       fluenceConfig,
       aquaImports,
       noBuild: flags["no-build"],
+      marineBuildArgs: flags["marine-build-args"],
     });
 
     await initFluenceClient(flags, fluenceConfig);

@@ -36,12 +36,14 @@ import {
   BIN_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
+  MARINE_BUILD_ARGS,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SEPARATOR,
 } from "../../lib/const.js";
 import { haltCountly } from "../../lib/countly.js";
 import { getModuleWasmPath } from "../../lib/helpers/downloadFile.js";
+import { updateAquaServiceInterfaceFile } from "../../lib/helpers/generateServiceInterface.js";
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { exitCli, initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
@@ -66,6 +68,7 @@ export default class REPL extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,
+    ...MARINE_BUILD_ARGS,
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
@@ -73,7 +76,7 @@ export default class REPL extends Command {
     }),
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
+    const { args, flags, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(REPL),
     );
@@ -99,7 +102,19 @@ export default class REPL extends Command {
         serviceConfig,
         maybeFluenceConfig,
         marineCli,
+        flags["marine-build-args"],
       );
+
+    const isServiceListedInFluenceConfig =
+      maybeFluenceConfig?.services?.[nameOrPathOrUrl] !== undefined;
+
+    if (isServiceListedInFluenceConfig) {
+      await updateAquaServiceInterfaceFile(
+        { [nameOrPathOrUrl]: getModuleWasmPath(facadeModuleConfig) },
+        maybeFluenceConfig?.services,
+        marineCli,
+      );
+    }
 
     stopSpinner();
 
@@ -160,7 +175,9 @@ const ensureServiceConfig = async (
   if (readonlyServiceConfig === null) {
     stopSpinner(color.red("error"));
     return commandObj.error(
-      `No service config at ${color.yellow(serviceOrServiceDirPathOrUrl)}`,
+      `No service config found at ${color.yellow(
+        serviceOrServiceDirPathOrUrl,
+      )}`,
     );
   }
 

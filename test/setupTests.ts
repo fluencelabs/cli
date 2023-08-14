@@ -27,6 +27,12 @@ import { fluence, initFirstTime } from "./helpers.js";
     args: ["dep", "i"],
   });
 
+  try {
+    await fluence({
+      args: ["key", "new", "default", "--default", "--user"],
+    });
+  } catch {}
+
   await Promise.all(
     TEMPLATES.map((template) => {
       return initFirstTime(template);

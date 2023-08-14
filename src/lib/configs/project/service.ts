@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import { cwd } from "node:process";
+
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";
 
+import { commandObj } from "../../commandObj.js";
 import {
   CLI_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -27,7 +32,7 @@ import {
   ensureServiceAbsolutePath,
   validateAquaName,
 } from "../../helpers/downloadFile.js";
-import { ensureFluenceDir } from "../../paths.js";
+import { getFluenceDir, projectRootDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -39,6 +44,7 @@ import {
   type ConfigValidateFunction,
 } from "../initConfig.js";
 
+import type { FluenceConfigReadonly } from "./fluence.js";
 import {
   type OverridableModuleProperties,
   overridableModuleProperties,
@@ -127,7 +133,7 @@ const getInitConfigOptions = (
     latestSchema: configSchemaV0,
     migrations,
     name: SERVICE_CONFIG_FILE_NAME,
-    getSchemaDirPath: ensureFluenceDir,
+    getSchemaDirPath: getFluenceDir,
     getConfigOrConfigDirPath: (): string => {
       return configDirPath;
     },
@@ -144,6 +150,32 @@ export const initServiceConfig = async (
       await ensureServiceAbsolutePath(configOrConfigDirPathOrUrl, absolutePath),
     ),
   )();
+};
+
+export const ensureServiceConfig = async (
+  nameOrPathOrUrl: string,
+  maybeFluenceConfig: FluenceConfigReadonly | null,
+): Promise<ServiceConfig> => {
+  const maybeServicePathFromFluenceConfig =
+    maybeFluenceConfig?.services?.[nameOrPathOrUrl]?.get;
+
+  const serviceOrServiceDirPathOrUrl =
+    maybeServicePathFromFluenceConfig ?? nameOrPathOrUrl;
+
+  const serviceConfig = await initServiceConfig(
+    serviceOrServiceDirPathOrUrl,
+    maybeServicePathFromFluenceConfig === "string" ? projectRootDir : cwd(),
+  );
+
+  if (serviceConfig === null) {
+    return commandObj.error(
+      `No service config found at ${color.yellow(
+        serviceOrServiceDirPathOrUrl,
+      )}`,
+    );
+  }
+
+  return serviceConfig;
 };
 
 export const initReadonlyServiceConfig = async (
@@ -177,7 +209,8 @@ name: ${name}
 # A map of modules that the service consists of.
 # Service must have a facade module. Each module properties can be overridden
 modules:
-  facade: # module name
+# # module name
+  facade:
     # Either path to the module directory or
     # URL to the tar.gz archive which contains the content of the module directory
     get: "${relativePathToFacade}"

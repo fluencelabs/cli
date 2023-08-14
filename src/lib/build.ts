@@ -50,18 +50,14 @@ import {
   getModuleWasmPath,
   isUrl,
 } from "../lib/helpers/downloadFile.js";
-import { generateAquaInterfaceForService } from "../lib/helpers/generateServiceInterface.js";
 import type { MarineCLI } from "../lib/marineCli.js";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
+import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import {
-  ensureFluenceAquaServicesPath,
-  getCargoTomlPath,
-  projectRootDir,
-} from "./paths.js";
+import { getCargoTomlPath, projectRootDir } from "./paths.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -148,10 +144,12 @@ const resolveServiceInfos = async ({
 
 type BuildArg = ResolveServiceInfosArg & {
   marineCli: MarineCLI;
+  marineBuildArgs: string | undefined;
 };
 
 export const build = async ({
   marineCli,
+  marineBuildArgs,
   ...resolveDeployInfosArg
 }: BuildArg): Promise<Array<ServiceInfo>> => {
   const serviceInfos = await resolveServiceInfos(resolveDeployInfosArg);
@@ -195,7 +193,14 @@ export const build = async ({
 
   if (serviceInfos.length > 0) {
     startSpinner("Making sure all services are built");
-    await buildModules([...mapOfModuleConfigs.values()], marineCli);
+
+    await buildModules(
+      [...mapOfModuleConfigs.values()],
+      marineCli,
+      marineBuildArgs,
+      resolveDeployInfosArg.fluenceConfig,
+    );
+
     stopSpinner();
   }
 
@@ -247,27 +252,10 @@ export const build = async ({
     },
   );
 
-  // generate interfaces for all services
-  const serviceInterfaces = [
-    ...new Set(
-      await Promise.all(
-        Object.entries(serviceNamePathToFacadeMap).map(
-          ([serviceId, pathToFacadeWasm]) => {
-            return generateAquaInterfaceForService({
-              serviceId,
-              pathToFacadeWasm,
-              marineCli,
-            });
-          },
-        ),
-      ),
-    ),
-  ];
-
-  await writeFile(
-    await ensureFluenceAquaServicesPath(),
-    `${serviceInterfaces.join("\n\n")}\n`,
-    FS_OPTIONS,
+  await updateAquaServiceInterfaceFile(
+    serviceNamePathToFacadeMap,
+    resolveDeployInfosArg.fluenceConfig.services,
+    marineCli,
   );
 
   return serviceInfoWithModuleConfigs;
@@ -401,6 +389,7 @@ export const resolveSingleServiceModuleConfigsAndBuild = async (
   serviceConfig: ServiceConfigReadonly,
   maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
   marineCli: MarineCLI,
+  marineBuildArgs: string | undefined,
 ) => {
   const maybeOverridesFromFluenceCOnfig =
     maybeFluenceConfig?.services?.[serviceConfig.name]?.overrideModules;
@@ -410,7 +399,12 @@ export const resolveSingleServiceModuleConfigsAndBuild = async (
     maybeOverridesFromFluenceCOnfig,
   );
 
-  await buildModules(moduleConfigs, marineCli);
+  await buildModules(
+    moduleConfigs,
+    marineCli,
+    marineBuildArgs,
+    maybeFluenceConfig,
+  );
 
   const facadeModuleConfig = moduleConfigs.at(-1);
 
@@ -425,6 +419,8 @@ export const resolveSingleServiceModuleConfigsAndBuild = async (
 export const buildModules = async (
   modulesConfigs: ModuleConfigReadonly[],
   marineCli: MarineCLI,
+  marineBuildArgs: string | undefined,
+  maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
 ): Promise<void> => {
   const rustModuleConfigs = modulesConfigs.filter(({ type }) => {
     return type === MODULE_TYPE_RUST;
@@ -440,14 +436,20 @@ export const buildModules = async (
     return;
   }
 
+  const pFlagForEachModule = rustModuleConfigs.flatMap(({ name }) => {
+    return ["-p", name];
+  });
+
+  const marineBuildArgsToUse =
+    marineBuildArgs ?? maybeFluenceConfig?.marineBuildArgs;
+
+  const marineBuildArgsArr =
+    marineBuildArgsToUse === undefined
+      ? ["--release"]
+      : marineBuildArgsToUse.split(" ");
+
   await marineCli({
-    args: [
-      "build",
-      ...rustModuleConfigs.flatMap(({ name }) => {
-        return ["-p", name];
-      }),
-    ],
-    flags: { release: true },
+    args: ["build", ...pFlagForEachModule, ...marineBuildArgsArr],
     cwd: projectRootDir,
   });
 };

@@ -15,34 +15,45 @@
  */
 
 import assert from "node:assert";
+import { relative } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { build } from "./build.js";
+import { resolveSingleServiceModuleConfigsAndBuild } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
+import { initReadonlyModuleConfig } from "./configs/project/module.js";
+import {
+  FACADE_MODULE_NAME,
+  initReadonlyServiceConfig,
+} from "./configs/project/service.js";
 import { DEFAULT_WORKER_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
+  getModuleWasmPath,
   validateAquaName,
 } from "./helpers/downloadFile.js";
+import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import type { MarineCLI } from "./marineCli.js";
+import { projectRootDir } from "./paths.js";
 import { confirm, input } from "./prompt.js";
 
 type AddServiceArg = {
   serviceName: string;
-  pathOrUrl: string;
+  absolutePathOrUrl: string;
   fluenceConfig: FluenceConfig;
   marineCli: MarineCLI;
+  marineBuildArgs?: string | undefined;
   interactive?: boolean;
 };
 
 export const addService = async ({
   serviceName: serviceNameFromArgs,
-  pathOrUrl,
+  absolutePathOrUrl,
   fluenceConfig,
   marineCli,
+  marineBuildArgs,
   interactive = true,
 }: AddServiceArg): Promise<string> => {
   let serviceName = serviceNameFromArgs;
@@ -80,11 +91,46 @@ export const addService = async ({
   fluenceConfig.services = {
     ...fluenceConfig.services,
     [serviceName]: {
-      get: pathOrUrl,
+      get: relative(projectRootDir, absolutePathOrUrl),
     },
   };
 
-  await build({ marineCli, fluenceConfig });
+  const serviceConfig = await initReadonlyServiceConfig(
+    absolutePathOrUrl,
+    projectRootDir,
+  );
+
+  if (serviceConfig === null) {
+    return commandObj.error(
+      `Service config not found at ${color.yellow(absolutePathOrUrl)}`,
+    );
+  }
+
+  await resolveSingleServiceModuleConfigsAndBuild(
+    serviceConfig,
+    fluenceConfig,
+    marineCli,
+    marineBuildArgs,
+  );
+
+  const facadeModuleConfig = await initReadonlyModuleConfig(
+    serviceConfig.modules[FACADE_MODULE_NAME].get,
+    serviceConfig.$getDirPath(),
+  );
+
+  assert(
+    facadeModuleConfig !== null,
+    "Unreachable. Facade module is always present in service config",
+  );
+
+  await updateAquaServiceInterfaceFile(
+    {
+      [serviceName]: getModuleWasmPath(facadeModuleConfig),
+    },
+    fluenceConfig.services,
+    marineCli,
+  );
+
   await fluenceConfig.$commit();
 
   if (interactive) {
