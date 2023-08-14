@@ -141,5 +141,4 @@ jobs:
         uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
-          set-version: true
-          package-manager: yarn
+          package-manager: yarn npm
