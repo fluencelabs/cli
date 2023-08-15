@@ -150,13 +150,13 @@ jobs:
           package-manager: yarn npm
           flags: --tag snapshot
 
-      - name: Generate archives
-        run: yarn oclif-pack
+      - name: Generate archive
+        run: yarn oclif-pack-linux
 
       - run: ls -alh dist/
 
-      - name: Upload archives to artifacts
+      - name: Upload archive to artifacts
         uses: actions/upload-artifact@v3
         with:
           name: linux-x64
-          path: dist/linux-x64.zip
+          path: dist/fluence-*-linux-x64.tar.xz
