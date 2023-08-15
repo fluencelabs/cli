@@ -19,7 +19,10 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import { type ContractsENV, CONTRACTS_ENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import {
+  type ContractsENV,
+  CONTRACTS_ENV,
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { UniversalProvider } from "@walletconnect/universal-provider";
@@ -86,7 +89,7 @@ export const ensureChainNetwork = async ({
 
 export const getSigner = async (
   network: ContractsENV,
-  privKey: string | undefined
+  privKey: string | undefined,
 ): Promise<ethers.Signer> => {
   return privKey === undefined
     ? getWalletConnectProvider(network)
@@ -154,12 +157,12 @@ const getWalletConnectProvider = async (
 const getWallet = (privKey: string, network: ContractsENV): ethers.Wallet => {
   return new ethers.Wallet(
     privKey,
-    new ethers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl)
+    new ethers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl),
   );
 };
 
 export const waitTx = async (
-  tx: ethers.ContractTransactionResponse
+  tx: ethers.ContractTransactionResponse,
 ): Promise<ethers.ContractTransactionReceipt> => {
   startSpinner("Waiting for transaction to be mined...");
 

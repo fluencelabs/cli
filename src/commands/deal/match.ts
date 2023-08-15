@@ -58,7 +58,7 @@ export default class Match extends BaseCommand<typeof Match> {
     const { flags, fluenceConfig, args } = await initCli(
       this,
       await this.parse(Match),
-      true
+      true,
     );
 
     const dealAddress =
@@ -105,8 +105,8 @@ export default class Match extends BaseCommand<typeof Match> {
 
     this.log(
       `${color.green(patCount.toString())} workers joined to deal ${color.green(
-        dealAddress
-      )}`
+        dealAddress,
+      )}`,
     );
   }
 }

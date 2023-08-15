@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { type ContractsENV, CONTRACTS_ENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import {
+  type ContractsENV,
+  CONTRACTS_ENV,
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import type { JSONSchemaType } from "ajv";
 
 import {

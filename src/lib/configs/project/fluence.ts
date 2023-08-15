@@ -17,7 +17,10 @@
 import assert from "node:assert";
 import path, { join } from "node:path";
 
-import { type ContractsENV, CONTRACTS_ENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import {
+  type ContractsENV,
+  CONTRACTS_ENV,
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import type { JSONSchemaType } from "ajv";

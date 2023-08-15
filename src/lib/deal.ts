@@ -21,13 +21,13 @@
 import assert from "node:assert";
 
 import { DealClient } from "@fluencelabs/deal-aurora";
+import { type ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import ethers = require("ethers");
 import { CID } from "ipfs-http-client";
 
 import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL } from "./const.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
-import { type ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";

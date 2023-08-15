@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { type ContractsENV, CONTRACTS_ENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import {
+  type ContractsENV,
+  CONTRACTS_ENV,
+} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";
@@ -63,8 +66,8 @@ export const WC_METADATA = {
 };
 export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
   testnet: {
-    ethereumNodeUrl: "https://testnet.aurora.dev",
-    chainId: 1313161555,
+    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
+    chainId: 80001,
   },
   local: {
     ethereumNodeUrl: "http://127.0.0.1:8545",
@@ -73,7 +76,7 @@ export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
 };
 export const DEAL_RPC_CONFIG = {
   31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
-  1313161555: DEAL_CONFIG["testnet"].ethereumNodeUrl,
+  80001: DEAL_CONFIG["testnet"].ethereumNodeUrl,
 };
 
 export const AQUA_EXT = "aqua";

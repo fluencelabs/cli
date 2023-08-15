@@ -23,7 +23,9 @@ import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 const color = oclifColor.default;
+// eslint-disable-next-line import/extensions
 import * as base58 from "multiformats/bases/base58";
+// eslint-disable-next-line import/extensions
 import * as digest from "multiformats/hashes/digest";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
