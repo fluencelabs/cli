@@ -41,7 +41,7 @@
     "unused-exports": "ts-unused-exports tsconfig.json",
     "upgrade-dependencies": "npm-check-updates -u",
     "oclif-pack": "shx rm -rf tmp && shx rm -rf dist && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64'",
-    "oclif-pack-linux": "shx rm -rf tmp && shx rm -rf dist && oclif pack tarballs -t 'linux-x64'"
+    "oclif-upload-linux": "shx rm -rf tmp && shx rm -rf dist && oclif upload tarballs -t 'linux-x64'",
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "^0.3.2",

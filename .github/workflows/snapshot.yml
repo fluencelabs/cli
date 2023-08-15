@@ -72,15 +72,12 @@ jobs:
           exportToken: false
           secrets: |
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
-            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
+            kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN;
+            kv/ci/fcli-binaries id | AWS_ACCESS_KEY_ID ;
+            kv/ci/fcli-binaries secret | AWS_SECRET_ACCESS_KEY
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2.4.0
-        with:
-          version: 8
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v3
@@ -150,13 +147,5 @@ jobs:
           package-manager: yarn npm
           flags: --tag snapshot
 
-      - name: Generate archive
-        run: yarn oclif-pack-linux
-
-      - run: ls -alh dist/
-
-      - name: Upload archive to artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux-x64
-          path: dist/fluence-*-linux-x64.tar.xz
+      - name: Upload archive
+        run: yarn oclif-upload-linux
