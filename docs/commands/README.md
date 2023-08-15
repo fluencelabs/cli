@@ -6,8 +6,8 @@
 * [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
-* [`fluence compute-provider matching registration [WORKERS-COUNT]`](#fluence-compute-provider-matching-registration-workers-count)
-* [`fluence compute-provider pat create [DEAL-ADDRESS]`](#fluence-compute-provider-pat-create-deal-address)
+* [`fluence compute-provider matching addWorkersSlots [PEER-ID] [WORKERS-COUNT]`](#fluence-compute-provider-matching-addworkersslots-peer-id-workers-count)
+* [`fluence compute-provider matching register`](#fluence-compute-provider-matching-register)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
 * [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
@@ -199,46 +199,45 @@ EXAMPLES
 
 _See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/build.ts)_
 
-## `fluence compute-provider matching registration [WORKERS-COUNT]`
+## `fluence compute-provider matching addWorkersSlots [PEER-ID] [WORKERS-COUNT]`
 
-Registration in matching contract
+Add worker slots to matching contract for peerId
 
 ```
 USAGE
-  $ fluence compute-provider matching registration [WORKERS-COUNT] [--no-input] [--privKey <value>] [--network <value>]
+  $ fluence compute-provider matching addWorkersSlots [PEER-ID] [WORKERS-COUNT] [--no-input] [--privKey <value>]
+  [--network <value>]
 
 ARGUMENTS
+  PEER-ID        PeerId of the workers
   WORKERS-COUNT  Workers to be registered with the matching engine
 
 FLAGS
-  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
-                       (kras, stage, testnet, local)
+  --network=<network>  [default: local] The network in which the transactions used by the command will be carried out
+                       (testnet, local)
   --no-input           Don't interactively ask for any input from the user
   --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
 
 DESCRIPTION
-  Registration in matching contract
+  Add worker slots to matching contract for peerId
 ```
 
-## `fluence compute-provider pat create [DEAL-ADDRESS]`
+## `fluence compute-provider matching register`
 
-Create provider access token for the deal
+Register in matching contract
 
 ```
 USAGE
-  $ fluence compute-provider pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
+  $ fluence compute-provider matching register [--no-input] [--privKey <value>] [--network <value>]
 
 FLAGS
-  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
-                       (kras, stage, testnet, local)
+  --network=<network>  [default: local] The network in which the transactions used by the command will be carried out
+                       (testnet, local)
   --no-input           Don't interactively ask for any input from the user
   --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
 
 DESCRIPTION
-  Create provider access token for the deal
+  Register in matching contract
 ```
 
 ## `fluence deal deploy [WORKER-NAMES]`
@@ -261,8 +260,8 @@ FLAGS
   --import=<path>...                Path to a directory to import aqua files from. May be used several times
   --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
                                     property in fluence.yaml
-  --network=<network>               [default: testnet] The network in which the transactions used by the command will be
-                                    carried out (local, testnet)
+  --network=<network>               [default: local] The network in which the transactions used by the command will be
+                                    carried out (testnet, local)
   --no-build                        Don't build the project before running the command
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
