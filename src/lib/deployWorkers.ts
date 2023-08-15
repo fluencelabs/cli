@@ -423,9 +423,8 @@ export const prepareForDeploy = async ({
         async ([originalGetValue, moduleAbsolutePath]): Promise<
           [string, InitializedReadonlyConfig<ConfigV0>]
         > => {
-          const moduleConfig = await initReadonlyModuleConfig(
-            moduleAbsolutePath,
-          );
+          const moduleConfig =
+            await initReadonlyModuleConfig(moduleAbsolutePath);
 
           if (moduleConfig === null) {
             return commandObj.error(
