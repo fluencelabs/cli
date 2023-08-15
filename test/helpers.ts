@@ -94,14 +94,6 @@ export const initFirstTime = async (template: Template) => {
           ? getDefaultJSDirPath(templatePath)
           : getDefaultTSDirPath(templatePath);
 
-      // await writeFile(path.join(cwd, "yarn.lock"), "");
-
-      // await execPromise({
-      //   command: "yarn",
-      //   args: [],
-      //   options: { cwd },
-      // });
-
       await execPromise({
         command: "npm",
         args: ["install"],
