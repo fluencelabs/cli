@@ -153,10 +153,10 @@ jobs:
       - name: Generate archives
         run: yarn oclif-pack
 
-      - name: ls -alh dist/
+      - run: ls -alh dist/
 
       - name: Upload archives to artifacts
         uses: actions/upload-artifact@v3
-          with:
-            name: linux-x64
-            path: dist/linux-x64.zip
+        with:
+          name: linux-x64
+          path: dist/linux-x64.zip
