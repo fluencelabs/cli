@@ -46,7 +46,7 @@
     "unused-exports": "ts-unused-exports tsconfig.json",
     "upgrade-dependencies": "npm-check-updates -u",
     "oclif-pack": "yarn clean && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64'",
-    "oclif-upload-linux": "yarn clean && oclif upload tarballs -t 'linux-x64'",
+    "oclif-upload-linux": "yarn clean && oclif upload tarballs -t 'linux-x64'"
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "^0.3.2",
@@ -123,6 +123,11 @@
     "bin": "fluence",
     "dirname": "fluence",
     "commands": "./dist/commands",
+    "upload": {
+      "s3": {
+        "bucket": "fcli-binaries"
+      }
+    },
     "topics": {
       "dep": {},
       "dep:cargo": {},
