@@ -149,3 +149,7 @@ jobs:
 
       - name: Upload archive
         run: yarn oclif-upload-linux
+
+      - name: Setup tmate session
+        if: failure() && !cancelled()
+        uses: mxschmitt/action-tmate@v3
