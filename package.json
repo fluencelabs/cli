@@ -123,7 +123,7 @@
     "bin": "fluence",
     "dirname": "fluence",
     "commands": "./dist/commands",
-    "upload": {
+    "update": {
       "s3": {
         "bucket": "fcli-binaries"
       }
