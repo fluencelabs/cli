@@ -156,7 +156,7 @@ jobs:
 
       - name: Promote fluence-cli
         if: inputs.channel != 'null'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version $(jq .[] -r .github/release-please/manifest) --sha ${{ inputs.ref }} --channel ${{ inputs.channel }} --no-xz
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest)" --sha ${{ inputs.ref }} --channel ${{ inputs.channel }} --no-xz
 
       - name: Upload archive to CI
         uses: actions/upload-artifact@v3
