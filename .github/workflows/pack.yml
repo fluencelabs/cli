@@ -13,7 +13,7 @@ on:
         required: true
       upload-to-s3:
         description: "Upload artifact to s3"
-        type: string
+        type: bool
         default: false
       channel:
         description: "Promote version to channel"
