@@ -15,6 +15,10 @@ on:
         description: "Upload artifact to s3"
         type: string
         default: false
+      channel:
+        description: "Promote version to channel"
+        type: string
+        default: "null"
       marine-version:
         description: "marine version"
         type: string
@@ -143,18 +147,19 @@ jobs:
           flags: --tag snapshot
           publish: false
 
-      - name: Pack fluece-cli
+      - name: Pack fluence-cli
         run: yarn pack-${{ inputs.platform }}
 
-      - name: Upload fluece-cli
+      - name: Upload fluence-cli
         if: inputs.upload-to-s3 == 'true'
         run: yarn upload-${{ inputs.platform }}
+
+      - name: Promote fluence-cli
+        if: inputs.channel != 'null'
+        run: yarn oclif promote -t ${{ inputs.platform }} --version $(jq .[] -r .github/release-please/manifest) --sha ${{ inputs.ref }} --channel ${{ inputs.channel }} --no-xz
 
       - name: Upload archive to CI
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.platform }}
           path: dist/fluence-*${{ inputs.platform }}*.tar.gz
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3

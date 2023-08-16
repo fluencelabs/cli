@@ -22,6 +22,7 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
+    "oclif": "oclif",
     "before-build": "ts-node src/beforeBuild.ts",
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts --ext .js",

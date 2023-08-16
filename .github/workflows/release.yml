@@ -34,6 +34,22 @@ jobs:
           RELEASE_PLEASE_OUTPUT: ${{ toJSON(steps.release.outputs) }}
         run: echo "${RELEASE_PLEASE_OUTPUT}" | jq
 
+  promote:
+    strategy:
+      matrix:
+        platform:
+          - linux-x64
+          - darwin-x64
+          - darwin-arm64
+
+    name: "fluence-cli"
+    uses: ./.github/workflows/pack.yml
+    with:
+      ref: ${{ github.ref }}
+      platform: ${{ matrix.platform }}
+      upload-to-s3: true
+      channel: "main"
+
   fluence-cli:
     if: needs.release-please.outputs.fluence-cli-release-created
     runs-on: ubuntu-latest
