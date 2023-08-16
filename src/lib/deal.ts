@@ -162,8 +162,6 @@ export const dealUpdate = async ({
 
   promptConfirmTx(privKey);
 
-  commandObj.log(`${bytesCid.length}`);
-
   const tx = await config.setAppCID({
     prefixes: bytesCid.slice(0, 4),
     hash: bytesCid.slice(4),
