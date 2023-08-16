@@ -229,6 +229,8 @@ DESCRIPTION
   Add worker slots to matching contract for peerId
 ```
 
+_See code: [dist/commands/compute-provider/matching/addWorkersSlots.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/compute-provider/matching/addWorkersSlots.ts)_
+
 ## `fluence compute-provider matching register`
 
 Register in matching contract
@@ -246,6 +248,8 @@ FLAGS
 DESCRIPTION
   Register in matching contract
 ```
+
+_See code: [dist/commands/compute-provider/matching/register.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/compute-provider/matching/register.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -682,6 +686,8 @@ DESCRIPTION
 EXAMPLES
   $ fluence module remove
 ```
+
+_See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/module/remove.ts)_
 
 ## `fluence run`
 
