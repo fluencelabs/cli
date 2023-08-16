@@ -134,12 +134,12 @@ jobs:
             }
 
       - name: Generate snapshot version
-        if: inputs.upload-to-s3 != 'true'
+        if: inputs.upload-to-s3 != true
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
       - name: Set version
-        if: inputs.upload-to-s3 != 'true'
+        if: inputs.upload-to-s3 != true
         uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
@@ -151,12 +151,12 @@ jobs:
         run: yarn pack-${{ inputs.platform }}
 
       - name: Upload fluence-cli
-        if: inputs.upload-to-s3 == 'true'
+        if: inputs.upload-to-s3 == true
         run: yarn upload-${{ inputs.platform }}
 
       - name: Promote fluence-cli
         if: inputs.channel != 'null'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest)" --sha ${{ inputs.ref }} --channel ${{ inputs.channel }} --no-xz
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha ${{ inputs.ref }} --channel ${{ inputs.channel }} --no-xz
 
       - name: Upload archive to CI
         uses: actions/upload-artifact@v3
