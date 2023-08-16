@@ -47,7 +47,7 @@ jobs:
     with:
       ref: ${{ github.ref }}
       platform: ${{ matrix.platform }}
-      upload-to-s3: true
+      upload-to-s3: "true"
       channel: "main"
 
   fluence-cli:
