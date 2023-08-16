@@ -22,6 +22,7 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
+    "oclif": "oclif",
     "before-build": "ts-node src/beforeBuild.ts",
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts --ext .js",
@@ -32,9 +33,12 @@
     "prepack": "yarn before-build && yarn build",
     "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "clean": "shx rm -rf tmp && shx rm -rf dist",
-    "pack-linux-x64": "yarn clean && oclif pack tarballs -t 'linux-x64'",
-    "pack-darwin-x64": "yarn clean && oclif pack tarballs -t 'darwin-x64'",
-    "pack-darwin-arm64": "yarn clean && oclif pack tarballs -t 'darwin-arm64'",
+    "pack-linux-x64": "yarn clean && oclif pack tarballs -t 'linux-x64' --no-xz",
+    "pack-darwin-x64": "yarn clean && oclif pack tarballs -t 'darwin-x64' --no-xz",
+    "pack-darwin-arm64": "yarn clean && oclif pack tarballs -t 'darwin-arm64'--no-xz",
+    "upload-linux-x64": "oclif upload tarballs -t 'linux-x64' --no-xz",
+    "upload-darwin-x64": "oclif upload tarballs -t 'darwin-x64' --no-xz",
+    "upload-darwin-arm64": "oclif upload tarballs -t 'darwin-arm64' --no-xz",
     "test-linux-x64": "yarn pack-linux-x64 && yarn test",
     "test-darwin-x64": "yarn pack-darwin-x64 && yarn test",
     "test-darwin-arm64": "yarn pack-darwin-arm64 && yarn test",
@@ -45,7 +49,8 @@
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
     "upgrade-dependencies": "npm-check-updates -u",
-    "oclif-pack": "yarn clean && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64'"
+    "oclif-pack": "yarn clean && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64' --no-xz",
+    "oclif-upload": "yarn oclif-pack && oclif upload tarballs -t 'linux-x64,darwin-x64,darwin-arm64'"
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "^0.3.2",
@@ -59,9 +64,10 @@
     "@multiformats/multiaddr": "^12.1.6",
     "@oclif/color": "^1.0.10",
     "@oclif/core": "^2.11.5",
-    "@oclif/plugin-autocomplete": "^2.3.3",
+    "@oclif/plugin-autocomplete": "^2.3.6",
     "@oclif/plugin-help": "^5.2.15",
     "@oclif/plugin-not-found": "^2.3.34",
+    "@oclif/plugin-update": "^3.1.32",
     "@walletconnect/universal-provider": "^2.4.7",
     "ajv": "^8.12.0",
     "camelcase": "^7.0.1",
@@ -122,6 +128,11 @@
     "bin": "fluence",
     "dirname": "fluence",
     "commands": "./dist/commands",
+    "update": {
+      "s3": {
+        "bucket": "fcli-binaries"
+      }
+    },
     "topics": {
       "dep": {},
       "dep:cargo": {},
@@ -130,7 +141,8 @@
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-not-found",
-      "@oclif/plugin-autocomplete"
+      "@oclif/plugin-autocomplete",
+      "@oclif/plugin-update"
     ],
     "topicSeparator": " "
   },
