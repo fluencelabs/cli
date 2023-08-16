@@ -29,6 +29,7 @@
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
 * [`fluence spell new [NAME]`](#fluence-spell-new-name)
+* [`fluence update [CHANNEL]`](#fluence-update-channel)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
@@ -834,6 +835,43 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/spell/new.ts)_
+
+## `fluence update [CHANNEL]`
+
+update the fluence CLI
+
+```
+USAGE
+  $ fluence update [CHANNEL] [-a] [-v <value> | -i] [--force]
+
+FLAGS
+  -a, --available        Install a specific version.
+  -i, --interactive      Interactively select version to install. This is ignored if a channel is provided.
+  -v, --version=<value>  Install a specific version.
+  --force                Force a re-download of the requested version.
+
+DESCRIPTION
+  update the fluence CLI
+
+EXAMPLES
+  Update to the stable channel:
+
+    $ fluence update stable
+
+  Update to a specific version:
+
+    $ fluence update --version 1.0.0
+
+  Interactively select version:
+
+    $ fluence update --interactive
+
+  See available versions:
+
+    $ fluence update --available
+```
+
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.32/src/commands/update.ts)_
 
 ## `fluence workers deploy [WORKER-NAMES]`
 
