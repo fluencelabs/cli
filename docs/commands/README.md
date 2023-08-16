@@ -29,6 +29,7 @@
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
 * [`fluence spell new [NAME]`](#fluence-spell-new-name)
+* [`fluence update [CHANNEL]`](#fluence-update-channel)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
@@ -54,6 +55,8 @@ DESCRIPTION
 ALIASES
   $ fluence air b
 ```
+
+_See code: [dist/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
@@ -117,6 +120,8 @@ DESCRIPTION
   what they translate into
 ```
 
+_See code: [dist/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/aqua/json.ts)_
+
 ## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
 
 Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
@@ -144,6 +149,8 @@ DESCRIPTION
 ALIASES
   $ fluence aqua yaml
 ```
+
+_See code: [dist/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -174,7 +181,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.3/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.6/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -237,6 +244,8 @@ EXAMPLES
   $ fluence deal deploy
 ```
 
+_See code: [dist/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/deal/deploy.ts)_
+
 ## `fluence deal logs [WORKER-NAMES]`
 
 Get logs from deployed workers for deals listed in workers.yaml
@@ -268,6 +277,8 @@ EXAMPLES
   $ fluence deal logs
 ```
 
+_See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/deal/logs.ts)_
+
 ## `fluence default peers [NETWORK]`
 
 Print default Fluence network peer addresses
@@ -288,6 +299,8 @@ DESCRIPTION
 EXAMPLES
   $ fluence default peers
 ```
+
+_See code: [dist/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/default/peers.ts)_
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -324,6 +337,8 @@ EXAMPLES
   $ fluence dependency cargo install
 ```
 
+_See code: [dist/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/cargo/install.ts)_
+
 ## `fluence dependency install`
 
 Install all project dependencies (dependencies are cached inside user's .fluence directory)
@@ -346,6 +361,8 @@ ALIASES
 EXAMPLES
   $ fluence dependency install
 ```
+
+_See code: [dist/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/install.ts)_
 
 ## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -379,6 +396,8 @@ EXAMPLES
   $ fluence dependency npm install
 ```
 
+_See code: [dist/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/npm/install.ts)_
+
 ## `fluence dependency reset`
 
 Reset all project dependencies to recommended versions for the current Fluence CLI version
@@ -402,6 +421,8 @@ ALIASES
 EXAMPLES
   $ fluence dependency reset
 ```
+
+_See code: [dist/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/reset.ts)_
 
 ## `fluence dependency versions`
 
@@ -428,6 +449,8 @@ EXAMPLES
   $ fluence dependency versions
 ```
 
+_See code: [dist/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/versions.ts)_
+
 ## `fluence help [COMMANDS]`
 
 Display help for fluence.
@@ -446,7 +469,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.15/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.16/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -494,6 +517,8 @@ EXAMPLES
   $ fluence key default
 ```
 
+_See code: [dist/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/key/default.ts)_
+
 ## `fluence key new [NAME]`
 
 Generate key-pair and store it in user-secrets.yaml or project-secrets.yaml
@@ -517,6 +542,8 @@ EXAMPLES
   $ fluence key new
 ```
 
+_See code: [dist/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/key/new.ts)_
+
 ## `fluence key remove [NAME]`
 
 Remove key-pair from user-secrets.yaml or project-secrets.yaml
@@ -538,6 +565,8 @@ DESCRIPTION
 EXAMPLES
   $ fluence key remove
 ```
+
+_See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/key/remove.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -563,6 +592,8 @@ EXAMPLES
   $ fluence module add
 ```
 
+_See code: [dist/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/module/add.ts)_
+
 ## `fluence module new [NAME]`
 
 Create new marine module template
@@ -586,6 +617,8 @@ EXAMPLES
   $ fluence module new
 ```
 
+_See code: [dist/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/module/new.ts)_
+
 ## `fluence module remove [NAME | PATH | URL]`
 
 Remove module from service.yaml
@@ -608,6 +641,8 @@ EXAMPLES
   $ fluence module remove
 ```
 
+_See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/module/remove.ts)_
+
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
 Create provider access token for the deal
@@ -628,6 +663,8 @@ FLAGS
 DESCRIPTION
   Create provider access token for the deal
 ```
+
+_See code: [dist/commands/resource-owner/pat/create.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/resource-owner/pat/create.ts)_
 
 ## `fluence run`
 
@@ -701,6 +738,8 @@ EXAMPLES
   $ fluence service add
 ```
 
+_See code: [dist/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/add.ts)_
+
 ## `fluence service new [NAME]`
 
 Create new marine service template
@@ -723,6 +762,8 @@ EXAMPLES
   $ fluence service new
 ```
 
+_See code: [dist/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/new.ts)_
+
 ## `fluence service remove [NAME | PATH | URL]`
 
 Remove service from fluence.yaml services property and from all of the workers
@@ -743,6 +784,8 @@ DESCRIPTION
 EXAMPLES
   $ fluence service remove
 ```
+
+_See code: [dist/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -767,6 +810,8 @@ EXAMPLES
   $ fluence service repl
 ```
 
+_See code: [dist/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/repl.ts)_
+
 ## `fluence spell new [NAME]`
 
 Create a new spell template
@@ -788,6 +833,45 @@ DESCRIPTION
 EXAMPLES
   $ fluence spell new
 ```
+
+_See code: [dist/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/spell/new.ts)_
+
+## `fluence update [CHANNEL]`
+
+update the fluence CLI
+
+```
+USAGE
+  $ fluence update [CHANNEL] [-a] [-v <value> | -i] [--force]
+
+FLAGS
+  -a, --available        Install a specific version.
+  -i, --interactive      Interactively select version to install. This is ignored if a channel is provided.
+  -v, --version=<value>  Install a specific version.
+  --force                Force a re-download of the requested version.
+
+DESCRIPTION
+  update the fluence CLI
+
+EXAMPLES
+  Update to the stable channel:
+
+    $ fluence update stable
+
+  Update to a specific version:
+
+    $ fluence update --version 1.0.0
+
+  Interactively select version:
+
+    $ fluence update --interactive
+
+  See available versions:
+
+    $ fluence update --available
+```
+
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.32/src/commands/update.ts)_
 
 ## `fluence workers deploy [WORKER-NAMES]`
 
@@ -826,6 +910,8 @@ EXAMPLES
   $ fluence workers deploy
 ```
 
+_See code: [dist/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/workers/deploy.ts)_
+
 ## `fluence workers logs [WORKER-NAMES]`
 
 Get logs from deployed workers for hosts listed in workers.yaml
@@ -860,6 +946,8 @@ DESCRIPTION
 EXAMPLES
   $ fluence workers logs
 ```
+
+_See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/workers/logs.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
@@ -896,4 +984,6 @@ DESCRIPTION
 EXAMPLES
   $ fluence workers upload
 ```
+
+_See code: [dist/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/workers/upload.ts)_
 <!-- commandsstop -->
