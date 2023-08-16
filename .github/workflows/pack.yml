@@ -11,6 +11,10 @@ on:
         description: "Platform for which to build fluence-cli"
         type: string
         required: true
+      upload-to-s3:
+        description: "Upload artifact to s3"
+        type: string
+        default: false
       marine-version:
         description: "marine version"
         type: string
@@ -127,10 +131,12 @@ jobs:
             }
 
       - name: Generate snapshot version
+        if: inputs.upload-to-s3 != 'true'
         id: version
         uses: fluencelabs/github-actions/generate-snapshot-id@main
 
       - name: Set version
+        if: inputs.upload-to-s3 != 'true'
         uses: fluencelabs/github-actions/npm-publish-snapshot@main
         with:
           id: ${{ steps.version.outputs.id }}
@@ -141,8 +147,15 @@ jobs:
       - name: Pack fluece-cli
         run: yarn pack-${{ inputs.platform }}
 
+      - name: Pack fluece-cli
+        if: inputs.upload-to-s3 == 'true'
+        run: yarn upload-${{ inputs.platform }}
+
       - name: Upload archive to CI
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.platform }}
           path: dist/fluence-*${{ inputs.platform }}*.tar.gz
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
