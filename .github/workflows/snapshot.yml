@@ -88,8 +88,11 @@ jobs:
 
       - run: yarn install
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      - name: Configure yarn to publish to private registry
+        run: |
+          yarn config set npmRegistryServer "https://npm.fluence.dev"
+          yarn config set npmAlwaysAuth true
+          yarn config set npmAuthToken $NODE_AUTH_TOKEN
 
       - name: Set js-client.api version
         if: inputs.js-client-snapshots != 'null'
@@ -109,7 +112,7 @@ jobs:
 
       - name: Set aqua-api version
         if: inputs.aqua-snapshots != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
+        uses: fluencelabs/github-actions/npm-set-dependency@FLU-390
         with:
           package: "@fluencelabs/aqua-api"
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
@@ -131,12 +134,6 @@ jobs:
                 "marine-rs-sdk-test": "${{ inputs.marine-rs-sdk-test-version }}"
               }
             }
-
-      - name: Configure yarn to publish to private registry
-        run: |
-          yarn config set npmRegistryServer "https://npm.fluence.dev"
-          yarn config set npmAlwaysAuth true
-          yarn config set npmAuthToken $NODE_AUTH_TOKEN
 
       - name: Generate snapshot version
         id: version
