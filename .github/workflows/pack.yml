@@ -85,7 +85,6 @@ jobs:
         with:
           node-version: "18"
           registry-url: "https://npm.fluence.dev"
-          cache: "yarn"
 
       - run: yarn install
 
@@ -147,7 +146,7 @@ jobs:
       - name: Pack fluece-cli
         run: yarn pack-${{ inputs.platform }}
 
-      - name: Pack fluece-cli
+      - name: Upload fluece-cli
         if: inputs.upload-to-s3 == 'true'
         run: yarn upload-${{ inputs.platform }}
 

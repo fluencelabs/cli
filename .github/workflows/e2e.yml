@@ -37,7 +37,7 @@ jobs:
     with:
       ref: ${{ github.ref }}
 
-  fluence-cli-pack-test:
+  fluence-cli-pack:
     name: "fluence-cli"
     if: >
       github.event_name == 'push' ||
