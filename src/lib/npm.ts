@@ -18,6 +18,7 @@ import { join } from "node:path";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
+import node_modules from "node_modules-path";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
@@ -35,13 +36,15 @@ import {
 } from "./helpers/package.js";
 import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
+const npmPath = join(node_modules(), ".bin", "npm");
+
 export const getLatestVersionOfNPMDependency = async (
   name: string,
 ): Promise<string> => {
   try {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return (
-      await execPromise({ command: "npm", args: ["view", name, "version"] })
+      await execPromise({ command: npmPath, args: ["view", name, "version"] })
     )
       .trim()
       .split("\n")
@@ -72,7 +75,7 @@ const installNpmDependency = async ({
 }: InstallNpmDependencyArg): Promise<void> => {
   try {
     await execPromise({
-      command: "npm",
+      command: npmPath,
       args: ["i", `${name}@${version}`],
       flags: { prefix: dependencyTmpDirPath },
       spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
