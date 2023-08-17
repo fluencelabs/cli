@@ -76,7 +76,7 @@ FLAGS
   --air                         Generate .air file instead of .ts
   --common-js                   Use no extension in generated .ts file imports
   --const=<NAME=value>...       Constants to be passed to the compiler
-  --dry                         Checks if compilation is succeeded, without output
+  --dry                         Checks if compilation succeeded, without output
   --import=<path>...            Path to a directory to import aqua files from. May be used several times
   --js                          Generate .js file instead of .ts
   --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug, info,
