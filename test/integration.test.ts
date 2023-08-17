@@ -339,7 +339,10 @@ describe("integration tests", () => {
             },
             cwd,
           });
-        } catch {}
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(`runDeployedServices failed: ${String(e)}`);
+        }
 
         const parsedRes = JSON.parse(res);
         assert(Array.isArray(parsedRes));
