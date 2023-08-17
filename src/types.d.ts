@@ -23,6 +23,11 @@ declare module "replace-homedir" {
   ): string;
 }
 
+declare module "node_modules-path" {
+  export = node_modules;
+  declare function node_modules(): string;
+}
+
 declare module "get-random-values" {
   export = getRandomValues;
   declare function getRandomValues(array: Uint8Array): Uint8Array;

@@ -82,6 +82,8 @@
     "ipfs-http-client": "^60.0.1",
     "lodash-es": "^4.17.21",
     "lokijs": "^1.5.12",
+    "node_modules-path": "^2.0.7",
+    "npm": "^9.8.1",
     "platform": "^1.3.6",
     "replace-homedir": "^2.0.0",
     "semver": "^7.5.4",
