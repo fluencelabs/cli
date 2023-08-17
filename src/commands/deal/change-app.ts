@@ -46,10 +46,9 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   };
 
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
+    const { flags, maybeFluenceConfig, args } = await initCli(
       this,
       await this.parse(ChangeApp),
-      true,
     );
 
     const tx = await dealUpdate({
@@ -60,7 +59,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
         args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
       network: await ensureChainNetwork({
         maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
+        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
       }),
       privKey: flags.privKey,
     });

@@ -48,17 +48,16 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { flags, fluenceConfig } = await initCli(
+    const { flags, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(Create),
-      true,
     );
 
     const dealAddress = await dealCreate({
       ...flags,
       chainNetwork: await ensureChainNetwork({
         maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
+        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
       }),
     });
 

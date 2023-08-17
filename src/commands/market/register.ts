@@ -18,19 +18,18 @@ import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 
-import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifeCycle.js";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { initCli } from "../../lib/lifeCycle.js";
 import {
   ensureChainNetwork,
   getSigner,
   promptConfirmTx,
   waitTx,
-} from "../../../lib/provider.js";
+} from "../../lib/provider.js";
 
-export default class RegisterInMatcher extends BaseCommand<
-  typeof RegisterInMatcher
-> {
+export default class Register extends BaseCommand<typeof Register> {
   static override description = "Register in matching contract";
   static override flags = {
     ...baseFlags,
@@ -39,15 +38,14 @@ export default class RegisterInMatcher extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { flags, fluenceConfig } = await initCli(
+    const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(RegisterInMatcher),
-      true,
+      await this.parse(Register),
     );
 
     const network = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
+      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
     });
 
     const signer = await getSigner(network, flags.privKey);
@@ -73,6 +71,6 @@ export default class RegisterInMatcher extends BaseCommand<
     promptConfirmTx(flags.privKey);
     await waitTx(tx);
 
-    this.log(color.green(`Successfully joined to matching contract`));
+    commandObj.log(color.green(`Successfully joined to matching contract`));
   }
 }

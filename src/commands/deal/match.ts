@@ -27,6 +27,7 @@ import { Args } from "@oclif/core";
 const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -55,10 +56,9 @@ export default class Match extends BaseCommand<typeof Match> {
   };
 
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
+    const { flags, maybeFluenceConfig, args } = await initCli(
       this,
       await this.parse(Match),
-      true,
     );
 
     const dealAddress =
@@ -66,7 +66,7 @@ export default class Match extends BaseCommand<typeof Match> {
 
     const network = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
+      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
     });
 
     const signer = await getSigner(network, flags.privKey);
@@ -103,8 +103,8 @@ export default class Match extends BaseCommand<typeof Match> {
       }
     }
 
-    this.log(
-      `${color.green(patCount.toString())} workers joined to deal ${color.green(
+    commandObj.log(
+      `${color.green(patCount)} workers joined the deal ${color.green(
         dealAddress,
       )}`,
     );

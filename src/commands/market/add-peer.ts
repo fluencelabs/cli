@@ -21,60 +21,58 @@
 
 import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
-import { Args } from "@oclif/core";
+import { Flags } from "@oclif/core";
 const color = oclifColor.default;
+import { digest } from "multiformats";
 // eslint-disable-next-line import/extensions
-import * as base58 from "multiformats/bases/base58";
-// eslint-disable-next-line import/extensions
-import * as digest from "multiformats/hashes/digest";
+import { base58btc } from "multiformats/bases/base58";
 
-import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifeCycle.js";
-import { input } from "../../../lib/prompt.js";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { initCli } from "../../lib/lifeCycle.js";
+import { input } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getSigner,
   promptConfirmTx,
   waitTx,
-} from "../../../lib/provider.js";
+} from "../../lib/provider.js";
 
-const WORKERS_COUNT = "WORKERS-COUNT";
-const PEER_ID = "PEER-ID";
-
-export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
+export default class AddPeer extends BaseCommand<typeof AddPeer> {
   static override description =
-    "Add worker slots to matching contract for peerId";
+    "Register specific nox instance as a Compute Peer";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...NETWORK_FLAG,
-  };
-  static override args = {
-    [PEER_ID]: Args.string({
-      description: "PeerId of the workers",
+    "peer-id": Flags.string({
+      description:
+        "Peer id of the nox instance that you want to register as a Compute Peer",
+      helpValue: "<peer-id>",
     }),
-    [WORKERS_COUNT]: Args.string({
-      description: "Workers to be registered with the matching engine",
+    slots: Flags.string({
+      description: "Number of available worker slots on this Compute Peer",
+      helpValue: "<number>",
     }),
   };
 
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
+    const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(AddWorkerSlots),
-      true,
+      await this.parse(AddPeer),
     );
 
     const network = await ensureChainNetwork({
       maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
+      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
     });
 
     const workersCount =
-      args[WORKERS_COUNT] ?? (await input({ message: "Enter workers count" }));
+      flags.slots ?? (await input({ message: "Enter workers count" }));
 
-    const peerId = args[PEER_ID] ?? (await input({ message: "Enter peerId" }));
+    const peerId =
+      flags["peer-id"] ?? (await input({ message: "Enter peerId" }));
 
     const signer = await getSigner(network, flags.privKey);
 
@@ -94,7 +92,7 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
     promptConfirmTx(flags.privKey);
     await waitTx(approveTx);
 
-    const multihash = digest.decode(base58.base58btc.decode("z" + peerId));
+    const multihash = digest.decode(base58btc.decode("z" + peerId));
     const bytes = multihash.bytes.subarray(6);
 
     const tx = await matcher.addWorkersSlots(bytes, workersCount);
@@ -103,7 +101,7 @@ export default class AddWorkerSlots extends BaseCommand<typeof AddWorkerSlots> {
 
     const free = await matcher.getFreeWorkersSolts(bytes);
 
-    this.log(
+    commandObj.log(
       color.green(
         `Added ${color.bold(
           workersCount,
