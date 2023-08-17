@@ -6,8 +6,6 @@
 * [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
-* [`fluence compute-provider matching addWorkersSlots [PEER-ID] [WORKERS-COUNT]`](#fluence-compute-provider-matching-addworkersslots-peer-id-workers-count)
-* [`fluence compute-provider matching register`](#fluence-compute-provider-matching-register)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
 * [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
@@ -21,6 +19,8 @@
 * [`fluence key default [NAME]`](#fluence-key-default-name)
 * [`fluence key new [NAME]`](#fluence-key-new-name)
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
+* [`fluence market add-peer`](#fluence-market-add-peer)
+* [`fluence market register`](#fluence-market-register)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
@@ -206,51 +206,6 @@ EXAMPLES
 
 _See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/build.ts)_
 
-## `fluence compute-provider matching addWorkersSlots [PEER-ID] [WORKERS-COUNT]`
-
-Add worker slots to matching contract for peerId
-
-```
-USAGE
-  $ fluence compute-provider matching addWorkersSlots [PEER-ID] [WORKERS-COUNT] [--no-input] [--privKey <value>]
-  [--network <value>]
-
-ARGUMENTS
-  PEER-ID        PeerId of the workers
-  WORKERS-COUNT  Workers to be registered with the matching engine
-
-FLAGS
-  --network=<network>  [default: local] The network in which the transactions used by the command will be carried out
-                       (testnet, local)
-  --no-input           Don't interactively ask for any input from the user
-  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-
-DESCRIPTION
-  Add worker slots to matching contract for peerId
-```
-
-_See code: [dist/commands/compute-provider/matching/addWorkersSlots.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/compute-provider/matching/addWorkersSlots.ts)_
-
-## `fluence compute-provider matching register`
-
-Register in matching contract
-
-```
-USAGE
-  $ fluence compute-provider matching register [--no-input] [--privKey <value>] [--network <value>]
-
-FLAGS
-  --network=<network>  [default: local] The network in which the transactions used by the command will be carried out
-                       (testnet, local)
-  --no-input           Don't interactively ask for any input from the user
-  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-
-DESCRIPTION
-  Register in matching contract
-```
-
-_See code: [dist/commands/compute-provider/matching/register.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/compute-provider/matching/register.ts)_
-
 ## `fluence deal deploy [WORKER-NAMES]`
 
 Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -277,7 +232,7 @@ FLAGS
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                     Print particle ids when running Fluence js-client
-  --privKey=<value>                 !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --privKey=<private-key>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>            Relay for Fluence js-client to connect to
   --tracing                         Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
@@ -310,7 +265,7 @@ FLAGS
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                  Print particle ids when running Fluence js-client
-  --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --privKey=<private-key>        !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
@@ -613,6 +568,48 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/key/remove.ts)_
+
+## `fluence market add-peer`
+
+Register specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence market add-peer [--no-input] [--privKey <value>] [--network <value>] [--peer-id <value>] [--slots <value>]
+
+FLAGS
+  --network=<network>      [default: local] The network in which the transactions used by the command will be carried
+                           out (testnet, local)
+  --no-input               Don't interactively ask for any input from the user
+  --peer-id=<peer-id>      Peer id of the nox instance that you want to register as a Compute Peer
+  --privKey=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --slots=<number>         Number of available worker slots on this Compute Peer
+
+DESCRIPTION
+  Register specific nox instance as a Compute Peer
+```
+
+_See code: [dist/commands/market/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/market/add-peer.ts)_
+
+## `fluence market register`
+
+Register in matching contract
+
+```
+USAGE
+  $ fluence market register [--no-input] [--privKey <value>] [--network <value>]
+
+FLAGS
+  --network=<network>      [default: local] The network in which the transactions used by the command will be carried
+                           out (testnet, local)
+  --no-input               Don't interactively ask for any input from the user
+  --privKey=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+
+DESCRIPTION
+  Register in matching contract
+```
+
+_See code: [dist/commands/market/register.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/market/register.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -920,7 +917,7 @@ FLAGS
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                     Print particle ids when running Fluence js-client
-  --privKey=<value>                 !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --privKey=<private-key>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>            Relay for Fluence js-client to connect to
   --tracing                         Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
@@ -955,7 +952,7 @@ FLAGS
   --no-input                     Don't interactively ask for any input from the user
   --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                  Print particle ids when running Fluence js-client
-  --privKey=<value>              !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --privKey=<private-key>        !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>         Relay for Fluence js-client to connect to
   --spell-id=<spell-id>          [default: worker-spell] Spell id
   --tracing                      Compile aqua in tracing mode (for debugging purposes)
@@ -995,7 +992,7 @@ FLAGS
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                     Print particle ids when running Fluence js-client
-  --privKey=<value>                 !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --privKey=<private-key>           !WARNING! for debug purposes only. Passing private keys through flags is unsecure
   --relay=<multiaddress>            Relay for Fluence js-client to connect to
   --tracing                         Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
