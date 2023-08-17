@@ -7,7 +7,7 @@ networks:
 
 services:
   deal-aurora:
-    image: "${DEAL_AURORA_IMAGE:-docker.fluence.dev/aurora:main-9e7523f-4-1}"
+    image: "${DEAL_AURORA_IMAGE:-docker.fluence.dev/aurora:0.2.6}"
     pull_policy: always
     ports:
       - 8545:8545
