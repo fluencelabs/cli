@@ -98,7 +98,7 @@ export default class Aqua extends Command {
     }),
     dry: Flags.boolean({
       default: false,
-      description: "Checks if compilation is succeeded, without output",
+      description: "Checks if compilation succeeded, without output",
     }),
     ...TRACING_FLAG,
   };
