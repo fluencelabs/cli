@@ -50,6 +50,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       description:
         "Peer id of the nox instance that you want to register as a Compute Peer",
       helpValue: "<peer-id>",
+      multiple: true,
     }),
     slots: Flags.string({
       description: "Number of available worker slots on this Compute Peer",
@@ -71,44 +72,41 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     const workersCount =
       flags.slots ?? (await input({ message: "Enter workers count" }));
 
-    const peerId =
-      flags["peer-id"] ?? (await input({ message: "Enter peerId" }));
+    const peerIds = flags["peer-id"] ?? [
+      await input({ message: "Enter peerId" }),
+    ];
 
-    const signer = await getSigner(network, flags.privKey);
+    for (const peerId of peerIds) {
+      const signer = await getSigner(network, flags["priv-key"]);
+      const dealClient = new DealClient(signer, network);
+      const globalContracts = dealClient.getGlobalContracts();
+      const matcher = await globalContracts.getMatcher();
+      const flt = await globalContracts.getFLT();
+      const factory = await globalContracts.getFactory();
+      const collateral = await factory.REQUIRED_COLLATERAL();
 
-    const dealClient = new DealClient(signer, network);
+      const approveTx = await flt.approve(
+        await matcher.getAddress(),
+        collateral * BigInt(workersCount),
+      );
 
-    const globalContracts = dealClient.getGlobalContracts();
-    const matcher = await globalContracts.getMatcher();
-    const flt = await globalContracts.getFLT();
-    const factory = await globalContracts.getFactory();
-    const collateral = await factory.REQUIRED_COLLATERAL();
+      promptConfirmTx(flags["priv-key"]);
+      await waitTx(approveTx);
 
-    const approveTx = await flt.approve(
-      await matcher.getAddress(),
-      collateral * BigInt(workersCount),
-    );
+      const multihash = digest.decode(base58btc.decode("z" + peerId));
+      const bytes = multihash.bytes.subarray(6);
+      const tx = await matcher.addWorkersSlots(bytes, workersCount);
+      promptConfirmTx(flags["priv-key"]);
+      await waitTx(tx);
+      const free = await matcher.getFreeWorkersSolts(bytes);
 
-    promptConfirmTx(flags.privKey);
-    await waitTx(approveTx);
-
-    const multihash = digest.decode(base58btc.decode("z" + peerId));
-    const bytes = multihash.bytes.subarray(6);
-
-    const tx = await matcher.addWorkersSlots(bytes, workersCount);
-    promptConfirmTx(flags.privKey);
-    await waitTx(tx);
-
-    const free = await matcher.getFreeWorkersSolts(bytes);
-
-    commandObj.log(
-      color.green(
-        `Added ${color.bold(
+      commandObj.logToStderr(
+        `Added ${color.yellow(
           workersCount,
-        )} worker slots. Compute peer ${color.bold(
-          peerId,
-        )} now has ${color.bold(free)} free worker slots.`,
-      ),
-    );
+        )} worker slots. Compute peer ${color.yellow(
+          peerIds,
+        )} has ${color.yellow(free)} free worker slots now.`,
+      );
+    }
   }
 }

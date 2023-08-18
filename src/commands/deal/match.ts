@@ -14,31 +14,14 @@
  * limitations under the License.
  */
 
-import { assert } from "console";
-
-import {
-  DealClient,
-  WorkersModule__factory,
-  type Matcher,
-} from "@fluencelabs/deal-aurora";
-import oclifColor from "@oclif/color";
 import { Args } from "@oclif/core";
 
-const color = oclifColor.default;
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { match } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
-
-const PAT_CREATED_EVENT_TOPIC = "PATCreated";
+import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Match extends BaseCommand<typeof Match> {
   static override hidden = true;
@@ -69,44 +52,6 @@ export default class Match extends BaseCommand<typeof Match> {
       maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
     });
 
-    const signer = await getSigner(network, flags.privKey);
-
-    const dealClient = new DealClient(signer, network);
-
-    const globalContracts = dealClient.getGlobalContracts();
-
-    const matcher: Matcher = await globalContracts.getMatcher();
-
-    const tx = await matcher.matchWithDeal(dealAddress);
-
-    promptConfirmTx(flags.privKey);
-    const res = await waitTx(tx);
-
-    const workersInterface = WorkersModule__factory.createInterface();
-
-    const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);
-
-    let patCount = 0;
-
-    for (const log of res.logs) {
-      if (log.topics[0] === event.topicHash) {
-        const id: unknown = workersInterface
-          .parseLog({
-            topics: [...log.topics],
-            data: log.data,
-          })
-          ?.args.getValue("id");
-
-        assert(typeof id === "string");
-
-        patCount = patCount + 1;
-      }
-    }
-
-    commandObj.log(
-      `${color.green(patCount)} workers joined the deal ${color.green(
-        dealAddress,
-      )}`,
-    );
+    await match(network, flags["priv-key"], dealAddress);
   }
 }

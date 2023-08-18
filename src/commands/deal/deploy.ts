@@ -18,7 +18,7 @@ import assert from "node:assert";
 
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
-import { Args } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -43,7 +43,7 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS,
 } from "../../lib/const.js";
-import { dealCreate, dealUpdate } from "../../lib/deal.js";
+import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
 import {
   ensureAquaFileWithWorkerInfo,
   prepareForDeploy,
@@ -68,6 +68,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
     ...MARINE_BUILD_ARGS,
+    "auto-match": Flags.boolean({
+      description: `Disable automatic matching`,
+      allowNo: true,
+      default: true,
+    }),
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -151,10 +156,18 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
         await dealUpdate({
           network: chainNetwork,
-          privKey: flags.privKey,
+          privKey: flags["priv-key"],
           appCID,
           dealAddress: maybePreviouslyDeployedDeal.dealId,
         });
+
+        if (flags["auto-match"]) {
+          await match(
+            chainNetwork,
+            flags["priv-key"],
+            maybePreviouslyDeployedDeal.dealIdOriginal,
+          );
+        }
 
         updatedDeals[workerName] = {
           deal: getLinkToAddress(maybePreviouslyDeployedDeal.dealIdOriginal),
@@ -186,11 +199,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       const dealIdOriginal = await dealCreate({
         chainNetwork,
-        privKey: flags.privKey,
+        privKey: flags["priv-key"],
         appCID,
         minWorkers,
         targetWorkers,
       });
+
+      if (flags["auto-match"]) {
+        await match(chainNetwork, flags["priv-key"], dealIdOriginal);
+      }
 
       if (workersConfig.deals === undefined) {
         workersConfig.deals = {};

@@ -31,15 +31,15 @@ export default class Create extends BaseCommand<typeof Create> {
     "Create your deal with the specified parameters";
   static override flags = {
     ...baseFlags,
-    appCID: Flags.string({
+    "app-cid": Flags.string({
       description: "CID of the application that will be deployed",
       required: true,
     }),
-    minWorkers: Flags.integer({
+    "min-workers": Flags.integer({
       description: "Required workers to activate the deal",
       default: 1,
     }),
-    targetWorkers: Flags.integer({
+    "target-workers": Flags.integer({
       description: "Max workers in the deal",
       default: 3,
     }),
@@ -54,7 +54,10 @@ export default class Create extends BaseCommand<typeof Create> {
     );
 
     const dealAddress = await dealCreate({
-      ...flags,
+      appCID: flags["app-cid"],
+      minWorkers: flags["min-workers"],
+      targetWorkers: flags["target-workers"],
+      privKey: flags["priv-key"],
       chainNetwork: await ensureChainNetwork({
         maybeNetworkFromFlags: flags.network,
         maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,

@@ -20,11 +20,18 @@
 
 import assert from "node:assert";
 
-import { DealClient } from "@fluencelabs/deal-aurora";
+import {
+  DealClient,
+  WorkersModule__factory,
+  type Matcher,
+} from "@fluencelabs/deal-aurora";
 import { type ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import ethers = require("ethers");
 import { CID } from "ipfs-http-client";
 
+import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL } from "./const.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 
@@ -170,3 +177,43 @@ export const dealUpdate = async ({
 
   return tx;
 };
+
+const PAT_CREATED_EVENT_TOPIC = "PATCreated";
+
+export async function match(
+  network: ContractsENV,
+  privKey: string | undefined,
+  dealAddress: string,
+) {
+  const signer = await getSigner(network, privKey);
+  const dealClient = new DealClient(signer, network);
+  const globalContracts = dealClient.getGlobalContracts();
+  const matcher: Matcher = await globalContracts.getMatcher();
+  const tx = await matcher.matchWithDeal(dealAddress);
+  promptConfirmTx(privKey);
+  const res = await waitTx(tx);
+  const workersInterface = WorkersModule__factory.createInterface();
+  const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);
+
+  const patCount = res.logs.filter((log) => {
+    if (log.topics[0] !== event.topicHash) {
+      return false;
+    }
+
+    const id: unknown = workersInterface
+      .parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      ?.args.getValue("id");
+
+    assert(typeof id === "string");
+    return true;
+  }).length;
+
+  commandObj.logToStderr(
+    `${color.yellow(patCount)} workers joined the deal ${color.yellow(
+      dealAddress,
+    )}`,
+  );
+}

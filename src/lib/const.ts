@@ -193,7 +193,7 @@ export const GLOBAL_FLAG = {
 };
 
 export const PRIV_KEY_FLAG = {
-  privKey: Flags.string({
+  "priv-key": Flags.string({
     description:
       "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
     helpValue: "<private-key>",
@@ -375,15 +375,31 @@ data Answer:
     answer: string
     peer: string
 
+data Worker:
+  host_id: string
+  worker_id: string
+
+data Subnet:
+  workers: []Worker
+  error: []string
+
+service Connector("fluence_aurora_connector"):
+    resolve_subnet(dealId: string, apiEndpoint: string) -> Subnet
+
+func resolve_subnet(dealId: string) -> Subnet:
+    on HOST_PEER_ID:
+        subnet <- Connector.resolve_subnet(dealId, "http://deal-aurora:8545")
+    <- subnet
+
 func runDeployedServices() -> *Answer:
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.defaultWorker!.dealId
+    dealId = workersInfo.deals.defaultWorker!.dealIdOriginal
     answers: *Answer
-    workers <- resolveSubnetwork(dealId)
-    for w <- workers!:
-        on w.metadata.peer_id via w.metadata.relay_id:
+    subnet <- resolve_subnet(dealId)
+    for w <- subnet.workers:
+        on w.worker_id via w.host_id:
             answer <- MyService.greeting("fluence")
-            answers <<- Answer(answer=answer, peer=w.metadata.relay_id!)
+            answers <<- Answer(answer=answer, peer=w.host_id)
 
     <- answers`;
 

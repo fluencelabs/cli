@@ -28,7 +28,7 @@ import { initFluenceConfigWithPath } from "../src/lib/configs/project/fluence.js
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import { DEFAULT_WORKER_NAME, FS_OPTIONS } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
-import { local } from "../src/lib/localNodes.js";
+import { localPeerIds, local } from "../src/lib/localNodes.js";
 
 import {
   fluence,
@@ -214,15 +214,9 @@ describe("integration tests", () => {
         },
       };
 
-      const peers = [
-        "12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR",
-        "12D3KooWQdpukY3p2DhDfUfDgphAqsGu5ZUrmQ4mcHSGrRag6gQK",
-        "12D3KooWRT8V5awYdEZm6aAV9HWweCEbhWd7df4wehqHZXAB7yMZ",
-      ];
-
       fluenceConfig.hosts = {
         [DEFAULT_WORKER_NAME]: {
-          peerIds: peers,
+          peerIds: localPeerIds,
         },
       };
 
@@ -257,7 +251,7 @@ describe("integration tests", () => {
 
       const arrayOfResults = parsedResult.map(assertHasPeer).sort(sortPeers);
 
-      const expected = peers.map((peer) => {
+      const expected = localPeerIds.map((peer) => {
         return {
           answer: "Hi, fluence",
           peer,
@@ -273,6 +267,30 @@ describe("integration tests", () => {
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
       await init(cwd, "quickstart");
+
+      await fluence({
+        args: ["market", "register"],
+        flags: {
+          network: "local",
+          "priv-key": PRIV_KEY,
+        },
+        cwd,
+      });
+
+      const peerIdFlags = localPeerIds.flatMap((peerId) => {
+        return ["--peer-id", peerId];
+      });
+
+      await fluence({
+        args: ["market", "add-peer", ...peerIdFlags],
+        flags: {
+          network: "local",
+          "priv-key": PRIV_KEY,
+          slots: 1,
+        },
+        cwd,
+      });
+
       const pathToNewServiceDir = join("src", "services", "myService");
 
       const newServiceConfig = await initServiceConfig(
@@ -312,14 +330,11 @@ describe("integration tests", () => {
       await fluenceConfig.$commit();
 
       await fluence({
-        args: [
-          "deal",
-          "deploy",
-          "--privKey",
-          "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5",
-          "--network",
-          "local",
-        ],
+        args: ["deal", "deploy"],
+        flags: {
+          "priv-key": PRIV_KEY,
+          network: "local",
+        },
         cwd,
       });
 
@@ -341,7 +356,7 @@ describe("integration tests", () => {
           });
         } catch (e) {
           // eslint-disable-next-line no-console
-          console.error(`runDeployedServices failed: ${String(e)}`);
+          console.warn(`runDeployedServices failed: ${String(e)}`);
         }
 
         const parsedRes = JSON.parse(res);
@@ -393,6 +408,9 @@ const compileAqua = (cwd: string) => {
 const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
   return join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 };
+
+const PRIV_KEY =
+  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5";
 
 const WD_MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;

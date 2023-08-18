@@ -48,16 +48,12 @@ export default class Register extends BaseCommand<typeof Register> {
       maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
     });
 
-    const signer = await getSigner(network, flags.privKey);
-
+    const signer = await getSigner(network, flags["priv-key"]);
     const dealClient = new DealClient(signer, network);
-
     const globalContracts = dealClient.getGlobalContracts();
-
     const matcher = await globalContracts.getMatcher();
     const factory = await globalContracts.getFactory();
     const flt = await globalContracts.getFLT();
-
     const collateral = await factory.REQUIRED_COLLATERAL();
     const pricePerEpoch = await factory.PRICE_PER_EPOCH();
 
@@ -68,7 +64,7 @@ export default class Register extends BaseCommand<typeof Register> {
       [],
     );
 
-    promptConfirmTx(flags.privKey);
+    promptConfirmTx(flags["priv-key"]);
     await waitTx(tx);
 
     commandObj.log(color.green(`Successfully joined to matching contract`));

@@ -61,7 +61,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
         maybeNetworkFromFlags: flags.network,
         maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
       }),
-      privKey: flags.privKey,
+      privKey: flags["priv-key"],
     });
 
     commandObj.logToStderr(`Tx hash: ${color.yellow(tx.hash)}`);

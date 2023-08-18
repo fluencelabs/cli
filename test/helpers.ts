@@ -18,7 +18,7 @@ import "@total-typescript/ts-reset";
 import assert from "node:assert";
 import { access, cp, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
-import path from "node:path";
+import { join } from "node:path";
 
 import {
   krasnodar,
@@ -51,10 +51,13 @@ type CliArg = {
   cwd?: string;
 };
 
-const pathToFluenceExecutable = path.join(
+const pathToBinDir = join(
   process.cwd(),
-  path.join("tmp", `${platform()}-${arch()}`, CLI_NAME, "bin", CLI_NAME),
+  join("tmp", `${platform()}-${arch()}`, CLI_NAME, "bin"),
 );
+
+const pathToCliRunJS = join(pathToBinDir, "run.js");
+const pathToNodeJS = join(pathToBinDir, "node");
 
 export const fluence = async ({
   args = [],
@@ -62,8 +65,8 @@ export const fluence = async ({
   cwd = process.cwd(),
 }: CliArg): ReturnType<typeof execPromise> => {
   return execPromise({
-    command: pathToFluenceExecutable,
-    args,
+    command: pathToNodeJS,
+    args: [pathToCliRunJS, ...args],
     flags: {
       "no-input": true,
       ...flags,
@@ -74,7 +77,7 @@ export const fluence = async ({
 };
 
 const getInitializedTemplatePath = (template: Template) => {
-  return path.join("tmp", "templates", template);
+  return join("tmp", "templates", template);
 };
 
 export const initFirstTime = async (template: Template) => {
