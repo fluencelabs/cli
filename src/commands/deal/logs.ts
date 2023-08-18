@@ -82,7 +82,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
       );
     }
 
-    commandObj.log(
+    commandObj.logToStderr(
       logs
         .map(({ host_id, logs, spell_id, deal_id }) => {
           return `${color.yellow(
