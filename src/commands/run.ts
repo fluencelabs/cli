@@ -20,7 +20,7 @@ import { dirname, resolve } from "node:path";
 
 import { beautify } from "@fluencelabs/air-beautify-wasm";
 import { compileAquaCallFromPath } from "@fluencelabs/aqua-api";
-import { Fluence, callAquaFunction } from "@fluencelabs/js-client.api";
+import { Fluence, callAquaFunction } from "@fluencelabs/js-client";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Flags } from "@oclif/core";

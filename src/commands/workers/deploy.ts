@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Fluence } from "@fluencelabs/js-client.api";
+import { Fluence } from "@fluencelabs/js-client";
 import oclifColor from "@oclif/color";
 const color = oclifColor.default;
 import { Args } from "@oclif/core";

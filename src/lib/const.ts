@@ -350,8 +350,7 @@ export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
-export const JS_CLIENT_NODE_NPM_DEPENDENCY = "@fluencelabs/js-client.node";
-export const JS_CLIENT_API_NPM_DEPENDENCY = "@fluencelabs/js-client.api";
+export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
 export const FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY =
   "@fluencelabs/fluence-network-environment";
 
@@ -473,8 +472,7 @@ const PEERS = {
 }[process.env[FLUENCE_ENV] as FluenceEnv];
 
 export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
-import "@fluencelabs/js-client.node";
-import { Fluence } from "@fluencelabs/js-client.api";
+import { Fluence } from "@fluencelabs/js-client";
 ${PEERS}
 
 import {
