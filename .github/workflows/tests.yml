@@ -137,7 +137,7 @@ jobs:
 
       - name: Run nox network
         run: |
-          NOX_IMAGE=docker.fluence.dev/nox:ipfs_alpha-decider_3039_1 docker-compose -f .github/e2e/docker-compose.yml up -d
+          docker-compose -f .github/e2e/docker-compose.yml up -d
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1

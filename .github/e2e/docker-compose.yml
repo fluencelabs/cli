@@ -29,7 +29,7 @@ services:
         ipv4_address: 10.50.10.100
 
   nox-1:
-    image: "${NOX_IMAGE:-docker.fluence.dev/nox:ipfs_alpha-decider_3020_1}"
+    image: "${NOX_IMAGE:-docker.fluence.dev/nox:ipfs_alpha-decider_3039_1}"
     pull_policy: always
     ports:
       - 7771:7771
@@ -65,7 +65,7 @@ services:
         ipv4_address: 10.50.10.10
 
   nox-2:
-    image: "${NOX_IMAGE:-docker.fluence.dev/nox:ipfs_alpha-decider_3020_1}"
+    image: "${NOX_IMAGE:-docker.fluence.dev/nox:ipfs_alpha-decider_3039_1}"
     pull_policy: always
     ports:
       - 7772:7772
@@ -100,7 +100,7 @@ services:
         ipv4_address: 10.50.10.20
 
   nox-3:
-    image: "${NOX_IMAGE:-docker.fluence.dev/nox:ipfs_alpha-decider_3020_1}"
+    image: "${NOX_IMAGE:-docker.fluence.dev/nox:ipfs_alpha-decider_3039_1}"
     pull_policy: always
     ports:
       - 7773:7773
