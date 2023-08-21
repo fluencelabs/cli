@@ -55,9 +55,9 @@ export const initFluenceClient = async (
         type: "Ed25519",
       },
     });
+
+    commandObj.logToStderr(color.green(`Connected`));
   } catch (e) {
-    commandObj.error(
-      `Failed to connect to ${color.yellow(relay)}. ${stringifyUnknown(e)}`,
-    );
+    commandObj.error(`Failed to connect. ${stringifyUnknown(e)}`);
   }
 };

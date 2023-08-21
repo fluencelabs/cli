@@ -35,6 +35,7 @@ import {
   TRACING_FLAG,
 } from "../../lib/const.js";
 import { parseWorkers } from "../../lib/deployWorkers.js";
+import { formatAquaLogs } from "../../lib/helpers/formatLogs.js";
 import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
 import { initFluenceClient } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -81,13 +82,13 @@ export default class Logs extends BaseCommand<typeof Logs> {
       );
     }
 
-    commandObj.log(
+    commandObj.logToStderr(
       logs
         .map(({ host_id, logs, spell_id, deal_id }) => {
           return `${color.yellow(
             dealIdWorkerNameMap[deal_id] ?? "Unknown worker",
-          )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${logs.join(
-            "\n",
+          )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${formatAquaLogs(
+            logs,
           )}`;
         })
         .join("\n\n"),
