@@ -46,7 +46,7 @@ services:
       FLUENCE_ENV_CONNECTOR_CONTRACT_ADDRESS: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981"
       FLUENCE_SYSTEM_SERVICES__DECIDER__DECIDER_PERIOD_SEC: 5
     command:
-      - --aqua-pool-size=2
+      - --aqua-pool-size=5
       - -t=7771
       - -w=9991
       - -x=10.50.10.10
@@ -82,7 +82,7 @@ services:
       FLUENCE_ENV_CONNECTOR_CONTRACT_ADDRESS: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981"
       FLUENCE_SYSTEM_SERVICES__DECIDER__DECIDER_PERIOD_SEC: 5
     command:
-      - --aqua-pool-size=2
+      - --aqua-pool-size=5
       - -t=7772
       - -w=9992
       - -x=10.50.10.20
@@ -117,7 +117,7 @@ services:
       FLUENCE_ENV_CONNECTOR_CONTRACT_ADDRESS: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981"
       FLUENCE_SYSTEM_SERVICES__DECIDER__DECIDER_PERIOD_SEC: 5
     command:
-      - --aqua-pool-size=2
+      - --aqua-pool-size=5
       - -t=7773
       - -w=9993
       - -x=10.50.10.30
