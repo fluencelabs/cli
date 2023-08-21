@@ -410,7 +410,7 @@ const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
 };
 
 const PRIV_KEY =
-  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5";
+  "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f";
 
 const WD_MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;
