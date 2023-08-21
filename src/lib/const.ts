@@ -376,12 +376,12 @@ data Answer:
     peer: string
 
 data Worker:
-  host_id: string
-  worker_id: string
+    host_id: string
+    worker_id: string
 
 data Subnet:
-  workers: []Worker
-  error: []string
+    workers: []Worker
+    error: []string
 
 service Connector("fluence_aurora_connector"):
     resolve_subnet(dealId: string, apiEndpoint: string) -> Subnet
