@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.6.1...fluence-cli-v0.6.2) (2023-08-22)
+
+
+### Features
+
+* pack CLI [fixes DXJ-443] ([#398](https://github.com/fluencelabs/cli/issues/398)) ([78cdda2](https://github.com/fluencelabs/cli/commit/78cdda2594c280d9165be4cd4a0c4421e417aeb6))
+* patch oclif node execution so there are no warnings ([#422](https://github.com/fluencelabs/cli/issues/422)) ([db5d92f](https://github.com/fluencelabs/cli/commit/db5d92fc34f2c161ee97e1e8985c442562af1667))
+* use local npm ([#417](https://github.com/fluencelabs/cli/issues/417)) ([a6c62f5](https://github.com/fluencelabs/cli/commit/a6c62f57e7138ef20b9b08193cf734e08691ad3d))
+
+
+### Bug Fixes
+
+* change description ([#416](https://github.com/fluencelabs/cli/issues/416)) ([4711f7f](https://github.com/fluencelabs/cli/commit/4711f7fb4666767d3731095001c74ff4a918ea32))
+* fix worker logs [fixes DXJ-449] ([#418](https://github.com/fluencelabs/cli/issues/418)) ([78521c3](https://github.com/fluencelabs/cli/commit/78521c3bee0ede80373b7a84fa9422f42ac745f4))
+
 ## [0.6.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.6.0...fluence-cli-v0.6.1) (2023-08-10)
 
 
