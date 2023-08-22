@@ -15,6 +15,7 @@
  */
 
 import assert from "node:assert";
+import { warn } from "node:console";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -355,8 +356,7 @@ describe("integration tests", () => {
             cwd,
           });
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.warn(`runDeployedServices failed: ${String(e)}`);
+          warn(`runDeployedServices failed: ${String(e)}`);
         }
 
         const parsedRes = JSON.parse(res);

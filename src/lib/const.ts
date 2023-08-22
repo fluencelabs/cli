@@ -369,12 +369,7 @@ const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
-module ResolveSubnet
-
 export runDeployedServices
-
-import "workers.aqua"
-import "services.aqua"
 
 data Worker:
     pat_id: string

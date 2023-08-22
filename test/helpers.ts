@@ -66,7 +66,7 @@ export const fluence = async ({
 }: CliArg): ReturnType<typeof execPromise> => {
   return execPromise({
     command: pathToNodeJS,
-    args: [pathToCliRunJS, ...args],
+    args: ["--no-warnings", pathToCliRunJS, ...args],
     flags: {
       "no-input": true,
       ...flags,
