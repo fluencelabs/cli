@@ -19,7 +19,12 @@
 // eslint-disable-next-line node/shebang
 import oclif from "@oclif/core";
 
-import { createErrorPromise } from "../dist/countlyInterceptor.js";
+import {
+  createErrorPromise,
+  setUpProcessWarningListener,
+} from "../dist/errorInterceptor.js";
+
+setUpProcessWarningListener();
 
 oclif
   .run(process.argv.slice(2), import.meta.url)

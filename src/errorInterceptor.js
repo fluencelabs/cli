@@ -145,3 +145,24 @@ interceptor.on("response", ({ request: { url } }) => {
     }
   }
 });
+
+/**
+ * The main purpose of this function is to set up a listener for process warnings.
+ * oclif reports this warnings when CLI command can not be interpreted by Node.js
+ * (most of the time related to some imports dependencies missing)
+ * This throws an error and enables us to see what the error is about
+ * @returns {void}
+ */
+export function setUpProcessWarningListener() {
+  process.on("warning", (warning) => {
+    if ("code" in warning && warning.code === "MODULE_NOT_FOUND") {
+      throw new Error(warning.stack);
+    } else if ("stack" in warning) {
+      // eslint-disable-next-line no-console
+      console.warn(warning.stack);
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(warning);
+    }
+  });
+}

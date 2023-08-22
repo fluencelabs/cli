@@ -21,7 +21,7 @@ import Countly from "countly-sdk-nodejs";
 import {
   sessionEndPromise,
   isCountlyInitialized,
-} from "../countlyInterceptor.js";
+} from "../errorInterceptor.js";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
