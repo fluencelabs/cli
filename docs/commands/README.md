@@ -56,7 +56,7 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [dist/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/air/beautify.ts)_
+_See code: [dist/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
@@ -93,7 +93,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -120,7 +120,7 @@ DESCRIPTION
   what they translate into
 ```
 
-_See code: [dist/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/aqua/json.ts)_
+_See code: [dist/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/aqua/json.ts)_
 
 ## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
 
@@ -150,7 +150,7 @@ ALIASES
   $ fluence aqua yaml
 ```
 
-_See code: [dist/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/aqua/yml.ts)_
+_See code: [dist/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -203,7 +203,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -244,7 +244,7 @@ EXAMPLES
   $ fluence deal deploy
 ```
 
-_See code: [dist/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/deal/deploy.ts)_
+_See code: [dist/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/deal/deploy.ts)_
 
 ## `fluence deal logs [WORKER-NAMES]`
 
@@ -277,7 +277,7 @@ EXAMPLES
   $ fluence deal logs
 ```
 
-_See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/deal/logs.ts)_
+_See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/deal/logs.ts)_
 
 ## `fluence default peers [NETWORK]`
 
@@ -300,7 +300,7 @@ EXAMPLES
   $ fluence default peers
 ```
 
-_See code: [dist/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/default/peers.ts)_
+_See code: [dist/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/default/peers.ts)_
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -337,7 +337,7 @@ EXAMPLES
   $ fluence dependency cargo install
 ```
 
-_See code: [dist/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/cargo/install.ts)_
+_See code: [dist/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/cargo/install.ts)_
 
 ## `fluence dependency install`
 
@@ -362,7 +362,7 @@ EXAMPLES
   $ fluence dependency install
 ```
 
-_See code: [dist/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/install.ts)_
+_See code: [dist/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/install.ts)_
 
 ## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -396,7 +396,7 @@ EXAMPLES
   $ fluence dependency npm install
 ```
 
-_See code: [dist/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/npm/install.ts)_
+_See code: [dist/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/npm/install.ts)_
 
 ## `fluence dependency reset`
 
@@ -422,7 +422,7 @@ EXAMPLES
   $ fluence dependency reset
 ```
 
-_See code: [dist/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/reset.ts)_
+_See code: [dist/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/reset.ts)_
 
 ## `fluence dependency versions`
 
@@ -449,7 +449,7 @@ EXAMPLES
   $ fluence dependency versions
 ```
 
-_See code: [dist/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/dependency/versions.ts)_
+_See code: [dist/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/versions.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -493,7 +493,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -517,7 +517,7 @@ EXAMPLES
   $ fluence key default
 ```
 
-_See code: [dist/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/key/default.ts)_
+_See code: [dist/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/key/default.ts)_
 
 ## `fluence key new [NAME]`
 
@@ -542,7 +542,7 @@ EXAMPLES
   $ fluence key new
 ```
 
-_See code: [dist/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/key/new.ts)_
+_See code: [dist/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/key/new.ts)_
 
 ## `fluence key remove [NAME]`
 
@@ -566,7 +566,7 @@ EXAMPLES
   $ fluence key remove
 ```
 
-_See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/key/remove.ts)_
+_See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/key/remove.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -592,7 +592,7 @@ EXAMPLES
   $ fluence module add
 ```
 
-_See code: [dist/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/module/add.ts)_
+_See code: [dist/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/module/add.ts)_
 
 ## `fluence module new [NAME]`
 
@@ -617,7 +617,7 @@ EXAMPLES
   $ fluence module new
 ```
 
-_See code: [dist/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/module/new.ts)_
+_See code: [dist/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/module/new.ts)_
 
 ## `fluence module remove [NAME | PATH | URL]`
 
@@ -641,7 +641,7 @@ EXAMPLES
   $ fluence module remove
 ```
 
-_See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/module/remove.ts)_
+_See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/module/remove.ts)_
 
 ## `fluence resource-owner pat create [DEAL-ADDRESS]`
 
@@ -664,7 +664,7 @@ DESCRIPTION
   Create provider access token for the deal
 ```
 
-_See code: [dist/commands/resource-owner/pat/create.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/resource-owner/pat/create.ts)_
+_See code: [dist/commands/resource-owner/pat/create.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/resource-owner/pat/create.ts)_
 
 ## `fluence run`
 
@@ -711,7 +711,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -738,7 +738,7 @@ EXAMPLES
   $ fluence service add
 ```
 
-_See code: [dist/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/add.ts)_
+_See code: [dist/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/add.ts)_
 
 ## `fluence service new [NAME]`
 
@@ -762,7 +762,7 @@ EXAMPLES
   $ fluence service new
 ```
 
-_See code: [dist/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/new.ts)_
+_See code: [dist/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/new.ts)_
 
 ## `fluence service remove [NAME | PATH | URL]`
 
@@ -785,7 +785,7 @@ EXAMPLES
   $ fluence service remove
 ```
 
-_See code: [dist/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/remove.ts)_
+_See code: [dist/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -810,7 +810,7 @@ EXAMPLES
   $ fluence service repl
 ```
 
-_See code: [dist/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/service/repl.ts)_
+_See code: [dist/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/repl.ts)_
 
 ## `fluence spell new [NAME]`
 
@@ -834,7 +834,7 @@ EXAMPLES
   $ fluence spell new
 ```
 
-_See code: [dist/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/spell/new.ts)_
+_See code: [dist/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/spell/new.ts)_
 
 ## `fluence update [CHANNEL]`
 
@@ -910,7 +910,7 @@ EXAMPLES
   $ fluence workers deploy
 ```
 
-_See code: [dist/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/workers/deploy.ts)_
+_See code: [dist/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/workers/deploy.ts)_
 
 ## `fluence workers logs [WORKER-NAMES]`
 
@@ -947,7 +947,7 @@ EXAMPLES
   $ fluence workers logs
 ```
 
-_See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/workers/logs.ts)_
+_See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/workers/logs.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
@@ -985,5 +985,5 @@ EXAMPLES
   $ fluence workers upload
 ```
 
-_See code: [dist/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/workers/upload.ts)_
+_See code: [dist/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/workers/upload.ts)_
 <!-- commandsstop -->
