@@ -43,7 +43,7 @@ import {
   FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
   CLI_NAME_FULL,
   getMainAquaFileContent,
-  READMEs
+  READMEs,
 } from "../lib/const.js";
 import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
@@ -310,8 +310,7 @@ const initTSorJSProject = async ({
     author: "",
     license: "ISC",
     dependencies: {
-      [JS_CLIENT_NPM_DEPENDENCY]:
-        versions.npm[JS_CLIENT_NPM_DEPENDENCY],
+      [JS_CLIENT_NPM_DEPENDENCY]: versions.npm[JS_CLIENT_NPM_DEPENDENCY],
       [FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY]:
         versions.npm[FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY],
       ...(isJS

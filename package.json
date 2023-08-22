@@ -57,7 +57,7 @@
     "@fluencelabs/aqua-api": "^0.11.11",
     "@fluencelabs/deal-aurora": "0.1.8",
     "@fluencelabs/fluence-network-environment": "^1.1.2",
-    "@fluencelabs/js-client": "^0.0.1",
+    "@fluencelabs/js-client": "^0.0.4",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.23.0",
     "@multiformats/multiaddr": "^12.1.6",
