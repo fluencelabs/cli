@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 try {
+  setFailed(getInput("versions"));
   const inputVersions = JSON.parse(getInput("versions"));
   assert(typeof inputVersions === "object" && inputVersions !== null);
 
