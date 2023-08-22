@@ -369,19 +369,25 @@ const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
+module ResolveSubnet
+
 export runDeployedServices
 
-data Answer:
-    answer: string
-    peer: string
+import "workers.aqua"
+import "services.aqua"
 
 data Worker:
+    pat_id: string
     host_id: string
-    worker_id: string
+    worker_id: ?string
 
 data Subnet:
     workers: []Worker
     error: []string
+
+data Answer:
+    answer: ?string
+    worker: Worker
 
 service Connector("fluence_aurora_connector"):
     resolve_subnet(dealId: string, apiEndpoint: string) -> Subnet
@@ -391,17 +397,21 @@ func resolve_subnet(dealId: string) -> Subnet:
         subnet <- Connector.resolve_subnet(dealId, "http://deal-aurora:8545")
     <- subnet
 
-func runDeployedServices() -> *Answer:
+func runDeployedServices() -> []Answer:
     workersInfo <- getWorkersInfo()
     dealId = workersInfo.deals.defaultWorker!.dealIdOriginal
     answers: *Answer
     subnet <- resolve_subnet(dealId)
     for w <- subnet.workers:
-        on w.worker_id via w.host_id:
-            answer <- MyService.greeting("fluence")
-            answers <<- Answer(answer=answer, peer=w.host_id)
+        if w.worker_id != nil:
+            on w.worker_id! via w.host_id:
+                answer <- MyService.greeting("fluence")
+                answers <<- Answer(answer=?[answer], worker = w)
+        else:
+            answers <<- Answer(answer=nil, worker = w)
 
-    <- answers`;
+    <- answers
+`;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
   RUN_DEPLOYED_SERVICE_AQUA,
