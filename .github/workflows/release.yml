@@ -86,6 +86,12 @@ jobs:
 
       - run: yarn install
 
+      - name: Configure yarn to publish to registry
+        run: |
+          yarn config set npmRegistryServer "https://registry.npmjs.org"
+          yarn config set npmAlwaysAuth true
+          yarn config set npmAuthToken $NODE_AUTH_TOKEN
+
       - name: Publish to npm registry
         run: yarn npm publish --access public --tag unstable
 
