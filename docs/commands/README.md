@@ -591,7 +591,7 @@ DESCRIPTION
   Register specific nox instance as a Compute Peer
 ```
 
-_See code: [dist/commands/market/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/market/add-peer.ts)_
+_See code: [dist/commands/market/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/market/add-peer.ts)_
 
 ## `fluence market register`
 
@@ -611,7 +611,7 @@ DESCRIPTION
   Register in matching contract
 ```
 
-_See code: [dist/commands/market/register.ts](https://github.com/fluencelabs/cli/blob/v0.6.1/dist/commands/market/register.ts)_
+_See code: [dist/commands/market/register.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/market/register.ts)_
 
 ## `fluence module add [PATH | URL]`
 
