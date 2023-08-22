@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { compileFromPath } from "@fluencelabs/aqua-api";
@@ -97,3 +97,30 @@ await mkdir(COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH, {
 
 await compileInstallationSpellAqua();
 await compileInstallationSpellAqua(true);
+
+const BIN_FILE_PATH = join(
+  join("node_modules", "oclif", "lib", "tarballs"),
+  "bin.js",
+);
+
+const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
+const NODE_RUN = `  "\\$NODE" "\\$DIR/run" "\\$@"`;
+const NODE_RUN_NO_WARNINGS = NODE_RUN.replace('NODE"', 'NODE" --no-warnings');
+const timesNodeRunAppears = binFileContent.split(NODE_RUN).length - 1;
+
+if (timesNodeRunAppears === 1) {
+  const newBinFileContent = binFileContent.replace(
+    NODE_RUN,
+    NODE_RUN_NO_WARNINGS,
+  );
+
+  await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
+} else {
+  const timesNodeRunNoWarningsAppears =
+    binFileContent.split(NODE_RUN_NO_WARNINGS).length - 1;
+
+  assert(
+    timesNodeRunNoWarningsAppears === 1,
+    `${BIN_FILE_PATH} file has changed. Please make sure patch that replaces 'node' with 'node --no-warnings' is still valid.`,
+  );
+}
