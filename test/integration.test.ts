@@ -413,17 +413,14 @@ describe("integration tests", () => {
         }
       }
 
-      if (runDeployedServicesTimeoutReached) {
-        throw new Error(
-          `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${String(
-            typeof maybeRunDeployedError === "object" &&
-              maybeRunDeployedError !== null &&
-              "message" in maybeRunDeployedError
-              ? maybeRunDeployedError.message
-              : maybeRunDeployedError,
-          )}`,
-        );
-      }
+      assert(
+        runDeployedServicesTimeoutReached,
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
+          maybeRunDeployedError instanceof Error
+            ? maybeRunDeployedError.message
+            : String(maybeRunDeployedError)
+        }`,
+      );
 
       const parsedResult = JSON.parse(result);
 
@@ -438,15 +435,14 @@ describe("integration tests", () => {
         return answer === null;
       });
 
-      if (resultsWithNoAnswer.length > 0) {
-        throw new Error(
-          `When running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} nox returned workers from blockchain that has worker_id == null: ${resultsWithNoAnswer
-            .map(({ worker }) => {
-              return jsonStringify(worker);
-            })
-            .join("\n")}`,
-        );
-      }
+      assert(
+        resultsWithNoAnswer.length > 0,
+        `When running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} nox returned workers from blockchain that has worker_id == null: ${resultsWithNoAnswer
+          .map(({ worker }) => {
+            return jsonStringify(worker);
+          })
+          .join("\n")}`,
+      );
 
       const expected = local
         .map((peer) => {
