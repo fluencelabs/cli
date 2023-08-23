@@ -365,6 +365,9 @@ export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
 )}\n\n`;
 
+const RUN_DEPLOYED_SERVICES_FUNCTION = "runDeployedServices";
+export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION}()`;
+
 const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
@@ -392,18 +395,18 @@ func resolve_subnet(dealId: string) -> Subnet:
         subnet <- Connector.resolve_subnet(dealId, "http://deal-aurora:8545")
     <- subnet
 
-func runDeployedServices() -> []Answer:
+func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
     workersInfo <- getWorkersInfo()
     dealId = workersInfo.deals.defaultWorker!.dealIdOriginal
     answers: *Answer
     subnet <- resolve_subnet(dealId)
     for w <- subnet.workers:
-        if w.worker_id != nil:
+        if w.worker_id == nil:
+            answers <<- Answer(answer=nil, worker=w)
+        else:
             on w.worker_id! via w.host_id:
                 answer <- MyService.greeting("fluence")
                 answers <<- Answer(answer=?[answer], worker = w)
-        else:
-            answers <<- Answer(answer=nil, worker = w)
 
     <- answers
 `;

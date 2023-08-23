@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AssertionError } from "node:assert";
+import { jsonStringify } from "./helpers/jsonStringify.js";
 
 /**
  * Makes all properties in the object to be NOT readonly
@@ -69,7 +69,7 @@ export const hasKey = <K extends string>(
  * @example
  * const unknown: unknown = { a: 1 }
  * assertHasKey('b', unknown, 'unknown must have "b" key')
- * // throws AssertionError({ message: 'unknown must have "b" key' })
+ * // throws Error('unknown must have "b" key')
  * @param key any string key
  * @param unknown any value
  * @param message error message
@@ -78,10 +78,12 @@ export const hasKey = <K extends string>(
 export function assertHasKey<K extends string>(
   key: K,
   unknown: unknown,
-  message: string,
+  message?: string,
 ): asserts unknown is Record<K, unknown> {
-  if (hasKey(key, unknown)) {
-    throw new AssertionError({ message });
+  if (!hasKey(key, unknown)) {
+    throw new Error(
+      message ?? `missing key '${key}' in ${jsonStringify(unknown)}`,
+    );
   }
 }
 
