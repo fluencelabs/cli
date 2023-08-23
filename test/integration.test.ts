@@ -414,7 +414,7 @@ describe("integration tests", () => {
       }
 
       assert(
-        runDeployedServicesTimeoutReached,
+        !runDeployedServicesTimeoutReached,
         `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
           maybeRunDeployedError instanceof Error
             ? maybeRunDeployedError.message
