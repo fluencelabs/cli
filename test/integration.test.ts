@@ -436,7 +436,7 @@ describe("integration tests", () => {
       });
 
       assert(
-        resultsWithNoAnswer.length > 0,
+        resultsWithNoAnswer.length === 0,
         `When running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} nox returned workers from blockchain that has worker_id == null: ${resultsWithNoAnswer
           .map(({ worker }) => {
             return jsonStringify(worker);
