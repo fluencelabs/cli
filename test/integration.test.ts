@@ -479,7 +479,7 @@ const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
   return join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 };
 
-const RUN_DEPLOYED_SERVICES_TIMEOUT = 200_000;
+const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 5;
 
 const PRIV_KEY =
   "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f";
