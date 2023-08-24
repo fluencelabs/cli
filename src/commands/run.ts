@@ -27,7 +27,7 @@ import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { ajv } from "../lib/ajvInstance.js";
+import { validationErrorToString, ajv } from "../lib/ajvInstance.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
   AQUA_INPUT_PATH_PROPERTY,
@@ -301,7 +301,7 @@ const getRunData = async (flags: {
 
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid ${color.yellow(dataPath)}: ${JSON.stringify(
+        `Invalid ${color.yellow(dataPath)}: ${validationErrorToString(
           validateRunData.errors,
         )}`,
       );
@@ -325,7 +325,7 @@ const getRunData = async (flags: {
 
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid --${DATA_FLAG_NAME}: ${JSON.stringify(
+        `Invalid --${DATA_FLAG_NAME}: ${validationErrorToString(
           validateRunData.errors,
         )}`,
       );

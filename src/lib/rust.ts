@@ -58,19 +58,9 @@ const ensureRust = async (): Promise<void> => {
 
     await execPromise({
       command: "curl",
-      args: [
-        "--proto",
-        "'=https'",
-        "--tlsv1.2",
-        "-sSf",
-        "https://sh.rustup.rs",
-        "|",
-        "sh",
-        "-s",
-        "--",
-        "--quiet",
-        "-y",
-      ],
+      args: "--proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --quiet -y".split(
+        " ",
+      ),
       options: {
         shell: true,
       },

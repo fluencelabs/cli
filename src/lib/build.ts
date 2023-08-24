@@ -44,6 +44,7 @@ import {
   MODULE_TYPE_RUST,
   SERVICE_CONFIG_FULL_FILE_NAME,
   CLI_NAME,
+  DEFAULT_MARINE_BUILD_ARGS,
 } from "../lib/const.js";
 import {
   getUrlOrAbsolutePath,
@@ -52,10 +53,9 @@ import {
 } from "../lib/helpers/downloadFile.js";
 import type { MarineCLI } from "../lib/marineCli.js";
 
-import { ajv } from "./ajvInstance.js";
+import { ajv, validationErrorToString } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
-import { jsonStringify } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { getCargoTomlPath, projectRootDir } from "./paths.js";
 
@@ -308,7 +308,7 @@ members = []
 
   if (!validateCargoWorkspaceToml(parsedConfig)) {
     return commandObj.error(
-      `Cargo.toml at ${cargoTomlPath} is not valid. Please fix it manually. ${jsonStringify(
+      `Cargo.toml at ${cargoTomlPath} is not valid. Please fix it manually. ${validationErrorToString(
         validateCargoWorkspaceToml.errors,
       )}`,
     );
@@ -436,20 +436,18 @@ export const buildModules = async (
     return;
   }
 
-  const pFlagForEachModule = rustModuleConfigs.flatMap(({ name }) => {
+  const pFlagsForEachModule = rustModuleConfigs.flatMap(({ name }) => {
     return ["-p", name];
   });
 
-  const marineBuildArgsToUse =
-    marineBuildArgs ?? maybeFluenceConfig?.marineBuildArgs;
-
-  const marineBuildArgsArr =
-    marineBuildArgsToUse === undefined
-      ? ["--release"]
-      : marineBuildArgsToUse.split(" ");
+  const marineBuildArgsToUse = (
+    marineBuildArgs ??
+    maybeFluenceConfig?.marineBuildArgs ??
+    DEFAULT_MARINE_BUILD_ARGS
+  ).split(" ");
 
   await marineCli({
-    args: ["build", ...pFlagForEachModule, ...marineBuildArgsArr],
+    args: ["build", ...pFlagsForEachModule, ...marineBuildArgsToUse],
     cwd: projectRootDir,
   });
 };

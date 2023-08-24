@@ -25,38 +25,13 @@ import Ajv from "ajv";
 import { parse } from "yaml";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
 import { jsonStringify } from "../helpers/jsonStringify.js";
 import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
-
-type AjvErrors =
-  | Ajv.ErrorObject<string, Record<string, unknown>, unknown>[]
-  | null
-  | undefined;
-
-const validationErrorToString = (errors: AjvErrors) => {
-  if (errors === null || errors === undefined) {
-    return "";
-  }
-
-  return (
-    "Errors:\n\n" +
-    errors
-      .filter(({ instancePath }) => {
-        return instancePath !== "";
-      })
-      .map(({ instancePath, params, message }) => {
-        const paramsMessage = yamlDiffPatch("", {}, params);
-        return `${color.yellow(instancePath)} ${
-          message ?? ""
-        }\n${paramsMessage}`;
-      })
-      .join("\n")
-  );
-};
 
 type EnsureSchemaArg = {
   name: string;
