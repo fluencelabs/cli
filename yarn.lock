@@ -637,7 +637,7 @@ __metadata:
   dependencies:
     "@fluencelabs/air-beautify-wasm": ^0.3.2
     "@fluencelabs/aqua-api": 0.11.11
-    "@fluencelabs/deal-aurora": 0.2.6
+    "@fluencelabs/deal-aurora": 0.2.8
     "@fluencelabs/fluence-network-environment": ^1.1.2
     "@fluencelabs/installation-spell": ^0.5.16
     "@fluencelabs/js-client.api": ^0.12.1
@@ -711,15 +711,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-aurora@npm:0.2.6":
-  version: 0.2.6
-  resolution: "@fluencelabs/deal-aurora@npm:0.2.6"
+"@fluencelabs/deal-aurora@npm:0.2.8":
+  version: 0.2.8
+  resolution: "@fluencelabs/deal-aurora@npm:0.2.8"
   dependencies:
     "@nomicfoundation/hardhat-toolbox": ^3.0.0
-    "@openzeppelin/contracts": ^4.9.1
-    "@openzeppelin/contracts-upgradeable": ^4.9.1
-    dotenv: ^16.1.4
-  checksum: 4a9b7ae7b887b6d85672d4777d71d950f9c144b632e20561a3121a193d56b15c18e3bff17de83aa38c58ba68c140bfc2c5fe3c1b65cbc7d64d23b8e592906920
+    "@openzeppelin/contracts": ^4.9.3
+    "@openzeppelin/contracts-upgradeable": ^4.9.3
+    dotenv: ^16.3.1
+  checksum: a454133887ac7f599844e603561973c98ba5e2704cfda4f0abc9df14a3823a7b86e537d04d2b312315919995865958f43fce288a7914f11384974b08d7a66756
   languageName: node
   linkType: hard
 
@@ -2638,14 +2638,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts-upgradeable@npm:^4.9.1":
+"@openzeppelin/contracts-upgradeable@npm:^4.9.3":
   version: 4.9.3
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.3"
   checksum: bda0240b1d44c913ec5a4e109c622f216c2bbd7b468d210822f75782a5f7fe0609d08bf03b78b253333625e99e507cf2f75212f1de3b274bd9fc64ae967aeec3
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:^4.9.1":
+"@openzeppelin/contracts@npm:^4.9.3":
   version: 4.9.3
   resolution: "@openzeppelin/contracts@npm:4.9.3"
   checksum: 4932063e733b35fa7669b9fe2053f69b062366c5c208b0c6cfa1ac451712100c78acff98120c3a4b88d94154c802be05d160d71f37e7d74cadbe150964458838
@@ -6177,7 +6177,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.1.4, dotenv@npm:^16.3.1":
+"dotenv@npm:^16.3.1":
   version: 16.3.1
   resolution: "dotenv@npm:16.3.1"
   checksum: 15d75e7279018f4bafd0ee9706593dd14455ddb71b3bcba9c52574460b7ccaf67d5cf8b2c08a5af1a9da6db36c956a04a1192b101ee102a3e0cf8817bbcf3dfd
