@@ -116,7 +116,7 @@ jobs:
           versions: |
             {
               "npm": {
-                "@fluencelabs/js-client": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client'] }}",
+                "@fluencelabs/js-client": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client'] }}"
               },
               "cargo": {
                 "marine": "${{ inputs.marine-version }}",
