@@ -969,10 +969,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@npm:^0.11.11":
-  version: 0.11.11
-  resolution: "@fluencelabs/aqua-api@npm:0.11.11"
-  checksum: c5f93b319d5f0f15cf974c1fd3d340ce59317d7496f106c78e8aa2c6a6020128d12c71e50898ddcc7f1c7e06df123a422d7b9e0bca4dd2c730bd11f79f1df421
+"@fluencelabs/aqua-api@https://npm.fluence.dev/@fluencelabs/aqua-api/-/aqua-api-0.11.11-js-client-interface-a3ad518-1401-1.tgz":
+  version: 0.11.11-js-client-interface-a3ad518-1401-1
+  resolution: "@fluencelabs/aqua-api@https://npm.fluence.dev/@fluencelabs/aqua-api/-/aqua-api-0.11.11-js-client-interface-a3ad518-1401-1.tgz"
+  checksum: 31753c75c3aa8d74ab8c9f9144e4ba448f231b34a05186fea0a80532f7089cba1da734c75008b5805eaf54359fef4bfd958477f444ce24198e28087f60a62048
   languageName: node
   linkType: hard
 
@@ -1011,11 +1011,11 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": ^0.3.2
-    "@fluencelabs/aqua-api": ^0.11.11
+    "@fluencelabs/aqua-api": "https://npm.fluence.dev/@fluencelabs/aqua-api/-/aqua-api-0.11.11-js-client-interface-a3ad518-1401-1.tgz"
     "@fluencelabs/deal-aurora": 0.1.8
     "@fluencelabs/fluence-network-environment": ^1.1.2
     "@fluencelabs/installation-spell": ^0.5.16
-    "@fluencelabs/js-client": ^0.0.4
+    "@fluencelabs/js-client": ^0.0.10
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.23.0
     "@multiformats/multiaddr": ^12.1.6
@@ -1122,9 +1122,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "@fluencelabs/js-client@npm:0.0.4"
+"@fluencelabs/js-client@npm:^0.0.10":
+  version: 0.0.10
+  resolution: "@fluencelabs/js-client@npm:0.0.10"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@fluencelabs/interfaces": 0.8.1
@@ -1150,7 +1150,7 @@ __metadata:
     ts-pattern: 3.3.3
     uint8arrays: 4.0.3
     uuid: 8.3.2
-  checksum: c95645dc9ee53b6ac58a0fd1ccb2301e7b08861909e96a6086f2f5f01795445734a1ef313dbbd700b1e9c51ae9437b26c09886d55f6f2e61f9cdc53f8f659a04
+  checksum: 72ed38ba7aa1c15454910a2f40698f93c09a1ccf7287cc0e2b9aff7e7f37d3bc5cdeaf45735a3f204a338b78faa151d157f23f421e781cef11e80c8002bb6c38
   languageName: node
   linkType: hard
 
