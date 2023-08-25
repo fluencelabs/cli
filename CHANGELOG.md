@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.7.0...fluence-cli-v0.7.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* Use latest aqua-api ([#432](https://github.com/fluencelabs/cli/issues/432)) ([730bc4f](https://github.com/fluencelabs/cli/commit/730bc4f7b1eecd595de8a4bc538b26c867a8367a))
+
 ## [0.7.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.6.2...fluence-cli-v0.7.0) (2023-08-25)
 
 
