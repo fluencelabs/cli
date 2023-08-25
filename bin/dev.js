@@ -24,7 +24,12 @@ import url from "node:url";
 import oclif from "@oclif/core";
 import { register } from "ts-node";
 
-import { createErrorPromise } from "../src/countlyInterceptor.js";
+import {
+  setUpProcessWarningListener,
+  createErrorPromise,
+} from "../src/errorInterceptor.js";
+
+setUpProcessWarningListener();
 
 // In dev mode -> use ts-node and dev plugins
 process.env.NODE_ENV = "development";

@@ -53,11 +53,10 @@
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "^0.3.2",
-    "@fluencelabs/aqua-api": "^0.11.11",
+    "@fluencelabs/aqua-api": "https://npm.fluence.dev/@fluencelabs/aqua-api/-/aqua-api-0.11.11-js-client-interface-a3ad518-1401-1.tgz",
     "@fluencelabs/deal-aurora": "0.1.8",
     "@fluencelabs/fluence-network-environment": "^1.1.2",
-    "@fluencelabs/js-client.api": "^0.12.1",
-    "@fluencelabs/js-client.node": "^0.7.1",
+    "@fluencelabs/js-client": "^0.0.10",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.23.0",
     "@multiformats/multiaddr": "^12.1.6",

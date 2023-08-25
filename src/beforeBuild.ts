@@ -88,7 +88,7 @@ await mkdir(VERSIONS_DIR_PATH, { recursive: true });
 await cp("package.json", join(VERSIONS_DIR_PATH, "cli.package.json"));
 
 await cp(
-  join("node_modules", "@fluencelabs", "js-client.node", "package.json"),
+  join("node_modules", "@fluencelabs", "js-client", "package.json"),
   join(VERSIONS_DIR_PATH, "js-client.package.json"),
 );
 

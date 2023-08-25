@@ -157,20 +157,12 @@ jobs:
           yarn config set npmAlwaysAuth true
           yarn config set npmAuthToken $NODE_AUTH_TOKEN
 
-      - name: Set js-client.api version
+      - name: Set js-client version
         if: inputs.js-client-snapshots != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
-          package: "@fluencelabs/js-client.api"
-          version: ${{ fromJson(inputs.js-client-snapshots)['js-client.api'] }}
-          package-manager: yarn
-
-      - name: Set js-client.node version
-        if: inputs.js-client-snapshots != 'null'
-        uses: fluencelabs/github-actions/npm-set-dependency@main
-        with:
-          package: "@fluencelabs/js-client.node"
-          version: ${{ fromJson(inputs.js-client-snapshots)['js-client.node'] }}
+          package: "@fluencelabs/js-client"
+          version: ${{ fromJson(inputs.js-client-snapshots)['js-client'] }}
           package-manager: yarn
 
       - name: Set aqua-api version
@@ -195,8 +187,7 @@ jobs:
           versions: |
             {
               "npm": {
-                "@fluencelabs/js-client.api": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.api'] }}",
-                "@fluencelabs/js-client.node": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client.node'] }}"
+                "@fluencelabs/js-client": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client'] }}"
               },
               "cargo": {
                 "marine": "${{ inputs.marine-version }}",
