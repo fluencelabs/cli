@@ -969,10 +969,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@https://npm.fluence.dev/@fluencelabs/aqua-api/-/aqua-api-0.11.11-js-client-interface-a3ad518-1401-1.tgz":
-  version: 0.11.11-js-client-interface-a3ad518-1401-1
-  resolution: "@fluencelabs/aqua-api@https://npm.fluence.dev/@fluencelabs/aqua-api/-/aqua-api-0.11.11-js-client-interface-a3ad518-1401-1.tgz"
-  checksum: 31753c75c3aa8d74ab8c9f9144e4ba448f231b34a05186fea0a80532f7089cba1da734c75008b5805eaf54359fef4bfd958477f444ce24198e28087f60a62048
+"@fluencelabs/aqua-api@npm:^0.12.0":
+  version: 0.12.0
+  resolution: "@fluencelabs/aqua-api@npm:0.12.0"
+  checksum: 94d7971a5c9fbfdf33b4829b9446cf83dea7039d3cbc876339f88ea90c0d72233bb3338e860f4f242525df1a3c57d3122a0170e77abbf2b46a3a185febe8d2a7
   languageName: node
   linkType: hard
 
@@ -1011,7 +1011,7 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": ^0.3.2
-    "@fluencelabs/aqua-api": "https://npm.fluence.dev/@fluencelabs/aqua-api/-/aqua-api-0.11.11-js-client-interface-a3ad518-1401-1.tgz"
+    "@fluencelabs/aqua-api": ^0.12.0
     "@fluencelabs/deal-aurora": 0.1.8
     "@fluencelabs/fluence-network-environment": ^1.1.2
     "@fluencelabs/installation-spell": ^0.5.16
