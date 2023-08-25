@@ -29,7 +29,7 @@ import {
   IMPORT_FLAG,
   NO_BUILD_FLAG,
   TRACING_FLAG,
-  MARINE_BUILD_ARGS,
+  MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
 import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
@@ -50,7 +50,7 @@ export default class UPLOAD extends BaseCommand<typeof UPLOAD> {
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
-    ...MARINE_BUILD_ARGS,
+    ...MARINE_BUILD_ARGS_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({

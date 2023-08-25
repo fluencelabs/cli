@@ -34,6 +34,9 @@ import {
   ensureCargoDependency,
   installAllCargoDependencies,
 } from "../../../lib/rust.js";
+import versions from "../../../versions.json" assert { type: "json" };
+
+const FORCE_FLAG_NAME = "force";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
@@ -45,10 +48,10 @@ export default class Install extends BaseCommand<typeof Install> {
   static override flags = {
     ...baseFlags,
     toolchain: Flags.string({
-      description: `Rustup toolchain name`,
+      description: `Rust toolchain name that will be used in case pre-built binary download fails or --${FORCE_FLAG_NAME} flag is used. Default: ${versions["rust-toolchain"]}"]}`,
       helpValue: "<toolchain_name>",
     }),
-    force: Flags.boolean({
+    [FORCE_FLAG_NAME]: Flags.boolean({
       default: false,
       description:
         "Force install even if the dependency/dependencies is/are already installed",

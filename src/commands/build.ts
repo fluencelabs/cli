@@ -19,7 +19,7 @@ import { build } from "../lib/build.js";
 import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
-  MARINE_BUILD_ARGS,
+  MARINE_BUILD_ARGS_FLAG,
 } from "../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../lib/deployWorkers.js";
 import { initCli } from "../lib/lifeCycle.js";
@@ -30,7 +30,7 @@ export default class Build extends BaseCommand<typeof Build> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...MARINE_BUILD_ARGS,
+    ...MARINE_BUILD_ARGS_FLAG,
   };
   async run(): Promise<void> {
     const { fluenceConfig, flags } = await initCli(
