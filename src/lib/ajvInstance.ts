@@ -14,9 +14,38 @@
  * limitations under the License.
  */
 
+import oclifColor from "@oclif/color";
+const color = oclifColor.default;
 import Ajv from "ajv";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 export const ajv = new Ajv.default({
   allowUnionTypes: true,
   code: { esm: true },
 });
+
+type AjvErrors =
+  | Ajv.ErrorObject<string, Record<string, unknown>, unknown>[]
+  | null
+  | undefined;
+
+export const validationErrorToString = (errors: AjvErrors) => {
+  if (errors === null || errors === undefined) {
+    return "";
+  }
+
+  return (
+    "Errors:\n\n" +
+    errors
+      .filter(({ instancePath }) => {
+        return instancePath !== "";
+      })
+      .map(({ instancePath, params, message }) => {
+        const paramsMessage = yamlDiffPatch("", {}, params);
+        return `${color.yellow(instancePath)} ${
+          message ?? ""
+        }\n${paramsMessage}`;
+      })
+      .join("\n")
+  );
+};

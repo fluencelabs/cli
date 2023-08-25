@@ -28,8 +28,10 @@ import { parse } from "yaml";
 
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import versions from "../../../versions.json" assert { type: "json" };
-import { ajv } from "../../ajvInstance.js";
+import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
+  MARINE_BUILD_ARGS_FLAG_NAME,
+  MARINE_BUILD_ARGS_PROPERTY,
   DEFAULT_CHAIN_NETWORK,
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -41,6 +43,7 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   CLI_NAME_FULL,
   CLI_NAME,
+  DEFAULT_MARINE_BUILD_ARGS,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
@@ -228,7 +231,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
-  marineBuildArgs?: string;
+  [MARINE_BUILD_ARGS_PROPERTY]?: string;
 };
 
 const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
@@ -435,9 +438,9 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       items: { type: "string" },
       nullable: true,
     },
-    marineBuildArgs: {
+    [MARINE_BUILD_ARGS_PROPERTY]: {
       type: "string",
-      description: `\`cargo build\` arguments to pass to marine build command`,
+      description: `Space separated \`cargo build\` flags and args to pass to marine build. Can be overridden using --${MARINE_BUILD_ARGS_FLAG_NAME} flag Default: ${DEFAULT_MARINE_BUILD_ARGS}`,
       nullable: true,
     },
     cliVersion: {
@@ -668,6 +671,8 @@ version: 2
 #   ${DEFAULT_WORKER_NAME}:
 #     peerIds:
 #       - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
+# # Space separated \`cargo build\` flags and args to pass to marine build. Default: ${DEFAULT_MARINE_BUILD_ARGS}
+# ${MARINE_BUILD_ARGS_PROPERTY}: '${DEFAULT_MARINE_BUILD_ARGS}'
 `;
 };
 
@@ -683,7 +688,7 @@ const migrations: Migrations<Config> = [
   (config: Config): ConfigV1 => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
-        `Migration error. Errors: ${jsonStringify(
+        `Migration error. Errors: ${validationErrorToString(
           validateConfigSchemaV0.errors,
         )}`,
       );
@@ -712,7 +717,7 @@ const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV2> => {
     if (!validateConfigSchemaV1(config)) {
       throw new Error(
-        `Migration error. Errors: ${jsonStringify(
+        `Migration error. Errors: ${validationErrorToString(
           validateConfigSchemaV1.errors,
         )}`,
       );

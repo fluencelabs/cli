@@ -57,7 +57,7 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [dist/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/air/beautify.ts)_
+_See code: [dist/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
@@ -94,7 +94,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/aqua.ts)_
+_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/aqua.ts)_
 
 ## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
 
@@ -121,7 +121,7 @@ DESCRIPTION
   what they translate into
 ```
 
-_See code: [dist/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/aqua/json.ts)_
+_See code: [dist/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/aqua/json.ts)_
 
 ## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
 
@@ -151,7 +151,7 @@ ALIASES
   $ fluence aqua yaml
 ```
 
-_See code: [dist/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/aqua/yml.ts)_
+_See code: [dist/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -193,8 +193,8 @@ USAGE
   $ fluence build [--no-input] [--marine-build-args <value>]
 
 FLAGS
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-input                        Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -204,7 +204,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/build.ts)_
+_See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -225,8 +225,8 @@ FLAGS
   --[no-]auto-match                 Disable automatic matching
   --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --network=<network>               [default: local] The network in which the transactions used by the command will be
                                     carried out (testnet, local)
   --no-build                        Don't build the project before running the command
@@ -246,7 +246,7 @@ EXAMPLES
   $ fluence deal deploy
 ```
 
-_See code: [dist/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/deal/deploy.ts)_
+_See code: [dist/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/deal/deploy.ts)_
 
 ## `fluence deal logs [WORKER-NAMES]`
 
@@ -279,7 +279,7 @@ EXAMPLES
   $ fluence deal logs
 ```
 
-_See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/deal/logs.ts)_
+_See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/deal/logs.ts)_
 
 ## `fluence default peers [NETWORK]`
 
@@ -302,7 +302,7 @@ EXAMPLES
   $ fluence default peers
 ```
 
-_See code: [dist/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/default/peers.ts)_
+_See code: [dist/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/default/peers.ts)_
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -325,7 +325,8 @@ FLAGS
   --global                      Will override dependencies in a global user's config.yaml instead of project's
                                 fluence.yaml
   --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rustup toolchain name
+  --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
+                                flag is used. Default: nightly-2023-06-14-x86_64"]}
 
 DESCRIPTION
   (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo
@@ -339,7 +340,7 @@ EXAMPLES
   $ fluence dependency cargo install
 ```
 
-_See code: [dist/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/cargo/install.ts)_
+_See code: [dist/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/dependency/cargo/install.ts)_
 
 ## `fluence dependency install`
 
@@ -364,7 +365,7 @@ EXAMPLES
   $ fluence dependency install
 ```
 
-_See code: [dist/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/install.ts)_
+_See code: [dist/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/dependency/install.ts)_
 
 ## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -398,7 +399,7 @@ EXAMPLES
   $ fluence dependency npm install
 ```
 
-_See code: [dist/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/npm/install.ts)_
+_See code: [dist/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/dependency/npm/install.ts)_
 
 ## `fluence dependency reset`
 
@@ -424,7 +425,7 @@ EXAMPLES
   $ fluence dependency reset
 ```
 
-_See code: [dist/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/reset.ts)_
+_See code: [dist/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/dependency/reset.ts)_
 
 ## `fluence dependency versions`
 
@@ -451,7 +452,7 @@ EXAMPLES
   $ fluence dependency versions
 ```
 
-_See code: [dist/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/dependency/versions.ts)_
+_See code: [dist/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/dependency/versions.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -495,7 +496,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -519,7 +520,7 @@ EXAMPLES
   $ fluence key default
 ```
 
-_See code: [dist/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/key/default.ts)_
+_See code: [dist/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/key/default.ts)_
 
 ## `fluence key new [NAME]`
 
@@ -544,7 +545,7 @@ EXAMPLES
   $ fluence key new
 ```
 
-_See code: [dist/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/key/new.ts)_
+_See code: [dist/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/key/new.ts)_
 
 ## `fluence key remove [NAME]`
 
@@ -568,7 +569,7 @@ EXAMPLES
   $ fluence key remove
 ```
 
-_See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/key/remove.ts)_
+_See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/key/remove.ts)_
 
 ## `fluence market add-peer`
 
@@ -637,7 +638,7 @@ EXAMPLES
   $ fluence module add
 ```
 
-_See code: [dist/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/module/add.ts)_
+_See code: [dist/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/module/add.ts)_
 
 ## `fluence module new [NAME]`
 
@@ -662,7 +663,7 @@ EXAMPLES
   $ fluence module new
 ```
 
-_See code: [dist/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/module/new.ts)_
+_See code: [dist/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/module/new.ts)_
 
 ## `fluence module remove [NAME | PATH | URL]`
 
@@ -686,7 +687,7 @@ EXAMPLES
   $ fluence module remove
 ```
 
-_See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/module/remove.ts)_
+_See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/module/remove.ts)_
 
 ## `fluence run`
 
@@ -733,7 +734,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/run.ts)_
+_See code: [dist/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -747,8 +748,8 @@ ARGUMENTS
   PATH | URL  Path to a service or url to .tar.gz archive
 
 FLAGS
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --name=<name>                     Override service name (must start with a lowercase letter and contain only letters,
                                     numbers, and underscores)
   --no-input                        Don't interactively ask for any input from the user
@@ -760,7 +761,7 @@ EXAMPLES
   $ fluence service add
 ```
 
-_See code: [dist/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/add.ts)_
+_See code: [dist/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/service/add.ts)_
 
 ## `fluence service new [NAME]`
 
@@ -784,7 +785,7 @@ EXAMPLES
   $ fluence service new
 ```
 
-_See code: [dist/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/new.ts)_
+_See code: [dist/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/service/new.ts)_
 
 ## `fluence service remove [NAME | PATH | URL]`
 
@@ -807,7 +808,7 @@ EXAMPLES
   $ fluence service remove
 ```
 
-_See code: [dist/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/remove.ts)_
+_See code: [dist/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -821,8 +822,8 @@ ARGUMENTS
   NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
 
 FLAGS
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-input                        Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -832,7 +833,7 @@ EXAMPLES
   $ fluence service repl
 ```
 
-_See code: [dist/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/service/repl.ts)_
+_See code: [dist/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/service/repl.ts)_
 
 ## `fluence spell new [NAME]`
 
@@ -856,7 +857,7 @@ EXAMPLES
   $ fluence spell new
 ```
 
-_See code: [dist/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/spell/new.ts)_
+_See code: [dist/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/spell/new.ts)_
 
 ## `fluence update [CHANNEL]`
 
@@ -913,8 +914,8 @@ FLAGS
   -k, --key-pair-name=<name>        Key pair name
   --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-build                        Don't build the project before running the command
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
@@ -932,7 +933,7 @@ EXAMPLES
   $ fluence workers deploy
 ```
 
-_See code: [dist/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/workers/deploy.ts)_
+_See code: [dist/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/workers/deploy.ts)_
 
 ## `fluence workers logs [WORKER-NAMES]`
 
@@ -969,7 +970,7 @@ EXAMPLES
   $ fluence workers logs
 ```
 
-_See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/workers/logs.ts)_
+_See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/workers/logs.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
@@ -988,8 +989,8 @@ FLAGS
   -k, --key-pair-name=<name>        Key pair name
   --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-build                        Don't build the project before running the command
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
@@ -1007,5 +1008,5 @@ EXAMPLES
   $ fluence workers upload
 ```
 
-_See code: [dist/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.6.2/dist/commands/workers/upload.ts)_
+_See code: [dist/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.7.0/dist/commands/workers/upload.ts)_
 <!-- commandsstop -->

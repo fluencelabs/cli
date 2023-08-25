@@ -36,7 +36,7 @@ import {
   BIN_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
-  MARINE_BUILD_ARGS,
+  MARINE_BUILD_ARGS_FLAG,
   MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SEPARATOR,
@@ -68,7 +68,7 @@ export default class REPL extends Command {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...NO_INPUT_FLAG,
-    ...MARINE_BUILD_ARGS,
+    ...MARINE_BUILD_ARGS_FLAG,
   };
   static override args = {
     [NAME_OR_PATH_OR_URL]: Args.string({
