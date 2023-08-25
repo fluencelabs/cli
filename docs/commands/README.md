@@ -193,8 +193,8 @@ USAGE
   $ fluence build [--no-input] [--marine-build-args <value>]
 
 FLAGS
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-input                        Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -325,7 +325,8 @@ FLAGS
   --global                      Will override dependencies in a global user's config.yaml instead of project's
                                 fluence.yaml
   --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rustup toolchain name
+  --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
+                                flag is used. Default: nightly-2023-06-14-x86_64"]}
 
 DESCRIPTION
   (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo
@@ -747,8 +748,8 @@ ARGUMENTS
   PATH | URL  Path to a service or url to .tar.gz archive
 
 FLAGS
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --name=<name>                     Override service name (must start with a lowercase letter and contain only letters,
                                     numbers, and underscores)
   --no-input                        Don't interactively ask for any input from the user
@@ -821,8 +822,8 @@ ARGUMENTS
   NAME | PATH | URL  Service name from fluence.yaml, path to a service or url to .tar.gz archive
 
 FLAGS
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-input                        Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -913,8 +914,8 @@ FLAGS
   -k, --key-pair-name=<name>        Key pair name
   --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-build                        Don't build the project before running the command
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
@@ -988,8 +989,8 @@ FLAGS
   -k, --key-pair-name=<name>        Key pair name
   --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
   --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  `cargo build` flags and args to pass to marine build. Overrides 'marineBuildArgs'
-                                    property in fluence.yaml
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-build                        Don't build the project before running the command
   --no-input                        Don't interactively ask for any input from the user
   --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service

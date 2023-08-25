@@ -44,6 +44,8 @@ export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
+export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
+
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
@@ -239,9 +241,12 @@ export const TRACING_FLAG = {
   }),
 };
 
-export const MARINE_BUILD_ARGS = {
-  "marine-build-args": Flags.string({
-    description: `\`cargo build\` flags and args to pass to marine build. Overrides 'marineBuildArgs' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+export const MARINE_BUILD_ARGS_FLAG_NAME = "marine-build-args";
+export const MARINE_BUILD_ARGS_PROPERTY = "marineBuildArgs";
+
+export const MARINE_BUILD_ARGS_FLAG = {
+  [MARINE_BUILD_ARGS_FLAG_NAME]: Flags.string({
+    description: `Space separated \`cargo build\` flags and args to pass to marine build. Overrides '${MARINE_BUILD_ARGS_PROPERTY}' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}. Default: ${DEFAULT_MARINE_BUILD_ARGS}`,
     helpValue: "<--flag arg>",
   }),
 };

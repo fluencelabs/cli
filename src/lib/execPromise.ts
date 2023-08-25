@@ -43,16 +43,15 @@ export type ExecPromiseArg = {
 
 export const execPromise = async ({
   command,
-  args,
-  flags,
+  args = [],
+  flags = {},
   options,
   spinnerMessage,
   timeout,
   printOutput: printOutputArg = false,
 }: ExecPromiseArg): Promise<string> => {
   const printOutput = isInteractive ? printOutputArg : false;
-  const flagArgs = flags === undefined ? [] : flagsToArgs(flags);
-  const allArgs = [...(args ?? []), ...flagArgs];
+  const allArgs = [...args, ...flagsToArgs(flags)];
   const fullCommand = [command, ...allArgs].join(" ");
 
   const getCommandFailedMessage = (code: number | null = null) => {
