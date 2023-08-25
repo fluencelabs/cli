@@ -62,6 +62,10 @@ const compileInstallationSpellAqua = async (tracing = false) => {
         tracing,
       });
 
+      if (compilationResult.errors.length !== 0) {
+        throw new Error(compilationResult.errors.join("\n\n"));
+      }
+
       const tsSource = compilationResult.generatedSources[0]?.tsSource;
       assert(typeof tsSource === "string");
 

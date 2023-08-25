@@ -34,7 +34,7 @@ import {
   IMPORT_FLAG,
   NO_BUILD_FLAG,
   TRACING_FLAG,
-  MARINE_BUILD_ARGS,
+  MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
 import {
   ensureAquaFileWithWorkerInfo,
@@ -57,7 +57,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
-    ...MARINE_BUILD_ARGS,
+    ...MARINE_BUILD_ARGS_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
