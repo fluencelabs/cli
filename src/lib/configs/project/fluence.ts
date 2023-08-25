@@ -32,8 +32,6 @@ import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-} from "../../const.js";
-import {
   DEFAULT_CHAIN_NETWORK,
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
