@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.6.2...fluence-cli-v0.7.0) (2023-08-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove old packages, add new ones ([#424](https://github.com/fluencelabs/cli/issues/424))
+
+### Features
+
+* Remove old packages, add new ones ([#424](https://github.com/fluencelabs/cli/issues/424)) ([875b4fb](https://github.com/fluencelabs/cli/commit/875b4fba082c678a6b95496c2a7959e0e6a34435))
+* show aqua compilation error in beforeBuild and other improvements and refactorings ([#429](https://github.com/fluencelabs/cli/issues/429)) ([48d3f73](https://github.com/fluencelabs/cli/commit/48d3f73d603e6cd1881311de183bc19a2a3035c5))
+
 ## [0.6.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.6.1...fluence-cli-v0.6.2) (2023-08-22)
 
 
