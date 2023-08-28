@@ -33,7 +33,7 @@ import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
-import { userConfig } from "./user/config.js";
+import { userConfig } from "./globalConfigs.js";
 
 type EnsureSchemaArg = {
   name: string;
@@ -212,6 +212,7 @@ export type InitConfigOptions<
   getConfigOrConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
   validate?: ConfigValidateFunction<LatestConfig>;
+  docsInConfigs?: boolean;
 };
 
 type InitFunction<LatestConfig> =
@@ -275,6 +276,7 @@ export function getReadonlyConfigInitFunction<
       getConfigOrConfigDirPath,
       validate,
       getSchemaDirPath,
+      docsInConfigs = userConfig?.docsInConfigs ?? false,
     } = options;
 
     const configFullName = `${name}.${YAML_EXT}`;
@@ -370,14 +372,13 @@ export function getReadonlyConfigInitFunction<
 
       const defConf = await getDefaultConfig();
 
-      configString =
-        userConfig?.docsInConfigs === true
-          ? `${schemaPathComment}\n\n${documentationLinkComment}\n\n${defConf}`
-          : yamlDiffPatch(
-              `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
-              {},
-              parse(defConf),
-            );
+      configString = docsInConfigs
+        ? `${schemaPathComment}\n\n${documentationLinkComment}\n\n${defConf}`
+        : yamlDiffPatch(
+            `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
+            {},
+            parse(defConf),
+          );
 
       await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
     }
