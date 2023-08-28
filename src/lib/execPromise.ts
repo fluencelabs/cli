@@ -23,7 +23,7 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 import { isInteractive } from "./commandObj.js";
 import { CLI_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
-import { dbg } from "./debug.js";
+import { dbg } from "./dbg.js";
 import { type Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
