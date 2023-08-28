@@ -571,6 +571,48 @@ EXAMPLES
 
 _See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/key/remove.ts)_
 
+## `fluence market add-peer`
+
+Register specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence market add-peer [--no-input] [--priv-key <value>] [--network <value>] [--peer-id <value>] [--slots
+    <value>]
+
+FLAGS
+  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
+                            out (testnet, local)
+  --no-input                Don't interactively ask for any input from the user
+  --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
+  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --slots=<number>          Number of available worker slots on this Compute Peer
+
+DESCRIPTION
+  Register specific nox instance as a Compute Peer
+```
+
+_See code: [dist/commands/market/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/market/add-peer.ts)_
+
+## `fluence market register`
+
+Register in matching contract
+
+```
+USAGE
+  $ fluence market register [--no-input] [--priv-key <value>] [--network <value>]
+
+FLAGS
+  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
+                            out (testnet, local)
+  --no-input                Don't interactively ask for any input from the user
+  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+
+DESCRIPTION
+  Register in matching contract
+```
+
+_See code: [dist/commands/market/register.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/market/register.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -646,29 +688,6 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/module/remove.ts)_
-
-## `fluence resource-owner pat create [DEAL-ADDRESS]`
-
-Create provider access token for the deal
-
-```
-USAGE
-  $ fluence resource-owner pat create [DEAL-ADDRESS] [--no-input] [--privKey <value>] [--network <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
-
-FLAGS
-  --network=<network>  [default: testnet] The network in which the transactions used by the command will be carried out
-                       (local, testnet)
-  --no-input           Don't interactively ask for any input from the user
-  --privKey=<value>    !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-
-DESCRIPTION
-  Create provider access token for the deal
-```
-
-_See code: [dist/commands/resource-owner/pat/create.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/resource-owner/pat/create.ts)_
 
 ## `fluence run`
 
