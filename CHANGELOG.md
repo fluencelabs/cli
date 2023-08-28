@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.7.1...fluence-cli-v0.7.2) (2023-08-28)
+
+
+### Bug Fixes
+
+* experimental warnings ([#434](https://github.com/fluencelabs/cli/issues/434)) ([3acc43f](https://github.com/fluencelabs/cli/commit/3acc43f362071f7690a717f20be808bade989b14))
+
 ## [0.7.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.7.0...fluence-cli-v0.7.1) (2023-08-25)
 
 
