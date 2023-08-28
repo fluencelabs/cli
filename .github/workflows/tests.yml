@@ -57,6 +57,7 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
+  DEBUG: "fcli:debug"
 
 jobs:
   tests:
