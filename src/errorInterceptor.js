@@ -155,7 +155,12 @@ interceptor.on("response", ({ request: { url } }) => {
  */
 export function setUpProcessWarningListener() {
   process.on("warning", (warning) => {
-    if ("code" in warning && warning.code === "MODULE_NOT_FOUND") {
+    if (
+      ("code" in warning && warning.code === "MODULE_NOT_FOUND") ||
+      // when running in dev mode there is no warning.code
+      // so we have to rely on the text of the error message
+      (warning.stack ?? "").includes("Cannot find")
+    ) {
       throw new Error(warning.stack);
     }
   });
