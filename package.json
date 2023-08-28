@@ -2,7 +2,7 @@
   "name": "@fluencelabs/cli",
   "packageManager": "yarn@3.6.1",
   "type": "module",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
