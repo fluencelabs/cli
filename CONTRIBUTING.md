@@ -27,3 +27,4 @@ When you contribute, you have to be aware that your contribution is covered by *
     1. Make sure you have docker installed (it's most convenient and reliable if you install Docker Desktop by following the instruction for your operating system on their official website)
     1. run `docker compose up -d`
     1. run `FLUENCE_ENV=local yarn test-linux-x64` or `FLUENCE_ENV=local yarn test-darwin-arm64` which will lint and check the code, build it, package it, prepare the tests and run them
+-   for your convenience a dir `.f` is added to gitignore so you can generate projects in this dir for testing and development purposes

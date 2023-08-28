@@ -33,6 +33,8 @@ import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
+import { userConfig } from "./user/config.js";
+
 type EnsureSchemaArg = {
   name: string;
   configDirPath: string;
@@ -354,8 +356,29 @@ export function getReadonlyConfigInitFunction<
       }
       // If config file doesn't exist, create it with default config and schema path comment
 
+      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/cli/tree/main/docs/configs/${name.replace(
+        `.${YAML_EXT}`,
+        "",
+      )}.md`;
+
       const schemaPathComment = await getSchemaPathComment();
-      configString = `${schemaPathComment}\n\n${await getDefaultConfig()}`;
+
+      const description =
+        typeof latestSchema["description"] === "string"
+          ? `\n\n# ${latestSchema["description"]}`
+          : "";
+
+      const defConf = await getDefaultConfig();
+
+      configString =
+        userConfig?.docsInConfigs === true
+          ? `${schemaPathComment}\n\n${documentationLinkComment}\n\n${defConf}`
+          : yamlDiffPatch(
+              `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
+              {},
+              parse(defConf),
+            );
+
       await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
     }
 

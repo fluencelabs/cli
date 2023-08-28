@@ -15,6 +15,7 @@
  */
 
 import type { JSONSchemaType } from "ajv";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import {
   GLOBAL_CONFIG_FILE_NAME,
@@ -43,6 +44,7 @@ export const CHECK_FOR_UPDATES_DISABLED = "disabled";
 type ConfigV0 = {
   version: 0;
   countlyConsent: boolean;
+  docsInConfigs?: boolean;
   dependencies?: {
     npm?: Record<string, string>;
     cargo?: Record<string, string>;
@@ -99,41 +101,26 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description: `Last time when ${CLI_NAME_FULL} checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
       nullable: true,
     },
+    docsInConfigs: {
+      type: "boolean",
+      description:
+        "Whether to include commented-out documented config examples in the configs generated with the CLI",
+      nullable: true,
+    },
     version: { type: "number", const: 0 },
   },
   required: ["version", "countlyConsent"],
 };
 
 const getDefault: GetDefaultConfig = () => {
-  return `# Defines global config for Fluence CLI
+  const config: ConfigV0 = {
+    countlyConsent: false,
+    version: 0,
+  };
 
-# Weather you consent to send usage data to Countly
-countlyConsent: false
-
-# config version
-version: 0
-
-# # Last time when CLI checked for updates.
-# # Updates are checked daily unless this field is set to 'disabled'
-# lastCheckForUpdates: 2023-07-07T09:31:00.961Z
-
-# # (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies globally
-# # You can check out current project dependencies using \`fluence dep v\` command
-# dependencies:
-#   # A map of npm dependency versions
-#   # CLI ensures dependencies are installed each time you run aqua
-#   # There are also some dependencies that are installed by default (e.g. @fluencelabs/aqua-lib)
-#   # You can check default dependencies using \`fluence dep v --default\`
-#   # use \`fluence dep npm i --global\` to install global npm dependencies
-#   npm:
-#     "@fluencelabs/aqua-lib": 0.7.1
-#
-#   # A map of cargo dependency versions
-#   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
-#   # use \`fluence dep cargo i --global\` to install global cargo dependencies
-#   cargo:
-#     marine: 0.14.0
-`;
+  // This config will always be without any additional comments
+  // Because it defines whether configs should have comments or not by itself
+  return `${yamlDiffPatch("", {}, config)}\n`;
 };
 
 const migrations: Migrations<Config> = [];
