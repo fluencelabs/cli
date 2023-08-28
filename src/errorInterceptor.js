@@ -157,12 +157,6 @@ export function setUpProcessWarningListener() {
   process.on("warning", (warning) => {
     if ("code" in warning && warning.code === "MODULE_NOT_FOUND") {
       throw new Error(warning.stack);
-    } else if ("stack" in warning) {
-      // eslint-disable-next-line no-console
-      console.warn(`${warning.stack}\n`);
-    } else {
-      // eslint-disable-next-line no-console
-      console.warn(`${JSON.stringify(warning, null, 2)}\n`);
     }
   });
 }
