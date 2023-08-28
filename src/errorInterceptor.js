@@ -146,6 +146,11 @@ interceptor.on("response", ({ request: { url } }) => {
   }
 });
 
+const WARN_MSGS_TO_IGNORE = [
+  "ExperimentalWarning: Import assertions are not a stable feature of the JavaScript language",
+  "ExperimentalWarning: Importing JSON modules is an experimental feature and might change at any time",
+];
+
 /**
  * The main purpose of this function is to set up a listener for process warnings.
  * oclif reports this warnings when CLI command can not be interpreted by Node.js
@@ -163,5 +168,19 @@ export function setUpProcessWarningListener() {
     ) {
       throw new Error(warning.stack);
     }
+
+    const isWarnMsgToIgnore = WARN_MSGS_TO_IGNORE.some((msg) => {
+      return (
+        "stack" in warning &&
+        typeof warning.stack === "string" &&
+        warning.stack.includes(msg)
+      );
+    });
+
+    if (isWarnMsgToIgnore) {
+      return;
+    }
+
+    process.stderr.write(`Warning: ${String(warning)}\n`);
   });
 }
