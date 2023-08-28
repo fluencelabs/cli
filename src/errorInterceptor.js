@@ -146,6 +146,11 @@ interceptor.on("response", ({ request: { url } }) => {
   }
 });
 
+const WARN_MSGS_TO_IGNORE = [
+  "ExperimentalWarning: Import assertions are not a stable feature of the JavaScript language",
+  "ExperimentalWarning: Importing JSON modules is an experimental feature and might change at any time",
+];
+
 /**
  * The main purpose of this function is to set up a listener for process warnings.
  * oclif reports this warnings when CLI command can not be interpreted by Node.js
@@ -155,14 +160,25 @@ interceptor.on("response", ({ request: { url } }) => {
  */
 export function setUpProcessWarningListener() {
   process.on("warning", (warning) => {
-    if ("code" in warning && warning.code === "MODULE_NOT_FOUND") {
+    if (
+      ("code" in warning && warning.code === "MODULE_NOT_FOUND") ||
+      // when running in dev mode there is no warning.code
+      // so we have to rely on the text of the error message
+      (warning.stack ?? "").includes("Cannot find")
+    ) {
       throw new Error(warning.stack);
-    } else if ("stack" in warning) {
-      // eslint-disable-next-line no-console
-      console.warn(`${warning.stack}\n`);
-    } else {
-      // eslint-disable-next-line no-console
-      console.warn(`${JSON.stringify(warning, null, 2)}\n`);
+    }
+
+    const isWarnMsgToIgnore = WARN_MSGS_TO_IGNORE.some((msg) => {
+      return (
+        "stack" in warning &&
+        typeof warning.stack === "string" &&
+        warning.stack.includes(msg)
+      );
+    });
+
+    if (!isWarnMsgToIgnore) {
+      process.stderr.write(`Warning: ${String(warning)}\n`);
     }
   });
 }
