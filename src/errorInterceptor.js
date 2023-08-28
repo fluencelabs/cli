@@ -177,10 +177,8 @@ export function setUpProcessWarningListener() {
       );
     });
 
-    if (isWarnMsgToIgnore) {
-      return;
+    if (!isWarnMsgToIgnore) {
+      process.stderr.write(`Warning: ${String(warning)}\n`);
     }
-
-    process.stderr.write(`Warning: ${String(warning)}\n`);
   });
 }
