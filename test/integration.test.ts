@@ -313,7 +313,6 @@ describe("integration tests", () => {
 
       // log(`rrr:`, rrr);
 
-
       await init(cwd, "quickstart");
       log("init done");
 
@@ -349,7 +348,6 @@ describe("integration tests", () => {
       });
 
       log(`added peers ${localPeerIds.toString()}:`, addPeer);
-
 
       const pathToNewServiceDir = join("src", "services", "myService");
 
@@ -388,7 +386,7 @@ describe("integration tests", () => {
       );
 
       const relay = multiaddrs[0]?.multiaddr;
-      fluenceConfig.relays = [ relay! ];
+      fluenceConfig.relays = [relay!];
 
       fluenceConfig.spells = {
         newSpell: {
@@ -442,8 +440,6 @@ describe("integration tests", () => {
 
       log(`run done:`, result);
 
-
-
       // let result = "[]";
       // let runDeployedServicesTimeoutReached = false;
       // let maybeRunDeployedError: unknown = null;
@@ -454,14 +450,14 @@ describe("integration tests", () => {
 
       // while (!runDeployedServicesTimeoutReached) {
       //   try {
-          // result = await fluence({
-          //   args: ["run"],
-          //   flags: {
-          //     f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-          //     quiet: true,
-          //   },
-          //   cwd,
-          // });
+      // result = await fluence({
+      //   args: ["run"],
+      //   flags: {
+      //     f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+      //     quiet: true,
+      //   },
+      //   cwd,
+      // });
 
       //     clearTimeout(runDeployedServicesTimeout);
       //     break;
@@ -558,7 +554,6 @@ const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
 // Private Key: 0x1a1bf9026a097f33ce1a51f5aa0c4102e4a1432c757d922200ef37df168ae504
 // Private Key: 0xbb3457514f768615c8bc4061c7e47f817c8a570c5c3537479639d4fad052a98a
 // Private Key: 0xfbd9e512cc1b62db1ca689737c110afa9a3799e1bc04bf12c1c34ac39e0e2dd5
-
 
 const PRIV_KEY =
   "0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41";
