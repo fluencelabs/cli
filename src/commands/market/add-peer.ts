@@ -76,39 +76,37 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       await input({ message: "Enter peerId" }),
     ];
 
-    await Promise.all(
-      peerIds.map(async (peerId) => {
-        const signer = await getSigner(network, flags["priv-key"]);
-        const dealClient = new DealClient(signer, network);
-        const globalContracts = dealClient.getGlobalContracts();
-        const matcher = await globalContracts.getMatcher();
-        const flt = await globalContracts.getFLT();
-        const factory = await globalContracts.getFactory();
-        const collateral = await factory.REQUIRED_COLLATERAL();
+    for (const peerId of peerIds) {
+      const signer = await getSigner(network, flags["priv-key"]);
+      const dealClient = new DealClient(signer, network);
+      const globalContracts = dealClient.getGlobalContracts();
+      const matcher = await globalContracts.getMatcher();
+      const flt = await globalContracts.getFLT();
+      const factory = await globalContracts.getFactory();
+      const collateral = await factory.REQUIRED_COLLATERAL();
 
-        const approveTx = await flt.approve(
-          await matcher.getAddress(),
-          collateral * BigInt(workersCount),
-        );
+      const approveTx = await flt.approve(
+        await matcher.getAddress(),
+        collateral * BigInt(workersCount),
+      );
 
-        promptConfirmTx(flags["priv-key"]);
-        await waitTx(approveTx);
+      promptConfirmTx(flags["priv-key"]);
+      await waitTx(approveTx);
 
-        const multihash = digest.decode(base58btc.decode("z" + peerId));
-        const bytes = multihash.bytes.subarray(6);
-        const tx = await matcher.addWorkersSlots(bytes, workersCount);
-        promptConfirmTx(flags["priv-key"]);
-        await waitTx(tx);
-        const free = await matcher.getFreeWorkersSolts(bytes);
+      const multihash = digest.decode(base58btc.decode("z" + peerId));
+      const bytes = multihash.bytes.subarray(6);
+      const tx = await matcher.addWorkersSlots(bytes, workersCount);
+      promptConfirmTx(flags["priv-key"]);
+      await waitTx(tx);
+      const free = await matcher.getFreeWorkersSolts(bytes);
 
-        commandObj.logToStderr(
-          `Added ${color.yellow(
-            workersCount,
-          )} worker slots. Compute peer ${color.yellow(
-            peerIds,
-          )} has ${color.yellow(free)} free worker slots now.`,
-        );
-      }),
-    );
+      commandObj.logToStderr(
+        `Added ${color.yellow(
+          workersCount,
+        )} worker slots. Compute peer ${color.yellow(
+          peerIds,
+        )} has ${color.yellow(free)} free worker slots now.`,
+      );
+    }
   }
 }
