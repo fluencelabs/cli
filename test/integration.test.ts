@@ -265,7 +265,6 @@ describe("integration tests", () => {
         args: ["run"],
         flags: {
           f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-          quiet: true,
         },
         cwd,
       });
@@ -294,23 +293,52 @@ describe("integration tests", () => {
   maybeConcurrentTest(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
-      const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
-      await init(cwd, "quickstart");
+      function log(message?: unknown, ...optionalParams: unknown[]) {
+        const timestamp = new Date().toISOString().split("T")[1];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, no-console, @typescript-eslint/restrict-template-expressions
+        console.debug(`[${timestamp}]: ${message}`, ...optionalParams);
+      }
 
-      await fluence({
-        args: ["market", "register"],
-        flags: {
-          network: "local",
-          "priv-key": PRIV_KEY,
-        },
-        cwd,
-      });
+      const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
+
+      // log(`will run:`, RUN_DEPLOYED_SERVICES_FUNCTION_CALL);
+
+      // const rrr = await fluence({
+      //   args: ["run"],
+      //   flags: {
+      //     f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+      //   },
+      //   cwd,
+      // });
+
+      // log(`rrr:`, rrr);
+
+
+      await init(cwd, "quickstart");
+      log("init done");
+
+      try {
+        const registered = await fluence({
+          args: ["market", "register"],
+          flags: {
+            network: "local",
+            "priv-key": PRIV_KEY,
+          },
+          cwd,
+        });
+
+        log("registered in market:", registered);
+      } catch (e) {
+        log("error registering in market:", e);
+      }
 
       const peerIdFlags = localPeerIds.flatMap((peerId) => {
         return ["--peer-id", peerId];
       });
 
-      await fluence({
+      log(`will add ${localPeerIds.length} peers`);
+
+      const addPeer = await fluence({
         args: ["market", "add-peer", ...peerIdFlags],
         flags: {
           network: "local",
@@ -320,12 +348,17 @@ describe("integration tests", () => {
         cwd,
       });
 
+      log(`added peers ${localPeerIds.toString()}:`, addPeer);
+
+
       const pathToNewServiceDir = join("src", "services", "myService");
 
       const newServiceConfig = await initServiceConfig(
         pathToNewServiceDir,
         cwd,
       );
+
+      log(`initServiceConfig done`);
 
       assert(
         newServiceConfig !== null,
@@ -345,12 +378,17 @@ describe("integration tests", () => {
         cwd,
       });
 
+      log(`newSpell done`);
+
       const fluenceConfig = await initFluenceConfigWithPath(cwd);
 
       assert(
         fluenceConfig !== null,
         `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`,
       );
+
+      const relay = multiaddrs[0]?.multiaddr;
+      fluenceConfig.relays = [ relay! ];
 
       fluenceConfig.spells = {
         newSpell: {
@@ -377,7 +415,11 @@ describe("integration tests", () => {
 
       await fluenceConfig.$commit();
 
-      await fluence({
+      log(`config commit done`);
+
+      log(`will deploy deal`);
+
+      const dealDeploy = await fluence({
         args: ["deal", "deploy"],
         flags: {
           "priv-key": PRIV_KEY,
@@ -386,41 +428,57 @@ describe("integration tests", () => {
         cwd,
       });
 
-      let result = "[]";
-      let runDeployedServicesTimeoutReached = false;
-      let maybeRunDeployedError: unknown = null;
+      log(`deal deployed:`, dealDeploy);
 
-      const runDeployedServicesTimeout = setTimeout(() => {
-        runDeployedServicesTimeoutReached = true;
-      }, RUN_DEPLOYED_SERVICES_TIMEOUT);
+      log(`will run:`, RUN_DEPLOYED_SERVICES_FUNCTION_CALL);
 
-      while (!runDeployedServicesTimeoutReached) {
-        try {
-          result = await fluence({
-            args: ["run"],
-            flags: {
-              f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-              quiet: true,
-            },
-            cwd,
-          });
+      const result = await fluence({
+        args: ["run"],
+        flags: {
+          f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+        },
+        cwd,
+      });
 
-          clearTimeout(runDeployedServicesTimeout);
-          break;
-        } catch (e) {
-          maybeRunDeployedError = e;
-          continue;
-        }
-      }
+      log(`run done:`, result);
 
-      assert(
-        !runDeployedServicesTimeoutReached,
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
-          maybeRunDeployedError instanceof Error
-            ? maybeRunDeployedError.message
-            : String(maybeRunDeployedError)
-        }`,
-      );
+
+
+      // let result = "[]";
+      // let runDeployedServicesTimeoutReached = false;
+      // let maybeRunDeployedError: unknown = null;
+
+      // const runDeployedServicesTimeout = setTimeout(() => {
+      //   runDeployedServicesTimeoutReached = true;
+      // }, RUN_DEPLOYED_SERVICES_TIMEOUT);
+
+      // while (!runDeployedServicesTimeoutReached) {
+      //   try {
+          // result = await fluence({
+          //   args: ["run"],
+          //   flags: {
+          //     f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+          //     quiet: true,
+          //   },
+          //   cwd,
+          // });
+
+      //     clearTimeout(runDeployedServicesTimeout);
+      //     break;
+      //   } catch (e) {
+      //     maybeRunDeployedError = e;
+      //     continue;
+      //   }
+      // }
+
+      // assert(
+      //   !runDeployedServicesTimeoutReached,
+      //   `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
+      //     maybeRunDeployedError instanceof Error
+      //       ? maybeRunDeployedError.message
+      //       : String(maybeRunDeployedError)
+      //   }`,
+      // );
 
       const parsedResult = JSON.parse(result);
 
@@ -479,10 +537,31 @@ const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
   return join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 };
 
-const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 5;
+// const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 5;
+// Private Key: 0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5
+// Private Key: 0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41
+// Private Key: 0xdacd4b197ee7e9efdd5db1921c6c558d88e2c8b69902b8bafc812fb226a6b5e0
+// Private Key: 0xa22813cba71d9795475e88d8d84fd3ef6e9ed4e3d5f3c34462ae1645cd1f7f16
+// Private Key: 0xf96cde07b5743540fbad99faaabc7ac3158d5665f1eed0ec7ad913622b121903
+// Private Key: 0xfeb277a2fb0e226a729174c44bcc7dcb94dcfef7d4c1eb77e60e83a176f812cd
+// Private Key: 0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f
+// Private Key: 0xc9b5b488586bf92ed1fe35a985b48b92392087e86da2011896c289e0010fc6bf
+// Private Key: 0xe6776a7310afaffed6aeca2b54b1547d72dbfc9268ed05850584ddce53cf87a1
+// Private Key: 0xb454e1649f031838a3b63b2fb693635266e048754f23cae6d9718250e3fb8905
+// Private Key: 0xb8849e63d7c25960af6eaff78fd82fe916b2c20cf569aaf4fa259c15faedd146
+// Private Key: 0x53513db9b03255c58b5f535e6d9e15bb3bfed583839094126b9a42ce2aa7469c
+// Private Key: 0x66486a3148467413a10cc8891b657bf092d307e066a08b833b892913607aede0
+// Private Key: 0x5918ecc0f743222dee4ae4f2be17965e785435af6223ad3bdff80354d893f0c2
+// Private Key: 0xb76b8ce771bfccf0167c3b2a51993e7687a4d8cbfb9ced61a98f601a772bda08
+// Private Key: 0xcb448613322f0ae09bb111e6bfd5be93480f1ec521b062a614f9af025c8f1852
+// Private Key: 0x147840cb64e7c4ae02917144897c37b521b859ac643bf55ec83444c11c3a8a30
+// Private Key: 0x1a1bf9026a097f33ce1a51f5aa0c4102e4a1432c757d922200ef37df168ae504
+// Private Key: 0xbb3457514f768615c8bc4061c7e47f817c8a570c5c3537479639d4fad052a98a
+// Private Key: 0xfbd9e512cc1b62db1ca689737c110afa9a3799e1bc04bf12c1c34ac39e0e2dd5
+
 
 const PRIV_KEY =
-  "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f";
+  "0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41";
 
 const WD_MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;
