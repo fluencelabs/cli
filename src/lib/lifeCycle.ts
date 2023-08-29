@@ -52,6 +52,7 @@ import {
 } from "./const.js";
 import { haltCountly, initCountly, logErrorToCountly } from "./countly.js";
 import "./setupEnvironment.js";
+import { dbg } from "./dbg.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
@@ -136,6 +137,7 @@ export async function initCli<
     maybeFluenceConfig?: FluenceConfig | null;
   }
 > {
+  dbg("command execution started");
   setProjectRootDir(await recursivelyFindProjectRootDir(projectRootDir));
   setCommandObjAndIsInteractive(commandObjFromArgs, getIsInteractive(flags));
 
@@ -274,7 +276,7 @@ const handleFloxVersion = async (
 
 export const exitCli = async (): Promise<never> => {
   await haltCountly();
-
+  dbg("before exit");
   // Countly doesn't let process to finish
   // So there is a need to do it explicitly
   // eslint-disable-next-line no-process-exit
