@@ -313,6 +313,7 @@ describe("integration tests", () => {
 
       // log(`rrr:`, rrr);
 
+
       await init(cwd, "quickstart");
       log("init done");
 
@@ -428,53 +429,41 @@ describe("integration tests", () => {
 
       log(`deal deployed:`, dealDeploy);
 
-      log(`will run:`, RUN_DEPLOYED_SERVICES_FUNCTION_CALL);
+      let result = "[]";
+      let runDeployedServicesTimeoutReached = false;
+      let maybeRunDeployedError: unknown = null;
 
-      const result = await fluence({
-        args: ["run"],
-        flags: {
-          f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-        },
-        cwd,
-      });
+      const runDeployedServicesTimeout = setTimeout(() => {
+        runDeployedServicesTimeoutReached = true;
+      }, RUN_DEPLOYED_SERVICES_TIMEOUT);
 
-      log(`run done:`, result);
+      while (!runDeployedServicesTimeoutReached) {
+        try {
+          result = await fluence({
+            args: ["run"],
+            flags: {
+              f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+              quiet: true,
+            },
+            cwd,
+          });
 
-      // let result = "[]";
-      // let runDeployedServicesTimeoutReached = false;
-      // let maybeRunDeployedError: unknown = null;
+          clearTimeout(runDeployedServicesTimeout);
+          break;
+        } catch (e) {
+          maybeRunDeployedError = e;
+          continue;
+        }
+      }
 
-      // const runDeployedServicesTimeout = setTimeout(() => {
-      //   runDeployedServicesTimeoutReached = true;
-      // }, RUN_DEPLOYED_SERVICES_TIMEOUT);
-
-      // while (!runDeployedServicesTimeoutReached) {
-      //   try {
-      // result = await fluence({
-      //   args: ["run"],
-      //   flags: {
-      //     f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-      //     quiet: true,
-      //   },
-      //   cwd,
-      // });
-
-      //     clearTimeout(runDeployedServicesTimeout);
-      //     break;
-      //   } catch (e) {
-      //     maybeRunDeployedError = e;
-      //     continue;
-      //   }
-      // }
-
-      // assert(
-      //   !runDeployedServicesTimeoutReached,
-      //   `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
-      //     maybeRunDeployedError instanceof Error
-      //       ? maybeRunDeployedError.message
-      //       : String(maybeRunDeployedError)
-      //   }`,
-      // );
+      assert(
+        !runDeployedServicesTimeoutReached,
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
+          maybeRunDeployedError instanceof Error
+            ? maybeRunDeployedError.message
+            : String(maybeRunDeployedError)
+        }`,
+      );
 
       const parsedResult = JSON.parse(result);
 
@@ -533,7 +522,7 @@ const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
   return join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 };
 
-// const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 5;
+const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 5;
 // Private Key: 0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5
 // Private Key: 0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41
 // Private Key: 0xdacd4b197ee7e9efdd5db1921c6c558d88e2c8b69902b8bafc812fb226a6b5e0
