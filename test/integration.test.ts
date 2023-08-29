@@ -447,65 +447,66 @@ describe("integration tests", () => {
             cwd,
           });
 
-          clearTimeout(runDeployedServicesTimeout);
-          break;
-        } catch (e) {
-          maybeRunDeployedError = e;
-          continue;
-        }
-      }
 
-      assert(
-        !runDeployedServicesTimeoutReached,
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
-          maybeRunDeployedError instanceof Error
-            ? maybeRunDeployedError.message
-            : String(maybeRunDeployedError)
-        }`,
-      );
+        assert(
+          !runDeployedServicesTimeoutReached,
+          `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
+            maybeRunDeployedError instanceof Error
+              ? maybeRunDeployedError.message
+              : String(maybeRunDeployedError)
+          }`,
+        );
 
-      const parsedResult = JSON.parse(result);
+        const parsedResult = JSON.parse(result);
 
-      assert(
-        Array.isArray(parsedResult),
-        `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array, but it is: ${result}`,
-      );
+        assert(
+          Array.isArray(parsedResult),
+          `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array, but it is: ${result}`,
+        );
 
-      const arrayOfResults = parsedResult.map(assertHasWorkerAndAnswer);
+        const arrayOfResults = parsedResult.map(assertHasWorkerAndAnswer);
 
-      const resultsWithNoAnswer = arrayOfResults.filter(({ answer }) => {
-        return answer === null;
-      });
+        const resultsWithNoAnswer = arrayOfResults.filter(({ answer }) => {
+          return answer === null;
+        });
 
-      assert(
-        resultsWithNoAnswer.length === 0,
-        `When running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} nox returned workers from blockchain that has worker_id == null: ${resultsWithNoAnswer
-          .map(({ worker }) => {
-            return jsonStringify(worker);
+        assert(
+          resultsWithNoAnswer.length === 0,
+          `When running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} nox returned workers from blockchain that has worker_id == null: ${resultsWithNoAnswer
+            .map(({ worker }) => {
+              return jsonStringify(worker);
+            })
+            .join("\n")}`,
+        );
+
+        const expected = local
+          .map((peer) => {
+            return {
+              answer: "Hi, fluence",
+              peer: peer.peerId,
+            };
           })
-          .join("\n")}`,
-      );
+          .sort(sortPeers);
 
-      const expected = local
-        .map((peer) => {
-          return {
-            answer: "Hi, fluence",
-            peer: peer.peerId,
-          };
-        })
-        .sort(sortPeers);
+        const res = arrayOfResults
+          .map(({ answer, worker }) => {
+            return {
+              answer,
+              peer: worker.host_id,
+            };
+          })
+          .sort(sortPeers);
 
-      const res = arrayOfResults
-        .map(({ answer, worker }) => {
-          return {
-            answer,
-            peer: worker.host_id,
-          };
-        })
-        .sort(sortPeers);
+        // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
+        expect(res).toEqual(expected);
 
-      // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
-      expect(res).toEqual(expected);
+        clearTimeout(runDeployedServicesTimeout);
+        break;
+      } catch (e) {
+        maybeRunDeployedError = e;
+        continue;
+      }
+    }
     },
   );
 });
