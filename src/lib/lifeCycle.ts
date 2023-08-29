@@ -276,7 +276,6 @@ const handleFloxVersion = async (
 
 export const exitCli = async (): Promise<never> => {
   await haltCountly();
-  dbg("before exit");
   // Countly doesn't let process to finish
   // So there is a need to do it explicitly
   // eslint-disable-next-line no-process-exit

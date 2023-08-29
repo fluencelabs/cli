@@ -17,7 +17,6 @@
 import { Command, Flags, Interfaces } from "@oclif/core";
 
 import { NO_INPUT_FLAG } from "./lib/const.js";
-import { dbg } from "./lib/dbg.js";
 import { exitCli } from "./lib/lifeCycle.js";
 
 type Flags<T extends typeof Command> = Interfaces.InferredFlags<
@@ -38,8 +37,6 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
   protected override async finally(
     maybeError: Error | undefined,
   ): Promise<unknown> {
-    dbg("finally");
-
     // called after run and catch regardless of whether or not the command errored
     if (maybeError === undefined) {
       await super.finally(maybeError);
