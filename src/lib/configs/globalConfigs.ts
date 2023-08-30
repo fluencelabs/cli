@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type UserConfig } from "./user/config.js";
+import type { UserConfig } from "./user/config.js";
 
 export let userConfig: UserConfig;
 
