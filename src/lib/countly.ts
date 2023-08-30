@@ -85,7 +85,7 @@ const dependenciesToSegmentation = (
  * @returns void
  */
 export const addCountlyLog = async (message: string): Promise<void> => {
-  if (!isCountlyInitialized()) {
+  if (!(await isCountlyInitialized())) {
     return;
   }
 
@@ -99,7 +99,7 @@ export const addCountlyLog = async (message: string): Promise<void> => {
  * @returns void
  */
 export const logErrorToCountly = async (message: string): Promise<void> => {
-  if (!isCountlyInitialized()) {
+  if (!(await isCountlyInitialized())) {
     return;
   }
 
@@ -108,7 +108,7 @@ export const logErrorToCountly = async (message: string): Promise<void> => {
 };
 
 export const addCountlyEvent = async (key: string): Promise<void> => {
-  if (!isCountlyInitialized()) {
+  if (!(await isCountlyInitialized())) {
     return;
   }
 
@@ -118,7 +118,7 @@ export const addCountlyEvent = async (key: string): Promise<void> => {
 };
 
 export const haltCountly = async (): Promise<void> => {
-  if (!isCountlyInitialized()) {
+  if (!(await isCountlyInitialized())) {
     return;
   }
 
