@@ -27,7 +27,7 @@ A map of created deals
 | Property         | Type   | Required | Description                                            |
 |------------------|--------|----------|--------------------------------------------------------|
 | `chainNetworkId` | number | **Yes**  |                                                        |
-| `chainNetwork`   | string | **Yes**  | Possible values are: `testnet`, `local`.               |
+| `chainNetwork`   | string | **Yes**  | Possible values are: `local`, `testnet`.               |
 | `dealIdOriginal` | string | **Yes**  |                                                        |
 | `dealId`         | string | **Yes**  |                                                        |
 | `definition`     | string | **Yes**  |                                                        |
