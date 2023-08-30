@@ -33,6 +33,8 @@ import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
+import { userConfig } from "./globalConfigs.js";
+
 type EnsureSchemaArg = {
   name: string;
   configDirPath: string;
@@ -210,6 +212,7 @@ export type InitConfigOptions<
   getConfigOrConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
   validate?: ConfigValidateFunction<LatestConfig>;
+  docsInConfigs?: boolean;
 };
 
 type InitFunction<LatestConfig> =
@@ -273,6 +276,7 @@ export function getReadonlyConfigInitFunction<
       getConfigOrConfigDirPath,
       validate,
       getSchemaDirPath,
+      docsInConfigs = userConfig?.docsInConfigs ?? false,
     } = options;
 
     const configFullName = `${name}.${YAML_EXT}`;
@@ -354,8 +358,28 @@ export function getReadonlyConfigInitFunction<
       }
       // If config file doesn't exist, create it with default config and schema path comment
 
+      const documentationLinkComment = `# Documentation: https://github.com/fluencelabs/cli/tree/main/docs/configs/${name.replace(
+        `.${YAML_EXT}`,
+        "",
+      )}.md`;
+
       const schemaPathComment = await getSchemaPathComment();
-      configString = `${schemaPathComment}\n\n${await getDefaultConfig()}`;
+
+      const description =
+        typeof latestSchema["description"] === "string"
+          ? `\n\n# ${latestSchema["description"]}`
+          : "";
+
+      const defConf = await getDefaultConfig();
+
+      configString = docsInConfigs
+        ? `${schemaPathComment}\n\n${documentationLinkComment}\n\n${defConf}`
+        : yamlDiffPatch(
+            `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
+            {},
+            parse(defConf),
+          );
+
       await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
     }
 

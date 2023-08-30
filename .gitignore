@@ -9,7 +9,7 @@ oclif.manifest.json
 
 # for ease of development
 /schemas
-/.fluence-dev-project
+/.f
 .env
 
 # recommended by Fluence

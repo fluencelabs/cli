@@ -23,13 +23,13 @@ const color = oclifColor.default;
 
 import versions from "../../versions.json" assert { type: "json" };
 import { commandObj } from "../commandObj.js";
+import { userConfig } from "../configs/globalConfigs.js";
 import type {
   FluenceConfig,
   FluenceConfigReadonly,
 } from "../configs/project/fluence.js";
 import {
   initReadonlyUserConfig,
-  userConfig,
   type UserConfigReadonly,
 } from "../configs/user/config.js";
 import {

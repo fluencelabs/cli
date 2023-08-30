@@ -24,8 +24,8 @@ import {
 } from "../errorInterceptor.js";
 
 import { commandObj } from "./commandObj.js";
+import { userConfig } from "./configs/globalConfigs.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { userConfig } from "./configs/user/config.js";
 import { IS_DEVELOPMENT } from "./const.js";
 import { ensureDir, getUserCountlyDir } from "./paths.js";
 
