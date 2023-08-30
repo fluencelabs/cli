@@ -21,8 +21,7 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload } from "../../lib/compiled-aqua/installation-spell/upload.js";
-import { upload as uploadWithTracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js";
+import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
   MIN_WORKERS,
   TARGET_WORKERS,
@@ -48,7 +47,10 @@ import {
   prepareForDeploy,
 } from "../../lib/deployWorkers.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
-import { initFluenceClient } from "../../lib/jsClient.js";
+import {
+  disconnectFluenceClient,
+  initFluenceClient,
+} from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
@@ -109,12 +111,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     dbg("start connecting to fluence network");
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(true);
+    await doRegisterIpfsClient(true);
     dbg("start running upload");
 
-    const uploadResult = flags.tracing
-      ? await uploadWithTracing(uploadArg)
-      : await upload(uploadArg);
+    const uploadResult = await upload(flags.tracing, uploadArg);
 
     const createdDeals: Record<
       string,
@@ -259,9 +259,27 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     commandObj.log(
       `\n\n${color.yellow("Success!")}${createdDealsText}${updatedDealsText}`,
     );
+
+    await disconnectFluenceClient();
   }
 }
 
 const getLinkToAddress = (dealId: string) => {
   return `https://mumbai.polygonscan.com/address/${dealId}`;
 };
+
+async function upload(tracing: boolean, uploadArg: Upload_deployArgConfig) {
+  if (tracing) {
+    const { upload } = await import(
+      "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js"
+    );
+
+    return upload(uploadArg);
+  }
+
+  const { upload } = await import(
+    "../../lib/compiled-aqua/installation-spell/upload.js"
+  );
+
+  return upload(uploadArg);
+}

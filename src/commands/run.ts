@@ -45,7 +45,7 @@ import {
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../lib/helpers/jsonStringify.js";
-import { initFluenceClient } from "../lib/jsClient.js";
+import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
 import {
   projectRootDir,
@@ -218,6 +218,8 @@ export default class Run extends BaseCommand<typeof Run> {
       // eslint-disable-next-line no-console
       console.log(stringResult);
     }
+
+    await disconnectFluenceClient();
 
     // performance.mark("whole-end");
     // performance.measure("whole", "whole-start", "whole-end");

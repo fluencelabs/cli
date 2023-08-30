@@ -19,7 +19,6 @@ import { access, readFile } from "node:fs/promises";
 import type { IPFSHTTPClient } from "ipfs-http-client";
 
 import { commandObj } from "../commandObj.js";
-import { registerIpfsClient } from "../compiled-aqua/installation-spell/files.js";
 import { FS_OPTIONS } from "../const.js";
 import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
@@ -125,12 +124,18 @@ const dagUpload = async (
   }
 };
 
-export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
+export const doRegisterIpfsClient = async (
+  offAquaLogs: boolean,
+): Promise<void> => {
   const log = (msg: unknown) => {
     if (!offAquaLogs) {
       commandObj.logToStderr(`ipfs: ${stringifyUnknown(msg)}`);
     }
   };
+
+  const { registerIpfsClient } = await import(
+    "../compiled-aqua/installation-spell/files.js"
+  );
 
   registerIpfsClient({
     async upload(multiaddr, absolutePath) {

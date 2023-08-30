@@ -19,8 +19,6 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { get_logs_deal } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { get_logs_deal as get_logs_deal_with_tracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -36,7 +34,10 @@ import {
 import { parseWorkers } from "../../lib/deployWorkers.js";
 import { formatAquaLogs } from "../../lib/helpers/formatLogs.js";
 import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
-import { initFluenceClient } from "../../lib/jsClient.js";
+import {
+  disconnectFluenceClient,
+  initFluenceClient,
+} from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
@@ -70,9 +71,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     let logs;
 
     try {
-      logs = flags.tracing
-        ? await get_logs_deal_with_tracing(Object.keys(dealIdWorkerNameMap))
-        : await get_logs_deal(Object.keys(dealIdWorkerNameMap));
+      logs = await getLogsDeal(flags.tracing, Object.keys(dealIdWorkerNameMap));
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${stringifyUnknown(
@@ -92,6 +91,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
         })
         .join("\n\n"),
     );
+
+    await disconnectFluenceClient();
   }
 }
 
@@ -152,3 +153,19 @@ const getDealIdWorkerNameMap = async (
       return acc;
     }, {});
 };
+
+async function getLogsDeal(tracing: boolean, dealIds: string[]) {
+  if (tracing) {
+    const { get_logs_deal } = await import(
+      "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js"
+    );
+
+    return get_logs_deal(dealIds);
+  }
+
+  const { get_logs_deal } = await import(
+    "../../lib/compiled-aqua/installation-spell/cli.js"
+  );
+
+  return get_logs_deal(dealIds);
+}

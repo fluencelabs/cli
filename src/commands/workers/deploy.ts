@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { Fluence } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload_deploy } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { upload_deploy as upload_deploy_with_tracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js";
+import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -39,7 +37,10 @@ import {
   prepareForDeploy,
 } from "../../lib/deployWorkers.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
-import { initFluenceClient } from "../../lib/jsClient.js";
+import {
+  disconnectFluenceClient,
+  initFluenceClient,
+} from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 
@@ -87,13 +88,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     });
 
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(true);
+    await doRegisterIpfsClient(true);
 
-    const uploadDeployResult = flags.tracing
-      ? await upload_deploy_with_tracing(uploadDeployArg)
-      : await upload_deploy(uploadDeployArg);
+    const uploadDeployResult = await uploadDeploy(
+      flags.tracing,
+      uploadDeployArg,
+    );
 
     const timestamp = new Date().toISOString();
+    const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = (await Fluence.getClient()).getRelayPeerId();
 
     const { newDeployedWorkers, infoToPrint } =
@@ -141,5 +144,26 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         { "deployed workers": infoToPrint },
       )}`,
     );
+
+    await disconnectFluenceClient();
   }
+}
+
+async function uploadDeploy(
+  tracing: boolean,
+  uploadArg: Upload_deployArgConfig,
+) {
+  if (tracing) {
+    const { upload_deploy } = await import(
+      "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js"
+    );
+
+    return upload_deploy(uploadArg);
+  }
+
+  const { upload_deploy } = await import(
+    "../../lib/compiled-aqua/installation-spell/cli.js"
+  );
+
+  return upload_deploy(uploadArg);
 }

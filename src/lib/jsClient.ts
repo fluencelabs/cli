@@ -60,3 +60,8 @@ export const initFluenceClient = async (
     commandObj.error(`Failed to connect. ${stringifyUnknown(e)}`);
   }
 };
+
+export async function disconnectFluenceClient() {
+  const { Fluence } = await import("@fluencelabs/js-client");
+  await Fluence.disconnect();
+}

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { Fluence } from "@fluencelabs/js-client";
 import { Command, Flags, Interfaces } from "@oclif/core";
 
 import { NO_INPUT_FLAG } from "./lib/const.js";
@@ -38,8 +37,6 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
   protected override async finally(
     maybeError: Error | undefined,
   ): Promise<unknown> {
-    await Fluence.disconnect();
-
     // called after run and catch regardless of whether or not the command errored
     if (maybeError === undefined) {
       await super.finally(maybeError);

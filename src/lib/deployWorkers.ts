@@ -23,7 +23,6 @@ import { color } from "@oclif/color";
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
-import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import {
   type FluenceConfig,
@@ -604,6 +603,10 @@ export const prepareForDeploy = async ({
   }
 
   await validateWasmExist(workers);
+
+  const { deal_install_script } = await import(
+    "./compiled-aqua/installation-spell/deal_spell.js"
+  );
 
   return {
     workers,
