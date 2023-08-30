@@ -62,7 +62,7 @@ type PromptOptions<T, U extends Answers> = DistinctQuestion<U> & {
   flagName: string | undefined;
 };
 
-const prompt = async <T, U extends { [NAME]: T }>({
+const prompt = async <T, U extends Answers>({
   validateType,
   flagName,
   ...question
@@ -111,12 +111,14 @@ export const confirm = ({
   flagName,
   ...question
 }: ConfirmArg): Promise<boolean> => {
+  // inquirer broke it's types so we have to cast it. "confirm" always returns boolean
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
     type: "confirm",
     validateType: validateBooleanPrompt,
     flagName,
-  });
+  }) as Promise<boolean>;
 };
 
 export type InputArg = DistinctQuestion & {
@@ -125,12 +127,14 @@ export type InputArg = DistinctQuestion & {
 };
 
 export const input = ({ flagName, ...question }: InputArg): Promise<string> => {
+  // inquirer broke it's types so we have to cast it. "input" always returns string
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
     type: "input",
     validateType: validateStringPrompt,
     flagName,
-  });
+  }) as Promise<string>;
 };
 
 type PasswordArg = DistinctQuestion & {
@@ -142,12 +146,14 @@ export const password = ({
   flagName,
   ...question
 }: PasswordArg): Promise<string> => {
+  // inquirer broke it's types so we have to cast it. "password" always returns string
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
     type: "password",
     validateType: validateStringPrompt,
     flagName,
-  });
+  }) as Promise<string>;
 };
 
 type Separator = typeof inquirer.Separator;
@@ -263,7 +269,9 @@ export const list = async <T, U>(
     return noChoicesResult;
   }
 
-  const stringChoice = await prompt({
+  // inquirer broke it's types so we have to cast it. "list" always returns string
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const stringChoice = (await prompt({
     ...question,
     type: "list",
     validateType: validateStringPrompt,
@@ -271,7 +279,7 @@ export const list = async <T, U>(
       return choice instanceof Separator ? choice : choice.name;
     }),
     flagName,
-  });
+  })) as string;
 
   const choice = choices.find((choice): boolean => {
     return !(choice instanceof Separator) && choice.name === stringChoice;
