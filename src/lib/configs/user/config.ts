@@ -43,6 +43,7 @@ export const CHECK_FOR_UPDATES_DISABLED = "disabled";
 type ConfigV0 = {
   version: 0;
   countlyConsent: boolean;
+  docsInConfigs?: boolean;
   dependencies?: {
     npm?: Record<string, string>;
     cargo?: Record<string, string>;
@@ -99,19 +100,29 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description: `Last time when ${CLI_NAME_FULL} checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
       nullable: true,
     },
+    docsInConfigs: {
+      type: "boolean",
+      description:
+        "Whether to include commented-out documented config examples in the configs generated with the CLI",
+      nullable: true,
+    },
     version: { type: "number", const: 0 },
   },
   required: ["version", "countlyConsent"],
 };
 
-const getDefault: GetDefaultConfig = () => {
-  return `# Defines global config for Fluence CLI
+const getDefault = (docsInConfigs: boolean): GetDefaultConfig => {
+  return () => {
+    return `# Defines global config for Fluence CLI
 
 # Weather you consent to send usage data to Countly
 countlyConsent: false
 
 # config version
 version: 0
+
+# Whether to include commented-out documented config examples in the configs generated with the CLI
+docsInConfigs: ${docsInConfigs ? "true" : "false"}
 
 # # Last time when CLI checked for updates.
 # # Updates are checked daily unless this field is set to 'disabled'
@@ -134,6 +145,7 @@ version: 0
 #   cargo:
 #     marine: 0.14.0
 `;
+  };
 };
 
 const migrations: Migrations<Config> = [];
@@ -160,16 +172,15 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 };
 
 export const initUserConfig = getConfigInitFunction(initConfigOptions);
-export const initNewUserConfig = getConfigInitFunction(
-  initConfigOptions,
-  getDefault,
-);
+
+export const initNewUserConfig = (docsInConfigs: boolean) => {
+  return getConfigInitFunction(
+    { ...initConfigOptions, docsInConfigs },
+    getDefault(docsInConfigs),
+  )();
+};
+
 export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
 export const userConfigSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
-export let userConfig: UserConfig;
-
-export const setUserConfig = (newUserConfig: UserConfig) => {
-  userConfig = newUserConfig;
-};

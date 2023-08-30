@@ -19,7 +19,7 @@ import { omit } from "lodash-es";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { userConfig } from "../../lib/configs/user/config.js";
+import { userConfig } from "../../lib/configs/globalConfigs.js";
 import {
   CLI_NAME_FULL,
   GLOBAL_FLAG,

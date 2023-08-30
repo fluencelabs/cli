@@ -9,6 +9,7 @@ Defines global config for Fluence CLI
 | `countlyConsent`      | boolean                 | **Yes**  | Weather you consent to send usage data to Countly                                                                |
 | `version`             | number                  | **Yes**  |                                                                                                                  |
 | `dependencies`        | [object](#dependencies) | No       | (For advanced users) Global overrides of dependencies                                                            |
+| `docsInConfigs`       | boolean                 | No       | Whether to include commented-out documented config examples in the configs generated with the CLI                |
 | `lastCheckForUpdates` | string                  | No       | Last time when Fluence CLI checked for updates. Updates are checked daily unless this field is set to 'disabled' |
 
 ## dependencies
