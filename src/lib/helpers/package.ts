@@ -18,8 +18,7 @@ import assert from "node:assert";
 import { access, mkdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import versions from "../../versions.json" assert { type: "json" };
 import { commandObj } from "../commandObj.js";
@@ -47,7 +46,6 @@ import {
   ensureUserFluenceTmpNpmDir,
 } from "../paths.js";
 
-import { replaceHomeDir } from "./replaceHomeDir.js";
 import { isExactVersion } from "./validations.js";
 
 const packageManagers = ["npm", "cargo"] as const;
@@ -150,20 +148,21 @@ type ResolveVersionArg = {
   maybeFluenceConfig: FluenceConfig | null;
 };
 
-export const resolveVersionToInstall = ({
+export const resolveVersionToInstall = async ({
   name,
   maybeVersion,
   packageManager,
   maybeFluenceConfig,
-}: ResolveVersionArg):
+}: ResolveVersionArg): Promise<
   | {
       versionToInstall: string;
     }
   | {
       maybeVersionToCheck: string | undefined;
-    } => {
+    }
+> => {
   if (typeof maybeVersion === "string") {
-    if (!isExactVersion(maybeVersion)) {
+    if (!(await isExactVersion(maybeVersion))) {
       return {
         maybeVersionToCheck: maybeVersion,
       };
@@ -276,9 +275,7 @@ export const handleInstallation = async ({
 
   if (explicitInstallation) {
     commandObj.log(
-      `Successfully installed ${name}@${version} to ${replaceHomeDir(
-        dependencyDirPath,
-      )}`,
+      `Successfully installed ${name}@${version} to ${dependencyDirPath}`,
     );
   }
 };

@@ -17,7 +17,6 @@
 import { readFile, writeFile } from "fs/promises";
 
 import { Args } from "@oclif/core";
-import { parse } from "yaml";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -54,6 +53,7 @@ export default class Yaml extends BaseCommand<typeof Yaml> {
       FS_OPTIONS,
     );
 
+    const { parse } = await import("yaml");
     const parsedContent: unknown = parse(content);
 
     const aqua = jsToAqua(

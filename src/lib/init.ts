@@ -19,7 +19,6 @@ import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { color } from "@oclif/color";
-import Countly from "countly-sdk-nodejs";
 
 import {
   initNewFluenceConfig,
@@ -45,7 +44,6 @@ import {
   getMainAquaFileContent,
   READMEs,
 } from "../lib/const.js";
-import { replaceHomeDir } from "../lib/helpers/replaceHomeDir.js";
 import {
   ensureDefaultAquaJSPath,
   ensureDefaultAquaTSPath,
@@ -66,6 +64,7 @@ import { addService } from "./addService.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfig } from "./configs/project/workers.js";
+import { addCountlyEvent } from "./countly.js";
 import { ensureAquaFileWithWorkerInfo } from "./deployWorkers.js";
 import { generateNewModule } from "./generateNewModule.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
@@ -134,7 +133,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   }
 
   const { template = await selectTemplate() } = options;
-  Countly.add_event({ key: `init:template:${template}` });
+  await addCountlyEvent(`init:template:${template}`);
   await mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
@@ -219,9 +218,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
 
   commandObj.logToStderr(
     color.magentaBright(
-      `\nSuccessfully initialized ${CLI_NAME_FULL} project template at ${replaceHomeDir(
-        projectPath,
-      )}\n`,
+      `\nSuccessfully initialized ${CLI_NAME_FULL} project template at ${projectPath}\n`,
     ),
   );
 

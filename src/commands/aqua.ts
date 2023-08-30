@@ -16,10 +16,8 @@
 
 import { isAbsolute, resolve } from "path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
-import chokidar from "chokidar";
 
 import { compileToFiles, type CompileToFilesArgs } from "../lib/aqua.js";
 import { commandObj } from "../lib/commandObj.js";
@@ -182,6 +180,7 @@ export default class Aqua extends Command {
       );
     };
 
+    const chokidar = await import("chokidar");
     watchingNotification();
 
     chokidar

@@ -18,11 +18,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
-import { beautify } from "@fluencelabs/air-beautify-wasm";
-import { compileAquaCallFromPath } from "@fluencelabs/aqua-api";
-import { Fluence, callAquaFunction } from "@fluencelabs/js-client";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
 
@@ -301,7 +297,7 @@ const getRunData = async (flags: {
 
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid ${color.yellow(dataPath)}: ${validationErrorToString(
+        `Invalid ${color.yellow(dataPath)}: ${await validationErrorToString(
           validateRunData.errors,
         )}`,
       );
@@ -325,7 +321,7 @@ const getRunData = async (flags: {
 
     if (!validateRunData(parsedData)) {
       commandObj.error(
-        `Invalid --${DATA_FLAG_NAME}: ${validationErrorToString(
+        `Invalid --${DATA_FLAG_NAME}: ${await validationErrorToString(
           validateRunData.errors,
         )}`,
       );
@@ -389,6 +385,8 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
 };
 
 const fluenceRun = async (args: RunArgs) => {
+  const { compileAquaCallFromPath } = await import("@fluencelabs/aqua-api");
+
   const { functionCall, errors } = await compileAquaCallFromPath({
     funcCall: args.funcCall,
     data: args.runData,
@@ -408,10 +406,12 @@ const fluenceRun = async (args: RunArgs) => {
   if (args["print-air"]) {
     commandObj.log(functionCall.script);
   } else if (args["print-beautified-air"]) {
+    const { beautify } = await import("@fluencelabs/air-beautify-wasm");
     commandObj.log(beautify(functionCall.script));
   }
 
   await initFluenceClient(args, args.maybeFluenceConfig);
+  const { Fluence, callAquaFunction } = await import("@fluencelabs/js-client");
 
   const result = await callAquaFunction({
     args: args.runData ?? {},

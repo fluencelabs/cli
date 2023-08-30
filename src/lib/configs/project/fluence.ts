@@ -17,14 +17,8 @@
 import assert from "node:assert";
 import path, { join } from "node:path";
 
-import {
-  type ContractsENV,
-  CONTRACTS_ENV,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
-import { parse } from "yaml";
 
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import versions from "../../../versions.json" assert { type: "json" };
@@ -44,6 +38,8 @@ import {
   CLI_NAME_FULL,
   CLI_NAME,
   DEFAULT_MARINE_BUILD_ARGS,
+  type ContractsENV,
+  CONTRACTS_ENV,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
@@ -685,10 +681,10 @@ const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 
 const migrations: Migrations<Config> = [
-  (config: Config): ConfigV1 => {
+  async (config: Config): Promise<ConfigV1> => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
-        `Migration error. Errors: ${validationErrorToString(
+        `Migration error. Errors: ${await validationErrorToString(
           validateConfigSchemaV0.errors,
         )}`,
       );
@@ -717,12 +713,13 @@ const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV2> => {
     if (!validateConfigSchemaV1(config)) {
       throw new Error(
-        `Migration error. Errors: ${validationErrorToString(
+        `Migration error. Errors: ${await validationErrorToString(
           validateConfigSchemaV1.errors,
         )}`,
       );
     }
 
+    const { parse } = await import("yaml");
     const parsedConfig: unknown = parse(await getDefaultConfig());
     assert(validateConfigSchemaV2(parsedConfig));
 
@@ -847,7 +844,7 @@ const validateHostsAndDeals = (
   return workerNamesErrors.length === 0 ? true : workerNamesErrors.join("\n");
 };
 
-const validate: ConfigValidateFunction<LatestConfig> = (config) => {
+const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   if (config.services === undefined) {
     return true;
   }
@@ -856,8 +853,8 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     validateWorkers(config),
     validateHostsAndDeals(config, "hosts"),
     validateHostsAndDeals(config, "deals"),
-    validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
-    validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
+    await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
+    await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
 
   if (typeof validity === "string") {

@@ -16,8 +16,6 @@
 
 /* eslint-disable camelcase */
 
-import Countly from "countly-sdk-nodejs";
-
 import {
   sessionEndPromise,
   isCountlyInitialized,
@@ -39,6 +37,8 @@ export async function initCountly({
   const userCountlyDir = await getUserCountlyDir();
 
   if (!IS_DEVELOPMENT && userConfig.countlyConsent) {
+    const Countly = (await import("countly-sdk-nodejs")).default;
+
     Countly.init({
       app_key: "728984bc3e1aee7dd29674ee300530750b5630d8",
       url: "https://countly.fluence.dev/",
@@ -84,11 +84,12 @@ const dependenciesToSegmentation = (
  * @param message - message to be logged
  * @returns void
  */
-export const addCountlyLog = (message: string): void => {
+export const addCountlyLog = async (message: string): Promise<void> => {
   if (!isCountlyInitialized()) {
     return;
   }
 
+  const Countly = (await import("countly-sdk-nodejs")).default;
   Countly.add_log(message);
 };
 
@@ -97,12 +98,23 @@ export const addCountlyLog = (message: string): void => {
  * @param message - message to be logged
  * @returns void
  */
-export const logErrorToCountly = (message: string): void => {
+export const logErrorToCountly = async (message: string): Promise<void> => {
   if (!isCountlyInitialized()) {
     return;
   }
 
+  const Countly = (await import("countly-sdk-nodejs")).default;
   Countly.log_error(message);
+};
+
+export const addCountlyEvent = async (key: string): Promise<void> => {
+  if (!isCountlyInitialized()) {
+    return;
+  }
+
+  const Countly = (await import("countly-sdk-nodejs")).default;
+
+  Countly.add_event({ key });
 };
 
 export const haltCountly = async (): Promise<void> => {
@@ -110,6 +122,7 @@ export const haltCountly = async (): Promise<void> => {
     return;
   }
 
+  const Countly = (await import("countly-sdk-nodejs")).default;
   Countly.end_session();
   await sessionEndPromise;
 };

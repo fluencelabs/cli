@@ -18,8 +18,7 @@ import { access } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import versions from "../versions.json" assert { type: "json" };
 
@@ -42,7 +41,6 @@ import {
   splitPackageNameAndVersion,
   updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
-import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 
 const CARGO = "cargo";
@@ -221,9 +219,7 @@ const installCargoDependency = async ({
       version,
       root: dependencyTmpDirPath,
     },
-    spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
-      dependencyDirPath,
-    )}`,
+    spinnerMessage: `Installing ${name}@${version} to ${dependencyDirPath}`,
     printOutput: true,
   });
 };
@@ -275,11 +271,7 @@ const tryDownloadingBinary = async ({
 
   const url = `https://github.com/fluencelabs/marine/releases/download/${name}-v${version}/${name}-${platformToUse}-x86_64`;
 
-  startSpinner(
-    `Downloading ${name}@${version} binary to ${replaceHomeDir(
-      dependencyDirPath,
-    )}`,
-  );
+  startSpinner(`Downloading ${name}@${version} binary to ${dependencyDirPath}`);
 
   try {
     await downloadFile(binaryPath, url);
@@ -340,7 +332,7 @@ export const ensureCargoDependency = async ({
   await ensureRust();
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const resolveVersionToInstallResult = resolveVersionToInstall({
+  const resolveVersionToInstallResult = await resolveVersionToInstall({
     name,
     maybeVersion,
     packageManager: "cargo",
@@ -402,8 +394,7 @@ export const ensureCargoDependency = async ({
     packageManager: "cargo",
   });
 
-  addCountlyLog(`Using ${name}@${version} cargo dependency`);
-
+  await addCountlyLog(`Using ${name}@${version} cargo dependency`);
   return dependencyDirPath;
 };
 

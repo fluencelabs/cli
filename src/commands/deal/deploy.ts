@@ -16,10 +16,8 @@
 
 import assert from "node:assert";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -242,6 +240,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     dbg("start creating aqua files with worker info");
     await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+    const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     const createdDealsText =
       Object.values(createdDeals).length === 0

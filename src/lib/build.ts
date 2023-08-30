@@ -18,10 +18,7 @@ import assert from "node:assert";
 import { access, readFile, writeFile } from "node:fs/promises";
 import { relative } from "node:path";
 
-import { parse } from "@iarna/toml";
-import stringifyToTOML from "@iarna/toml/stringify.js";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import type {
@@ -304,11 +301,12 @@ members = []
 `;
   }
 
+  const { parse } = await import("@iarna/toml");
   const parsedConfig: unknown = parse(cargoTomlFileContent);
 
   if (!validateCargoWorkspaceToml(parsedConfig)) {
     return commandObj.error(
-      `Cargo.toml at ${cargoTomlPath} is not valid. Please fix it manually. ${validationErrorToString(
+      `Cargo.toml at ${cargoTomlPath} is not valid. Please fix it manually. ${await validationErrorToString(
         validateCargoWorkspaceToml.errors,
       )}`,
     );
@@ -343,6 +341,7 @@ members = []
     },
   };
 
+  const stringifyToTOML = (await import("@iarna/toml/stringify.js")).default;
   await writeFile(cargoTomlPath, stringifyToTOML(newConfig), FS_OPTIONS);
 };
 

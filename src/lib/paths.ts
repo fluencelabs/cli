@@ -181,7 +181,7 @@ export const getFluenceDir = (): string => {
   return path.join(projectRootDir, DOT_FLUENCE_DIR_NAME);
 };
 
-export const ensureFluenceDir = async (): Promise<string> => {
+const ensureFluenceDir = async (): Promise<string> => {
   return ensureDir(getFluenceDir());
 };
 
@@ -189,12 +189,8 @@ export const getFluenceAquaDir = (): string => {
   return path.join(getFluenceDir(), AQUA_DIR_NAME);
 };
 
-export const ensureFluenceAquaDir = async (): Promise<string> => {
+const ensureFluenceAquaDir = async (): Promise<string> => {
   return ensureDir(getFluenceAquaDir());
-};
-
-export const getFluenceAquaServicesPath = (): string => {
-  return path.join(getFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
 };
 
 export const ensureFluenceAquaServicesPath = async (): Promise<string> => {
@@ -207,6 +203,7 @@ export const ensureFluenceAquaWorkersPath = async (): Promise<string> => {
 
 // JS
 
+// exported for tests
 export const getDefaultJSDirPath = (projectRootDir: string): string => {
   return path.join(projectRootDir, SRC_DIR_NAME, JS_DIR_NAME);
 };
@@ -223,6 +220,7 @@ export const ensureDefaultAquaJSPath = async (): Promise<string> => {
 
 // TS
 
+// exported for tests
 export const getDefaultTSDirPath = (projectRootDir: string): string => {
   return path.join(projectRootDir, SRC_DIR_NAME, TS_DIR_NAME);
 };

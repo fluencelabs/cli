@@ -18,9 +18,7 @@ import assert from "node:assert";
 import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { compileFromPath } from "@fluencelabs/aqua-api";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
@@ -282,6 +280,8 @@ export const prepareForDeploy = async ({
         spellConfig.$getDirPath(),
         spellConfig.aquaFilePath,
       );
+
+      const { compileFromPath } = await import("@fluencelabs/aqua-api");
 
       const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,

@@ -15,8 +15,7 @@
  */
 
 import { kras, stage, testNet } from "@fluencelabs/fluence-network-environment";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import {

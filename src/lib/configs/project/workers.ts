@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  type ContractsENV,
-  CONTRACTS_ENV,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
 import type { JSONSchemaType } from "ajv";
 
 import {
@@ -25,6 +21,8 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
+  type ContractsENV,
+  CONTRACTS_ENV,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import {

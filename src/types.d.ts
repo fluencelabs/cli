@@ -15,14 +15,6 @@
  */
 
 /* eslint-disable camelcase */
-declare module "replace-homedir" {
-  export = replaceHomedir;
-  declare function replaceHomedir(
-    filepath: string,
-    replacement: string,
-  ): string;
-}
-
 declare module "node_modules-path" {
   export = node_modules;
   declare function node_modules(): string;

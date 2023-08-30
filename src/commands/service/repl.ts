@@ -19,9 +19,7 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { cwd } from "node:process";
 
-import stringifyToTOML from "@iarna/toml/stringify.js";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args, Command } from "@oclif/core";
 
 import { resolveSingleServiceModuleConfigsAndBuild } from "../../lib/build.js";
@@ -119,6 +117,7 @@ export default class REPL extends Command {
     stopSpinner();
 
     const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
+    const stringifyToTOML = (await import("@iarna/toml/stringify.js")).default;
 
     await writeFile(
       fluenceTmpConfigTomlPath,

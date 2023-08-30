@@ -15,10 +15,8 @@
  */
 
 import { Fluence } from "@fluencelabs/js-client";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -134,6 +132,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
     await workersConfig.$commit();
     await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+    const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     commandObj.log(
       `\n\n${color.yellow("Success!")}\n\nrelay: ${relayId}\n\n${yamlDiffPatch(
