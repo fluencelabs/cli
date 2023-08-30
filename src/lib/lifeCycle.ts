@@ -191,7 +191,7 @@ export async function initCli<
   setProjectRootDir(await recursivelyFindProjectRootDir(projectRootDir));
   setCommandObjAndIsInteractive(commandObjFromArgs, getIsInteractive(flags));
 
-  const platform = await import("platform");
+  const platform = (await import("platform")).default;
 
   if (platform.version === undefined) {
     return commandObj.error("Unknown platform");
