@@ -43,6 +43,7 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
+import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
 import {
   ensureAquaFileWithWorkerInfo,
@@ -108,8 +109,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       marineBuildArgs: flags["marine-build-args"],
     });
 
+    dbg("start connecting to fluence network");
     await initFluenceClient(flags, fluenceConfig);
     doRegisterIpfsClient(true);
+    dbg("start running upload");
 
     const uploadResult = flags.tracing
       ? await uploadWithTracing(uploadArg)
@@ -193,6 +196,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         continue;
       }
 
+      dbg("start deal creation");
+
       commandObj.logToStderr(
         `\nCreating deal for worker ${color.yellow(workerName)}\n`,
       );
@@ -206,7 +211,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       });
 
       if (flags["auto-match"]) {
+        dbg("start matching");
         await match(chainNetwork, flags["priv-key"], dealIdOriginal);
+        dbg("done matching");
       }
 
       if (workersConfig.deals === undefined) {
@@ -233,6 +240,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       };
     }
 
+    dbg("start creating aqua files with worker info");
     await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
 
     const createdDealsText =
