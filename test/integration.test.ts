@@ -318,7 +318,7 @@ describe("integration tests", () => {
 
       try {
         const registered = await fluence({
-          args: ["market", "register"],
+          args: ["provider", "register"],
           flags: {
             network: "local",
             "priv-key": PRIV_KEY,
@@ -338,7 +338,7 @@ describe("integration tests", () => {
       log(`will add ${localPeerIds.length} peers`);
 
       const addPeer = await fluence({
-        args: ["market", "add-peer", ...peerIdFlags],
+        args: ["provider", "add-peer", ...peerIdFlags],
         flags: {
           network: "local",
           "priv-key": PRIV_KEY,

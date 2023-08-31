@@ -19,11 +19,11 @@
 * [`fluence key default [NAME]`](#fluence-key-default-name)
 * [`fluence key new [NAME]`](#fluence-key-new-name)
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
-* [`fluence market add-peer`](#fluence-market-add-peer)
-* [`fluence market register`](#fluence-market-register)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence provider add-peer`](#fluence-provider-add-peer)
+* [`fluence provider register`](#fluence-provider-register)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
 * [`fluence service new [NAME]`](#fluence-service-new-name)
@@ -571,49 +571,6 @@ EXAMPLES
 
 _See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/key/remove.ts)_
 
-## `fluence market add-peer`
-
-Register specific nox instance as a Compute Peer
-
-```
-USAGE
-  $ fluence market add-peer [--no-input] [--priv-key <value>] [--network <value>] [--peer-id <value>] [--slots
-    <value>]
-
-FLAGS
-  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
-                            out (testnet, local)
-  --no-input                Don't interactively ask for any input from the user
-  --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --slots=<number>          Number of available worker slots on this Compute Peer
-
-DESCRIPTION
-  Register specific nox instance as a Compute Peer
-```
-
-_See code: [dist/commands/market/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/market/add-peer.ts)_
-
-## `fluence market register`
-
-Register in matching contract
-
-```
-USAGE
-  $ fluence market register [--no-input] [--priv-key <value>] [--network <value>]
-
-FLAGS
-  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
-                            out (testnet, local)
-  --no-input                Don't interactively ask for any input from the user
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-
-DESCRIPTION
-  Register in matching contract
-```
-
-_See code: [dist/commands/market/register.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/market/register.ts)_
-
 ## `fluence module add [PATH | URL]`
 
 Add module to service.yaml
@@ -688,6 +645,49 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/module/remove.ts)_
+
+## `fluence provider add-peer`
+
+Register specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--network <value>] [--peer-id <value>] [--slots
+    <value>]
+
+FLAGS
+  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
+                            out (testnet, local)
+  --no-input                Don't interactively ask for any input from the user
+  --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
+  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --slots=<number>          Number of available worker slots on this Compute Peer
+
+DESCRIPTION
+  Register specific nox instance as a Compute Peer
+```
+
+_See code: [dist/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/provider/add-peer.ts)_
+
+## `fluence provider register`
+
+Register in matching contract
+
+```
+USAGE
+  $ fluence provider register [--no-input] [--priv-key <value>] [--network <value>]
+
+FLAGS
+  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
+                            out (testnet, local)
+  --no-input                Don't interactively ask for any input from the user
+  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+
+DESCRIPTION
+  Register in matching contract
+```
+
+_See code: [dist/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.7.2/dist/commands/provider/register.ts)_
 
 ## `fluence run`
 
