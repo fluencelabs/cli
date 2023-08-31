@@ -165,11 +165,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         });
 
         if (flags["auto-match"]) {
+          dbg("start matching");
+
           await match(
             chainNetwork,
             flags["priv-key"],
             maybePreviouslyDeployedDeal.dealIdOriginal,
           );
+
+          dbg("done matching");
         }
 
         updatedDeals[workerName] = {

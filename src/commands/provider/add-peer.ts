@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import { DealClient } from "@fluencelabs/deal-aurora";
 import oclifColor from "@oclif/color";
 import { Flags } from "@oclif/core";
