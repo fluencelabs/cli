@@ -75,6 +75,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
 
     for (const peerId of peerIds) {
       const signer = await getSigner(network, flags["priv-key"]);
+      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const dealClient = new DealClient(signer, network);
@@ -90,6 +91,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       );
 
       promptConfirmTx(flags["priv-key"]);
+      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       await waitTx(approveTx);
@@ -98,6 +100,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       const bytes = multihash.bytes.subarray(6);
       const tx = await matcher.addWorkersSlots(bytes, workersCount);
       promptConfirmTx(flags["priv-key"]);
+      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       await waitTx(tx);

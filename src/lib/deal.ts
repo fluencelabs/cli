@@ -58,6 +58,7 @@ export const dealCreate = async ({
   const signer = await getSigner(chainNetwork, privKey);
 
   const { DealClient } = await import("@fluencelabs/deal-aurora");
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const dealClient = new DealClient(signer, chainNetwork);
@@ -79,6 +80,7 @@ export const dealCreate = async ({
     [], //TODO: get effectors from the project
   );
 
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const res = await waitTx(tx);
@@ -160,6 +162,7 @@ export const dealUpdate = async ({
 }: DealUpdateArg) => {
   const signer = await getSigner(network, privKey);
   const { DealClient } = await import("@fluencelabs/deal-aurora");
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const dealClient = new DealClient(signer, network);
@@ -176,6 +179,7 @@ export const dealUpdate = async ({
     hash: bytesCid.slice(4),
   });
 
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   await waitTx(tx);
@@ -196,6 +200,7 @@ export async function match(
     "@fluencelabs/deal-aurora"
   );
 
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const dealClient = new DealClient(signer, network);
@@ -203,6 +208,7 @@ export async function match(
   const matcher: Matcher = await globalContracts.getMatcher();
   const tx = await matcher.matchWithDeal(dealAddress);
   promptConfirmTx(privKey);
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const res = await waitTx(tx);
