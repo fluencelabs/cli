@@ -65,7 +65,6 @@ import { commandObj, isInteractive } from "./commandObj.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfig } from "./configs/project/workers.js";
 import { addCountlyEvent } from "./countly.js";
-import { ensureAquaFileWithWorkerInfo } from "./deployWorkers.js";
 import { generateNewModule } from "./generateNewModule.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/jsonStringify.js";
@@ -165,6 +164,8 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   );
 
   const workersConfig = await initNewWorkersConfig();
+
+  const { ensureAquaFileWithWorkerInfo } = await import("./deployWorkers.js");
   await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
   await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
 

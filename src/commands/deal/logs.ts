@@ -31,7 +31,6 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
 } from "../../lib/const.js";
-import { parseWorkers } from "../../lib/deployWorkers.js";
 import { formatAquaLogs } from "../../lib/helpers/formatLogs.js";
 import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
 import {
@@ -120,6 +119,7 @@ const getDealIdWorkerNameMap = async (
     );
 
   const workerNamesSet = Object.keys(deals);
+  const { parseWorkers } = await import("../../lib/deployWorkers.js");
 
   const workersToGetLogsFor =
     maybeWorkerNamesString === undefined

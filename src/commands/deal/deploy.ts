@@ -42,10 +42,6 @@ import {
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
-import {
-  ensureAquaFileWithWorkerInfo,
-  prepareForDeploy,
-} from "../../lib/deployWorkers.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import {
   disconnectFluenceClient,
@@ -99,6 +95,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       maybeFluenceConfig: fluenceConfig,
       flags,
     });
+
+    const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
+      "../../lib/deployWorkers.js"
+    );
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],

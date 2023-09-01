@@ -30,7 +30,6 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
-import { prepareForDeploy } from "../../lib/deployWorkers.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../../lib/helpers/jsonStringify.js";
 import {
@@ -73,6 +72,8 @@ export default class Upload extends BaseCommand<typeof Upload> {
       maybeFluenceConfig: fluenceConfig,
       flags,
     });
+
+    const { prepareForDeploy } = await import("../../lib/deployWorkers.js");
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],

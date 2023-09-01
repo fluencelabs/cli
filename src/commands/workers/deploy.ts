@@ -32,10 +32,6 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
-import {
-  ensureAquaFileWithWorkerInfo,
-  prepareForDeploy,
-} from "../../lib/deployWorkers.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import {
   disconnectFluenceClient,
@@ -76,6 +72,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       maybeFluenceConfig: fluenceConfig,
       flags,
     });
+
+    const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
+      "../../lib/deployWorkers.js"
+    );
 
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
