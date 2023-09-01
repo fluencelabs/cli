@@ -652,7 +652,7 @@ Register specific nox instance as a Compute Peer
 
 ```
 USAGE
-  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--network <value>] [--peer-id <value>] [--slots
+  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--network <value>] [--peer-id <value>] [--units
     <value>]
 
 FLAGS
@@ -661,7 +661,7 @@ FLAGS
   --no-input                Don't interactively ask for any input from the user
   --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
   --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --slots=<number>          Number of available worker slots on this Compute Peer
+  --units=<number>          Number of available worker units on this Compute Peer
 
 DESCRIPTION
   Register specific nox instance as a Compute Peer
