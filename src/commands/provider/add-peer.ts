@@ -42,8 +42,8 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       helpValue: "<peer-id>",
       multiple: true,
     }),
-    slots: Flags.string({
-      description: "Number of available worker slots on this Compute Peer",
+    units: Flags.string({
+      description: "Number of available worker units on this Compute Peer",
       helpValue: "<number>",
     }),
   };
@@ -60,7 +60,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     });
 
     const workersCount =
-      flags.slots ?? (await input({ message: "Enter workers count" }));
+      flags.units ?? (await input({ message: "Enter workers count" }));
 
     const peerIds = flags["peer-id"] ?? [
       await input({ message: "Enter peerId" }),

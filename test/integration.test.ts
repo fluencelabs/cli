@@ -342,7 +342,7 @@ describe("integration tests", () => {
         flags: {
           network: "local",
           "priv-key": PRIV_KEY,
-          slots: 1,
+          units: 1,
         },
         cwd,
       });
