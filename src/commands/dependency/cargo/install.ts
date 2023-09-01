@@ -14,33 +14,26 @@
  * limitations under the License.
  */
 
-import path, { join } from "node:path";
+import { join } from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { commandObj } from "../../../lib/commandObj.js";
 import {
   CARGO_DIR_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   GLOBAL_FLAG,
-  GLOBAL_FLAG_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
 } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifeCycle.js";
-import {
-  ensureCargoDependency,
-  installAllCargoDependencies,
-} from "../../../lib/rust.js";
 import versions from "../../../versions.json" assert { type: "json" };
 
 const FORCE_FLAG_NAME = "force";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
-  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's ${path.join(
+  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's ${join(
     DOT_FLUENCE_DIR_NAME,
     CARGO_DIR_NAME,
   )} directory)`;
@@ -68,36 +61,10 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Install),
+    const { installImpl } = await import(
+      "../../../commands-impl/dependency/cargo/install.js"
     );
 
-    const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
-
-    // if packageNameAndVersion not provided just install all cargo dependencies
-    if (packageNameAndVersion === undefined) {
-      await installAllCargoDependencies({
-        maybeFluenceConfig,
-        force: flags.force,
-      });
-
-      return commandObj.log("cargo dependencies successfully installed");
-    }
-
-    if (!flags.global && maybeFluenceConfig === null) {
-      return commandObj.error(
-        `Not a fluence project. If you wanted to install cargo dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`,
-      );
-    }
-
-    await ensureCargoDependency({
-      nameAndVersion: packageNameAndVersion,
-      maybeFluenceConfig,
-      explicitInstallation: true,
-      force: flags.force,
-      toolchain: flags.toolchain,
-      global: flags.global,
-    });
+    await installImpl.bind(this)(Install);
   }
 }

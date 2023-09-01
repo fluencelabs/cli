@@ -27,12 +27,8 @@ import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
 } from "./configs/project/service.js";
-import { DEFAULT_WORKER_NAME } from "./const.js";
-import {
-  AQUA_NAME_REQUIREMENTS,
-  getModuleWasmPath,
-  validateAquaName,
-} from "./helpers/downloadFile.js";
+import { AQUA_NAME_REQUIREMENTS, DEFAULT_WORKER_NAME } from "./const.js";
+import { getModuleWasmPath, validateAquaName } from "./helpers/downloadFile.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import type { MarineCLI } from "./marineCli.js";
 import { projectRootDir } from "./paths.js";

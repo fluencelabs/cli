@@ -47,6 +47,10 @@ export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 export const CONTRACTS_ENV = ["testnet", "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
+export const NETWORKS = ["kras", "stage", "testnet"] as const;
+export type Network = (typeof NETWORKS)[number];
+export const isNetwork = getIsStringUnion(NETWORKS);
+
 export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[1];
 
 export const isChainNetwork = getIsStringUnion(CONTRACTS_ENV);
@@ -152,6 +156,13 @@ export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
 export const DEFAULT_WORKER_NAME = "defaultWorker";
+
+export const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
+export const FUNC_FLAG_NAME = "func";
+export const INPUT_FLAG_NAME = "input";
+export const DATA_FLAG_NAME = "data";
+
+export const FUNC_CALL_EXAMPLE = 'funcName("stringArg")';
 
 const KEY_PAIR_FLAG_NAME = "key-pair-name";
 export const KEY_PAIR_FLAG = {
@@ -631,3 +642,6 @@ export const READMEs: Record<Template, string> = {
   ts: TS_README,
   js: JS_README,
 };
+
+export const AQUA_NAME_REQUIREMENTS =
+  "must start with a lowercase letter and contain only letters, numbers, and underscores";

@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-import { readFile, writeFile } from "fs/promises";
-
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { FS_OPTIONS, USE_F64_FLAG } from "../../lib/const.js";
-import { jsToAqua } from "../../lib/helpers/jsToAqua.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
+import { USE_F64_FLAG } from "../../lib/const.js";
 
 export default class Yaml extends BaseCommand<typeof Yaml> {
   static override aliases = ["aqua:yaml"];
@@ -46,29 +40,7 @@ export default class Yaml extends BaseCommand<typeof Yaml> {
   };
 
   async run(): Promise<void> {
-    const { args, flags } = await initCli(this, await this.parse(Yaml));
-
-    const content = await readFile(
-      args.INPUT ?? (await input({ message: "Enter path to input file" })),
-      FS_OPTIONS,
-    );
-
-    const { parse } = await import("yaml");
-    const parsedContent: unknown = parse(content);
-
-    const aqua = jsToAqua(
-      parsedContent,
-      args.FUNC ?? (await input({ message: "Enter exported function name" })),
-      flags.f64,
-    );
-
-    await writeFile(
-      args.OUTPUT ??
-        (await input({ message: "Enter path for an output file" })),
-      aqua,
-      FS_OPTIONS,
-    );
-
-    commandObj.logToStderr("Done!");
+    const { yamlImpl } = await import("../../commands-impl/aqua/yml.js");
+    await yamlImpl.bind(this)(Yaml);
   }
 }

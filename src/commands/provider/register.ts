@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
 
 export default class Register extends BaseCommand<typeof Register> {
   static override description = "Register in matching contract";
@@ -36,42 +26,10 @@ export default class Register extends BaseCommand<typeof Register> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Register),
+    const { registerImpl } = await import(
+      "../../commands-impl/provider/register.js"
     );
 
-    const network = await ensureChainNetwork({
-      maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-    });
-
-    const signer = await getSigner(network, flags["priv-key"]);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const dealClient = new DealClient(signer, network);
-    const globalContracts = dealClient.getGlobalContracts();
-    const matcher = await globalContracts.getMatcher();
-    const factory = await globalContracts.getFactory();
-    const flt = await globalContracts.getFLT();
-    const collateral = await factory.REQUIRED_COLLATERAL();
-    const pricePerEpoch = await factory.PRICE_PER_EPOCH();
-
-    const tx = await matcher.registerComputeProvider(
-      pricePerEpoch,
-      collateral,
-      await flt.getAddress(),
-      [],
-    );
-
-    promptConfirmTx(flags["priv-key"]);
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    await waitTx(tx);
-
-    commandObj.log(color.green(`Successfully joined to matching contract`));
+    await registerImpl.bind(this)(Register);
   }
 }

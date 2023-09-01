@@ -23,6 +23,7 @@ import { color } from "@oclif/color";
 import { commandObj } from "../commandObj.js";
 import { getConfigPath } from "../configs/initConfig.js";
 import {
+  AQUA_NAME_REQUIREMENTS,
   MODULE_CONFIG_FULL_FILE_NAME,
   MODULE_TYPE_RUST,
   SERVICE_CONFIG_FULL_FILE_NAME,
@@ -72,9 +73,6 @@ export const downloadFile = async (
 type EnsureValidAquaNameArg = {
   stringToValidate: string | undefined;
 } & Parameters<typeof input>[0];
-
-export const AQUA_NAME_REQUIREMENTS =
-  "must start with a lowercase letter and contain only letters, numbers, and underscores";
 
 export const ensureValidAquaName = async ({
   stringToValidate,

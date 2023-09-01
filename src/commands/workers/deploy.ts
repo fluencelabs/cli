@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
@@ -32,17 +28,6 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
-import {
-  ensureAquaFileWithWorkerInfo,
-  prepareForDeploy,
-} from "../../lib/deployWorkers.js";
-import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
-import {
-  disconnectFluenceClient,
-  initFluenceClient,
-} from "../../lib/jsClient.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -64,106 +49,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Deploy),
-      true,
+    const { deployImpl } = await import(
+      "../../commands-impl/workers/deploy.js"
     );
 
-    const workersConfig = await initNewWorkersConfig();
-
-    const aquaImports = await ensureAquaImports({
-      maybeFluenceConfig: fluenceConfig,
-      flags,
-    });
-
-    const uploadDeployArg = await prepareForDeploy({
-      workerNames: args["WORKER-NAMES"],
-      fluenceConfig,
-      hosts: true,
-      maybeWorkersConfig: workersConfig,
-      aquaImports,
-      noBuild: flags["no-build"],
-      marineBuildArgs: flags["marine-build-args"],
-    });
-
-    await initFluenceClient(flags, fluenceConfig);
-    await doRegisterIpfsClient(true);
-
-    const uploadDeployResult = await uploadDeploy(
-      flags.tracing,
-      uploadDeployArg,
-    );
-
-    const timestamp = new Date().toISOString();
-    const { Fluence } = await import("@fluencelabs/js-client");
-    const relayId = (await Fluence.getClient()).getRelayPeerId();
-
-    const { newDeployedWorkers, infoToPrint } =
-      uploadDeployResult.workers.reduce<{
-        newDeployedWorkers: Exclude<typeof workersConfig.hosts, undefined>;
-        infoToPrint: Record<
-          string,
-          Array<{
-            workerId: string;
-            hostId: string;
-          }>
-        >;
-      }>(
-        (acc, { name, ...worker }) => {
-          return {
-            newDeployedWorkers: {
-              ...acc.newDeployedWorkers,
-              [name]: { ...worker, timestamp, relayId },
-            },
-            infoToPrint: {
-              ...acc.infoToPrint,
-              [name]: worker.installation_spells.map(
-                ({ host_id, worker_id }) => {
-                  return {
-                    hostId: host_id,
-                    workerId: worker_id,
-                  };
-                },
-              ),
-            },
-          };
-        },
-        { newDeployedWorkers: {}, infoToPrint: {} },
-      );
-
-    workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
-    await workersConfig.$commit();
-    await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
-    const { yamlDiffPatch } = await import("yaml-diff-patch");
-
-    commandObj.log(
-      `\n\n${color.yellow("Success!")}\n\nrelay: ${relayId}\n\n${yamlDiffPatch(
-        "",
-        {},
-        { "deployed workers": infoToPrint },
-      )}`,
-    );
-
-    await disconnectFluenceClient();
+    await deployImpl.bind(this)(Deploy);
   }
-}
-
-async function uploadDeploy(
-  tracing: boolean,
-  uploadArg: Upload_deployArgConfig,
-) {
-  if (tracing) {
-    const { upload_deploy } = await import(
-      "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js"
-    );
-
-    return upload_deploy(uploadArg);
-  }
-
-  const { upload_deploy } = await import(
-    "../../lib/compiled-aqua/installation-spell/cli.js"
-  );
-
-  return upload_deploy(uploadArg);
 }

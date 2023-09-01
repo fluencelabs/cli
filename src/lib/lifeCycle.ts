@@ -144,7 +144,7 @@ type CommonReturn<A extends ArgOutput, F extends FlagOutput> = {
   flags: F;
 };
 
-type ParserOutputWithNoInputFlag<
+export type ParserOutputWithNoInputFlag<
   F extends FlagOutput,
   F2 extends FlagOutput,
   A extends ArgOutput,

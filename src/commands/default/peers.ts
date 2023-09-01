@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import { kras, stage, testNet } from "@fluencelabs/fluence-network-environment";
-import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { isNetwork, type Network, NETWORKS } from "../../lib/multiaddres.js";
-import { list } from "../../lib/prompt.js";
+import { NETWORKS } from "../../lib/const.js";
 
 export default class Peers extends BaseCommand<typeof Peers> {
   static override description = "Print default Fluence network peer addresses";
@@ -36,45 +31,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
     }),
   };
   async run(): Promise<void> {
-    const {
-      args: { NETWORK },
-    } = await initCli(this, await this.parse(Peers));
-
-    if (NETWORK === undefined) {
-      return printPeerAddresses("kras");
-    }
-
-    if (isNetwork(NETWORK)) {
-      return printPeerAddresses(NETWORK);
-    }
-
-    commandObj.warn(`Invalid network: ${color.yellow(NETWORK)}`);
-
-    const network = await list({
-      message: "Select network",
-      options: [...NETWORKS],
-      oneChoiceMessage: () => {
-        throw new Error("Unreachable");
-      },
-      onNoChoices() {
-        throw new Error("Unreachable");
-      },
-    });
-
-    printPeerAddresses(network);
+    const { peersImpl } = await import("../../commands-impl/default/peers.js");
+    await peersImpl.bind(this)(Peers);
   }
 }
-
-const printPeerAddresses = (network: Network) => {
-  return commandObj.log(
-    `${color.yellow(network)} multiaddresses:\n\n${{
-      kras,
-      stage,
-      testnet: testNet,
-    }[network]
-      .map(({ multiaddr }) => {
-        return multiaddr;
-      })
-      .join("\n")}`,
-  );
-};

@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
-import { dealUpdate } from "../../lib/deal.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   static override hidden = true;
@@ -44,24 +38,10 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(ChangeApp),
+    const { changeAppImpl } = await import(
+      "../../commands-impl/deal/change-app.js"
     );
 
-    const tx = await dealUpdate({
-      dealAddress:
-        args["DEAL-ADDRESS"] ??
-        (await input({ message: "Enter deal address" })),
-      appCID:
-        args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
-      network: await ensureChainNetwork({
-        maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-      }),
-      privKey: flags["priv-key"],
-    });
-
-    commandObj.logToStderr(`Tx hash: ${color.yellow(tx.hash)}`);
+    await changeAppImpl.bind(this)(ChangeApp);
   }
 }

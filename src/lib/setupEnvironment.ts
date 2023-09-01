@@ -18,7 +18,8 @@ import path from "node:path";
 
 import dotenv from "dotenv";
 
-import { type FluenceEnv, NETWORKS } from "./multiaddres.js";
+import { NETWORKS } from "./const.js";
+import type { FluenceEnv } from "./multiaddres.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";

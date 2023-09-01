@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
-import { dealCreate } from "../../lib/deal.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Create extends BaseCommand<typeof Create> {
   static override hidden = true;
@@ -47,24 +42,7 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Create),
-    );
-
-    const dealAddress = await dealCreate({
-      appCID: flags["app-cid"],
-      minWorkers: flags["min-workers"],
-      targetWorkers: flags["target-workers"],
-      privKey: flags["priv-key"],
-      chainNetwork: await ensureChainNetwork({
-        maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-      }),
-    });
-
-    commandObj.logToStderr(
-      `Deal contract created: ${color.yellow(dealAddress)}`,
-    );
+    const { createImpl } = await import("../../commands-impl/deal/create.js");
+    await createImpl.bind(this)(Create);
   }
 }

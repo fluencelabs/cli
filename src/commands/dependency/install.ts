@@ -17,11 +17,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { DOT_FLUENCE_DIR_NAME } from "../../lib/const.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { installAllNPMDependencies } from "../../lib/npm.js";
-import { installAllCargoDependencies } from "../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:i", "dep:i"];
@@ -36,21 +32,10 @@ export default class Install extends BaseCommand<typeof Install> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Install),
+    const { installImpl } = await import(
+      "../../commands-impl/dependency/install.js"
     );
 
-    await installAllNPMDependencies({
-      maybeFluenceConfig,
-      force: flags.force,
-    });
-
-    await installAllCargoDependencies({
-      maybeFluenceConfig,
-      force: flags.force,
-    });
-
-    commandObj.logToStderr("cargo and npm dependencies successfully installed");
+    await installImpl.bind(this)(Install);
   }
 }

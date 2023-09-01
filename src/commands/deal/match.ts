@@ -18,10 +18,6 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
-import { match } from "../../lib/deal.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Match extends BaseCommand<typeof Match> {
   static override hidden = true;
@@ -39,19 +35,7 @@ export default class Match extends BaseCommand<typeof Match> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Match),
-    );
-
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
-
-    const network = await ensureChainNetwork({
-      maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-    });
-
-    await match(network, flags["priv-key"], dealAddress);
+    const { matchImpl } = await import("../../commands-impl/deal/match.js");
+    await matchImpl.bind(this)(Match);
   }
 }

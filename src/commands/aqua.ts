@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-import { isAbsolute, resolve } from "path";
-
-import { color } from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
 
-import { compileToFiles, type CompileToFilesArgs } from "../lib/aqua.js";
-import { commandObj } from "../lib/commandObj.js";
 import {
   AQUA_EXT,
-  aquaLogLevelsString,
   IMPORT_FLAG,
   NO_INPUT_FLAG,
   TRACING_FLAG,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
+  aquaLogLevelsString,
 } from "../lib/const.js";
-import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
-import { initCli, exitCli } from "../lib/lifeCycle.js";
-import { projectRootDir, validatePath } from "../lib/paths.js";
-import { input, type InputArg } from "../lib/prompt.js";
 
 /**
  * This command doesn't extend BaseCommand like other commands do because it
@@ -101,155 +90,7 @@ export default class Aqua extends Command {
     ...TRACING_FLAG,
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Aqua),
-    );
-
-    const inputFlag = await resolveAbsoluteAquaPath({
-      maybePathFromFlags: flags.input,
-      maybePathFromFluenceYaml: maybeFluenceConfig?.aquaInputPath,
-      inputArg: {
-        message: `Enter path to an aqua file or an input directory that contains your .${AQUA_EXT} files`,
-        flagName: "input",
-        validate: validatePath,
-      },
-    });
-
-    const outputFlag = flags.dry
-      ? undefined
-      : await resolveAbsoluteAquaPath({
-          maybePathFromFlags: flags.output,
-          maybePathFromFluenceYaml:
-            maybeFluenceConfig?.aquaOutputTSPath ??
-            maybeFluenceConfig?.aquaOutputJSPath,
-          inputArg: {
-            message:
-              "Enter path to the output directory. Will be created if it doesn't exists (press Enter to use the current working directory)",
-            flagName: "output",
-          },
-        });
-
-    const jsFlag =
-      flags.js ||
-      (flags.output === undefined &&
-        maybeFluenceConfig?.aquaOutputJSPath !== undefined);
-
-    const importFlag = await ensureAquaImports({
-      flags,
-      maybeFluenceConfig,
-    });
-
-    const targetType = resolveTargetType(jsFlag, flags.air);
-
-    const compileCommandArgs: CompileToFilesArgs = {
-      compileArgs: {
-        filePath: inputFlag,
-        constants: flags.const,
-        imports: importFlag,
-        logLevel: flags["log-level-compiler"],
-        noRelay: flags["no-relay"],
-        noXor: flags["no-xor"],
-        targetType,
-        tracing: flags.tracing,
-      },
-      outputPath: outputFlag,
-      dry: flags.dry,
-    };
-
-    if (!flags.watch) {
-      await compileToFiles(compileCommandArgs);
-
-      commandObj.logToStderr(
-        `Successfully compiled ${color.yellow(
-          compileCommandArgs.compileArgs.filePath,
-        )}${
-          compileCommandArgs.outputPath === undefined
-            ? ""
-            : `\nto ${color.yellow(compileCommandArgs.outputPath)}`
-        }`,
-      );
-
-      await exitCli();
-      return;
-    }
-
-    const watchingNotification = (): void => {
-      return commandObj.logToStderr(
-        `Watching for changes at ${color.yellow(inputFlag)}...`,
-      );
-    };
-
-    const chokidar = await import("chokidar");
-    watchingNotification();
-
-    chokidar
-      .watch(inputFlag, {
-        followSymlinks: false,
-        usePolling: false,
-        interval: 100,
-        binaryInterval: 300,
-        ignoreInitial: true,
-      })
-      .on("all", (): void => {
-        compileToFiles(compileCommandArgs)
-          .then((): void => {
-            watchingNotification();
-          })
-          .catch((error): void => {
-            commandObj.logToStderr(stringifyUnknown(error));
-            return watchingNotification();
-          });
-      });
+    const { aquaImpl } = await import("../commands-impl/aqua.js");
+    await aquaImpl.bind(this)(Aqua);
   }
 }
-
-const resolveTargetType = (js: boolean, air: boolean): "ts" | "js" | "air" => {
-  if (js) {
-    return "js";
-  }
-
-  if (air) {
-    return "air";
-  }
-
-  return "ts";
-};
-
-type ResolveAbsoluteAquaPathArg = {
-  maybePathFromFlags: string | undefined;
-  maybePathFromFluenceYaml: string | undefined;
-  inputArg: InputArg;
-};
-
-const resolveAbsoluteAquaPath = async ({
-  maybePathFromFlags,
-  maybePathFromFluenceYaml,
-  inputArg,
-}: ResolveAbsoluteAquaPathArg) => {
-  if (maybePathFromFlags !== undefined) {
-    if (isAbsolute(maybePathFromFlags)) {
-      return maybePathFromFlags;
-    }
-
-    return resolve(maybePathFromFlags);
-  }
-
-  if (maybePathFromFluenceYaml !== undefined) {
-    if (isAbsolute(maybePathFromFluenceYaml)) {
-      return commandObj.error(
-        `Path ${maybePathFromFluenceYaml} in ${FLUENCE_CONFIG_FULL_FILE_NAME} must not be absolute, but should be relative to the project root directory`,
-      );
-    }
-
-    return resolve(projectRootDir, maybePathFromFluenceYaml);
-  }
-
-  const pathFromUserInput = await input(inputArg);
-
-  if (isAbsolute(pathFromUserInput)) {
-    return pathFromUserInput;
-  }
-
-  return resolve(pathFromUserInput);
-};

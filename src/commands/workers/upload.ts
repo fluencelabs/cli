@@ -17,8 +17,6 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
@@ -30,15 +28,6 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
-import { prepareForDeploy } from "../../lib/deployWorkers.js";
-import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
-import { jsonStringify } from "../../lib/helpers/jsonStringify.js";
-import {
-  disconnectFluenceClient,
-  initFluenceClient,
-} from "../../lib/jsClient.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 
 export default class Upload extends BaseCommand<typeof Upload> {
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -60,47 +49,10 @@ export default class Upload extends BaseCommand<typeof Upload> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, fluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Upload),
-      true,
+    const { uploadImpl } = await import(
+      "../../commands-impl/workers/upload.js"
     );
 
-    await initFluenceClient(flags, fluenceConfig);
-    await doRegisterIpfsClient(true);
-
-    const aquaImports = await ensureAquaImports({
-      maybeFluenceConfig: fluenceConfig,
-      flags,
-    });
-
-    const uploadArg = await prepareForDeploy({
-      workerNames: args["WORKER-NAMES"],
-      fluenceConfig,
-      hosts: true,
-      aquaImports,
-      noBuild: flags["no-build"],
-      marineBuildArgs: flags["marine-build-args"],
-    });
-
-    const uploadResult = await upload(flags.tracing, uploadArg);
-    commandObj.log(jsonStringify(uploadResult.workers));
-    await disconnectFluenceClient();
+    await uploadImpl.bind(this)(Upload);
   }
-}
-
-async function upload(tracing: boolean, uploadArg: Upload_deployArgConfig) {
-  if (tracing) {
-    const { upload } = await import(
-      "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js"
-    );
-
-    return upload(uploadArg);
-  }
-
-  const { upload } = await import(
-    "../../lib/compiled-aqua/installation-spell/upload.js"
-  );
-
-  return upload(uploadArg);
 }

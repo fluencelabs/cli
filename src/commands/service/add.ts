@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-import { isAbsolute, resolve } from "node:path";
-import { cwd } from "node:process";
-
-import { Args, Flags } from "@oclif/core";
+import { Flags, Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { addService } from "../../lib/addService.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import {
+  AQUA_NAME_REQUIREMENTS,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
-import {
-  AQUA_NAME_REQUIREMENTS,
-  isUrl,
-} from "../../lib/helpers/downloadFile.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { initMarineCli } from "../../lib/marineCli.js";
-import { input } from "../../lib/prompt.js";
 
 const PATH_OR_URL = "PATH | URL";
 
@@ -54,46 +42,7 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, fluenceConfig } = await initCli(
-      this,
-      await this.parse(Add),
-      true,
-    );
-
-    const serviceOrServiceDirPathOrUrl =
-      args[PATH_OR_URL] ??
-      (await input({ message: "Enter service path or url" }));
-
-    const serviceConfig = await initReadonlyServiceConfig(
-      serviceOrServiceDirPathOrUrl,
-      cwd(),
-    );
-
-    if (serviceConfig === null) {
-      commandObj.error(
-        `No service config found at ${serviceOrServiceDirPathOrUrl}`,
-      );
-    }
-
-    const marineCli = await initMarineCli(fluenceConfig);
-
-    await addService({
-      serviceName: flags.name ?? serviceConfig.name,
-      absolutePathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
-      fluenceConfig,
-      marineCli,
-      marineBuildArgs: flags["marine-build-args"],
-    });
+    const { addImpl } = await import("../../commands-impl/service/add.js");
+    await addImpl.bind(this)(Add);
   }
 }
-
-const resolveServicePathOrUrl = (serviceOrServiceDirPathOrUrl: string) => {
-  if (
-    isUrl(serviceOrServiceDirPathOrUrl) ||
-    isAbsolute(serviceOrServiceDirPathOrUrl)
-  ) {
-    return serviceOrServiceDirPathOrUrl;
-  }
-
-  return resolve(serviceOrServiceDirPathOrUrl);
-};

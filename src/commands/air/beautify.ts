@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import { readFile } from "fs/promises";
-
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { FS_OPTIONS } from "../../lib/const.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
 export default class Beautify extends BaseCommand<typeof Beautify> {
   static override aliases = ["air:b"];
@@ -40,16 +34,10 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(Beautify));
+    const { beautifyImpl } = await import(
+      "../../commands-impl/air/beautify.js"
+    );
 
-    const inputArg =
-      args.PATH ??
-      (await input({
-        message: `Enter a path to an AIR file`,
-      }));
-
-    const air = await readFile(inputArg, FS_OPTIONS);
-    const { beautify } = await import("@fluencelabs/air-beautify-wasm");
-    commandObj.log(beautify(air));
+    await beautifyImpl.bind(this)(Beautify);
   }
 }

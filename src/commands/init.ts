@@ -18,8 +18,6 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { TEMPLATES } from "../lib/const.js";
-import { ensureTemplate, init } from "../lib/init.js";
-import { initCli } from "../lib/lifeCycle.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description = "Initialize fluence project";
@@ -39,13 +37,7 @@ export default class Init extends BaseCommand<typeof Init> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, args } = await initCli(this, await this.parse(Init));
-
-    await init({
-      maybeProjectPath: args.path,
-      template: await ensureTemplate({
-        templateOrUnknown: flags.template,
-      }),
-    });
+    const { initImpl } = await import("../commands-impl/init.js");
+    await initImpl.bind(this)(Init);
   }
 }

@@ -40,6 +40,7 @@ import {
   DEFAULT_MARINE_BUILD_ARGS,
   type ContractsENV,
   CONTRACTS_ENV,
+  NETWORKS,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
@@ -50,7 +51,6 @@ import { local, localMultiaddrs } from "../../localNodes.js";
 import {
   getPeerId,
   getRandomPeerId,
-  NETWORKS,
   type FluenceEnv,
   type Relays,
 } from "../../multiaddres.js";

@@ -27,11 +27,8 @@ import { multiaddr } from "@multiformats/multiaddr";
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
-import { getIsStringUnion } from "./typeHelpers.js";
+import { NETWORKS, type Network } from "./const.js";
 
-export const NETWORKS = ["kras", "stage", "testnet"] as const;
-export type Network = (typeof NETWORKS)[number];
-export const isNetwork = getIsStringUnion(NETWORKS);
 export type FluenceEnv = Network | "local";
 export type Relays = Network | Array<string> | undefined;
 

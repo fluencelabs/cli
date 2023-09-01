@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-import path from "node:path";
-import { cwd } from "node:process";
-
-import { color } from "@oclif/color";
-import { Args, Flags } from "@oclif/core";
+import { Flags, Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
-import { ensureServiceConfig } from "../../lib/configs/project/service.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
-  MODULE_CONFIG_FULL_FILE_NAME,
   SERVICE_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { isUrl } from "../../lib/helpers/downloadFile.js";
-import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
-import { hasKey } from "../../lib/typeHelpers.js";
 
 const PATH_OR_URL = "PATH | URL";
 
@@ -57,95 +44,7 @@ export default class Add extends BaseCommand<typeof Add> {
     }),
   };
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Add),
-    );
-
-    const modulePathOrUrl =
-      args[PATH_OR_URL] ??
-      (await input({
-        message: "Enter path to a module or url to .tar.gz archive",
-      }));
-
-    const moduleConfig = await initReadonlyModuleConfig(modulePathOrUrl, cwd());
-
-    if (moduleConfig === null) {
-      return commandObj.error(
-        `${color.yellow(
-          MODULE_CONFIG_FULL_FILE_NAME,
-        )} not found for ${modulePathOrUrl}`,
-      );
-    }
-
-    const serviceNameOrPath =
-      flags.service ??
-      (await input({
-        message:
-          maybeFluenceConfig === null
-            ? `Enter path to the service directory`
-            : `Enter service name from ${color.yellow(
-                maybeFluenceConfig.$getPath(),
-              )} or path to the service directory`,
-      }));
-
-    let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
-
-    if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
-      const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
-      assert(typeof serviceGet === "string");
-      serviceOrServiceDirPathOrUrl = serviceGet;
-    }
-
-    if (isUrl(serviceOrServiceDirPathOrUrl)) {
-      return commandObj.error(
-        `Can't modify downloaded service ${color.yellow(
-          serviceOrServiceDirPathOrUrl,
-        )}`,
-      );
-    }
-
-    const serviceConfig = await ensureServiceConfig(
-      serviceOrServiceDirPathOrUrl,
-      maybeFluenceConfig,
-    );
-
-    const validateModuleName = (name: string): true | string => {
-      return (
-        !(name in serviceConfig.modules) ||
-        `You already have ${color.yellow(name)} in ${color.yellow(
-          serviceConfig.$getPath(),
-        )}`
-      );
-    };
-
-    let moduleName = flags.name ?? moduleConfig.name;
-    const moduleNameValidity = validateModuleName(moduleName);
-
-    if (moduleNameValidity !== true) {
-      this.warn(moduleNameValidity);
-
-      moduleName = await input({
-        message: `Enter another name for module`,
-        validate: validateModuleName,
-      });
-    }
-
-    serviceConfig.modules = {
-      ...serviceConfig.modules,
-      [moduleName]: {
-        get: isUrl(modulePathOrUrl)
-          ? modulePathOrUrl
-          : path.relative(serviceConfig.$getDirPath(), moduleConfig.$getPath()),
-      },
-    };
-
-    await serviceConfig.$commit();
-
-    commandObj.log(
-      `Added ${color.yellow(moduleName)} to ${color.yellow(
-        serviceConfig.$getPath(),
-      )}`,
-    );
+    const { addImpl } = await import("../../commands-impl/module/add.js");
+    await addImpl.bind(this)(Add);
   }
 }

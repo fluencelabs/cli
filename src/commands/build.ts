@@ -15,15 +15,10 @@
  */
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { build } from "../lib/build.js";
-import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   MARINE_BUILD_ARGS_FLAG,
 } from "../lib/const.js";
-import { ensureAquaFileWithWorkerInfo } from "../lib/deployWorkers.js";
-import { initCli } from "../lib/lifeCycle.js";
-import { initMarineCli } from "../lib/marineCli.js";
 
 export default class Build extends BaseCommand<typeof Build> {
   static override description = `Build all application services, described in ${FLUENCE_CONFIG_FULL_FILE_NAME} and generate aqua interfaces for them`;
@@ -33,21 +28,7 @@ export default class Build extends BaseCommand<typeof Build> {
     ...MARINE_BUILD_ARGS_FLAG,
   };
   async run(): Promise<void> {
-    const { fluenceConfig, flags } = await initCli(
-      this,
-      await this.parse(Build),
-      true,
-    );
-
-    const marineCli = await initMarineCli(fluenceConfig);
-
-    await build({
-      fluenceConfig,
-      marineCli,
-      marineBuildArgs: flags["marine-build-args"],
-    });
-
-    const workerConfig = await initNewWorkersConfig();
-    await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
+    const { buildImpl } = await import("../commands-impl/build.js");
+    await buildImpl.bind(this)(Build);
   }
 }
