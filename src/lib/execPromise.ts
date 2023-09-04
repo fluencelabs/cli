@@ -17,8 +17,7 @@
 import { spawn } from "node:child_process";
 import { join } from "path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 import { isInteractive } from "./commandObj.js";

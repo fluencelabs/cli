@@ -18,8 +18,7 @@ import assert from "node:assert";
 import path from "node:path";
 import { cwd } from "node:process";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -32,7 +31,6 @@ import {
   SERVICE_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { isUrl } from "../../lib/helpers/downloadFile.js";
-import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
@@ -146,7 +144,7 @@ export default class Add extends BaseCommand<typeof Add> {
 
     commandObj.log(
       `Added ${color.yellow(moduleName)} to ${color.yellow(
-        replaceHomeDir(serviceConfig.$getPath()),
+        serviceConfig.$getPath(),
       )}`,
     );
   }

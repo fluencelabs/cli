@@ -18,16 +18,10 @@
 
 import assert from "node:assert";
 
-import {
-  DealClient,
-  WorkersModule__factory,
-  type Matcher,
-} from "@fluencelabs/deal-aurora";
-import { type ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import ethers = require("ethers");
-import { CID } from "ipfs-http-client";
+import type { Matcher } from "@fluencelabs/deal-aurora";
+import type { ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
+import { color } from "@oclif/color";
+import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL } from "./const.js";
@@ -61,10 +55,15 @@ export const dealCreate = async ({
 }: DealCreateArg) => {
   const signer = await getSigner(chainNetwork, privKey);
 
+  const { DealClient } = await import("@fluencelabs/deal-aurora");
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const dealClient = new DealClient(signer, chainNetwork);
   const globalContracts = dealClient.getGlobalContracts();
 
   const factory = await globalContracts.getFactory();
+  const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
 
   promptConfirmTx(privKey);
@@ -79,6 +78,9 @@ export const dealCreate = async ({
     [], //TODO: get effectors from the project
   );
 
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const res = await waitTx(tx);
 
   const eventTopic = factory.interface.getEvent(EVENT_TOPIC_FRAGMENT);
@@ -97,12 +99,13 @@ export const dealCreate = async ({
     topics: [...log.topics],
   })?.args[DEAL_LOG_ARG_NAME];
 
-  const dealInfo = parseDealInfo(dealInfoEvent);
+  const dealInfo = await parseDealInfo(dealInfoEvent);
   return dealInfo.core;
 };
 
-function parseDealInfo(dealInfoEvent: ethers.Result): DealInfo {
+async function parseDealInfo(dealInfoEvent: ethers.Result): Promise<DealInfo> {
   const core = dealInfoEvent.getValue("core");
+  const { ethers } = await import("ethers");
   assert(ethers.isAddress(core), "Deal core address is not valid");
 
   const configModule = dealInfoEvent.getValue("configModule");
@@ -156,12 +159,15 @@ export const dealUpdate = async ({
   appCID,
 }: DealUpdateArg) => {
   const signer = await getSigner(network, privKey);
-
+  const { DealClient } = await import("@fluencelabs/deal-aurora");
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const dealClient = new DealClient(signer, network);
   const deal = dealClient.getDeal(dealAddress);
 
   const config = await deal.getConfigModule();
-
+  const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
 
   promptConfirmTx(privKey);
@@ -171,6 +177,9 @@ export const dealUpdate = async ({
     hash: bytesCid.slice(4),
   });
 
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   await waitTx(tx);
 
   return tx;
@@ -184,11 +193,22 @@ export async function match(
   dealAddress: string,
 ) {
   const signer = await getSigner(network, privKey);
+
+  const { DealClient, WorkersModule__factory } = await import(
+    "@fluencelabs/deal-aurora"
+  );
+
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const dealClient = new DealClient(signer, network);
   const globalContracts = dealClient.getGlobalContracts();
   const matcher: Matcher = await globalContracts.getMatcher();
   const tx = await matcher.matchWithDeal(dealAddress);
   promptConfirmTx(privKey);
+  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const res = await waitTx(tx);
   const workersInterface = WorkersModule__factory.createInterface();
   const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);

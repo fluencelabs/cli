@@ -17,8 +17,7 @@
 import assert from "node:assert";
 import { relative } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import { resolveSingleServiceModuleConfigsAndBuild } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";

@@ -16,11 +16,9 @@
 
 import { access, readFile } from "node:fs/promises";
 
-import { multiaddr, protocols } from "@multiformats/multiaddr";
-import { CID, create, type IPFSHTTPClient } from "ipfs-http-client";
+import type { IPFSHTTPClient } from "ipfs-http-client";
 
 import { commandObj } from "../commandObj.js";
-import { registerIpfsClient } from "../compiled-aqua/installation-spell/files.js";
 import { FS_OPTIONS } from "../const.js";
 import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
@@ -30,7 +28,12 @@ import { stringifyUnknown } from "../helpers/jsonStringify.js";
 
 /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
 
-const createIPFSClient = (multiaddrString: string) => {
+const createIPFSClient = async (multiaddrString: string) => {
+  const [{ multiaddr, protocols }, { create }] = await Promise.all([
+    import("@multiformats/multiaddr"),
+    import("ipfs-http-client"),
+  ]);
+
   return create(
     multiaddr(multiaddrString)
       .decapsulateCode(protocols("p2p").code)
@@ -43,7 +46,7 @@ const upload = async (
   content: Parameters<IPFSHTTPClient["add"]>[0],
   log: (msg: unknown) => void,
 ) => {
-  const ipfsClient = createIPFSClient(multiaddr);
+  const ipfsClient = await createIPFSClient(multiaddr);
 
   try {
     const { cid } = await ipfsClient.add(content, {
@@ -85,7 +88,7 @@ const dagUpload = async (
   content: Parameters<IPFSHTTPClient["dag"]["put"]>[0],
   log: (msg: unknown) => void,
 ) => {
-  const ipfsClient = createIPFSClient(multiaddr);
+  const ipfsClient = await createIPFSClient(multiaddr);
 
   try {
     const cid = await ipfsClient.dag.put(content, {
@@ -121,12 +124,18 @@ const dagUpload = async (
   }
 };
 
-export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
+export const doRegisterIpfsClient = async (
+  offAquaLogs: boolean,
+): Promise<void> => {
   const log = (msg: unknown) => {
     if (!offAquaLogs) {
       commandObj.logToStderr(`ipfs: ${stringifyUnknown(msg)}`);
     }
   };
+
+  const { registerIpfsClient } = await import(
+    "../compiled-aqua/installation-spell/files.js"
+  );
 
   registerIpfsClient({
     async upload(multiaddr, absolutePath) {
@@ -160,12 +169,12 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
       return dagUpload(multiaddr, string, log);
     },
     async id(multiaddr): Promise<string> {
-      const ipfsClient = createIPFSClient(multiaddr);
+      const ipfsClient = await createIPFSClient(multiaddr);
       const result = await ipfsClient.id();
       return result.id.toString();
     },
     async exists(multiaddr, cid): Promise<boolean> {
-      const ipfsClient = createIPFSClient(multiaddr);
+      const ipfsClient = await createIPFSClient(multiaddr);
 
       try {
         const results = ipfsClient.pin.ls({ paths: cid, type: "all" });
@@ -187,7 +196,8 @@ export const doRegisterIpfsClient = (offAquaLogs: boolean): void => {
       }
     },
     async remove(multiaddr, cid): Promise<string> {
-      const ipfsClient = createIPFSClient(multiaddr);
+      const ipfsClient = await createIPFSClient(multiaddr);
+      const { CID } = await import("ipfs-http-client");
 
       try {
         await ipfsClient.pin.rm(cid, { recursive: true });

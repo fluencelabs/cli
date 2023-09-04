@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -49,6 +47,10 @@ export default class Register extends BaseCommand<typeof Register> {
     });
 
     const signer = await getSigner(network, flags["priv-key"]);
+    const { DealClient } = await import("@fluencelabs/deal-aurora");
+    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const dealClient = new DealClient(signer, network);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
@@ -65,6 +67,9 @@ export default class Register extends BaseCommand<typeof Register> {
     );
 
     promptConfirmTx(flags["priv-key"]);
+    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     await waitTx(tx);
 
     commandObj.log(color.green(`Successfully joined to matching contract`));

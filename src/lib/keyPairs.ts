@@ -16,9 +16,7 @@
 
 import assert from "node:assert";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import inquirer from "inquirer";
+import { color } from "@oclif/color";
 
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { ConfigKeyPair } from "./configs/keyPair.js";
@@ -91,6 +89,8 @@ const getExistingUserKeyPair = async (
   );
 
   if (projectKeyPairOptions !== undefined && projectKeyPairOptions.length > 0) {
+    const inquirer = (await import("inquirer")).default;
+
     options.push(
       new inquirer.Separator("Project key-pairs:"),
       ...projectKeyPairOptions,
@@ -98,6 +98,8 @@ const getExistingUserKeyPair = async (
   }
 
   if (userKeyPairOptions.length > 0) {
+    const inquirer = (await import("inquirer")).default;
+
     options.push(
       new inquirer.Separator("User key-pairs:"),
       ...userKeyPairOptions,

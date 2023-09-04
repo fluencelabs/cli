@@ -19,14 +19,14 @@
 // eslint-disable-next-line import/extensions
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
-import Countly from "countly-sdk-nodejs";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
 /**
- * @type {() => boolean}
+ * @type {() => Promise<boolean>}
  */
-export const isCountlyInitialized = () => {
+export const isCountlyInitialized = async () => {
+  const Countly = await import("countly-sdk-nodejs");
   return Countly.device_id !== undefined;
 };
 
@@ -52,7 +52,7 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
  * @param {Error | unknown} error
  * @returns {never | Promise<void>}
  */
-export const createErrorPromise = (error) => {
+export const createErrorPromise = async (error) => {
   if (error instanceof CLIError) {
     // eslint-disable-next-line no-console
     console.error(`Error: ${error.message}`);
@@ -61,9 +61,11 @@ export const createErrorPromise = (error) => {
     console.error(error);
   }
 
-  if (!isCountlyInitialized()) {
+  if (!(await isCountlyInitialized())) {
     return exitWithCode1();
   }
+
+  const Countly = await import("countly-sdk-nodejs");
 
   if (error instanceof CLIError) {
     isErrorExpected = true;

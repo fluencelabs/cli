@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import {
-  get_logs,
-  type Get_logsArgApp_workers,
-} from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { get_logs as get_logs_with_tracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js";
+import type { Get_logsArgApp_workers } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
@@ -37,10 +32,12 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
 } from "../../lib/const.js";
-import { parseWorkers } from "../../lib/deployWorkers.js";
 import { formatAquaLogs } from "../../lib/helpers/formatLogs.js";
 import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
-import { initFluenceClient } from "../../lib/jsClient.js";
+import {
+  disconnectFluenceClient,
+  initFluenceClient,
+} from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -91,9 +88,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     let logs;
 
     try {
-      logs = flags.tracing
-        ? await get_logs_with_tracing(logsArg)
-        : await get_logs(logsArg);
+      logs = await getLogs(flags.tracing, logsArg);
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${stringifyUnknown(
@@ -113,6 +108,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
         })
         .join("\n\n"),
     );
+
+    await disconnectFluenceClient();
   }
 }
 
@@ -173,6 +170,7 @@ const getLogsArg = async ({
     );
 
   const workerNamesSet = Object.keys(hosts);
+  const { parseWorkers } = await import("../../lib/deployWorkers.js");
 
   const workersToGetLogsFor =
     maybeWorkerNamesString === undefined
@@ -207,3 +205,19 @@ const getLogsArg = async ({
       }),
   };
 };
+
+async function getLogs(tracing: boolean, logsArg: Get_logsArgApp_workers) {
+  if (tracing) {
+    const { get_logs } = await import(
+      "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js"
+    );
+
+    return get_logs(logsArg);
+  }
+
+  const { get_logs } = await import(
+    "../../lib/compiled-aqua/installation-spell/cli.js"
+  );
+
+  return get_logs(logsArg);
+}

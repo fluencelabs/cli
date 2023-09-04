@@ -155,10 +155,10 @@ type LatestConfig = ConfigV0;
 export type UserConfig = InitializedConfig<LatestConfig>;
 export type UserConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const validate: ConfigValidateFunction<LatestConfig> = (config) => {
+const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatch(
-    validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
-    validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
+    await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
+    await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
 };
 

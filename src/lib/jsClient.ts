@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { Fluence } from "@fluencelabs/js-client";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
@@ -41,6 +39,8 @@ export const initFluenceClient = async (
   const keyPair = await getExistingKeyPair(keyPairName);
 
   try {
+    const { Fluence } = await import("@fluencelabs/js-client");
+
     await Fluence.connect(relay, {
       connectionOptions: {
         dialTimeoutMs,
@@ -60,3 +60,8 @@ export const initFluenceClient = async (
     commandObj.error(`Failed to connect. ${stringifyUnknown(e)}`);
   }
 };
+
+export async function disconnectFluenceClient() {
+  const { Fluence } = await import("@fluencelabs/js-client");
+  await Fluence.disconnect();
+}

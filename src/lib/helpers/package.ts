@@ -18,8 +18,7 @@ import assert from "node:assert";
 import { access, mkdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import versions from "../../versions.json" assert { type: "json" };
 import { commandObj } from "../commandObj.js";
@@ -47,11 +46,48 @@ import {
   ensureUserFluenceTmpNpmDir,
 } from "../paths.js";
 
-import { replaceHomeDir } from "./replaceHomeDir.js";
 import { isExactVersion } from "./validations.js";
 
 const packageManagers = ["npm", "cargo"] as const;
 type PackageManager = (typeof packageManagers)[number];
+
+function isDefaultNpmPackage(
+  str: string,
+): str is keyof (typeof versions)["npm"] {
+  return str in versions.npm;
+}
+
+function isDefaultCargoPackage(
+  str: string,
+): str is keyof (typeof versions)["cargo"] {
+  return str in versions.cargo;
+}
+
+type ConfigWithDependencies = {
+  dependencies?: {
+    npm?: Record<string, string>;
+    cargo?: Record<string, string>;
+  };
+};
+
+function getCurrentlyUsedVersion(
+  maybeConfig: ConfigWithDependencies | null,
+  name: string,
+): string | void {
+  const versionFromConfig = maybeConfig?.dependencies?.npm?.[name];
+
+  if (versionFromConfig !== undefined) {
+    return versionFromConfig;
+  }
+
+  if (isDefaultNpmPackage(name)) {
+    return versions.npm[name];
+  }
+
+  if (isDefaultCargoPackage(name)) {
+    return versions.cargo[name];
+  }
+}
 
 type UpdateFluenceConfigIfVersionChangedArgs = {
   maybeFluenceConfig: FluenceConfig | null;
@@ -61,35 +97,31 @@ type UpdateFluenceConfigIfVersionChangedArgs = {
 };
 
 const updateFluenceConfigIfVersionChanged = async ({
-  maybeFluenceConfig,
+  fluenceConfig,
   name,
   version,
   packageManager,
-}: UpdateFluenceConfigIfVersionChangedArgs): Promise<void> => {
-  if (
-    maybeFluenceConfig === null ||
-    version ===
-      (maybeFluenceConfig.dependencies?.[packageManager]?.[name] ??
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        versions[packageManager][name])
-  ) {
+}: Omit<UpdateFluenceConfigIfVersionChangedArgs, "maybeFluenceConfig"> & {
+  fluenceConfig: FluenceConfig;
+}): Promise<void> => {
+  const currentlyUsedVersion = getCurrentlyUsedVersion(fluenceConfig, name);
+
+  if (version === currentlyUsedVersion) {
     return;
   }
 
-  if (maybeFluenceConfig.dependencies === undefined) {
-    maybeFluenceConfig.dependencies = {};
+  if (fluenceConfig.dependencies === undefined) {
+    fluenceConfig.dependencies = {};
   }
 
   const dependenciesForPackageManager =
-    maybeFluenceConfig.dependencies[packageManager] ?? {};
+    fluenceConfig.dependencies[packageManager] ?? {};
 
   dependenciesForPackageManager[name] = version;
 
-  maybeFluenceConfig.dependencies[packageManager] =
-    dependenciesForPackageManager;
+  fluenceConfig.dependencies[packageManager] = dependenciesForPackageManager;
 
-  await maybeFluenceConfig.$commit();
+  await fluenceConfig.$commit();
 };
 
 type UpdateUserConfigIfVersionChangedArgs = {
@@ -103,13 +135,9 @@ const updateUserConfigIfVersionChanged = async ({
   version,
   packageManager,
 }: UpdateUserConfigIfVersionChangedArgs): Promise<void> => {
-  if (
-    version ===
-    (userConfig.dependencies?.[packageManager]?.[name] ??
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      versions[packageManager][name])
-  ) {
+  const currentlyUsedVersion = getCurrentlyUsedVersion(userConfig, name);
+
+  if (version === currentlyUsedVersion) {
     return;
   }
 
@@ -135,11 +163,9 @@ export const updateConfigsIfVersionChanged = async ({
 }): Promise<void> => {
   if (global) {
     await updateUserConfigIfVersionChanged(restArgs);
-  } else {
-    await updateFluenceConfigIfVersionChanged({
-      maybeFluenceConfig,
-      ...restArgs,
-    });
+  } else if (maybeFluenceConfig !== null) {
+    const fluenceConfig = maybeFluenceConfig;
+    await updateFluenceConfigIfVersionChanged({ ...restArgs, fluenceConfig });
   }
 };
 
@@ -150,20 +176,21 @@ type ResolveVersionArg = {
   maybeFluenceConfig: FluenceConfig | null;
 };
 
-export const resolveVersionToInstall = ({
+export const resolveVersionToInstall = async ({
   name,
   maybeVersion,
   packageManager,
   maybeFluenceConfig,
-}: ResolveVersionArg):
+}: ResolveVersionArg): Promise<
   | {
       versionToInstall: string;
     }
   | {
       maybeVersionToCheck: string | undefined;
-    } => {
+    }
+> => {
   if (typeof maybeVersion === "string") {
-    if (!isExactVersion(maybeVersion)) {
+    if (!(await isExactVersion(maybeVersion))) {
       return {
         maybeVersionToCheck: maybeVersion,
       };
@@ -276,9 +303,7 @@ export const handleInstallation = async ({
 
   if (explicitInstallation) {
     commandObj.log(
-      `Successfully installed ${name}@${version} to ${replaceHomeDir(
-        dependencyDirPath,
-      )}`,
+      `Successfully installed ${name}@${version} to ${dependencyDirPath}`,
     );
   }
 };

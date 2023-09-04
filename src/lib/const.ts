@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  type ContractsENV,
-  CONTRACTS_ENV,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type {
   Flag,
@@ -48,6 +43,9 @@ export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
+
+export const CONTRACTS_ENV = ["testnet", "local"] as const;
+export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
 export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[1];
 

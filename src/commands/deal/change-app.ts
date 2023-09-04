@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
+import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
-
-const color = oclifColor.default;
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";

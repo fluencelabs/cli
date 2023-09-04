@@ -16,9 +16,8 @@
 
 import assert from "assert";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import camelcase from "camelcase";
+import { color } from "@oclif/color";
+import camelCase from "lodash-es/camelCase.js";
 
 import { commandObj } from "../commandObj.js";
 
@@ -90,7 +89,7 @@ export const jsToAqua = (
   funcNameFromArgs: string,
   useF64ForAllNumbers = false,
 ): string => {
-  const funcName = camelcase(cleanAquaName(funcNameFromArgs));
+  const funcName = camelCase(cleanAquaName(funcNameFromArgs));
   const funcNameValidity = validateAquaName(funcName);
 
   if (typeof funcNameValidity === "string") {
@@ -235,7 +234,7 @@ export const jsToAquaImpl = (
 
   if (typeof v === "object") {
     assert(v !== null, "we checked v is not null with isNilInAqua");
-    const newName = capitalize(camelcase(cleanAquaName(fieldName)));
+    const newName = capitalize(camelCase(cleanAquaName(fieldName)));
 
     if (!/^[A-Z]\w*$/.test(newName)) {
       return error(
@@ -276,7 +275,7 @@ export const jsToAquaImpl = (
           newNestingLevel,
         );
 
-        const camelCasedKey = camelcase(cleanAquaName(key));
+        const camelCasedKey = camelCase(cleanAquaName(key));
         const keyValidity = validateAquaName(camelCasedKey);
 
         if (typeof keyValidity === "string") {

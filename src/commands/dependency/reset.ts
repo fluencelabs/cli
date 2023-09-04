@@ -15,7 +15,6 @@
  */
 
 import { Flags } from "@oclif/core";
-import { omit } from "lodash-es";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -48,7 +47,7 @@ export default class Reset extends BaseCommand<typeof Reset> {
     );
 
     if (flags.global) {
-      const removedDependencies = removeRecommendedDependencies(
+      const removedDependencies = await removeRecommendedDependencies(
         userConfig.dependencies,
       );
 
@@ -66,7 +65,7 @@ export default class Reset extends BaseCommand<typeof Reset> {
     }
 
     if (maybeFluenceConfig !== null) {
-      const removedDependencies = removeRecommendedDependencies(
+      const removedDependencies = await removeRecommendedDependencies(
         maybeFluenceConfig.dependencies,
       );
 
@@ -87,13 +86,14 @@ export default class Reset extends BaseCommand<typeof Reset> {
   }
 }
 
-const removeRecommendedDependencies = ({
+const removeRecommendedDependencies = async ({
   npm = {},
   cargo = {},
 }: {
   npm?: Record<string, string>;
   cargo?: Record<string, string>;
 } = {}) => {
+  const omit = (await import("lodash-es/omit.js")).default;
   const resetNpmDependencies = omit(npm, fluenceNPMDependencies);
   const resetCargoDependencies = omit(cargo, fluenceCargoDependencies);
 

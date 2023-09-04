@@ -18,10 +18,7 @@ import crypto from "node:crypto";
 import { access, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import decompress from "decompress";
-import filenamify from "filenamify";
+import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { getConfigPath } from "../configs/initConfig.js";
@@ -120,6 +117,8 @@ const getDownloadDirPath = async (
       .split(withoutTrailingSlash.includes("/") ? "/" : "\\")
       .slice(-1)[0] ?? "";
 
+  const filenamify = (await import("filenamify")).default;
+
   const prefix =
     lastPortionOfPath === "" ? "" : `${filenamify(lastPortionOfPath)}_`;
 
@@ -139,6 +138,7 @@ const downloadAndDecompress = async (
 
   const archivePath = join(dirPath, ARCHIVE_FILE);
   await downloadFile(archivePath, get);
+  const decompress = (await import("decompress")).default;
   await decompress(archivePath, dirPath);
   await rm(archivePath, { force: true });
   return dirPath;

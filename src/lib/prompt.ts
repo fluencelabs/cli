@@ -16,16 +16,15 @@
 
 import assert from "node:assert";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { JSONSchemaType, ValidateFunction } from "ajv";
-import inquirer, { type Answers, type DistinctQuestion } from "inquirer";
+import type inquirer from "inquirer";
+import type { Answers, DistinctQuestion } from "inquirer";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const.js";
 
-const Separator = inquirer.Separator;
 const NAME = "NAME";
 
 const validateBooleanPrompt = ajv.compile({
@@ -93,6 +92,7 @@ const prompt = async <T, U extends Answers>({
     );
   }
 
+  const inquirer = (await import("inquirer")).default;
   const result: unknown = await inquirer.prompt([{ ...question, name: NAME }]);
 
   if (validateType(result)) {
@@ -198,10 +198,11 @@ const handleList = async <T, U>(
   noChoicesResult?: U;
 }> => {
   const { options, oneChoiceMessage, onNoChoices, flagName } = listOptions;
+  const inquirer = (await import("inquirer")).default;
 
   const choices = options.map(
     (choice): { name: string; value: T } | SeparatorObj => {
-      return choice instanceof Separator || typeof choice !== "string"
+      return choice instanceof inquirer.Separator || typeof choice !== "string"
         ? choice
         : { name: choice, value: choice };
     },
@@ -209,7 +210,7 @@ const handleList = async <T, U>(
 
   if (
     choices.filter((choice): boolean => {
-      return !(choice instanceof Separator);
+      return !(choice instanceof inquirer.Separator);
     }).length === 0
   ) {
     return {
@@ -223,7 +224,7 @@ const handleList = async <T, U>(
   if (
     choices.length === 1 &&
     firstChoice !== undefined &&
-    !(firstChoice instanceof Separator)
+    !(firstChoice instanceof inquirer.Separator)
   ) {
     const doConfirm = await confirm({
       message: oneChoiceMessage(firstChoice.name),
@@ -269,6 +270,8 @@ export const list = async <T, U>(
     return noChoicesResult;
   }
 
+  const inquirer = (await import("inquirer")).default;
+
   // inquirer broke it's types so we have to cast it. "list" always returns string
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const stringChoice = (await prompt({
@@ -276,17 +279,19 @@ export const list = async <T, U>(
     type: "list",
     validateType: validateStringPrompt,
     choices: choices.map((choice): string | SeparatorObj => {
-      return choice instanceof Separator ? choice : choice.name;
+      return choice instanceof inquirer.Separator ? choice : choice.name;
     }),
     flagName,
   })) as string;
 
   const choice = choices.find((choice): boolean => {
-    return !(choice instanceof Separator) && choice.name === stringChoice;
+    return (
+      !(choice instanceof inquirer.Separator) && choice.name === stringChoice
+    );
   });
 
   assert(choice !== undefined);
-  assert(!(choice instanceof Separator));
+  assert(!(choice instanceof inquirer.Separator));
 
   return choice.value;
 };
@@ -317,12 +322,14 @@ export const checkboxes = async <T, U>(
     return noChoicesResult;
   }
 
+  const inquirer = (await import("inquirer")).default;
+
   const stringChoices = await prompt({
     ...question,
     type: "checkbox",
     validateType: validateArrayOfStringsPrompt,
     choices: choices.map((choice): string | SeparatorObj => {
-      return choice instanceof Separator ? choice : choice.name;
+      return choice instanceof inquirer.Separator ? choice : choice.name;
     }),
     flagName,
   });
@@ -330,7 +337,10 @@ export const checkboxes = async <T, U>(
   const results: T[] = [];
 
   for (const choice of choices) {
-    if (!(choice instanceof Separator) && stringChoices.includes(choice.name)) {
+    if (
+      !(choice instanceof inquirer.Separator) &&
+      stringChoices.includes(choice.name)
+    ) {
       results.push(choice.value);
     }
   }

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import getRandomValues from "get-random-values";
-
 import type { ConfigKeyPair } from "../configs/keyPair.js";
 
-const genSecretKey = () => {
+const genSecretKey = async () => {
+  const getRandomValues = (await import("get-random-values")).default;
   return getRandomValues(new Uint8Array(32));
 };
 
@@ -26,9 +25,9 @@ const uint8ArrayToBase64 = (array: Uint8Array) => {
   return Buffer.from(array).toString("base64");
 };
 
-export const generateKeyPair = (name: string): ConfigKeyPair => {
+export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
   return {
-    secretKey: uint8ArrayToBase64(genSecretKey()),
+    secretKey: uint8ArrayToBase64(await genSecretKey()),
     name,
   };
 };

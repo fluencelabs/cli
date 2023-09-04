@@ -19,14 +19,8 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import {
-  type ContractsENV,
-  CONTRACTS_ENV,
-} from "@fluencelabs/deal-aurora/dist/client/config.js";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import { UniversalProvider } from "@walletconnect/universal-provider";
-import ethers = require("ethers");
+import { color } from "@oclif/color";
+import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import {
@@ -37,6 +31,8 @@ import {
   DEAL_RPC_CONFIG,
   WC_PROJECT_ID,
   WC_METADATA,
+  type ContractsENV,
+  CONTRACTS_ENV,
 } from "./const.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
@@ -99,6 +95,10 @@ export const getSigner = async (
 const getWalletConnectProvider = async (
   network: ContractsENV,
 ): Promise<ethers.Signer> => {
+  const { UniversalProvider } = await import(
+    "@walletconnect/universal-provider"
+  );
+
   const provider = await UniversalProvider.init({
     projectId: WC_PROJECT_ID,
     metadata: WC_METADATA,
@@ -151,10 +151,16 @@ const getWalletConnectProvider = async (
 
   stopSpinner(`\nWallet ${color.yellow(walletAddress)} connected`);
 
+  const { ethers } = await import("ethers");
   return new ethers.BrowserProvider(provider).getSigner();
 };
 
-const getWallet = (privKey: string, network: ContractsENV): ethers.Wallet => {
+const getWallet = async (
+  privKey: string,
+  network: ContractsENV,
+): Promise<ethers.Wallet> => {
+  const { ethers } = await import("ethers");
+
   return new ethers.Wallet(
     privKey,
     new ethers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl),

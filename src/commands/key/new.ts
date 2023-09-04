@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -28,7 +27,6 @@ import {
 } from "../../lib/const.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
 import { generateKeyPair } from "../../lib/helpers/generateKeyPair.js";
-import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm, input } from "../../lib/prompt.js";
@@ -66,9 +64,9 @@ export default class New extends BaseCommand<typeof New> {
     const userSecretsConfig = await initUserSecretsConfig();
     const projectSecretsConfig = await initNewProjectSecretsConfig();
 
-    const secretsConfigPath = replaceHomeDir(
-      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath(),
-    );
+    const secretsConfigPath = (
+      flags.user ? userSecretsConfig : projectSecretsConfig
+    ).$getPath();
 
     const enterKeyPairNameMessage = `Enter key-pair name to generate at ${secretsConfigPath}`;
 
@@ -102,7 +100,7 @@ export default class New extends BaseCommand<typeof New> {
       });
     }
 
-    const newKeyPair = generateKeyPair(keyPairName);
+    const newKeyPair = await generateKeyPair(keyPairName);
 
     if (flags.user) {
       userSecretsConfig.keyPairs.push(newKeyPair);

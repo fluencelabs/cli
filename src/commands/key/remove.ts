@@ -16,8 +16,7 @@
 
 import assert from "node:assert";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -29,7 +28,6 @@ import {
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { replaceHomeDir } from "../../lib/helpers/replaceHomeDir.js";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { list } from "../../lib/prompt.js";
@@ -63,9 +61,9 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const userSecretsConfig = await initUserSecretsConfig();
     const projectSecretsConfig = await initNewProjectSecretsConfig();
 
-    const secretsConfigPath = replaceHomeDir(
-      (flags.user ? userSecretsConfig : projectSecretsConfig).$getPath(),
-    );
+    const secretsConfigPath = (
+      flags.user ? userSecretsConfig : projectSecretsConfig
+    ).$getPath();
 
     let keyPairName = args.name;
 
