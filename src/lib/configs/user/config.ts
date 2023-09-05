@@ -30,7 +30,6 @@ import { ensureUserFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
-  type GetDefaultConfig,
   type InitConfigOptions,
   type InitializedConfig,
   type InitializedReadonlyConfig,
@@ -111,9 +110,8 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "countlyConsent"],
 };
 
-const getDefault = (docsInConfigs: boolean): GetDefaultConfig => {
-  return () => {
-    return `# Defines global config for Fluence CLI
+const getDefault = () => {
+  return `# Defines global config for Fluence CLI
 
 # Weather you consent to send usage data to Countly
 countlyConsent: false
@@ -121,8 +119,8 @@ countlyConsent: false
 # config version
 version: 0
 
-# Whether to include commented-out documented config examples in the configs generated with the CLI
-docsInConfigs: ${docsInConfigs ? "true" : "false"}
+# # Whether to include commented-out documented config examples in the configs generated with the CLI
+# docsInConfigs: true
 
 # # Last time when CLI checked for updates.
 # # Updates are checked daily unless this field is set to 'disabled'
@@ -145,7 +143,6 @@ docsInConfigs: ${docsInConfigs ? "true" : "false"}
 #   cargo:
 #     marine: 0.14.0
 `;
-  };
 };
 
 const migrations: Migrations<Config> = [];
@@ -173,12 +170,10 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initUserConfig = getConfigInitFunction(initConfigOptions);
 
-export const initNewUserConfig = (docsInConfigs: boolean) => {
-  return getConfigInitFunction(
-    { ...initConfigOptions, docsInConfigs },
-    getDefault(docsInConfigs),
-  )();
-};
+export const initNewUserConfig = getConfigInitFunction(
+  initConfigOptions,
+  getDefault,
+);
 
 export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
