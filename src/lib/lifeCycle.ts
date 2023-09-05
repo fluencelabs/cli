@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { join } from "path";
-
 import { color } from "@oclif/color";
 import type {
   ArgOutput,
