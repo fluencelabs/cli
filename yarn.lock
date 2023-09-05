@@ -729,8 +729,8 @@ __metadata:
   linkType: hard
 
 "@fluencelabs/js-client@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@fluencelabs/js-client@npm:0.1.0"
+  version: 0.1.1
+  resolution: "@fluencelabs/js-client@npm:0.1.1"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@fluencelabs/interfaces": 0.8.2
@@ -756,7 +756,7 @@ __metadata:
     ts-pattern: 3.3.3
     uint8arrays: 4.0.3
     uuid: 8.3.2
-  checksum: a798912a724d9a28f170eb2d738a7313a35f1bd1ef62aa580831d2b4fa796218b91172726237c337218b271c9e0b6bf90d73232743c425faf40d83fb569f7bde
+  checksum: bf3a8a736de7c25150b9f967c6ffa121d62a733a0a55e7678b69e79583dd4dc37dde3d271a960014b379a9e039d329a4802109bf038332d488c4ad3ea2977c91
   languageName: node
   linkType: hard
 
