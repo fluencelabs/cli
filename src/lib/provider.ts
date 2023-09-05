@@ -19,44 +19,24 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import {
-  type AquaProxy,
-  type Core,
-  type Deal,
-  type DealFactory,
-  type DeveloperFaucet,
-  type ERC20,
-} from "@fluencelabs/deal-aurora";
-import dealPkg from "@fluencelabs/deal-aurora";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import { UniversalProvider } from "@walletconnect/universal-provider";
-import { type BytesLike, ethers, providers } from "ethers";
+import { color } from "@oclif/color";
+import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import {
-  type ChainNetwork,
   DEAL_CONFIG,
-  CHAIN_NETWORKS,
   isChainNetwork,
   NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,
   DEAL_RPC_CONFIG,
   WC_PROJECT_ID,
   WC_METADATA,
+  type ContractsENV,
+  CONTRACTS_ENV,
 } from "./const.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { list } from "./prompt.js";
-
-const {
-  AquaProxy__factory,
-  Core__factory,
-  DealFactory__factory,
-  Deal__factory,
-  DeveloperFaucet__factory,
-  ERC20__factory,
-} = dealPkg;
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
@@ -66,13 +46,13 @@ const DEFAULT_NETWORK = "testnet";
 
 type EnsureChainNetworkArg = {
   maybeNetworkFromFlags: string | undefined;
-  maybeDealsConfigNetwork: ChainNetwork | undefined;
+  maybeDealsConfigNetwork: ContractsENV | undefined;
 };
 
 export const ensureChainNetwork = async ({
   maybeNetworkFromFlags,
   maybeDealsConfigNetwork,
-}: EnsureChainNetworkArg): Promise<ChainNetwork> => {
+}: EnsureChainNetworkArg): Promise<ContractsENV> => {
   const isValidNetworkFromFlags =
     isChainNetwork(maybeNetworkFromFlags) ||
     maybeNetworkFromFlags === undefined;
@@ -84,7 +64,7 @@ export const ensureChainNetwork = async ({
 
     return list({
       message: "Select chain network",
-      options: [...CHAIN_NETWORKS],
+      options: [...CONTRACTS_ENV],
       oneChoiceMessage(chainNetwork) {
         return `Do you want to use ${color.yellow(
           chainNetwork,
@@ -104,8 +84,8 @@ export const ensureChainNetwork = async ({
 };
 
 export const getSigner = async (
-  network: ChainNetwork,
-  privKey: BytesLike | undefined,
+  network: ContractsENV,
+  privKey: string | undefined,
 ): Promise<ethers.Signer> => {
   return privKey === undefined
     ? getWalletConnectProvider(network)
@@ -113,8 +93,12 @@ export const getSigner = async (
 };
 
 const getWalletConnectProvider = async (
-  network: ChainNetwork,
+  network: ContractsENV,
 ): Promise<ethers.Signer> => {
+  const { UniversalProvider } = await import(
+    "@walletconnect/universal-provider"
+  );
+
   const provider = await UniversalProvider.init({
     projectId: WC_PROJECT_ID,
     metadata: WC_METADATA,
@@ -167,87 +151,32 @@ const getWalletConnectProvider = async (
 
   stopSpinner(`\nWallet ${color.yellow(walletAddress)} connected`);
 
-  return new providers.Web3Provider(provider).getSigner();
+  const { ethers } = await import("ethers");
+  return new ethers.BrowserProvider(provider).getSigner();
 };
 
-const getWallet = (
-  privKey: BytesLike,
-  network: ChainNetwork,
-): ethers.Wallet => {
+const getWallet = async (
+  privKey: string,
+  network: ContractsENV,
+): Promise<ethers.Wallet> => {
+  const { ethers } = await import("ethers");
+
   return new ethers.Wallet(
     privKey,
-    new providers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl),
-  );
-};
-
-export const getCoreContract = (
-  signer: ethers.Signer,
-  network: ChainNetwork,
-): Core => {
-  return Core__factory.connect(DEAL_CONFIG[network].coreAddress, signer);
-};
-
-export const getFactoryContract = (
-  signer: ethers.Signer,
-  network: ChainNetwork,
-): DealFactory => {
-  return DealFactory__factory.connect(
-    DEAL_CONFIG[network].dealFactoryAddress,
-    signer,
-  );
-};
-
-export const getAquaProxy = (
-  address: string,
-  provider: ethers.providers.Provider,
-): AquaProxy => {
-  return AquaProxy__factory.connect(address, provider);
-};
-
-export const getDeveloperContract = (
-  signer: ethers.Signer,
-  network: ChainNetwork,
-): DeveloperFaucet => {
-  return DeveloperFaucet__factory.connect(
-    DEAL_CONFIG[network].developerFaucetAddress,
-    signer,
-  );
-};
-
-export const getDealContract = (
-  dealAddress: string,
-  signer: ethers.Signer,
-): Deal => {
-  return Deal__factory.connect(dealAddress, signer);
-};
-
-export const getUSDContract = async (
-  signer: ethers.Signer,
-  network: ChainNetwork,
-): Promise<ERC20> => {
-  return ERC20__factory.connect(
-    await getDeveloperContract(signer, network).usdToken(),
-    signer,
-  );
-};
-
-export const getFLTContract = async (
-  signer: ethers.Signer,
-  network: ChainNetwork,
-): Promise<ERC20> => {
-  return ERC20__factory.connect(
-    await getDeveloperContract(signer, network).fluenceToken(),
-    signer,
+    new ethers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl),
   );
 };
 
 export const waitTx = async (
-  tx: ethers.ContractTransaction,
-): Promise<ethers.ContractReceipt> => {
+  tx: ethers.ContractTransactionResponse,
+): Promise<ethers.ContractTransactionReceipt> => {
   startSpinner("Waiting for transaction to be mined...");
 
   const res = await tx.wait();
   stopSpinner();
+
+  assert(res !== null, "Transaction hash is not defined");
+  assert(res.status === 1, "Transaction failed");
 
   return res;
 };

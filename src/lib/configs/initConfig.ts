@@ -18,18 +18,13 @@ import assert from "node:assert";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
-import Ajv from "ajv";
-import { parse } from "yaml";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
 import { jsonStringify } from "../helpers/jsonStringify.js";
-import { replaceHomeDir } from "../helpers/replaceHomeDir.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
@@ -100,6 +95,11 @@ const migrateConfig = async <
     migratedConfig = await migration(migratedConfig);
   }
 
+  const [{ parse }, { yamlDiffPatch }] = await Promise.all([
+    import("yaml"),
+    import("yaml-diff-patch"),
+  ]);
+
   const migratedConfigString = yamlDiffPatch(
     configString,
     parse(configString),
@@ -112,7 +112,7 @@ const migrateConfig = async <
     return commandObj.error(
       `Couldn't migrate config ${color.yellow(
         configPath,
-      )}. ${validationErrorToString(validateLatestConfig.errors)}`,
+      )}. ${await validationErrorToString(validateLatestConfig.errors)}`,
     );
   }
 
@@ -158,9 +158,9 @@ const ensureConfigIsValidLatest = async <
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     return commandObj.error(
-      `Invalid config ${color.yellow(configPath)}. ${validationErrorToString(
-        validateLatestConfig.errors,
-      )}`,
+      `Invalid config ${color.yellow(
+        configPath,
+      )}. ${await validationErrorToString(validateLatestConfig.errors)}`,
     );
   }
 
@@ -289,6 +289,8 @@ export function getReadonlyConfigInitFunction<
     const { configDirPath } = getConfigPathResult;
     let { configPath } = getConfigPathResult;
 
+    const Ajv = (await import("ajv")).default;
+
     const validateAllConfigVersions = new Ajv.default({
       allowUnionTypes: true,
     }).compile<Config>({
@@ -309,6 +311,11 @@ export function getReadonlyConfigInitFunction<
         schema: validateLatestConfig.schema,
       })}`;
     };
+
+    const [{ parse }, { yamlDiffPatch }] = await Promise.all([
+      import("yaml"),
+      import("yaml-diff-patch"),
+    ]);
 
     let configString: string;
 
@@ -389,7 +396,7 @@ export function getReadonlyConfigInitFunction<
       return commandObj.error(
         `Invalid config at ${color.yellow(
           configPath,
-        )}. ${validationErrorToString(validateAllConfigVersions.errors)}`,
+        )}. ${await validationErrorToString(validateAllConfigVersions.errors)}`,
       );
     }
 
@@ -463,9 +470,7 @@ export function getConfigInitFunction<
 
     if (initializedConfigs.has(configPath)) {
       throw new Error(
-        `Mutable config ${replaceHomeDir(
-          configPath,
-        )} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`,
+        `Mutable config ${configPath} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`,
       );
     }
 
@@ -490,7 +495,7 @@ export function getConfigInitFunction<
           throw new Error(
             `Couldn't save config ${color.yellow(
               configPath,
-            )}. ${validationErrorToString(
+            )}. ${await validationErrorToString(
               initializedReadonlyConfig.$validateLatest.errors,
             )}`,
           );
@@ -506,6 +511,11 @@ export function getConfigInitFunction<
             delete config[key];
           }
         }
+
+        const [{ parse }, { yamlDiffPatch }] = await Promise.all([
+          import("yaml"),
+          import("yaml-diff-patch"),
+        ]);
 
         const newConfigString = `${yamlDiffPatch(
           configString,

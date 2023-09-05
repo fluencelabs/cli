@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
-import { dealUpdate } from "../../lib/deal.js";
+import { match } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
-export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
+export default class Match extends BaseCommand<typeof Match> {
   static override hidden = true;
-  static override description = "Change app id in the deal";
+  static override description = "Match deal with resource owners";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
@@ -38,30 +36,22 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
     "DEAL-ADDRESS": Args.string({
       description: "Deal address",
     }),
-    "NEW-APP-CID": Args.string({
-      description: "New app CID for the deal",
-    }),
   };
 
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig, args } = await initCli(
       this,
-      await this.parse(ChangeApp),
+      await this.parse(Match),
     );
 
-    const tx = await dealUpdate({
-      dealAddress:
-        args["DEAL-ADDRESS"] ??
-        (await input({ message: "Enter deal address" })),
-      appCID:
-        args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
-      network: await ensureChainNetwork({
-        maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-      }),
-      privKey: flags["priv-key"],
+    const dealAddress =
+      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
+
+    const network = await ensureChainNetwork({
+      maybeNetworkFromFlags: flags.network,
+      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
     });
 
-    commandObj.logToStderr(`Tx hash: ${color.yellow(tx.hash)}`);
+    await match(network, flags["priv-key"], dealAddress);
   }
 }

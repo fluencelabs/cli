@@ -16,9 +16,7 @@
 
 import { join } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import node_modules from "node_modules-path";
+import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
@@ -34,9 +32,11 @@ import {
   resolveDependencies,
   updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
-import { replaceHomeDir } from "./helpers/replaceHomeDir.js";
 
-const npmPath = join(node_modules(), ".bin", "npm");
+const getNpmPath = async () => {
+  const node_modules = (await import("node_modules-path")).default;
+  return join(node_modules(), ".bin", "npm");
+};
 
 export const getLatestVersionOfNPMDependency = async (
   name: string,
@@ -44,7 +44,10 @@ export const getLatestVersionOfNPMDependency = async (
   try {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return (
-      await execPromise({ command: npmPath, args: ["view", name, "version"] })
+      await execPromise({
+        command: await getNpmPath(),
+        args: ["view", name, "version"],
+      })
     )
       .trim()
       .split("\n")
@@ -75,18 +78,14 @@ const installNpmDependency = async ({
 }: InstallNpmDependencyArg): Promise<void> => {
   try {
     await execPromise({
-      command: npmPath,
+      command: await getNpmPath(),
       args: ["i", `${name}@${version}`],
       flags: { prefix: dependencyTmpDirPath },
-      spinnerMessage: `Installing ${name}@${version} to ${replaceHomeDir(
-        dependencyDirPath,
-      )}`,
+      spinnerMessage: `Installing ${name}@${version} to ${dependencyDirPath}`,
     });
   } catch (error) {
     commandObj.error(
-      `Not able to install ${name}@${version} to ${replaceHomeDir(
-        dependencyDirPath,
-      )}. Please make sure ${color.yellow(
+      `Not able to install ${name}@${version} to ${dependencyDirPath}. Please make sure ${color.yellow(
         name,
       )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
         `fluence dependency npm install ${name}@<version>`,
@@ -112,7 +111,7 @@ export const ensureNpmDependency = async ({
 }: EnsureNpmDependencyArg): Promise<string> => {
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const resolveVersionToInstallResult = resolveVersionToInstall({
+  const resolveVersionToInstallResult = await resolveVersionToInstall({
     name,
     maybeVersion,
     packageManager: "npm",
@@ -160,8 +159,7 @@ export const ensureNpmDependency = async ({
     packageManager: "npm",
   });
 
-  addCountlyLog(`Using ${name}@${version} npm dependency`);
-
+  await addCountlyLog(`Using ${name}@${version} npm dependency`);
   return join(dependencyDirPath, NODE_MODULES_DIR_NAME);
 };
 

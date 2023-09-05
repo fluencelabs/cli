@@ -18,9 +18,8 @@ import assert from "node:assert";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, parse } from "node:path";
 
-import { compileFromPath } from "@fluencelabs/aqua-api";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import type { compileFromPath } from "@fluencelabs/aqua-api";
+import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import { FS_OPTIONS, JS_EXT, TS_EXT } from "./const.js";
@@ -79,6 +78,8 @@ export const compileToFiles = async ({
   const isInputPathADirectory = (
     await stat(compileArgs.filePath)
   ).isDirectory();
+
+  const { compileFromPath } = await import("@fluencelabs/aqua-api");
 
   const compilationResultsWithFilePaths = isInputPathADirectory
     ? await Promise.all(

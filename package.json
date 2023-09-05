@@ -30,7 +30,7 @@
     "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "yarn before-build && yarn build",
-    "jest": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "jest": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
     "clean": "shx rm -rf tmp && shx rm -rf dist",
     "pack-linux-x64": "yarn clean && oclif pack tarballs -t 'linux-x64' --no-xz",
     "pack-darwin-x64": "yarn clean && oclif pack tarballs -t 'darwin-x64' --no-xz",
@@ -54,7 +54,7 @@
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "^0.3.2",
     "@fluencelabs/aqua-api": "^0.12.0",
-    "@fluencelabs/deal-aurora": "0.1.8",
+    "@fluencelabs/deal-aurora": "0.2.12",
     "@fluencelabs/fluence-network-environment": "^1.1.2",
     "@fluencelabs/js-client": "^0.1.0",
     "@iarna/toml": "^2.2.5",
@@ -68,31 +68,32 @@
     "@oclif/plugin-update": "^3.2.0",
     "@walletconnect/universal-provider": "^2.4.7",
     "ajv": "^8.12.0",
-    "camelcase": "^8.0.0",
     "chokidar": "^3.5.3",
     "countly-sdk-nodejs": "^22.6.0",
+    "debug": "^4.3.4",
     "decompress": "^4.2.1",
     "dotenv": "^16.3.1",
-    "ethers": "^5.7.2",
+    "ethers": "6.6.0",
     "filenamify": "^6.0.0",
     "get-random-values": "^2.1.0",
     "inquirer": "^9.2.10",
     "ipfs-http-client": "^60.0.1",
     "lodash-es": "^4.17.21",
     "lokijs": "^1.5.12",
+    "multiformats": "^12.0.1",
     "node_modules-path": "^2.0.7",
     "npm": "^9.8.1",
     "platform": "^1.3.6",
-    "replace-homedir": "^2.0.0",
     "semver": "^7.5.4",
     "yaml": "^2.3.2",
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
-    "@fluencelabs/installation-spell": "^0.5.16",
+    "@fluencelabs/installation-spell": "^0.5.17",
     "@swc/core": "^1.3.80",
     "@total-typescript/ts-reset": "^0.5.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
+    "@types/debug": "^4.1.8",
     "@types/decompress": "^4.2.4",
     "@types/iarna__toml": "^2.0.2",
     "@types/inquirer": "^9.0.3",
@@ -194,12 +195,6 @@
         "error",
         "always"
       ],
-      "import/extensions": [
-        "error",
-        "always"
-      ],
-      "import/no-unresolved": "off",
-      "node/no-unpublished-import": "off",
       "no-empty": [
         "error",
         {
@@ -273,9 +268,27 @@
           "next": "case"
         }
       ],
+      "import/extensions": [
+        "error",
+        "always"
+      ],
+      "import/no-unresolved": "off",
       "import/no-cycle": [
         "error"
       ],
+      "import/order": [
+        "error",
+        {
+          "newlines-between": "always",
+          "alphabetize": {
+            "order": "asc",
+            "caseInsensitive": true
+          }
+        }
+      ],
+      "node/no-unsupported-features/es-syntax": "off",
+      "node/no-unpublished-import": "off",
+      "node/no-missing-import": "off",
       "@typescript-eslint/explicit-member-accessibility": [
         "error",
         {
@@ -300,22 +313,11 @@
           "assertionStyle": "never"
         }
       ],
-      "import/order": [
-        "error",
-        {
-          "newlines-between": "always",
-          "alphabetize": {
-            "order": "asc",
-            "caseInsensitive": true
-          }
-        }
-      ],
       "unused-imports/no-unused-imports": "error",
       "license-header/header": [
         "error",
         "./resources/license-header.js"
-      ],
-      "node/no-missing-import": "off"
+      ]
     }
   },
   "eslintIgnore": [

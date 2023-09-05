@@ -18,7 +18,7 @@ import "@total-typescript/ts-reset";
 import assert from "node:assert";
 import { access, cp, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
-import path from "node:path";
+import { join } from "node:path";
 
 import {
   krasnodar,
@@ -26,8 +26,13 @@ import {
   testNet,
 } from "@fluencelabs/fluence-network-environment";
 
-import { CLI_NAME, type Template } from "../src/lib/const.js";
+import {
+  CLI_NAME,
+  type Template,
+  RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+} from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
+import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
 import { local } from "../src/lib/localNodes.js";
 import type { FluenceEnv } from "../src/lib/multiaddres.js";
 import { getDefaultJSDirPath, getDefaultTSDirPath } from "../src/lib/paths.js";
@@ -35,6 +40,7 @@ import {
   FLUENCE_ENV,
   RUN_TESTS_IN_PARALLEL,
 } from "../src/lib/setupEnvironment.js";
+import { assertHasKey } from "../src/lib/typeHelpers.js";
 
 export const multiaddrs = {
   kras: krasnodar,
@@ -49,32 +55,53 @@ type CliArg = {
   args?: ExecPromiseArg["args"];
   flags?: ExecPromiseArg["flags"];
   cwd?: string;
+  timeout?: number;
 };
 
-const pathToFluenceExecutable = path.join(
+const pathToBinDir = join(
   process.cwd(),
-  path.join("tmp", `${platform()}-${arch()}`, CLI_NAME, "bin", CLI_NAME),
+  join("tmp", `${platform()}-${arch()}`, CLI_NAME, "bin"),
 );
+
+const pathToCliRunJS = join(pathToBinDir, "run.js");
+const pathToNodeJS = join(pathToBinDir, "node");
 
 export const fluence = async ({
   args = [],
   flags,
   cwd = process.cwd(),
+  timeout = 1000 * 60 * 4, // 4 minutes,
 }: CliArg): ReturnType<typeof execPromise> => {
-  return execPromise({
-    command: pathToFluenceExecutable,
-    args,
-    flags: {
-      "no-input": true,
-      ...flags,
-    },
-    options: { cwd },
-    printOutput: true,
-  });
+  let res: string;
+
+  try {
+    res = await execPromise({
+      command: pathToNodeJS,
+      args: ["--no-warnings", pathToCliRunJS, ...args],
+      flags: {
+        "no-input": true,
+        ...flags,
+      },
+      options: { cwd },
+      printOutput: true,
+      timeout,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      throw new Error(
+        // CHECK THE STACK TRACE BELOW TO SEE THE ERROR ORIGIN
+        err.message,
+      );
+    }
+
+    throw err;
+  }
+
+  return res;
 };
 
 const getInitializedTemplatePath = (template: Template) => {
-  return path.join("tmp", "templates", template);
+  return join("tmp", "templates", template);
 };
 
 export const initFirstTime = async (template: Template) => {
@@ -158,13 +185,47 @@ export const sortPeers = <T extends { peer: string }>(
   return 0;
 };
 
-export const assertHasPeer = (result: unknown) => {
-  assert(
-    typeof result === "object" &&
-      result !== null &&
-      "peer" in result &&
-      typeof result.peer === "string",
-  );
+export const assertHasPeer = (result: unknown): { peer: string } => {
+  try {
+    assertHasKey("peer", result);
+    assert(typeof result.peer === "string");
+    return { ...result, peer: result.peer };
+  } catch (err) {
+    assert(err instanceof Error, "Error must be an instance of Error");
+    throw new Error(
+      `Running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is supposed to return an array of objects of a particular shape: { peer: string }. One of the received objects doesn't match the shape: ${jsonStringify(
+        result,
+      )}. Error: ${err.message}`,
+    );
+  }
+};
 
-  return { ...result, peer: result.peer };
+export const assertHasWorkerAndAnswer = (
+  result: unknown,
+): {
+  worker: { host_id: string; worker_id: string | null; pat_id: string };
+  answer: string | null;
+} => {
+  try {
+    assertHasKey("worker", result);
+    assertHasKey("answer", result);
+    const { worker, answer } = result;
+    assert(typeof answer === "string" || answer === null);
+    assertHasKey("host_id", worker);
+    assertHasKey("worker_id", worker);
+    assertHasKey("pat_id", worker);
+    const { host_id, worker_id, pat_id } = worker;
+    assert(typeof host_id === "string");
+    assert(typeof worker_id === "string" || worker_id === null);
+    assert(typeof pat_id === "string");
+
+    return { worker: { host_id, worker_id, pat_id }, answer };
+  } catch (err) {
+    assert(err instanceof Error, "Error must be an instance of Error");
+    throw new Error(
+      `Running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is supposed to return an array of objects of a particular shape: { worker: { host_id: string, worker_id: string | null, pat_id: string }, answer: string | null }. One of the received objects doesn't match the shape: ${jsonStringify(
+        result,
+      )}. Error: ${err.message}`,
+    );
+  }
 };

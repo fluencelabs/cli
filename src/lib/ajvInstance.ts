@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import Ajv from "ajv";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 export const ajv = new Ajv.default({
   allowUnionTypes: true,
@@ -29,10 +27,12 @@ type AjvErrors =
   | null
   | undefined;
 
-export const validationErrorToString = (errors: AjvErrors) => {
+export const validationErrorToString = async (errors: AjvErrors) => {
   if (errors === null || errors === undefined) {
     return "";
   }
+
+  const { yamlDiffPatch } = await import("yaml-diff-patch");
 
   return (
     "Errors:\n\n" +

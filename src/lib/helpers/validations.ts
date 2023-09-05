@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import semver from "semver";
-
 export type ValidationResult = string | true;
 
 export const validateUnique = <T>(
@@ -61,15 +59,22 @@ export const validateBatch = (
   return errors.length === 0 ? true : errors.join("\n");
 };
 
-export const isExactVersion = (version: string): boolean => {
+export const isExactVersion = async (version: string): Promise<boolean> => {
+  const semver = await import("semver");
   return semver.clean(version) === version;
 };
 
-export const validateAllVersionsAreExact = (
+export const validateAllVersionsAreExact = async (
   versions: Record<string, string>,
-): ValidationResult => {
-  const notExactVersions = Object.entries(versions).filter(([, version]) => {
-    return !isExactVersion(version);
+): Promise<ValidationResult> => {
+  const versionsWithExactness = await Promise.all(
+    Object.entries(versions).map(async ([name, version]) => {
+      return [name, version, await isExactVersion(version)] as const;
+    }),
+  );
+
+  const notExactVersions = versionsWithExactness.filter(([, , isExact]) => {
+    return !isExact;
   });
 
   return notExactVersions.length === 0

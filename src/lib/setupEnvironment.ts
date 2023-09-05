@@ -74,5 +74,5 @@ const isFluenceEnv = (v: unknown): v is FluenceEnv => {
 
 setEnvVariable(FLUENCE_ENV, isFluenceEnv, "kras");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
-setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "true");
+setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

@@ -16,8 +16,7 @@
 
 import { cwd } from "node:process";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import { commandObj } from "../../commandObj.js";

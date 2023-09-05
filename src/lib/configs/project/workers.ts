@@ -17,12 +17,12 @@
 import type { JSONSchemaType } from "ajv";
 
 import {
-  type ChainNetwork,
-  CHAIN_NETWORKS,
   WORKERS_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
+  type ContractsENV,
+  CONTRACTS_ENV,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import {
@@ -55,7 +55,7 @@ const workerInfoSchema = {
 export type Deal = WorkerInfo & {
   dealId: string;
   dealIdOriginal: string;
-  chainNetwork: ChainNetwork;
+  chainNetwork: ContractsENV;
   chainNetworkId: number;
 };
 
@@ -111,7 +111,7 @@ const dealSchema: JSONSchemaType<Deal> = {
     dealIdOriginal: { type: "string" },
     chainNetwork: {
       type: "string",
-      enum: CHAIN_NETWORKS,
+      enum: CONTRACTS_ENV,
     },
     chainNetworkId: { type: "number" },
   },

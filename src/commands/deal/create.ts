@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -31,15 +30,15 @@ export default class Create extends BaseCommand<typeof Create> {
     "Create your deal with the specified parameters";
   static override flags = {
     ...baseFlags,
-    appCID: Flags.string({
+    "app-cid": Flags.string({
       description: "CID of the application that will be deployed",
       required: true,
     }),
-    minWorkers: Flags.integer({
+    "min-workers": Flags.integer({
       description: "Required workers to activate the deal",
       default: 1,
     }),
-    targetWorkers: Flags.integer({
+    "target-workers": Flags.integer({
       description: "Max workers in the deal",
       default: 3,
     }),
@@ -48,17 +47,19 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { flags, fluenceConfig } = await initCli(
+    const { flags, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(Create),
-      true,
     );
 
     const dealAddress = await dealCreate({
-      ...flags,
+      appCID: flags["app-cid"],
+      minWorkers: flags["min-workers"],
+      targetWorkers: flags["target-workers"],
+      privKey: flags["priv-key"],
       chainNetwork: await ensureChainNetwork({
         maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
+        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
       }),
     });
 

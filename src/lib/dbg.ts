@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import replaceHomedir from "replace-homedir";
+import debug from "debug";
 
-export const replaceHomeDir = (path: string): string => {
-  return replaceHomedir(path, "~");
-};
+export const dbg = debug("fcli:debug");

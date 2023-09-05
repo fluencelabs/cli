@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import {
@@ -67,8 +66,8 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "keyPairs", "defaultKeyPairName"],
 };
 
-const getDefault: GetDefaultConfig = () => {
-  const { secretKey, name } = generateKeyPair(AUTO_GENERATED);
+const getDefault: GetDefaultConfig = async () => {
+  const { secretKey, name } = await generateKeyPair(AUTO_GENERATED);
   return `# Defines user's secret keys that can be used across different Fluence projects.
 # You can manage user's keys using commands from \`fluence key\` group of commands with \`--user\` flag
 

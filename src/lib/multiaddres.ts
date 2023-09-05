@@ -22,9 +22,9 @@ import {
   testNet,
   type Node,
 } from "@fluencelabs/fluence-network-environment";
+// TODO: replace with dynamic import
 import { multiaddr } from "@multiformats/multiaddr";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import { getIsStringUnion } from "./typeHelpers.js";

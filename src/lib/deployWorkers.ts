@@ -18,14 +18,11 @@ import assert from "node:assert";
 import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { compileFromPath } from "@fluencelabs/aqua-api";
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
-import { deal_install_script } from "./compiled-aqua/installation-spell/deal_spell.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import {
   type FluenceConfig,
@@ -282,6 +279,8 @@ export const prepareForDeploy = async ({
         spellConfig.$getDirPath(),
         spellConfig.aquaFilePath,
       );
+
+      const { compileFromPath } = await import("@fluencelabs/aqua-api");
 
       const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,
@@ -604,6 +603,10 @@ export const prepareForDeploy = async ({
   }
 
   await validateWasmExist(workers);
+
+  const { deal_install_script } = await import(
+    "./compiled-aqua/installation-spell/deal_spell.js"
+  );
 
   return {
     workers,

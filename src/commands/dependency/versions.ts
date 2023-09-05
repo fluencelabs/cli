@@ -15,7 +15,6 @@
  */
 
 import { Flags } from "@oclif/core";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -45,6 +44,8 @@ export default class Versions extends BaseCommand<typeof Versions> {
       this,
       await this.parse(Versions),
     );
+
+    const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     if (flags.default) {
       return commandObj.log(

@@ -16,7 +16,6 @@
 
 import { readFile } from "fs/promises";
 
-import { beautify } from "@fluencelabs/air-beautify-wasm";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -50,6 +49,7 @@ export default class Beautify extends BaseCommand<typeof Beautify> {
       }));
 
     const air = await readFile(inputArg, FS_OPTIONS);
+    const { beautify } = await import("@fluencelabs/air-beautify-wasm");
     commandObj.log(beautify(air));
   }
 }

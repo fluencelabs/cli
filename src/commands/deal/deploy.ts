@@ -16,15 +16,12 @@
 
 import assert from "node:assert";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
-import { Args } from "@oclif/core";
-import { yamlDiffPatch } from "yaml-diff-patch";
+import { color } from "@oclif/color";
+import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { upload } from "../../lib/compiled-aqua/installation-spell/upload.js";
-import { upload as uploadWithTracing } from "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js";
+import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
   MIN_WORKERS,
   TARGET_WORKERS,
@@ -43,13 +40,13 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
-import { dealCreate, dealUpdate } from "../../lib/deal.js";
-import {
-  ensureAquaFileWithWorkerInfo,
-  prepareForDeploy,
-} from "../../lib/deployWorkers.js";
+import { dbg } from "../../lib/dbg.js";
+import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
-import { initFluenceClient } from "../../lib/jsClient.js";
+import {
+  disconnectFluenceClient,
+  initFluenceClient,
+} from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
@@ -68,6 +65,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
     ...MARINE_BUILD_ARGS_FLAG,
+    "auto-match": Flags.boolean({
+      description: `Disable automatic matching`,
+      allowNo: true,
+      default: true,
+    }),
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -94,6 +96,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       flags,
     });
 
+    const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
+      "../../lib/deployWorkers.js"
+    );
+
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       maybeWorkersConfig: workersConfig,
@@ -103,12 +109,12 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       marineBuildArgs: flags["marine-build-args"],
     });
 
+    dbg("start connecting to fluence network");
     await initFluenceClient(flags, fluenceConfig);
-    doRegisterIpfsClient(true);
+    await doRegisterIpfsClient(true);
+    dbg("start running upload");
 
-    const uploadResult = flags.tracing
-      ? await uploadWithTracing(uploadArg)
-      : await upload(uploadArg);
+    const uploadResult = await upload(flags.tracing, uploadArg);
 
     const createdDeals: Record<
       string,
@@ -151,10 +157,22 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
         await dealUpdate({
           network: chainNetwork,
-          privKey: flags.privKey,
+          privKey: flags["priv-key"],
           appCID,
           dealAddress: maybePreviouslyDeployedDeal.dealId,
         });
+
+        if (flags["auto-match"]) {
+          dbg("start matching");
+
+          await match(
+            chainNetwork,
+            flags["priv-key"],
+            maybePreviouslyDeployedDeal.dealIdOriginal,
+          );
+
+          dbg("done matching");
+        }
 
         updatedDeals[workerName] = {
           deal: getLinkToAddress(maybePreviouslyDeployedDeal.dealIdOriginal),
@@ -180,17 +198,25 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         continue;
       }
 
+      dbg("start deal creation");
+
       commandObj.logToStderr(
         `\nCreating deal for worker ${color.yellow(workerName)}\n`,
       );
 
       const dealIdOriginal = await dealCreate({
         chainNetwork,
-        privKey: flags.privKey,
+        privKey: flags["priv-key"],
         appCID,
         minWorkers,
         targetWorkers,
       });
+
+      if (flags["auto-match"]) {
+        dbg("start matching");
+        await match(chainNetwork, flags["priv-key"], dealIdOriginal);
+        dbg("done matching");
+      }
 
       if (workersConfig.deals === undefined) {
         workersConfig.deals = {};
@@ -216,7 +242,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       };
     }
 
+    dbg("start creating aqua files with worker info");
     await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+    const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     const createdDealsText =
       Object.values(createdDeals).length === 0
@@ -235,9 +263,27 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     commandObj.log(
       `\n\n${color.yellow("Success!")}${createdDealsText}${updatedDealsText}`,
     );
+
+    await disconnectFluenceClient();
   }
 }
 
 const getLinkToAddress = (dealId: string) => {
-  return `https://explorer.testnet.aurora.dev/address/${dealId}`;
+  return `https://mumbai.polygonscan.com/address/${dealId}`;
 };
+
+async function upload(tracing: boolean, uploadArg: Upload_deployArgConfig) {
+  if (tracing) {
+    const { upload } = await import(
+      "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js"
+    );
+
+    return upload(uploadArg);
+  }
+
+  const { upload } = await import(
+    "../../lib/compiled-aqua/installation-spell/upload.js"
+  );
+
+  return upload(uploadArg);
+}

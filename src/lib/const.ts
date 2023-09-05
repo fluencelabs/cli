@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type {
   Flag,
@@ -45,22 +44,15 @@ export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
-export const CHAIN_NETWORKS = [
-  "local",
-  "testnet",
-  //  "mainnet"
-] as const;
+export const CONTRACTS_ENV = ["testnet", "local"] as const;
+export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
-export const DEFAULT_CHAIN_NETWORK = CHAIN_NETWORKS[1];
+export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[1];
 
-export const isChainNetwork = getIsStringUnion(CHAIN_NETWORKS);
-export type ChainNetwork = (typeof CHAIN_NETWORKS)[number];
+export const isChainNetwork = getIsStringUnion(CONTRACTS_ENV);
 
 export type ChainConfig = {
   ethereumNodeUrl: string;
-  coreAddress: string;
-  dealFactoryAddress: string;
-  developerFaucetAddress: string;
   chainId: number;
 };
 
@@ -72,25 +64,19 @@ export const WC_METADATA = {
   url: GITHUB_REPO_NAME,
   icons: [],
 };
-export const DEAL_CONFIG: Record<ChainNetwork, ChainConfig> = {
+export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
+  testnet: {
+    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
+    chainId: 80001,
+  },
   local: {
     ethereumNodeUrl: "http://127.0.0.1:8545",
-    coreAddress: "0x42e59295F72a5B31884d8532396C0D89732c8e84",
-    dealFactoryAddress: "0xea6777e8c011E7968605fd012A9Dd49401ec386C",
-    developerFaucetAddress: "0x3D56d40F298AaC494EE4612d39edF591ed8C5c69",
     chainId: 31_337,
-  },
-  testnet: {
-    ethereumNodeUrl: "https://testnet.aurora.dev",
-    coreAddress: "0x11134d4e7a8Fcb28A7eB4f08bf2FE03b0A96E097",
-    dealFactoryAddress: "0xb497e025D3095A197E30Ca84DEc36a637E649868",
-    developerFaucetAddress: "0xbCec12E243Be086bae044AB7857B4AE5a20dB16C",
-    chainId: 1313161555,
   },
 };
 export const DEAL_RPC_CONFIG = {
   31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
-  1313161555: DEAL_CONFIG["testnet"].ethereumNodeUrl,
+  80001: DEAL_CONFIG["testnet"].ethereumNodeUrl,
 };
 
 export const AQUA_EXT = "aqua";
@@ -189,7 +175,7 @@ export const NO_INPUT_FLAG = {
 export const NETWORK_FLAG_NAME = "network";
 export const NETWORK_FLAG = {
   [NETWORK_FLAG_NAME]: Flags.string({
-    description: `The network in which the transactions used by the command will be carried out (${CHAIN_NETWORKS.join(
+    description: `The network in which the transactions used by the command will be carried out (${CONTRACTS_ENV.join(
       ", ",
     )})`,
     helpValue: "<network>",
@@ -207,9 +193,10 @@ export const GLOBAL_FLAG = {
 };
 
 export const PRIV_KEY_FLAG = {
-  privKey: Flags.string({
+  "priv-key": Flags.string({
     description:
       "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
+    helpValue: "<private-key>",
   }),
 };
 
@@ -380,27 +367,51 @@ export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
 )}\n\n`;
 
+const RUN_DEPLOYED_SERVICES_FUNCTION = "runDeployedServices";
+export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION}()`;
+
 const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices
 
+data Worker:
+    pat_id: string
+    host_id: string
+    worker_id: ?string
+
+data Subnet:
+    workers: []Worker
+    error: []string
+
 data Answer:
-    answer: string
-    peer: string
+    answer: ?string
+    worker: Worker
 
-func runDeployedServices() -> *Answer:
+service Connector("fluence_aurora_connector"):
+    resolve_subnet(dealId: string, apiEndpoint: string) -> Subnet
+
+func resolve_subnet(dealId: string) -> Subnet:
+    on HOST_PEER_ID:
+        subnet <- Connector.resolve_subnet(dealId, "http://deal-aurora:8545")
+    <- subnet
+
+func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
     workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.defaultWorker!.dealId
+    dealId = workersInfo.deals.defaultWorker!.dealIdOriginal
     answers: *Answer
-    workers <- resolveSubnetwork(dealId)
-    for w <- workers!:
-        on w.metadata.peer_id via w.metadata.relay_id:
-            answer <- MyService.greeting("fluence")
-            answers <<- Answer(answer=answer, peer=w.metadata.relay_id!)
+    subnet <- resolve_subnet(dealId)
+    for w <- subnet.workers:
+        if w.worker_id == nil:
+            answers <<- Answer(answer=nil, worker=w)
+        else:
+            on w.worker_id! via w.host_id:
+                answer <- MyService.greeting("fluence")
+                answers <<- Answer(answer=?[answer], worker = w)
 
-    <- answers`;
+    <- answers
+`;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
   RUN_DEPLOYED_SERVICE_AQUA,

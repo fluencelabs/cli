@@ -17,10 +17,8 @@
 import assert from "node:assert";
 import path, { join } from "node:path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
-import { parse } from "yaml";
 
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import versions from "../../../versions.json" assert { type: "json" };
@@ -28,11 +26,7 @@ import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-} from "../../const.js";
-import {
   DEFAULT_CHAIN_NETWORK,
-  type ChainNetwork,
-  CHAIN_NETWORKS,
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -44,6 +38,8 @@ import {
   CLI_NAME_FULL,
   CLI_NAME,
   DEFAULT_MARINE_BUILD_ARGS,
+  type ContractsENV,
+  CONTRACTS_ENV,
 } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
@@ -227,7 +223,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   hosts?: Record<string, Host>;
   workers?: Record<string, Worker>;
   deals?: Record<string, Deal>;
-  chainNetwork?: ChainNetwork;
+  chainNetwork?: ContractsENV;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
@@ -412,7 +408,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
     chainNetwork: {
       type: "string",
       description: "The network in which the transactions will be carried out",
-      enum: CHAIN_NETWORKS,
+      enum: CONTRACTS_ENV,
       default: "testnet",
       nullable: true,
     },
@@ -640,7 +636,7 @@ version: 2
 #
 #
 # # The network in which the transactions will be carried out
-# chainNetwork: ${CHAIN_NETWORKS[0]} # default: ${DEFAULT_CHAIN_NETWORK}
+# chainNetwork: ${CONTRACTS_ENV[0]} # default: ${DEFAULT_CHAIN_NETWORK}
 #
 #
 # # The version of the CLI that is compatible with this project.
@@ -685,10 +681,10 @@ const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 
 const migrations: Migrations<Config> = [
-  (config: Config): ConfigV1 => {
+  async (config: Config): Promise<ConfigV1> => {
     if (!validateConfigSchemaV0(config)) {
       throw new Error(
-        `Migration error. Errors: ${validationErrorToString(
+        `Migration error. Errors: ${await validationErrorToString(
           validateConfigSchemaV0.errors,
         )}`,
       );
@@ -717,12 +713,13 @@ const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV2> => {
     if (!validateConfigSchemaV1(config)) {
       throw new Error(
-        `Migration error. Errors: ${validationErrorToString(
+        `Migration error. Errors: ${await validationErrorToString(
           validateConfigSchemaV1.errors,
         )}`,
       );
     }
 
+    const { parse } = await import("yaml");
     const parsedConfig: unknown = parse(await getDefaultConfig());
     assert(validateConfigSchemaV2(parsedConfig));
 
@@ -847,7 +844,7 @@ const validateHostsAndDeals = (
   return workerNamesErrors.length === 0 ? true : workerNamesErrors.join("\n");
 };
 
-const validate: ConfigValidateFunction<LatestConfig> = (config) => {
+const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   if (config.services === undefined) {
     return true;
   }
@@ -856,8 +853,8 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     validateWorkers(config),
     validateHostsAndDeals(config, "hosts"),
     validateHostsAndDeals(config, "deals"),
-    validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
-    validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
+    await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
+    await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
 
   if (typeof validity === "string") {

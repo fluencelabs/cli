@@ -15,15 +15,18 @@
  */
 
 import { spawn } from "node:child_process";
+import { join } from "path";
 
-import oclifColor from "@oclif/color";
-const color = oclifColor.default;
+import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 import { isInteractive } from "./commandObj.js";
-import { MARINE_CARGO_DEPENDENCY } from "./const.js";
+import { CLI_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
+import { dbg } from "./dbg.js";
 import { type Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+
+const PATH_TO_RUN_JS = join(CLI_NAME, "bin", "run.js");
 
 type SpawnParams = Parameters<typeof spawn>;
 
@@ -53,6 +56,14 @@ export const execPromise = async ({
   const printOutput = isInteractive ? printOutputArg : false;
   const allArgs = [...args, ...flagsToArgs(flags)];
   const fullCommand = [command, ...allArgs].join(" ");
+
+  const isRunningCLITest = fullCommand.includes(PATH_TO_RUN_JS);
+
+  dbg(
+    isRunningCLITest
+      ? `${CLI_NAME}${fullCommand.split(PATH_TO_RUN_JS)[1]}`
+      : fullCommand,
+  );
 
   const getCommandFailedMessage = (code: number | null = null) => {
     const exitCodeMessage =
@@ -90,6 +101,10 @@ export const execPromise = async ({
     let stdout = "";
 
     childProcess.stdout?.on("data", (data: Buffer): void => {
+      if (isRunningCLITest) {
+        process.stderr.write(data);
+      }
+
       if (printOutput) {
         process.stdout.write(data);
       }
@@ -100,6 +115,10 @@ export const execPromise = async ({
     let stderr = "";
 
     childProcess.stderr?.on("data", (data: Buffer): void => {
+      if (isRunningCLITest) {
+        process.stderr.write(data);
+      }
+
       if (printOutput) {
         process.stderr.write(data);
       }
