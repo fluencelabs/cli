@@ -3,7 +3,7 @@
   "rust-toolchain": "nightly-2023-06-14-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.7.1",
-    "@fluencelabs/spell": "0.5.13",
+    "@fluencelabs/spell": "0.5.18",
     "@fluencelabs/registry": "0.8.6",
     "@fluencelabs/js-client": "0.0.10",
     "@fluencelabs/fluence-network-environment": "1.1.2"
