@@ -710,14 +710,14 @@ __metadata:
   linkType: hard
 
 "@fluencelabs/installation-spell@npm:^0.5.17":
-  version: 0.5.17
-  resolution: "@fluencelabs/installation-spell@npm:0.5.17"
+  version: 0.5.18
+  resolution: "@fluencelabs/installation-spell@npm:0.5.18"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.17
     "@fluencelabs/aqua-lib": 0.7.1
     "@fluencelabs/registry": 0.8.6
-    "@fluencelabs/spell": 0.5.17
-  checksum: 8c96d00b4a7aa7f5e5c02e69c7e1042d7916fac809dfeff8259c20e139b0f095288f952d2fef3716cb4ee430983ef955652fb572d49812322c5911252129fbc2
+    "@fluencelabs/spell": 0.5.18
+  checksum: a4c25bd478e9875347fb534e920aad80658f019295c633deb387cf07500a210e23875c9e736dbabc057983e174e29feb4c9901e7b0bdcf3e841b09aa54d5b161
   languageName: node
   linkType: hard
 
@@ -770,10 +770,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.17":
-  version: 0.5.17
-  resolution: "@fluencelabs/spell@npm:0.5.17"
-  checksum: b724f68358a5577569704e9dd34ec59929c8c249a6f0bb892e44c5fc0aa205dc2a4bfe48f17a47baf88fa9e4aa17106388c5e2cf54aa51344b55279f17622e45
+"@fluencelabs/spell@npm:0.5.18":
+  version: 0.5.18
+  resolution: "@fluencelabs/spell@npm:0.5.18"
+  checksum: 7fdae47fbd115c1f27e7fd3ab5ed1f8a11e4c9a51c17e028d94410a7a66bfd9b87a1b290b968e290f2e391d9ca75a3d621fa5814565d7ef8e23095e9b410abc1
   languageName: node
   linkType: hard
 
