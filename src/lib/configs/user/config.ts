@@ -119,8 +119,8 @@ countlyConsent: false
 # config version
 version: 0
 
-# # Whether to include commented-out documented config examples in the configs generated with the CLI
-# docsInConfigs: true
+# Whether to include commented-out documented config examples in the configs generated with the CLI
+docsInConfigs: false
 
 # # Last time when CLI checked for updates.
 # # Updates are checked daily unless this field is set to 'disabled'
