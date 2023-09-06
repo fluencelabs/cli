@@ -77,18 +77,22 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       "../../lib/deployWorkers.js"
     );
 
+    await initFluenceClient(flags, fluenceConfig);
+    await doRegisterIpfsClient(true);
+    const { Fluence } = await import("@fluencelabs/js-client");
+    const relayId = (await Fluence.getClient()).getRelayPeerId();
+    const initPeerId = (await Fluence.getClient()).getPeerId();
+
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
       hosts: true,
-      maybeWorkersConfig: workersConfig,
+      workersConfig: workersConfig,
       aquaImports,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
+      initPeerId,
     });
-
-    await initFluenceClient(flags, fluenceConfig);
-    await doRegisterIpfsClient(true);
 
     const uploadDeployResult = await uploadDeploy(
       flags.tracing,
@@ -96,8 +100,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     const timestamp = new Date().toISOString();
-    const { Fluence } = await import("@fluencelabs/js-client");
-    const relayId = (await Fluence.getClient()).getRelayPeerId();
 
     const { newDeployedWorkers, infoToPrint } =
       uploadDeployResult.workers.reduce<{

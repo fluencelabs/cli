@@ -67,6 +67,8 @@ export default class Upload extends BaseCommand<typeof Upload> {
 
     await initFluenceClient(flags, fluenceConfig);
     await doRegisterIpfsClient(true);
+    const { Fluence } = await import("@fluencelabs/js-client");
+    const initPeerId = (await Fluence.getClient()).getPeerId();
 
     const aquaImports = await ensureAquaImports({
       maybeFluenceConfig: fluenceConfig,
@@ -82,6 +84,7 @@ export default class Upload extends BaseCommand<typeof Upload> {
       aquaImports,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
+      initPeerId,
     });
 
     const uploadResult = await upload(flags.tracing, uploadArg);

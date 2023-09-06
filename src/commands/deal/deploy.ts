@@ -102,7 +102,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
-      maybeWorkersConfig: workersConfig,
+      workersConfig,
       fluenceConfig,
       aquaImports,
       noBuild: flags["no-build"],

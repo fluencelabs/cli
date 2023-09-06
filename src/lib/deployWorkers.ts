@@ -125,7 +125,8 @@ type PrepareForDeployArg = {
   aquaImports: Array<string>;
   noBuild: boolean;
   marineBuildArgs: undefined | string;
-  maybeWorkersConfig?: WorkersConfigReadonly;
+  workersConfig?: WorkersConfigReadonly;
+  initPeerId?: string;
   hosts?: boolean;
 };
 
@@ -135,7 +136,8 @@ export const prepareForDeploy = async ({
   aquaImports,
   noBuild,
   marineBuildArgs,
-  maybeWorkersConfig,
+  workersConfig: maybeWorkersConfig,
+  initPeerId: maybeInitPeerId,
   hosts = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
   const hostsOrDealsString = hosts ? "hosts" : "deals";
@@ -586,6 +588,15 @@ export const prepareForDeploy = async ({
         return maybeSpellConfig;
       });
 
+      const dummyDealId =
+        maybeInitPeerId === undefined
+          ? {}
+          : {
+              dummy_deal_id: `${workerName}_${maybeInitPeerId}_${Math.random()
+                .toString()
+                .slice(2)}`,
+            };
+
       return {
         name: workerName,
         hosts: peerIds.map((peerId) => {
@@ -595,6 +606,7 @@ export const prepareForDeploy = async ({
           services,
           spells,
         },
+        ...dummyDealId,
       };
     });
 
