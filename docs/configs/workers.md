@@ -50,6 +50,7 @@ A map of deployed workers
 | Property              | Type                             | Required | Description                                            |
 |-----------------------|----------------------------------|----------|--------------------------------------------------------|
 | `definition`          | string                           | **Yes**  |                                                        |
+| `dummyDealId`         | string                           | **Yes**  |                                                        |
 | `installation_spells` | [object](#installation_spells)[] | **Yes**  | A list of installation spells                          |
 | `relayId`             | string                           | **Yes**  |                                                        |
 | `timestamp`           | string                           | **Yes**  | ISO timestamp of the time when the worker was deployed |
