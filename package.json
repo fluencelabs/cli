@@ -89,7 +89,7 @@
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
-    "@fluencelabs/installation-spell": "https://raw.githubusercontent.com/fluencelabs/cli/dummy-deal-id/fluencelabs.tgz",
+    "@fluencelabs/installation-spell": "https://raw.githubusercontent.com/fluencelabs/cli/dummy-deal-id/fluencelabs-1.tgz",
     "@swc/core": "^1.3.80",
     "@total-typescript/ts-reset": "^0.5.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",

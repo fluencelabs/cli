@@ -85,6 +85,7 @@ export default class Upload extends BaseCommand<typeof Upload> {
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
       initPeerId,
+      directDeploy: true,
     });
 
     const uploadResult = await upload(flags.tracing, uploadArg);

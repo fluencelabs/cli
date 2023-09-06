@@ -128,6 +128,7 @@ type PrepareForDeployArg = {
   workersConfig?: WorkersConfigReadonly;
   initPeerId?: string;
   hosts?: boolean;
+  directDeploy?: boolean;
 };
 
 export const prepareForDeploy = async ({
@@ -139,6 +140,7 @@ export const prepareForDeploy = async ({
   workersConfig: maybeWorkersConfig,
   initPeerId: maybeInitPeerId,
   hosts = false,
+  directDeploy = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
   const hostsOrDealsString = hosts ? "hosts" : "deals";
 
@@ -623,6 +625,7 @@ export const prepareForDeploy = async ({
       connections: { connect: false, disconnect: false },
       blockchain: { start_block: 0, end_block: 0 },
     },
+    direct_deploy: directDeploy,
   };
 };
 

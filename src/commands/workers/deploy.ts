@@ -92,6 +92,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
       initPeerId,
+      directDeploy: true,
     });
 
     const uploadDeployResult = await uploadDeploy(
