@@ -144,6 +144,7 @@ const getLogsArg = async ({
             },
           ],
           name: "",
+          dummy_deal_id: "",
         },
       ],
     };
@@ -200,8 +201,8 @@ const getLogsArg = async ({
       .filter(([name]) => {
         return workersToGetLogsFor.includes(name);
       })
-      .map(([name, config]) => {
-        return { name, ...config };
+      .map(([name, { dummyDealId, ...config }]) => {
+        return { name, dummy_deal_id: dummyDealId, ...config };
       }),
   };
 };

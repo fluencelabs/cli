@@ -588,15 +588,6 @@ export const prepareForDeploy = async ({
         return maybeSpellConfig;
       });
 
-      const dummyDealId =
-        maybeInitPeerId === undefined
-          ? {}
-          : {
-              dummy_deal_id: `${workerName}_${maybeInitPeerId}_${Math.random()
-                .toString()
-                .slice(2)}`,
-            };
-
       return {
         name: workerName,
         hosts: peerIds.map((peerId) => {
@@ -606,7 +597,11 @@ export const prepareForDeploy = async ({
           services,
           spells,
         },
-        ...dummyDealId,
+        dummy_deal_id:
+          maybeWorkersConfig?.hosts?.[workerName]?.dummyDealId ??
+          `${workerName}_${maybeInitPeerId}_${Math.random()
+            .toString()
+            .slice(2)}`,
       };
     });
 
@@ -719,6 +714,7 @@ export const ensureAquaFileWithWorkerInfo = async (
           ],
           relayId: "",
           timestamp: "",
+          dummyDealId: "",
         } satisfies Host);
 
         return [key, value];

@@ -87,7 +87,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
       hosts: true,
-      workersConfig: workersConfig,
+      workersConfig,
       aquaImports,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
@@ -112,11 +112,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           }>
         >;
       }>(
-        (acc, { name, ...worker }) => {
+        (acc, { name, dummy_deal_id: dummyDealId, ...worker }) => {
           return {
             newDeployedWorkers: {
               ...acc.newDeployedWorkers,
-              [name]: { ...worker, timestamp, relayId },
+              [name]: { ...worker, timestamp, relayId, dummyDealId },
             },
             infoToPrint: {
               ...acc.infoToPrint,
