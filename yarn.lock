@@ -597,10 +597,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-lib@npm:0.7.1":
-  version: 0.7.1
-  resolution: "@fluencelabs/aqua-lib@npm:0.7.1"
-  checksum: f91b316420138a6e4ed4137dc10848e5ac60fa0c1ef40894bbcc2e6fc2a5d2534ae2e8601ef6b9e3f2e8c6be427a3ca86ac3112771f57631f8ae262abae75881
+"@fluencelabs/aqua-lib@npm:0.7.2":
+  version: 0.7.2
+  resolution: "@fluencelabs/aqua-lib@npm:0.7.2"
+  checksum: cbca68e2f8e7454d22fe31a4971216aff0601397d7fa864d4d0ab82699762ed6d3707b95093f837c4f9e5382d0406940fd40857acc8665cda2b164a3163a71ed
   languageName: node
   linkType: hard
 
@@ -619,7 +619,7 @@ __metadata:
     "@fluencelabs/aqua-api": ^0.12.0
     "@fluencelabs/deal-aurora": 0.2.12
     "@fluencelabs/fluence-network-environment": ^1.1.2
-    "@fluencelabs/installation-spell": ^0.5.17
+    "@fluencelabs/installation-spell": "https://raw.githubusercontent.com/fluencelabs/cli/dummy-deal-id/fluencelabs-installation-spell-0.5.18.tgz"
     "@fluencelabs/js-client": ^0.1.0
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.23.0
@@ -709,15 +709,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@npm:^0.5.17":
-  version: 0.5.17
-  resolution: "@fluencelabs/installation-spell@npm:0.5.17"
+"@fluencelabs/installation-spell@https://raw.githubusercontent.com/fluencelabs/cli/dummy-deal-id/fluencelabs-installation-spell-0.5.18.tgz":
+  version: 0.5.18
+  resolution: "@fluencelabs/installation-spell@https://raw.githubusercontent.com/fluencelabs/cli/dummy-deal-id/fluencelabs-installation-spell-0.5.18.tgz"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.17
-    "@fluencelabs/aqua-lib": 0.7.1
+    "@fluencelabs/aqua-lib": 0.7.2
     "@fluencelabs/registry": 0.8.6
-    "@fluencelabs/spell": 0.5.17
-  checksum: 8c96d00b4a7aa7f5e5c02e69c7e1042d7916fac809dfeff8259c20e139b0f095288f952d2fef3716cb4ee430983ef955652fb572d49812322c5911252129fbc2
+    "@fluencelabs/spell": 0.5.18
+  checksum: 727a6e25fd63fc2db3f476cd61d34668cb1680b10ecf28135e004217bd0c40dc9efbe6c5f1cc45ee95a8ccacb979ea400ca7edf8662e3dc463414e46563be6b4
   languageName: node
   linkType: hard
 
@@ -770,10 +770,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.17":
-  version: 0.5.17
-  resolution: "@fluencelabs/spell@npm:0.5.17"
-  checksum: b724f68358a5577569704e9dd34ec59929c8c249a6f0bb892e44c5fc0aa205dc2a4bfe48f17a47baf88fa9e4aa17106388c5e2cf54aa51344b55279f17622e45
+"@fluencelabs/spell@npm:0.5.18":
+  version: 0.5.18
+  resolution: "@fluencelabs/spell@npm:0.5.18"
+  checksum: 7fdae47fbd115c1f27e7fd3ab5ed1f8a11e4c9a51c17e028d94410a7a66bfd9b87a1b290b968e290f2e391d9ca75a3d621fa5814565d7ef8e23095e9b410abc1
   languageName: node
   linkType: hard
 
