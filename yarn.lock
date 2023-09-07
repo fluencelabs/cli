@@ -568,9 +568,9 @@ __metadata:
   linkType: hard
 
 "@fluencelabs/air-beautify-wasm@npm:^0.3.3":
-  version: 0.3.3
-  resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.3"
-  checksum: 87f67f82e28d3ccc750b4c85dbe383301ac2b21badfeee3c21ac361d0d002142c5792085168d6bba1786977d52337c778dc32deefecd93e68c121e0a56601fa8
+  version: 0.3.4
+  resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.4"
+  checksum: aa3ff8ee80e4ccf1ba89211df17748554f6b754360859820f3445ebd9ad8c8aa0b362d30dd0e4085700cca6929e1c2d84c34dc0dc2a94cbb58b9d0326c1b6ee9
   languageName: node
   linkType: hard
 
