@@ -261,32 +261,59 @@ describe("integration tests", () => {
         cwd,
       });
 
-      const result = await fluence({
-        args: ["run"],
-        flags: {
-          f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-        },
-        cwd,
-      });
+      let runDeployedServicesTimeoutReached = false;
+      let maybeRunDeployedError: unknown = null;
 
-      const parsedResult = JSON.parse(result);
+      const runDeployedServicesTimeout = setTimeout(() => {
+        runDeployedServicesTimeoutReached = true;
+      }, RUN_DEPLOYED_SERVICES_TIMEOUT);
+
+      while (!runDeployedServicesTimeoutReached) {
+        try {
+          const result = await fluence({
+            args: ["run"],
+            flags: {
+              f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+            },
+            cwd,
+          });
+
+          const parsedResult = JSON.parse(result);
+
+          assert(
+            Array.isArray(parsedResult),
+            `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} is expected to be an array but it is: ${result}`,
+          );
+
+          const arrayOfResults = parsedResult
+            .map(assertHasPeer)
+            .sort(sortPeers);
+
+          const expected = localPeerIds.map((peer) => {
+            return {
+              answer: "Hi, fluence",
+              peer,
+            };
+          });
+
+          // running the deployed services is expected to return a result from each of the localPeers we deployed to
+          expect(arrayOfResults).toEqual(expected);
+          clearTimeout(runDeployedServicesTimeout);
+          break;
+        } catch (e) {
+          maybeRunDeployedError = e;
+          continue;
+        }
+      }
 
       assert(
-        Array.isArray(parsedResult),
-        `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} is expected to be an array but it is: ${result}`,
+        !runDeployedServicesTimeoutReached,
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
+          maybeRunDeployedError instanceof Error
+            ? maybeRunDeployedError.message
+            : String(maybeRunDeployedError)
+        }`,
       );
-
-      const arrayOfResults = parsedResult.map(assertHasPeer).sort(sortPeers);
-
-      const expected = localPeerIds.map((peer) => {
-        return {
-          answer: "Hi, fluence",
-          peer,
-        };
-      });
-
-      // running the deployed services is expected to return a result from each of the localPeers we deployed to
-      expect(arrayOfResults).toEqual(expected);
     },
   );
 
