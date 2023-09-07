@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.7.2...fluence-cli-v0.8.0) (2023-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* add matching and chain networks ([#310](https://github.com/fluencelabs/cli/issues/310))
+
+### Features
+
+* add matching and chain networks ([#310](https://github.com/fluencelabs/cli/issues/310)) ([239bebd](https://github.com/fluencelabs/cli/commit/239bebd03f5b7f32be2383c1aa70117e962a39f3))
+* configs without comments by default [fixes DXJ-465] ([#443](https://github.com/fluencelabs/cli/issues/443)) ([73f6bbe](https://github.com/fluencelabs/cli/commit/73f6bbe22e438ffdd738dfa212e15687f41b6b27))
+* make docs and examples in the configs optional [fixes DXJ-458] ([#436](https://github.com/fluencelabs/cli/issues/436)) ([6ae4307](https://github.com/fluencelabs/cli/commit/6ae4307c06b88c834a3795a4a2edabc283adb197))
+* update dependencies ([#438](https://github.com/fluencelabs/cli/issues/438)) ([84004ae](https://github.com/fluencelabs/cli/commit/84004ae24923af9eca87a6534fb7f357eab5fb31))
+* use dummy deal id for workers deploy [fixes DXJ-373] ([#446](https://github.com/fluencelabs/cli/issues/446)) ([8c430a2](https://github.com/fluencelabs/cli/commit/8c430a28e54f50bb6a253678ff1ca5fe993112ae))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/js-client to v0.1.1 ([#439](https://github.com/fluencelabs/cli/issues/439)) ([311c0ca](https://github.com/fluencelabs/cli/commit/311c0caac466ce84f7d8d1078b74f949551605fb))
+
 ## [0.7.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.7.1...fluence-cli-v0.7.2) (2023-08-28)
 
 
