@@ -4,7 +4,7 @@
   "npm": {
     "@fluencelabs/aqua-lib": "0.7.1",
     "@fluencelabs/spell": "0.5.20",
-    "@fluencelabs/registry": "0.8.6",
+    "@fluencelabs/registry": "0.8.7",
     "@fluencelabs/js-client": "0.1.1",
     "@fluencelabs/fluence-network-environment": "1.1.2"
   },
