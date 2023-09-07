@@ -52,7 +52,7 @@
     "oclif-upload": "yarn oclif-pack && oclif upload tarballs -t 'linux-x64,darwin-x64,darwin-arm64'"
   },
   "dependencies": {
-    "@fluencelabs/air-beautify-wasm": "^0.3.2",
+    "@fluencelabs/air-beautify-wasm": "^0.3.3",
     "@fluencelabs/aqua-api": "^0.12.0",
     "@fluencelabs/deal-aurora": "0.2.12",
     "@fluencelabs/fluence-network-environment": "^1.1.2",
@@ -90,7 +90,7 @@
   },
   "devDependencies": {
     "@fluencelabs/installation-spell": "^0.5.20",
-    "@swc/core": "^1.3.80",
+    "@swc/core": "^1.3.83",
     "@total-typescript/ts-reset": "^0.5.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/debug": "^4.1.8",
@@ -99,7 +99,7 @@
     "@types/inquirer": "^9.0.3",
     "@types/jest": "^29.5.4",
     "@types/lodash-es": "^4.17.8",
-    "@types/node": "^18.17.12",
+    "@types/node": "^18.17.14",
     "@types/platform": "^1.3.4",
     "@types/semver": "^7.5.1",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
