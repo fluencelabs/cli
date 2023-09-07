@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.0...fluence-cli-v0.8.1) (2023-09-07)
+
+
+### Features
+
+* try worker deploy multiple ([#452](https://github.com/fluencelabs/cli/issues/452)) ([adae1fb](https://github.com/fluencelabs/cli/commit/adae1fbb6fd05cdec037f72701ee7e4bf17f01ce))
+* update dependencies ([#451](https://github.com/fluencelabs/cli/issues/451)) ([76f6dd2](https://github.com/fluencelabs/cli/commit/76f6dd227571cc295e1f306b74c57e696aa14041))
+
 ## [0.8.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.7.2...fluence-cli-v0.8.0) (2023-09-07)
 
 
