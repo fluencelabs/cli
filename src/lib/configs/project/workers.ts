@@ -63,6 +63,7 @@ type Deals = Record<string, Deal>;
 
 export type Host = WorkerInfo & {
   relayId: string;
+  dummyDealId: string;
   installation_spells: {
     host_id: string;
     spell_id: string;
@@ -85,6 +86,9 @@ const hostSchema: JSONSchemaType<Host> = {
   ...workerInfoSchema,
   properties: {
     ...workerInfoSchema.properties,
+    dummyDealId: {
+      type: "string",
+    },
     installation_spells: {
       type: "array",
       description: "A list of installation spells",
@@ -100,7 +104,12 @@ const hostSchema: JSONSchemaType<Host> = {
     },
     relayId: { type: "string" },
   },
-  required: [...workerInfoSchema.required, "installation_spells", "relayId"],
+  required: [
+    ...workerInfoSchema.required,
+    "installation_spells",
+    "relayId",
+    "dummyDealId",
+  ],
 } as const;
 
 const dealSchema: JSONSchemaType<Deal> = {

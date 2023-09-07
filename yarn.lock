@@ -597,10 +597,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-lib@npm:0.7.1":
-  version: 0.7.1
-  resolution: "@fluencelabs/aqua-lib@npm:0.7.1"
-  checksum: f91b316420138a6e4ed4137dc10848e5ac60fa0c1ef40894bbcc2e6fc2a5d2534ae2e8601ef6b9e3f2e8c6be427a3ca86ac3112771f57631f8ae262abae75881
+"@fluencelabs/aqua-lib@npm:0.7.2":
+  version: 0.7.2
+  resolution: "@fluencelabs/aqua-lib@npm:0.7.2"
+  checksum: cbca68e2f8e7454d22fe31a4971216aff0601397d7fa864d4d0ab82699762ed6d3707b95093f837c4f9e5382d0406940fd40857acc8665cda2b164a3163a71ed
   languageName: node
   linkType: hard
 
@@ -619,7 +619,7 @@ __metadata:
     "@fluencelabs/aqua-api": ^0.12.0
     "@fluencelabs/deal-aurora": 0.2.12
     "@fluencelabs/fluence-network-environment": ^1.1.2
-    "@fluencelabs/installation-spell": ^0.5.17
+    "@fluencelabs/installation-spell": ^0.5.20
     "@fluencelabs/js-client": ^0.1.0
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.23.0
@@ -709,15 +709,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@npm:^0.5.17":
-  version: 0.5.17
-  resolution: "@fluencelabs/installation-spell@npm:0.5.17"
+"@fluencelabs/installation-spell@npm:^0.5.20":
+  version: 0.5.20
+  resolution: "@fluencelabs/installation-spell@npm:0.5.20"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.17
-    "@fluencelabs/aqua-lib": 0.7.1
+    "@fluencelabs/aqua-lib": 0.7.2
     "@fluencelabs/registry": 0.8.6
-    "@fluencelabs/spell": 0.5.17
-  checksum: 8c96d00b4a7aa7f5e5c02e69c7e1042d7916fac809dfeff8259c20e139b0f095288f952d2fef3716cb4ee430983ef955652fb572d49812322c5911252129fbc2
+    "@fluencelabs/spell": 0.5.20
+  checksum: e299a17948edb727d2a57b3ba24429773e1c7b22f944f9e4bac4775c7647cc1316f1b77e4ea922318ecac5c01f9c5abb391b98e28ce6fbdd0c291a658765daa1
   languageName: node
   linkType: hard
 
@@ -770,10 +770,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.17":
-  version: 0.5.17
-  resolution: "@fluencelabs/spell@npm:0.5.17"
-  checksum: b724f68358a5577569704e9dd34ec59929c8c249a6f0bb892e44c5fc0aa205dc2a4bfe48f17a47baf88fa9e4aa17106388c5e2cf54aa51344b55279f17622e45
+"@fluencelabs/spell@npm:0.5.20":
+  version: 0.5.20
+  resolution: "@fluencelabs/spell@npm:0.5.20"
+  checksum: 7af1c808286e42e8318521a9628de2d950231c303a63be98c333170d51a1f8fef601b9ec890c9e67cf274a2dc8fdb8679745a7c775ccaa5ea55682d1e3c380f6
   languageName: node
   linkType: hard
 
