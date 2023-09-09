@@ -2125,6 +2125,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^2.15.0":
+  version: 2.15.0
+  resolution: "@oclif/core@npm:2.15.0"
+  dependencies:
+    "@types/cli-progress": ^3.11.0
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.12.0
+    debug: ^4.3.4
+    ejs: ^3.1.8
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    slice-ansi: ^4.0.0
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    ts-node: ^10.9.1
+    tslib: ^2.5.0
+    widest-line: ^3.1.0
+    wordwrap: ^1.0.0
+    wrap-ansi: ^7.0.0
+  checksum: a4ef8ad00d9bc7cb48e5847bad7def6947f913875f4b0ecec65ab423a3c2a82c87df173c709c3c25396d545f60d20d17d562c474f66230d76de43061ce22ba90
+  languageName: node
+  linkType: hard
+
 "@oclif/plugin-autocomplete@npm:^2.3.6":
   version: 2.3.6
   resolution: "@oclif/plugin-autocomplete@npm:2.3.6"
@@ -2155,25 +2191,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-not-found@npm:^2.3.32":
-  version: 2.3.37
-  resolution: "@oclif/plugin-not-found@npm:2.3.37"
+"@oclif/plugin-not-found@npm:^2.3.32, @oclif/plugin-not-found@npm:^2.4.0":
+  version: 2.4.1
+  resolution: "@oclif/plugin-not-found@npm:2.4.1"
   dependencies:
-    "@oclif/color": ^1.0.10
-    "@oclif/core": ^2.11.7
-    fast-levenshtein: ^3.0.0
-  checksum: 2cae7df0890b761e3c99cf8276a82ed86548b63f816d724a2a6ae0184fb76a0bd49482717fa330406d30a8973aa13be7f07c79564e8b83fa249e2bd67f38983c
-  languageName: node
-  linkType: hard
-
-"@oclif/plugin-not-found@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "@oclif/plugin-not-found@npm:2.4.0"
-  dependencies:
-    "@oclif/core": ^2.11.10
+    "@oclif/core": ^2.15.0
     chalk: ^4
     fast-levenshtein: ^3.0.0
-  checksum: 54dc4c9a3f71ced2d6a8816f40351d5deaa11002802db684171ab94a4a834b5b38872eb404dd55c67dcedf043558a73281771b00928440776b6049b9b171785e
+  checksum: 7be4e98aeec1cb5127c3bc3c9c89747374c128e677f5457b53972d3abac579b385efdc10fed610345ef792ba9506ac98fa2fb706627e6728a197da276797df1d
   languageName: node
   linkType: hard
 
