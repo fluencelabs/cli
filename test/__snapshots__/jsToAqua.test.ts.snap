@@ -11,7 +11,9 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: [
     "3"
   ]
 ] 1`] = `
-"func res() -> [][]string:
+"aqua SomeModule declares *
+
+func get() -> [][]string:
     <- [
         [
             "1"
@@ -31,7 +33,9 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: [
   -2,
   3
 ] 1`] = `
-"func res() -> []i64:
+"aqua SomeModule declares *
+
+func get() -> []i64:
     <- [
         1,
         -2,
@@ -45,7 +49,9 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: [
   2,
   3
 ] 1`] = `
-"func res() -> []u64:
+"aqua SomeModule declares *
+
+func get() -> []u64:
     <- [
         1,
         2,
@@ -59,7 +65,9 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: [
   2,
   3
 ] 1`] = `
-"func res() -> []f64:
+"aqua SomeModule declares *
+
+func get() -> []f64:
     <- [
         1.1,
         2,
@@ -71,7 +79,9 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: [
 exports[`Conversion from js to aqua Expect test case to match snapshot: {
   "$$optional": 1
 } 1`] = `
-"func res() -> ?u64:
+"aqua SomeModule declares *
+
+func get() -> ?u64:
     <- ?[1]
 "
 `;
@@ -104,27 +114,29 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: {
     "$$isNil": true
   }
 } 1`] = `
-"data ResC:
+"aqua SomeModule declares *
+
+data C:
     f: string
 
-data ResD:
+data D:
     f: string
 
-data Res:
+data ReturnType:
     a: ?u64
     b: ?f64
-    c: ?[]ResC
-    d: ?[]ResD
+    c: ?[]C
+    d: ?[]D
 
-func res() -> Res:
-    <- Res(
+func get() -> ReturnType:
+    <- ReturnType(
         a=nil,
         b=nil,
         c=?[[
-            ResC(
+            C(
                 f="4"
             ),
-            ResC(
+            C(
                 f="5"
             )
         ]],
@@ -152,37 +164,39 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: {
     }
   ]
 } 1`] = `
-"data ResA:
+"aqua SomeModule declares *
+
+data A:
     a: []u64
 
-data ResB:
+data B:
     a: i64
     b: f64
 
-data ResC:
+data C:
     a: string
 
-data Res:
-    a: ResA
-    b: ResB
-    c: []ResC
+data ReturnType:
+    a: A
+    b: B
+    c: []C
 
-func res() -> Res:
-    <- Res(
-        a=ResA(
+func get() -> ReturnType:
+    <- ReturnType(
+        a=A(
             a=[
                 2
             ]
         ),
-        b=ResB(
+        b=B(
             a=-1,
             b=2.2
         ),
         c=[
-            ResC(
+            C(
                 a="4"
             ),
-            ResC(
+            C(
                 a="5"
             )
         ]
@@ -195,14 +209,16 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: {
   "b": [],
   "d": {}
 } 1`] = `
-"data Res:
+"aqua SomeModule declares *
+
+data ReturnType:
     a: ?u8
     b: ?u8
     c: ?u8
     d: ?u8
 
-func res() -> Res:
-    <- Res(
+func get() -> ReturnType:
+    <- ReturnType(
         a=nil,
         b=nil,
         c=nil,
@@ -212,7 +228,9 @@ func res() -> Res:
 `;
 
 exports[`Conversion from js to aqua Expect test case to match snapshot: 1 1`] = `
-"func res() -> u64:
+"aqua SomeModule declares *
+
+func get() -> u64:
     <- 1
 "
 `;

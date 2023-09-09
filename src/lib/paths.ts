@@ -40,7 +40,7 @@ import {
   TMP_DIR_NAME,
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
-  AQUA_WORKERS_FILE_NAME,
+  AQUA_WORKERS_FULL_FILE_NAME,
   SPELLS_DIR_NAME,
   README_MD_FILE_NAME,
 } from "./const.js";
@@ -198,7 +198,7 @@ export const ensureFluenceAquaServicesPath = async (): Promise<string> => {
 };
 
 export const ensureFluenceAquaWorkersPath = async (): Promise<string> => {
-  return path.join(await ensureFluenceAquaDir(), AQUA_WORKERS_FILE_NAME);
+  return path.join(await ensureFluenceAquaDir(), AQUA_WORKERS_FULL_FILE_NAME);
 };
 
 // JS

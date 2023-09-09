@@ -15,15 +15,22 @@
  */
 
 import assert from "assert";
+import { readFile, writeFile } from "fs/promises";
+import { join, sep } from "path";
 
 import { color } from "@oclif/color";
 import camelCase from "lodash-es/camelCase.js";
+import startCase from "lodash-es/startCase.js";
 
 import { commandObj } from "../commandObj.js";
+import { AQUA_EXT, FS_OPTIONS } from "../const.js";
+import { input } from "../prompt.js";
 
 import { capitalize } from "./capitilize.js";
 import { cleanAquaName, validateAquaName } from "./downloadFile.js";
 import { stringifyUnknown } from "./jsonStringify.js";
+
+export const TOP_LEVEL_TYPE_NAME = "ReturnType";
 
 /**
  * In js object, json or yaml when you want to represent optional value and still generate a type for it you can use this syntax:
@@ -86,30 +93,21 @@ const isNilInAqua = <T>(v: T | NilInAqua): v is NilInAqua => {
 
 export const jsToAqua = (
   v: unknown,
-  funcNameFromArgs: string,
+  fileName: string,
   useF64ForAllNumbers = false,
 ): string => {
-  const funcName = camelCase(cleanAquaName(funcNameFromArgs));
-  const funcNameValidity = validateAquaName(funcName);
-
-  if (typeof funcNameValidity === "string") {
-    return commandObj.error(
-      `Failed converting object to aqua. ${color.yellow(
-        funcNameFromArgs,
-      )} ${funcNameValidity}`,
-    );
-  }
+  const moduleName = startCase(cleanAquaName(fileName)).split(" ").join("");
 
   const { type, value, typeDefs } = jsToAquaImpl(
     v,
-    funcName,
+    TOP_LEVEL_TYPE_NAME,
     "",
     useF64ForAllNumbers,
   );
 
-  return `${
+  return `aqua ${moduleName} declares *\n\n${
     typeDefs === undefined ? "" : `${typeDefs}\n\n`
-  }func ${funcName}() -> ${type}:\n    <- ${value}\n`;
+  }func get() -> ${type}:\n    <- ${value}\n`;
 };
 
 const NIL = { type: "?u8", value: "nil" } as const;
@@ -238,7 +236,17 @@ export const jsToAquaImpl = (
 
     if (!/^[A-Z]\w*$/.test(newName)) {
       return error(
-        "Name must start with a letter and contain only letters, numbers and underscores",
+        `Name must start with a letter and contain only letters, numbers and underscores. Got: ${color.yellow(
+          newName,
+        )}`,
+      );
+    }
+
+    if (newName === TOP_LEVEL_TYPE_NAME && nestingLevel > 1) {
+      return error(
+        `Please don't name your top-level property as ${color.yellow(
+          TOP_LEVEL_TYPE_NAME,
+        )}`,
       );
     }
 
@@ -270,7 +278,7 @@ export const jsToAquaImpl = (
         const { type, value, typeDefs } = jsToAquaImpl(
           val,
           key,
-          nestedType,
+          newName === TOP_LEVEL_TYPE_NAME ? "" : nestedType,
           useF64ForAllNumbers,
           newNestingLevel,
         );
@@ -305,3 +313,53 @@ export const jsToAquaImpl = (
 
   return error(`Unsupported type: ${typeof v}`);
 };
+
+export async function fileToAqua(
+  inputPathArg: string | undefined,
+  outputPathArg: string | undefined,
+  f64: boolean,
+  parseFn: (content: string) => unknown,
+) {
+  const inputPath =
+    inputPathArg ?? (await input({ message: "Enter path to input file" }));
+
+  const content = await readFile(inputPath, FS_OPTIONS);
+  const parsedContent = parseFn(content);
+
+  let outputPath = outputPathArg;
+
+  if (outputPath === undefined) {
+    const inputFilePath = inputPath.split(sep);
+    const inputFileNameWithExt = inputFilePath.pop();
+    const inputPathWithoutFileName = inputFilePath.join(sep);
+    assert(inputFileNameWithExt !== undefined);
+    const inputFileNameWithExtArr = inputFileNameWithExt.split(".");
+
+    const outputPathWithoutExt =
+      inputFileNameWithExtArr.length === 1
+        ? inputFileNameWithExtArr[0]
+        : inputFileNameWithExtArr.slice(0, -1).join(".");
+
+    assert(outputPathWithoutExt !== undefined);
+
+    outputPath = join(
+      inputPathWithoutFileName,
+      `${outputPathWithoutExt}.${AQUA_EXT}`,
+    );
+  }
+
+  const fileNameWithExt = outputPath.split(sep).pop();
+  assert(fileNameWithExt !== undefined);
+  const fileNameWithExtArr = fileNameWithExt.split(".");
+  const ext = fileNameWithExtArr.pop();
+
+  if (ext !== "aqua") {
+    commandObj.error("Output file must have .aqua extension");
+  }
+
+  const fileName = fileNameWithExtArr.join(".");
+
+  const aqua = jsToAqua(parsedContent, fileName, f64);
+  await writeFile(outputPath, aqua, FS_OPTIONS);
+  commandObj.logToStderr(`Created aqua file at ${color.yellow(outputPath)}`);
+}

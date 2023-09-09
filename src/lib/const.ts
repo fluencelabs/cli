@@ -125,7 +125,7 @@ export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
-export const AQUA_WORKERS_FILE_NAME = `workers.${AQUA_EXT}`;
+export const AQUA_WORKERS_FULL_FILE_NAME = `${WORKERS_CONFIG_FILE_NAME}.${AQUA_EXT}`;
 export const SPELL_AQUA_FILE_NAME = `spell.${AQUA_EXT}`;
 
 export const GITIGNORE_FILE_NAME = ".gitignore";
@@ -398,8 +398,8 @@ func resolve_subnet(dealId: string) -> Subnet:
     <- subnet
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
-    workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.defaultWorker!.dealIdOriginal
+    workers <- Workers.get()
+    dealId = workers.deals.defaultWorker!.dealIdOriginal
     answers: *Answer
     subnet <- resolve_subnet(dealId)
     for w <- subnet.workers:
@@ -425,7 +425,7 @@ export const getMainAquaFileContent = (
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
 
-import "${AQUA_WORKERS_FILE_NAME}"
+use "${AQUA_WORKERS_FULL_FILE_NAME}"
 import "services.aqua"
 
 -- IMPORTANT: Add exports for all functions that you want to run

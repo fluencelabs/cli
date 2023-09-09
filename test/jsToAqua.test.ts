@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+import camelCase from "lodash-es/camelCase.js";
+
 import { stringifyUnknown } from "../src/lib/helpers/jsonStringify.js";
 import {
+  TOP_LEVEL_TYPE_NAME,
   jsToAqua,
   jsToAquaImpl,
   makeOptional,
 } from "../src/lib/helpers/jsToAqua.js";
 
-const WRAPPER_FUNCTION_NAME = "res";
+const MODULE_NAME = "someModule";
 
 describe("Conversion from js to aqua", () => {
   test.each`
@@ -43,7 +46,7 @@ describe("Conversion from js to aqua", () => {
     "js: $js. value: $value. type: $type. typeDefs: $typeDefs",
     ({ js, value, type, typeDefs }) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      const res = jsToAquaImpl(js, WRAPPER_FUNCTION_NAME, "");
+      const res = jsToAquaImpl(js, MODULE_NAME, "");
 
       /* eslint-disable @typescript-eslint/no-unsafe-member-access */
       expect(res.value).toStrictEqual(value);
@@ -81,31 +84,46 @@ describe("Conversion from js to aqua", () => {
     test(`Expect test case to match snapshot: ${stringifyUnknown(
       testCase,
     )}`, () => {
-      expect(jsToAqua(testCase, WRAPPER_FUNCTION_NAME)).toMatchSnapshot();
+      expect(jsToAqua(testCase, MODULE_NAME)).toMatchSnapshot();
     });
   });
 
   test("array with different element types throws an error", () => {
     expect(() => {
-      jsToAquaImpl([1, "2", true], WRAPPER_FUNCTION_NAME, "");
+      jsToAquaImpl([1, "2", true], MODULE_NAME, "");
     }).toThrowError();
   });
 
   test("array with the objects that contain numbers with the same element types doesn't throw an error", () => {
     expect(() => {
-      jsToAquaImpl([{ n: 1 }, { n: 2 }], WRAPPER_FUNCTION_NAME, "");
+      jsToAquaImpl([{ n: 1 }, { n: 2 }], MODULE_NAME, "");
     }).not.toThrowError();
   });
 
   test("array with the objects that contain numbers with different element types throws an error", () => {
     expect(() => {
-      jsToAquaImpl([{ n: -1 }, { n: 1.1 }], WRAPPER_FUNCTION_NAME, "");
+      jsToAquaImpl([{ n: -1 }, { n: 1.1 }], MODULE_NAME, "");
     }).toThrowError();
   });
 
   test("array with the objects that contain numbers with different element types, but with a f64 flag doesn't throw", () => {
     expect(() => {
-      jsToAquaImpl([{ n: -1 }, { n: 1 }], WRAPPER_FUNCTION_NAME, "", true);
+      jsToAquaImpl([{ n: -1 }, { n: 1 }], MODULE_NAME, "", true);
     }).not.toThrowError();
+  });
+
+  test(`object that contains ${TOP_LEVEL_TYPE_NAME} to throw`, () => {
+    expect(() => {
+      jsToAquaImpl({ [TOP_LEVEL_TYPE_NAME]: { a: 1 } }, MODULE_NAME, "", true);
+    }).toThrowError();
+
+    expect(() => {
+      jsToAquaImpl(
+        { [camelCase(TOP_LEVEL_TYPE_NAME)]: { a: 1 } },
+        MODULE_NAME,
+        "",
+        true,
+      );
+    }).toThrowError();
   });
 });

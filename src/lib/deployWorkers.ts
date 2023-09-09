@@ -47,7 +47,7 @@ import type {
   Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import { FS_OPTIONS } from "./const.js";
+import { WORKERS_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -749,7 +749,7 @@ export const ensureAquaFileWithWorkerInfo = async (
 
   await writeFile(
     await ensureFluenceAquaWorkersPath(),
-    jsToAqua(workersInfo, "getWorkersInfo"),
+    jsToAqua(workersInfo, WORKERS_CONFIG_FILE_NAME),
     FS_OPTIONS,
   );
 };
