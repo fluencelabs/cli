@@ -47,7 +47,7 @@ import type {
   Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import { WORKERS_CONFIG_FILE_NAME, FS_OPTIONS } from "./const.js";
+import { FS_OPTIONS, HOSTS_FILE_NAME, DEALS_FILE_NAME } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -59,7 +59,11 @@ import { jsToAqua, makeOptional } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
-import { ensureFluenceAquaWorkersPath, projectRootDir } from "./paths.js";
+import {
+  ensureFluenceAquaDealsPath,
+  ensureFluenceAquaHostsPath,
+  projectRootDir,
+} from "./paths.js";
 import { checkboxes } from "./prompt.js";
 
 export const parseWorkers = (workerNamesString: string) => {
@@ -725,31 +729,15 @@ export const ensureAquaFileWithWorkerInfo = async (
     ),
   );
 
-  const hasSomeDealWorkers = Object.keys(dealWorkers).length !== 0;
-
-  const hasSomeDirectHostingWorkers =
-    Object.keys(directHostingWorkers).length !== 0;
-
-  if (!hasSomeDealWorkers && !hasSomeDirectHostingWorkers) {
-    return writeFile(await ensureFluenceAquaWorkersPath(), "", FS_OPTIONS);
-  }
-
-  const workersInfo: {
-    deals?: typeof dealWorkers;
-    hosts?: typeof directHostingWorkers;
-  } = {};
-
-  if (hasSomeDealWorkers) {
-    workersInfo.deals = dealWorkers;
-  }
-
-  if (hasSomeDirectHostingWorkers) {
-    workersInfo.hosts = directHostingWorkers;
-  }
+  await writeFile(
+    await ensureFluenceAquaHostsPath(),
+    jsToAqua(directHostingWorkers, HOSTS_FILE_NAME),
+    FS_OPTIONS,
+  );
 
   await writeFile(
-    await ensureFluenceAquaWorkersPath(),
-    jsToAqua(workersInfo, WORKERS_CONFIG_FILE_NAME),
+    await ensureFluenceAquaDealsPath(),
+    jsToAqua(dealWorkers, DEALS_FILE_NAME),
     FS_OPTIONS,
   );
 };

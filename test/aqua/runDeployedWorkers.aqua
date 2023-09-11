@@ -2,8 +2,7 @@ aqua Main
 
 import "@fluencelabs/aqua-lib/builtin.aqua"
 
-import "workers.aqua"
-import "services.aqua"
+use "hosts.aqua"
 
 export runDeployedServices
 
@@ -13,7 +12,7 @@ data Answer:
 
 func runDeployedServices() -> *Answer:
     workersInfo <- getWorkersInfo()
-    installationSpells = workersInfo.hosts.defaultWorker!.installationSpells
+    installationSpells = hosts.defaultWorker!.installationSpells
     answers: *Answer
     for s <- installationSpells:
         on s.workerId via s.hostId:

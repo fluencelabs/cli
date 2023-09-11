@@ -40,9 +40,10 @@ import {
   TMP_DIR_NAME,
   TS_DIR_NAME,
   VSCODE_DIR_NAME,
-  AQUA_WORKERS_FULL_FILE_NAME,
+  DEALS_FULL_FILE_NAME,
   SPELLS_DIR_NAME,
   README_MD_FILE_NAME,
+  HOSTS_FULL_FILE_NAME,
 } from "./const.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
@@ -197,8 +198,12 @@ export const ensureFluenceAquaServicesPath = async (): Promise<string> => {
   return path.join(await ensureFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
 };
 
-export const ensureFluenceAquaWorkersPath = async (): Promise<string> => {
-  return path.join(await ensureFluenceAquaDir(), AQUA_WORKERS_FULL_FILE_NAME);
+export const ensureFluenceAquaHostsPath = async (): Promise<string> => {
+  return path.join(await ensureFluenceAquaDir(), HOSTS_FULL_FILE_NAME);
+};
+
+export const ensureFluenceAquaDealsPath = async (): Promise<string> => {
+  return path.join(await ensureFluenceAquaDir(), DEALS_FULL_FILE_NAME);
 };
 
 // JS
