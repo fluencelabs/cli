@@ -16,13 +16,8 @@
  * limitations under the License.
  */
 
-/* eslint-disable node/shebang */
-
-import path from "node:path";
-import url from "node:url";
-
+// eslint-disable-next-line node/shebang
 import oclif from "@oclif/core";
-import { register } from "ts-node";
 
 import {
   setUpProcessWarningListener,
@@ -33,17 +28,6 @@ setUpProcessWarningListener();
 
 // In dev mode -> use ts-node and dev plugins
 process.env.NODE_ENV = "development";
-
-register({
-  project: path.join(
-    path.dirname(url.fileURLToPath(import.meta.url)),
-    "..",
-    "tsconfig.json",
-  ),
-  transpileOnly: true,
-  swc: true,
-});
-
 // In dev mode, always show stack traces
 oclif.settings.debug = true;
 
