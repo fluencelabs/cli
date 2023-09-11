@@ -3,6 +3,7 @@ aqua Main
 import "@fluencelabs/aqua-lib/builtin.aqua"
 
 use "hosts.aqua"
+import "services.aqua"
 
 export runDeployedServices
 
