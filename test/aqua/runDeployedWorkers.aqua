@@ -11,7 +11,7 @@ data Answer:
     peer: string
 
 func runDeployedServices() -> *Answer:
-    workersInfo <- getWorkersInfo()
+    hosts <- Hosts.get()
     installationSpells = hosts.defaultWorker!.installationSpells
     answers: *Answer
     for s <- installationSpells:
