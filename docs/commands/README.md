@@ -2,8 +2,8 @@
 <!-- commands -->
 * [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
 * [`fluence aqua`](#fluence-aqua)
-* [`fluence aqua json [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-json-func-input-output)
-* [`fluence aqua yml [FUNC] [INPUT] [OUTPUT]`](#fluence-aqua-yml-func-input-output)
+* [`fluence aqua json [INPUT] [OUTPUT]`](#fluence-aqua-json-input-output)
+* [`fluence aqua yml [INPUT] [OUTPUT]`](#fluence-aqua-yml-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
@@ -96,18 +96,17 @@ EXAMPLES
 
 _See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.8.1/dist/commands/aqua.ts)_
 
-## `fluence aqua json [FUNC] [INPUT] [OUTPUT]`
+## `fluence aqua json [INPUT] [OUTPUT]`
 
 Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the json file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
-  $ fluence aqua json [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua json [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
-  FUNC    Name of the exported function
   INPUT   Path to json file
-  OUTPUT  Path to for output file
+  OUTPUT  Path to the output file (must have .aqua extension)
 
 FLAGS
   --f64       Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
@@ -123,18 +122,17 @@ DESCRIPTION
 
 _See code: [dist/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.8.1/dist/commands/aqua/json.ts)_
 
-## `fluence aqua yml [FUNC] [INPUT] [OUTPUT]`
+## `fluence aqua yml [INPUT] [OUTPUT]`
 
 Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua object literal with the same structure as the yaml file. For valid generation please refer to aqua documentation https://fluence.dev/docs/aqua-book/language/ to learn about what kind of structures are valid in aqua language and what they translate into
 
 ```
 USAGE
-  $ fluence aqua yml [FUNC] [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua yml [INPUT] [OUTPUT] [--no-input] [--f64]
 
 ARGUMENTS
-  FUNC    Name of the exported function
   INPUT   Path to yaml file
-  OUTPUT  Path to for output file
+  OUTPUT  Path to the output file (must have .aqua extension)
 
 FLAGS
   --f64       Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
