@@ -53,22 +53,35 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
 
 /**
  * @param {Error | unknown} error
+ * @returns {unknown}
+ */
+function formatError(error) {
+  if (error instanceof CLIError) {
+    return error.message;
+  }
+
+  if (error instanceof Error && typeof error.stack === "string") {
+    return color.red(error.stack);
+  }
+
+  if (typeof error === "object" && error !== null) {
+    return color.red(jsonStringify(error));
+  }
+
+  if (typeof error === "string") {
+    return color.red(error);
+  }
+
+  return error;
+}
+
+/**
+ * @param {Error | unknown} error
  * @returns {never | Promise<void>}
  */
 export const createErrorPromise = async (error) => {
-  /* eslint-disable no-console */
-  if (error instanceof CLIError) {
-    console.error(color.red("Error:"), error.message);
-  } else if (error instanceof Error) {
-    console.error(color.red(error.stack));
-  } else if (typeof error === "object" && error !== null) {
-    console.error(color.red(jsonStringify(error)));
-  } else if (typeof error === "string") {
-    console.error(color.red(error));
-  } else {
-    console.error(color.red("Error:"), error);
-  }
-  /* eslint-enable no-console */
+  // eslint-disable-next-line no-console
+  console.error(color.red("Error:"), formatError(error));
 
   if (!(await isCountlyInitialized())) {
     return exitWithCode1();
