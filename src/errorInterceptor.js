@@ -18,7 +18,10 @@
 
 // eslint-disable-next-line import/extensions
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
+import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
+
+import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -53,13 +56,19 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
  * @returns {never | Promise<void>}
  */
 export const createErrorPromise = async (error) => {
+  /* eslint-disable no-console */
   if (error instanceof CLIError) {
-    // eslint-disable-next-line no-console
-    console.error(`Error: ${error.message}`);
+    console.error(color.red("Error:"), error.message);
+  } else if (error instanceof Error) {
+    console.error(color.red(error.stack));
+  } else if (typeof error === "object" && error !== null) {
+    console.error(color.red(jsonStringify(error)));
+  } else if (typeof error === "string") {
+    console.error(color.red(error));
   } else {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    console.error(color.red("Error:"), error);
   }
+  /* eslint-enable no-console */
 
   if (!(await isCountlyInitialized())) {
     return exitWithCode1();
