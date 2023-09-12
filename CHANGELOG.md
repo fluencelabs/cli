@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.1...fluence-cli-v0.8.2) (2023-09-12)
+
+
+### Features
+
+* update dep and pin fluencelabs dep ([#462](https://github.com/fluencelabs/cli/issues/462)) ([4713517](https://github.com/fluencelabs/cli/commit/4713517e3788d06dfd3a049a2529e77d50b72dd6))
+* update installation spell ([#466](https://github.com/fluencelabs/cli/issues/466)) ([fe3f806](https://github.com/fluencelabs/cli/commit/fe3f806b65faf392de9c1c700493fbf63a086085))
+
 ## [0.8.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.0...fluence-cli-v0.8.1) (2023-09-07)
 
 
