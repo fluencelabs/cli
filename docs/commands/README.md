@@ -102,16 +102,18 @@ Infers aqua types for an arbitrary json file, generates valid aqua code with a f
 
 ```
 USAGE
-  $ fluence aqua json [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua json [INPUT] [OUTPUT] [--no-input] [--f64] [--types <value>]
 
 ARGUMENTS
   INPUT   Path to json file
   OUTPUT  Path to the output file (must have .aqua extension)
 
 FLAGS
-  --f64       Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
-              Without this flag, numbers will be converted to u64, i64 or f64 depending on their value
-  --no-input  Don't interactively ask for any input from the user
+  --f64           Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
+                  Without this flag, numbers will be converted to u64, i64 or f64 depending on their value
+  --no-input      Don't interactively ask for any input from the user
+  --types=<path>  Experimental! Path to a file with custom types. Must be a list with objects that have 'name' and
+                  'properties'. 'properties' must be a list of all custom type properties
 
 DESCRIPTION
   Infers aqua types for an arbitrary json file, generates valid aqua code with a function call that returns an aqua
@@ -128,16 +130,18 @@ Infers aqua types for an arbitrary yaml file, generates valid aqua code with a f
 
 ```
 USAGE
-  $ fluence aqua yml [INPUT] [OUTPUT] [--no-input] [--f64]
+  $ fluence aqua yml [INPUT] [OUTPUT] [--no-input] [--f64] [--types <value>]
 
 ARGUMENTS
   INPUT   Path to yaml file
   OUTPUT  Path to the output file (must have .aqua extension)
 
 FLAGS
-  --f64       Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
-              Without this flag, numbers will be converted to u64, i64 or f64 depending on their value
-  --no-input  Don't interactively ask for any input from the user
+  --f64           Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
+                  Without this flag, numbers will be converted to u64, i64 or f64 depending on their value
+  --no-input      Don't interactively ask for any input from the user
+  --types=<path>  Experimental! Path to a file with custom types. Must be a list with objects that have 'name' and
+                  'properties'. 'properties' must be a list of all custom type properties
 
 DESCRIPTION
   Infers aqua types for an arbitrary yaml file, generates valid aqua code with a function call that returns an aqua
