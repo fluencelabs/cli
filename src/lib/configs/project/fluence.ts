@@ -41,6 +41,7 @@ import {
   type ContractsENV,
   CONTRACTS_ENV,
 } from "../../const.js";
+import { DEFAULT_IPFS_ADDRESS } from "../../const.js";
 import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
   validateAllVersionsAreExact,
@@ -228,6 +229,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   aquaImports?: Array<string>;
   cliVersion?: string;
   [MARINE_BUILD_ARGS_PROPERTY]?: string;
+  ipfsAddress?: string;
 };
 
 const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
@@ -443,6 +445,12 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       type: "string",
       description: `The version of the ${CLI_NAME_FULL} that is compatible with this project. Set this to enforce a particular set of versions of all fluence components`,
       nullable: true,
+    },
+    ipfsAddress: {
+      type: "string",
+      description: `IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} (for 'workers deploy' IPFS address provided by relay that you are connected to is used)`,
+      nullable: true,
+      default: DEFAULT_IPFS_ADDRESS,
     },
   },
 } as const;
@@ -669,6 +677,7 @@ version: 2
 #       - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
 # # Space separated \`cargo build\` flags and args to pass to marine build. Default: ${DEFAULT_MARINE_BUILD_ARGS}
 # ${MARINE_BUILD_ARGS_PROPERTY}: '${DEFAULT_MARINE_BUILD_ARGS}'
+# # IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} (for 'workers deploy' IPFS address provided by relay that you are connected to is used)
 `;
 };
 
