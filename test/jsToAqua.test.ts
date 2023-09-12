@@ -18,13 +18,12 @@ import camelCase from "lodash-es/camelCase.js";
 
 import { stringifyUnknown } from "../src/lib/helpers/jsonStringify.js";
 import {
-  TOP_LEVEL_TYPE_NAME,
   jsToAqua,
   jsToAquaImpl,
   makeOptional,
 } from "../src/lib/helpers/jsToAqua.js";
 
-const MODULE_NAME = "someModule";
+const fileName = "someModule";
 
 describe("Conversion from js to aqua", () => {
   test.each`
@@ -45,8 +44,17 @@ describe("Conversion from js to aqua", () => {
   `(
     "js: $js. value: $value. type: $type. typeDefs: $typeDefs",
     ({ js, value, type, typeDefs }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      const res = jsToAquaImpl(js, MODULE_NAME, "");
+      const valueToConvert: unknown = js;
+
+      const res = jsToAquaImpl({
+        valueToConvert,
+        currentNesting: "",
+        fieldName: fileName,
+        level: "top",
+        sortedCustomTypes: [],
+        useF64ForAllNumbers: false,
+        nestingLevel: 1,
+      });
 
       /* eslint-disable @typescript-eslint/no-unsafe-member-access */
       expect(res.value).toStrictEqual(value);
@@ -80,50 +88,73 @@ describe("Conversion from js to aqua", () => {
       c: makeOptional([{ f: "4" }, { f: "5" }], [{ f: "5" }]),
       d: makeOptional(undefined, [{ f: "5" }]),
     },
-  ].forEach((testCase) => {
+  ].forEach((valueToConvert) => {
     test(`Expect test case to match snapshot: ${stringifyUnknown(
-      testCase,
+      valueToConvert,
     )}`, () => {
-      expect(jsToAqua(testCase, MODULE_NAME)).toMatchSnapshot();
+      expect(jsToAqua({ fileName, valueToConvert })).toMatchSnapshot();
     });
+  });
+
+  test(`Expect custom type to work`, () => {
+    expect(
+      jsToAqua({
+        fileName,
+        valueToConvert: { a: 1, b: { a: 1 }, c: [{ e: { s: 1 } }] },
+        customTypes: [
+          { name: "Works", properties: ["a", "b", "c"] },
+          { name: "Nested", properties: ["a"] },
+          { name: "InsideArray", properties: ["e"] },
+        ],
+      }),
+    ).toMatchSnapshot();
   });
 
   test("array with different element types throws an error", () => {
     expect(() => {
-      jsToAquaImpl([1, "2", true], MODULE_NAME, "");
+      jsToAqua({ valueToConvert: [1, "2", true], fileName });
     }).toThrowError();
   });
 
   test("array with the objects that contain numbers with the same element types doesn't throw an error", () => {
     expect(() => {
-      jsToAquaImpl([{ n: 1 }, { n: 2 }], MODULE_NAME, "");
+      jsToAqua({ valueToConvert: [{ n: 1 }, { n: 2 }], fileName });
     }).not.toThrowError();
   });
 
   test("array with the objects that contain numbers with different element types throws an error", () => {
     expect(() => {
-      jsToAquaImpl([{ n: -1 }, { n: 1.1 }], MODULE_NAME, "");
+      jsToAqua({ valueToConvert: [{ n: -1 }, { n: 1.1 }], fileName });
     }).toThrowError();
   });
 
   test("array with the objects that contain numbers with different element types, but with a f64 flag doesn't throw", () => {
     expect(() => {
-      jsToAquaImpl([{ n: -1 }, { n: 1 }], MODULE_NAME, "", true);
+      jsToAqua({
+        valueToConvert: [{ n: -1 }, { n: 1 }],
+        fileName,
+        useF64ForAllNumbers: true,
+      });
     }).not.toThrowError();
   });
 
-  test(`object that contains ${TOP_LEVEL_TYPE_NAME} to throw`, () => {
+  test(`object that contains ${fileName} to throw`, () => {
     expect(() => {
-      jsToAquaImpl({ [TOP_LEVEL_TYPE_NAME]: { a: 1 } }, MODULE_NAME, "", true);
+      jsToAqua({ valueToConvert: { [fileName]: { a: 1 } }, fileName });
     }).toThrowError();
 
     expect(() => {
-      jsToAquaImpl(
-        { [camelCase(TOP_LEVEL_TYPE_NAME)]: { a: 1 } },
-        MODULE_NAME,
-        "",
-        true,
-      );
+      jsToAqua({
+        valueToConvert: { [camelCase(fileName)]: { a: 1 } },
+        fileName,
+      });
+    }).toThrowError();
+
+    expect(() => {
+      jsToAqua({
+        valueToConvert: [{ [camelCase(fileName)]: [{ a: 1 }] }],
+        fileName,
+      });
     }).toThrowError();
   });
 });

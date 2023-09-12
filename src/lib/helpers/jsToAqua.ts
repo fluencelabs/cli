@@ -19,9 +19,11 @@ import { readFile, writeFile } from "fs/promises";
 import { join, sep } from "path";
 
 import { color } from "@oclif/color";
+import type { JSONSchemaType } from "ajv";
 import camelCase from "lodash-es/camelCase.js";
 import startCase from "lodash-es/startCase.js";
 
+import { validationErrorToString, ajv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { AQUA_EXT, FS_OPTIONS } from "../const.js";
 import { input } from "../prompt.js";
@@ -29,8 +31,6 @@ import { input } from "../prompt.js";
 import { capitalize } from "./capitilize.js";
 import { cleanAquaName, validateAquaName } from "./downloadFile.js";
 import { stringifyUnknown } from "./jsonStringify.js";
-
-export const TOP_LEVEL_TYPE_NAME = "ReturnType";
 
 /**
  * In js object, json or yaml when you want to represent optional value and still generate a type for it you can use this syntax:
@@ -91,22 +91,44 @@ const isNilInAqua = <T>(v: T | NilInAqua): v is NilInAqua => {
   );
 };
 
-export const jsToAqua = (
-  v: unknown,
-  fileName: string,
+function dedupeTypeDefs(typeDefs: string): string {
+  return [...new Set(typeDefs.split("\n\n"))].join("\n\n");
+}
+
+export type JsToAquaArg = {
+  valueToConvert: unknown;
+  fileName: string;
+  useF64ForAllNumbers?: boolean;
+  customTypes?: CustomTypes;
+};
+
+export const jsToAqua = ({
+  valueToConvert,
+  fileName,
   useF64ForAllNumbers = false,
-): string => {
+  customTypes = [],
+}: JsToAquaArg): string => {
   const moduleName = startCase(cleanAquaName(fileName)).split(" ").join("");
 
-  const { type, value, typeDefs } = jsToAquaImpl(
-    v,
-    TOP_LEVEL_TYPE_NAME,
-    "",
+  const sortedCustomTypes = customTypes.map(({ name, properties }) => {
+    return {
+      properties: JSON.stringify(properties.sort()),
+      name,
+    };
+  });
+
+  const { type, value, typeDefs } = jsToAquaImpl({
+    fieldName: moduleName,
+    nestingLevel: 1,
+    currentNesting: "",
+    level: "top",
+    valueToConvert,
     useF64ForAllNumbers,
-  );
+    sortedCustomTypes,
+  });
 
   return `aqua ${moduleName} declares *\n\n${
-    typeDefs === undefined ? "" : `${typeDefs}\n\n`
+    typeDefs === undefined ? "" : `${dedupeTypeDefs(typeDefs)}\n\n`
   }func get() -> ${type}:\n    <- ${value}\n`;
 };
 
@@ -116,41 +138,57 @@ const NUMBER_TYPES = ["u64", "i64", "f64"] as const;
 
 const INDENTATION = "    ";
 
-export const jsToAquaImpl = (
-  v: unknown,
-  fieldName: string,
-  currentNesting: string,
-  useF64ForAllNumbers = false,
-  nestingLevel = 1,
-): { type: string; value: string; typeDefs?: string | undefined } => {
+type JsToAquaImplArg = {
+  valueToConvert: unknown;
+  fieldName: string;
+  currentNesting: string;
+  useF64ForAllNumbers: boolean;
+  nestingLevel: number;
+  sortedCustomTypes: Array<{ name: string; properties: string }>;
+  level: "top" | "second" | "rest";
+};
+
+export const jsToAquaImpl = ({
+  valueToConvert,
+  fieldName,
+  currentNesting,
+  useF64ForAllNumbers,
+  nestingLevel,
+  sortedCustomTypes,
+  level,
+}: JsToAquaImplArg): {
+  type: string;
+  value: string;
+  typeDefs?: string | undefined;
+} => {
   const error = (message: string) => {
     return commandObj.error(
       `Failed converting to aqua. ${message}. At ${color.yellow(
         currentNesting === "" ? "" : `${currentNesting}.`,
-      )}${color.yellow(fieldName)}: ${stringifyUnknown(v)}`,
+      )}${color.yellow(fieldName)}: ${stringifyUnknown(valueToConvert)}`,
     );
   };
 
-  if (typeof v === "string") {
-    return { type: "string", value: `"${v}"` };
+  if (typeof valueToConvert === "string") {
+    return { type: "string", value: `"${valueToConvert}"` };
   }
 
-  if (typeof v === "number") {
-    const isInteger = Number.isInteger(v);
+  if (typeof valueToConvert === "number") {
+    const isInteger = Number.isInteger(valueToConvert);
 
     const type = (() => {
       if (useF64ForAllNumbers || !isInteger) {
         return "f64";
       }
 
-      if (v < 0) {
+      if (valueToConvert < 0) {
         return "i64";
       }
 
       return "u64";
     })();
 
-    const stringNumber = v.toString();
+    const stringNumber = valueToConvert.toString();
 
     const value =
       type === "f64" && isInteger ? `${stringNumber}.0` : stringNumber;
@@ -158,11 +196,11 @@ export const jsToAquaImpl = (
     return { type, value };
   }
 
-  if (typeof v === "boolean") {
-    return { type: "bool", value: v.toString() };
+  if (typeof valueToConvert === "boolean") {
+    return { type: "bool", value: valueToConvert.toString() };
   }
 
-  if (isNilInAqua(v)) {
+  if (isNilInAqua(valueToConvert)) {
     return NIL;
   }
 
@@ -170,15 +208,17 @@ export const jsToAquaImpl = (
   const prevIndent = INDENTATION.repeat(nestingLevel);
   const newIndent = INDENTATION.repeat(newNestingLevel);
 
-  if (Array.isArray(v)) {
-    const mappedToAqua = v.map((val) => {
-      return jsToAquaImpl(
-        val,
+  if (Array.isArray(valueToConvert)) {
+    const mappedToAqua = valueToConvert.map((valueToConvert) => {
+      return jsToAquaImpl({
+        nestingLevel: newNestingLevel,
+        valueToConvert,
         fieldName,
         currentNesting,
         useF64ForAllNumbers,
-        newNestingLevel,
-      );
+        sortedCustomTypes,
+        level: level,
+      });
     });
 
     const firstElementType = mappedToAqua[0]?.type ?? NIL.type;
@@ -230,8 +270,12 @@ export const jsToAquaImpl = (
     };
   }
 
-  if (typeof v === "object") {
-    assert(v !== null, "we checked v is not null with isNilInAqua");
+  if (typeof valueToConvert === "object") {
+    assert(
+      valueToConvert !== null,
+      "we checked v is not null with isNilInAqua",
+    );
+
     const newName = capitalize(camelCase(cleanAquaName(fieldName)));
 
     if (!/^[A-Z]\w*$/.test(newName)) {
@@ -242,29 +286,40 @@ export const jsToAquaImpl = (
       );
     }
 
-    if (newName === TOP_LEVEL_TYPE_NAME && nestingLevel > 1) {
+    if (level === "second" && newName === currentNesting) {
       return error(
-        `Please don't name your top-level property as ${color.yellow(
-          TOP_LEVEL_TYPE_NAME,
-        )}`,
+        `Either rename your file so it is not called as your top-level object property ${color.yellow(
+          newName,
+        )} or pass a custom type name to be used instead`,
       );
     }
 
-    const objectEntries = Object.entries(v);
-    const nestedType = `${currentNesting}${newName}`;
+    const objectEntries: [string, unknown][] = Object.entries(valueToConvert);
+    const objectProperties = JSON.stringify(Object.keys(valueToConvert).sort());
 
-    if (OPTIONAL in v) {
-      const { type, value, typeDefs } = jsToAquaImpl(
-        v[OPTIONAL],
+    const { name: nestedType } = sortedCustomTypes.find(({ properties }) => {
+      return properties === objectProperties;
+    }) ?? {
+      name: level === "rest" ? `${currentNesting}${newName}` : newName,
+    };
+
+    if (OPTIONAL in valueToConvert) {
+      const { type, value, typeDefs } = jsToAquaImpl({
+        valueToConvert: valueToConvert[OPTIONAL],
         fieldName,
         currentNesting,
         useF64ForAllNumbers,
         nestingLevel,
-      );
+        sortedCustomTypes,
+        level,
+      });
 
       return {
         type: `?${type}`,
-        value: IS_NIL in v && v[IS_NIL] === true ? NIL.value : `?[${value}]`,
+        value:
+          IS_NIL in valueToConvert && valueToConvert[IS_NIL] === true
+            ? NIL.value
+            : `?[${value}]`,
         typeDefs,
       };
     }
@@ -274,20 +329,22 @@ export const jsToAquaImpl = (
       keyDataTypes: string[];
       entries: string[];
     }>(
-      ({ keyTypes, keyDataTypes, entries }, [key, val]) => {
-        const { type, value, typeDefs } = jsToAquaImpl(
-          val,
-          key,
-          newName === TOP_LEVEL_TYPE_NAME ? "" : nestedType,
+      ({ keyTypes, keyDataTypes, entries }, [fieldName, valueToConvert]) => {
+        const { type, value, typeDefs } = jsToAquaImpl({
+          currentNesting: nestedType,
+          nestingLevel: newNestingLevel,
+          level: level === "top" ? "second" : "rest",
+          valueToConvert,
+          fieldName,
           useF64ForAllNumbers,
-          newNestingLevel,
-        );
+          sortedCustomTypes,
+        });
 
-        const camelCasedKey = camelCase(cleanAquaName(key));
+        const camelCasedKey = camelCase(cleanAquaName(fieldName));
         const keyValidity = validateAquaName(camelCasedKey);
 
         if (typeof keyValidity === "string") {
-          return error(`Invalid key ${color.yellow(key)} ${keyValidity}`);
+          return error(`Invalid key ${color.yellow(fieldName)} ${keyValidity}`);
         }
 
         return {
@@ -311,20 +368,57 @@ export const jsToAquaImpl = (
     };
   }
 
-  return error(`Unsupported type: ${typeof v}`);
+  return error(`Unsupported type: ${typeof valueToConvert}`);
 };
+
+export type CustomTypes = Array<{ name: string; properties: Array<string> }>;
+
+const customTypesSchema: JSONSchemaType<CustomTypes> = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      name: { type: "string" },
+      properties: {
+        type: "array",
+        items: { type: "string" },
+      },
+    },
+    required: ["name", "properties"],
+  },
+};
+
+const customTypesValidator = ajv.compile(customTypesSchema);
 
 export async function fileToAqua(
   inputPathArg: string | undefined,
   outputPathArg: string | undefined,
-  f64: boolean,
+  useF64ForAllNumbers: boolean,
+  customTypesPath: string | undefined,
   parseFn: (content: string) => unknown,
 ) {
+  let customTypes: CustomTypes = [];
+
+  if (customTypesPath !== undefined) {
+    const content = await readFile(customTypesPath, FS_OPTIONS);
+    const parsedContent = parseFn(content);
+
+    if (!customTypesValidator(parsedContent)) {
+      return commandObj.error(
+        `Invalid custom types file ${color.yellow(
+          customTypesPath,
+        )}: ${await validationErrorToString(customTypesValidator.errors)}`,
+      );
+    }
+
+    customTypes = parsedContent;
+  }
+
   const inputPath =
     inputPathArg ?? (await input({ message: "Enter path to input file" }));
 
   const content = await readFile(inputPath, FS_OPTIONS);
-  const parsedContent = parseFn(content);
+  const valueToConvert = parseFn(content);
 
   let outputPath = outputPathArg;
 
@@ -359,7 +453,13 @@ export async function fileToAqua(
 
   const fileName = fileNameWithExtArr.join(".");
 
-  const aqua = jsToAqua(parsedContent, fileName, f64);
+  const aqua = jsToAqua({
+    valueToConvert,
+    fileName,
+    useF64ForAllNumbers,
+    customTypes,
+  });
+
   await writeFile(outputPath, aqua, FS_OPTIONS);
   commandObj.logToStderr(`Created aqua file at ${color.yellow(outputPath)}`);
 }

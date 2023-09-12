@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Conversion from js to aqua Expect custom type to work 1`] = `
+"aqua SomeModule declares *
+
+data Nested:
+    a: u64
+
+data InsideArrayE:
+    s: u64
+
+data InsideArray:
+    e: InsideArrayE
+
+data Works:
+    a: u64
+    b: Nested
+    c: []InsideArray
+
+func get() -> Works:
+    <- Works(
+        a=1,
+        b=Nested(
+            a=1
+        ),
+        c=[
+            InsideArray(
+                e=InsideArrayE(
+                    s=1
+                )
+            )
+        ]
+    )
+"
+`;
+
 exports[`Conversion from js to aqua Expect test case to match snapshot: [
   [
     "1"
@@ -122,14 +156,14 @@ data C:
 data D:
     f: string
 
-data ReturnType:
+data SomeModule:
     a: ?u64
     b: ?f64
     c: ?[]C
     d: ?[]D
 
-func get() -> ReturnType:
-    <- ReturnType(
+func get() -> SomeModule:
+    <- SomeModule(
         a=nil,
         b=nil,
         c=?[[
@@ -176,13 +210,13 @@ data B:
 data C:
     a: string
 
-data ReturnType:
+data SomeModule:
     a: A
     b: B
     c: []C
 
-func get() -> ReturnType:
-    <- ReturnType(
+func get() -> SomeModule:
+    <- SomeModule(
         a=A(
             a=[
                 2
@@ -211,14 +245,14 @@ exports[`Conversion from js to aqua Expect test case to match snapshot: {
 } 1`] = `
 "aqua SomeModule declares *
 
-data ReturnType:
+data SomeModule:
     a: ?u8
     b: ?u8
     c: ?u8
     d: ?u8
 
-func get() -> ReturnType:
-    <- ReturnType(
+func get() -> SomeModule:
+    <- SomeModule(
         a=nil,
         b=nil,
         c=nil,

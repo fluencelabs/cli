@@ -17,7 +17,7 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { AQUA_EXT, USE_F64_FLAG } from "../../lib/const.js";
+import { CUSTOM_TYPES_FLAG, AQUA_EXT, USE_F64_FLAG } from "../../lib/const.js";
 import { fileToAqua } from "../../lib/helpers/jsToAqua.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -27,6 +27,7 @@ export default class Json extends BaseCommand<typeof Json> {
   static override flags = {
     ...baseFlags,
     ...USE_F64_FLAG,
+    ...CUSTOM_TYPES_FLAG,
   };
   static override args = {
     INPUT: Args.string({
@@ -39,6 +40,13 @@ export default class Json extends BaseCommand<typeof Json> {
 
   async run(): Promise<void> {
     const { args, flags } = await initCli(this, await this.parse(Json));
-    await fileToAqua(args.INPUT, args.OUTPUT, flags.f64, JSON.parse);
+
+    await fileToAqua(
+      args.INPUT,
+      args.OUTPUT,
+      flags.f64,
+      flags.types,
+      JSON.parse,
+    );
   }
 }

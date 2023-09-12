@@ -219,6 +219,14 @@ export const USE_F64_FLAG = {
   }),
 };
 
+export const CUSTOM_TYPES_FLAG = {
+  types: Flags.string({
+    description:
+      "Experimental! Path to a file with custom types. Must be a list with objects that have 'name' and 'properties'. 'properties' must be a list of all custom type properties",
+    helpValue: "<path>",
+  }),
+};
+
 export const NO_BUILD_FLAG = {
   "no-build": Flags.boolean({
     default: false,

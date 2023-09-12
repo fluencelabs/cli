@@ -17,7 +17,7 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { USE_F64_FLAG, AQUA_EXT } from "../../lib/const.js";
+import { CUSTOM_TYPES_FLAG, USE_F64_FLAG, AQUA_EXT } from "../../lib/const.js";
 import { fileToAqua } from "../../lib/helpers/jsToAqua.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -28,6 +28,7 @@ export default class Yaml extends BaseCommand<typeof Yaml> {
   static override flags = {
     ...baseFlags,
     ...USE_F64_FLAG,
+    ...CUSTOM_TYPES_FLAG,
   };
   static override args = {
     INPUT: Args.string({
@@ -41,6 +42,6 @@ export default class Yaml extends BaseCommand<typeof Yaml> {
   async run(): Promise<void> {
     const { args, flags } = await initCli(this, await this.parse(Yaml));
     const { parse } = await import("yaml");
-    await fileToAqua(args.INPUT, args.OUTPUT, flags.f64, parse);
+    await fileToAqua(args.INPUT, args.OUTPUT, flags.f64, flags.types, parse);
   }
 }
