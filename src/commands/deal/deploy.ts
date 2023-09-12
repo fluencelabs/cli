@@ -40,6 +40,7 @@ import {
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
   DEFAULT_IPFS_ADDRESS,
+  IPFS_ADDR_PROPERTY,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -118,7 +119,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const uploadResult = await upload(
       flags.tracing,
       uploadArg,
-      fluenceConfig.ipfsAddress ?? DEFAULT_IPFS_ADDRESS,
+      fluenceConfig[IPFS_ADDR_PROPERTY] ?? DEFAULT_IPFS_ADDRESS,
     );
 
     const createdDeals: Record<

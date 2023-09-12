@@ -34,7 +34,7 @@ export const CLI_NAME_FULL = "Fluence CLI";
 export const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
 export const PACKAGE_NAME = "@fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
-export const DEFAULT_IPFS_ADDRESS = "";
+export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
 
 export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
 export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
@@ -242,6 +242,7 @@ export const TRACING_FLAG = {
 
 export const MARINE_BUILD_ARGS_FLAG_NAME = "marine-build-args";
 export const MARINE_BUILD_ARGS_PROPERTY = "marineBuildArgs";
+export const IPFS_ADDR_PROPERTY = "ipfsAddr";
 
 export const MARINE_BUILD_ARGS_FLAG = {
   [MARINE_BUILD_ARGS_FLAG_NAME]: Flags.string({
