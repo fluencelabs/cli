@@ -39,6 +39,8 @@ import {
   NO_BUILD_FLAG,
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
+  DEFAULT_IPFS_ADDRESS,
+  IPFS_ADDR_PROPERTY,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -114,7 +116,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     await doRegisterIpfsClient(true);
     dbg("start running upload");
 
-    const uploadResult = await upload(flags.tracing, uploadArg);
+    const uploadResult = await upload(
+      flags.tracing,
+      uploadArg,
+      fluenceConfig[IPFS_ADDR_PROPERTY] ?? DEFAULT_IPFS_ADDRESS,
+    );
 
     const createdDeals: Record<
       string,
@@ -272,18 +278,22 @@ const getLinkToAddress = (dealId: string) => {
   return `https://mumbai.polygonscan.com/address/${dealId}`;
 };
 
-async function upload(tracing: boolean, uploadArg: Upload_deployArgConfig) {
+async function upload(
+  tracing: boolean,
+  uploadArg: Upload_deployArgConfig,
+  ipfsAddress: string,
+) {
   if (tracing) {
-    const { upload } = await import(
+    const { upload_deal } = await import(
       "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js"
     );
 
-    return upload(uploadArg);
+    return upload_deal(uploadArg, ipfsAddress);
   }
 
-  const { upload } = await import(
+  const { upload_deal } = await import(
     "../../lib/compiled-aqua/installation-spell/upload.js"
   );
 
-  return upload(uploadArg);
+  return upload_deal(uploadArg, ipfsAddress);
 }

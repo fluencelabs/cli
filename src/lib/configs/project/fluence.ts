@@ -23,6 +23,7 @@ import type { JSONSchemaType } from "ajv";
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import versions from "../../../versions.json" assert { type: "json" };
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
+import { IPFS_ADDR_PROPERTY, DEFAULT_IPFS_ADDRESS } from "../../const.js";
 import {
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
@@ -228,6 +229,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   aquaImports?: Array<string>;
   cliVersion?: string;
   [MARINE_BUILD_ARGS_PROPERTY]?: string;
+  [IPFS_ADDR_PROPERTY]?: string;
 };
 
 const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
@@ -443,6 +445,12 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
       type: "string",
       description: `The version of the ${CLI_NAME_FULL} that is compatible with this project. Set this to enforce a particular set of versions of all fluence components`,
       nullable: true,
+    },
+    [IPFS_ADDR_PROPERTY]: {
+      type: "string",
+      description: `IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} (for 'workers deploy' IPFS address provided by relay that you are connected to is used)`,
+      nullable: true,
+      default: DEFAULT_IPFS_ADDRESS,
     },
   },
 } as const;
@@ -669,6 +677,8 @@ version: 2
 #       - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
 # # Space separated \`cargo build\` flags and args to pass to marine build. Default: ${DEFAULT_MARINE_BUILD_ARGS}
 # ${MARINE_BUILD_ARGS_PROPERTY}: '${DEFAULT_MARINE_BUILD_ARGS}'
+# # IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} (for 'workers deploy' IPFS address provided by relay that you are connected to is used)
+# ${IPFS_ADDR_PROPERTY}: '${DEFAULT_IPFS_ADDRESS}'
 `;
 };
 
