@@ -85,7 +85,6 @@ export default class Upload extends BaseCommand<typeof Upload> {
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
       initPeerId,
-      directDeploy: true,
     });
 
     const uploadResult = await upload(flags.tracing, uploadArg);
@@ -96,16 +95,16 @@ export default class Upload extends BaseCommand<typeof Upload> {
 
 async function upload(tracing: boolean, uploadArg: Upload_deployArgConfig) {
   if (tracing) {
-    const { upload } = await import(
+    const { upload_workers } = await import(
       "../../lib/compiled-aqua-with-tracing/installation-spell/upload.js"
     );
 
-    return upload(uploadArg);
+    return upload_workers(uploadArg);
   }
 
-  const { upload } = await import(
+  const { upload_workers } = await import(
     "../../lib/compiled-aqua/installation-spell/upload.js"
   );
 
-  return upload(uploadArg);
+  return upload_workers(uploadArg);
 }
