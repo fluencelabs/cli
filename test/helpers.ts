@@ -30,6 +30,9 @@ import {
   CLI_NAME,
   type Template,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+  // FLUENCE_CONFIG_FULL_FILE_NAME,
+  // FS_OPTIONS,
+  // IPFS_ADDR_PROPERTY,
 } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
@@ -41,6 +44,8 @@ import {
   RUN_TESTS_IN_PARALLEL,
 } from "../src/lib/setupEnvironment.js";
 import { assertHasKey } from "../src/lib/typeHelpers.js";
+
+// const TEST_IPFS_ADDR = "/ip4/127.0.0.1/tcp/5001";
 
 export const multiaddrs = {
   kras: krasnodar,
@@ -128,6 +133,14 @@ export const initFirstTime = async (template: Template) => {
       });
     }
   }
+
+  // const projectConfigPath = join(templatePath, FLUENCE_CONFIG_FULL_FILE_NAME);
+  // const projectConfigContent = await readFile(projectConfigPath, FS_OPTIONS);
+
+  // await writeFile(
+  //   projectConfigPath,
+  //   `${projectConfigContent}\n${IPFS_ADDR_PROPERTY}: ${TEST_IPFS_ADDR}`,
+  // );
 
   // eslint-disable-next-line no-console
   console.log(`Initialized template "${template}"`);

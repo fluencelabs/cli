@@ -1,18 +1,9 @@
-networks:
-  nox:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.50.10.0/24
-
 services:
   deal-aurora:
     image: "${DEAL_AURORA_IMAGE:-docker.fluence.dev/aurora:0.2.11}"
     pull_policy: always
     ports:
       - 8545:8545
-    networks:
-      nox:
 
   ipfs:
     image: ipfs/go-ipfs
@@ -24,9 +15,6 @@ services:
       IPFS_PROFILE: server
     volumes:
       - ./ipfs/:/container-init.d/
-    networks:
-      nox:
-        ipv4_address: 10.50.10.100
 
   nox-1:
     image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.5}"
@@ -35,9 +23,9 @@ services:
       - 7771:7771
       - 9991:9991
     environment:
-      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/127.0.0.1/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/dns4/ipfs/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://deal-aurora:8545
-      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_FROM_BLOCK: earliest
       WASM_LOG: "info"
       RUST_LOG: "debug,particle_reap=debug,aquamarine=warn,aquamarine::particle_functions=debug,aquamarine::log=debug,aquamarine::aqua_runtime=error,ipfs_effector=off,ipfs_pure=off,system_services=debug,marine_core::module::marine_module=info,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=trace,wasmtime_cranelift=off,wasmtime_jit=off,libp2p_tcp=off,libp2p_swarm=off,particle_protocol::libp2p_protocol::upgrade=info,libp2p_mplex=off,particle_reap=off,netlink_proto=warn"
@@ -51,7 +39,6 @@ services:
       - --aqua-pool-size=5
       - -t=7771
       - -w=9991
-      - -x=10.50.10.10
       - --external-maddrs
       - /dns4/nox-1/tcp/7771
       - /dns4/nox-1/tcp/9991/ws
@@ -62,9 +49,6 @@ services:
       - -k=hK62afickoeP2uZbmSkAYXxxqP8ozq16VRN7qfTP719EHC5V5tjrtW57BSjUr8GvsEXmJRbtejUWyPZ2rZMyQdq
     depends_on:
       - ipfs
-    networks:
-      nox:
-        ipv4_address: 10.50.10.10
 
   nox-2:
     image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.5}"
@@ -73,9 +57,9 @@ services:
       - 7772:7772
       - 9992:9992
     environment:
-      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/127.0.0.1/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/dns4/ipfs/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://deal-aurora:8545
-      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_FROM_BLOCK: earliest
       WASM_LOG: "info"
       RUST_LOG: "debug,particle_reap=debug,aquamarine=warn,aquamarine::particle_functions=debug,aquamarine::log=debug,aquamarine::aqua_runtime=error,ipfs_effector=off,ipfs_pure=off,system_services=debug,marine_core::module::marine_module=info,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=trace,wasmtime_cranelift=off,wasmtime_jit=off,libp2p_tcp=off,libp2p_swarm=off,particle_protocol::libp2p_protocol::upgrade=info,libp2p_mplex=off,particle_reap=off,netlink_proto=warn"
@@ -89,7 +73,6 @@ services:
       - --aqua-pool-size=5
       - -t=7772
       - -w=9992
-      - -x=10.50.10.20
       - --external-maddrs
       - /dns4/nox-2/tcp/7772
       - /dns4/nox-2/tcp/9992/ws
@@ -99,9 +82,6 @@ services:
       - -k=2WijTVdhVRzyZamWjqPx4V4iNMrajegNMwNa2PmvPSZV6RRpo5M2fsPWdQr22HVRubuJhhSw8BrWiGt6FPhFAuXy
     depends_on:
       - ipfs
-    networks:
-      nox:
-        ipv4_address: 10.50.10.20
 
   nox-3:
     image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.5}"
@@ -110,9 +90,9 @@ services:
       - 7773:7773
       - 9993:9993
     environment:
-      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: "/ip4/127.0.0.1/tcp/5001"
+      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/dns4/ipfs/tcp/5001"
       FLUENCE_ENV_CONNECTOR_API_ENDPOINT: http://deal-aurora:8545
-      FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: "/ip4/10.50.10.100/tcp/5001"
       FLUENCE_ENV_CONNECTOR_FROM_BLOCK: earliest
       WASM_LOG: "info"
       RUST_LOG: "debug,particle_reap=debug,aquamarine=warn,aquamarine::particle_functions=debug,aquamarine::log=debug,aquamarine::aqua_runtime=error,ipfs_effector=off,ipfs_pure=off,system_services=debug,marine_core::module::marine_module=info,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=trace,wasmtime_cranelift=off,wasmtime_jit=off,libp2p_tcp=off,libp2p_swarm=off,particle_protocol::libp2p_protocol::upgrade=info,libp2p_mplex=off,particle_reap=off,netlink_proto=warn"
@@ -126,7 +106,6 @@ services:
       - --aqua-pool-size=5
       - -t=7773
       - -w=9993
-      - -x=10.50.10.30
       - --external-maddrs
       - /dns4/nox-3/tcp/7773
       - /dns4/nox-3/tcp/9993/ws
@@ -136,6 +115,3 @@ services:
       - -k=2n2wBVanBeu2GWtvKBdrYK9DJAocgG3PrTUXMharq6TTfxqTL4sLdXL9BF23n6rsnkAY5pR9vBtx2uWYDQAiZdrX
     depends_on:
       - ipfs
-    networks:
-      nox:
-        ipv4_address: 10.50.10.30
