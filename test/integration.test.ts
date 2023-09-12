@@ -258,6 +258,9 @@ describe("integration tests", () => {
 
       await fluence({
         args: ["workers", "deploy"],
+        flags: {
+          tracing: true,
+        },
         cwd,
       });
 
