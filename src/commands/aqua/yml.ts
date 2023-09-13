@@ -17,7 +17,7 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { CUSTOM_TYPES_FLAG, USE_F64_FLAG, AQUA_EXT } from "../../lib/const.js";
+import { CUSTOM_TYPES_FLAG, USE_F64_FLAG } from "../../lib/const.js";
 import { fileToAqua } from "../../lib/helpers/jsToAqua.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -35,7 +35,7 @@ export default class Yaml extends BaseCommand<typeof Yaml> {
       description: "Path to yaml file",
     }),
     OUTPUT: Args.string({
-      description: `Path to the output file (must have .${AQUA_EXT} extension)`,
+      description: `Path to the output dir`,
     }),
   };
 

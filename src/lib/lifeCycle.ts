@@ -250,12 +250,11 @@ const ensureCorrectCliVersion = async (
       )}${SEPARATOR}`,
     );
 
-    if (
-      await confirm({
-        message:
-          "Do you want me to continue checking for updates once per day?",
-      })
-    ) {
+    const isCheckingForUpdates = await confirm({
+      message: "Do you want me to continue checking for updates once per day?",
+    });
+
+    if (!isCheckingForUpdates) {
       userConfig.lastCheckForUpdates = CHECK_FOR_UPDATES_DISABLED;
       await userConfig.$commit();
 

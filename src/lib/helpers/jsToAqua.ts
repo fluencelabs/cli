@@ -15,8 +15,8 @@
  */
 
 import assert from "assert";
-import { readFile, writeFile } from "fs/promises";
-import { join, sep } from "path";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import { dirname, join, parse } from "path";
 
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
@@ -108,7 +108,9 @@ export const jsToAqua = ({
   useF64ForAllNumbers = false,
   customTypes = [],
 }: JsToAquaArg): string => {
-  const moduleName = startCase(cleanAquaName(fileName)).split(" ").join("");
+  const moduleName = startCase(cleanAquaName(camelCase(fileName)))
+    .split(" ")
+    .join("");
 
   const sortedCustomTypes = customTypes.map(({ name, properties }) => {
     return {
@@ -392,7 +394,7 @@ const customTypesValidator = ajv.compile(customTypesSchema);
 
 export async function fileToAqua(
   inputPathArg: string | undefined,
-  outputPathArg: string | undefined,
+  outputDirPathArg: string | undefined,
   useF64ForAllNumbers: boolean,
   customTypesPath: string | undefined,
   parseFn: (content: string) => unknown,
@@ -420,38 +422,15 @@ export async function fileToAqua(
   const content = await readFile(inputPath, FS_OPTIONS);
   const valueToConvert = parseFn(content);
 
-  let outputPath = outputPathArg;
+  const inputPathDir = dirname(inputPath);
+  const fileName = parse(inputPath).name;
+  const fileNameWithExt = `${fileName}.${AQUA_EXT}`;
+  let outputPath = join(inputPathDir, fileNameWithExt);
 
-  if (outputPath === undefined) {
-    const inputFilePath = inputPath.split(sep);
-    const inputFileNameWithExt = inputFilePath.pop();
-    const inputPathWithoutFileName = inputFilePath.join(sep);
-    assert(inputFileNameWithExt !== undefined);
-    const inputFileNameWithExtArr = inputFileNameWithExt.split(".");
-
-    const outputPathWithoutExt =
-      inputFileNameWithExtArr.length === 1
-        ? inputFileNameWithExtArr[0]
-        : inputFileNameWithExtArr.slice(0, -1).join(".");
-
-    assert(outputPathWithoutExt !== undefined);
-
-    outputPath = join(
-      inputPathWithoutFileName,
-      `${outputPathWithoutExt}.${AQUA_EXT}`,
-    );
+  if (typeof outputDirPathArg === "string") {
+    await mkdir(outputDirPathArg, { recursive: true });
+    outputPath = join(outputDirPathArg, fileNameWithExt);
   }
-
-  const fileNameWithExt = outputPath.split(sep).pop();
-  assert(fileNameWithExt !== undefined);
-  const fileNameWithExtArr = fileNameWithExt.split(".");
-  const ext = fileNameWithExtArr.pop();
-
-  if (ext !== "aqua") {
-    commandObj.error("Output file must have .aqua extension");
-  }
-
-  const fileName = fileNameWithExtArr.join(".");
 
   const aqua = jsToAqua({
     valueToConvert,
