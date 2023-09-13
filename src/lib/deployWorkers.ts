@@ -47,7 +47,7 @@ import type {
   Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import { FS_OPTIONS } from "./const.js";
+import { FS_OPTIONS, HOSTS_FILE_NAME, DEALS_FILE_NAME } from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -55,11 +55,19 @@ import {
   isUrl,
 } from "./helpers/downloadFile.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
-import { jsToAqua, makeOptional } from "./helpers/jsToAqua.js";
+import {
+  jsToAqua,
+  makeOptional,
+  type CustomTypes,
+} from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
-import { ensureFluenceAquaWorkersPath, projectRootDir } from "./paths.js";
+import {
+  ensureFluenceAquaDealsPath,
+  ensureFluenceAquaHostsPath,
+  projectRootDir,
+} from "./paths.js";
 import { checkboxes } from "./prompt.js";
 
 export const parseWorkers = (workerNamesString: string) => {
@@ -671,6 +679,29 @@ const validateWasmExist = async (
   }
 };
 
+const emptyDeal: Deal = {
+  dealId: "",
+  chainNetwork: "testnet",
+  chainNetworkId: 0,
+  dealIdOriginal: "",
+  definition: "",
+  timestamp: "",
+};
+
+const emptySpellIds: Host["installation_spells"][number] = {
+  host_id: "",
+  spell_id: "",
+  worker_id: "",
+};
+
+const emptyHosts: Host = {
+  definition: "",
+  installation_spells: [emptySpellIds],
+  relayId: "",
+  timestamp: "",
+  dummyDealId: "",
+};
+
 export const ensureAquaFileWithWorkerInfo = async (
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly,
@@ -681,16 +712,7 @@ export const ensureAquaFileWithWorkerInfo = async (
         const key = workerName;
         // if worker was deployed put deal info, otherwise put null
         const maybeDeal = "dealId" in info ? info : null;
-
-        const value = makeOptional(maybeDeal, {
-          dealId: "",
-          chainNetwork: "testnet",
-          chainNetworkId: 0,
-          dealIdOriginal: "",
-          definition: "",
-          timestamp: "",
-        } satisfies Deal);
-
+        const value = makeOptional(maybeDeal, emptyDeal);
         return [key, value];
       },
     ),
@@ -702,51 +724,38 @@ export const ensureAquaFileWithWorkerInfo = async (
         const key = workerName;
         // if worker was deployed put hosts info, otherwise put null
         const maybeHost = "relayId" in info ? info : null;
-
-        const value = makeOptional(maybeHost, {
-          definition: "",
-          installation_spells: [
-            {
-              host_id: "",
-              spell_id: "",
-              worker_id: "",
-            },
-          ],
-          relayId: "",
-          timestamp: "",
-          dummyDealId: "",
-        } satisfies Host);
-
+        const value = makeOptional(maybeHost, emptyHosts);
         return [key, value];
       },
     ),
   );
 
-  const hasSomeDealWorkers = Object.keys(dealWorkers).length !== 0;
-
-  const hasSomeDirectHostingWorkers =
-    Object.keys(directHostingWorkers).length !== 0;
-
-  if (!hasSomeDealWorkers && !hasSomeDirectHostingWorkers) {
-    return writeFile(await ensureFluenceAquaWorkersPath(), "", FS_OPTIONS);
-  }
-
-  const workersInfo: {
-    deals?: typeof dealWorkers;
-    hosts?: typeof directHostingWorkers;
-  } = {};
-
-  if (hasSomeDealWorkers) {
-    workersInfo.deals = dealWorkers;
-  }
-
-  if (hasSomeDirectHostingWorkers) {
-    workersInfo.hosts = directHostingWorkers;
-  }
+  const customHostsTypes: CustomTypes = [
+    { name: "Host", properties: Object.keys(emptyHosts) },
+    { name: "SpellLocation", properties: Object.keys(emptySpellIds) },
+  ];
 
   await writeFile(
-    await ensureFluenceAquaWorkersPath(),
-    jsToAqua(workersInfo, "getWorkersInfo"),
+    await ensureFluenceAquaHostsPath(),
+    jsToAqua({
+      valueToConvert: directHostingWorkers,
+      fileName: HOSTS_FILE_NAME,
+      customTypes: customHostsTypes,
+    }),
+    FS_OPTIONS,
+  );
+
+  const customDealsTypes: CustomTypes = [
+    { name: "Deal", properties: Object.keys(emptyDeal) },
+  ];
+
+  await writeFile(
+    await ensureFluenceAquaDealsPath(),
+    jsToAqua({
+      valueToConvert: dealWorkers,
+      fileName: DEALS_FILE_NAME,
+      customTypes: customDealsTypes,
+    }),
     FS_OPTIONS,
   );
 };

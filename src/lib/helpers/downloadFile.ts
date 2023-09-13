@@ -98,8 +98,11 @@ export const validateAquaName = (text: string): true | string => {
   return /^[a-z]\w*$/.test(text) || AQUA_NAME_REQUIREMENTS;
 };
 
-export const cleanAquaName = (text: string): string => {
-  return text.replace(/\W/g, "");
+export const validateAquaTypeName = (text: string): true | string => {
+  return (
+    /^[A-Z]\w*$/.test(text) ||
+    "must start with an uppercase letter and contain only letters, numbers, and underscores"
+  );
 };
 
 const ARCHIVE_FILE = "archive.tar.gz";

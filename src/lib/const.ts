@@ -126,7 +126,10 @@ export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
-export const AQUA_WORKERS_FILE_NAME = `workers.${AQUA_EXT}`;
+export const DEALS_FILE_NAME = "deals";
+export const DEALS_FULL_FILE_NAME = `${DEALS_FILE_NAME}.${AQUA_EXT}`;
+export const HOSTS_FILE_NAME = "hosts";
+export const HOSTS_FULL_FILE_NAME = `${HOSTS_FILE_NAME}.${AQUA_EXT}`;
 export const SPELL_AQUA_FILE_NAME = `spell.${AQUA_EXT}`;
 
 export const GITIGNORE_FILE_NAME = ".gitignore";
@@ -214,6 +217,14 @@ export const USE_F64_FLAG = {
     default: false,
     description:
       "Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them. Without this flag, numbers will be converted to u64, i64 or f64 depending on their value",
+  }),
+};
+
+export const CUSTOM_TYPES_FLAG = {
+  types: Flags.string({
+    description:
+      "Experimental! Path to a file with custom types. Must be a list with objects that have 'name' and 'properties'. 'properties' must be a list of all custom type properties",
+    helpValue: "<path>",
   }),
 };
 
@@ -400,8 +411,8 @@ func resolve_subnet(dealId: string) -> Subnet:
     <- subnet
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
-    workersInfo <- getWorkersInfo()
-    dealId = workersInfo.deals.defaultWorker!.dealIdOriginal
+    deals <- Deals.get()
+    dealId = deals.defaultWorker!.dealIdOriginal
     answers: *Answer
     subnet <- resolve_subnet(dealId)
     for w <- subnet.workers:
@@ -427,7 +438,8 @@ export const getMainAquaFileContent = (
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
 
-import "${AQUA_WORKERS_FILE_NAME}"
+use "${DEALS_FULL_FILE_NAME}"
+use "${HOSTS_FULL_FILE_NAME}"
 import "services.aqua"
 
 -- IMPORTANT: Add exports for all functions that you want to run
