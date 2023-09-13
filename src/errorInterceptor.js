@@ -18,7 +18,10 @@
 
 // eslint-disable-next-line import/extensions
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
+import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
+
+import { jsonStringify } from "./lib/helpers/jsonStringify.js";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -50,16 +53,40 @@ const ERROR_HANDLED_BY_OCLIF_KEY = "errorHandledByOclif";
 
 /**
  * @param {Error | unknown} error
+ * @returns {unknown}
+ */
+function formatError(error) {
+  if (error instanceof CLIError) {
+    // this errors are thrown by us using `commandObj.error` and are already readable and expected, so no additional coloring is needed
+    return error.message;
+  }
+
+  if (error instanceof Error && typeof error.stack === "string") {
+    // most unexpected errors are like this. error.stack also contains error message so we print it
+    return color.red(error.stack);
+  }
+
+  if (typeof error === "object" && error !== null) {
+    // some unexpected errors (e.g. avm) are just js objects - format and paint them red
+    return color.red(jsonStringify(error));
+  }
+
+  if (typeof error === "string") {
+    // some errors can be just strings - it's unexpected - paint them red
+    return color.red(error);
+  }
+
+  // don't stringify/paint unknown stuff, let Node.js just display it
+  return error;
+}
+
+/**
+ * @param {Error | unknown} error
  * @returns {never | Promise<void>}
  */
 export const createErrorPromise = async (error) => {
-  if (error instanceof CLIError) {
-    // eslint-disable-next-line no-console
-    console.error(`Error: ${error.message}`);
-  } else {
-    // eslint-disable-next-line no-console
-    console.error(error);
-  }
+  // eslint-disable-next-line no-console
+  console.error(color.red("Error:"), formatError(error));
 
   if (!(await isCountlyInitialized())) {
     return exitWithCode1();
