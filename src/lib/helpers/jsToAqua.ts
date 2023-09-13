@@ -175,6 +175,11 @@ type JsToAquaImplArg = {
   useF64ForAllNumbers: boolean;
   nestingLevel: number;
   sortedCustomTypes: Array<{ name: string; properties: string }>;
+  /**
+   * "top" - is a top level type returned from the get() function of the module
+   * "second" - are all the types of objects that are direct children of the top level type. Their names are not prefixed
+   * "rest" - all the types. Their names are prefixed with parent type names
+   */
   level: "top" | "second" | "rest";
 };
 
@@ -314,6 +319,7 @@ export const jsToAquaImpl = ({
       );
     }
 
+    // Check "top" level type name is not clashing with the "second" level
     if (level === "second" && newName === currentNesting) {
       return error(
         `Either rename your file so it is not called as your top-level object property ${color.yellow(
@@ -325,9 +331,10 @@ export const jsToAquaImpl = ({
     const objectEntries: [string, unknown][] = Object.entries(valueToConvert);
     const objectProperties = JSON.stringify(Object.keys(valueToConvert).sort());
 
-    const { name: nestedType } = sortedCustomTypes.find(({ properties }) => {
+    const { name: type } = sortedCustomTypes.find(({ properties }) => {
       return properties === objectProperties;
     }) ?? {
+      // Don't nest type names for top-level and direct child types
       name: level === "rest" ? `${currentNesting}${newName}` : newName,
     };
 
@@ -358,9 +365,15 @@ export const jsToAquaImpl = ({
       entries: string[];
     }>(
       ({ keyTypes, keyDataTypes, entries }, [fieldName, valueToConvert]) => {
-        const { type, value, typeDefs } = jsToAquaImpl({
-          currentNesting: nestedType,
+        const {
+          type: innerType,
+          value,
+          typeDefs,
+        } = jsToAquaImpl({
+          currentNesting: type,
           nestingLevel: newNestingLevel,
+          // each time we nest objects - the level changes:
+          // "top" -> "second" -> "rest"
           level: level === "top" ? "second" : "rest",
           valueToConvert,
           fieldName,
@@ -376,7 +389,7 @@ export const jsToAquaImpl = ({
         }
 
         return {
-          keyTypes: [...keyTypes, `    ${camelCasedKey}: ${type}`],
+          keyTypes: [...keyTypes, `    ${camelCasedKey}: ${innerType}`],
           keyDataTypes:
             typeDefs === undefined ? keyDataTypes : [...keyDataTypes, typeDefs],
           entries: [...entries, `\n${newIndent}${camelCasedKey}=${value}`],
@@ -386,13 +399,13 @@ export const jsToAquaImpl = ({
     );
 
     return {
-      type: nestedType,
-      value: `${nestedType}(${entries.join(",")}\n${INDENTATION.repeat(
+      type,
+      value: `${type}(${entries.join(",")}\n${INDENTATION.repeat(
         nestingLevel,
       )})`,
       typeDefs: `${
         keyDataTypes.length === 0 ? "" : `${keyDataTypes.join("\n\n")}\n\n`
-      }data ${nestedType}:\n${keyTypes.join("\n")}`,
+      }data ${type}:\n${keyTypes.join("\n")}`,
     };
   }
 
