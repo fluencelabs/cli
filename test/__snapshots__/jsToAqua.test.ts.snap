@@ -12,13 +12,14 @@ data InsideArrayE:
 data InsideArray:
     e: InsideArrayE
 
-data Works:
+data SomeModule:
     a: u64
     b: Nested
     c: []InsideArray
+    d: []InsideArray
 
-func get() -> Works:
-    <- Works(
+func get() -> SomeModule:
+    <- SomeModule(
         a=1,
         b=Nested(
             a=1
@@ -27,6 +28,13 @@ func get() -> Works:
             InsideArray(
                 e=InsideArrayE(
                     s=1
+                )
+            )
+        ],
+        d=[
+            InsideArray(
+                e=InsideArrayE(
+                    s=2
                 )
             )
         ]

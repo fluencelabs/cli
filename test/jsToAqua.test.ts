@@ -100,7 +100,12 @@ describe("Conversion from js to aqua", () => {
     expect(
       jsToAqua({
         fileName,
-        valueToConvert: { a: 1, b: { a: 1 }, c: [{ e: { s: 1 } }] },
+        valueToConvert: {
+          a: 1,
+          b: { a: 1 },
+          c: [{ e: { s: 1 } }],
+          d: [{ e: { s: 2 } }],
+        },
         customTypes: [
           { name: "Works", properties: ["a", "b", "c"] },
           { name: "Nested", properties: ["a"] },
@@ -138,7 +143,7 @@ describe("Conversion from js to aqua", () => {
     }).not.toThrowError();
   });
 
-  test(`object that contains ${fileName} to throw`, () => {
+  test(`object that contains fileName '${fileName}' as the top-level property to throw`, () => {
     expect(() => {
       jsToAqua({ valueToConvert: { [fileName]: { a: 1 } }, fileName });
     }).toThrowError();

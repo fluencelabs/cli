@@ -21,7 +21,6 @@ import { dirname, join, parse } from "path";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import camelCase from "lodash-es/camelCase.js";
-import startCase from "lodash-es/startCase.js";
 
 import { validationErrorToString, ajv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
@@ -29,7 +28,7 @@ import { AQUA_EXT, FS_OPTIONS } from "../const.js";
 import { input } from "../prompt.js";
 
 import { capitalize } from "./capitilize.js";
-import { cleanAquaName, validateAquaName } from "./downloadFile.js";
+import { validateAquaTypeName, validateAquaName } from "./downloadFile.js";
 import { stringifyUnknown } from "./jsonStringify.js";
 
 /**
@@ -108,9 +107,14 @@ export const jsToAqua = ({
   useF64ForAllNumbers = false,
   customTypes = [],
 }: JsToAquaArg): string => {
-  const moduleName = startCase(cleanAquaName(camelCase(fileName)))
-    .split(" ")
-    .join("");
+  const moduleName = capitalize(camelCase(fileName));
+  const moduleNameValidity = validateAquaTypeName(moduleName);
+
+  if (typeof moduleNameValidity === "string") {
+    return commandObj.error(
+      `file name must start with a letter. Got: ${color.yellow(fileName)}`,
+    );
+  }
 
   const sortedCustomTypes = customTypes.map(({ name, properties }) => {
     return {
@@ -138,7 +142,7 @@ const NIL = { type: "?u8", value: "nil" } as const;
 
 const NUMBER_TYPES = ["u64", "i64", "f64"] as const;
 
-const INDENTATION = "    ";
+const INDENTATION = " ".repeat(4);
 
 type JsToAquaImplArg = {
   valueToConvert: unknown;
@@ -219,7 +223,7 @@ export const jsToAquaImpl = ({
         currentNesting,
         useF64ForAllNumbers,
         sortedCustomTypes,
-        level: level,
+        level,
       });
     });
 
@@ -278,13 +282,12 @@ export const jsToAquaImpl = ({
       "we checked v is not null with isNilInAqua",
     );
 
-    const newName = capitalize(camelCase(cleanAquaName(fieldName)));
+    const newName = capitalize(camelCase(fieldName));
+    const newNameValidity = validateAquaTypeName(newName);
 
-    if (!/^[A-Z]\w*$/.test(newName)) {
+    if (typeof newNameValidity === "string") {
       return error(
-        `Name must start with a letter and contain only letters, numbers and underscores. Got: ${color.yellow(
-          newName,
-        )}`,
+        `Name must start with a letter. Got: ${color.yellow(newName)}`,
       );
     }
 
@@ -342,7 +345,7 @@ export const jsToAquaImpl = ({
           sortedCustomTypes,
         });
 
-        const camelCasedKey = camelCase(cleanAquaName(fieldName));
+        const camelCasedKey = camelCase(fieldName);
         const keyValidity = validateAquaName(camelCasedKey);
 
         if (typeof keyValidity === "string") {
