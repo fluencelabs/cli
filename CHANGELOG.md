@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.2...fluence-cli-v0.8.3) (2023-09-13)
+
+
+### Features
+
+* add more red to error messages ([#467](https://github.com/fluencelabs/cli/issues/467)) ([66b66a4](https://github.com/fluencelabs/cli/commit/66b66a4d570dd9b60da4a6c05990460124fb129c))
+* use `use` instead of `import` in generated aqua ([#464](https://github.com/fluencelabs/cli/issues/464)) ([76934c7](https://github.com/fluencelabs/cli/commit/76934c764b557bd35e711817e051138141561a06))
+
 ## [0.8.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.1...fluence-cli-v0.8.2) (2023-09-12)
 
 
