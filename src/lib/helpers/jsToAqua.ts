@@ -94,6 +94,17 @@ function dedupeTypeDefs(typeDefs: string): string {
   return [...new Set(typeDefs.split("\n\n"))].join("\n\n");
 }
 
+function toAquaType(s: string): string | Error {
+  const aquaType = capitalize(camelCase(s));
+  const validity = validateAquaTypeName(aquaType);
+
+  if (typeof validity === "string") {
+    return new Error(validity);
+  }
+
+  return aquaType;
+}
+
 export type JsToAquaArg = {
   valueToConvert: unknown;
   fileName: string;
@@ -107,21 +118,34 @@ export const jsToAqua = ({
   useF64ForAllNumbers = false,
   customTypes = [],
 }: JsToAquaArg): string => {
-  const moduleName = capitalize(camelCase(fileName));
-  const moduleNameValidity = validateAquaTypeName(moduleName);
+  const moduleName = toAquaType(fileName);
 
-  if (typeof moduleNameValidity === "string") {
+  if (moduleName instanceof Error) {
     return commandObj.error(
       `file name must start with a letter. Got: ${color.yellow(fileName)}`,
     );
   }
 
-  const sortedCustomTypes = customTypes.map(({ name, properties }) => {
-    return {
-      properties: JSON.stringify(properties.sort()),
-      name,
-    };
+  const customTypesWithAquaNames = customTypes.map((v) => {
+    return { ...v, name: toAquaType(v.name) };
   });
+
+  const customTypeErrors = customTypesWithAquaNames.filter(
+    (v): v is { name: Error; properties: Array<string> } => {
+      return v.name instanceof Error;
+    },
+  );
+
+  if (customTypeErrors.length > 0) {
+    return commandObj.error(customTypeErrors.join("\n\n"));
+  }
+
+  const sortedCustomTypes = customTypesWithAquaNames.map(
+    ({ properties, name }) => {
+      assert(typeof name === "string", "Checked for errors above");
+      return { properties: JSON.stringify(properties.sort()), name };
+    },
+  );
 
   const { type, value, typeDefs } = jsToAquaImpl({
     fieldName: moduleName,
@@ -282,10 +306,9 @@ export const jsToAquaImpl = ({
       "we checked v is not null with isNilInAqua",
     );
 
-    const newName = capitalize(camelCase(fieldName));
-    const newNameValidity = validateAquaTypeName(newName);
+    const newName = toAquaType(fieldName);
 
-    if (typeof newNameValidity === "string") {
+    if (newName instanceof Error) {
       return error(
         `Name must start with a letter. Got: ${color.yellow(newName)}`,
       );
