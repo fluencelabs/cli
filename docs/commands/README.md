@@ -106,7 +106,7 @@ USAGE
 
 ARGUMENTS
   INPUT   Path to json file
-  OUTPUT  Path to the output file (must have .aqua extension)
+  OUTPUT  Path to the output dir
 
 FLAGS
   --f64           Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
@@ -134,7 +134,7 @@ USAGE
 
 ARGUMENTS
   INPUT   Path to yaml file
-  OUTPUT  Path to the output file (must have .aqua extension)
+  OUTPUT  Path to the output dir
 
 FLAGS
   --f64           Convert all numbers to f64. Useful for arrays objects that contain numbers of different types in them.
