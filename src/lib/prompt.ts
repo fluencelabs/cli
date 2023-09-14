@@ -54,6 +54,20 @@ const arrayOfStringsSchema: JSONSchemaType<{ [NAME]: Array<string> }> = {
   required: [NAME],
 };
 
+export const validatePositiveNumber = (input: unknown): true | string => {
+  const parsed = Number(input);
+
+  if (Number.isNaN(parsed)) {
+    return "Must be a number";
+  }
+
+  if (parsed <= 0) {
+    return "Must be a positive number";
+  }
+
+  return true;
+};
+
 const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 
 type PromptOptions<T, U extends Answers> = DistinctQuestion<U> & {
@@ -115,6 +129,7 @@ export const confirm = ({
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
+    message: `${question.message}:`,
     type: "confirm",
     validateType: validateBooleanPrompt,
     flagName,
@@ -123,14 +138,29 @@ export const confirm = ({
 
 export type InputArg = DistinctQuestion & {
   message: string;
+  allowEmpty?: boolean | undefined;
   flagName?: string | undefined;
 };
 
-export const input = ({ flagName, ...question }: InputArg): Promise<string> => {
+export const input = ({
+  flagName,
+  allowEmpty = false,
+  ...question
+}: InputArg): Promise<string> => {
   // inquirer broke it's types so we have to cast it. "input" always returns string
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
+    validate: async (value: string) => {
+      if (!allowEmpty && value === "") {
+        return "Must not be empty";
+      }
+
+      return question.validate === undefined
+        ? true
+        : await question.validate(value);
+    },
+    message: `${question.message}:`,
     type: "input",
     validateType: validateStringPrompt,
     flagName,
@@ -139,17 +169,28 @@ export const input = ({ flagName, ...question }: InputArg): Promise<string> => {
 
 type PasswordArg = DistinctQuestion & {
   message: string;
+  allowEmpty?: boolean | undefined;
   flagName?: string | undefined;
 };
 
 export const password = ({
   flagName,
+  allowEmpty = false,
   ...question
 }: PasswordArg): Promise<string> => {
   // inquirer broke it's types so we have to cast it. "password" always returns string
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
+    validate: async (value: string) => {
+      if (!allowEmpty && value === "") {
+        return "Must not be empty";
+      }
+
+      return question.validate === undefined
+        ? true
+        : await question.validate(value);
+    },
     type: "password",
     validateType: validateStringPrompt,
     flagName,

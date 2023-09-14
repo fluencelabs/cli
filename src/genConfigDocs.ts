@@ -20,6 +20,7 @@ import { join } from "node:path";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
 import { projectSecretsSchema } from "./lib/configs/project/projectSecrets.js";
+import { providerSchema } from "./lib/configs/project/provider.js";
 import { serviceSchema } from "./lib/configs/project/service.js";
 import { spellSchema } from "./lib/configs/project/spell.js";
 import { workersSchema } from "./lib/configs/project/workers.js";
@@ -39,6 +40,7 @@ import {
   FS_OPTIONS,
   YAML_EXT,
   CLI_NAME_FULL,
+  PROVIDER_CONFIG_FILE_NAME,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/jsonStringify.js";
@@ -47,6 +49,7 @@ const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 
 const configsInfo = Object.entries({
   [FLUENCE_CONFIG_FILE_NAME]: fluenceSchema,
+  [PROVIDER_CONFIG_FILE_NAME]: providerSchema,
   [MODULE_CONFIG_FILE_NAME]: moduleSchema,
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
   [SPELL_CONFIG_FILE_NAME]: spellSchema,

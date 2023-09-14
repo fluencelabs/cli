@@ -42,6 +42,20 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
+export const numberProperties = [
+  "maxCollateral",
+  "minCollateral",
+  "minPricePerEpoch",
+] as const;
+
+export type NumberProperty = (typeof numberProperties)[number];
+
+export const defaultNumberProperties: Record<NumberProperty, number> = {
+  minCollateral: 100500,
+  maxCollateral: 1 * 10 ** 18,
+  minPricePerEpoch: 83 * 10 ** 15,
+};
+
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
@@ -107,6 +121,7 @@ export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
+export const PROVIDER_CONFIG_FILE_NAME = `provider`;
 export const WORKERS_CONFIG_FILE_NAME = `workers`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets`;
@@ -116,6 +131,7 @@ export const SERVICE_CONFIG_FILE_NAME = `service`;
 export const SPELL_CONFIG_FILE_NAME = `spell`;
 
 export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const PROVIDER_CONFIG_FULL_FILE_NAME = `${PROVIDER_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const WORKERS_CONFIG_FULL_FILE_NAME = `${WORKERS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROJECT_SECRETS_FULL_CONFIG_FILE_NAME = `${PROJECT_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FULL_FILE_NAME = `${USER_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
@@ -201,6 +217,7 @@ export const PRIV_KEY_FLAG = {
     description:
       "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
     helpValue: "<private-key>",
+    hidden: true,
   }),
 };
 

@@ -23,7 +23,6 @@ export const recursivelyFindFile = async (
 ): Promise<null | string> => {
   let currentDirPath = dirPath;
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const filePath = join(currentDirPath, fileName);
 
