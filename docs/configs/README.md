@@ -3,6 +3,9 @@
 ## [fluence.yaml](./fluence.md)
 
 Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use `fluence init` command to generate a template for new Fluence project
+## [provider.yaml](./provider.md)
+
+undefined
 ## [module.yaml](./module.md)
 
 Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use `fluence module new` command to generate a template for new module
