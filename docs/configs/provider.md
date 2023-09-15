@@ -1,13 +1,10 @@
 ## Properties
 
-| Property           | Type                      | Required | Description |
-|--------------------|---------------------------|----------|-------------|
-| `version`          | number                    | **Yes**  |             |
-| `computePeers`     | [object](#computepeers)[] | No       |             |
-| `effectors`        | string[]                  | No       |             |
-| `maxCollateral`    | number                    | No       |             |
-| `minCollateral`    | number                    | No       |             |
-| `minPricePerEpoch` | number                    | No       |             |
+| Property       | Type                      | Required | Description |
+|----------------|---------------------------|----------|-------------|
+| `computePeers` | [object](#computepeers)[] | **Yes**  |             |
+| `offer`        | [object](#offer)          | **Yes**  |             |
+| `version`      | number                    | **Yes**  |             |
 
 ## computePeers
 
@@ -17,4 +14,15 @@
 |----------|--------|----------|-------------|
 | `peerId` | string | **Yes**  |             |
 | `slots`  | number | **Yes**  |             |
+
+## offer
+
+### Properties
+
+| Property           | Type     | Required | Description |
+|--------------------|----------|----------|-------------|
+| `effectors`        | string[] | **Yes**  |             |
+| `maxCollateral`    | number   | **Yes**  |             |
+| `minCollateral`    | number   | **Yes**  |             |
+| `minPricePerEpoch` | number   | **Yes**  |             |
 
