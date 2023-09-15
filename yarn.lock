@@ -635,7 +635,7 @@ __metadata:
     "@fluencelabs/deal-aurora": 0.2.12
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.21
-    "@fluencelabs/js-client": 0.1.5
+    "@fluencelabs/js-client": 0.1.6
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.1
     "@multiformats/multiaddr": ^12.1.7
@@ -742,9 +742,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.1.5":
-  version: 0.1.5
-  resolution: "@fluencelabs/js-client@npm:0.1.5"
+"@fluencelabs/js-client@npm:0.1.6":
+  version: 0.1.6
+  resolution: "@fluencelabs/js-client@npm:0.1.6"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
@@ -770,7 +770,7 @@ __metadata:
     ts-pattern: 3.3.3
     uint8arrays: 4.0.3
     uuid: 8.3.2
-  checksum: 3f867facda31e33b32a9edf975e2d770527c50154e26cdc16b32e955af8a384e83729636585e8de5ecc632cedd648121f9562639822620a8d4e9114934bf39db
+  checksum: c04878ee6dba6dd0dfcd241b77a3e71b2295977e435bcc9f55f39cbed8894e3237a35f14cc16a1d7a13bac4bf28e4a29872a3a269361d49bf9b6d7519e65a208
   languageName: node
   linkType: hard
 
