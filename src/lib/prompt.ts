@@ -54,20 +54,6 @@ const arrayOfStringsSchema: JSONSchemaType<{ [NAME]: Array<string> }> = {
   required: [NAME],
 };
 
-export const validatePositiveNumber = (input: unknown): true | string => {
-  const parsed = Number(input);
-
-  if (Number.isNaN(parsed)) {
-    return "Must be a number";
-  }
-
-  if (parsed <= 0) {
-    return "Must be a positive number";
-  }
-
-  return true;
-};
-
 const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 
 type PromptOptions<T, U extends Answers> = DistinctQuestion<U> & {

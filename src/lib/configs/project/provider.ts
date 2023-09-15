@@ -82,11 +82,12 @@ const getDefaultConfig = async ({
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
 
-${yamlDiffPatch("", {}, { computePeers })}
-${yamlDiffPatch("", {}, { effectors })}
+${yamlDiffPatch("", {}, { minPricePerEpoch })}
 ${yamlDiffPatch("", {}, { minCollateral })}
 ${yamlDiffPatch("", {}, { maxCollateral })}
-${yamlDiffPatch("", {}, { minPricePerEpoch })}
+${yamlDiffPatch("", {}, { effectors })}
+
+${yamlDiffPatch("", {}, { computePeers })}
 
 # config version
 version: 0

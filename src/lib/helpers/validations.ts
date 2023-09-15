@@ -85,3 +85,23 @@ export const validateAllVersionsAreExact = async (
         })
         .join(", ")}`;
 };
+
+export const validatePositiveNumberOrEmpty = (
+  input: unknown,
+): ValidationResult => {
+  if (input === "") {
+    return true;
+  }
+
+  const parsed = Number(input);
+
+  if (Number.isNaN(parsed)) {
+    return "Must be a number";
+  }
+
+  if (parsed <= 0) {
+    return "Must be a positive number";
+  }
+
+  return true;
+};

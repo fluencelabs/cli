@@ -31,8 +31,10 @@ import {
   defaultNumberProperties,
   type NumberProperty,
 } from "../../lib/const.js";
+import { commaSeparatedToArr } from "../../lib/helpers/commaSeparatedToArr.js";
+import { validatePositiveNumberOrEmpty } from "../../lib/helpers/validations.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { validatePositiveNumber, confirm, input } from "../../lib/prompt.js";
+import { confirm, input } from "../../lib/prompt.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description =
@@ -59,11 +61,15 @@ export default class Init extends BaseCommand<typeof Init> {
           )}. Aborting.`,
         );
       }
+    }
 
+    const userProvidedConfig = await generateUserProviderConfig();
+
+    if (maybeProviderConfig !== null) {
       await rm(maybeProviderConfig.$getPath(), { force: true });
     }
 
-    const providerConfig = await generateProviderConfig();
+    const providerConfig = await initNewProviderConfig(userProvidedConfig);
 
     commandObj.logToStderr(
       `Successfully created provider config at ${color.yellow(
@@ -77,23 +83,19 @@ async function promptToSetNumberProperty(
   userProvidedConfig: UserProvidedConfig,
   property: NumberProperty,
 ) {
-  const isUsingDefaultNumberProperty = await confirm({
-    message: `Do you want to use default value for ${color.yellow(property)} (${
-      defaultNumberProperties[property]
-    })`,
+  const defaultValue = defaultNumberProperties[property];
+
+  const propertyStr = await input({
+    message: `Enter ${color.yellow(property)} (default: ${defaultValue})`,
+    validate: validatePositiveNumberOrEmpty,
+    allowEmpty: true,
   });
 
-  if (!isUsingDefaultNumberProperty) {
-    const propertyStr = await input({
-      message: `Enter ${color.yellow(property)}`,
-      validate: validatePositiveNumber,
-    });
-
-    userProvidedConfig[property] = Number(propertyStr);
-  }
+  userProvidedConfig[property] =
+    propertyStr === "" ? defaultValue : Number(propertyStr);
 }
 
-async function generateProviderConfig() {
+async function generateUserProviderConfig() {
   const userProvidedConfig: UserProvidedConfig = {
     computePeers: [],
     effectors: [],
@@ -101,7 +103,7 @@ async function generateProviderConfig() {
   };
 
   if (!isInteractive) {
-    return initNewProviderConfig(userProvidedConfig);
+    return userProvidedConfig;
   }
 
   for (const numberProperty of numberProperties) {
@@ -121,29 +123,14 @@ async function generateProviderConfig() {
     }
   } while (true);
 
-  let firstEffectorPrompt = true;
+  const effectors = await input({
+    message:
+      "Enter comma-separated list of effector CIDs (default: empty list)",
+  });
 
-  while (true) {
-    const isAddingMore = await confirm({
-      message: `Do you want to add${
-        firstEffectorPrompt ? "" : " more"
-      } effectors`,
-    });
+  userProvidedConfig.effectors = commaSeparatedToArr(effectors);
 
-    firstEffectorPrompt = false;
-
-    if (!isAddingMore) {
-      break;
-    }
-
-    const effector = await input({
-      message: "Enter effector",
-    });
-
-    userProvidedConfig.effectors.push(effector);
-  }
-
-  return initNewProviderConfig(userProvidedConfig);
+  return userProvidedConfig;
 }
 
 async function promptForComputePeer(): Promise<ComputePeer> {
@@ -153,7 +140,7 @@ async function promptForComputePeer(): Promise<ComputePeer> {
 
   const slotsStr = await input({
     message: `Enter number of worker slots for ${color.yellow(peerId)}`,
-    validate: validatePositiveNumber,
+    validate: validatePositiveNumberOrEmpty,
   });
 
   return {

@@ -245,7 +245,7 @@ const resolveAbsoluteAquaPath = async ({
     return resolve(projectRootDir, maybePathFromFluenceYaml);
   }
 
-  const pathFromUserInput = await input(inputArg);
+  const pathFromUserInput = await input({ ...inputArg, allowEmpty: true });
 
   if (isAbsolute(pathFromUserInput)) {
     return pathFromUserInput;

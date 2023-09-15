@@ -120,6 +120,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
             (await input({
               message:
                 "Enter project path or press enter to init in the current directory",
+              allowEmpty: true,
             })),
         );
 

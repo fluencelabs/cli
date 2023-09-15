@@ -48,6 +48,7 @@ import type {
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
 import { FS_OPTIONS, HOSTS_FILE_NAME, DEALS_FILE_NAME } from "./const.js";
+import { commaSeparatedToArr } from "./helpers/commaSeparatedToArr.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -69,12 +70,6 @@ import {
   projectRootDir,
 } from "./paths.js";
 import { checkboxes } from "./prompt.js";
-
-export const parseWorkers = (workerNamesString: string) => {
-  return workerNamesString.split(",").map((s) => {
-    return s.trim();
-  });
-};
 
 const handlePreviouslyDeployedWorkers = async (
   maybeDeployedHostsOrDeals:
@@ -174,7 +169,7 @@ export const prepareForDeploy = async ({
   const workersToDeploy =
     workerNamesString === undefined
       ? workerNamesSet
-      : parseWorkers(workerNamesString);
+      : commaSeparatedToArr(workerNamesString);
 
   if (workersToDeploy.length === 0) {
     return commandObj.error(

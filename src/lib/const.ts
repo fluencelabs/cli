@@ -43,9 +43,9 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
 export const numberProperties = [
-  "maxCollateral",
-  "minCollateral",
   "minPricePerEpoch",
+  "minCollateral",
+  "maxCollateral",
 ] as const;
 
 export type NumberProperty = (typeof numberProperties)[number];
@@ -354,6 +354,7 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
 /${DOT_FLUENCE_DIR_NAME}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
 **/node_modules
 **/target/
 .repl_history
