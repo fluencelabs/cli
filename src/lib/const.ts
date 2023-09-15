@@ -217,7 +217,6 @@ export const PRIV_KEY_FLAG = {
     description:
       "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
     helpValue: "<private-key>",
-    hidden: true,
   }),
 };
 
