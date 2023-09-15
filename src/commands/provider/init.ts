@@ -91,15 +91,17 @@ async function promptToSetNumberProperty(
     allowEmpty: true,
   });
 
-  userProvidedConfig[property] =
+  userProvidedConfig.offer[property] =
     propertyStr === "" ? defaultValue : Number(propertyStr);
 }
 
 async function generateUserProviderConfig() {
   const userProvidedConfig: UserProvidedConfig = {
     computePeers: [],
-    effectors: [],
-    ...defaultNumberProperties,
+    offer: {
+      ...defaultNumberProperties,
+      effectors: [],
+    },
   };
 
   if (!isInteractive) {
@@ -128,7 +130,7 @@ async function generateUserProviderConfig() {
       "Enter comma-separated list of effector CIDs (default: empty list)",
   });
 
-  userProvidedConfig.effectors = commaSeparatedToArr(effectors);
+  userProvidedConfig.offer.effectors = commaSeparatedToArr(effectors);
 
   return userProvidedConfig;
 }

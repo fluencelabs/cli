@@ -28,23 +28,42 @@ import {
   type InitConfigOptions,
 } from "../initConfig.js";
 
+export type Offer = {
+  minPricePerEpoch: number;
+  minCollateral: number;
+  maxCollateral: number;
+  effectors: Array<string>;
+};
+
 export type ComputePeer = {
   peerId: string;
   slots: number;
 };
 
 type ConfigV0 = {
-  version: 0;
+  offer: Offer;
   computePeers: Array<ComputePeer>;
-  effectors: Array<string>;
-  minCollateral: number;
-  maxCollateral: number;
-  minPricePerEpoch: number;
+  version: 0;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   properties: {
+    offer: {
+      type: "object",
+      properties: {
+        minPricePerEpoch: { type: "number" },
+        minCollateral: { type: "number" },
+        maxCollateral: { type: "number" },
+        effectors: { type: "array", items: { type: "string" } },
+      },
+      required: [
+        "minPricePerEpoch",
+        "minCollateral",
+        "maxCollateral",
+        "effectors",
+      ],
+    },
     computePeers: {
       type: "array",
       items: {
@@ -56,13 +75,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
         required: ["peerId", "slots"],
       },
     },
-    effectors: { type: "array", items: { type: "string" } },
-    minCollateral: { type: "number" },
-    maxCollateral: { type: "number" },
-    minPricePerEpoch: { type: "number" },
     version: { type: "number", const: 0 },
   },
-  required: ["version"],
+  required: ["version", "computePeers", "offer"],
 };
 
 const getConfigOrConfigDirPath = () => {
@@ -71,10 +86,7 @@ const getConfigOrConfigDirPath = () => {
 
 const getDefaultConfig = async ({
   computePeers,
-  effectors,
-  minCollateral,
-  maxCollateral,
-  minPricePerEpoch,
+  offer,
 }: UserProvidedConfig) => {
   const { yamlDiffPatch } = await import("yaml-diff-patch");
 
@@ -82,11 +94,7 @@ const getDefaultConfig = async ({
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
 
-${yamlDiffPatch("", {}, { minPricePerEpoch })}
-${yamlDiffPatch("", {}, { minCollateral })}
-${yamlDiffPatch("", {}, { maxCollateral })}
-${yamlDiffPatch("", {}, { effectors })}
-
+${yamlDiffPatch("", {}, { offer })}
 ${yamlDiffPatch("", {}, { computePeers })}
 
 # config version
