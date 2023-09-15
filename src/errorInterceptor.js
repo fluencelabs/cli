@@ -16,10 +16,9 @@
 
 /* eslint-disable no-process-exit */
 
+import assert from "node:assert";
+
 // eslint-disable-next-line import/extensions
-
-import assert from "assert";
-
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
