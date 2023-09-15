@@ -79,7 +79,9 @@ const upload = async (
 
     return cidString;
   } catch (error) {
-    commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
+    commandObj.error(
+      `\n\nFailed to upload to ${multiaddr}:\n\n${stringifyUnknown(error)}`,
+    );
   }
 };
 
@@ -120,7 +122,9 @@ const dagUpload = async (
 
     return cidString;
   } catch (error) {
-    commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
+    commandObj.error(
+      `\n\nFailed to upload to ${multiaddr}:\n\n${stringifyUnknown(error)}`,
+    );
   }
 };
 
@@ -143,7 +147,7 @@ export const doRegisterIpfsClient = async (
         await access(absolutePath);
       } catch {
         throw new Error(
-          `Failed IPFS upload. File ${absolutePath} doesn't exist`,
+          `Failed IPFS upload to ${multiaddr}. File ${absolutePath} doesn't exist`,
         );
       }
 
@@ -158,7 +162,7 @@ export const doRegisterIpfsClient = async (
         await access(absolutePath);
       } catch {
         throw new Error(
-          `Failed IPFS upload. File ${absolutePath} doesn't exist`,
+          `Failed IPFS upload to ${multiaddr}. File ${absolutePath} doesn't exist`,
         );
       }
 
