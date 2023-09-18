@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.4...fluence-cli-v0.8.5) (2023-09-18)
+
+
+### Features
+
+* format avm errors ([#472](https://github.com/fluencelabs/cli/issues/472)) ([c4a6e2d](https://github.com/fluencelabs/cli/commit/c4a6e2d6b1f5bde72ad38517f3cc15bd03a6ab5f))
+
 ## [0.8.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.3...fluence-cli-v0.8.4) (2023-09-18)
 
 
