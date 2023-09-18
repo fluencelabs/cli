@@ -48,7 +48,7 @@ export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 export const CONTRACTS_ENV = ["testnet", "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
-export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[1];
+export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[0];
 
 export const isChainNetwork = getIsStringUnion(CONTRACTS_ENV);
 
