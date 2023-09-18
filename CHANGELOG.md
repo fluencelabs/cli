@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.3...fluence-cli-v0.8.4) (2023-09-18)
+
+
+### Features
+
+* update dependencies ([#475](https://github.com/fluencelabs/cli/issues/475)) ([3ef0c85](https://github.com/fluencelabs/cli/commit/3ef0c85b4856456394a001775358d00a55a2b1af))
+
 ## [0.8.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.2...fluence-cli-v0.8.3) (2023-09-13)
 
 
