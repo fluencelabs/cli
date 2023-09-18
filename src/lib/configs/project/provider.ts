@@ -16,7 +16,11 @@
 
 import type { JSONSchemaType } from "ajv";
 
-import { PROVIDER_CONFIG_FILE_NAME } from "../../const.js";
+import {
+  PROVIDER_CONFIG_FILE_NAME,
+  TOP_LEVEL_SCHEMA_ID,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+} from "../../const.js";
 import { getFluenceDir, projectRootDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -47,6 +51,9 @@ type ConfigV0 = {
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+  title: PROVIDER_CONFIG_FULL_FILE_NAME,
+  description: `Defines config used for provider set up`,
   type: "object",
   properties: {
     offer: {
