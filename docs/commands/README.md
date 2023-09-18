@@ -229,7 +229,7 @@ FLAGS
   --import=<path>...                Path to a directory to import aqua files from. May be used several times
   --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
                                     'marineBuildArgs' property in fluence.yaml. Default: --release
-  --network=<network>               [default: local] The network in which the transactions used by the command will be
+  --network=<network>               [default: testnet] The network in which the transactions used by the command will be
                                     carried out (testnet, local)
   --no-build                        Don't build the project before running the command
   --no-input                        Don't interactively ask for any input from the user
@@ -658,7 +658,7 @@ USAGE
     <value>]
 
 FLAGS
-  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
+  --network=<network>       [default: testnet] The network in which the transactions used by the command will be carried
                             out (testnet, local)
   --no-input                Don't interactively ask for any input from the user
   --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
@@ -680,7 +680,7 @@ USAGE
   $ fluence provider register [--no-input] [--priv-key <value>] [--network <value>]
 
 FLAGS
-  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
+  --network=<network>       [default: testnet] The network in which the transactions used by the command will be carried
                             out (testnet, local)
   --no-input                Don't interactively ask for any input from the user
   --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
