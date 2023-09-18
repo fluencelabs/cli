@@ -17,7 +17,7 @@ services:
       - ./ipfs/:/container-init.d/
 
   nox-1:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.5}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.6}"
     pull_policy: always
     ports:
       - 7771:7771
@@ -51,7 +51,7 @@ services:
       - ipfs
 
   nox-2:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.5}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.6}"
     pull_policy: always
     ports:
       - 7772:7772
@@ -84,7 +84,7 @@ services:
       - ipfs
 
   nox-3:
-    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.5}"
+    image: "${NOX_IMAGE:-fluencelabs/nox:minimal_0.2.6}"
     pull_policy: always
     ports:
       - 7773:7773
