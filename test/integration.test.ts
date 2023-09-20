@@ -35,6 +35,7 @@ import {
 import { execPromise } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
 import { localPeerIds, local } from "../src/lib/localNodes.js";
+import { hasKey } from "../src/lib/typeHelpers.js";
 
 import {
   fluence,
@@ -469,7 +470,7 @@ describe("integration tests", () => {
             flags: {
               f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
               quiet: true,
-              const: 'API_ENDPOINT="http://deal-aurora:8545"',
+              const: API_ENDPOINT,
             },
             cwd,
           });
@@ -533,6 +534,38 @@ describe("integration tests", () => {
             : String(maybeRunDeployedError)
         }`,
       );
+
+      const showSubnetResult = await fluence({
+        args: ["run"],
+        flags: {
+          f: "showSubnet()",
+          quiet: true,
+          const: API_ENDPOINT,
+        },
+        cwd,
+      });
+
+      const parsedShowSubnetResult = JSON.parse(showSubnetResult);
+
+      function isWorkerService(unknown: unknown) {
+        return (
+          hasKey("services", unknown) &&
+          Array.isArray(unknown.services) &&
+          unknown.services.every((i) => {
+            return typeof i === "string";
+          }) &&
+          hasKey("worker_id", unknown) &&
+          unknown.worker_id !== null
+        );
+      }
+
+      assert(
+        Array.isArray(parsedShowSubnetResult) &&
+          parsedShowSubnetResult.every((unknown) => {
+            return isWorkerService(unknown);
+          }),
+        `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
+      );
     },
   );
 });
@@ -569,6 +602,8 @@ const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 // Private Key: 0x1a1bf9026a097f33ce1a51f5aa0c4102e4a1432c757d922200ef37df168ae504
 // Private Key: 0xbb3457514f768615c8bc4061c7e47f817c8a570c5c3537479639d4fad052a98a
 // Private Key: 0xfbd9e512cc1b62db1ca689737c110afa9a3799e1bc04bf12c1c34ac39e0e2dd5
+
+const API_ENDPOINT = 'API_ENDPOINT="http://deal-aurora:8545"';
 
 const PRIV_KEY =
   "0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41";
