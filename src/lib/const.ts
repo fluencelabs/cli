@@ -387,7 +387,7 @@ const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
-export runDeployedServices
+export runDeployedServices, showSubnet
 
 data Worker:
     pat_id: string
@@ -405,9 +405,11 @@ data Answer:
 service Connector("fluence_aurora_connector"):
     resolve_subnet(dealId: string, apiEndpoint: string) -> Subnet
 
+const API_ENDPOINT ?= "https://rpc.ankr.com/polygon_mumbai" -- for local you can use "http://deal-aurora:8545"
+
 func resolve_subnet(dealId: string) -> Subnet:
     on HOST_PEER_ID:
-        subnet <- Connector.resolve_subnet(dealId, "http://deal-aurora:8545")
+        subnet <- Connector.resolve_subnet(dealId, API_ENDPOINT)
     <- subnet
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
@@ -424,6 +426,32 @@ func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
                 answers <<- Answer(answer=?[answer], worker = w)
 
     <- answers
+
+data WorkerServices:
+    worker_id: string
+    services: []string
+
+func showSubnet() -> []WorkerServices:
+    deals <- Deals.get()
+    dealId = deals.defaultWorker!.dealIdOriginal
+    subnet <- resolve_subnet(dealId)
+
+    services: *WorkerServices
+    for w <- subnet.workers:
+      if w.worker_id != nil:
+        on w.worker_id! via w.host_id:
+          -- get list of all services on this worker
+          srvs <- Srv.list()
+
+          -- gather aliases
+          aliases: *string
+          for s <- srvs:
+            if s.aliases.length != 0:
+              aliases <<- s.aliases[0]
+
+          services <<- WorkerServices(worker_id = w.worker_id!, services = aliases)
+
+    <- services
 `;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(

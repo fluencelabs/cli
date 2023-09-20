@@ -469,6 +469,7 @@ describe("integration tests", () => {
             flags: {
               f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
               quiet: true,
+              const: 'API_ENDPOINT="http://deal-aurora:8545"',
             },
             cwd,
           });
