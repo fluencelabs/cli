@@ -707,7 +707,7 @@ FLAGS
   -f, --func=<function-call>     Function call. Example: funcName("stringArg")
   -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
   -k, --key-pair-name=<name>     Key pair name
-  --const=<NAME = value>...      Constant that will be used in the aqua code that you run (example of aqua code:
+  --const=<NAME="value">...      Constant that will be used in the aqua code that you run (example of aqua code:
                                  SOME_CONST ?= "default_value"). Constant name must be upper cased.
   --data=<json>                  JSON in { [argumentName]: argumentValue } format. You can call a function using these
                                  argument names
