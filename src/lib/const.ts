@@ -418,7 +418,9 @@ data WorkerServices:
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
     dealId = deals.defaultWorker!.dealIdOriginal
-    subnet <- resolve_subnet(dealId)
+    subnet <- Subnet.resolve(dealId)
+    if subnet.success == false:
+        Console.print(["Failed to resolve subnet: ", subnet.error])
 
     services: *WorkerServices
     for w <- subnet.workers:
