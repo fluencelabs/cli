@@ -104,25 +104,33 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     const removeResult = await remove(flags.tracing, removeArg);
 
-    const newDeployedWorkers = Object.fromEntries(
+    const newHosts = Object.fromEntries(
       Object.entries(workersConfig.hosts)
         .map(([name, { installation_spells: prevInstSp, ...rest }]) => {
-          const currentWorkerResult = removeResult.find((w) => {
-            return w.name === name;
+          const currentWorkerResult = removeResult.find((r) => {
+            return r.name === name;
           });
 
-          const installation_spells = prevInstSp.filter(({ worker_id }) => {
-            return (currentWorkerResult?.worker_ids ?? []).includes(worker_id);
+          const removedWorkerIds = currentWorkerResult?.worker_ids ?? [];
+
+          const notRemovedWorkers = prevInstSp.filter(({ worker_id }) => {
+            const workerRemovedSuccessfully =
+              removedWorkerIds.includes(worker_id);
+
+            return !workerRemovedSuccessfully;
           });
 
-          return [name, { installation_spells, ...rest }] as const;
+          return [
+            name,
+            { installation_spells: notRemovedWorkers, ...rest },
+          ] as const;
         })
         .filter(([, { installation_spells }]) => {
           return installation_spells.length > 0;
         }),
     );
 
-    workersConfig.hosts = newDeployedWorkers;
+    workersConfig.hosts = newHosts;
 
     if (Object.keys(workersConfig.hosts).length === 0) {
       delete workersConfig.hosts;
