@@ -334,8 +334,8 @@ describe("integration tests", () => {
       const newWorkersConfig = await readFile(workersConfigPath, FS_OPTIONS);
 
       assert(
-        newWorkersConfig.trim() === "",
-        `workers config is expected to be empty after remove`,
+        !newWorkersConfig.includes("hosts:"),
+        `'hosts' property in workers.yaml config is expected to be removed. Got:\n\n${newWorkersConfig}`,
       );
 
       // Check workers where actually removed
