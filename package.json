@@ -89,7 +89,7 @@
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
-    "@fluencelabs/installation-spell": "./s6.tgz",
+    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/workers-remove/s6.tgz",
     "@total-typescript/ts-reset": "^0.5.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/debug": "^4.1.8",
