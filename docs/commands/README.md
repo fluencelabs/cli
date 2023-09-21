@@ -977,7 +977,7 @@ _See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence workers remove [WORKER-NAMES]`
 
-Deploy workers to hosts, described in 'hosts' property in fluence.yaml
+Remove workers from hosts, described in 'hosts' property in workers.yaml
 
 ```
 USAGE
@@ -985,8 +985,8 @@ USAGE
     <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--tracing]
 
 ARGUMENTS
-  WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
-                'hosts' property in fluence.yaml are deployed)
+  WORKER-NAMES  Comma separated names of workers to remove. Example: "worker1,worker2" (by default all workers from
+                'hosts' property in workers.yaml are removed)
 
 FLAGS
   -k, --key-pair-name=<name>     Key pair name
@@ -1001,7 +1001,7 @@ FLAGS
                                  and not processed.
 
 DESCRIPTION
-  Deploy workers to hosts, described in 'hosts' property in fluence.yaml
+  Remove workers from hosts, described in 'hosts' property in workers.yaml
 
 EXAMPLES
   $ fluence workers remove
