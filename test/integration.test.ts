@@ -343,6 +343,12 @@ describe("integration tests", () => {
 
       await writeFile(workersConfigPath, workersConfig, FS_OPTIONS);
 
+      // Update "hosts.aqua" to contain previously removed workers
+      await fluence({
+        args: ["build"],
+        cwd,
+      });
+
       const callRemovedWorkersResult = await fluence({
         args: ["run"],
         flags: {
