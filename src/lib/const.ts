@@ -397,7 +397,8 @@ func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
     deals <- Deals.get()
     dealId = deals.defaultWorker!.dealIdOriginal
     answers: *Answer
-    subnet <- Subnet.resolve(dealId)
+    on HOST_PEER_ID:
+      subnet <- Subnet.resolve(dealId)
     if subnet.success == false:
         Console.print(["Failed to resolve subnet: ", subnet.error])
 
@@ -418,7 +419,8 @@ data WorkerServices:
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
     dealId = deals.defaultWorker!.dealIdOriginal
-    subnet <- Subnet.resolve(dealId)
+    on HOST_PEER_ID:
+      subnet <- Subnet.resolve(dealId)
     if subnet.success == false:
         Console.print(["Failed to resolve subnet: ", subnet.error])
 
