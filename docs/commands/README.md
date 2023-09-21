@@ -382,7 +382,7 @@ ARGUMENTS
                                        fluence.yaml, , user's .fluence/config.yaml, dependency versions recommended by
                                        fluence, latest version cargo is aware of. If you want to install a specific
                                        version, you can do so by appending @ and the version to the package name. For
-                                       example: @fluencelabs/aqua-lib@0.6.0
+                                       example: @fluencelabs/aqua-lib@0.0.0
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
