@@ -105,9 +105,21 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const removeResult = await remove(flags.tracing, removeArg);
 
     const newDeployedWorkers = Object.fromEntries(
-      Object.entries(workersConfig.hosts).filter(([name]) => {
-        return removeResult.includes(name);
-      }),
+      Object.entries(workersConfig.hosts)
+        .map(([name, { installation_spells: prevInstSp, ...rest }]) => {
+          const currentWorkerResult = removeResult.find((w) => {
+            return w.name === name;
+          });
+
+          const installation_spells = prevInstSp.filter(({ worker_id }) => {
+            return (currentWorkerResult?.worker_ids ?? []).includes(worker_id);
+          });
+
+          return [name, { installation_spells, ...rest }] as const;
+        })
+        .filter(([, { installation_spells }]) => {
+          return installation_spells.length > 0;
+        }),
     );
 
     workersConfig.hosts = newDeployedWorkers;
