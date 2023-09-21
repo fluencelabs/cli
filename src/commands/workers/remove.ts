@@ -70,17 +70,17 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = (await Fluence.getClient()).getRelayPeerId();
 
-    const workerConfig = await initNewWorkersConfig();
-
-    if (workerConfig.hosts === undefined) {
+    if (workersConfig.hosts === undefined) {
       return commandObj.error(
         `There are no workers in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
       );
     }
 
-    const workerNamesSet = Object.keys(workerConfig.hosts).map((workerName) => {
-      return workerName;
-    });
+    const workerNamesSet = Object.keys(workersConfig.hosts).map(
+      (workerName) => {
+        return workerName;
+      },
+    );
 
     const workersToRemove =
       args["WORKER-NAMES"] === undefined
@@ -88,7 +88,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
         : parseWorkers(args["WORKER-NAMES"]);
 
     const removeArg: RemoveArgWorkers = {
-      workers: Object.entries(workerConfig.hosts)
+      workers: Object.entries(workersConfig.hosts)
         .filter(([workerName]) => {
           return workersToRemove.includes(workerName);
         })
@@ -105,7 +105,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const removeResult = await remove(flags.tracing, removeArg);
 
     const newDeployedWorkers = Object.fromEntries(
-      Object.entries(workerConfig.hosts).filter(([name]) => {
+      Object.entries(workersConfig.hosts).filter(([name]) => {
         return removeResult.includes(name);
       }),
     );

@@ -343,7 +343,7 @@ describe("integration tests", () => {
       await writeFile(workersConfigPath, workersConfig, FS_OPTIONS);
 
       expect(async () => {
-        return await fluence({
+        return fluence({
           args: ["run"],
           flags: {
             f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
