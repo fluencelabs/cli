@@ -514,8 +514,8 @@ describe("integration tests", () => {
             })
             .sort(sortPeers);
 
-          log("expected", expected)
-          log("actual", res)
+          log("expected", expected);
+          log("actual", res);
           // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
           expect(res).toEqual(expected);
 
