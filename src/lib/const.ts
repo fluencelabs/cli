@@ -352,7 +352,7 @@ export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
-const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
+export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
@@ -389,34 +389,18 @@ const RUN_DEPLOYED_SERVICE_AQUA = `
 
 export runDeployedServices, showSubnet
 
-data Worker:
-    pat_id: string
-    host_id: string
-    worker_id: ?string
-
-data Subnet:
-    workers: []Worker
-    error: []string
-
 data Answer:
     answer: ?string
     worker: Worker
-
-service Connector("fluence_aurora_connector"):
-    resolve_subnet(dealId: string, apiEndpoint: string) -> Subnet
-
-const API_ENDPOINT ?= "https://rpc.ankr.com/polygon_mumbai" -- for local you can use "http://deal-aurora:8545"
-
-func resolve_subnet(dealId: string) -> Subnet:
-    on HOST_PEER_ID:
-        subnet <- Connector.resolve_subnet(dealId, API_ENDPOINT)
-    <- subnet
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
     deals <- Deals.get()
     dealId = deals.defaultWorker!.dealIdOriginal
     answers: *Answer
-    subnet <- resolve_subnet(dealId)
+    subnet <- Subnet.resolve(dealId)
+    if subnet.success == false:
+        Console.print(["Failed to resolve subnet: ", subnet.error])
+
     for w <- subnet.workers:
         if w.worker_id == nil:
             answers <<- Answer(answer=nil, worker=w)
@@ -464,7 +448,7 @@ export const getMainAquaFileContent = (
   return `aqua Main
 
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
-import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
+import "${AQUA_LIB_NPM_DEPENDENCY}/subnet.aqua"
 
 use "${DEALS_FULL_FILE_NAME}"
 use "${HOSTS_FULL_FILE_NAME}"
@@ -562,7 +546,7 @@ main().catch((error) => {
   console.error(error);
 });`;
 
-export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
+export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():

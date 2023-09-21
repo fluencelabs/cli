@@ -28,6 +28,7 @@ import {
   GLOBAL_FLAG_NAME,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
+  AQUA_LIB_NPM_DEPENDENCY,
 } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import {
@@ -56,7 +57,7 @@ export default class Install extends BaseCommand<typeof Install> {
       description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FULL_FILE_NAME}, , user's ${join(
         DOT_FLUENCE_DIR_NAME,
         GLOBAL_CONFIG_FULL_FILE_NAME,
-      )}, dependency versions recommended by fluence, latest version cargo is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: @fluencelabs/aqua-lib@0.6.0`,
+      )}, dependency versions recommended by fluence, latest version cargo is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: ${AQUA_LIB_NPM_DEPENDENCY}@0.0.0`,
     }),
   };
 
