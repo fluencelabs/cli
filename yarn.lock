@@ -634,7 +634,7 @@ __metadata:
     "@fluencelabs/aqua-api": 0.12.1
     "@fluencelabs/deal-aurora": 0.2.12
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": 0.5.21
+    "@fluencelabs/installation-spell": "file:./s2.tgz"
     "@fluencelabs/js-client": 0.1.6
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.1
@@ -723,15 +723,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@npm:0.5.21":
+"@fluencelabs/installation-spell@file:./s2.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A.":
   version: 0.5.21
-  resolution: "@fluencelabs/installation-spell@npm:0.5.21"
+  resolution: "@fluencelabs/installation-spell@file:./s2.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A."
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.17
     "@fluencelabs/aqua-lib": 0.7.2
     "@fluencelabs/registry": 0.8.6
     "@fluencelabs/spell": 0.5.21
-  checksum: 5bb311d9960861ded5594ad98f274d00e29ebfd3a066ec4c7f46d7919da0475f5d68512789ece7323b302035502892912d03619738469bb47b9f4d35b177de1f
+  checksum: 95d94d6af62300fb26e631d60618ab27d07b221dfc13684cf8c700af983c1421f7e010cce83cf29e364a106edaf85a1d2f9bb4b0878a188ff819839a908a33fa
   languageName: node
   linkType: hard
 

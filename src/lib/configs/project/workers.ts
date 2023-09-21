@@ -222,6 +222,17 @@ version: 0
 `;
 };
 
+// export const initWorkersConfigWithPath = async (
+//   path: string,
+// ): Promise<InitializedConfig<LatestConfig> | null> => {
+//   return getConfigInitFunction({
+//     ...initConfigOptions,
+//     getConfigOrConfigDirPath: () => {
+//       return path;
+//     },
+//   })();
+// };
+
 export const initNewWorkersConfig = getConfigInitFunction(
   initConfigOptions,
   getDefault,

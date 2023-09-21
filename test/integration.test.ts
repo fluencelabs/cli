@@ -28,9 +28,11 @@ import { initFluenceConfigWithPath } from "../src/lib/configs/project/fluence.js
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
   DEFAULT_WORKER_NAME,
+  DOT_FLUENCE_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+  WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
@@ -225,7 +227,9 @@ describe("integration tests", () => {
         cwd,
       });
 
-      const fluenceConfig = await initFluenceConfigWithPath(cwd);
+      const fluenceConfig = await initFluenceConfigWithPath(
+        join(cwd, ".fluence"),
+      );
 
       assert(
         fluenceConfig !== null,
@@ -315,6 +319,40 @@ describe("integration tests", () => {
             : String(maybeRunDeployedError)
         }`,
       );
+
+      const workersConfigPath = join(
+        cwd,
+        DOT_FLUENCE_DIR_NAME,
+        WORKERS_CONFIG_FULL_FILE_NAME,
+      );
+
+      const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+
+      await fluence({
+        args: ["workers", "remove"],
+        cwd,
+      });
+
+      const newWorkersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+
+      assert(
+        newWorkersConfig.trim() === "",
+        `workers config is expected to be empty after remove`,
+      );
+
+      // Check workers where actually removed
+
+      await writeFile(workersConfigPath, workersConfig, FS_OPTIONS);
+
+      expect(async () => {
+        return await fluence({
+          args: ["run"],
+          flags: {
+            f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+          },
+          cwd,
+        });
+      }).toThrow();
     },
   );
 
