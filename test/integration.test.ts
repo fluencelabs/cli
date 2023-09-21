@@ -227,9 +227,7 @@ describe("integration tests", () => {
         cwd,
       });
 
-      const fluenceConfig = await initFluenceConfigWithPath(
-        join(cwd, ".fluence"),
-      );
+      const fluenceConfig = await initFluenceConfigWithPath(cwd);
 
       assert(
         fluenceConfig !== null,

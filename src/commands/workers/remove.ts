@@ -28,6 +28,7 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
   TRACING_FLAG,
+  WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { parseWorkers } from "../../lib/deployWorkers.js";
 import {
@@ -37,7 +38,7 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
-  static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
+  static override description = `Remove workers from hosts, described in 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -49,7 +50,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
   };
   static override args = {
     "WORKER-NAMES": Args.string({
-      description: `Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
+      description: `Comma separated names of workers to remove. Example: "worker1,worker2" (by default all workers from 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME} are removed)`,
     }),
   };
   async run(): Promise<void> {
