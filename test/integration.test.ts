@@ -330,6 +330,16 @@ describe("integration tests", () => {
 
       const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
 
+      let allWorkersAreRemoved = await fluence({
+        args: ["run"],
+        flags: {
+          f: "areAllWorkersRemoved()",
+        },
+        cwd,
+      });
+
+      expect(allWorkersAreRemoved).toBe("false");
+
       await fluence({
         args: ["workers", "remove"],
         cwd,
@@ -352,7 +362,7 @@ describe("integration tests", () => {
         cwd,
       });
 
-      const allWorkersAreRemoved = await fluence({
+      allWorkersAreRemoved = await fluence({
         args: ["run"],
         flags: {
           f: "areAllWorkersRemoved()",
@@ -360,7 +370,7 @@ describe("integration tests", () => {
         cwd,
       });
 
-      expect(allWorkersAreRemoved).toBe(true);
+      expect(allWorkersAreRemoved).toBe("true");
     },
   );
 
