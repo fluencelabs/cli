@@ -6,7 +6,7 @@ import "@fluencelabs/aqua-lib/workers.aqua"
 use "hosts.aqua"
 import "services.aqua"
 
-export runDeployedServices
+export runDeployedServices, areAllWorkersRemoved
 
 data Answer:
     answer: string
