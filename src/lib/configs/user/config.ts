@@ -113,11 +113,11 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 const getDefault = () => {
   return `# Defines global config for Fluence CLI
 
-# Weather you consent to send usage data to Countly
-countlyConsent: false
-
 # config version
 version: 0
+
+# Weather you consent to send usage data to Countly
+countlyConsent: false
 
 # Whether to include commented-out documented config examples in the configs generated with the CLI
 docsInConfigs: false

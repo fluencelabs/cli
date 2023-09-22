@@ -71,6 +71,9 @@ const getDefault: GetDefaultConfig = async () => {
   return `# Defines user's secret keys that can be used across different Fluence projects.
 # You can manage user's keys using commands from \`fluence key\` group of commands with \`--user\` flag
 
+# config version
+version: 0
+
 # user's key pairs
 keyPairs:
   - name: ${name}
@@ -78,9 +81,6 @@ keyPairs:
 
 # Key pair with this name will be used for the deployment by default.
 defaultKeyPairName: ${name}
-
-# config version
-version: 0
 `;
 };
 

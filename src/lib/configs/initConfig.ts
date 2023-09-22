@@ -128,7 +128,7 @@ const migrateConfig = async <
   }
 
   if (configString !== migratedConfigString) {
-    await writeFile(configPath, migratedConfigString + "\n", FS_OPTIONS);
+    await writeFile(configPath, formatConfig(migratedConfigString), FS_OPTIONS);
   }
 
   return {
@@ -356,7 +356,7 @@ export function getReadonlyConfigInitFunction<
         : `${schemaPathComment}\n${fileContent.trim()}\n`;
 
       if (configString !== fileContent) {
-        await writeFile(configPath, configString, FS_OPTIONS);
+        await writeFile(configPath, formatConfig(configString), FS_OPTIONS);
       }
     } catch {
       if (getDefaultConfig === undefined) {
@@ -379,15 +379,14 @@ export function getReadonlyConfigInitFunction<
 
       const defConf = await getDefaultConfig();
 
-      configString = docsInConfigs
-        ? `${schemaPathComment}\n\n${documentationLinkComment}\n\n${defConf}`
-        : yamlDiffPatch(
-            `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
-            {},
-            parse(defConf),
-          );
+      configString = getConfigString(
+        schemaPathComment,
+        documentationLinkComment,
+        defConf,
+        description,
+      );
 
-      await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
+      await writeFile(configPath, formatConfig(configString), FS_OPTIONS);
     }
 
     const config: unknown = parse(configString);
@@ -433,10 +432,67 @@ export function getReadonlyConfigInitFunction<
       },
       $validateLatest: validateLatestConfig,
     };
+
+    function getConfigString(
+      schemaPathComment: string,
+      documentationLinkComment: string,
+      defConf: string,
+      description: string,
+    ): string {
+      if (docsInConfigs) {
+        return `${schemaPathComment}\n${documentationLinkComment}\n${defConf}`;
+      }
+
+      return yamlDiffPatch(
+        `${schemaPathComment}${description}\n${documentationLinkComment}\n`,
+        {},
+        parse(defConf),
+      );
+    }
   };
 }
 
 const initializedConfigs = new Set<string>();
+
+function formatConfig(configWithoutComments: string) {
+  const formattedConfig = configWithoutComments
+    .trim()
+    .split("\n")
+    .flatMap((line, i, ar) => {
+      // If it's empty string - it was previously a newline - remove it
+      if (line.trim() === "") {
+        return [];
+      }
+
+      const maybePreviousLine = ar[i - 1];
+
+      if (
+        line.startsWith("#") &&
+        maybePreviousLine !== undefined &&
+        !maybePreviousLine.startsWith("#")
+      ) {
+        return ["", line];
+      }
+
+      // Don't add new lines after indented code
+      if (line.startsWith(" ") || line.startsWith("#")) {
+        return [line];
+      }
+
+      if (
+        maybePreviousLine !== undefined &&
+        maybePreviousLine.startsWith("#")
+      ) {
+        return [line];
+      }
+
+      // If it's top level property - separate it with a new line ("" -> "\n" in the next step)
+      return ["", line];
+    })
+    .join("\n");
+
+  return `${formattedConfig.trim()}\n`;
+}
 
 export function getConfigInitFunction<
   Config extends BaseConfig,
@@ -524,7 +580,7 @@ export function getConfigInitFunction<
         ).trim()}\n`;
 
         if (configString !== newConfigString) {
-          configString = newConfigString;
+          configString = formatConfig(newConfigString);
 
           await writeFile(configPath, configString, FS_OPTIONS);
         }
