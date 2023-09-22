@@ -379,12 +379,13 @@ export function getReadonlyConfigInitFunction<
 
       const defConf = await getDefaultConfig();
 
-      configString = getConfigString(
-        schemaPathComment,
-        documentationLinkComment,
-        defConf,
-        description,
-      );
+      configString = docsInConfigs
+        ? `${schemaPathComment}\n${documentationLinkComment}\n${defConf}`
+        : yamlDiffPatch(
+            `${schemaPathComment}${description}\n${documentationLinkComment}\n`,
+            {},
+            parse(defConf),
+          );
 
       await writeFile(configPath, formatConfig(configString), FS_OPTIONS);
     }
@@ -432,23 +433,6 @@ export function getReadonlyConfigInitFunction<
       },
       $validateLatest: validateLatestConfig,
     };
-
-    function getConfigString(
-      schemaPathComment: string,
-      documentationLinkComment: string,
-      defConf: string,
-      description: string,
-    ): string {
-      if (docsInConfigs) {
-        return `${schemaPathComment}\n${documentationLinkComment}\n${defConf}`;
-      }
-
-      return yamlDiffPatch(
-        `${schemaPathComment}${description}\n${documentationLinkComment}\n`,
-        {},
-        parse(defConf),
-      );
-    }
   };
 }
 
@@ -466,6 +450,7 @@ function formatConfig(configWithoutComments: string) {
 
       const maybePreviousLine = ar[i - 1];
 
+      // If it's a comment but previous line is not a comment - separate it with a new line ("" -> "\n" in the next step)
       if (
         line.startsWith("#") &&
         maybePreviousLine !== undefined &&
@@ -479,6 +464,7 @@ function formatConfig(configWithoutComments: string) {
         return [line];
       }
 
+      // If previous line is a comment - separate it with a new line ("" -> "\n" in the next step)
       if (
         maybePreviousLine !== undefined &&
         maybePreviousLine.startsWith("#")
