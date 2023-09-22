@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
@@ -22,7 +23,7 @@ import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { NODE_MODULES_DIR_NAME } from "./const.js";
 import { addCountlyLog } from "./countly.js";
-import { execPromise } from "./execPromise.js";
+import { type ExecPromiseArg, execPromise } from "./execPromise.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import {
   splitPackageNameAndVersion,
@@ -38,20 +39,50 @@ const getNpmPath = async () => {
   return join(node_modules(), ".bin", "npm");
 };
 
+async function runNpm(args: Omit<ExecPromiseArg, "command">) {
+  let res: string;
+
+  try {
+    res = await execPromise({
+      command: await getNpmPath(),
+      ...args,
+    });
+  } catch {
+    try {
+      res = await execPromise({
+        command: "npm",
+        ...args,
+      });
+    } catch (e) {
+      commandObj.error(
+        `Can't find ${color.yellow(
+          "npm",
+        )} in your system. Please make sure it's available on PATH.\n\n${stringifyUnknown(
+          e,
+        )}`,
+      );
+    }
+  }
+
+  return res;
+}
+
 export const getLatestVersionOfNPMDependency = async (
   name: string,
 ): Promise<string> => {
   try {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (
-      await execPromise({
-        command: await getNpmPath(),
-        args: ["view", name, "version"],
-      })
-    )
-      .trim()
-      .split("\n")
-      .pop() as string;
+    const versions = await runNpm({
+      args: ["view", name, "version"],
+    });
+
+    const lastVersion = versions.trim().split("\n").pop();
+
+    assert(
+      lastVersion !== undefined,
+      `Couldn't find last version of your ${name} using npm`,
+    );
+
+    return lastVersion;
   } catch (error) {
     commandObj.error(
       `Failed to get latest version of ${color.yellow(
@@ -77,8 +108,7 @@ const installNpmDependency = async ({
   version,
 }: InstallNpmDependencyArg): Promise<void> => {
   try {
-    await execPromise({
-      command: await getNpmPath(),
+    await runNpm({
       args: ["i", `${name}@${version}`],
       flags: { prefix: dependencyTmpDirPath },
       spinnerMessage: `Installing ${name}@${version} to ${dependencyDirPath}`,
