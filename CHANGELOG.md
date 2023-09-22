@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.6](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.5...fluence-cli-v0.8.6) (2023-09-22)
+
+
+### Features
+
+* add `showSubnet` func ([#478](https://github.com/fluencelabs/cli/issues/478)) ([0b5d8d9](https://github.com/fluencelabs/cli/commit/0b5d8d9cce05313f8ddbaa3d2768bf072848ca99))
+
+
+### Bug Fixes
+
+* deal update ([#483](https://github.com/fluencelabs/cli/issues/483)) ([fed1933](https://github.com/fluencelabs/cli/commit/fed1933d82f4ac763bd8424acc3f95f4e86b45bd))
+
 ## [0.8.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.4...fluence-cli-v0.8.5) (2023-09-18)
 
 
