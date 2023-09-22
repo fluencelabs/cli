@@ -338,7 +338,7 @@ describe("integration tests", () => {
         cwd,
       });
 
-      expect(allWorkersAreRemoved).toBe("false");
+      expect(allWorkersAreRemoved.trim()).toBe("false");
 
       await fluence({
         args: ["workers", "remove"],
@@ -370,7 +370,7 @@ describe("integration tests", () => {
         cwd,
       });
 
-      expect(allWorkersAreRemoved).toBe("true");
+      expect(allWorkersAreRemoved.trim()).toBe("true");
     },
   );
 
