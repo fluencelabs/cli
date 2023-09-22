@@ -23,7 +23,11 @@ import type { JSONSchemaType } from "ajv";
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import versions from "../../../versions.json" assert { type: "json" };
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
-import { IPFS_ADDR_PROPERTY, DEFAULT_IPFS_ADDRESS } from "../../const.js";
+import {
+  IPFS_ADDR_PROPERTY,
+  DEFAULT_IPFS_ADDRESS,
+  AQUA_LIB_NPM_DEPENDENCY,
+} from "../../const.js";
 import {
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
@@ -652,11 +656,11 @@ deals:
 # dependencies:
 #   # A map of npm dependency versions
 #   # CLI ensures dependencies are installed each time you run aqua
-#   # There are also some dependencies that are installed by default (e.g. @fluencelabs/aqua-lib)
+#   # There are also some dependencies that are installed by default (e.g. ${AQUA_LIB_NPM_DEPENDENCY})
 #   # You can check default dependencies using \`fluence dep v --default\`
 #   # use \`fluence dep npm i\` to install project npm dependencies
 #   npm:
-#     "@fluencelabs/aqua-lib": ${versions.npm["@fluencelabs/aqua-lib"]}
+#     "${AQUA_LIB_NPM_DEPENDENCY}": ${versions.npm[AQUA_LIB_NPM_DEPENDENCY]}
 #
 #   # A map of cargo dependency versions
 #   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL

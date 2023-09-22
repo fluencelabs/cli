@@ -320,7 +320,7 @@ ARGUMENTS
                                        fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
                                        fluence, latest version cargo is aware of. If you want to install a specific
                                        version, you can do so by appending @ and the version to the package name. For
-                                       example: marine@0.12.4
+                                       example: package@version
 
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
@@ -379,10 +379,10 @@ USAGE
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
-                                       fluence.yaml, , user's .fluence/config.yaml, dependency versions recommended by
-                                       fluence, latest version cargo is aware of. If you want to install a specific
-                                       version, you can do so by appending @ and the version to the package name. For
-                                       example: @fluencelabs/aqua-lib@0.6.0
+                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
+                                       fluence, latest version npm is aware of. If you want to install a specific
+                                       version, you can do so by appending @ and the version to the package name.
+                                       Example: package@version
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
