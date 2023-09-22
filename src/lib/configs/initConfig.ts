@@ -576,7 +576,7 @@ export function getConfigInitFunction<
         ).trim()}\n`;
 
         if (configString !== newConfigString) {
-          configString = await saveConfig(configPath, configString);
+          configString = await saveConfig(configPath, newConfigString);
         }
       },
       $getConfigString(): string {
