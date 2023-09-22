@@ -34,7 +34,6 @@ import {
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
-import { dbg } from "../src/lib/dbg.js";
 import { execPromise } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
 import { localPeerIds, local } from "../src/lib/localNodes.js";
@@ -349,15 +348,15 @@ describe("integration tests", () => {
         cwd,
       });
 
-      const callRemovedWorkersResult = await fluence({
+      const allWorkersAreRemoved = await fluence({
         args: ["run"],
         flags: {
-          f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+          f: "areAllWorkersRemoved()",
         },
         cwd,
       });
 
-      dbg(callRemovedWorkersResult);
+      expect(allWorkersAreRemoved).toBe(true);
     },
   );
 

@@ -1,6 +1,7 @@
 aqua Main
 
 import "@fluencelabs/aqua-lib/builtin.aqua"
+import "@fluencelabs/aqua-lib/workers.aqua"
 
 use "hosts.aqua"
 import "services.aqua"
@@ -21,3 +22,18 @@ func runDeployedServices() -> *Answer:
             answers <<- Answer(answer=answer, peer=s.hostId)
 
     <- answers
+
+func areAllWorkersRemoved() -> bool:
+    hosts <- Hosts.get()
+    installationSpells = hosts.defaultWorker!.installationSpells
+    dummyDealId = hosts.defaultWorker!.dummyDealId
+
+    allWorkersAreRemoved = true
+
+    for s <- installationSpells:
+        on s.hostId:
+            res <- DealWorker.get_worker_id(dummyDealId)
+            if res != nil:
+                allWorkersAreRemoved = false
+
+    <- allWorkersAreRemoved
