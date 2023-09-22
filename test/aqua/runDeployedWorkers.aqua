@@ -34,6 +34,6 @@ func areAllWorkersRemoved() -> bool:
         on s.hostId:
             res <- DealWorker.get_worker_id(?[dummyDealId])
             if res != nil:
-                allWorkersAreRemoved = false
+                allWorkersAreRemoved <- false
 
     <- allWorkersAreRemoved
