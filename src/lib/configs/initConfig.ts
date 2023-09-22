@@ -380,9 +380,9 @@ export function getReadonlyConfigInitFunction<
       const defConf = await getDefaultConfig();
 
       configString = docsInConfigs
-        ? `${schemaPathComment}\n${documentationLinkComment}\n${defConf}`
+        ? `${schemaPathComment}\n\n${documentationLinkComment}\n${defConf}`
         : yamlDiffPatch(
-            `${schemaPathComment}${description}\n${documentationLinkComment}\n`,
+            `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,
             {},
             parse(defConf),
           );
