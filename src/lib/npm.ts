@@ -44,10 +44,7 @@ let npmExecutable: string | undefined;
 
 async function runNpm(args: Omit<ExecPromiseArg, "command">) {
   if (typeof npmExecutable === "string") {
-    return execPromise({
-      command: npmExecutable,
-      ...args,
-    });
+    return execPromise({ command: npmExecutable, ...args });
   }
 
   try {
@@ -58,10 +55,7 @@ async function runNpm(args: Omit<ExecPromiseArg, "command">) {
     npmExecutable = "npm";
   }
 
-  return execPromise({
-    command: npmExecutable,
-    ...args,
-  });
+  return execPromise({ command: npmExecutable, ...args });
 }
 
 export const getLatestVersionOfNPMDependency = async (
