@@ -15,6 +15,7 @@
  */
 
 import assert from "node:assert";
+import { access } from "node:fs/promises";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
@@ -39,32 +40,28 @@ const getNpmPath = async () => {
   return join(node_modules(), ".bin", "npm");
 };
 
-async function runNpm(args: Omit<ExecPromiseArg, "command">) {
-  let res: string;
+let npmExecutable: string | undefined;
 
-  try {
-    res = await execPromise({
-      command: await getNpmPath(),
+async function runNpm(args: Omit<ExecPromiseArg, "command">) {
+  if (typeof npmExecutable === "string") {
+    return execPromise({
+      command: npmExecutable,
       ...args,
     });
-  } catch (localNpmErr) {
-    try {
-      res = await execPromise({
-        command: "npm",
-        ...args,
-      });
-    } catch (globalNpmErr) {
-      commandObj.error(
-        `Can't find ${color.yellow(
-          "npm",
-        )} in your system. Please make sure it's available on PATH. Errors:\n\n${stringifyUnknown(
-          localNpmErr,
-        )}\n\n${stringifyUnknown(globalNpmErr)}`,
-      );
-    }
   }
 
-  return res;
+  try {
+    const npmPath = await getNpmPath();
+    await access(npmPath);
+    npmExecutable = npmPath;
+  } catch {
+    npmExecutable = "npm";
+  }
+
+  return execPromise({
+    command: npmExecutable,
+    ...args,
+  });
 }
 
 export const getLatestVersionOfNPMDependency = async (
