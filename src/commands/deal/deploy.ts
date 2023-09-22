@@ -165,7 +165,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           network: chainNetwork,
           privKey: flags["priv-key"],
           appCID,
-          dealAddress: maybePreviouslyDeployedDeal.dealId,
+          dealAddress: maybePreviouslyDeployedDeal.dealIdOriginal,
         });
 
         if (flags["auto-match"]) {
