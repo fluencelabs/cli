@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.7](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.6...fluence-cli-v0.8.7) (2023-09-22)
+
+
+### Features
+
+* use Subnet.resolve ([#481](https://github.com/fluencelabs/cli/issues/481)) ([e13a64b](https://github.com/fluencelabs/cli/commit/e13a64beb0b9646e8739c0e99472584ee68a0de3))
+
 ## [0.8.6](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.5...fluence-cli-v0.8.6) (2023-09-22)
 
 
