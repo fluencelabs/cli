@@ -44,6 +44,7 @@ import {
   multiaddrs,
   sortPeers,
   assertHasWorkerAndAnswer,
+  assertHasPeer,
 } from "./helpers.js";
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
@@ -287,12 +288,7 @@ describe("integration tests", () => {
 
           const arrayOfResults = parsedResult
             .map((u) => {
-              const {
-                answer,
-                worker: { host_id },
-              } = assertHasWorkerAndAnswer(u);
-
-              return { answer, peer: host_id };
+              return assertHasPeer(u);
             })
             .sort((a, b) => {
               return sortPeers(a, b);
@@ -489,7 +485,9 @@ describe("integration tests", () => {
             `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array, but it is: ${result}`,
           );
 
-          const arrayOfResults = parsedResult.map(assertHasWorkerAndAnswer);
+          const arrayOfResults = parsedResult.map((u) => {
+            return assertHasWorkerAndAnswer(u);
+          });
 
           const resultsWithNoAnswer = arrayOfResults.filter(({ answer }) => {
             return answer === null;

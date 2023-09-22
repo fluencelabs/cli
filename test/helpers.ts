@@ -233,11 +233,10 @@ export const assertHasWorkerAndAnswer = (
 
     return { worker: { host_id, worker_id, pat_id }, answer };
   } catch (err) {
-    assert(err instanceof Error, "Error must be an instance of Error");
     throw new Error(
       `Running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is supposed to return an array of objects of a particular shape: { worker: { host_id: string, worker_id: string | null, pat_id: string }, answer: string | null }. One of the received objects doesn't match the shape: ${jsonStringify(
         result,
-      )}. Error: ${err.message}`,
+      )}. Error: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 };
