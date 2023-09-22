@@ -26,7 +26,7 @@ func runDeployedServices() -> *Answer:
 func areAllWorkersRemoved() -> bool:
     hosts <- Hosts.get()
     installationSpells = hosts.defaultWorker!.installationSpells
-    dummyDealId = hosts.defaultWorker!.dummyDealId
+    dummyDealId = hosts.defaultWorker!.dummyDealId!
 
     allWorkersRemoved: ?bool
 
