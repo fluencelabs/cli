@@ -398,7 +398,7 @@ func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
     dealId = deals.defaultWorker!.dealIdOriginal
     answers: *Answer
     on HOST_PEER_ID:
-      subnet <- Subnet.resolve(dealId)
+        subnet <- Subnet.resolve(dealId)
     if subnet.success == false:
         Console.print(["Failed to resolve subnet: ", subnet.error])
 
@@ -420,24 +420,24 @@ func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
     dealId = deals.defaultWorker!.dealIdOriginal
     on HOST_PEER_ID:
-      subnet <- Subnet.resolve(dealId)
+        subnet <- Subnet.resolve(dealId)
     if subnet.success == false:
         Console.print(["Failed to resolve subnet: ", subnet.error])
 
     services: *WorkerServices
     for w <- subnet.workers:
-      if w.worker_id != nil:
-        on w.worker_id! via w.host_id:
-          -- get list of all services on this worker
-          srvs <- Srv.list()
+        if w.worker_id != nil:
+            on w.worker_id! via w.host_id:
+                -- get list of all services on this worker
+                srvs <- Srv.list()
 
-          -- gather aliases
-          aliases: *string
-          for s <- srvs:
-            if s.aliases.length != 0:
-              aliases <<- s.aliases[0]
+                -- gather aliases
+                aliases: *string
+                for s <- srvs:
+                    if s.aliases.length != 0:
+                        aliases <<- s.aliases[0]
 
-          services <<- WorkerServices(worker_id = w.worker_id!, services = aliases)
+                    services <<- WorkerServices(worker_id = w.worker_id!, services = aliases)
 
     <- services
 `;
