@@ -79,7 +79,7 @@ export const getLatestVersionOfNPMDependency = async (
 
     assert(
       lastVersion !== undefined,
-      `Couldn't find last version of your ${name} using npm`,
+      `Couldn't find last version of your ${name} using npm. Got:\n\n${versions}`,
     );
 
     return lastVersion;
