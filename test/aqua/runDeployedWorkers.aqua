@@ -28,12 +28,16 @@ func areAllWorkersRemoved() -> bool:
     installationSpells = hosts.defaultWorker!.installationSpells
     dummyDealId = hosts.defaultWorker!.dummyDealId
 
-    allWorkersAreRemoved = true
+    allWorkersRemoved: ?bool
 
     for s <- installationSpells:
         on s.hostId:
-            res <- DealWorker.get_worker_id(?[dummyDealId])
-            if res != nil:
-                allWorkersAreRemoved <- false
+            res <- DealWorker.get_worker_id(dummyDealId)
 
-    <- allWorkersAreRemoved
+            if res != nil:
+                allWorkersRemoved <<- false
+
+    if allWorkersRemoved == nil:
+        allWorkersRemoved <<- true
+
+    <- allWorkersRemoved!
