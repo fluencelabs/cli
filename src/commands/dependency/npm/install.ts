@@ -28,7 +28,6 @@ import {
   GLOBAL_FLAG_NAME,
   NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
-  AQUA_LIB_NPM_DEPENDENCY,
 } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import {
