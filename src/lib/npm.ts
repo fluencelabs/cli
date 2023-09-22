@@ -47,19 +47,19 @@ async function runNpm(args: Omit<ExecPromiseArg, "command">) {
       command: await getNpmPath(),
       ...args,
     });
-  } catch {
+  } catch (localNpmErr) {
     try {
       res = await execPromise({
         command: "npm",
         ...args,
       });
-    } catch (e) {
+    } catch (globalNpmErr) {
       commandObj.error(
         `Can't find ${color.yellow(
           "npm",
-        )} in your system. Please make sure it's available on PATH.\n\n${stringifyUnknown(
-          e,
-        )}`,
+        )} in your system. Please make sure it's available on PATH. Errors:\n\n${stringifyUnknown(
+          localNpmErr,
+        )}\n\n${stringifyUnknown(globalNpmErr)}`,
       );
     }
   }
