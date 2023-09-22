@@ -289,8 +289,12 @@ describe("integration tests", () => {
           );
 
           const arrayOfResults = parsedResult
-            .map(assertHasPeer)
-            .sort(sortPeers);
+            .map((u) => {
+              return assertHasPeer(u);
+            })
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           const expected = localPeerIds.map((peer) => {
             return {
@@ -512,7 +516,6 @@ describe("integration tests", () => {
             flags: {
               f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
               quiet: true,
-              const: API_ENDPOINT,
             },
             cwd,
           });
@@ -524,7 +527,9 @@ describe("integration tests", () => {
             `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array, but it is: ${result}`,
           );
 
-          const arrayOfResults = parsedResult.map(assertHasWorkerAndAnswer);
+          const arrayOfResults = parsedResult.map((u) => {
+            return assertHasWorkerAndAnswer(u);
+          });
 
           const resultsWithNoAnswer = arrayOfResults.filter(({ answer }) => {
             return answer === null;
@@ -546,7 +551,9 @@ describe("integration tests", () => {
                 peer: peer.peerId,
               };
             })
-            .sort(sortPeers);
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           const res = arrayOfResults
             .map(({ answer, worker }) => {
@@ -555,7 +562,9 @@ describe("integration tests", () => {
                 peer: worker.host_id,
               };
             })
-            .sort(sortPeers);
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
           expect(res).toEqual(expected);
@@ -582,7 +591,6 @@ describe("integration tests", () => {
         flags: {
           f: "showSubnet()",
           quiet: true,
-          const: API_ENDPOINT,
         },
         cwd,
       });
@@ -597,7 +605,9 @@ describe("integration tests", () => {
             return typeof i === "string";
           }) &&
           hasKey("worker_id", unknown) &&
-          unknown.worker_id !== null
+          unknown.worker_id !== null &&
+          hasKey("host_id", unknown) &&
+          typeof unknown.host_id === "string"
         );
       }
 
@@ -644,8 +654,6 @@ const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 // Private Key: 0x1a1bf9026a097f33ce1a51f5aa0c4102e4a1432c757d922200ef37df168ae504
 // Private Key: 0xbb3457514f768615c8bc4061c7e47f817c8a570c5c3537479639d4fad052a98a
 // Private Key: 0xfbd9e512cc1b62db1ca689737c110afa9a3799e1bc04bf12c1c34ac39e0e2dd5
-
-const API_ENDPOINT = 'API_ENDPOINT="http://deal-aurora:8545"';
 
 const PRIV_KEY =
   "0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41";
