@@ -44,7 +44,6 @@ import {
   multiaddrs,
   sortPeers,
   assertHasWorkerAndAnswer,
-  assertHasPeer,
 } from "./helpers.js";
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
@@ -287,8 +286,17 @@ describe("integration tests", () => {
           );
 
           const arrayOfResults = parsedResult
-            .map(assertHasPeer)
-            .sort(sortPeers);
+            .map((u) => {
+              const {
+                answer,
+                worker: { host_id },
+              } = assertHasWorkerAndAnswer(u);
+
+              return { answer, peer: host_id };
+            })
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           const expected = localPeerIds.map((peer) => {
             return {
@@ -503,7 +511,9 @@ describe("integration tests", () => {
                 peer: peer.peerId,
               };
             })
-            .sort(sortPeers);
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           const res = arrayOfResults
             .map(({ answer, worker }) => {
@@ -512,10 +522,10 @@ describe("integration tests", () => {
                 peer: worker.host_id,
               };
             })
-            .sort(sortPeers);
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
-          log("expected", expected);
-          log("actual", res);
           // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
           expect(res).toEqual(expected);
 
