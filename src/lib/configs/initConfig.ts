@@ -128,7 +128,7 @@ const migrateConfig = async <
   }
 
   if (configString !== migratedConfigString) {
-    await writeFile(configPath, formatConfig(migratedConfigString), FS_OPTIONS);
+    await saveConfig(configPath, migratedConfigString);
   }
 
   return {
@@ -356,7 +356,7 @@ export function getReadonlyConfigInitFunction<
         : `${schemaPathComment}\n${fileContent.trim()}\n`;
 
       if (configString !== fileContent) {
-        await writeFile(configPath, formatConfig(configString), FS_OPTIONS);
+        await saveConfig(configPath, configString);
       }
     } catch {
       if (getDefaultConfig === undefined) {
@@ -387,7 +387,7 @@ export function getReadonlyConfigInitFunction<
             parse(defConf),
           );
 
-      await writeFile(configPath, formatConfig(configString), FS_OPTIONS);
+      await saveConfig(configPath, configString);
     }
 
     const config: unknown = parse(configString);
@@ -443,14 +443,14 @@ function formatConfig(configWithoutComments: string) {
     .trim()
     .split("\n")
     .flatMap((line, i, ar) => {
-      // If it's empty string - it was previously a newline - remove it
+      // If it's empty string - it was a newline - remove it
       if (line.trim() === "") {
         return [];
       }
 
       const maybePreviousLine = ar[i - 1];
 
-      // If it's a comment but previous line is not a comment - separate it with a new line ("" -> "\n" in the next step)
+      // If it's a comment but previous line is not a comment - separate it with a new line ("" -> "\n" when joined)
       if (
         line.startsWith("#") &&
         maybePreviousLine !== undefined &&
@@ -464,7 +464,7 @@ function formatConfig(configWithoutComments: string) {
         return [line];
       }
 
-      // If previous line is a comment - separate it with a new line ("" -> "\n" in the next step)
+      // If previous line is a comment - don't add a new line
       if (
         maybePreviousLine !== undefined &&
         maybePreviousLine.startsWith("#")
@@ -472,12 +472,22 @@ function formatConfig(configWithoutComments: string) {
         return [line];
       }
 
-      // If it's top level property - separate it with a new line ("" -> "\n" in the next step)
+      // If it's top level property - separate it with a new line ("" -> "\n" when joined)
       return ["", line];
     })
     .join("\n");
 
   return `${formattedConfig.trim()}\n`;
+}
+
+async function saveConfig(
+  configPath: string,
+  migratedConfigString: string,
+): Promise<string> {
+  const configToSave = formatConfig(migratedConfigString);
+  await writeFile(configPath, configToSave, FS_OPTIONS);
+  const savedConfig = configToSave;
+  return savedConfig;
 }
 
 export function getConfigInitFunction<
@@ -566,9 +576,7 @@ export function getConfigInitFunction<
         ).trim()}\n`;
 
         if (configString !== newConfigString) {
-          configString = formatConfig(newConfigString);
-
-          await writeFile(configPath, configString, FS_OPTIONS);
+          configString = await saveConfig(configPath, configString);
         }
       },
       $getConfigString(): string {
