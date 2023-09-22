@@ -634,7 +634,7 @@ __metadata:
     "@fluencelabs/aqua-api": 0.12.1
     "@fluencelabs/deal-aurora": 0.2.12
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/workers-remove/s6.tgz"
+    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/workers-remove/s7.tgz"
     "@fluencelabs/js-client": 0.1.7
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.1
@@ -723,15 +723,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/workers-remove/s6.tgz":
+"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/workers-remove/s7.tgz":
   version: 0.5.21
-  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/workers-remove/s6.tgz"
+  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/workers-remove/s7.tgz"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.17
     "@fluencelabs/aqua-lib": 0.7.2
     "@fluencelabs/registry": 0.8.6
     "@fluencelabs/spell": 0.5.21
-  checksum: abd3695e87722720ab40740a73c4a78401906a43b0633e1ab1e2ff267d4ed3335e2946b766c43c4f504901bf8a4c15d4aefe5d9ab562b515bd6ea7a250016c6f
+  checksum: 3652e0d211432b47b203556278d422ac83caeb4d62f761fbd3cdc0311accbffa969a9c05de02cb94fc6f51a50bdc06a20f71a43fba8c9a5c230193a4a122d14a
   languageName: node
   linkType: hard
 
