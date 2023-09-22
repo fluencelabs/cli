@@ -563,7 +563,9 @@ describe("integration tests", () => {
             return typeof i === "string";
           }) &&
           hasKey("worker_id", unknown) &&
-          unknown.worker_id !== null
+          unknown.worker_id !== null &&
+          hasKey("host_id", unknown) &&
+          typeof unknown.host_id === "string"
         );
       }
 

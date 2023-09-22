@@ -408,13 +408,14 @@ func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
         else:
             on w.worker_id! via w.host_id:
                 answer <- MyService.greeting("fluence")
-                answers <<- Answer(answer=?[answer], worker = w)
+                answers <<- Answer(answer=?[answer], worker=w)
 
     <- answers
 
 data WorkerServices:
-    worker_id: string
-    services: []string
+    host_id: string
+    worker_id: ?string
+    services: ?[]string
 
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
@@ -437,7 +438,9 @@ func showSubnet() -> []WorkerServices:
                     if s.aliases.length != 0:
                         aliases <<- s.aliases[0]
 
-                    services <<- WorkerServices(worker_id = w.worker_id!, services = aliases)
+                    services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[aliases])
+        else:
+            services <<- WorkerServices(host_id=w.host_id, worker_id=nil, services=nil)
 
     <- services
 `;
