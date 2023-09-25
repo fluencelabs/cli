@@ -47,12 +47,24 @@ async function runNpm(args: Omit<ExecPromiseArg, "command">) {
     return execPromise({ command: npmExecutable, ...args });
   }
 
+  const npmPath = await getNpmPath();
+
   try {
-    const npmPath = await getNpmPath();
     await access(npmPath);
     npmExecutable = npmPath;
   } catch {
-    npmExecutable = "npm";
+    try {
+      await execPromise({ command: "npm", args: ["--version"] });
+      npmExecutable = "npm";
+    } catch {
+      commandObj.error(
+        `Couldn't find npm executable. Tried at ${color.yellow(
+          npmPath,
+        )} and also tried finding npm in your ${color.yellow(
+          "$PATH",
+        )}. Please make sure npm is available`,
+      );
+    }
   }
 
   return execPromise({ command: npmExecutable, ...args });
@@ -106,11 +118,9 @@ const installNpmDependency = async ({
     });
   } catch (error) {
     commandObj.error(
-      `Not able to install ${name}@${version} to ${dependencyDirPath}. Please make sure ${color.yellow(
-        name,
-      )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
-        `fluence dependency npm install ${name}@<version>`,
-      )} command.\n${stringifyUnknown(error)}`,
+      `Not able to install ${name}@${version} to ${dependencyDirPath}. \n${stringifyUnknown(
+        error,
+      )}`,
     );
   }
 };
