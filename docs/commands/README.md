@@ -1007,7 +1007,7 @@ EXAMPLES
   $ fluence workers remove
 ```
 
-_See code: [dist/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.8.7/dist/commands/workers/remove.ts)_
+_See code: [dist/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.8.8/dist/commands/workers/remove.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
