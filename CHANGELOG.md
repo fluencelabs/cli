@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.8](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.7...fluence-cli-v0.8.8) (2023-09-25)
+
+
+### Bug Fixes
+
+* npm not being found when installed with yarn [fixes DXJ-479] ([#484](https://github.com/fluencelabs/cli/issues/484)) ([d0f4b2b](https://github.com/fluencelabs/cli/commit/d0f4b2b153839e19aa2772b86dbfa750690e0e7e))
+
 ## [0.8.7](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.6...fluence-cli-v0.8.7) (2023-09-22)
 
 
