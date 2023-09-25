@@ -438,8 +438,8 @@ export function getReadonlyConfigInitFunction<
 
 const initializedConfigs = new Set<string>();
 
-function formatConfig(configWithoutComments: string) {
-  const formattedConfig = configWithoutComments
+function formatConfig(configString: string) {
+  const formattedConfig = configString
     .trim()
     .split("\n")
     .flatMap((line, i, ar) => {
