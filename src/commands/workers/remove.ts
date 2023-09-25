@@ -76,15 +76,9 @@ export default class Remove extends BaseCommand<typeof Remove> {
       );
     }
 
-    const workerNamesSet = Object.keys(workersConfig.hosts).map(
-      (workerName) => {
-        return workerName;
-      },
-    );
-
     const workersToRemove =
       args["WORKER-NAMES"] === undefined
-        ? workerNamesSet
+        ? Object.keys(workersConfig.hosts)
         : parseWorkers(args["WORKER-NAMES"]);
 
     const removeArg: RemoveArgWorkers = {
