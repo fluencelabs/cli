@@ -443,32 +443,29 @@ function formatConfig(configString: string) {
     .trim()
     .split("\n")
     .flatMap((line, i, ar) => {
-      // If it's empty string - it was a newline - remove it
+      // If it's an empty string - it was a newline before split - remove it
       if (line.trim() === "") {
         return [];
       }
 
       const maybePreviousLine = ar[i - 1];
+      const isComment = line.startsWith("#");
+      const isPreviousLineComment = maybePreviousLine?.startsWith("#") ?? false;
 
-      // If it's a comment but previous line is not a comment - separate it with a new line ("" -> "\n" when joined)
-      if (
-        line.startsWith("#") &&
-        maybePreviousLine !== undefined &&
-        !maybePreviousLine.startsWith("#")
-      ) {
+      const addNewLineBeforeBlockOfComments =
+        isComment && !isPreviousLineComment;
+
+      if (addNewLineBeforeBlockOfComments) {
         return ["", line];
       }
 
-      // Don't add new lines after indented code
-      if (line.startsWith(" ") || line.startsWith("#")) {
-        return [line];
-      }
+      const isFirstLine = maybePreviousLine === undefined;
+      const isIndentedCode = line.startsWith(" ");
 
-      // If previous line is a comment - don't add a new line
-      if (
-        maybePreviousLine !== undefined &&
-        maybePreviousLine.startsWith("#")
-      ) {
+      const doNotAddNewLine =
+        isFirstLine || isIndentedCode || isComment || isPreviousLineComment;
+
+      if (doNotAddNewLine) {
         return [line];
       }
 
@@ -486,8 +483,7 @@ async function saveConfig(
 ): Promise<string> {
   const configToSave = formatConfig(migratedConfigString);
   await writeFile(configPath, configToSave, FS_OPTIONS);
-  const savedConfig = configToSave;
-  return savedConfig;
+  return configToSave;
 }
 
 export function getConfigInitFunction<
