@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
+import { access } from "node:fs/promises";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
@@ -22,7 +24,7 @@ import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { NODE_MODULES_DIR_NAME } from "./const.js";
 import { addCountlyLog } from "./countly.js";
-import { execPromise } from "./execPromise.js";
+import { type ExecPromiseArg, execPromise } from "./execPromise.js";
 import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import {
   splitPackageNameAndVersion,
@@ -38,20 +40,52 @@ const getNpmPath = async () => {
   return join(node_modules(), ".bin", "npm");
 };
 
+let npmExecutable: string | undefined;
+
+async function runNpm(args: Omit<ExecPromiseArg, "command">) {
+  if (typeof npmExecutable === "string") {
+    return execPromise({ command: npmExecutable, ...args });
+  }
+
+  const npmPath = await getNpmPath();
+
+  try {
+    await access(npmPath);
+    npmExecutable = npmPath;
+  } catch {
+    try {
+      await execPromise({ command: "npm", args: ["--version"] });
+      npmExecutable = "npm";
+    } catch {
+      commandObj.error(
+        `Couldn't find npm executable. Tried at ${color.yellow(
+          npmPath,
+        )} and also tried finding npm in your ${color.yellow(
+          "$PATH",
+        )}. Please make sure npm is available`,
+      );
+    }
+  }
+
+  return execPromise({ command: npmExecutable, ...args });
+}
+
 export const getLatestVersionOfNPMDependency = async (
   name: string,
 ): Promise<string> => {
   try {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (
-      await execPromise({
-        command: await getNpmPath(),
-        args: ["view", name, "version"],
-      })
-    )
-      .trim()
-      .split("\n")
-      .pop() as string;
+    const versions = await runNpm({
+      args: ["view", name, "version"],
+    });
+
+    const lastVersion = versions.trim().split("\n").pop();
+
+    assert(
+      lastVersion !== undefined,
+      `Couldn't find last version of your ${name} using npm. Got:\n\n${versions}`,
+    );
+
+    return lastVersion;
   } catch (error) {
     commandObj.error(
       `Failed to get latest version of ${color.yellow(
@@ -77,19 +111,16 @@ const installNpmDependency = async ({
   version,
 }: InstallNpmDependencyArg): Promise<void> => {
   try {
-    await execPromise({
-      command: await getNpmPath(),
+    await runNpm({
       args: ["i", `${name}@${version}`],
       flags: { prefix: dependencyTmpDirPath },
       spinnerMessage: `Installing ${name}@${version} to ${dependencyDirPath}`,
     });
   } catch (error) {
     commandObj.error(
-      `Not able to install ${name}@${version} to ${dependencyDirPath}. Please make sure ${color.yellow(
-        name,
-      )} is spelled correctly or try to install a different version of the dependency using ${color.yellow(
-        `fluence dependency npm install ${name}@<version>`,
-      )} command.\n${stringifyUnknown(error)}`,
+      `Not able to install ${name}@${version} to ${dependencyDirPath}. \n${stringifyUnknown(
+        error,
+      )}`,
     );
   }
 };
