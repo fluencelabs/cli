@@ -589,10 +589,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@npm:0.12.1":
-  version: 0.12.1
-  resolution: "@fluencelabs/aqua-api@npm:0.12.1"
-  checksum: 0a5fe06b605e0467d56e03bb85ed9c00ad03341826bf02650d03a62f5acd7132dae5281edece20b5cbca3769a663749a1b347e042bcaef749bae5d488ff35488
+"@fluencelabs/aqua-api@npm:0.12.2":
+  version: 0.12.2
+  resolution: "@fluencelabs/aqua-api@npm:0.12.2"
+  checksum: b9c7d89917a7d5cfc50c21c0befd6771d139025358284b25697962d216ecc93501681a6eece6d97b8d6d2864011f4252c4d194d929b9f97a6fb8c664a8a63dd2
   languageName: node
   linkType: hard
 
@@ -631,7 +631,7 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
-    "@fluencelabs/aqua-api": 0.12.1
+    "@fluencelabs/aqua-api": 0.12.2
     "@fluencelabs/deal-aurora": 0.2.12
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.22
