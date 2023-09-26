@@ -3007,11 +3007,11 @@ __metadata:
   linkType: hard
 
 "@types/decompress@npm:^4.2.4":
-  version: 4.2.4
-  resolution: "@types/decompress@npm:4.2.4"
+  version: 4.2.5
+  resolution: "@types/decompress@npm:4.2.5"
   dependencies:
     "@types/node": "*"
-  checksum: e47960f863148ef3afe9060a0c8dfd11d671322a47a341a3bd7128bbdea5b57c10117d76db0cfebf533b695ca81a4ffd4a3e6f338a149a5547052d4f63af9f76
+  checksum: 039bfb51457c764251c7b0cfa8a85a2b3ba4643b621aa7fb6e3252bd271a879216fdbcdc685dc6316d6bd0d95a8ca1691cc5c11ff9730a65f48cfec1fa38cbf5
   languageName: node
   linkType: hard
 
