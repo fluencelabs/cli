@@ -128,7 +128,7 @@ const migrateConfig = async <
   }
 
   if (configString !== migratedConfigString) {
-    await writeFile(configPath, migratedConfigString + "\n", FS_OPTIONS);
+    await saveConfig(configPath, migratedConfigString);
   }
 
   return {
@@ -356,7 +356,7 @@ export function getReadonlyConfigInitFunction<
         : `${schemaPathComment}\n${fileContent.trim()}\n`;
 
       if (configString !== fileContent) {
-        await writeFile(configPath, configString, FS_OPTIONS);
+        await saveConfig(configPath, configString);
       }
     } catch {
       if (getDefaultConfig === undefined) {
@@ -380,14 +380,14 @@ export function getReadonlyConfigInitFunction<
       const defConf = await getDefaultConfig();
 
       configString = docsInConfigs
-        ? `${schemaPathComment}\n\n${documentationLinkComment}\n\n${defConf}`
+        ? `${schemaPathComment}\n\n${documentationLinkComment}\n${defConf}`
         : yamlDiffPatch(
-            `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
+            `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,
             {},
             parse(defConf),
           );
 
-      await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
+      await saveConfig(configPath, configString);
     }
 
     const config: unknown = parse(configString);
@@ -437,6 +437,54 @@ export function getReadonlyConfigInitFunction<
 }
 
 const initializedConfigs = new Set<string>();
+
+function formatConfig(configString: string) {
+  const formattedConfig = configString
+    .trim()
+    .split("\n")
+    .flatMap((line, i, ar) => {
+      // If it's an empty string - it was a newline before split - remove it
+      if (line.trim() === "") {
+        return [];
+      }
+
+      const maybePreviousLine = ar[i - 1];
+      const isComment = line.startsWith("#");
+      const isPreviousLineComment = maybePreviousLine?.startsWith("#") ?? false;
+
+      const addNewLineBeforeBlockOfComments =
+        isComment && !isPreviousLineComment;
+
+      if (addNewLineBeforeBlockOfComments) {
+        return ["", line];
+      }
+
+      const isFirstLine = maybePreviousLine === undefined;
+      const isIndentedCode = line.startsWith(" ");
+
+      const doNotAddNewLine =
+        isFirstLine || isIndentedCode || isComment || isPreviousLineComment;
+
+      if (doNotAddNewLine) {
+        return [line];
+      }
+
+      // If it's top level property - separate it with a new line ("" -> "\n" when joined)
+      return ["", line];
+    })
+    .join("\n");
+
+  return `${formattedConfig.trim()}\n`;
+}
+
+async function saveConfig(
+  configPath: string,
+  migratedConfigString: string,
+): Promise<string> {
+  const configToSave = formatConfig(migratedConfigString);
+  await writeFile(configPath, configToSave, FS_OPTIONS);
+  return configToSave;
+}
 
 export function getConfigInitFunction<
   Config extends BaseConfig,
@@ -524,9 +572,7 @@ export function getConfigInitFunction<
         ).trim()}\n`;
 
         if (configString !== newConfigString) {
-          configString = newConfigString;
-
-          await writeFile(configPath, configString, FS_OPTIONS);
+          configString = await saveConfig(configPath, newConfigString);
         }
       },
       $getConfigString(): string {

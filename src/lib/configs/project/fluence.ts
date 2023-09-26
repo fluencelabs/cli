@@ -498,9 +498,19 @@ const getDefaultConfig = async (): Promise<string> => {
 # Most importantly - what exactly you want to deploy and how
 # You can use \`fluence init\` command to generate a template for new Fluence project
 
+# config version
+version: 2
+
+# nox multiaddresses that will be used by cli to connect to the Fluence network.
+# can be a list of multiaddresses or a name of the network.
+relays: ${jsonStringify(DEFAULT_RELAYS_FOR_TEMPLATE)} # default: kras
+
+# Path to the aqua file or directory with aqua files that you want to compile by default.
+# Must be relative to the project root dir
+aquaInputPath: ${path.relative(projectRootDir, await ensureSrcAquaMainPath())}
+
 # A map with worker names as keys and worker configs as values
 workers:
-# # worker name
   ${DEFAULT_WORKER_NAME}:
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
@@ -508,24 +518,9 @@ workers:
 
 # A map with worker names as keys and deals as values
 deals:
-# # worker name
   ${DEFAULT_WORKER_NAME}:
     minWorkers: ${MIN_WORKERS} # required amount of workers to activate the deal
     targetWorkers: ${TARGET_WORKERS} # max amount of workers in the deal
-
-
-# Path to the aqua file or directory with aqua files that you want to compile by default.
-# Must be relative to the project root dir
-aquaInputPath: ${path.relative(projectRootDir, await ensureSrcAquaMainPath())}
-
-
-# nox multiaddresses that will be used by cli to connect to the Fluence network.
-# can be a list of multiaddresses or a name of the network.
-relays: ${jsonStringify(DEFAULT_RELAYS_FOR_TEMPLATE)} # default: kras
-
-
-# config version
-version: 2
 
 # # A map with service names as keys and service configs as values.
 # # Service names must start with a lowercase letter and contain only letters numbers and underscores.

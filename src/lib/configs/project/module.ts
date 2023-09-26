@@ -178,15 +178,16 @@ const getDefault: (name: string) => GetDefaultConfig = (
 ): GetDefaultConfig => {
   return () => {
     return `# Module type "rust" is for the source code written in rust which can be compiled into a Marine module
+
+# config versions
+version: 0
+
 # Module type "compiled" is for the precompiled modules.
 type: ${MODULE_TYPE_RUST} # default: "compiled"
 
 # "name" property from the Cargo.toml (for module type "rust")
 # or name of the precompiled .wasm file (for module type "compiled")
 name: ${name}
-
-# config versions
-version: 0
 
 # # environment variables accessible by a particular module
 # # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
