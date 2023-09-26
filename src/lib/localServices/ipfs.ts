@@ -46,9 +46,9 @@ const upload = async (
   content: Parameters<IPFSHTTPClient["add"]>[0],
   log: (msg: unknown) => void,
 ) => {
-  const ipfsClient = await createIPFSClient(multiaddr);
-
   try {
+    const ipfsClient = await createIPFSClient(multiaddr);
+
     const { cid } = await ipfsClient.add(content, {
       pin: true,
       cidVersion: 1,
