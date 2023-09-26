@@ -33,6 +33,7 @@
 * [`fluence update [CHANNEL]`](#fluence-update-channel)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
+* [`fluence workers remove [WORKER-NAMES]`](#fluence-workers-remove-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
 
 ## `fluence air beautify [PATH]`
@@ -973,6 +974,40 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.8.8/dist/commands/workers/logs.ts)_
+
+## `fluence workers remove [WORKER-NAMES]`
+
+Remove workers from hosts, described in 'hosts' property in workers.yaml
+
+```
+USAGE
+  $ fluence workers remove [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--tracing]
+
+ARGUMENTS
+  WORKER-NAMES  Comma separated names of workers to remove. Example: "worker1,worker2" (by default all workers from
+                'hosts' property in workers.yaml are removed)
+
+FLAGS
+  -k, --key-pair-name=<name>     Key pair name
+  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
+  --no-input                     Don't interactively ask for any input from the user
+  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                  Print particle ids when running Fluence js-client
+  --priv-key=<private-key>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --relay=<multiaddress>         Relay for Fluence js-client to connect to
+  --tracing                      Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
+                                 and not processed.
+
+DESCRIPTION
+  Remove workers from hosts, described in 'hosts' property in workers.yaml
+
+EXAMPLES
+  $ fluence workers remove
+```
+
+_See code: [dist/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.8.8/dist/commands/workers/remove.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 

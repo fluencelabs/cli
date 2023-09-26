@@ -28,9 +28,11 @@ import { initFluenceConfigWithPath } from "../src/lib/configs/project/fluence.js
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
   DEFAULT_WORKER_NAME,
+  DOT_FLUENCE_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+  WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
@@ -319,6 +321,56 @@ describe("integration tests", () => {
             : String(maybeRunDeployedError)
         }`,
       );
+
+      const workersConfigPath = join(
+        cwd,
+        DOT_FLUENCE_DIR_NAME,
+        WORKERS_CONFIG_FULL_FILE_NAME,
+      );
+
+      const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+
+      let allWorkersAreRemoved = await fluence({
+        args: ["run"],
+        flags: {
+          f: "areAllWorkersRemoved()",
+        },
+        cwd,
+      });
+
+      expect(allWorkersAreRemoved.trim()).toBe("false");
+
+      await fluence({
+        args: ["workers", "remove"],
+        cwd,
+      });
+
+      const newWorkersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+
+      assert(
+        !newWorkersConfig.includes("hosts:"),
+        `'hosts' property in workers.yaml config is expected to be removed. Got:\n\n${newWorkersConfig}`,
+      );
+
+      // Check workers where actually removed
+
+      await writeFile(workersConfigPath, workersConfig, FS_OPTIONS);
+
+      // Update "hosts.aqua" to contain previously removed workers
+      await fluence({
+        args: ["build"],
+        cwd,
+      });
+
+      allWorkersAreRemoved = await fluence({
+        args: ["run"],
+        flags: {
+          f: "areAllWorkersRemoved()",
+        },
+        cwd,
+      });
+
+      expect(allWorkersAreRemoved.trim()).toBe("true");
     },
   );
 
