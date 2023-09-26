@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.9](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.8...fluence-cli-v0.8.9) (2023-09-26)
+
+
+### Features
+
+* add config formatting ([#486](https://github.com/fluencelabs/cli/issues/486)) ([4767406](https://github.com/fluencelabs/cli/commit/4767406b4396908dc72efad0d4bd402d5cad0bec))
+* workers remove ([#480](https://github.com/fluencelabs/cli/issues/480)) ([71acd94](https://github.com/fluencelabs/cli/commit/71acd940f5dec0a1988478caecae42adf79bc8fd))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/aqua-api to v0.12.2 ([#498](https://github.com/fluencelabs/cli/issues/498)) ([4fcca42](https://github.com/fluencelabs/cli/commit/4fcca42198818643a94ce152af0a03bf1844ebac))
+
 ## [0.8.8](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.7...fluence-cli-v0.8.8) (2023-09-25)
 
 
