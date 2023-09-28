@@ -34,7 +34,6 @@ import {
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
-import { dbg } from "../src/lib/dbg.js";
 import { execPromise } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
 import { localPeerIds, local } from "../src/lib/localNodes.js";
@@ -623,8 +622,8 @@ describe("integration tests", () => {
         `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
       );
 
-      const dealLogs = await fluence({ args: ["deal", "logs"], cwd });
-      dbg(dealLogs);
+      // check logs are working
+      assert((await fluence({ args: ["deal", "logs"], cwd })) !== "");
     },
   );
 });
