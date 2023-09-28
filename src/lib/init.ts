@@ -122,26 +122,13 @@ import {
 } from "./aqua/main.js";
 
 const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
-const connectTo = ${NODES_CONST}[0].multiaddr;
-if (typeof connectTo !== "string") {
-  throw new Error("connectTo is not a string");
-}
-
-const main = async () => {
-  await Fluence.connect(connectTo);
-
-  const helloWorldResult = await helloWorld("Fluence");
-  const helloWorldRemoteResult = await helloWorldRemote("Fluence");
-  const getInfoResult = await getInfo();
-
-  console.log(helloWorldResult);
-
-  process.exit(0);
-};
-
-main().catch((error) => {
-  console.error(error);
-});`;
+await Fluence.connect(${NODES_CONST}[0].multiaddr);
+const helloWorldResult = await helloWorld("Fluence");
+const helloWorldRemoteResult = await helloWorldRemote("Fluence");
+const getInfoResult = await getInfo();
+console.log(helloWorldResult);
+await Fluence.disconnect()
+`;
 };
 
 const selectTemplate = (): Promise<Template> => {

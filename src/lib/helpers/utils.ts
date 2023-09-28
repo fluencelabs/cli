@@ -165,3 +165,14 @@ export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
 export const base64ToUint8Array = (base64: string) => {
   return new Uint8Array(Buffer.from(base64, "base64"));
 };
+
+export function removeProperties<T>(
+  obj: Record<string, T>,
+  isPropertyToRemove: (arg: [key: string, value: unknown]) => boolean,
+): Record<string, T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key, value]) => {
+      return !isPropertyToRemove([key, value]);
+    }),
+  );
+}

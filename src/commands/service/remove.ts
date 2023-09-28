@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -22,9 +21,13 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import type { FluenceConfigReadonly } from "../../lib/configs/project/fluence.js";
+import {
+  isFluenceConfigWithServices,
+  type FluenceConfigWithServices,
+} from "../../lib/configs/project/fluence.js";
 import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
 import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
+import { removeProperties } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -56,19 +59,23 @@ export default class Remove extends BaseCommand<typeof Remove> {
         )}, path to a service or url to .tar.gz archive`,
       }));
 
+    if (!isFluenceConfigWithServices(fluenceConfig)) {
+      return commandObj.error(
+        `There are no services in ${color.yellow(fluenceConfig.$getPath())}`,
+      );
+    }
+
     const serviceNameToRemove = await getServiceNameToRemove(
       nameOrPathOrUrl,
       fluenceConfig,
     );
 
-    assert(
-      fluenceConfig.services !== undefined,
-      "We checked fluenceConfig.services !== undefined at getServiceNameToRemove",
+    fluenceConfig.services = removeProperties(
+      fluenceConfig.services,
+      ([name]) => {
+        return name !== serviceNameToRemove;
+      },
     );
-
-    // Our configs can't be Map object so there is no workaround for this rule
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete fluenceConfig.services[serviceNameToRemove];
 
     if (fluenceConfig.workers !== undefined) {
       fluenceConfig.workers = Object.fromEntries(
@@ -100,16 +107,10 @@ export default class Remove extends BaseCommand<typeof Remove> {
   }
 }
 
-const getServiceNameToRemove = async (
+async function getServiceNameToRemove(
   nameOrPathOrUrl: string,
-  fluenceConfig: FluenceConfigReadonly,
-): Promise<string> => {
-  if (fluenceConfig.services === undefined) {
-    return commandObj.error(
-      `There are no services in ${color.yellow(fluenceConfig.$getPath())}`,
-    );
-  }
-
+  fluenceConfig: FluenceConfigWithServices,
+): Promise<string> {
   if (nameOrPathOrUrl in fluenceConfig.services) {
     return nameOrPathOrUrl;
   }
@@ -156,4 +157,4 @@ const getServiceNameToRemove = async (
       fluenceConfig.$getPath(),
     )}`,
   );
-};
+}

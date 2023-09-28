@@ -488,6 +488,7 @@ const configSchemaV3: JSONSchemaType<ConfigV3> = {
           type: "array",
           description: `List of custom relay multiaddresses to use when connecting to Fluence network`,
           items: { type: "string" },
+          minItems: 1,
         },
       },
       required: ["contractsEnv", "relays"],
@@ -775,6 +776,15 @@ type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3;
 type LatestConfig = ConfigV3;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
+export type FluenceConfigWithServices = FluenceConfig & {
+  services: NonNullable<FluenceConfig["services"]>;
+};
+
+export function isFluenceConfigWithServices(
+  config: FluenceConfig,
+): config is FluenceConfigWithServices {
+  return "services" in config;
+}
 
 const checkDuplicatesAndPresence = (
   fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">,
@@ -885,22 +895,6 @@ const validateHostsAndDeals = (
   return workerNamesErrors.length === 0 ? true : workerNamesErrors.join("\n");
 };
 
-function validateCustomRelays({
-  customFluenceEnv,
-}: Pick<FluenceConfig, "customFluenceEnv">) {
-  if (customFluenceEnv === undefined) {
-    return true;
-  }
-
-  const { relays } = customFluenceEnv;
-
-  if (relays.length === 0) {
-    return "customFluenceEnv.relays list must not be empty";
-  }
-
-  return true;
-}
-
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   if (config.services === undefined) {
     return true;
@@ -912,7 +906,6 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     validateHostsAndDeals(config, "deals"),
     await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
     await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
-    validateCustomRelays(config),
   );
 
   if (typeof validity === "string") {

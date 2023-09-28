@@ -24,7 +24,7 @@ import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
 import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
-import { jsonStringify } from "../helpers/utils.js";
+import { jsonStringify, removeProperties } from "../helpers/utils.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
@@ -557,17 +557,9 @@ export function getConfigInitFunction<
           );
         }
 
-        const config = { ...this };
-
-        for (const key in config) {
-          if (
-            Object.prototype.hasOwnProperty.call(config, key) &&
-            typeof config[key] === "function"
-          ) {
-            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-            delete config[key];
-          }
-        }
+        const config = removeProperties({ ...this }, ([, v]) => {
+          return typeof v === "function";
+        });
 
         const [{ parse }, { yamlDiffPatch }] = await Promise.all([
           import("yaml"),
