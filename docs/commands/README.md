@@ -8,7 +8,8 @@
 * [`fluence build`](#fluence-build)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
-* [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
+* [`fluence default env [ENV]`](#fluence-default-env-env)
+* [`fluence default peers [ENV]`](#fluence-default-peers-env)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
@@ -215,32 +216,35 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>]
-    [--network <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
-    [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match]
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--env
+    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>] [--auto-match]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
                 'deals' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>        Key pair name
-  --[no-]auto-match                 Disable automatic matching
-  --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --network=<network>               [default: testnet] The network in which the transactions used by the command will be
-                                    carried out (testnet, local)
-  --no-build                        Don't build the project before running the command
-  --no-input                        Don't interactively ask for any input from the user
-  --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                     Print particle ids when running Fluence js-client
-  --priv-key=<private-key>          !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>            Relay for Fluence js-client to connect to
-  --tracing                         Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                    and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --[no-]auto-match                                Disable automatic matching
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-build                                       Don't build the project before running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -258,22 +262,25 @@ Get logs from deployed workers for deals listed in workers.yaml
 ```
 USAGE
   $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
+    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
 
 FLAGS
-  -k, --key-pair-name=<name>     Key pair name
-  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --no-input                     Don't interactively ask for any input from the user
-  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                  Print particle ids when running Fluence js-client
-  --priv-key=<private-key>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>         Relay for Fluence js-client to connect to
-  --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                 and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
@@ -284,16 +291,39 @@ EXAMPLES
 
 _See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.8.9/dist/commands/deal/logs.ts)_
 
-## `fluence default peers [NETWORK]`
+## `fluence default env [ENV]`
 
 Print default Fluence network peer addresses
 
 ```
 USAGE
-  $ fluence default peers [NETWORK] [--no-input]
+  $ fluence default env [ENV] [--no-input]
 
 ARGUMENTS
-  NETWORK  Network to use. One of kras, stage, testnet
+  ENV  Fluence Environment to use when running the command
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Print default Fluence network peer addresses
+
+EXAMPLES
+  $ fluence default env
+```
+
+_See code: [dist/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.8.9/dist/commands/default/env.ts)_
+
+## `fluence default peers [ENV]`
+
+Print default Fluence network peer addresses
+
+```
+USAGE
+  $ fluence default peers [ENV] [--no-input]
+
+ARGUMENTS
+  ENV  Fluence Environment to use when running the command
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
@@ -483,14 +513,15 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [--no-input] [-t <value>]
+  $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>]
 
 ARGUMENTS
   PATH  Project path
 
 FLAGS
-  -t, --template=<value>  Template to use for the project. One of: quickstart, minimal, ts, js
-  --no-input              Don't interactively ask for any input from the user
+  -t, --template=<value>                           Template to use for the project. One of: quickstart, minimal, ts, js
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
 
 DESCRIPTION
   Initialize fluence project
@@ -655,16 +686,16 @@ Register specific nox instance as a Compute Peer
 
 ```
 USAGE
-  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--network <value>] [--peer-id <value>] [--units
-    <value>]
+  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units <value>]
 
 FLAGS
-  --network=<network>       [default: testnet] The network in which the transactions used by the command will be carried
-                            out (testnet, local)
-  --no-input                Don't interactively ask for any input from the user
-  --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --units=<number>          Number of available worker units on this Compute Peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>...                           Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --units=<number>                                 Number of available worker units on this Compute Peer
 
 DESCRIPTION
   Register specific nox instance as a Compute Peer
@@ -678,13 +709,13 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [--network <value>]
+  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --network=<network>       [default: testnet] The network in which the transactions used by the command will be carried
-                            out (testnet, local)
-  --no-input                Don't interactively ask for any input from the user
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
 
 DESCRIPTION
   Register in matching contract
@@ -701,34 +732,38 @@ USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
     [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--tracing]
+    [--particle-id] [--env <value>] [--tracing]
 
 FLAGS
-  -b, --print-beautified-air     Prints beautified AIR code before function execution
-  -f, --func=<function-call>     Function call. Example: funcName("stringArg")
-  -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
-  -k, --key-pair-name=<name>     Key pair name
-  --const=<NAME="value">...      Constant that will be used in the aqua code that you run (example of aqua code:
-                                 SOME_CONST ?= "default_value"). Constant name must be upper cased.
-  --data=<json>                  JSON in { [argumentName]: argumentValue } format. You can call a function using these
-                                 argument names
-  --data-path=<path>             Path to a JSON file in { [argumentName]: argumentValue } format. You can call a
-                                 function using these argument names
-  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...             Path to a directory to import aqua files from. May be used several times
-  --log-level-compiler=<level>   Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
-                                 info, warn, error, off
-  --no-input                     Don't interactively ask for any input from the user
-  --no-relay                     Do not generate a pass through the relay node
-  --no-xor                       Do not generate a wrapper that catches and displays errors
-  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                  Print particle ids when running Fluence js-client
-  --print-air                    Prints generated AIR code before function execution
-  --quiet                        Print only execution result. Overrides all --log-level-* flags
-  --relay=<multiaddress>         Relay for Fluence js-client to connect to
-  --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                 and not processed.
+  -b, --print-beautified-air                       Prints beautified AIR code before function execution
+  -f, --func=<function-call>                       Function call. Example: funcName("stringArg")
+  -i, --input=<path>                               Path to an aqua file or to a directory that contains aqua files
+  -k, --key-pair-name=<name>                       Key pair name
+  --const=<NAME="value">...                        Constant that will be used in the aqua code that you run (example of
+                                                   aqua code: SOME_CONST ?= "default_value"). Constant name must be
+                                                   upper cased.
+  --data=<json>                                    JSON in { [argumentName]: argumentValue } format. You can call a
+                                                   function using these argument names
+  --data-path=<path>                               Path to a JSON file in { [argumentName]: argumentValue } format. You
+                                                   can call a function using these argument names
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: Must be one of: all,
+                                                   trace, debug, info, warn, error, off
+  --no-input                                       Don't interactively ask for any input from the user
+  --no-relay                                       Do not generate a pass through the relay node
+  --no-xor                                         Do not generate a wrapper that catches and displays errors
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --print-air                                      Prints generated AIR code before function execution
+  --quiet                                          Print only execution result. Overrides all --log-level-* flags
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Run aqua script
@@ -906,28 +941,33 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build] [--tracing]
-    [--marine-build-args <value>]
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
                 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>        Key pair name
-  --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --no-build                        Don't build the project before running the command
-  --no-input                        Don't interactively ask for any input from the user
-  --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                     Print particle ids when running Fluence js-client
-  --priv-key=<private-key>          !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>            Relay for Fluence js-client to connect to
-  --tracing                         Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                    and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-build                                       Don't build the project before running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
@@ -945,26 +985,29 @@ Get logs from deployed workers for hosts listed in workers.yaml
 ```
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id <value>] [--host-id <value>]
-    [--spell-id <value>] [--tracing]
+    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id <value>] [--host-id
+    <value>] [--spell-id <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
 
 FLAGS
-  -k, --key-pair-name=<name>     Key pair name
-  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --host-id=<host-id>            Host id
-  --no-input                     Don't interactively ask for any input from the user
-  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                  Print particle ids when running Fluence js-client
-  --priv-key=<private-key>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>         Relay for Fluence js-client to connect to
-  --spell-id=<spell-id>          [default: worker-spell] Spell id
-  --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                 and not processed.
-  --worker-id=<worker-id>        Worker id
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --host-id=<host-id>                              Host id
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --spell-id=<spell-id>                            [default: worker-spell] Spell id
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
+  --worker-id=<worker-id>                          Worker id
 
 DESCRIPTION
   Get logs from deployed workers for hosts listed in workers.yaml
@@ -982,23 +1025,26 @@ Remove workers from hosts, described in 'hosts' property in workers.yaml
 ```
 USAGE
   $ fluence workers remove [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--tracing]
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to remove. Example: "worker1,worker2" (by default all workers from
                 'hosts' property in workers.yaml are removed)
 
 FLAGS
-  -k, --key-pair-name=<name>     Key pair name
-  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --no-input                     Don't interactively ask for any input from the user
-  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                  Print particle ids when running Fluence js-client
-  --priv-key=<private-key>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>         Relay for Fluence js-client to connect to
-  --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                 and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Remove workers from hosts, described in 'hosts' property in workers.yaml
@@ -1016,27 +1062,32 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>] [--no-build] [--tracing]
-    [--marine-build-args <value>]
+    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>        Key pair name
-  --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --no-build                        Don't build the project before running the command
-  --no-input                        Don't interactively ask for any input from the user
-  --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                     Print particle ids when running Fluence js-client
-  --priv-key=<private-key>          !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>            Relay for Fluence js-client to connect to
-  --tracing                         Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                    and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-build                                       Don't build the project before running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml
