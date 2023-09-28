@@ -35,8 +35,6 @@ import {
   INDEX_JS_FILE_NAME,
   INDEX_TS_FILE_NAME,
   SRC_DIR_NAME,
-  TYPESCRIPT_RECOMMENDED_VERSION,
-  TS_NODE_RECOMMENDED_VERSION,
   TS_CONFIG_FILE_NAME,
   JS_CLIENT_NPM_DEPENDENCY,
   FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
@@ -58,6 +56,7 @@ import {
   getREADMEPath,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
+import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
 import versions from "../versions.json" assert { type: "json" };
 
 import { addService } from "./addService.js";
@@ -410,8 +409,8 @@ const initTSorJSProject = async ({
       ...(isJS
         ? {}
         : {
-            "ts-node": TS_NODE_RECOMMENDED_VERSION,
-            typescript: TYPESCRIPT_RECOMMENDED_VERSION,
+            "ts-node": CLIPackageJSON.devDependencies["ts-node"],
+            typescript: CLIPackageJSON.devDependencies["typescript"],
           }),
     },
   } as const;

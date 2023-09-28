@@ -22,8 +22,6 @@ import type {
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
-import versions from "../versions/cli.package.json" assert { type: "json" };
-
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
@@ -34,9 +32,6 @@ export const PACKAGE_NAME = "@fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
 
-export const TS_NODE_RECOMMENDED_VERSION = versions.devDependencies["ts-node"];
-export const TYPESCRIPT_RECOMMENDED_VERSION =
-  versions.devDependencies["typescript"];
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
