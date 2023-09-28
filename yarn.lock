@@ -1499,8 +1499,8 @@ __metadata:
   linkType: hard
 
 "@mswjs/interceptors@npm:^0.25.4":
-  version: 0.25.4
-  resolution: "@mswjs/interceptors@npm:0.25.4"
+  version: 0.25.6
+  resolution: "@mswjs/interceptors@npm:0.25.6"
   dependencies:
     "@open-draft/deferred-promise": ^2.2.0
     "@open-draft/logger": ^0.3.0
@@ -1508,7 +1508,7 @@ __metadata:
     is-node-process: ^1.2.0
     outvariant: ^1.2.1
     strict-event-emitter: ^0.5.1
-  checksum: d4534bf1dde3eb8294c3fb70dd2d4471965167a84c11b50b7eec5f2d909c110b1776d53992de5fda047a89f3f651a72f30d01418dd4580aab90a6e878ae5b857
+  checksum: cbcffbb32fbb5b6004a065dd6601e628b6cc95abc388f7bab2df1197203941eb29abc1d9bd653925ca7654e988e7249e1916be708793d7e191c5becb2cefa416
   languageName: node
   linkType: hard
 
