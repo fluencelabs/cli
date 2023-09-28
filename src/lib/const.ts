@@ -465,7 +465,7 @@ func showSubnet() -> []WorkerServices:
                     if s.aliases.length != 0:
                         aliases <<- s.aliases[0]
 
-                    services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[aliases])
+                services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[aliases])
         else:
             services <<- WorkerServices(host_id=w.host_id, worker_id=nil, services=nil)
 
