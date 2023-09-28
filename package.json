@@ -30,7 +30,7 @@
     "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "yarn before-build && yarn build",
-    "jest": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose -t 'should deploy deals with spell and service, resolve and run services on them'",
+    "jest": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
     "clean": "shx rm -rf tmp && shx rm -rf dist",
     "pack-linux-x64": "yarn clean && oclif pack tarballs -t 'linux-x64' --no-xz",
     "pack-darwin-x64": "yarn clean && oclif pack tarballs -t 'darwin-x64' --no-xz",
