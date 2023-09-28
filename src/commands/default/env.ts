@@ -30,7 +30,8 @@ import {
 } from "../../lib/multiaddres.js";
 
 export default class Peers extends BaseCommand<typeof Peers> {
-  static override description = "Print default Fluence network peer addresses";
+  static override description =
+    "Switch default Fluence Environment used in the current Fluence project";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
