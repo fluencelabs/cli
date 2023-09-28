@@ -30,7 +30,7 @@
     "find-dead-code": "ts-prune",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "yarn before-build && yarn build",
-    "jest": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
+    "jest": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose -t 'should deploy deals with spell and service, resolve and run services on them'",
     "clean": "shx rm -rf tmp && shx rm -rf dist",
     "pack-linux-x64": "yarn clean && oclif pack tarballs -t 'linux-x64' --no-xz",
     "pack-darwin-x64": "yarn clean && oclif pack tarballs -t 'darwin-x64' --no-xz",
@@ -89,7 +89,8 @@
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
-    "@fluencelabs/installation-spell": "0.5.22",
+    "@fluencelabs/aqua-lib": "0.7.7",
+    "@fluencelabs/installation-spell": "./aksjdhfkljsahdfkjlasdhfakjlsdf.tgz",
     "@total-typescript/ts-reset": "^0.5.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/debug": "^4.1.9",

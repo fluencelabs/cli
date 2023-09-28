@@ -34,6 +34,7 @@ import {
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
+import { dbg } from "../src/lib/dbg.js";
 import { execPromise } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
 import { localPeerIds, local } from "../src/lib/localNodes.js";
@@ -494,14 +495,9 @@ describe("integration tests", () => {
       );
 
       fluenceConfig.deals[DEFAULT_WORKER_NAME].minWorkers = 3;
-
       await fluenceConfig.$commit();
 
-      log(`config commit done`);
-
-      log(`will deploy deal`);
-
-      const dealDeploy = await fluence({
+      await fluence({
         args: ["deal", "deploy"],
         flags: {
           "priv-key": PRIV_KEY,
@@ -509,8 +505,6 @@ describe("integration tests", () => {
         },
         cwd,
       });
-
-      log(`deal deployed:`, dealDeploy);
 
       let runDeployedServicesTimeoutReached = false;
       let maybeRunDeployedError: unknown = null;
@@ -628,6 +622,9 @@ describe("integration tests", () => {
           }),
         `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
       );
+
+      const dealLogs = await fluence({ args: ["deal", "logs"], cwd });
+      dbg(dealLogs);
     },
   );
 });
