@@ -24,14 +24,14 @@ A map of created deals
 
 #### Properties
 
-| Property         | Type   | Required | Description                                            |
-|------------------|--------|----------|--------------------------------------------------------|
-| `chainNetworkId` | number | **Yes**  |                                                        |
-| `chainNetwork`   | string | **Yes**  | Possible values are: `testnet`, `local`.               |
-| `dealIdOriginal` | string | **Yes**  |                                                        |
-| `dealId`         | string | **Yes**  |                                                        |
-| `definition`     | string | **Yes**  |                                                        |
-| `timestamp`      | string | **Yes**  | ISO timestamp of the time when the worker was deployed |
+| Property         | Type   | Required | Description                                               |
+|------------------|--------|----------|-----------------------------------------------------------|
+| `chainNetworkId` | number | **Yes**  |                                                           |
+| `chainNetwork`   | string | **Yes**  | Possible values are: `kras`, `testnet`, `stage`, `local`. |
+| `dealIdOriginal` | string | **Yes**  |                                                           |
+| `dealId`         | string | **Yes**  |                                                           |
+| `definition`     | string | **Yes**  |                                                           |
+| `timestamp`      | string | **Yes**  | ISO timestamp of the time when the worker was deployed    |
 
 ## hosts
 
