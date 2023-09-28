@@ -115,6 +115,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
       serviceConfig,
     );
 
+    // Our configs can't be Map object so there is no workaround for this rule
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete serviceConfig.modules[moduleNameToRemove];
     await serviceConfig.$commit();
 

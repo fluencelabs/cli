@@ -23,8 +23,8 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 import { isInteractive } from "./commandObj.js";
 import { CLI_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { dbg } from "./dbg.js";
-import { type Flags, flagsToArgs } from "./helpers/flagsToArgs.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+import { type Flags, flagsToArgs } from "./helpers/utils.js";
 
 const PATH_TO_RUN_JS = join(CLI_NAME, "bin", "run.js");
 

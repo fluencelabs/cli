@@ -24,7 +24,7 @@ import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
 import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
-import { jsonStringify } from "../helpers/jsonStringify.js";
+import { jsonStringify } from "../helpers/utils.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
@@ -212,7 +212,6 @@ export type InitConfigOptions<
   getConfigOrConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
   validate?: ConfigValidateFunction<LatestConfig>;
-  docsInConfigs?: boolean;
 };
 
 type InitFunction<LatestConfig> =
@@ -276,7 +275,6 @@ export function getReadonlyConfigInitFunction<
       getConfigOrConfigDirPath,
       validate,
       getSchemaDirPath,
-      docsInConfigs = userConfig?.docsInConfigs ?? false,
     } = options;
 
     const configFullName = `${name}.${YAML_EXT}`;
@@ -379,13 +377,16 @@ export function getReadonlyConfigInitFunction<
 
       const defConf = await getDefaultConfig();
 
-      configString = docsInConfigs
-        ? `${schemaPathComment}\n\n${documentationLinkComment}\n${defConf}`
-        : yamlDiffPatch(
-            `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,
-            {},
-            parse(defConf),
-          );
+      configString =
+        // this is basically the only place where userConfig is undefined until it's initialized in initCli
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        userConfig?.docsInConfigs ?? false
+          ? `${schemaPathComment}\n\n${documentationLinkComment}\n${defConf}`
+          : yamlDiffPatch(
+              `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,
+              {},
+              parse(defConf),
+            );
 
       await saveConfig(configPath, configString);
     }
@@ -522,10 +523,17 @@ export function getConfigInitFunction<
       );
     }
 
-    const maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
-      options,
-      getDefaultConfig,
-    )();
+    let maybeInitializedReadonlyConfig: InitializedReadonlyConfig<LatestConfig> | null;
+
+    if (getDefaultConfig === undefined) {
+      maybeInitializedReadonlyConfig =
+        await getReadonlyConfigInitFunction(options)();
+    } else {
+      maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
+        options,
+        getDefaultConfig,
+      )();
+    }
 
     if (maybeInitializedReadonlyConfig === null) {
       return null;
@@ -556,6 +564,7 @@ export function getConfigInitFunction<
             Object.prototype.hasOwnProperty.call(config, key) &&
             typeof config[key] === "function"
           ) {
+            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete config[key];
           }
         }

@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
+import assert from "assert";
+
+import { color } from "@oclif/color";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { envConfig } from "../../lib/configs/globalConfigs.js";
 import { ENV_ARG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveFluenceEnv, resolveRelays } from "../../lib/multiaddres.js";
+import {
+  ensureValidEnvFlag,
+  fluenceEnvPrompt,
+  ensureCustomRelays,
+} from "../../lib/multiaddres.js";
 
 export default class Peers extends BaseCommand<typeof Peers> {
   static override description = "Print default Fluence network peer addresses";
@@ -30,16 +39,34 @@ export default class Peers extends BaseCommand<typeof Peers> {
     ...ENV_ARG,
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
+    const { args, fluenceConfig } = await initCli(
       this,
       await this.parse(Peers),
+      true,
     );
 
-    const relays = resolveRelays(
-      await resolveFluenceEnv(args.ENV),
-      maybeFluenceConfig,
-    );
+    assert(envConfig !== undefined, "this command requires fluence project");
+    const fluenceEnvFromArgs = await ensureValidEnvFlag(args.ENV);
 
-    commandObj.log(relays.join("\n"));
+    const newFluenceEnv =
+      fluenceEnvFromArgs === undefined
+        ? await fluenceEnvPrompt()
+        : fluenceEnvFromArgs;
+
+    if (
+      newFluenceEnv === "custom" &&
+      fluenceConfig.customFluenceEnv === undefined
+    ) {
+      await ensureCustomRelays(fluenceConfig);
+    }
+
+    envConfig.fluenceEnv = newFluenceEnv;
+    await envConfig.$commit();
+
+    commandObj.log(
+      `Successfully set default fluence environment to ${color.yellow(
+        newFluenceEnv,
+      )}`,
+    );
   }
 }

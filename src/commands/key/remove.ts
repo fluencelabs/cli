@@ -146,7 +146,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
           userSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
         } else {
-          const newDefaultKeyPairName = userSecretsConfig.keyPairs?.[0]?.name;
+          const newDefaultKeyPairName = userSecretsConfig.keyPairs[0]?.name;
 
           if (newDefaultKeyPairName === undefined) {
             throw new Error("Unreachable");
@@ -189,8 +189,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
           projectSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
         } else {
-          const newDefaultKeypairName =
-            projectSecretsConfig?.keyPairs?.[0]?.name;
+          const newDefaultKeypairName = projectSecretsConfig.keyPairs[0]?.name;
 
           if (newDefaultKeypairName === undefined) {
             throw new Error("Unreachable");

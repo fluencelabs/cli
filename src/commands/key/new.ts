@@ -26,7 +26,7 @@ import {
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { generateKeyPair } from "../../lib/helpers/generateKeyPair.js";
+import { generateKeyPair } from "../../lib/helpers/utils.js";
 import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm, input } from "../../lib/prompt.js";

@@ -27,72 +27,216 @@ import { multiaddr } from "@multiformats/multiaddr";
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
-import { getIsStringUnion } from "./typeHelpers.js";
+import { envConfig } from "./configs/globalConfigs.js";
+import type {
+  FluenceConfig,
+  FluenceConfigReadonly,
+} from "./configs/project/fluence.js";
+import {
+  type ContractsENV,
+  ENV_FLAG_NAME,
+  FLUENCE_ENVS,
+  isFluenceEnv,
+  type FluenceEnv,
+  CONTRACTS_ENV,
+} from "./const.js";
+import { commaSepStrToArr } from "./helpers/utils.js";
+import { input, list } from "./prompt.js";
 
-export const NETWORKS = ["kras", "stage", "testnet"] as const;
-export type Network = (typeof NETWORKS)[number];
-export const isNetwork = getIsStringUnion(NETWORKS);
-export type FluenceEnv = Network | "local";
-export type Relays = Network | Array<string> | undefined;
+export function fluenceEnvPrompt(): Promise<FluenceEnv> {
+  return list({
+    message: `Select Fluence Environment to use by default with this project. Default: ${FLUENCE_ENVS[0]}`,
+    options: [...FLUENCE_ENVS],
+    oneChoiceMessage() {
+      throw new Error("Unreachable. There are multiple envs");
+    },
+    onNoChoices() {
+      throw new Error("Unreachable. There are multiple envs");
+    },
+  });
+}
 
-const ADDR_MAP: Record<Network, Array<Node>> = {
+export async function ensureValidEnvFlag(
+  envFlag: string | undefined,
+): Promise<FluenceEnv | undefined> {
+  if (envFlag === undefined) {
+    return undefined;
+  }
+
+  if (!isFluenceEnv(envFlag)) {
+    commandObj.warn(
+      `Invalid flag: ${color.yellow(`--${ENV_FLAG_NAME} ${envFlag}`)}`,
+    );
+
+    return fluenceEnvPrompt();
+  }
+
+  return envFlag;
+}
+
+export async function resolveFluenceEnv(
+  fluenceEnvFromFlagsNotValidated: string | undefined,
+): Promise<FluenceEnv> {
+  const fluenceEnvFromFlags = await ensureValidEnvFlag(
+    fluenceEnvFromFlagsNotValidated,
+  );
+
+  const fluenceEnv = fluenceEnvFromFlags ?? envConfig?.fluenceEnv;
+
+  if (fluenceEnv !== undefined) {
+    return fluenceEnv;
+  }
+
+  const fluenceEnvFromPrompt = await fluenceEnvPrompt();
+
+  if (envConfig === undefined) {
+    return fluenceEnvFromPrompt;
+  }
+
+  envConfig.fluenceEnv = fluenceEnvFromPrompt;
+  await envConfig.$commit();
+  return fluenceEnvFromPrompt;
+}
+
+export const localMultiaddrs: string[] = [
+  "/ip4/127.0.0.1/tcp/9991/ws/p2p/12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR",
+  "/ip4/127.0.0.1/tcp/9992/ws/p2p/12D3KooWQdpukY3p2DhDfUfDgphAqsGu5ZUrmQ4mcHSGrRag6gQK",
+  "/ip4/127.0.0.1/tcp/9993/ws/p2p/12D3KooWRT8V5awYdEZm6aAV9HWweCEbhWd7df4wehqHZXAB7yMZ",
+];
+
+export const localPeerIds: string[] = localMultiaddrs.map((multiaddr) => {
+  return getPeerId(multiaddr);
+});
+
+export function multiaddrsToNodes(multiaddrs: string[]): Node[] {
+  return multiaddrs.map((multiaddr) => {
+    return {
+      peerId: getPeerId(multiaddr),
+      multiaddr,
+    };
+  });
+}
+
+export const local: Node[] = multiaddrsToNodes(localMultiaddrs);
+
+const ADDR_MAP: Record<ContractsENV, Array<Node>> = {
   kras: krasnodar,
   stage,
   testnet: testNet,
+  local,
 };
 
-const resolveAddrs = (
-  maybeRelays: Relays | null | undefined,
-): Array<string> => {
-  if (maybeRelays === undefined || maybeRelays === null) {
-    return ADDR_MAP.kras.map((node) => {
-      return node.multiaddr;
-    });
+export async function ensureCustomRelays(fluenceConfig: FluenceConfig) {
+  const contractsEnv = await list({
+    message: "Select contracts environment for your custom network",
+    options: [...CONTRACTS_ENV],
+    oneChoiceMessage: (): never => {
+      throw new Error("Unreachable: only one contracts env");
+    },
+    onNoChoices: (): never => {
+      throw new Error("Unreachable: no contracts envs");
+    },
+  });
+
+  const fluenceEnvOrCustomRelays = commaSepStrToArr(
+    await input({
+      message: "Enter comma-separated list of relays",
+      validate: (input: string) => {
+        const relays = commaSepStrToArr(input);
+
+        if (relays.length === 0) {
+          return "You must specify at least one relay";
+        }
+
+        return true;
+      },
+    }),
+  );
+
+  fluenceConfig.customFluenceEnv = {
+    contractsEnv,
+    relays: fluenceEnvOrCustomRelays,
+  };
+
+  await fluenceConfig.$commit();
+  return fluenceEnvOrCustomRelays;
+}
+
+function getCustomRelays(
+  maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+) {
+  if (maybeFluenceConfigReadonly === null) {
+    commandObj.error(
+      `You must init fluence project if you want to use ${color.yellow(
+        "custom",
+      )} fluence env`,
+    );
   }
 
-  const relays = maybeRelays;
-
-  if (Array.isArray(relays)) {
-    return relays.map((relay) => {
-      return resolveRelay(relay);
-    });
+  if (maybeFluenceConfigReadonly.customFluenceEnv === undefined) {
+    commandObj.error(
+      `You must specify custom fluence env in ${color.yellow(
+        maybeFluenceConfigReadonly.$getPath(),
+      )} if you want to use ${color.yellow("custom")} fluence environment`,
+    );
   }
 
-  return ADDR_MAP[relays].map((node) => {
+  return maybeFluenceConfigReadonly.customFluenceEnv.relays;
+}
+
+export function resolveRelays(
+  fluenceEnv: FluenceEnv,
+  maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+): Array<string> {
+  if (fluenceEnv === "custom") {
+    return getCustomRelays(maybeFluenceConfigReadonly);
+  }
+
+  return ADDR_MAP[fluenceEnv].map((node) => {
     return node.multiaddr;
   });
-};
+}
 
-const getRandomArrayItem = <T>(ar: Array<T>): T => {
+function getRandomArrayItem<T>(ar: Array<T>): T {
   const randomIndex = Math.round(Math.random() * (ar.length - 1));
   const randomItem = ar[randomIndex];
   assert(randomItem !== undefined);
   return randomItem;
-};
+}
 
 /**
  * @param maybeRelayName - name of the relay in format `networkName-index`
  * @returns undefined if name is not in format `networkName-index` or Node if it is
  */
-const getMaybeNamedNode = (
+function getMaybeNamedNode(
   maybeRelayName: string | undefined,
-): undefined | Node => {
+  maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+): undefined | Node {
   if (maybeRelayName === undefined) {
     return undefined;
   }
 
-  const maybeNetworkName = NETWORKS.find((networkName) => {
+  const maybeFluenceEnv = FLUENCE_ENVS.find((networkName) => {
     return maybeRelayName.startsWith(networkName);
   });
 
   // if ID doesn't start with network name - return undefined
-  if (maybeNetworkName === undefined) {
+  if (maybeFluenceEnv === undefined) {
     return undefined;
   }
 
-  const networkName = maybeNetworkName;
+  const relays =
+    maybeFluenceEnv === "custom"
+      ? multiaddrsToNodes(getCustomRelays(maybeFluenceConfigReadonly))
+      : ADDR_MAP[maybeFluenceEnv];
+
   const [, indexString] = maybeRelayName.split("-");
-  const parseResult = parseNamedPeer(indexString, networkName);
+
+  const parseResult = parseNamedPeer(
+    indexString,
+    maybeFluenceEnv,
+    relays.length,
+  );
 
   if (typeof parseResult === "string") {
     commandObj.error(
@@ -100,16 +244,17 @@ const getMaybeNamedNode = (
     );
   }
 
-  return ADDR_MAP[networkName][parseResult];
-};
+  return relays[parseResult];
+}
 
-const parseNamedPeer = (
+function parseNamedPeer(
   indexString: string | undefined,
-  networkName: Network,
-): number | string => {
+  fluenceEnv: FluenceEnv,
+  relaysLength: number,
+): number | string {
   if (indexString === undefined) {
     return `You must specify peer index after dash (e.g. ${color.yellow(
-      `${networkName}-0`,
+      `${fluenceEnv}-0`,
     )})`;
   }
 
@@ -119,33 +264,52 @@ const parseNamedPeer = (
     return `Index ${color.yellow(indexString)} is not a number`;
   }
 
-  if (index < 0 || index >= ADDR_MAP[networkName].length) {
+  if (index < 0 || index >= relaysLength) {
     return `Index ${index} is out of range`;
   }
 
   return index;
-};
+}
 
-const getRandomRelayAddr = (maybeRelays: Relays | null | undefined): string => {
-  return getRandomArrayItem(resolveAddrs(maybeRelays));
-};
-
-export const resolveRelay = (
-  maybeRelay: string | undefined,
-  maybeRelays?: Relays | null | undefined,
-) => {
-  return (
-    getMaybeNamedNode(maybeRelay)?.multiaddr ??
-    maybeRelay ??
-    getRandomRelayAddr(maybeRelays)
+function getRandomRelayAddr(
+  fluenceEnv: FluenceEnv,
+  maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+): string {
+  return getRandomArrayItem(
+    resolveRelays(fluenceEnv, maybeFluenceConfigReadonly),
   );
-};
+}
 
-export const resolvePeerId = (peerId: string) => {
-  return getMaybeNamedNode(peerId)?.peerId ?? peerId;
-};
+export function resolveRelay(
+  maybeRelay: string | undefined,
+  fluenceEnv: FluenceEnv,
+  maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+) {
+  return (
+    getMaybeNamedNode(maybeRelay, maybeFluenceConfigReadonly)?.multiaddr ??
+    maybeRelay ??
+    getRandomRelayAddr(fluenceEnv, maybeFluenceConfigReadonly)
+  );
+}
 
-export const getPeerId = (addr: string): string => {
+export function resolvePeerId(
+  peerIdOrNamedNode: string,
+  maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+) {
+  return (
+    getMaybeNamedNode(peerIdOrNamedNode, maybeFluenceConfigReadonly)?.peerId ??
+    peerIdOrNamedNode
+  );
+}
+
+export function getRandomPeerId(
+  fluenceEnv: FluenceEnv,
+  maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+): string {
+  return getPeerId(getRandomRelayAddr(fluenceEnv, maybeFluenceConfigReadonly));
+}
+
+export function getPeerId(addr: string): string {
   const id = multiaddr(addr).getPeerId();
 
   if (id === null) {
@@ -155,8 +319,4 @@ export const getPeerId = (addr: string): string => {
   }
 
   return id;
-};
-
-export const getRandomPeerId = (relays: Relays): string => {
-  return getPeerId(getRandomRelayAddr(relays));
-};
+}

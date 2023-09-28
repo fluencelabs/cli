@@ -18,7 +18,7 @@ import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
   ensureChainNetwork,
@@ -32,7 +32,7 @@ export default class Register extends BaseCommand<typeof Register> {
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
-    ...NETWORK_FLAG,
+    ...ENV_FLAG,
   };
 
   async run(): Promise<void> {
@@ -41,16 +41,12 @@ export default class Register extends BaseCommand<typeof Register> {
       await this.parse(Register),
     );
 
-    const network = await ensureChainNetwork({
-      maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-    });
-
+    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
     const signer = await getSigner(network, flags["priv-key"]);
     const { DealClient } = await import("@fluencelabs/deal-aurora");
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error
     const dealClient = new DealClient(signer, network);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
@@ -69,7 +65,7 @@ export default class Register extends BaseCommand<typeof Register> {
     promptConfirmTx(flags["priv-key"]);
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error
     await waitTx(tx);
 
     commandObj.log(color.green(`Successfully joined to matching contract`));

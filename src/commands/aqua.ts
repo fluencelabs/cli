@@ -30,7 +30,7 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { stringifyUnknown } from "../lib/helpers/jsonStringify.js";
+import { stringifyUnknown } from "../lib/helpers/utils.js";
 import { initCli, exitCli } from "../lib/lifeCycle.js";
 import { projectRootDir, validatePath } from "../lib/paths.js";
 import { input, type InputArg } from "../lib/prompt.js";
@@ -175,7 +175,7 @@ export default class Aqua extends Command {
     }
 
     const watchingNotification = (): void => {
-      return commandObj.logToStderr(
+      commandObj.logToStderr(
         `Watching for changes at ${color.yellow(inputFlag)}...`,
       );
     };
@@ -198,7 +198,7 @@ export default class Aqua extends Command {
           })
           .catch((error): void => {
             commandObj.logToStderr(stringifyUnknown(error));
-            return watchingNotification();
+            watchingNotification();
           });
       });
   }

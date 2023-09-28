@@ -48,7 +48,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     if (flags.default) {
-      return commandObj.log(
+      commandObj.log(
         yamlDiffPatch(
           "",
           {},
@@ -61,6 +61,8 @@ export default class Versions extends BaseCommand<typeof Versions> {
           },
         ),
       );
+
+      return;
     }
 
     commandObj.log(

@@ -18,6 +18,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
+import type { Node } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
 
 import {
@@ -34,7 +35,6 @@ import {
   INDEX_JS_FILE_NAME,
   INDEX_TS_FILE_NAME,
   SRC_DIR_NAME,
-  TEMPLATE_INDEX_FILE_CONTENT,
   TYPESCRIPT_RECOMMENDED_VERSION,
   TS_NODE_RECOMMENDED_VERSION,
   TS_CONFIG_FILE_NAME,
@@ -62,14 +62,88 @@ import versions from "../versions.json" assert { type: "json" };
 
 import { addService } from "./addService.js";
 import { commandObj, isInteractive } from "./commandObj.js";
+import { setEnvConfig } from "./configs/globalConfigs.js";
+import { initNewEnvConfig } from "./configs/project/env.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfig } from "./configs/project/workers.js";
+import type { ContractsENV } from "./const.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
-import { jsonStringify } from "./helpers/jsonStringify.js";
+import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
+import {
+  ensureCustomRelays,
+  resolveFluenceEnv,
+  local,
+  multiaddrsToNodes,
+} from "./multiaddres.js";
 import { ensureSrcAquaMainPath } from "./paths.js";
+
+const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
+// @ts-nocheck`;
+
+const NODES_CONST = "nodes";
+
+const getPeersImportStatement = (peersToImport: string): string => {
+  return `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
+};
+
+const getCustomPeers = (peers: Node[]) => {
+  return `const ${NODES_CONST} = ${jsonStringify(peers)}`;
+};
+
+const getPeersImportInJS = (
+  fluenceEnvOrCustomRelays: ContractsENV | Array<string>,
+) => {
+  if (Array.isArray(fluenceEnvOrCustomRelays)) {
+    return getCustomPeers(multiaddrsToNodes(fluenceEnvOrCustomRelays));
+  }
+
+  return {
+    kras: getPeersImportStatement("krasnodar"),
+    stage: getPeersImportStatement("stage"),
+    testnet: getPeersImportStatement("testNet"),
+    local: getCustomPeers(local),
+  }[fluenceEnvOrCustomRelays];
+};
+
+export const getJsTemplateIndexJsContent = (
+  fluenceEnvOrCustomRelays: ContractsENV | Array<string>,
+) => {
+  return `${DISABLE_TS_AND_ES_LINT}
+import { Fluence } from "@fluencelabs/js-client";
+${getPeersImportInJS(fluenceEnvOrCustomRelays)}
+
+import {
+  helloWorld,
+  helloWorldRemote,
+  getInfo,
+  getInfos,
+} from "./aqua/main.js";
+
+const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
+const connectTo = ${NODES_CONST}[0].multiaddr;
+if (typeof connectTo !== "string") {
+  throw new Error("connectTo is not a string");
+}
+
+const main = async () => {
+  await Fluence.connect(connectTo);
+
+  const helloWorldResult = await helloWorld("Fluence");
+  const helloWorldRemoteResult = await helloWorldRemote("Fluence");
+  const getInfoResult = await getInfo();
+
+  console.log(helloWorldResult);
+
+  process.exit(0);
+};
+
+main().catch((error) => {
+  console.error(error);
+});`;
+};
 
 const selectTemplate = (): Promise<Template> => {
   return list({
@@ -108,10 +182,11 @@ export const ensureTemplate = ({
 
 type InitArg = {
   maybeProjectPath?: string | undefined;
-  template?: Template;
+  template?: Template | undefined;
+  fluenceEnvFromFlags?: string | undefined;
 };
 
-export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
+export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const projectPath =
     options.maybeProjectPath === undefined && !isInteractive
       ? process.cwd()
@@ -137,6 +212,15 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
+  const fluenceEnv = await resolveFluenceEnv(options.fluenceEnvFromFlags);
+  setEnvConfig(await initNewEnvConfig(fluenceEnv));
+  let fluenceEnvOrCustomRelays: ContractsENV | Array<string>;
+
+  if (fluenceEnv === "custom") {
+    fluenceEnvOrCustomRelays = await ensureCustomRelays(fluenceConfig);
+  } else {
+    fluenceEnvOrCustomRelays = fluenceEnv;
+  }
 
   await writeFile(
     await ensureSrcAquaMainPath(),
@@ -202,12 +286,22 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
       break;
 
     case "js": {
-      await initTSorJSProject({ isJS: true, fluenceConfig });
+      await initTSorJSProject({
+        isJS: true,
+        fluenceConfig,
+        fluenceEnvOrCustomRelays,
+      });
+
       break;
     }
 
     case "ts": {
-      await initTSorJSProject({ isJS: false, fluenceConfig });
+      await initTSorJSProject({
+        isJS: false,
+        fluenceConfig,
+        fluenceEnvOrCustomRelays,
+      });
+
       break;
     }
 
@@ -224,7 +318,7 @@ export const init = async (options: InitArg = {}): Promise<FluenceConfig> => {
   );
 
   return fluenceConfig;
-};
+}
 
 const shouldInit = async (projectPath: string): Promise<boolean> => {
   if (!isInteractive) {
@@ -269,11 +363,13 @@ const shouldInit = async (projectPath: string): Promise<boolean> => {
 };
 
 type InitTSorJSProjectArg = {
+  fluenceEnvOrCustomRelays: ContractsENV | Array<string>;
   isJS: boolean;
   fluenceConfig: FluenceConfig;
 };
 
 const initTSorJSProject = async ({
+  fluenceEnvOrCustomRelays,
   isJS,
   fluenceConfig,
 }: InitTSorJSProjectArg): Promise<void> => {
@@ -328,7 +424,7 @@ const initTSorJSProject = async ({
 
   await writeFile(
     join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
-    TEMPLATE_INDEX_FILE_CONTENT,
+    getJsTemplateIndexJsContent(fluenceEnvOrCustomRelays),
     FS_OPTIONS,
   );
 

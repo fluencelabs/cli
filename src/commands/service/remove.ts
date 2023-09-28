@@ -61,7 +61,13 @@ export default class Remove extends BaseCommand<typeof Remove> {
       fluenceConfig,
     );
 
-    assert(fluenceConfig.services !== undefined);
+    assert(
+      fluenceConfig.services !== undefined,
+      "We checked fluenceConfig.services !== undefined at getServiceNameToRemove",
+    );
+
+    // Our configs can't be Map object so there is no workaround for this rule
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete fluenceConfig.services[serviceNameToRemove];
 
     if (fluenceConfig.workers !== undefined) {

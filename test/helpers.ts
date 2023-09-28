@@ -35,9 +35,8 @@ import {
   // IPFS_ADDR_PROPERTY,
 } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
-import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
-import { local } from "../src/lib/localNodes.js";
-import type { FluenceEnv } from "../src/lib/multiaddres.js";
+import { jsonStringify } from "../src/lib/helpers/utils.js";
+import { local } from "../src/lib/multiaddres.js";
 import { getDefaultJSDirPath, getDefaultTSDirPath } from "../src/lib/paths.js";
 import {
   FLUENCE_ENV,
@@ -47,14 +46,14 @@ import { assertHasKey } from "../src/lib/typeHelpers.js";
 
 // const TEST_IPFS_ADDR = "/ip4/127.0.0.1/tcp/5001";
 
+export const fluenceEnv = process.env[FLUENCE_ENV];
+
 export const multiaddrs = {
   kras: krasnodar,
   stage: stage,
   testnet: testNet,
   local,
-  // This typescript error happens only when running config docs generation script that's why type assertion is used
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
-}[process.env[FLUENCE_ENV] as FluenceEnv];
+}[fluenceEnv];
 
 type CliArg = {
   args?: ExecPromiseArg["args"];
@@ -117,7 +116,7 @@ export const initFirstTime = async (template: Template) => {
   } catch {
     await fluence({
       args: ["init", templatePath],
-      flags: { template, "no-input": true },
+      flags: { template, env: fluenceEnv, "no-input": true },
     });
 
     if (template === "js" || template === "ts") {

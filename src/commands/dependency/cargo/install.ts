@@ -82,7 +82,8 @@ export default class Install extends BaseCommand<typeof Install> {
         force: flags.force,
       });
 
-      return commandObj.log("cargo dependencies successfully installed");
+      commandObj.log("cargo dependencies successfully installed");
+      return;
     }
 
     if (!flags.global && maybeFluenceConfig === null) {

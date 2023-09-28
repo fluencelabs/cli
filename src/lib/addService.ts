@@ -69,7 +69,7 @@ export const addService = async ({
     }
 
     return (
-      !(name in (fluenceConfig?.services ?? {})) ||
+      !(name in (fluenceConfig.services ?? {})) ||
       `You already have ${color.yellow(name)} in ${color.yellow(
         fluenceConfig.$getPath(),
       )}`
@@ -143,10 +143,9 @@ export const addService = async ({
   if (
     !(
       isInteractive &&
-      fluenceConfig !== undefined &&
       fluenceConfig.workers !== undefined &&
       DEFAULT_WORKER_NAME in fluenceConfig.workers &&
-      !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.services ?? []).includes(
+      !(fluenceConfig.workers[DEFAULT_WORKER_NAME].services ?? []).includes(
         serviceName,
       ) &&
       (interactive
@@ -162,7 +161,6 @@ export const addService = async ({
   }
 
   const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
-  assert(defaultWorker !== undefined);
 
   fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
     ...defaultWorker,

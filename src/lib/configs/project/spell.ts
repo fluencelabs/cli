@@ -192,12 +192,12 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
 ) => {
   return validateBatch(
     config.clock?.startTimestamp !== undefined &&
-      config.clock?.startDelaySec !== undefined
+      config.clock.startDelaySec !== undefined
       ? `You can't specify both 'startTimestamp' and 'startDelaySec' properties`
       : true,
 
     config.clock?.endTimestamp !== undefined &&
-      config.clock?.endDelaySec !== undefined
+      config.clock.endDelaySec !== undefined
       ? `You can't specify both 'endTimestamp' and 'endDelaySec' properties`
       : true,
 

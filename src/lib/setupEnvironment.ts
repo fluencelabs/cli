@@ -18,7 +18,8 @@ import path from "node:path";
 
 import dotenv from "dotenv";
 
-import { type FluenceEnv, NETWORKS } from "./multiaddres.js";
+import { type ContractsENV, FLUENCE_ENVS } from "./const.js";
+import { getIsStringUnion } from "./typeHelpers.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
@@ -68,11 +69,13 @@ const isAbsolutePath = (v: unknown): v is string => {
   return typeof v === "string" && path.isAbsolute(v);
 };
 
-const isFluenceEnv = (v: unknown): v is FluenceEnv => {
-  return typeof v === "string" && [...NETWORKS, "local"].includes(v);
-};
+const isFluenceEnvWithoutCustom = getIsStringUnion(
+  FLUENCE_ENVS.filter((e): e is ContractsENV => {
+    return e !== "custom";
+  }),
+);
 
-setEnvVariable(FLUENCE_ENV, isFluenceEnv, "kras");
+setEnvVariable(FLUENCE_ENV, isFluenceEnvWithoutCustom, "local");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
 setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

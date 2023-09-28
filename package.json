@@ -54,7 +54,7 @@
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "0.3.4",
     "@fluencelabs/aqua-api": "0.12.2",
-    "@fluencelabs/deal-aurora": "0.2.12",
+    "@fluencelabs/deal-aurora": "0.2.16",
     "@fluencelabs/fluence-network-environment": "1.1.2",
     "@fluencelabs/js-client": "0.1.7",
     "@iarna/toml": "^2.2.5",
@@ -170,8 +170,7 @@
     "extends": [
       "eslint:recommended",
       "plugin:node/recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      "plugin:@typescript-eslint/strict-type-checked",
       "plugin:import/recommended",
       "plugin:import/typescript",
       "prettier"

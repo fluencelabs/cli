@@ -109,7 +109,7 @@ export default class REPL extends Command {
     if (isServiceListedInFluenceConfig) {
       await updateAquaServiceInterfaceFile(
         { [nameOrPathOrUrl]: getModuleWasmPath(facadeModuleConfig) },
-        maybeFluenceConfig?.services,
+        maybeFluenceConfig.services,
         marineCli,
       );
     }

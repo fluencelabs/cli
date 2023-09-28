@@ -41,7 +41,7 @@ import {
   CLI_NAME_FULL,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
-import { jsonStringify } from "./lib/helpers/jsonStringify.js";
+import { jsonStringify } from "./lib/helpers/utils.js";
 
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 

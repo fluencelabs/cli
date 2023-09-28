@@ -16,12 +16,12 @@
 
 import camelCase from "lodash-es/camelCase.js";
 
-import { stringifyUnknown } from "../src/lib/helpers/jsonStringify.js";
 import {
   jsToAqua,
   jsToAquaImpl,
   makeOptional,
 } from "../src/lib/helpers/jsToAqua.js";
+import { stringifyUnknown } from "../src/lib/helpers/utils.js";
 
 const fileName = "someModule";
 

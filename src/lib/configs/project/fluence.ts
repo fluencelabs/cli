@@ -24,14 +24,11 @@ import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "
 import versions from "../../../versions.json" assert { type: "json" };
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
+  AQUA_LIB_NPM_DEPENDENCY,
   IPFS_ADDR_PROPERTY,
   DEFAULT_IPFS_ADDRESS,
-  AQUA_LIB_NPM_DEPENDENCY,
-} from "../../const.js";
-import {
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  DEFAULT_CHAIN_NETWORK,
   DEFAULT_WORKER_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -45,26 +42,19 @@ import {
   DEFAULT_MARINE_BUILD_ARGS,
   type ContractsENV,
   CONTRACTS_ENV,
+  type FluenceEnv,
+  FLUENCE_ENVS,
 } from "../../const.js";
-import { jsonStringify } from "../../helpers/jsonStringify.js";
 import {
   validateAllVersionsAreExact,
   validateBatch,
 } from "../../helpers/validations.js";
-import { local, localMultiaddrs } from "../../localNodes.js";
-import {
-  getPeerId,
-  getRandomPeerId,
-  NETWORKS,
-  type FluenceEnv,
-  type Relays,
-} from "../../multiaddres.js";
+import { resolveRelays, localMultiaddrs } from "../../multiaddres.js";
 import {
   ensureSrcAquaMainPath,
   getFluenceDir,
   projectRootDir,
 } from "../../paths.js";
-import { FLUENCE_ENV } from "../../setupEnvironment.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -123,7 +113,7 @@ type ServiceV1 = {
 type ConfigV1 = {
   version: 1;
   services?: Record<string, ServiceV1>;
-  relays?: Relays;
+  relays?: FluenceEnv | Array<string>;
 };
 
 const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
@@ -178,10 +168,10 @@ const configSchemaV1Obj = {
     },
     relays: {
       title: "Relays",
-      description: `List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: ${NETWORKS[0]}`,
+      description: `List of Fluence Peer multi addresses or a name of the network. This multi addresses are used for connecting to the Fluence network when deploying. Peer ids from these addresses are also used for deploying in case if you don't specify "peerId" or "peerIds" property in the deployment config. Default: ${FLUENCE_ENVS[0]}`,
       type: ["string", "array"],
       oneOf: [
-        { type: "string", title: "Network name", enum: NETWORKS },
+        { type: "string", title: "Network name", enum: FLUENCE_ENVS },
         {
           type: "array",
           title: "Multi addresses",
@@ -314,11 +304,8 @@ export function assertIsArrayWithHostsOrDeals(
   });
 }
 
-const configSchemaV2: JSONSchemaType<ConfigV2> = {
+const configSchemaV2Obj = {
   ...configSchemaV1Obj,
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  title: FLUENCE_CONFIG_FULL_FILE_NAME,
-  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV1Obj.properties,
     version: { type: "number", const: 2 },
@@ -459,35 +446,54 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = {
   },
 } as const;
 
-const getDefaultPeerId = (relays?: FluenceConfigReadonly["relays"]): string => {
-  if (Array.isArray(relays)) {
-    const firstRelay = relays[0];
+const configSchemaV2: JSONSchemaType<ConfigV2> = configSchemaV2Obj;
 
-    assert(
-      firstRelay !== undefined,
-      `relays array is empty in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-    );
-
-    return getPeerId(firstRelay);
-  }
-
-  // This typescript error happens only when running config docs generation script that's why type assertion is used
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
-  const fluenceEnv = (relays ?? process.env[FLUENCE_ENV]) as FluenceEnv;
-
-  if (fluenceEnv === "local") {
-    const localNode = local[0];
-    assert(localNode !== undefined);
-    return localNode.peerId;
-  }
-
-  return getRandomPeerId(fluenceEnv);
+type ConfigV3 = Omit<ConfigV2, "version" | "relays" | "chainNetwork"> & {
+  version: 3;
+  customFluenceEnv?: {
+    contractsEnv: ContractsENV;
+    relays: Array<string>;
+  };
 };
 
-const DEFAULT_RELAYS_FOR_TEMPLATE: Relays =
-  process.env[FLUENCE_ENV] === "local"
-    ? localMultiaddrs
-    : process.env[FLUENCE_ENV];
+const configSchemaV3: JSONSchemaType<ConfigV3> = {
+  ...configSchemaV2Obj,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FULL_FILE_NAME,
+  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
+  properties: {
+    ...(() => {
+      const properties = {
+        ...configSchemaV2Obj.properties,
+      };
+
+      // @ts-expect-error v3 deprecated relays property
+      delete properties.relays;
+      // @ts-expect-error v3 deprecated chainNetwork property
+      delete properties.chainNetwork;
+      return properties;
+    })(),
+    version: { type: "number", const: 3 },
+    customFluenceEnv: {
+      type: "object",
+      description: `Custom Fluence environment to use when connecting to Fluence network`,
+      nullable: true,
+      properties: {
+        contractsEnv: {
+          type: "string",
+          description: `Contracts environment to use for this fluence network to sign contracts on the blockchain`,
+          enum: CONTRACTS_ENV,
+        },
+        relays: {
+          type: "array",
+          description: `List of custom relay multiaddresses to use when connecting to Fluence network`,
+          items: { type: "string" },
+        },
+      },
+      required: ["contractsEnv", "relays"],
+    },
+  },
+} as const;
 
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
@@ -500,10 +506,6 @@ const getDefaultConfig = async (): Promise<string> => {
 
 # config version
 version: 2
-
-# nox multiaddresses that will be used by cli to connect to the Fluence network.
-# can be a list of multiaddresses or a name of the network.
-relays: ${jsonStringify(DEFAULT_RELAYS_FOR_TEMPLATE)} # default: kras
 
 # Path to the aqua file or directory with aqua files that you want to compile by default.
 # Must be relative to the project root dir
@@ -522,6 +524,11 @@ deals:
     minWorkers: ${MIN_WORKERS} # required amount of workers to activate the deal
     targetWorkers: ${TARGET_WORKERS} # max amount of workers in the deal
 
+# # A list of custom relay multiaddresses to use when connecting to Fluence network
+# customFluenceEnv:
+#   contractsEnv: local
+#   relays:
+#     - "${localMultiaddrs[0]}"
 # # A map with service names as keys and service configs as values.
 # # Service names must start with a lowercase letter and contain only letters numbers and underscores.
 # # You can use \`fluence service new\` or \`fluence service add\` command to add a service
@@ -642,10 +649,6 @@ deals:
 # aquaOutputJSPath: "src/js/src/aqua"
 #
 #
-# # The network in which the transactions will be carried out
-# chainNetwork: ${CONTRACTS_ENV[0]} # default: ${DEFAULT_CHAIN_NETWORK}
-#
-#
 # # The version of the CLI that is compatible with this project.
 # # You can set this to enforce a particular set of versions of all fluence components
 # cliVersion: ${CLIPackageJSON.version}
@@ -672,8 +675,7 @@ deals:
 # hosts:
 #   # worker name
 #   ${DEFAULT_WORKER_NAME}:
-#     peerIds:
-#       - ${getDefaultPeerId(DEFAULT_RELAYS_FOR_TEMPLATE)}
+#     peerIds: []
 # # Space separated \`cargo build\` flags and args to pass to marine build. Default: ${DEFAULT_MARINE_BUILD_ARGS}
 # ${MARINE_BUILD_ARGS_PROPERTY}: '${DEFAULT_MARINE_BUILD_ARGS}'
 # # IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} (for 'workers deploy' IPFS address provided by relay that you are connected to is used)
@@ -737,10 +739,40 @@ const migrations: Migrations<Config> = [
       ...parsedConfig,
     };
   },
+  async (config: Config): Promise<ConfigV3> => {
+    if (!validateConfigSchemaV2(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV1.errors,
+        )}`,
+      );
+    }
+
+    const { relays, chainNetwork, ...restConfig } = config;
+
+    let customFluenceEnv: ConfigV3["customFluenceEnv"] | undefined;
+
+    // if some kind of custom network was previously set - migrate it to the new format
+    if (Array.isArray(relays) || chainNetwork !== undefined) {
+      customFluenceEnv = {
+        contractsEnv: chainNetwork ?? "testnet",
+        relays:
+          relays === undefined || typeof relays === "string"
+            ? resolveRelays(relays ?? "kras", null)
+            : relays,
+      };
+    }
+
+    return {
+      ...restConfig,
+      ...(customFluenceEnv === undefined ? {} : customFluenceEnv),
+      version: 3,
+    };
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1 | ConfigV2;
-type LatestConfig = ConfigV2;
+type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3;
+type LatestConfig = ConfigV3;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
@@ -853,6 +885,22 @@ const validateHostsAndDeals = (
   return workerNamesErrors.length === 0 ? true : workerNamesErrors.join("\n");
 };
 
+function validateCustomRelays({
+  customFluenceEnv,
+}: Pick<FluenceConfig, "customFluenceEnv">) {
+  if (customFluenceEnv === undefined) {
+    return true;
+  }
+
+  const { relays } = customFluenceEnv;
+
+  if (relays.length === 0) {
+    return "customFluenceEnv.relays list must not be empty";
+  }
+
+  return true;
+}
+
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   if (config.services === undefined) {
     return true;
@@ -864,6 +912,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     validateHostsAndDeals(config, "deals"),
     await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
     await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
+    validateCustomRelays(config),
   );
 
   if (typeof validity === "string") {
@@ -874,8 +923,8 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
 };
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2],
-  latestSchema: configSchemaV2,
+  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2, configSchemaV3],
+  latestSchema: configSchemaV3,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath,
@@ -885,7 +934,7 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initFluenceConfigWithPath = async (
   path: string,
-): Promise<InitializedConfig<ConfigV2> | null> => {
+): Promise<InitializedConfig<LatestConfig> | null> => {
   return getConfigInitFunction({
     ...initConfigOptions,
     getConfigOrConfigDirPath: () => {
@@ -902,4 +951,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV2;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV3;

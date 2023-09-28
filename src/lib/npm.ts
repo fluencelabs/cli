@@ -25,7 +25,6 @@ import type { FluenceConfig } from "./configs/project/fluence.js";
 import { NODE_MODULES_DIR_NAME } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { type ExecPromiseArg, execPromise } from "./execPromise.js";
-import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import {
   splitPackageNameAndVersion,
   resolveDependencyDirPathAndTmpPath,
@@ -34,6 +33,7 @@ import {
   resolveDependencies,
   updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
+import { stringifyUnknown } from "./helpers/utils.js";
 
 const getNpmPath = async () => {
   const node_modules = (await import("node_modules-path")).default;

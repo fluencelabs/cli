@@ -45,8 +45,8 @@ import {
   README_MD_FILE_NAME,
   HOSTS_FULL_FILE_NAME,
 } from "./const.js";
-import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
+import { stringifyUnknown } from "./helpers/utils.js";
 import { FLUENCE_USER_DIR } from "./setupEnvironment.js";
 
 export const validatePath = async (path: string): Promise<string | true> => {
