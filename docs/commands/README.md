@@ -293,7 +293,7 @@ _See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/
 
 ## `fluence default env [ENV]`
 
-Print default Fluence network peer addresses
+Switch default Fluence Environment used in the current Fluence project
 
 ```
 USAGE
@@ -306,7 +306,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Print default Fluence network peer addresses
+  Switch default Fluence Environment used in the current Fluence project
 
 EXAMPLES
   $ fluence default env
