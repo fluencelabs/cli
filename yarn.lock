@@ -596,12 +596,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-ipfs@npm:0.5.17":
-  version: 0.5.17
-  resolution: "@fluencelabs/aqua-ipfs@npm:0.5.17"
+"@fluencelabs/aqua-ipfs@npm:0.5.21":
+  version: 0.5.21
+  resolution: "@fluencelabs/aqua-ipfs@npm:0.5.21"
   dependencies:
-    "@fluencelabs/aqua-lib": ^0.7.0
-  checksum: 5627f1ce7852cbbb76fe40a3114f4aa4e05630cb6a9ce5b01632bc4b1a1f3846b93ce247ab751c3865feb33bede381fb02c4773b0dd4dad3926457a00b1a052e
+    "@fluencelabs/aqua-lib": 0.7.7
+  checksum: e7c52578b4727a069d81dd343db9d6908a935bccca2e3101ffc9214f866d95bb8f89ef8c4d6a54a243138ee37272a7be7b9cfaf894328d212f8a0b0c2cab4a84
   languageName: node
   linkType: hard
 
@@ -612,23 +612,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-lib@npm:^0.7.0":
-  version: 0.7.3
-  resolution: "@fluencelabs/aqua-lib@npm:0.7.3"
-  checksum: d006fffe1de1ee90837b9ad367caa74c8a20028a67ad51c5429d390484f802e2e25b3a9cd7543b01a4eea962469c79f33f511219ae1e53f2f1a47ac209eab418
-  languageName: node
-  linkType: hard
-
 "@fluencelabs/cli@workspace:.":
   version: 0.0.0-use.local
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
     "@fluencelabs/aqua-api": 0.12.2
-    "@fluencelabs/aqua-lib": 0.7.7
     "@fluencelabs/deal-aurora": 0.2.16
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/up-logs/aksjdhfkljsahdfkjlasdhfakjlsdf.tgz"
+    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/up-logs/askjdhf12341234.tgz"
     "@fluencelabs/js-client": 0.1.7
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.4
@@ -717,14 +709,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/aksjdhfkljsahdfkjlasdhfakjlsdf.tgz":
+"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/askjdhf12341234.tgz":
   version: 0.5.22
-  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/aksjdhfkljsahdfkjlasdhfakjlsdf.tgz"
+  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/askjdhf12341234.tgz"
   dependencies:
-    "@fluencelabs/aqua-ipfs": 0.5.17
+    "@fluencelabs/aqua-ipfs": 0.5.21
     "@fluencelabs/aqua-lib": 0.7.7
     "@fluencelabs/spell": 0.5.22
-  checksum: 4ae7ec8fa50a18495fa4e69ba4cd815931ca2c43d9164cc91e968019db608ef407e28d4bade077602b6313bafa4b14020618519791df0d318460a760de096ad1
+  checksum: d5dd134cde7871f63324e665f89b1695a130961593abce9bb1382f9a4293cefaaae9f680e4856612ba08b58ff0f11685087adc8df5e987970e4e7a8b5b5d3768
   languageName: node
   linkType: hard
 
