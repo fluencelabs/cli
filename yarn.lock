@@ -620,7 +620,7 @@ __metadata:
     "@fluencelabs/aqua-api": 0.12.2
     "@fluencelabs/deal-aurora": 0.2.16
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/up-logs/askjdhf12341234.tgz"
+    "@fluencelabs/installation-spell": 0.5.23
     "@fluencelabs/js-client": 0.1.7
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.4
@@ -709,14 +709,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/askjdhf12341234.tgz":
-  version: 0.5.22
-  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/askjdhf12341234.tgz"
+"@fluencelabs/installation-spell@npm:0.5.23":
+  version: 0.5.23
+  resolution: "@fluencelabs/installation-spell@npm:0.5.23"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.21
     "@fluencelabs/aqua-lib": 0.7.7
-    "@fluencelabs/spell": 0.5.22
-  checksum: d5dd134cde7871f63324e665f89b1695a130961593abce9bb1382f9a4293cefaaae9f680e4856612ba08b58ff0f11685087adc8df5e987970e4e7a8b5b5d3768
+    "@fluencelabs/spell": 0.5.23
+  checksum: 3a0a2bab1480c1c709a0cdee28b32a4b4e6ab26b519cada1b5821974e07ffc2972ee4a155e69f26016f508bce7a5d73328936f613e7474f3d269f561718221bf
   languageName: node
   linkType: hard
 
@@ -759,10 +759,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.22":
-  version: 0.5.22
-  resolution: "@fluencelabs/spell@npm:0.5.22"
-  checksum: 7f6a8ae4c343e961ab7ea8ff59b5b48885f77dede51a9a3fd210d402fef77452bc433fe313a89ef8b434327f15a1e2f20a58dae9c256487e7720dcfd10b868c3
+"@fluencelabs/spell@npm:0.5.23":
+  version: 0.5.23
+  resolution: "@fluencelabs/spell@npm:0.5.23"
+  checksum: 0ea4cc70d432183ae8bb734d3da64a05da443a78443120f146ce48f19889cffb14ed03f3be440355e2059c62eaddb99fcc81cc1a4a92fe2ac5aa2ee4cdfeb484
   languageName: node
   linkType: hard
 
