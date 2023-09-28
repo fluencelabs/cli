@@ -628,7 +628,7 @@ __metadata:
     "@fluencelabs/aqua-lib": 0.7.7
     "@fluencelabs/deal-aurora": 0.2.16
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": ./aksjdhfkljsahdfkjlasdhfakjlsdf.tgz
+    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/up-logs/aksjdhfkljsahdfkjlasdhfakjlsdf.tgz"
     "@fluencelabs/js-client": 0.1.7
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.4
@@ -717,9 +717,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@file:./aksjdhfkljsahdfkjlasdhfakjlsdf.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A.":
+"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/aksjdhfkljsahdfkjlasdhfakjlsdf.tgz":
   version: 0.5.22
-  resolution: "@fluencelabs/installation-spell@file:./aksjdhfkljsahdfkjlasdhfakjlsdf.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A."
+  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/up-logs/aksjdhfkljsahdfkjlasdhfakjlsdf.tgz"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.17
     "@fluencelabs/aqua-lib": 0.7.7
