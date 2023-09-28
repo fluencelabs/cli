@@ -34,7 +34,6 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   CLI_NAME,
   CONTRACTS_ENV_TO_CHAIN_ID,
-  type FluenceEnv,
 } from "./const.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { resolveFluenceEnv } from "./multiaddres.js";
@@ -43,16 +42,6 @@ const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
 const KEY_QUERY_PARAM_NAME = "symKey";
 
-function logContractsEnv(fluenceEnv: FluenceEnv, contractsEnv: ContractsENV) {
-  commandObj.logToStderr(
-    `Using ${color.yellow(
-      contractsEnv,
-    )} blockchain environment to sign contracts for ${color.yellow(
-      fluenceEnv,
-    )} fluence environment`,
-  );
-}
-
 export async function ensureChainNetwork(
   fluenceEnvFromFlags: string | undefined,
   maybeFluenceConfig: FluenceConfigReadonly | null,
@@ -60,7 +49,10 @@ export async function ensureChainNetwork(
   const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
 
   if (fluenceEnv !== "custom") {
-    logContractsEnv(fluenceEnv, fluenceEnv);
+    commandObj.logToStderr(
+      `Using ${color.yellow(fluenceEnv)} environment to sign contracts`,
+    );
+
     return fluenceEnv;
   }
 
@@ -76,7 +68,14 @@ export async function ensureChainNetwork(
     );
   }
 
-  logContractsEnv(fluenceEnv, customContractsEnv);
+  commandObj.logToStderr(
+    `Using ${color.yellow(
+      customContractsEnv,
+    )} blockchain environment to sign contracts for ${color.yellow(
+      fluenceEnv,
+    )} fluence environment`,
+  );
+
   return customContractsEnv;
 }
 
