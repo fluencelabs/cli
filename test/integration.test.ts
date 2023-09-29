@@ -494,14 +494,9 @@ describe("integration tests", () => {
       );
 
       fluenceConfig.deals[DEFAULT_WORKER_NAME].minWorkers = 3;
-
       await fluenceConfig.$commit();
 
-      log(`config commit done`);
-
-      log(`will deploy deal`);
-
-      const dealDeploy = await fluence({
+      await fluence({
         args: ["deal", "deploy"],
         flags: {
           "priv-key": PRIV_KEY,
@@ -509,8 +504,6 @@ describe("integration tests", () => {
         },
         cwd,
       });
-
-      log(`deal deployed:`, dealDeploy);
 
       let runDeployedServicesTimeoutReached = false;
       let maybeRunDeployedError: unknown = null;
@@ -628,6 +621,9 @@ describe("integration tests", () => {
           }),
         `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
       );
+
+      // check logs are working
+      assert((await fluence({ args: ["deal", "logs"], cwd })) !== "");
     },
   );
 });
