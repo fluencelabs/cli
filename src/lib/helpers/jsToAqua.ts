@@ -21,6 +21,7 @@ import { dirname, join, parse } from "path";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import camelCase from "lodash-es/camelCase.js";
+import capitalize from "lodash-es/capitalize.js";
 
 import { validationErrorToString, ajv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
@@ -28,7 +29,7 @@ import { AQUA_EXT, FS_OPTIONS } from "../const.js";
 import { input } from "../prompt.js";
 
 import { validateAquaTypeName, validateAquaName } from "./downloadFile.js";
-import { stringifyUnknown, capitalize } from "./utils.js";
+import { stringifyUnknown } from "./utils.js";
 
 /**
  * In js object, json or yaml when you want to represent optional value and still generate a type for it you can use this syntax:

@@ -25,6 +25,7 @@ import {
 // TODO: replace with dynamic import
 import { multiaddr } from "@multiformats/multiaddr";
 import { color } from "@oclif/color";
+import sample from "lodash-es/sample.js";
 
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
@@ -197,13 +198,6 @@ export function resolveRelays(
   });
 }
 
-function getRandomArrayItem<T>(ar: Array<T>): T {
-  const randomIndex = Math.round(Math.random() * (ar.length - 1));
-  const randomItem = ar[randomIndex];
-  assert(randomItem !== undefined);
-  return randomItem;
-}
-
 /**
  * @param maybeRelayName - name of the relay in format `networkName-index`
  * @returns undefined if name is not in format `networkName-index` or Node if it is
@@ -275,9 +269,14 @@ function getRandomRelayAddr(
   fluenceEnv: FluenceEnv,
   maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
 ): string {
-  return getRandomArrayItem(
-    resolveRelays(fluenceEnv, maybeFluenceConfigReadonly),
+  const r = sample(resolveRelays(fluenceEnv, maybeFluenceConfigReadonly));
+
+  assert(
+    r !== undefined,
+    "Unreachable. resolveRelays must have returned a non-empty array",
   );
+
+  return r;
 }
 
 export function resolveRelay(

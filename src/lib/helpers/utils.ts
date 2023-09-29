@@ -19,10 +19,6 @@ import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 import type { ConfigKeyPair } from "../configs/keyPair.js";
 
-export const capitalize = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
-
 export function commaSepStrToArr(commaSepStr: string) {
   return commaSepStr.split(",").map((s) => {
     return s.trim();
