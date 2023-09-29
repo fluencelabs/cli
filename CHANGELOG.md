@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.9.0...fluence-cli-v0.9.1) (2023-09-29)
+
+
+### Bug Fixes
+
+* fix deal logs ([#506](https://github.com/fluencelabs/cli/issues/506)) ([90a03e7](https://github.com/fluencelabs/cli/commit/90a03e714a49fa90fbf1ed528ab937c0f33e40bd))
+
 ## [0.9.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.9...fluence-cli-v0.9.0) (2023-09-28)
 
 
