@@ -225,23 +225,26 @@ ARGUMENTS
                 'deals' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>        Key pair name
-  --[no-]auto-match                 Disable automatic matching
-  --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --network=<network>               [default: kras] The network in which the transactions used by the command will be
-                                    carried out (kras, testnet, stage, local)
-  --no-build                        Don't build the project before running the command
-  --no-input                        Don't interactively ask for any input from the user
-  --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                     Print particle ids when running Fluence js-client
-  --priv-key=<private-key>          !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>            Relay for Fluence js-client to connect to
-  --tracing                         Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                    and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --[no-]auto-match                                Disable automatic matching
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-build                                       Don't build the project before running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -309,7 +312,7 @@ EXAMPLES
   $ fluence default env
 ```
 
-_See code: [dist/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.8.9/dist/commands/default/env.ts)_
+_See code: [dist/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/dist/commands/default/env.ts)_
 
 ## `fluence default peers [ENV]`
 
@@ -686,12 +689,13 @@ USAGE
   $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units <value>]
 
 FLAGS
-  --network=<network>       [default: kras] The network in which the transactions used by the command will be carried
-                            out (kras, testnet, stage, local)
-  --no-input                Don't interactively ask for any input from the user
-  --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --units=<number>          Number of available worker units on this Compute Peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>...                           Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --units=<number>                                 Number of available worker units on this Compute Peer
 
 DESCRIPTION
   Register specific nox instance as a Compute Peer
@@ -708,10 +712,10 @@ USAGE
   $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --network=<network>       [default: kras] The network in which the transactions used by the command will be carried
-                            out (kras, testnet, stage, local)
-  --no-input                Don't interactively ask for any input from the user
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
 
 DESCRIPTION
   Register in matching contract
