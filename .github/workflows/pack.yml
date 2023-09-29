@@ -8,7 +8,7 @@ on:
         type: string
         default: "main"
       tag:
-        descrtiption: "Release tag to upload artifacts to"
+        description: "Release tag to upload artifacts to"
         type: string
         default: "null"
       platform:

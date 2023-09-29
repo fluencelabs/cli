@@ -79,6 +79,14 @@ export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
     url: "https://rpc.ankr.com/polygon_mumbai",
     id: 80001,
   },
+  stage: {
+    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
+    chainId: 80001,
+  },
+  kras: {
+    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
+    chainId: 80001,
+  },
   local: {
     url: "http://127.0.0.1:8545",
     id: 31_337,

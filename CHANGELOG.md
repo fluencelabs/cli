@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.9.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.9.0...fluence-cli-v0.9.1) (2023-09-29)
+
+
+### Bug Fixes
+
+* fix deal logs ([#506](https://github.com/fluencelabs/cli/issues/506)) ([90a03e7](https://github.com/fluencelabs/cli/commit/90a03e714a49fa90fbf1ed528ab937c0f33e40bd))
+
+## [0.9.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.9...fluence-cli-v0.9.0) (2023-09-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* update deal to 0.2.16 ([#499](https://github.com/fluencelabs/cli/issues/499))
+
+### Bug Fixes
+
+* **template:** fix duplication in showSubnet ([#500](https://github.com/fluencelabs/cli/issues/500)) ([fda823b](https://github.com/fluencelabs/cli/commit/fda823b18aaa762af9db1c434acb527d2932e0cd))
+* update deal to 0.2.16 ([#499](https://github.com/fluencelabs/cli/issues/499)) ([5509f09](https://github.com/fluencelabs/cli/commit/5509f092a35e066d28bf6464e0f1e9d428501a6b))
+
 ## [0.8.9](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.8...fluence-cli-v0.8.9) (2023-09-26)
 
 
