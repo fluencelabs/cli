@@ -21,7 +21,7 @@ import { dirname, join, parse } from "path";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import camelCase from "lodash-es/camelCase.js";
-import capitalize from "lodash-es/capitalize.js";
+import upperFirst from "lodash-es/upperFirst.js";
 
 import { validationErrorToString, ajv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
@@ -95,7 +95,7 @@ function dedupeTypeDefs(typeDefs: string): string {
 }
 
 function toAquaType(s: string): string | Error {
-  const aquaType = capitalize(camelCase(s));
+  const aquaType = upperFirst(camelCase(s));
   const validity = validateAquaTypeName(aquaType);
 
   if (typeof validity === "string") {
