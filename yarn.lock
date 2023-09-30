@@ -2144,13 +2144,13 @@ __metadata:
   linkType: hard
 
 "@oclif/plugin-autocomplete@npm:^2.3.8":
-  version: 2.3.8
-  resolution: "@oclif/plugin-autocomplete@npm:2.3.8"
+  version: 2.3.9
+  resolution: "@oclif/plugin-autocomplete@npm:2.3.9"
   dependencies:
     "@oclif/core": ^2.15.0
     chalk: ^4.1.0
     debug: ^4.3.4
-  checksum: 5c15ae7ac2304b8ab09a6c13e9aca52435c7639648e3bb8f6fa5d38987b07e33b4aab850ce61242c50d41cf80510ac93643da0dde6807b629b43d1ea808fba68
+  checksum: d9a5cd040f9df8c3b028fff7764b47254bd2718928c66c3781b7502114cd9a7680bd54f522d5f268b783646ead205429efb7d804bb61e6e009cd475fd80b3881
   languageName: node
   linkType: hard
 
