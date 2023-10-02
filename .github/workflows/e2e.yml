@@ -53,6 +53,6 @@ jobs:
   registry:
     needs:
       - fluence-cli
-    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    uses: fluencelabs/registry/.github/workflows/tests.yml@cli-up
     with:
       flox-version: "${{ needs.fluence-cli.outputs.version }}"
