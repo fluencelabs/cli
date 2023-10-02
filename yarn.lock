@@ -3005,11 +3005,11 @@ __metadata:
   linkType: hard
 
 "@types/iarna__toml@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@types/iarna__toml@npm:2.0.2"
+  version: 2.0.3
+  resolution: "@types/iarna__toml@npm:2.0.3"
   dependencies:
     "@types/node": "*"
-  checksum: 43bb44e4e241f16cf6b4352328e4221dbc77893ed1c854ccc62f028a2ad7565a4499d5cdc8a98ef2456c3bf392b40191e2f796ca89abfe8d1e1444a7b9b983a6
+  checksum: cfb86fadb2a7fb38e1b44836686b4b0c292c08626e22f18be2bfc9d2918ebdf0941b04a1a614af2a1fa6764fb901366671ffa236045770ca38b8ce09f111f359
   languageName: node
   linkType: hard
 
