@@ -582,6 +582,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fastify/busboy@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@fastify/busboy@npm:2.0.0"
+  checksum: 41879937ce1dee6421ef9cd4da53239830617e1f0bb7a0e843940772cd72827205d05e518af6adabe6e1ea19301285fff432b9d11bad01a531e698bea95c781b
+  languageName: node
+  linkType: hard
+
 "@fluencelabs/air-beautify-wasm@npm:0.3.4":
   version: 0.3.4
   resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.4"
@@ -623,27 +630,27 @@ __metadata:
     "@fluencelabs/installation-spell": 0.5.23
     "@fluencelabs/js-client": 0.1.7
     "@iarna/toml": ^2.2.5
-    "@mswjs/interceptors": ^0.25.4
+    "@mswjs/interceptors": ^0.25.6
     "@multiformats/multiaddr": ^12.1.7
-    "@oclif/color": ^1.0.10
+    "@oclif/color": ^1.0.12
     "@oclif/core": ^2.15.0
-    "@oclif/plugin-autocomplete": ^2.3.8
-    "@oclif/plugin-help": ^5.2.19
-    "@oclif/plugin-not-found": ^2.4.1
-    "@oclif/plugin-update": ^3.2.3
+    "@oclif/plugin-autocomplete": ^2.3.9
+    "@oclif/plugin-help": ^5.2.20
+    "@oclif/plugin-not-found": ^2.4.2
+    "@oclif/plugin-update": ^3.2.4
     "@total-typescript/ts-reset": ^0.5.1
     "@tsconfig/node18-strictest-esm": ^1.0.1
     "@types/debug": ^4.1.9
     "@types/decompress": ^4.2.5
-    "@types/iarna__toml": ^2.0.2
+    "@types/iarna__toml": ^2.0.3
     "@types/inquirer": ^9.0.3
     "@types/jest": ^29.5.5
     "@types/lodash-es": ^4.17.9
-    "@types/node": ^18.17.19
+    "@types/node": ^18.18.1
     "@types/platform": ^1.3.4
-    "@types/semver": ^7.5.2
-    "@typescript-eslint/eslint-plugin": ^6.7.2
-    "@typescript-eslint/parser": ^6.7.2
+    "@types/semver": ^7.5.3
+    "@typescript-eslint/eslint-plugin": ^6.7.3
+    "@typescript-eslint/parser": ^6.7.3
     "@walletconnect/universal-provider": ^2.4.7
     ajv: ^8.12.0
     chokidar: ^3.5.3
@@ -671,7 +678,7 @@ __metadata:
     node_modules-path: ^2.0.7
     npm: ^10.1.0
     npm-check-updates: ^16.14.4
-    oclif: ^3.17.1
+    oclif: ^3.17.2
     platform: ^1.3.6
     prettier: ^3.0.3
     semver: ^7.5.4
@@ -682,7 +689,7 @@ __metadata:
     ts-unused-exports: ^10.0.1
     tslib: ^2.6.2
     typescript: ^5.2.2
-    undici: ^5.25.2
+    undici: ^5.25.3
     yaml: ^2.3.2
     yaml-diff-patch: ^2.0.0
   bin:
@@ -1464,9 +1471,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mswjs/interceptors@npm:^0.25.4":
-  version: 0.25.4
-  resolution: "@mswjs/interceptors@npm:0.25.4"
+"@mswjs/interceptors@npm:^0.25.6":
+  version: 0.25.6
+  resolution: "@mswjs/interceptors@npm:0.25.6"
   dependencies:
     "@open-draft/deferred-promise": ^2.2.0
     "@open-draft/logger": ^0.3.0
@@ -1474,7 +1481,7 @@ __metadata:
     is-node-process: ^1.2.0
     outvariant: ^1.2.1
     strict-event-emitter: ^0.5.1
-  checksum: d4534bf1dde3eb8294c3fb70dd2d4471965167a84c11b50b7eec5f2d909c110b1776d53992de5fda047a89f3f651a72f30d01418dd4580aab90a6e878ae5b857
+  checksum: cbcffbb32fbb5b6004a065dd6601e628b6cc95abc388f7bab2df1197203941eb29abc1d9bd653925ca7654e988e7249e1916be708793d7e191c5becb2cefa416
   languageName: node
   linkType: hard
 
@@ -2069,6 +2076,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/color@npm:^1.0.12":
+  version: 1.0.12
+  resolution: "@oclif/color@npm:1.0.12"
+  dependencies:
+    ansi-styles: ^4.2.1
+    chalk: ^4.1.0
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    tslib: ^2
+  checksum: 380681bb1fe6e73450e9089278841647db774cbe002bee1ec8eb4f1ba554a2510ecbc778b25f6c92a8e94df3f7d5bde7d47d342579f5b3e7b9ac81dfe5ed2f06
+  languageName: node
+  linkType: hard
+
 "@oclif/core@npm:^2.11.4, @oclif/core@npm:^2.11.7, @oclif/core@npm:^2.11.8":
   version: 2.11.10
   resolution: "@oclif/core@npm:2.11.10"
@@ -2143,14 +2163,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-autocomplete@npm:^2.3.8":
-  version: 2.3.8
-  resolution: "@oclif/plugin-autocomplete@npm:2.3.8"
+"@oclif/plugin-autocomplete@npm:^2.3.9":
+  version: 2.3.9
+  resolution: "@oclif/plugin-autocomplete@npm:2.3.9"
   dependencies:
     "@oclif/core": ^2.15.0
     chalk: ^4.1.0
     debug: ^4.3.4
-  checksum: 5c15ae7ac2304b8ab09a6c13e9aca52435c7639648e3bb8f6fa5d38987b07e33b4aab850ce61242c50d41cf80510ac93643da0dde6807b629b43d1ea808fba68
+  checksum: d9a5cd040f9df8c3b028fff7764b47254bd2718928c66c3781b7502114cd9a7680bd54f522d5f268b783646ead205429efb7d804bb61e6e009cd475fd80b3881
   languageName: node
   linkType: hard
 
@@ -2163,12 +2183,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-help@npm:^5.2.19":
-  version: 5.2.19
-  resolution: "@oclif/plugin-help@npm:5.2.19"
+"@oclif/plugin-help@npm:^5.2.20":
+  version: 5.2.20
+  resolution: "@oclif/plugin-help@npm:5.2.20"
   dependencies:
     "@oclif/core": ^2.15.0
-  checksum: 4f02006f303766e57351b35e96bd3c05e7b3957949379bb120bec037816c895066d162bc25deafeaf3a9c11ec38525f309a082d3c502d4d7afd843aaf1d693af
+  checksum: 4e98e9b81f26d63dea15c82a367ee60b36f3b62261015282090b90b94dec9a53cd4a856c7b10767bba5a7d2582c1ffb2b72ec00bd62ec35f9359bcdc87dcd674
   languageName: node
   linkType: hard
 
@@ -2183,20 +2203,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-not-found@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "@oclif/plugin-not-found@npm:2.4.1"
+"@oclif/plugin-not-found@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@oclif/plugin-not-found@npm:2.4.2"
   dependencies:
     "@oclif/core": ^2.15.0
     chalk: ^4
     fast-levenshtein: ^3.0.0
-  checksum: 7be4e98aeec1cb5127c3bc3c9c89747374c128e677f5457b53972d3abac579b385efdc10fed610345ef792ba9506ac98fa2fb706627e6728a197da276797df1d
+  checksum: a4a2da5fb385c14e56ebeb655e094d9ff2f0c74a146fec99e35c2f16a7bbffd41538638be000e9a5c008e3bfc4e6ad2617d845ea5a25651082ad7c0c3dfe6026
   languageName: node
   linkType: hard
 
-"@oclif/plugin-update@npm:^3.2.3":
-  version: 3.2.3
-  resolution: "@oclif/plugin-update@npm:3.2.3"
+"@oclif/plugin-update@npm:^3.2.4":
+  version: 3.2.4
+  resolution: "@oclif/plugin-update@npm:3.2.4"
   dependencies:
     "@oclif/core": ^2.11.8
     chalk: ^4
@@ -2210,7 +2230,7 @@ __metadata:
     log-chopper: ^1.0.2
     semver: ^7.5.4
     tar-fs: ^2.1.1
-  checksum: 8b69b1011126c5d700fbb2fc2ecede320193e10d49eca73af5b4a02cdeda44fa12407b187940b0037c2d385d4e47d252fd68d3ffe01de0999168df74f1dd15e6
+  checksum: 1c98efe1180e5ff6ad7e343b6bdeed9a8f530924c46721746d2994151c4928f79377b8f41cda53f52a9b8272c1426ecfe8e2e45b993a0cb368b4b5fb4a008205
   languageName: node
   linkType: hard
 
@@ -3004,12 +3024,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/iarna__toml@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@types/iarna__toml@npm:2.0.2"
+"@types/iarna__toml@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@types/iarna__toml@npm:2.0.3"
   dependencies:
     "@types/node": "*"
-  checksum: 43bb44e4e241f16cf6b4352328e4221dbc77893ed1c854ccc62f028a2ad7565a4499d5cdc8a98ef2456c3bf392b40191e2f796ca89abfe8d1e1444a7b9b983a6
+  checksum: cfb86fadb2a7fb38e1b44836686b4b0c292c08626e22f18be2bfc9d2918ebdf0941b04a1a614af2a1fa6764fb901366671ffa236045770ca38b8ce09f111f359
   languageName: node
   linkType: hard
 
@@ -3132,10 +3152,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.0.0, @types/node@npm:^18.17.19":
+"@types/node@npm:^18.0.0":
   version: 18.18.0
   resolution: "@types/node@npm:18.18.0"
   checksum: 61bcffa28eb713e7a4c66fd369df603369c3f834a783faeced95fe3e78903faa25f1a704d49e054f41d71b7915eeb066d10a37cc699421fcf5dd267f96ad5808
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^18.18.1":
+  version: 18.18.1
+  resolution: "@types/node@npm:18.18.1"
+  checksum: 079085afc8615b91727900628410a2077f7fff51c5c3e20c4ab2d9caae4010b035aac13dae1221155e9d6ca46084aebf68121642140527b4009eee17b716d339
   languageName: node
   linkType: hard
 
@@ -3183,10 +3210,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/semver@npm:^7.5.2":
-  version: 7.5.2
-  resolution: "@types/semver@npm:7.5.2"
-  checksum: 743aa8a2b58e20b329c19bd2459152cb049d12fafab7279b90ac11e0f268c97efbcb606ea0c681cca03f79015381b40d9b1244349b354270bec3f939ed49f6e9
+"@types/semver@npm:^7.5.3":
+  version: 7.5.3
+  resolution: "@types/semver@npm:7.5.3"
+  checksum: 349fdd1ab6c213bac5c991bac766bd07b8b12e63762462bb058740dcd2eb09c8193d068bb226f134661275f2022976214c0e727a4e5eb83ec1b131127c980d3e
   languageName: node
   linkType: hard
 
@@ -3241,7 +3268,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^6.7.2":
+"@typescript-eslint/eslint-plugin@npm:^6.7.3":
   version: 6.7.3
   resolution: "@typescript-eslint/eslint-plugin@npm:6.7.3"
   dependencies:
@@ -3266,7 +3293,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^6.7.2":
+"@typescript-eslint/parser@npm:^6.7.3":
   version: 6.7.3
   resolution: "@typescript-eslint/parser@npm:6.7.3"
   dependencies:
@@ -11455,9 +11482,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.17.1":
-  version: 3.17.1
-  resolution: "oclif@npm:3.17.1"
+"oclif@npm:^3.17.2":
+  version: 3.17.2
+  resolution: "oclif@npm:3.17.2"
   dependencies:
     "@oclif/core": ^2.11.4
     "@oclif/plugin-help": ^5.2.14
@@ -11480,7 +11507,7 @@ __metadata:
     yeoman-generator: ^5.8.0
   bin:
     oclif: bin/run
-  checksum: 753e7e66078364cbac52f53cea94817707b899e1046e8ab71813dd89bf9889e3dc6874bfda89a9defc89179d5717cb48e9ddc4ec3d6774b4dda6606da5a216ab
+  checksum: 3da58e84fc8127893ad1b5b60d72bf4c9cbed5b78748d3d68c8a7ead4c8da5a548507d7c1bdb1a10a041f2938018ef15fdbf683629f8637fadf499b99f05a555
   languageName: node
   linkType: hard
 
@@ -14546,12 +14573,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.25.2":
-  version: 5.25.2
-  resolution: "undici@npm:5.25.2"
+"undici@npm:^5.25.3":
+  version: 5.25.3
+  resolution: "undici@npm:5.25.3"
   dependencies:
-    busboy: ^1.6.0
-  checksum: 1177a9c4fc9a1ddb765508d0f69ae61c166559badce8d797aaa92beef70ec5ac8fdc420b643f5d8d40b9a37891ba5536e2070d86a9c54a128aec67ad0c862d06
+    "@fastify/busboy": ^2.0.0
+  checksum: 65b814b7d8b06dab2d41c250d123663fe94edb78cf1a891cf3476569ea66dc425c7d4ba52b91d6f8ed6eba24613dd28e4a5070c372063532c3b997cd343ccc96
   languageName: node
   linkType: hard
 
