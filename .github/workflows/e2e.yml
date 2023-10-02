@@ -56,4 +56,3 @@ jobs:
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
     with:
       flox-version: "${{ needs.fluence-cli.outputs.version }}"
-      ref: cli-up
