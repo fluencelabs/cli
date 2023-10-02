@@ -719,7 +719,7 @@ DESCRIPTION
   Init provider config. Creates a config file in the current directory.
 ```
 
-_See code: [dist/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/provider/init.ts)_
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/provider/init.ts)_
 
 ## `fluence provider register`
 
