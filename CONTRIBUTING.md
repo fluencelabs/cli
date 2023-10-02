@@ -14,7 +14,7 @@ When you contribute, you have to be aware that your contribution is covered by *
 
 ## Guidelines for contributors
 
--   CLI uses `yarn` as a package manager. To install yarn you need Node.js 18 installed and then run `corepack enable`. Then you do `yarn install` to install all the dependencies and you need to also do `yarn before-build` before moving any further
+-   CLI uses `yarn` as a package manager. To install yarn you need Node.js 18 installed and then run `corepack enable`. Then you run `yarn` to install all the dependencies and you need to also run `yarn before-build` before moving any further
 -   **First** commit in your PR or PR title must use [Conventional Commits](https://www.conventionalcommits.org/) (optionally end your commit message with: `[fixes DXJ-000 DXJ-001]`. Where `DXJ-000` and `DXJ-001` are ids of the Linear issues that you were working on)
 -   To use Fluence CLI in the development mode, run: `./bin/dev.js` (types are not checked in development mode because it's faster and more convenient to work with. Use typechecking provided by your IDE during development)
 -   To use Fluence CLI in the production mode, run `yarn build` first, then run: `./bin/run.js`. If you want to make sure you are running the actual package the users will use, do `yarn pack-*` command for your platform and architecture (this is used for tests as well)
@@ -26,5 +26,5 @@ When you contribute, you have to be aware that your contribution is covered by *
 -   To run tests locally you need to do the following:
     1. [Docker](https://docs.docker.com/get-docker/)
     1. run `docker compose up -d`
-    1. run `FLUENCE_ENV=local yarn test-linux-x64` or `FLUENCE_ENV=local yarn test-darwin-arm64` which will lint and check the code, build it, package it, prepare the tests and run them
+    1. run e.g. for linux: `DEBUG=fluence:* yarn test-linux-x64` which will lint and check the code, build it, package it, prepare the tests and run them
 -   for your convenience a dir `.f` is added to gitignore so you can generate projects in this dir for testing and development purposes

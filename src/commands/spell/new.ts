@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "assert";
 import { mkdir, writeFile } from "fs/promises";
 import { join, relative } from "path";
 
@@ -89,7 +88,7 @@ export default class New extends BaseCommand<typeof New> {
         isInteractive &&
         fluenceConfig.workers !== undefined &&
         DEFAULT_WORKER_NAME in fluenceConfig.workers &&
-        !(fluenceConfig.workers[DEFAULT_WORKER_NAME]?.spells ?? []).includes(
+        !(fluenceConfig.workers[DEFAULT_WORKER_NAME].spells ?? []).includes(
           spellName,
         ) &&
         (await confirm({
@@ -103,7 +102,6 @@ export default class New extends BaseCommand<typeof New> {
     }
 
     const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
-    assert(defaultWorker !== undefined);
 
     fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
       ...defaultWorker,

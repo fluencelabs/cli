@@ -61,6 +61,7 @@ import {
   type CustomTypes,
 } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
+import { commaSepStrToArr } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
 import {
@@ -69,12 +70,6 @@ import {
   projectRootDir,
 } from "./paths.js";
 import { checkboxes } from "./prompt.js";
-
-export const parseWorkers = (workerNamesString: string) => {
-  return workerNamesString.split(",").map((s) => {
-    return s.trim();
-  });
-};
 
 const handlePreviouslyDeployedWorkers = async (
   maybeDeployedHostsOrDeals:
@@ -174,7 +169,7 @@ export const prepareForDeploy = async ({
   const workersToDeploy =
     workerNamesString === undefined
       ? workerNamesSet
-      : parseWorkers(workerNamesString);
+      : commaSepStrToArr(workerNamesString);
 
   if (workersToDeploy.length === 0) {
     return commandObj.error(
@@ -498,9 +493,10 @@ export const prepareForDeploy = async ({
       return workersToDeployConfirmed.includes(workerName);
     })
     .map(([workerName, hostsOrDeals]) => {
-      const peerIds = "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
+      const peerIdsOrNamedNodes =
+        "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
 
-      if (hosts && peerIds.length === 0) {
+      if (hosts && peerIdsOrNamedNodes.length === 0) {
         commandObj.error(
           `You must have at least one peerId listed in ${color.yellow(
             "peerIds",
@@ -598,8 +594,8 @@ export const prepareForDeploy = async ({
 
       return {
         name: workerName,
-        hosts: peerIds.map((peerId) => {
-          return resolvePeerId(peerId);
+        hosts: peerIdsOrNamedNodes.map((peerIdOrNamedNode) => {
+          return resolvePeerId(peerIdOrNamedNode, fluenceConfig);
         }),
         config: {
           services,

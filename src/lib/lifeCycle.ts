@@ -27,7 +27,12 @@ import {
   setCommandObjAndIsInteractive,
   type CommandObj,
 } from "./commandObj.js";
-import { setUserConfig, userConfig } from "./configs/globalConfigs.js";
+import {
+  setEnvConfig,
+  setUserConfig,
+  userConfig,
+} from "./configs/globalConfigs.js";
+import { initEnvConfig, initNewEnvConfig } from "./configs/project/env.js";
 import {
   type FluenceConfig,
   initFluenceConfig,
@@ -51,7 +56,7 @@ import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
-import { stringifyUnknown } from "./helpers/jsonStringify.js";
+import { stringifyUnknown } from "./helpers/utils.js";
 import { getLatestVersionOfNPMDependency } from "./npm.js";
 import {
   projectRootDir,
@@ -156,6 +161,16 @@ export async function initCli<
 
   await initCountly({ maybeFluenceConfig });
   await ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
+
+  if (requiresFluenceProject) {
+    setEnvConfig(await initNewEnvConfig());
+  } else {
+    const envConfig = await initEnvConfig();
+
+    if (envConfig !== null) {
+      setEnvConfig(envConfig);
+    }
+  }
 
   return {
     args,

@@ -46,14 +46,6 @@ type JSONModuleConf = {
 
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
-): JSONModuleConf;
-export function moduleToJSONModuleConfig(
-  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
-  isOld: true,
-): JSONModuleConf;
-
-export function moduleToJSONModuleConfig(
-  moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
 ): JSONModuleConf {
   const {
     name,
@@ -96,4 +88,3 @@ export function moduleToJSONModuleConfig(
 
   return jsonModuleConfig;
 }
-/* eslint-enable camelcase */

@@ -69,13 +69,15 @@ const moduleSchemaForService: JSONSchemaType<ServiceModuleV0> = {
 
 export const FACADE_MODULE_NAME = "facade";
 
+type Modules = { [FACADE_MODULE_NAME]: ServiceModuleV0 } & Record<
+  string,
+  ServiceModuleV0
+>;
+
 type ConfigV0 = {
   version: 0;
   name: string;
-  modules: { [FACADE_MODULE_NAME]: ServiceModuleV0 } & Record<
-    string,
-    ServiceModuleV0
-  >;
+  modules: Modules;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -103,6 +105,12 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   },
   required: ["version", "name", "modules"],
 };
+
+export function isValidServiceModules(
+  arg: Record<string, ServiceModuleV0>,
+): arg is Modules {
+  return FACADE_MODULE_NAME in arg;
+}
 
 const migrations: Migrations<Config> = [];
 

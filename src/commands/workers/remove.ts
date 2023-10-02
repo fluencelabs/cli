@@ -30,7 +30,7 @@ import {
   TRACING_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { parseWorkers } from "../../lib/deployWorkers.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
@@ -79,7 +79,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const workersToRemove =
       args["WORKER-NAMES"] === undefined
         ? Object.keys(workersConfig.hosts)
-        : parseWorkers(args["WORKER-NAMES"]);
+        : commaSepStrToArr(args["WORKER-NAMES"]);
 
     const removeArg: RemoveArgWorkers = {
       workers: Object.entries(workersConfig.hosts)

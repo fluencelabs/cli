@@ -24,7 +24,7 @@ import {
   USER_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
-import { generateKeyPair } from "../../helpers/generateKeyPair.js";
+import { generateKeyPair } from "../../helpers/utils.js";
 import {
   validateHasDefault,
   validateBatch,

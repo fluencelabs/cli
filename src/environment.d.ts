@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { FluenceEnv } from "../src/lib/multiaddres.js";
 import {
   DEBUG_COUNTLY,
   FLUENCE_ENV,
   FLUENCE_USER_DIR,
 } from "../src/lib/setupEnvironment.js";
 
+import { ContractsENV } from "./lib/const.js";
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      [FLUENCE_ENV]: FluenceEnv;
+      [FLUENCE_ENV]: ContractsENV;
       [DEBUG_COUNTLY]: "true" | "false";
       [FLUENCE_USER_DIR]?: string;
     }

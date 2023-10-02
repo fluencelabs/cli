@@ -35,18 +35,18 @@ import {
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
-import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
-import { localPeerIds, local } from "../src/lib/localNodes.js";
+import { jsonStringify } from "../src/lib/helpers/utils.js";
+import { localPeerIds, local } from "../src/lib/multiaddres.js";
 import { hasKey } from "../src/lib/typeHelpers.js";
 
 import {
   fluence,
   init,
   maybeConcurrentTest,
-  multiaddrs,
   sortPeers,
   assertHasWorkerAndAnswer,
   assertHasPeer,
+  fluenceEnv,
 } from "./helpers.js";
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
@@ -116,17 +116,10 @@ describe("integration tests", () => {
   });
 
   maybeConcurrentTest("should work without project", async () => {
-    const relay = multiaddrs[0]?.multiaddr;
-
-    assert(
-      typeof relay === "string",
-      "multiaddrs is expected to be a non empty array",
-    );
-
     const result = await fluence({
       args: ["run"],
       flags: {
-        relay,
+        env: fluenceEnv,
         f: "identify()",
         i: join("test", "aqua", "smoke.aqua"),
         quiet: true,
@@ -271,7 +264,11 @@ describe("integration tests", () => {
         runDeployedServicesTimeoutReached = true;
       }, RUN_DEPLOYED_SERVICES_TIMEOUT);
 
-      while (!runDeployedServicesTimeoutReached) {
+      let isAttemptingToRunDeployedServices = true;
+
+      while (isAttemptingToRunDeployedServices) {
+        isAttemptingToRunDeployedServices = !runDeployedServicesTimeoutReached;
+
         try {
           const result = await fluence({
             args: ["run"],
@@ -306,10 +303,9 @@ describe("integration tests", () => {
           // running the deployed services is expected to return a result from each of the localPeers we deployed to
           expect(arrayOfResults).toEqual(expected);
           clearTimeout(runDeployedServicesTimeout);
-          break;
+          isAttemptingToRunDeployedServices = false;
         } catch (e) {
           maybeRunDeployedError = e;
-          continue;
         }
       }
 
@@ -403,10 +399,7 @@ describe("integration tests", () => {
       try {
         const registered = await fluence({
           args: ["provider", "register"],
-          flags: {
-            network: "local",
-            "priv-key": PRIV_KEY,
-          },
+          flags: { "priv-key": PRIV_KEY },
           cwd,
         });
 
@@ -423,11 +416,7 @@ describe("integration tests", () => {
 
       const addPeer = await fluence({
         args: ["provider", "add-peer", ...peerIdFlags],
-        flags: {
-          network: "local",
-          "priv-key": PRIV_KEY,
-          units: 1,
-        },
+        flags: { "priv-key": PRIV_KEY, units: 1 },
         cwd,
       });
 
@@ -469,9 +458,6 @@ describe("integration tests", () => {
         `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`,
       );
 
-      const relay = multiaddrs[0]?.multiaddr;
-      fluenceConfig.relays = [relay!];
-
       fluenceConfig.spells = {
         newSpell: {
           get: pathToNewSpell,
@@ -498,10 +484,7 @@ describe("integration tests", () => {
 
       await fluence({
         args: ["deal", "deploy"],
-        flags: {
-          "priv-key": PRIV_KEY,
-          network: "local",
-        },
+        flags: { "priv-key": PRIV_KEY },
         cwd,
       });
 
@@ -512,7 +495,11 @@ describe("integration tests", () => {
         runDeployedServicesTimeoutReached = true;
       }, RUN_DEPLOYED_SERVICES_TIMEOUT);
 
-      while (!runDeployedServicesTimeoutReached) {
+      let isAttemptingToRunDeployedServices = true;
+
+      while (isAttemptingToRunDeployedServices) {
+        isAttemptingToRunDeployedServices = !runDeployedServicesTimeoutReached;
+
         try {
           const result = await fluence({
             args: ["run"],
@@ -573,10 +560,9 @@ describe("integration tests", () => {
           expect(res).toEqual(expected);
 
           clearTimeout(runDeployedServicesTimeout);
-          break;
+          isAttemptingToRunDeployedServices = false;
         } catch (e) {
           maybeRunDeployedError = e;
-          continue;
         }
       }
 

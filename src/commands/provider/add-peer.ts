@@ -19,7 +19,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import {
@@ -35,7 +35,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
-    ...NETWORK_FLAG,
+    ...ENV_FLAG,
     "peer-id": Flags.string({
       description:
         "Peer id of the nox instance that you want to register as a Compute Peer",
@@ -54,10 +54,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       await this.parse(AddPeer),
     );
 
-    const network = await ensureChainNetwork({
-      maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-    });
+    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
 
     const workersCount =
       flags.units ?? (await input({ message: "Enter workers count" }));
@@ -77,7 +74,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       const signer = await getSigner(network, flags["priv-key"]);
       // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       const dealClient = new DealClient(signer, network);
       const globalContracts = dealClient.getGlobalContracts();
       const matcher = await globalContracts.getMatcher();
@@ -93,7 +90,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       promptConfirmTx(flags["priv-key"]);
       // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       await waitTx(approveTx);
 
       const multihash = digest.decode(base58btc.decode("z" + peerId));
@@ -102,7 +99,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       promptConfirmTx(flags["priv-key"]);
       // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       await waitTx(tx);
       const free = await matcher.getFreeWorkersSolts(bytes);
 

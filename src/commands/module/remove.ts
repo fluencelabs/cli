@@ -22,8 +22,8 @@ import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import { isValidServiceModules } from "../../lib/configs/project/service.js";
 import {
-  FACADE_MODULE_NAME,
   ensureServiceConfig,
   type ServiceConfigReadonly,
 } from "../../lib/configs/project/service.js";
@@ -35,6 +35,7 @@ import {
   getModuleAbsolutePath,
   isUrl,
 } from "../../lib/helpers/downloadFile.js";
+import { removeProperties } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { hasKey } from "../../lib/typeHelpers.js";
@@ -102,7 +103,16 @@ export default class Remove extends BaseCommand<typeof Remove> {
         )}, path to a module or url to .tar.gz archive`,
       }));
 
-    if (nameOrPathOrUrl === FACADE_MODULE_NAME) {
+    const moduleNameToRemove = await getModuleNameToRemove(
+      nameOrPathOrUrl,
+      serviceConfig,
+    );
+
+    const newModules = removeProperties(serviceConfig.modules, ([name]) => {
+      return name !== moduleNameToRemove;
+    });
+
+    if (!isValidServiceModules(newModules)) {
       return commandObj.error(
         `Each service must have a facade module, if you want to change it either override it in ${color.yellow(
           FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -110,12 +120,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
       );
     }
 
-    const moduleNameToRemove = await getModuleNameToRemove(
-      nameOrPathOrUrl,
-      serviceConfig,
-    );
-
-    delete serviceConfig.modules[moduleNameToRemove];
+    serviceConfig.modules = newModules;
     await serviceConfig.$commit();
 
     commandObj.log(

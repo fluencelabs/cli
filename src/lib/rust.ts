@@ -32,7 +32,6 @@ import {
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
-import { jsonStringify } from "./helpers/jsonStringify.js";
 import {
   handleInstallation,
   resolveDependencies,
@@ -42,6 +41,7 @@ import {
   updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+import { jsonStringify } from "./helpers/utils.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";

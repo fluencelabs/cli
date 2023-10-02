@@ -58,7 +58,7 @@ export const dealCreate = async ({
   const { DealClient } = await import("@fluencelabs/deal-aurora");
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   const dealClient = new DealClient(signer, chainNetwork);
   const globalContracts = dealClient.getGlobalContracts();
 
@@ -80,7 +80,7 @@ export const dealCreate = async ({
 
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   const res = await waitTx(tx);
 
   const eventTopic = factory.interface.getEvent(EVENT_TOPIC_FRAGMENT);
@@ -162,7 +162,7 @@ export const dealUpdate = async ({
   const { DealClient } = await import("@fluencelabs/deal-aurora");
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   const dealClient = new DealClient(signer, network);
   const deal = dealClient.getDeal(dealAddress);
 
@@ -179,7 +179,7 @@ export const dealUpdate = async ({
 
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   await waitTx(tx);
 
   return tx;
@@ -200,7 +200,7 @@ export async function match(
 
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   const dealClient = new DealClient(signer, network);
   const globalContracts = dealClient.getGlobalContracts();
   const matcher: Matcher = await globalContracts.getMatcher();
@@ -208,7 +208,7 @@ export async function match(
   promptConfirmTx(privKey);
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   const res = await waitTx(tx);
   const workersInterface = WorkersModule__factory.createInterface();
   const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);

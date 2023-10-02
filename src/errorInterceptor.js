@@ -23,7 +23,7 @@ import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
-import { jsonStringify } from "./lib/helpers/jsonStringify.js";
+import { jsonStringify } from "./lib/helpers/utils.js";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -156,7 +156,7 @@ export const createErrorPromise = async (error) => {
 };
 
 /**
- * @type {(value?: unknown) => void}
+ * @type {((value?: unknown) => void) | undefined}
  */
 let resolveSessionEndPromise;
 export const sessionEndPromise = new Promise((resolve) => {

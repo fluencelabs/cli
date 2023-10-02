@@ -29,7 +29,7 @@ import {
   ensureVSCodeSettingsJsonPath,
 } from "../paths.js";
 
-import { jsonStringify } from "./jsonStringify.js";
+import { jsonStringify } from "./utils.js";
 
 type GetAquaImportsArg = {
   maybeFluenceConfig: FluenceConfig | null;

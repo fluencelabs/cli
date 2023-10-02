@@ -15,18 +15,14 @@
  */
 
 import { color } from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 import type {
   Flag,
   OutputFlags,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
-import { aquaComment } from "./helpers/comment.js";
-import { jsonStringify } from "./helpers/jsonStringify.js";
-import { local } from "./localNodes.js";
-import type { FluenceEnv } from "./multiaddres.js";
-import { FLUENCE_ENV } from "./setupEnvironment.js";
+import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
 export const CLI_NAME = "fluence";
@@ -36,8 +32,6 @@ export const PACKAGE_NAME = "@fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
 
-export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
-export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
@@ -48,13 +42,9 @@ export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
-export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[0];
-
-export const isChainNetwork = getIsStringUnion(CONTRACTS_ENV);
-
 export type ChainConfig = {
-  ethereumNodeUrl: string;
-  chainId: number;
+  url: string;
+  id: number;
 };
 
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
@@ -65,28 +55,49 @@ export const WC_METADATA = {
   url: GITHUB_REPO_NAME,
   icons: [],
 };
+
+export const FLUENCE_ENVS = [
+  "kras",
+  "stage",
+  "testnet",
+  "local",
+  "custom",
+] as const;
+export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
+export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
+
 export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
+  kras: {
+    url: "https://rpc.ankr.com/polygon_mumbai",
+    id: 80001,
+  },
   testnet: {
-    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
-    chainId: 80001,
+    url: "https://rpc.ankr.com/polygon_mumbai",
+    id: 80001,
   },
   stage: {
-    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
-    chainId: 80001,
-  },
-  kras: {
-    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
-    chainId: 80001,
+    url: "https://rpc.ankr.com/polygon_mumbai",
+    id: 80001,
   },
   local: {
-    ethereumNodeUrl: "http://127.0.0.1:8545",
-    chainId: 31_337,
+    url: "http://127.0.0.1:8545",
+    id: 31_337,
   },
 };
-export const DEAL_RPC_CONFIG = {
-  31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
-  80001: DEAL_CONFIG["testnet"].ethereumNodeUrl,
-};
+
+export const DEAL_RPC_CONFIG = Object.fromEntries(
+  Object.values(DEAL_CONFIG).map(({ id, url }) => {
+    return [id, url];
+  }),
+);
+
+// @ts-expect-error we know that keys are ContractsEnv, not just string
+export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
+  Object.fromEntries(
+    Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
+      return [name, id];
+    }),
+  );
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
@@ -122,6 +133,7 @@ export const GLOBAL_CONFIG_FILE_NAME = `config`;
 export const MODULE_CONFIG_FILE_NAME = `module`;
 export const SERVICE_CONFIG_FILE_NAME = `service`;
 export const SPELL_CONFIG_FILE_NAME = `spell`;
+export const ENV_CONFIG_FILE_NAME = `env`;
 
 export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const WORKERS_CONFIG_FULL_FILE_NAME = `${WORKERS_CONFIG_FILE_NAME}.${YAML_EXT}`;
@@ -131,6 +143,7 @@ export const GLOBAL_CONFIG_FULL_FILE_NAME = `${GLOBAL_CONFIG_FILE_NAME}.${YAML_E
 export const MODULE_CONFIG_FULL_FILE_NAME = `${MODULE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const SERVICE_CONFIG_FULL_FILE_NAME = `${SERVICE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const ENV_CONFIG_FULL_FILE_NAME = `${ENV_CONFIG_FILE_NAME}.${YAML_EXT}`;
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
@@ -184,15 +197,19 @@ export const NO_INPUT_FLAG = {
   }),
 } as const;
 
-export const NETWORK_FLAG_NAME = "network";
-export const NETWORK_FLAG = {
-  [NETWORK_FLAG_NAME]: Flags.string({
-    description: `The network in which the transactions used by the command will be carried out (${CONTRACTS_ENV.join(
-      ", ",
-    )})`,
-    helpValue: "<network>",
-    default: DEFAULT_CHAIN_NETWORK,
-  }),
+const envFlagAndArg = {
+  description: "Fluence Environment to use when running the command",
+  helpValue: `<${FLUENCE_ENVS.join(" | ")}>`,
+};
+
+export const ENV_FLAG_NAME = "env";
+export const ENV_FLAG = {
+  [ENV_FLAG_NAME]: Flags.string(envFlagAndArg),
+};
+
+export const ENV_ARG_NAME = "ENV";
+export const ENV_ARG = {
+  [ENV_ARG_NAME]: Args.string(envFlagAndArg),
 };
 
 export const GLOBAL_FLAG_NAME = "global";
@@ -293,6 +310,7 @@ export const FLUENCE_CLIENT_FLAGS = {
     default: false,
     description: "Print particle ids when running Fluence js-client",
   }),
+  ...ENV_FLAG,
 } as const;
 
 export type FluenceClientFlags = FromFlagsDef<typeof FLUENCE_CLIENT_FLAGS>;
@@ -344,6 +362,7 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
 /${DOT_FLUENCE_DIR_NAME}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 **/node_modules
 **/target/
@@ -509,57 +528,6 @@ func getInfos(peers: []PeerId) -> []Info:
     <- infos
 `;
 };
-
-const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
-// @ts-nocheck`;
-
-const NODES_CONST = "nodes";
-
-const getPeersImportStatement = (peersToImport: string): string => {
-  return `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
-};
-
-const PEERS = {
-  kras: getPeersImportStatement("krasnodar"),
-  stage: getPeersImportStatement("stage"),
-  testnet: getPeersImportStatement("testNet"),
-  local: `const ${NODES_CONST} = ${jsonStringify(local)}`,
-  // This typescript error happens only when running config docs generation script that's why type assertion is used
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
-}[process.env[FLUENCE_ENV] as FluenceEnv];
-
-export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
-import { Fluence } from "@fluencelabs/js-client";
-${PEERS}
-
-import {
-  helloWorld,
-  helloWorldRemote,
-  getInfo,
-  getInfos,
-} from "./aqua/main.js";
-
-const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
-const connectTo = ${NODES_CONST}[0].multiaddr;
-if (typeof connectTo !== "string") {
-  throw new Error("connectTo is not a string");
-}
-
-const main = async () => {
-  await Fluence.connect(connectTo);
-
-  const helloWorldResult = await helloWorld("Fluence");
-  const helloWorldRemoteResult = await helloWorldRemote("Fluence");
-  const getInfoResult = await getInfo();
-
-  console.log(helloWorldResult);
-
-  process.exit(0);
-};
-
-main().catch((error) => {
-  console.error(error);
-});`;
 
 export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"

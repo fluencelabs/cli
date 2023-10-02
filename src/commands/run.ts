@@ -44,7 +44,7 @@ import {
   TRACING_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { jsonStringify } from "../lib/helpers/jsonStringify.js";
+import { jsonStringify } from "../lib/helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
 import {
@@ -212,12 +212,10 @@ export default class Run extends BaseCommand<typeof Run> {
     const stringResult =
       typeof result === "string" ? result : jsonStringify(result);
 
-    if (stringResult !== undefined) {
-      // If `--quite` flag is used then commandObj.log does nothing
-      // So we use console.log here instead
-      // eslint-disable-next-line no-console
-      console.log(stringResult);
-    }
+    // If `--quite` flag is used then commandObj.log does nothing
+    // So we use console.log here instead
+    // eslint-disable-next-line no-console
+    console.log(stringResult);
 
     await disconnectFluenceClient();
 

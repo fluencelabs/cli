@@ -23,7 +23,7 @@ export const ajv = new Ajv.default({
 });
 
 type AjvErrors =
-  | Ajv.ErrorObject<string, Record<string, unknown>, unknown>[]
+  | Ajv.ErrorObject<string, Record<string, unknown>>[]
   | null
   | undefined;
 

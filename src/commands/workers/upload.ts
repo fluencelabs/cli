@@ -31,7 +31,7 @@ import {
   MARINE_BUILD_ARGS_FLAG,
 } from "../../lib/const.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
-import { jsonStringify } from "../../lib/helpers/jsonStringify.js";
+import { jsonStringify } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,

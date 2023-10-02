@@ -19,7 +19,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
@@ -42,7 +42,7 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Max workers in the deal",
       default: 3,
     }),
-    ...NETWORK_FLAG,
+    ...ENV_FLAG,
     ...PRIV_KEY_FLAG,
   };
 
@@ -57,10 +57,7 @@ export default class Create extends BaseCommand<typeof Create> {
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
       privKey: flags["priv-key"],
-      chainNetwork: await ensureChainNetwork({
-        maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-      }),
+      chainNetwork: await ensureChainNetwork(flags.env, maybeFluenceConfig),
     });
 
     commandObj.logToStderr(
