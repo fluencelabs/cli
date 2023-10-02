@@ -2057,15 +2057,15 @@ __metadata:
   linkType: hard
 
 "@oclif/color@npm:^1.0.10":
-  version: 1.0.11
-  resolution: "@oclif/color@npm:1.0.11"
+  version: 1.0.12
+  resolution: "@oclif/color@npm:1.0.12"
   dependencies:
     ansi-styles: ^4.2.1
     chalk: ^4.1.0
     strip-ansi: ^6.0.1
     supports-color: ^8.1.1
     tslib: ^2
-  checksum: 4db5f4613f8ecce5c04dbaf25d2674d97bb65044fbea725fdbd60a2fef7872f3be1fd36ce2bc15d96707cc7cc4b1cab05d39105f1c810f9c2340e0137aa4a961
+  checksum: 380681bb1fe6e73450e9089278841647db774cbe002bee1ec8eb4f1ba554a2510ecbc778b25f6c92a8e94df3f7d5bde7d47d342579f5b3e7b9ac81dfe5ed2f06
   languageName: node
   linkType: hard
 
