@@ -192,12 +192,12 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
 ) => {
   return validateBatch(
     config.clock?.startTimestamp !== undefined &&
-      config.clock?.startDelaySec !== undefined
+      config.clock.startDelaySec !== undefined
       ? `You can't specify both 'startTimestamp' and 'startDelaySec' properties`
       : true,
 
     config.clock?.endTimestamp !== undefined &&
-      config.clock?.endDelaySec !== undefined
+      config.clock.endDelaySec !== undefined
       ? `You can't specify both 'endTimestamp' and 'endDelaySec' properties`
       : true,
 
@@ -291,6 +291,9 @@ export const initReadonlySpellConfig = async (
 const getDefault = (): string => {
   return `# Defines a spell. You can use \`fluence spell new\` command to generate a template for new spell
 
+# config version
+version: 0
+
 # Path to Aqua file which contains an Aqua function that you want to use as a spell
 aquaFilePath: "./spell.aqua"
 
@@ -331,9 +334,6 @@ clock:
 #   # If this property or \`endDelaySec\` not specified, periodic execution will never end.
 #   # If it is in the past at the moment of spell creation on Rust peer - the spell will never be executed
 #   endTimestamp: '2023-07-06T23:59:59Z'
-
-# config version
-version: 0
 `;
 };
 

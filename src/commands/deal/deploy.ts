@@ -30,7 +30,7 @@ import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
-  NETWORK_FLAG,
+  ENV_FLAG,
   OFF_AQUA_LOGS_FLAG,
   DEAL_CONFIG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -61,7 +61,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
-    ...NETWORK_FLAG,
+    ...ENV_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
@@ -85,12 +85,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true,
     );
 
-    const chainNetwork = await ensureChainNetwork({
-      maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: fluenceConfig.chainNetwork,
-    });
-
-    const chainNetworkId = DEAL_CONFIG[chainNetwork].chainId;
+    const chainNetwork = await ensureChainNetwork(flags.env, fluenceConfig);
+    const chainNetworkId = DEAL_CONFIG[chainNetwork].id;
     const workersConfig = await initNewWorkersConfig();
 
     const aquaImports = await ensureAquaImports({
@@ -140,7 +136,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       name: workerName,
       definition: appCID,
     } of uploadResult.workers) {
-      const deal = fluenceConfig?.deals?.[workerName];
+      const deal = fluenceConfig.deals?.[workerName];
       assert(deal !== undefined);
       const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
 
@@ -165,7 +161,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           network: chainNetwork,
           privKey: flags["priv-key"],
           appCID,
-          dealAddress: maybePreviouslyDeployedDeal.dealId,
+          dealAddress: maybePreviouslyDeployedDeal.dealIdOriginal,
         });
 
         if (flags["auto-match"]) {
@@ -263,7 +259,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         : `\n\n${yamlDiffPatch("", {}, { "updated deals": updatedDeals })}`;
 
     if (createdDealsText === "" && updatedDealsText === "") {
-      return commandObj.log("No updated or created deals");
+      commandObj.log("No updated or created deals");
+      return;
     }
 
     commandObj.log(

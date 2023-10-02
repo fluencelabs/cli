@@ -312,7 +312,7 @@ members = []
     );
   }
 
-  const oldCargoWorkspaceMembers = parsedConfig?.workspace?.members ?? [];
+  const oldCargoWorkspaceMembers = parsedConfig.workspace?.members ?? [];
 
   const cargoWorkspaceMembersExistance = await Promise.allSettled(
     oldCargoWorkspaceMembers.map((member) => {
@@ -329,7 +329,7 @@ members = []
   const newConfig = {
     ...parsedConfig,
     workspace: {
-      ...(parsedConfig?.workspace ?? {}),
+      ...(parsedConfig.workspace ?? {}),
       members: [
         ...new Set([
           ...existingCargoWorkspaceMembers,

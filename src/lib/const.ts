@@ -15,18 +15,14 @@
  */
 
 import { color } from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args, Flags } from "@oclif/core";
 import type {
   Flag,
   OutputFlags,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
-import { aquaComment } from "./helpers/comment.js";
-import { jsonStringify } from "./helpers/jsonStringify.js";
-import { local } from "./localNodes.js";
-import type { FluenceEnv } from "./multiaddres.js";
-import { FLUENCE_ENV } from "./setupEnvironment.js";
+import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
 export const CLI_NAME = "fluence";
@@ -36,8 +32,6 @@ export const PACKAGE_NAME = "@fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
 
-export const TS_NODE_RECOMMENDED_VERSION = "10.9.1";
-export const TYPESCRIPT_RECOMMENDED_VERSION = "4.8.4";
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
@@ -59,16 +53,12 @@ export const defaultNumberProperties: Record<NumberProperty, number> = {
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
-export const CONTRACTS_ENV = ["testnet", "local"] as const;
+export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
-export const DEFAULT_CHAIN_NETWORK = CONTRACTS_ENV[1];
-
-export const isChainNetwork = getIsStringUnion(CONTRACTS_ENV);
-
 export type ChainConfig = {
-  ethereumNodeUrl: string;
-  chainId: number;
+  url: string;
+  id: number;
 };
 
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
@@ -79,20 +69,49 @@ export const WC_METADATA = {
   url: GITHUB_REPO_NAME,
   icons: [],
 };
+
+export const FLUENCE_ENVS = [
+  "kras",
+  "stage",
+  "testnet",
+  "local",
+  "custom",
+] as const;
+export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
+export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
+
 export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
+  kras: {
+    url: "https://rpc.ankr.com/polygon_mumbai",
+    id: 80001,
+  },
   testnet: {
-    ethereumNodeUrl: "https://rpc.ankr.com/polygon_mumbai",
-    chainId: 80001,
+    url: "https://rpc.ankr.com/polygon_mumbai",
+    id: 80001,
+  },
+  stage: {
+    url: "https://rpc.ankr.com/polygon_mumbai",
+    id: 80001,
   },
   local: {
-    ethereumNodeUrl: "http://127.0.0.1:8545",
-    chainId: 31_337,
+    url: "http://127.0.0.1:8545",
+    id: 31_337,
   },
 };
-export const DEAL_RPC_CONFIG = {
-  31_337: DEAL_CONFIG["local"].ethereumNodeUrl,
-  80001: DEAL_CONFIG["testnet"].ethereumNodeUrl,
-};
+
+export const DEAL_RPC_CONFIG = Object.fromEntries(
+  Object.values(DEAL_CONFIG).map(({ id, url }) => {
+    return [id, url];
+  }),
+);
+
+// @ts-expect-error we know that keys are ContractsEnv, not just string
+export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
+  Object.fromEntries(
+    Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
+      return [name, id];
+    }),
+  );
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
@@ -129,6 +148,7 @@ export const GLOBAL_CONFIG_FILE_NAME = `config`;
 export const MODULE_CONFIG_FILE_NAME = `module`;
 export const SERVICE_CONFIG_FILE_NAME = `service`;
 export const SPELL_CONFIG_FILE_NAME = `spell`;
+export const ENV_CONFIG_FILE_NAME = `env`;
 
 export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROVIDER_CONFIG_FULL_FILE_NAME = `${PROVIDER_CONFIG_FILE_NAME}.${YAML_EXT}`;
@@ -139,6 +159,7 @@ export const GLOBAL_CONFIG_FULL_FILE_NAME = `${GLOBAL_CONFIG_FILE_NAME}.${YAML_E
 export const MODULE_CONFIG_FULL_FILE_NAME = `${MODULE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const SERVICE_CONFIG_FULL_FILE_NAME = `${SERVICE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const ENV_CONFIG_FULL_FILE_NAME = `${ENV_CONFIG_FILE_NAME}.${YAML_EXT}`;
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
@@ -192,15 +213,19 @@ export const NO_INPUT_FLAG = {
   }),
 } as const;
 
-export const NETWORK_FLAG_NAME = "network";
-export const NETWORK_FLAG = {
-  [NETWORK_FLAG_NAME]: Flags.string({
-    description: `The network in which the transactions used by the command will be carried out (${CONTRACTS_ENV.join(
-      ", ",
-    )})`,
-    helpValue: "<network>",
-    default: DEFAULT_CHAIN_NETWORK,
-  }),
+const envFlagAndArg = {
+  description: "Fluence Environment to use when running the command",
+  helpValue: `<${FLUENCE_ENVS.join(" | ")}>`,
+};
+
+export const ENV_FLAG_NAME = "env";
+export const ENV_FLAG = {
+  [ENV_FLAG_NAME]: Flags.string(envFlagAndArg),
+};
+
+export const ENV_ARG_NAME = "ENV";
+export const ENV_ARG = {
+  [ENV_ARG_NAME]: Args.string(envFlagAndArg),
 };
 
 export const GLOBAL_FLAG_NAME = "global";
@@ -301,6 +326,7 @@ export const FLUENCE_CLIENT_FLAGS = {
     default: false,
     description: "Print particle ids when running Fluence js-client",
   }),
+  ...ENV_FLAG,
 } as const;
 
 export type FluenceClientFlags = FromFlagsDef<typeof FLUENCE_CLIENT_FLAGS>;
@@ -352,6 +378,7 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
 /${DOT_FLUENCE_DIR_NAME}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
 **/node_modules
@@ -369,7 +396,7 @@ export const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
-const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
+export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
@@ -404,43 +431,62 @@ const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
 -- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
 
-export runDeployedServices
-
-data Worker:
-    pat_id: string
-    host_id: string
-    worker_id: ?string
-
-data Subnet:
-    workers: []Worker
-    error: []string
+export runDeployedServices, showSubnet
 
 data Answer:
     answer: ?string
     worker: Worker
 
-service Connector("fluence_aurora_connector"):
-    resolve_subnet(dealId: string, apiEndpoint: string) -> Subnet
-
-func resolve_subnet(dealId: string) -> Subnet:
-    on HOST_PEER_ID:
-        subnet <- Connector.resolve_subnet(dealId, "http://deal-aurora:8545")
-    <- subnet
-
 func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
     deals <- Deals.get()
     dealId = deals.defaultWorker!.dealIdOriginal
     answers: *Answer
-    subnet <- resolve_subnet(dealId)
+    on HOST_PEER_ID:
+        subnet <- Subnet.resolve(dealId)
+    if subnet.success == false:
+        Console.print(["Failed to resolve subnet: ", subnet.error])
+
     for w <- subnet.workers:
         if w.worker_id == nil:
             answers <<- Answer(answer=nil, worker=w)
         else:
             on w.worker_id! via w.host_id:
                 answer <- MyService.greeting("fluence")
-                answers <<- Answer(answer=?[answer], worker = w)
+                answers <<- Answer(answer=?[answer], worker=w)
 
     <- answers
+
+data WorkerServices:
+    host_id: string
+    worker_id: ?string
+    services: ?[]string
+
+func showSubnet() -> []WorkerServices:
+    deals <- Deals.get()
+    dealId = deals.defaultWorker!.dealIdOriginal
+    on HOST_PEER_ID:
+        subnet <- Subnet.resolve(dealId)
+    if subnet.success == false:
+        Console.print(["Failed to resolve subnet: ", subnet.error])
+
+    services: *WorkerServices
+    for w <- subnet.workers:
+        if w.worker_id != nil:
+            on w.worker_id! via w.host_id:
+                -- get list of all services on this worker
+                srvs <- Srv.list()
+
+                -- gather aliases
+                aliases: *string
+                for s <- srvs:
+                    if s.aliases.length != 0:
+                        aliases <<- s.aliases[0]
+
+                services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[aliases])
+        else:
+            services <<- WorkerServices(host_id=w.host_id, worker_id=nil, services=nil)
+
+    <- services
 `;
 
 const RUN_DEPLOYED_SERVICE_AQUA_COMMENT = aquaComment(
@@ -453,7 +499,7 @@ export const getMainAquaFileContent = (
   return `aqua Main
 
 import "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
-import "${REGISTRY_NPM_DEPENDENCY}/subnetwork.aqua"
+import "${AQUA_LIB_NPM_DEPENDENCY}/subnet.aqua"
 
 use "${DEALS_FULL_FILE_NAME}"
 use "${HOSTS_FULL_FILE_NAME}"
@@ -500,58 +546,7 @@ func getInfos(peers: []PeerId) -> []Info:
 `;
 };
 
-const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
-// @ts-nocheck`;
-
-const NODES_CONST = "nodes";
-
-const getPeersImportStatement = (peersToImport: string): string => {
-  return `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
-};
-
-const PEERS = {
-  kras: getPeersImportStatement("krasnodar"),
-  stage: getPeersImportStatement("stage"),
-  testnet: getPeersImportStatement("testNet"),
-  local: `const ${NODES_CONST} = ${jsonStringify(local)}`,
-  // This typescript error happens only when running config docs generation script that's why type assertion is used
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unnecessary-type-assertion
-}[process.env[FLUENCE_ENV] as FluenceEnv];
-
-export const TEMPLATE_INDEX_FILE_CONTENT = `${DISABLE_TS_AND_ES_LINT}
-import { Fluence } from "@fluencelabs/js-client";
-${PEERS}
-
-import {
-  helloWorld,
-  helloWorldRemote,
-  getInfo,
-  getInfos,
-} from "./aqua/main.js";
-
-const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
-const connectTo = ${NODES_CONST}[0].multiaddr;
-if (typeof connectTo !== "string") {
-  throw new Error("connectTo is not a string");
-}
-
-const main = async () => {
-  await Fluence.connect(connectTo);
-
-  const helloWorldResult = await helloWorld("Fluence");
-  const helloWorldRemoteResult = await helloWorldRemote("Fluence");
-  const getInfoResult = await getInfo();
-
-  console.log(helloWorldResult);
-
-  process.exit(0);
-};
-
-main().catch((error) => {
-  console.error(error);
-});`;
-
-export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
+export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():

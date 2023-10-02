@@ -18,11 +18,14 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import type { FluenceClientFlags, KeyPairFlag } from "./const.js";
-import { base64ToUint8Array } from "./helpers/generateKeyPair.js";
-import { stringifyUnknown } from "./helpers/jsonStringify.js";
+import {
+  ENV_FLAG_NAME,
+  type FluenceClientFlags,
+  type KeyPairFlag,
+} from "./const.js";
+import { base64ToUint8Array, stringifyUnknown } from "./helpers/utils.js";
 import { getExistingKeyPair } from "./keyPairs.js";
-import { resolveRelay } from "./multiaddres.js";
+import { resolveFluenceEnv, resolveRelay } from "./multiaddres.js";
 
 export const initFluenceClient = async (
   {
@@ -31,11 +34,17 @@ export const initFluenceClient = async (
     ["dial-timeout"]: dialTimeoutMs,
     ttl,
     "particle-id": printParticleId,
+    [ENV_FLAG_NAME]: envFlag,
   }: FluenceClientFlags & KeyPairFlag,
   maybeFluenceConfig: FluenceConfig | null,
 ): Promise<void> => {
-  const relay = resolveRelay(maybeRelay, maybeFluenceConfig?.relays);
-  commandObj.logToStderr(`Connecting to: ${color.yellow(relay)}`);
+  const fluenceEnv = await resolveFluenceEnv(envFlag);
+  const relay = resolveRelay(maybeRelay, fluenceEnv, maybeFluenceConfig);
+
+  commandObj.logToStderr(
+    `Connecting to ${color.yellow(fluenceEnv)} relay: ${relay}`,
+  );
+
   const keyPair = await getExistingKeyPair(keyPairName);
 
   try {

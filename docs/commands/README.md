@@ -8,7 +8,8 @@
 * [`fluence build`](#fluence-build)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
-* [`fluence default peers [NETWORK]`](#fluence-default-peers-network)
+* [`fluence default env [ENV]`](#fluence-default-env-env)
+* [`fluence default peers [ENV]`](#fluence-default-peers-env)
 * [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
 * [`fluence dependency install`](#fluence-dependency-install)
 * [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
@@ -34,6 +35,7 @@
 * [`fluence update [CHANNEL]`](#fluence-update-channel)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
 * [`fluence workers logs [WORKER-NAMES]`](#fluence-workers-logs-worker-names)
+* [`fluence workers remove [WORKER-NAMES]`](#fluence-workers-remove-worker-names)
 * [`fluence workers upload [WORKER-NAMES]`](#fluence-workers-upload-worker-names)
 
 ## `fluence air beautify [PATH]`
@@ -58,7 +60,7 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [dist/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/air/beautify.ts)_
+_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
@@ -95,7 +97,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [dist/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/aqua.ts)_
+_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/aqua.ts)_
 
 ## `fluence aqua json [INPUT] [OUTPUT]`
 
@@ -123,7 +125,7 @@ DESCRIPTION
   what they translate into
 ```
 
-_See code: [dist/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/aqua/json.ts)_
+_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/aqua/json.ts)_
 
 ## `fluence aqua yml [INPUT] [OUTPUT]`
 
@@ -154,7 +156,7 @@ ALIASES
   $ fluence aqua yaml
 ```
 
-_See code: [dist/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/aqua/yml.ts)_
+_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -185,7 +187,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.8/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.9/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -207,7 +209,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [dist/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/build.ts)_
+_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -215,32 +217,35 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>]
-    [--network <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
-    [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match]
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--env
+    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>] [--auto-match]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
                 'deals' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>        Key pair name
-  --[no-]auto-match                 Disable automatic matching
-  --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --network=<network>               [default: local] The network in which the transactions used by the command will be
-                                    carried out (testnet, local)
-  --no-build                        Don't build the project before running the command
-  --no-input                        Don't interactively ask for any input from the user
-  --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                     Print particle ids when running Fluence js-client
-  --priv-key=<private-key>          !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>            Relay for Fluence js-client to connect to
-  --tracing                         Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                    and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --[no-]auto-match                                Disable automatic matching
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-build                                       Don't build the project before running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -249,7 +254,7 @@ EXAMPLES
   $ fluence deal deploy
 ```
 
-_See code: [dist/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/deal/deploy.ts)_
+_See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/deal/deploy.ts)_
 
 ## `fluence deal logs [WORKER-NAMES]`
 
@@ -258,22 +263,25 @@ Get logs from deployed workers for deals listed in workers.yaml
 ```
 USAGE
   $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
+    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
 
 FLAGS
-  -k, --key-pair-name=<name>     Key pair name
-  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --no-input                     Don't interactively ask for any input from the user
-  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                  Print particle ids when running Fluence js-client
-  --priv-key=<private-key>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>         Relay for Fluence js-client to connect to
-  --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                 and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
@@ -282,18 +290,41 @@ EXAMPLES
   $ fluence deal logs
 ```
 
-_See code: [dist/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/deal/logs.ts)_
+_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/deal/logs.ts)_
 
-## `fluence default peers [NETWORK]`
+## `fluence default env [ENV]`
+
+Switch default Fluence Environment used in the current Fluence project
+
+```
+USAGE
+  $ fluence default env [ENV] [--no-input]
+
+ARGUMENTS
+  ENV  Fluence Environment to use when running the command
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Switch default Fluence Environment used in the current Fluence project
+
+EXAMPLES
+  $ fluence default env
+```
+
+_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/default/env.ts)_
+
+## `fluence default peers [ENV]`
 
 Print default Fluence network peer addresses
 
 ```
 USAGE
-  $ fluence default peers [NETWORK] [--no-input]
+  $ fluence default peers [ENV] [--no-input]
 
 ARGUMENTS
-  NETWORK  Network to use. One of kras, stage, testnet
+  ENV  Fluence Environment to use when running the command
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
@@ -305,7 +336,7 @@ EXAMPLES
   $ fluence default peers
 ```
 
-_See code: [dist/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/default/peers.ts)_
+_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/default/peers.ts)_
 
 ## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -321,7 +352,7 @@ ARGUMENTS
                                        fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
                                        fluence, latest version cargo is aware of. If you want to install a specific
                                        version, you can do so by appending @ and the version to the package name. For
-                                       example: marine@0.12.4
+                                       example: package@version
 
 FLAGS
   --force                       Force install even if the dependency/dependencies is/are already installed
@@ -343,7 +374,7 @@ EXAMPLES
   $ fluence dependency cargo install
 ```
 
-_See code: [dist/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/dependency/cargo/install.ts)_
+_See code: [src/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/dependency/cargo/install.ts)_
 
 ## `fluence dependency install`
 
@@ -368,7 +399,7 @@ EXAMPLES
   $ fluence dependency install
 ```
 
-_See code: [dist/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/dependency/install.ts)_
+_See code: [src/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/dependency/install.ts)_
 
 ## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -380,10 +411,10 @@ USAGE
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
-                                       fluence.yaml, , user's .fluence/config.yaml, dependency versions recommended by
-                                       fluence, latest version cargo is aware of. If you want to install a specific
-                                       version, you can do so by appending @ and the version to the package name. For
-                                       example: @fluencelabs/aqua-lib@0.6.0
+                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
+                                       fluence, latest version npm is aware of. If you want to install a specific
+                                       version, you can do so by appending @ and the version to the package name.
+                                       Example: package@version
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -402,7 +433,7 @@ EXAMPLES
   $ fluence dependency npm install
 ```
 
-_See code: [dist/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/dependency/npm/install.ts)_
+_See code: [src/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/dependency/npm/install.ts)_
 
 ## `fluence dependency reset`
 
@@ -428,7 +459,7 @@ EXAMPLES
   $ fluence dependency reset
 ```
 
-_See code: [dist/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/dependency/reset.ts)_
+_See code: [src/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/dependency/reset.ts)_
 
 ## `fluence dependency versions`
 
@@ -455,7 +486,7 @@ EXAMPLES
   $ fluence dependency versions
 ```
 
-_See code: [dist/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/dependency/versions.ts)_
+_See code: [src/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/dependency/versions.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -475,7 +506,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.19/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.20/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -483,14 +514,15 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [--no-input] [-t <value>]
+  $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>]
 
 ARGUMENTS
   PATH  Project path
 
 FLAGS
-  -t, --template=<value>  Template to use for the project. One of: quickstart, minimal, ts, js
-  --no-input              Don't interactively ask for any input from the user
+  -t, --template=<value>                           Template to use for the project. One of: quickstart, minimal, ts, js
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
 
 DESCRIPTION
   Initialize fluence project
@@ -499,7 +531,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -523,7 +555,7 @@ EXAMPLES
   $ fluence key default
 ```
 
-_See code: [dist/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/key/default.ts)_
+_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/key/default.ts)_
 
 ## `fluence key new [NAME]`
 
@@ -548,7 +580,7 @@ EXAMPLES
   $ fluence key new
 ```
 
-_See code: [dist/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/key/new.ts)_
+_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/key/new.ts)_
 
 ## `fluence key remove [NAME]`
 
@@ -572,7 +604,7 @@ EXAMPLES
   $ fluence key remove
 ```
 
-_See code: [dist/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/key/remove.ts)_
+_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/key/remove.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -598,7 +630,7 @@ EXAMPLES
   $ fluence module add
 ```
 
-_See code: [dist/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/module/add.ts)_
+_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/module/add.ts)_
 
 ## `fluence module new [NAME]`
 
@@ -623,7 +655,7 @@ EXAMPLES
   $ fluence module new
 ```
 
-_See code: [dist/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/module/new.ts)_
+_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/module/new.ts)_
 
 ## `fluence module remove [NAME | PATH | URL]`
 
@@ -647,7 +679,7 @@ EXAMPLES
   $ fluence module remove
 ```
 
-_See code: [dist/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/module/remove.ts)_
+_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/module/remove.ts)_
 
 ## `fluence provider add-peer`
 
@@ -655,22 +687,22 @@ Register specific nox instance as a Compute Peer
 
 ```
 USAGE
-  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--network <value>] [--peer-id <value>] [--units
-    <value>]
+  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units <value>]
 
 FLAGS
-  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
-                            out (testnet, local)
-  --no-input                Don't interactively ask for any input from the user
-  --peer-id=<peer-id>...    Peer id of the nox instance that you want to register as a Compute Peer
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --units=<number>          Number of available worker units on this Compute Peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>...                           Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --units=<number>                                 Number of available worker units on this Compute Peer
 
 DESCRIPTION
   Register specific nox instance as a Compute Peer
 ```
 
-_See code: [dist/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/provider/add-peer.ts)_
+_See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/provider/add-peer.ts)_
 
 ## `fluence provider init`
 
@@ -695,19 +727,19 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [--network <value>]
+  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --network=<network>       [default: local] The network in which the transactions used by the command will be carried
-                            out (testnet, local)
-  --no-input                Don't interactively ask for any input from the user
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
 
 DESCRIPTION
   Register in matching contract
 ```
 
-_See code: [dist/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/provider/register.ts)_
+_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/provider/register.ts)_
 
 ## `fluence run`
 
@@ -718,34 +750,38 @@ USAGE
   $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
     [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
     [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--tracing]
+    [--particle-id] [--env <value>] [--tracing]
 
 FLAGS
-  -b, --print-beautified-air     Prints beautified AIR code before function execution
-  -f, --func=<function-call>     Function call. Example: funcName("stringArg")
-  -i, --input=<path>             Path to an aqua file or to a directory that contains aqua files
-  -k, --key-pair-name=<name>     Key pair name
-  --const=<NAME = value>...      Constant that will be used in the aqua code that you run (example of aqua code:
-                                 SOME_CONST ?= "default_value"). Constant name must be upper cased.
-  --data=<json>                  JSON in { [argumentName]: argumentValue } format. You can call a function using these
-                                 argument names
-  --data-path=<path>             Path to a JSON file in { [argumentName]: argumentValue } format. You can call a
-                                 function using these argument names
-  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...             Path to a directory to import aqua files from. May be used several times
-  --log-level-compiler=<level>   Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
-                                 info, warn, error, off
-  --no-input                     Don't interactively ask for any input from the user
-  --no-relay                     Do not generate a pass through the relay node
-  --no-xor                       Do not generate a wrapper that catches and displays errors
-  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                  Print particle ids when running Fluence js-client
-  --print-air                    Prints generated AIR code before function execution
-  --quiet                        Print only execution result. Overrides all --log-level-* flags
-  --relay=<multiaddress>         Relay for Fluence js-client to connect to
-  --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                 and not processed.
+  -b, --print-beautified-air                       Prints beautified AIR code before function execution
+  -f, --func=<function-call>                       Function call. Example: funcName("stringArg")
+  -i, --input=<path>                               Path to an aqua file or to a directory that contains aqua files
+  -k, --key-pair-name=<name>                       Key pair name
+  --const=<NAME="value">...                        Constant that will be used in the aqua code that you run (example of
+                                                   aqua code: SOME_CONST ?= "default_value"). Constant name must be
+                                                   upper cased.
+  --data=<json>                                    JSON in { [argumentName]: argumentValue } format. You can call a
+                                                   function using these argument names
+  --data-path=<path>                               Path to a JSON file in { [argumentName]: argumentValue } format. You
+                                                   can call a function using these argument names
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: Must be one of: all,
+                                                   trace, debug, info, warn, error, off
+  --no-input                                       Don't interactively ask for any input from the user
+  --no-relay                                       Do not generate a pass through the relay node
+  --no-xor                                         Do not generate a wrapper that catches and displays errors
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --print-air                                      Prints generated AIR code before function execution
+  --quiet                                          Print only execution result. Overrides all --log-level-* flags
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Run aqua script
@@ -754,7 +790,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [dist/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/run.ts)_
+_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -781,7 +817,7 @@ EXAMPLES
   $ fluence service add
 ```
 
-_See code: [dist/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/service/add.ts)_
+_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/service/add.ts)_
 
 ## `fluence service new [NAME]`
 
@@ -805,7 +841,7 @@ EXAMPLES
   $ fluence service new
 ```
 
-_See code: [dist/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/service/new.ts)_
+_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/service/new.ts)_
 
 ## `fluence service remove [NAME | PATH | URL]`
 
@@ -828,7 +864,7 @@ EXAMPLES
   $ fluence service remove
 ```
 
-_See code: [dist/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/service/remove.ts)_
+_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -853,7 +889,7 @@ EXAMPLES
   $ fluence service repl
 ```
 
-_See code: [dist/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/service/repl.ts)_
+_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/service/repl.ts)_
 
 ## `fluence spell new [NAME]`
 
@@ -877,7 +913,7 @@ EXAMPLES
   $ fluence spell new
 ```
 
-_See code: [dist/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/spell/new.ts)_
+_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/spell/new.ts)_
 
 ## `fluence update [CHANNEL]`
 
@@ -914,7 +950,7 @@ EXAMPLES
     $ fluence update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.2.3/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.2.4/src/commands/update.ts)_
 
 ## `fluence workers deploy [WORKER-NAMES]`
 
@@ -923,28 +959,33 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build] [--tracing]
-    [--marine-build-args <value>]
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
                 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>        Key pair name
-  --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --no-build                        Don't build the project before running the command
-  --no-input                        Don't interactively ask for any input from the user
-  --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                     Print particle ids when running Fluence js-client
-  --priv-key=<private-key>          !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>            Relay for Fluence js-client to connect to
-  --tracing                         Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                    and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-build                                       Don't build the project before running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Deploy workers to hosts, described in 'hosts' property in fluence.yaml
@@ -953,7 +994,7 @@ EXAMPLES
   $ fluence workers deploy
 ```
 
-_See code: [dist/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/workers/deploy.ts)_
+_See code: [src/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/workers/deploy.ts)_
 
 ## `fluence workers logs [WORKER-NAMES]`
 
@@ -962,26 +1003,29 @@ Get logs from deployed workers for hosts listed in workers.yaml
 ```
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id <value>] [--host-id <value>]
-    [--spell-id <value>] [--tracing]
+    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id <value>] [--host-id
+    <value>] [--spell-id <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
 
 FLAGS
-  -k, --key-pair-name=<name>     Key pair name
-  --dial-timeout=<milliseconds>  [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --host-id=<host-id>            Host id
-  --no-input                     Don't interactively ask for any input from the user
-  --off-aqua-logs                Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                  Print particle ids when running Fluence js-client
-  --priv-key=<private-key>       !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>         Relay for Fluence js-client to connect to
-  --spell-id=<spell-id>          [default: worker-spell] Spell id
-  --tracing                      Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>           [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                 and not processed.
-  --worker-id=<worker-id>        Worker id
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --host-id=<host-id>                              Host id
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --spell-id=<spell-id>                            [default: worker-spell] Spell id
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
+  --worker-id=<worker-id>                          Worker id
 
 DESCRIPTION
   Get logs from deployed workers for hosts listed in workers.yaml
@@ -990,7 +1034,44 @@ EXAMPLES
   $ fluence workers logs
 ```
 
-_See code: [dist/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/workers/logs.ts)_
+_See code: [src/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/workers/logs.ts)_
+
+## `fluence workers remove [WORKER-NAMES]`
+
+Remove workers from hosts, described in 'hosts' property in workers.yaml
+
+```
+USAGE
+  $ fluence workers remove [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
+    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--tracing]
+
+ARGUMENTS
+  WORKER-NAMES  Comma separated names of workers to remove. Example: "worker1,worker2" (by default all workers from
+                'hosts' property in workers.yaml are removed)
+
+FLAGS
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
+
+DESCRIPTION
+  Remove workers from hosts, described in 'hosts' property in workers.yaml
+
+EXAMPLES
+  $ fluence workers remove
+```
+
+_See code: [src/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/workers/remove.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
@@ -999,27 +1080,32 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>] [--no-build] [--tracing]
-    [--marine-build-args <value>]
+    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>        Key pair name
-  --dial-timeout=<milliseconds>     [default: 60000] Timeout for Fluence js-client to connect to relay peer
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --no-build                        Don't build the project before running the command
-  --no-input                        Don't interactively ask for any input from the user
-  --off-aqua-logs                   Turns off logs from Console.print in aqua and from IPFS service
-  --particle-id                     Print particle ids when running Fluence js-client
-  --priv-key=<private-key>          !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --relay=<multiaddress>            Relay for Fluence js-client to connect to
-  --tracing                         Compile aqua in tracing mode (for debugging purposes)
-  --ttl=<milliseconds>              [default: 120000] Particle Time To Live since 'now'. After that, particle is expired
-                                    and not processed.
+  -k, --key-pair-name=<name>                       Key pair name
+  --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-build                                       Don't build the project before running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
+  --particle-id                                    Print particle ids when running Fluence js-client
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --tracing                                        Compile aqua in tracing mode (for debugging purposes)
+  --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Upload workers to hosts, described in 'hosts' property in fluence.yaml
@@ -1028,5 +1114,5 @@ EXAMPLES
   $ fluence workers upload
 ```
 
-_See code: [dist/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.8.3/dist/commands/workers/upload.ts)_
+_See code: [src/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.9.1/src/commands/workers/upload.ts)_
 <!-- commandsstop -->

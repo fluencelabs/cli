@@ -74,6 +74,9 @@ const getDefault: GetDefaultConfig = () => {
   return `# Defines project's secret keys that are used only in the scope of this particular Fluence project.
 # You can manage project's keys using commands from \`fluence key\` group of commands
 
+# config version
+version: 0
+
 # Key Pairs available for your fluence project
 keyPairs:
   [
@@ -86,9 +89,6 @@ keyPairs:
 # Key pair with this name will be used for the deployment by default.
 # You can override it with flags or by using keyPair properties in fluence.yaml
 # defaultKeyPairName: myKeyPair
-
-# config version
-version: 0
 `;
 };
 

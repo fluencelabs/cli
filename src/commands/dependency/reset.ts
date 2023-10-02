@@ -58,10 +58,8 @@ export default class Reset extends BaseCommand<typeof Reset> {
       }
 
       await userConfig.$commit();
-
-      return commandObj.log(
-        "successfully reset user's global dependency versions",
-      );
+      commandObj.log("successfully reset user's global dependency versions");
+      return;
     }
 
     if (maybeFluenceConfig !== null) {
@@ -77,7 +75,8 @@ export default class Reset extends BaseCommand<typeof Reset> {
 
       await maybeFluenceConfig.$commit();
 
-      return commandObj.log("successfully reset project's dependency versions");
+      commandObj.log("successfully reset project's dependency versions");
+      return;
     }
 
     commandObj.error(

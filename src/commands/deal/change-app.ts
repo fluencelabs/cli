@@ -19,7 +19,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { dealUpdate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -31,7 +31,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
-    ...NETWORK_FLAG,
+    ...ENV_FLAG,
   };
 
   static override args = {
@@ -55,10 +55,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
         (await input({ message: "Enter deal address" })),
       appCID:
         args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
-      network: await ensureChainNetwork({
-        maybeNetworkFromFlags: flags.network,
-        maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-      }),
+      network: await ensureChainNetwork(flags.env, maybeFluenceConfig),
       privKey: flags["priv-key"],
     });
 

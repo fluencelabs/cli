@@ -17,7 +17,7 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { NETWORK_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { match } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -29,7 +29,7 @@ export default class Match extends BaseCommand<typeof Match> {
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
-    ...NETWORK_FLAG,
+    ...ENV_FLAG,
   };
 
   static override args = {
@@ -47,11 +47,7 @@ export default class Match extends BaseCommand<typeof Match> {
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
-    const network = await ensureChainNetwork({
-      maybeNetworkFromFlags: flags.network,
-      maybeDealsConfigNetwork: maybeFluenceConfig?.chainNetwork,
-    });
-
+    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
     await match(network, flags["priv-key"], dealAddress);
   }
 }

@@ -16,11 +16,13 @@
 
 import type { JSONSchemaType } from "ajv";
 
+import versions from "../../../versions.json" assert { type: "json" };
 import {
   GLOBAL_CONFIG_FILE_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   CLI_NAME_FULL,
+  AQUA_LIB_NPM_DEPENDENCY,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
@@ -113,11 +115,11 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 const getDefault = () => {
   return `# Defines global config for Fluence CLI
 
-# Weather you consent to send usage data to Countly
-countlyConsent: false
-
 # config version
 version: 0
+
+# Weather you consent to send usage data to Countly
+countlyConsent: false
 
 # Whether to include commented-out documented config examples in the configs generated with the CLI
 docsInConfigs: false
@@ -131,11 +133,11 @@ docsInConfigs: false
 # dependencies:
 #   # A map of npm dependency versions
 #   # CLI ensures dependencies are installed each time you run aqua
-#   # There are also some dependencies that are installed by default (e.g. @fluencelabs/aqua-lib)
+#   # There are also some dependencies that are installed by default (e.g. ${AQUA_LIB_NPM_DEPENDENCY})
 #   # You can check default dependencies using \`fluence dep v --default\`
 #   # use \`fluence dep npm i --global\` to install global npm dependencies
 #   npm:
-#     "@fluencelabs/aqua-lib": 0.7.1
+#     "${AQUA_LIB_NPM_DEPENDENCY}": ${versions.npm[AQUA_LIB_NPM_DEPENDENCY]}
 #
 #   # A map of cargo dependency versions
 #   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL

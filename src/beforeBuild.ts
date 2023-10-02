@@ -51,7 +51,7 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
 
 const compileInstallationSpellAqua = async (tracing = false) => {
   return Promise.all(
-    ["upload", "cli", "deal_spell", "files"].map(async (fileName) => {
+    ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
       const compilationResult = await compileFromPath({
         filePath: join(
           INSTALLATION_SPELL_AQUA_DIR_PATH,

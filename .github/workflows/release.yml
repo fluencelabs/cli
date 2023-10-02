@@ -35,8 +35,10 @@ jobs:
         run: echo "${RELEASE_PLEASE_OUTPUT}" | jq
 
   promote:
+    needs: release-please
     strategy:
       matrix:
+        fail-fast: false
         platform:
           - linux-x64
           - darwin-x64
@@ -46,6 +48,7 @@ jobs:
     uses: ./.github/workflows/pack.yml
     with:
       ref: ${{ github.ref }}
+      tag: ${{ needs.release-please.outputs.fluence-cli-tag-name || 'null' }}
       platform: ${{ matrix.platform }}
       upload-to-s3: true
       channel: "main"

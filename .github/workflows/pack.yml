@@ -7,6 +7,10 @@ on:
         description: "Git ref to checkout to"
         type: string
         default: "main"
+      tag:
+        description: "Release tag to upload artifacts to"
+        type: string
+        default: "null"
       platform:
         description: "Platform for which to build fluence-cli"
         type: string
@@ -54,7 +58,7 @@ jobs:
     runs-on: builder
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
@@ -149,8 +153,18 @@ jobs:
         if: inputs.channel != 'null'
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz
 
+      - name: Rename archive
+        run: mv dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
+
       - name: Upload archive to CI
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.platform }}
-          path: dist/fluence-*${{ inputs.platform }}*.tar.gz
+          path: fluence-cli-${{ inputs.platform }}.tar.gz
+
+      - name: Upload archive to release
+        if: inputs.tag != 'null'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: fluence-cli-${{ inputs.platform }}.tar.gz
+          tag_name: ${{ inputs.tag }}

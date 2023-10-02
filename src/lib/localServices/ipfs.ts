@@ -20,7 +20,7 @@ import type { IPFSHTTPClient } from "ipfs-http-client";
 
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS } from "../const.js";
-import { stringifyUnknown } from "../helpers/jsonStringify.js";
+import { stringifyUnknown } from "../helpers/utils.js";
 
 // !IMPORTANT for some reason when in tsconfig.json "moduleResolution" is set to "nodenext" - "ipfs-http-client" types all become "any"
 // so when working with this module - remove "nodenext" from "moduleResolution" so you can make sure types are correct
@@ -46,9 +46,9 @@ const upload = async (
   content: Parameters<IPFSHTTPClient["add"]>[0],
   log: (msg: unknown) => void,
 ) => {
-  const ipfsClient = await createIPFSClient(multiaddr);
-
   try {
+    const ipfsClient = await createIPFSClient(multiaddr);
+
     const { cid } = await ipfsClient.add(content, {
       pin: true,
       cidVersion: 1,
@@ -79,7 +79,9 @@ const upload = async (
 
     return cidString;
   } catch (error) {
-    commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
+    commandObj.error(
+      `\n\nFailed to upload to ${multiaddr}:\n\n${stringifyUnknown(error)}`,
+    );
   }
 };
 
@@ -120,7 +122,9 @@ const dagUpload = async (
 
     return cidString;
   } catch (error) {
-    commandObj.error(`failed to upload: ${stringifyUnknown(error)}`);
+    commandObj.error(
+      `\n\nFailed to upload to ${multiaddr}:\n\n${stringifyUnknown(error)}`,
+    );
   }
 };
 
@@ -143,7 +147,7 @@ export const doRegisterIpfsClient = async (
         await access(absolutePath);
       } catch {
         throw new Error(
-          `Failed IPFS upload. File ${absolutePath} doesn't exist`,
+          `Failed IPFS upload to ${multiaddr}. File ${absolutePath} doesn't exist`,
         );
       }
 
@@ -158,7 +162,7 @@ export const doRegisterIpfsClient = async (
         await access(absolutePath);
       } catch {
         throw new Error(
-          `Failed IPFS upload. File ${absolutePath} doesn't exist`,
+          `Failed IPFS upload to ${multiaddr}. File ${absolutePath} doesn't exist`,
         );
       }
 

@@ -71,22 +71,25 @@ type ConfigWithDependencies = {
 };
 
 function getCurrentlyUsedVersion(
+  packageManager: PackageManager,
   maybeConfig: ConfigWithDependencies | null,
   name: string,
-): string | void {
-  const versionFromConfig = maybeConfig?.dependencies?.npm?.[name];
+): string | undefined {
+  const versionFromConfig = maybeConfig?.dependencies?.[packageManager]?.[name];
 
   if (versionFromConfig !== undefined) {
     return versionFromConfig;
   }
 
-  if (isDefaultNpmPackage(name)) {
+  if (packageManager === "npm" && isDefaultNpmPackage(name)) {
     return versions.npm[name];
   }
 
-  if (isDefaultCargoPackage(name)) {
+  if (packageManager === "cargo" && isDefaultCargoPackage(name)) {
     return versions.cargo[name];
   }
+
+  return undefined;
 }
 
 type UpdateFluenceConfigIfVersionChangedArgs = {
@@ -104,7 +107,11 @@ const updateFluenceConfigIfVersionChanged = async ({
 }: Omit<UpdateFluenceConfigIfVersionChangedArgs, "maybeFluenceConfig"> & {
   fluenceConfig: FluenceConfig;
 }): Promise<void> => {
-  const currentlyUsedVersion = getCurrentlyUsedVersion(fluenceConfig, name);
+  const currentlyUsedVersion = getCurrentlyUsedVersion(
+    packageManager,
+    fluenceConfig,
+    name,
+  );
 
   if (version === currentlyUsedVersion) {
     return;
@@ -135,7 +142,11 @@ const updateUserConfigIfVersionChanged = async ({
   version,
   packageManager,
 }: UpdateUserConfigIfVersionChangedArgs): Promise<void> => {
-  const currentlyUsedVersion = getCurrentlyUsedVersion(userConfig, name);
+  const currentlyUsedVersion = getCurrentlyUsedVersion(
+    packageManager,
+    userConfig,
+    name,
+  );
 
   if (version === currentlyUsedVersion) {
     return;

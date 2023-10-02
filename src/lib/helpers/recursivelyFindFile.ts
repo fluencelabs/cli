@@ -23,21 +23,25 @@ export const recursivelyFindFile = async (
 ): Promise<null | string> => {
   let currentDirPath = dirPath;
 
-  while (true) {
+  let filePathToReturn: undefined | string | null;
+
+  while (filePathToReturn === undefined) {
     const filePath = join(currentDirPath, fileName);
 
     try {
-      // eslint-disable-next-line no-await-in-loop
       await access(filePath);
-      return filePath;
+      filePathToReturn = filePath;
     } catch {
       const parentDir = dirname(currentDirPath);
 
       if (parentDir === currentDirPath) {
-        return null;
+        filePathToReturn = null;
+        continue;
       }
 
       currentDirPath = parentDir;
     }
   }
+
+  return filePathToReturn;
 };

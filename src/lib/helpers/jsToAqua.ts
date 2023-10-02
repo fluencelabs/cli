@@ -21,15 +21,15 @@ import { dirname, join, parse } from "path";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import camelCase from "lodash-es/camelCase.js";
+import upperFirst from "lodash-es/upperFirst.js";
 
 import { validationErrorToString, ajv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { AQUA_EXT, FS_OPTIONS } from "../const.js";
 import { input } from "../prompt.js";
 
-import { capitalize } from "./capitilize.js";
 import { validateAquaTypeName, validateAquaName } from "./downloadFile.js";
-import { stringifyUnknown } from "./jsonStringify.js";
+import { stringifyUnknown } from "./utils.js";
 
 /**
  * In js object, json or yaml when you want to represent optional value and still generate a type for it you can use this syntax:
@@ -81,21 +81,21 @@ export const makeOptional = <T>(
   return optional;
 };
 
-const isNilInAqua = <T>(v: T | NilInAqua): v is NilInAqua => {
+function isNilInAqua(v: unknown): v is NilInAqua {
   return (
     v === undefined ||
     v === null ||
     (typeof v === "object" && Object.keys(v).length === 0) ||
     (Array.isArray(v) && v.length === 0)
   );
-};
+}
 
 function dedupeTypeDefs(typeDefs: string): string {
   return [...new Set(typeDefs.split("\n\n"))].join("\n\n");
 }
 
 function toAquaType(s: string): string | Error {
-  const aquaType = capitalize(camelCase(s));
+  const aquaType = upperFirst(camelCase(s));
   const validity = validateAquaTypeName(aquaType);
 
   if (typeof validity === "string") {

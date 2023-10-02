@@ -24,7 +24,7 @@ import type { AnySchema, JSONSchemaType, ValidateFunction } from "ajv";
 import { validationErrorToString } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import { FS_OPTIONS, SCHEMAS_DIR_NAME, YAML_EXT, YML_EXT } from "../const.js";
-import { jsonStringify } from "../helpers/jsonStringify.js";
+import { jsonStringify, removeProperties } from "../helpers/utils.js";
 import type { ValidationResult } from "../helpers/validations.js";
 import type { Mutable } from "../typeHelpers.js";
 
@@ -128,7 +128,7 @@ const migrateConfig = async <
   }
 
   if (configString !== migratedConfigString) {
-    await writeFile(configPath, migratedConfigString + "\n", FS_OPTIONS);
+    await saveConfig(configPath, migratedConfigString);
   }
 
   return {
@@ -212,7 +212,6 @@ export type InitConfigOptions<
   getConfigOrConfigDirPath: GetPath;
   getSchemaDirPath?: GetPath;
   validate?: ConfigValidateFunction<LatestConfig>;
-  docsInConfigs?: boolean;
 };
 
 type InitFunction<LatestConfig> =
@@ -276,7 +275,6 @@ export function getReadonlyConfigInitFunction<
       getConfigOrConfigDirPath,
       validate,
       getSchemaDirPath,
-      docsInConfigs = userConfig?.docsInConfigs ?? false,
     } = options;
 
     const configFullName = `${name}.${YAML_EXT}`;
@@ -356,7 +354,7 @@ export function getReadonlyConfigInitFunction<
         : `${schemaPathComment}\n${fileContent.trim()}\n`;
 
       if (configString !== fileContent) {
-        await writeFile(configPath, configString, FS_OPTIONS);
+        await saveConfig(configPath, configString);
       }
     } catch {
       if (getDefaultConfig === undefined) {
@@ -379,15 +377,18 @@ export function getReadonlyConfigInitFunction<
 
       const defConf = await getDefaultConfig();
 
-      configString = docsInConfigs
-        ? `${schemaPathComment}\n\n${documentationLinkComment}\n\n${defConf}`
-        : yamlDiffPatch(
-            `${schemaPathComment}${description}\n\n${documentationLinkComment}\n\n`,
-            {},
-            parse(defConf),
-          );
+      configString =
+        // this is basically the only place where userConfig is undefined until it's initialized in initCli
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        userConfig?.docsInConfigs ?? false
+          ? `${schemaPathComment}\n\n${documentationLinkComment}\n${defConf}`
+          : yamlDiffPatch(
+              `${schemaPathComment}\n${description}\n\n${documentationLinkComment}\n`,
+              {},
+              parse(defConf),
+            );
 
-      await writeFile(configPath, `${configString.trim()}\n`, FS_OPTIONS);
+      await saveConfig(configPath, configString);
     }
 
     const config: unknown = parse(configString);
@@ -438,6 +439,54 @@ export function getReadonlyConfigInitFunction<
 
 const initializedConfigs = new Set<string>();
 
+function formatConfig(configString: string) {
+  const formattedConfig = configString
+    .trim()
+    .split("\n")
+    .flatMap((line, i, ar) => {
+      // If it's an empty string - it was a newline before split - remove it
+      if (line.trim() === "") {
+        return [];
+      }
+
+      const maybePreviousLine = ar[i - 1];
+      const isComment = line.startsWith("#");
+      const isPreviousLineComment = maybePreviousLine?.startsWith("#") ?? false;
+
+      const addNewLineBeforeBlockOfComments =
+        isComment && !isPreviousLineComment;
+
+      if (addNewLineBeforeBlockOfComments) {
+        return ["", line];
+      }
+
+      const isFirstLine = maybePreviousLine === undefined;
+      const isIndentedCode = line.startsWith(" ");
+
+      const doNotAddNewLine =
+        isFirstLine || isIndentedCode || isComment || isPreviousLineComment;
+
+      if (doNotAddNewLine) {
+        return [line];
+      }
+
+      // If it's top level property - separate it with a new line ("" -> "\n" when joined)
+      return ["", line];
+    })
+    .join("\n");
+
+  return `${formattedConfig.trim()}\n`;
+}
+
+async function saveConfig(
+  configPath: string,
+  migratedConfigString: string,
+): Promise<string> {
+  const configToSave = formatConfig(migratedConfigString);
+  await writeFile(configPath, configToSave, FS_OPTIONS);
+  return configToSave;
+}
+
 export function getConfigInitFunction<
   Config extends BaseConfig,
   LatestConfig extends BaseConfig,
@@ -474,10 +523,17 @@ export function getConfigInitFunction<
       );
     }
 
-    const maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
-      options,
-      getDefaultConfig,
-    )();
+    let maybeInitializedReadonlyConfig: InitializedReadonlyConfig<LatestConfig> | null;
+
+    if (getDefaultConfig === undefined) {
+      maybeInitializedReadonlyConfig =
+        await getReadonlyConfigInitFunction(options)();
+    } else {
+      maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
+        options,
+        getDefaultConfig,
+      )();
+    }
 
     if (maybeInitializedReadonlyConfig === null) {
       return null;
@@ -501,16 +557,9 @@ export function getConfigInitFunction<
           );
         }
 
-        const config = { ...this };
-
-        for (const key in config) {
-          if (
-            Object.prototype.hasOwnProperty.call(config, key) &&
-            typeof config[key] === "function"
-          ) {
-            delete config[key];
-          }
-        }
+        const config = removeProperties({ ...this }, ([, v]) => {
+          return typeof v === "function";
+        });
 
         const [{ parse }, { yamlDiffPatch }] = await Promise.all([
           import("yaml"),
@@ -524,9 +573,7 @@ export function getConfigInitFunction<
         ).trim()}\n`;
 
         if (configString !== newConfigString) {
-          configString = newConfigString;
-
-          await writeFile(configPath, configString, FS_OPTIONS);
+          configString = await saveConfig(configPath, newConfigString);
         }
       },
       $getConfigString(): string {

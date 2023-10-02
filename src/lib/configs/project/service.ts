@@ -69,13 +69,15 @@ const moduleSchemaForService: JSONSchemaType<ServiceModuleV0> = {
 
 export const FACADE_MODULE_NAME = "facade";
 
+type Modules = { [FACADE_MODULE_NAME]: ServiceModuleV0 } & Record<
+  string,
+  ServiceModuleV0
+>;
+
 type ConfigV0 = {
   version: 0;
   name: string;
-  modules: { [FACADE_MODULE_NAME]: ServiceModuleV0 } & Record<
-    string,
-    ServiceModuleV0
-  >;
+  modules: Modules;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -103,6 +105,12 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   },
   required: ["version", "name", "modules"],
 };
+
+export function isValidServiceModules(
+  arg: Record<string, ServiceModuleV0>,
+): arg is Modules {
+  return FACADE_MODULE_NAME in arg;
+}
 
 const migrations: Migrations<Config> = [];
 
@@ -200,6 +208,9 @@ const getDefault: (
 # most importantly the modules that the service consists of.
 # You can use \`fluence service new\` command to generate a template for new service
 
+# config version
+version: 0
+
 # Service name.
 # Currently it is used for the service name only when you add service to fluence.yaml using "add" command.
 # But this name can be overridden to any other with the --name flag or manually in fluence.yaml
@@ -208,7 +219,6 @@ name: ${name}
 # A map of modules that the service consists of.
 # Service must have a facade module. Each module properties can be overridden
 modules:
-# # module name
   facade:
     # Either path to the module directory or
     # URL to the tar.gz archive which contains the content of the module directory
@@ -248,9 +258,6 @@ modules:
 #     # Aliases should be used in Marine module development because it's hard to know the full path to a file
 #     volumes:
 #       alias: "some/alias/path"
-
-# config version
-version: 0
 `;
   };
 };

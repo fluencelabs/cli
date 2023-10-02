@@ -32,9 +32,11 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
 } from "../../lib/const.js";
-import { commaSeparatedToArr } from "../../lib/helpers/commaSeparatedToArr.js";
-import { formatAquaLogs } from "../../lib/helpers/formatLogs.js";
-import { stringifyUnknown } from "../../lib/helpers/jsonStringify.js";
+import {
+  formatAquaLogs,
+  stringifyUnknown,
+  commaSepStrToArr,
+} from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
@@ -176,7 +178,7 @@ const getLogsArg = async ({
   const workersToGetLogsFor =
     maybeWorkerNamesString === undefined
       ? workerNamesSet
-      : commaSeparatedToArr(maybeWorkerNamesString);
+      : commaSepStrToArr(maybeWorkerNamesString);
 
   const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
     (workerName) => {

@@ -44,7 +44,7 @@ import {
   TRACING_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { jsonStringify } from "../lib/helpers/jsonStringify.js";
+import { jsonStringify } from "../lib/helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
 import {
@@ -99,7 +99,7 @@ export default class Run extends BaseCommand<typeof Run> {
     const: Flags.string({
       description:
         'Constant that will be used in the aqua code that you run (example of aqua code: SOME_CONST ?= "default_value"). Constant name must be upper cased.',
-      helpValue: "<NAME = value>",
+      helpValue: '<NAME="value">',
       multiple: true,
     }),
     // TODO: DXJ-207
@@ -212,12 +212,10 @@ export default class Run extends BaseCommand<typeof Run> {
     const stringResult =
       typeof result === "string" ? result : jsonStringify(result);
 
-    if (stringResult !== undefined) {
-      // If `--quite` flag is used then commandObj.log does nothing
-      // So we use console.log here instead
-      // eslint-disable-next-line no-console
-      console.log(stringResult);
-    }
+    // If `--quite` flag is used then commandObj.log does nothing
+    // So we use console.log here instead
+    // eslint-disable-next-line no-console
+    console.log(stringResult);
 
     await disconnectFluenceClient();
 
@@ -394,7 +392,7 @@ const fluenceRun = async (args: RunArgs) => {
     data: args.runData,
     filePath: args.filePath,
     imports: args.imports,
-    constants: args.const ?? [],
+    constants: formatConstants(args.const),
     logLevel: args.logLevelCompiler,
     noXor: args["no-xor"],
     noRelay: args["no-relay"],
@@ -426,3 +424,16 @@ const fluenceRun = async (args: RunArgs) => {
 
   return result;
 };
+
+function formatConstants(
+  constants: string[] | undefined,
+): string[] | undefined {
+  return (constants ?? []).map((c) => {
+    return c
+      .split("=")
+      .map((s) => {
+        return s.trim();
+      })
+      .join(" = ");
+  });
+}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { jsonStringify } from "./helpers/jsonStringify.js";
+import { jsonStringify } from "./helpers/utils.js";
 
 /**
  * Makes all properties in the object to be NOT readonly

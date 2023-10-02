@@ -17,6 +17,7 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { envSchema } from "./lib/configs/project/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
 import { projectSecretsSchema } from "./lib/configs/project/projectSecrets.js";
@@ -41,9 +42,10 @@ import {
   YAML_EXT,
   CLI_NAME_FULL,
   PROVIDER_CONFIG_FILE_NAME,
+  ENV_CONFIG_FILE_NAME,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
-import { jsonStringify } from "./lib/helpers/jsonStringify.js";
+import { jsonStringify } from "./lib/helpers/utils.js";
 
 const DOCS_CONFIGS_DIR_PATH = join("docs", "configs");
 
@@ -57,6 +59,7 @@ const configsInfo = Object.entries({
   [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
   [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
   [GLOBAL_CONFIG_FILE_NAME]: userConfigSchema,
+  [ENV_CONFIG_FILE_NAME]: envSchema,
 }).map(([filename, schema]) => {
   return {
     schemaPath: join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),

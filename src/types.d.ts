@@ -26,7 +26,7 @@ declare module "get-random-values" {
 }
 
 declare module "countly-sdk-nodejs" {
-  export const device_id: string;
+  export const device_id: string | undefined;
   function init(config: unknown): void;
   function begin_session(): void;
   function end_session(): void;

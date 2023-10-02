@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import type { EnvConfig } from "./project/env.js";
 import type { UserConfig } from "./user/config.js";
 
 export let userConfig: UserConfig;
 
 export const setUserConfig = (newUserConfig: UserConfig) => {
   userConfig = newUserConfig;
+};
+
+export let envConfig: EnvConfig | undefined;
+
+export const setEnvConfig = (newEnvConfig: EnvConfig) => {
+  envConfig = newEnvConfig;
 };

@@ -16,12 +16,14 @@
 
 /* eslint-disable no-process-exit */
 
+import assert from "node:assert";
+
 // eslint-disable-next-line import/extensions
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
-import { jsonStringify } from "./lib/helpers/jsonStringify.js";
+import { jsonStringify } from "./lib/helpers/utils.js";
 
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
@@ -67,6 +69,36 @@ function formatError(error) {
   }
 
   if (typeof error === "object" && error !== null) {
+    if (
+      // Is AVM error
+      "instruction" in error &&
+      typeof error.instruction === "string" &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      "peer_id" in error &&
+      typeof error.peer_id === "string"
+    ) {
+      let message = error.message;
+
+      try {
+        const regexpWithGroup = /(.*error message is )(.*)/g;
+
+        message = error.message.replace(
+          regexpWithGroup,
+          (_, group1, group2) => {
+            assert(typeof group1 === "string" && typeof group2 === "string");
+            return `${group1}${group2
+              .replace(/\\n/g, "\n")
+              .replace(/\\"/g, '"')}`;
+          },
+        );
+      } catch {}
+
+      return color.red(
+        `${message}\n\ninstruction: ${error.instruction}\npeer_id: ${error.peer_id}`,
+      );
+    }
+
     // some unexpected errors (e.g. avm) are just js objects - format and paint them red
     return color.red(jsonStringify(error));
   }
@@ -124,7 +156,7 @@ export const createErrorPromise = async (error) => {
 };
 
 /**
- * @type {(value?: unknown) => void}
+ * @type {((value?: unknown) => void) | undefined}
  */
 let resolveSessionEndPromise;
 export const sessionEndPromise = new Promise((resolve) => {

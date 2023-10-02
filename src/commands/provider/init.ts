@@ -31,7 +31,7 @@ import {
   defaultNumberProperties,
   type NumberProperty,
 } from "../../lib/const.js";
-import { commaSeparatedToArr } from "../../lib/helpers/commaSeparatedToArr.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { validatePositiveNumberOrEmpty } from "../../lib/helpers/validations.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm, input } from "../../lib/prompt.js";
@@ -112,25 +112,23 @@ async function generateUserProviderConfig() {
     await promptToSetNumberProperty(userProvidedConfig, numberProperty);
   }
 
+  let isAddingMore: boolean;
+
   do {
     const computePeer = await promptForComputePeer();
     userProvidedConfig.computePeers.push(computePeer);
 
-    const isAddingMore = await confirm({
+    isAddingMore = await confirm({
       message: "Do you want to add more compute peers",
     });
-
-    if (!isAddingMore) {
-      break;
-    }
-  } while (true);
+  } while (isAddingMore);
 
   const effectors = await input({
     message:
       "Enter comma-separated list of effector CIDs (default: empty list)",
   });
 
-  userProvidedConfig.offer.effectors = commaSeparatedToArr(effectors);
+  userProvidedConfig.offer.effectors = commaSepStrToArr(effectors);
 
   return userProvidedConfig;
 }

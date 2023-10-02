@@ -1,5 +1,77 @@
 # Changelog
 
+## [0.9.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.9.0...fluence-cli-v0.9.1) (2023-09-29)
+
+
+### Bug Fixes
+
+* fix deal logs ([#506](https://github.com/fluencelabs/cli/issues/506)) ([90a03e7](https://github.com/fluencelabs/cli/commit/90a03e714a49fa90fbf1ed528ab937c0f33e40bd))
+
+## [0.9.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.9...fluence-cli-v0.9.0) (2023-09-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* update deal to 0.2.16 ([#499](https://github.com/fluencelabs/cli/issues/499))
+
+### Bug Fixes
+
+* **template:** fix duplication in showSubnet ([#500](https://github.com/fluencelabs/cli/issues/500)) ([fda823b](https://github.com/fluencelabs/cli/commit/fda823b18aaa762af9db1c434acb527d2932e0cd))
+* update deal to 0.2.16 ([#499](https://github.com/fluencelabs/cli/issues/499)) ([5509f09](https://github.com/fluencelabs/cli/commit/5509f092a35e066d28bf6464e0f1e9d428501a6b))
+
+## [0.8.9](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.8...fluence-cli-v0.8.9) (2023-09-26)
+
+
+### Features
+
+* add config formatting ([#486](https://github.com/fluencelabs/cli/issues/486)) ([4767406](https://github.com/fluencelabs/cli/commit/4767406b4396908dc72efad0d4bd402d5cad0bec))
+* workers remove ([#480](https://github.com/fluencelabs/cli/issues/480)) ([71acd94](https://github.com/fluencelabs/cli/commit/71acd940f5dec0a1988478caecae42adf79bc8fd))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/aqua-api to v0.12.2 ([#498](https://github.com/fluencelabs/cli/issues/498)) ([4fcca42](https://github.com/fluencelabs/cli/commit/4fcca42198818643a94ce152af0a03bf1844ebac))
+
+## [0.8.8](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.7...fluence-cli-v0.8.8) (2023-09-25)
+
+
+### Bug Fixes
+
+* npm not being found when installed with yarn [fixes DXJ-479] ([#484](https://github.com/fluencelabs/cli/issues/484)) ([d0f4b2b](https://github.com/fluencelabs/cli/commit/d0f4b2b153839e19aa2772b86dbfa750690e0e7e))
+
+## [0.8.7](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.6...fluence-cli-v0.8.7) (2023-09-22)
+
+
+### Features
+
+* use Subnet.resolve ([#481](https://github.com/fluencelabs/cli/issues/481)) ([e13a64b](https://github.com/fluencelabs/cli/commit/e13a64beb0b9646e8739c0e99472584ee68a0de3))
+
+## [0.8.6](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.5...fluence-cli-v0.8.6) (2023-09-22)
+
+
+### Features
+
+* add `showSubnet` func ([#478](https://github.com/fluencelabs/cli/issues/478)) ([0b5d8d9](https://github.com/fluencelabs/cli/commit/0b5d8d9cce05313f8ddbaa3d2768bf072848ca99))
+
+
+### Bug Fixes
+
+* deal update ([#483](https://github.com/fluencelabs/cli/issues/483)) ([fed1933](https://github.com/fluencelabs/cli/commit/fed1933d82f4ac763bd8424acc3f95f4e86b45bd))
+
+## [0.8.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.4...fluence-cli-v0.8.5) (2023-09-18)
+
+
+### Features
+
+* format avm errors ([#472](https://github.com/fluencelabs/cli/issues/472)) ([c4a6e2d](https://github.com/fluencelabs/cli/commit/c4a6e2d6b1f5bde72ad38517f3cc15bd03a6ab5f))
+
+## [0.8.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.3...fluence-cli-v0.8.4) (2023-09-18)
+
+
+### Features
+
+* update dependencies ([#475](https://github.com/fluencelabs/cli/issues/475)) ([3ef0c85](https://github.com/fluencelabs/cli/commit/3ef0c85b4856456394a001775358d00a55a2b1af))
+
 ## [0.8.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.8.2...fluence-cli-v0.8.3) (2023-09-13)
 
 

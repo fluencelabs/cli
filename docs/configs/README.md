@@ -27,3 +27,6 @@ Defines user's secret keys that can be used across different Fluence projects. Y
 ## [config.yaml](./config.md)
 
 Defines global config for Fluence CLI
+## [env.yaml](./env.md)
+
+Defines user project preferences

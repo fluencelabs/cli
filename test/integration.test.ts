@@ -28,22 +28,25 @@ import { initFluenceConfigWithPath } from "../src/lib/configs/project/fluence.js
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
   DEFAULT_WORKER_NAME,
+  DOT_FLUENCE_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+  WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
-import { jsonStringify } from "../src/lib/helpers/jsonStringify.js";
-import { localPeerIds, local } from "../src/lib/localNodes.js";
+import { jsonStringify } from "../src/lib/helpers/utils.js";
+import { localPeerIds, local } from "../src/lib/multiaddres.js";
+import { hasKey } from "../src/lib/typeHelpers.js";
 
 import {
   fluence,
   init,
   maybeConcurrentTest,
-  multiaddrs,
   sortPeers,
   assertHasWorkerAndAnswer,
   assertHasPeer,
+  fluenceEnv,
 } from "./helpers.js";
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
@@ -113,17 +116,10 @@ describe("integration tests", () => {
   });
 
   maybeConcurrentTest("should work without project", async () => {
-    const relay = multiaddrs[0]?.multiaddr;
-
-    assert(
-      typeof relay === "string",
-      "multiaddrs is expected to be a non empty array",
-    );
-
     const result = await fluence({
       args: ["run"],
       flags: {
-        relay,
+        env: fluenceEnv,
         f: "identify()",
         i: join("test", "aqua", "smoke.aqua"),
         quiet: true,
@@ -268,7 +264,11 @@ describe("integration tests", () => {
         runDeployedServicesTimeoutReached = true;
       }, RUN_DEPLOYED_SERVICES_TIMEOUT);
 
-      while (!runDeployedServicesTimeoutReached) {
+      let isAttemptingToRunDeployedServices = true;
+
+      while (isAttemptingToRunDeployedServices) {
+        isAttemptingToRunDeployedServices = !runDeployedServicesTimeoutReached;
+
         try {
           const result = await fluence({
             args: ["run"],
@@ -286,8 +286,12 @@ describe("integration tests", () => {
           );
 
           const arrayOfResults = parsedResult
-            .map(assertHasPeer)
-            .sort(sortPeers);
+            .map((u) => {
+              return assertHasPeer(u);
+            })
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           const expected = localPeerIds.map((peer) => {
             return {
@@ -299,10 +303,9 @@ describe("integration tests", () => {
           // running the deployed services is expected to return a result from each of the localPeers we deployed to
           expect(arrayOfResults).toEqual(expected);
           clearTimeout(runDeployedServicesTimeout);
-          break;
+          isAttemptingToRunDeployedServices = false;
         } catch (e) {
           maybeRunDeployedError = e;
-          continue;
         }
       }
 
@@ -314,6 +317,56 @@ describe("integration tests", () => {
             : String(maybeRunDeployedError)
         }`,
       );
+
+      const workersConfigPath = join(
+        cwd,
+        DOT_FLUENCE_DIR_NAME,
+        WORKERS_CONFIG_FULL_FILE_NAME,
+      );
+
+      const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+
+      let allWorkersAreRemoved = await fluence({
+        args: ["run"],
+        flags: {
+          f: "areAllWorkersRemoved()",
+        },
+        cwd,
+      });
+
+      expect(allWorkersAreRemoved.trim()).toBe("false");
+
+      await fluence({
+        args: ["workers", "remove"],
+        cwd,
+      });
+
+      const newWorkersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+
+      assert(
+        !newWorkersConfig.includes("hosts:"),
+        `'hosts' property in workers.yaml config is expected to be removed. Got:\n\n${newWorkersConfig}`,
+      );
+
+      // Check workers where actually removed
+
+      await writeFile(workersConfigPath, workersConfig, FS_OPTIONS);
+
+      // Update "hosts.aqua" to contain previously removed workers
+      await fluence({
+        args: ["build"],
+        cwd,
+      });
+
+      allWorkersAreRemoved = await fluence({
+        args: ["run"],
+        flags: {
+          f: "areAllWorkersRemoved()",
+        },
+        cwd,
+      });
+
+      expect(allWorkersAreRemoved.trim()).toBe("true");
     },
   );
 
@@ -346,10 +399,7 @@ describe("integration tests", () => {
       try {
         const registered = await fluence({
           args: ["provider", "register"],
-          flags: {
-            network: "local",
-            "priv-key": PRIV_KEY,
-          },
+          flags: { "priv-key": PRIV_KEY },
           cwd,
         });
 
@@ -366,11 +416,7 @@ describe("integration tests", () => {
 
       const addPeer = await fluence({
         args: ["provider", "add-peer", ...peerIdFlags],
-        flags: {
-          network: "local",
-          "priv-key": PRIV_KEY,
-          units: 1,
-        },
+        flags: { "priv-key": PRIV_KEY, units: 1 },
         cwd,
       });
 
@@ -412,9 +458,6 @@ describe("integration tests", () => {
         `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`,
       );
 
-      const relay = multiaddrs[0]?.multiaddr;
-      fluenceConfig.relays = [relay!];
-
       fluenceConfig.spells = {
         newSpell: {
           get: pathToNewSpell,
@@ -437,23 +480,13 @@ describe("integration tests", () => {
       );
 
       fluenceConfig.deals[DEFAULT_WORKER_NAME].minWorkers = 3;
-
       await fluenceConfig.$commit();
 
-      log(`config commit done`);
-
-      log(`will deploy deal`);
-
-      const dealDeploy = await fluence({
+      await fluence({
         args: ["deal", "deploy"],
-        flags: {
-          "priv-key": PRIV_KEY,
-          network: "local",
-        },
+        flags: { "priv-key": PRIV_KEY },
         cwd,
       });
-
-      log(`deal deployed:`, dealDeploy);
 
       let runDeployedServicesTimeoutReached = false;
       let maybeRunDeployedError: unknown = null;
@@ -462,7 +495,11 @@ describe("integration tests", () => {
         runDeployedServicesTimeoutReached = true;
       }, RUN_DEPLOYED_SERVICES_TIMEOUT);
 
-      while (!runDeployedServicesTimeoutReached) {
+      let isAttemptingToRunDeployedServices = true;
+
+      while (isAttemptingToRunDeployedServices) {
+        isAttemptingToRunDeployedServices = !runDeployedServicesTimeoutReached;
+
         try {
           const result = await fluence({
             args: ["run"],
@@ -480,7 +517,9 @@ describe("integration tests", () => {
             `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array, but it is: ${result}`,
           );
 
-          const arrayOfResults = parsedResult.map(assertHasWorkerAndAnswer);
+          const arrayOfResults = parsedResult.map((u) => {
+            return assertHasWorkerAndAnswer(u);
+          });
 
           const resultsWithNoAnswer = arrayOfResults.filter(({ answer }) => {
             return answer === null;
@@ -502,7 +541,9 @@ describe("integration tests", () => {
                 peer: peer.peerId,
               };
             })
-            .sort(sortPeers);
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           const res = arrayOfResults
             .map(({ answer, worker }) => {
@@ -511,16 +552,17 @@ describe("integration tests", () => {
                 peer: worker.host_id,
               };
             })
-            .sort(sortPeers);
+            .sort((a, b) => {
+              return sortPeers(a, b);
+            });
 
           // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
           expect(res).toEqual(expected);
 
           clearTimeout(runDeployedServicesTimeout);
-          break;
+          isAttemptingToRunDeployedServices = false;
         } catch (e) {
           maybeRunDeployedError = e;
-          continue;
         }
       }
 
@@ -532,6 +574,42 @@ describe("integration tests", () => {
             : String(maybeRunDeployedError)
         }`,
       );
+
+      const showSubnetResult = await fluence({
+        args: ["run"],
+        flags: {
+          f: "showSubnet()",
+          quiet: true,
+        },
+        cwd,
+      });
+
+      const parsedShowSubnetResult = JSON.parse(showSubnetResult);
+
+      function isWorkerService(unknown: unknown) {
+        return (
+          hasKey("services", unknown) &&
+          Array.isArray(unknown.services) &&
+          unknown.services.every((i) => {
+            return typeof i === "string";
+          }) &&
+          hasKey("worker_id", unknown) &&
+          unknown.worker_id !== null &&
+          hasKey("host_id", unknown) &&
+          typeof unknown.host_id === "string"
+        );
+      }
+
+      assert(
+        Array.isArray(parsedShowSubnetResult) &&
+          parsedShowSubnetResult.every((unknown) => {
+            return isWorkerService(unknown);
+          }),
+        `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
+      );
+
+      // check logs are working
+      assert((await fluence({ args: ["deal", "logs"], cwd })) !== "");
     },
   );
 });

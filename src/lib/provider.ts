@@ -23,65 +23,61 @@ import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
+import type { FluenceConfigReadonly } from "./configs/project/fluence.js";
 import {
   DEAL_CONFIG,
-  isChainNetwork,
-  NETWORK_FLAG_NAME,
   CLI_CONNECTOR_URL,
   DEAL_RPC_CONFIG,
   WC_PROJECT_ID,
   WC_METADATA,
   type ContractsENV,
-  CONTRACTS_ENV,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  CLI_NAME,
+  CONTRACTS_ENV_TO_CHAIN_ID,
 } from "./const.js";
-import { stringifyUnknown } from "./helpers/jsonStringify.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { list } from "./prompt.js";
+import { resolveFluenceEnv } from "./multiaddres.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
 const KEY_QUERY_PARAM_NAME = "symKey";
 
-const DEFAULT_NETWORK = "testnet";
+export async function ensureChainNetwork(
+  fluenceEnvFromFlags: string | undefined,
+  maybeFluenceConfig: FluenceConfigReadonly | null,
+): Promise<ContractsENV> {
+  const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
 
-type EnsureChainNetworkArg = {
-  maybeNetworkFromFlags: string | undefined;
-  maybeDealsConfigNetwork: ContractsENV | undefined;
-};
-
-export const ensureChainNetwork = async ({
-  maybeNetworkFromFlags,
-  maybeDealsConfigNetwork,
-}: EnsureChainNetworkArg): Promise<ContractsENV> => {
-  const isValidNetworkFromFlags =
-    isChainNetwork(maybeNetworkFromFlags) ||
-    maybeNetworkFromFlags === undefined;
-
-  if (!isValidNetworkFromFlags) {
-    commandObj.warn(
-      `Invalid chain network: ${stringifyUnknown(maybeNetworkFromFlags)}`,
+  if (fluenceEnv !== "custom") {
+    commandObj.logToStderr(
+      `Using ${color.yellow(fluenceEnv)} environment to sign contracts`,
     );
 
-    return list({
-      message: "Select chain network",
-      options: [...CONTRACTS_ENV],
-      oneChoiceMessage(chainNetwork) {
-        return `Do you want to use ${color.yellow(
-          chainNetwork,
-        )} chain network?`;
-      },
-      onNoChoices() {
-        return commandObj.error("No chain network selected");
-      },
-      flagName: NETWORK_FLAG_NAME,
-    });
+    return fluenceEnv;
   }
 
-  const networkToUse =
-    maybeNetworkFromFlags ?? maybeDealsConfigNetwork ?? DEFAULT_NETWORK;
+  const customContractsEnv = maybeFluenceConfig?.customFluenceEnv?.contractsEnv;
 
-  return networkToUse;
-};
+  if (customContractsEnv === undefined) {
+    commandObj.error(
+      `${color.yellow("customFluenceEnv")} is not defined in ${color.yellow(
+        maybeFluenceConfig?.$getPath() ?? FLUENCE_CONFIG_FULL_FILE_NAME,
+      )}. Please make sure it's there or choose some other fluence environment using ${color.yellow(
+        `${CLI_NAME} default env`,
+      )}`,
+    );
+  }
+
+  commandObj.logToStderr(
+    `Using ${color.yellow(
+      customContractsEnv,
+    )} blockchain environment to sign contracts for ${color.yellow(
+      fluenceEnv,
+    )} fluence environment`,
+  );
+
+  return customContractsEnv;
+}
 
 export const getSigner = async (
   network: ContractsENV,
@@ -92,9 +88,7 @@ export const getSigner = async (
     : getWallet(privKey, network);
 };
 
-const getWalletConnectProvider = async (
-  network: ContractsENV,
-): Promise<ethers.Signer> => {
+async function getWalletConnectProvider(env: ContractsENV) {
   const { UniversalProvider } = await import(
     "@walletconnect/universal-provider"
   );
@@ -123,8 +117,6 @@ const getWalletConnectProvider = async (
     );
   });
 
-  color.yellow("Connecting to wallet...");
-
   const session = await provider.connect({
     namespaces: {
       eip155: {
@@ -135,7 +127,7 @@ const getWalletConnectProvider = async (
           "personal_sign",
           "eth_signTypedData",
         ],
-        chains: [`eip155:${DEAL_CONFIG[network].chainId}`],
+        chains: [`eip155:${CONTRACTS_ENV_TO_CHAIN_ID[env]}`],
         events: ["chainChanged", "accountsChanged"],
         rpcMap: DEAL_RPC_CONFIG,
       },
@@ -145,7 +137,7 @@ const getWalletConnectProvider = async (
   const walletAddress =
     session?.namespaces["eip155"]?.accounts[0]?.split(":")[2];
 
-  if (walletAddress === null) {
+  if (walletAddress === undefined) {
     throw new Error("Wallet address is not defined");
   }
 
@@ -153,7 +145,7 @@ const getWalletConnectProvider = async (
 
   const { ethers } = await import("ethers");
   return new ethers.BrowserProvider(provider).getSigner();
-};
+}
 
 const getWallet = async (
   privKey: string,
@@ -163,7 +155,7 @@ const getWallet = async (
 
   return new ethers.Wallet(
     privKey,
-    new ethers.JsonRpcProvider(DEAL_CONFIG[network].ethereumNodeUrl),
+    new ethers.JsonRpcProvider(DEAL_CONFIG[network].url),
   );
 };
 
