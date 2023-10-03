@@ -4,29 +4,44 @@ Defines config used for provider set up
 
 ## Properties
 
-| Property       | Type                      | Required | Description |
-|----------------|---------------------------|----------|-------------|
-| `computePeers` | [object](#computepeers)[] | **Yes**  |             |
-| `offer`        | [object](#offer)          | **Yes**  |             |
-| `version`      | number                    | **Yes**  |             |
+| Property       | Type                    | Required | Description |
+|----------------|-------------------------|----------|-------------|
+| `computePeers` | [object](#computepeers) | **Yes**  |             |
+| `offers`       | [object](#offers)       | **Yes**  |             |
+| `version`      | number                  | **Yes**  |             |
 
 ## computePeers
 
 ### Properties
 
+| Property      | Type                   | Required | Description |
+|---------------|------------------------|----------|-------------|
+| `ComputePeer` | [object](#computepeer) | No       |             |
+
+### ComputePeer
+
+#### Properties
+
 | Property | Type   | Required | Description |
 |----------|--------|----------|-------------|
-| `peerId` | string | **Yes**  |             |
-| `slots`  | number | **Yes**  |             |
+| `worker` | number | **Yes**  |             |
 
-## offer
+## offers
 
 ### Properties
 
-| Property           | Type     | Required | Description |
-|--------------------|----------|----------|-------------|
-| `effectors`        | string[] | **Yes**  |             |
-| `maxCollateral`    | number   | **Yes**  |             |
-| `minCollateral`    | number   | **Yes**  |             |
-| `minPricePerEpoch` | number   | **Yes**  |             |
+| Property | Type             | Required | Description |
+|----------|------------------|----------|-------------|
+| `Offer`  | [object](#offer) | No       |             |
+
+### Offer
+
+#### Properties
+
+| Property                 | Type     | Required | Description |
+|--------------------------|----------|----------|-------------|
+| `computePeers`           | string[] | **Yes**  |             |
+| `maxCollateralPerWorker` | number   | **Yes**  |             |
+| `minPricePerWorkerEpoch` | number   | **Yes**  |             |
+| `effectors`              | string[] | No       |             |
 
