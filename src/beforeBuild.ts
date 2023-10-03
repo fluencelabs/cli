@@ -19,6 +19,7 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { compileFromPath } from "@fluencelabs/aqua-api";
+import aquaToJs from "@fluencelabs/aqua-to-js";
 
 import { AQUA_EXT, FS_OPTIONS } from "./lib/const.js";
 
@@ -58,7 +59,6 @@ const compileInstallationSpellAqua = async (tracing = false) => {
           `${fileName}.${AQUA_EXT}`,
         ),
         imports: ["node_modules"],
-        targetType: "ts",
         tracing,
       });
 
@@ -66,8 +66,7 @@ const compileInstallationSpellAqua = async (tracing = false) => {
         throw new Error(compilationResult.errors.join("\n\n"));
       }
 
-      const tsSource = compilationResult.generatedSources[0]?.tsSource;
-      assert(typeof tsSource === "string");
+      const { sources } = await aquaToJs(compilationResult, "ts");
 
       await writeFile(
         join(
@@ -76,7 +75,7 @@ const compileInstallationSpellAqua = async (tracing = false) => {
             : COMPILED_INSTALLATION_SPELL_AQUA_PATH,
           `${fileName}.ts`,
         ),
-        tsSource,
+        sources,
         FS_OPTIONS,
       );
     }),

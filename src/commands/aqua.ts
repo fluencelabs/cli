@@ -150,9 +150,9 @@ export default class Aqua extends Command {
         logLevel: flags["log-level-compiler"],
         noRelay: flags["no-relay"],
         noXor: flags["no-xor"],
-        targetType,
         tracing: flags.tracing,
       },
+      targetType,
       outputPath: outputFlag,
       dry: flags.dry,
     };

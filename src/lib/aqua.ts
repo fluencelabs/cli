@@ -19,6 +19,7 @@ import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join, parse } from "node:path";
 
 import type { compileFromPath } from "@fluencelabs/aqua-api";
+import aquaToJs from "@fluencelabs/aqua-to-js";
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
@@ -52,27 +53,24 @@ const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
 
 const writeFileAndMakeSureDirExists = async (
   filePath: string,
-  data: string,
+  data: string | Promise<string>,
 ) => {
   const dirPath = parse(filePath).dir;
   await mkdir(dirPath, { recursive: true });
-  await writeFile(filePath, data, FS_OPTIONS);
+  await writeFile(filePath, await data, FS_OPTIONS);
 };
-
-const EMPTY_GENERATED_SOURCE: Omit<
-  Awaited<ReturnType<typeof compileFromPath>>["generatedSources"][number],
-  "name"
-> = {};
 
 export type CompileToFilesArgs = {
   compileArgs: Omit<Parameters<typeof compileFromPath>[0], "funcCall">;
   outputPath: string | undefined;
+  targetType: "ts" | "js" | "air";
   dry?: boolean;
 };
 
 export const compileToFiles = async ({
   compileArgs,
   outputPath,
+  targetType,
   dry = false,
 }: CompileToFilesArgs): Promise<void> => {
   const isInputPathADirectory = (
@@ -142,43 +140,49 @@ export const compileToFiles = async ({
   await Promise.all(
     compilationResultsWithFilePaths.flatMap(
       ({ compilationResult, aquaFilePath }) => {
-        const generatedSource =
-          compilationResult.generatedSources[0] ?? EMPTY_GENERATED_SOURCE;
-
         const parsedPath = parse(aquaFilePath);
         const fileNameWithoutExt = parsedPath.name;
         const dirPath = parsedPath.dir;
         const finalOutputDirPath = dirPath.replace(inputDirPath, outputPath);
 
-        if (compileArgs.targetType === "ts") {
-          if (generatedSource.tsSource === undefined) {
+        const hasNoFunctionsAndServices =
+          Object.keys(compilationResult.functions).length === 0 &&
+          Object.keys(compilationResult.services).length === 0;
+
+        if (targetType === "ts") {
+          if (hasNoFunctionsAndServices) {
             return [];
           }
 
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${TS_EXT}`),
-              generatedSource.tsSource,
+              aquaToJs(compilationResult, "ts").then(({ sources }) => {
+                return sources;
+              }),
             ),
           ];
         }
 
-        if (compileArgs.targetType === "js") {
-          if (
-            generatedSource.jsSource === undefined ||
-            generatedSource.tsTypes === undefined
-          ) {
+        if (targetType === "js") {
+          if (hasNoFunctionsAndServices) {
             return [];
           }
+
+          const aquaToJsPromise = aquaToJs(compilationResult, "js");
 
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${JS_EXT}`),
-              generatedSource.jsSource,
+              aquaToJsPromise.then(({ sources }) => {
+                return sources;
+              }),
             ),
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.d.${TS_EXT}`),
-              generatedSource.tsTypes,
+              aquaToJsPromise.then(({ types }) => {
+                return types;
+              }),
             ),
           ];
         }
