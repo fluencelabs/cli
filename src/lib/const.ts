@@ -37,17 +37,15 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
 export const numberProperties = [
-  "minPricePerEpoch",
-  "minCollateral",
-  "maxCollateral",
+  "minPricePerWorkerEpoch",
+  "maxCollateralPerWorker",
 ] as const;
 
 export type NumberProperty = (typeof numberProperties)[number];
 
 export const defaultNumberProperties: Record<NumberProperty, number> = {
-  minCollateral: 100500,
-  maxCollateral: 1 * 10 ** 18,
-  minPricePerEpoch: 83 * 10 ** 15,
+  maxCollateralPerWorker: 1 * 10 ** 18,
+  minPricePerWorkerEpoch: 83 * 10 ** 15,
 };
 
 export const U32_MAX = 4_294_967_295;

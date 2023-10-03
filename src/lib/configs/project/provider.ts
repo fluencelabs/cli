@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import {
@@ -33,21 +34,47 @@ import {
 } from "../initConfig.js";
 
 export type Offer = {
-  minPricePerEpoch: number;
-  minCollateral: number;
-  maxCollateral: number;
-  effectors: Array<string>;
+  minPricePerWorkerEpoch: number;
+  maxCollateralPerWorker: number;
+  computePeers: Array<string>;
+  effectors?: Array<string>;
 };
 
 export type ComputePeer = {
-  peerId: string;
-  slots: number;
+  worker: number;
 };
 
 type ConfigV0 = {
-  offer: Offer;
-  computePeers: Array<ComputePeer>;
+  offers: Record<string, Offer>;
+  computePeers: Record<string, ComputePeer>;
   version: 0;
+};
+
+const offerSchema: JSONSchemaType<Offer> = {
+  type: "object",
+  properties: {
+    minPricePerWorkerEpoch: { type: "number" },
+    maxCollateralPerWorker: { type: "number" },
+    computePeers: {
+      type: "array",
+      items: { type: "string" },
+      uniqueItems: true,
+    },
+    effectors: { type: "array", items: { type: "string" }, nullable: true },
+  },
+  required: [
+    "minPricePerWorkerEpoch",
+    "maxCollateralPerWorker",
+    "computePeers",
+  ],
+};
+
+const computePeerSchema: JSONSchemaType<ComputePeer> = {
+  type: "object",
+  properties: {
+    worker: { type: "number" },
+  },
+  required: ["worker"],
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -56,35 +83,25 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   description: `Defines config used for provider set up`,
   type: "object",
   properties: {
-    offer: {
+    offers: {
       type: "object",
+      additionalProperties: offerSchema,
       properties: {
-        minPricePerEpoch: { type: "number" },
-        minCollateral: { type: "number" },
-        maxCollateral: { type: "number" },
-        effectors: { type: "array", items: { type: "string" } },
+        Offer: offerSchema,
       },
-      required: [
-        "minPricePerEpoch",
-        "minCollateral",
-        "maxCollateral",
-        "effectors",
-      ],
+      required: [],
     },
     computePeers: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          peerId: { type: "string" },
-          slots: { type: "number" },
-        },
-        required: ["peerId", "slots"],
+      type: "object",
+      additionalProperties: computePeerSchema,
+      properties: {
+        ComputePeer: computePeerSchema,
       },
+      required: [],
     },
     version: { type: "number", const: 0 },
   },
-  required: ["version", "computePeers", "offer"],
+  required: ["version", "computePeers", "offers"],
 };
 
 const getConfigOrConfigDirPath = () => {
@@ -93,7 +110,7 @@ const getConfigOrConfigDirPath = () => {
 
 const getDefaultConfig = async ({
   computePeers,
-  offer,
+  offers,
 }: UserProvidedConfig) => {
   const { yamlDiffPatch } = await import("yaml-diff-patch");
 
@@ -101,7 +118,7 @@ const getDefaultConfig = async ({
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
 
-${yamlDiffPatch("", {}, { offer })}
+${yamlDiffPatch("", {}, { offers })}
 ${yamlDiffPatch("", {}, { computePeers })}
 
 # config version
@@ -121,7 +138,34 @@ type LatestConfig = ConfigV0;
 export type ProviderConfig = InitializedConfig<LatestConfig>;
 export type ProviderConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const validate: ConfigValidateFunction<LatestConfig> = () => {
+const validate: ConfigValidateFunction<LatestConfig> = (config) => {
+  const invalid: Array<{
+    offerName: string;
+    missingComputePeerNames: Array<string>;
+  }> = [];
+
+  for (const [offerName, { computePeers }] of Object.entries(config.offers)) {
+    const missingComputePeerNames = computePeers.filter((cp) => {
+      return !(cp in config.computePeers);
+    });
+
+    if (missingComputePeerNames.length > 0) {
+      invalid.push({ offerName, missingComputePeerNames });
+    }
+  }
+
+  if (invalid.length > 0) {
+    return invalid
+      .map(({ offerName, missingComputePeerNames }) => {
+        return `Offer ${color.yellow(
+          offerName,
+        )} has computePeers missing from the config's top level computePeers property: ${color.yellow(
+          missingComputePeerNames.join(", "),
+        )}`;
+      })
+      .join("\n");
+  }
+
   return true;
 };
 
