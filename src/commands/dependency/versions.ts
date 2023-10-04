@@ -80,6 +80,9 @@ export default class Versions extends BaseCommand<typeof Versions> {
           "internal dependencies": filterOutNonFluenceDependencies(
             CLIPackageJSON.dependencies,
           ),
+          "dev dependencies": filterOutNonFluenceDependencies(
+            CLIPackageJSON.devDependencies,
+          ),
           "js-client dependencies": filterOutNonFluenceDependencies(
             JSClientPackageJSON.dependencies,
           ),
