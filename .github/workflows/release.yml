@@ -37,8 +37,8 @@ jobs:
   promote:
     needs: release-please
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         platform:
           - linux-x64
           - darwin-x64
