@@ -19,6 +19,21 @@ To download and install `fluence` use our `install.sh` script
 curl -qL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | sh
 ```
 
+To select `fluence` version compatible with certain network (`stage`, `testnet`,
+`kras`) run:
+
+```shell
+fluence update <network>
+```
+
+You will receive notifications about updates when new version is promoted.
+
+For more information run:
+
+```shell
+fluence update --help
+```
+
 ### Using npm
 
 Prerequisites:
