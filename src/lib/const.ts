@@ -68,15 +68,15 @@ export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
 export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
   kras: {
-    url: "https://rpc.ankr.com/polygon_mumbai",
+    url: "https://rpc-mumbai.maticvigil.com",
     id: 80001,
   },
   testnet: {
-    url: "https://rpc.ankr.com/polygon_mumbai",
+    url: "https://rpc-mumbai.maticvigil.com",
     id: 80001,
   },
   stage: {
-    url: "https://rpc.ankr.com/polygon_mumbai",
+    url: "https://rpc-mumbai.maticvigil.com",
     id: 80001,
   },
   local: {
