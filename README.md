@@ -38,8 +38,8 @@ fluence update --help
 
 Prerequisites:
 
-- Linux or MacOS (there are currently some bugs on Windows)
-- [Node.js = 18.x.x](https://nodejs.org/)
+-   Linux or MacOS (there are currently some bugs on Windows)
+-   [Node.js = 18.x.x](https://nodejs.org/)
 
 To install and try Fluence CLI, run:
 
