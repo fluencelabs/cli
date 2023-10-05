@@ -41,7 +41,7 @@ esac
 # Construct archive name
 archive="fluence-cli-${os}-${arch}.tar.gz"
 
-# Get archive ling
+# Get archive link
 tag="$(curl -sS https://api.github.com/repos/fluencelabs/cli/releases/latest | jq -r .tag_name)"
 url="https://github.com/fluencelabs/cli/releases/download/${tag}/${archive}"
 
