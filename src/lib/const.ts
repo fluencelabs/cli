@@ -68,15 +68,15 @@ export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
 export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
   kras: {
-    url: "https://rpc-mumbai.maticvigil.com",
+    url: "https://kras-rpc.fluence.dev",
     id: 80001,
   },
   testnet: {
-    url: "https://rpc-mumbai.maticvigil.com",
+    url: "https://testnet-rpc.fluence.dev",
     id: 80001,
   },
   stage: {
-    url: "https://rpc-mumbai.maticvigil.com",
+    url: "https://stage-rpc.fluence.dev",
     id: 80001,
   },
   local: {
