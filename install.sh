@@ -39,7 +39,7 @@ case "$OS" in
 esac
 
 # Construct archive name
-archive="fluence-cli-${os}-${arch}.tar.gz"
+archive="fluence-${os}-${arch}.tar.gz"
 
 # Construct archive link
 url="https://fcli-binaries.s3.eu-west-1.amazonaws.com/channels/stable/${archive}"
@@ -48,7 +48,6 @@ url="https://fcli-binaries.s3.eu-west-1.amazonaws.com/channels/stable/${archive}
 mkdir -p "${FLUENCE_USER_DIR}/cli"
 
 # Download and extract archive
-echo "Downloading ${tag} for ${os}-${arch}"
 curl -L -sS "$url" -o "${TEMP}/${archive}"
 tar --strip-components=1 -xzf "${TEMP}/${archive}" -C "${FLUENCE_USER_DIR}/cli"
 
