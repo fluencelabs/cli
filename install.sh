@@ -1,4 +1,8 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+
+# set current working directory to script directory to run script from everywhere
+cd "$(dirname "$0")"
 
 # Get the Operating System and Architecture type
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
