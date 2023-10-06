@@ -17,6 +17,7 @@
 import assert from "node:assert";
 import path, { join } from "node:path";
 
+import { kras } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
@@ -49,7 +50,7 @@ import {
   validateAllVersionsAreExact,
   validateBatch,
 } from "../../helpers/validations.js";
-import { resolveRelays, localMultiaddrs } from "../../multiaddres.js";
+import { resolveRelays } from "../../multiaddres.js";
 import {
   ensureSrcAquaMainPath,
   getFluenceDir,
@@ -529,7 +530,7 @@ deals:
 # customFluenceEnv:
 #   contractsEnv: local
 #   relays:
-#     - "${localMultiaddrs[0]}"
+#     - "${kras[0]?.multiaddr}"
 # # A map with service names as keys and service configs as values.
 # # Service names must start with a lowercase letter and contain only letters numbers and underscores.
 # # You can use \`fluence service new\` or \`fluence service add\` command to add a service
@@ -759,7 +760,7 @@ const migrations: Migrations<Config> = [
         contractsEnv: chainNetwork ?? "testnet",
         relays:
           relays === undefined || typeof relays === "string"
-            ? resolveRelays(relays ?? "kras", null)
+            ? resolveRelays(relays ?? "kras", null, null)
             : relays,
       };
     }

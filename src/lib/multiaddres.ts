@@ -15,12 +15,15 @@
  */
 
 import assert from "node:assert";
+import { access, readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import {
   krasnodar,
   stage,
   testNet,
   type Node,
+  kras,
 } from "@fluencelabs/fluence-network-environment";
 // TODO: replace with dynamic import
 import { multiaddr } from "@multiformats/multiaddr";
@@ -29,20 +32,28 @@ import sample from "lodash-es/sample.js";
 
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
+import { genPrivKeys } from "./configs/project/dockerCompose.js";
 import type {
   FluenceConfig,
   FluenceConfigReadonly,
 } from "./configs/project/fluence.js";
 import {
-  type ContractsENV,
+  initNewProviderConfig,
+  initReadonlyProviderConfig,
+} from "./configs/project/provider.js";
+import {
   ENV_FLAG_NAME,
   FLUENCE_ENVS,
   isFluenceEnv,
   type FluenceEnv,
   CONTRACTS_ENV,
+  type PublicFluenceEnv,
+  FS_OPTIONS,
 } from "./const.js";
-import { commaSepStrToArr } from "./helpers/utils.js";
-import { input, list } from "./prompt.js";
+import { generateUserProviderConfig } from "./generateUserProviderConfig.js";
+import { commaSepStrToArr, base64ToUint8Array } from "./helpers/utils.js";
+import { ensureFluenceSecretsDir } from "./paths.js";
+import { confirm, input, list } from "./prompt.js";
 
 export function fluenceEnvPrompt(): Promise<FluenceEnv> {
   return list({
@@ -99,15 +110,7 @@ export async function resolveFluenceEnv(
   return fluenceEnvFromPrompt;
 }
 
-export const localMultiaddrs: string[] = [
-  "/ip4/127.0.0.1/tcp/9991/ws/p2p/12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR",
-  "/ip4/127.0.0.1/tcp/9992/ws/p2p/12D3KooWQdpukY3p2DhDfUfDgphAqsGu5ZUrmQ4mcHSGrRag6gQK",
-  "/ip4/127.0.0.1/tcp/9993/ws/p2p/12D3KooWRT8V5awYdEZm6aAV9HWweCEbhWd7df4wehqHZXAB7yMZ",
-];
-
-export const localPeerIds: string[] = localMultiaddrs.map((multiaddr) => {
-  return getPeerId(multiaddr);
-});
+export const LOCAL_PREFIX = "/ip4/127.0.0.1/tcp/9991/ws/p2p/";
 
 export function multiaddrsToNodes(multiaddrs: string[]): Node[] {
   return multiaddrs.map((multiaddr) => {
@@ -118,13 +121,101 @@ export function multiaddrsToNodes(multiaddrs: string[]): Node[] {
   });
 }
 
-export const local: Node[] = multiaddrsToNodes(localMultiaddrs);
+async function getPeerIdFromSecretKey(secretKey: string) {
+  const { createClient } = await import("@fluencelabs/js-client");
 
-const ADDR_MAP: Record<ContractsENV, Array<Node>> = {
+  const client = await createClient(kras[0]?.multiaddr ?? "", {
+    keyPair: {
+      source: base64ToUint8Array(secretKey),
+      type: "Ed25519",
+    },
+  });
+
+  const peerId = client.getPeerId();
+  await client.disconnect();
+  return peerId;
+}
+
+export async function getLocalNodes(fluenceEnv: FluenceEnv) {
+  if (fluenceEnv !== "local") {
+    return null;
+  }
+
+  let providerConfig = await initReadonlyProviderConfig();
+
+  if (providerConfig === null) {
+    providerConfig = await initNewProviderConfig(
+      await generateUserProviderConfig(),
+    );
+  }
+
+  const secretsDirPath = await ensureFluenceSecretsDir();
+
+  const peers = await Promise.all(
+    Object.keys(providerConfig.computePeers).map(async (name) => {
+      const secretKeyPath = join(secretsDirPath, `${name}.txt`);
+
+      try {
+        await access(secretKeyPath);
+      } catch {
+        return {
+          name,
+        };
+      }
+
+      const secretKey = await readFile(secretKeyPath, FS_OPTIONS);
+      return { name, peerId: await getPeerIdFromSecretKey(secretKey) };
+    }),
+  );
+
+  const peersWithoutSecretKey = peers.filter((p): p is { name: string } => {
+    return p.peerId === undefined;
+  });
+
+  let newPeerIds: Record<string, string> = {};
+
+  if (peersWithoutSecretKey.length > 0) {
+    const generateSecretKeys = await confirm({
+      message: `Private keys for peers are missing at:\n${peersWithoutSecretKey
+        .map(({ name }) => {
+          return join(secretsDirPath, name);
+        })
+        .join("\n")}\nDo you want to generate them?`,
+    });
+
+    if (!generateSecretKeys) {
+      commandObj.error("Can't use local network without private keys");
+    }
+
+    const privKeys = await genPrivKeys(
+      peersWithoutSecretKey.map(({ name }) => {
+        return name;
+      }),
+    );
+
+    newPeerIds = Object.fromEntries(
+      await Promise.all(
+        privKeys.map(async ([name, , secretKey]) => {
+          return [name, await getPeerIdFromSecretKey(secretKey)] as const;
+        }),
+      ),
+    );
+  }
+
+  return peers.map(({ name, peerId = newPeerIds[name] }): Node => {
+    assert(
+      peerId !== undefined,
+      "Unreachable: we generated missing peerIds on the previous step",
+    );
+
+    return { multiaddr: `${LOCAL_PREFIX}${peerId}`, peerId };
+  });
+}
+
+const ADDR_MAP: Record<PublicFluenceEnv, Array<Node>> = {
   kras: krasnodar,
   stage,
   testnet: testNet,
-  local,
 };
 
 export async function ensureCustomRelays(fluenceConfig: FluenceConfig) {
@@ -188,9 +279,18 @@ function getCustomRelays(
 export function resolveRelays(
   fluenceEnv: FluenceEnv,
   maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+  localNodes: Node[] | null,
 ): Array<string> {
   if (fluenceEnv === "custom") {
     return getCustomRelays(maybeFluenceConfigReadonly);
+  }
+
+  if (fluenceEnv === "local") {
+    return (
+      localNodes?.map(({ multiaddr }) => {
+        return multiaddr;
+      }) ?? []
+    );
   }
 
   return ADDR_MAP[fluenceEnv].map((node) => {
@@ -205,6 +305,7 @@ export function resolveRelays(
 function getMaybeNamedNode(
   maybeRelayName: string | undefined,
   maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+  localNodes: Node[] | null,
 ): undefined | Node {
   if (maybeRelayName === undefined) {
     return undefined;
@@ -222,6 +323,8 @@ function getMaybeNamedNode(
   const relays =
     maybeFluenceEnv === "custom"
       ? multiaddrsToNodes(getCustomRelays(maybeFluenceConfigReadonly))
+      : maybeFluenceEnv === "local"
+      ? localNodes ?? []
       : ADDR_MAP[maybeFluenceEnv];
 
   const [, indexString] = maybeRelayName.split("-");
@@ -268,8 +371,11 @@ function parseNamedPeer(
 function getRandomRelayAddr(
   fluenceEnv: FluenceEnv,
   maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+  localNodes: Node[] | null,
 ): string {
-  const r = sample(resolveRelays(fluenceEnv, maybeFluenceConfigReadonly));
+  const r = sample(
+    resolveRelays(fluenceEnv, maybeFluenceConfigReadonly, localNodes),
+  );
 
   assert(
     r !== undefined,
@@ -283,29 +389,35 @@ export function resolveRelay(
   maybeRelay: string | undefined,
   fluenceEnv: FluenceEnv,
   maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+  localNodes: Node[] | null,
 ) {
   return (
-    getMaybeNamedNode(maybeRelay, maybeFluenceConfigReadonly)?.multiaddr ??
+    getMaybeNamedNode(maybeRelay, maybeFluenceConfigReadonly, localNodes)
+      ?.multiaddr ??
     maybeRelay ??
-    getRandomRelayAddr(fluenceEnv, maybeFluenceConfigReadonly)
+    getRandomRelayAddr(fluenceEnv, maybeFluenceConfigReadonly, localNodes)
   );
 }
 
 export function resolvePeerId(
   peerIdOrNamedNode: string,
   maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+  localNodes: Node[] | null,
 ) {
   return (
-    getMaybeNamedNode(peerIdOrNamedNode, maybeFluenceConfigReadonly)?.peerId ??
-    peerIdOrNamedNode
+    getMaybeNamedNode(peerIdOrNamedNode, maybeFluenceConfigReadonly, localNodes)
+      ?.peerId ?? peerIdOrNamedNode
   );
 }
 
 export function getRandomPeerId(
   fluenceEnv: FluenceEnv,
   maybeFluenceConfigReadonly: FluenceConfigReadonly | null,
+  localNodes: Node[] | null,
 ): string {
-  return getPeerId(getRandomRelayAddr(fluenceEnv, maybeFluenceConfigReadonly));
+  return getPeerId(
+    getRandomRelayAddr(fluenceEnv, maybeFluenceConfigReadonly, localNodes),
+  );
 }
 
 export function getPeerId(addr: string): string {

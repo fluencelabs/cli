@@ -24,7 +24,7 @@ import { commandObj } from "../../lib/commandObj.js";
 import { initNewProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
+import { getProjectSecretKey, getUserSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { list } from "../../lib/prompt.js";
 
@@ -72,8 +72,8 @@ export default class Default extends BaseCommand<typeof Default> {
 
       return (
         (flags.user
-          ? await getUserKeyPair(keyPairName)
-          : await getProjectKeyPair(keyPairName)) !== undefined ||
+          ? await getUserSecretKey(keyPairName)
+          : await getProjectSecretKey(keyPairName)) !== undefined ||
         `Key-pair with name ${color.yellow(
           keyPairName,
         )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
@@ -95,22 +95,21 @@ export default class Default extends BaseCommand<typeof Default> {
             `There are no key-pairs to set as default at ${secretsConfigPath}`,
           );
         },
-        options: (flags.user
-          ? userSecretsConfig
-          : projectSecretsConfig
-        ).keyPairs.map((value): string => {
-          return value.name;
-        }),
+        options: Object.keys(
+          flags.user
+            ? userSecretsConfig.secretKeys
+            : projectSecretsConfig.secretKeys ?? {},
+        ),
       });
     }
 
     assert(typeof keyPairName === "string");
 
     if (flags.user) {
-      userSecretsConfig.defaultKeyPairName = keyPairName;
+      userSecretsConfig.defaultSecretKey = keyPairName;
       await userSecretsConfig.$commit();
     } else {
-      projectSecretsConfig.defaultKeyPairName = keyPairName;
+      projectSecretsConfig.defaultSecretKey = keyPairName;
       await projectSecretsConfig.$commit();
     }
 

@@ -26,8 +26,8 @@ import {
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { generateKeyPair } from "../../lib/helpers/utils.js";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
+import { genSecretKeyString } from "../../lib/helpers/utils.js";
+import { getProjectSecretKey, getUserSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm, input } from "../../lib/prompt.js";
 
@@ -81,8 +81,8 @@ export default class New extends BaseCommand<typeof New> {
     ): Promise<true | string> => {
       return (
         (flags.user
-          ? await getUserKeyPair(keyPairName)
-          : await getProjectKeyPair(keyPairName)) === undefined ||
+          ? await getUserSecretKey(keyPairName)
+          : await getProjectSecretKey(keyPairName)) === undefined ||
         `Key-pair with name ${color.yellow(
           keyPairName,
         )} already exists at ${secretsConfigPath}. Please, choose another name.`
@@ -100,12 +100,16 @@ export default class New extends BaseCommand<typeof New> {
       });
     }
 
-    const newKeyPair = await generateKeyPair(keyPairName);
+    const secretKey = await genSecretKeyString();
 
     if (flags.user) {
-      userSecretsConfig.keyPairs.push(newKeyPair);
+      userSecretsConfig.secretKeys[keyPairName] = secretKey;
     } else {
-      projectSecretsConfig.keyPairs.push(newKeyPair);
+      if (projectSecretsConfig.secretKeys === undefined) {
+        projectSecretsConfig.secretKeys = {};
+      }
+
+      projectSecretsConfig.secretKeys[keyPairName] = secretKey;
     }
 
     if (
@@ -119,9 +123,9 @@ export default class New extends BaseCommand<typeof New> {
         : false)
     ) {
       if (flags.user) {
-        userSecretsConfig.defaultKeyPairName = newKeyPair.name;
+        userSecretsConfig.defaultSecretKey = keyPairName;
       } else {
-        projectSecretsConfig.defaultKeyPairName = newKeyPair.name;
+        projectSecretsConfig.defaultSecretKey = keyPairName;
       }
     }
 

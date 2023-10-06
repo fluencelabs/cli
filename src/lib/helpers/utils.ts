@@ -25,7 +25,7 @@ export function commaSepStrToArr(commaSepStr: string) {
   });
 }
 
-const comment = (commentToken: string) => {
+function comment(commentToken: string) {
   return (text: string): string => {
     return text
       .split("\n")
@@ -38,19 +38,19 @@ const comment = (commentToken: string) => {
       })
       .join("\n");
   };
-};
+}
 
 export const jsComment = comment("//");
 export const aquaComment = comment("--");
 
-export const jsonStringify = (
+export function jsonStringify(
   unknown: unknown,
   replacer: Parameters<typeof JSON.stringify>[1] = null,
-): string => {
+): string {
   return JSON.stringify(unknown, replacer, 2);
-};
+}
 
-export const stringifyUnknown = (unknown: unknown): string => {
+export function stringifyUnknown(unknown: unknown): string {
   try {
     if (unknown instanceof CLIError) {
       return String(unknown);
@@ -68,12 +68,12 @@ export const stringifyUnknown = (unknown: unknown): string => {
   } catch {
     return String(unknown);
   }
-};
+}
 
-const flagToArg = (
+function flagToArg(
   flagName: string,
   flagValue: string | number | boolean | undefined,
-): string[] => {
+): string[] {
   if (flagValue === undefined || flagValue === false) {
     return [];
   }
@@ -85,7 +85,7 @@ const flagToArg = (
   }
 
   return [flag, String(flagValue)];
-};
+}
 
 export type Flags = Record<
   string,
@@ -142,25 +142,31 @@ function formatMessage(message: string) {
   return jsonStringify(message);
 }
 
-const genSecretKey = async () => {
+async function genSecretKey() {
   const getRandomValues = (await import("get-random-values")).default;
   return getRandomValues(new Uint8Array(32));
-};
+}
 
-const uint8ArrayToBase64 = (array: Uint8Array) => {
+function uint8ArrayToBase64(array: Uint8Array) {
   return Buffer.from(array).toString("base64");
-};
+}
 
-export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
+export async function genSecretKeyString(): Promise<string> {
+  return uint8ArrayToBase64(await genSecretKey());
+}
+
+export async function genSecretKeyStringWithName(
+  name: string,
+): Promise<ConfigKeyPair> {
   return {
-    secretKey: uint8ArrayToBase64(await genSecretKey()),
+    secretKey: await genSecretKeyString(),
     name,
   };
-};
+}
 
-export const base64ToUint8Array = (base64: string) => {
+export function base64ToUint8Array(base64: string) {
   return new Uint8Array(Buffer.from(base64, "base64"));
-};
+}
 
 export function removeProperties<T>(
   obj: Record<string, T>,

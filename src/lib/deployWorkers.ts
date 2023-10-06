@@ -47,7 +47,12 @@ import type {
   Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import { FS_OPTIONS, HOSTS_FILE_NAME, DEALS_FILE_NAME } from "./const.js";
+import {
+  FS_OPTIONS,
+  HOSTS_FILE_NAME,
+  DEALS_FILE_NAME,
+  type FluenceEnv,
+} from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -63,7 +68,7 @@ import {
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
-import { resolvePeerId } from "./multiaddres.js";
+import { getLocalNodes, resolvePeerId } from "./multiaddres.js";
 import {
   ensureFluenceAquaDealsPath,
   ensureFluenceAquaHostsPath,
@@ -127,6 +132,7 @@ type PrepareForDeployArg = {
   fluenceConfig: FluenceConfig;
   aquaImports: Array<string>;
   noBuild: boolean;
+  fluenceEnv: FluenceEnv;
   marineBuildArgs: undefined | string;
   workersConfig?: WorkersConfigReadonly;
   initPeerId?: string;
@@ -138,11 +144,13 @@ export const prepareForDeploy = async ({
   fluenceConfig,
   aquaImports,
   noBuild,
+  fluenceEnv,
   marineBuildArgs,
   workersConfig: maybeWorkersConfig,
   initPeerId: maybeInitPeerId,
   hosts = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
+  const localNodes = await getLocalNodes(fluenceEnv);
   const hostsOrDealsString = hosts ? "hosts" : "deals";
 
   const hostsOrDeals = Object.entries(
@@ -595,7 +603,7 @@ export const prepareForDeploy = async ({
       return {
         name: workerName,
         hosts: peerIdsOrNamedNodes.map((peerIdOrNamedNode) => {
-          return resolvePeerId(peerIdOrNamedNode, fluenceConfig);
+          return resolvePeerId(peerIdOrNamedNode, fluenceConfig, localNodes);
         }),
         config: {
           services,

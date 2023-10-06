@@ -20,7 +20,7 @@ import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj, isInteractive } from "../../lib/commandObj.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { initNewProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
 import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
@@ -28,7 +28,7 @@ import {
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
+import { getProjectSecretKey, getUserSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { list } from "../../lib/prompt.js";
 
@@ -76,15 +76,18 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
       return (
         (flags.user
-          ? await getUserKeyPair(keyPairName)
-          : await getProjectKeyPair(keyPairName)) !== undefined ||
+          ? await getUserSecretKey(keyPairName)
+          : await getProjectSecretKey(keyPairName)) !== undefined ||
         `Key-pair with name ${color.yellow(
           keyPairName,
         )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
       );
     };
 
-    if (flags.user && userSecretsConfig.keyPairs.length === 1) {
+    if (
+      flags.user &&
+      Object.entries(userSecretsConfig.secretKeys).length === 1
+    ) {
       return commandObj.error(
         `There is only one key-pair in ${secretsConfigPath} and it can't be removed, because having at least one user's key-pair is required.`,
       );
@@ -105,102 +108,21 @@ export default class Remove extends BaseCommand<typeof Remove> {
             `There are no key-pairs to remove at ${secretsConfigPath}`,
           );
         },
-        options: (flags.user
-          ? userSecretsConfig
-          : projectSecretsConfig
-        ).keyPairs.map((value): string => {
-          return value.name;
-        }),
+        options: Object.keys(
+          flags.user
+            ? userSecretsConfig.secretKeys
+            : projectSecretsConfig.secretKeys ?? {},
+        ),
       });
     }
 
     assert(typeof keyPairName === "string");
 
-    if (flags.user) {
-      userSecretsConfig.keyPairs = userSecretsConfig.keyPairs.filter(
-        ({ name }): boolean => {
-          return name !== keyPairName;
-        },
-      );
-
-      if (keyPairName === userSecretsConfig.defaultKeyPairName) {
-        if (isInteractive) {
-          const newDefaultKeyPairName = await list({
-            message: `Select new default key-pair name for user's secrets`,
-            oneChoiceMessage: (choice: string): string => {
-              return `Do you want to set ${color.yellow(
-                choice,
-              )} as default key-pair?`;
-            },
-            onNoChoices: (): never => {
-              commandObj.error(
-                "There are no key-pairs to set as default for user's secrets",
-              );
-            },
-            options: userSecretsConfig.keyPairs.map((value): string => {
-              return value.name;
-            }),
-          });
-
-          assert(typeof newDefaultKeyPairName === "string");
-
-          userSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
-        } else {
-          const newDefaultKeyPairName = userSecretsConfig.keyPairs[0]?.name;
-
-          if (newDefaultKeyPairName === undefined) {
-            throw new Error("Unreachable");
-          }
-
-          userSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
-        }
-      }
-
-      await userSecretsConfig.$commit();
-    } else {
-      projectSecretsConfig.keyPairs = projectSecretsConfig.keyPairs.filter(
-        ({ name }): boolean => {
-          return name !== keyPairName;
-        },
-      );
-
-      if (projectSecretsConfig.keyPairs.length === 0) {
-        delete projectSecretsConfig.defaultKeyPairName;
-      } else if (keyPairName === projectSecretsConfig.defaultKeyPairName) {
-        if (isInteractive) {
-          const newDefaultKeyPairName = await list({
-            message: `Select new default key-pair name for project's secrets`,
-            oneChoiceMessage: (choice: string): string => {
-              return `Do you want to set ${color.yellow(
-                choice,
-              )} as default key-pair?`;
-            },
-            onNoChoices: (): never => {
-              commandObj.error(
-                "There are no key-pairs to set as default for project's secrets",
-              );
-            },
-            options: projectSecretsConfig.keyPairs.map((value): string => {
-              return value.name;
-            }),
-          });
-
-          assert(typeof newDefaultKeyPairName === "string");
-
-          projectSecretsConfig.defaultKeyPairName = newDefaultKeyPairName;
-        } else {
-          const newDefaultKeypairName = projectSecretsConfig.keyPairs[0]?.name;
-
-          if (newDefaultKeypairName === undefined) {
-            throw new Error("Unreachable");
-          }
-
-          projectSecretsConfig.defaultKeyPairName = newDefaultKeypairName;
-        }
-      }
-
-      await projectSecretsConfig.$commit();
-    }
+    await removeKeyPair(
+      flags.user,
+      keyPairName,
+      flags.user ? userSecretsConfig : projectSecretsConfig,
+    );
 
     commandObj.log(
       `Key-pair with name ${color.yellow(
@@ -208,4 +130,43 @@ export default class Remove extends BaseCommand<typeof Remove> {
       )} successfully removed from ${secretsConfigPath}`,
     );
   }
+}
+
+async function removeKeyPair(
+  isUserSecrets: boolean,
+  keyPairName: string,
+  config: {
+    secretKeys?: Record<string, string>;
+    defaultSecretKey?: string;
+    $commit: () => Promise<void>;
+  },
+): Promise<void> {
+  config.secretKeys = Object.fromEntries(
+    Object.entries(config.secretKeys ?? {}).filter(([name]): boolean => {
+      return name !== keyPairName;
+    }),
+  );
+
+  const deletedDefaultKey = keyPairName === config.defaultSecretKey;
+
+  if (deletedDefaultKey && isUserSecrets) {
+    const newDefaultKeyPairName = await list({
+      message: `Select new default key-pair name`,
+      oneChoiceMessage: (choice: string): string => {
+        return `Do you want to set ${color.yellow(
+          choice,
+        )} as default key-pair?`;
+      },
+      onNoChoices: (): never => {
+        commandObj.error("There are no key-pairs to set as default");
+      },
+      options: Object.keys(config.secretKeys),
+    });
+
+    config.defaultSecretKey = newDefaultKeyPairName;
+  } else if (deletedDefaultKey) {
+    delete config.defaultSecretKey;
+  }
+
+  await config.$commit();
 }

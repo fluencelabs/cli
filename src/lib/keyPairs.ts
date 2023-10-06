@@ -14,43 +14,27 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
 import { color } from "@oclif/color";
 
 import { commandObj, isInteractive } from "./commandObj.js";
-import type { ConfigKeyPair } from "./configs/keyPair.js";
 import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
 import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
 import { list, type Choices } from "./prompt.js";
 
-export const getUserKeyPair = async (
-  keyPairName: string | undefined,
-): Promise<ConfigKeyPair | undefined> => {
+export async function getUserSecretKey(
+  secretKeyName: string | undefined,
+): Promise<string | undefined> {
   const userSecretsConfig = await initReadonlyUserSecretsConfig();
 
-  if (keyPairName === undefined) {
-    const defaultKeyPair = userSecretsConfig.keyPairs.find(
-      ({ name }): boolean => {
-        return name === userSecretsConfig.defaultKeyPairName;
-      },
-    );
+  return userSecretsConfig.secretKeys[
+    secretKeyName ?? userSecretsConfig.defaultSecretKey
+  ];
+}
 
-    assert(defaultKeyPair !== undefined);
-    return defaultKeyPair;
-  }
-
-  const keyPair = userSecretsConfig.keyPairs.find(({ name }): boolean => {
-    return name === keyPairName;
-  });
-
-  return keyPair;
-};
-
-const getExistingUserKeyPair = async (
-  keyPairName: string | undefined,
-): Promise<ConfigKeyPair> => {
-  const keyPair = await getUserKeyPair(keyPairName);
+async function getExistingUserSecretKey(
+  secretKeyName: string | undefined,
+): Promise<string> {
+  const keyPair = await getUserSecretKey(secretKeyName);
 
   if (keyPair !== undefined) {
     return keyPair;
@@ -58,41 +42,35 @@ const getExistingUserKeyPair = async (
 
   const userSecretsConfig = await initReadonlyUserSecretsConfig();
 
-  const noUserKeyPairMessage = `No key-pair ${color.yellow(keyPairName)} found`;
+  const noUserKeyPairMessage = `No key-pair ${color.yellow(
+    secretKeyName,
+  )} found`;
 
   if (!isInteractive) {
     return commandObj.error(noUserKeyPairMessage);
   }
 
   commandObj.warn(noUserKeyPairMessage);
-
   const readonlyProjectSecretsConfig = await initReadonlyProjectSecretsConfig();
+  const options: Choices<{ key: string }> = [];
 
-  const options: Choices<ConfigKeyPair> = [];
+  const projectKeyPairOptions = Object.entries(
+    readonlyProjectSecretsConfig?.secretKeys ?? {},
+  ).map(([name, key]) => {
+    return { value: { key }, name };
+  });
 
-  const projectKeyPairOptions = readonlyProjectSecretsConfig?.keyPairs.map(
-    (value): { value: ConfigKeyPair; name: string } => {
-      return {
-        value,
-        name: value.name,
-      };
+  const userKeyPairOptions = Object.entries(userSecretsConfig.secretKeys).map(
+    ([name, key]) => {
+      return { value: { key }, name };
     },
   );
 
-  const userKeyPairOptions = userSecretsConfig.keyPairs.map(
-    (value): { value: ConfigKeyPair; name: string } => {
-      return {
-        value,
-        name: value.name,
-      };
-    },
-  );
-
-  if (projectKeyPairOptions !== undefined && projectKeyPairOptions.length > 0) {
+  if (projectKeyPairOptions.length > 0) {
     const inquirer = (await import("inquirer")).default;
 
     options.push(
-      new inquirer.Separator("Project key-pairs:"),
+      new inquirer.Separator("Project secret keys:"),
       ...projectKeyPairOptions,
     );
   }
@@ -101,50 +79,48 @@ const getExistingUserKeyPair = async (
     const inquirer = (await import("inquirer")).default;
 
     options.push(
-      new inquirer.Separator("User key-pairs:"),
+      new inquirer.Separator("User secret keys:"),
       ...userKeyPairOptions,
     );
   }
 
-  return list({
-    message: "Select existing key-pair name",
+  const { key } = await list({
+    message: "Select existing secret key name",
     options,
     oneChoiceMessage: (name): string => {
       return `Do you want to use ${color.yellow(name)}`;
     },
     onNoChoices: (): never => {
       return commandObj.error(
-        "There are no other key-pairs. You need a key-pair to continue",
+        "There are no other secret keys. You need a secret key to continue",
       );
     },
   });
-};
 
-export const getProjectKeyPair = async (
-  keyPairName: string | undefined,
-): Promise<ConfigKeyPair | undefined> => {
+  return key;
+}
+
+export async function getProjectSecretKey(
+  secretKeyName: string | undefined,
+): Promise<string | undefined> {
   const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
+  const secretKeys = projectSecretsConfig?.secretKeys;
 
-  if (projectSecretsConfig === null) {
+  const secretKeyNameToUse =
+    secretKeyName ?? projectSecretsConfig?.defaultSecretKey;
+
+  if (secretKeys === undefined || secretKeyNameToUse === undefined) {
     return;
   }
 
-  if (keyPairName === undefined) {
-    return projectSecretsConfig.keyPairs.find(({ name }): boolean => {
-      return name === projectSecretsConfig.defaultKeyPairName;
-    });
-  }
+  return secretKeys[secretKeyNameToUse];
+}
 
-  return projectSecretsConfig.keyPairs.find(({ name }): boolean => {
-    return name === keyPairName;
-  });
-};
-
-export const getExistingKeyPair = async (
-  keyPairName: string | undefined,
-): Promise<ConfigKeyPair> => {
+export async function getExistingSecretKey(
+  secretKeyName: string | undefined,
+): Promise<string> {
   return (
-    (await getProjectKeyPair(keyPairName)) ??
-    getExistingUserKeyPair(keyPairName)
+    (await getProjectSecretKey(secretKeyName)) ??
+    getExistingUserSecretKey(secretKeyName)
   );
-};
+}

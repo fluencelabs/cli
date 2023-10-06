@@ -57,7 +57,6 @@ import {
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
-import versions from "../versions.json" assert { type: "json" };
 
 import { addService } from "./addService.js";
 import { commandObj, isInteractive } from "./commandObj.js";
@@ -65,7 +64,7 @@ import { setEnvConfig } from "./configs/globalConfigs.js";
 import { initNewEnvConfig } from "./configs/project/env.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfig } from "./configs/project/workers.js";
-import type { ContractsENV } from "./const.js";
+import type { ContractsENV, PublicFluenceEnv } from "./const.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
@@ -74,8 +73,8 @@ import { initMarineCli } from "./marineCli.js";
 import {
   ensureCustomRelays,
   resolveFluenceEnv,
-  local,
   multiaddrsToNodes,
+  getLocalNodes,
 } from "./multiaddres.js";
 import { ensureSrcAquaMainPath } from "./paths.js";
 
@@ -93,7 +92,7 @@ const getCustomPeers = (peers: Node[]) => {
 };
 
 const getPeersImportInJS = (
-  fluenceEnvOrCustomRelays: ContractsENV | Array<string>,
+  fluenceEnvOrCustomRelays: PublicFluenceEnv | Array<string>,
 ) => {
   if (Array.isArray(fluenceEnvOrCustomRelays)) {
     return getCustomPeers(multiaddrsToNodes(fluenceEnvOrCustomRelays));
@@ -103,12 +102,11 @@ const getPeersImportInJS = (
     kras: getPeersImportStatement("krasnodar"),
     stage: getPeersImportStatement("stage"),
     testnet: getPeersImportStatement("testNet"),
-    local: getCustomPeers(local),
   }[fluenceEnvOrCustomRelays];
 };
 
 export const getJsTemplateIndexJsContent = (
-  fluenceEnvOrCustomRelays: ContractsENV | Array<string>,
+  fluenceEnvOrCustomRelays: PublicFluenceEnv | Array<string>,
 ) => {
   return `${DISABLE_TS_AND_ES_LINT}
 import { Fluence } from "@fluencelabs/js-client";
@@ -205,6 +203,12 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
   if (fluenceEnv === "custom") {
     fluenceEnvOrCustomRelays = await ensureCustomRelays(fluenceConfig);
+  } else if (fluenceEnv === "local") {
+    fluenceEnvOrCustomRelays = ((await getLocalNodes(fluenceEnv)) ?? []).map(
+      ({ multiaddr }) => {
+        return multiaddr;
+      },
+    );
   } else {
     fluenceEnvOrCustomRelays = fluenceEnv;
   }
@@ -350,7 +354,7 @@ const shouldInit = async (projectPath: string): Promise<boolean> => {
 };
 
 type InitTSorJSProjectArg = {
-  fluenceEnvOrCustomRelays: ContractsENV | Array<string>;
+  fluenceEnvOrCustomRelays: PublicFluenceEnv | Array<string>;
   isJS: boolean;
   fluenceConfig: FluenceConfig;
 };
@@ -391,9 +395,10 @@ const initTSorJSProject = async ({
     author: "",
     license: "ISC",
     dependencies: {
-      [JS_CLIENT_NPM_DEPENDENCY]: versions.npm[JS_CLIENT_NPM_DEPENDENCY],
+      [JS_CLIENT_NPM_DEPENDENCY]:
+        CLIPackageJSON.dependencies[JS_CLIENT_NPM_DEPENDENCY],
       [FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY]:
-        versions.npm[FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY],
+        CLIPackageJSON.dependencies[FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY],
       ...(isJS
         ? {}
         : {

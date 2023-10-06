@@ -29,6 +29,7 @@ import {
   FLUENCE_CLIENT_FLAGS,
   TRACING_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
@@ -36,6 +37,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove workers from hosts, described in 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
@@ -66,7 +68,8 @@ export default class Remove extends BaseCommand<typeof Remove> {
       "../../lib/deployWorkers.js"
     );
 
-    await initFluenceClient(flags, fluenceConfig);
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    await initFluenceClient(flags, fluenceConfig, fluenceEnv);
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = (await Fluence.getClient()).getRelayPeerId();
 

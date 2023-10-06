@@ -17,20 +17,16 @@
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
+import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   AUTO_GENERATED,
   CLI_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
-import { generateKeyPair } from "../../helpers/utils.js";
-import {
-  validateHasDefault,
-  validateBatch,
-  validateUnique,
-  type ValidationResult,
-} from "../../helpers/validations.js";
+import { genSecretKeyStringWithName } from "../../helpers/utils.js";
 import { ensureUserFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -40,6 +36,7 @@ import {
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
+  type ConfigValidateFunction,
 } from "../initConfig.js";
 import { type ConfigKeyPair, configKeyPairSchema } from "../keyPair.js";
 
@@ -51,9 +48,6 @@ type ConfigV0 = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${USER_SECRETS_CONFIG_FULL_FILE_NAME}`,
-  title: USER_SECRETS_CONFIG_FULL_FILE_NAME,
-  description: `Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from \`${CLI_NAME} key\` group of commands with \`--user\` flag`,
   properties: {
     defaultKeyPairName: { type: "string" },
     keyPairs: {
@@ -66,8 +60,41 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "keyPairs", "defaultKeyPairName"],
 };
 
+const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+
+type ConfigV1 = {
+  version: 1;
+  secretKeys: Record<string, string>;
+  defaultSecretKey: string;
+};
+
+const configSchemaV1: JSONSchemaType<ConfigV1> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${USER_SECRETS_CONFIG_FULL_FILE_NAME}`,
+  title: USER_SECRETS_CONFIG_FULL_FILE_NAME,
+  type: "object",
+  description: `Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from \`${CLI_NAME} key\` group of commands with \`--user\` flag`,
+  properties: {
+    defaultSecretKey: {
+      type: "string",
+      description: `Secret key with this name will be used for the deployment by default. You can override it with flags or by using keyPair properties in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+    },
+    secretKeys: {
+      title: "Secret Keys",
+      type: "object",
+      additionalProperties: { type: "string" },
+      properties: {
+        secretKey: { type: "string", description: "Secret Key" },
+      },
+      description: "Secret Keys available for the user",
+      required: [],
+    },
+    version: { type: "number", const: 1 },
+  },
+  required: ["version", "defaultSecretKey", "secretKeys"],
+};
+
 const getDefault: GetDefaultConfig = async () => {
-  const { secretKey, name } = await generateKeyPair(AUTO_GENERATED);
+  const { secretKey, name } = await genSecretKeyStringWithName(AUTO_GENERATED);
   return `# Defines user's secret keys that can be used across different Fluence projects.
 # You can manage user's keys using commands from \`fluence key\` group of commands with \`--user\` flag
 
@@ -75,49 +102,55 @@ const getDefault: GetDefaultConfig = async () => {
 version: 0
 
 # user's key pairs
-keyPairs:
-  - name: ${name}
-    secretKey: ${secretKey}
+secretKeys:
+  ${name}: ${secretKey}
 
 # Key pair with this name will be used for the deployment by default.
-defaultKeyPairName: ${name}
+defaultSecretKey: ${name}
 `;
 };
 
-const migrations: Migrations<Config> = [];
+const migrations: Migrations<Config> = [
+  async (config: Config): Promise<ConfigV1> => {
+    if (!validateConfigSchemaV0(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
 
-const validate = (config: LatestConfig): ValidationResult => {
-  return validateBatch(
-    validateUnique(
-      config.keyPairs,
-      ({ name }): string => {
-        return name;
-      },
-      (name): string => {
-        return `There are multiple key-pairs with the same name ${color.yellow(
-          name,
-        )}`;
-      },
-    ),
-    validateHasDefault(
-      config.keyPairs,
-      config.defaultKeyPairName,
-      ({ name }): string => {
-        return name;
-      },
-      `Default key-pair ${color.yellow(config.defaultKeyPairName)} not found`,
-    ),
-  );
+    return {
+      version: 1,
+      secretKeys: Object.fromEntries(
+        config.keyPairs.map(({ name, secretKey }) => {
+          return [name, secretKey];
+        }),
+      ),
+      defaultSecretKey: config.defaultKeyPairName,
+    };
+  },
+];
+
+const validate: ConfigValidateFunction<LatestConfig> = (
+  { defaultSecretKey, secretKeys },
+  configPath,
+) => {
+  return defaultSecretKey in secretKeys
+    ? true
+    : `Default key ${color.yellow(
+        defaultSecretKey,
+      )} not found at ${configPath}`;
 };
 
-type Config = ConfigV0;
-type LatestConfig = ConfigV0;
+type Config = ConfigV0 | ConfigV1;
+type LatestConfig = ConfigV1;
 export type UserSecretsConfig = InitializedConfig<LatestConfig>;
 export type UserSecretsConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
+  allSchemas: [configSchemaV0, configSchemaV1],
+  latestSchema: configSchemaV1,
   migrations,
   name: USER_SECRETS_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: ensureUserFluenceDir,
@@ -132,4 +165,4 @@ export const initReadonlyUserSecretsConfig = getReadonlyConfigInitFunction(
   initConfigOptions,
   getDefault,
 );
-export const userSecretsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export const userSecretsSchema: JSONSchemaType<LatestConfig> = configSchemaV1;

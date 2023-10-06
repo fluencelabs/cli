@@ -41,6 +41,7 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -51,6 +52,7 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
@@ -98,17 +100,20 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       "../../lib/deployWorkers.js"
     );
 
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       workersConfig,
       fluenceConfig,
       aquaImports,
+      fluenceEnv,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
     });
 
     dbg("start connecting to fluence network");
-    await initFluenceClient(flags, fluenceConfig);
+    await initFluenceClient(flags, fluenceConfig, fluenceEnv);
     await doRegisterIpfsClient(true);
     dbg("start running upload");
 

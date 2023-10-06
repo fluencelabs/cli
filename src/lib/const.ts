@@ -51,7 +51,11 @@ export const defaultNumberProperties: Record<NumberProperty, number> = {
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
-export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"] as const;
+export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
+export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
+export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
+
+export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
 export type ChainConfig = {
@@ -68,13 +72,7 @@ export const WC_METADATA = {
   icons: [],
 };
 
-export const FLUENCE_ENVS = [
-  "kras",
-  "stage",
-  "testnet",
-  "local",
-  "custom",
-] as const;
+export const FLUENCE_ENVS = [...CONTRACTS_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
@@ -136,6 +134,7 @@ export const NPM_DIR_NAME = "npm";
 export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
+export const SECRETS_DIR_NAME = "secrets";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
@@ -147,6 +146,7 @@ export const MODULE_CONFIG_FILE_NAME = `module`;
 export const SERVICE_CONFIG_FILE_NAME = `service`;
 export const SPELL_CONFIG_FILE_NAME = `spell`;
 export const ENV_CONFIG_FILE_NAME = `env`;
+export const DOCKER_COMPOSE_FILE_NAME = `docker-compose`;
 
 export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROVIDER_CONFIG_FULL_FILE_NAME = `${PROVIDER_CONFIG_FILE_NAME}.${YAML_EXT}`;
@@ -158,6 +158,7 @@ export const MODULE_CONFIG_FULL_FILE_NAME = `${MODULE_CONFIG_FILE_NAME}.${YAML_E
 export const SERVICE_CONFIG_FULL_FILE_NAME = `${SERVICE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const ENV_CONFIG_FULL_FILE_NAME = `${ENV_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const DOCKER_COMPOSE_FULL_FILE_NAME = `${DOCKER_COMPOSE_FILE_NAME}.${YAML_EXT}`;
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
@@ -192,11 +193,10 @@ export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
 export const DEFAULT_WORKER_NAME = "defaultWorker";
 
-const KEY_PAIR_FLAG_NAME = "key-pair-name";
+const SK_FLAG_NAME = "sk";
 export const KEY_PAIR_FLAG = {
-  [KEY_PAIR_FLAG_NAME]: Flags.string({
-    char: "k",
-    description: "Key pair name",
+  [SK_FLAG_NAME]: Flags.string({
+    description: "Peer secret key name",
     helpValue: "<name>",
   }),
 } as const;

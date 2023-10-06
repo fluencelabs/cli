@@ -90,7 +90,7 @@ const migrateConfig = async <
 }> => {
   let migratedConfig = config;
 
-  for (const migration of migrations.slice(config.version)) {
+  for (const migration of migrations.slice(Number(config.version))) {
     // eslint-disable-next-line no-await-in-loop
     migratedConfig = await migration(migratedConfig);
   }
@@ -189,7 +189,7 @@ export type InitializedConfig<LatestConfig> = Mutable<
 > & {
   $commit(): Promise<void>;
 };
-type BaseConfig = { version: number } & Record<string, unknown>;
+type BaseConfig = { version: number | string } & Record<string, unknown>;
 export type Migrations<Config> = Array<
   (config: Config) => Config | Promise<Config>
 >;
@@ -403,7 +403,7 @@ export function getReadonlyConfigInitFunction<
 
     let latestConfig: LatestConfig;
 
-    if (config.version < migrations.length) {
+    if (Number(config.version) < migrations.length) {
       ({ latestConfig, configString } = await migrateConfig({
         config,
         configPath,

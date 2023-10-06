@@ -44,6 +44,7 @@ import {
   SPELLS_DIR_NAME,
   README_MD_FILE_NAME,
   HOSTS_FULL_FILE_NAME,
+  SECRETS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -204,6 +205,10 @@ export const ensureFluenceAquaHostsPath = async (): Promise<string> => {
 
 export const ensureFluenceAquaDealsPath = async (): Promise<string> => {
   return path.join(await ensureFluenceAquaDir(), DEALS_FULL_FILE_NAME);
+};
+
+export const ensureFluenceSecretsDir = async (): Promise<string> => {
+  return ensureDir(path.join(getFluenceDir(), SECRETS_DIR_NAME));
 };
 
 // JS

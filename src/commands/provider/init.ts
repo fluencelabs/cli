@@ -19,22 +19,14 @@ import { rm } from "fs/promises";
 import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj, isInteractive } from "../../lib/commandObj.js";
+import { commandObj } from "../../lib/commandObj.js";
 import {
   initNewProviderConfig,
-  type UserProvidedConfig,
   initReadonlyProviderConfig,
-  type Offer,
 } from "../../lib/configs/project/provider.js";
-import { numberProperties } from "../../lib/const.js";
-import {
-  defaultNumberProperties,
-  type NumberProperty,
-} from "../../lib/const.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
-import { validatePositiveNumberOrEmpty } from "../../lib/helpers/validations.js";
+import { generateUserProviderConfig } from "../../lib/generateUserProviderConfig.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { checkboxes, confirm, input } from "../../lib/prompt.js";
+import { confirm } from "../../lib/prompt.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description =
@@ -77,124 +69,4 @@ export default class Init extends BaseCommand<typeof Init> {
       )}`,
     );
   }
-}
-
-async function promptToSetNumberProperty(
-  offer: Offer,
-  property: NumberProperty,
-) {
-  const defaultValue = defaultNumberProperties[property];
-
-  const propertyStr = await input({
-    message: `Enter ${color.yellow(property)} (default: ${defaultValue})`,
-    validate: validatePositiveNumberOrEmpty,
-    allowEmpty: true,
-  });
-
-  offer[property] = propertyStr === "" ? defaultValue : Number(propertyStr);
-}
-
-async function generateUserProviderConfig() {
-  const userProvidedConfig: UserProvidedConfig = {
-    offers: {},
-    computePeers: {},
-  };
-
-  if (!isInteractive) {
-    return userProvidedConfig;
-  }
-
-  commandObj.logToStderr(`Add compute peers`);
-  let isAddingMoreComputePeers: boolean;
-  let computePeersCounter = 0;
-
-  do {
-    const defaultName = `peer-${computePeersCounter}`;
-
-    let name = await input({
-      message: `Enter name for compute peer. Default: ${defaultName}`,
-      allowEmpty: true,
-    });
-
-    if (name === "") {
-      name = defaultName;
-      computePeersCounter = computePeersCounter + 1;
-    }
-
-    const slotsStr = await input({
-      message: `Enter number of workers for ${color.yellow(name)}. Default: 1`,
-      allowEmpty: true,
-      validate: validatePositiveNumberOrEmpty,
-    });
-
-    userProvidedConfig.computePeers[name] = {
-      worker: slotsStr === "" ? 1 : Number(slotsStr),
-    };
-
-    isAddingMoreComputePeers = await confirm({
-      message: "Do you want to add more compute peers",
-    });
-  } while (isAddingMoreComputePeers);
-
-  commandObj.logToStderr(`Add offers`);
-  let isAddingMoreOffers: boolean;
-  let offersCounter = 0;
-
-  do {
-    const defaultName = `offer-${offersCounter}`;
-
-    let name = await input({
-      message: `Enter name for offer. Default: ${defaultName}`,
-      allowEmpty: true,
-    });
-
-    if (name === "") {
-      name = defaultName;
-      offersCounter = offersCounter + 1;
-    }
-
-    const computePeers = await checkboxes({
-      message: `Select compute peers for ${color.yellow(name)}`,
-      options: Object.keys(userProvidedConfig.computePeers),
-      validate: (choices: string[]) => {
-        if (choices.length === 0) {
-          return "Please select at least one compute peer";
-        }
-
-        return true;
-      },
-      oneChoiceMessage(choice) {
-        return `Selected ${color.yellow(choice)}`;
-      },
-      onNoChoices() {
-        throw new Error("No compute peers selected");
-      },
-    });
-
-    const effectorsString = await input({
-      message:
-        "Enter comma-separated list of effector CIDs (default: no effectors)",
-      allowEmpty: true,
-    });
-
-    const effectors = commaSepStrToArr(effectorsString);
-
-    const offer: Offer = {
-      ...defaultNumberProperties,
-      computePeers,
-      ...(effectors.length > 0 ? { effectors } : {}),
-    };
-
-    for (const numberProperty of numberProperties) {
-      await promptToSetNumberProperty(offer, numberProperty);
-    }
-
-    userProvidedConfig.offers[name] = offer;
-
-    isAddingMoreOffers = await confirm({
-      message: "Do you want to add more offers",
-    });
-  } while (isAddingMoreOffers);
-
-  return userProvidedConfig;
 }

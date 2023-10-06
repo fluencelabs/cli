@@ -17,6 +17,7 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
+import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
 import { envSchema } from "./lib/configs/project/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
@@ -43,6 +44,7 @@ import {
   CLI_NAME_FULL,
   PROVIDER_CONFIG_FILE_NAME,
   ENV_CONFIG_FILE_NAME,
+  DOCKER_COMPOSE_FILE_NAME,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/utils.js";
@@ -60,6 +62,7 @@ const configsInfo = Object.entries({
   [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
   [GLOBAL_CONFIG_FILE_NAME]: userConfigSchema,
   [ENV_CONFIG_FILE_NAME]: envSchema,
+  [DOCKER_COMPOSE_FILE_NAME]: dockerComposeSchema,
 }).map(([filename, schema]) => {
   return {
     schemaPath: join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),

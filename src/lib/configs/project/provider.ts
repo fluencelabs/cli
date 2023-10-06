@@ -41,11 +41,11 @@ export type Offer = {
 };
 
 export type ComputePeer = {
-  worker: number;
+  worker?: number;
 };
 
 type ConfigV0 = {
-  offers: Record<string, Offer>;
+  offers?: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   version: 0;
 };
@@ -72,9 +72,9 @@ const offerSchema: JSONSchemaType<Offer> = {
 const computePeerSchema: JSONSchemaType<ComputePeer> = {
   type: "object",
   properties: {
-    worker: { type: "number" },
+    worker: { type: "number", nullable: true },
   },
-  required: ["worker"],
+  required: [],
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -89,6 +89,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       properties: {
         Offer: offerSchema,
       },
+      nullable: true,
       required: [],
     },
     computePeers: {
@@ -101,7 +102,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     },
     version: { type: "number", const: 0 },
   },
-  required: ["version", "computePeers", "offers"],
+  required: ["version", "computePeers"],
 };
 
 const getConfigOrConfigDirPath = () => {
@@ -118,7 +119,7 @@ const getDefaultConfig = async ({
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
 
-${yamlDiffPatch("", {}, { offers })}
+${offers === undefined ? "" : yamlDiffPatch("", {}, { offers })}
 ${yamlDiffPatch("", {}, { computePeers })}
 
 # config version
@@ -144,7 +145,9 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     missingComputePeerNames: Array<string>;
   }> = [];
 
-  for (const [offerName, { computePeers }] of Object.entries(config.offers)) {
+  for (const [offerName, { computePeers }] of Object.entries(
+    config.offers ?? {},
+  )) {
     const missingComputePeerNames = computePeers.filter((cp) => {
       return !(cp in config.computePeers);
     });
