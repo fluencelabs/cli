@@ -1,0 +1,45 @@
+name: "install test"
+
+on:
+  pull_request:
+    paths:
+      - "install.sh"
+  push:
+    branches:
+      - "main"
+    paths:
+      - "install.sh"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+
+jobs:
+  test-install:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+          - os: ubuntu-latest
+
+    steps:
+      - name: Checkout fluence-cli
+        uses: actions/checkout@v3
+        with:
+          repository: fluencelabs/cli
+
+      - name: Run install.sh script
+        run: ./install.sh
+
+      - name: Check fluence
+        run: ${FLUENCE_USER_DIR}/cli/bin/fluence --version
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf tmp ~/.fluence
