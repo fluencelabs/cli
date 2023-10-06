@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.10.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.9.1...fluence-cli-v0.10.0) (2023-10-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve fluence env switching [fixes DXJ-473] ([#502](https://github.com/fluencelabs/cli/issues/502))
+
+### Features
+
+* add aqua imports command [fixes DXJ-483] ([#518](https://github.com/fluencelabs/cli/issues/518)) ([419566a](https://github.com/fluencelabs/cli/commit/419566a1cd033bc7d3a9bbf640b4f4f232d700d5))
+* improve fluence env switching [fixes DXJ-473] ([#502](https://github.com/fluencelabs/cli/issues/502)) ([a09f39b](https://github.com/fluencelabs/cli/commit/a09f39b0913799dbd54d0cfc08f755f0ec54c988))
+* show dev dependencies [fixes DXJ-492] ([#521](https://github.com/fluencelabs/cli/issues/521)) ([8976225](https://github.com/fluencelabs/cli/commit/8976225919051adae217df569103f3dc9ac0f6f3))
+
+
+### Bug Fixes
+
+* change rpc ([#523](https://github.com/fluencelabs/cli/issues/523)) ([ddfd48f](https://github.com/fluencelabs/cli/commit/ddfd48f6c4fb1af602b443cd43ebf56a2f7feada))
+* change rpc ([#524](https://github.com/fluencelabs/cli/issues/524)) ([8c5ab67](https://github.com/fluencelabs/cli/commit/8c5ab67cc169839b970dc79740a95a4f91f1907c))
+* **deps:** update dependency @fluencelabs/aqua-api to v0.12.3 ([#501](https://github.com/fluencelabs/cli/issues/501)) ([2525c44](https://github.com/fluencelabs/cli/commit/2525c443867013b1932532e4fbdeb97ad7a2249a))
+
 ## [0.9.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.9.0...fluence-cli-v0.9.1) (2023-09-29)
 
 
