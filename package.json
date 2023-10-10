@@ -48,8 +48,8 @@
     "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && ts-node ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
     "up-deps": "npm-check-updates -u",
-    "oclif-pack": "yarn clean && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64' --no-xz",
-    "oclif-upload": "yarn oclif-pack && oclif upload tarballs -t 'linux-x64,darwin-x64,darwin-arm64'"
+    "oclif-pack": "yarn prepack && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64' --no-xz",
+    "oclif-upload": "oclif upload tarballs -t 'linux-x64,darwin-x64,darwin-arm64'"
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "0.3.4",
