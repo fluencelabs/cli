@@ -10666,17 +10666,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"multiformats@npm:^12.0.1":
-  version: 12.0.1
-  resolution: "multiformats@npm:12.0.1"
-  checksum: 227f5a0bb835e998d105028ffaa4cec944b6461c7b7f3ddc4f3aca22f6917ad59643302898c67af167a6f9d7abddcab094e501488664e2b9437f0b6a9b2ab68d
-  languageName: node
-  linkType: hard
-
-"multiformats@npm:^12.1.1":
-  version: 12.1.1
-  resolution: "multiformats@npm:12.1.1"
-  checksum: cdd19168ea110eec37b6c193bd76dea36c1716de68cf1280f701928d00bbba3aa5e32dc71395091254738a11db47f1acf040f8ddf1688bc4b7cda5d6bbf1eb46
+"multiformats@npm:^12.0.1, multiformats@npm:^12.1.1":
+  version: 12.1.2
+  resolution: "multiformats@npm:12.1.2"
+  checksum: 092c914fc60e647c976da2bfa82236a426f88d1bd278a0b211539f7252b8a316eb24d78a04549111591beaeb83bbcac233f31f91a65450d27de79194d35ae127
   languageName: node
   linkType: hard
 
