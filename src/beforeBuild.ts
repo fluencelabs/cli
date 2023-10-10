@@ -107,24 +107,22 @@ const BIN_FILE_PATH = join(
   "bin.js",
 );
 
-const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
-const NODE_RUN = `  "\\$NODE" "\\$DIR/run" "\\$@"`;
-const NODE_RUN_NO_WARNINGS = NODE_RUN.replace('NODE"', 'NODE" --no-warnings');
-const timesNodeRunAppears = binFileContent.split(NODE_RUN).length - 1;
+try {
+  const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
 
-if (timesNodeRunAppears === 1) {
-  const newBinFileContent = binFileContent.replace(
-    NODE_RUN,
-    NODE_RUN_NO_WARNINGS,
-  );
+  const search = `#!/usr/bin/env bash`;
+  const insert = `\nexport NODE_NO_WARNINGS=1`;
 
-  await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
-} else {
-  const timesNodeRunNoWarningsAppears =
-    binFileContent.split(NODE_RUN_NO_WARNINGS).length - 1;
+  if (binFileContent.includes(search) && !binFileContent.includes(insert)) {
+    const newBinFileContent = binFileContent.replace(search, search + insert);
 
-  assert(
-    timesNodeRunNoWarningsAppears === 1,
-    `${BIN_FILE_PATH} file has changed. Please make sure patch that replaces 'node' with 'node --no-warnings' is still valid.`,
-  );
+    await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
+    console.log(`${BIN_FILE_PATH} modified successfully.`);
+  } else {
+    console.log(
+      `${BIN_FILE_PATH} is already modified or the pattern does not exist.`,
+    );
+  }
+} catch (err) {
+  console.error(`Error while modifying ${BIN_FILE_PATH}: ${err}`);
 }
