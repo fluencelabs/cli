@@ -1,6 +1,6 @@
 {
   "name": "@fluencelabs/cli",
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@3.6.4",
   "type": "module",
   "version": "0.10.0",
   "description": "CLI for working with Fluence network",
