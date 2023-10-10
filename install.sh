@@ -46,6 +46,7 @@ tar --strip-components=1 -xzf "${TEMP}/${archive}" -C "${FLUENCE_USER_DIR}/cli"
 
 echo "Fluence CLI installation complete!"
 if echo $PATH | grep -q $HOME/.local/bin ; then
+  mkdir -p $HOME/.local/bin
   ln -sf ${FLUENCE_USER_DIR}/cli/bin/fluence $HOME/.local/bin/fluence
 else
   echo "Create a symlink to fluence binary in any directory that is in \$PATH, for example:"
