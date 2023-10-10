@@ -2063,19 +2063,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/color@npm:^1.0.10":
-  version: 1.0.11
-  resolution: "@oclif/color@npm:1.0.11"
-  dependencies:
-    ansi-styles: ^4.2.1
-    chalk: ^4.1.0
-    strip-ansi: ^6.0.1
-    supports-color: ^8.1.1
-    tslib: ^2
-  checksum: 4db5f4613f8ecce5c04dbaf25d2674d97bb65044fbea725fdbd60a2fef7872f3be1fd36ce2bc15d96707cc7cc4b1cab05d39105f1c810f9c2340e0137aa4a961
-  languageName: node
-  linkType: hard
-
 "@oclif/color@npm:^1.0.12":
   version: 1.0.12
   resolution: "@oclif/color@npm:1.0.12"
@@ -2089,7 +2076,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^2.11.4, @oclif/core@npm:^2.11.7, @oclif/core@npm:^2.11.8":
+"@oclif/core@npm:^2.11.4, @oclif/core@npm:^2.11.8":
   version: 2.11.10
   resolution: "@oclif/core@npm:2.11.10"
   dependencies:
@@ -2192,25 +2179,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-not-found@npm:^2.3.32":
-  version: 2.3.37
-  resolution: "@oclif/plugin-not-found@npm:2.3.37"
-  dependencies:
-    "@oclif/color": ^1.0.10
-    "@oclif/core": ^2.11.7
-    fast-levenshtein: ^3.0.0
-  checksum: 2cae7df0890b761e3c99cf8276a82ed86548b63f816d724a2a6ae0184fb76a0bd49482717fa330406d30a8973aa13be7f07c79564e8b83fa249e2bd67f38983c
-  languageName: node
-  linkType: hard
-
-"@oclif/plugin-not-found@npm:^2.4.2":
-  version: 2.4.2
-  resolution: "@oclif/plugin-not-found@npm:2.4.2"
+"@oclif/plugin-not-found@npm:^2.3.32, @oclif/plugin-not-found@npm:^2.4.2":
+  version: 2.4.3
+  resolution: "@oclif/plugin-not-found@npm:2.4.3"
   dependencies:
     "@oclif/core": ^2.15.0
     chalk: ^4
     fast-levenshtein: ^3.0.0
-  checksum: a4a2da5fb385c14e56ebeb655e094d9ff2f0c74a146fec99e35c2f16a7bbffd41538638be000e9a5c008e3bfc4e6ad2617d845ea5a25651082ad7c0c3dfe6026
+  checksum: a7452e4d4b868411856dd3a195609af0757a8a171fbcc17f4311d8b04764e37f4c6d32dd1d9078b166452836e5fa7c42996ffb444016e466f92092c46a2606fb
   languageName: node
   linkType: hard
 
