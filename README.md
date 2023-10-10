@@ -36,22 +36,22 @@ fluence update --help
 
 ### Installing manually
 
-- download fluence archive for your platfrom from
-  [latest release](https://github.com/fluencelabs/cli/releases/latest).
-- extract archive contents to default fluence user directory
+-   download fluence archive for your platfrom from
+    [latest release](https://github.com/fluencelabs/cli/releases/latest).
+-   extract archive contents to default fluence user directory
 
-  ```shell
-  tar --strip-components=1 -xzf <archive> -C "${HOME}/.fluence/cli"
-  ```
+    ```shell
+    tar --strip-components=1 -xzf <archive> -C "${HOME}/.fluence/cli"
+    ```
 
-- add `${HOME}/.fluence/cli/bin` to `$PATH`
+-   add `${HOME}/.fluence/cli/bin` to `$PATH`
 
 ### Using npm
 
 Prerequisites:
 
-- Linux or MacOS (there are currently some bugs on Windows)
-- [Node.js = 18.x.x](https://nodejs.org/)
+-   Linux or MacOS (there are currently some bugs on Windows)
+-   [Node.js = 18.x.x](https://nodejs.org/)
 
 To install and try Fluence CLI, run:
 
