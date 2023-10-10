@@ -16,7 +16,7 @@ installation, storage of keys and ids, etc.
 To download and install `fluence` use our `install.sh` script
 
 ```shell
-curl -qL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | sh
+curl -qL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | bash
 ```
 
 To select `fluence` version compatible with certain network (`stage`, `testnet`,
@@ -34,24 +34,24 @@ For more information run:
 fluence update --help
 ```
 
-### Installig manually
+### Installing manually
 
--   download fluence archive for your platfrom from
-    [latest release](https://github.com/fluencelabs/cli/releases/latest).
--   extract archive contents to default fluence user directory directory
+- download fluence archive for your platfrom from
+  [latest release](https://github.com/fluencelabs/cli/releases/latest).
+- extract archive contents to default fluence user directory
 
-    ```shell
-    tar --strip-components=1 -xzf <archive> -C "${HOME}/.fluence/cli"
-    ```
+  ```shell
+  tar --strip-components=1 -xzf <archive> -C "${HOME}/.fluence/cli"
+  ```
 
--   add `${HOME}/.fluence/cli/bin` to `$PATH`
+- add `${HOME}/.fluence/cli/bin` to `$PATH`
 
 ### Using npm
 
 Prerequisites:
 
--   Linux or MacOS (there are currently some bugs on Windows)
--   [Node.js = 18.x.x](https://nodejs.org/)
+- Linux or MacOS (there are currently some bugs on Windows)
+- [Node.js = 18.x.x](https://nodejs.org/)
 
 To install and try Fluence CLI, run:
 
