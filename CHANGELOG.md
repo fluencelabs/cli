@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.10.0...fluence-cli-v0.11.0) (2023-10-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* update js-client and other dependencies ([#538](https://github.com/fluencelabs/cli/issues/538))
+
+### Features
+
+* update js-client and other dependencies ([#538](https://github.com/fluencelabs/cli/issues/538)) ([fef0b67](https://github.com/fluencelabs/cli/commit/fef0b676b8c49bbc08e807defc73791557003ff0))
+
 ## [0.10.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.9.1...fluence-cli-v0.10.0) (2023-10-06)
 
 
