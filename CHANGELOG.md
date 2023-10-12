@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.0...fluence-cli-v0.11.1) (2023-10-12)
+
+
+### Bug Fixes
+
+* **chore:** Bump version ([#544](https://github.com/fluencelabs/cli/issues/544)) ([b624ecc](https://github.com/fluencelabs/cli/commit/b624eccf106b7f54d7b8fca138fa9b7692ee68d9))
+* **docs:** Bump js-client to 0.2.0 in versions.json ([54ec2c3](https://github.com/fluencelabs/cli/commit/54ec2c317444e9c4a139cfcae51a36d824040fb0))
+
 ## [0.11.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.10.0...fluence-cli-v0.11.0) (2023-10-11)
 
 
