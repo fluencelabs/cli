@@ -72,6 +72,30 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       allowNo: true,
       default: true,
     }),
+    "payment-token": Flags.string({
+      description: "Address of the payment token",
+      required: true,
+    }),
+    "collateral-per-worker": Flags.integer({
+      description: "Collateral per worker",
+      required: true,
+    }),
+    "min-workers": Flags.integer({
+      description: "Required workers to activate the deal",
+      required: true,
+    }),
+    "target-workers": Flags.integer({
+      description: "Max workers in the deal",
+      required: true,
+    }),
+    "max-workers-per-provider": Flags.integer({
+      description: "Max workers per provider",
+      required: true,
+    }),
+    "price-per-worker-epoch": Flags.integer({
+      description: "Price per worker epoch",
+      required: true,
+    }),
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -212,6 +236,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         appCID,
         minWorkers,
         targetWorkers,
+        paymentToken: flags["payment-token"],
+        collateralPerWorker: flags["collateral-per-worker"],
+        maxWorkersPerProvider: flags["max-workers-per-provider"],
+        pricePerWorkerEpoch: flags["price-per-worker-epoch"],
+        effectors: [],
       });
 
       if (flags["auto-match"]) {

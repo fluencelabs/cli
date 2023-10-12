@@ -34,13 +34,29 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "CID of the application that will be deployed",
       required: true,
     }),
+    "payment-token": Flags.string({
+      description: "Address of the payment token",
+      required: true,
+    }),
+    "collateral-per-worker": Flags.integer({
+      description: "Collateral per worker",
+      required: true,
+    }),
     "min-workers": Flags.integer({
       description: "Required workers to activate the deal",
-      default: 1,
+      required: true,
     }),
     "target-workers": Flags.integer({
       description: "Max workers in the deal",
-      default: 3,
+      required: true,
+    }),
+    "max-workers-per-provider": Flags.integer({
+      description: "Max workers per provider",
+      required: true,
+    }),
+    "price-per-worker-epoch": Flags.integer({
+      description: "Price per worker epoch",
+      required: true,
     }),
     ...ENV_FLAG,
     ...PRIV_KEY_FLAG,
@@ -54,8 +70,13 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const dealAddress = await dealCreate({
       appCID: flags["app-cid"],
+      paymentToken: flags["payment-token"],
+      collateralPerWorker: flags["collateral-per-worker"],
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
+      maxWorkersPerProvider: flags["max-workers-per-provider"],
+      pricePerWorkerEpoch: flags["price-per-worker-epoch"],
+      effectors: [],
       privKey: flags["priv-key"],
       chainNetwork: await ensureChainNetwork(flags.env, maybeFluenceConfig),
     });

@@ -21,6 +21,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { input } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getSigner,
@@ -28,52 +29,68 @@ import {
   waitTx,
 } from "../../lib/provider.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register in matching contract";
+export default class SubUnits extends BaseCommand<typeof SubUnits> {
+  static override description =
+    "Sub units to specific nox instance as a Compute Peer";
   static override flags = {
     ...baseFlags,
-    "max-collateral": Flags.string({
-      description: "Max collateral for provider offer",
-      required: true,
-    }),
-    "price-per-epoch": Flags.string({
-      description: "Price per epoch for provider offer",
-      required: true,
-    }),
     ...PRIV_KEY_FLAG,
     ...ENV_FLAG,
+    "peer-id": Flags.string({
+      description:
+        "Peer id of the nox instance that you want to register as a Compute Peer",
+      helpValue: "<peer-id>",
+    }),
+    units: Flags.string({
+      description: "Number of available worker units on this Compute Peer",
+      helpValue: "<number>",
+    }),
   };
 
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Register),
+      await this.parse(SubUnits),
     );
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
+
+    const unitsCount =
+      flags.units ?? (await input({ message: "Enter new units count" }));
+
+    const peerId =
+      flags["peer-id"] ?? (await input({ message: "Enter peerId" }));
+
+    const [{ DealClient }, { digest }, { base58btc }] = await Promise.all([
+      import("@fluencelabs/deal-aurora"),
+      import("multiformats"),
+      // eslint-disable-next-line import/extensions
+      import("multiformats/bases/base58"),
+    ]);
+
     const signer = await getSigner(network, flags["priv-key"]);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const dealClient = new DealClient(signer, network);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
-    const flt = await globalContracts.getFLT();
 
-    const tx = await matcher.registerComputeProvider(
-      flags["price-per-epoch"],
-      flags["max-collateral"],
-      await flt.getAddress(),
-      [],
-    );
-
+    const multihash = digest.decode(base58btc.decode("z" + peerId));
+    const bytes = multihash.bytes.subarray(6);
+    const tx = await matcher.subWorkersSlots(bytes, unitsCount);
     promptConfirmTx(flags["priv-key"]);
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     await waitTx(tx);
 
-    commandObj.log(color.green(`Successfully joined to matching contract`));
+    const free = (await matcher.getComputePeerInfo(peerId)).freeWorkerSlots;
+
+    commandObj.logToStderr(
+      `Added ${color.yellow(unitsCount)} units. Compute peer ${color.yellow(
+        peerId,
+      )} has ${color.yellow(free)} free worker slots now.`,
+    );
   }
 }

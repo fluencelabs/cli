@@ -15,12 +15,12 @@
  */
 
 import { color } from "@oclif/color";
-import { Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { input } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getSigner,
@@ -28,52 +28,57 @@ import {
   waitTx,
 } from "../../lib/provider.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register in matching contract";
+export default class Withdraw extends BaseCommand<typeof Withdraw> {
+  static override hidden = true;
+  static override description = "Remove unit from the deal";
   static override flags = {
     ...baseFlags,
-    "max-collateral": Flags.string({
-      description: "Max collateral for provider offer",
-      required: true,
-    }),
-    "price-per-epoch": Flags.string({
-      description: "Price per epoch for provider offer",
-      required: true,
-    }),
     ...PRIV_KEY_FLAG,
     ...ENV_FLAG,
   };
 
+  static override args = {
+    "DEAL-ADDRESS": Args.string({
+      description: "Deal address",
+    }),
+    AMOUNT: Args.string({
+      description: "Amount of tokens to deposit",
+    }),
+  };
+
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
+    const { flags, maybeFluenceConfig, args } = await initCli(
       this,
-      await this.parse(Register),
+      await this.parse(Withdraw),
     );
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const signer = await getSigner(network, flags["priv-key"]);
+    const privKey = flags["priv-key"];
+
+    const dealAddress =
+      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
+
+    const amount =
+      args["AMOUNT"] ??
+      (await input({ message: "Enter amount of tokens to deposit" }));
+
+    const signer = await getSigner(network, privKey);
     const { DealClient } = await import("@fluencelabs/deal-aurora");
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const dealClient = new DealClient(signer, network);
-    const globalContracts = dealClient.getGlobalContracts();
-    const matcher = await globalContracts.getMatcher();
-    const flt = await globalContracts.getFLT();
+    const deal = dealClient.getDeal(dealAddress);
 
-    const tx = await matcher.registerComputeProvider(
-      flags["price-per-epoch"],
-      flags["max-collateral"],
-      await flt.getAddress(),
-      [],
-    );
+    promptConfirmTx(privKey);
 
-    promptConfirmTx(flags["priv-key"]);
+    const tx = await deal.withdraw(amount);
+
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     await waitTx(tx);
 
-    commandObj.log(color.green(`Successfully joined to matching contract`));
+    color.green(`Tokens were deposited to the deal ${dealAddress}`);
   }
 }

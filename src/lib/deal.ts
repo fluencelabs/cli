@@ -18,10 +18,10 @@
 
 import assert from "node:assert";
 
-import type { Matcher } from "@fluencelabs/deal-aurora";
+import { Deal__factory, type Matcher } from "@fluencelabs/deal-aurora";
 import type { ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import { color } from "@oclif/color";
-import type { ethers } from "ethers";
+import { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL } from "./const.js";
@@ -42,16 +42,26 @@ type DealCreateArg = {
   chainNetwork: ContractsENV;
   privKey: string | undefined;
   appCID: string;
+  paymentToken: string;
+  collateralPerWorker: number;
   minWorkers: number;
   targetWorkers: number;
+  maxWorkersPerProvider: number;
+  pricePerWorkerEpoch: number;
+  effectors: string[];
 };
 
 export const dealCreate = async ({
   chainNetwork,
-  appCID,
-  minWorkers,
   privKey,
+  appCID,
+  paymentToken,
+  collateralPerWorker,
+  minWorkers,
   targetWorkers,
+  maxWorkersPerProvider,
+  pricePerWorkerEpoch,
+  effectors,
 }: DealCreateArg) => {
   const signer = await getSigner(chainNetwork, privKey);
 
@@ -68,14 +78,26 @@ export const dealCreate = async ({
 
   promptConfirmTx(privKey);
 
-  const tx = await factory.createDeal(
-    minWorkers,
-    targetWorkers,
+  const tx = await factory.deployDeal(
     {
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
     },
-    [], //TODO: get effectors from the project
+    paymentToken,
+    collateralPerWorker,
+    minWorkers,
+    targetWorkers,
+    maxWorkersPerProvider,
+    ethers.parseEther(String(pricePerWorkerEpoch)),
+    effectors.map((effectorHash) => {
+      const id = CID.parse(effectorHash).bytes;
+      return {
+        prefixes: id.slice(0, 4),
+        hash: id.slice(4),
+      };
+    }),
+    0,
+    [],
   );
 
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
@@ -166,13 +188,12 @@ export const dealUpdate = async ({
   const dealClient = new DealClient(signer, network);
   const deal = dealClient.getDeal(dealAddress);
 
-  const config = await deal.getConfigModule();
   const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
 
   promptConfirmTx(privKey);
 
-  const tx = await config.setAppCID({
+  const tx = await deal.setAppCID({
     prefixes: bytesCid.slice(0, 4),
     hash: bytesCid.slice(4),
   });
@@ -185,7 +206,7 @@ export const dealUpdate = async ({
   return tx;
 };
 
-const PAT_CREATED_EVENT_TOPIC = "PATCreated";
+const COMPUTE_UNIT_CREATED_EVENT_TOPIC = "ComputeUnitCreated";
 
 export async function match(
   network: ContractsENV,
@@ -194,9 +215,7 @@ export async function match(
 ) {
   const signer = await getSigner(network, privKey);
 
-  const { DealClient, WorkersModule__factory } = await import(
-    "@fluencelabs/deal-aurora"
-  );
+  const { DealClient } = await import("@fluencelabs/deal-aurora");
 
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -204,21 +223,27 @@ export async function match(
   const dealClient = new DealClient(signer, network);
   const globalContracts = dealClient.getGlobalContracts();
   const matcher: Matcher = await globalContracts.getMatcher();
-  const tx = await matcher.matchWithDeal(dealAddress);
+
+  const preMatchingResult = await matcher.findComputePeers(dealAddress);
+  const tx = await matcher.matchDeal(
+    dealAddress,
+    preMatchingResult.computeProviders,
+    preMatchingResult.computePeers,
+  );
   promptConfirmTx(privKey);
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const res = await waitTx(tx);
-  const workersInterface = WorkersModule__factory.createInterface();
-  const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);
+  const dealInterface = Deal__factory.createInterface();
+  const event = dealInterface.getEvent(COMPUTE_UNIT_CREATED_EVENT_TOPIC);
 
   const patCount = res.logs.filter((log) => {
     if (log.topics[0] !== event.topicHash) {
       return false;
     }
 
-    const id: unknown = workersInterface
+    const id: unknown = dealInterface
       .parseLog({
         topics: [...log.topics],
         data: log.data,

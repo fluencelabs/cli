@@ -19,61 +19,72 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
+import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register in matching contract";
+export default class Info extends BaseCommand<typeof Info> {
+  static override description = "Get info about provider";
   static override flags = {
     ...baseFlags,
-    "max-collateral": Flags.string({
-      description: "Max collateral for provider offer",
+    "provider-address": Flags.string({
+      description: "Compute provider address",
       required: true,
     }),
-    "price-per-epoch": Flags.string({
-      description: "Price per epoch for provider offer",
-      required: true,
-    }),
-    ...PRIV_KEY_FLAG,
     ...ENV_FLAG,
   };
 
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Register),
+      await this.parse(Info),
     );
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const signer = await getSigner(network, flags["priv-key"]);
     const { DealClient } = await import("@fluencelabs/deal-aurora");
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(signer, network);
+    const dealClient = new DealClient(await getProvider(network), network);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
-    const flt = await globalContracts.getFLT();
 
-    const tx = await matcher.registerComputeProvider(
-      flags["price-per-epoch"],
-      flags["max-collateral"],
-      await flt.getAddress(),
-      [],
+    const providerAddress = flags["provider-address"];
+
+    const computeProviderInfo =
+      await matcher.getComputeProviderInfo(providerAddress);
+
+    commandObj.log(color.gray(`Provider info:`));
+
+    commandObj.log(
+      color.gray(`Max collateral: ${computeProviderInfo.maxCollateral}`),
     );
 
-    promptConfirmTx(flags["priv-key"]);
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    await waitTx(tx);
+    commandObj.log(
+      color.gray(
+        `Min price per worker per epoch: ${computeProviderInfo.minPricePerEpoch}`,
+      ),
+    );
 
-    commandObj.log(color.green(`Successfully joined to matching contract`));
+    commandObj.log(
+      color.gray(`Payment token: ${computeProviderInfo.paymentToken}`),
+    );
+
+    commandObj.log(
+      color.gray(`Free units: ${computeProviderInfo.totalFreeWorkerSlots}`),
+    );
+
+    commandObj.log(color.gray(`--Peers--`));
+    const peerIdsAndPeers =
+      await matcher.getPeersByComputeProvider(providerAddress);
+
+    for (let i = 0; i < peerIdsAndPeers.length; i++) {
+      commandObj.log(color.gray(`Peer: ${peerIdsAndPeers[0][i]}`));
+      commandObj.log(
+        color.gray(
+          `Free worker slots: ${peerIdsAndPeers[1][i]!.freeWorkerSlots}`,
+        ),
+      );
+    }
   }
 }
