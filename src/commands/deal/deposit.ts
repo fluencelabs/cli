@@ -68,20 +68,20 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(signer, network);
+    const dealClient = new DealClient(network, signer);
     const deal = dealClient.getDeal(dealAddress);
 
     promptConfirmTx(privKey);
 
-    await (
+    const approveTx = await ERC20__factory.connect(
+      await deal.paymentToken(),
       // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-      await ERC20__factory.connect(await deal.paymentToken(), signer).approve(
-        await deal.getAddress(),
-        amount,
-      )
-    ).wait();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      signer,
+    ).approve(await deal.getAddress(), amount);
+
+    await approveTx.wait();
 
     promptConfirmTx(privKey);
 

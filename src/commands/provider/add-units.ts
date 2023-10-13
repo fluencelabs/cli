@@ -72,7 +72,7 @@ export default class AddUnits extends BaseCommand<typeof AddUnits> {
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(signer, network);
+    const dealClient = new DealClient(network, signer);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
@@ -101,7 +101,7 @@ export default class AddUnits extends BaseCommand<typeof AddUnits> {
     // @ts-expect-error
     await waitTx(tx);
 
-    const free = (await matcher.getComputePeerInfo(peerId)).freeWorkerSlots;
+    const free = (await matcher.getComputePeerInfo(bytes)).freeWorkerSlots;
 
     commandObj.logToStderr(
       `Added ${color.yellow(unitsCount)} units. Compute peer ${color.yellow(

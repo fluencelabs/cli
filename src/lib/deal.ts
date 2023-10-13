@@ -69,7 +69,7 @@ export const dealCreate = async ({
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  const dealClient = new DealClient(signer, chainNetwork);
+  const dealClient = new DealClient(chainNetwork, signer);
   const globalContracts = dealClient.getGlobalContracts();
 
   const factory = await globalContracts.getFactory();
@@ -185,7 +185,7 @@ export const dealUpdate = async ({
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  const dealClient = new DealClient(signer, network);
+  const dealClient = new DealClient(network, signer);
   const deal = dealClient.getDeal(dealAddress);
 
   const { CID } = await import("ipfs-http-client");
@@ -220,16 +220,18 @@ export async function match(
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  const dealClient = new DealClient(signer, network);
+  const dealClient = new DealClient(network, signer);
   const globalContracts = dealClient.getGlobalContracts();
   const matcher: Matcher = await globalContracts.getMatcher();
 
   const preMatchingResult = await matcher.findComputePeers(dealAddress);
+
   const tx = await matcher.matchDeal(
     dealAddress,
     preMatchingResult.computeProviders,
     preMatchingResult.computePeers,
   );
+
   promptConfirmTx(privKey);
   // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

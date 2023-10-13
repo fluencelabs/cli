@@ -22,6 +22,7 @@ import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
+import { ethers } from "ethers";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about provider";
@@ -45,7 +46,7 @@ export default class Info extends BaseCommand<typeof Info> {
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(await getProvider(network), network);
+    const dealClient = new DealClient(network, await getProvider(network));
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
 
@@ -57,12 +58,19 @@ export default class Info extends BaseCommand<typeof Info> {
     commandObj.log(color.gray(`Provider info:`));
 
     commandObj.log(
-      color.gray(`Max collateral: ${computeProviderInfo.maxCollateral}`),
+      color.gray(
+        `Max collateral: ${ethers.formatEther(
+          computeProviderInfo.maxCollateral,
+        )} FLT`,
+      ),
     );
 
+    //TODO: add to units in payment token
     commandObj.log(
       color.gray(
-        `Min price per worker per epoch: ${computeProviderInfo.minPricePerEpoch}`,
+        `Min price per worker per epoch: ${ethers.formatEther(
+          computeProviderInfo.minPricePerEpoch,
+        )}`,
       ),
     );
 
@@ -75,16 +83,28 @@ export default class Info extends BaseCommand<typeof Info> {
     );
 
     commandObj.log(color.gray(`--Peers--`));
+
     const peerIdsAndPeers =
       await matcher.getPeersByComputeProvider(providerAddress);
 
-    for (let i = 0; i < peerIdsAndPeers.length; i++) {
-      commandObj.log(color.gray(`Peer: ${peerIdsAndPeers[0][i]}`));
-      commandObj.log(
-        color.gray(
-          `Free worker slots: ${peerIdsAndPeers[1][i]!.freeWorkerSlots}`,
-        ),
-      );
+    if (peerIdsAndPeers[0].length === 0) {
+      commandObj.log(color.gray(`No peers`));
+    } else {
+      for (let i = 0; i < peerIdsAndPeers[0].length; i++) {
+        commandObj.log(color.gray(`\nPeer: ${peerIdsAndPeers[0][i]}`));
+
+        const peer = peerIdsAndPeers[1][i];
+
+        if (peer === undefined) {
+          continue;
+        }
+
+        commandObj.log(
+          color.gray(`Free worker slots: ${peer.freeWorkerSlots}`),
+        );
+      }
     }
+
+    commandObj.log(color.gray(`----------`));
   }
 }

@@ -27,6 +27,7 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../lib/provider.js";
+import { ethers } from "ethers";
 
 export default class Register extends BaseCommand<typeof Register> {
   static override description = "Register in matching contract";
@@ -56,14 +57,14 @@ export default class Register extends BaseCommand<typeof Register> {
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(signer, network);
+    const dealClient = new DealClient(network, signer);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
 
     const tx = await matcher.registerComputeProvider(
-      flags["price-per-epoch"],
-      flags["max-collateral"],
+      ethers.parseEther(String(flags["price-per-epoch"])),
+      ethers.parseEther(String(flags["max-collateral"])),
       await flt.getAddress(),
       [],
     );

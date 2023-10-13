@@ -51,7 +51,7 @@ export default class Info extends BaseCommand<typeof Info> {
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(await getProvider(network), network);
+    const dealClient = new DealClient(network, await getProvider(network));
 
     const dealAddress =
       this.args["DEAL-ADDRESS"] ??

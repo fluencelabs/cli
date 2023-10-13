@@ -75,10 +75,13 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      const dealClient = new DealClient(signer, network);
+      const dealClient = new DealClient(network, signer);
       const globalContracts = dealClient.getGlobalContracts();
       const matcher = await globalContracts.getMatcher();
       const flt = await globalContracts.getFLT();
+
+      const multihash = digest.decode(base58btc.decode("z" + peerId));
+      const bytes = multihash.bytes.subarray(6);
 
       const collateral = (
         await matcher.getComputeProviderInfo(await signer.getAddress())
@@ -95,8 +98,6 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       // @ts-expect-error
       await waitTx(approveTx);
 
-      const multihash = digest.decode(base58btc.decode("z" + peerId));
-      const bytes = multihash.bytes.subarray(6);
       const tx = await matcher.addWorkersSlots(bytes, workersCount);
       promptConfirmTx(flags["priv-key"]);
       // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
@@ -104,14 +105,12 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       // @ts-expect-error
       await waitTx(tx);
 
-      const free = (await matcher.getComputePeerInfo(peerId)).freeWorkerSlots;
+      const free = (await matcher.getComputePeerInfo(bytes)).freeWorkerSlots;
 
       commandObj.logToStderr(
-        `Added ${color.yellow(
-          workersCount,
-        )} worker slots. Compute peer ${color.yellow(
+        `Added ${color.yellow(workersCount)} compute peer with ${color.yellow(
           peerIds,
-        )} has ${color.yellow(free)} free worker slots now.`,
+        )} has ${color.yellow(free)} free worker slots.`,
       );
     }
   }

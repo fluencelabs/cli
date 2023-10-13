@@ -61,7 +61,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(await getProvider(network), network);
+    const dealClient = new DealClient(network, await getProvider(network));
     const deal = dealClient.getDeal(dealAddress);
 
     const rewardAmount = await deal.getRewardAmount(unitId);

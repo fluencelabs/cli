@@ -29,7 +29,7 @@ import {
   waitTx,
 } from "../../lib/provider.js";
 
-export default class SubUnits extends BaseCommand<typeof SubUnits> {
+export default class RemoveUnits extends BaseCommand<typeof RemoveUnits> {
   static override description =
     "Sub units to specific nox instance as a Compute Peer";
   static override flags = {
@@ -50,7 +50,7 @@ export default class SubUnits extends BaseCommand<typeof SubUnits> {
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(SubUnits),
+      await this.parse(RemoveUnits),
     );
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
@@ -72,7 +72,7 @@ export default class SubUnits extends BaseCommand<typeof SubUnits> {
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    const dealClient = new DealClient(signer, network);
+    const dealClient = new DealClient(network, signer);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
 
@@ -85,10 +85,10 @@ export default class SubUnits extends BaseCommand<typeof SubUnits> {
     // @ts-expect-error
     await waitTx(tx);
 
-    const free = (await matcher.getComputePeerInfo(peerId)).freeWorkerSlots;
+    const free = (await matcher.getComputePeerInfo(bytes)).freeWorkerSlots;
 
     commandObj.logToStderr(
-      `Added ${color.yellow(unitsCount)} units. Compute peer ${color.yellow(
+      `Removed ${color.yellow(unitsCount)} units. Compute peer ${color.yellow(
         peerId,
       )} has ${color.yellow(free)} free worker slots now.`,
     );
