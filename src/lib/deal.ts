@@ -30,24 +30,15 @@ import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
-type DealInfo = {
-  core: string;
-  configModule: string;
-  paymentModule: string;
-  statusModule: string;
-  workersModule: string;
-};
-
 type DealCreateArg = {
   chainNetwork: ContractsENV;
   privKey: string | undefined;
   appCID: string;
-  paymentToken: string;
-  collateralPerWorker: number;
+  collateralPerWorker: string;
   minWorkers: number;
   targetWorkers: number;
   maxWorkersPerProvider: number;
-  pricePerWorkerEpoch: number;
+  pricePerWorkerEpoch: string;
   effectors: string[];
 };
 
@@ -55,7 +46,6 @@ export const dealCreate = async ({
   chainNetwork,
   privKey,
   appCID,
-  paymentToken,
   collateralPerWorker,
   minWorkers,
   targetWorkers,
@@ -76,6 +66,8 @@ export const dealCreate = async ({
   const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
 
+  const flt = await globalContracts.getFLT();
+
   promptConfirmTx(privKey);
 
   const tx = await factory.deployDeal(
@@ -83,12 +75,12 @@ export const dealCreate = async ({
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
     },
-    paymentToken,
-    collateralPerWorker,
+    await flt.getAddress(),
+    ethers.parseEther(collateralPerWorker),
     minWorkers,
     targetWorkers,
     maxWorkersPerProvider,
-    ethers.parseEther(String(pricePerWorkerEpoch)),
+    ethers.parseEther(pricePerWorkerEpoch),
     effectors.map((effectorHash) => {
       const id = CID.parse(effectorHash).bytes;
       return {
@@ -116,56 +108,15 @@ export const dealCreate = async ({
     `DealCreated event not found. Try updating ${CLI_NAME_FULL} to the latest version`,
   );
 
-  const dealInfoEvent: ethers.Result = factory.interface.parseLog({
-    data: log.data,
-    topics: [...log.topics],
-  })?.args[DEAL_LOG_ARG_NAME];
+  const dealInfoEvent: ethers.Result = factory.interface
+    .parseLog({
+      data: log.data,
+      topics: [...log.topics],
+    })
+    ?.args.getValue(DEAL_LOG_ARG_NAME);
 
-  const dealInfo = await parseDealInfo(dealInfoEvent);
-  return dealInfo.core;
+  return dealInfoEvent.toString();
 };
-
-async function parseDealInfo(dealInfoEvent: ethers.Result): Promise<DealInfo> {
-  const core = dealInfoEvent.getValue("core");
-  const { ethers } = await import("ethers");
-  assert(ethers.isAddress(core), "Deal core address is not valid");
-
-  const configModule = dealInfoEvent.getValue("configModule");
-
-  assert(
-    ethers.isAddress(configModule),
-    "Deal config module address is not valid",
-  );
-
-  const paymentModule = dealInfoEvent.getValue("paymentModule");
-
-  assert(
-    ethers.isAddress(paymentModule),
-    "Deal payment module address is not valid",
-  );
-
-  const statusModule = dealInfoEvent.getValue("statusModule");
-
-  assert(
-    ethers.isAddress(statusModule),
-    "Deal status module address is not valid",
-  );
-
-  const workersModule = dealInfoEvent.getValue("workersModule");
-
-  assert(
-    ethers.isAddress(workersModule),
-    "Deal workers module address is not valid",
-  );
-
-  return {
-    core,
-    configModule,
-    paymentModule,
-    statusModule,
-    workersModule,
-  };
-}
 
 type DealUpdateArg = {
   network: ContractsENV;
@@ -224,12 +175,18 @@ export async function match(
   const globalContracts = dealClient.getGlobalContracts();
   const matcher: Matcher = await globalContracts.getMatcher();
 
-  const preMatchingResult = await matcher.findComputePeers(dealAddress);
+  const peers = await matcher.findComputePeers(dealAddress);
 
   const tx = await matcher.matchDeal(
     dealAddress,
-    preMatchingResult.computeProviders,
-    preMatchingResult.computePeers,
+    peers.computeProviders.map((x) => {
+      return String(x);
+    }),
+    peers.computePeers.map((x) => {
+      return x.map((y) => {
+        return String(y);
+      });
+    }),
   );
 
   promptConfirmTx(privKey);

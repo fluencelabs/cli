@@ -21,8 +21,9 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
 import { input } from "../../lib/prompt.js";
+import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
+import { ethers } from "ethers";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about provider";
@@ -35,13 +36,10 @@ export default class Info extends BaseCommand<typeof Info> {
     "DEAL-ADDRESS": Args.string({
       description: "Deal address",
     }),
-    "UNIT-ID": Args.string({
-      description: "Compute unit CID",
-    }),
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
+    const { flags, maybeFluenceConfig, args } = await initCli(
       this,
       await this.parse(Info),
     );
@@ -54,24 +52,42 @@ export default class Info extends BaseCommand<typeof Info> {
     const dealClient = new DealClient(network, await getProvider(network));
 
     const dealAddress =
-      this.args["DEAL-ADDRESS"] ??
-      (await input({ message: "Enter deal address" }));
+      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
     const deal = dealClient.getDeal(dealAddress);
 
     commandObj.log(color.gray(`Deal info:`));
 
-    commandObj.log(color.gray(`Status: ${await deal.getStatus()}`));
+    const status = await deal.getStatus();
+
+    //TODO: change to enum
+    switch (status) {
+      case 0n:
+        commandObj.log(color.gray(`Status: Inactive`));
+        break;
+      case 1n:
+        commandObj.log(color.gray(`Status: Active`));
+        break;
+      case 2n:
+        commandObj.log(color.gray(`Status: Ended`));
+        break;
+    }
 
     commandObj.log(color.gray(`Balance: ${await deal.getFreeBalance()}`));
 
     commandObj.log(
-      color.gray(`Collateral per worker: ${await deal.collateralPerWorker()}`),
+      color.gray(
+        `Collateral per worker: ${ethers.formatEther(
+          await deal.collateralPerWorker(),
+        )} FLT`,
+      ),
     );
 
     commandObj.log(
       color.gray(
-        `Price per worker per epoch: ${await deal.pricePerWorkerEpoch()}`,
+        `Price per worker per epoch: ${ethers.formatEther(
+          await deal.pricePerWorkerEpoch(),
+        )}`,
       ),
     );
 
@@ -81,22 +97,31 @@ export default class Info extends BaseCommand<typeof Info> {
 
     commandObj.log(color.gray(`Target worker: ${await deal.targetWorkers()}`));
 
+    const currentComputeUnitCount = await deal.getComputeUnitCount();
+
     commandObj.log(
-      color.gray(`Current compute units: ${await deal.getComputeUnitCount()}`),
+      color.gray(`Current compute units: ${currentComputeUnitCount}`),
     );
 
     commandObj.log(color.gray(`--Compute Units--`));
 
-    const computeUnits = await deal.getComputeUnits();
+    if (currentComputeUnitCount === 0n) {
+      commandObj.log(color.gray(`No compute units`));
+    } else {
+      const computeUnits = await deal.getComputeUnits();
 
-    for (const unit of computeUnits) {
-      commandObj.log(color.gray(`Compute unit: ${unit.id}`));
+      for (const unit of computeUnits) {
+        commandObj.log(color.gray(`\nCompute unit: ${unit.id}`));
+        commandObj.log(color.gray(`Owner: ${unit.owner}`));
 
-      commandObj.log(color.gray(`WorkerId: ${unit.workerId}`));
+        if (unit.workerId === ethers.ZeroHash) {
+          commandObj.log(color.gray(`Worker Id: None`));
+        } else {
+          commandObj.log(color.gray(`Worker Id: ${unit.workerId}`));
+        }
 
-      commandObj.log(color.gray(`Worker slot: ${unit.peerId}`));
-
-      commandObj.log(color.gray(`Owner: ${unit.owner}`));
+        commandObj.log(color.gray(`Peer Id: ${unit.peerId}`));
+      }
     }
   }
 }

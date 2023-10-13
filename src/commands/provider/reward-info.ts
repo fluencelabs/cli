@@ -39,7 +39,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
       description: "Deal address",
     }),
     "UNIT-ID": Args.string({
-      description: "Compute unit CID",
+      description: "Compute unit ID",
     }),
   };
 
@@ -55,7 +55,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
     const unitId =
-      args["UNIT-ID"] ?? (await input({ message: "Enter unit CID" }));
+      args["UNIT-ID"] ?? (await input({ message: "Enter unit id" }));
 
     const { DealClient } = await import("@fluencelabs/deal-aurora");
     // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules

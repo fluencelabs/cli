@@ -72,11 +72,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       allowNo: true,
       default: true,
     }),
-    "payment-token": Flags.string({
-      description: "Address of the payment token",
-      required: true,
-    }),
-    "collateral-per-worker": Flags.integer({
+    "collateral-per-worker": Flags.string({
       description: "Collateral per worker",
       required: true,
     }),
@@ -92,7 +88,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       description: "Max workers per provider",
       required: true,
     }),
-    "price-per-worker-epoch": Flags.integer({
+    "price-per-worker-epoch": Flags.string({
       description: "Price per worker epoch",
       required: true,
     }),
@@ -236,7 +232,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         appCID,
         minWorkers,
         targetWorkers,
-        paymentToken: flags["payment-token"],
         collateralPerWorker: flags["collateral-per-worker"],
         maxWorkersPerProvider: flags["max-workers-per-provider"],
         pricePerWorkerEpoch: flags["price-per-worker-epoch"],

@@ -623,7 +623,7 @@ __metadata:
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
     "@fluencelabs/aqua-api": 0.12.3
-    "@fluencelabs/deal-aurora": ./fluencelabs-deal-aurora-0.2.13.tgz
+    "@fluencelabs/deal-aurora": ./fluencelabs-deal-aurora-0.2.15.tgz
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.24
     "@fluencelabs/js-client": 0.2.1
@@ -695,15 +695,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-aurora@file:./fluencelabs-deal-aurora-0.2.13.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A.":
-  version: 0.2.13
-  resolution: "@fluencelabs/deal-aurora@file:./fluencelabs-deal-aurora-0.2.13.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A."
+"@fluencelabs/deal-aurora@file:./fluencelabs-deal-aurora-0.2.15.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A.":
+  version: 0.2.15
+  resolution: "@fluencelabs/deal-aurora@file:./fluencelabs-deal-aurora-0.2.15.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A."
   dependencies:
     "@nomicfoundation/hardhat-toolbox": ^3.0.0
     "@openzeppelin/contracts": ^4.9.3
     "@openzeppelin/contracts-upgradeable": ^4.9.3
     dotenv: ^16.3.1
-  checksum: f2faf11ef4cc331fcfb08ed0fff29e501ba1fa6a5fee4162337e95e4b1fa8bc49c247a9320ae78be1e400238ddeeb99e76786aa2f0079243cd3125c31c85c9f4
+  checksum: defef34a513e771847c58262b14cf49060321f22cd9706468c263f56b2c19ae145a3cdc3e86784c92eda5f0d63804fa57021d5c4fe4aaa73469d116df5471a36
   languageName: node
   linkType: hard
 
@@ -12580,12 +12580,12 @@ __metadata:
   linkType: hard
 
 "protons-runtime@npm:^5.0.0":
-  version: 5.0.4
-  resolution: "protons-runtime@npm:5.0.4"
+  version: 5.0.5
+  resolution: "protons-runtime@npm:5.0.5"
   dependencies:
     uint8arraylist: ^2.4.3
     uint8arrays: ^4.0.6
-  checksum: 2eddb8437bf840e00a2ba08bb238ab8ab7a98817f28ab4cc03e86bfa537742c2746609c1b15182e77edbbfb56149b40d27d04589ef427bcab2bfb54b9a82d5d4
+  checksum: 3709164d2cde019a065b0a1a5872e70eeb188c71c45f699b86f4aa389d2f4282a46022998370131afa0e04173fbb56feec903e81fd3e8021ae8ddcba73f87ded
   languageName: node
   linkType: hard
 

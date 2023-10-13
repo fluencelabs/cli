@@ -34,11 +34,7 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "CID of the application that will be deployed",
       required: true,
     }),
-    "payment-token": Flags.string({
-      description: "Address of the payment token",
-      required: true,
-    }),
-    "collateral-per-worker": Flags.integer({
+    "collateral-per-worker": Flags.string({
       description: "Collateral per worker",
       required: true,
     }),
@@ -54,7 +50,7 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Max workers per provider",
       required: true,
     }),
-    "price-per-worker-epoch": Flags.integer({
+    "price-per-worker-epoch": Flags.string({
       description: "Price per worker epoch",
       required: true,
     }),
@@ -70,7 +66,6 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const dealAddress = await dealCreate({
       appCID: flags["app-cid"],
-      paymentToken: flags["payment-token"],
       collateralPerWorker: flags["collateral-per-worker"],
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
