@@ -68,15 +68,15 @@ export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
 export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
   kras: {
-    url: "https://kras-rpc.fluence.dev",
+    url: "https://polygon-mumbai.g.alchemy.com/v2/lSTLbdQejAUJ854kpjvyFXrmKocI2N-z",
     id: 80001,
   },
   testnet: {
-    url: "https://testnet-rpc.fluence.dev",
+    url: "https://polygon-mumbai.g.alchemy.com/v2/_Tc--Ia76JVzBPdr8IbBWDTCPf-DVQpS",
     id: 80001,
   },
   stage: {
-    url: "https://stage-rpc.fluence.dev",
+    url: "https://polygon-mumbai.g.alchemy.com/v2/_nxv_qsNy3ZWBipXy41imOXj4j6aNfCc",
     id: 80001,
   },
   local: {
