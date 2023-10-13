@@ -61,10 +61,10 @@ import versions from "../versions.json" assert { type: "json" };
 
 import { addService } from "./addService.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import { setEnvConfig } from "./configs/globalConfigs.js";
+import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
 import { initNewEnvConfig } from "./configs/project/env.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
-import { initNewWorkersConfig } from "./configs/project/workers.js";
+import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
 import type { ContractsENV } from "./const.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
@@ -199,7 +199,14 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
   const fluenceEnv = await resolveFluenceEnv(options.fluenceEnvFromFlags);
-  setEnvConfig(await initNewEnvConfig(fluenceEnv));
+
+  if (envConfig === undefined) {
+    setEnvConfig(await initNewEnvConfig(fluenceEnv));
+  } else {
+    envConfig.fluenceEnv = fluenceEnv;
+    await envConfig.$commit();
+  }
+
   let fluenceEnvOrCustomRelays: ContractsENV | Array<string>;
 
   if (fluenceEnv === "custom") {
@@ -233,8 +240,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     FS_OPTIONS,
   );
 
-  const workersConfig = await initNewWorkersConfig();
-
+  const workersConfig = await initNewWorkersConfigReadonly();
   const { ensureAquaFileWithWorkerInfo } = await import("./deployWorkers.js");
   await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
   await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
