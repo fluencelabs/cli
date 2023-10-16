@@ -17,7 +17,7 @@
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
-import { execPromise } from "../../lib/execPromise.js";
+import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Down extends BaseCommand<typeof Down> {
@@ -28,14 +28,13 @@ export default class Down extends BaseCommand<typeof Down> {
   };
   async run(): Promise<void> {
     await initCli(this, await this.parse(Down));
-    const dockerCompose = await initNewDockerComposeConfig();
+    const dockerComposeConfig = await initNewDockerComposeConfig();
 
-    await execPromise({
-      command: "docker",
-      args: ["compose", "down"],
+    await dockerCompose({
+      args: ["down"],
       printOutput: true,
       options: {
-        cwd: dockerCompose.$getDirPath(),
+        cwd: dockerComposeConfig.$getDirPath(),
       },
     });
   }
