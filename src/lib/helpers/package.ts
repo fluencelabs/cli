@@ -349,7 +349,9 @@ export const getRecommendedDependencies = (packageManager: PackageManager) => {
 
   return Object.fromEntries(
     Object.entries(versionsPerPackageManager).filter(([dependencyName]) => {
-      return defaultDependencies.includes(dependencyName);
+      return defaultDependencies.some((dep) => {
+        return dep === dependencyName;
+      });
     }),
   );
 };
