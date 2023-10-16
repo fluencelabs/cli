@@ -14,20 +14,30 @@
  * limitations under the License.
  */
 
+import { rm } from "fs/promises";
+
 import type { JSONSchemaType } from "ajv";
 
 import versions from "../../../versions.json" assert { type: "json" };
+import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   GLOBAL_CONFIG_FILE_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   CLI_NAME_FULL,
   AQUA_LIB_NPM_DEPENDENCY,
+  AUTO_GENERATED,
 } from "../../const.js";
+import { genSecretKeyString } from "../../helpers/utils.js";
 import {
   validateAllVersionsAreExact,
   validateBatch,
 } from "../../helpers/validations.js";
+import {
+  createSecretKey,
+  getUserSecretKey,
+  writeSecretKey,
+} from "../../keyPairs.js";
 import { ensureUserFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -38,6 +48,8 @@ import {
   type Migrations,
   type ConfigValidateFunction,
 } from "../initConfig.js";
+
+import { initReadonlyUserSecretsConfig } from "./userSecrets.js";
 
 export const CHECK_FOR_UPDATES_DISABLED = "disabled";
 
@@ -52,11 +64,8 @@ type ConfigV0 = {
   lastCheckForUpdates?: string;
 };
 
-const configSchemaV0: JSONSchemaType<ConfigV0> = {
+const configSchemaV0Obj = {
   type: "object",
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${GLOBAL_CONFIG_FULL_FILE_NAME}`,
-  title: GLOBAL_CONFIG_FULL_FILE_NAME,
-  description: `Defines global config for ${CLI_NAME_FULL}`,
   properties: {
     countlyConsent: {
       type: "boolean",
@@ -110,9 +119,45 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     version: { type: "number", const: 0 },
   },
   required: ["version", "countlyConsent"],
+} as const;
+
+const configSchemaV0: JSONSchemaType<ConfigV0> = configSchemaV0Obj;
+
+type ConfigV1 = Omit<ConfigV0, "version"> & {
+  version: 1;
+  defaultSecretKeyName: string;
 };
 
-const getDefault = () => {
+const configSchemaV1Obj = {
+  ...configSchemaV0Obj,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${GLOBAL_CONFIG_FULL_FILE_NAME}`,
+  title: GLOBAL_CONFIG_FULL_FILE_NAME,
+  description: `Defines global config for ${CLI_NAME_FULL}`,
+  properties: {
+    ...configSchemaV0Obj.properties,
+    version: { type: "number", const: 1 },
+    defaultSecretKeyName: {
+      type: "string",
+      description:
+        "Secret key with this name will be used by default by js-client inside CLI to run Aqua code",
+    },
+  },
+  required: [...configSchemaV0Obj.required, "defaultSecretKeyName"],
+} as const;
+
+const configSchemaV1: JSONSchemaType<ConfigV1> = configSchemaV1Obj;
+
+async function getDefault() {
+  const userSecretKey = await getUserSecretKey(AUTO_GENERATED);
+
+  if (userSecretKey === undefined) {
+    await createSecretKey({
+      name: AUTO_GENERATED,
+      isUser: true,
+      maybeFluenceConfig: null,
+    });
+  }
+
   return `# Defines global config for Fluence CLI
 
 # config version
@@ -123,6 +168,9 @@ countlyConsent: false
 
 # Whether to include commented-out documented config examples in the configs generated with the CLI
 docsInConfigs: false
+
+# Secret key with this name will be used by default by js-client inside CLI to run Aqua code
+defaultSecretKeyName: ${AUTO_GENERATED}
 
 # # Last time when CLI checked for updates.
 # # Updates are checked daily unless this field is set to 'disabled'
@@ -145,12 +193,47 @@ docsInConfigs: false
 #   cargo:
 #     marine: 0.14.0
 `;
-};
+}
 
-const migrations: Migrations<Config> = [];
+const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 
-type Config = ConfigV0;
-type LatestConfig = ConfigV0;
+const migrations: Migrations<Config> = [
+  async (config: Config): Promise<ConfigV1> => {
+    if (!validateConfigSchemaV0(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
+
+    const userSecretsConfig = await initReadonlyUserSecretsConfig();
+
+    await Promise.all(
+      (userSecretsConfig?.keyPairs ?? []).map(({ name, secretKey }) => {
+        return writeSecretKey({
+          name,
+          secretKey,
+          isUser: true,
+        });
+      }),
+    );
+
+    if (userSecretsConfig !== null) {
+      await rm(userSecretsConfig.$getPath());
+    }
+
+    return {
+      ...config,
+      version: 1,
+      defaultSecretKeyName:
+        userSecretsConfig?.defaultKeyPairName ?? (await genSecretKeyString()),
+    };
+  },
+];
+
+type Config = ConfigV0 | ConfigV1;
+type LatestConfig = ConfigV1;
 export type UserConfig = InitializedConfig<LatestConfig>;
 export type UserConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
@@ -162,8 +245,8 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
 };
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
+  allSchemas: [configSchemaV0, configSchemaV1],
+  latestSchema: configSchemaV1,
   migrations,
   name: GLOBAL_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: ensureUserFluenceDir,
@@ -180,4 +263,4 @@ export const initNewUserConfig = getConfigInitFunction(
 export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const userConfigSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export const userConfigSchema: JSONSchemaType<LatestConfig> = configSchemaV1;

@@ -15,6 +15,7 @@
  */
 
 import { isAbsolute, resolve } from "path";
+import { cwd } from "process";
 
 import { color } from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
@@ -245,7 +246,7 @@ const resolveAbsoluteAquaPath = async ({
     return resolve(projectRootDir, maybePathFromFluenceYaml);
   }
 
-  const pathFromUserInput = await input({ ...inputArg, allowEmpty: true });
+  const pathFromUserInput = await input({ ...inputArg, default: cwd() });
 
   if (isAbsolute(pathFromUserInput)) {
     return pathFromUserInput;

@@ -15,7 +15,8 @@
  */
 
 import assert from "node:assert";
-import path, { join } from "node:path";
+import { rm } from "node:fs/promises";
+import { join, relative } from "node:path";
 
 import { kras } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
@@ -45,11 +46,13 @@ import {
   CONTRACTS_ENV,
   type FluenceEnv,
   FLUENCE_ENVS,
+  AUTO_GENERATED,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
   validateBatch,
 } from "../../helpers/validations.js";
+import { writeSecretKey } from "../../keyPairs.js";
 import { resolveRelays } from "../../multiaddres.js";
 import {
   ensureSrcAquaMainPath,
@@ -70,6 +73,7 @@ import {
   type OverridableModuleProperties,
   overridableModuleProperties,
 } from "./module.js";
+import { initReadonlyProjectSecretsConfig } from "./projectSecrets.js";
 import {
   type OverridableSpellProperties,
   overridableSpellProperties,
@@ -84,7 +88,7 @@ type ConfigV0 = {
   services: Array<ServiceV0>;
 };
 
-const configSchemaV0: JSONSchemaType<ConfigV0> = {
+const configSchemaV0Obj = {
   type: "object",
   properties: {
     version: { type: "number", const: 0 },
@@ -102,7 +106,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     },
   },
   required: ["version", "services"],
-};
+} as const;
+
+const configSchemaV0: JSONSchemaType<ConfigV0> = configSchemaV0Obj;
 
 export type OverrideModules = Record<string, OverridableModuleProperties>;
 
@@ -457,11 +463,8 @@ type ConfigV3 = Omit<ConfigV2, "version" | "relays" | "chainNetwork"> & {
   };
 };
 
-const configSchemaV3: JSONSchemaType<ConfigV3> = {
+const configSchemaV3Obj = {
   ...configSchemaV2Obj,
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  title: FLUENCE_CONFIG_FULL_FILE_NAME,
-  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...(() => {
       const properties = {
@@ -497,6 +500,39 @@ const configSchemaV3: JSONSchemaType<ConfigV3> = {
   },
 } as const;
 
+const configSchemaV3: JSONSchemaType<ConfigV3> = configSchemaV3Obj;
+
+type ConfigV4 = Omit<ConfigV3, "version"> & {
+  version: 4;
+  defaultSecretKeyName?: string;
+  relaysPath?: string;
+};
+
+const configSchemaV4Obj = {
+  ...configSchemaV3Obj,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FULL_FILE_NAME,
+  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
+  properties: {
+    ...configSchemaV3Obj.properties,
+    version: { type: "number", const: 4 },
+    defaultSecretKeyName: {
+      description:
+        "Secret key with this name will be used by default by js-client inside CLI to run Aqua code",
+      type: "string",
+      nullable: true,
+    },
+    relaysPath: {
+      description:
+        "Path to the directory where you want relays.json file to be generated. Must be relative to the project root dir. This file contains a list of relays to use when connecting to Fluence network and depends on the default environment that you use in your project",
+      type: "string",
+      nullable: true,
+    },
+  },
+} as const;
+
+const configSchemaV4: JSONSchemaType<ConfigV4> = configSchemaV4Obj;
+
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
 };
@@ -507,11 +543,11 @@ const getDefaultConfig = async (): Promise<string> => {
 # You can use \`fluence init\` command to generate a template for new Fluence project
 
 # config version
-version: 2
+version: 4
 
 # Path to the aqua file or directory with aqua files that you want to compile by default.
 # Must be relative to the project root dir
-aquaInputPath: ${path.relative(projectRootDir, await ensureSrcAquaMainPath())}
+aquaInputPath: ${relative(projectRootDir, await ensureSrcAquaMainPath())}
 
 # A map with worker names as keys and worker configs as values
 workers:
@@ -682,6 +718,10 @@ deals:
 # ${MARINE_BUILD_ARGS_PROPERTY}: '${DEFAULT_MARINE_BUILD_ARGS}'
 # # IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} (for 'workers deploy' IPFS address provided by relay that you are connected to is used)
 # ${IPFS_ADDR_PROPERTY}: '${DEFAULT_IPFS_ADDRESS}'
+# # Secret key with this name will be used by default by js-client inside CLI to run Aqua code
+# defaultSecretKeyName: ${AUTO_GENERATED}
+# # Path to the directory where you want relays.json file to be generated. Must be relative to the project root dir. This file contains a list of relays to use when connecting to Fluence network and depends on the default environment that you use in your project
+# relaysPath: relative/path
 `;
 };
 
@@ -692,6 +732,7 @@ const getDefault = (): Promise<string> => {
 const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
+const validateConfigSchemaV3 = ajv.compile(configSchemaV3);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -708,9 +749,9 @@ const migrations: Migrations<Config> = [
         return {
           ...acc,
           [name]: {
-            get: path.relative(
+            get: relative(
               projectRootDir,
-              path.join(projectRootDir, "artifacts", name),
+              join(projectRootDir, "artifacts", name),
             ),
           },
         };
@@ -760,7 +801,10 @@ const migrations: Migrations<Config> = [
         contractsEnv: chainNetwork ?? "testnet",
         relays:
           relays === undefined || typeof relays === "string"
-            ? resolveRelays(relays ?? "kras", null, null)
+            ? await resolveRelays({
+                fluenceEnv: relays ?? "kras",
+                maybeFluenceConfig: null,
+              })
             : relays,
       };
     }
@@ -771,10 +815,43 @@ const migrations: Migrations<Config> = [
       version: 3,
     };
   },
+  async (config: Config): Promise<ConfigV4> => {
+    if (!validateConfigSchemaV3(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV1.errors,
+        )}`,
+      );
+    }
+
+    const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
+
+    await Promise.all(
+      (projectSecretsConfig?.keyPairs ?? []).map(({ name, secretKey }) => {
+        return writeSecretKey({
+          name,
+          secretKey,
+          isUser: false,
+        });
+      }),
+    );
+
+    if (projectSecretsConfig !== null) {
+      await rm(projectSecretsConfig.$getPath());
+    }
+
+    return {
+      ...config,
+      version: 4,
+      ...(projectSecretsConfig?.defaultKeyPairName === undefined
+        ? {}
+        : { defaultSecretKeyName: projectSecretsConfig.defaultKeyPairName }),
+    };
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3;
-type LatestConfig = ConfigV3;
+type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3 | ConfigV4;
+type LatestConfig = ConfigV4;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 export type FluenceConfigWithServices = FluenceConfig & {
@@ -917,8 +994,14 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
 };
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0, configSchemaV1, configSchemaV2, configSchemaV3],
-  latestSchema: configSchemaV3,
+  allSchemas: [
+    configSchemaV0,
+    configSchemaV1,
+    configSchemaV2,
+    configSchemaV3,
+    configSchemaV4,
+  ],
+  latestSchema: configSchemaV4,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath,
@@ -945,4 +1028,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV3;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV4;

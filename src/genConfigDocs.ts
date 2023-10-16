@@ -21,21 +21,17 @@ import { dockerComposeSchema } from "./lib/configs/project/dockerCompose.js";
 import { envSchema } from "./lib/configs/project/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
-import { projectSecretsSchema } from "./lib/configs/project/projectSecrets.js";
 import { providerSchema } from "./lib/configs/project/provider.js";
 import { serviceSchema } from "./lib/configs/project/service.js";
 import { spellSchema } from "./lib/configs/project/spell.js";
 import { workersSchema } from "./lib/configs/project/workers.js";
 import { userConfigSchema } from "./lib/configs/user/config.js";
-import { userSecretsSchema } from "./lib/configs/user/userSecrets.js";
 import {
   FLUENCE_CONFIG_FILE_NAME,
   JSON_EXT,
   MODULE_CONFIG_FILE_NAME,
-  PROJECT_SECRETS_CONFIG_FILE_NAME,
   SCHEMAS_DIR_NAME,
   SERVICE_CONFIG_FILE_NAME,
-  USER_SECRETS_CONFIG_FILE_NAME,
   GLOBAL_CONFIG_FILE_NAME,
   WORKERS_CONFIG_FILE_NAME,
   SPELL_CONFIG_FILE_NAME,
@@ -58,8 +54,6 @@ const configsInfo = Object.entries({
   [SERVICE_CONFIG_FILE_NAME]: serviceSchema,
   [SPELL_CONFIG_FILE_NAME]: spellSchema,
   [WORKERS_CONFIG_FILE_NAME]: workersSchema,
-  [PROJECT_SECRETS_CONFIG_FILE_NAME]: projectSecretsSchema,
-  [USER_SECRETS_CONFIG_FILE_NAME]: userSecretsSchema,
   [GLOBAL_CONFIG_FILE_NAME]: userConfigSchema,
   [ENV_CONFIG_FILE_NAME]: envSchema,
   [DOCKER_COMPOSE_FILE_NAME]: dockerComposeSchema,

@@ -136,9 +136,9 @@ jobs:
       #     compose-file: ".github/e2e/docker-compose.yml"
       #     down-flags: "--volumes"
 
-      - name: Run nox network
-        run: |
-          docker-compose -f .github/e2e/docker-compose.yml up -d
+      # - name: Run nox network
+      #   run: |
+      #     docker-compose -f .github/e2e/docker-compose.yml up -d
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1

@@ -15,33 +15,28 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { ENV_ARG } from "../../lib/const.js";
+import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
+import { execPromise } from "../../lib/execPromise.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveFluenceEnv, resolveRelays } from "../../lib/multiaddres.js";
 
-export default class Peers extends BaseCommand<typeof Peers> {
-  static override description = "Print default Fluence network peer addresses";
+export default class Up extends BaseCommand<typeof Up> {
+  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
   };
-  static override args = {
-    ...ENV_ARG,
-  };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Peers),
-    );
+    await initCli(this, await this.parse(Up));
+    const dockerCompose = await initNewDockerComposeConfig();
 
-    const fluenceEnv = await resolveFluenceEnv(args.ENV);
-
-    const relays = await resolveRelays({
-      fluenceEnv,
-      maybeFluenceConfig,
+    await execPromise({
+      command: "docker",
+      args: ["compose", "up", "-d"],
+      printOutput: true,
+      options: {
+        cwd: dockerCompose.$getDirPath(),
+      },
     });
-
-    commandObj.log(relays.join("\n"));
   }
 }

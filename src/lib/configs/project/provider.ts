@@ -21,7 +21,12 @@ import {
   PROVIDER_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  WEB_SOCKET_PORT_START,
 } from "../../const.js";
+import {
+  type ProviderConfigArgs,
+  generateUserProviderConfig,
+} from "../../generateUserProviderConfig.js";
 import { getFluenceDir, projectRootDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -42,10 +47,11 @@ export type Offer = {
 
 export type ComputePeer = {
   worker?: number;
+  port?: string;
 };
 
 type ConfigV0 = {
-  offers?: Record<string, Offer>;
+  offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   version: 0;
 };
@@ -73,6 +79,11 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
   type: "object",
   properties: {
     worker: { type: "number", nullable: true },
+    port: {
+      type: "string",
+      nullable: true,
+      description: `Both host and container port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
+    },
   },
   required: [],
 };
@@ -89,7 +100,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       properties: {
         Offer: offerSchema,
       },
-      nullable: true,
       required: [],
     },
     computePeers: {
@@ -102,35 +112,28 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     },
     version: { type: "number", const: 0 },
   },
-  required: ["version", "computePeers"],
+  required: ["version", "computePeers", "offers"],
 };
 
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
 };
 
-const getDefaultConfig = async ({
-  computePeers,
-  offers,
-}: UserProvidedConfig) => {
-  const { yamlDiffPatch } = await import("yaml-diff-patch");
+function getDefault(args: ProviderConfigArgs) {
+  return async () => {
+    const { yamlDiffPatch } = await import("yaml-diff-patch");
+    const userProvidedConfig = await generateUserProviderConfig(args);
 
-  return () => {
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
 
-${offers === undefined ? "" : yamlDiffPatch("", {}, { offers })}
-${yamlDiffPatch("", {}, { computePeers })}
-
 # config version
 version: 0
-`;
-  };
-};
 
-const getDefault = (providedByUser: UserProvidedConfig) => {
-  return getDefaultConfig(providedByUser);
-};
+${yamlDiffPatch("", {}, userProvidedConfig)}
+  `;
+  };
+}
 
 const migrations: Migrations<Config> = [];
 
@@ -145,9 +148,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     missingComputePeerNames: Array<string>;
   }> = [];
 
-  for (const [offerName, { computePeers }] of Object.entries(
-    config.offers ?? {},
-  )) {
+  for (const [offerName, { computePeers }] of Object.entries(config.offers)) {
     const missingComputePeerNames = computePeers.filter((cp) => {
       return !(cp in config.computePeers);
     });
@@ -184,13 +185,14 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
-export const initNewProviderConfig = async (
-  providedByUser: UserProvidedConfig,
+export const initNewProviderConfig = async (args: ProviderConfigArgs = {}) => {
+  return getConfigInitFunction(initConfigOptions, getDefault(args))();
+};
+
+export const initNewReadonlyProviderConfig = async (
+  args: ProviderConfigArgs = {},
 ) => {
-  return getConfigInitFunction(
-    initConfigOptions,
-    await getDefault(providedByUser),
-  )();
+  return getReadonlyConfigInitFunction(initConfigOptions, getDefault(args))();
 };
 
 export const initProviderConfig = getConfigInitFunction(initConfigOptions);

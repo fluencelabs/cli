@@ -15,8 +15,8 @@
  */
 
 import { access, mkdir } from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
 
 import { commandObj } from "./commandObj.js";
 import {
@@ -77,35 +77,35 @@ export const ensureUserFluenceDir = (): Promise<string> => {
     return ensureDir(commandObj.config.configDir);
   }
 
-  return ensureDir(path.join(os.homedir(), DOT_FLUENCE_DIR_NAME));
+  return ensureDir(join(homedir(), DOT_FLUENCE_DIR_NAME));
 };
 
 export const getUserCountlyDir = async (): Promise<string> => {
-  return path.join(
-    await ensureUserFluenceDir(),
-    COUNTLY_DIR_NAME,
-    COUNTLY_DIR_NAME,
-  );
+  return join(await ensureUserFluenceDir(), COUNTLY_DIR_NAME, COUNTLY_DIR_NAME);
 };
 
 export const ensureUserFluenceTmpNpmDir = async (): Promise<string> => {
   return ensureDir(
-    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, NPM_DIR_NAME),
+    join(await ensureUserFluenceDir(), TMP_DIR_NAME, NPM_DIR_NAME),
   );
 };
 
 export const ensureUserFluenceNpmDir = async (): Promise<string> => {
-  return ensureDir(path.join(await ensureUserFluenceDir(), NPM_DIR_NAME));
+  return ensureDir(join(await ensureUserFluenceDir(), NPM_DIR_NAME));
 };
 
 export const ensureUserFluenceTmpCargoDir = async (): Promise<string> => {
   return ensureDir(
-    path.join(await ensureUserFluenceDir(), TMP_DIR_NAME, CARGO_DIR_NAME),
+    join(await ensureUserFluenceDir(), TMP_DIR_NAME, CARGO_DIR_NAME),
   );
 };
 
 export const ensureUserFluenceCargoDir = async (): Promise<string> => {
-  return ensureDir(path.join(await ensureUserFluenceDir(), CARGO_DIR_NAME));
+  return ensureDir(join(await ensureUserFluenceDir(), CARGO_DIR_NAME));
+};
+
+export const ensureUserFluenceSecretsDir = async (): Promise<string> => {
+  return ensureDir(join(await ensureUserFluenceDir(), SECRETS_DIR_NAME));
 };
 
 // Project paths:
@@ -124,7 +124,7 @@ export const recursivelyFindProjectRootDir = async (
     return initialCwd;
   }
 
-  return path.dirname(fluenceConfigPath);
+  return dirname(fluenceConfigPath);
 };
 
 export let projectRootDir = initialCwd;
@@ -134,53 +134,53 @@ export const setProjectRootDir = (dir: string): void => {
 };
 
 const ensureSrcAquaDir = async (): Promise<string> => {
-  return ensureDir(path.join(projectRootDir, SRC_DIR_NAME, AQUA_DIR_NAME));
+  return ensureDir(join(projectRootDir, SRC_DIR_NAME, AQUA_DIR_NAME));
 };
 
 export const ensureSrcAquaMainPath = async (): Promise<string> => {
-  return path.join(await ensureSrcAquaDir(), DEFAULT_SRC_AQUA_FILE_NAME);
+  return join(await ensureSrcAquaDir(), DEFAULT_SRC_AQUA_FILE_NAME);
 };
 
 export const ensureSrcServicesDir = async (): Promise<string> => {
-  return ensureDir(path.join(projectRootDir, SRC_DIR_NAME, SERVICES_DIR_NAME));
+  return ensureDir(join(projectRootDir, SRC_DIR_NAME, SERVICES_DIR_NAME));
 };
 
 export const ensureSrcModulesDir = async (): Promise<string> => {
-  return ensureDir(path.join(projectRootDir, SRC_DIR_NAME, MODULES_DIR_NAME));
+  return ensureDir(join(projectRootDir, SRC_DIR_NAME, MODULES_DIR_NAME));
 };
 
 export const ensureSrcSpellsDir = async (): Promise<string> => {
-  return ensureDir(path.join(projectRootDir, SRC_DIR_NAME, SPELLS_DIR_NAME));
+  return ensureDir(join(projectRootDir, SRC_DIR_NAME, SPELLS_DIR_NAME));
 };
 
 const ensureVSCodeDir = async (): Promise<string> => {
-  return ensureDir(path.join(projectRootDir, VSCODE_DIR_NAME));
+  return ensureDir(join(projectRootDir, VSCODE_DIR_NAME));
 };
 
 export const ensureVSCodeSettingsJsonPath = async (): Promise<string> => {
-  return path.join(await ensureVSCodeDir(), SETTINGS_JSON_FILE_NAME);
+  return join(await ensureVSCodeDir(), SETTINGS_JSON_FILE_NAME);
 };
 
 export const ensureVSCodeExtensionsJsonPath = async (): Promise<string> => {
-  return path.join(await ensureVSCodeDir(), EXTENSIONS_JSON_FILE_NAME);
+  return join(await ensureVSCodeDir(), EXTENSIONS_JSON_FILE_NAME);
 };
 
 export const getGitignorePath = (): string => {
-  return path.join(projectRootDir, GITIGNORE_FILE_NAME);
+  return join(projectRootDir, GITIGNORE_FILE_NAME);
 };
 
 export const getCargoTomlPath = (): string => {
-  return path.join(projectRootDir, CARGO_TOML);
+  return join(projectRootDir, CARGO_TOML);
 };
 
 export const getREADMEPath = (): string => {
-  return path.join(projectRootDir, README_MD_FILE_NAME);
+  return join(projectRootDir, README_MD_FILE_NAME);
 };
 
 // Project .fluence paths:
 
 export const getFluenceDir = (): string => {
-  return path.join(projectRootDir, DOT_FLUENCE_DIR_NAME);
+  return join(projectRootDir, DOT_FLUENCE_DIR_NAME);
 };
 
 const ensureFluenceDir = async (): Promise<string> => {
@@ -188,7 +188,7 @@ const ensureFluenceDir = async (): Promise<string> => {
 };
 
 export const getFluenceAquaDir = (): string => {
-  return path.join(getFluenceDir(), AQUA_DIR_NAME);
+  return join(getFluenceDir(), AQUA_DIR_NAME);
 };
 
 const ensureFluenceAquaDir = async (): Promise<string> => {
@@ -196,71 +196,89 @@ const ensureFluenceAquaDir = async (): Promise<string> => {
 };
 
 export const ensureFluenceAquaServicesPath = async (): Promise<string> => {
-  return path.join(await ensureFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
+  return join(await ensureFluenceAquaDir(), AQUA_SERVICES_FILE_NAME);
 };
 
 export const ensureFluenceAquaHostsPath = async (): Promise<string> => {
-  return path.join(await ensureFluenceAquaDir(), HOSTS_FULL_FILE_NAME);
+  return join(await ensureFluenceAquaDir(), HOSTS_FULL_FILE_NAME);
 };
 
 export const ensureFluenceAquaDealsPath = async (): Promise<string> => {
-  return path.join(await ensureFluenceAquaDir(), DEALS_FULL_FILE_NAME);
+  return join(await ensureFluenceAquaDir(), DEALS_FULL_FILE_NAME);
+};
+
+export const getFluenceSecretsDir = (): string => {
+  return join(getFluenceDir(), SECRETS_DIR_NAME);
 };
 
 export const ensureFluenceSecretsDir = async (): Promise<string> => {
-  return ensureDir(path.join(getFluenceDir(), SECRETS_DIR_NAME));
+  return ensureDir(getFluenceSecretsDir());
 };
+
+export async function getSecretsPathForReading(isUser: boolean) {
+  return isUser ? await ensureUserFluenceSecretsDir() : getFluenceSecretsDir();
+}
+
+export async function getSecretsPathForWriting(isUser: boolean) {
+  return isUser
+    ? await ensureUserFluenceSecretsDir()
+    : await ensureFluenceSecretsDir();
+}
 
 // JS
 
 // exported for tests
 export const getDefaultJSDirPath = (projectRootDir: string): string => {
-  return path.join(projectRootDir, SRC_DIR_NAME, JS_DIR_NAME);
+  return join(projectRootDir, SRC_DIR_NAME, JS_DIR_NAME);
 };
 
 export const ensureDefaultJSDirPath = async (): Promise<string> => {
   return ensureDir(getDefaultJSDirPath(projectRootDir));
 };
 
+export const ensureDefaultJSSrcPath = async (): Promise<string> => {
+  return ensureDir(join(await ensureDefaultJSDirPath(), SRC_DIR_NAME));
+};
+
 export const ensureDefaultAquaJSPath = async (): Promise<string> => {
-  return ensureDir(
-    path.join(await ensureDefaultJSDirPath(), SRC_DIR_NAME, AQUA_DIR_NAME),
-  );
+  return ensureDir(join(await ensureDefaultJSSrcPath(), AQUA_DIR_NAME));
 };
 
 // TS
 
 // exported for tests
 export const getDefaultTSDirPath = (projectRootDir: string): string => {
-  return path.join(projectRootDir, SRC_DIR_NAME, TS_DIR_NAME);
+  return join(projectRootDir, SRC_DIR_NAME, TS_DIR_NAME);
 };
 
 export const ensureDefaultTSDirPath = async (): Promise<string> => {
   return ensureDir(getDefaultTSDirPath(projectRootDir));
 };
 
+export const ensureDefaultTSSrcPath = async (): Promise<string> => {
+  return ensureDir(join(await ensureDefaultTSDirPath(), SRC_DIR_NAME));
+};
+
 export const ensureDefaultAquaTSPath = async (): Promise<string> => {
-  return ensureDir(
-    path.join(await ensureDefaultTSDirPath(), SRC_DIR_NAME, AQUA_DIR_NAME),
-  );
+  return ensureDir(join(await ensureDefaultTSSrcPath(), AQUA_DIR_NAME));
 };
 
 export const ensureFluenceModulesDir = async (): Promise<string> => {
-  return ensureDir(path.join(await ensureFluenceDir(), MODULES_DIR_NAME));
+  return ensureDir(join(await ensureFluenceDir(), MODULES_DIR_NAME));
 };
 
 export const ensureFluenceServicesDir = async (): Promise<string> => {
-  return ensureDir(path.join(await ensureFluenceDir(), SERVICES_DIR_NAME));
+  return ensureDir(join(await ensureFluenceDir(), SERVICES_DIR_NAME));
 };
 
 export const ensureFluenceSpellsDir = async (): Promise<string> => {
-  return ensureDir(path.join(await ensureFluenceDir(), SPELLS_DIR_NAME));
+  return ensureDir(join(await ensureFluenceDir(), SPELLS_DIR_NAME));
 };
 
 const ensureFluenceTmpDir = async (): Promise<string> => {
-  return ensureDir(path.join(await ensureFluenceDir(), TMP_DIR_NAME));
+  return ensureDir(join(await ensureFluenceDir(), TMP_DIR_NAME));
 };
 
 export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
-  return path.join(await ensureFluenceTmpDir(), CONFIG_TOML);
+  return join(await ensureFluenceTmpDir(), CONFIG_TOML);
 };

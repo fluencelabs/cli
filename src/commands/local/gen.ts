@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
+import { rm } from "fs/promises";
+
+import { color } from "@oclif/color";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
-  initProviderConfig,
-  initNewProviderConfig,
-} from "../../lib/configs/project/provider.js";
+  initNewDockerComposeConfig,
+  initReadonlyDockerComposeConfig,
+} from "../../lib/configs/project/dockerCompose.js";
 import {
+  PROVIDER_CONFIG_FLAGS,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { generateUserProviderConfig } from "../../lib/generateUserProviderConfig.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
 
@@ -34,31 +37,34 @@ export default class Gen extends BaseCommand<typeof Gen> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    ...PROVIDER_CONFIG_FLAGS,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Gen));
-    let providerConfig = await initProviderConfig();
+    const { flags } = await initCli(this, await this.parse(Gen));
 
-    if (providerConfig === null) {
+    const existingDockerCompose = await initReadonlyDockerComposeConfig();
+
+    if (existingDockerCompose !== null) {
       if (
-        await confirm({
-          message: `Provider config doesn't exist. Do you want to create it?`,
-        })
+        !(await confirm({
+          message: `Do you want to replace existing ${color.yellow(
+            existingDockerCompose.$getPath(),
+          )}`,
+          default: false,
+        }))
       ) {
-        const userProviderConfig = await generateUserProviderConfig();
-        providerConfig = await initNewProviderConfig(userProviderConfig);
-      } else {
         commandObj.error(
-          `Provider config config is required for local setup. Aborting.`,
+          `The config already exists at ${existingDockerCompose.$getPath()}. Aborting.`,
         );
       }
+
+      await rm(existingDockerCompose.$getPath());
     }
 
-    const noxNames = Object.keys(providerConfig.computePeers);
-    const dockerCompose = await initNewDockerComposeConfig(noxNames);
+    const dockerCompose = await initNewDockerComposeConfig({
+      numberOfNoxes: flags.noxes,
+    });
 
-    commandObj.logToStderr(
-      `Successfully generated ${DOCKER_COMPOSE_FULL_FILE_NAME} at ${dockerCompose.$getPath()}`,
-    );
+    commandObj.logToStderr(`Created new config at ${dockerCompose.$getPath()}`);
   }
 }

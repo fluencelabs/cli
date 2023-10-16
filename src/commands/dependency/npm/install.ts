@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import path, { join } from "node:path";
+import { join } from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
@@ -37,7 +37,7 @@ import {
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:npm:i", "dep:npm:i"];
-  static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside user's ${path.join(
+  static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside user's ${join(
     DOT_FLUENCE_DIR_NAME,
     NPM_DIR_NAME,
   )} directory)`;

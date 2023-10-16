@@ -21,22 +21,12 @@ import { arch, platform } from "node:os";
 import { join } from "node:path";
 
 import {
-  krasnodar,
-  stage,
-  testNet,
-} from "@fluencelabs/fluence-network-environment";
-
-import {
   CLI_NAME,
   type Template,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-  // FLUENCE_CONFIG_FULL_FILE_NAME,
-  // FS_OPTIONS,
-  // IPFS_ADDR_PROPERTY,
 } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/utils.js";
-import { local } from "../src/lib/multiaddres.js";
 import { getDefaultJSDirPath, getDefaultTSDirPath } from "../src/lib/paths.js";
 import {
   FLUENCE_ENV,
@@ -44,16 +34,7 @@ import {
 } from "../src/lib/setupEnvironment.js";
 import { assertHasKey } from "../src/lib/typeHelpers.js";
 
-// const TEST_IPFS_ADDR = "/ip4/127.0.0.1/tcp/5001";
-
 export const fluenceEnv = process.env[FLUENCE_ENV];
-
-export const multiaddrs = {
-  kras: krasnodar,
-  stage: stage,
-  testnet: testNet,
-  local,
-}[fluenceEnv];
 
 type CliArg = {
   args?: ExecPromiseArg["args"];
@@ -133,27 +114,7 @@ export const initFirstTime = async (template: Template) => {
     }
   }
 
-  // const projectConfigPath = join(templatePath, FLUENCE_CONFIG_FULL_FILE_NAME);
-  // const projectConfigContent = await readFile(projectConfigPath, FS_OPTIONS);
-
-  // await writeFile(
-  //   projectConfigPath,
-  //   `${projectConfigContent}\n${IPFS_ADDR_PROPERTY}: ${TEST_IPFS_ADDR}`,
-  // );
-
-  // eslint-disable-next-line no-console
-  console.log(`Initialized template "${template}"`);
   return templatePath;
-};
-
-const generateDefaultKey = (cwd: string) => {
-  return fluence({
-    args: ["key", "new", "default"],
-    flags: {
-      default: true,
-    },
-    cwd,
-  });
 };
 
 export const init = async (cwd: string, template: Template): Promise<void> => {
@@ -164,7 +125,6 @@ export const init = async (cwd: string, template: Template): Promise<void> => {
   } catch {}
 
   await cp(templatePath, cwd, { recursive: true });
-  await generateDefaultKey(cwd);
 };
 
 export const maybeConcurrentTest = (...args: Parameters<typeof test>): void => {

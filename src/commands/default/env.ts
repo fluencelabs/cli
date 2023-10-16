@@ -26,7 +26,8 @@ import { initCli } from "../../lib/lifeCycle.js";
 import {
   ensureValidEnvFlag,
   fluenceEnvPrompt,
-  ensureCustomRelays,
+  ensureCustomNodes,
+  updateRelaysJSON,
 } from "../../lib/multiaddres.js";
 
 export default class Peers extends BaseCommand<typeof Peers> {
@@ -46,7 +47,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
       true,
     );
 
-    assert(envConfig !== undefined, "this command requires fluence project");
+    assert(envConfig !== null, "this command requires fluence project");
     const fluenceEnvFromArgs = await ensureValidEnvFlag(args.ENV);
 
     const newFluenceEnv =
@@ -58,11 +59,15 @@ export default class Peers extends BaseCommand<typeof Peers> {
       newFluenceEnv === "custom" &&
       fluenceConfig.customFluenceEnv === undefined
     ) {
-      await ensureCustomRelays(fluenceConfig);
+      await ensureCustomNodes(fluenceConfig);
     }
 
     envConfig.fluenceEnv = newFluenceEnv;
     await envConfig.$commit();
+
+    await updateRelaysJSON({
+      fluenceConfig: fluenceConfig,
+    });
 
     commandObj.log(
       `Successfully set default fluence environment to ${color.yellow(

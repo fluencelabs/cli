@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj, isInteractive } from "../../lib/commandObj.js";
-import { initNewProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
-import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
   PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { genSecretKeyString } from "../../lib/helpers/utils.js";
-import { getProjectSecretKey, getUserSecretKey } from "../../lib/keyPairs.js";
+import { createSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
   static override description = `Generate key-pair and store it in ${USER_SECRETS_CONFIG_FULL_FILE_NAME} or ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`;
@@ -57,86 +50,10 @@ export default class New extends BaseCommand<typeof New> {
       await this.parse(New),
     );
 
-    if (!flags.user && maybeFluenceConfig === null) {
-      await ensureFluenceProject();
-    }
-
-    const userSecretsConfig = await initUserSecretsConfig();
-    const projectSecretsConfig = await initNewProjectSecretsConfig();
-
-    const secretsConfigPath = (
-      flags.user ? userSecretsConfig : projectSecretsConfig
-    ).$getPath();
-
-    const enterKeyPairNameMessage = `Enter key-pair name to generate at ${secretsConfigPath}`;
-
-    let keyPairName =
-      args.name ??
-      (await input({
-        message: enterKeyPairNameMessage,
-      }));
-
-    const validateKeyPairName = async (
-      keyPairName: string,
-    ): Promise<true | string> => {
-      return (
-        (flags.user
-          ? await getUserSecretKey(keyPairName)
-          : await getProjectSecretKey(keyPairName)) === undefined ||
-        `Key-pair with name ${color.yellow(
-          keyPairName,
-        )} already exists at ${secretsConfigPath}. Please, choose another name.`
-      );
-    };
-
-    const keyPairValidationResult = await validateKeyPairName(keyPairName);
-
-    if (keyPairValidationResult !== true) {
-      commandObj.warn(keyPairValidationResult);
-
-      keyPairName = await input({
-        message: enterKeyPairNameMessage,
-        validate: validateKeyPairName,
-      });
-    }
-
-    const secretKey = await genSecretKeyString();
-
-    if (flags.user) {
-      userSecretsConfig.secretKeys[keyPairName] = secretKey;
-    } else {
-      if (projectSecretsConfig.secretKeys === undefined) {
-        projectSecretsConfig.secretKeys = {};
-      }
-
-      projectSecretsConfig.secretKeys[keyPairName] = secretKey;
-    }
-
-    if (
-      flags.default ||
-      (isInteractive
-        ? await confirm({
-            message: `Do you want to set ${color.yellow(
-              keyPairName,
-            )} as default key-pair for ${secretsConfigPath}`,
-          })
-        : false)
-    ) {
-      if (flags.user) {
-        userSecretsConfig.defaultSecretKey = keyPairName;
-      } else {
-        projectSecretsConfig.defaultSecretKey = keyPairName;
-      }
-    }
-
-    await (flags.user
-      ? userSecretsConfig.$commit()
-      : projectSecretsConfig.$commit());
-
-    commandObj.log(
-      `Key-pair with name ${color.yellow(
-        keyPairName,
-      )} successfully generated and saved to ${secretsConfigPath}`,
-    );
+    await createSecretKey({
+      isUser: flags.user,
+      name: args.name,
+      maybeFluenceConfig,
+    });
   }
 }

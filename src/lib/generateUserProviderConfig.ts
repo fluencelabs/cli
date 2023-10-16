@@ -16,13 +16,13 @@
 
 import { color } from "@oclif/color";
 
-import { commandObj, isInteractive } from "./commandObj.js";
+import { isInteractive } from "./commandObj.js";
+import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
 import {
-  type UserProvidedConfig,
-  type Offer,
-} from "./configs/project/provider.js";
-import { numberProperties } from "./const.js";
-import { defaultNumberProperties, type NumberProperty } from "./const.js";
+  defaultNumberProperties,
+  type NumberProperty,
+  numberProperties,
+} from "./const.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import { validatePositiveNumberOrEmpty } from "./helpers/validations.js";
 import { checkboxes, confirm, input } from "./prompt.js";
@@ -31,113 +31,107 @@ async function promptToSetNumberProperty(
   offer: Offer,
   property: NumberProperty,
 ) {
-  const defaultValue = defaultNumberProperties[property];
-
   const propertyStr = await input({
-    message: `Enter ${color.yellow(property)} (default: ${defaultValue})`,
+    message: `Enter ${color.yellow(property)}`,
     validate: validatePositiveNumberOrEmpty,
-    allowEmpty: true,
+    default: `${defaultNumberProperties[property]}`,
   });
 
-  offer[property] = propertyStr === "" ? defaultValue : Number(propertyStr);
+  offer[property] = Number(propertyStr);
 }
 
-export async function generateUserProviderConfig() {
+const DEFAULT_NUMBER_OF_NOXES = 3;
+
+export type ProviderConfigArgs = {
+  numberOfNoxes?: number | undefined;
+};
+
+export async function generateUserProviderConfig({
+  numberOfNoxes,
+}: ProviderConfigArgs) {
   const userProvidedConfig: UserProvidedConfig = {
     computePeers: {},
+    offers: {},
   };
 
-  if (!isInteractive) {
-    return userProvidedConfig;
-  }
-
-  const needsChain = await confirm({
-    message: "Do you require creating deels on blockchain",
-  });
-
-  commandObj.logToStderr(`Add compute peers`);
   let isAddingMoreComputePeers: boolean;
   let computePeersCounter = 0;
 
   do {
     const defaultName = `nox-${computePeersCounter}`;
 
-    let name = await input({
-      message: `Enter name for compute peer. Default: ${defaultName}`,
-      allowEmpty: true,
-    });
+    let name =
+      numberOfNoxes === undefined
+        ? await input({
+            message: `Enter name for compute peer`,
+            default: defaultName,
+          })
+        : defaultName;
 
-    if (name === "") {
+    if (name === defaultName) {
       name = defaultName;
       computePeersCounter = computePeersCounter + 1;
     }
 
-    if (needsChain) {
-      const slotsStr = await input({
-        message: `Enter number of workers for ${color.yellow(
-          name,
-        )}. Default: 1`,
-        allowEmpty: true,
-        validate: validatePositiveNumberOrEmpty,
-      });
-
-      userProvidedConfig.computePeers[name] = {
-        worker: slotsStr === "" ? 1 : Number(slotsStr),
-      };
-    } else {
-      userProvidedConfig.computePeers[name] = {};
-    }
-
-    isAddingMoreComputePeers = await confirm({
-      message: "Do you want to add more compute peers",
+    const slotsStr = await input({
+      message: `Enter number of workers for ${color.yellow(name)}`,
+      default: "1",
+      validate: validatePositiveNumberOrEmpty,
     });
+
+    userProvidedConfig.computePeers[name] = {
+      worker: Number(slotsStr),
+    };
+
+    isAddingMoreComputePeers =
+      numberOfNoxes === undefined && isInteractive
+        ? await confirm({
+            message: "Do you want to add more compute peers",
+          })
+        : (numberOfNoxes ?? DEFAULT_NUMBER_OF_NOXES) > computePeersCounter;
   } while (isAddingMoreComputePeers);
 
-  commandObj.logToStderr(`Add offers`);
   let isAddingMoreOffers: boolean;
   let offersCounter = 0;
-
-  if (!needsChain) {
-    return userProvidedConfig;
-  }
-
-  userProvidedConfig.offers = {};
 
   do {
     const defaultName = `offer-${offersCounter}`;
 
     let name = await input({
-      message: `Enter name for offer. Default: ${defaultName}`,
-      allowEmpty: true,
+      message: `Enter name for offer`,
+      default: defaultName,
     });
 
-    if (name === "") {
+    if (name === defaultName) {
       name = defaultName;
       offersCounter = offersCounter + 1;
     }
 
-    const computePeers = await checkboxes({
-      message: `Select compute peers for ${color.yellow(name)}`,
-      options: Object.keys(userProvidedConfig.computePeers),
-      validate: (choices: string[]) => {
-        if (choices.length === 0) {
-          return "Please select at least one compute peer";
-        }
+    const computePeerOptions = Object.keys(userProvidedConfig.computePeers);
 
-        return true;
-      },
-      oneChoiceMessage(choice) {
-        return `Selected ${color.yellow(choice)}`;
-      },
-      onNoChoices() {
-        throw new Error("No compute peers selected");
-      },
-    });
+    const computePeers = isInteractive
+      ? await checkboxes({
+          message: `Select compute peers for ${color.yellow(name)}`,
+          options: computePeerOptions,
+          validate: (choices: string[]) => {
+            if (choices.length === 0) {
+              return "Please select at least one compute peer";
+            }
+
+            return true;
+          },
+          oneChoiceMessage(choice) {
+            return `Selected ${color.yellow(choice)}`;
+          },
+          onNoChoices() {
+            throw new Error("No compute peers selected");
+          },
+        })
+      : computePeerOptions;
 
     const effectorsString = await input({
-      message:
-        "Enter comma-separated list of effector CIDs (default: no effectors)",
-      allowEmpty: true,
+      message: "Enter comma-separated list of effector CIDs",
+      default: "",
     });
 
     const effectors =
@@ -157,6 +151,7 @@ export async function generateUserProviderConfig() {
 
     isAddingMoreOffers = await confirm({
       message: "Do you want to add more offers",
+      default: false,
     });
   } while (isAddingMoreOffers);
 

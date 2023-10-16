@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
-import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { initNewProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
-import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
 import {
   PROJECT_SECRETS_FULL_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { getProjectSecretKey, getUserSecretKey } from "../../lib/keyPairs.js";
+import { removeSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { list } from "../../lib/prompt.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove key-pair from ${USER_SECRETS_CONFIG_FULL_FILE_NAME} or ${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}`;
@@ -54,119 +46,10 @@ export default class Remove extends BaseCommand<typeof Remove> {
       await this.parse(Remove),
     );
 
-    if (!flags.user && maybeFluenceConfig === null) {
-      await ensureFluenceProject();
-    }
-
-    const userSecretsConfig = await initUserSecretsConfig();
-    const projectSecretsConfig = await initNewProjectSecretsConfig();
-
-    const secretsConfigPath = (
-      flags.user ? userSecretsConfig : projectSecretsConfig
-    ).$getPath();
-
-    let keyPairName = args.name;
-
-    const validateKeyPairName = async (
-      keyPairName: string | undefined,
-    ): Promise<true | string> => {
-      if (keyPairName === undefined) {
-        return "Key-pair name must be selected";
-      }
-
-      return (
-        (flags.user
-          ? await getUserSecretKey(keyPairName)
-          : await getProjectSecretKey(keyPairName)) !== undefined ||
-        `Key-pair with name ${color.yellow(
-          keyPairName,
-        )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
-      );
-    };
-
-    if (
-      flags.user &&
-      Object.entries(userSecretsConfig.secretKeys).length === 1
-    ) {
-      return commandObj.error(
-        `There is only one key-pair in ${secretsConfigPath} and it can't be removed, because having at least one user's key-pair is required.`,
-      );
-    }
-
-    const keyPairValidationResult = await validateKeyPairName(keyPairName);
-
-    if (keyPairValidationResult !== true) {
-      this.warn(keyPairValidationResult);
-
-      keyPairName = await list({
-        message: `Select key-pair name to remove at ${secretsConfigPath}`,
-        oneChoiceMessage: (choice: string): string => {
-          return `Do you want to remove ${color.yellow(choice)}?`;
-        },
-        onNoChoices: (): never => {
-          return commandObj.error(
-            `There are no key-pairs to remove at ${secretsConfigPath}`,
-          );
-        },
-        options: Object.keys(
-          flags.user
-            ? userSecretsConfig.secretKeys
-            : projectSecretsConfig.secretKeys ?? {},
-        ),
-      });
-    }
-
-    assert(typeof keyPairName === "string");
-
-    await removeKeyPair(
-      flags.user,
-      keyPairName,
-      flags.user ? userSecretsConfig : projectSecretsConfig,
-    );
-
-    commandObj.log(
-      `Key-pair with name ${color.yellow(
-        keyPairName,
-      )} successfully removed from ${secretsConfigPath}`,
-    );
-  }
-}
-
-async function removeKeyPair(
-  isUserSecrets: boolean,
-  keyPairName: string,
-  config: {
-    secretKeys?: Record<string, string>;
-    defaultSecretKey?: string;
-    $commit: () => Promise<void>;
-  },
-): Promise<void> {
-  config.secretKeys = Object.fromEntries(
-    Object.entries(config.secretKeys ?? {}).filter(([name]): boolean => {
-      return name !== keyPairName;
-    }),
-  );
-
-  const deletedDefaultKey = keyPairName === config.defaultSecretKey;
-
-  if (deletedDefaultKey && isUserSecrets) {
-    const newDefaultKeyPairName = await list({
-      message: `Select new default key-pair name`,
-      oneChoiceMessage: (choice: string): string => {
-        return `Do you want to set ${color.yellow(
-          choice,
-        )} as default key-pair?`;
-      },
-      onNoChoices: (): never => {
-        commandObj.error("There are no key-pairs to set as default");
-      },
-      options: Object.keys(config.secretKeys),
+    await removeSecretKey({
+      name: args.name,
+      isUser: flags.user,
+      maybeFluenceConfig,
     });
-
-    config.defaultSecretKey = newDefaultKeyPairName;
-  } else if (deletedDefaultKey) {
-    delete config.defaultSecretKey;
   }
-
-  await config.$commit();
 }

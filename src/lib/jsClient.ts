@@ -25,7 +25,7 @@ import {
 } from "./const.js";
 import { base64ToUint8Array, stringifyUnknown } from "./helpers/utils.js";
 import { getExistingSecretKey } from "./keyPairs.js";
-import { getLocalNodes, resolveRelay } from "./multiaddres.js";
+import { resolveRelay } from "./multiaddres.js";
 
 export const initFluenceClient = async (
   {
@@ -38,14 +38,11 @@ export const initFluenceClient = async (
   maybeFluenceConfig: FluenceConfig | null,
   fluenceEnv: FluenceEnv,
 ): Promise<void> => {
-  const localNodes = await getLocalNodes(fluenceEnv);
-
-  const relay = resolveRelay(
-    maybeRelay,
+  const relay = await resolveRelay({
     fluenceEnv,
     maybeFluenceConfig,
-    localNodes,
-  );
+    maybeRelay,
+  });
 
   commandObj.logToStderr(
     `Connecting to ${color.yellow(fluenceEnv)} relay: ${relay}`,

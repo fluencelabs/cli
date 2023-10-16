@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import { isAbsolute } from "node:path";
 
 import dotenv from "dotenv";
 
@@ -66,7 +66,7 @@ const isTrueOrFalseString = (v: unknown): v is "true" | "false" => {
 };
 
 const isAbsolutePath = (v: unknown): v is string => {
-  return typeof v === "string" && path.isAbsolute(v);
+  return typeof v === "string" && isAbsolute(v);
 };
 
 const isFluenceEnvWithoutCustom = getIsStringUnion(

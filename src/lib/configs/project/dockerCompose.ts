@@ -15,8 +15,6 @@
  */
 
 import assert from "assert";
-import { writeFile } from "fs/promises";
-import { join, relative } from "path";
 
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
@@ -25,31 +23,34 @@ import versions from "../../../versions.json" assert { type: "json" };
 import {
   DOCKER_COMPOSE_FILE_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
-  FS_OPTIONS,
   TOP_LEVEL_SCHEMA_ID,
+  IPFS_PORT,
+  IPFS_CONTAINER_NAME,
+  CHAIN_CONTAINER_NAME,
+  CHAIN_PORT,
+  TCP_PORT_START,
+  WEB_SOCKET_PORT_START,
 } from "../../const.js";
-import { genSecretKeyString } from "../../helpers/utils.js";
-import { ensureFluenceSecretsDir, getFluenceDir } from "../../paths.js";
+import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
+import { genSecretKeysOrReturnExisting } from "../../keyPairs.js";
+import { getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
   type GetDefaultConfig,
-  type InitConfigOptions,
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
 } from "../initConfig.js";
 
-const IPFS_CONTAINER_NAME = "ipfs";
-const IPFS_PORT = 5001;
-const CHAIN_CONTAINER_NAME = "chain";
-const CHAIN_PORT = 8545;
-const TCP_PORT_START = 7771;
-const WEB_SOCKET_PORT_START = 9991;
+import {
+  initNewReadonlyProviderConfig,
+  type ProviderConfigReadonly,
+} from "./provider.js";
 
 type Service = {
-  image: string;
-  ports: string[];
+  image?: string;
+  ports?: string[];
   pull_policy?: string;
   environment?: Record<string, string | number>;
   volumes?: string[];
@@ -61,10 +62,11 @@ type Service = {
 const serviceSchema: JSONSchemaType<Service> = {
   type: "object",
   properties: {
-    image: { type: "string" },
+    image: { type: "string", nullable: true },
     ports: {
       type: "array",
       items: { type: "string" },
+      nullable: true,
     },
     pull_policy: { type: "string", nullable: true },
     environment: {
@@ -94,13 +96,14 @@ const serviceSchema: JSONSchemaType<Service> = {
       nullable: true,
     },
   },
-  required: ["image", "ports"],
+  required: [],
 };
 
 type ConfigV0 = {
   version: "3";
   services: Record<string, Service>;
-  secrets: Record<string, { file: string }>;
+  include?: string[];
+  secrets?: Record<string, { file?: string }>;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -118,14 +121,20 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       },
       required: [],
     },
+    include: {
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+    },
     secrets: {
       type: "object",
+      nullable: true,
       additionalProperties: {
         type: "object",
         properties: {
-          file: { type: "string" },
+          file: { type: "string", nullable: true },
         },
-        required: ["file"],
+        required: [],
       },
       required: [],
     },
@@ -188,30 +197,21 @@ function genNox({
   ];
 }
 
-export async function genPrivKeys(noxNames: string[]) {
-  const fluenceDir = getFluenceDir();
-  const secretsPath = await ensureFluenceSecretsDir();
-
-  return Promise.all(
-    noxNames.map(async (name) => {
-      const filePath = join(secretsPath, `${name}.txt`);
-      const secretKey = await genSecretKeyString();
-      await writeFile(filePath, secretKey, FS_OPTIONS);
-      return [name, relative(fluenceDir, filePath), secretKey] as const;
-    }),
+async function genDockerCompose(
+  providerConfig: ProviderConfigReadonly,
+): Promise<LatestConfig> {
+  const secretKeys = await genSecretKeysOrReturnExisting(
+    Object.keys(providerConfig.computePeers),
   );
-}
 
-async function genDockerCompose(noxNames: string[]): Promise<LatestConfig> {
-  const privateKeys = await genPrivKeys(noxNames);
-  const [bootStrapNoxNameAndKey, ...restPrivateKeys] = privateKeys;
+  const [bootStrapNoxNameAndKey, ...restSecretKeys] = secretKeys;
 
   assert(
     bootStrapNoxNameAndKey !== undefined,
     "At least one nox is required to generate a docker-compose.yml",
   );
 
-  const [bootStrapNoxName] = bootStrapNoxNameAndKey;
+  const { name: bootStrapNoxName } = bootStrapNoxNameAndKey;
 
   return {
     version: "3",
@@ -239,7 +239,7 @@ async function genDockerCompose(noxNames: string[]): Promise<LatestConfig> {
         }),
       ]),
       ...Object.fromEntries(
-        restPrivateKeys.map(([name], index) => {
+        restSecretKeys.map(({ name }, index) => {
           return genNox({
             name,
             tcpPort: TCP_PORT_START + 1 + index,
@@ -250,29 +250,32 @@ async function genDockerCompose(noxNames: string[]): Promise<LatestConfig> {
       ),
     },
     secrets: Object.fromEntries(
-      privateKeys.map(([name, file]) => {
+      secretKeys.map(({ name, path: file }) => {
         return [name, { file }];
       }),
     ),
   };
 }
 
-const getDefault = async (noxNames: string[]): Promise<GetDefaultConfig> => {
-  const dockerCompose = await genDockerCompose(noxNames);
+async function genDefaultDockerCompose(
+  providerConfig: ProviderConfigReadonly,
+): Promise<GetDefaultConfig> {
+  const def = await genDockerCompose(providerConfig);
 
   return () => {
-    return yamlDiffPatch("", {}, dockerCompose);
+    return yamlDiffPatch("", {}, def);
   };
-};
+}
 
 const migrations: Migrations<Config> = [];
 
 type Config = ConfigV0;
 type LatestConfig = ConfigV0;
-export type EnvConfig = InitializedConfig<LatestConfig>;
-export type EnvConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
+export type DockerComposeConfig = InitializedConfig<LatestConfig>;
+export type DockerComposeConfigReadonly =
+  InitializedReadonlyConfig<LatestConfig>;
 
-const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
+const initConfigOptions = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
@@ -280,13 +283,29 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   getConfigOrConfigDirPath: getFluenceDir,
 };
 
-export const initNewDockerComposeConfig = async (noxNames: string[]) => {
-  return getConfigInitFunction(initConfigOptions, await getDefault(noxNames))();
-};
+export async function initNewDockerComposeConfig(
+  args: ProviderConfigArgs = {},
+) {
+  const providerConfig = await initNewReadonlyProviderConfig(args);
+  return getConfigInitFunction(
+    initConfigOptions,
+    await genDefaultDockerCompose(providerConfig),
+  )();
+}
+
+export async function initNewReadonlyDockerComposeConfig(
+  args: ProviderConfigArgs = {},
+) {
+  const providerConfig = await initNewReadonlyProviderConfig(args);
+  return getReadonlyConfigInitFunction(
+    initConfigOptions,
+    await genDefaultDockerCompose(providerConfig),
+  )();
+}
 
 export const initDockerComposeConfig = getConfigInitFunction(initConfigOptions);
 
-export const initReadonlyEnvConfig =
+export const initReadonlyDockerComposeConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
 export const dockerComposeSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

@@ -109,6 +109,13 @@ export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
     }),
   );
 
+export const IPFS_CONTAINER_NAME = "ipfs";
+export const IPFS_PORT = 5001;
+export const CHAIN_CONTAINER_NAME = "chain";
+export const CHAIN_PORT = 8545;
+export const TCP_PORT_START = 7771;
+export const WEB_SOCKET_PORT_START = 9991;
+
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
 export const JS_EXT = "js";
@@ -290,6 +297,12 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const PROVIDER_CONFIG_FLAGS = {
+  noxes: Flags.integer({
+    description: "Number of noxes to generate in your configs",
+  }),
+};
+
 export const MARINE_BUILD_ARGS_FLAG_NAME = "marine-build-args";
 export const MARINE_BUILD_ARGS_PROPERTY = "marineBuildArgs";
 export const IPFS_ADDR_PROPERTY = "ipfsAddr";
@@ -375,7 +388,7 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
-/${DOT_FLUENCE_DIR_NAME}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
@@ -385,8 +398,7 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /.vscode/settings.json
 /src/ts/src/aqua
 /src/js/src/aqua`;
-
-export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
+export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
@@ -398,8 +410,6 @@ export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
-export const FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY =
-  "@fluencelabs/fluence-network-environment";
 
 export const fluenceNPMDependencies = [
   AQUA_LIB_NPM_DEPENDENCY,

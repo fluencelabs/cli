@@ -85,7 +85,6 @@ export default class Upload extends BaseCommand<typeof Upload> {
       fluenceConfig,
       hosts: true,
       aquaImports,
-      fluenceEnv,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
       initPeerId,

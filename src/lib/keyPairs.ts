@@ -14,33 +14,352 @@
  * limitations under the License.
  */
 
+import { access, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { join, parse, relative } from "node:path";
+
 import { color } from "@oclif/color";
 
 import { commandObj, isInteractive } from "./commandObj.js";
-import { initReadonlyProjectSecretsConfig } from "./configs/project/projectSecrets.js";
-import { initReadonlyUserSecretsConfig } from "./configs/user/userSecrets.js";
-import { list, type Choices } from "./prompt.js";
+import { userConfig } from "./configs/globalConfigs.js";
+import {
+  initReadonlyFluenceConfig,
+  type FluenceConfig,
+} from "./configs/project/fluence.js";
+import type { UserConfig } from "./configs/user/config.js";
+import { FS_OPTIONS } from "./const.js";
+import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
+import { genSecretKeyString } from "./helpers/utils.js";
+import {
+  ensureUserFluenceSecretsDir,
+  getFluenceSecretsDir,
+  getSecretsPathForWriting,
+  getSecretsPathForReading,
+  ensureFluenceSecretsDir,
+  getFluenceDir,
+} from "./paths.js";
+import { list, type Choices, input, confirm } from "./prompt.js";
+
+type CreateSecretKeyArg = {
+  name: string | undefined;
+  isUser: boolean;
+  maybeFluenceConfig: FluenceConfig | null;
+};
+
+type ResolveUserOrProjectConfigArgs = {
+  isUser: boolean;
+  maybeFluenceConfig: FluenceConfig | null;
+};
+
+async function resolveUserOrProjectConfig({
+  isUser,
+  maybeFluenceConfig,
+}: ResolveUserOrProjectConfigArgs): Promise<UserConfig | FluenceConfig> {
+  if (isUser) {
+    return userConfig;
+  }
+
+  if (maybeFluenceConfig !== null) {
+    return maybeFluenceConfig;
+  }
+
+  return ensureFluenceProject();
+}
+
+type WriteSecretKeyArg = {
+  name: string;
+  isUser: boolean;
+  secretKey: string;
+};
+
+export async function writeSecretKey({
+  isUser,
+  name,
+  secretKey,
+}: WriteSecretKeyArg) {
+  const secretsPath = await getSecretsPathForWriting(isUser);
+  await writeFile(join(secretsPath, `${name}.txt`), secretKey, FS_OPTIONS);
+}
+
+export async function createSecretKey({
+  name,
+  isUser,
+  maybeFluenceConfig,
+}: CreateSecretKeyArg) {
+  const userOrProjectConfig = await resolveUserOrProjectConfig({
+    isUser,
+    maybeFluenceConfig,
+  });
+
+  const secretsPath = await getSecretsPathForWriting(isUser);
+  const secrets = await getSecretKeys(isUser);
+
+  function validate(name: string | undefined) {
+    if (name === undefined) {
+      return `You have to enter secret key name to generate at ${secretsPath}`;
+    }
+
+    if (name in secrets) {
+      return `Secret key ${color.yellow(
+        name,
+      )} already exists at ${secretsPath}`;
+    }
+
+    return true;
+  }
+
+  function promptSecretKeyName() {
+    return input({
+      message: `Enter secret key name to generate at ${secretsPath}`,
+      validate,
+    });
+  }
+
+  let secretKeyNameToUse = name ?? (await promptSecretKeyName());
+  const keyNameValidity = validate(secretKeyNameToUse);
+
+  if (keyNameValidity !== true) {
+    if (!isInteractive) {
+      commandObj.error(keyNameValidity);
+    }
+
+    commandObj.warn(keyNameValidity);
+
+    secretKeyNameToUse = await promptSecretKeyName();
+  }
+
+  await writeSecretKey({
+    isUser,
+    name: secretKeyNameToUse,
+    secretKey: await genSecretKeyString(),
+  });
+
+  if (
+    isInteractive &&
+    (await confirm({
+      message: `Do you want to set ${color.yellow(
+        secretKeyNameToUse,
+      )} as default secret key at ${userOrProjectConfig.$getPath()}`,
+    }))
+  ) {
+    userOrProjectConfig.defaultSecretKeyName = secretKeyNameToUse;
+    await userOrProjectConfig.$commit();
+  }
+
+  commandObj.logToStderr(
+    `Secret key with name ${color.yellow(
+      secretKeyNameToUse,
+    )} successfully generated and saved to ${secretsPath}`,
+  );
+}
+
+export async function removeSecretKey({
+  name,
+  isUser,
+  maybeFluenceConfig,
+}: CreateSecretKeyArg) {
+  const userOrProjectConfig = await resolveUserOrProjectConfig({
+    isUser,
+    maybeFluenceConfig,
+  });
+
+  const secretsPath = isUser
+    ? getFluenceSecretsDir()
+    : await ensureUserFluenceSecretsDir();
+
+  const secrets = await getSecretKeys(isUser);
+
+  if (isUser && Object.keys(secrets).length === 1) {
+    commandObj.error(
+      `There is only one secret key in ${secretsPath} and it can't be removed, because having at least one user's secret key is required.`,
+    );
+  }
+
+  function validate(name: string) {
+    if (!(name in secrets)) {
+      return `Secret key ${color.yellow(
+        name,
+      )} doesn't exists at ${secretsPath}`;
+    }
+
+    return true;
+  }
+
+  function promptSecretKeyName() {
+    return list({
+      message: "Select secret key name to remove",
+      options: Object.keys(secrets),
+      oneChoiceMessage(choice) {
+        return `Do you want to remove ${color.yellow(choice)}`;
+      },
+      onNoChoices() {
+        return commandObj.error(
+          `There are no secret keys to remove at ${secretsPath}`,
+        );
+      },
+    });
+  }
+
+  let secretKeyNameToUse = name ?? (await promptSecretKeyName());
+  const keyNameValidity = validate(secretKeyNameToUse);
+
+  if (keyNameValidity !== true) {
+    if (!isInteractive) {
+      commandObj.error(keyNameValidity);
+    }
+
+    commandObj.warn(keyNameValidity);
+    secretKeyNameToUse = await promptSecretKeyName();
+  }
+
+  await rm(join(secretsPath, `${secretKeyNameToUse}.txt`));
+
+  commandObj.logToStderr(
+    `Secret key with name ${color.yellow(
+      secretKeyNameToUse,
+    )} successfully removed from ${secretsPath}`,
+  );
+
+  if (userOrProjectConfig.defaultSecretKeyName !== secretKeyNameToUse) {
+    return;
+  }
+
+  if (!isUser) {
+    delete userOrProjectConfig.defaultSecretKeyName;
+    await userOrProjectConfig.$commit();
+  }
+
+  if (!isInteractive) {
+    if (isUser) {
+      commandObj.warn(
+        `Please set another default secret key manually at ${userOrProjectConfig.$getPath()}`,
+      );
+    }
+
+    return;
+  }
+
+  const options = Object.keys(secrets).filter((key) => {
+    return key !== secretKeyNameToUse;
+  });
+
+  const needToSelectNewDefault =
+    isUser ||
+    (options.length > 0 &&
+      (await confirm({
+        message: `Do you want to set another secret key as default at ${userOrProjectConfig.$getPath()}`,
+      })));
+
+  if (!needToSelectNewDefault) {
+    return;
+  }
+
+  await setDefaultSecretKey({
+    isUser,
+    maybeFluenceConfig,
+    name,
+  });
+}
+
+export async function setDefaultSecretKey({
+  name,
+  isUser,
+  maybeFluenceConfig,
+}: CreateSecretKeyArg) {
+  const userOrProjectConfig = await resolveUserOrProjectConfig({
+    isUser,
+    maybeFluenceConfig,
+  });
+
+  const secretsPath = isUser
+    ? getFluenceSecretsDir()
+    : await ensureUserFluenceSecretsDir();
+
+  const secrets = await getSecretKeys(isUser);
+
+  function validate(name: string) {
+    if (!(name in secrets)) {
+      return `Secret key ${color.yellow(
+        name,
+      )} doesn't exists at ${secretsPath}`;
+    }
+
+    return true;
+  }
+
+  function promptSecretKeyName() {
+    return list({
+      message: "Select new default secret key",
+      options: Object.keys(secrets),
+      oneChoiceMessage(choice) {
+        return `Do you want to set ${color.yellow(choice)} as default`;
+      },
+      onNoChoices() {
+        return commandObj.error(
+          `There are no secret keys to set as default at ${secretsPath}`,
+        );
+      },
+    });
+  }
+
+  let secretKeyNameToUse = name ?? (await promptSecretKeyName());
+  const keyNameValidity = validate(secretKeyNameToUse);
+
+  if (keyNameValidity !== true) {
+    if (!isInteractive) {
+      commandObj.error(keyNameValidity);
+    }
+
+    commandObj.warn(keyNameValidity);
+    secretKeyNameToUse = await promptSecretKeyName();
+  }
+
+  userOrProjectConfig.defaultSecretKeyName = secretKeyNameToUse;
+  await userOrProjectConfig.$commit();
+
+  commandObj.logToStderr(
+    `Secret key with name ${color.yellow(
+      secretKeyNameToUse,
+    )} successfully set as default at ${userOrProjectConfig.$getPath()}`,
+  );
+}
 
 export async function getUserSecretKey(
   secretKeyName: string | undefined,
 ): Promise<string | undefined> {
-  const userSecretsConfig = await initReadonlyUserSecretsConfig();
-
-  return userSecretsConfig.secretKeys[
-    secretKeyName ?? userSecretsConfig.defaultSecretKey
-  ];
+  const userSecrets = await getUserSecretKeys();
+  return userSecrets[secretKeyName ?? userConfig.defaultSecretKeyName];
 }
 
-async function getExistingUserSecretKey(
+export async function getProjectSecretKey(
   secretKeyName: string | undefined,
-): Promise<string> {
-  const keyPair = await getUserSecretKey(secretKeyName);
+): Promise<string | undefined> {
+  const fluenceConfig = await initReadonlyFluenceConfig();
 
-  if (keyPair !== undefined) {
-    return keyPair;
+  const secretKeyNameToUse =
+    secretKeyName ?? fluenceConfig?.defaultSecretKeyName;
+
+  if (secretKeyNameToUse === undefined) {
+    return;
   }
 
-  const userSecretsConfig = await initReadonlyUserSecretsConfig();
+  const secretKeys = await getProjectSecretKeys();
+  return secretKeys[secretKeyNameToUse];
+}
+
+export async function getExistingSecretKey(
+  secretKeyName: string | undefined,
+): Promise<string> {
+  const projectSecretKey = await getProjectSecretKey(secretKeyName);
+
+  if (projectSecretKey !== undefined) {
+    return projectSecretKey;
+  }
+
+  const userSecretKey = await getUserSecretKey(secretKeyName);
+
+  if (userSecretKey !== undefined) {
+    return userSecretKey;
+  }
 
   const noUserKeyPairMessage = `No key-pair ${color.yellow(
     secretKeyName,
@@ -51,16 +370,11 @@ async function getExistingUserSecretKey(
   }
 
   commandObj.warn(noUserKeyPairMessage);
-  const readonlyProjectSecretsConfig = await initReadonlyProjectSecretsConfig();
+
   const options: Choices<{ key: string }> = [];
+  const projectSecretKeys = await getProjectSecretKeys();
 
-  const projectKeyPairOptions = Object.entries(
-    readonlyProjectSecretsConfig?.secretKeys ?? {},
-  ).map(([name, key]) => {
-    return { value: { key }, name };
-  });
-
-  const userKeyPairOptions = Object.entries(userSecretsConfig.secretKeys).map(
+  const projectKeyPairOptions = Object.entries(projectSecretKeys).map(
     ([name, key]) => {
       return { value: { key }, name };
     },
@@ -75,14 +389,18 @@ async function getExistingUserSecretKey(
     );
   }
 
-  if (userKeyPairOptions.length > 0) {
-    const inquirer = (await import("inquirer")).default;
+  const userSecrets = await getUserSecretKeys();
 
-    options.push(
-      new inquirer.Separator("User secret keys:"),
-      ...userKeyPairOptions,
-    );
-  }
+  const userKeyPairOptions = Object.entries(userSecrets).map(([name, key]) => {
+    return { value: { key }, name };
+  });
+
+  const inquirer = (await import("inquirer")).default;
+
+  options.push(
+    new inquirer.Separator("User secret keys:"),
+    ...userKeyPairOptions,
+  );
 
   const { key } = await list({
     message: "Select existing secret key name",
@@ -100,27 +418,58 @@ async function getExistingUserSecretKey(
   return key;
 }
 
-export async function getProjectSecretKey(
-  secretKeyName: string | undefined,
-): Promise<string | undefined> {
-  const projectSecretsConfig = await initReadonlyProjectSecretsConfig();
-  const secretKeys = projectSecretsConfig?.secretKeys;
-
-  const secretKeyNameToUse =
-    secretKeyName ?? projectSecretsConfig?.defaultSecretKey;
-
-  if (secretKeys === undefined || secretKeyNameToUse === undefined) {
-    return;
-  }
-
-  return secretKeys[secretKeyNameToUse];
+async function getUserSecretKeys() {
+  return getSecretKeys(true);
 }
 
-export async function getExistingSecretKey(
-  secretKeyName: string | undefined,
-): Promise<string> {
-  return (
-    (await getProjectSecretKey(secretKeyName)) ??
-    getExistingUserSecretKey(secretKeyName)
+async function getProjectSecretKeys() {
+  return getSecretKeys(false);
+}
+
+export async function getSecretKeys(
+  isUser: boolean,
+): Promise<Record<string, string>> {
+  const dir = await getSecretsPathForReading(isUser);
+
+  try {
+    await access(dir);
+  } catch {
+    return {};
+  }
+
+  const dirContent = await readdir(dir);
+  return Object.fromEntries(
+    await Promise.all(
+      dirContent.map(async (fileName) => {
+        return [
+          parse(fileName).name,
+          await readFile(join(dir, fileName), FS_OPTIONS),
+        ] as const;
+      }),
+    ),
+  );
+}
+
+export async function getSecretKeyOrReturnExisting(name: string) {
+  const fluenceDir = getFluenceDir();
+  const secretsPath = await ensureFluenceSecretsDir();
+  const filePath = join(secretsPath, `${name}.txt`);
+  let secretKey;
+
+  try {
+    secretKey = await readFile(filePath, FS_OPTIONS);
+  } catch {
+    secretKey = await genSecretKeyString();
+    await writeFile(filePath, secretKey, FS_OPTIONS);
+  }
+
+  return { name, path: relative(fluenceDir, filePath), secretKey } as const;
+}
+
+export async function genSecretKeysOrReturnExisting(secretKeyNames: string[]) {
+  return Promise.all(
+    secretKeyNames.map((name) => {
+      return getSecretKeyOrReturnExisting(name);
+    }),
   );
 }

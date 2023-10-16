@@ -24,7 +24,6 @@ import {
   initNewProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
-import { generateUserProviderConfig } from "../../lib/generateUserProviderConfig.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
 
@@ -55,13 +54,11 @@ export default class Init extends BaseCommand<typeof Init> {
       }
     }
 
-    const userProvidedConfig = await generateUserProviderConfig();
-
     if (maybeProviderConfig !== null) {
       await rm(maybeProviderConfig.$getPath(), { force: true });
     }
 
-    const providerConfig = await initNewProviderConfig(userProvidedConfig);
+    const providerConfig = await initNewProviderConfig();
 
     commandObj.logToStderr(
       `Successfully created provider config at ${color.yellow(

@@ -17,7 +17,7 @@
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { TEMPLATES, ENV_FLAG } from "../lib/const.js";
+import { TEMPLATES, ENV_FLAG, PROVIDER_CONFIG_FLAGS } from "../lib/const.js";
 import { ensureTemplate, init } from "../lib/init.js";
 import { initCli } from "../lib/lifeCycle.js";
 
@@ -33,6 +33,7 @@ export default class Init extends BaseCommand<typeof Init> {
       char: "t",
     }),
     ...ENV_FLAG,
+    ...PROVIDER_CONFIG_FLAGS,
   };
   static override args = {
     path: Args.string({
@@ -48,6 +49,7 @@ export default class Init extends BaseCommand<typeof Init> {
         templateOrUnknown: flags.template,
       }),
       fluenceEnvFromFlags: flags.env,
+      numberOfNoxes: flags.noxes,
     });
   }
 }

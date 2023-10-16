@@ -25,6 +25,5 @@ When you contribute, you have to be aware that your contribution is covered by *
 -   Don't use colors inside commands descriptions. They can't be rendered to markdown and they will not be rendered to users of the packaged Fluence CLI anyway, when they run `--help`
 -   To run tests locally you need to do the following:
     1. [Docker](https://docs.docker.com/get-docker/)
-    1. run `docker compose up -d`
     1. run e.g. for linux: `DEBUG=fluence:* yarn test-linux-x64` which will lint and check the code, build it, package it, prepare the tests and run them
 -   for your convenience a dir `.f` is added to gitignore so you can generate projects in this dir for testing and development purposes

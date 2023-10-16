@@ -92,7 +92,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       hosts: true,
       workersConfig,
       aquaImports,
-      fluenceEnv,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
       initPeerId,
