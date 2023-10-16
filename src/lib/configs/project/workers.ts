@@ -227,6 +227,11 @@ export const initNewWorkersConfig = getConfigInitFunction(
   getDefault,
 );
 
+export const initNewWorkersConfigReadonly = getReadonlyConfigInitFunction(
+  initConfigOptions,
+  getDefault,
+);
+
 export const initReadonlyWorkersConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 

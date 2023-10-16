@@ -62,11 +62,11 @@ import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" 
 import { addService } from "./addService.js";
 import { compileToFiles } from "./aqua.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import { setEnvConfig } from "./configs/globalConfigs.js";
+import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
 import { initNewEnvConfig } from "./configs/project/env.js";
 import { initNewProviderConfig } from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
-import { initNewWorkersConfig } from "./configs/project/workers.js";
+import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
@@ -169,7 +169,13 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
   const fluenceEnv = await resolveFluenceEnv(options.fluenceEnvFromFlags);
-  setEnvConfig(await initNewEnvConfig(fluenceEnv));
+
+  if (envConfig === null) {
+    setEnvConfig(await initNewEnvConfig(fluenceEnv));
+  } else {
+    envConfig.fluenceEnv = fluenceEnv;
+    await envConfig.$commit();
+  }
 
   if (fluenceEnv === "local") {
     await initNewProviderConfig({
@@ -202,8 +208,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     FS_OPTIONS,
   );
 
-  const workersConfig = await initNewWorkersConfig();
-
+  const workersConfig = await initNewWorkersConfigReadonly();
   const { ensureAquaFileWithWorkerInfo } = await import("./deployWorkers.js");
   await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
   await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
