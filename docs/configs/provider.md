@@ -22,9 +22,10 @@ Defines config used for provider set up
 
 #### Properties
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `worker` | number | **Yes**  |             |
+| Property | Type   | Required | Description                                                                                             |
+|----------|--------|----------|---------------------------------------------------------------------------------------------------------|
+| `port`   | string | No       | Both host and container port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| `worker` | number | No       |                                                                                                         |
 
 ## offers
 

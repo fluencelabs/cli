@@ -18,15 +18,12 @@ Defines a spell. You can use `fluence spell new` command to generate a template 
 ## [workers.yaml](./workers.md)
 
 A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command
-## [project-secrets.yaml](./project-secrets.md)
-
-Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands
-## [user-secrets.yaml](./user-secrets.md)
-
-Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `fluence key` group of commands with `--user` flag
 ## [config.yaml](./config.md)
 
 Defines global config for Fluence CLI
 ## [env.yaml](./env.md)
 
 Defines user project preferences
+## [docker-compose.yaml](./docker-compose.md)
+
+Defines a multi-containers based application.
