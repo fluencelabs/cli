@@ -734,9 +734,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/interfaces@npm:0.8.2-dxj-464-83af1f4-1524-1":
+"@fluencelabs/interfaces@https://npm.fluence.dev/@fluencelabs/interfaces/-/interfaces-0.8.2-dxj-464-83af1f4-1524-1.tgz":
   version: 0.8.2-dxj-464-83af1f4-1524-1
-  resolution: "@fluencelabs/interfaces@npm:0.8.2-dxj-464-83af1f4-1524-1"
+  resolution: "@fluencelabs/interfaces@https://npm.fluence.dev/@fluencelabs/interfaces/-/interfaces-0.8.2-dxj-464-83af1f4-1524-1.tgz"
   checksum: 41554862f5dce44e8150feaeb416ca8c657baea5872fe7a383d6dac37bf751e7400dc7d7f77168a6d9bf08f69580022780d6d328bb3fef42330544b9fba443bb
   languageName: node
   linkType: hard
@@ -748,8 +748,8 @@ __metadata:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
     "@fluencelabs/avm": 0.48.0
-    "@fluencelabs/interfaces": 0.8.2-dxj-464-83af1f4-1524-1
-    "@fluencelabs/marine-worker": 0.3.3-dxj-464-83af1f4-1524-1
+    "@fluencelabs/interfaces": "https://npm.fluence.dev/@fluencelabs/interfaces/-/interfaces-0.8.2-dxj-464-83af1f4-1524-1.tgz"
+    "@fluencelabs/marine-worker": "https://npm.fluence.dev/@fluencelabs/marine-worker/-/marine-worker-0.3.3-dxj-464-83af1f4-1524-1.tgz"
     "@libp2p/crypto": 2.0.3
     "@libp2p/interface": 0.1.2
     "@libp2p/peer-id": 3.0.2
@@ -788,9 +788,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/marine-worker@npm:0.3.3-dxj-464-83af1f4-1524-1":
+"@fluencelabs/marine-worker@https://npm.fluence.dev/@fluencelabs/marine-worker/-/marine-worker-0.3.3-dxj-464-83af1f4-1524-1.tgz":
   version: 0.3.3-dxj-464-83af1f4-1524-1
-  resolution: "@fluencelabs/marine-worker@npm:0.3.3-dxj-464-83af1f4-1524-1"
+  resolution: "@fluencelabs/marine-worker@https://npm.fluence.dev/@fluencelabs/marine-worker/-/marine-worker-0.3.3-dxj-464-83af1f4-1524-1.tgz"
   dependencies:
     "@fluencelabs/marine-js": 0.7.2
     observable-fns: 0.6.1
