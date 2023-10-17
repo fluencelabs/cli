@@ -161,7 +161,7 @@ async function getDefault() {
   return `# Defines global config for Fluence CLI
 
 # config version
-version: 0
+version: 1
 
 # Weather you consent to send usage data to Countly
 countlyConsent: false
@@ -223,11 +223,22 @@ const migrations: Migrations<Config> = [
       await rm(userSecretsConfig.$getPath());
     }
 
+    const { defaultKeyPairName } = userSecretsConfig ?? {};
+
+    if (defaultKeyPairName === undefined) {
+      const secretKey = await genSecretKeyString();
+
+      await writeSecretKey({
+        name: AUTO_GENERATED,
+        secretKey,
+        isUser: true,
+      });
+    }
+
     return {
       ...config,
       version: 1,
-      defaultSecretKeyName:
-        userSecretsConfig?.defaultKeyPairName ?? (await genSecretKeyString()),
+      defaultSecretKeyName: defaultKeyPairName ?? AUTO_GENERATED,
     };
   },
 ];

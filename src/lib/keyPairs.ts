@@ -361,9 +361,9 @@ export async function getExistingSecretKey(
     return userSecretKey;
   }
 
-  const noUserKeyPairMessage = `No key-pair ${color.yellow(
+  const noUserKeyPairMessage = `Secret key ${color.yellow(
     secretKeyName,
-  )} found`;
+  )} not found`;
 
   if (!isInteractive) {
     return commandObj.error(noUserKeyPairMessage);
