@@ -203,6 +203,7 @@ export const DEFAULT_WORKER_NAME = "defaultWorker";
 const SK_FLAG_NAME = "sk";
 export const KEY_PAIR_FLAG = {
   [SK_FLAG_NAME]: Flags.string({
+    char: "k",
     description: "Peer secret key name",
     helpValue: "<name>",
   }),
