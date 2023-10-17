@@ -21,7 +21,9 @@
 * [`fluence key new [NAME]`](#fluence-key-new-name)
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
 * [`fluence local down`](#fluence-local-down)
-* [`fluence local gen`](#fluence-local-gen)
+* [`fluence local init`](#fluence-local-init)
+* [`fluence local ps`](#fluence-local-ps)
+* [`fluence local restart`](#fluence-local-restart)
 * [`fluence local up`](#fluence-local-up)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
@@ -612,7 +614,7 @@ _See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/
 
 ## `fluence local down`
 
-Stop currently running docker-compose.yaml using docker
+Stop currently running docker-compose.yaml using docker compose
 
 ```
 USAGE
@@ -622,7 +624,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Stop currently running docker-compose.yaml using docker
+  Stop currently running docker-compose.yaml using docker compose
 
 EXAMPLES
   $ fluence local down
@@ -630,30 +632,70 @@ EXAMPLES
 
 _See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/down.ts)_
 
-## `fluence local gen`
+## `fluence local init`
 
-Create docker-compose.yaml according to provider.yaml
+Init docker-compose.yaml according to provider.yaml
 
 ```
 USAGE
-  $ fluence local gen [--no-input] [--noxes <value>]
+  $ fluence local init [--no-input] [--noxes <value>]
 
 FLAGS
   --no-input       Don't interactively ask for any input from the user
   --noxes=<value>  Number of noxes to generate in your configs
 
 DESCRIPTION
-  Create docker-compose.yaml according to provider.yaml
+  Init docker-compose.yaml according to provider.yaml
 
 EXAMPLES
-  $ fluence local gen
+  $ fluence local init
 ```
 
-_See code: [src/commands/local/gen.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/gen.ts)_
+_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/init.ts)_
+
+## `fluence local ps`
+
+List containers using docker compose
+
+```
+USAGE
+  $ fluence local ps [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  List containers using docker compose
+
+EXAMPLES
+  $ fluence local ps
+```
+
+_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/ps.ts)_
+
+## `fluence local restart`
+
+Restart docker-compose.yaml using docker compose
+
+```
+USAGE
+  $ fluence local restart [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Restart docker-compose.yaml using docker compose
+
+EXAMPLES
+  $ fluence local restart
+```
+
+_See code: [src/commands/local/restart.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/restart.ts)_
 
 ## `fluence local up`
 
-Run docker-compose.yaml using docker
+Run docker-compose.yaml using docker compose
 
 ```
 USAGE
@@ -663,7 +705,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Run docker-compose.yaml using docker
+  Run docker-compose.yaml using docker compose
 
 EXAMPLES
   $ fluence local up
