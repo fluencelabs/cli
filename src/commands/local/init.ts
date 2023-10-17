@@ -32,15 +32,15 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
 
-export default class Gen extends BaseCommand<typeof Gen> {
-  static override description = `Create ${DOCKER_COMPOSE_FULL_FILE_NAME} according to ${PROVIDER_CONFIG_FULL_FILE_NAME}`;
+export default class Init extends BaseCommand<typeof Init> {
+  static override description = `Init ${DOCKER_COMPOSE_FULL_FILE_NAME} according to ${PROVIDER_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
     ...PROVIDER_CONFIG_FLAGS,
   };
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Gen));
+    const { flags } = await initCli(this, await this.parse(Init));
 
     const existingDockerCompose = await initReadonlyDockerComposeConfig();
 

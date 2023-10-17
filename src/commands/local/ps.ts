@@ -16,22 +16,21 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
-import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Up extends BaseCommand<typeof Up> {
-  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
+export default class PS extends BaseCommand<typeof PS> {
+  static override description = `List containers using docker compose`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Up));
+    await initCli(this, await this.parse(PS));
     const dockerComposeConfig = await initNewDockerComposeConfig();
 
     await dockerCompose({
-      args: ["up", "-d"],
+      args: ["ps"],
       printOutput: true,
       options: {
         cwd: dockerComposeConfig.$getDirPath(),

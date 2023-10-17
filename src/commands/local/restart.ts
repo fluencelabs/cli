@@ -20,18 +20,18 @@ import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Up extends BaseCommand<typeof Up> {
-  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
+export default class Restart extends BaseCommand<typeof Restart> {
+  static override description = `Restart ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Up));
+    await initCli(this, await this.parse(Restart));
     const dockerComposeConfig = await initNewDockerComposeConfig();
 
     await dockerCompose({
-      args: ["up", "-d"],
+      args: ["restart"],
       printOutput: true,
       options: {
         cwd: dockerComposeConfig.$getDirPath(),

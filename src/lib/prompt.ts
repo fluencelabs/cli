@@ -320,7 +320,7 @@ export const list = async <T, U>(
 
   const choice = choices.find((choice): boolean => {
     return (
-      !(choice instanceof inquirer.Separator) && choice.name === stringChoice
+      !(choice instanceof inquirer.Separator) && choice.value === stringChoice
     );
   });
 
