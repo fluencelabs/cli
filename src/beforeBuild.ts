@@ -111,18 +111,22 @@ try {
   const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
 
   const search = `#!/usr/bin/env bash`;
-  const insert = `\nexport NODE_NO_WARNINGS=1`;
+  const insert = `export NODE_NO_WARNINGS=1`;
+  const hasSearch = binFileContent.includes(search);
+  const hasInsert = binFileContent.includes(insert);
 
-  if (binFileContent.includes(search) && !binFileContent.includes(insert)) {
-    const newBinFileContent = binFileContent.replace(search, search + insert);
+  if (hasSearch && !hasInsert) {
+    const newBinFileContent = binFileContent.replace(
+      search,
+      `${search}\n${insert}`,
+    );
 
     await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
-    console.log(`${BIN_FILE_PATH} modified successfully.`);
-  } else {
-    console.log(
-      `${BIN_FILE_PATH} is already modified or the pattern does not exist.`,
-    );
+  } else if (!hasSearch) {
+    throw new Error(`Wasn't able to find '${search}' in ${BIN_FILE_PATH}`);
   }
 } catch (err) {
-  console.error(`Error while modifying ${BIN_FILE_PATH}: ${err}`);
+  // eslint-disable-next-line no-console
+  console.error(`Error while modifying ${BIN_FILE_PATH}`);
+  throw err;
 }
