@@ -214,9 +214,6 @@
       "dot-notation": [
         "off"
       ],
-      "no-constant-condition": [
-        "off"
-      ],
       "object-curly-spacing": [
         "error",
         "always"

@@ -43,6 +43,7 @@ export default class Init extends BaseCommand<typeof Init> {
         message: `Provider config already exists at ${color.yellow(
           maybeProviderConfig.$getPath(),
         )}. Do you want to overwrite it?`,
+        default: false,
       });
 
       if (!isOverwriting) {
@@ -52,9 +53,7 @@ export default class Init extends BaseCommand<typeof Init> {
           )}. Aborting.`,
         );
       }
-    }
 
-    if (maybeProviderConfig !== null) {
       await rm(maybeProviderConfig.$getPath(), { force: true });
     }
 

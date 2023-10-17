@@ -64,10 +64,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
 
     envConfig.fluenceEnv = newFluenceEnv;
     await envConfig.$commit();
-
-    await updateRelaysJSON({
-      fluenceConfig: fluenceConfig,
-    });
+    await updateRelaysJSON({ fluenceConfig });
 
     commandObj.log(
       `Successfully set default fluence environment to ${color.yellow(

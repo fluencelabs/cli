@@ -320,13 +320,13 @@ export const list = async <T, U>(
 
   const choice = choices.find((choice): boolean => {
     return (
-      !(choice instanceof inquirer.Separator) && choice.value === stringChoice
+      !(choice instanceof inquirer.Separator) &&
+      // In non-interactive case default value might be returned
+      (isInteractive ? choice.name : choice.value) === stringChoice
     );
   });
 
-  assert(choice !== undefined);
-  assert(!(choice instanceof inquirer.Separator));
-
+  assert(choice !== undefined && !(choice instanceof inquirer.Separator));
   return choice.value;
 };
 

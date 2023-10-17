@@ -41,18 +41,17 @@ export default class Init extends BaseCommand<typeof Init> {
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
-
     const existingDockerCompose = await initReadonlyDockerComposeConfig();
 
     if (existingDockerCompose !== null) {
-      if (
-        !(await confirm({
-          message: `Do you want to replace existing ${color.yellow(
-            existingDockerCompose.$getPath(),
-          )}`,
-          default: false,
-        }))
-      ) {
+      const isOverwriting = await confirm({
+        message: `Do you want to replace existing ${color.yellow(
+          existingDockerCompose.$getPath(),
+        )}`,
+        default: false,
+      });
+
+      if (!isOverwriting) {
         commandObj.error(
           `The config already exists at ${existingDockerCompose.$getPath()}. Aborting.`,
         );

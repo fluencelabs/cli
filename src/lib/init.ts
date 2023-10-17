@@ -262,7 +262,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   }
 
   await updateRelaysJSON({
-    fluenceConfig: fluenceConfig,
+    fluenceConfig,
     numberOfNoxes: options.numberOfNoxes,
   });
 
