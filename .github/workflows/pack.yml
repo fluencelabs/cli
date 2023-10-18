@@ -151,7 +151,7 @@ jobs:
 
       - name: Promote fluence-cli
         if: inputs.channel != 'null'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
       - name: Rename archive
         run: mv dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
@@ -168,3 +168,7 @@ jobs:
         with:
           files: fluence-cli-${{ inputs.platform }}.tar.gz
           tag_name: ${{ inputs.tag }}
+
+      - name: Promote fluence-cli to latest
+        if: inputs.tag != 'null'
+        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel latest --no-xz --indexes
