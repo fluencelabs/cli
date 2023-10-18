@@ -2,6 +2,7 @@
 import { exportVariable, getInput, setFailed } from "@actions/core";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
+import assert from "assert";
 
 try {
   const inputVersions = JSON.parse(getInput("versions"));

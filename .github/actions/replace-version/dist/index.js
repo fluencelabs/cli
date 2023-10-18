@@ -2798,16 +2798,18 @@ var __webpack_exports__ = {};
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(186);
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(147);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(17);
+/* harmony import */ var assert__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(491);
 // @ts-check
+
 
 
 
 
 try {
   const inputVersions = JSON.parse((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("versions"));
-  assert(typeof inputVersions === "object" && inputVersions !== null);
+  assert__WEBPACK_IMPORTED_MODULE_3__(typeof inputVersions === "object" && inputVersions !== null);
 
-  assert(
+  assert__WEBPACK_IMPORTED_MODULE_3__(
     typeof process.env.GITHUB_WORKSPACE === "string",
     "GITHUB_WORKSPACE environment variable is not set",
   );
@@ -2820,14 +2822,15 @@ try {
 
   const versionsFileContent = (0,fs__WEBPACK_IMPORTED_MODULE_1__.readFileSync)(versionsFilePath, "utf-8");
   const versions = JSON.parse(versionsFileContent);
-  assert(typeof versions === "object" && versions !== null);
+  assert__WEBPACK_IMPORTED_MODULE_3__(typeof versions === "object" && versions !== null);
 
   let cargoDependencyUpdated = false;
 
   // Merge inputVersions into versions
   for (const category in inputVersions) {
     if (
-      !versions.hasOwnProperty(category) || inputVersions[category] === null
+      !versions.hasOwnProperty(category) ||
+      inputVersions[category] === null
     ) {
       continue;
     }

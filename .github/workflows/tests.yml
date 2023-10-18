@@ -204,11 +204,6 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: yarn test-linux-x64
 
-      - name: Post Run nox network
-        if: always()
-        run: |
-          docker-compose -f tmp/templates/quickstart/.fluence/docker-compose.yaml down --volumes
-
       - name: Cleanup
         if: always()
         run: rm -rf tmp ~/.fluence
@@ -216,4 +211,3 @@ jobs:
       - name: Dump nox logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
-
