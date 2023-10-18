@@ -71,7 +71,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
     await initFluenceClient(flags, fluenceConfig, fluenceEnv);
     const { Fluence } = await import("@fluencelabs/js-client");
-    const relayId = (await Fluence.getClient()).getRelayPeerId();
+    const relayId = Fluence.getClient().getRelayPeerId();
 
     if (workersConfig.hosts === undefined) {
       return commandObj.error(

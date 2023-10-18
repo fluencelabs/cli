@@ -18,6 +18,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
+import { callAquaFunction } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
@@ -263,10 +264,11 @@ const ensureAquaPath = async ({
   });
 };
 
-type RunData = Record<string, unknown>;
+type RunData = Parameters<typeof callAquaFunction>[0]["args"];
 
 const runDataSchema: JSONSchemaType<RunData> = {
   type: "object",
+  required: [],
 };
 
 const validateRunData = ajv.compile(runDataSchema);
@@ -275,7 +277,7 @@ const getRunData = async (flags: {
   data: string | undefined;
   "data-path": string | undefined;
 }): Promise<RunData | undefined> => {
-  const runData: RunData = {};
+  let runData: RunData = {};
   const { data, "data-path": dataPath } = flags;
 
   if (typeof dataPath === "string") {
@@ -305,11 +307,7 @@ const getRunData = async (flags: {
       );
     }
 
-    for (const key in parsedData) {
-      if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
-        runData[key] = parsedData[key];
-      }
-    }
+    runData = parsedData;
   }
 
   if (typeof data === "string") {
@@ -329,11 +327,7 @@ const getRunData = async (flags: {
       );
     }
 
-    for (const key in parsedData) {
-      if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
-        runData[key] = parsedData[key];
-      }
-    }
+    runData = { ...runData, ...parsedData };
   }
 
   const dataString = JSON.stringify(runData);
@@ -421,7 +415,7 @@ const fluenceRun = async (args: RunArgs) => {
     config: {},
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     def: functionCall.funcDef,
-    peer: await Fluence.getClient(),
+    peer: Fluence.getClient(),
     script: functionCall.script,
   });
 

@@ -107,24 +107,26 @@ const BIN_FILE_PATH = join(
   "bin.js",
 );
 
-const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
-const NODE_RUN = `  "\\$NODE" "\\$DIR/run" "\\$@"`;
-const NODE_RUN_NO_WARNINGS = NODE_RUN.replace('NODE"', 'NODE" --no-warnings');
-const timesNodeRunAppears = binFileContent.split(NODE_RUN).length - 1;
+try {
+  const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
 
-if (timesNodeRunAppears === 1) {
-  const newBinFileContent = binFileContent.replace(
-    NODE_RUN,
-    NODE_RUN_NO_WARNINGS,
-  );
+  const search = `#!/usr/bin/env bash`;
+  const insert = `export NODE_NO_WARNINGS=1`;
+  const hasSearch = binFileContent.includes(search);
+  const hasInsert = binFileContent.includes(insert);
 
-  await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
-} else {
-  const timesNodeRunNoWarningsAppears =
-    binFileContent.split(NODE_RUN_NO_WARNINGS).length - 1;
+  if (hasSearch && !hasInsert) {
+    const newBinFileContent = binFileContent.replace(
+      search,
+      `${search}\n${insert}`,
+    );
 
-  assert(
-    timesNodeRunNoWarningsAppears === 1,
-    `${BIN_FILE_PATH} file has changed. Please make sure patch that replaces 'node' with 'node --no-warnings' is still valid.`,
-  );
+    await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
+  } else if (!hasSearch) {
+    throw new Error(`Wasn't able to find '${search}' in ${BIN_FILE_PATH}`);
+  }
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.error(`Error while modifying ${BIN_FILE_PATH}`);
+  throw err;
 }
