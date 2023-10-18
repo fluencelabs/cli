@@ -21,6 +21,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import versions from "../../../versions.json" assert { type: "json" };
 import {
+  FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR,
   DOCKER_COMPOSE_FILE_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -142,6 +143,8 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   required: ["version", "services"],
 };
 
+const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
+
 type GenNoxImageArgs = {
   name: string;
   tcpPort: number;
@@ -162,8 +165,9 @@ function genNox({
       pull_policy: "always",
       ports: [`${tcpPort}:${tcpPort}`, `${webSocketPort}:${webSocketPort}`],
       environment: {
-        FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: `/ip4/127.0.0.1/tcp/${IPFS_PORT}`,
-        FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`,
+        FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR,
+        FLUENCE_ENV_DECIDER_IPFS_MULTIADDR: NOX_IPFS_MULTIADDR,
+        FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: NOX_IPFS_MULTIADDR,
         FLUENCE_ENV_CONNECTOR_API_ENDPOINT: `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`,
         FLUENCE_ENV_CONNECTOR_FROM_BLOCK: "earliest",
         WASM_LOG: "info",

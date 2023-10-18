@@ -76,7 +76,6 @@
     "dotenv": "^16.3.1",
     "ethers": "6.6.0",
     "filenamify": "^6.0.0",
-    "get-random-values": "^3.0.0",
     "inquirer": "^9.2.11",
     "ipfs-http-client": "^60.0.1",
     "lodash-es": "^4.17.21",

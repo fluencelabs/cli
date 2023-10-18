@@ -17,8 +17,6 @@
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
-import type { ConfigKeyPair } from "../configs/keyPair.js";
-
 export function commaSepStrToArr(commaSepStr: string) {
   return commaSepStr.split(",").map((s) => {
     return s.trim();
@@ -140,32 +138,6 @@ function formatMessage(message: string) {
   }
 
   return jsonStringify(message);
-}
-
-async function genSecretKey() {
-  const getRandomValues = (await import("get-random-values")).default;
-  return getRandomValues(new Uint8Array(32));
-}
-
-function uint8ArrayToBase64(array: Uint8Array) {
-  return Buffer.from(array).toString("base64");
-}
-
-export async function genSecretKeyString(): Promise<string> {
-  return uint8ArrayToBase64(await genSecretKey());
-}
-
-export async function genSecretKeyStringWithName(
-  name: string,
-): Promise<ConfigKeyPair> {
-  return {
-    secretKey: await genSecretKeyString(),
-    name,
-  };
-}
-
-export function base64ToUint8Array(base64: string) {
-  return new Uint8Array(Buffer.from(base64, "base64"));
 }
 
 export function removeProperties<T>(

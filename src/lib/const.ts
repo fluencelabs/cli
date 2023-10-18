@@ -111,6 +111,7 @@ export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = 5001;
+export const FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
 export const CHAIN_CONTAINER_NAME = "chain";
 export const CHAIN_PORT = 8545;
 export const TCP_PORT_START = 7771;

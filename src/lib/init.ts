@@ -88,7 +88,7 @@ import {
   getInfos,
 } from "./aqua/main.js";
 
-await Fluence.connect(relays[0].multiaddr);
+await Fluence.connect(relays[0].multiaddr, {});
 const helloWorldResult = await helloWorld("Fluence");
 console.log(helloWorldResult);
 const helloWorldRemoteResult = await helloWorldRemote("Fluence");

@@ -18,7 +18,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
-import { callAquaFunction } from "@fluencelabs/js-client";
+import type { callAquaFunction } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";

@@ -44,12 +44,11 @@ import {
   WEB_SOCKET_PORT_START,
 } from "./const.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
+import { commaSepStrToArr, jsonStringify } from "./helpers/utils.js";
 import {
-  commaSepStrToArr,
   base64ToUint8Array,
-  jsonStringify,
-} from "./helpers/utils.js";
-import { getSecretKeyOrReturnExisting } from "./keyPairs.js";
+  getSecretKeyOrReturnExisting,
+} from "./keyPairs.js";
 import { projectRootDir } from "./paths.js";
 import { input, list } from "./prompt.js";
 
@@ -119,25 +118,9 @@ export function multiaddrsToNodes(multiaddrs: string[]): Node[] {
 }
 
 export async function getPeerIdFromSecretKey(secretKey: string) {
-  const { createClient } = await import("@fluencelabs/js-client");
-
-  // TODO: replace with peerId get from js-client
-  const client = await createClient(
-    await getRandomRelayAddr({
-      fluenceEnv: "stage",
-      maybeFluenceConfig: null,
-    }),
-    {
-      keyPair: {
-        source: base64ToUint8Array(secretKey),
-        type: "Ed25519",
-      },
-    },
-  );
-
-  const peerId = client.getPeerId();
-  await client.disconnect();
-  return peerId;
+  const { KeyPair } = await import("@fluencelabs/js-client");
+  const keyPair = await KeyPair.fromEd25519SK(base64ToUint8Array(secretKey));
+  return keyPair.getPeerId();
 }
 
 async function ensureLocalNodes(numberOfNoxes?: number | undefined) {

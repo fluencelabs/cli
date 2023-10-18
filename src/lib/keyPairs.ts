@@ -28,7 +28,6 @@ import {
 import type { UserConfig } from "./configs/user/config.js";
 import { FS_OPTIONS } from "./const.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
-import { genSecretKeyString } from "./helpers/utils.js";
 import {
   ensureUserFluenceSecretsDir,
   getFluenceSecretsDir,
@@ -472,4 +471,15 @@ export async function genSecretKeysOrReturnExisting(secretKeyNames: string[]) {
       return getSecretKeyOrReturnExisting(name);
     }),
   );
+}
+
+export async function genSecretKeyString(): Promise<string> {
+  const { KeyPair } = await import("@fluencelabs/js-client");
+  const keyPair = await KeyPair.randomEd25519();
+  const privateKey = keyPair.toEd25519PrivateKey();
+  return Buffer.from(privateKey).toString("base64");
+}
+
+export function base64ToUint8Array(base64: string) {
+  return new Uint8Array(Buffer.from(base64, "base64"));
 }

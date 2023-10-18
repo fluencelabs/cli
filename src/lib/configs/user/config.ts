@@ -28,12 +28,12 @@ import {
   AQUA_LIB_NPM_DEPENDENCY,
   AUTO_GENERATED,
 } from "../../const.js";
-import { genSecretKeyString } from "../../helpers/utils.js";
 import {
   validateAllVersionsAreExact,
   validateBatch,
 } from "../../helpers/validations.js";
 import {
+  genSecretKeyString,
   createSecretKey,
   getUserSecretKey,
   writeSecretKey,
@@ -226,11 +226,9 @@ const migrations: Migrations<Config> = [
     const { defaultKeyPairName } = userSecretsConfig ?? {};
 
     if (defaultKeyPairName === undefined) {
-      const secretKey = await genSecretKeyString();
-
       await writeSecretKey({
         name: AUTO_GENERATED,
-        secretKey,
+        secretKey: await genSecretKeyString(),
         isUser: true,
       });
     }
