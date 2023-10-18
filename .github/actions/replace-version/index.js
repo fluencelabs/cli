@@ -27,7 +27,8 @@ try {
   // Merge inputVersions into versions
   for (const category in inputVersions) {
     if (
-      !versions.hasOwnProperty(category) || inputVersions[category] === null
+      !versions.hasOwnProperty(category) ||
+      inputVersions[category] === null
     ) {
       continue;
     }
