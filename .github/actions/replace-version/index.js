@@ -1,6 +1,5 @@
 // @ts-check
 import { exportVariable, getInput, setFailed } from "@actions/core";
-import assert from "assert";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
@@ -28,25 +27,32 @@ try {
   // Merge inputVersions into versions
   for (const category in inputVersions) {
     if (
-      !versions.hasOwnProperty(category) ||
-      inputVersions[category] === null
+      !versions.hasOwnProperty(category) || inputVersions[category] === null
     ) {
       continue;
     }
 
-    for (const component in inputVersions[category]) {
-      if (
-        !versions[category].hasOwnProperty(component) ||
-        inputVersions[category][component] === "null"
-      ) {
-        continue;
-      }
+    const inputCategoryValue = inputVersions[category];
+    if (
+      typeof inputCategoryValue === "string" ||
+      typeof inputCategoryValue === "number"
+    ) {
+      versions[category] = inputCategoryValue; // directly update the value if it is a string or number
+    } else if (typeof inputCategoryValue === "object") {
+      for (const component in inputCategoryValue) {
+        if (
+          !versions[category].hasOwnProperty(component) ||
+          inputVersions[category][component] === null
+        ) {
+          continue;
+        }
 
-      versions[category][component] = inputVersions[category][component];
+        versions[category][component] = inputVersions[category][component];
 
-      // Check if a cargo dependency was updated
-      if (category === "cargo") {
-        cargoDependencyUpdated = true;
+        // Check if a cargo dependency was updated
+        if (category === "cargo") {
+          cargoDependencyUpdated = true;
+        }
       }
     }
   }
