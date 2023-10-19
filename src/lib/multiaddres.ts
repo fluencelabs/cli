@@ -125,9 +125,9 @@ export async function getPeerIdFromSecretKey(secretKey: string) {
 
 async function ensureLocalAddrsAndPeerIds(numberOfNoxes?: number | undefined) {
   return (await getResolvedProviderConfig({ numberOfNoxes })).map(
-    ({ peerId, port }): AddrAndPeerId => {
+    ({ peerId, webSocketPort }): AddrAndPeerId => {
       return {
-        multiaddr: `/ip4/127.0.0.1/tcp/${port}/ws/p2p/${peerId}`,
+        multiaddr: `/ip4/127.0.0.1/tcp/${webSocketPort}/ws/p2p/${peerId}`,
         peerId,
       };
     },
@@ -368,23 +368,22 @@ export async function updateRelaysJSON({
 export async function getResolvedProviderConfig(args: ProviderConfigArgs = {}) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   return Promise.all(
-    Object.entries(providerConfig.computePeers).map(
-      async ([name, { port: portFromConfig, worker = 1 }], i) => {
-        let port = portFromConfig;
+    Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {
+      const { webSocketPort: webSocketPortFromConfig, worker = 1 } = peer;
 
-        if (port === undefined) {
-          port = `${WEB_SOCKET_PORT_START + i}`;
-        }
+      const webSocketPort =
+        webSocketPortFromConfig === undefined
+          ? WEB_SOCKET_PORT_START + i
+          : webSocketPortFromConfig;
 
-        const { secretKey } = await getSecretKeyOrReturnExisting(name);
+      const { secretKey } = await getSecretKeyOrReturnExisting(name);
 
-        return {
-          name,
-          port,
-          peerId: await getPeerIdFromSecretKey(secretKey),
-          worker,
-        };
-      },
-    ),
+      return {
+        name,
+        webSocketPort,
+        peerId: await getPeerIdFromSecretKey(secretKey),
+        worker,
+      };
+    }),
   );
 }

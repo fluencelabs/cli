@@ -465,14 +465,6 @@ export async function getSecretKeyOrReturnExisting(name: string) {
   return { name, path: relative(fluenceDir, filePath), secretKey } as const;
 }
 
-export async function genSecretKeysOrReturnExisting(secretKeyNames: string[]) {
-  return Promise.all(
-    secretKeyNames.map((name) => {
-      return getSecretKeyOrReturnExisting(name);
-    }),
-  );
-}
-
 export async function genSecretKeyString(): Promise<string> {
   const { KeyPair } = await import("@fluencelabs/js-client");
   const keyPair = await KeyPair.randomEd25519();

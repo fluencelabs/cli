@@ -22,6 +22,7 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   WEB_SOCKET_PORT_START,
+  TCP_PORT_START,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
@@ -47,7 +48,8 @@ export type Offer = {
 
 export type ComputePeer = {
   worker?: number;
-  port?: string;
+  webSocketPort?: number;
+  tcpPort?: number;
 };
 
 type ConfigV0 = {
@@ -79,10 +81,15 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
   type: "object",
   properties: {
     worker: { type: "number", nullable: true },
-    port: {
-      type: "string",
+    webSocketPort: {
+      type: "number",
       nullable: true,
-      description: `Both host and container port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
+      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
+    },
+    tcpPort: {
+      type: "number",
+      nullable: true,
+      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
     },
   },
   required: [],
@@ -148,8 +155,18 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     missingComputePeerNames: Array<string>;
   }> = [];
 
+  if (Object.keys(config.computePeers).length === 0) {
+    return `There should be at least one computePeer defined in the config`;
+  }
+
+  const offers = Object.entries(config.offers);
+
+  if (offers.length === 0) {
+    return `There should be at least one offer defined in the config`;
+  }
+
   // Checking that all computePeers referenced in offers are defined
-  for (const [offerName, { computePeers }] of Object.entries(config.offers)) {
+  for (const [offerName, { computePeers }] of offers) {
     const missingComputePeerNames = computePeers.filter((cp) => {
       return !(cp in config.computePeers);
     });

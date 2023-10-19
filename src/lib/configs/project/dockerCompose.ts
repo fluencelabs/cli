@@ -31,9 +31,10 @@ import {
   CHAIN_PORT,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
 import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
-import { genSecretKeysOrReturnExisting } from "../../keyPairs.js";
+import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -149,14 +150,16 @@ type GenNoxImageArgs = {
   name: string;
   tcpPort: number;
   webSocketPort: number;
-  bootstrapNoxName: string;
+  bootstrapName: string;
+  bootstrapTcpPort?: number;
 };
 
 function genNox({
   name,
   tcpPort,
   webSocketPort,
-  bootstrapNoxName,
+  bootstrapName,
+  bootstrapTcpPort,
 }: GenNoxImageArgs): [name: string, service: Service] {
   return [
     name,
@@ -191,9 +194,9 @@ function genNox({
         `/dns4/${name}/tcp/${tcpPort}`,
         `/dns4/${name}/tcp/${webSocketPort}/ws`,
         "--allow-private-ips",
-        tcpPort === TCP_PORT_START
+        bootstrapTcpPort === undefined
           ? "--local"
-          : `--bootstraps=/dns/${bootstrapNoxName}/tcp/${TCP_PORT_START}`,
+          : `--bootstraps=/dns/${bootstrapName}/tcp/${bootstrapTcpPort}`,
       ],
       depends_on: [IPFS_CONTAINER_NAME],
       secrets: [name],
@@ -204,18 +207,30 @@ function genNox({
 async function genDockerCompose(
   providerConfig: ProviderConfigReadonly,
 ): Promise<LatestConfig> {
-  const secretKeys = await genSecretKeysOrReturnExisting(
-    Object.keys(providerConfig.computePeers),
+  const peers = await Promise.all(
+    Object.entries(providerConfig.computePeers).map(
+      async ([name, { webSocketPort, tcpPort }]) => {
+        return {
+          ...(await getSecretKeyOrReturnExisting(name)),
+          webSocketPort,
+          tcpPort,
+        };
+      },
+    ),
   );
 
-  const [bootstrapNoxNameAndKey, ...restSecretKeys] = secretKeys;
+  const [bootstrap, ...restNoxes] = peers;
 
   assert(
-    bootstrapNoxNameAndKey !== undefined,
-    "At least one nox is required to generate a docker-compose.yml",
+    bootstrap !== undefined,
+    `Unreachable. 'computePeers' non-emptiness is checked during ${PROVIDER_CONFIG_FULL_FILE_NAME} validation`,
   );
 
-  const { name: bootstrapNoxName } = bootstrapNoxNameAndKey;
+  const {
+    name: bootstrapName,
+    webSocketPort: bootstrapWebSocketPort = WEB_SOCKET_PORT_START,
+    tcpPort: bootstrapTcpPort = TCP_PORT_START,
+  } = bootstrap;
 
   return {
     version: "3",
@@ -236,25 +251,26 @@ async function genDockerCompose(
       },
       ...Object.fromEntries([
         genNox({
-          name: bootstrapNoxName,
-          tcpPort: TCP_PORT_START,
-          webSocketPort: WEB_SOCKET_PORT_START,
-          bootstrapNoxName: bootstrapNoxName,
+          name: bootstrapName,
+          tcpPort: bootstrapTcpPort,
+          webSocketPort: bootstrapWebSocketPort,
+          bootstrapName: bootstrapName,
         }),
       ]),
       ...Object.fromEntries(
-        restSecretKeys.map(({ name }, index) => {
+        restNoxes.map(({ name, tcpPort, webSocketPort }, index) => {
           return genNox({
             name,
-            tcpPort: TCP_PORT_START + 1 + index,
-            webSocketPort: WEB_SOCKET_PORT_START + 1 + index,
-            bootstrapNoxName: bootstrapNoxName,
+            tcpPort: tcpPort ?? TCP_PORT_START + index + 1,
+            webSocketPort: webSocketPort ?? WEB_SOCKET_PORT_START + index + 1,
+            bootstrapName: bootstrapName,
+            bootstrapTcpPort,
           });
         }),
       ),
     },
     secrets: Object.fromEntries(
-      secretKeys.map(({ name, path: file }) => {
+      peers.map(({ name, path: file }) => {
         return [name, { file }];
       }),
     ),
