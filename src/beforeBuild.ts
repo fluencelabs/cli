@@ -53,11 +53,13 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
 const compileInstallationSpellAqua = async (tracing = false) => {
   return Promise.all(
     ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
+      const filePath = join(
+        INSTALLATION_SPELL_AQUA_DIR_PATH,
+        `${fileName}.${AQUA_EXT}`,
+      );
+
       const compilationResult = await compileFromPath({
-        filePath: join(
-          INSTALLATION_SPELL_AQUA_DIR_PATH,
-          `${fileName}.${AQUA_EXT}`,
-        ),
+        filePath,
         imports: ["node_modules"],
         tracing,
       });
@@ -66,7 +68,13 @@ const compileInstallationSpellAqua = async (tracing = false) => {
         throw new Error(compilationResult.errors.join("\n\n"));
       }
 
-      const { sources } = await aquaToJs(compilationResult, "ts");
+      const { sources } = (await aquaToJs(compilationResult, "ts")) ?? {};
+
+      if (sources === undefined) {
+        throw new Error(
+          `File ${filePath} no longer exposes anything. Please expose something from it or remove it from compilation`,
+        );
+      }
 
       await writeFile(
         join(
