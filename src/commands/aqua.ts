@@ -246,6 +246,11 @@ const resolveAbsoluteAquaPath = async ({
     return resolve(projectRootDir, maybePathFromFluenceYaml);
   }
 
+  // By default input for aqua is set in fluence.yaml
+  // If it's not set (user removed it for some reason from fluence.yaml)
+  // or there is no fluence.yaml at all - then there is a need to provide path to the input for aqua compilation
+  // By default it's suggest to use current working directory as input for aqua compilation
+  // But user can pass a flag to provide a different path or provide the path interactively when prompted
   const pathFromUserInput = await input({ ...inputArg, default: cwd() });
 
   if (isAbsolute(pathFromUserInput)) {

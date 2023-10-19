@@ -53,7 +53,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       import("multiformats/bases/base58"),
     ]);
 
-    for (const { peerId, worker } of peerIds) {
+    for (const { peerId, computeUnits } of peerIds) {
       const signer = await getSigner(network, flags["priv-key"]);
       // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
       const dealClient = new DealClient(signer, network);
@@ -65,7 +65,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
 
       const approveTx = await flt.approve(
         await matcher.getAddress(),
-        collateral * BigInt(worker),
+        collateral * BigInt(computeUnits),
       );
 
       promptConfirmTx(flags["priv-key"]);
@@ -74,7 +74,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
 
       const multihash = digest.decode(base58btc.decode("z" + peerId));
       const bytes = multihash.bytes.subarray(6);
-      const tx = await matcher.addWorkersSlots(bytes, worker);
+      const tx = await matcher.addWorkersSlots(bytes, computeUnits);
       promptConfirmTx(flags["priv-key"]);
       // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
       await waitTx(tx);
@@ -82,7 +82,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
 
       commandObj.logToStderr(
         `Added ${color.yellow(
-          worker,
+          computeUnits,
         )} worker slots. Compute peer ${color.yellow(
           peerId,
         )} has ${color.yellow(free)} free worker slots now.`,

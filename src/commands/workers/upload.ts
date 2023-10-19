@@ -83,7 +83,6 @@ export default class Upload extends BaseCommand<typeof Upload> {
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
-      hosts: true,
       aquaImports,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],

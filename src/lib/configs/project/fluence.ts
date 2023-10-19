@@ -297,6 +297,7 @@ const hostConfigSchema: JSONSchemaType<Host> = {
       type: "array",
       description: "An array of peer IDs to deploy on",
       items: { type: "string" },
+      minItems: 1,
     },
   },
   required: ["peerIds"],

@@ -293,12 +293,19 @@ export async function resolveRelay({
   maybeRelay,
   ...args
 }: { maybeRelay: string | undefined } & ResolveNodesArgs) {
-  return (
-    (await getMaybeNamedAddrAndPeerId(maybeRelay, args.maybeFluenceConfig))
-      ?.multiaddr ??
-    maybeRelay ??
-    (await getRandomRelayAddr(args))
-  );
+  const namedAddr = (
+    await getMaybeNamedAddrAndPeerId(maybeRelay, args.maybeFluenceConfig)
+  )?.multiaddr;
+
+  if (namedAddr !== undefined) {
+    return namedAddr;
+  }
+
+  if (maybeRelay !== undefined) {
+    return maybeRelay;
+  }
+
+  return getRandomRelayAddr(args);
 }
 
 export async function resolvePeerId(
@@ -369,12 +376,10 @@ export async function getResolvedProviderConfig(args: ProviderConfigArgs = {}) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   return Promise.all(
     Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {
-      const { webSocketPort: webSocketPortFromConfig, worker = 1 } = peer;
+      const { webSocketPort: webSocketPortFromConfig, computeUnits = 1 } = peer;
 
       const webSocketPort =
-        webSocketPortFromConfig === undefined
-          ? WEB_SOCKET_PORT_START + i
-          : webSocketPortFromConfig;
+        webSocketPortFromConfig ?? WEB_SOCKET_PORT_START + i;
 
       const { secretKey } = await getSecretKeyOrReturnExisting(name);
 
@@ -382,7 +387,7 @@ export async function getResolvedProviderConfig(args: ProviderConfigArgs = {}) {
         name,
         webSocketPort,
         peerId: await getPeerIdFromSecretKey(secretKey),
-        worker,
+        computeUnits,
       };
     }),
   );

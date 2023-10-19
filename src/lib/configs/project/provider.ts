@@ -47,7 +47,7 @@ export type Offer = {
 };
 
 export type ComputePeer = {
-  worker?: number;
+  computeUnits?: number;
   webSocketPort?: number;
   tcpPort?: number;
 };
@@ -80,7 +80,7 @@ const offerSchema: JSONSchemaType<Offer> = {
 const computePeerSchema: JSONSchemaType<ComputePeer> = {
   type: "object",
   properties: {
-    worker: { type: "number", nullable: true },
+    computeUnits: { type: "number", nullable: true },
     webSocketPort: {
       type: "number",
       nullable: true,
