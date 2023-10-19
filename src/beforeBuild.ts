@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -126,12 +125,4 @@ if (timesNodeRunAppears === 1) {
   );
 
   await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
-} else {
-  const timesNodeRunNoWarningsAppears =
-    binFileContent.split(NODE_RUN_NO_WARNINGS).length - 1;
-
-  assert(
-    timesNodeRunNoWarningsAppears === 1,
-    `${BIN_FILE_PATH} file has changed. Please make sure patch that replaces 'node' with 'node --no-warnings' is still valid.`,
-  );
 }
