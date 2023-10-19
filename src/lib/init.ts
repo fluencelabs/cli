@@ -122,7 +122,7 @@ import {
 } from "./aqua/main.js";
 
 const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
-await Fluence.connect(${NODES_CONST}[0].multiaddr);
+await Fluence.connect(${NODES_CONST}[0].multiaddr, {});
 const helloWorldResult = await helloWorld("Fluence");
 const helloWorldRemoteResult = await helloWorldRemote("Fluence");
 const getInfoResult = await getInfo();
