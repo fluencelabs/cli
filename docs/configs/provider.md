@@ -24,9 +24,9 @@ Defines config used for provider set up
 
 | Property        | Type   | Required | Description                                                                                                       |
 |-----------------|--------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `computeUnits`  | number | No       |                                                                                                                   |
 | `tcpPort`       | number | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `webSocketPort` | number | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
-| `worker`        | number | No       |                                                                                                                   |
 
 ## offers
 
