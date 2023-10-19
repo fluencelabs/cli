@@ -17,6 +17,10 @@
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
+import type {
+  get_logs,
+  get_logs_deal,
+} from "../compiled-aqua/installation-spell/cli.js";
 import type { ConfigKeyPair } from "../configs/keyPair.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
@@ -104,13 +108,25 @@ export const flagsToArgs = (flags: Flags): string[] => {
     .flat(2);
 };
 
-type FormatAquaLogsArg = Array<{
-  message: string;
-  timestamp: number;
-}>;
+type FormatAquaLogsType =
+  | Awaited<ReturnType<typeof get_logs>>[number]
+  | ({ worker_name: string } & Awaited<
+      ReturnType<typeof get_logs_deal>
+    >[number]["logs"][number]);
 
-export function formatAquaLogs(aquaLogs: FormatAquaLogsArg): string {
-  return aquaLogs
+export function formatAquaLogs({
+  logs,
+  error,
+  host_id,
+  spell_id,
+  worker_id,
+  worker_name,
+}: FormatAquaLogsType): string {
+  if (typeof error === "string") {
+    return `${LOGS_GET_ERROR_START}${error}`;
+  }
+
+  const formattedLogs = logs
     .map(({ message, timestamp }) => {
       const date = new Date(timestamp * 1000)
         .toISOString()
@@ -120,6 +136,19 @@ export function formatAquaLogs(aquaLogs: FormatAquaLogsArg): string {
       return `${color.blue(date)} ${formatMessage(message)}`;
     })
     .join("\n");
+
+  const formattedHeader = Object.entries({
+    host_id,
+    worker_id,
+    spell_id,
+  })
+    .map(([key, value]) => {
+      return `${key}: ${value}`;
+    })
+    .join(", ");
+
+  const formattedWorkerName = color.yellow(worker_name);
+  return `${formattedWorkerName} (${formattedHeader}):\n\n${formattedLogs}`;
 }
 
 function formatMessage(message: string) {
@@ -172,3 +201,6 @@ export function removeProperties<T>(
     }),
   );
 }
+
+export const LOGS_RESOLVE_SUBNET_ERROR_START = `Failed to resolve subnet: `;
+export const LOGS_GET_ERROR_START = `Failed to get logs: `;

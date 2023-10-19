@@ -35,7 +35,11 @@ import {
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
-import { jsonStringify } from "../src/lib/helpers/utils.js";
+import {
+  jsonStringify,
+  LOGS_RESOLVE_SUBNET_ERROR_START,
+  LOGS_GET_ERROR_START,
+} from "../src/lib/helpers/utils.js";
 import { localPeerIds, local } from "../src/lib/multiaddres.js";
 import { hasKey } from "../src/lib/typeHelpers.js";
 
@@ -608,8 +612,17 @@ describe("integration tests", () => {
         `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
       );
 
-      // check logs are working
-      assert((await fluence({ args: ["deal", "logs"], cwd })) !== "");
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+      if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
+        throw new Error(
+          `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
+        );
+      }
+
+      if (logs.includes(LOGS_GET_ERROR_START)) {
+        throw new Error(`Failed to get deal logs:\n\n${logs}`);
+      }
     },
   );
 });

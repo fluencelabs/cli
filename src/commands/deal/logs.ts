@@ -32,6 +32,7 @@ import {
   TRACING_FLAG,
 } from "../../lib/const.js";
 import {
+  LOGS_RESOLVE_SUBNET_ERROR_START,
   formatAquaLogs,
   stringifyUnknown,
   commaSepStrToArr,
@@ -84,12 +85,17 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
     commandObj.log(
       logs
-        .map(({ host_id, logs, spell_id, deal_id }) => {
-          return `${color.yellow(
-            dealIdWorkerNameMap[deal_id] ?? "Unknown worker",
-          )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${formatAquaLogs(
-            logs,
-          )}`;
+        .flatMap(({ error, logs, deal_id }) => {
+          if (typeof error === "string") {
+            return [`${LOGS_RESOLVE_SUBNET_ERROR_START}${error}`];
+          }
+
+          return logs.map((l) => {
+            return formatAquaLogs({
+              ...l,
+              worker_name: dealIdWorkerNameMap[deal_id] ?? "UnknownWorker",
+            });
+          });
         })
         .join("\n\n"),
     );
