@@ -19,7 +19,7 @@ on:
         description: "nox image tag"
         type: string
         default: "null"
-      deal-aurora-image:
+      chain-image:
         description: "chain image tag"
         type: string
         default: "null"
@@ -116,14 +116,14 @@ jobs:
       - name: Set chain image
         run: |
           # set chain image
-          case ${{ inputs.deal-aurora-image }} in
+          case ${{ inputs.chain-image }} in
           # if nox image is not passed from e2e read from versions.json
           'null')
             chain="$(jq .chain src/versions.json -r)"
           ;;
           # else set chain image to snapshot passed from e2e
           *)
-            chain=${{ inputs.deal-aurora-image }}
+            chain=${{ inputs.chain-image }}
           ;;
           esac
 

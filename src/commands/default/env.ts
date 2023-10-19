@@ -26,7 +26,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import {
   ensureValidEnvFlag,
   fluenceEnvPrompt,
-  ensureCustomNodes,
+  ensureCustomAddrsAndPeerIds,
   updateRelaysJSON,
 } from "../../lib/multiaddres.js";
 
@@ -59,7 +59,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
       newFluenceEnv === "custom" &&
       fluenceConfig.customFluenceEnv === undefined
     ) {
-      await ensureCustomNodes(fluenceConfig);
+      await ensureCustomAddrsAndPeerIds(fluenceConfig);
     }
 
     envConfig.fluenceEnv = newFluenceEnv;

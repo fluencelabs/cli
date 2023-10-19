@@ -111,7 +111,7 @@ export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = 5001;
-export const FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
+export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
 export const CHAIN_CONTAINER_NAME = "chain";
 export const CHAIN_PORT = 8545;
 export const TCP_PORT_START = 7771;
@@ -205,7 +205,7 @@ const SK_FLAG_NAME = "sk";
 export const KEY_PAIR_FLAG = {
   [SK_FLAG_NAME]: Flags.string({
     char: "k",
-    description: "Peer secret key name",
+    description: "Name of a peer's Network Private Key",
     helpValue: "<name>",
   }),
 } as const;
@@ -301,7 +301,7 @@ export const TRACING_FLAG = {
 
 export const PROVIDER_CONFIG_FLAGS = {
   noxes: Flags.integer({
-    description: "Number of noxes to generate in your configs",
+    description: "Number of Compute Peers to generate in your provider config",
   }),
 };
 

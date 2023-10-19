@@ -21,7 +21,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import versions from "../../../versions.json" assert { type: "json" };
 import {
-  FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR,
+  LOCAL_IPFS_ADDRESS,
   DOCKER_COMPOSE_FILE_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -149,14 +149,14 @@ type GenNoxImageArgs = {
   name: string;
   tcpPort: number;
   webSocketPort: number;
-  bootStrapNoxName: string;
+  bootstrapNoxName: string;
 };
 
 function genNox({
   name,
   tcpPort,
   webSocketPort,
-  bootStrapNoxName,
+  bootstrapNoxName,
 }: GenNoxImageArgs): [name: string, service: Service] {
   return [
     name,
@@ -165,7 +165,7 @@ function genNox({
       pull_policy: "always",
       ports: [`${tcpPort}:${tcpPort}`, `${webSocketPort}:${webSocketPort}`],
       environment: {
-        FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR,
+        FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: LOCAL_IPFS_ADDRESS,
         FLUENCE_ENV_DECIDER_IPFS_MULTIADDR: NOX_IPFS_MULTIADDR,
         FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: NOX_IPFS_MULTIADDR,
         FLUENCE_ENV_CONNECTOR_API_ENDPOINT: `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`,
@@ -193,7 +193,7 @@ function genNox({
         "--allow-private-ips",
         tcpPort === TCP_PORT_START
           ? "--local"
-          : `--bootstraps=/dns/${bootStrapNoxName}/tcp/${TCP_PORT_START}`,
+          : `--bootstraps=/dns/${bootstrapNoxName}/tcp/${TCP_PORT_START}`,
       ],
       depends_on: [IPFS_CONTAINER_NAME],
       secrets: [name],
@@ -208,14 +208,14 @@ async function genDockerCompose(
     Object.keys(providerConfig.computePeers),
   );
 
-  const [bootStrapNoxNameAndKey, ...restSecretKeys] = secretKeys;
+  const [bootstrapNoxNameAndKey, ...restSecretKeys] = secretKeys;
 
   assert(
-    bootStrapNoxNameAndKey !== undefined,
+    bootstrapNoxNameAndKey !== undefined,
     "At least one nox is required to generate a docker-compose.yml",
   );
 
-  const { name: bootStrapNoxName } = bootStrapNoxNameAndKey;
+  const { name: bootstrapNoxName } = bootstrapNoxNameAndKey;
 
   return {
     version: "3",
@@ -236,10 +236,10 @@ async function genDockerCompose(
       },
       ...Object.fromEntries([
         genNox({
-          name: bootStrapNoxName,
+          name: bootstrapNoxName,
           tcpPort: TCP_PORT_START,
           webSocketPort: WEB_SOCKET_PORT_START,
-          bootStrapNoxName,
+          bootstrapNoxName: bootstrapNoxName,
         }),
       ]),
       ...Object.fromEntries(
@@ -248,7 +248,7 @@ async function genDockerCompose(
             name,
             tcpPort: TCP_PORT_START + 1 + index,
             webSocketPort: WEB_SOCKET_PORT_START + 1 + index,
-            bootStrapNoxName,
+            bootstrapNoxName: bootstrapNoxName,
           });
         }),
       ),

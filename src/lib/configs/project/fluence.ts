@@ -47,7 +47,7 @@ import {
   type FluenceEnv,
   FLUENCE_ENVS,
   AUTO_GENERATED,
-  FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR,
+  LOCAL_IPFS_ADDRESS,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
@@ -447,7 +447,7 @@ const configSchemaV2Obj = {
     },
     [IPFS_ADDR_PROPERTY]: {
       type: "string",
-      description: `IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} or ${FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR} if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)`,
+      description: `IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} or ${LOCAL_IPFS_ADDRESS} if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)`,
       nullable: true,
       default: DEFAULT_IPFS_ADDRESS,
     },
@@ -717,7 +717,7 @@ deals:
 #     peerIds: []
 # # Space separated \`cargo build\` flags and args to pass to marine build. Default: ${DEFAULT_MARINE_BUILD_ARGS}
 # ${MARINE_BUILD_ARGS_PROPERTY}: '${DEFAULT_MARINE_BUILD_ARGS}'
-# # IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} or ${FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR} if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)
+# # IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} or ${LOCAL_IPFS_ADDRESS} if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)
 # ${IPFS_ADDR_PROPERTY}: '${DEFAULT_IPFS_ADDRESS}'
 # # Secret key with this name will be used by default by js-client inside CLI to run Aqua code
 # defaultSecretKeyName: ${AUTO_GENERATED}

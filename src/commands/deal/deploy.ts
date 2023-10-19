@@ -28,7 +28,7 @@ import {
 } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
-  FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR,
+  LOCAL_IPFS_ADDRESS,
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   ENV_FLAG,
@@ -121,9 +121,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       flags.tracing,
       uploadArg,
       fluenceConfig[IPFS_ADDR_PROPERTY] ??
-        (fluenceEnv === "local"
-          ? FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR
-          : DEFAULT_IPFS_ADDRESS),
+        (fluenceEnv === "local" ? LOCAL_IPFS_ADDRESS : DEFAULT_IPFS_ADDRESS),
     );
 
     const createdDeals: Record<

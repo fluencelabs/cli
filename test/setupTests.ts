@@ -31,7 +31,7 @@ import {
   TMP_DIR_NAME,
 } from "../src/lib/const.js";
 import "../src/lib/setupEnvironment.js";
-import { multiaddrsToNodes } from "../src/lib/multiaddres.js";
+import { addrsToNodes } from "../src/lib/multiaddres.js";
 
 import { fluenceEnv, fluence, initFirstTime } from "./helpers.js";
 
@@ -83,7 +83,7 @@ await Promise.all(
 
 const local =
   fluenceEnv === "local"
-    ? multiaddrsToNodes(
+    ? addrsToNodes(
         (
           await fluence({
             args: ["default", "peers", "local"],

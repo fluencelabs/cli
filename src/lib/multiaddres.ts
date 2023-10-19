@@ -23,7 +23,7 @@ import {
   krasnodar,
   stage,
   testNet,
-  type Node,
+  type Node as AddrAndPeerId,
 } from "@fluencelabs/fluence-network-environment";
 // TODO: replace with dynamic import
 import { multiaddr } from "@multiformats/multiaddr";
@@ -108,7 +108,7 @@ export async function resolveFluenceEnv(
   return fluenceEnvFromPrompt;
 }
 
-export function multiaddrsToNodes(multiaddrs: string[]): Node[] {
+export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   return multiaddrs.map((multiaddr) => {
     return {
       peerId: getPeerId(multiaddr),
@@ -123,9 +123,9 @@ export async function getPeerIdFromSecretKey(secretKey: string) {
   return keyPair.getPeerId();
 }
 
-async function ensureLocalNodes(numberOfNoxes?: number | undefined) {
+async function ensureLocalAddrsAndPeerIds(numberOfNoxes?: number | undefined) {
   return (await getResolvedProviderConfig({ numberOfNoxes })).map(
-    ({ peerId, port }): Node => {
+    ({ peerId, port }): AddrAndPeerId => {
       return {
         multiaddr: `/ip4/127.0.0.1/tcp/${port}/ws/p2p/${peerId}`,
         peerId,
@@ -134,13 +134,15 @@ async function ensureLocalNodes(numberOfNoxes?: number | undefined) {
   );
 }
 
-const ADDR_MAP: Record<PublicFluenceEnv, Array<Node>> = {
+const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
   kras: krasnodar,
   stage,
   testnet: testNet,
 };
 
-export async function ensureCustomNodes(fluenceConfig: FluenceConfig | null) {
+export async function ensureCustomAddrsAndPeerIds(
+  fluenceConfig: FluenceConfig | null,
+) {
   if (fluenceConfig === null) {
     commandObj.error(
       `You must init fluence project if you want to use ${color.yellow(
@@ -181,7 +183,7 @@ export async function ensureCustomNodes(fluenceConfig: FluenceConfig | null) {
   };
 
   await fluenceConfig.$commit();
-  return multiaddrsToNodes(fluenceEnvOrCustomRelays);
+  return addrsToNodes(fluenceEnvOrCustomRelays);
 }
 
 type ResolveNodesArgs = {
@@ -190,17 +192,17 @@ type ResolveNodesArgs = {
   numberOfNoxes?: number | undefined;
 };
 
-export async function resolveNodes({
+export async function resolveAddrsAndPeerIds({
   fluenceEnv,
   maybeFluenceConfig,
   numberOfNoxes,
-}: ResolveNodesArgs): Promise<Node[]> {
+}: ResolveNodesArgs): Promise<AddrAndPeerId[]> {
   if (fluenceEnv === "custom") {
-    return ensureCustomNodes(maybeFluenceConfig);
+    return ensureCustomAddrsAndPeerIds(maybeFluenceConfig);
   }
 
   if (fluenceEnv === "local") {
-    return ensureLocalNodes(numberOfNoxes);
+    return ensureLocalAddrsAndPeerIds(numberOfNoxes);
   }
 
   return ADDR_MAP[fluenceEnv];
@@ -209,19 +211,19 @@ export async function resolveNodes({
 export async function resolveRelays(
   args: ResolveNodesArgs,
 ): Promise<Array<string>> {
-  return (await resolveNodes(args)).map((node) => {
+  return (await resolveAddrsAndPeerIds(args)).map((node) => {
     return node.multiaddr;
   });
 }
 
 /**
  * @param maybeRelayName - name of the relay in format `networkName-index`
- * @returns undefined if name is not in format `networkName-index` or Node if it is
+ * @returns undefined if name is not in format `networkName-index` or AddrAndPeerId if it is
  */
-async function getMaybeNamedNode(
+async function getMaybeNamedAddrAndPeerId(
   maybeRelayName: string | undefined,
   maybeFluenceConfig: FluenceConfig | null,
-): Promise<Node | undefined> {
+): Promise<AddrAndPeerId | undefined> {
   if (maybeRelayName === undefined) {
     return undefined;
   }
@@ -235,7 +237,11 @@ async function getMaybeNamedNode(
     return undefined;
   }
 
-  const relays = await resolveNodes({ fluenceEnv, maybeFluenceConfig });
+  const relays = await resolveAddrsAndPeerIds({
+    fluenceEnv,
+    maybeFluenceConfig,
+  });
+
   const [, indexString] = maybeRelayName.split("-");
   const parseResult = parseNamedPeer(indexString, fluenceEnv, relays.length);
 
@@ -288,7 +294,8 @@ export async function resolveRelay({
   ...args
 }: { maybeRelay: string | undefined } & ResolveNodesArgs) {
   return (
-    (await getMaybeNamedNode(maybeRelay, args.maybeFluenceConfig))?.multiaddr ??
+    (await getMaybeNamedAddrAndPeerId(maybeRelay, args.maybeFluenceConfig))
+      ?.multiaddr ??
     maybeRelay ??
     (await getRandomRelayAddr(args))
   );
@@ -299,8 +306,8 @@ export async function resolvePeerId(
   maybeFluenceConfig: FluenceConfig | null,
 ) {
   return (
-    (await getMaybeNamedNode(peerIdOrNamedNode, maybeFluenceConfig))?.peerId ??
-    peerIdOrNamedNode
+    (await getMaybeNamedAddrAndPeerId(peerIdOrNamedNode, maybeFluenceConfig))
+      ?.peerId ?? peerIdOrNamedNode
   );
 }
 
@@ -346,7 +353,7 @@ export async function updateRelaysJSON({
     );
   }
 
-  const relays = await resolveNodes({
+  const relays = await resolveAddrsAndPeerIds({
     fluenceEnv: envConfig.fluenceEnv,
     maybeFluenceConfig: fluenceConfig,
     numberOfNoxes,

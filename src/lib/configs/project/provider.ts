@@ -148,6 +148,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     missingComputePeerNames: Array<string>;
   }> = [];
 
+  // Checking that all computePeers referenced in offers are defined
   for (const [offerName, { computePeers }] of Object.entries(config.offers)) {
     const missingComputePeerNames = computePeers.filter((cp) => {
       return !(cp in config.computePeers);
