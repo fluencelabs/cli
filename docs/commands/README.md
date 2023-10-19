@@ -231,7 +231,7 @@ ARGUMENTS
                 'deals' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                  Peer secret key name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --[no-]auto-match                                Disable automatic matching
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
@@ -274,7 +274,7 @@ ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
 
 FLAGS
-  -k, --sk=<name>                                  Peer secret key name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -528,7 +528,7 @@ FLAGS
   -t, --template=<value>                           Template to use for the project. One of: quickstart, minimal, ts, js
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
-  --noxes=<value>                                  Number of noxes to generate in your configs
+  --noxes=<value>                                  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Initialize fluence project
@@ -642,7 +642,7 @@ USAGE
 
 FLAGS
   --no-input       Don't interactively ask for any input from the user
-  --noxes=<value>  Number of noxes to generate in your configs
+  --noxes=<value>  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -860,7 +860,7 @@ FLAGS
   -b, --print-beautified-air                       Prints beautified AIR code before function execution
   -f, --func=<function-call>                       Function call. Example: funcName("stringArg")
   -i, --input=<path>                               Path to an aqua file or to a directory that contains aqua files
-  -k, --sk=<name>                                  Peer secret key name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --const=<NAME="value">...                        Constant that will be used in the aqua code that you run (example of
                                                    aqua code: SOME_CONST ?= "default_value"). Constant name must be
                                                    upper cased.
@@ -1071,7 +1071,7 @@ ARGUMENTS
                 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                  Peer secret key name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1114,7 +1114,7 @@ ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
 
 FLAGS
-  -k, --sk=<name>                                  Peer secret key name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1154,7 +1154,7 @@ ARGUMENTS
                 'hosts' property in workers.yaml are removed)
 
 FLAGS
-  -k, --sk=<name>                                  Peer secret key name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1191,7 +1191,7 @@ ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                  Peer secret key name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
