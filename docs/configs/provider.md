@@ -22,10 +22,11 @@ Defines config used for provider set up
 
 #### Properties
 
-| Property | Type   | Required | Description                                                                                             |
-|----------|--------|----------|---------------------------------------------------------------------------------------------------------|
-| `port`   | string | No       | Both host and container port to use. Default: for each nox a unique port is assigned starting from 9991 |
-| `worker` | number | No       |                                                                                                         |
+| Property        | Type   | Required | Description                                                                                                       |
+|-----------------|--------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `tcpPort`       | number | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `webSocketPort` | number | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| `worker`        | number | No       |                                                                                                                   |
 
 ## offers
 
