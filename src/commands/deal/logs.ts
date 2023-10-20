@@ -157,7 +157,7 @@ const getDealIdWorkerNameMap = async (
       return workersToGetLogsFor.includes(name);
     })
     .reduce<Record<string, string>>((acc, [name, config]) => {
-      acc[config.dealId] = name;
+      acc[config.dealIdOriginal] = name;
       return acc;
     }, {});
 };
