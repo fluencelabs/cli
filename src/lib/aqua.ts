@@ -52,10 +52,8 @@ const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
 
 const writeFileAndMakeSureDirExists = async (
   filePath: string,
-  dataPromise: string | Promise<string | undefined>,
+  data: string | undefined,
 ) => {
-  const data = await dataPromise;
-
   if (data === undefined) {
     return;
   }
@@ -146,44 +144,33 @@ export const compileToFiles = async ({
 
   await Promise.all(
     compilationResultsWithFilePaths.flatMap(
-      ({ compilationResult, aquaFilePath }) => {
+      async ({ compilationResult, aquaFilePath }) => {
         const parsedPath = parse(aquaFilePath);
         const fileNameWithoutExt = parsedPath.name;
         const dirPath = parsedPath.dir;
         const finalOutputDirPath = dirPath.replace(inputDirPath, outputPath);
 
-        const sourcesPromise = (async () => {
-          return (await aquaToJs(compilationResult, "ts"))?.sources;
-        })();
-
         if (targetType === "ts") {
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${TS_EXT}`),
-              sourcesPromise,
+              (await aquaToJs(compilationResult, "ts"))?.sources,
             ),
           ];
         }
 
         if (targetType === "js") {
-          const aquaToJsPromise = aquaToJs(compilationResult, "js");
-
-          const sourcesPromise = (async () => {
-            return (await aquaToJsPromise)?.sources;
-          })();
-
-          const typesPromise = (async () => {
-            return (await aquaToJsPromise)?.types;
-          })();
+          const { sources, types } =
+            (await aquaToJs(compilationResult, "js")) ?? {};
 
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${JS_EXT}`),
-              sourcesPromise,
+              sources,
             ),
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.d.${TS_EXT}`),
-              typesPromise,
+              types,
             ),
           ];
         }
