@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.1...fluence-cli-v0.11.2) (2023-10-20)
+
+
+### Features
+
+* add provider config [fixes DXJ-470] ([#470](https://github.com/fluencelabs/cli/issues/470)) ([a4706c5](https://github.com/fluencelabs/cli/commit/a4706c59c4263e6528fe8f45fc4b07c293ce540a))
+* use aqua-to-js lib [fixes DXJ-489] ([#517](https://github.com/fluencelabs/cli/issues/517)) ([4b41025](https://github.com/fluencelabs/cli/commit/4b41025d18b417807f6d809873db55c8067f3fa6))
+
+
+### Bug Fixes
+
+* Disable node warnings when running as standalone ([#536](https://github.com/fluencelabs/cli/issues/536)) ([5834e35](https://github.com/fluencelabs/cli/commit/5834e3572562548efabcb289dc3e74adb2009b46))
+* js-client error ([#559](https://github.com/fluencelabs/cli/issues/559)) ([214ad91](https://github.com/fluencelabs/cli/commit/214ad91d2bd46c4d87d7f2a1e3fd61d79a1f4a7a))
+* mutable configs initing more then once ([#545](https://github.com/fluencelabs/cli/issues/545)) ([d5e3a65](https://github.com/fluencelabs/cli/commit/d5e3a658d897b216cbab4678da5027f7fa808fa4))
+
 ## [0.11.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.0...fluence-cli-v0.11.1) (2023-10-12)
 
 
