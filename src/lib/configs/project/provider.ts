@@ -64,6 +64,7 @@ const offerSchema: JSONSchemaType<Offer> = {
     minPricePerWorkerEpoch: { type: "number" },
     maxCollateralPerWorker: { type: "number" },
     computePeers: {
+      description: "Number of Compute Units for this Compute Peer",
       type: "array",
       items: { type: "string" },
       uniqueItems: true,
