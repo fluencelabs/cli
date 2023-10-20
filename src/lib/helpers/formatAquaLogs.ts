@@ -37,8 +37,26 @@ export function formatAquaLogs({
   worker_id,
   worker_name,
 }: FormatAquaLogsType): string {
+  const formattedWorkerName =
+    worker_name === "" ? "" : `${color.yellow(worker_name)} `;
+
+  const formattedHeader = Object.entries({
+    host_id,
+    worker_id,
+    spell_id,
+  })
+    .map(([key, value]) => {
+      return `${key}: ${value}`;
+    })
+    .join(", ");
+
+  const header = `${formattedWorkerName}(${formattedHeader}):`;
+
   if (typeof error === "string") {
-    return `${LOGS_GET_ERROR_START}${error}`;
+    const trimmedError = error.trim();
+    return `${header} ${LOGS_GET_ERROR_START}${
+      trimmedError === "" ? "Unknown error" : trimmedError
+    }`;
   }
 
   const formattedLogs = logs
@@ -52,18 +70,7 @@ export function formatAquaLogs({
     })
     .join("\n");
 
-  const formattedHeader = Object.entries({
-    host_id,
-    worker_id,
-    spell_id,
-  })
-    .map(([key, value]) => {
-      return `${key}: ${value}`;
-    })
-    .join(", ");
-
-  const formattedWorkerName = color.yellow(worker_name);
-  return `${formattedWorkerName} (${formattedHeader}):\n\n${formattedLogs}`;
+  return `${header}\n\n${formattedLogs}`;
 }
 
 function formatAquaLogsMessage(message: string) {

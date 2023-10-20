@@ -86,14 +86,21 @@ export default class Logs extends BaseCommand<typeof Logs> {
     commandObj.log(
       logs
         .flatMap(({ error, logs, deal_id }) => {
+          const workerName =
+            dealIdWorkerNameMap[deal_id] === undefined
+              ? ""
+              : `${color.blue(dealIdWorkerNameMap[deal_id])} `;
+
           if (typeof error === "string") {
-            return [`${LOGS_RESOLVE_SUBNET_ERROR_START}${error}`];
+            return [
+              `${workerName}(${deal_id}): ${LOGS_RESOLVE_SUBNET_ERROR_START}${error}`,
+            ];
           }
 
           return logs.map((l) => {
             return formatAquaLogs({
               ...l,
-              worker_name: dealIdWorkerNameMap[deal_id] ?? "UnknownWorker",
+              worker_name: workerName,
             });
           });
         })
