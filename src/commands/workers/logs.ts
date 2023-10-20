@@ -32,11 +32,8 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
 } from "../../lib/const.js";
-import {
-  formatAquaLogs,
-  stringifyUnknown,
-  commaSepStrToArr,
-} from "../../lib/helpers/utils.js";
+import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
+import { stringifyUnknown, commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,

@@ -31,9 +31,9 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
 } from "../../lib/const.js";
+import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
 import {
   LOGS_RESOLVE_SUBNET_ERROR_START,
-  formatAquaLogs,
   stringifyUnknown,
   commaSepStrToArr,
 } from "../../lib/helpers/utils.js";
