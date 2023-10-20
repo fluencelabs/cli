@@ -297,15 +297,7 @@ export async function resolveRelay({
     await getMaybeNamedAddrAndPeerId(maybeRelay, args.maybeFluenceConfig)
   )?.multiaddr;
 
-  if (namedAddr !== undefined) {
-    return namedAddr;
-  }
-
-  if (maybeRelay !== undefined) {
-    return maybeRelay;
-  }
-
-  return getRandomRelayAddr(args);
+  return namedAddr ?? maybeRelay ?? getRandomRelayAddr(args);
 }
 
 export async function resolvePeerId(
@@ -344,10 +336,8 @@ export async function updateRelaysJSON({
   numberOfNoxes,
 }: UpdateRelaysJSONArgs) {
   if (
-    !(
-      typeof fluenceConfig?.relaysPath === "string" &&
-      envConfig?.fluenceEnv !== undefined
-    )
+    typeof fluenceConfig?.relaysPath !== "string" ||
+    envConfig?.fluenceEnv === undefined
   ) {
     return;
   }

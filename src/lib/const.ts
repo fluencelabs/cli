@@ -43,9 +43,12 @@ export const numberProperties = [
 
 export type NumberProperty = (typeof numberProperties)[number];
 
+const ETH = 10 ** 18;
+const MILLI_ETH = 10 ** 15;
+
 export const defaultNumberProperties: Record<NumberProperty, number> = {
-  maxCollateralPerWorker: 1 * 10 ** 18,
-  minPricePerWorkerEpoch: 83 * 10 ** 15,
+  maxCollateralPerWorker: ETH,
+  minPricePerWorkerEpoch: 83 * MILLI_ETH,
 };
 
 export const U32_MAX = 4_294_967_295;
