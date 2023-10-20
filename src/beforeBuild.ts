@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { compileFromPath } from "@fluencelabs/aqua-api";
+import aquaToJs from "@fluencelabs/aqua-to-js";
 
 import { AQUA_EXT, FS_OPTIONS } from "./lib/const.js";
 
@@ -52,13 +52,14 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
 const compileInstallationSpellAqua = async (tracing = false) => {
   return Promise.all(
     ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
+      const filePath = join(
+        INSTALLATION_SPELL_AQUA_DIR_PATH,
+        `${fileName}.${AQUA_EXT}`,
+      );
+
       const compilationResult = await compileFromPath({
-        filePath: join(
-          INSTALLATION_SPELL_AQUA_DIR_PATH,
-          `${fileName}.${AQUA_EXT}`,
-        ),
+        filePath,
         imports: ["node_modules"],
-        targetType: "ts",
         tracing,
       });
 
@@ -66,8 +67,13 @@ const compileInstallationSpellAqua = async (tracing = false) => {
         throw new Error(compilationResult.errors.join("\n\n"));
       }
 
-      const tsSource = compilationResult.generatedSources[0]?.tsSource;
-      assert(typeof tsSource === "string");
+      const { sources } = (await aquaToJs(compilationResult, "ts")) ?? {};
+
+      if (sources === undefined) {
+        throw new Error(
+          `File ${filePath} no longer exposes anything. Please expose something from it or remove it from compilation`,
+        );
+      }
 
       await writeFile(
         join(
@@ -76,7 +82,7 @@ const compileInstallationSpellAqua = async (tracing = false) => {
             : COMPILED_INSTALLATION_SPELL_AQUA_PATH,
           `${fileName}.ts`,
         ),
-        tsSource,
+        sources,
         FS_OPTIONS,
       );
     }),
