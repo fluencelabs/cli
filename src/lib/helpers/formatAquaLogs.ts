@@ -25,9 +25,28 @@ import { LOGS_GET_ERROR_START, jsonStringify } from "./utils.js";
 
 type FormatAquaLogsType =
   | Awaited<ReturnType<typeof get_logs>>[number]
-  | ({ worker_name: string } & Awaited<
+  | ({ worker_name: string | undefined } & Awaited<
       ReturnType<typeof get_logs_deal>
     >[number]["logs"][number]);
+
+export function formatAquaLogsHeader({
+  worker_name,
+  ...rest
+}: { worker_name: string | undefined } & Record<
+  string,
+  string | null | undefined
+>) {
+  const formattedWorkerName =
+    worker_name === undefined ? "" : `${color.yellow(worker_name)} `;
+
+  const formattedHeader = Object.entries(rest)
+    .map(([key, value]) => {
+      return `${key}: ${value ?? "unknown"}`;
+    })
+    .join(", ");
+
+  return `${formattedWorkerName}(${formattedHeader}): `;
+}
 
 export function formatAquaLogs({
   logs,
@@ -37,26 +56,20 @@ export function formatAquaLogs({
   worker_id,
   worker_name,
 }: FormatAquaLogsType): string {
-  const formattedWorkerName =
-    worker_name === "" ? "" : `${color.yellow(worker_name)} `;
-
-  const formattedHeader = Object.entries({
+  const header = formatAquaLogsHeader({
+    worker_name,
     host_id,
     worker_id,
     spell_id,
-  })
-    .map(([key, value]) => {
-      return `${key}: ${value}`;
-    })
-    .join(", ");
-
-  const header = `${formattedWorkerName}(${formattedHeader}):`;
+  });
 
   if (typeof error === "string") {
     const trimmedError = error.trim();
-    return `${header} ${LOGS_GET_ERROR_START}${
-      trimmedError === "" ? "Unknown error" : trimmedError
-    }`;
+    return `${header}${color.red(
+      `${LOGS_GET_ERROR_START}${
+        trimmedError === "" ? "Unknown error when getting logs" : trimmedError
+      }`,
+    )}`;
   }
 
   const formattedLogs = logs

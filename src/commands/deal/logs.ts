@@ -31,7 +31,10 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
 } from "../../lib/const.js";
-import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
+import {
+  formatAquaLogsHeader,
+  formatAquaLogs,
+} from "../../lib/helpers/formatAquaLogs.js";
 import {
   LOGS_RESOLVE_SUBNET_ERROR_START,
   stringifyUnknown,
@@ -86,22 +89,29 @@ export default class Logs extends BaseCommand<typeof Logs> {
     commandObj.log(
       logs
         .flatMap(({ error, logs, deal_id }) => {
-          const workerName =
-            dealIdWorkerNameMap[deal_id] === undefined
-              ? ""
-              : `${color.blue(dealIdWorkerNameMap[deal_id])} `;
+          const worker_name = dealIdWorkerNameMap[deal_id];
 
           if (typeof error === "string") {
+            const header = formatAquaLogsHeader({
+              worker_name,
+              deal_id,
+            });
+
+            const trimmedError = error.trim();
+
             return [
-              `${workerName}(${deal_id}): ${LOGS_RESOLVE_SUBNET_ERROR_START}${error}`,
+              `${header}${color.red(
+                `${LOGS_RESOLVE_SUBNET_ERROR_START}${
+                  trimmedError === ""
+                    ? "Unknown error when resolving subnet"
+                    : trimmedError
+                }`,
+              )}`,
             ];
           }
 
           return logs.map((l) => {
-            return formatAquaLogs({
-              ...l,
-              worker_name: workerName,
-            });
+            return formatAquaLogs({ ...l, worker_name });
           });
         })
         .join("\n\n"),
