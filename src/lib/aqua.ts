@@ -52,8 +52,10 @@ const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
 
 const writeFileAndMakeSureDirExists = async (
   filePath: string,
-  data: string | undefined,
+  dataPromise: string | Promise<string | undefined>,
 ) => {
+  const data = await dataPromise;
+
   if (data === undefined) {
     return;
   }
@@ -144,7 +146,7 @@ export const compileToFiles = async ({
 
   await Promise.all(
     compilationResultsWithFilePaths.flatMap(
-      async ({ compilationResult, aquaFilePath }) => {
+      ({ compilationResult, aquaFilePath }) => {
         const parsedPath = parse(aquaFilePath);
         const fileNameWithoutExt = parsedPath.name;
         const dirPath = parsedPath.dir;
@@ -154,23 +156,28 @@ export const compileToFiles = async ({
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${TS_EXT}`),
-              (await aquaToJs(compilationResult, "ts"))?.sources,
+              aquaToJs(compilationResult, "ts").then((r) => {
+                return r?.sources;
+              }),
             ),
           ];
         }
 
         if (targetType === "js") {
-          const { sources, types } =
-            (await aquaToJs(compilationResult, "js")) ?? {};
+          const aquaToJsPromise = aquaToJs(compilationResult, "js");
 
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${JS_EXT}`),
-              sources,
+              aquaToJsPromise.then((r) => {
+                return r?.sources;
+              }),
             ),
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.d.${TS_EXT}`),
-              types,
+              aquaToJsPromise.then((r) => {
+                return r?.types;
+              }),
             ),
           ];
         }
