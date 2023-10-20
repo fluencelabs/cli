@@ -56,9 +56,7 @@ export const dealCreate = async ({
   const signer = await getSigner(chainNetwork, privKey);
 
   const { DealClient } = await import("@fluencelabs/deal-aurora");
-  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   const dealClient = new DealClient(signer, chainNetwork);
   const globalContracts = dealClient.getGlobalContracts();
 
@@ -78,9 +76,7 @@ export const dealCreate = async ({
     [], //TODO: get effectors from the project
   );
 
-  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   const res = await waitTx(tx);
 
   const eventTopic = factory.interface.getEvent(EVENT_TOPIC_FRAGMENT);
@@ -160,9 +156,7 @@ export const dealUpdate = async ({
 }: DealUpdateArg) => {
   const signer = await getSigner(network, privKey);
   const { DealClient } = await import("@fluencelabs/deal-aurora");
-  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   const dealClient = new DealClient(signer, network);
   const deal = dealClient.getDeal(dealAddress);
 
@@ -177,9 +171,7 @@ export const dealUpdate = async ({
     hash: bytesCid.slice(4),
   });
 
-  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   await waitTx(tx);
 
   return tx;
@@ -198,17 +190,13 @@ export async function match(
     "@fluencelabs/deal-aurora"
   );
 
-  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   const dealClient = new DealClient(signer, network);
   const globalContracts = dealClient.getGlobalContracts();
   const matcher: Matcher = await globalContracts.getMatcher();
   const tx = await matcher.matchWithDeal(dealAddress);
   promptConfirmTx(privKey);
-  // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   const res = await waitTx(tx);
   const workersInterface = WorkersModule__factory.createInterface();
   const event = workersInterface.getEvent(PAT_CREATED_EVENT_TOPIC);

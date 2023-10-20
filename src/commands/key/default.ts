@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
-
-import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { initNewProjectSecretsConfig } from "../../lib/configs/project/projectSecrets.js";
-import { initUserSecretsConfig } from "../../lib/configs/user/userSecrets.js";
-import { ensureFluenceProject } from "../../lib/helpers/ensureFluenceProject.js";
-import { getProjectKeyPair, getUserKeyPair } from "../../lib/keyPairs.js";
+import { setDefaultSecretKey } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { list } from "../../lib/prompt.js";
 
 export default class Default extends BaseCommand<typeof Default> {
   static override description = "Set default key-pair for user or project";
@@ -50,74 +42,10 @@ export default class Default extends BaseCommand<typeof Default> {
       await this.parse(Default),
     );
 
-    if (!flags.user && maybeFluenceConfig === null) {
-      await ensureFluenceProject();
-    }
-
-    const userSecretsConfig = await initUserSecretsConfig();
-    const projectSecretsConfig = await initNewProjectSecretsConfig();
-
-    const secretsConfigPath = (
-      flags.user ? userSecretsConfig : projectSecretsConfig
-    ).$getPath();
-
-    let keyPairName = args.name;
-
-    const validateKeyPairName = async (
-      keyPairName: string | undefined,
-    ): Promise<true | string> => {
-      if (keyPairName === undefined) {
-        return "Key-pair name must be selected";
-      }
-
-      return (
-        (flags.user
-          ? await getUserKeyPair(keyPairName)
-          : await getProjectKeyPair(keyPairName)) !== undefined ||
-        `Key-pair with name ${color.yellow(
-          keyPairName,
-        )} doesn't exists at ${secretsConfigPath}. Please, choose another name.`
-      );
-    };
-
-    const keyPairValidationResult = await validateKeyPairName(keyPairName);
-
-    if (keyPairValidationResult !== true) {
-      this.warn(keyPairValidationResult);
-
-      keyPairName = await list({
-        message: `Select key-pair name to set as default at ${secretsConfigPath}`,
-        oneChoiceMessage: (choice: string): string => {
-          return `Do you want to set ${color.yellow(choice)} as default?`;
-        },
-        onNoChoices: (): never => {
-          return commandObj.error(
-            `There are no key-pairs to set as default at ${secretsConfigPath}`,
-          );
-        },
-        options: (flags.user
-          ? userSecretsConfig
-          : projectSecretsConfig
-        ).keyPairs.map((value): string => {
-          return value.name;
-        }),
-      });
-    }
-
-    assert(typeof keyPairName === "string");
-
-    if (flags.user) {
-      userSecretsConfig.defaultKeyPairName = keyPairName;
-      await userSecretsConfig.$commit();
-    } else {
-      projectSecretsConfig.defaultKeyPairName = keyPairName;
-      await projectSecretsConfig.$commit();
-    }
-
-    commandObj.log(
-      `Key-pair with name ${color.yellow(
-        keyPairName,
-      )} successfully set as default at ${secretsConfigPath}`,
-    );
+    await setDefaultSecretKey({
+      maybeFluenceConfig,
+      isUser: flags.user,
+      name: args.name,
+    });
   }
 }

@@ -20,11 +20,6 @@ declare module "node_modules-path" {
   declare function node_modules(): string;
 }
 
-declare module "get-random-values" {
-  export = getRandomValues;
-  declare function getRandomValues(array: Uint8Array): Uint8Array;
-}
-
 declare module "countly-sdk-nodejs" {
   export const device_id: string | undefined;
   function init(config: unknown): void;

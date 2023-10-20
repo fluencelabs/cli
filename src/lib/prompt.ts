@@ -23,7 +23,7 @@ import type { Answers, DistinctQuestion } from "inquirer";
 
 import { ajv } from "./ajvInstance.js";
 import { commandObj, isInteractive } from "./commandObj.js";
-import { IS_TTY, NO_INPUT_FLAG_NAME } from "./const.js";
+import { NO_INPUT_FLAG_NAME } from "./const.js";
 
 const NAME = "NAME";
 
@@ -58,7 +58,7 @@ const validateArrayOfStringsPrompt = ajv.compile(arrayOfStringsSchema);
 
 type PromptOptions<T, U extends Answers> = DistinctQuestion<U> & {
   validateType: ValidateFunction<{ NAME: T }>;
-  flagName: string | undefined;
+  flagName?: string | undefined;
 };
 
 const prompt = async <T, U extends Answers>({
@@ -78,17 +78,17 @@ const prompt = async <T, U extends Answers>({
           `--${flagName}`,
         )} flag and make sure you use it correctly.`;
 
-  const advice = `${promptMessageWarning}${flagAdvice}`;
-
-  if (!IS_TTY) {
-    return commandObj.error(`Cannot prompt in non-interactive mode.${advice}`);
-  }
-
   if (!isInteractive) {
+    if (question.default !== undefined) {
+      // TODO: fix inquirer types so this part is type-checked
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return question.default;
+    }
+
     return commandObj.error(
       `Can't prompt when in non-interactive mode or when ${color.yellow(
         `--${NO_INPUT_FLAG_NAME}`,
-      )} is set.${advice}`,
+      )} is set.${promptMessageWarning}${flagAdvice}`,
     );
   }
 
@@ -115,6 +115,7 @@ export const confirm = ({
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
+    message: `${question.message}:`,
     type: "confirm",
     validateType: validateBooleanPrompt,
     flagName,
@@ -126,14 +127,23 @@ export type InputArg = DistinctQuestion & {
   flagName?: string | undefined;
 };
 
-export const input = ({ flagName, ...question }: InputArg): Promise<string> => {
+export const input = (question: InputArg): Promise<string> => {
   // inquirer broke it's types so we have to cast it. "input" always returns string
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
+    validate: async (value: string) => {
+      if (typeof question.default !== "string" && value === "") {
+        return "Must not be empty";
+      }
+
+      return question.validate === undefined
+        ? true
+        : await question.validate(value);
+    },
+    message: `${question.message}:`,
     type: "input",
     validateType: validateStringPrompt,
-    flagName,
   }) as Promise<string>;
 };
 
@@ -142,17 +152,22 @@ type PasswordArg = DistinctQuestion & {
   flagName?: string | undefined;
 };
 
-export const password = ({
-  flagName,
-  ...question
-}: PasswordArg): Promise<string> => {
+export const password = (question: PasswordArg): Promise<string> => {
   // inquirer broke it's types so we have to cast it. "password" always returns string
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return prompt({
     ...question,
+    validate: async (value: string) => {
+      if (typeof question.default !== "string" && value === "") {
+        return "Must not be empty";
+      }
+
+      return question.validate === undefined
+        ? true
+        : await question.validate(value);
+    },
     type: "password",
     validateType: validateStringPrompt,
-    flagName,
   }) as Promise<string>;
 };
 
@@ -188,10 +203,14 @@ type ListOptions<T, U> = DistinctQuestion & {
    * Flag name to use if user can't be prompted because he uses cli in non-interactive mode
    */
   flagName?: string | undefined;
+  default?: T;
 };
 
 const handleList = async <T, U>(
-  listOptions: Omit<ListOptions<T, U>, keyof DistinctQuestion>,
+  listOptions: Omit<
+    ListOptions<T, U>,
+    Exclude<keyof DistinctQuestion, "default">
+  >,
 ): Promise<{
   choices: Array<{ value: T; name: string } | SeparatorObj>;
   result?: T;
@@ -200,11 +219,23 @@ const handleList = async <T, U>(
   const { options, oneChoiceMessage, onNoChoices, flagName } = listOptions;
   const inquirer = (await import("inquirer")).default;
 
+  function nameWithDefault(name: string) {
+    if (name === listOptions.default) {
+      return `${name} ${color.gray("(default)")}`;
+    }
+
+    return name;
+  }
+
   const choices = options.map(
     (choice): { name: string; value: T } | SeparatorObj => {
-      return choice instanceof inquirer.Separator || typeof choice !== "string"
-        ? choice
-        : { name: choice, value: choice };
+      if (choice instanceof inquirer.Separator) {
+        return choice;
+      }
+
+      return typeof choice === "string"
+        ? { name: nameWithDefault(choice), value: choice }
+        : { name: nameWithDefault(choice.name), value: choice.value };
     },
   );
 
@@ -260,6 +291,9 @@ export const list = async <T, U>(
     oneChoiceMessage,
     onNoChoices,
     flagName,
+    // TODO: fix inquirer types so this part is type-checked
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    default: question.default,
   });
 
   if (result !== undefined) {
@@ -286,13 +320,13 @@ export const list = async <T, U>(
 
   const choice = choices.find((choice): boolean => {
     return (
-      !(choice instanceof inquirer.Separator) && choice.name === stringChoice
+      !(choice instanceof inquirer.Separator) &&
+      // In non-interactive case default value might be returned
+      (isInteractive ? choice.name : choice.value) === stringChoice
     );
   });
 
-  assert(choice !== undefined);
-  assert(!(choice instanceof inquirer.Separator));
-
+  assert(choice !== undefined && !(choice instanceof inquirer.Separator));
   return choice.value;
 };
 

@@ -36,10 +36,29 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
+export const numberProperties = [
+  "minPricePerWorkerEpoch",
+  "maxCollateralPerWorker",
+] as const;
+
+export type NumberProperty = (typeof numberProperties)[number];
+
+const ETH = 10 ** 18;
+const MILLI_ETH = 10 ** 15;
+
+export const defaultNumberProperties: Record<NumberProperty, number> = {
+  maxCollateralPerWorker: ETH,
+  minPricePerWorkerEpoch: 83 * MILLI_ETH,
+};
+
 export const U32_MAX = 4_294_967_295;
 export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
-export const CONTRACTS_ENV = ["kras", "testnet", "stage", "local"] as const;
+export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
+export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
+export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
+
+export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
 
 export type ChainConfig = {
@@ -56,13 +75,7 @@ export const WC_METADATA = {
   icons: [],
 };
 
-export const FLUENCE_ENVS = [
-  "kras",
-  "stage",
-  "testnet",
-  "local",
-  "custom",
-] as const;
+export const FLUENCE_ENVS = [...CONTRACTS_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
@@ -99,6 +112,14 @@ export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
     }),
   );
 
+export const IPFS_CONTAINER_NAME = "ipfs";
+export const IPFS_PORT = 5001;
+export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
+export const CHAIN_CONTAINER_NAME = "chain";
+export const CHAIN_PORT = 8545;
+export const TCP_PORT_START = 7771;
+export const WEB_SOCKET_PORT_START = 9991;
+
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
 export const JS_EXT = "js";
@@ -124,8 +145,10 @@ export const NPM_DIR_NAME = "npm";
 export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
+export const SECRETS_DIR_NAME = "secrets";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
+export const PROVIDER_CONFIG_FILE_NAME = `provider`;
 export const WORKERS_CONFIG_FILE_NAME = `workers`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets`;
@@ -134,8 +157,10 @@ export const MODULE_CONFIG_FILE_NAME = `module`;
 export const SERVICE_CONFIG_FILE_NAME = `service`;
 export const SPELL_CONFIG_FILE_NAME = `spell`;
 export const ENV_CONFIG_FILE_NAME = `env`;
+export const DOCKER_COMPOSE_FILE_NAME = `docker-compose`;
 
 export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const PROVIDER_CONFIG_FULL_FILE_NAME = `${PROVIDER_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const WORKERS_CONFIG_FULL_FILE_NAME = `${WORKERS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROJECT_SECRETS_FULL_CONFIG_FILE_NAME = `${PROJECT_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FULL_FILE_NAME = `${USER_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
@@ -144,6 +169,7 @@ export const MODULE_CONFIG_FULL_FILE_NAME = `${MODULE_CONFIG_FILE_NAME}.${YAML_E
 export const SERVICE_CONFIG_FULL_FILE_NAME = `${SERVICE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const ENV_CONFIG_FULL_FILE_NAME = `${ENV_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const DOCKER_COMPOSE_FULL_FILE_NAME = `${DOCKER_COMPOSE_FILE_NAME}.${YAML_EXT}`;
 
 export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
@@ -178,11 +204,11 @@ export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
 export const DEFAULT_WORKER_NAME = "defaultWorker";
 
-const KEY_PAIR_FLAG_NAME = "key-pair-name";
+const SK_FLAG_NAME = "sk";
 export const KEY_PAIR_FLAG = {
-  [KEY_PAIR_FLAG_NAME]: Flags.string({
+  [SK_FLAG_NAME]: Flags.string({
     char: "k",
-    description: "Key pair name",
+    description: "Name of a peer's Network Private Key",
     helpValue: "<name>",
   }),
 } as const;
@@ -276,6 +302,12 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const PROVIDER_CONFIG_FLAGS = {
+  noxes: Flags.integer({
+    description: "Number of Compute Peers to generate in your provider config",
+  }),
+};
+
 export const MARINE_BUILD_ARGS_FLAG_NAME = "marine-build-args";
 export const MARINE_BUILD_ARGS_PROPERTY = "marineBuildArgs";
 export const IPFS_ADDR_PROPERTY = "ipfsAddr";
@@ -361,17 +393,17 @@ export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
-/${DOT_FLUENCE_DIR_NAME}/${PROJECT_SECRETS_FULL_CONFIG_FILE_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
 **/node_modules
 **/target/
 .repl_history
 /.vscode/settings.json
 /src/ts/src/aqua
 /src/js/src/aqua`;
-
-export const IS_TTY = process.stdout.isTTY && process.stdin.isTTY;
+export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
@@ -383,8 +415,6 @@ export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
-export const FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY =
-  "@fluencelabs/fluence-network-environment";
 
 export const fluenceNPMDependencies = [
   AQUA_LIB_NPM_DEPENDENCY,

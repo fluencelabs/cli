@@ -30,6 +30,7 @@ import {
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import {
   formatAquaLogs,
@@ -41,6 +42,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
   static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
@@ -64,7 +66,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
       await this.parse(Logs),
     );
 
-    await initFluenceClient(flags, maybeFluenceConfig);
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    await initFluenceClient(flags, maybeFluenceConfig, fluenceEnv);
 
     const dealIdWorkerNameMap = await getDealIdWorkerNameMap(
       args["WORKER-NAMES"],
