@@ -421,8 +421,8 @@ const initTSorJSProject = async ({
       imports: await ensureAquaImports({
         maybeFluenceConfig: fluenceConfig,
       }),
-      targetType: isJS ? "js" : "ts",
     },
+    targetType: isJS ? "js" : "ts",
     outputPath: join(projectRootDir, defaultAquaTSorJSPathRelative),
   });
 };
