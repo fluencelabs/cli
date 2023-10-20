@@ -40,10 +40,10 @@ Defines config used for provider set up
 
 #### Properties
 
-| Property                 | Type     | Required | Description |
-|--------------------------|----------|----------|-------------|
-| `computePeers`           | string[] | **Yes**  |             |
-| `maxCollateralPerWorker` | number   | **Yes**  |             |
-| `minPricePerWorkerEpoch` | number   | **Yes**  |             |
-| `effectors`              | string[] | No       |             |
+| Property                 | Type     | Required | Description                                   |
+|--------------------------|----------|----------|-----------------------------------------------|
+| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
+| `maxCollateralPerWorker` | number   | **Yes**  |                                               |
+| `minPricePerWorkerEpoch` | number   | **Yes**  |                                               |
+| `effectors`              | string[] | No       |                                               |
 
