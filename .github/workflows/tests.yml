@@ -207,7 +207,7 @@ jobs:
       - name: Cleanup
         if: always()
         run:
-          fluence local down
+          yarn fluence local down
           rm -rf tmp ~/.fluence
 
       - name: Dump nox logs
