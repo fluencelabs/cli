@@ -223,7 +223,7 @@ export async function resolveRelays(
 async function getMaybeNamedAddrAndPeerId(
   maybeRelayName: string | undefined,
   maybeFluenceConfig: FluenceConfig | null,
-): Promise<AddrAndPeerId | undefined> {
+): Promise<(AddrAndPeerId & { fluenceEnv: FluenceEnv }) | undefined> {
   if (maybeRelayName === undefined) {
     return undefined;
   }
@@ -251,7 +251,13 @@ async function getMaybeNamedAddrAndPeerId(
     );
   }
 
-  return relays[parseResult];
+  const relay = relays[parseResult];
+
+  if (relay === undefined) {
+    return undefined;
+  }
+
+  return { ...relay, fluenceEnv };
 }
 
 function parseNamedPeer(
@@ -290,14 +296,46 @@ async function getRandomRelayAddr(args: ResolveNodesArgs): Promise<string> {
 }
 
 export async function resolveRelay({
-  maybeRelay,
+  relayFromFlags,
+  fluenceEnvFromFlags,
   ...args
-}: { maybeRelay: string | undefined } & ResolveNodesArgs) {
-  const namedAddr = (
-    await getMaybeNamedAddrAndPeerId(maybeRelay, args.maybeFluenceConfig)
-  )?.multiaddr;
+}: {
+  relayFromFlags: string | undefined;
+  fluenceEnvFromFlags: string | undefined;
+} & Omit<ResolveNodesArgs, "fluenceEnv">) {
+  const namedAddr = await getMaybeNamedAddrAndPeerId(
+    relayFromFlags,
+    args.maybeFluenceConfig,
+  );
 
-  return namedAddr ?? maybeRelay ?? getRandomRelayAddr(args);
+  if (namedAddr !== undefined) {
+    commandObj.logToStderr(
+      `Connecting to ${color.yellow(namedAddr.fluenceEnv)} relay: ${
+        namedAddr.multiaddr
+      }`,
+    );
+
+    return namedAddr.multiaddr;
+  }
+
+  if (relayFromFlags !== undefined) {
+    commandObj.logToStderr(
+      `Connecting to relay: ${color.yellow(relayFromFlags)}`,
+    );
+
+    return relayFromFlags;
+  }
+
+  const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
+  const randomRelay = await getRandomRelayAddr({ ...args, fluenceEnv });
+
+  commandObj.logToStderr(
+    `Connecting to random ${color.yellow(fluenceEnv)} relay: ${color.yellow(
+      randomRelay,
+    )}`,
+  );
+
+  return randomRelay;
 }
 
 export async function resolvePeerId(

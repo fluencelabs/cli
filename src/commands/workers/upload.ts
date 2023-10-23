@@ -29,7 +29,6 @@ import {
   NO_BUILD_FLAG,
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
-  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../../lib/helpers/utils.js";
@@ -39,7 +38,6 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 
 export default class Upload extends BaseCommand<typeof Upload> {
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -67,8 +65,7 @@ export default class Upload extends BaseCommand<typeof Upload> {
       true,
     );
 
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
-    await initFluenceClient(flags, fluenceConfig, fluenceEnv);
+    await initFluenceClient(flags, fluenceConfig);
     await doRegisterIpfsClient(true);
     const { Fluence } = await import("@fluencelabs/js-client");
     const initPeerId = Fluence.getClient().getPeerId();

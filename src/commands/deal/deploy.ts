@@ -101,8 +101,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       "../../lib/deployWorkers.js"
     );
 
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
-
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       workersConfig,
@@ -113,9 +111,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     });
 
     dbg("start connecting to fluence network");
-    await initFluenceClient(flags, fluenceConfig, fluenceEnv);
+    await initFluenceClient(flags, fluenceConfig);
     await doRegisterIpfsClient(true);
     dbg("start running upload");
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
     const uploadResult = await upload(
       flags.tracing,
