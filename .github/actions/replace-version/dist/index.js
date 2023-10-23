@@ -2796,9 +2796,9 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(186);
-/* harmony import */ var assert__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(491);
-/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(147);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(17);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(147);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(17);
+/* harmony import */ var assert__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(491);
 // @ts-check
 
 
@@ -2807,47 +2807,57 @@ var __webpack_exports__ = {};
 
 try {
   const inputVersions = JSON.parse((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("versions"));
-  assert__WEBPACK_IMPORTED_MODULE_1__(typeof inputVersions === "object" && inputVersions !== null);
+  assert__WEBPACK_IMPORTED_MODULE_3__(typeof inputVersions === "object" && inputVersions !== null);
 
-  assert__WEBPACK_IMPORTED_MODULE_1__(
+  assert__WEBPACK_IMPORTED_MODULE_3__(
     typeof process.env.GITHUB_WORKSPACE === "string",
-    "GITHUB_WORKSPACE environment variable is not set"
+    "GITHUB_WORKSPACE environment variable is not set",
   );
 
-  const versionsFilePath = (0,path__WEBPACK_IMPORTED_MODULE_3__.join)(
+  const versionsFilePath = (0,path__WEBPACK_IMPORTED_MODULE_2__.join)(
     process.env.GITHUB_WORKSPACE,
     "src",
-    "versions.json"
+    "versions.json",
   );
 
-  const versionsFileContent = (0,fs__WEBPACK_IMPORTED_MODULE_2__.readFileSync)(versionsFilePath, "utf-8");
+  const versionsFileContent = (0,fs__WEBPACK_IMPORTED_MODULE_1__.readFileSync)(versionsFilePath, "utf-8");
   const versions = JSON.parse(versionsFileContent);
-  assert__WEBPACK_IMPORTED_MODULE_1__(typeof versions === "object" && versions !== null);
+  assert__WEBPACK_IMPORTED_MODULE_3__(typeof versions === "object" && versions !== null);
 
   let cargoDependencyUpdated = false;
 
   // Merge inputVersions into versions
   for (const category in inputVersions) {
     if (
-      !versions.hasOwnProperty(category) ||
-      inputVersions[category] === null
+      !versions.hasOwnProperty(category) || inputVersions[category] === null
     ) {
       continue;
     }
 
-    for (const component in inputVersions[category]) {
-      if (
-        !versions[category].hasOwnProperty(component) ||
-        inputVersions[category][component] === "null"
-      ) {
-        continue;
+    const inputCategoryValue = inputVersions[category];
+    if (
+      typeof inputCategoryValue === "string" ||
+      typeof inputCategoryValue === "number"
+    ) {
+      if (inputCategoryValue !== "null") { // ignore "null" strings
+        versions[category] = inputCategoryValue;
       }
+    } else if (typeof inputCategoryValue === "object") {
+      for (const component in inputCategoryValue) {
+        if (
+          !versions[category].hasOwnProperty(component) ||
+          inputVersions[category][component] === null ||
+          inputVersions[category][component] === "null" // ignore "null" strings
+        ) {
+          continue;
+        }
 
-      versions[category][component] = inputVersions[category][component];
+        versions[category][component] = inputVersions[category][component];
 
-      // Check if a cargo dependency was updated
-      if (category === "cargo") {
-        cargoDependencyUpdated = true;
+        // Check if a cargo dependency was updated
+        if (category === "cargo") {
+          cargoDependencyUpdated = true;
+        }
       }
     }
   }
@@ -2855,7 +2865,7 @@ try {
   const newVersionsJSONString = JSON.stringify(versions, null, 2);
 
   // Save updated versions.json
-  (0,fs__WEBPACK_IMPORTED_MODULE_2__.writeFileSync)(versionsFilePath, newVersionsJSONString);
+  (0,fs__WEBPACK_IMPORTED_MODULE_1__.writeFileSync)(versionsFilePath, newVersionsJSONString);
 
   // Print updated versions.json to stdout
   console.log(`Updated versions.json:\n${newVersionsJSONString}`);

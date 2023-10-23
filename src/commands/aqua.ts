@@ -15,6 +15,7 @@
  */
 
 import { isAbsolute, resolve } from "path";
+import { cwd } from "process";
 
 import { color } from "@oclif/color";
 import { Command, Flags } from "@oclif/core";
@@ -150,9 +151,9 @@ export default class Aqua extends Command {
         logLevel: flags["log-level-compiler"],
         noRelay: flags["no-relay"],
         noXor: flags["no-xor"],
-        targetType,
         tracing: flags.tracing,
       },
+      targetType,
       outputPath: outputFlag,
       dry: flags.dry,
     };
@@ -245,7 +246,12 @@ const resolveAbsoluteAquaPath = async ({
     return resolve(projectRootDir, maybePathFromFluenceYaml);
   }
 
-  const pathFromUserInput = await input(inputArg);
+  // By default input for aqua is set in fluence.yaml
+  // If it's not set (user removed it for some reason from fluence.yaml)
+  // or there is no fluence.yaml at all - then there is a need to provide path to the input for aqua compilation
+  // By default it's suggested to use current working directory as input for aqua compilation
+  // But user can pass a flag to provide a different path or provide the path interactively when prompted
+  const pathFromUserInput = await input({ ...inputArg, default: cwd() });
 
   if (isAbsolute(pathFromUserInput)) {
     return pathFromUserInput;

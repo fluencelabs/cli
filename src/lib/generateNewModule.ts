@@ -15,7 +15,7 @@
  */
 
 import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { basename, join } from "node:path";
 
 import versions from "../versions.json" assert { type: "json" };
 
@@ -30,18 +30,18 @@ export const generateNewModule = async (
   pathToModuleDir: string,
 ): Promise<void> => {
   await mkdir(pathToModuleDir, { recursive: true });
-  const name = path.basename(pathToModuleDir);
-  const newModuleSrcDirPath = path.join(pathToModuleDir, "src");
+  const name = basename(pathToModuleDir);
+  const newModuleSrcDirPath = join(pathToModuleDir, "src");
   await mkdir(newModuleSrcDirPath, { recursive: true });
 
   await writeFile(
-    path.join(newModuleSrcDirPath, "main.rs"),
+    join(newModuleSrcDirPath, "main.rs"),
     MAIN_RS_CONTENT,
     FS_OPTIONS,
   );
 
   await writeFile(
-    path.join(pathToModuleDir, "Cargo.toml"),
+    join(pathToModuleDir, "Cargo.toml"),
     getCargoTomlContent(name),
     FS_OPTIONS,
   );

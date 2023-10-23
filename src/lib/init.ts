@@ -17,8 +17,8 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
+import { cwd } from "node:process";
 
-import type { Node } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
 
 import {
@@ -37,7 +37,6 @@ import {
   SRC_DIR_NAME,
   TS_CONFIG_FILE_NAME,
   JS_CLIENT_NPM_DEPENDENCY,
-  FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY,
   CLI_NAME_FULL,
   getMainAquaFileContent,
   READMEs,
@@ -51,68 +50,36 @@ import {
   ensureSrcServicesDir,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
-  projectRootDir,
   setProjectRootDir,
   getREADMEPath,
+  ensureDefaultJSSrcPath,
+  ensureDefaultTSSrcPath,
+  projectRootDir,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
-import versions from "../versions.json" assert { type: "json" };
 
 import { addService } from "./addService.js";
+import { compileToFiles } from "./aqua.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
 import { initNewEnvConfig } from "./configs/project/env.js";
+import { initNewProviderConfig } from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
-import type { ContractsENV } from "./const.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
+import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { ensureAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
-import {
-  ensureCustomRelays,
-  resolveFluenceEnv,
-  local,
-  multiaddrsToNodes,
-} from "./multiaddres.js";
+import { updateRelaysJSON, resolveFluenceEnv } from "./multiaddres.js";
 import { ensureSrcAquaMainPath } from "./paths.js";
 
-const DISABLE_TS_AND_ES_LINT = `/* eslint-disable */
-// @ts-nocheck`;
-
-const NODES_CONST = "nodes";
-
-const getPeersImportStatement = (peersToImport: string): string => {
-  return `import { ${peersToImport} as ${NODES_CONST} } from "@fluencelabs/fluence-network-environment";`;
-};
-
-const getCustomPeers = (peers: Node[]) => {
-  return `const ${NODES_CONST} = ${jsonStringify(peers)}`;
-};
-
-const getPeersImportInJS = (
-  fluenceEnvOrCustomRelays: ContractsENV | Array<string>,
-) => {
-  if (Array.isArray(fluenceEnvOrCustomRelays)) {
-    return getCustomPeers(multiaddrsToNodes(fluenceEnvOrCustomRelays));
-  }
-
-  return {
-    kras: getPeersImportStatement("krasnodar"),
-    stage: getPeersImportStatement("stage"),
-    testnet: getPeersImportStatement("testNet"),
-    local: getCustomPeers(local),
-  }[fluenceEnvOrCustomRelays];
-};
-
-export const getJsTemplateIndexJsContent = (
-  fluenceEnvOrCustomRelays: ContractsENV | Array<string>,
-) => {
-  return `${DISABLE_TS_AND_ES_LINT}
+export const jsTemplateIndexJsContent = `/* eslint-disable */
+// @ts-nocheck
 import { Fluence } from "@fluencelabs/js-client";
-${getPeersImportInJS(fluenceEnvOrCustomRelays)}
+import relays from "./relays.json" assert { type: "json" };
 
 import {
   helloWorld,
@@ -121,15 +88,17 @@ import {
   getInfos,
 } from "./aqua/main.js";
 
-const peerIds = ${NODES_CONST}.map(({ peerId }) => peerId);
-await Fluence.connect(${NODES_CONST}[0].multiaddr, {});
+await Fluence.connect(relays[0].multiaddr, {});
 const helloWorldResult = await helloWorld("Fluence");
-const helloWorldRemoteResult = await helloWorldRemote("Fluence");
-const getInfoResult = await getInfo();
 console.log(helloWorldResult);
-await Fluence.disconnect()
+const helloWorldRemoteResult = await helloWorldRemote("Fluence");
+console.log(helloWorldRemoteResult);
+const getInfoResult = await getInfo();
+console.log(getInfoResult);
+const getInfosResult = await getInfos(relays.map(({ peerId }) => peerId));
+console.log(getInfosResult);
+await Fluence.disconnect();
 `;
-};
 
 const selectTemplate = (): Promise<Template> => {
   return list({
@@ -170,7 +139,7 @@ type InitArg = {
   maybeProjectPath?: string | undefined;
   template?: Template | undefined;
   fluenceEnvFromFlags?: string | undefined;
-};
+} & ProviderConfigArgs;
 
 export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const projectPath =
@@ -180,7 +149,8 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
           options.maybeProjectPath ??
             (await input({
               message:
-                "Enter project path or press enter to init in the current directory:",
+                "Enter project path or press enter to init in the current directory",
+              default: cwd(),
             })),
         );
 
@@ -200,19 +170,17 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const fluenceConfig = await initNewFluenceConfig();
   const fluenceEnv = await resolveFluenceEnv(options.fluenceEnvFromFlags);
 
-  if (envConfig === undefined) {
+  if (envConfig === null) {
     setEnvConfig(await initNewEnvConfig(fluenceEnv));
   } else {
     envConfig.fluenceEnv = fluenceEnv;
     await envConfig.$commit();
   }
 
-  let fluenceEnvOrCustomRelays: ContractsENV | Array<string>;
-
-  if (fluenceEnv === "custom") {
-    fluenceEnvOrCustomRelays = await ensureCustomRelays(fluenceConfig);
-  } else {
-    fluenceEnvOrCustomRelays = fluenceEnv;
+  if (fluenceEnv === "local") {
+    await initNewProviderConfig({
+      numberOfNoxes: options.numberOfNoxes,
+    });
   }
 
   await writeFile(
@@ -278,22 +246,12 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
       break;
 
     case "js": {
-      await initTSorJSProject({
-        isJS: true,
-        fluenceConfig,
-        fluenceEnvOrCustomRelays,
-      });
-
+      await initTSorJSProject({ isJS: true, fluenceConfig });
       break;
     }
 
     case "ts": {
-      await initTSorJSProject({
-        isJS: false,
-        fluenceConfig,
-        fluenceEnvOrCustomRelays,
-      });
-
+      await initTSorJSProject({ isJS: false, fluenceConfig });
       break;
     }
 
@@ -302,6 +260,11 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
       return _exhaustiveCheck;
     }
   }
+
+  await updateRelaysJSON({
+    fluenceConfig,
+    numberOfNoxes: options.numberOfNoxes,
+  });
 
   commandObj.logToStderr(
     color.magentaBright(
@@ -355,13 +318,11 @@ const shouldInit = async (projectPath: string): Promise<boolean> => {
 };
 
 type InitTSorJSProjectArg = {
-  fluenceEnvOrCustomRelays: ContractsENV | Array<string>;
   isJS: boolean;
   fluenceConfig: FluenceConfig;
 };
 
 const initTSorJSProject = async ({
-  fluenceEnvOrCustomRelays,
   isJS,
   fluenceConfig,
 }: InitTSorJSProjectArg): Promise<void> => {
@@ -396,16 +357,17 @@ const initTSorJSProject = async ({
     author: "",
     license: "ISC",
     dependencies: {
-      [JS_CLIENT_NPM_DEPENDENCY]: versions.npm[JS_CLIENT_NPM_DEPENDENCY],
-      [FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY]:
-        versions.npm[FLUENCE_NETWORK_ENVIRONMENT_NPM_DEPENDENCY],
-      ...(isJS
-        ? {}
-        : {
+      [JS_CLIENT_NPM_DEPENDENCY]:
+        CLIPackageJSON.dependencies[JS_CLIENT_NPM_DEPENDENCY],
+    },
+    ...(isJS
+      ? {}
+      : {
+          devDependencies: {
             "ts-node": CLIPackageJSON.devDependencies["ts-node"],
             typescript: CLIPackageJSON.devDependencies["typescript"],
-          }),
-    },
+          },
+        }),
   } as const;
 
   await writeFile(
@@ -416,8 +378,13 @@ const initTSorJSProject = async ({
 
   await writeFile(
     join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
-    getJsTemplateIndexJsContent(fluenceEnvOrCustomRelays),
+    jsTemplateIndexJsContent,
     FS_OPTIONS,
+  );
+
+  fluenceConfig.relaysPath = relative(
+    projectRootDir,
+    isJS ? await ensureDefaultJSSrcPath() : await ensureDefaultTSSrcPath(),
   );
 
   if (isJS) {
@@ -447,4 +414,15 @@ const initTSorJSProject = async ({
   }
 
   await fluenceConfig.$commit();
+
+  await compileToFiles({
+    compileArgs: {
+      filePath: await ensureSrcAquaMainPath(),
+      imports: await ensureAquaImports({
+        maybeFluenceConfig: fluenceConfig,
+      }),
+    },
+    targetType: isJS ? "js" : "ts",
+    outputPath: join(projectRootDir, defaultAquaTSorJSPathRelative),
+  });
 };

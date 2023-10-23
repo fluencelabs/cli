@@ -28,6 +28,7 @@ import {
   type FluenceConfig,
   type FluenceConfigReadonly,
   assertIsArrayWithHostsOrDeals,
+  type OverrideModules,
 } from "./configs/project/fluence.js";
 import {
   type ConfigV0,
@@ -36,6 +37,7 @@ import {
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
+  type ServiceConfigReadonly,
 } from "./configs/project/service.js";
 import {
   initReadonlySpellConfig,
@@ -72,17 +74,17 @@ import {
 import { checkboxes } from "./prompt.js";
 
 const handlePreviouslyDeployedWorkers = async (
-  maybeDeployedHostsOrDeals:
+  deployedHostsOrDeals:
     | WorkersConfigReadonly["deals"]
     | WorkersConfigReadonly["hosts"]
     | undefined,
   workersToDeploy: Array<string>,
 ) => {
-  if (maybeDeployedHostsOrDeals === undefined) {
+  if (deployedHostsOrDeals === undefined) {
     return workersToDeploy;
   }
 
-  const previouslyDeployedWorkersNames = Object.keys(maybeDeployedHostsOrDeals);
+  const previouslyDeployedWorkersNames = Object.keys(deployedHostsOrDeals);
 
   const previouslyDeployedWorkersNamesToBeDeployed = workersToDeploy.filter(
     (workerName) => {
@@ -122,15 +124,17 @@ const handlePreviouslyDeployedWorkers = async (
   });
 };
 
+type UploadDeploySpellConfig =
+  Upload_deployArgConfig["workers"][number]["config"]["spells"][number];
+
 type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
   aquaImports: Array<string>;
   noBuild: boolean;
   marineBuildArgs: undefined | string;
-  workersConfig?: WorkersConfigReadonly;
   initPeerId?: string;
-  hosts?: boolean;
+  workersConfig?: WorkersConfigReadonly;
 };
 
 export const prepareForDeploy = async ({
@@ -139,11 +143,11 @@ export const prepareForDeploy = async ({
   aquaImports,
   noBuild,
   marineBuildArgs,
+  initPeerId,
   workersConfig: maybeWorkersConfig,
-  initPeerId: maybeInitPeerId,
-  hosts = false,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
-  const hostsOrDealsString = hosts ? "hosts" : "deals";
+  const isDealDeploy = initPeerId === undefined;
+  const hostsOrDealsString = isDealDeploy ? "deals" : "hosts";
 
   const hostsOrDeals = Object.entries(
     fluenceConfig[hostsOrDealsString] ??
@@ -253,7 +257,7 @@ export const prepareForDeploy = async ({
   ];
 
   const spellConfigs = await Promise.all(
-    spellNames.map(async (name) => {
+    spellNames.map(async (name): Promise<UploadDeploySpellConfig> => {
       const maybeSpell = fluenceConfig.spells?.[name];
 
       assert(
@@ -488,126 +492,25 @@ export const prepareForDeploy = async ({
     );
   }
 
-  const workers: Upload_deployArgConfig["workers"] = hostsOrDeals
-    .filter(([workerName]) => {
-      return workersToDeployConfirmed.includes(workerName);
-    })
-    .map(([workerName, hostsOrDeals]) => {
-      const peerIdsOrNamedNodes =
-        "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
-
-      if (hosts && peerIdsOrNamedNodes.length === 0) {
-        commandObj.error(
-          `You must have at least one peerId listed in ${color.yellow(
-            "peerIds",
-          )} property in ${color.yellow(
-            `hosts.${workerName}`,
-          )} property in ${fluenceConfig.$getPath()}`,
-        );
-      }
-
-      const workerConfig = workersFromFluenceConfig[workerName];
-
-      assert(
-        workerConfig !== undefined,
-        `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
+  const workers: Upload_deployArgConfig["workers"] = await Promise.all(
+    hostsOrDeals
+      .filter(([workerName]) => {
+        return workersToDeployConfirmed.includes(workerName);
+      })
+      .map(([workerName, hostsOrDeals]) => {
+        return resolveWorker({
+          workerName,
+          hostsOrDeals,
+          fluenceConfig,
           workersFromFluenceConfig,
-        )}`,
-      );
-
-      const services: Upload_deployArgConfig["workers"][number]["config"]["services"] =
-        (workerConfig.services ?? []).map((serviceName) => {
-          const maybeServiceConfig = serviceConfigs.find((c) => {
-            return c.serviceName === serviceName;
-          });
-
-          assert(
-            maybeServiceConfig !== undefined,
-            `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
-              serviceConfigs,
-            )}`,
-          );
-
-          const { overrideModules, serviceConfig } = maybeServiceConfig;
-
-          const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
-            serviceConfig.modules;
-
-          const modules = [
-            ...Object.entries(restModules),
-            [FACADE_MODULE_NAME, facadeModule] as const,
-          ].map(([name, { get, ...overridesFromService }]) => {
-            const moduleUrlOrAbsolutePath = getUrlOrAbsolutePath(
-              get,
-              serviceConfig.$getDirPath(),
-            );
-
-            const moduleConfig = moduleAbsolutePathOrURLToModuleConfigsMap.get(
-              moduleUrlOrAbsolutePath,
-            );
-
-            assert(
-              moduleConfig !== undefined,
-              `Unreachable. Module should not be undefined because moduleConfigsMap was created from serviceConfigs.modules. Searching for ${moduleUrlOrAbsolutePath} in ${JSON.stringify(
-                Object.fromEntries(
-                  moduleAbsolutePathOrURLToModuleConfigsMap.entries(),
-                ),
-              )}`,
-            );
-
-            const overridesFromProject = overrideModules?.[name];
-
-            const overriddenModuleConfig = {
-              ...moduleConfig,
-              ...overridesFromService,
-              ...overridesFromProject,
-            };
-
-            return {
-              wasm: getModuleWasmPath(overriddenModuleConfig),
-              config: JSON.stringify(
-                moduleToJSONModuleConfig(overriddenModuleConfig),
-              ),
-            };
-          });
-
-          return {
-            name: serviceName,
-            modules,
-          };
+          serviceConfigs,
+          moduleAbsolutePathOrURLToModuleConfigsMap,
+          spellConfigs,
+          maybeWorkersConfig,
+          initPeerId,
         });
-
-      const spells = (workerConfig.spells ?? []).map((spellName) => {
-        const maybeSpellConfig = spellConfigs.find((c) => {
-          return c.name === spellName;
-        });
-
-        assert(
-          maybeSpellConfig !== undefined,
-          `Unreachable. Spell should not be undefined because spellConfigs where created from workerConfig.spells. Looking for ${spellName} in ${JSON.stringify(
-            spellConfigs,
-          )}`,
-        );
-
-        return maybeSpellConfig;
-      });
-
-      return {
-        name: workerName,
-        hosts: peerIdsOrNamedNodes.map((peerIdOrNamedNode) => {
-          return resolvePeerId(peerIdOrNamedNode, fluenceConfig);
-        }),
-        config: {
-          services,
-          spells,
-        },
-        dummy_deal_id:
-          maybeWorkersConfig?.hosts?.[workerName]?.dummyDealId ??
-          `${workerName}_${maybeInitPeerId}_${Math.random()
-            .toString()
-            .slice(2)}`,
-      };
-    });
+      }),
+  );
 
   if (workers.length === 0) {
     commandObj.error(`You must select at least one worker to deploy`);
@@ -755,3 +658,148 @@ export const ensureAquaFileWithWorkerInfo = async (
     FS_OPTIONS,
   );
 };
+
+type ResolveWorkerArgs = {
+  fluenceConfig: FluenceConfig;
+  hostsOrDeals: NonNullable<
+    FluenceConfig["deals"] | FluenceConfig["hosts"]
+  >[string];
+  workerName: string;
+  workersFromFluenceConfig: NonNullable<FluenceConfig["workers"]>;
+  serviceConfigs: {
+    serviceName: string;
+    overrideModules: OverrideModules | undefined;
+    serviceConfig: ServiceConfigReadonly;
+  }[];
+  moduleAbsolutePathOrURLToModuleConfigsMap: Map<
+    string,
+    InitializedReadonlyConfig<ConfigV0>
+  >;
+  spellConfigs: UploadDeploySpellConfig[];
+  maybeWorkersConfig: WorkersConfigReadonly | undefined;
+  initPeerId: string | undefined;
+};
+
+async function resolveWorker({
+  hostsOrDeals,
+  workerName,
+  fluenceConfig,
+  workersFromFluenceConfig,
+  serviceConfigs,
+  moduleAbsolutePathOrURLToModuleConfigsMap,
+  spellConfigs,
+  maybeWorkersConfig,
+  initPeerId,
+}: ResolveWorkerArgs) {
+  let dummyDealId = "deal_deploy_does_not_need_dummy_deal_id";
+  const isDealDeploy = initPeerId === undefined;
+
+  if (!isDealDeploy) {
+    dummyDealId =
+      maybeWorkersConfig?.hosts?.[workerName]?.dummyDealId ??
+      `${workerName}_${initPeerId}_${Math.random().toString().slice(2)}`;
+  }
+
+  const peerIdsOrNamedNodes =
+    "peerIds" in hostsOrDeals ? hostsOrDeals.peerIds : [];
+
+  const workerConfig = workersFromFluenceConfig[workerName];
+
+  assert(
+    workerConfig !== undefined,
+    `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${workerName} in ${JSON.stringify(
+      workersFromFluenceConfig,
+    )}`,
+  );
+
+  const services: Upload_deployArgConfig["workers"][number]["config"]["services"] =
+    (workerConfig.services ?? []).map((serviceName) => {
+      const maybeServiceConfig = serviceConfigs.find((c) => {
+        return c.serviceName === serviceName;
+      });
+
+      assert(
+        maybeServiceConfig !== undefined,
+        `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
+          serviceConfigs,
+        )}`,
+      );
+
+      const { overrideModules, serviceConfig } = maybeServiceConfig;
+
+      const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
+        serviceConfig.modules;
+
+      const modules = [
+        ...Object.entries(restModules),
+        [FACADE_MODULE_NAME, facadeModule] as const,
+      ].map(([name, { get, ...overridesFromService }]) => {
+        const moduleUrlOrAbsolutePath = getUrlOrAbsolutePath(
+          get,
+          serviceConfig.$getDirPath(),
+        );
+
+        const moduleConfig = moduleAbsolutePathOrURLToModuleConfigsMap.get(
+          moduleUrlOrAbsolutePath,
+        );
+
+        assert(
+          moduleConfig !== undefined,
+          `Unreachable. Module should not be undefined because moduleConfigsMap was created from serviceConfigs.modules. Searching for ${moduleUrlOrAbsolutePath} in ${JSON.stringify(
+            Object.fromEntries(
+              moduleAbsolutePathOrURLToModuleConfigsMap.entries(),
+            ),
+          )}`,
+        );
+
+        const overridesFromProject = overrideModules?.[name];
+
+        const overriddenModuleConfig = {
+          ...moduleConfig,
+          ...overridesFromService,
+          ...overridesFromProject,
+        };
+
+        return {
+          wasm: getModuleWasmPath(overriddenModuleConfig),
+          config: JSON.stringify(
+            moduleToJSONModuleConfig(overriddenModuleConfig),
+          ),
+        };
+      });
+
+      return {
+        name: serviceName,
+        modules,
+      };
+    });
+
+  const spells = (workerConfig.spells ?? []).map((spellName) => {
+    const spellConfig = spellConfigs.find((c) => {
+      return c.name === spellName;
+    });
+
+    assert(
+      spellConfig !== undefined,
+      `Unreachable. Spell should not be undefined because spellConfigs where created from workerConfig.spells. Looking for ${spellName} in ${JSON.stringify(
+        spellConfigs,
+      )}`,
+    );
+
+    return spellConfig;
+  });
+
+  return {
+    name: workerName,
+    hosts: await Promise.all(
+      peerIdsOrNamedNodes.map((peerIdOrNamedNode) => {
+        return resolvePeerId(peerIdOrNamedNode, fluenceConfig);
+      }),
+    ),
+    config: {
+      services,
+      spells,
+    },
+    dummy_deal_id: dummyDealId,
+  };
+}

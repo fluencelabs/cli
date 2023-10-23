@@ -31,6 +31,7 @@ import {
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
 import { stringifyUnknown, commaSepStrToArr } from "../../lib/helpers/utils.js";
@@ -39,6 +40,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 import { input } from "../../lib/prompt.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
@@ -76,7 +78,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
       await this.parse(Logs),
     );
 
-    await initFluenceClient(flags, maybeFluenceConfig);
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    await initFluenceClient(flags, maybeFluenceConfig, fluenceEnv);
 
     const logsArg = await getLogsArg({
       maybeWorkerNamesString: args["WORKER-NAMES"],

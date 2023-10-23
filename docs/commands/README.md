@@ -20,10 +20,16 @@
 * [`fluence key default [NAME]`](#fluence-key-default-name)
 * [`fluence key new [NAME]`](#fluence-key-new-name)
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
+* [`fluence local down`](#fluence-local-down)
+* [`fluence local init`](#fluence-local-init)
+* [`fluence local ps`](#fluence-local-ps)
+* [`fluence local restart`](#fluence-local-restart)
+* [`fluence local up`](#fluence-local-up)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-peer`](#fluence-provider-add-peer)
+* [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider register`](#fluence-provider-register)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
@@ -186,7 +192,7 @@ EXAMPLES
   $ fluence autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.9/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v2.3.10/src/commands/autocomplete/index.ts)_
 
 ## `fluence build`
 
@@ -225,11 +231,11 @@ ARGUMENTS
                 'deals' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>                       Key pair name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --[no-]auto-match                                Disable automatic matching
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --import=<path>...                               Path to a directory to import aqua files from. May be used several
                                                    times
   --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
@@ -268,10 +274,10 @@ ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
 
 FLAGS
-  -k, --key-pair-name=<name>                       Key pair name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                                    Print particle ids when running Fluence js-client
@@ -505,7 +511,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.20/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.3/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -513,15 +519,16 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>]
+  $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>] [--noxes <value>]
 
 ARGUMENTS
   PATH  Project path
 
 FLAGS
   -t, --template=<value>                           Template to use for the project. One of: quickstart, minimal, ts, js
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
+  --noxes=<value>                                  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Initialize fluence project
@@ -605,6 +612,107 @@ EXAMPLES
 
 _See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/key/remove.ts)_
 
+## `fluence local down`
+
+Stop currently running docker-compose.yaml using docker compose
+
+```
+USAGE
+  $ fluence local down [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Stop currently running docker-compose.yaml using docker compose
+
+EXAMPLES
+  $ fluence local down
+```
+
+_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/down.ts)_
+
+## `fluence local init`
+
+Init docker-compose.yaml according to provider.yaml
+
+```
+USAGE
+  $ fluence local init [--no-input] [--noxes <value>]
+
+FLAGS
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate in your provider config
+
+DESCRIPTION
+  Init docker-compose.yaml according to provider.yaml
+
+EXAMPLES
+  $ fluence local init
+```
+
+_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/init.ts)_
+
+## `fluence local ps`
+
+List containers using docker compose
+
+```
+USAGE
+  $ fluence local ps [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  List containers using docker compose
+
+EXAMPLES
+  $ fluence local ps
+```
+
+_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/ps.ts)_
+
+## `fluence local restart`
+
+Restart docker-compose.yaml using docker compose
+
+```
+USAGE
+  $ fluence local restart [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Restart docker-compose.yaml using docker compose
+
+EXAMPLES
+  $ fluence local restart
+```
+
+_See code: [src/commands/local/restart.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/restart.ts)_
+
+## `fluence local up`
+
+Run docker-compose.yaml using docker compose
+
+```
+USAGE
+  $ fluence local up [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Run docker-compose.yaml using docker compose
+
+EXAMPLES
+  $ fluence local up
+```
+
+_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/local/up.ts)_
+
 ## `fluence module add [PATH | URL]`
 
 Add module to service.yaml
@@ -686,22 +794,36 @@ Register specific nox instance as a Compute Peer
 
 ```
 USAGE
-  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units <value>]
+  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
-  --peer-id=<peer-id>...                           Peer id of the nox instance that you want to register as a Compute
-                                                   Peer
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
-  --units=<number>                                 Number of available worker units on this Compute Peer
 
 DESCRIPTION
   Register specific nox instance as a Compute Peer
 ```
 
 _See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/provider/add-peer.ts)_
+
+## `fluence provider init`
+
+Init provider config. Creates a config file in the current directory.
+
+```
+USAGE
+  $ fluence provider init [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Init provider config. Creates a config file in the current directory.
+```
+
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.11.1/src/commands/provider/init.ts)_
 
 ## `fluence provider register`
 
@@ -712,7 +834,7 @@ USAGE
   $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
@@ -738,7 +860,7 @@ FLAGS
   -b, --print-beautified-air                       Prints beautified AIR code before function execution
   -f, --func=<function-call>                       Function call. Example: funcName("stringArg")
   -i, --input=<path>                               Path to an aqua file or to a directory that contains aqua files
-  -k, --key-pair-name=<name>                       Key pair name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --const=<NAME="value">...                        Constant that will be used in the aqua code that you run (example of
                                                    aqua code: SOME_CONST ?= "default_value"). Constant name must be
                                                    upper cased.
@@ -748,7 +870,7 @@ FLAGS
                                                    can call a function using these argument names
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --import=<path>...                               Path to a directory to import aqua files from. May be used several
                                                    times
   --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: Must be one of: all,
@@ -903,10 +1025,10 @@ update the fluence CLI
 
 ```
 USAGE
-  $ fluence update [CHANNEL] [-a] [-v <value> | -i] [--force]
+  $ fluence update [CHANNEL] [-a] [--force] [-i | -v <value>]
 
 FLAGS
-  -a, --available        Install a specific version.
+  -a, --available        See available versions.
   -i, --interactive      Interactively select version to install. This is ignored if a channel is provided.
   -v, --version=<value>  Install a specific version.
   --force                Force a re-download of the requested version.
@@ -932,7 +1054,7 @@ EXAMPLES
     $ fluence update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.2.4/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.1.2/src/commands/update.ts)_
 
 ## `fluence workers deploy [WORKER-NAMES]`
 
@@ -949,10 +1071,10 @@ ARGUMENTS
                 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>                       Key pair name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --import=<path>...                               Path to a directory to import aqua files from. May be used several
                                                    times
   --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
@@ -992,10 +1114,10 @@ ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
 
 FLAGS
-  -k, --key-pair-name=<name>                       Key pair name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --host-id=<host-id>                              Host id
   --no-input                                       Don't interactively ask for any input from the user
   --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
@@ -1032,10 +1154,10 @@ ARGUMENTS
                 'hosts' property in workers.yaml are removed)
 
 FLAGS
-  -k, --key-pair-name=<name>                       Key pair name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                                    Print particle ids when running Fluence js-client
@@ -1069,10 +1191,10 @@ ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --key-pair-name=<name>                       Key pair name
+  -k, --sk=<name>                                  Name of a peer's Network Private Key
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
-  --env=<kras | stage | testnet | local | custom>  Fluence Environment to use when running the command
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --import=<path>...                               Path to a directory to import aqua files from. May be used several
                                                    times
   --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.

@@ -28,6 +28,7 @@ import {
 } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
+  LOCAL_IPFS_ADDRESS,
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   ENV_FLAG,
@@ -41,6 +42,7 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -51,6 +53,7 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
@@ -98,6 +101,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       "../../lib/deployWorkers.js"
     );
 
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       workersConfig,
@@ -108,14 +113,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     });
 
     dbg("start connecting to fluence network");
-    await initFluenceClient(flags, fluenceConfig);
+    await initFluenceClient(flags, fluenceConfig, fluenceEnv);
     await doRegisterIpfsClient(true);
     dbg("start running upload");
 
     const uploadResult = await upload(
       flags.tracing,
       uploadArg,
-      fluenceConfig[IPFS_ADDR_PROPERTY] ?? DEFAULT_IPFS_ADDRESS,
+      fluenceConfig[IPFS_ADDR_PROPERTY] ??
+        (fluenceEnv === "local" ? LOCAL_IPFS_ADDRESS : DEFAULT_IPFS_ADDRESS),
     );
 
     const createdDeals: Record<

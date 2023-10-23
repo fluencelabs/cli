@@ -15,33 +15,26 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { ENV_ARG } from "../../lib/const.js";
+import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveFluenceEnv, resolveRelays } from "../../lib/multiaddres.js";
 
-export default class Peers extends BaseCommand<typeof Peers> {
-  static override description = "Print default Fluence network peer addresses";
+export default class PS extends BaseCommand<typeof PS> {
+  static override description = `List containers using docker compose`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
   };
-  static override args = {
-    ...ENV_ARG,
-  };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Peers),
-    );
+    await initCli(this, await this.parse(PS));
+    const dockerComposeConfig = await initNewDockerComposeConfig();
 
-    const fluenceEnv = await resolveFluenceEnv(args.ENV);
-
-    const relays = await resolveRelays({
-      fluenceEnv,
-      maybeFluenceConfig,
+    await dockerCompose({
+      args: ["ps"],
+      printOutput: true,
+      options: {
+        cwd: dockerComposeConfig.$getDirPath(),
+      },
     });
-
-    commandObj.log(relays.join("\n"));
   }
 }

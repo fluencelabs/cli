@@ -19,12 +19,12 @@ import type { UserConfig } from "./user/config.js";
 
 export let userConfig: UserConfig;
 
-export const setUserConfig = (newUserConfig: UserConfig) => {
+export function setUserConfig(newUserConfig: UserConfig) {
   userConfig = newUserConfig;
-};
+}
 
-export let envConfig: EnvConfig | undefined;
+export let envConfig: EnvConfig | null = null;
 
-export const setEnvConfig = (newEnvConfig: EnvConfig) => {
+export function setEnvConfig(newEnvConfig: EnvConfig) {
   envConfig = newEnvConfig;
-};
+}

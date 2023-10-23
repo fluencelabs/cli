@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
+import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
-
-import type { ConfigKeyPair } from "../configs/keyPair.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
   return commaSepStr.split(",").map((s) => {
@@ -24,7 +23,7 @@ export function commaSepStrToArr(commaSepStr: string) {
   });
 }
 
-const comment = (commentToken: string) => {
+function comment(commentToken: string) {
   return (text: string): string => {
     return text
       .split("\n")
@@ -37,19 +36,19 @@ const comment = (commentToken: string) => {
       })
       .join("\n");
   };
-};
+}
 
 export const jsComment = comment("//");
 export const aquaComment = comment("--");
 
-export const jsonStringify = (
+export function jsonStringify(
   unknown: unknown,
   replacer: Parameters<typeof JSON.stringify>[1] = null,
-): string => {
+): string {
   return JSON.stringify(unknown, replacer, 2);
-};
+}
 
-export const stringifyUnknown = (unknown: unknown): string => {
+export function stringifyUnknown(unknown: unknown): string {
   try {
     if (unknown instanceof CLIError) {
       return String(unknown);
@@ -67,12 +66,12 @@ export const stringifyUnknown = (unknown: unknown): string => {
   } catch {
     return String(unknown);
   }
-};
+}
 
-const flagToArg = (
+function flagToArg(
   flagName: string,
   flagValue: string | number | boolean | undefined,
-): string[] => {
+): string[] {
   if (flagValue === undefined || flagValue === false) {
     return [];
   }
@@ -84,7 +83,7 @@ const flagToArg = (
   }
 
   return [flag, String(flagValue)];
-};
+}
 
 export type Flags = Record<
   string,
@@ -103,25 +102,43 @@ export const flagsToArgs = (flags: Flags): string[] => {
     .flat(2);
 };
 
-const genSecretKey = async () => {
-  const getRandomValues = (await import("get-random-values")).default;
-  return getRandomValues(new Uint8Array(32));
-};
+type FormatAquaLogsArg = Array<{
+  message: string;
+  timestamp: number;
+}>;
 
-const uint8ArrayToBase64 = (array: Uint8Array) => {
-  return Buffer.from(array).toString("base64");
-};
+export function formatAquaLogs(aquaLogs: FormatAquaLogsArg): string {
+  return aquaLogs
+    .map(({ message, timestamp }) => {
+      const date = new Date(timestamp * 1000)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
 
-export const generateKeyPair = async (name: string): Promise<ConfigKeyPair> => {
-  return {
-    secretKey: uint8ArrayToBase64(await genSecretKey()),
-    name,
-  };
-};
+      return `${color.blue(date)} ${formatMessage(message)}`;
+    })
+    .join("\n");
+}
 
-export const base64ToUint8Array = (base64: string) => {
-  return new Uint8Array(Buffer.from(base64, "base64"));
-};
+function formatMessage(message: string) {
+  const parsedMessage = JSON.parse(message);
+
+  if (Array.isArray(parsedMessage)) {
+    return parsedMessage
+      .map((messagePart) => {
+        return typeof messagePart === "string"
+          ? messagePart
+          : jsonStringify(messagePart);
+      })
+      .join(" ");
+  }
+
+  if (typeof parsedMessage === "string") {
+    return parsedMessage;
+  }
+
+  return jsonStringify(message);
+}
 
 export function removeProperties<T>(
   obj: Record<string, T>,

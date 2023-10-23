@@ -29,6 +29,7 @@ import { FLUENCE_CONFIG_FULL_FILE_NAME } from "../../lib/const.js";
 import { getServiceAbsolutePath } from "../../lib/helpers/downloadFile.js";
 import { removeProperties } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { projectRootDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
@@ -117,16 +118,13 @@ async function getServiceNameToRemove(
 
   const servicesAbsolutePathsWithNames = await Promise.all(
     Object.entries(fluenceConfig.services).map(async ([name, { get }]) => {
-      return [
-        name,
-        await getServiceAbsolutePath(get, fluenceConfig.$getDirPath()),
-      ] as const;
+      return [name, await getServiceAbsolutePath(get, projectRootDir)] as const;
     }),
   );
 
   const absolutePathRelativeToService = await getServiceAbsolutePath(
     nameOrPathOrUrl,
-    fluenceConfig.$getDirPath(),
+    projectRootDir,
   );
 
   let [moduleNameToRemove] =
