@@ -104,11 +104,9 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
             return [
               `${header}${color.red(
-                `${LOGS_RESOLVE_SUBNET_ERROR_START}${
-                  trimmedError === ""
-                    ? "Unknown error when resolving subnet"
-                    : trimmedError
-                }`,
+                trimmedError === ""
+                  ? `${LOGS_RESOLVE_SUBNET_ERROR_START}Unknown error when resolving subnet`
+                  : trimmedError,
               )}`,
             ];
           }

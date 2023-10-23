@@ -66,9 +66,9 @@ export function formatAquaLogs({
   if (typeof error === "string") {
     const trimmedError = error.trim();
     return `${header}${color.red(
-      `${LOGS_GET_ERROR_START}${
-        trimmedError === "" ? "Unknown error when getting logs" : trimmedError
-      }`,
+      trimmedError === ""
+        ? `${LOGS_GET_ERROR_START}Unknown error when getting logs`
+        : trimmedError,
     )}`;
   }
 
