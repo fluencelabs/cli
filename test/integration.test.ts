@@ -597,6 +597,8 @@ describe("integration tests", () => {
 
       const logs = await fluence({ args: ["deal", "logs"], cwd });
 
+      assert(logs.trim() !== "", "logs are expected to be non-empty");
+
       if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
         throw new Error(
           `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
