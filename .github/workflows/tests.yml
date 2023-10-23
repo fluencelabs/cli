@@ -206,7 +206,7 @@ jobs:
 
       - name: Cleanup
         if: always()
-        run:
+        run: |
           yarn fluence local down
           rm -rf tmp ~/.fluence
 
