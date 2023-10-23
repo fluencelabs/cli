@@ -112,5 +112,5 @@ export function removeProperties<T>(
   );
 }
 
-export const LOGS_RESOLVE_SUBNET_ERROR_START = `Failed to resolve subnet: `;
-export const LOGS_GET_ERROR_START = `Failed to get logs: `;
+export const LOGS_RESOLVE_SUBNET_ERROR_START = `Failed to resolve subnet:`;
+export const LOGS_GET_ERROR_START = `Failed to get logs:`;
