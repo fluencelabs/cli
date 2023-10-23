@@ -43,13 +43,11 @@ import {
   type AquaLogLevel,
   type FromFlagsDef,
   TRACING_FLAG,
-  ENV_FLAG_NAME,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../lib/helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
-import { resolveFluenceEnv } from "../lib/multiaddres.js";
 import {
   projectRootDir,
   recursivelyFindProjectRootDir,
@@ -406,8 +404,7 @@ const fluenceRun = async (args: RunArgs) => {
     commandObj.log(beautify(functionCall.script));
   }
 
-  const fluenceEnv = await resolveFluenceEnv(args[ENV_FLAG_NAME]);
-  await initFluenceClient(args, args.maybeFluenceConfig, fluenceEnv);
+  await initFluenceClient(args, args.maybeFluenceConfig);
   const { Fluence, callAquaFunction } = await import("@fluencelabs/js-client");
 
   const result = await callAquaFunction({

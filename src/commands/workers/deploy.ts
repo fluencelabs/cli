@@ -31,7 +31,6 @@ import {
   NO_BUILD_FLAG,
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
-  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import {
@@ -40,7 +39,6 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -79,8 +77,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       "../../lib/deployWorkers.js"
     );
 
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
-    await initFluenceClient(flags, fluenceConfig, fluenceEnv);
+    await initFluenceClient(flags, fluenceConfig);
     await doRegisterIpfsClient(true);
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = Fluence.getClient().getRelayPeerId();
