@@ -10,7 +10,7 @@
   "cargo": {
     "marine": "0.17.0",
     "mrepl": "0.24.0",
-    "marine-rs-sdk": "0.10.0",
-    "marine-rs-sdk-test": "0.10.2"
+    "marine-rs-sdk": "0.10.1",
+    "marine-rs-sdk-test": "0.11.0"
   }
 }
