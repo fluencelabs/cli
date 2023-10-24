@@ -206,7 +206,7 @@ jobs:
 
       - name: Dump container logs
         if: always()
-        run: yarn fluence local logs
+        uses: jwalton/gh-docker-logs@v2
 
       - name: Cleanup
         if: always()
