@@ -366,7 +366,7 @@ FLAGS
                                 fluence.yaml
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
-                                flag is used. Default: nightly-2023-06-14-x86_64"]}
+                                flag is used. Default: nightly-2023-08-27-x86_64"]}
 
 DESCRIPTION
   (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
@@ -102,44 +101,6 @@ export const flagsToArgs = (flags: Flags): string[] => {
     .flat(2);
 };
 
-type FormatAquaLogsArg = Array<{
-  message: string;
-  timestamp: number;
-}>;
-
-export function formatAquaLogs(aquaLogs: FormatAquaLogsArg): string {
-  return aquaLogs
-    .map(({ message, timestamp }) => {
-      const date = new Date(timestamp * 1000)
-        .toISOString()
-        .slice(0, 19)
-        .replace("T", " ");
-
-      return `${color.blue(date)} ${formatMessage(message)}`;
-    })
-    .join("\n");
-}
-
-function formatMessage(message: string) {
-  const parsedMessage = JSON.parse(message);
-
-  if (Array.isArray(parsedMessage)) {
-    return parsedMessage
-      .map((messagePart) => {
-        return typeof messagePart === "string"
-          ? messagePart
-          : jsonStringify(messagePart);
-      })
-      .join(" ");
-  }
-
-  if (typeof parsedMessage === "string") {
-    return parsedMessage;
-  }
-
-  return jsonStringify(message);
-}
-
 export function removeProperties<T>(
   obj: Record<string, T>,
   isPropertyToRemove: (arg: [key: string, value: unknown]) => boolean,
@@ -150,3 +111,6 @@ export function removeProperties<T>(
     }),
   );
 }
+
+export const LOGS_RESOLVE_SUBNET_ERROR_START = `Failed to resolve subnet:`;
+export const LOGS_GET_ERROR_START = `Failed to get logs:`;

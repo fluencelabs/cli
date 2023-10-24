@@ -32,11 +32,8 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
 } from "../../lib/const.js";
-import {
-  formatAquaLogs,
-  stringifyUnknown,
-  commaSepStrToArr,
-} from "../../lib/helpers/utils.js";
+import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
+import { stringifyUnknown, commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
@@ -102,12 +99,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
     commandObj.logToStderr(
       logs
-        .map(({ host_id, logs, spell_id, worker_name }) => {
-          return `${color.yellow(
-            worker_name,
-          )} (host_id: ${host_id}, spell_id: ${spell_id}):\n\n${formatAquaLogs(
-            logs,
-          )}`;
+        .map((logs) => {
+          return formatAquaLogs(logs);
         })
         .join("\n\n"),
     );

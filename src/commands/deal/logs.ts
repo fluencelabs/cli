@@ -32,7 +32,11 @@ import {
   TRACING_FLAG,
 } from "../../lib/const.js";
 import {
+  formatAquaLogsHeader,
   formatAquaLogs,
+} from "../../lib/helpers/formatAquaLogs.js";
+import {
+  LOGS_RESOLVE_SUBNET_ERROR_START,
   stringifyUnknown,
   commaSepStrToArr,
 } from "../../lib/helpers/utils.js";
@@ -84,12 +88,29 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
     commandObj.log(
       logs
-        .map(({ host_id, logs, spell_id, deal_id }) => {
-          return `${color.yellow(
-            dealIdWorkerNameMap[deal_id] ?? "Unknown worker",
-          )} (host_id: ${host_id}, spell_id: ${spell_id}, deal_id: ${deal_id}):\n\n${formatAquaLogs(
-            logs,
-          )}`;
+        .flatMap(({ error, logs, deal_id }) => {
+          const worker_name = dealIdWorkerNameMap[deal_id];
+
+          if (typeof error === "string") {
+            const header = formatAquaLogsHeader({
+              worker_name,
+              deal_id,
+            });
+
+            const trimmedError = error.trim();
+
+            return [
+              `${header}${color.red(
+                trimmedError === ""
+                  ? `${LOGS_RESOLVE_SUBNET_ERROR_START}Unknown error when resolving subnet`
+                  : trimmedError,
+              )}`,
+            ];
+          }
+
+          return logs.map((l) => {
+            return formatAquaLogs({ ...l, worker_name });
+          });
         })
         .join("\n\n"),
     );
@@ -151,7 +172,7 @@ const getDealIdWorkerNameMap = async (
       return workersToGetLogsFor.includes(name);
     })
     .reduce<Record<string, string>>((acc, [name, config]) => {
-      acc[config.dealId] = name;
+      acc[config.dealIdOriginal] = name;
       return acc;
     }, {});
 };

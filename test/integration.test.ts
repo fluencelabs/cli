@@ -35,7 +35,11 @@ import {
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
-import { jsonStringify } from "../src/lib/helpers/utils.js";
+import {
+  jsonStringify,
+  LOGS_RESOLVE_SUBNET_ERROR_START,
+  LOGS_GET_ERROR_START,
+} from "../src/lib/helpers/utils.js";
 import { hasKey } from "../src/lib/typeHelpers.js";
 
 import {
@@ -332,6 +336,10 @@ describe("integration tests", () => {
         }
       }
 
+      // TODO: check worker logs
+      // const logs = await fluence({ args: ["workers", "logs"], cwd });
+      // assertLogsAreValid(logs);
+
       assert(
         !runDeployedServicesTimeoutReached,
         `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${
@@ -592,6 +600,16 @@ describe("integration tests", () => {
           }),
         `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
       );
+
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+      if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
+        throw new Error(
+          `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
+        );
+      }
+
+      assertLogsAreValid(logs);
     },
   );
 });
@@ -681,3 +699,11 @@ service NewService("${WD_NEW_SERVICE_NAME}"):
 
 ${WD_NEW_SERVICE_2_INTERFACE}
 `;
+
+function assertLogsAreValid(logs: string) {
+  assert(logs.trim() !== "", "logs are expected to be non-empty");
+
+  if (logs.includes(LOGS_GET_ERROR_START)) {
+    throw new Error(`Failed to get deal logs:\n\n${logs}`);
+  }
+}
