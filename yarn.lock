@@ -635,7 +635,7 @@ __metadata:
     "@fluencelabs/aqua-to-js": 0.1.0
     "@fluencelabs/deal-aurora": 0.2.16
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/3d00ee9f8152af70db7c875df6ef2437849372ae/fluencelabs-installation-spell-0.5.25.tgz"
+    "@fluencelabs/installation-spell": 0.5.26
     "@fluencelabs/js-client": 0.3.0
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
@@ -723,14 +723,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/3d00ee9f8152af70db7c875df6ef2437849372ae/fluencelabs-installation-spell-0.5.25.tgz":
-  version: 0.5.25
-  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/3d00ee9f8152af70db7c875df6ef2437849372ae/fluencelabs-installation-spell-0.5.25.tgz"
+"@fluencelabs/installation-spell@npm:0.5.26":
+  version: 0.5.26
+  resolution: "@fluencelabs/installation-spell@npm:0.5.26"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.21
     "@fluencelabs/aqua-lib": 0.7.7
-    "@fluencelabs/spell": 0.5.25
-  checksum: 8d99384a5e3ea20fbda423debe4d0faf39b7647f5963464faefcab682bdafb3cbd720b0cc88ffedeaad13325ac9a77d40dfb7c5cbc1aa5cc2ed94d65ac6343d1
+    "@fluencelabs/spell": 0.5.26
+  checksum: d5ff0c597d87a2666e006a94c32fc17e0747cd1a01f50bea46a84945a331e2982994081ec40a7214bc885c47479cfdb7fa0a7005e2ce0c542d66031fcf68cede
   languageName: node
   linkType: hard
 
@@ -799,10 +799,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.25":
-  version: 0.5.25
-  resolution: "@fluencelabs/spell@npm:0.5.25"
-  checksum: 300582a970628c3b9b47ac923f77a99dcc5a962f67685a848895aa216d3ff5f88964aaec3031d301a91a7612af3c954ce011b089de548198ec983fbf2cd18bd0
+"@fluencelabs/spell@npm:0.5.26":
+  version: 0.5.26
+  resolution: "@fluencelabs/spell@npm:0.5.26"
+  checksum: 20b95c3e3e00ffd831be57ae847f57060ce5de1093cb495ac0343f384edd809205b32327650cfe99061f7aa7670f9ce79dc131f414dd88f2c4b6373f17fd2d65
   languageName: node
   linkType: hard
 
