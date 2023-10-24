@@ -75,7 +75,7 @@
     "debug": "^4.3.4",
     "decompress": "^4.2.1",
     "dotenv": "^16.3.1",
-    "ethers": "6.6.0",
+    "ethers": "6.8.0",
     "filenamify": "^6.0.0",
     "inquirer": "^9.2.11",
     "ipfs-http-client": "^60.0.1",
