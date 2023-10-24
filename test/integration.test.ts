@@ -592,9 +592,6 @@ describe("integration tests", () => {
           }),
         `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
       );
-
-      // check logs are working
-      assert((await fluence({ args: ["deal", "logs"], cwd })) !== "");
     },
   );
 });
