@@ -24,6 +24,7 @@ import { getIsStringUnion } from "./typeHelpers.js";
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
 export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
+export const CI = "CI";
 export const RUN_TESTS_IN_PARALLEL = "RUN_TESTS_IN_PARALLEL";
 
 dotenv.config();
@@ -78,4 +79,5 @@ const isFluenceEnvWithoutCustom = getIsStringUnion(
 setEnvVariable(FLUENCE_ENV, isFluenceEnvWithoutCustom, "local");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
 setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "false");
+setEnvVariable(CI, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);
