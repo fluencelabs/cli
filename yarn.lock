@@ -635,7 +635,7 @@ __metadata:
     "@fluencelabs/aqua-to-js": 0.1.0
     "@fluencelabs/deal-aurora": 0.2.16
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": 0.5.25
+    "@fluencelabs/installation-spell": "https://github.com/fluencelabs/cli/raw/4c97871aa656222dc71c132c936b3b74e4f95086/fluencelabs-installation-spell-0.5.24.tgz"
     "@fluencelabs/js-client": 0.3.0
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
@@ -723,14 +723,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@npm:0.5.25":
-  version: 0.5.25
-  resolution: "@fluencelabs/installation-spell@npm:0.5.25"
+"@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/4c97871aa656222dc71c132c936b3b74e4f95086/fluencelabs-installation-spell-0.5.24.tgz":
+  version: 0.5.24
+  resolution: "@fluencelabs/installation-spell@https://github.com/fluencelabs/cli/raw/4c97871aa656222dc71c132c936b3b74e4f95086/fluencelabs-installation-spell-0.5.24.tgz"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.21
     "@fluencelabs/aqua-lib": 0.7.7
-    "@fluencelabs/spell": 0.5.25
-  checksum: 86ef8f36a09dbfe6770cd61d824162c55b7847f10319842af12812838064d7df396ec2f235432a95bbbf51eba77552680ef24b67608ed8c460795d78db9a6828
+    "@fluencelabs/spell": 0.5.24
+  checksum: 486f2ed8b0b1a85680121ceb370420026bb9b17550b5739c2f3ba6463e132553b78224c40c32f1d861eff3ce1338c793143fd88387e0dbf2833b04df006961eb
   languageName: node
   linkType: hard
 
@@ -799,10 +799,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.25":
-  version: 0.5.25
-  resolution: "@fluencelabs/spell@npm:0.5.25"
-  checksum: 300582a970628c3b9b47ac923f77a99dcc5a962f67685a848895aa216d3ff5f88964aaec3031d301a91a7612af3c954ce011b089de548198ec983fbf2cd18bd0
+"@fluencelabs/spell@npm:0.5.24":
+  version: 0.5.24
+  resolution: "@fluencelabs/spell@npm:0.5.24"
+  checksum: 69235bac3247e33c7cf7c2af66b16c1f20974f4a0602295d016952ea367f8186f7831f4dff116746ba2f6fcd1f918ef81d917debfd01ea55352da12a673600f6
   languageName: node
   linkType: hard
 
