@@ -55,7 +55,10 @@
       "prPriority": 5
     },
     {
-      "matchPackagePatterns": ["@fluencelabs/installation-spell", "@fluencelabs/spell"],
+      "matchPackagePatterns": [
+        "@fluencelabs/installation-spell",
+        "@fluencelabs/spell"
+      ],
       "groupName": "spell"
     }
   ]
