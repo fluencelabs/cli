@@ -5,6 +5,7 @@
   "schedule": "every weekend",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
+  "respectLatest": false,
   "regexManagers": [
     {
       "fileMatch": [
