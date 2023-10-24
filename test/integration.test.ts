@@ -79,9 +79,11 @@ describe("integration tests", () => {
   });
 
   afterAll(async () => {
-    await fluence({
-      args: ["local", "down"],
-    });
+    if (process.env.CI === "false") {
+      await fluence({
+        args: ["local", "down"],
+      });
+    }
   });
 
   maybeConcurrentTest("should work with minimal template", async () => {
