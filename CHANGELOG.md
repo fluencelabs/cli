@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.2...fluence-cli-v0.11.3) (2023-10-24)
+
+
+### Features
+
+* add `local logs` [fixes DXJ-513] ([#574](https://github.com/fluencelabs/cli/issues/574)) ([885fce6](https://github.com/fluencelabs/cli/commit/885fce676f6e83046aa89fe6220b783c31dc1444))
+* up deal logs and better tests for them ([#560](https://github.com/fluencelabs/cli/issues/560)) ([48a6420](https://github.com/fluencelabs/cli/commit/48a6420cf3802aa940bc94ce79c225cc5e4ffdb2))
+
+
+### Bug Fixes
+
+* env must not be required when using `--relay` [fixes DXJ-511] ([#570](https://github.com/fluencelabs/cli/issues/570)) ([b8d6c5b](https://github.com/fluencelabs/cli/commit/b8d6c5b9476962805a7fcf6bcc0cfb171089c584))
+
 ## [0.11.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.1...fluence-cli-v0.11.2) (2023-10-20)
 
 
