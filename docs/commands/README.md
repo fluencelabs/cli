@@ -22,6 +22,7 @@
 * [`fluence key remove [NAME]`](#fluence-key-remove-name)
 * [`fluence local down`](#fluence-local-down)
 * [`fluence local init`](#fluence-local-init)
+* [`fluence local logs`](#fluence-local-logs)
 * [`fluence local ps`](#fluence-local-ps)
 * [`fluence local restart`](#fluence-local-restart)
 * [`fluence local up`](#fluence-local-up)
@@ -652,6 +653,26 @@ EXAMPLES
 ```
 
 _See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.11.2/src/commands/local/init.ts)_
+
+## `fluence local logs`
+
+Stop currently running docker-compose.yaml using docker compose
+
+```
+USAGE
+  $ fluence local logs [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Stop currently running docker-compose.yaml using docker compose
+
+EXAMPLES
+  $ fluence local logs
+```
+
+_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/v0.11.2/src/commands/local/logs.ts)_
 
 ## `fluence local ps`
 
