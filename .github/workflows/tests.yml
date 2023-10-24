@@ -51,6 +51,14 @@ on:
         description: "deal-aurora version"
         type: string
         default: "null"
+      spell-version:
+        description: "@fluencelabs/spell version"
+        type: string
+        default: "null"
+      installation-spell-version:
+        description: "@fluencelabs/installation-spell version"
+        type: string
+        default: "null"
 
 env:
   CI: true
@@ -179,6 +187,14 @@ jobs:
           version: "${{ inputs.deal-aurora-version }}"
           package-manager: yarn
 
+      - name: Set installation-spell version
+        if: inputs.installation-spell-version != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/installation-spell-version"
+          version: "${{ inputs.installation-spell-version }}"
+          package-manager: yarn
+
       - name: Update versions.json
         uses: ./.github/actions/replace-version
         with:
@@ -186,6 +202,9 @@ jobs:
             {
               "nox": "${{ env.NOX_IMAGE }}",
               "chain": "${{ env.CHAIN_IMAGE }}",
+              "npm": {
+                "@fluencelabs/spell": "${{ inputs.spell-version == 'null' && 'null' || inputs.spell-version }}"
+              },
               "cargo": {
                 "marine": "${{ inputs.marine-version }}",
                 "mrepl": "${{ inputs.mrepl-version }}",
