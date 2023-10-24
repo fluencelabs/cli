@@ -122,7 +122,7 @@ jobs:
         if: inputs.installation-spell-version != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
-          package: "@fluencelabs/installation-spell-version"
+          package: "@fluencelabs/installation-spell"
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
           flags: "--save-dev"
