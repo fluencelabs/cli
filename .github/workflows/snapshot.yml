@@ -125,6 +125,7 @@ jobs:
           package: "@fluencelabs/installation-spell-version"
           version: "${{ inputs.installation-spell-version }}"
           package-manager: yarn
+          flags: "--save-dev"
 
       - name: Update versions.json
         uses: ./.github/actions/replace-version
