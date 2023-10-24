@@ -204,12 +204,12 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: yarn test-linux-x64
 
+      - name: Dump container logs
+        if: always()
+        run: yarn fluence local logs
+
       - name: Cleanup
         if: always()
         run: |
           yarn fluence local down
           rm -rf tmp ~/.fluence
-
-      - name: Dump container logs
-        if: always()
-        run: yarn fluence local logs
