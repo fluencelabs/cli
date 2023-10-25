@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.3...fluence-cli-v0.11.4) (2023-10-25)
+
+
+### Features
+
+* update spell template [fixes DXJ-514] ([#587](https://github.com/fluencelabs/cli/issues/587)) ([7560514](https://github.com/fluencelabs/cli/commit/7560514a2dfa852f56eb1771d3538e688d146bb1))
+
+
+### Bug Fixes
+
+* fix update app cid ([#586](https://github.com/fluencelabs/cli/issues/586)) ([90efcdb](https://github.com/fluencelabs/cli/commit/90efcdb54cd99797050ec7ed80bbc3607b32f065))
+
 ## [0.11.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.2...fluence-cli-v0.11.3) (2023-10-24)
 
 
