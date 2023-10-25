@@ -636,7 +636,7 @@ __metadata:
     "@fluencelabs/deal-aurora": 0.2.17
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.26
-    "@fluencelabs/js-client": 0.3.0
+    "@fluencelabs/js-client": 0.4.0
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -741,15 +741,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.3.0":
-  version: 0.3.0
-  resolution: "@fluencelabs/js-client@npm:0.3.0"
+"@fluencelabs/js-client-isomorphic@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@fluencelabs/js-client-isomorphic@npm:1.0.0"
+  dependencies:
+    "@fluencelabs/avm": 0.52.0
+    "@fluencelabs/marine-js": 0.7.2
+    "@fluencelabs/marine-worker": 0.4.1
+    "@fluencelabs/threads": ^2.0.0
+  checksum: 39a72323dcaed7d33b08ff76f0f2c7809f745453df1e834428c73c0d07f79a807c6d750c43162b1fec82c0dd4feeb83b2422c6bb1323216c822733c8f7980f3d
+  languageName: node
+  linkType: hard
+
+"@fluencelabs/js-client@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@fluencelabs/js-client@npm:0.4.0"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
     "@fluencelabs/avm": 0.52.0
     "@fluencelabs/interfaces": 0.8.2
-    "@fluencelabs/marine-worker": 0.4.0
+    "@fluencelabs/js-client-isomorphic": 1.0.0
+    "@fluencelabs/marine-worker": 0.4.1
+    "@fluencelabs/threads": ^2.0.0
     "@libp2p/crypto": 2.0.3
     "@libp2p/interface": 0.1.2
     "@libp2p/peer-id": 3.0.2
@@ -768,12 +782,11 @@ __metadata:
     libp2p: 0.46.6
     multiformats: 11.0.1
     rxjs: 7.5.5
-    threads: "github:fluencelabs/threads.js#b00a5342380b0278d3ae56dcfb170effb3cad7cd"
     ts-pattern: 3.3.3
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: 920676013ccdcc545d467aa8ffcfde1f8dd9a0f1fc0637acd7bf50b3baaa52770fa60d263d8b04d19c450f4c38bc30ecb7ee7a5e89c4dfc618161aa87fcc54b2
+  checksum: 1d084e66f1ae39b91232df10432821508ae43addbcfb495a32ef3f3fd92e0c9f4f6239499ebd78e52bc9937931fa08e357e4af203b609ddc987312713ebc1698
   languageName: node
   linkType: hard
 
@@ -788,14 +801,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/marine-worker@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@fluencelabs/marine-worker@npm:0.4.0"
+"@fluencelabs/marine-worker@npm:0.4.1":
+  version: 0.4.1
+  resolution: "@fluencelabs/marine-worker@npm:0.4.1"
   dependencies:
     "@fluencelabs/marine-js": 0.7.2
+    "@fluencelabs/threads": ^2.0.0
     observable-fns: 0.6.1
-    threads: "github:fluencelabs/threads.js#b00a5342380b0278d3ae56dcfb170effb3cad7cd"
-  checksum: 77385f768486e1d314d781666186b8fc1b2de92cc3759bfc986049e088e7a423203c2d8524190b5a4e9c89da84e8165b594b8ac17a03119d4287b3f694e96437
+  checksum: 81cc8dae87b29ee829cbcec7362f5af12f7561866632e6defbf0983b32ce304167c59e9fe40becc96c69a0e57ac16a3c718b52d2b3df32c7301ede972fa58146
   languageName: node
   linkType: hard
 
@@ -803,6 +816,22 @@ __metadata:
   version: 0.5.26
   resolution: "@fluencelabs/spell@npm:0.5.26"
   checksum: 20b95c3e3e00ffd831be57ae847f57060ce5de1093cb495ac0343f384edd809205b32327650cfe99061f7aa7670f9ce79dc131f414dd88f2c4b6373f17fd2d65
+  languageName: node
+  linkType: hard
+
+"@fluencelabs/threads@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@fluencelabs/threads@npm:2.0.0"
+  dependencies:
+    callsites: ^3.1.0
+    debug: ^4.2.0
+    is-observable: ^2.1.0
+    observable-fns: ^0.6.1
+    tiny-worker: ">= 2"
+  dependenciesMeta:
+    tiny-worker:
+      optional: true
+  checksum: 2d01eae08e92c7bd4f3eb667a1d7b2b0b84fbe7d56b0acb714061a40317c29cfbeba282397dd1e3c2f07916cc8bae5b342233fbb0f841f9c5baf79ed3edd145f
   languageName: node
   linkType: hard
 
@@ -14524,22 +14553,6 @@ __metadata:
   dependencies:
     real-require: ^0.1.0
   checksum: 0547795a8f357ba1ac0dba29c71f965182e29e21752951a04a7167515ee37524bfba6c410f31e65a01a8d3e5b93400b812889aa09523e38ce4d744c894ffa6c0
-  languageName: node
-  linkType: hard
-
-"threads@github:fluencelabs/threads.js#b00a5342380b0278d3ae56dcfb170effb3cad7cd":
-  version: 1.7.0
-  resolution: "threads@https://github.com/fluencelabs/threads.js.git#commit=b00a5342380b0278d3ae56dcfb170effb3cad7cd"
-  dependencies:
-    callsites: ^3.1.0
-    debug: ^4.2.0
-    is-observable: ^2.1.0
-    observable-fns: ^0.6.1
-    tiny-worker: ">= 2"
-  dependenciesMeta:
-    tiny-worker:
-      optional: true
-  checksum: 57123cab9d35cee8562698f054a5bb6ae38677b098bb4b2298e76139d053439f6f097c76c0434f699d73250e9681a0d74f9fe6b241dcbe602dd88216f0c2346d
   languageName: node
   linkType: hard
 
