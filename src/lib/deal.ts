@@ -160,13 +160,13 @@ export const dealUpdate = async ({
   const dealClient = new DealClient(signer, network);
   const deal = dealClient.getDeal(dealAddress);
 
-  const config = await deal.getConfigModule();
+  const core = await deal.getCore();
   const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
 
   promptConfirmTx(privKey);
 
-  const tx = await config.setAppCID({
+  const tx = await core.setAppCID({
     prefixes: bytesCid.slice(0, 4),
     hash: bytesCid.slice(4),
   });
