@@ -282,6 +282,6 @@ async function promptForNamePathOrUrl(
   }
 
   return input({
-    message: "Enter path to a service or url to .tar.gz archive";
+    message: "Enter path to a service or url to .tar.gz archive",
   });
 }
