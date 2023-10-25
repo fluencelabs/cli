@@ -2,7 +2,7 @@
   "name": "@fluencelabs/cli",
   "packageManager": "yarn@3.6.4",
   "type": "module",
-  "version": "0.11.3",
+  "version": "0.11.4",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
@@ -58,7 +58,7 @@
     "@fluencelabs/aqua-to-js": "0.1.0",
     "@fluencelabs/deal-aurora": "0.2.17",
     "@fluencelabs/fluence-network-environment": "1.1.2",
-    "@fluencelabs/js-client": "0.3.0",
+    "@fluencelabs/js-client": "0.4.0",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.25.7",
     "@multiformats/multiaddr": "^12.1.7",
