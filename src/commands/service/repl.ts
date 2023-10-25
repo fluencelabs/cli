@@ -24,7 +24,10 @@ import { Args, Command } from "@oclif/core";
 
 import { resolveSingleServiceModuleConfigsAndBuild } from "../../lib/build.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
-import { initReadonlyFluenceConfig } from "../../lib/configs/project/fluence.js";
+import {
+  initReadonlyFluenceConfig,
+  type FluenceConfig,
+} from "../../lib/configs/project/fluence.js";
 import type { ModuleConfigReadonly } from "../../lib/configs/project/module.js";
 import {
   initReadonlyServiceConfig,
@@ -49,7 +52,7 @@ import {
   ensureFluenceTmpConfigTomlPath,
   projectRootDir,
 } from "../../lib/paths.js";
-import { input } from "../../lib/prompt.js";
+import { input, confirm, list } from "../../lib/prompt.js";
 import { ensureCargoDependency } from "../../lib/rust.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
@@ -81,14 +84,7 @@ export default class REPL extends Command {
 
     const nameOrPathOrUrl =
       args[NAME_OR_PATH_OR_URL] ??
-      (await input({
-        message:
-          maybeFluenceConfig === null
-            ? `Enter path to a service or url to .tar.gz archive`
-            : `Enter service name from ${color.yellow(
-                maybeFluenceConfig.$getPath(),
-              )}, path to a service or url to .tar.gz archive`,
-      }));
+      (await promptForNamePathOrUrl(maybeFluenceConfig));
 
     const serviceConfig = await ensureServiceConfig(nameOrPathOrUrl);
     const marineCli = await initMarineCli(maybeFluenceConfig);
@@ -183,7 +179,6 @@ const ensureServiceConfig = async (
   return readonlyServiceConfig;
 };
 
-/* eslint-disable camelcase */
 type TomlModuleConfig = {
   name: string;
   load_from?: string;
@@ -248,4 +243,48 @@ const ensureModuleConfigsForToml = (
   });
 };
 
-/* eslint-enable camelcase */
+const ENTER_PATH_OR_URL_MESSAGE =
+  "Enter path to a service or url to .tar.gz archive";
+
+async function promptForNamePathOrUrl(
+  maybeFluenceConfig: FluenceConfig | null,
+): Promise<string> {
+  const serviceNames = Object.keys(maybeFluenceConfig?.services ?? {});
+  const [firstService] = serviceNames;
+
+  if (
+    serviceNames.length === 1 &&
+    firstService !== undefined &&
+    (await confirm({
+      message: `Do you want to select ${color.yellow(
+        firstService,
+      )} service from ${color.yellow(maybeFluenceConfig?.$getPath())}`,
+    }))
+  ) {
+    return firstService;
+  }
+
+  if (
+    serviceNames.length > 1 &&
+    (await confirm({
+      message: `Do you want to select a service from ${color.yellow(
+        maybeFluenceConfig?.$getPath(),
+      )}`,
+    }))
+  ) {
+    return list({
+      message: "Select service",
+      options: serviceNames,
+      oneChoiceMessage(s) {
+        return `Do you want to select ${s}`;
+      },
+      onNoChoices() {
+        return ENTER_PATH_OR_URL_MESSAGE;
+      },
+    });
+  }
+
+  return input({
+    message: ENTER_PATH_OR_URL_MESSAGE,
+  });
+}
