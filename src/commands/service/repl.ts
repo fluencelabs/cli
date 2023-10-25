@@ -243,9 +243,6 @@ const ensureModuleConfigsForToml = (
   });
 };
 
-const ENTER_PATH_OR_URL_MESSAGE =
-  "Enter path to a service or url to .tar.gz archive";
-
 async function promptForNamePathOrUrl(
   maybeFluenceConfig: FluenceConfig | null,
 ): Promise<string> {
@@ -275,16 +272,16 @@ async function promptForNamePathOrUrl(
     return list({
       message: "Select service",
       options: serviceNames,
-      oneChoiceMessage(s) {
-        return `Do you want to select ${s}`;
+      oneChoiceMessage() {
+        throw new Error("Unreachable");
       },
       onNoChoices() {
-        return ENTER_PATH_OR_URL_MESSAGE;
+        throw new Error("Unreachable");
       },
     });
   }
 
   return input({
-    message: ENTER_PATH_OR_URL_MESSAGE,
+    message: "Enter path to a service or url to .tar.gz archive";
   });
 }
