@@ -566,7 +566,7 @@ func spell():
     msg = "Spell is working!"
     str <- Debug.stringify(msg)
     Spell "worker-spell"
-    Spell.list_push_string("logs", str)
+    Spell.store_log(str)
 `;
 
 const QUICKSTART_README = `# Fluence Quickstart Template
