@@ -52,7 +52,7 @@ import {
   ensureFluenceTmpConfigTomlPath,
   projectRootDir,
 } from "../../lib/paths.js";
-import { input, confirm, list } from "../../lib/prompt.js";
+import { input, list } from "../../lib/prompt.js";
 import { ensureCargoDependency } from "../../lib/rust.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
@@ -243,45 +243,31 @@ const ensureModuleConfigsForToml = (
   });
 };
 
+const ENTER_PATH_OR_URL_MSG =
+  "Enter path to a service or url to .tar.gz archive";
+
 async function promptForNamePathOrUrl(
   maybeFluenceConfig: FluenceConfig | null,
 ): Promise<string> {
   const serviceNames = Object.keys(maybeFluenceConfig?.services ?? {});
-  const [firstService] = serviceNames;
 
-  if (
-    serviceNames.length === 1 &&
-    firstService !== undefined &&
-    (await confirm({
-      message: `Do you want to select ${color.yellow(
-        firstService,
-      )} service from ${color.yellow(maybeFluenceConfig?.$getPath())}`,
-    }))
-  ) {
-    return firstService;
-  }
+  const selected = await list({
+    message: "Select service",
+    options:
+      serviceNames.length === 0 ? [] : [...serviceNames, ENTER_PATH_OR_URL_MSG],
+    oneChoiceMessage(s) {
+      return `Do you want to select ${color.yellow(s)} service`;
+    },
+    onNoChoices() {
+      return ENTER_PATH_OR_URL_MSG;
+    },
+  });
 
-  if (
-    serviceNames.length > 1 &&
-    (await confirm({
-      message: `Do you want to select a service from ${color.yellow(
-        maybeFluenceConfig?.$getPath(),
-      )}`,
-    }))
-  ) {
-    return list({
-      message: "Select service",
-      options: serviceNames,
-      oneChoiceMessage() {
-        throw new Error("Unreachable");
-      },
-      onNoChoices() {
-        throw new Error("Unreachable");
-      },
+  if (selected === ENTER_PATH_OR_URL_MSG) {
+    return input({
+      message: ENTER_PATH_OR_URL_MSG,
     });
   }
 
-  return input({
-    message: "Enter path to a service or url to .tar.gz archive",
-  });
+  return selected;
 }
