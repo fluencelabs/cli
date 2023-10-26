@@ -181,7 +181,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.artifact-name == 'null' && inputs.platform }}
-          path: fluence-cli-${{ inputs.plaform }}.tar.gz
+          path: fluence-cli-${{ inputs.platform }}.tar.gz
 
       - name: Upload archive to release
         if: inputs.tag != 'null'
