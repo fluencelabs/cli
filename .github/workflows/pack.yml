@@ -180,7 +180,7 @@ jobs:
       - name: Upload archive to CI
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ inputs.artifact-name == 'null' && inputs.platform }}
+          name: ${{ inputs.artifact-name == 'null' && inputs.platform || inputs.artifact-name }}
           path: fluence-cli-${{ inputs.platform }}.tar.gz
 
       - name: Upload archive to release
