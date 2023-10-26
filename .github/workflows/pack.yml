@@ -15,6 +15,10 @@ on:
         description: "Platform for which to build fluence-cli"
         type: string
         required: true
+      artifact-name:
+        description: "Name for the artifact to upload to CI"
+        type: string
+        default: "null"
       upload-to-s3:
         description: "Upload artifact to s3"
         type: boolean
@@ -159,8 +163,8 @@ jobs:
       - name: Upload archive to CI
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ inputs.platform }}
-          path: fluence-cli-${{ inputs.platform }}.tar.gz
+          name: ${{ inputs.artifact-name == 'null' && inputs.platform }}
+          path: tmp/fluence
 
       - name: Upload archive to release
         if: inputs.tag != 'null'
