@@ -30,7 +30,7 @@ import {
   SPELL_AQUA_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureSrcSpellsDir } from "../../lib/paths.js";
+import { ensureSrcSpellsDir, projectRootDir } from "../../lib/paths.js";
 import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -78,7 +78,7 @@ export default class New extends BaseCommand<typeof New> {
     }
 
     fluenceConfig.spells[spellName] = {
-      get: relative(fluenceConfig.$getDirPath(), pathToSpellDir),
+      get: relative(projectRootDir, pathToSpellDir),
     };
 
     await fluenceConfig.$commit();

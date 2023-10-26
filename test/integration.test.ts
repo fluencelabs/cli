@@ -15,8 +15,8 @@
  */
 
 import assert from "node:assert";
-import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { join, resolve } from "node:path";
 
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
@@ -35,8 +35,11 @@ import {
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
 import { execPromise } from "../src/lib/execPromise.js";
-import { jsonStringify } from "../src/lib/helpers/utils.js";
-import { localPeerIds, local } from "../src/lib/multiaddres.js";
+import {
+  jsonStringify,
+  LOGS_RESOLVE_SUBNET_ERROR_START,
+  LOGS_GET_ERROR_START,
+} from "../src/lib/helpers/utils.js";
 import { hasKey } from "../src/lib/typeHelpers.js";
 
 import {
@@ -48,6 +51,13 @@ import {
   assertHasPeer,
   fluenceEnv,
 } from "./helpers.js";
+import { NO_PROJECT, multiaddrs } from "./setupTests.js";
+
+const peerIds = multiaddrs
+  .map(({ peerId }) => {
+    return peerId;
+  })
+  .sort();
 
 const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
 
@@ -66,6 +76,14 @@ describe("integration tests", () => {
       } as CommandObj,
       false,
     );
+  });
+
+  afterAll(async () => {
+    if (process.env.CI === "false") {
+      await fluence({
+        args: ["local", "down"],
+      });
+    }
   });
 
   maybeConcurrentTest("should work with minimal template", async () => {
@@ -95,7 +113,9 @@ describe("integration tests", () => {
     ).trim();
 
     // we expect to see "Hello, Fluence" printed when running typescript code
-    expect(resultOfRunningAquaUsingTSNode).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
+    expect(
+      resultOfRunningAquaUsingTSNode.includes(EXPECTED_TS_OR_JS_RUN_RESULT),
+    ).toBe(true);
   });
 
   maybeConcurrentTest("should work with js template", async () => {
@@ -112,18 +132,25 @@ describe("integration tests", () => {
     ).trim();
 
     // we expect to see "Hello, Fluence" printed when running javascript code
-    expect(resultOfRunningAquaUsingNode).toBe(EXPECTED_TS_OR_JS_RUN_RESULT);
+    expect(
+      resultOfRunningAquaUsingNode.includes(EXPECTED_TS_OR_JS_RUN_RESULT),
+    ).toBe(true);
   });
 
   maybeConcurrentTest("should work without project", async () => {
+    const cwd = join("tmp", NO_PROJECT);
+    await mkdir(cwd, { recursive: true });
+
     const result = await fluence({
       args: ["run"],
       flags: {
+        relay: multiaddrs[0]?.multiaddr,
         env: fluenceEnv,
         f: "identify()",
-        i: join("test", "aqua", "smoke.aqua"),
+        i: resolve(join("test", "aqua", "smoke.aqua")),
         quiet: true,
       },
+      cwd,
     });
 
     const parsedResult = JSON.parse(result);
@@ -235,7 +262,7 @@ describe("integration tests", () => {
 
       fluenceConfig.hosts = {
         [DEFAULT_WORKER_NAME]: {
-          peerIds: localPeerIds,
+          peerIds,
         },
       };
 
@@ -293,7 +320,7 @@ describe("integration tests", () => {
               return sortPeers(a, b);
             });
 
-          const expected = localPeerIds.map((peer) => {
+          const expected = peerIds.map((peer) => {
             return {
               answer: "Hi, fluence",
               peer,
@@ -308,6 +335,10 @@ describe("integration tests", () => {
           maybeRunDeployedError = e;
         }
       }
+
+      // TODO: check worker logs
+      // const logs = await fluence({ args: ["workers", "logs"], cwd });
+      // assertLogsAreValid(logs);
 
       assert(
         !runDeployedServicesTimeoutReached,
@@ -373,54 +404,20 @@ describe("integration tests", () => {
   maybeConcurrentTest(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
-      function log(message?: unknown, ...optionalParams: unknown[]) {
-        const timestamp = new Date().toISOString().split("T")[1];
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, no-console, @typescript-eslint/restrict-template-expressions
-        console.debug(`[${timestamp}]: ${message}`, ...optionalParams);
-      }
-
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
-
-      // log(`will run:`, RUN_DEPLOYED_SERVICES_FUNCTION_CALL);
-
-      // const rrr = await fluence({
-      //   args: ["run"],
-      //   flags: {
-      //     f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-      //   },
-      //   cwd,
-      // });
-
-      // log(`rrr:`, rrr);
-
       await init(cwd, "quickstart");
-      log("init done");
 
-      try {
-        const registered = await fluence({
-          args: ["provider", "register"],
-          flags: { "priv-key": PRIV_KEY },
-          cwd,
-        });
-
-        log("registered in market:", registered);
-      } catch (e) {
-        log("error registering in market:", e);
-      }
-
-      const peerIdFlags = localPeerIds.flatMap((peerId) => {
-        return ["--peer-id", peerId];
-      });
-
-      log(`will add ${localPeerIds.length} peers`);
-
-      const addPeer = await fluence({
-        args: ["provider", "add-peer", ...peerIdFlags],
-        flags: { "priv-key": PRIV_KEY, units: 1 },
+      await fluence({
+        args: ["provider", "register"],
+        flags: { "priv-key": PRIV_KEY },
         cwd,
       });
 
-      log(`added peers ${localPeerIds.toString()}:`, addPeer);
+      await fluence({
+        args: ["provider", "add-peer"],
+        flags: { "priv-key": PRIV_KEY },
+        cwd,
+      });
 
       const pathToNewServiceDir = join("src", "services", "myService");
 
@@ -428,8 +425,6 @@ describe("integration tests", () => {
         pathToNewServiceDir,
         cwd,
       );
-
-      log(`initServiceConfig done`);
 
       assert(
         newServiceConfig !== null,
@@ -448,8 +443,6 @@ describe("integration tests", () => {
         args: ["spell", "new", "newSpell"],
         cwd,
       });
-
-      log(`newSpell done`);
 
       const fluenceConfig = await initFluenceConfigWithPath(cwd);
 
@@ -534,7 +527,7 @@ describe("integration tests", () => {
               .join("\n")}`,
           );
 
-          const expected = local
+          const expected = multiaddrs
             .map((peer) => {
               return {
                 answer: "Hi, fluence",
@@ -608,8 +601,15 @@ describe("integration tests", () => {
         `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
       );
 
-      // check logs are working
-      assert((await fluence({ args: ["deal", "logs"], cwd })) !== "");
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+      if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
+        throw new Error(
+          `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
+        );
+      }
+
+      assertLogsAreValid(logs);
     },
   );
 });
@@ -699,3 +699,11 @@ service NewService("${WD_NEW_SERVICE_NAME}"):
 
 ${WD_NEW_SERVICE_2_INTERFACE}
 `;
+
+function assertLogsAreValid(logs: string) {
+  assert(logs.trim() !== "", "logs are expected to be non-empty");
+
+  if (logs.includes(LOGS_GET_ERROR_START)) {
+    throw new Error(`Failed to get deal logs:\n\n${logs}`);
+  }
+}

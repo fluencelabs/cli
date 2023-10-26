@@ -54,10 +54,8 @@ export default class Register extends BaseCommand<typeof Register> {
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
     const signer = await getSigner(network, flags["priv-key"]);
     const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
+    // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+    const dealClient = new DealClient(signer, network);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
@@ -70,9 +68,7 @@ export default class Register extends BaseCommand<typeof Register> {
     );
 
     promptConfirmTx(flags["priv-key"]);
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+    // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
     await waitTx(tx);
 
     commandObj.log(color.green(`Successfully joined to matching contract`));

@@ -15,13 +15,12 @@
  */
 
 import { color } from "@oclif/color";
-import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
+import { getResolvedProviderConfig } from "../../lib/multiaddres.js";
 import {
   ensureChainNetwork,
   getSigner,
@@ -36,16 +35,6 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...ENV_FLAG,
-    "peer-id": Flags.string({
-      description:
-        "Peer id of the nox instance that you want to register as a Compute Peer",
-      helpValue: "<peer-id>",
-      multiple: true,
-    }),
-    units: Flags.string({
-      description: "Number of available worker units on this Compute Peer",
-      helpValue: "<number>",
-    }),
   };
 
   async run(): Promise<void> {
@@ -55,13 +44,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     );
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-
-    const workersCount =
-      flags.units ?? (await input({ message: "Enter workers count" }));
-
-    const peerIds = flags["peer-id"] ?? [
-      await input({ message: "Enter peerId" }),
-    ];
+    const peerIds = await getResolvedProviderConfig();
 
     const [{ DealClient }, { digest }, { base58btc }] = await Promise.all([
       import("@fluencelabs/deal-aurora"),
@@ -70,18 +53,13 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       import("multiformats/bases/base58"),
     ]);
 
-    for (const peerId of peerIds) {
+    for (const { peerId, computeUnits } of peerIds) {
       const signer = await getSigner(network, flags["priv-key"]);
-      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      const dealClient = new DealClient(network, signer);
+      // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+      const dealClient = new DealClient(signer, network);
       const globalContracts = dealClient.getGlobalContracts();
       const matcher = await globalContracts.getMatcher();
       const flt = await globalContracts.getFLT();
-
-      const multihash = digest.decode(base58btc.decode("z" + peerId));
-      const bytes = multihash.bytes.subarray(6);
 
       const collateral = (
         await matcher.getComputeProviderInfo(await signer.getAddress())
@@ -89,28 +67,28 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
 
       const approveTx = await flt.approve(
         await matcher.getAddress(),
-        collateral * BigInt(workersCount),
+        collateral * BigInt(computeUnits),
       );
 
       promptConfirmTx(flags["priv-key"]);
-      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+      // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
       await waitTx(approveTx);
 
-      const tx = await matcher.addWorkersSlots(bytes, workersCount);
+      const multihash = digest.decode(base58btc.decode("z" + peerId));
+      const bytes = multihash.bytes.subarray(6);
+      const tx = await matcher.addWorkersSlots(bytes, computeUnits);
       promptConfirmTx(flags["priv-key"]);
-      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+      // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
       await waitTx(tx);
 
       const free = (await matcher.getComputePeerInfo(bytes)).freeWorkerSlots;
 
       commandObj.logToStderr(
-        `Added ${color.yellow(workersCount)} compute peer with ${color.yellow(
-          peerIds,
-        )} has ${color.yellow(free)} free worker slots.`,
+        `Added ${color.yellow(
+          computeUnits,
+        )} worker slots. Compute peer ${color.yellow(
+          peerId,
+        )} has ${color.yellow(free)} free worker slots now.`,
       );
     }
   }

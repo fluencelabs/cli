@@ -18,13 +18,11 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import {
-  AUTO_GENERATED,
   CLI_NAME,
   TOP_LEVEL_SCHEMA_ID,
   USER_SECRETS_CONFIG_FILE_NAME,
   USER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../const.js";
-import { generateKeyPair } from "../../helpers/utils.js";
 import {
   validateHasDefault,
   validateBatch,
@@ -33,9 +31,7 @@ import {
 } from "../../helpers/validations.js";
 import { ensureUserFluenceDir } from "../../paths.js";
 import {
-  getConfigInitFunction,
   getReadonlyConfigInitFunction,
-  type GetDefaultConfig,
   type InitConfigOptions,
   type InitializedConfig,
   type InitializedReadonlyConfig,
@@ -64,24 +60,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     version: { type: "number", const: 0 },
   },
   required: ["version", "keyPairs", "defaultKeyPairName"],
-};
-
-const getDefault: GetDefaultConfig = async () => {
-  const { secretKey, name } = await generateKeyPair(AUTO_GENERATED);
-  return `# Defines user's secret keys that can be used across different Fluence projects.
-# You can manage user's keys using commands from \`fluence key\` group of commands with \`--user\` flag
-
-# config version
-version: 0
-
-# user's key pairs
-keyPairs:
-  - name: ${name}
-    secretKey: ${secretKey}
-
-# Key pair with this name will be used for the deployment by default.
-defaultKeyPairName: ${name}
-`;
 };
 
 const migrations: Migrations<Config> = [];
@@ -124,12 +102,5 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   validate,
 };
 
-export const initUserSecretsConfig = getConfigInitFunction(
-  initConfigOptions,
-  getDefault,
-);
-export const initReadonlyUserSecretsConfig = getReadonlyConfigInitFunction(
-  initConfigOptions,
-  getDefault,
-);
-export const userSecretsSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export const initReadonlyUserSecretsConfig =
+  getReadonlyConfigInitFunction(initConfigOptions);

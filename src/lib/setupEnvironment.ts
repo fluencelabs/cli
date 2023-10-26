@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import path from "node:path";
+import { isAbsolute } from "node:path";
 
 import dotenv from "dotenv";
 
@@ -24,6 +24,7 @@ import { getIsStringUnion } from "./typeHelpers.js";
 export const FLUENCE_ENV = "FLUENCE_ENV";
 export const DEBUG_COUNTLY = "DEBUG_COUNTLY";
 export const FLUENCE_USER_DIR = "FLUENCE_USER_DIR";
+export const CI = "CI";
 export const RUN_TESTS_IN_PARALLEL = "RUN_TESTS_IN_PARALLEL";
 
 dotenv.config();
@@ -66,7 +67,7 @@ const isTrueOrFalseString = (v: unknown): v is "true" | "false" => {
 };
 
 const isAbsolutePath = (v: unknown): v is string => {
-  return typeof v === "string" && path.isAbsolute(v);
+  return typeof v === "string" && isAbsolute(v);
 };
 
 const isFluenceEnvWithoutCustom = getIsStringUnion(
@@ -78,4 +79,5 @@ const isFluenceEnvWithoutCustom = getIsStringUnion(
 setEnvVariable(FLUENCE_ENV, isFluenceEnvWithoutCustom, "local");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
 setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "false");
+setEnvVariable(CI, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

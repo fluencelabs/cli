@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.11.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.3...fluence-cli-v0.11.4) (2023-10-25)
+
+
+### Features
+
+* update spell template [fixes DXJ-514] ([#587](https://github.com/fluencelabs/cli/issues/587)) ([7560514](https://github.com/fluencelabs/cli/commit/7560514a2dfa852f56eb1771d3538e688d146bb1))
+
+
+### Bug Fixes
+
+* fix update app cid ([#586](https://github.com/fluencelabs/cli/issues/586)) ([90efcdb](https://github.com/fluencelabs/cli/commit/90efcdb54cd99797050ec7ed80bbc3607b32f065))
+
+## [0.11.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.2...fluence-cli-v0.11.3) (2023-10-24)
+
+
+### Features
+
+* add `local logs` [fixes DXJ-513] ([#574](https://github.com/fluencelabs/cli/issues/574)) ([885fce6](https://github.com/fluencelabs/cli/commit/885fce676f6e83046aa89fe6220b783c31dc1444))
+* up deal logs and better tests for them ([#560](https://github.com/fluencelabs/cli/issues/560)) ([48a6420](https://github.com/fluencelabs/cli/commit/48a6420cf3802aa940bc94ce79c225cc5e4ffdb2))
+
+
+### Bug Fixes
+
+* env must not be required when using `--relay` [fixes DXJ-511] ([#570](https://github.com/fluencelabs/cli/issues/570)) ([b8d6c5b](https://github.com/fluencelabs/cli/commit/b8d6c5b9476962805a7fcf6bcc0cfb171089c584))
+
+## [0.11.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.1...fluence-cli-v0.11.2) (2023-10-20)
+
+
+### Features
+
+* add provider config [fixes DXJ-470] ([#470](https://github.com/fluencelabs/cli/issues/470)) ([a4706c5](https://github.com/fluencelabs/cli/commit/a4706c59c4263e6528fe8f45fc4b07c293ce540a))
+* use aqua-to-js lib [fixes DXJ-489] ([#517](https://github.com/fluencelabs/cli/issues/517)) ([4b41025](https://github.com/fluencelabs/cli/commit/4b41025d18b417807f6d809873db55c8067f3fa6))
+
+
+### Bug Fixes
+
+* Disable node warnings when running as standalone ([#536](https://github.com/fluencelabs/cli/issues/536)) ([5834e35](https://github.com/fluencelabs/cli/commit/5834e3572562548efabcb289dc3e74adb2009b46))
+* js-client error ([#559](https://github.com/fluencelabs/cli/issues/559)) ([214ad91](https://github.com/fluencelabs/cli/commit/214ad91d2bd46c4d87d7f2a1e3fd61d79a1f4a7a))
+* mutable configs initing more then once ([#545](https://github.com/fluencelabs/cli/issues/545)) ([d5e3a65](https://github.com/fluencelabs/cli/commit/d5e3a658d897b216cbab4678da5027f7fa808fa4))
+
 ## [0.11.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.0...fluence-cli-v0.11.1) (2023-10-12)
 
 

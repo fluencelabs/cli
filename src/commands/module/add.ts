@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import path from "node:path";
+import { relative } from "node:path";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -136,7 +136,7 @@ export default class Add extends BaseCommand<typeof Add> {
       [moduleName]: {
         get: isUrl(modulePathOrUrl)
           ? modulePathOrUrl
-          : path.relative(serviceConfig.$getDirPath(), moduleConfig.$getPath()),
+          : relative(serviceConfig.$getDirPath(), moduleConfig.$getPath()),
       },
     };
 

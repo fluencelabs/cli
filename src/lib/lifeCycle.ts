@@ -57,6 +57,7 @@ import { dbg } from "./dbg.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
 import { stringifyUnknown } from "./helpers/utils.js";
+import { updateRelaysJSON } from "./multiaddres.js";
 import { getLatestVersionOfNPMDependency } from "./npm.js";
 import {
   projectRootDir,
@@ -157,8 +158,12 @@ export async function initCli<
   }
 
   await ensureUserConfig();
-  const maybeFluenceConfig = await initFluenceConfig();
 
+  const res = requiresFluenceProject
+    ? { fluenceConfig: await ensureFluenceProject() }
+    : { maybeFluenceConfig: await initFluenceConfig() };
+
+  const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
   await initCountly({ maybeFluenceConfig });
   await ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
 
@@ -172,17 +177,14 @@ export async function initCli<
     }
   }
 
+  await updateRelaysJSON({
+    fluenceConfig: maybeFluenceConfig,
+  });
+
   return {
     args,
     flags,
-    ...(requiresFluenceProject
-      ? {
-          fluenceConfig:
-            maybeFluenceConfig === null
-              ? await ensureFluenceProject()
-              : maybeFluenceConfig,
-        }
-      : { maybeFluenceConfig }),
+    ...res,
   };
 }
 

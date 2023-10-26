@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import path, { join } from "node:path";
+import { join } from "node:path";
 
 import { Args, Flags } from "@oclif/core";
 
@@ -40,7 +40,7 @@ const FORCE_FLAG_NAME = "force";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dependency:cargo:i", "dep:cargo:i"];
-  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's ${path.join(
+  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's ${join(
     DOT_FLUENCE_DIR_NAME,
     CARGO_DIR_NAME,
   )} directory)`;

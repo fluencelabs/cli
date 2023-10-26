@@ -52,27 +52,30 @@ const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
 
 const writeFileAndMakeSureDirExists = async (
   filePath: string,
-  data: string,
+  dataPromise: string | Promise<string | undefined>,
 ) => {
+  const data = await dataPromise;
+
+  if (data === undefined) {
+    return;
+  }
+
   const dirPath = parse(filePath).dir;
   await mkdir(dirPath, { recursive: true });
   await writeFile(filePath, data, FS_OPTIONS);
 };
 
-const EMPTY_GENERATED_SOURCE: Omit<
-  Awaited<ReturnType<typeof compileFromPath>>["generatedSources"][number],
-  "name"
-> = {};
-
 export type CompileToFilesArgs = {
   compileArgs: Omit<Parameters<typeof compileFromPath>[0], "funcCall">;
   outputPath: string | undefined;
+  targetType: "ts" | "js" | "air";
   dry?: boolean;
 };
 
 export const compileToFiles = async ({
   compileArgs,
   outputPath,
+  targetType,
   dry = false,
 }: CompileToFilesArgs): Promise<void> => {
   const isInputPathADirectory = (
@@ -139,46 +142,42 @@ export const compileToFiles = async ({
     ? compileArgs.filePath
     : parse(compileArgs.filePath).dir;
 
+  const aquaToJs = (await import("@fluencelabs/aqua-to-js")).default;
+
   await Promise.all(
     compilationResultsWithFilePaths.flatMap(
       ({ compilationResult, aquaFilePath }) => {
-        const generatedSource =
-          compilationResult.generatedSources[0] ?? EMPTY_GENERATED_SOURCE;
-
         const parsedPath = parse(aquaFilePath);
         const fileNameWithoutExt = parsedPath.name;
         const dirPath = parsedPath.dir;
         const finalOutputDirPath = dirPath.replace(inputDirPath, outputPath);
 
-        if (compileArgs.targetType === "ts") {
-          if (generatedSource.tsSource === undefined) {
-            return [];
-          }
-
+        if (targetType === "ts") {
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${TS_EXT}`),
-              generatedSource.tsSource,
+              aquaToJs(compilationResult, "ts").then((r) => {
+                return r?.sources;
+              }),
             ),
           ];
         }
 
-        if (compileArgs.targetType === "js") {
-          if (
-            generatedSource.jsSource === undefined ||
-            generatedSource.tsTypes === undefined
-          ) {
-            return [];
-          }
+        if (targetType === "js") {
+          const aquaToJsPromise = aquaToJs(compilationResult, "js");
 
           return [
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.${JS_EXT}`),
-              generatedSource.jsSource,
+              aquaToJsPromise.then((r) => {
+                return r?.sources;
+              }),
             ),
             writeFileAndMakeSureDirExists(
               join(finalOutputDirPath, `${fileNameWithoutExt}.d.${TS_EXT}`),
-              generatedSource.tsTypes,
+              aquaToJsPromise.then((r) => {
+                return r?.types;
+              }),
             ),
           ];
         }

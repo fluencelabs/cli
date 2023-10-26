@@ -3,6 +3,9 @@
 ## [fluence.yaml](./fluence.md)
 
 Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use `fluence init` command to generate a template for new Fluence project
+## [provider.yaml](./provider.md)
+
+Defines config used for provider set up
 ## [module.yaml](./module.md)
 
 Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use `fluence module new` command to generate a template for new module
@@ -15,15 +18,12 @@ Defines a spell. You can use `fluence spell new` command to generate a template 
 ## [workers.yaml](./workers.md)
 
 A result of app deployment. This file is created automatically after successful deployment using `fluence workers deploy` command
-## [project-secrets.yaml](./project-secrets.md)
-
-Defines project's secret keys that are used only in the scope of this particular Fluence project. You can manage project's keys using commands from `fluence key` group of commands
-## [user-secrets.yaml](./user-secrets.md)
-
-Defines user's secret keys that can be used across different Fluence projects. You can manage user's keys using commands from `fluence key` group of commands with `--user` flag
 ## [config.yaml](./config.md)
 
 Defines global config for Fluence CLI
 ## [env.yaml](./env.md)
 
 Defines user project preferences
+## [docker-compose.yaml](./docker-compose.md)
+
+Defines a multi-containers based application.

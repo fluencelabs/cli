@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { compileFromPath } from "@fluencelabs/aqua-api";
+import aquaToJs from "@fluencelabs/aqua-to-js";
 
 import { AQUA_EXT, FS_OPTIONS } from "./lib/const.js";
 
@@ -52,13 +52,14 @@ const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
 const compileInstallationSpellAqua = async (tracing = false) => {
   return Promise.all(
     ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
+      const filePath = join(
+        INSTALLATION_SPELL_AQUA_DIR_PATH,
+        `${fileName}.${AQUA_EXT}`,
+      );
+
       const compilationResult = await compileFromPath({
-        filePath: join(
-          INSTALLATION_SPELL_AQUA_DIR_PATH,
-          `${fileName}.${AQUA_EXT}`,
-        ),
+        filePath,
         imports: ["node_modules"],
-        targetType: "ts",
         tracing,
       });
 
@@ -66,8 +67,13 @@ const compileInstallationSpellAqua = async (tracing = false) => {
         throw new Error(compilationResult.errors.join("\n\n"));
       }
 
-      const tsSource = compilationResult.generatedSources[0]?.tsSource;
-      assert(typeof tsSource === "string");
+      const { sources } = (await aquaToJs(compilationResult, "ts")) ?? {};
+
+      if (sources === undefined) {
+        throw new Error(
+          `File ${filePath} no longer exposes anything. Please expose something from it or remove it from compilation`,
+        );
+      }
 
       await writeFile(
         join(
@@ -76,7 +82,7 @@ const compileInstallationSpellAqua = async (tracing = false) => {
             : COMPILED_INSTALLATION_SPELL_AQUA_PATH,
           `${fileName}.ts`,
         ),
-        tsSource,
+        sources,
         FS_OPTIONS,
       );
     }),
@@ -107,24 +113,26 @@ const BIN_FILE_PATH = join(
   "bin.js",
 );
 
-const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
-const NODE_RUN = `  "\\$NODE" "\\$DIR/run" "\\$@"`;
-const NODE_RUN_NO_WARNINGS = NODE_RUN.replace('NODE"', 'NODE" --no-warnings');
-const timesNodeRunAppears = binFileContent.split(NODE_RUN).length - 1;
+try {
+  const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
 
-if (timesNodeRunAppears === 1) {
-  const newBinFileContent = binFileContent.replace(
-    NODE_RUN,
-    NODE_RUN_NO_WARNINGS,
-  );
+  const search = `#!/usr/bin/env bash`;
+  const insert = `export NODE_NO_WARNINGS=1`;
+  const hasSearch = binFileContent.includes(search);
+  const hasInsert = binFileContent.includes(insert);
 
-  await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
-} else {
-  const timesNodeRunNoWarningsAppears =
-    binFileContent.split(NODE_RUN_NO_WARNINGS).length - 1;
+  if (hasSearch && !hasInsert) {
+    const newBinFileContent = binFileContent.replace(
+      search,
+      `${search}\n${insert}`,
+    );
 
-  assert(
-    timesNodeRunNoWarningsAppears === 1,
-    `${BIN_FILE_PATH} file has changed. Please make sure patch that replaces 'node' with 'node --no-warnings' is still valid.`,
-  );
+    await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
+  } else if (!hasSearch) {
+    throw new Error(`Wasn't able to find '${search}' in ${BIN_FILE_PATH}`);
+  }
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.error(`Error while modifying ${BIN_FILE_PATH}`);
+  throw err;
 }

@@ -1,8 +1,8 @@
 // @ts-check
 import { exportVariable, getInput, setFailed } from "@actions/core";
-import assert from "assert";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
+import assert from "assert";
 
 try {
   const inputVersions = JSON.parse(getInput("versions"));
@@ -34,19 +34,31 @@ try {
       continue;
     }
 
-    for (const component in inputVersions[category]) {
-      if (
-        !versions[category].hasOwnProperty(component) ||
-        inputVersions[category][component] === "null"
-      ) {
-        continue;
+    const inputCategoryValue = inputVersions[category];
+    if (
+      typeof inputCategoryValue === "string" ||
+      typeof inputCategoryValue === "number"
+    ) {
+      if (inputCategoryValue !== "null") {
+        // ignore "null" strings
+        versions[category] = inputCategoryValue;
       }
+    } else if (typeof inputCategoryValue === "object") {
+      for (const component in inputCategoryValue) {
+        if (
+          !versions[category].hasOwnProperty(component) ||
+          inputVersions[category][component] === null ||
+          inputVersions[category][component] === "null" // ignore "null" strings
+        ) {
+          continue;
+        }
 
-      versions[category][component] = inputVersions[category][component];
+        versions[category][component] = inputVersions[category][component];
 
-      // Check if a cargo dependency was updated
-      if (category === "cargo") {
-        cargoDependencyUpdated = true;
+        // Check if a cargo dependency was updated
+        if (category === "cargo") {
+          cargoDependencyUpdated = true;
+        }
       }
     }
   }

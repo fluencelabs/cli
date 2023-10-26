@@ -18,12 +18,10 @@ on:
       nox-image:
         description: "nox image tag"
         type: string
-        # default is set in .github/e2e/docker-compose.yml
         default: "null"
-      deal-aurora-image:
-        description: "deal-aurora image tag"
+      chain-image:
+        description: "chain image tag"
         type: string
-        # default is set in .github/e2e/docker-compose.yml
         default: "null"
       marine-version:
         description: "marine version"
@@ -51,6 +49,14 @@ on:
         default: "null"
       deal-aurora-version:
         description: "deal-aurora version"
+        type: string
+        default: "null"
+      spell-version:
+        description: "@fluencelabs/spell version"
+        type: string
+        default: "null"
+      installation-spell-version:
+        description: "@fluencelabs/installation-spell version"
         type: string
         default: "null"
 
@@ -96,7 +102,7 @@ jobs:
             kv/npm-registry/basicauth/ci token | NODE_AUTH_TOKEN;
             kv/cargo-registry/users/ci token | CARGO_REGISTRIES_FLUENCE_TOKEN
 
-      - name: Set nox version
+      - name: Set nox image
         run: |
           # set nox image
           case ${{ inputs.nox-image }} in
@@ -115,13 +121,22 @@ jobs:
           echo "nox image used for tests is $nox"
           echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
 
-      - name: Set deal-aurora version
-        if: inputs.deal-aurora-image != 'null'
+      - name: Set chain image
         run: |
-          deal_aurora=${{ inputs.deal-aurora-image }}
+          # set chain image
+          case ${{ inputs.chain-image }} in
+          # if nox image is not passed from e2e read from versions.json
+          'null')
+            chain="$(jq .chain src/versions.json -r)"
+          ;;
+          # else set chain image to snapshot passed from e2e
+          *)
+            chain=${{ inputs.chain-image }}
+          ;;
+          esac
 
-          echo "deal-aurora image used for tests is $deal_aurora"
-          echo "DEAL_AURORA_IMAGE=${deal_aurora}" >> $GITHUB_ENV
+          echo "chain image used for tests is $chain"
+          echo "CHAIN_IMAGE=${chain}" >> $GITHUB_ENV
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -129,16 +144,6 @@ jobs:
           registry: docker.fluence.dev
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-
-      # - name: Run nox network
-      #   uses: isbang/compose-action@v1.5.1
-      #   with:
-      #     compose-file: ".github/e2e/docker-compose.yml"
-      #     down-flags: "--volumes"
-
-      - name: Run nox network
-        run: |
-          docker-compose -f .github/e2e/docker-compose.yml up -d
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -182,13 +187,23 @@ jobs:
           version: "${{ inputs.deal-aurora-version }}"
           package-manager: yarn
 
+      - name: Set installation-spell version
+        if: inputs.installation-spell-version != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/installation-spell"
+          version: "${{ inputs.installation-spell-version }}"
+          package-manager: yarn
+
       - name: Update versions.json
         uses: ./.github/actions/replace-version
         with:
           versions: |
             {
+              "nox": "${{ env.NOX_IMAGE }}",
+              "chain": "${{ env.CHAIN_IMAGE }}",
               "npm": {
-                "@fluencelabs/js-client": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client'] }}"
+                "@fluencelabs/spell": "${{ inputs.spell-version == 'null' && 'null' || inputs.spell-version }}"
               },
               "cargo": {
                 "marine": "${{ inputs.marine-version }}",
@@ -208,15 +223,12 @@ jobs:
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
         run: yarn test-linux-x64
 
-      - name: Cleanup
-        if: always()
-        run: rm -rf tmp ~/.fluence
-
-      - name: Dump nox logs
+      - name: Dump container logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
 
-      - name: Post Run nox network
+      - name: Cleanup
         if: always()
         run: |
-          docker-compose -f .github/e2e/docker-compose.yml down --volumes
+          yarn fluence local down
+          rm -rf tmp ~/.fluence

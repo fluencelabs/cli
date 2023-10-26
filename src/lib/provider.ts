@@ -50,7 +50,9 @@ export async function ensureChainNetwork(
 
   if (fluenceEnv !== "custom") {
     commandObj.logToStderr(
-      `Using ${color.yellow(fluenceEnv)} environment to sign contracts`,
+      `Using ${color.yellow(
+        fluenceEnv,
+      )} blockchain environment to send transactions`,
     );
 
     return fluenceEnv;
@@ -71,9 +73,7 @@ export async function ensureChainNetwork(
   commandObj.logToStderr(
     `Using ${color.yellow(
       customContractsEnv,
-    )} blockchain environment to sign contracts for ${color.yellow(
-      fluenceEnv,
-    )} fluence environment`,
+    )} blockchain environment to send transactions`,
   );
 
   return customContractsEnv;

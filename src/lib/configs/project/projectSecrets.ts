@@ -32,9 +32,7 @@ import {
 } from "../../helpers/validations.js";
 import { getFluenceDir } from "../../paths.js";
 import {
-  getConfigInitFunction,
   getReadonlyConfigInitFunction,
-  type GetDefaultConfig,
   type InitConfigOptions,
   type InitializedConfig,
   type InitializedReadonlyConfig,
@@ -68,28 +66,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     version: { type: "number", const: 0 },
   },
   required: ["version", "keyPairs"],
-};
-
-const getDefault: GetDefaultConfig = () => {
-  return `# Defines project's secret keys that are used only in the scope of this particular Fluence project.
-# You can manage project's keys using commands from \`fluence key\` group of commands
-
-# config version
-version: 0
-
-# Key Pairs available for your fluence project
-keyPairs:
-  [
-#    {
-#      name: myKeyPair,
-#      secretKey: y5MU5/jpyGGDFlDdJa+UCSkWKNr8iGtb6bRiytc/M54=
-#    }
-  ]
-
-# Key pair with this name will be used for the deployment by default.
-# You can override it with flags or by using keyPair properties in fluence.yaml
-# defaultKeyPairName: myKeyPair
-`;
 };
 
 const migrations: Migrations<Config> = [];
@@ -137,15 +113,5 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   validate,
 };
 
-export const initNewProjectSecretsConfig = getConfigInitFunction(
-  initConfigOptions,
-  getDefault,
-);
-export const initNewReadonlyProjectSecretsConfig =
-  getReadonlyConfigInitFunction(initConfigOptions, getDefault);
-
 export const initReadonlyProjectSecretsConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
-
-export const projectSecretsSchema: JSONSchemaType<LatestConfig> =
-  configSchemaV0;

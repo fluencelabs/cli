@@ -35,10 +35,12 @@ export default class Peers extends BaseCommand<typeof Peers> {
       await this.parse(Peers),
     );
 
-    const relays = resolveRelays(
-      await resolveFluenceEnv(args.ENV),
+    const fluenceEnv = await resolveFluenceEnv(args.ENV);
+
+    const relays = await resolveRelays({
+      fluenceEnv,
       maybeFluenceConfig,
-    );
+    });
 
     commandObj.log(relays.join("\n"));
   }

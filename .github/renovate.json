@@ -5,6 +5,7 @@
   "schedule": "every weekend",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
+  "respectLatest": false,
   "regexManagers": [
     {
       "fileMatch": [
@@ -52,6 +53,13 @@
       "groupName": "nox",
       "schedule": ["at any time"],
       "prPriority": 5
+    },
+    {
+      "matchPackagePatterns": [
+        "@fluencelabs/installation-spell",
+        "@fluencelabs/spell"
+      ],
+      "groupName": "spell"
     }
   ]
 }
