@@ -51,6 +51,14 @@ on:
         description: "aqua snapshots"
         type: string
         default: "null"
+      spell-version:
+        description: "@fluencelabs/spell version"
+        type: string
+        default: "null"
+      installation-spell-version:
+        description: "@fluencelabs/installation-spell version"
+        type: string
+        default: "null"
 
 env:
   CI: true
@@ -116,13 +124,22 @@ jobs:
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
 
+      - name: Set installation-spell version
+        if: inputs.installation-spell-version != 'null'
+        uses: fluencelabs/github-actions/npm-set-dependency@main
+        with:
+          package: "@fluencelabs/installation-spell"
+          version: "${{ inputs.installation-spell-version }}"
+          package-manager: yarn
+          flags: "--save-dev"
+
       - name: Update versions.json
         uses: ./.github/actions/replace-version
         with:
           versions: |
             {
               "npm": {
-                "@fluencelabs/js-client": "${{ inputs.js-client-snapshots == 'null' && 'null' || fromJson(inputs.js-client-snapshots)['js-client'] }}"
+                "@fluencelabs/spell": "${{ inputs.spell-version == 'null' && 'null' || inputs.spell-version }}"
               },
               "cargo": {
                 "marine": "${{ inputs.marine-version }}",
@@ -164,7 +181,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.artifact-name == 'null' && inputs.platform }}
-          path: tmp/fluence
+          path: fluence-cli-${{ inputs.plaform }}.tar.fz
 
       - name: Upload archive to release
         if: inputs.tag != 'null'
