@@ -45,6 +45,7 @@ import {
   README_MD_FILE_NAME,
   HOSTS_FULL_FILE_NAME,
   SECRETS_DIR_NAME,
+  CONFIGS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -224,6 +225,10 @@ export async function getSecretsPathForWriting(isUser: boolean) {
     ? await ensureUserFluenceSecretsDir()
     : await ensureFluenceSecretsDir();
 }
+
+export const ensureUserFluenceConfigsDir = async (): Promise<string> => {
+  return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
+};
 
 // JS
 

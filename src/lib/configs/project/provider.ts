@@ -46,15 +46,47 @@ export type Offer = {
   effectors?: Array<string>;
 };
 
+export type NoxConfigYAML = {
+  tcpPort: number;
+  webSocketPort: number;
+};
+
+export const commonNoxConfig: NoxConfigYAML = {
+  tcpPort: TCP_PORT_START,
+  webSocketPort: WEB_SOCKET_PORT_START,
+};
+
+const noxConfigYAMLSchema = {
+  type: "object",
+  properties: {
+    tcpPort: {
+      type: "number",
+      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
+    },
+    webSocketPort: {
+      type: "number",
+      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
+    },
+    bootstrapNodes: {
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+      description: `List of bootstrap nodes to use. Default: empty list`,
+    },
+  },
+  required: ["tcpPort", "webSocketPort"],
+  nullable: true,
+} as const satisfies JSONSchemaType<NoxConfigYAML>;
+
 export type ComputePeer = {
   computeUnits?: number;
-  webSocketPort?: number;
-  tcpPort?: number;
+  nox?: NoxConfigYAML;
 };
 
 type ConfigV0 = {
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
+  nox?: NoxConfigYAML;
   version: 0;
 };
 
@@ -82,16 +114,7 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
   type: "object",
   properties: {
     computeUnits: { type: "number", nullable: true },
-    webSocketPort: {
-      type: "number",
-      nullable: true,
-      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
-    },
-    tcpPort: {
-      type: "number",
-      nullable: true,
-      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
-    },
+    nox: noxConfigYAMLSchema,
   },
   required: [],
 };
@@ -118,6 +141,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       },
       required: [],
     },
+    nox: noxConfigYAMLSchema,
     version: { type: "number", const: 0 },
   },
   required: ["version", "computePeers", "offers"],

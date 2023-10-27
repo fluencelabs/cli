@@ -15,8 +15,11 @@
  */
 
 import assert from "assert";
+import { writeFile } from "fs/promises";
+import { join, relative } from "path";
 
 import type { JSONSchemaType } from "ajv";
+import assign from "lodash-es/assign.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import versions from "../../../versions.json" assert { type: "json" };
@@ -32,10 +35,13 @@ import {
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  FS_OPTIONS,
+  TOML_EXT,
+  CONFIGS_DIR_NAME,
 } from "../../const.js";
 import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
-import { getFluenceDir } from "../../paths.js";
+import { ensureUserFluenceConfigsDir, getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -45,10 +51,24 @@ import {
   type Migrations,
 } from "../initConfig.js";
 
+import { commonNoxConfig } from "./provider.js";
 import {
   initNewReadonlyProviderConfig,
+  type NoxConfigYAML,
   type ProviderConfigReadonly,
 } from "./provider.js";
+
+type NoxConfigToml = {
+  tcp_port: number;
+  websocket_port: number;
+};
+
+export function configYAMLToConfigToml(config: NoxConfigYAML): NoxConfigToml {
+  return {
+    tcp_port: config.tcpPort,
+    websocket_port: config.webSocketPort,
+  };
+}
 
 type Service = {
   image?: string;
@@ -161,6 +181,8 @@ function genNox({
   bootstrapName,
   bootstrapTcpPort,
 }: GenNoxImageArgs): [name: string, service: Service] {
+  const configTomlName = getConfigTomlName(name);
+  const configLocation = `/run/${CONFIGS_DIR_NAME}/${configTomlName}`;
   return [
     name,
     {
@@ -187,9 +209,8 @@ function genNox({
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
       },
       command: [
+        `--config=${configLocation}`,
         "--aqua-pool-size=5",
-        `-t=${tcpPort}`,
-        `-w=${webSocketPort}`,
         "--external-maddrs",
         `/dns4/${name}/tcp/${tcpPort}`,
         `/dns4/${name}/tcp/${webSocketPort}/ws`,
@@ -199,6 +220,7 @@ function genNox({
           : `--bootstraps=/dns/${bootstrapName}/tcp/${bootstrapTcpPort}`,
       ],
       depends_on: [IPFS_CONTAINER_NAME],
+      volumes: [`./${CONFIGS_DIR_NAME}/${configTomlName}:${configLocation}`],
       secrets: [name],
     },
   ];
@@ -207,16 +229,23 @@ function genNox({
 async function genDockerCompose(
   providerConfig: ProviderConfigReadonly,
 ): Promise<LatestConfig> {
+  const configsDir = await ensureUserFluenceConfigsDir();
+  const fluenceDir = getFluenceDir();
+
   const peers = await Promise.all(
-    Object.entries(providerConfig.computePeers).map(
-      async ([name, { webSocketPort, tcpPort }]) => {
-        return {
-          ...(await getSecretKeyOrReturnExisting(name)),
-          webSocketPort,
-          tcpPort,
-        };
-      },
-    ),
+    Object.entries(providerConfig.computePeers).map(async ([name, { nox }]) => {
+      const relativeConfigFilePath = relative(
+        fluenceDir,
+        join(configsDir, getConfigTomlName(name)),
+      );
+
+      return {
+        ...(await getSecretKeyOrReturnExisting(name)),
+        webSocketPort: nox?.webSocketPort,
+        tcpPort: nox?.tcpPort,
+        relativeConfigFilePath,
+      };
+    }),
   );
 
   const [bootstrap, ...restNoxes] = peers;
@@ -269,11 +298,11 @@ async function genDockerCompose(
         }),
       ),
     },
-    secrets: Object.fromEntries(
-      peers.map(({ name, path: file }) => {
-        return [name, { file }];
+    secrets: Object.fromEntries([
+      ...peers.map(({ name, relativeSecretFilePath: file }) => {
+        return [name, { file }] as const;
       }),
-    ),
+    ]),
   };
 }
 
@@ -303,10 +332,19 @@ const initConfigOptions = {
   getConfigOrConfigDirPath: getFluenceDir,
 };
 
+function getConfigName(noxName: string) {
+  return `${noxName}_Config`;
+}
+
+function getConfigTomlName(noxName: string) {
+  return `${getConfigName(noxName)}.${TOML_EXT}`;
+}
+
 export async function initNewDockerComposeConfig(
   args: ProviderConfigArgs = {},
 ) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
+  await ensureConfigToml(providerConfig);
   return getConfigInitFunction(
     initConfigOptions,
     await genDefaultDockerCompose(providerConfig),
@@ -317,6 +355,7 @@ export async function initNewReadonlyDockerComposeConfig(
   args: ProviderConfigArgs = {},
 ) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
+  await ensureConfigToml(providerConfig);
   return getReadonlyConfigInitFunction(
     initConfigOptions,
     await genDefaultDockerCompose(providerConfig),
@@ -329,3 +368,29 @@ export const initReadonlyDockerComposeConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
 export const dockerComposeSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+
+async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
+  const baseNoxConfig = assign(commonNoxConfig, providerConfig.nox ?? {});
+  const configsDir = await ensureUserFluenceConfigsDir();
+  const { stringify } = await import("@iarna/toml");
+
+  await Promise.all(
+    Object.entries(providerConfig.computePeers).map(([key, value], i) => {
+      const overridden = assign(baseNoxConfig, value.nox ?? {});
+
+      if (overridden.tcpPort === TCP_PORT_START) {
+        overridden.tcpPort = TCP_PORT_START + i;
+      }
+
+      if (overridden.webSocketPort === WEB_SOCKET_PORT_START) {
+        overridden.webSocketPort = WEB_SOCKET_PORT_START + i;
+      }
+
+      return writeFile(
+        join(configsDir, getConfigTomlName(key)),
+        stringify(configYAMLToConfigToml(overridden)),
+        FS_OPTIONS,
+      );
+    }),
+  );
+}

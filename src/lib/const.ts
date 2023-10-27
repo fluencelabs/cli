@@ -146,6 +146,7 @@ export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
 export const SECRETS_DIR_NAME = "secrets";
+export const CONFIGS_DIR_NAME = "configs";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
