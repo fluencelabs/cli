@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.12.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.4...fluence-cli-v0.12.0) (2023-10-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update dependency @fluencelabs/js-client to v0.4.2
+
+### Features
+
+* allow user to select service from list [fixes DXJ-501] ([#589](https://github.com/fluencelabs/cli/issues/589)) ([428a40c](https://github.com/fluencelabs/cli/commit/428a40c7789205c6b654322fee667be67bbd98bf))
+* **deps:** update dependency @fluencelabs/js-client to v0.4.2 ([79985df](https://github.com/fluencelabs/cli/commit/79985df3306dc9aae688f82b15277eeb953f29ce))
+
+
+### Bug Fixes
+
+* Bump nox to 0.4.0 ([#597](https://github.com/fluencelabs/cli/issues/597)) ([d51d9a7](https://github.com/fluencelabs/cli/commit/d51d9a72b0498e20730527d6cc9c031713a9b858))
+
 ## [0.11.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.3...fluence-cli-v0.11.4) (2023-10-25)
 
 
