@@ -1,17 +1,5 @@
 # Changelog
 
-## [0.11.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.4...fluence-cli-v0.11.5) (2023-10-30)
-
-
-### Features
-
-* allow user to select service from list [fixes DXJ-501] ([#589](https://github.com/fluencelabs/cli/issues/589)) ([428a40c](https://github.com/fluencelabs/cli/commit/428a40c7789205c6b654322fee667be67bbd98bf))
-
-
-### Bug Fixes
-
-* **deps:** update dependency @fluencelabs/js-client to v0.4.2 ([#543](https://github.com/fluencelabs/cli/issues/543)) ([79985df](https://github.com/fluencelabs/cli/commit/79985df3306dc9aae688f82b15277eeb953f29ce))
-
 ## [0.11.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.3...fluence-cli-v0.11.4) (2023-10-25)
 
 
