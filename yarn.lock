@@ -619,10 +619,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/avm@npm:0.52.0":
-  version: 0.52.0
-  resolution: "@fluencelabs/avm@npm:0.52.0"
-  checksum: c6afe8cc01626ae1dda655795f4bf6ad14a2f8d24ac3b37e59019857c9417720c82adf9ae0bc1375af5272864adda2dd9d864d6e7f30b735929deea9f6bf390d
+"@fluencelabs/avm@npm:0.54.0":
+  version: 0.54.0
+  resolution: "@fluencelabs/avm@npm:0.54.0"
+  checksum: afd9e7b11e167b2a4bfbd81dd1bd4e827a4c4c995afebfa80f2db6b0161969699877ccc66243c459ce382e9986f17369439cb1da976403fde1d432e8cf684a16
   languageName: node
   linkType: hard
 
@@ -636,7 +636,7 @@ __metadata:
     "@fluencelabs/deal-aurora": 0.2.17
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.26
-    "@fluencelabs/js-client": 0.4.0
+    "@fluencelabs/js-client": 0.4.2
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -741,27 +741,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client-isomorphic@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@fluencelabs/js-client-isomorphic@npm:1.0.0"
+"@fluencelabs/js-client-isomorphic@npm:0.2.1":
+  version: 0.2.1
+  resolution: "@fluencelabs/js-client-isomorphic@npm:0.2.1"
   dependencies:
-    "@fluencelabs/avm": 0.52.0
+    "@fluencelabs/avm": 0.54.0
     "@fluencelabs/marine-js": 0.7.2
     "@fluencelabs/marine-worker": 0.4.1
     "@fluencelabs/threads": ^2.0.0
-  checksum: 39a72323dcaed7d33b08ff76f0f2c7809f745453df1e834428c73c0d07f79a807c6d750c43162b1fec82c0dd4feeb83b2422c6bb1323216c822733c8f7980f3d
+  checksum: e99c206b85844b022b97c8f728fc60b4d380cec3d486d6a3ecee8737661a86b4d0f588f574c6b4bb5fdc617213043282f795f9543cb1e84644e1aedf67b5435e
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@fluencelabs/js-client@npm:0.4.0"
+"@fluencelabs/js-client@npm:0.4.2":
+  version: 0.4.2
+  resolution: "@fluencelabs/js-client@npm:0.4.2"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
-    "@fluencelabs/avm": 0.52.0
+    "@fluencelabs/avm": 0.54.0
     "@fluencelabs/interfaces": 0.8.2
-    "@fluencelabs/js-client-isomorphic": 1.0.0
+    "@fluencelabs/js-client-isomorphic": 0.2.1
     "@fluencelabs/marine-worker": 0.4.1
     "@fluencelabs/threads": ^2.0.0
     "@libp2p/crypto": 2.0.3
@@ -786,7 +786,7 @@ __metadata:
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: 1d084e66f1ae39b91232df10432821508ae43addbcfb495a32ef3f3fd92e0c9f4f6239499ebd78e52bc9937931fa08e357e4af203b609ddc987312713ebc1698
+  checksum: b16549d31cc5de20d6fbc38fe3b2b9b01e554dfb7fc5abb6adf7c5f5eb3f5231d5ecf3d031e399ecc55379279944d6130d246a47c01c0f1c8591333f8152e06e
   languageName: node
   linkType: hard
 
