@@ -815,11 +815,14 @@ Register specific nox instance as a Compute Peer
 
 ```
 USAGE
-  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--compute-units
+    <value>]
 
 FLAGS
+  --compute-units=<value>...                       Number of compute units to add for each peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<value>...                             Peer id of the compute peer
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
 
