@@ -15,6 +15,7 @@
  */
 
 import { color } from "@oclif/color";
+import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -28,6 +29,8 @@ import {
   waitTx,
 } from "../../lib/provider.js";
 
+const DEFAULT_NUMBER_OF_COMPUTE_UNITS = 1;
+
 export default class AddPeer extends BaseCommand<typeof AddPeer> {
   static override description =
     "Register specific nox instance as a Compute Peer";
@@ -35,6 +38,14 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...ENV_FLAG,
+    "peer-id": Flags.string({
+      description: "Peer id of the compute peer",
+      multiple: true,
+    }),
+    "compute-units": Flags.integer({
+      description: "Number of compute units to add for each peer",
+      multiple: true,
+    }),
   };
 
   async run(): Promise<void> {
@@ -43,8 +54,25 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       await this.parse(AddPeer),
     );
 
+    const defaultNumberOfComputeUnits =
+      flags["compute-units"] === undefined
+        ? DEFAULT_NUMBER_OF_COMPUTE_UNITS
+        : flags["compute-units"][0] ?? DEFAULT_NUMBER_OF_COMPUTE_UNITS;
+
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const peerIds = await getResolvedProviderConfig();
+
+    const peerIds =
+      flags["peer-id"] !== undefined && flags["peer-id"].length !== 0
+        ? flags["peer-id"].map((peerId, i) => {
+            return {
+              peerId,
+              computeUnits:
+                flags["compute-units"] === undefined
+                  ? defaultNumberOfComputeUnits
+                  : flags["compute-units"][i] ?? defaultNumberOfComputeUnits,
+            };
+          })
+        : await getResolvedProviderConfig();
 
     const [{ DealClient }, { digest }, { base58btc }] = await Promise.all([
       import("@fluencelabs/deal-aurora"),
