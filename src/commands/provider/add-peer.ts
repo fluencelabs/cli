@@ -55,9 +55,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     );
 
     const defaultNumberOfComputeUnits =
-      flags["compute-units"] === undefined
-        ? DEFAULT_NUMBER_OF_COMPUTE_UNITS
-        : flags["compute-units"][0] ?? DEFAULT_NUMBER_OF_COMPUTE_UNITS;
+      flags["compute-units"]?.[0] ?? DEFAULT_NUMBER_OF_COMPUTE_UNITS;
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
 
@@ -67,9 +65,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
             return {
               peerId,
               computeUnits:
-                flags["compute-units"] === undefined
-                  ? defaultNumberOfComputeUnits
-                  : flags["compute-units"][i] ?? defaultNumberOfComputeUnits,
+                flags["compute-units"]?.[i] ?? defaultNumberOfComputeUnits,
             };
           })
         : await getResolvedProviderConfig();
