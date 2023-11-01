@@ -23,6 +23,8 @@ import {
   CLI_NAME,
   type ContractsENV,
   CONTRACTS_ENV,
+  DEFAULT_DEAL_NAME,
+  DEFAULT_WORKER_NAME,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import {
@@ -188,8 +190,7 @@ version: 0
 
 # # A map of created deals
 # deals:
-#   # worker name
-#   defaultWorker:
+#   ${DEFAULT_DEAL_NAME}:
 #     # worker CID
 #     definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
 #     # ISO timestamp of the time when the worker was deployed
@@ -205,8 +206,7 @@ version: 0
 
 # # A map of deployed workers
 # hosts:
-#   # worker name
-#   defaultWorker:
+#   ${DEFAULT_WORKER_NAME}:
 #     # worker CID
 #     definition: bafkreicoctafgctpxf7jk4nynpnma4wdxpcecjtspsjmuidmag6enctnqa
 #     # worker installation spells

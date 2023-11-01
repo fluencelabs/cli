@@ -27,7 +27,7 @@ import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
 } from "./configs/project/service.js";
-import { DEFAULT_WORKER_NAME } from "./const.js";
+import { DEFAULT_DEAL_NAME } from "./const.js";
 import {
   AQUA_NAME_REQUIREMENTS,
   getModuleWasmPath,
@@ -144,15 +144,15 @@ export const addService = async ({
     !(
       isInteractive &&
       fluenceConfig.deals !== undefined &&
-      DEFAULT_WORKER_NAME in fluenceConfig.deals &&
-      !(fluenceConfig.deals[DEFAULT_WORKER_NAME].services ?? []).includes(
+      DEFAULT_DEAL_NAME in fluenceConfig.deals &&
+      !(fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? []).includes(
         serviceName,
       ) &&
       (interactive
         ? await confirm({
             message: `Do you want to add service ${color.yellow(
               serviceName,
-            )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
+            )} to a default worker ${color.yellow(DEFAULT_DEAL_NAME)}`,
           })
         : true)
     )
@@ -160,11 +160,11 @@ export const addService = async ({
     return serviceName;
   }
 
-  const defaultWorker = fluenceConfig.deals[DEFAULT_WORKER_NAME];
+  const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
 
-  fluenceConfig.deals[DEFAULT_WORKER_NAME] = {
-    ...defaultWorker,
-    services: [...(defaultWorker.services ?? []), serviceName],
+  fluenceConfig.deals[DEFAULT_DEAL_NAME] = {
+    ...defaultDeal,
+    services: [...(defaultDeal.services ?? []), serviceName],
   };
 
   await fluenceConfig.$commit();
@@ -172,7 +172,7 @@ export const addService = async ({
   if (interactive) {
     commandObj.log(
       `Added ${color.yellow(serviceName)} to ${color.yellow(
-        DEFAULT_WORKER_NAME,
+        DEFAULT_DEAL_NAME,
       )}`,
     );
   }

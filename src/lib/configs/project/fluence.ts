@@ -31,7 +31,7 @@ import {
   DEFAULT_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  DEFAULT_WORKER_NAME,
+  DEFAULT_DEAL_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   GLOBAL_CONFIG_FULL_FILE_NAME,
@@ -565,7 +565,7 @@ const configSchemaV5Obj = {
         },
       },
       properties: {
-        Worker_to_create_deal_for: {
+        dealName: {
           ...workerConfigSchemaObj,
           properties: {
             ...workerConfigSchemaObj.properties,
@@ -588,7 +588,7 @@ const configSchemaV5Obj = {
         },
       },
       properties: {
-        Worker_to_host: {
+        workerName: {
           ...workerConfigSchemaObj,
           properties: {
             ...workerConfigSchemaObj.properties,
@@ -621,7 +621,7 @@ aquaInputPath: ${relative(projectRootDir, await ensureSrcAquaMainPath())}
 
 # A map with worker names as keys and deals as values
 deals:
-  ${DEFAULT_WORKER_NAME}:
+  ${DEFAULT_DEAL_NAME}:
     minWorkers: ${MIN_WORKERS} # required amount of workers to activate the deal
     targetWorkers: ${TARGET_WORKERS} # max amount of workers in the deal
     services: [] # list of service names to be deployed to this worker
@@ -777,7 +777,7 @@ deals:
 # # If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain
 # hosts:
 #   # worker name
-#   ${DEFAULT_WORKER_NAME}:
+#   ${DEFAULT_DEAL_NAME}:
 #     peerIds: []
 #     services: [] # list of service names to be deployed to this worker
 #     spells: [] # list of spell names to be deployed to this worker

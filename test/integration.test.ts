@@ -27,6 +27,7 @@ import {
 import { initFluenceConfigWithPath } from "../src/lib/configs/project/fluence.js";
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
+  DEFAULT_DEAL_NAME,
   DEFAULT_WORKER_NAME,
   DOT_FLUENCE_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -450,13 +451,13 @@ describe("integration tests", () => {
 
       assert(
         fluenceConfig.deals !== undefined &&
-          fluenceConfig.deals[DEFAULT_WORKER_NAME] !== undefined,
-        `${DEFAULT_WORKER_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+          fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
+        `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
       );
 
-      fluenceConfig.deals[DEFAULT_WORKER_NAME].minWorkers = 3;
-      fluenceConfig.deals[DEFAULT_WORKER_NAME].services = ["myService"];
-      fluenceConfig.deals[DEFAULT_WORKER_NAME].spells = ["newSpell"];
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].minWorkers = 3;
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].services = ["myService"];
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = ["newSpell"];
       await fluenceConfig.$commit();
 
       await fluence({

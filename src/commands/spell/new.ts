@@ -24,7 +24,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
 import {
-  DEFAULT_WORKER_NAME,
+  DEFAULT_DEAL_NAME,
   FS_OPTIONS,
   SPELL_AQUA_FILE_CONTENT,
   SPELL_AQUA_FILE_NAME,
@@ -87,33 +87,31 @@ export default class New extends BaseCommand<typeof New> {
       !(
         isInteractive &&
         fluenceConfig.deals !== undefined &&
-        DEFAULT_WORKER_NAME in fluenceConfig.deals &&
-        !(fluenceConfig.deals[DEFAULT_WORKER_NAME].spells ?? []).includes(
+        DEFAULT_DEAL_NAME in fluenceConfig.deals &&
+        !(fluenceConfig.deals[DEFAULT_DEAL_NAME].spells ?? []).includes(
           spellName,
         ) &&
         (await confirm({
           message: `Do you want to add spell ${color.yellow(
             spellName,
-          )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
+          )} to a default worker ${color.yellow(DEFAULT_DEAL_NAME)}`,
         }))
       )
     ) {
       return;
     }
 
-    const defaultWorker = fluenceConfig.deals[DEFAULT_WORKER_NAME];
+    const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
 
-    fluenceConfig.deals[DEFAULT_WORKER_NAME] = {
-      ...defaultWorker,
-      spells: [...(defaultWorker.spells ?? []), spellName],
+    fluenceConfig.deals[DEFAULT_DEAL_NAME] = {
+      ...defaultDeal,
+      spells: [...(defaultDeal.spells ?? []), spellName],
     };
 
     await fluenceConfig.$commit();
 
     commandObj.log(
-      `Added ${color.yellow(spellName)} to ${color.yellow(
-        DEFAULT_WORKER_NAME,
-      )}`,
+      `Added ${color.yellow(spellName)} to ${color.yellow(DEFAULT_DEAL_NAME)}`,
     );
   }
 }
