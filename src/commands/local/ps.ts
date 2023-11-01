@@ -26,8 +26,10 @@ export default class PS extends BaseCommand<typeof PS> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(PS));
-    const dockerComposeConfig = await initNewDockerComposeConfig();
+    const { maybeFluenceConfig } = await initCli(this, await this.parse(PS));
+
+    const dockerComposeConfig =
+      await initNewDockerComposeConfig(maybeFluenceConfig);
 
     await dockerCompose({
       args: ["ps"],

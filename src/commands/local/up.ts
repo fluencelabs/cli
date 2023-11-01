@@ -27,8 +27,10 @@ export default class Up extends BaseCommand<typeof Up> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Up));
-    const dockerComposeConfig = await initNewDockerComposeConfig();
+    const { maybeFluenceConfig } = await initCli(this, await this.parse(Up));
+
+    const dockerComposeConfig =
+      await initNewDockerComposeConfig(maybeFluenceConfig);
 
     await dockerCompose({
       args: ["up", "-d"],

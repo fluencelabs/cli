@@ -40,7 +40,11 @@ export default class Init extends BaseCommand<typeof Init> {
     ...PROVIDER_CONFIG_FLAGS,
   };
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Init));
+    const { flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Init),
+    );
+
     const existingDockerCompose = await initReadonlyDockerComposeConfig();
 
     if (existingDockerCompose !== null) {
@@ -60,7 +64,7 @@ export default class Init extends BaseCommand<typeof Init> {
       await rm(existingDockerCompose.$getPath());
     }
 
-    const dockerCompose = await initNewDockerComposeConfig({
+    const dockerCompose = await initNewDockerComposeConfig(maybeFluenceConfig, {
       numberOfNoxes: flags.noxes,
     });
 

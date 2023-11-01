@@ -27,8 +27,10 @@ export default class Logs extends BaseCommand<typeof Logs> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Logs));
-    const dockerComposeConfig = await initNewDockerComposeConfig();
+    const { maybeFluenceConfig } = await initCli(this, await this.parse(Logs));
+
+    const dockerComposeConfig =
+      await initNewDockerComposeConfig(maybeFluenceConfig);
 
     await dockerCompose({
       args: ["logs"],

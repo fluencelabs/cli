@@ -226,7 +226,7 @@ export async function getSecretsPathForWriting(isUser: boolean) {
     : await ensureFluenceSecretsDir();
 }
 
-export const ensureUserFluenceConfigsDir = async (): Promise<string> => {
+export const ensureFluenceConfigsDir = async (): Promise<string> => {
   return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
 };
 

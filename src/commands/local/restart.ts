@@ -27,8 +27,13 @@ export default class Restart extends BaseCommand<typeof Restart> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Restart));
-    const dockerComposeConfig = await initNewDockerComposeConfig();
+    const { maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Restart),
+    );
+
+    const dockerComposeConfig =
+      await initNewDockerComposeConfig(maybeFluenceConfig);
 
     await dockerCompose({
       args: ["restart"],

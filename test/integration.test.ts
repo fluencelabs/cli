@@ -80,9 +80,10 @@ describe("integration tests", () => {
 
   afterAll(async () => {
     if (process.env.CI === "false") {
-      await fluence({
-        args: ["local", "down"],
-      });
+      await Promise.resolve();
+      // await fluence({
+      //   args: ["local", "down"],
+      // });
     }
   });
 
@@ -159,7 +160,7 @@ describe("integration tests", () => {
   });
 
   maybeConcurrentTest(
-    "should deploy workers with spell and service, resolve and run services on them",
+    "hajsldkfhsdjfhlkjsahdflk should deploy workers with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
       await init(cwd, "minimal");
@@ -402,7 +403,7 @@ describe("integration tests", () => {
   );
 
   maybeConcurrentTest(
-    "should deploy deals with spell and service, resolve and run services on them",
+    "hajsldkfhsdjfhlkjsahdflk should deploy deals with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
       await init(cwd, "quickstart");

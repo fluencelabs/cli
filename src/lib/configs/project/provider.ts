@@ -23,6 +23,8 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
   WEB_SOCKET_PORT_START,
   TCP_PORT_START,
+  HTTP_PORT_START,
+  DEFAULT_AQUAVM_POOL_SIZE,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
@@ -47,34 +49,44 @@ export type Offer = {
 };
 
 export type NoxConfigYAML = {
-  tcpPort: number;
-  webSocketPort: number;
+  tcpPort?: number;
+  webSocketPort?: number;
+  httpPort?: number;
+  aquavmPoolSize?: number;
 };
 
 export const commonNoxConfig: NoxConfigYAML = {
   tcpPort: TCP_PORT_START,
   webSocketPort: WEB_SOCKET_PORT_START,
+  httpPort: HTTP_PORT_START,
+  aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
 };
 
 const noxConfigYAMLSchema = {
   type: "object",
   properties: {
     tcpPort: {
+      nullable: true,
       type: "number",
       description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
     },
     webSocketPort: {
+      nullable: true,
       type: "number",
       description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
     },
-    bootstrapNodes: {
-      type: "array",
-      items: { type: "string" },
+    httpPort: {
       nullable: true,
-      description: `List of bootstrap nodes to use. Default: empty list`,
+      type: "number",
+      description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
+    },
+    aquavmPoolSize: {
+      nullable: true,
+      type: "number",
+      description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
     },
   },
-  required: ["tcpPort", "webSocketPort"],
+  required: [],
   nullable: true,
 } as const satisfies JSONSchemaType<NoxConfigYAML>;
 

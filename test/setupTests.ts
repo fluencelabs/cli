@@ -27,7 +27,6 @@ import {
 import {
   DOT_FLUENCE_DIR_NAME,
   SECRETS_DIR_NAME,
-  TEMPLATES,
   TMP_DIR_NAME,
 } from "../src/lib/const.js";
 import "../src/lib/setupEnvironment.js";
@@ -49,7 +48,8 @@ try {
 } catch {}
 
 const [firstPath, ...rest] = await Promise.all(
-  TEMPLATES.map((template) => {
+  (["quickstart", "minimal"] as const).map((template) => {
+    // TEMPLATES.map((template) => {
     return initFirstTime(template);
   }),
 );
