@@ -263,20 +263,11 @@ describe("integration tests", () => {
       fluenceConfig.hosts = {
         [DEFAULT_WORKER_NAME]: {
           peerIds,
+          services: [WD_NEW_SERVICE_2_NAME],
+          spells: [NEW_SPELL_NAME],
         },
       };
 
-      assert(
-        fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
-        `${DEFAULT_WORKER_NAME} is expected to be in workers property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-      );
-
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = [
-        WD_NEW_SERVICE_2_NAME,
-      ];
-
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
 
       await fluence({
@@ -458,21 +449,14 @@ describe("integration tests", () => {
       };
 
       assert(
-        fluenceConfig.workers !== undefined &&
-          fluenceConfig.workers[DEFAULT_WORKER_NAME] !== undefined,
-        `${DEFAULT_WORKER_NAME} is expected to be in workers property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-      );
-
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].services = ["myService"];
-      fluenceConfig.workers[DEFAULT_WORKER_NAME].spells = ["newSpell"];
-
-      assert(
         fluenceConfig.deals !== undefined &&
           fluenceConfig.deals[DEFAULT_WORKER_NAME] !== undefined,
         `${DEFAULT_WORKER_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
       );
 
       fluenceConfig.deals[DEFAULT_WORKER_NAME].minWorkers = 3;
+      fluenceConfig.deals[DEFAULT_WORKER_NAME].services = ["myService"];
+      fluenceConfig.deals[DEFAULT_WORKER_NAME].spells = ["newSpell"];
       await fluenceConfig.$commit();
 
       await fluence({

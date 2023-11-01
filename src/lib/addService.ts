@@ -143,9 +143,9 @@ export const addService = async ({
   if (
     !(
       isInteractive &&
-      fluenceConfig.workers !== undefined &&
-      DEFAULT_WORKER_NAME in fluenceConfig.workers &&
-      !(fluenceConfig.workers[DEFAULT_WORKER_NAME].services ?? []).includes(
+      fluenceConfig.deals !== undefined &&
+      DEFAULT_WORKER_NAME in fluenceConfig.deals &&
+      !(fluenceConfig.deals[DEFAULT_WORKER_NAME].services ?? []).includes(
         serviceName,
       ) &&
       (interactive
@@ -160,9 +160,9 @@ export const addService = async ({
     return serviceName;
   }
 
-  const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
+  const defaultWorker = fluenceConfig.deals[DEFAULT_WORKER_NAME];
 
-  fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
+  fluenceConfig.deals[DEFAULT_WORKER_NAME] = {
     ...defaultWorker,
     services: [...(defaultWorker.services ?? []), serviceName],
   };

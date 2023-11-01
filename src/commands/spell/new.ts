@@ -86,9 +86,9 @@ export default class New extends BaseCommand<typeof New> {
     if (
       !(
         isInteractive &&
-        fluenceConfig.workers !== undefined &&
-        DEFAULT_WORKER_NAME in fluenceConfig.workers &&
-        !(fluenceConfig.workers[DEFAULT_WORKER_NAME].spells ?? []).includes(
+        fluenceConfig.deals !== undefined &&
+        DEFAULT_WORKER_NAME in fluenceConfig.deals &&
+        !(fluenceConfig.deals[DEFAULT_WORKER_NAME].spells ?? []).includes(
           spellName,
         ) &&
         (await confirm({
@@ -101,9 +101,9 @@ export default class New extends BaseCommand<typeof New> {
       return;
     }
 
-    const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
+    const defaultWorker = fluenceConfig.deals[DEFAULT_WORKER_NAME];
 
-    fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
+    fluenceConfig.deals[DEFAULT_WORKER_NAME] = {
       ...defaultWorker,
       spells: [...(defaultWorker.spells ?? []), spellName],
     };

@@ -247,7 +247,7 @@ const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
   required: ["get"],
 } as const;
 
-const dealSchema: JSONSchemaType<Deal> = {
+const dealSchemaObj = {
   type: "object",
   properties: {
     minWorkers: {
@@ -268,9 +268,11 @@ const dealSchema: JSONSchemaType<Deal> = {
   required: [],
 } as const;
 
+const dealSchema: JSONSchemaType<Deal> = dealSchemaObj;
+
 const validateDealSchema = ajv.compile(dealSchema);
 
-const workerConfigSchema: JSONSchemaType<Worker> = {
+const workerConfigSchemaObj = {
   type: "object",
   description: "Worker config",
   properties: {
@@ -290,7 +292,9 @@ const workerConfigSchema: JSONSchemaType<Worker> = {
   required: [],
 } as const;
 
-const hostConfigSchema: JSONSchemaType<Host> = {
+const workerConfigSchema: JSONSchemaType<Worker> = workerConfigSchemaObj;
+
+const hostConfigSchemaObj = {
   type: "object",
   properties: {
     peerIds: {
@@ -301,7 +305,9 @@ const hostConfigSchema: JSONSchemaType<Host> = {
     },
   },
   required: ["peerIds"],
-};
+} as const;
+
+const hostConfigSchema: JSONSchemaType<Host> = hostConfigSchemaObj;
 
 const validateHostsSchema = ajv.compile(hostConfigSchema);
 
@@ -512,9 +518,6 @@ type ConfigV4 = Omit<ConfigV3, "version"> & {
 
 const configSchemaV4Obj = {
   ...configSchemaV3Obj,
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  title: FLUENCE_CONFIG_FULL_FILE_NAME,
-  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV3Obj.properties,
     version: { type: "number", const: 4 },
@@ -535,6 +538,71 @@ const configSchemaV4Obj = {
 
 const configSchemaV4: JSONSchemaType<ConfigV4> = configSchemaV4Obj;
 
+type ConfigV5 = Omit<ConfigV4, "workers" | "version" | "deals" | "hosts"> & {
+  version: 5;
+  deals?: Record<string, Deal & Worker>;
+  hosts?: Record<string, Host & Worker>;
+};
+
+const configSchemaV5Obj = {
+  ...configSchemaV4Obj,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FULL_FILE_NAME,
+  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
+  properties: {
+    ...configSchemaV4Obj.properties,
+    version: { type: "number", const: 5 },
+    deals: {
+      description:
+        "A map of objects with worker names as keys, each object defines a deal",
+      type: "object",
+      nullable: true,
+      additionalProperties: {
+        ...workerConfigSchemaObj,
+        properties: {
+          ...workerConfigSchemaObj.properties,
+          ...dealSchemaObj.properties,
+        },
+      },
+      properties: {
+        Worker_to_create_deal_for: {
+          ...workerConfigSchemaObj,
+          properties: {
+            ...workerConfigSchemaObj.properties,
+            ...dealSchemaObj.properties,
+          },
+        },
+      },
+      required: [],
+    },
+    hosts: {
+      description:
+        "A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on. If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain",
+      type: "object",
+      nullable: true,
+      additionalProperties: {
+        ...workerConfigSchemaObj,
+        properties: {
+          ...workerConfigSchemaObj.properties,
+          ...hostConfigSchemaObj.properties,
+        },
+      },
+      properties: {
+        Worker_to_host: {
+          ...workerConfigSchemaObj,
+          properties: {
+            ...workerConfigSchemaObj.properties,
+            ...hostConfigSchemaObj.properties,
+          },
+        },
+      },
+      required: [],
+    },
+  },
+} as const;
+
+const configSchemaV5: JSONSchemaType<ConfigV5> = configSchemaV5Obj;
+
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
 };
@@ -545,24 +613,19 @@ const getDefaultConfig = async (): Promise<string> => {
 # You can use \`fluence init\` command to generate a template for new Fluence project
 
 # config version
-version: 4
+version: 5
 
 # Path to the aqua file or directory with aqua files that you want to compile by default.
 # Must be relative to the project root dir
 aquaInputPath: ${relative(projectRootDir, await ensureSrcAquaMainPath())}
-
-# A map with worker names as keys and worker configs as values
-workers:
-  ${DEFAULT_WORKER_NAME}:
-    services: [] # list of service names to be deployed to this worker
-    spells: [] # list of spell names to be deployed to this worker
-
 
 # A map with worker names as keys and deals as values
 deals:
   ${DEFAULT_WORKER_NAME}:
     minWorkers: ${MIN_WORKERS} # required amount of workers to activate the deal
     targetWorkers: ${TARGET_WORKERS} # max amount of workers in the deal
+    services: [] # list of service names to be deployed to this worker
+    spells: [] # list of spell names to be deployed to this worker
 
 # # A list of custom relay multiaddresses to use when connecting to Fluence network
 # customFluenceEnv:
@@ -711,11 +774,13 @@ deals:
 #   cargo:
 #     ${MARINE_CARGO_DEPENDENCY}: ${versions.cargo.marine}
 #
-# # if you want to deploy your services to specific peerIds. Soon it will be deprecated in favor of \`deals\` property
+# # If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain
 # hosts:
 #   # worker name
 #   ${DEFAULT_WORKER_NAME}:
 #     peerIds: []
+#     services: [] # list of service names to be deployed to this worker
+#     spells: [] # list of spell names to be deployed to this worker
 # # Space separated \`cargo build\` flags and args to pass to marine build. Default: ${DEFAULT_MARINE_BUILD_ARGS}
 # ${MARINE_BUILD_ARGS_PROPERTY}: '${DEFAULT_MARINE_BUILD_ARGS}'
 # # IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: ${DEFAULT_IPFS_ADDRESS} or ${LOCAL_IPFS_ADDRESS} if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)
@@ -735,6 +800,7 @@ const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 const validateConfigSchemaV3 = ajv.compile(configSchemaV3);
+const validateConfigSchemaV4 = ajv.compile(configSchemaV4);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -788,7 +854,7 @@ const migrations: Migrations<Config> = [
     if (!validateConfigSchemaV2(config)) {
       throw new Error(
         `Migration error. Errors: ${await validationErrorToString(
-          validateConfigSchemaV1.errors,
+          validateConfigSchemaV2.errors,
         )}`,
       );
     }
@@ -821,7 +887,7 @@ const migrations: Migrations<Config> = [
     if (!validateConfigSchemaV3(config)) {
       throw new Error(
         `Migration error. Errors: ${await validationErrorToString(
-          validateConfigSchemaV1.errors,
+          validateConfigSchemaV3.errors,
         )}`,
       );
     }
@@ -850,10 +916,46 @@ const migrations: Migrations<Config> = [
         : { defaultSecretKeyName: projectSecretsConfig.defaultKeyPairName }),
     };
   },
+  async (config: Config): Promise<ConfigV5> => {
+    if (!validateConfigSchemaV4(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV4.errors,
+        )}`,
+      );
+    }
+
+    const { workers, ...restConfig } = config;
+
+    const res: ConfigV5 = {
+      ...restConfig,
+      version: 5,
+    };
+
+    if (res.hosts !== undefined) {
+      res.hosts = Object.fromEntries(
+        Object.entries(res.hosts).map(([k, v]) => {
+          const worker = workers?.[k] ?? {};
+          return [k, { ...v, ...worker }] as const;
+        }),
+      );
+    }
+
+    if (res.deals !== undefined) {
+      res.deals = Object.fromEntries(
+        Object.entries(res.deals).map(([k, v]) => {
+          const worker = workers?.[k] ?? {};
+          return [k, { ...v, ...worker }] as const;
+        }),
+      );
+    }
+
+    return res;
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3 | ConfigV4;
-type LatestConfig = ConfigV4;
+type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3 | ConfigV4 | ConfigV5;
+type LatestConfig = ConfigV5;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 export type FluenceConfigWithServices = FluenceConfig & {
@@ -867,13 +969,9 @@ export function isFluenceConfigWithServices(
 }
 
 const checkDuplicatesAndPresence = (
-  fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">,
+  fluenceConfig: Pick<FluenceConfig, "spells" | "services" | "hosts" | "deals">,
   servicesOrSpells: "services" | "spells",
 ) => {
-  if (fluenceConfig.workers === undefined) {
-    return true;
-  }
-
   const servicesOrSpellsSet = new Set(
     Object.keys(fluenceConfig[servicesOrSpells] ?? {}).flatMap(
       (serviceOrSpellName) => {
@@ -882,97 +980,102 @@ const checkDuplicatesAndPresence = (
     ),
   );
 
-  return Object.entries(fluenceConfig.workers).reduce<string | true>(
+  const hostsValidity = Object.entries(fluenceConfig.hosts ?? {}).reduce<
+    string | true
+  >((acc, [workerName, workerConfig]) => {
+    return checkDuplicatesAndPresenceImplementation({
+      workerConfig,
+      servicesOrSpells,
+      servicesOrSpellsSet,
+      acc,
+      workerName,
+    });
+  }, true);
+
+  if (typeof hostsValidity === "string") {
+    return hostsValidity;
+  }
+
+  return Object.entries(fluenceConfig.deals ?? {}).reduce<string | true>(
     (acc, [workerName, workerConfig]) => {
-      const workerServicesOrSpells = workerConfig[servicesOrSpells] ?? [];
-      const workerServicesOrSpellsSet = new Set(workerServicesOrSpells);
-
-      const notListedInFluenceYAML = workerServicesOrSpells.filter(
-        (serviceName) => {
-          return !servicesOrSpellsSet.has(serviceName);
-        },
-      );
-
-      const maybePreviousError = typeof acc === "string" ? acc : null;
-
-      const maybeNotListedError =
-        notListedInFluenceYAML.length !== 0
-          ? `Worker ${color.yellow(
-              workerName,
-            )} has ${servicesOrSpells} that are not listed in ${color.yellow(
-              "services",
-            )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
-              [...new Set(notListedInFluenceYAML)].join(", "),
-            )}`
-          : null;
-
-      const maybeHasDuplicatesError =
-        workerServicesOrSpellsSet.size !== workerServicesOrSpells.length
-          ? `Worker ${color.yellow(
-              workerName,
-            )} has duplicated ${servicesOrSpells} in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
-              workerServicesOrSpells.filter((serviceName, index) => {
-                return workerServicesOrSpells.indexOf(serviceName) !== index;
-              }),
-            )}`
-          : null;
-
-      const errors = [
-        maybePreviousError,
-        maybeNotListedError,
-        maybeHasDuplicatesError,
-      ].filter((error): error is string => {
-        return error !== null;
+      return checkDuplicatesAndPresenceImplementation({
+        workerConfig,
+        servicesOrSpells,
+        servicesOrSpellsSet,
+        acc,
+        workerName,
       });
-
-      return errors.length === 0 ? true : errors.join("\n");
     },
     true,
   );
 };
 
+type CheckDuplicatesAndPresenceImplementationArgs = {
+  workerConfig: Deal & Worker;
+  servicesOrSpells: "services" | "spells";
+  servicesOrSpellsSet: Set<string>;
+  acc: string | boolean;
+  workerName: string;
+};
+
+function checkDuplicatesAndPresenceImplementation({
+  workerConfig,
+  servicesOrSpells,
+  servicesOrSpellsSet,
+  acc,
+  workerName,
+}: CheckDuplicatesAndPresenceImplementationArgs) {
+  const workerServicesOrSpells = workerConfig[servicesOrSpells] ?? [];
+  const workerServicesOrSpellsSet = new Set(workerServicesOrSpells);
+
+  const notListedInFluenceYAML = workerServicesOrSpells.filter(
+    (serviceName) => {
+      return !servicesOrSpellsSet.has(serviceName);
+    },
+  );
+
+  const maybePreviousError = typeof acc === "string" ? acc : null;
+
+  const maybeNotListedError =
+    notListedInFluenceYAML.length !== 0
+      ? `Worker ${color.yellow(
+          workerName,
+        )} has ${servicesOrSpells} that are not listed in ${color.yellow(
+          "services",
+        )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
+          [...new Set(notListedInFluenceYAML)].join(", "),
+        )}`
+      : null;
+
+  const maybeHasDuplicatesError =
+    workerServicesOrSpellsSet.size !== workerServicesOrSpells.length
+      ? `Worker ${color.yellow(
+          workerName,
+        )} has duplicated ${servicesOrSpells} in ${FLUENCE_CONFIG_FULL_FILE_NAME}: ${color.yellow(
+          workerServicesOrSpells.filter((serviceName, index) => {
+            return workerServicesOrSpells.indexOf(serviceName) !== index;
+          }),
+        )}`
+      : null;
+
+  const errors = [
+    maybePreviousError,
+    maybeNotListedError,
+    maybeHasDuplicatesError,
+  ].filter((error): error is string => {
+    return error !== null;
+  });
+
+  return errors.length === 0 ? true : errors.join("\n");
+}
+
 const validateWorkers = (
-  fluenceConfig: Pick<FluenceConfig, "workers" | "spells" | "services">,
+  fluenceConfig: Pick<FluenceConfig, "spells" | "services">,
 ) => {
   return validateBatch(
     checkDuplicatesAndPresence(fluenceConfig, "services"),
     checkDuplicatesAndPresence(fluenceConfig, "spells"),
   );
-};
-
-const validateHostsAndDeals = (
-  fluenceConfig: Pick<FluenceConfig, "hosts" | "deals" | "workers">,
-  hostsOrDealsProperty: "hosts" | "deals",
-) => {
-  const hostsOrDeals = fluenceConfig[hostsOrDealsProperty];
-
-  if (hostsOrDeals === undefined) {
-    return true;
-  }
-
-  const workers = fluenceConfig["workers"];
-
-  const workersSet = new Set(
-    Object.keys(workers ?? {}).flatMap((serviceName) => {
-      return serviceName;
-    }),
-  );
-
-  const workerNamesErrors = Object.keys(hostsOrDeals)
-    .map((workerName) => {
-      return workersSet.has(workerName)
-        ? null
-        : `Worker named ${color.yellow(workerName)} listed in ${color.yellow(
-            hostsOrDealsProperty,
-          )} property must be listed in ${color.yellow(
-            "workers",
-          )} property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
-    })
-    .filter((error): error is string => {
-      return error !== null;
-    });
-
-  return workerNamesErrors.length === 0 ? true : workerNamesErrors.join("\n");
 };
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
@@ -982,8 +1085,6 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
 
   const validity = validateBatch(
     validateWorkers(config),
-    validateHostsAndDeals(config, "hosts"),
-    validateHostsAndDeals(config, "deals"),
     await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
     await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
@@ -1002,8 +1103,9 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
     configSchemaV2,
     configSchemaV3,
     configSchemaV4,
+    configSchemaV5,
   ],
-  latestSchema: configSchemaV4,
+  latestSchema: configSchemaV5,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath,
@@ -1030,4 +1132,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV4;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV5;
