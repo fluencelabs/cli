@@ -577,7 +577,7 @@ const configSchemaV5Obj = {
     },
     hosts: {
       description:
-        "A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on. If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain",
+        "A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on. Intended to be used by providers to deploy directly without using the blockchain",
       type: "object",
       nullable: true,
       additionalProperties: {
