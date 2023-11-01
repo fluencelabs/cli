@@ -41,11 +41,11 @@ A map of objects with worker names as keys, each object defines a deal
 
 ### Properties
 
-| Property                    | Type                                 | Required | Description   |
-|-----------------------------|--------------------------------------|----------|---------------|
-| `Worker_to_create_deal_for` | [object](#worker_to_create_deal_for) | No       | Worker config |
+| Property   | Type                | Required | Description   |
+|------------|---------------------|----------|---------------|
+| `dealName` | [object](#dealname) | No       | Worker config |
 
-### Worker_to_create_deal_for
+### dealName
 
 Worker config
 
@@ -95,11 +95,11 @@ A map of objects with worker names as keys, each object defines a list of peer I
 
 ### Properties
 
-| Property         | Type                      | Required | Description   |
-|------------------|---------------------------|----------|---------------|
-| `Worker_to_host` | [object](#worker_to_host) | No       | Worker config |
+| Property     | Type                  | Required | Description   |
+|--------------|-----------------------|----------|---------------|
+| `workerName` | [object](#workername) | No       | Worker config |
 
-### Worker_to_host
+### workerName
 
 Worker config
 
