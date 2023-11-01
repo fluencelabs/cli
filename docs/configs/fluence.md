@@ -16,7 +16,7 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 | `deals`                | [object](#deals)            | No       | A map of objects with worker names as keys, each object defines a deal                                                                                                                                                                                                                                                                                                                                                               |
 | `defaultSecretKeyName` | string                      | No       | Secret key with this name will be used by default by js-client inside CLI to run Aqua code                                                                                                                                                                                                                                                                                                                                           |
 | `dependencies`         | [object](#dependencies)     | No       | (For advanced users) Overrides for the project dependencies                                                                                                                                                                                                                                                                                                                                                                          |
-| `hosts`                | [object](#hosts)            | No       | A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on                                                                                                                                                                                                                                                                                                                             |
+| `hosts`                | [object](#hosts)            | No       | A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on. If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain                                                                                                                                                                                  |
 | `ipfsAddr`             | string                      | No       | IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: /dns4/ipfs.fluence.dev/tcp/5001 or /ip4/127.0.0.1/tcp/5001 if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)                                                                                                                                                                             |
 | `marineBuildArgs`      | string                      | No       | Space separated `cargo build` flags and args to pass to marine build. Can be overridden using --marine-build-args flag Default: --release                                                                                                                                                                                                                                                                                            |
 | `relaysPath`           | string                      | No       | Path to the directory where you want relays.json file to be generated. Must be relative to the project root dir. This file contains a list of relays to use when connecting to Fluence network and depends on the default environment that you use in your project                                                                                                                                                                   |
@@ -41,18 +41,22 @@ A map of objects with worker names as keys, each object defines a deal
 
 ### Properties
 
-| Property                    | Type                                 | Required | Description |
-|-----------------------------|--------------------------------------|----------|-------------|
-| `Worker_to_create_deal_for` | [object](#worker_to_create_deal_for) | No       |             |
+| Property                    | Type                                 | Required | Description   |
+|-----------------------------|--------------------------------------|----------|---------------|
+| `Worker_to_create_deal_for` | [object](#worker_to_create_deal_for) | No       | Worker config |
 
 ### Worker_to_create_deal_for
 
+Worker config
+
 #### Properties
 
-| Property        | Type   | Required | Description                           |
-|-----------------|--------|----------|---------------------------------------|
-| `minWorkers`    | number | No       | Required workers to activate the deal |
-| `targetWorkers` | number | No       | Max workers in the deal               |
+| Property        | Type     | Required | Description                                                                                       |
+|-----------------|----------|----------|---------------------------------------------------------------------------------------------------|
+| `minWorkers`    | number   | No       | Required workers to activate the deal                                                             |
+| `services`      | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
+| `spells`        | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
+| `targetWorkers` | number   | No       | Max workers in the deal                                                                           |
 
 ## dependencies
 
@@ -87,21 +91,25 @@ A map of npm dependency versions. Fluence CLI ensures dependencies are installed
 
 ## hosts
 
-A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on
+A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on. If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain
 
 ### Properties
 
-| Property         | Type                      | Required | Description |
-|------------------|---------------------------|----------|-------------|
-| `Worker_to_host` | [object](#worker_to_host) | No       |             |
+| Property         | Type                      | Required | Description   |
+|------------------|---------------------------|----------|---------------|
+| `Worker_to_host` | [object](#worker_to_host) | No       | Worker config |
 
 ### Worker_to_host
 
+Worker config
+
 #### Properties
 
-| Property  | Type     | Required | Description                       |
-|-----------|----------|----------|-----------------------------------|
-| `peerIds` | string[] | **Yes**  | An array of peer IDs to deploy on |
+| Property   | Type     | Required | Description                                                                                       |
+|------------|----------|----------|---------------------------------------------------------------------------------------------------|
+| `peerIds`  | string[] | No       | An array of peer IDs to deploy on                                                                 |
+| `services` | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
+| `spells`   | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
 
 ## services
 
