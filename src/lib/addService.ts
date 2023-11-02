@@ -152,7 +152,7 @@ export const addService = async ({
         ? await confirm({
             message: `Do you want to add service ${color.yellow(
               serviceName,
-            )} to a default worker ${color.yellow(DEFAULT_DEAL_NAME)}`,
+            )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
           })
         : true)
     )

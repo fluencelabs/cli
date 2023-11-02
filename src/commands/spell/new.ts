@@ -94,7 +94,7 @@ export default class New extends BaseCommand<typeof New> {
         (await confirm({
           message: `Do you want to add spell ${color.yellow(
             spellName,
-          )} to a default worker ${color.yellow(DEFAULT_DEAL_NAME)}`,
+          )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
         }))
       )
     ) {
