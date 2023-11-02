@@ -151,6 +151,10 @@ export async function ensureCustomAddrsAndPeerIds(
     );
   }
 
+  if (fluenceConfig.customFluenceEnv?.relays !== undefined) {
+    return addrsToNodes(fluenceConfig.customFluenceEnv.relays);
+  }
+
   const contractsEnv = await list({
     message: "Select contracts environment for your custom network",
     options: [...CONTRACTS_ENV],
