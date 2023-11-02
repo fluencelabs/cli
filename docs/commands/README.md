@@ -10,11 +10,11 @@
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
-* [`fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-cargo-install-package-name--package-nameversion)
-* [`fluence dependency install`](#fluence-dependency-install)
-* [`fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dependency-npm-install-package-name--package-nameversion)
-* [`fluence dependency reset`](#fluence-dependency-reset)
-* [`fluence dependency versions`](#fluence-dependency-versions)
+* [`fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-install-package-name--package-nameversion)
+* [`fluence dep install`](#fluence-dep-install)
+* [`fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-install-package-name--package-nameversion)
+* [`fluence dep reset`](#fluence-dep-reset)
+* [`fluence dep versions`](#fluence-dep-versions)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
@@ -344,13 +344,13 @@ EXAMPLES
 
 _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/default/peers.ts)_
 
-## `fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+## `fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo directory)
 
 ```
 USAGE
-  $ fluence dependency cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
+  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
     [--global]
 
 ARGUMENTS
@@ -373,22 +373,21 @@ DESCRIPTION
   directory)
 
 ALIASES
-  $ fluence dependency cargo i
   $ fluence dep cargo i
 
 EXAMPLES
-  $ fluence dependency cargo install
+  $ fluence dep cargo install
 ```
 
-_See code: [src/commands/dependency/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dependency/cargo/install.ts)_
+_See code: [src/commands/dep/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dep/cargo/install.ts)_
 
-## `fluence dependency install`
+## `fluence dep install`
 
 Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ```
 USAGE
-  $ fluence dependency install [--no-input] [--force]
+  $ fluence dep install [--no-input] [--force]
 
 FLAGS
   --force     Force install even if the dependency/dependencies is/are already installed
@@ -398,22 +397,21 @@ DESCRIPTION
   Install all project dependencies (dependencies are cached inside user's .fluence directory)
 
 ALIASES
-  $ fluence dependency i
   $ fluence dep i
 
 EXAMPLES
-  $ fluence dependency install
+  $ fluence dep install
 ```
 
-_See code: [src/commands/dependency/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dependency/install.ts)_
+_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dep/install.ts)_
 
-## `fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+## `fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm directory)
 
 ```
 USAGE
-  $ fluence dependency npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
+  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -432,22 +430,21 @@ DESCRIPTION
   directory)
 
 ALIASES
-  $ fluence dependency npm i
   $ fluence dep npm i
 
 EXAMPLES
-  $ fluence dependency npm install
+  $ fluence dep npm install
 ```
 
-_See code: [src/commands/dependency/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dependency/npm/install.ts)_
+_See code: [src/commands/dep/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dep/npm/install.ts)_
 
-## `fluence dependency reset`
+## `fluence dep reset`
 
 Reset all project dependencies to recommended versions for the current Fluence CLI version
 
 ```
 USAGE
-  $ fluence dependency reset [--no-input] [--global] [--all]
+  $ fluence dep reset [--no-input] [--global] [--all]
 
 FLAGS
   --all       Remove all dependencies, not only recommended ones
@@ -458,22 +455,21 @@ DESCRIPTION
   Reset all project dependencies to recommended versions for the current Fluence CLI version
 
 ALIASES
-  $ fluence dependency r
   $ fluence dep r
 
 EXAMPLES
-  $ fluence dependency reset
+  $ fluence dep reset
 ```
 
-_See code: [src/commands/dependency/reset.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dependency/reset.ts)_
+_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dep/reset.ts)_
 
-## `fluence dependency versions`
+## `fluence dep versions`
 
 Get versions of all dependencies
 
 ```
 USAGE
-  $ fluence dependency versions [--no-input] [--default]
+  $ fluence dep versions [--no-input] [--default]
 
 FLAGS
   --default   Display default npm and cargo dependencies and their versions for current CLI version. Default npm
@@ -484,15 +480,13 @@ DESCRIPTION
   Get versions of all dependencies
 
 ALIASES
-  $ fluence dependency v
   $ fluence dep v
-  $ fluence dep versions
 
 EXAMPLES
-  $ fluence dependency versions
+  $ fluence dep versions
 ```
 
-_See code: [src/commands/dependency/versions.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dependency/versions.ts)_
+_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.12.0/src/commands/dep/versions.ts)_
 
 ## `fluence help [COMMANDS]`
 
