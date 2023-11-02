@@ -29,7 +29,7 @@ import JSClientPackageJSON from "../../versions/js-client.package.json" assert {
 import versions from "../../versions.json" assert { type: "json" };
 
 export default class Versions extends BaseCommand<typeof Versions> {
-  static override aliases = ["dependency:v", "dep:v", "dep:versions"];
+  static override aliases = ["dep:v"];
   static override description = "Get versions of all dependencies";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {

@@ -24,7 +24,7 @@ import { installAllNPMDependencies } from "../../lib/npm.js";
 import { installAllCargoDependencies } from "../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
-  static override aliases = ["dependency:i", "dep:i"];
+  static override aliases = ["dep:i"];
   static override description = `Install all project dependencies (dependencies are cached inside user's ${DOT_FLUENCE_DIR_NAME} directory)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
