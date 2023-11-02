@@ -184,35 +184,9 @@ export const prepareForDeploy = async ({
   }
 
   const { services: servicesFromFluenceConfig = {} } = fluenceConfig;
-  const { workers: workersFromFluenceConfig = {} } = fluenceConfig;
 
-  const workersFromFluenceConfigArray = Object.keys(workersFromFluenceConfig);
-
-  if (workersFromFluenceConfigArray.length === 0) {
-    return commandObj.error(
-      `You must have a ${color.yellow(
-        "workers",
-      )} property in ${fluenceConfig.$getPath()} that contains a record with at least one worker name as a key`,
-    );
-  }
-
-  const workerNamesNotFoundInWorkersConfig = workersToDeploy.filter(
-    (workerName) => {
-      return !workersFromFluenceConfigArray.includes(workerName);
-    },
-  );
-
-  if (workerNamesNotFoundInWorkersConfig.length !== 0) {
-    commandObj.error(
-      `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
-        .map((workerName) => {
-          return color.yellow(workerName);
-        })
-        .join(", ")} in ${color.yellow(
-        fluenceConfig.$getPath(),
-      )} please check the spelling and try again`,
-    );
-  }
+  const { [isDealDeploy ? "deals" : "hosts"]: workersFromFluenceConfig = {} } =
+    fluenceConfig;
 
   const workersToDeployConfirmed = await handlePreviouslyDeployedWorkers(
     maybeDeployedHostsOrDeals,
@@ -606,7 +580,7 @@ export const ensureAquaFileWithWorkerInfo = async (
   fluenceConfig: FluenceConfigReadonly,
 ) => {
   const dealWorkers = Object.fromEntries(
-    Object.entries({ ...fluenceConfig.workers, ...workersConfig.deals }).map(
+    Object.entries({ ...fluenceConfig.deals, ...workersConfig.deals }).map(
       ([workerName, info]) => {
         const key = workerName;
         // if worker was deployed put deal info, otherwise put null
@@ -618,7 +592,7 @@ export const ensureAquaFileWithWorkerInfo = async (
   );
 
   const directHostingWorkers = Object.fromEntries(
-    Object.entries({ ...fluenceConfig.workers, ...workersConfig.hosts }).map(
+    Object.entries({ ...fluenceConfig.hosts, ...workersConfig.hosts }).map(
       ([workerName, info]) => {
         const key = workerName;
         // if worker was deployed put hosts info, otherwise put null
@@ -665,7 +639,9 @@ type ResolveWorkerArgs = {
     FluenceConfig["deals"] | FluenceConfig["hosts"]
   >[string];
   workerName: string;
-  workersFromFluenceConfig: NonNullable<FluenceConfig["workers"]>;
+  workersFromFluenceConfig: NonNullable<
+    FluenceConfig["deals"] | FluenceConfig["hosts"]
+  >;
   serviceConfigs: {
     serviceName: string;
     overrideModules: OverrideModules | undefined;

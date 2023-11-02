@@ -78,9 +78,29 @@ export default class Remove extends BaseCommand<typeof Remove> {
       },
     );
 
-    if (fluenceConfig.workers !== undefined) {
-      fluenceConfig.workers = Object.fromEntries(
-        Object.entries(fluenceConfig.workers).map(([workerName, worker]) => {
+    if (fluenceConfig.deals !== undefined) {
+      fluenceConfig.deals = Object.fromEntries(
+        Object.entries(fluenceConfig.deals).map(([workerName, worker]) => {
+          return [
+            workerName,
+            {
+              ...worker,
+              ...(worker.services === undefined
+                ? {}
+                : {
+                    services: worker.services.filter((service) => {
+                      return service !== serviceNameToRemove;
+                    }),
+                  }),
+            },
+          ];
+        }),
+      );
+    }
+
+    if (fluenceConfig.hosts !== undefined) {
+      fluenceConfig.hosts = Object.fromEntries(
+        Object.entries(fluenceConfig.hosts).map(([workerName, worker]) => {
           return [
             workerName,
             {

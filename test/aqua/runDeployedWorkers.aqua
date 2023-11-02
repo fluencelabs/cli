@@ -14,7 +14,7 @@ data Answer:
 
 func runDeployedServices() -> *Answer:
     hosts <- Hosts.get()
-    installationSpells = hosts.defaultWorker!.installationSpells
+    installationSpells = hosts.workerName!.installationSpells
     answers: *Answer
     for s <- installationSpells:
         on s.workerId via s.hostId:
@@ -25,8 +25,8 @@ func runDeployedServices() -> *Answer:
 
 func areAllWorkersRemoved() -> bool:
     hosts <- Hosts.get()
-    installationSpells = hosts.defaultWorker!.installationSpells
-    dummyDealId = hosts.defaultWorker!.dummyDealId
+    installationSpells = hosts.workerName!.installationSpells
+    dummyDealId = hosts.workerName!.dummyDealId
 
     allWorkersRemoved: ?bool
 
