@@ -36,21 +36,21 @@ fi
 
 # Validate and set system architecture
 case "$ARCH" in
-"x86_64") arch="x64" ;;
-"arm64" | "aarch64") arch="arm64" ;;
-*)
-  echo "Error: Unsupported architecture - $ARCH"
-  exit 1
+  "x86_64") arch="x64" ;;
+  "arm64" | "aarch64") arch="arm64" ;;
+  *)
+    echo "Error: Unsupported architecture - $ARCH"
+    exit 1
   ;;
 esac
 
 # Validate and set the operating system type
 case "$OS" in
-"darwin") os="darwin" ;;
-"linux") os="linux" ;;
-*)
-  echo "Error: Unsupported OS - $OS"
-  exit 1
+  "darwin") os="darwin" ;;
+  "linux") os="linux" ;;
+  *)
+    echo "Error: Unsupported OS - $OS"
+    exit 1
   ;;
 esac
 
