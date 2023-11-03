@@ -171,8 +171,6 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   }
 
   if (fluenceEnv === "local") {
-    console.log(template, projectRootDir);
-
     await initNewProviderConfig({
       numberOfNoxes: options.numberOfNoxes,
     });
