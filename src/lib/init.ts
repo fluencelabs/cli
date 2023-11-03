@@ -16,7 +16,7 @@
 
 import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
+import { basename, join, relative, resolve } from "node:path";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -31,30 +31,23 @@ import {
   RECOMMENDED_GITIGNORE_CONTENT,
   TEMPLATES,
   isTemplate,
-  PACKAGE_JSON_FILE_NAME,
-  INDEX_JS_FILE_NAME,
-  INDEX_TS_FILE_NAME,
-  SRC_DIR_NAME,
-  TS_CONFIG_FILE_NAME,
   JS_CLIENT_NPM_DEPENDENCY,
   CLI_NAME_FULL,
   getMainAquaFileContent,
   READMEs,
 } from "../lib/const.js";
 import {
-  ensureDefaultAquaJSPath,
-  ensureDefaultAquaTSPath,
-  ensureDefaultJSDirPath,
-  ensureDefaultTSDirPath,
+  ensureSrcAquaPath,
   ensureFluenceAquaServicesPath,
-  ensureSrcServicesDir,
+  ensureServicesDir,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
   setProjectRootDir,
   getREADMEPath,
-  ensureDefaultJSSrcPath,
-  ensureDefaultTSSrcPath,
+  ensureSrcPath,
   projectRootDir,
+  getPackageJSONPath,
+  getTsConfigPath,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -74,7 +67,7 @@ import { ensureAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { updateRelaysJSON, resolveFluenceEnv } from "./multiaddres.js";
-import { ensureSrcAquaMainPath } from "./paths.js";
+import { ensureAquaMainPath, ensureSrcIndexTSorJSPath } from "./paths.js";
 
 export const jsTemplateIndexJsContent = `/* eslint-disable */
 // @ts-nocheck
@@ -178,13 +171,15 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   }
 
   if (fluenceEnv === "local") {
+    console.log(template, projectRootDir);
+
     await initNewProviderConfig({
       numberOfNoxes: options.numberOfNoxes,
     });
   }
 
   await writeFile(
-    await ensureSrcAquaMainPath(),
+    await ensureAquaMainPath(),
     getMainAquaFileContent(template !== "quickstart"),
     FS_OPTIONS,
   );
@@ -217,10 +212,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     case "quickstart": {
       const serviceName = "myService";
 
-      const absoluteServicePath = join(
-        await ensureSrcServicesDir(),
-        serviceName,
-      );
+      const absoluteServicePath = join(await ensureServicesDir(), serviceName);
 
       const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
       await generateNewModule(pathToModuleDir);
@@ -326,36 +318,28 @@ const initTSorJSProject = async ({
   isJS,
   fluenceConfig,
 }: InitTSorJSProjectArg): Promise<void> => {
-  const defaultAquaTSorJSPath = isJS
-    ? await ensureDefaultAquaJSPath()
-    : await ensureDefaultAquaTSPath();
+  const defaultAquaTSorJSPath = await ensureSrcAquaPath();
 
   const defaultAquaTSorJSPathRelative = relative(
     projectRootDir,
     defaultAquaTSorJSPath,
   );
 
-  const defaultTSorJSDirPath = isJS
-    ? await ensureDefaultJSDirPath()
-    : await ensureDefaultTSDirPath();
+  const indexFilePath = await ensureSrcIndexTSorJSPath(isJS);
+  const indexFileName = basename(indexFilePath);
 
-  const indexFileName = isJS ? INDEX_JS_FILE_NAME : INDEX_TS_FILE_NAME;
-
-  const PACKAGE_JSON = {
+  const packageJson = {
     type: "module",
     version: "1.0.0",
-    description: "",
     main: indexFileName,
     scripts: {
-      start: `${isJS ? "node" : "ts-node"} ${join(
-        SRC_DIR_NAME,
-        indexFileName,
+      start: `node${isJS ? "" : "--loader ts-node/esm"} ${relative(
+        projectRootDir,
+        indexFilePath,
       )}`,
       ...(isJS ? {} : { build: "tsc -b" }),
     },
     keywords: ["fluence"],
-    author: "",
-    license: "ISC",
     dependencies: {
       [JS_CLIENT_NPM_DEPENDENCY]:
         CLIPackageJSON.dependencies[JS_CLIENT_NPM_DEPENDENCY],
@@ -371,21 +355,14 @@ const initTSorJSProject = async ({
   } as const;
 
   await writeFile(
-    join(defaultTSorJSDirPath, PACKAGE_JSON_FILE_NAME),
-    JSON.stringify(PACKAGE_JSON, null, 2) + "\n",
+    getPackageJSONPath(),
+    `${jsonStringify(packageJson)}\n`,
     FS_OPTIONS,
   );
 
-  await writeFile(
-    join(defaultTSorJSDirPath, SRC_DIR_NAME, indexFileName),
-    jsTemplateIndexJsContent,
-    FS_OPTIONS,
-  );
+  await writeFile(indexFilePath, jsTemplateIndexJsContent, FS_OPTIONS);
 
-  fluenceConfig.relaysPath = relative(
-    projectRootDir,
-    isJS ? await ensureDefaultJSSrcPath() : await ensureDefaultTSSrcPath(),
-  );
+  fluenceConfig.relaysPath = relative(projectRootDir, await ensureSrcPath());
 
   if (isJS) {
     fluenceConfig.aquaOutputJSPath = defaultAquaTSorJSPathRelative;
@@ -405,8 +382,8 @@ const initTSorJSProject = async ({
     };
 
     await writeFile(
-      join(defaultTSorJSDirPath, TS_CONFIG_FILE_NAME),
-      jsonStringify(TS_CONFIG),
+      getTsConfigPath(),
+      `${jsonStringify(TS_CONFIG)}\n`,
       FS_OPTIONS,
     );
 
@@ -417,7 +394,7 @@ const initTSorJSProject = async ({
 
   await compileToFiles({
     compileArgs: {
-      filePath: await ensureSrcAquaMainPath(),
+      filePath: await ensureAquaMainPath(),
       imports: await ensureAquaImports({
         maybeFluenceConfig: fluenceConfig,
       }),

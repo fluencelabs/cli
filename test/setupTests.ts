@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "assert";
 import { cp } from "fs/promises";
 import { join } from "path";
 
@@ -33,7 +32,12 @@ import {
 import "../src/lib/setupEnvironment.js";
 import { addrsToNodes } from "../src/lib/multiaddres.js";
 
-import { fluenceEnv, fluence, initFirstTime } from "./helpers.js";
+import {
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+  fluenceEnv,
+  fluence,
+  initFirstTime,
+} from "./helpers.js";
 
 // eslint-disable-next-line no-console
 console.log("Setting up tests...");
@@ -48,23 +52,21 @@ try {
   });
 } catch {}
 
-const [firstPath, ...rest] = await Promise.all(
+const [, ...rest] = await Promise.all(
   TEMPLATES.map((template) => {
     return initFirstTime(template);
   }),
 );
 
-assert(firstPath !== undefined, "There is always at least one template");
-
 if (fluenceEnv === "local") {
   await fluence({
     args: ["local", "up"],
-    cwd: firstPath,
+    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
   });
 }
 
-const firstTemplateSecretsPath = join(
-  firstPath,
+const secretsPath = join(
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
   DOT_FLUENCE_DIR_NAME,
   SECRETS_DIR_NAME,
 );
@@ -73,11 +75,10 @@ export const NO_PROJECT = "shouldWorkWithoutProject";
 
 await Promise.all(
   [...rest, join(TMP_DIR_NAME, NO_PROJECT)].map((path) => {
-    return cp(
-      firstTemplateSecretsPath,
-      join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME),
-      { force: true, recursive: true },
-    );
+    return cp(secretsPath, join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME), {
+      force: true,
+      recursive: true,
+    });
   }),
 );
 
@@ -87,7 +88,7 @@ const local =
         (
           await fluence({
             args: ["default", "peers", "local"],
-            cwd: firstPath,
+            cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
           })
         )
           .trim()
