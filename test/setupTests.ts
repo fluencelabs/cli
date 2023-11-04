@@ -52,7 +52,7 @@ try {
   });
 } catch {}
 
-const [, ...rest] = await Promise.all(
+const [, ...restTemplatePaths] = await Promise.all(
   TEMPLATES.map((template) => {
     return initFirstTime(template);
   }),
@@ -74,7 +74,7 @@ const secretsPath = join(
 export const NO_PROJECT = "shouldWorkWithoutProject";
 
 await Promise.all(
-  [...rest, join(TMP_DIR_NAME, NO_PROJECT)].map((path) => {
+  [...restTemplatePaths, join(TMP_DIR_NAME, NO_PROJECT)].map((path) => {
     return cp(secretsPath, join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME), {
       force: true,
       recursive: true,
