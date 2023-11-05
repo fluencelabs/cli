@@ -30,7 +30,7 @@ import {
   SPELL_AQUA_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureSrcSpellsDir, projectRootDir } from "../../lib/paths.js";
+import { ensureSpellsDir, projectRootDir } from "../../lib/paths.js";
 import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -57,7 +57,7 @@ export default class New extends BaseCommand<typeof New> {
     const spellName =
       args.name ?? (await input({ message: "Enter spell name" }));
 
-    const pathToSpellsDir = flags.path ?? (await ensureSrcSpellsDir());
+    const pathToSpellsDir = flags.path ?? (await ensureSpellsDir());
     const pathToSpellDir = join(pathToSpellsDir, spellName);
     await generateNewSpell(pathToSpellDir);
 

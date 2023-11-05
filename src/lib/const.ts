@@ -132,8 +132,6 @@ export const TOML_EXT = "toml";
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
-export const TS_DIR_NAME = "ts";
-export const JS_DIR_NAME = "js";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
@@ -171,7 +169,7 @@ export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT
 export const ENV_CONFIG_FULL_FILE_NAME = `${ENV_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const DOCKER_COMPOSE_FULL_FILE_NAME = `${DOCKER_COMPOSE_FILE_NAME}.${YAML_EXT}`;
 
-export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
+export const MAIN_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
 export const DEALS_FILE_NAME = "deals";
 export const DEALS_FULL_FILE_NAME = `${DEALS_FILE_NAME}.${AQUA_EXT}`;

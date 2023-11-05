@@ -25,7 +25,7 @@ import { ensureServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
 import { isUrl } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureSrcModulesDir } from "../../lib/paths.js";
+import { ensureModulesDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -70,7 +70,7 @@ export default class New extends BaseCommand<typeof New> {
         validate: validateModuleName,
       }));
 
-    const pathToModulesDir = flags.path ?? (await ensureSrcModulesDir());
+    const pathToModulesDir = flags.path ?? (await ensureModulesDir());
     const pathToModuleDir = join(pathToModulesDir, moduleName);
     await generateNewModule(pathToModuleDir);
 
