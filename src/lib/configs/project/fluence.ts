@@ -56,7 +56,7 @@ import {
 import { writeSecretKey } from "../../keyPairs.js";
 import { resolveRelays } from "../../multiaddres.js";
 import {
-  ensureSrcAquaMainPath,
+  ensureAquaMainPath,
   getFluenceDir,
   projectRootDir,
 } from "../../paths.js";
@@ -617,7 +617,7 @@ version: 5
 
 # Path to the aqua file or directory with aqua files that you want to compile by default.
 # Must be relative to the project root dir
-aquaInputPath: ${relative(projectRootDir, await ensureSrcAquaMainPath())}
+aquaInputPath: ${relative(projectRootDir, await ensureAquaMainPath())}
 
 # A map with worker names as keys and deals as values
 deals:

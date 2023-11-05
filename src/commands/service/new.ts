@@ -30,7 +30,7 @@ import {
 } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
-import { ensureSrcServicesDir } from "../../lib/paths.js";
+import { ensureServicesDir } from "../../lib/paths.js";
 import { input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -74,7 +74,7 @@ export default class New extends BaseCommand<typeof New> {
     }
 
     const absoluteServicePath = resolve(
-      join(flags.path ?? (await ensureSrcServicesDir()), serviceName),
+      join(flags.path ?? (await ensureServicesDir()), serviceName),
     );
 
     const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);

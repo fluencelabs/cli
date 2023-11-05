@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
@@ -41,6 +41,13 @@ import {
   LOGS_RESOLVE_SUBNET_ERROR_START,
   LOGS_GET_ERROR_START,
 } from "../src/lib/helpers/utils.js";
+import {
+  getServicesDir,
+  getFluenceAquaServicesPath,
+  getAquaMainPath,
+  getSpellsDir,
+  getSrcIndexTSorJSPath,
+} from "../src/lib/paths.js";
 import { hasKey } from "../src/lib/typeHelpers.js";
 
 import {
@@ -51,6 +58,7 @@ import {
   assertHasWorkerAndAnswer,
   assertHasPeer,
   fluenceEnv,
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
 } from "./helpers.js";
 import { NO_PROJECT, multiaddrs } from "./setupTests.js";
 
@@ -81,10 +89,10 @@ describe("integration tests", () => {
 
   afterAll(async () => {
     if (process.env.CI === "false") {
-      await Promise.resolve();
-      // await fluence({
-      //   args: ["local", "down"],
-      // });
+      await fluence({
+        args: ["local", "down"],
+        cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+      });
     }
   });
 
@@ -109,7 +117,7 @@ describe("integration tests", () => {
     const resultOfRunningAquaUsingTSNode = (
       await execPromise({
         command: "npx",
-        args: ["ts-node", getIndexJSorTSPath("ts", cwd)],
+        args: ["ts-node", getSrcIndexTSorJSPath(false, cwd)],
         printOutput: true,
       })
     ).trim();
@@ -128,7 +136,7 @@ describe("integration tests", () => {
     const resultOfRunningAquaUsingNode = (
       await execPromise({
         command: "node",
-        args: [getIndexJSorTSPath("js", cwd)],
+        args: [getSrcIndexTSorJSPath(true, cwd)],
         printOutput: true,
       })
     ).trim();
@@ -167,7 +175,7 @@ describe("integration tests", () => {
       await init(cwd, "minimal");
 
       await writeFile(
-        join(cwd, "src", "aqua", "main.aqua"),
+        getAquaMainPath(cwd),
         await readFile(
           join("test", "aqua", "runDeployedWorkers.aqua"),
           FS_OPTIONS,
@@ -175,49 +183,42 @@ describe("integration tests", () => {
         FS_OPTIONS,
       );
 
-      const pathToNewServiceDir = join("src", "services", WD_NEW_SERVICE_NAME);
-
       await fluence({
         args: ["service", "new", WD_NEW_SERVICE_NAME],
         cwd,
       });
 
       const readInterfacesFile = async () => {
-        return readFile(
-          join(cwd, ".fluence", "aqua", "services.aqua"),
-          FS_OPTIONS,
-        );
+        return readFile(getFluenceAquaServicesPath(cwd), FS_OPTIONS);
       };
 
       let interfacesFileContent = await readInterfacesFile();
       // we expect to a NewService interface in services.aqua file
       expect(interfacesFileContent).toBe(`${WD_NEW_SERVICE_INTERFACE}\n`);
 
+      const pathToNewServiceDir = join(
+        getServicesDir(cwd),
+        WD_NEW_SERVICE_NAME,
+      );
+
       const newServiceConfig = await initServiceConfig(
-        pathToNewServiceDir,
+        relative(cwd, pathToNewServiceDir),
         cwd,
       );
 
       assert(
         newServiceConfig !== null,
-        `we create a service at ${join(
-          cwd,
-          pathToNewServiceDir,
-        )} above - so the config is expected to exist`,
+        `we create a service at ${pathToNewServiceDir} above - so the config is expected to exist`,
       );
 
       newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
-      const NEW_SPELL_NAME = "newSpell";
-
-      const pathToNewSpell = join("src", "spells", NEW_SPELL_NAME);
-
       // update first service module source code so it contains a struct
 
       await writeFile(
         join(
-          join(cwd, "src", "services", WD_NEW_SERVICE_NAME),
+          pathToNewServiceDir,
           join("modules", WD_NEW_SERVICE_NAME, "src", "main.rs"),
         ),
         WD_MAIN_RS_CONTENT,
@@ -244,6 +245,8 @@ describe("integration tests", () => {
       // we expect to see both service interfaces in services.aqua file and the first one should be updated because we built all the services above including the first one
       expect(interfacesFileContent).toBe(WD_UPDATED_SERVICE_INTERFACES);
 
+      const NEW_SPELL_NAME = "newSpell";
+
       await fluence({
         args: ["spell", "new", NEW_SPELL_NAME],
         cwd,
@@ -254,6 +257,11 @@ describe("integration tests", () => {
       assert(
         fluenceConfig !== null,
         `We initialized the project at ${cwd} above, so the fluence config is expected to exist in that dir`,
+      );
+
+      const pathToNewSpell = relative(
+        cwd,
+        join(getSpellsDir(cwd), NEW_SPELL_NAME),
       );
 
       fluenceConfig.spells = {
@@ -412,28 +420,26 @@ describe("integration tests", () => {
         cwd,
       });
 
-      const pathToNewServiceDir = join("src", "services", "myService");
+      const MY_SERVICE_NAME = "myService";
+      const pathToNewServiceDir = join(getServicesDir(cwd), MY_SERVICE_NAME);
 
       const newServiceConfig = await initServiceConfig(
-        pathToNewServiceDir,
+        relative(cwd, pathToNewServiceDir),
         cwd,
       );
 
       assert(
         newServiceConfig !== null,
-        `quickstart template is expected to create a service at ${join(
-          cwd,
-          pathToNewServiceDir,
-        )} by default`,
+        `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
       );
 
       newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
-      const pathToNewSpell = join("src", "spells", "newSpell");
+      const NEW_SPELL_NAME = "newSpell";
 
       await fluence({
-        args: ["spell", "new", "newSpell"],
+        args: ["spell", "new", NEW_SPELL_NAME],
         cwd,
       });
 
@@ -444,9 +450,11 @@ describe("integration tests", () => {
         `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`,
       );
 
+      const pathToNewSpell = join(getSpellsDir(cwd), NEW_SPELL_NAME);
+
       fluenceConfig.spells = {
         newSpell: {
-          get: pathToNewSpell,
+          get: relative(cwd, pathToNewSpell),
         },
       };
 
@@ -457,8 +465,8 @@ describe("integration tests", () => {
       );
 
       fluenceConfig.deals[DEFAULT_DEAL_NAME].minWorkers = 3;
-      fluenceConfig.deals[DEFAULT_DEAL_NAME].services = ["myService"];
-      fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = ["newSpell"];
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
 
       await fluence({
@@ -605,10 +613,6 @@ const compileAqua = (cwd: string) => {
     args: ["aqua"],
     cwd,
   });
-};
-
-const getIndexJSorTSPath = (JSOrTs: "js" | "ts", cwd: string): string => {
-  return join(cwd, "src", JSOrTs, "src", `index.${JSOrTs}`);
 };
 
 const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
