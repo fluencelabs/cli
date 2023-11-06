@@ -37,7 +37,13 @@ function override(rec: RecToOverride, prefix: string): RecToOverride {
       const envVar = `${prefix}_${snakeCase(name).toUpperCase()}`;
 
       if (typeof version === "string") {
-        const overriddenVersion = process.env[envVar] ?? version;
+        const versionFromEnv = process.env[envVar];
+
+        const overriddenVersion =
+          versionFromEnv === undefined || versionFromEnv === ""
+            ? version
+            : versionFromEnv;
+
         return [name, overriddenVersion];
       }
 
