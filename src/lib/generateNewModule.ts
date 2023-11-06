@@ -17,7 +17,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 
-import versions from "../versions.json" assert { type: "json" };
+import { versions } from "../versions.js";
 
 import { initNewReadonlyModuleConfig } from "./configs/project/module.js";
 import {
