@@ -24,13 +24,13 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj, isInteractive } from "../../lib/commandObj.js";
 import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
 import {
-  DEFAULT_WORKER_NAME,
+  DEFAULT_DEAL_NAME,
   FS_OPTIONS,
   SPELL_AQUA_FILE_CONTENT,
   SPELL_AQUA_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureSrcSpellsDir, projectRootDir } from "../../lib/paths.js";
+import { ensureSpellsDir, projectRootDir } from "../../lib/paths.js";
 import { confirm, input } from "../../lib/prompt.js";
 
 export default class New extends BaseCommand<typeof New> {
@@ -57,7 +57,7 @@ export default class New extends BaseCommand<typeof New> {
     const spellName =
       args.name ?? (await input({ message: "Enter spell name" }));
 
-    const pathToSpellsDir = flags.path ?? (await ensureSrcSpellsDir());
+    const pathToSpellsDir = flags.path ?? (await ensureSpellsDir());
     const pathToSpellDir = join(pathToSpellsDir, spellName);
     await generateNewSpell(pathToSpellDir);
 
@@ -86,34 +86,32 @@ export default class New extends BaseCommand<typeof New> {
     if (
       !(
         isInteractive &&
-        fluenceConfig.workers !== undefined &&
-        DEFAULT_WORKER_NAME in fluenceConfig.workers &&
-        !(fluenceConfig.workers[DEFAULT_WORKER_NAME].spells ?? []).includes(
+        fluenceConfig.deals !== undefined &&
+        DEFAULT_DEAL_NAME in fluenceConfig.deals &&
+        !(fluenceConfig.deals[DEFAULT_DEAL_NAME].spells ?? []).includes(
           spellName,
         ) &&
         (await confirm({
           message: `Do you want to add spell ${color.yellow(
             spellName,
-          )} to a default worker ${color.yellow(DEFAULT_WORKER_NAME)}`,
+          )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
         }))
       )
     ) {
       return;
     }
 
-    const defaultWorker = fluenceConfig.workers[DEFAULT_WORKER_NAME];
+    const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
 
-    fluenceConfig.workers[DEFAULT_WORKER_NAME] = {
-      ...defaultWorker,
-      spells: [...(defaultWorker.spells ?? []), spellName],
+    fluenceConfig.deals[DEFAULT_DEAL_NAME] = {
+      ...defaultDeal,
+      spells: [...(defaultDeal.spells ?? []), spellName],
     };
 
     await fluenceConfig.$commit();
 
     commandObj.log(
-      `Added ${color.yellow(spellName)} to ${color.yellow(
-        DEFAULT_WORKER_NAME,
-      )}`,
+      `Added ${color.yellow(spellName)} to ${color.yellow(DEFAULT_DEAL_NAME)}`,
     );
   }
 }

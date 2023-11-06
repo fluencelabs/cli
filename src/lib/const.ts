@@ -132,8 +132,6 @@ export const TOML_EXT = "toml";
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
-export const TS_DIR_NAME = "ts";
-export const JS_DIR_NAME = "js";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
@@ -171,7 +169,7 @@ export const SPELL_CONFIG_FULL_FILE_NAME = `${SPELL_CONFIG_FILE_NAME}.${YAML_EXT
 export const ENV_CONFIG_FULL_FILE_NAME = `${ENV_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const DOCKER_COMPOSE_FULL_FILE_NAME = `${DOCKER_COMPOSE_FILE_NAME}.${YAML_EXT}`;
 
-export const DEFAULT_SRC_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
+export const MAIN_AQUA_FILE_NAME = `main.${AQUA_EXT}`;
 export const AQUA_SERVICES_FILE_NAME = `services.${AQUA_EXT}`;
 export const DEALS_FILE_NAME = "deals";
 export const DEALS_FULL_FILE_NAME = `${DEALS_FILE_NAME}.${AQUA_EXT}`;
@@ -202,7 +200,8 @@ export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEPLOY_NAME = "default";
-export const DEFAULT_WORKER_NAME = "defaultWorker";
+export const DEFAULT_DEAL_NAME = "dealName";
+export const DEFAULT_WORKER_NAME = "workerName";
 
 const SK_FLAG_NAME = "sk";
 export const KEY_PAIR_FLAG = {
@@ -442,7 +441,7 @@ export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNC
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
--- with worker '${DEFAULT_WORKER_NAME}' which has service 'MyService' with method 'greeting'
+-- with worker '${DEFAULT_DEAL_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices, showSubnet
 
@@ -452,7 +451,7 @@ data Answer:
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
     deals <- Deals.get()
-    dealId = deals.defaultWorker!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
     answers: *Answer
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
@@ -476,7 +475,7 @@ data WorkerServices:
 
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
-    dealId = deals.defaultWorker!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
     if subnet.success == false:

@@ -21,30 +21,37 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
 import { commandObj } from "../../../lib/commandObj.js";
 import {
+  CARGO_DIR_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
   GLOBAL_FLAG,
   GLOBAL_FLAG_NAME,
-  NPM_DIR_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
 } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
 import {
-  ensureNpmDependency,
-  installAllNPMDependencies,
-} from "../../../lib/npm.js";
+  ensureCargoDependency,
+  installAllCargoDependencies,
+} from "../../../lib/rust.js";
+import versions from "../../../versions.json" assert { type: "json" };
+
+const FORCE_FLAG_NAME = "force";
 
 export default class Install extends BaseCommand<typeof Install> {
-  static override aliases = ["dependency:npm:i", "dep:npm:i"];
-  static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside user's ${join(
+  static override aliases = ["dep:cargo:i"];
+  static override description = `(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's ${join(
     DOT_FLUENCE_DIR_NAME,
-    NPM_DIR_NAME,
+    CARGO_DIR_NAME,
   )} directory)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    force: Flags.boolean({
+    toolchain: Flags.string({
+      description: `Rust toolchain name that will be used in case pre-built binary download fails or --${FORCE_FLAG_NAME} flag is used. Default: ${versions["rust-toolchain"]}"]}`,
+      helpValue: "<toolchain_name>",
+    }),
+    [FORCE_FLAG_NAME]: Flags.boolean({
       default: false,
       description:
         "Force install even if the dependency/dependencies is/are already installed",
@@ -56,7 +63,7 @@ export default class Install extends BaseCommand<typeof Install> {
       description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FULL_FILE_NAME}, user's ${join(
         DOT_FLUENCE_DIR_NAME,
         GLOBAL_CONFIG_FULL_FILE_NAME,
-      )}, dependency versions recommended by fluence, latest version npm is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. Example: package@version`,
+      )}, dependency versions recommended by fluence, latest version cargo is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. For example: package@version`,
     }),
   };
 
@@ -68,28 +75,29 @@ export default class Install extends BaseCommand<typeof Install> {
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
 
-    // if packageNameAndVersion not provided just install all npm dependencies
+    // if packageNameAndVersion not provided just install all cargo dependencies
     if (packageNameAndVersion === undefined) {
-      await installAllNPMDependencies({
+      await installAllCargoDependencies({
         maybeFluenceConfig,
         force: flags.force,
       });
 
-      commandObj.log("npm dependencies successfully installed");
+      commandObj.log("cargo dependencies successfully installed");
       return;
     }
 
     if (!flags.global && maybeFluenceConfig === null) {
       return commandObj.error(
-        `Not a fluence project. If you wanted to install npm dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`,
+        `Not a fluence project. If you wanted to install cargo dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`,
       );
     }
 
-    await ensureNpmDependency({
+    await ensureCargoDependency({
       nameAndVersion: packageNameAndVersion,
       maybeFluenceConfig,
       explicitInstallation: true,
       force: flags.force,
+      toolchain: flags.toolchain,
       global: flags.global,
     });
   }

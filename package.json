@@ -2,7 +2,7 @@
   "name": "@fluencelabs/cli",
   "packageManager": "yarn@3.6.4",
   "type": "module",
-  "version": "0.11.4",
+  "version": "0.12.1",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
@@ -58,7 +58,7 @@
     "@fluencelabs/aqua-to-js": "0.1.0",
     "@fluencelabs/deal-aurora": "0.2.18",
     "@fluencelabs/fluence-network-environment": "1.1.2",
-    "@fluencelabs/js-client": "0.4.0",
+    "@fluencelabs/js-client": "0.4.2",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.25.7",
     "@multiformats/multiaddr": "^12.1.7",
@@ -135,9 +135,39 @@
       }
     },
     "topics": {
-      "dep": {},
-      "dep:cargo": {},
-      "dep:npm": {}
+      "aqua": {
+        "description": "Set of convenience commands for converting JSON and YAML into Aqua object literal syntax"
+      },
+      "deal": {
+        "description": "Manage deals"
+      },
+      "default": {
+        "description": "Manage and display default CLI configurations"
+      },
+      "dep": {
+        "description": "(For advanced users) Manage project's dependencies"
+      },
+      "key": {
+        "description": "Manage secret keys, that define peer-ids of both nox and js-client (including the one inside this CLI itself)"
+      },
+      "local": {
+        "description": "Manage local fluence environment using docker-compose"
+      },
+      "module": {
+        "description": "Manage project's service modules"
+      },
+      "provider": {
+        "description": "Set of commands to be used by providers or you can use them to manage your local environment"
+      },
+      "service": {
+        "description": "Manage project's services"
+      },
+      "spell": {
+        "description": "Manage project's spells"
+      },
+      "workers": {
+        "description": "Manage directly deployed workers without using blockchain. These commands can be used only with the peers that you own"
+      }
     },
     "plugins": [
       "@oclif/plugin-help",

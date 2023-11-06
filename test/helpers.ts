@@ -27,7 +27,6 @@ import {
 } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/utils.js";
-import { getDefaultJSDirPath, getDefaultTSDirPath } from "../src/lib/paths.js";
 import {
   FLUENCE_ENV,
   RUN_TESTS_IN_PARALLEL,
@@ -101,15 +100,10 @@ export const initFirstTime = async (template: Template) => {
     });
 
     if (template === "js" || template === "ts") {
-      const cwd =
-        template === "js"
-          ? getDefaultJSDirPath(templatePath)
-          : getDefaultTSDirPath(templatePath);
-
       await execPromise({
         command: "npm",
         args: ["install"],
-        options: { cwd },
+        options: { cwd: templatePath },
       });
     }
   }
@@ -199,3 +193,9 @@ export const assertHasWorkerAndAnswer = (
     );
   }
 };
+
+export const pathToTheTemplateWhereLocalEnvironmentIsSpunUp = join(
+  "tmp",
+  "templates",
+  "quickstart",
+);

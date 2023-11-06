@@ -29,7 +29,7 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
-  static override aliases = ["dependency:r", "dep:r"];
+  static override aliases = ["dep:r"];
   static override description = `Reset all project dependencies to recommended versions for the current ${CLI_NAME_FULL} version`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
