@@ -34,10 +34,10 @@ interface RecToOverride extends Record<string, string | RecToOverride> {}
 function override(rec: RecToOverride, prefix: string): RecToOverride {
   return Object.fromEntries<string | RecToOverride>(
     Object.entries(rec).map(([name, version]) => {
-      const envVar = `${prefix}_${snakeCase(name).toUpperCase()}`;
+      const envVarName = `${prefix}_${snakeCase(name).toUpperCase()}`;
 
       if (typeof version === "string") {
-        const versionFromEnv = process.env[envVar];
+        const versionFromEnv = process.env[envVarName];
 
         const overriddenVersion =
           versionFromEnv === undefined || versionFromEnv === ""
@@ -47,7 +47,7 @@ function override(rec: RecToOverride, prefix: string): RecToOverride {
         return [name, overriddenVersion];
       }
 
-      return [name, override(version, envVar)];
+      return [name, override(version, envVarName)];
     }),
   );
 }
