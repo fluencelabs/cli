@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.0...fluence-cli-v0.12.1) (2023-11-05)
+
+
+### Features
+
+* improve topic descriptions ([#602](https://github.com/fluencelabs/cli/issues/602)) ([20ad8b4](https://github.com/fluencelabs/cli/commit/20ad8b412a7d983ef0b118466997601e67338d10))
+* migrate "workers" property in fluence.yaml directly into "deals" and "hosts" properties [fixes DXJ-507] ([#600](https://github.com/fluencelabs/cli/issues/600)) ([4ed38f4](https://github.com/fluencelabs/cli/commit/4ed38f4b8a0288a03bee5e7ca4fea1ff12ec0e51))
+* restructure project templates [fixes DXJ-523] ([#604](https://github.com/fluencelabs/cli/issues/604)) ([0fa6fa5](https://github.com/fluencelabs/cli/commit/0fa6fa5cb7ab5f5fbc9e77593b0070892025c52a))
+* support flags in add-peer ([#598](https://github.com/fluencelabs/cli/issues/598)) ([d5b6e1e](https://github.com/fluencelabs/cli/commit/d5b6e1e96755b48b1ed0128cfb7c0c6f9bee57ca))
+
+
+### Bug Fixes
+
+* fix custom env [fixes DXJ-521] ([#601](https://github.com/fluencelabs/cli/issues/601)) ([af04bd0](https://github.com/fluencelabs/cli/commit/af04bd0f76a87b2a4df9cea05e3486ba8cf2de64))
+
 ## [0.12.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.11.4...fluence-cli-v0.12.0) (2023-10-30)
 
 
