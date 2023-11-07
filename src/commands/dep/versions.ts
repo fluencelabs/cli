@@ -26,7 +26,7 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
 import JSClientPackageJSON from "../../versions/js-client.package.json" assert { type: "json" };
-import versions from "../../versions.json" assert { type: "json" };
+import { versions } from "../../versions.js";
 
 export default class Versions extends BaseCommand<typeof Versions> {
   static override aliases = ["dep:v"];

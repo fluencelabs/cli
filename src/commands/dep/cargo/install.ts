@@ -34,7 +34,7 @@ import {
   ensureCargoDependency,
   installAllCargoDependencies,
 } from "../../../lib/rust.js";
-import versions from "../../../versions.json" assert { type: "json" };
+import { versions } from "../../../versions.js";
 
 const FORCE_FLAG_NAME = "force";
 

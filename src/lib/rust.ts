@@ -20,7 +20,7 @@ import { join } from "node:path";
 
 import { color } from "@oclif/color";
 
-import versions from "../versions.json" assert { type: "json" };
+import { versions } from "../versions.js";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
