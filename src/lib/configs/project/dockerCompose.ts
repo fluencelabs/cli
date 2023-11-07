@@ -74,7 +74,9 @@ function getIsLocal() {
   return envConfig.fluenceEnv === "local";
 }
 
-function getDefaultConfigTOML(fluenceConfig: FluenceConfigReadonly | null) {
+async function getDefaultConfigTOML(
+  fluenceConfig: FluenceConfigReadonly | null,
+) {
   const isLocal = getIsLocal();
 
   const contractsEnv: ContractsENV =
@@ -82,34 +84,33 @@ function getDefaultConfigTOML(fluenceConfig: FluenceConfigReadonly | null) {
       ? fluenceConfig?.customFluenceEnv?.contractsEnv ?? "local"
       : envConfig?.fluenceEnv ?? "local";
 
-  // const { DEAL_CONFIG } = await import(
-  //   "@fluencelabs/deal-aurora/dist/client/config.js"
-  // );
+  const { DEAL_CONFIG } = await import(
+    "@fluencelabs/deal-aurora/dist/client/config.js"
+  );
 
-  console.log(isLocal, contractsEnv);
+  const dealConfig = await DEAL_CONFIG[contractsEnv]();
 
   return {
     system_services: {
       enable: ["aqua-ipfs", "decider"],
       aqua_ipfs: {
-        // external_api_multiaddr: "/dns4/cocksucker/tcp/7778",
         external_api_multiaddr: isLocal ? LOCAL_IPFS_ADDRESS : "",
         local_api_multiaddr: isLocal ? NOX_IPFS_MULTIADDR : "",
       },
-      // decider: {
-      //   decider_period_sec: 10,
-      // worker_ipfs_multiaddr: isLocal
-      //   ? NOX_IPFS_MULTIADDR
-      //   : "http://ipfs.fluence.dev",
-      // network_api_endpoint: isLocal
-      //   ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
-      //   : "http://mumbai-polygon.ru:8545",
-      // network_id: CONTRACTS_ENV_TO_CHAIN_ID[contractsEnv],
-      // start_block: "earliest",
-      // matcher_address: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
-      // wallet_key:
-      //   "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
-      // },
+      decider: {
+        decider_period_sec: 10,
+        worker_ipfs_multiaddr: isLocal
+          ? NOX_IPFS_MULTIADDR
+          : "http://ipfs.fluence.dev",
+        network_api_endpoint: isLocal
+          ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
+          : "http://mumbai-polygon.ru:8545",
+        network_id: dealConfig.chainId,
+        start_block: "earliest",
+        matcher_address: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
+        wallet_key:
+          "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
+      },
     },
   };
 }
@@ -121,13 +122,13 @@ type NoxConfigToml = {
   aquavm_pool_size?: number;
 };
 
-export function configYAMLToConfigToml(
+export async function configYAMLToConfigToml(
   { aquavmPoolSize, httpPort, tcpPort, webSocketPort, ...rest }: NoxConfigYAML,
   fluenceConfig: FluenceConfigReadonly | null,
-): NoxConfigToml {
+): Promise<NoxConfigToml> {
   return omitBy(
     {
-      ...getDefaultConfigTOML(fluenceConfig),
+      ...(await getDefaultConfigTOML(fluenceConfig)),
       tcp_port: tcpPort,
       websocket_port: webSocketPort,
       http_port: httpPort,
@@ -253,34 +254,16 @@ function genNox({
     name,
     {
       image: versions.nox,
-      // pull_policy: "always",
       ports: [`${tcpPort}:${tcpPort}`, `${webSocketPort}:${webSocketPort}`],
       environment: {
-        // FLUENCE_ENV_AQUA_IPFS_EXTERNAL_API_MULTIADDR: LOCAL_IPFS_ADDRESS,
-        FLUENCE_ENV_AQUA_IPFS_LOCAL_API_MULTIADDR: NOX_IPFS_MULTIADDR,
-
-        FLUENCE_ENV_DECIDER_IPFS_MULTIADDR: NOX_IPFS_MULTIADDR,
-        FLUENCE_ENV_CONNECTOR_API_ENDPOINT: `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`,
-        FLUENCE_ENV_CONNECTOR_FROM_BLOCK: "earliest",
-
         WASM_LOG: "info",
         RUST_LOG:
           "debug,particle_reap=debug,aquamarine=warn,aquamarine::particle_functions=debug,aquamarine::log=debug,aquamarine::aqua_runtime=error,ipfs_effector=off,ipfs_pure=off,system_services=debug,marine_core::module::marine_module=info,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=trace,wasmtime_cranelift=off,wasmtime_jit=off,libp2p_tcp=off,libp2p_swarm=off,particle_protocol::libp2p_protocol::upgrade=info,libp2p_mplex=off,particle_reap=off,netlink_proto=warn",
-        FLUENCE_ENV_CONNECTOR_WALLET_KEY:
-          "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
-        FLUENCE_ENV_CONNECTOR_CONTRACT_ADDRESS:
-          "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
-        FLUENCE_SYSTEM_SERVICES__DECIDER__DECIDER_PERIOD_SEC: 10,
-
         FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
-
-        FLUENCE_SYSTEM_SERVICES__DECIDER__NETWORK_ID: 31337, // already there
-
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
       },
       command: [
         `--config=${configLocation}`,
-        "--aqua-pool-size=5",
         "--external-maddrs",
         `/dns4/${name}/tcp/${tcpPort}`,
         `/dns4/${name}/tcp/${webSocketPort}/ws`,

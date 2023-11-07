@@ -184,9 +184,8 @@ export const prepareForDeploy = async ({
   }
 
   const { services: servicesFromFluenceConfig = {} } = fluenceConfig;
-
-  const { [isDealDeploy ? "deals" : "hosts"]: workersFromFluenceConfig = {} } =
-    fluenceConfig;
+  const dealsOrHosts = isDealDeploy ? "deals" : "hosts";
+  const { [dealsOrHosts]: workersFromFluenceConfig = {} } = fluenceConfig;
 
   const workersToDeployConfirmed = await handlePreviouslyDeployedWorkers(
     maybeDeployedHostsOrDeals,
@@ -211,7 +210,7 @@ export const prepareForDeploy = async ({
         `All workers must have at least one service or spell. Worker ${color.yellow(
           workerName,
         )} listed in ${fluenceConfig.$getPath()} ${color.yellow(
-          "workers",
+          dealsOrHosts,
         )} property does not have any spells or services`,
       );
     }
