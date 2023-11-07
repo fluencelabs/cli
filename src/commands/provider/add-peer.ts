@@ -80,7 +80,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     for (const { peerId, computeUnits } of peerIds) {
       const signer = await getSigner(network, flags["priv-key"]);
       // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-      const dealClient = new DealClient(signer, network);
+      const dealClient = new DealClient(network, signer);
       const globalContracts = dealClient.getGlobalContracts();
       const matcher = await globalContracts.getMatcher();
       const flt = await globalContracts.getFLT();

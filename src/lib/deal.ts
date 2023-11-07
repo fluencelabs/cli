@@ -57,7 +57,7 @@ export const dealCreate = async ({
 
   const { DealClient } = await import("@fluencelabs/deal-aurora");
   // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-  const dealClient = new DealClient(signer, chainNetwork);
+  const dealClient = new DealClient(chainNetwork, signer);
   const globalContracts = dealClient.getGlobalContracts();
 
   const factory = await globalContracts.getFactory();
@@ -130,7 +130,7 @@ export const dealUpdate = async ({
   const signer = await getSigner(network, privKey);
   const { DealClient } = await import("@fluencelabs/deal-aurora");
   // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-  const dealClient = new DealClient(signer, network);
+  const dealClient = new DealClient(network, signer);
   const deal = dealClient.getDeal(dealAddress);
 
   const { CID } = await import("ipfs-http-client");
@@ -161,7 +161,7 @@ export async function match(
   const { DealClient } = await import("@fluencelabs/deal-aurora");
 
   // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-  const dealClient = new DealClient(signer, network);
+  const dealClient = new DealClient(network, signer);
   const globalContracts = dealClient.getGlobalContracts();
   const matcher: Matcher = await globalContracts.getMatcher();
 

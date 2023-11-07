@@ -55,7 +55,7 @@ export default class Register extends BaseCommand<typeof Register> {
     const signer = await getSigner(network, flags["priv-key"]);
     const { DealClient } = await import("@fluencelabs/deal-aurora");
     // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-    const dealClient = new DealClient(signer, network);
+    const dealClient = new DealClient(network, signer);
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
