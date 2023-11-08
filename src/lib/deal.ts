@@ -68,6 +68,16 @@ export const dealCreate = async ({
 
   promptConfirmTx(privKey);
 
+  const approveTx = await flt.approve(
+    await factory.getAddress(),
+    BigInt(targetWorkers) * ethers.parseEther(pricePerWorkerEpoch) * 2n,
+  );
+
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+  await waitTx(approveTx);
+
+  promptConfirmTx(privKey);
+
   const tx = await factory.deployDeal(
     {
       prefixes: bytesCid.slice(0, 4),
