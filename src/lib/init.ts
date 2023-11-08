@@ -16,7 +16,7 @@
 
 import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
-import { basename, join, relative, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -31,23 +31,27 @@ import {
   RECOMMENDED_GITIGNORE_CONTENT,
   TEMPLATES,
   isTemplate,
-  JS_CLIENT_NPM_DEPENDENCY,
   CLI_NAME_FULL,
   getMainAquaFileContent,
   READMEs,
+  JS_CLIENT_NPM_DEPENDENCY,
 } from "../lib/const.js";
 import {
-  ensureSrcAquaPath,
+  ensureFrontendCompiledAquaPath,
   ensureFluenceAquaServicesPath,
   ensureServicesDir,
   ensureVSCodeExtensionsJsonPath,
   getGitignorePath,
   setProjectRootDir,
   getREADMEPath,
-  ensureSrcPath,
   projectRootDir,
   getPackageJSONPath,
+  getFrontendSrcPath,
+  getFrontendCompiledAquaPath,
+  getViteConfigPath,
+  getIndexHTMLPath,
   getTsConfigPath,
+  getFrontendPath,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -67,31 +71,7 @@ import { ensureAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { updateRelaysJSON, resolveFluenceEnv } from "./multiaddres.js";
-import { ensureAquaMainPath, ensureSrcIndexTSorJSPath } from "./paths.js";
-
-export const jsTemplateIndexJsContent = `/* eslint-disable */
-// @ts-nocheck
-import { Fluence } from "@fluencelabs/js-client";
-import relays from "./relays.json" assert { type: "json" };
-
-import {
-  helloWorld,
-  helloWorldRemote,
-  getInfo,
-  getInfos,
-} from "./aqua/main.js";
-
-await Fluence.connect(relays[0].multiaddr, {});
-const helloWorldResult = await helloWorld("Fluence");
-console.log(helloWorldResult);
-const helloWorldRemoteResult = await helloWorldRemote("Fluence");
-console.log(helloWorldRemoteResult);
-const getInfoResult = await getInfo();
-console.log(getInfoResult);
-const getInfosResult = await getInfos(relays.map(({ peerId }) => peerId));
-console.log(getInfosResult);
-await Fluence.disconnect();
-`;
+import { getFrontendIndexTSorJSPath, ensureAquaMainPath } from "./paths.js";
 
 const selectTemplate = (): Promise<Template> => {
   return list({
@@ -178,7 +158,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
   await writeFile(
     await ensureAquaMainPath(),
-    getMainAquaFileContent(template !== "quickstart"),
+    getMainAquaFileContent(template === "minimal"),
     FS_OPTIONS,
   );
 
@@ -207,40 +187,22 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
 
   switch (template) {
-    case "quickstart": {
-      const serviceName = "myService";
-
-      const absoluteServicePath = join(await ensureServicesDir(), serviceName);
-
-      const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
-      await generateNewModule(pathToModuleDir);
-
-      await initNewReadonlyServiceConfig(
-        absoluteServicePath,
-        relative(absoluteServicePath, pathToModuleDir),
-        serviceName,
-      );
-
-      await addService({
-        serviceName,
-        fluenceConfig,
-        marineCli: await initMarineCli(fluenceConfig),
-        absolutePathOrUrl: absoluteServicePath,
-        interactive: false,
-      });
-
-      break;
-    }
-
     case "minimal":
       break;
 
+    case "quickstart": {
+      await quickstart();
+      break;
+    }
+
     case "js": {
+      await quickstart();
       await initTSorJSProject({ isJS: true, fluenceConfig });
       break;
     }
 
     case "ts": {
+      await quickstart();
       await initTSorJSProject({ isJS: false, fluenceConfig });
       break;
     }
@@ -249,6 +211,27 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
       const _exhaustiveCheck: never = template;
       return _exhaustiveCheck;
     }
+  }
+
+  async function quickstart() {
+    const serviceName = "myService";
+    const absoluteServicePath = join(await ensureServicesDir(), serviceName);
+    const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
+    await generateNewModule(pathToModuleDir);
+
+    await initNewReadonlyServiceConfig(
+      absoluteServicePath,
+      relative(absoluteServicePath, pathToModuleDir),
+      serviceName,
+    );
+
+    await addService({
+      serviceName,
+      fluenceConfig,
+      marineCli: await initMarineCli(fluenceConfig),
+      absolutePathOrUrl: absoluteServicePath,
+      interactive: false,
+    });
   }
 
   await updateRelaysJSON({
@@ -312,92 +295,228 @@ type InitTSorJSProjectArg = {
   fluenceConfig: FluenceConfig;
 };
 
-const initTSorJSProject = async ({
+async function initTSorJSProject({
   isJS,
   fluenceConfig,
-}: InitTSorJSProjectArg): Promise<void> => {
-  const defaultAquaTSorJSPath = await ensureSrcAquaPath();
+}: InitTSorJSProjectArg): Promise<void> {
+  const frontendCompiledAquaPath = await ensureFrontendCompiledAquaPath();
+  const indexFilePath = getFrontendIndexTSorJSPath(isJS);
+  const packageJSONPath = getPackageJSONPath();
+  const frontendSrcPath = getFrontendSrcPath();
+  fluenceConfig.relaysPath = relative(projectRootDir, frontendSrcPath);
 
-  const defaultAquaTSorJSPathRelative = relative(
+  const relativeFrontendCompiledAquaPath = relative(
     projectRootDir,
-    defaultAquaTSorJSPath,
+    frontendCompiledAquaPath,
   );
 
-  const indexFilePath = await ensureSrcIndexTSorJSPath(isJS);
-  const indexFileName = basename(indexFilePath);
+  fluenceConfig[isJS ? "aquaOutputJSPath" : "aquaOutputTSPath"] =
+    relativeFrontendCompiledAquaPath;
 
-  const packageJson = {
-    type: "module",
-    version: "1.0.0",
-    main: indexFileName,
-    scripts: {
-      start: `node${isJS ? "" : "--loader ts-node/esm"} ${relative(
-        projectRootDir,
-        indexFilePath,
-      )}`,
-      ...(isJS ? {} : { build: "tsc -b" }),
+  await Promise.all([
+    fluenceConfig.$commit(),
+    writeFile(indexFilePath, getIndexJsContent(isJS), FS_OPTIONS),
+    writeFile(getViteConfigPath(isJS), VITE_CONFIG_CONTENT, FS_OPTIONS),
+    writeFile(packageJSONPath, jsonStringify(getPackageJSON(isJS)), FS_OPTIONS),
+    writeFile(getIndexHTMLPath(), getIndexHTMLContent(isJS), FS_OPTIONS),
+    isJS
+      ? Promise.resolve()
+      : writeFile(getTsConfigPath(), TS_CONFIG_CONTENT, FS_OPTIONS),
+
+    (async () => {
+      return compileToFiles({
+        compileArgs: {
+          filePath: await ensureAquaMainPath(),
+          imports: await ensureAquaImports({
+            maybeFluenceConfig: fluenceConfig,
+          }),
+        },
+        targetType: isJS ? "js" : "ts",
+        outputPath: frontendCompiledAquaPath,
+      });
+    })(),
+  ]);
+}
+
+function getIndexHTMLContent(isJS: boolean) {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fluence</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/${relative(
+      getFrontendPath(),
+      getFrontendIndexTSorJSPath(isJS),
+    )}"></script>
+  </body>
+</html>
+`;
+}
+
+function getIndexJsContent(isJS: boolean) {
+  return `import { Fluence } from "@fluencelabs/js-client";
+import relays from "./relays.json" assert { type: "json" };
+import {
+  helloWorld,
+  helloWorldRemote,
+  runDeployedServices,
+  showSubnet,
+} from "./${relative(
+    getFrontendSrcPath(),
+    join(getFrontendCompiledAquaPath(), "main.js"),
+  )}";
+
+const appEl =
+  document.querySelector("#app") ??
+  (() => {
+    throw new Error("#app element is not found");
+  })();
+
+const buttons = [
+  {
+    fnName: "helloWorld",
+    fn() {
+      return helloWorld("Fluence");
     },
-    keywords: ["fluence"],
+  },
+  {
+    fnName: "helloWorldRemote",
+    fn() {
+      return helloWorldRemote("Fluence");
+    },
+  },
+  {
+    fnName: "showSubnet",
+    fn() {
+      return showSubnet();
+    },
+  },
+  {
+    fnName: "runDeployedServices",
+    fn() {
+      return runDeployedServices();
+    },
+  },
+];
+
+(async () => {
+  try {
+    await Fluence.connect(relays[0].multiaddr, {});
+  } catch (error) {
+    appEl.innerHTML = stringifyError(error);
+    throw error;
+  }
+
+  appEl.innerHTML = buttons.map(({ fnName }) => button(fnName)).join("\\n");
+
+  requestAnimationFrame(() => {
+    buttons.forEach(({ fnName, fn }) => {
+      const buttonEl =
+        document.querySelector(\`#\${fnName}\`) ??
+        (() => {
+          throw new Error(\`Button with id="\${fnName}" is not found\`);
+        })();
+
+      buttonEl.addEventListener("click", () => {
+        runAquaFunction(fn);
+      });
+    });
+  });
+})();
+
+function button(fnName${isJS ? "" : ": string"}) {
+  return \`<button type="button" id="\${fnName}">\${fnName}</button>\`;
+}
+
+async function runAquaFunction(fn${isJS ? "" : ": () => Promise<unknown>"}) {
+  const p = document.createElement("p");
+  p.style.whiteSpace = "pre-wrap";
+  try {
+    const res = await fn();
+    p.style.color = "green";
+    p.innerHTML = \`✅ \${JSON.stringify(res, null, 2)}\`;
+  } catch (e) {
+    p.style.color = "red";
+    p.innerHTML = \`❌ \${stringifyError(e)}\`;
+  }
+  appEl.append(p);
+}
+
+function stringifyError(e${isJS ? "" : ": unknown"}) {
+  if (e instanceof Error) {
+    return e.message;
+  }
+
+  if (e instanceof Object) {
+    const message = JSON.stringify(e, null, 2);
+    if (message.includes("[0].dealIdOriginal")) {
+      return "Please, make sure you have deployed the service";
+    }
+
+    return JSON.stringify(e, null, 2);
+  }
+
+  return String(e);
+}
+`;
+}
+
+const VITE_CONFIG_CONTENT = `import { defineConfig } from "vite";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+
+export default defineConfig({
+  plugins: [nodePolyfills()],
+});
+`;
+
+const TS_CONFIG_CONTENT = `{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}
+`;
+
+function getPackageJSON(isJS: boolean) {
+  return {
+    private: true,
+    version: "0.0.0",
+    type: "module",
+    scripts: {
+      dev: "vite",
+      build: `${isJS ? "" : "tsc && "}vite build`,
+      preview: "vite preview",
+    },
+    devDependencies: {
+      vite: "4.4.5",
+      "vite-plugin-node-polyfills": "0.16.0",
+      ...(isJS ? {} : { typescript: "5.0.2" }),
+    },
     dependencies: {
       [JS_CLIENT_NPM_DEPENDENCY]:
         CLIPackageJSON.dependencies[JS_CLIENT_NPM_DEPENDENCY],
     },
-    ...(isJS
-      ? {}
-      : {
-          devDependencies: {
-            "ts-node": CLIPackageJSON.devDependencies["ts-node"],
-            typescript: CLIPackageJSON.devDependencies["typescript"],
-          },
-        }),
-  } as const;
-
-  await writeFile(
-    getPackageJSONPath(),
-    `${jsonStringify(packageJson)}\n`,
-    FS_OPTIONS,
-  );
-
-  await writeFile(indexFilePath, jsTemplateIndexJsContent, FS_OPTIONS);
-
-  fluenceConfig.relaysPath = relative(projectRootDir, await ensureSrcPath());
-
-  if (isJS) {
-    fluenceConfig.aquaOutputJSPath = defaultAquaTSorJSPathRelative;
-  } else {
-    const TS_CONFIG = {
-      compilerOptions: {
-        target: "es2022",
-        module: "es2022",
-        strict: true,
-        skipLibCheck: true,
-        moduleResolution: "nodenext",
-        outDir: "dist",
-      },
-      "ts-node": {
-        esm: true,
-      },
-    };
-
-    await writeFile(
-      getTsConfigPath(),
-      `${jsonStringify(TS_CONFIG)}\n`,
-      FS_OPTIONS,
-    );
-
-    fluenceConfig.aquaOutputTSPath = defaultAquaTSorJSPathRelative;
-  }
-
-  await fluenceConfig.$commit();
-
-  await compileToFiles({
-    compileArgs: {
-      filePath: await ensureAquaMainPath(),
-      imports: await ensureAquaImports({
-        maybeFluenceConfig: fluenceConfig,
-      }),
-    },
-    targetType: isJS ? "js" : "ts",
-    outputPath: join(projectRootDir, defaultAquaTSorJSPathRelative),
-  });
-};
+  };
+}
