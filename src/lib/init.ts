@@ -509,14 +509,14 @@ function getPackageJSON(isJS: boolean) {
       build: `${isJS ? "" : "tsc && "}vite build`,
       preview: "vite preview",
     },
+    dependencies: {
+      [JS_CLIENT_NPM_DEPENDENCY]:
+        CLIPackageJSON.dependencies[JS_CLIENT_NPM_DEPENDENCY],
+    },
     devDependencies: {
       vite: "4.4.5",
       "vite-plugin-node-polyfills": "0.16.0",
       ...(isJS ? {} : { typescript: "5.0.2" }),
-    },
-    dependencies: {
-      [JS_CLIENT_NPM_DEPENDENCY]:
-        CLIPackageJSON.dependencies[JS_CLIENT_NPM_DEPENDENCY],
     },
   };
 }
