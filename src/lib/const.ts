@@ -132,10 +132,12 @@ export const TOML_EXT = "toml";
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
+export const FRONTEND_DIR_NAME = "frontend";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
 export const AQUA_DIR_NAME = "aqua";
+export const COMPILED_AQUA_DIR_NAME = "compiled-aqua";
 export const MODULES_DIR_NAME = "modules";
 export const SERVICES_DIR_NAME = "services";
 export const SPELLS_DIR_NAME = "spells";
@@ -186,6 +188,7 @@ export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
 
 export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
 export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
+export const INDEX_HTML_FILE_NAME = `index.html`;
 
 export const CONFIG_TOML = `Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
