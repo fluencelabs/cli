@@ -9,6 +9,7 @@ Defines config used for provider set up
 | `computePeers` | [object](#computepeers) | **Yes**  |             |
 | `offers`       | [object](#offers)       | **Yes**  |             |
 | `version`      | number                  | **Yes**  |             |
+| `nox`          | [object](#nox)          | No       |             |
 
 ## computePeers
 
@@ -22,11 +23,32 @@ Defines config used for provider set up
 
 #### Properties
 
-| Property        | Type   | Required | Description                                                                                                       |
-|-----------------|--------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `computeUnits`  | number | No       |                                                                                                                   |
-| `tcpPort`       | number | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `webSocketPort` | number | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| Property       | Type           | Required | Description |
+|----------------|----------------|----------|-------------|
+| `computeUnits` | number         | No       |             |
+| `nox`          | [object](#nox) | No       |             |
+
+#### nox
+
+##### Properties
+
+| Property           | Type   | Required | Description                                                                                                       |
+|--------------------|--------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `aquavm_pool_size` | number | No       | Number of aquavm instances to run. Default: 8                                                                     |
+| `http_port`        | number | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
+| `tcp_port`         | number | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `websocket_port`   | number | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+
+## nox
+
+### Properties
+
+| Property           | Type   | Required | Description                                                                                                       |
+|--------------------|--------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `aquavm_pool_size` | number | No       | Number of aquavm instances to run. Default: 8                                                                     |
+| `http_port`        | number | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
+| `tcp_port`         | number | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `websocket_port`   | number | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ## offers
 
