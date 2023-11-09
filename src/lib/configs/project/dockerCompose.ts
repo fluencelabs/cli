@@ -308,12 +308,10 @@ async function genDockerCompose(
     services: {
       [CHAIN_CONTAINER_NAME]: {
         image: versions.chain,
-        pull_policy: "always",
         ports: [`${CHAIN_PORT}:${CHAIN_PORT}`],
       },
       [IPFS_CONTAINER_NAME]: {
         image: "ipfs/go-ipfs",
-        pull_policy: "always",
         ports: [`${IPFS_PORT}:${IPFS_PORT}`, "4001:4001"],
         environment: {
           IPFS_PROFILE: "server",
