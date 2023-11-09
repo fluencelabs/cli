@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.1...fluence-cli-v0.12.2) (2023-11-09)
+
+
+### Features
+
+* restructure templates [fixes DXJ-526] ([#608](https://github.com/fluencelabs/cli/issues/608)) ([185a905](https://github.com/fluencelabs/cli/commit/185a905838e9b8dbb83348070fa022e087ebed80))
+* support env variables to override cli dependencies [fixes DXJ-524] ([#605](https://github.com/fluencelabs/cli/issues/605)) ([0dd52bc](https://github.com/fluencelabs/cli/commit/0dd52bc2c9b672176219ae99bda4ddcf8832111e))
+
 ## [0.12.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.0...fluence-cli-v0.12.1) (2023-11-05)
 
 
