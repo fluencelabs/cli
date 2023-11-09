@@ -23,7 +23,7 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
-import versions from "../../../versions.json" assert { type: "json" };
+import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   AQUA_LIB_NPM_DEPENDENCY,

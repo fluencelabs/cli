@@ -24,7 +24,7 @@ import isNil from "lodash-es/isNil.js";
 import omitBy from "lodash-es/omitBy.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import versions from "../../../versions.json" assert { type: "json" };
+import { versions } from "../../../versions.js";
 import {
   DOCKER_COMPOSE_FILE_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,

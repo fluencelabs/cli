@@ -18,7 +18,7 @@ import { rm } from "fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
-import versions from "../../../versions.json" assert { type: "json" };
+import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   GLOBAL_CONFIG_FILE_NAME,
