@@ -26,6 +26,7 @@ import {
 import {
   DOT_FLUENCE_DIR_NAME,
   SECRETS_DIR_NAME,
+  TEMPLATES,
   TMP_DIR_NAME,
 } from "../src/lib/const.js";
 import "../src/lib/setupEnvironment.js";

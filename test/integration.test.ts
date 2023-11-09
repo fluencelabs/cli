@@ -127,7 +127,7 @@ describe("integration tests", () => {
   });
 
   maybeConcurrentTest(
-    "hajsldkfhsdjfhlkjsahdflk should deploy workers with spell and service, resolve and run services on them",
+    "should deploy workers with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
       await init(cwd, "minimal");
@@ -361,7 +361,7 @@ describe("integration tests", () => {
   );
 
   maybeConcurrentTest(
-    "hajsldkfhsdjfhlkjsahdflk should deploy deals with spell and service, resolve and run services on them",
+    "should deploy deals with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
       await init(cwd, "quickstart");
