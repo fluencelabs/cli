@@ -34,6 +34,7 @@ Defines a multi-containers based application.
 | `depends_on`  | string[]               | No       |             |
 | `environment` | [object](#environment) | No       |             |
 | `image`       | string                 | No       |             |
+| `platform`    | string                 | No       |             |
 | `ports`       | string[]               | No       |             |
 | `pull_policy` | string                 | No       |             |
 | `secrets`     | string[]               | No       |             |
