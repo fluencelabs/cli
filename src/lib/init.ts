@@ -343,7 +343,10 @@ function getIndexHTMLContent(isJS: boolean) {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:,">
+    <link
+      rel="icon"
+      href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgc3R5bGU9ImZpbGw6bm9uZSI+PHBhdGggZD0iTTE3LjI3NyAwaC0yLjQzNHY1LjM1NGMtNS4zNy41NzctOS41NSA1LjEyMy05LjU1IDEwLjY0NiAwIDUuNTIzIDQuMTggMTAuMDcgOS41NSAxMC42NDZWMzJoMi40MzR2LTUuMzY4YzUuMzEtLjYzMiA5LjQzLTUuMTUgOS40My0xMC42MzIgMC01LjQ4MS00LjEyLTEwLTkuNDMtMTAuNjMyek03LjcyNiAxNmE4LjI3NiA4LjI3NiAwIDAgMSA3LjExOS04LjE5NHYxNi4zODhBOC4yNzYgOC4yNzYgMCAwIDEgNy43MjYgMTZabTE2LjU0OCAwYTguMjc2IDguMjc2IDAgMCAxLTYuOTk2IDguMTc2VjcuODI0QTguMjc2IDguMjc2IDAgMCAxIDI0LjI3MyAxNloiIHN0eWxlPSJjbGlwLXJ1bGU6ZXZlbm9kZDtmaWxsOiNlNDFjNWM7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQiLz48L3N2Zz4="
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fluence</title>
   </head>
@@ -377,27 +380,27 @@ const appEl =
     throw new Error("#app element is not found");
   })();
 
-const buttons = [
+const aquaFunctions = [
   {
-    fnName: "helloWorld",
+    name: "helloWorld",
     fn() {
       return helloWorld("Fluence");
     },
   },
   {
-    fnName: "helloWorldRemote",
+    name: "helloWorldRemote",
     fn() {
       return helloWorldRemote("Fluence");
     },
   },
   {
-    fnName: "showSubnet",
+    name: "showSubnet",
     fn() {
       return showSubnet();
     },
   },
   {
-    fnName: "runDeployedServices",
+    name: "runDeployedServices",
     fn() {
       return runDeployedServices();
     },
@@ -405,44 +408,50 @@ const buttons = [
 ];
 
 (async () => {
+  const p = document.createElement("p");
+  p.innerText = "Loading...";
+  appEl.append(p);
   try {
-    await Fluence.connect(relays[0].multiaddr, {});
+    await Fluence.connect(relays[0].multiaddr);
   } catch (error) {
-    appEl.innerHTML = stringifyError(error);
+    p.style.color = "red";
+    p.innerText = \`❌ \${stringifyError(error)}\`;
     throw error;
   }
 
-  appEl.innerHTML = buttons.map(({ fnName }) => button(fnName)).join("\\n");
+  p.remove();
 
-  requestAnimationFrame(() => {
-    buttons.forEach(({ fnName, fn }) => {
-      const buttonEl =
-        document.querySelector(\`#\${fnName}\`) ??
-        (() => {
-          throw new Error(\`Button with id="\${fnName}" is not found\`);
-        })();
+  aquaFunctions.forEach((aquaFn) => {
+    const buttonEl = document.createElement("button");
+    buttonEl.innerText = aquaFn.name;
 
-      buttonEl.addEventListener("click", () => {
-        runAquaFunction(fn);
-      });
+    buttonEl.addEventListener("click", () => {
+      runAquaFunction(aquaFn);
     });
+
+    appEl.append(buttonEl);
   });
 })();
 
-function button(fnName${isJS ? "" : ": string"}) {
-  return \`<button type="button" id="\${fnName}">\${fnName}</button>\`;
+${
+  isJS
+    ? ""
+    : `type AquaFunction = {
+  name: string;
+  fn: () => Promise<unknown>;
+};
+`
 }
-
-async function runAquaFunction(fn${isJS ? "" : ": () => Promise<unknown>"}) {
+async function runAquaFunction({ fn, name }${isJS ? "" : ": AquaFunction"}) {
   const p = document.createElement("p");
   p.style.whiteSpace = "pre-wrap";
   try {
     const res = await fn();
     p.style.color = "green";
-    p.innerHTML = \`✅ \${JSON.stringify(res, null, 2)}\`;
+    p.innerHTML = \`\${name}: ✅ \${JSON.stringify(res, null, 2)}\`;
   } catch (e) {
     p.style.color = "red";
-    p.innerHTML = \`❌ \${stringifyError(e)}\`;
+    p.innerHTML = \`\${name}: ❌ \${stringifyError(e)}\`;
   }
   appEl.append(p);
 }
