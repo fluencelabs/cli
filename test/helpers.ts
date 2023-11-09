@@ -98,14 +98,6 @@ export const initFirstTime = async (template: Template) => {
       args: ["init", templatePath],
       flags: { template, env: fluenceEnv, "no-input": true },
     });
-
-    if (template === "js" || template === "ts") {
-      await execPromise({
-        command: "npm",
-        args: ["install"],
-        options: { cwd: templatePath },
-      });
-    }
   }
 
   return templatePath;
