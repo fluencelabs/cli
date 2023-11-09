@@ -409,7 +409,7 @@ export async function getResolvedProviderConfig(args: ProviderConfigArgs = {}) {
   return Promise.all(
     Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {
       const {
-        nox: { webSocketPort: webSocketPortFromConfig } = {},
+        nox: { websocket_port: webSocketPortFromConfig } = {},
         computeUnits = 1,
       } = peer;
 

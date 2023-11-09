@@ -57,10 +57,10 @@ import {
 } from "../initConfig.js";
 
 import type { FluenceConfigReadonly } from "./fluence.js";
-import { commonNoxConfig } from "./provider.js";
 import {
+  commonNoxConfig,
+  type NoxConfigToml,
   initNewReadonlyProviderConfig,
-  type NoxConfigYAML,
   type ProviderConfigReadonly,
 } from "./provider.js";
 
@@ -115,25 +115,14 @@ async function getDefaultConfigTOML(
   };
 }
 
-type NoxConfigToml = {
-  tcp_port?: number;
-  websocket_port?: number;
-  http_port?: number;
-  aquavm_pool_size?: number;
-};
-
-export async function configYAMLToConfigToml(
-  { aquavmPoolSize, httpPort, tcpPort, webSocketPort, ...rest }: NoxConfigYAML,
+export async function configTOMLWithDefault(
+  configFromUser: NoxConfigToml,
   fluenceConfig: FluenceConfigReadonly | null,
 ): Promise<NoxConfigToml> {
   return omitBy(
     {
       ...(await getDefaultConfigTOML(fluenceConfig)),
-      tcp_port: tcpPort,
-      websocket_port: webSocketPort,
-      http_port: httpPort,
-      aquavm_pool_size: aquavmPoolSize,
-      ...rest,
+      ...configFromUser,
     },
     isNil,
   );
@@ -294,8 +283,8 @@ async function genDockerCompose(
 
       return {
         ...(await getSecretKeyOrReturnExisting(name)),
-        webSocketPort: nox?.webSocketPort,
-        tcpPort: nox?.tcpPort,
+        webSocketPort: nox?.websocket_port,
+        tcpPort: nox?.tcp_port,
         relativeConfigFilePath,
       };
     }),
@@ -433,24 +422,24 @@ export async function ensureConfigToml(
   const { stringify } = await import("@iarna/toml");
 
   await Promise.all(
-    Object.entries(providerConfig.computePeers).map(([key, value], i) => {
+    Object.entries(providerConfig.computePeers).map(async ([key, value], i) => {
       const overridden = assign({}, baseNoxConfig, value.nox ?? {});
 
-      if (overridden.tcpPort === TCP_PORT_START) {
-        overridden.tcpPort = TCP_PORT_START + i;
+      if (overridden.tcp_port === TCP_PORT_START) {
+        overridden.tcp_port = TCP_PORT_START + i;
       }
 
-      if (overridden.webSocketPort === WEB_SOCKET_PORT_START) {
-        overridden.webSocketPort = WEB_SOCKET_PORT_START + i;
+      if (overridden.websocket_port === WEB_SOCKET_PORT_START) {
+        overridden.websocket_port = WEB_SOCKET_PORT_START + i;
       }
 
-      if (overridden.httpPort === HTTP_PORT_START) {
-        overridden.httpPort = HTTP_PORT_START + i;
+      if (overridden.http_port === HTTP_PORT_START) {
+        overridden.http_port = HTTP_PORT_START + i;
       }
 
       return writeFile(
         join(configsDir, getConfigTomlName(key)),
-        stringify(configYAMLToConfigToml(overridden, fluenceConfig)),
+        stringify(await configTOMLWithDefault(overridden, fluenceConfig)),
         FS_OPTIONS,
       );
     }),

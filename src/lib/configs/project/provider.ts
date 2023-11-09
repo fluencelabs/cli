@@ -48,39 +48,39 @@ export type Offer = {
   effectors?: Array<string>;
 };
 
-export type NoxConfigYAML = {
-  tcpPort?: number;
-  webSocketPort?: number;
-  httpPort?: number;
-  aquavmPoolSize?: number;
+export type NoxConfigToml = {
+  tcp_port?: number;
+  websocket_port?: number;
+  http_port?: number;
+  aquavm_pool_size?: number;
 };
 
-export const commonNoxConfig: NoxConfigYAML = {
-  tcpPort: TCP_PORT_START,
-  webSocketPort: WEB_SOCKET_PORT_START,
-  httpPort: HTTP_PORT_START,
-  aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
+export const commonNoxConfig: NoxConfigToml = {
+  tcp_port: TCP_PORT_START,
+  websocket_port: WEB_SOCKET_PORT_START,
+  http_port: HTTP_PORT_START,
+  aquavm_pool_size: DEFAULT_AQUAVM_POOL_SIZE,
 };
 
 const noxConfigYAMLSchema = {
   type: "object",
   properties: {
-    tcpPort: {
+    tcp_port: {
       nullable: true,
       type: "number",
       description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
     },
-    webSocketPort: {
+    websocket_port: {
       nullable: true,
       type: "number",
       description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
     },
-    httpPort: {
+    http_port: {
       nullable: true,
       type: "number",
       description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
     },
-    aquavmPoolSize: {
+    aquavm_pool_size: {
       nullable: true,
       type: "number",
       description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
@@ -88,17 +88,17 @@ const noxConfigYAMLSchema = {
   },
   required: [],
   nullable: true,
-} as const satisfies JSONSchemaType<NoxConfigYAML>;
+} as const satisfies JSONSchemaType<NoxConfigToml>;
 
 export type ComputePeer = {
   computeUnits?: number;
-  nox?: NoxConfigYAML;
+  nox?: NoxConfigToml;
 };
 
 type ConfigV0 = {
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
-  nox?: NoxConfigYAML;
+  nox?: NoxConfigToml;
   version: 0;
 };
 

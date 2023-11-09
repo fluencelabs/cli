@@ -52,6 +52,7 @@ import {
   TS_EXT,
   JS_EXT,
   INDEX_HTML_FILE_NAME,
+  CONFIGS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -240,6 +241,10 @@ export const getFluenceSecretsDir = (): string => {
 
 export const ensureFluenceSecretsDir = async (): Promise<string> => {
   return ensureDir(getFluenceSecretsDir());
+};
+
+export const ensureFluenceConfigsDir = async (): Promise<string> => {
+  return ensureDir(join(await ensureFluenceDir(), CONFIGS_DIR_NAME));
 };
 
 export async function getSecretsPathForReading(isUser: boolean) {
