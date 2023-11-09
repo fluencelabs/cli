@@ -59,6 +59,7 @@ type Service = {
   command?: string[];
   depends_on?: string[];
   secrets?: string[];
+  platform?: string;
 };
 
 const serviceSchema: JSONSchemaType<Service> = {
@@ -97,6 +98,7 @@ const serviceSchema: JSONSchemaType<Service> = {
       items: { type: "string" },
       nullable: true,
     },
+    platform: { type: "string", nullable: true },
   },
   required: [],
 };
@@ -236,6 +238,7 @@ async function genDockerCompose(
     version: "3",
     services: {
       [CHAIN_CONTAINER_NAME]: {
+        platform: "linux/x86_64",
         image: versions.chain,
         pull_policy: "always",
         ports: [`${CHAIN_PORT}:${CHAIN_PORT}`],
