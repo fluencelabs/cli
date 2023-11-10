@@ -650,7 +650,7 @@ _See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/
 
 ## `fluence local logs`
 
-Stop currently running docker-compose.yaml using docker compose
+Display docker-compose.yaml logs
 
 ```
 USAGE
@@ -660,7 +660,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Stop currently running docker-compose.yaml using docker compose
+  Display docker-compose.yaml logs
 
 EXAMPLES
   $ fluence local logs
