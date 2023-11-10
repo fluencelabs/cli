@@ -60,6 +60,7 @@ import {
   getFluenceDir,
   projectRootDir,
 } from "../../paths.js";
+import type { Mutable } from "../../typeHelpers.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -335,7 +336,7 @@ const configSchemaV2Obj = {
           type: "object",
           title: "npm dependencies",
           nullable: true,
-          description: `A map of npm dependency versions. ${CLI_NAME_FULL} ensures dependencies are installed each time you run aqua`,
+          description: `A map of npm aqua dependency versions. ${CLI_NAME_FULL} ensures dependencies are installed each time you run aqua`,
           additionalProperties: { type: "string" },
           properties: {
             npm_dependency_name: {
@@ -544,13 +545,23 @@ type ConfigV5 = Omit<ConfigV4, "workers" | "version" | "deals" | "hosts"> & {
   hosts?: Record<string, Host & Worker>;
 };
 
+const configSchemaV4ObjPropertiesWithoutWorkers: Omit<
+  typeof configSchemaV4Obj.properties,
+  "workers"
+> &
+  Mutable<Partial<Pick<typeof configSchemaV4Obj.properties, "workers">>> = {
+  ...configSchemaV4Obj.properties,
+};
+
+delete configSchemaV4ObjPropertiesWithoutWorkers.workers;
+
 const configSchemaV5Obj = {
   ...configSchemaV4Obj,
   $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
   title: FLUENCE_CONFIG_FULL_FILE_NAME,
   description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
-    ...configSchemaV4Obj.properties,
+    ...configSchemaV4ObjPropertiesWithoutWorkers,
     version: { type: "number", const: 5 },
     deals: {
       description:
@@ -760,7 +771,7 @@ deals:
 # # (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies
 # # You can check out current project dependencies using \`fluence dep v\` command
 # dependencies:
-#   # A map of npm dependency versions
+#   # A map of npm aqua dependency versions
 #   # CLI ensures dependencies are installed each time you run aqua
 #   # There are also some dependencies that are installed by default (e.g. ${AQUA_LIB_NPM_DEPENDENCY})
 #   # You can check default dependencies using \`fluence dep v --default\`
