@@ -846,7 +846,7 @@ EXAMPLES
   $ fluence provider gen
 ```
 
-_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.12.2/src/commands/provider/gen.ts)_
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/provider/gen.ts)_
 
 ## `fluence provider init`
 
