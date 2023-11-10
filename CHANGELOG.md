@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.3...fluence-cli-v0.12.4) (2023-11-10)
+
+
+### Bug Fixes
+
+* improve docs ([#613](https://github.com/fluencelabs/cli/issues/613)) ([049ba1e](https://github.com/fluencelabs/cli/commit/049ba1e5519c7f18be3ef4941187ab9a4c0e0b6d))
+
+## [0.12.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.2...fluence-cli-v0.12.3) (2023-11-09)
+
+
+### Bug Fixes
+
+* update spell and installation-spell ([#611](https://github.com/fluencelabs/cli/issues/611)) ([5bd3563](https://github.com/fluencelabs/cli/commit/5bd35635b0cc9ee750f326ce299adf07506293a1))
+
 ## [0.12.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.1...fluence-cli-v0.12.2) (2023-11-09)
 
 

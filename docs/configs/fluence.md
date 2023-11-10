@@ -22,7 +22,6 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 | `relaysPath`           | string                      | No       | Path to the directory where you want relays.json file to be generated. Must be relative to the project root dir. This file contains a list of relays to use when connecting to Fluence network and depends on the default environment that you use in your project                                                                                                                                                                   |
 | `services`             | [object](#services)         | No       | A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config                                                                                                                               |
 | `spells`               | [object](#spells)           | No       | A map with spell names as keys and spell configs as values                                                                                                                                                                                                                                                                                                                                                                           |
-| `workers`              | [object](#workers)          | No       | A Map with worker names as keys and worker configs as values                                                                                                                                                                                                                                                                                                                                                                         |
 
 ## customFluenceEnv
 
@@ -67,7 +66,7 @@ Worker config
 | Property | Type             | Required | Description                                                                                                                                        |
 |----------|------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `cargo`  | [object](#cargo) | No       | A map of cargo dependency versions. Fluence CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL |
-| `npm`    | [object](#npm)   | No       | A map of npm dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua                                            |
+| `npm`    | [object](#npm)   | No       | A map of npm aqua dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua                                       |
 
 ### cargo
 
@@ -81,7 +80,7 @@ A map of cargo dependency versions. Fluence CLI ensures dependencies are install
 
 ### npm
 
-A map of npm dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua
+A map of npm aqua dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua
 
 #### Properties
 
@@ -239,25 +238,4 @@ A map of Aqua function arguments names as keys and arguments values as values. T
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-
-## workers
-
-A Map with worker names as keys and worker configs as values
-
-### Properties
-
-| Property | Type              | Required | Description   |
-|----------|-------------------|----------|---------------|
-| `Worker` | [object](#worker) | No       | Worker config |
-
-### Worker
-
-Worker config
-
-#### Properties
-
-| Property   | Type     | Required | Description                                                                                       |
-|------------|----------|----------|---------------------------------------------------------------------------------------------------|
-| `services` | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
-| `spells`   | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
 
