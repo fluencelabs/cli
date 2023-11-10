@@ -109,8 +109,8 @@ jobs:
           # if nox image is not passed from e2e read from versions.json
           'null')
             nox="$(jq .nox src/versions.json -r)"
-            # use minimal image
-            nox="${nox//nox:/nox:minimal_}"
+            # # use minimal image
+            # nox="${nox//nox:/nox:minimal_}"
           ;;
           # else set nox image to snapshot passed from e2e
           *)
