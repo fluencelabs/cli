@@ -28,7 +28,7 @@ func areAllWorkersRemoved() -> bool:
     installationSpells = hosts.workerName!.installationSpells
     dummyDealId = hosts.workerName!.dummyDealId
 
-    allWorkersRemoved: ?bool
+    allWorkersRemoved: *bool
 
     for s <- installationSpells:
         on s.hostId:
