@@ -66,6 +66,7 @@ type ConfigV0 = {
 
 const configSchemaV0Obj = {
   type: "object",
+  additionalProperties: false,
   properties: {
     countlyConsent: {
       type: "boolean",
@@ -73,6 +74,7 @@ const configSchemaV0Obj = {
     },
     dependencies: {
       type: "object",
+      additionalProperties: false,
       description: "(For advanced users) Global overrides of dependencies",
       properties: {
         npm: {
