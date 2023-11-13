@@ -134,6 +134,7 @@ const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
   },
   required: [],
   nullable: true,
+  additionalProperties: false,
 } as const;
 
 const serviceSchema: JSONSchemaType<ServiceV1> = {
@@ -159,6 +160,7 @@ const serviceSchema: JSONSchemaType<ServiceV1> = {
     },
   },
   required: ["get"],
+  additionalProperties: false,
 } as const;
 
 const configSchemaV1Obj = {
@@ -246,6 +248,7 @@ const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
     ...overridableSpellProperties,
   },
   required: ["get"],
+  additionalProperties: false,
 } as const;
 
 const dealSchemaObj = {
@@ -362,6 +365,7 @@ const configSchemaV2Obj = {
         },
       },
       required: [],
+      additionalProperties: false,
     },
     [AQUA_INPUT_PATH_PROPERTY]: {
       type: "string",
@@ -505,6 +509,7 @@ const configSchemaV3Obj = {
         },
       },
       required: ["contractsEnv", "relays"],
+      additionalProperties: false,
     },
   },
 } as const;
@@ -596,6 +601,7 @@ const configSchemaV5Obj = {
         properties: {
           ...workerConfigSchemaObj.properties,
           ...hostConfigSchemaObj.properties,
+          additionalProperties: false,
         },
       },
       properties: {
@@ -604,12 +610,14 @@ const configSchemaV5Obj = {
           properties: {
             ...workerConfigSchemaObj.properties,
             ...hostConfigSchemaObj.properties,
+            additionalProperties: false,
           },
         },
       },
       required: [],
     },
   },
+  additionalProperties: false,
 } as const;
 
 const configSchemaV5: JSONSchemaType<ConfigV5> = configSchemaV5Obj;

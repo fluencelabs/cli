@@ -128,6 +128,7 @@ const noxConfigYAMLSchema = {
     systemServices: {
       nullable: true,
       type: "object",
+      additionalProperties: false,
       properties: {
         enable: {
           nullable: true,
@@ -137,6 +138,7 @@ const noxConfigYAMLSchema = {
         },
         aquaIpfs: {
           type: "object",
+          additionalProperties: false,
           nullable: true,
           properties: {
             externalApiMultiaddr: {
@@ -154,6 +156,7 @@ const noxConfigYAMLSchema = {
         },
         decider: {
           type: "object",
+          additionalProperties: false,
           nullable: true,
           properties: {
             deciderPeriodSec: {
@@ -205,6 +208,7 @@ const noxConfigYAMLSchema = {
   },
   required: [],
   nullable: true,
+  additionalProperties: false,
 } as const satisfies JSONSchemaType<NoxConfigYAML>;
 
 export type ComputePeer = {
@@ -221,6 +225,7 @@ type ConfigV0 = {
 
 const offerSchema: JSONSchemaType<Offer> = {
   type: "object",
+  additionalProperties: false,
   properties: {
     minPricePerWorkerEpoch: { type: "number" },
     maxCollateralPerWorker: { type: "number" },
@@ -241,6 +246,7 @@ const offerSchema: JSONSchemaType<Offer> = {
 
 const computePeerSchema: JSONSchemaType<ComputePeer> = {
   type: "object",
+  additionalProperties: false,
   properties: {
     computeUnits: { type: "number", nullable: true },
     nox: noxConfigYAMLSchema,
@@ -253,6 +259,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   title: PROVIDER_CONFIG_FULL_FILE_NAME,
   description: `Defines config used for provider set up`,
   type: "object",
+  additionalProperties: false,
   properties: {
     offers: {
       type: "object",

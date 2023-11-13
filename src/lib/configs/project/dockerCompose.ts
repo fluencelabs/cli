@@ -19,9 +19,6 @@ import { writeFile } from "fs/promises";
 import { join, relative } from "path";
 
 import type { JSONSchemaType } from "ajv";
-import assign from "lodash-es/assign.js";
-import isNil from "lodash-es/isNil.js";
-import omitBy from "lodash-es/omitBy.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { versions } from "../../../versions.js";
@@ -75,7 +72,7 @@ function getIsLocal() {
   return envConfig.fluenceEnv === "local";
 }
 
-async function getDefaultConfigYAML(
+async function getDefaultNoxConfigYAML(
   fluenceConfig: FluenceConfigReadonly | null,
 ): Promise<NoxConfigYAML> {
   const isLocal = getIsLocal();
@@ -91,12 +88,16 @@ async function getDefaultConfigYAML(
 
   const dealConfig = await DEAL_CONFIG[contractsEnv]();
 
-  return {
+  return mergeNoxConfigYAML(commonNoxConfig, {
     systemServices: {
       enable: ["aqua-ipfs", "decider"],
       aquaIpfs: {
-        externalApiMultiaddr: isLocal ? LOCAL_IPFS_ADDRESS : "",
-        localApiMultiaddr: isLocal ? NOX_IPFS_MULTIADDR : "",
+        externalApiMultiaddr: isLocal
+          ? LOCAL_IPFS_ADDRESS
+          : `/dns4/${contractsEnv}-ipfs.fluence.dev/tcp/5020`,
+        localApiMultiaddr: isLocal
+          ? NOX_IPFS_MULTIADDR
+          : `/dns4/${contractsEnv}-ipfs.fluence.dev/tcp/5020`,
       },
       decider: {
         deciderPeriodSec: 10,
@@ -108,25 +109,14 @@ async function getDefaultConfigYAML(
           : "http://mumbai-polygon.ru:8545",
         networkId: dealConfig.chainId,
         startBlock: "earliest",
+        // TODO: use correct addr for env
         matcherAddress: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
+        // TODO: pass correct key
         walletKey:
           "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
       },
     },
-  };
-}
-
-export async function configYAMLWithDefault(
-  configFromUser: NoxConfigYAML,
-  fluenceConfig: FluenceConfigReadonly | null,
-): Promise<NoxConfigYAML> {
-  return omitBy(
-    {
-      ...(await getDefaultConfigYAML(fluenceConfig)),
-      ...configFromUser,
-    },
-    isNil,
-  );
+  });
 }
 
 type Service = {
@@ -416,13 +406,13 @@ export async function ensureConfigToml(
   fluenceConfig: FluenceConfigReadonly | null,
   providerConfig: ProviderConfigReadonly,
 ) {
-  const baseNoxConfig = assign({}, commonNoxConfig, providerConfig.nox ?? {});
+  const baseNoxConfig = await getDefaultNoxConfigYAML(fluenceConfig);
   const configsDir = await ensureFluenceConfigsDir();
   const { stringify } = await import("@iarna/toml");
 
   await Promise.all(
     Object.entries(providerConfig.computePeers).map(async ([key, value], i) => {
-      const overridden = assign({}, baseNoxConfig, value.nox ?? {});
+      const overridden = mergeNoxConfigYAML(baseNoxConfig, value.nox ?? {});
 
       if (overridden.tcpPort === TCP_PORT_START) {
         overridden.tcpPort = TCP_PORT_START + i;
@@ -439,11 +429,7 @@ export async function ensureConfigToml(
       return writeFile(
         join(configsDir, getConfigTomlName(key)),
         [
-          stringify(
-            configYAMLToConfigToml(
-              await configYAMLWithDefault(overridden, fluenceConfig),
-            ),
-          ),
+          stringify(configYAMLToConfigToml(overridden)),
           providerConfig.nox?.rawConfig ?? "",
           value.nox?.rawConfig ?? "",
         ]
@@ -455,6 +441,35 @@ export async function ensureConfigToml(
       );
     }),
   );
+}
+
+function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML): NoxConfigYAML {
+  return {
+    ...a,
+    ...b,
+    ...(a.systemServices !== undefined && b.systemServices !== undefined
+      ? {
+          systemServices: {
+            ...a.systemServices,
+            ...b.systemServices,
+            enable: Array.from(
+              new Set([
+                ...(a.systemServices.enable ?? []),
+                ...(b.systemServices.enable ?? []),
+              ]),
+            ),
+            aquaIpfs: {
+              ...a.systemServices.aquaIpfs,
+              ...b.systemServices.aquaIpfs,
+            },
+            decider: {
+              ...a.systemServices.decider,
+              ...b.systemServices.decider,
+            },
+          },
+        }
+      : {}),
+  };
 }
 
 function configYAMLToConfigToml(config: NoxConfigYAML) {
