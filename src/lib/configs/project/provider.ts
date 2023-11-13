@@ -162,7 +162,7 @@ const noxConfigYAMLSchema = {
             deciderPeriodSec: {
               nullable: true,
               type: "number",
-              description: `Decider period in seconds. Default: 60`,
+              description: `Decider period in seconds`,
             },
             workerIpfsMultiaddr: {
               nullable: true,
