@@ -28,9 +28,11 @@ export default function App() {
     <>
       <Switch fallback={<div>CLI is not connected</div>}>
         <Match when={state.server?.tag === "transaction"}>
+          {/* @ts-ignore */}
           <Transaction {...state.server?.data} />
         </Match>
         <Match when={state.server?.tag === "success"}>
+          {/* @ts-ignore */}
           <TransactionSuccess {...state.server?.data} />
         </Match>
       </Switch>

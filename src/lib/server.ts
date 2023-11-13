@@ -15,7 +15,7 @@
  */
 
 import { createRequire } from "module";
-import { dirname } from "path";
+import { dirname, join } from "path";
 
 import express from "express";
 import type { Fn, Objects, Pipe, Unions } from "hotscript";
@@ -39,7 +39,10 @@ function initServer() {
     const app = express();
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    app.use(express.static(dirname(require.resolve("../public"))));
+
+    app.use(
+      express.static(join(dirname(require.resolve("../versions")), "public")),
+    );
 
     app.get("/events", (_, response) => {
       response.writeHead(200, {
@@ -58,7 +61,7 @@ function initServer() {
 
     app.listen(PORT, () => {
       commandObj.logToStderr(`Server started on http://localhost:${PORT}`);
-      void open(`http://localhost:${PORT}`, { app: { name: "firefox" } });
+      void open(`http://localhost:${PORT}`);
       res(true);
     });
   });
