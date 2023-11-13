@@ -406,7 +406,11 @@ export async function ensureConfigToml(
   fluenceConfig: FluenceConfigReadonly | null,
   providerConfig: ProviderConfigReadonly,
 ) {
-  const baseNoxConfig = await getDefaultNoxConfigYAML(fluenceConfig);
+  const baseNoxConfig = mergeNoxConfigYAML(
+    await getDefaultNoxConfigYAML(fluenceConfig),
+    providerConfig.nox ?? {},
+  );
+
   const configsDir = await ensureFluenceConfigsDir();
   const { stringify } = await import("@iarna/toml");
 
