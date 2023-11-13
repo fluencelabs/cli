@@ -48,57 +48,63 @@ export type Offer = {
   effectors?: Array<string>;
 };
 
-export type NoxConfigToml = {
-  tcp_port?: number;
-  websocket_port?: number;
-  http_port?: number;
-  aquavm_pool_size?: number;
+export type NoxConfigYAML = {
+  tcpPort?: number;
+  websocketPort?: number;
+  httpPort?: number;
+  aquavmPoolSize?: number;
+  rawConfig?: string;
 };
 
-export const commonNoxConfig: NoxConfigToml = {
-  tcp_port: TCP_PORT_START,
-  websocket_port: WEB_SOCKET_PORT_START,
-  http_port: HTTP_PORT_START,
-  aquavm_pool_size: DEFAULT_AQUAVM_POOL_SIZE,
+export const commonNoxConfig: NoxConfigYAML = {
+  tcpPort: TCP_PORT_START,
+  websocketPort: WEB_SOCKET_PORT_START,
+  httpPort: HTTP_PORT_START,
+  aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
 };
 
 const noxConfigYAMLSchema = {
   type: "object",
   properties: {
-    tcp_port: {
+    tcpPort: {
       nullable: true,
       type: "number",
       description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
     },
-    websocket_port: {
+    websocketPort: {
       nullable: true,
       type: "number",
       description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
     },
-    http_port: {
+    httpPort: {
       nullable: true,
       type: "number",
       description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
     },
-    aquavm_pool_size: {
+    aquavmPoolSize: {
       nullable: true,
       type: "number",
       description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
     },
+    rawConfig: {
+      nullable: true,
+      type: "string",
+      description: `Raw TOML config string to append to the generated config. Default: empty string`,
+    },
   },
   required: [],
   nullable: true,
-} as const satisfies JSONSchemaType<NoxConfigToml>;
+} as const satisfies JSONSchemaType<NoxConfigYAML>;
 
 export type ComputePeer = {
   computeUnits?: number;
-  nox?: NoxConfigToml;
+  nox?: NoxConfigYAML;
 };
 
 type ConfigV0 = {
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
-  nox?: NoxConfigToml;
+  nox?: NoxConfigYAML;
   version: 0;
 };
 

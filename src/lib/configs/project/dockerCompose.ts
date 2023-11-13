@@ -59,7 +59,7 @@ import {
 import type { FluenceConfigReadonly } from "./fluence.js";
 import {
   commonNoxConfig,
-  type NoxConfigToml,
+  type NoxConfigYAML,
   initNewReadonlyProviderConfig,
   type ProviderConfigReadonly,
 } from "./provider.js";
@@ -116,9 +116,9 @@ async function getDefaultConfigTOML(
 }
 
 export async function configTOMLWithDefault(
-  configFromUser: NoxConfigToml,
+  configFromUser: NoxConfigYAML,
   fluenceConfig: FluenceConfigReadonly | null,
-): Promise<NoxConfigToml> {
+): Promise<NoxConfigYAML> {
   return omitBy(
     {
       ...(await getDefaultConfigTOML(fluenceConfig)),
@@ -283,8 +283,8 @@ async function genDockerCompose(
 
       return {
         ...(await getSecretKeyOrReturnExisting(name)),
-        webSocketPort: nox?.websocket_port,
-        tcpPort: nox?.tcp_port,
+        webSocketPort: nox?.websocketPort,
+        tcpPort: nox?.tcpPort,
         relativeConfigFilePath,
       };
     }),
@@ -423,21 +423,31 @@ export async function ensureConfigToml(
     Object.entries(providerConfig.computePeers).map(async ([key, value], i) => {
       const overridden = assign({}, baseNoxConfig, value.nox ?? {});
 
-      if (overridden.tcp_port === TCP_PORT_START) {
-        overridden.tcp_port = TCP_PORT_START + i;
+      if (overridden.tcpPort === TCP_PORT_START) {
+        overridden.tcpPort = TCP_PORT_START + i;
       }
 
-      if (overridden.websocket_port === WEB_SOCKET_PORT_START) {
-        overridden.websocket_port = WEB_SOCKET_PORT_START + i;
+      if (overridden.websocketPort === WEB_SOCKET_PORT_START) {
+        overridden.websocketPort = WEB_SOCKET_PORT_START + i;
       }
 
-      if (overridden.http_port === HTTP_PORT_START) {
-        overridden.http_port = HTTP_PORT_START + i;
+      if (overridden.httpPort === HTTP_PORT_START) {
+        overridden.httpPort = HTTP_PORT_START + i;
       }
+
+      delete overridden.rawConfig;
 
       return writeFile(
         join(configsDir, getConfigTomlName(key)),
-        stringify(await configTOMLWithDefault(overridden, fluenceConfig)),
+        [
+          stringify(await configTOMLWithDefault(overridden, fluenceConfig)),
+          providerConfig.nox?.rawConfig ?? "",
+          value.nox?.rawConfig ?? "",
+        ]
+          .filter((x) => {
+            return x !== "";
+          })
+          .join("\n"),
         FS_OPTIONS,
       );
     }),
