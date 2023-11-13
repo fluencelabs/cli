@@ -64,15 +64,15 @@ Defines config used for provider set up
 
 **Properties**
 
-| Property              | Type   | Required | Description                            |
-|-----------------------|--------|----------|----------------------------------------|
-| `deciderPeriodSec`    | number | No       | Decider period in seconds. Default: 60 |
-| `matcherAddress`      | string | No       | Matcher address                        |
-| `networkApiEndpoint`  | string | No       | Network API endpoint                   |
-| `networkId`           | number | No       | Network ID                             |
-| `startBlock`          | string | No       | Start block                            |
-| `walletKey`           | string | No       | Wallet key                             |
-| `workerIpfsMultiaddr` | string | No       | Multiaddress of worker IPFS node       |
+| Property              | Type   | Required | Description                      |
+|-----------------------|--------|----------|----------------------------------|
+| `deciderPeriodSec`    | number | No       | Decider period in seconds        |
+| `matcherAddress`      | string | No       | Matcher address                  |
+| `networkApiEndpoint`  | string | No       | Network API endpoint             |
+| `networkId`           | number | No       | Network ID                       |
+| `startBlock`          | string | No       | Start block                      |
+| `walletKey`           | string | No       | Wallet key                       |
+| `workerIpfsMultiaddr` | string | No       | Multiaddress of worker IPFS node |
 
 ## nox
 
@@ -110,15 +110,15 @@ Defines config used for provider set up
 
 ##### Properties
 
-| Property              | Type   | Required | Description                            |
-|-----------------------|--------|----------|----------------------------------------|
-| `deciderPeriodSec`    | number | No       | Decider period in seconds. Default: 60 |
-| `matcherAddress`      | string | No       | Matcher address                        |
-| `networkApiEndpoint`  | string | No       | Network API endpoint                   |
-| `networkId`           | number | No       | Network ID                             |
-| `startBlock`          | string | No       | Start block                            |
-| `walletKey`           | string | No       | Wallet key                             |
-| `workerIpfsMultiaddr` | string | No       | Multiaddress of worker IPFS node       |
+| Property              | Type   | Required | Description                      |
+|-----------------------|--------|----------|----------------------------------|
+| `deciderPeriodSec`    | number | No       | Decider period in seconds        |
+| `matcherAddress`      | string | No       | Matcher address                  |
+| `networkApiEndpoint`  | string | No       | Network API endpoint             |
+| `networkId`           | number | No       | Network ID                       |
+| `startBlock`          | string | No       | Start block                      |
+| `walletKey`           | string | No       | Wallet key                       |
+| `workerIpfsMultiaddr` | string | No       | Multiaddress of worker IPFS node |
 
 ## offers
 
