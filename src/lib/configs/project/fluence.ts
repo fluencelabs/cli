@@ -601,8 +601,8 @@ const configSchemaV5Obj = {
         properties: {
           ...workerConfigSchemaObj.properties,
           ...hostConfigSchemaObj.properties,
-          additionalProperties: false,
         },
+        additionalProperties: false,
       },
       properties: {
         workerName: {
@@ -610,8 +610,8 @@ const configSchemaV5Obj = {
           properties: {
             ...workerConfigSchemaObj.properties,
             ...hostConfigSchemaObj.properties,
-            additionalProperties: false,
           },
+          additionalProperties: false,
         },
       },
       required: [],
