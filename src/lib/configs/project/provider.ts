@@ -53,7 +53,46 @@ export type NoxConfigYAML = {
   websocketPort?: number;
   httpPort?: number;
   aquavmPoolSize?: number;
+  systemServices?: {
+    enable?: Array<string>;
+    aquaIpfs?: {
+      externalApiMultiaddr?: string;
+      localApiMultiaddr?: string;
+    };
+    decider?: {
+      deciderPeriodSec?: number;
+      workerIpfsMultiaddr?: string;
+      networkApiEndpoint?: string;
+      networkId?: number;
+      startBlock?: string;
+      matcherAddress?: string;
+      walletKey?: string;
+    };
+  };
   rawConfig?: string;
+};
+
+export type NoxConfigTOML = {
+  tcp_port?: number;
+  websocket_port?: number;
+  http_port?: number;
+  aquavm_pool_size?: number;
+  system_services?: {
+    enable?: Array<string>;
+    aqua_ipfs?: {
+      external_api_multiaddr?: string;
+      local_api_multiaddr?: string;
+    };
+    decider?: {
+      decider_period_sec?: number;
+      worker_ipfs_multiaddr?: string;
+      network_api_endpoint?: string;
+      network_id?: number;
+      start_block?: string;
+      matcher_address?: string;
+      wallet_key?: string;
+    };
+  };
 };
 
 export const commonNoxConfig: NoxConfigYAML = {
@@ -85,6 +124,78 @@ const noxConfigYAMLSchema = {
       nullable: true,
       type: "number",
       description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
+    },
+    systemServices: {
+      nullable: true,
+      type: "object",
+      properties: {
+        enable: {
+          nullable: true,
+          type: "array",
+          items: { type: "string" },
+          description: `List of system services to enable`,
+        },
+        aquaIpfs: {
+          type: "object",
+          nullable: true,
+          properties: {
+            externalApiMultiaddr: {
+              nullable: true,
+              type: "string",
+              description: `Multiaddress of external IPFS API`,
+            },
+            localApiMultiaddr: {
+              nullable: true,
+              type: "string",
+              description: `Multiaddress of local IPFS API`,
+            },
+          },
+          required: [],
+        },
+        decider: {
+          type: "object",
+          nullable: true,
+          properties: {
+            deciderPeriodSec: {
+              nullable: true,
+              type: "number",
+              description: `Decider period in seconds. Default: 60`,
+            },
+            workerIpfsMultiaddr: {
+              nullable: true,
+              type: "string",
+              description: `Multiaddress of worker IPFS node`,
+            },
+            networkApiEndpoint: {
+              nullable: true,
+              type: "string",
+              description: `Network API endpoint`,
+            },
+            networkId: {
+              nullable: true,
+              type: "number",
+              description: `Network ID`,
+            },
+            startBlock: {
+              nullable: true,
+              type: "string",
+              description: `Start block`,
+            },
+            matcherAddress: {
+              nullable: true,
+              type: "string",
+              description: `Matcher address`,
+            },
+            walletKey: {
+              nullable: true,
+              type: "string",
+              description: `Wallet key`,
+            },
+          },
+          required: [],
+        },
+      },
+      required: [],
     },
     rawConfig: {
       nullable: true,

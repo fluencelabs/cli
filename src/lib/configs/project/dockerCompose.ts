@@ -62,6 +62,7 @@ import {
   type NoxConfigYAML,
   initNewReadonlyProviderConfig,
   type ProviderConfigReadonly,
+  type NoxConfigTOML,
 } from "./provider.js";
 
 const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
@@ -74,9 +75,9 @@ function getIsLocal() {
   return envConfig.fluenceEnv === "local";
 }
 
-async function getDefaultConfigTOML(
+async function getDefaultConfigYAML(
   fluenceConfig: FluenceConfigReadonly | null,
-) {
+): Promise<NoxConfigYAML> {
   const isLocal = getIsLocal();
 
   const contractsEnv: ContractsENV =
@@ -91,37 +92,37 @@ async function getDefaultConfigTOML(
   const dealConfig = await DEAL_CONFIG[contractsEnv]();
 
   return {
-    system_services: {
+    systemServices: {
       enable: ["aqua-ipfs", "decider"],
-      aqua_ipfs: {
-        external_api_multiaddr: isLocal ? LOCAL_IPFS_ADDRESS : "",
-        local_api_multiaddr: isLocal ? NOX_IPFS_MULTIADDR : "",
+      aquaIpfs: {
+        externalApiMultiaddr: isLocal ? LOCAL_IPFS_ADDRESS : "",
+        localApiMultiaddr: isLocal ? NOX_IPFS_MULTIADDR : "",
       },
       decider: {
-        decider_period_sec: 10,
-        worker_ipfs_multiaddr: isLocal
+        deciderPeriodSec: 10,
+        workerIpfsMultiaddr: isLocal
           ? NOX_IPFS_MULTIADDR
           : "http://ipfs.fluence.dev",
-        network_api_endpoint: isLocal
+        networkApiEndpoint: isLocal
           ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
           : "http://mumbai-polygon.ru:8545",
-        network_id: dealConfig.chainId,
-        start_block: "earliest",
-        matcher_address: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
-        wallet_key:
+        networkId: dealConfig.chainId,
+        startBlock: "earliest",
+        matcherAddress: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
+        walletKey:
           "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
       },
     },
   };
 }
 
-export async function configTOMLWithDefault(
+export async function configYAMLWithDefault(
   configFromUser: NoxConfigYAML,
   fluenceConfig: FluenceConfigReadonly | null,
 ): Promise<NoxConfigYAML> {
   return omitBy(
     {
-      ...(await getDefaultConfigTOML(fluenceConfig)),
+      ...(await getDefaultConfigYAML(fluenceConfig)),
       ...configFromUser,
     },
     isNil,
@@ -435,12 +436,14 @@ export async function ensureConfigToml(
         overridden.httpPort = HTTP_PORT_START + i;
       }
 
-      delete overridden.rawConfig;
-
       return writeFile(
         join(configsDir, getConfigTomlName(key)),
         [
-          stringify(await configTOMLWithDefault(overridden, fluenceConfig)),
+          stringify(
+            configYAMLToConfigToml(
+              await configYAMLWithDefault(overridden, fluenceConfig),
+            ),
+          ),
           providerConfig.nox?.rawConfig ?? "",
           value.nox?.rawConfig ?? "",
         ]
@@ -452,4 +455,89 @@ export async function ensureConfigToml(
       );
     }),
   );
+}
+
+function configYAMLToConfigToml(config: NoxConfigYAML) {
+  const configToml: NoxConfigTOML = {};
+
+  if (config.aquavmPoolSize !== undefined) {
+    configToml.aquavm_pool_size = config.aquavmPoolSize;
+  }
+
+  if (config.httpPort !== undefined) {
+    configToml.http_port = config.httpPort;
+  }
+
+  if (config.tcpPort !== undefined) {
+    configToml.tcp_port = config.tcpPort;
+  }
+
+  if (config.websocketPort !== undefined) {
+    configToml.websocket_port = config.websocketPort;
+  }
+
+  if (config.systemServices !== undefined) {
+    const system_services: typeof configToml.system_services = {};
+
+    if (config.systemServices.enable !== undefined) {
+      system_services.enable = config.systemServices.enable;
+    }
+
+    if (config.systemServices.aquaIpfs !== undefined) {
+      const aqua_ipfs: typeof system_services.aqua_ipfs = {};
+
+      if (config.systemServices.aquaIpfs.externalApiMultiaddr !== undefined) {
+        aqua_ipfs.external_api_multiaddr =
+          config.systemServices.aquaIpfs.externalApiMultiaddr;
+      }
+
+      if (config.systemServices.aquaIpfs.localApiMultiaddr !== undefined) {
+        aqua_ipfs.local_api_multiaddr =
+          config.systemServices.aquaIpfs.localApiMultiaddr;
+      }
+
+      system_services.aqua_ipfs = aqua_ipfs;
+    }
+
+    if (config.systemServices.decider !== undefined) {
+      const decider: typeof system_services.decider = {};
+
+      if (config.systemServices.decider.deciderPeriodSec !== undefined) {
+        decider.decider_period_sec =
+          config.systemServices.decider.deciderPeriodSec;
+      }
+
+      if (config.systemServices.decider.workerIpfsMultiaddr !== undefined) {
+        decider.worker_ipfs_multiaddr =
+          config.systemServices.decider.workerIpfsMultiaddr;
+      }
+
+      if (config.systemServices.decider.networkApiEndpoint !== undefined) {
+        decider.network_api_endpoint =
+          config.systemServices.decider.networkApiEndpoint;
+      }
+
+      if (config.systemServices.decider.networkId !== undefined) {
+        decider.network_id = config.systemServices.decider.networkId;
+      }
+
+      if (config.systemServices.decider.startBlock !== undefined) {
+        decider.start_block = config.systemServices.decider.startBlock;
+      }
+
+      if (config.systemServices.decider.matcherAddress !== undefined) {
+        decider.matcher_address = config.systemServices.decider.matcherAddress;
+      }
+
+      if (config.systemServices.decider.walletKey !== undefined) {
+        decider.wallet_key = config.systemServices.decider.walletKey;
+      }
+
+      system_services.decider = decider;
+    }
+
+    configToml.system_services = system_services;
+  }
+
+  return configToml;
 }
