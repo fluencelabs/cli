@@ -410,7 +410,7 @@ describe("integration tests", () => {
 
       await fluence({
         args: ["provider", "register"],
-        flags: { "priv-key": PRIV_KEY },
+        flags: { "priv-key": PRIV_KEY, "max-collateral": 1, "price-per-epoch": 1 },
         cwd,
       });
 
@@ -471,7 +471,7 @@ describe("integration tests", () => {
 
       await fluence({
         args: ["deal", "deploy"],
-        flags: { "priv-key": PRIV_KEY },
+        flags: { "priv-key": PRIV_KEY, "collateral-per-worker": 1, "max-workers-per-provider": 3, "min-workers": 1, "price-per-worker-epoch": 1, "target-workers": 1},
         cwd,
       });
 
