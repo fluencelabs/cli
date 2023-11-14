@@ -8,9 +8,7 @@
   "respectLatest": false,
   "regexManagers": [
     {
-      "fileMatch": [
-        "^src/versions\\.json$"
-      ],
+      "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
         "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
       ],
@@ -18,9 +16,7 @@
       "depNameTemplate": "nox"
     },
     {
-      "fileMatch": [
-        "^src/versions\\.json$"
-      ],
+      "fileMatch": ["^src/versions\\.json$"],
       "matchStrings": [
         "\"chain\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
       ],
@@ -70,10 +66,7 @@
       "groupName": "spell"
     },
     {
-      "matchPackagePatterns": [
-        "chain",
-        "@fluencelabs/deal-aurora"
-      ],
+      "matchPackagePatterns": ["chain", "@fluencelabs/deal-aurora"],
       "groupName": "deal"
     }
   ]
