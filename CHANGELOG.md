@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.12.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.4...fluence-cli-v0.12.5) (2023-11-14)
+
+
+### Bug Fixes
+
+* Set chain image to public one, configure renovate to bump deal and chain versions ([#619](https://github.com/fluencelabs/cli/issues/619)) ([bc47802](https://github.com/fluencelabs/cli/commit/bc478023f600f8691b62b44f1d62dcd57cf599e1))
+* **tests:** Use streams instead of options [LNG-277] ([#617](https://github.com/fluencelabs/cli/issues/617)) ([9ba5e20](https://github.com/fluencelabs/cli/commit/9ba5e20444e199b021d13480cdc5ff01c411a4cf))
+* up installation spell ([#615](https://github.com/fluencelabs/cli/issues/615)) ([f8ed578](https://github.com/fluencelabs/cli/commit/f8ed578294455291db0474017943a79b066f1b63))
+
 ## [0.12.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.3...fluence-cli-v0.12.4) (2023-11-10)
 
 
