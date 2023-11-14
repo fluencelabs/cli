@@ -9,15 +9,23 @@
   "regexManagers": [
     {
       "fileMatch": [
-        "^src/versions\\.json$",
-        "^\\.github/e2e/docker-compose\\.yml$"
+        "^src/versions\\.json$"
       ],
       "matchStrings": [
-        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n",
-        "image:\\s+\"\\${NOX_IMAGE:-(?<lookupName>[^:]+):minimal_(?<currentValue>.*)}\""
+        "\"nox\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
       ],
       "datasourceTemplate": "docker",
       "depNameTemplate": "nox"
+    },
+    {
+      "fileMatch": [
+        "^src/versions\\.json$"
+      ],
+      "matchStrings": [
+        "\"chain\": \"(?<lookupName>[^:]+):(?<currentValue>.*)\",\n"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "chain"
     },
     {
       "fileMatch": ["^src/versions\\.json$"],
@@ -60,6 +68,13 @@
         "@fluencelabs/spell"
       ],
       "groupName": "spell"
+    },
+    {
+      "matchPackagePatterns": [
+        "chain",
+        "@fluencelabs/deal-aurora"
+      ],
+      "groupName": "deal"
     }
   ]
 }
