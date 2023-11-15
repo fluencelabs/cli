@@ -120,7 +120,7 @@ export const CHAIN_PORT = 8545;
 export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
-export const DEFAULT_AQUAVM_POOL_SIZE = 8;
+export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
