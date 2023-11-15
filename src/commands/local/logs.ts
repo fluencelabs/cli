@@ -21,7 +21,7 @@ import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
-  static override description = `Stop currently running ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
+  static override description = `Display ${DOCKER_COMPOSE_FULL_FILE_NAME} logs`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

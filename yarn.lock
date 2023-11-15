@@ -635,7 +635,7 @@ __metadata:
     "@fluencelabs/aqua-to-js": 0.1.0
     "@fluencelabs/deal-aurora": 0.2.20
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": 0.5.26
+    "@fluencelabs/installation-spell": 0.5.28
     "@fluencelabs/js-client": 0.4.2
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
@@ -723,14 +723,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@npm:0.5.26":
-  version: 0.5.26
-  resolution: "@fluencelabs/installation-spell@npm:0.5.26"
+"@fluencelabs/installation-spell@npm:0.5.28":
+  version: 0.5.28
+  resolution: "@fluencelabs/installation-spell@npm:0.5.28"
   dependencies:
     "@fluencelabs/aqua-ipfs": 0.5.21
     "@fluencelabs/aqua-lib": 0.7.7
-    "@fluencelabs/spell": 0.5.26
-  checksum: d5ff0c597d87a2666e006a94c32fc17e0747cd1a01f50bea46a84945a331e2982994081ec40a7214bc885c47479cfdb7fa0a7005e2ce0c542d66031fcf68cede
+    "@fluencelabs/spell": 0.5.28
+  checksum: b825990f9b57d201c6233e6c3e4cd99b6c9b9f5e79cc714ea3c287765884846d496ef2cbb8a8a8976b9f84e6bd8041720a3ef85bd76cd4ee732cec1cf1ed76f0
   languageName: node
   linkType: hard
 
@@ -812,10 +812,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.26":
-  version: 0.5.26
-  resolution: "@fluencelabs/spell@npm:0.5.26"
-  checksum: 20b95c3e3e00ffd831be57ae847f57060ce5de1093cb495ac0343f384edd809205b32327650cfe99061f7aa7670f9ce79dc131f414dd88f2c4b6373f17fd2d65
+"@fluencelabs/spell@npm:0.5.28":
+  version: 0.5.28
+  resolution: "@fluencelabs/spell@npm:0.5.28"
+  checksum: 913be1a4f0e3be89424192e2bff95ab1dd9f031e96cf447dc40a626b8fa1453bc36fed7717b581aeb8e2dd840e8507cd3d44910370ce1293bc309c83634f96f6
   languageName: node
   linkType: hard
 

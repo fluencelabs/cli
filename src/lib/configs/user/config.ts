@@ -18,7 +18,7 @@ import { rm } from "fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
-import versions from "../../../versions.json" assert { type: "json" };
+import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   GLOBAL_CONFIG_FILE_NAME,
@@ -33,12 +33,13 @@ import {
   validateBatch,
 } from "../../helpers/validations.js";
 import {
-  genSecretKeyString,
   createSecretKey,
+  genSecretKeyString,
   getUserSecretKey,
   writeSecretKey,
 } from "../../keyPairs.js";
 import { ensureUserFluenceDir } from "../../paths.js";
+import { setUserConfig } from "../globalConfigs.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -147,17 +148,7 @@ const configSchemaV1Obj = {
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = configSchemaV1Obj;
 
-async function getDefault() {
-  const userSecretKey = await getUserSecretKey(AUTO_GENERATED);
-
-  if (userSecretKey === undefined) {
-    await createSecretKey({
-      name: AUTO_GENERATED,
-      isUser: true,
-      maybeFluenceConfig: null,
-    });
-  }
-
+function getDefault() {
   return `# Defines global config for Fluence CLI
 
 # config version
@@ -264,10 +255,27 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initUserConfig = getConfigInitFunction(initConfigOptions);
 
-export const initNewUserConfig = getConfigInitFunction(
-  initConfigOptions,
-  getDefault,
-);
+export async function initNewUserConfig() {
+  const userConfig = await getConfigInitFunction(
+    initConfigOptions,
+    getDefault,
+  )();
+
+  setUserConfig(userConfig);
+
+  const userSecretKey = await getUserSecretKey(AUTO_GENERATED);
+
+  if (userSecretKey === undefined) {
+    await createSecretKey({
+      name: AUTO_GENERATED,
+      isUser: true,
+      maybeFluenceConfig: null,
+      askToSetKeyAsDefaultInteractively: false,
+    });
+  }
+
+  return userConfig;
+}
 
 export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);

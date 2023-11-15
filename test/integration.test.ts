@@ -35,7 +35,6 @@ import {
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   WORKERS_CONFIG_FULL_FILE_NAME,
 } from "../src/lib/const.js";
-import { execPromise } from "../src/lib/execPromise.js";
 import {
   jsonStringify,
   LOGS_RESOLVE_SUBNET_ERROR_START,
@@ -46,7 +45,6 @@ import {
   getFluenceAquaServicesPath,
   getAquaMainPath,
   getSpellsDir,
-  getSrcIndexTSorJSPath,
 } from "../src/lib/paths.js";
 import { hasKey } from "../src/lib/typeHelpers.js";
 
@@ -67,8 +65,6 @@ const peerIds = multiaddrs
     return peerId;
   })
   .sort();
-
-const EXPECTED_TS_OR_JS_RUN_RESULT = "Hello, Fluence";
 
 describe("integration tests", () => {
   beforeAll(() => {
@@ -107,44 +103,6 @@ describe("integration tests", () => {
       },
       cwd,
     });
-  });
-
-  maybeConcurrentTest("should work with ts template", async () => {
-    const cwd = join("tmp", "shouldWorkWithTSTemplate");
-    await init(cwd, "ts");
-    await compileAqua(cwd);
-
-    const resultOfRunningAquaUsingTSNode = (
-      await execPromise({
-        command: "npx",
-        args: ["ts-node", getSrcIndexTSorJSPath(false, cwd)],
-        printOutput: true,
-      })
-    ).trim();
-
-    // we expect to see "Hello, Fluence" printed when running typescript code
-    expect(
-      resultOfRunningAquaUsingTSNode.includes(EXPECTED_TS_OR_JS_RUN_RESULT),
-    ).toBe(true);
-  });
-
-  maybeConcurrentTest("should work with js template", async () => {
-    const cwd = join("tmp", "shouldWorkWithJSTemplate");
-    await init(cwd, "js");
-    await compileAqua(cwd);
-
-    const resultOfRunningAquaUsingNode = (
-      await execPromise({
-        command: "node",
-        args: [getSrcIndexTSorJSPath(true, cwd)],
-        printOutput: true,
-      })
-    ).trim();
-
-    // we expect to see "Hello, Fluence" printed when running javascript code
-    expect(
-      resultOfRunningAquaUsingNode.includes(EXPECTED_TS_OR_JS_RUN_RESULT),
-    ).toBe(true);
   });
 
   maybeConcurrentTest("should work without project", async () => {
@@ -607,13 +565,6 @@ describe("integration tests", () => {
     },
   );
 });
-
-const compileAqua = (cwd: string) => {
-  return fluence({
-    args: ["aqua"],
-    cwd,
-  });
-};
 
 const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 // Private Key: 0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5

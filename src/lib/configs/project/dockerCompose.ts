@@ -19,7 +19,7 @@ import assert from "assert";
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
-import versions from "../../../versions.json" assert { type: "json" };
+import { versions } from "../../../versions.js";
 import {
   LOCAL_IPFS_ADDRESS,
   DOCKER_COMPOSE_FILE_NAME,
