@@ -40,7 +40,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 8                                                                     |
+| `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to append to the generated config. Default: empty string                                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
@@ -94,7 +94,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 8                                                                     |
+| `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to append to the generated config. Default: empty string                                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
