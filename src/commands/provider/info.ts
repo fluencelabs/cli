@@ -22,7 +22,6 @@ import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
-import { ethers } from "ethers";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about provider";
@@ -56,6 +55,7 @@ export default class Info extends BaseCommand<typeof Info> {
       await matcher.getComputeProviderInfo(providerAddress);
 
     commandObj.log(color.gray(`Provider info:`));
+    const { ethers } = await import("ethers");
 
     commandObj.log(
       color.gray(
@@ -90,7 +90,7 @@ export default class Info extends BaseCommand<typeof Info> {
     if (peerIdsAndPeers[0].length === 0) {
       commandObj.log(color.gray(`No peers`));
     } else {
-      for (let i = 0; i < peerIdsAndPeers[0].length; i++) {
+      for (let i = 0; i < peerIdsAndPeers[0].length; i = i + 1) {
         commandObj.log(color.gray(`\nPeer: ${peerIdsAndPeers[0][i]}`));
 
         const peer = peerIdsAndPeers[1][i];

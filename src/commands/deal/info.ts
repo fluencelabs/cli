@@ -23,7 +23,6 @@ import { ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
-import { ethers } from "ethers";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about provider";
@@ -74,6 +73,7 @@ export default class Info extends BaseCommand<typeof Info> {
     }
 
     commandObj.log(color.gray(`Balance: ${await deal.getFreeBalance()}`));
+    const { ethers } = await import("ethers");
 
     commandObj.log(
       color.gray(

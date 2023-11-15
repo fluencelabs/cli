@@ -28,7 +28,6 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../lib/provider.js";
-import { ethers } from "ethers";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
   static override hidden = true;
@@ -60,11 +59,11 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
+    const { ethers } = await import("ethers");
+
     const amount = ethers.parseEther(
-      String(
-        args["AMOUNT"] ??
-          (await input({ message: "Enter amount of tokens to deposit" })),
-      ),
+      args["AMOUNT"] ??
+        (await input({ message: "Enter amount of tokens to deposit" })),
     );
 
     const signer = await getSigner(network, privKey);

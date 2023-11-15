@@ -23,7 +23,6 @@ import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
-import { ethers } from "ethers";
 
 export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   static override hidden = true;
@@ -65,6 +64,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
     const deal = dealClient.getDeal(dealAddress);
 
     const rewardAmount = await deal.getRewardAmount(unitId);
+    const { ethers } = await import("ethers");
 
     commandObj.log(
       color.green(`Reward amount: ${ethers.formatEther(rewardAmount)}`),

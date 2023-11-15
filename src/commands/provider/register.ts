@@ -27,7 +27,6 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../lib/provider.js";
-import { ethers } from "ethers";
 
 export default class Register extends BaseCommand<typeof Register> {
   static override description = "Register in matching contract";
@@ -59,6 +58,7 @@ export default class Register extends BaseCommand<typeof Register> {
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
+    const { ethers } = await import("ethers");
 
     const tx = await matcher.registerComputeProvider(
       ethers.parseEther(String(flags["price-per-epoch"])),
