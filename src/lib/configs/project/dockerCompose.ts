@@ -44,6 +44,7 @@ import {
   HTTP_PORT_START,
   type ContractsENV,
   LOCAL_IPFS_ADDRESS,
+  WALLET_KEYS_FOR_LOCAL_NETWORK,
 } from "../../const.js";
 import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
@@ -115,9 +116,6 @@ async function getDefaultNoxConfigYAML(
         startBlock: "earliest",
         // TODO: use correct addr for env
         matcherAddress: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
-        // TODO: pass correct key
-        walletKey:
-          "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
       },
     },
   });
@@ -432,6 +430,20 @@ export async function ensureConfigToml(
 
       if (overridden.httpPort === undefined) {
         overridden.httpPort = HTTP_PORT_START + i;
+      }
+
+      if (
+        "systemServices" in overridden &&
+        "decider" in overridden.systemServices &&
+        overridden.systemServices.decider.walletKey === undefined
+      ) {
+        const walletKey =
+          WALLET_KEYS_FOR_LOCAL_NETWORK[
+            i % WALLET_KEYS_FOR_LOCAL_NETWORK.length
+          ];
+
+        assert(walletKey !== undefined, "Unreachable");
+        overridden.systemServices.decider.walletKey = walletKey;
       }
 
       return writeFile(
