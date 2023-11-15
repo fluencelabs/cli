@@ -152,7 +152,19 @@ export async function ensureCustomAddrsAndPeerIds(
   }
 
   if (fluenceConfig.customFluenceEnv?.relays !== undefined) {
-    return addrsToNodes(fluenceConfig.customFluenceEnv.relays);
+    let res;
+
+    try {
+      res = addrsToNodes(fluenceConfig.customFluenceEnv.relays);
+    } catch (e) {
+      commandObj.error(
+        `${fluenceConfig.$getPath()} at ${color.yellow(
+          "customFluenceEnv.relays",
+        )}: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+
+    return res;
   }
 
   const contractsEnv = await list({

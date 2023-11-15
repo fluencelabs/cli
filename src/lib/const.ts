@@ -607,75 +607,37 @@ fluence run -f 'runDeployedServices()'
 \`\`\`
 `;
 
-const TS_README = `# Fluence TypeScript Template
-
+function getTsOrJsReadme(isJS: boolean) {
+  const jsOrTsString = isJS ? "JavaScript" : "TypeScript";
+  return `# Fluence ${jsOrTsString} Template
 ## Usage
 
 \`\`\`sh
-# Compile example aqua code to TypeScript
-fluence aqua
-
-# \`cd\` into \`ts\` directory
-cd src/ts
+# \`cd\` into \`frontend\` directory
+cd src/frontend
 
 # Install dependencies
 npm i
 
 # Run example code
-npm start
+npm run dev
 
 # You can also deploy deal and run the deployed code
-
-# Generate a service template and add it to the default worker
-fluence service new myService
 
 # Deploy the default worker
 fluence deal deploy
 
-# Uncomment \`runDeployedServices\` aqua function in \`src/aqua/main.aqua\` and compile it
+# Compile aqua to ${jsOrTsString} so it contains info about deployed services
 fluence aqua
 
-# Import \`runDeployedServices\` function in \`src/ts/src/index.ts\` and run it
-npm start
+# Try running \`runDeployedServices\` aqua function in the browser
 \`\`\`
 `;
-
-const JS_README = `# Fluence JavaScript Template
-
-## Usage
-
-\`\`\`sh
-# Compile example aqua code to JavaScript
-fluence aqua
-
-# \`cd\` into \`js\` directory
-cd src/js
-
-# Install dependencies
-npm i
-
-# Run example code
-npm start
-
-# You can also deploy deal and run the deployed code
-
-# Generate a service template and add it to the default worker
-fluence service new myService
-
-# Deploy the default worker
-fluence deal deploy
-
-# Uncomment \`runDeployedServices\` aqua function in \`src/aqua/main.aqua\` and compile it
-fluence aqua
-
-# Import \`runDeployedServices\` function in \`src/ts/src/index.js\` and run it
-npm start
-\`\`\`
-`;
+}
 
 export const READMEs: Record<Template, string> = {
   quickstart: QUICKSTART_README,
   minimal: MINIMAL_README,
-  ts: TS_README,
-  js: JS_README,
+  ts: getTsOrJsReadme(false),
+  js: getTsOrJsReadme(true),
 };
