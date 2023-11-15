@@ -432,18 +432,21 @@ export async function ensureConfigToml(
         overridden.httpPort = HTTP_PORT_START + i;
       }
 
-      if (
-        "systemServices" in overridden &&
-        "decider" in overridden.systemServices &&
-        overridden.systemServices.decider.walletKey === undefined
-      ) {
+      if (overridden.systemServices?.decider?.walletKey === undefined) {
         const walletKey =
           WALLET_KEYS_FOR_LOCAL_NETWORK[
             i % WALLET_KEYS_FOR_LOCAL_NETWORK.length
           ];
 
         assert(walletKey !== undefined, "Unreachable");
-        overridden.systemServices.decider.walletKey = walletKey;
+
+        overridden.systemServices = {
+          ...overridden.systemServices,
+          decider: {
+            ...overridden.systemServices?.decider,
+            walletKey,
+          },
+        };
       }
 
       return writeFile(
