@@ -4,31 +4,37 @@ Defines config used for provider set up
 
 ## Properties
 
-| Property       | Type                    | Required | Description |
-|----------------|-------------------------|----------|-------------|
-| `computePeers` | [object](#computepeers) | **Yes**  |             |
-| `offers`       | [object](#offers)       | **Yes**  |             |
-| `version`      | number                  | **Yes**  |             |
-| `nox`          | [object](#nox)          | No       |             |
+| Property       | Type                    | Required | Description                                                                                     |
+|----------------|-------------------------|----------|-------------------------------------------------------------------------------------------------|
+| `computePeers` | [object](#computepeers) | **Yes**  | A map with compute peer names as keys and compute peers as values                               |
+| `offers`       | [object](#offers)       | **Yes**  | A map with offer names as keys and offers as values                                             |
+| `version`      | number                  | **Yes**  |                                                                                                 |
+| `nox`          | [object](#nox)          | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 ## computePeers
 
+A map with compute peer names as keys and compute peers as values
+
 ### Properties
 
-| Property      | Type                   | Required | Description |
-|---------------|------------------------|----------|-------------|
-| `ComputePeer` | [object](#computepeer) | No       |             |
+| Property      | Type                   | Required | Description            |
+|---------------|------------------------|----------|------------------------|
+| `ComputePeer` | [object](#computepeer) | No       | Defines a compute peer |
 
 ### ComputePeer
 
+Defines a compute peer
+
 #### Properties
 
-| Property       | Type           | Required | Description |
-|----------------|----------------|----------|-------------|
-| `computeUnits` | number         | No       |             |
-| `nox`          | [object](#nox) | No       |             |
+| Property       | Type           | Required | Description                                                                                     |
+|----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
+| `computeUnits` | number         | No       |                                                                                                 |
+| `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 #### nox
+
+Configuration to pass to the nox compute peer. Config.toml files are generated from this config
 
 ##### Properties
 
@@ -37,21 +43,25 @@ Defines config used for provider set up
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 8                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to append to the generated config. Default: empty string                                   |
-| `systemServices` | [object](#systemservices) | No       |                                                                                                                   |
+| `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ##### systemServices
 
+System services to run by default. aquaIpfs and decider are enabled by default
+
 ###### Properties
 
 | Property   | Type                | Required | Description                       |
 |------------|---------------------|----------|-----------------------------------|
-| `aquaIpfs` | [object](#aquaipfs) | No       |                                   |
-| `decider`  | [object](#decider)  | No       |                                   |
+| `aquaIpfs` | [object](#aquaipfs) | No       | Aqua IPFS service configuration   |
+| `decider`  | [object](#decider)  | No       | Decider service configuration     |
 | `enable`   | string[]            | No       | List of system services to enable |
 
 ###### aquaIpfs
+
+Aqua IPFS service configuration
 
 **Properties**
 
@@ -61,6 +71,8 @@ Defines config used for provider set up
 | `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
 
 ###### decider
+
+Decider service configuration
 
 **Properties**
 
@@ -76,6 +88,8 @@ Defines config used for provider set up
 
 ## nox
 
+Configuration to pass to the nox compute peer. Config.toml files are generated from this config
+
 ### Properties
 
 | Property         | Type                      | Required | Description                                                                                                       |
@@ -83,21 +97,25 @@ Defines config used for provider set up
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 8                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to append to the generated config. Default: empty string                                   |
-| `systemServices` | [object](#systemservices) | No       |                                                                                                                   |
+| `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ### systemServices
 
+System services to run by default. aquaIpfs and decider are enabled by default
+
 #### Properties
 
 | Property   | Type                | Required | Description                       |
 |------------|---------------------|----------|-----------------------------------|
-| `aquaIpfs` | [object](#aquaipfs) | No       |                                   |
-| `decider`  | [object](#decider)  | No       |                                   |
+| `aquaIpfs` | [object](#aquaipfs) | No       | Aqua IPFS service configuration   |
+| `decider`  | [object](#decider)  | No       | Decider service configuration     |
 | `enable`   | string[]            | No       | List of system services to enable |
 
 #### aquaIpfs
+
+Aqua IPFS service configuration
 
 ##### Properties
 
@@ -107,6 +125,8 @@ Defines config used for provider set up
 | `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
 
 #### decider
+
+Decider service configuration
 
 ##### Properties
 
@@ -122,13 +142,17 @@ Defines config used for provider set up
 
 ## offers
 
+A map with offer names as keys and offers as values
+
 ### Properties
 
-| Property | Type             | Required | Description |
-|----------|------------------|----------|-------------|
-| `Offer`  | [object](#offer) | No       |             |
+| Property | Type             | Required | Description              |
+|----------|------------------|----------|--------------------------|
+| `Offer`  | [object](#offer) | No       | Defines a provider offer |
 
 ### Offer
+
+Defines a provider offer
 
 #### Properties
 
