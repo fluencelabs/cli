@@ -311,6 +311,10 @@ export const PROVIDER_CONFIG_FLAGS = {
   noxes: Flags.integer({
     description: "Number of Compute Peers to generate in your provider config",
   }),
+  "provider-config-path": Flags.string({
+    description: "Path to the provider config file",
+    aliases: ["p"],
+  }),
 };
 
 export const MARINE_BUILD_ARGS_FLAG_NAME = "marine-build-args";

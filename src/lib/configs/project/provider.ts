@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { resolve } from "node:path";
+
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
@@ -38,7 +40,6 @@ import {
   type InitializedReadonlyConfig,
   type Migrations,
   type ConfigValidateFunction,
-  type InitConfigOptions,
 } from "../initConfig.js";
 
 export type Offer = {
@@ -72,38 +73,14 @@ export type NoxConfigYAML = {
   rawConfig?: string;
 };
 
-export type NoxConfigTOML = {
-  tcp_port?: number;
-  websocket_port?: number;
-  http_port?: number;
-  aquavm_pool_size?: number;
-  system_services?: {
-    enable?: Array<string>;
-    aqua_ipfs?: {
-      external_api_multiaddr?: string;
-      local_api_multiaddr?: string;
-    };
-    decider?: {
-      decider_period_sec?: number;
-      worker_ipfs_multiaddr?: string;
-      network_api_endpoint?: string;
-      network_id?: number;
-      start_block?: string;
-      matcher_address?: string;
-      wallet_key?: string;
-    };
-  };
-};
-
 export const commonNoxConfig: NoxConfigYAML = {
-  tcpPort: TCP_PORT_START,
-  websocketPort: WEB_SOCKET_PORT_START,
-  httpPort: HTTP_PORT_START,
   aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
 };
 
 const noxConfigYAMLSchema = {
   type: "object",
+  description:
+    "Configuration to pass to the nox compute peer. Config.toml files are generated from this config",
   properties: {
     tcpPort: {
       nullable: true,
@@ -128,6 +105,8 @@ const noxConfigYAMLSchema = {
     systemServices: {
       nullable: true,
       type: "object",
+      description:
+        "System services to run by default. aquaIpfs and decider are enabled by default",
       additionalProperties: false,
       properties: {
         enable: {
@@ -138,6 +117,7 @@ const noxConfigYAMLSchema = {
         },
         aquaIpfs: {
           type: "object",
+          description: "Aqua IPFS service configuration",
           additionalProperties: false,
           nullable: true,
           properties: {
@@ -156,6 +136,7 @@ const noxConfigYAMLSchema = {
         },
         decider: {
           type: "object",
+          description: "Decider service configuration",
           additionalProperties: false,
           nullable: true,
           properties: {
@@ -225,6 +206,7 @@ type ConfigV0 = {
 
 const offerSchema: JSONSchemaType<Offer> = {
   type: "object",
+  description: "Defines a provider offer",
   additionalProperties: false,
   properties: {
     minPricePerWorkerEpoch: { type: "number" },
@@ -246,6 +228,7 @@ const offerSchema: JSONSchemaType<Offer> = {
 
 const computePeerSchema: JSONSchemaType<ComputePeer> = {
   type: "object",
+  description: "Defines a compute peer",
   additionalProperties: false,
   properties: {
     computeUnits: { type: "number", nullable: true },
@@ -262,6 +245,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   additionalProperties: false,
   properties: {
     offers: {
+      description: "A map with offer names as keys and offers as values",
       type: "object",
       additionalProperties: offerSchema,
       properties: {
@@ -270,6 +254,8 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       required: [],
     },
     computePeers: {
+      description:
+        "A map with compute peer names as keys and compute peers as values",
       type: "object",
       additionalProperties: computePeerSchema,
       properties: {
@@ -352,30 +338,50 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   return true;
 };
 
-const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
-  migrations,
-  name: PROVIDER_CONFIG_FILE_NAME,
-  getConfigOrConfigDirPath,
-  getSchemaDirPath: getFluenceDir,
-  validate,
-};
+function getInitConfigOptions(path: string | undefined) {
+  return {
+    allSchemas: [configSchemaV0],
+    latestSchema: configSchemaV0,
+    migrations,
+    name: PROVIDER_CONFIG_FILE_NAME,
+    getConfigOrConfigDirPath: () => {
+      return typeof path === "string"
+        ? resolve(path)
+        : getConfigOrConfigDirPath();
+    },
+    getSchemaDirPath: getFluenceDir,
+    validate,
+  };
+}
 
 export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
-export const initNewProviderConfig = async (args: ProviderConfigArgs = {}) => {
-  return getConfigInitFunction(initConfigOptions, getDefault(args))();
-};
+export async function initNewProviderConfig({
+  path,
+  ...restArgs
+}: ProviderConfigArgs & { path?: string | undefined } = {}) {
+  return getConfigInitFunction(
+    getInitConfigOptions(path),
+    getDefault(restArgs),
+  )();
+}
 
-export const initNewReadonlyProviderConfig = async (
-  args: ProviderConfigArgs = {},
-) => {
-  return getReadonlyConfigInitFunction(initConfigOptions, getDefault(args))();
-};
+export async function initNewReadonlyProviderConfig({
+  path,
+  ...restArgs
+}: ProviderConfigArgs & { path?: string | undefined } = {}) {
+  return getReadonlyConfigInitFunction(
+    getInitConfigOptions(path),
+    getDefault(restArgs),
+  )();
+}
 
-export const initProviderConfig = getConfigInitFunction(initConfigOptions);
-export const initReadonlyProviderConfig =
-  getReadonlyConfigInitFunction(initConfigOptions);
+export function initProviderConfig(path?: string | undefined) {
+  return getConfigInitFunction(getInitConfigOptions(path))();
+}
+
+export function initReadonlyProviderConfig(path?: string | undefined) {
+  return getReadonlyConfigInitFunction(getInitConfigOptions(path))();
+}
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

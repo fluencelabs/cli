@@ -18,7 +18,12 @@ import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join, relative } from "path";
 
+import type { JsonMap } from "@iarna/toml";
 import type { JSONSchemaType } from "ajv";
+import cloneDeep from "lodash-es/cloneDeep.js";
+import mapKeys from "lodash-es/mapKeys.js";
+import mergeWith from "lodash-es/mergeWith.js";
+import snakeCase from "lodash-es/snakeCase.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { versions } from "../../../versions.js";
@@ -59,7 +64,6 @@ import {
   type NoxConfigYAML,
   initNewReadonlyProviderConfig,
   type ProviderConfigReadonly,
-  type NoxConfigTOML,
 } from "./provider.js";
 
 const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
@@ -329,11 +333,11 @@ async function genDockerCompose(
         }),
       ),
     },
-    secrets: Object.fromEntries([
-      ...peers.map(({ name, relativeSecretFilePath: file }) => {
+    secrets: Object.fromEntries(
+      peers.map(({ name, relativeSecretFilePath: file }) => {
         return [name, { file }] as const;
       }),
-    ]),
+    ),
   };
 }
 
@@ -418,15 +422,15 @@ export async function ensureConfigToml(
     Object.entries(providerConfig.computePeers).map(async ([key, value], i) => {
       const overridden = mergeNoxConfigYAML(baseNoxConfig, value.nox ?? {});
 
-      if (overridden.tcpPort === TCP_PORT_START) {
+      if (overridden.tcpPort === undefined) {
         overridden.tcpPort = TCP_PORT_START + i;
       }
 
-      if (overridden.websocketPort === WEB_SOCKET_PORT_START) {
+      if (overridden.websocketPort === undefined) {
         overridden.websocketPort = WEB_SOCKET_PORT_START + i;
       }
 
-      if (overridden.httpPort === HTTP_PORT_START) {
+      if (overridden.httpPort === undefined) {
         overridden.httpPort = HTTP_PORT_START + i;
       }
 
@@ -434,12 +438,10 @@ export async function ensureConfigToml(
         join(configsDir, getConfigTomlName(key)),
         [
           stringify(configYAMLToConfigToml(overridden)),
-          providerConfig.nox?.rawConfig ?? "",
-          value.nox?.rawConfig ?? "",
+          providerConfig.nox?.rawConfig,
+          value.nox?.rawConfig,
         ]
-          .filter((x) => {
-            return x !== "";
-          })
+          .filter(Boolean)
           .join("\n"),
         FS_OPTIONS,
       );
@@ -447,116 +449,38 @@ export async function ensureConfigToml(
   );
 }
 
-function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML): NoxConfigYAML {
-  return {
-    ...a,
-    ...b,
-    ...(a.systemServices !== undefined && b.systemServices !== undefined
-      ? {
-          systemServices: {
-            ...a.systemServices,
-            ...b.systemServices,
-            enable: Array.from(
-              new Set([
-                ...(a.systemServices.enable ?? []),
-                ...(b.systemServices.enable ?? []),
-              ]),
-            ),
-            aquaIpfs: {
-              ...a.systemServices.aquaIpfs,
-              ...b.systemServices.aquaIpfs,
-            },
-            decider: {
-              ...a.systemServices.decider,
-              ...b.systemServices.decider,
-            },
-          },
-        }
-      : {}),
-  };
+function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
+  return mergeWith(cloneDeep(a), b, (objValue, srcValue) => {
+    if (Array.isArray(objValue) && Array.isArray(srcValue)) {
+      return srcValue;
+    }
+
+    return undefined;
+  });
 }
 
 function configYAMLToConfigToml(config: NoxConfigYAML) {
-  const configToml: NoxConfigTOML = {};
+  // Would be too hard to properly type this
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return camelCaseKeysToSnakeCase(config) as JsonMap;
+}
 
-  if (config.aquavmPoolSize !== undefined) {
-    configToml.aquavm_pool_size = config.aquavmPoolSize;
-  }
-
-  if (config.httpPort !== undefined) {
-    configToml.http_port = config.httpPort;
-  }
-
-  if (config.tcpPort !== undefined) {
-    configToml.tcp_port = config.tcpPort;
-  }
-
-  if (config.websocketPort !== undefined) {
-    configToml.websocket_port = config.websocketPort;
-  }
-
-  if (config.systemServices !== undefined) {
-    const system_services: typeof configToml.system_services = {};
-
-    if (config.systemServices.enable !== undefined) {
-      system_services.enable = config.systemServices.enable;
+function camelCaseKeysToSnakeCase(val: unknown): unknown {
+  if (typeof val === "object" && val !== null) {
+    if (Array.isArray(val)) {
+      return val.map(camelCaseKeysToSnakeCase);
     }
 
-    if (config.systemServices.aquaIpfs !== undefined) {
-      const aqua_ipfs: typeof system_services.aqua_ipfs = {};
+    const objWithSnakeCaseKeys = mapKeys(val, (_, key) => {
+      return snakeCase(key);
+    });
 
-      if (config.systemServices.aquaIpfs.externalApiMultiaddr !== undefined) {
-        aqua_ipfs.external_api_multiaddr =
-          config.systemServices.aquaIpfs.externalApiMultiaddr;
-      }
-
-      if (config.systemServices.aquaIpfs.localApiMultiaddr !== undefined) {
-        aqua_ipfs.local_api_multiaddr =
-          config.systemServices.aquaIpfs.localApiMultiaddr;
-      }
-
-      system_services.aqua_ipfs = aqua_ipfs;
-    }
-
-    if (config.systemServices.decider !== undefined) {
-      const decider: typeof system_services.decider = {};
-
-      if (config.systemServices.decider.deciderPeriodSec !== undefined) {
-        decider.decider_period_sec =
-          config.systemServices.decider.deciderPeriodSec;
-      }
-
-      if (config.systemServices.decider.workerIpfsMultiaddr !== undefined) {
-        decider.worker_ipfs_multiaddr =
-          config.systemServices.decider.workerIpfsMultiaddr;
-      }
-
-      if (config.systemServices.decider.networkApiEndpoint !== undefined) {
-        decider.network_api_endpoint =
-          config.systemServices.decider.networkApiEndpoint;
-      }
-
-      if (config.systemServices.decider.networkId !== undefined) {
-        decider.network_id = config.systemServices.decider.networkId;
-      }
-
-      if (config.systemServices.decider.startBlock !== undefined) {
-        decider.start_block = config.systemServices.decider.startBlock;
-      }
-
-      if (config.systemServices.decider.matcherAddress !== undefined) {
-        decider.matcher_address = config.systemServices.decider.matcherAddress;
-      }
-
-      if (config.systemServices.decider.walletKey !== undefined) {
-        decider.wallet_key = config.systemServices.decider.walletKey;
-      }
-
-      system_services.decider = decider;
-    }
-
-    configToml.system_services = system_services;
+    return Object.fromEntries(
+      Object.entries(objWithSnakeCaseKeys).map(([key, value]) => {
+        return [key, camelCaseKeysToSnakeCase(value)];
+      }),
+    );
   }
 
-  return configToml;
+  return val;
 }

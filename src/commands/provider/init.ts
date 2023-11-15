@@ -24,6 +24,7 @@ import {
   initNewProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
+import { PROVIDER_CONFIG_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
 
@@ -32,16 +33,20 @@ export default class Init extends BaseCommand<typeof Init> {
     "Init provider config. Creates a config file in the current directory.";
   static override flags = {
     ...baseFlags,
+    ...PROVIDER_CONFIG_FLAGS,
   };
 
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Init));
-    const maybeProviderConfig = await initReadonlyProviderConfig();
+    const { flags } = await initCli(this, await this.parse(Init));
 
-    if (maybeProviderConfig !== null) {
+    let providerConfig = await initReadonlyProviderConfig(
+      flags["provider-config-path"],
+    );
+
+    if (providerConfig !== null) {
       const isOverwriting = await confirm({
         message: `Provider config already exists at ${color.yellow(
-          maybeProviderConfig.$getPath(),
+          providerConfig.$getPath(),
         )}. Do you want to overwrite it?`,
         default: false,
       });
@@ -49,15 +54,18 @@ export default class Init extends BaseCommand<typeof Init> {
       if (!isOverwriting) {
         return commandObj.error(
           `Provider config already exists at ${color.yellow(
-            maybeProviderConfig.$getPath(),
+            providerConfig.$getPath(),
           )}. Aborting.`,
         );
       }
 
-      await rm(maybeProviderConfig.$getPath(), { force: true });
+      await rm(providerConfig.$getPath(), { force: true });
     }
 
-    const providerConfig = await initNewProviderConfig();
+    providerConfig = await initNewProviderConfig({
+      path: flags["provider-config-path"],
+      numberOfNoxes: flags.noxes,
+    });
 
     commandObj.logToStderr(
       `Successfully created provider config at ${color.yellow(
