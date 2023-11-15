@@ -1,5 +1,5 @@
 {
-  "nox": "fluencelabs/nox:0.4.0",
+  "nox": "docker.fluence.dev/nox:FLU-494",
   "chain": "fluencelabs/chain-rpc:0.2.17",
   "rust-toolchain": "nightly-2023-08-27-x86_64",
   "npm": {
