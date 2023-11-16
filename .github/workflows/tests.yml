@@ -139,7 +139,7 @@ jobs:
           echo "CHAIN_IMAGE=${chain}" >> $GITHUB_ENV
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: docker.fluence.dev
           username: ${{ env.DOCKER_USERNAME }}
