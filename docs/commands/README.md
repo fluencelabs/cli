@@ -32,6 +32,7 @@
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-peer`](#fluence-provider-add-peer)
 * [`fluence provider add-units`](#fluence-provider-add-units)
+* [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider info`](#fluence-provider-info)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider register`](#fluence-provider-register)
@@ -883,6 +884,28 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/add-units.ts)_
+
+## `fluence provider gen`
+
+Generate Config.toml files according to provider.yaml
+
+```
+USAGE
+  $ fluence provider gen [--no-input] [--noxes <value>] [--provider-config-path <value>]
+
+FLAGS
+  --no-input                      Don't interactively ask for any input from the user
+  --noxes=<value>                 Number of Compute Peers to generate in your provider config
+  --provider-config-path=<value>  Path to the provider config file
+
+DESCRIPTION
+  Generate Config.toml files according to provider.yaml
+
+EXAMPLES
+  $ fluence provider gen
+```
+
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/gen.ts)_
 
 ## `fluence provider info`
 
