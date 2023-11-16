@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.13.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.5...fluence-cli-v0.13.0) (2023-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deal:** Deal lifecycle
+
+### Features
+
+* **deal:** Deal lifecycle ([f3763e9](https://github.com/fluencelabs/cli/commit/f3763e95136494e70f745a3d04eee5225fc2ff3f))
+* improve custom relay error ([#622](https://github.com/fluencelabs/cli/issues/622)) ([8038102](https://github.com/fluencelabs/cli/commit/8038102b4e54d2290fa52d625ee118e567dd1aca))
+* update deps ([#623](https://github.com/fluencelabs/cli/issues/623)) ([ae406b4](https://github.com/fluencelabs/cli/commit/ae406b4a8005d01f8b0cb8f190cdfe86d15da9a4))
+
+
+### Bug Fixes
+
+* generate key after config is generated ([#620](https://github.com/fluencelabs/cli/issues/620)) ([2bff233](https://github.com/fluencelabs/cli/commit/2bff233c14742bd4e637aed4c3d624dedddb6271))
+* update ts and js README ([#618](https://github.com/fluencelabs/cli/issues/618)) ([ea208b4](https://github.com/fluencelabs/cli/commit/ea208b463d5a66d59c0fad6a1e6322546aaf194b))
+
 ## [0.12.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.4...fluence-cli-v0.12.5) (2023-11-14)
 
 
