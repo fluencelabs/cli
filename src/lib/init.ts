@@ -61,7 +61,7 @@ import { compileToFiles } from "./aqua.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
 import { initNewEnvConfig } from "./configs/project/env.js";
-import { initNewProviderConfig } from "./configs/project/provider.js";
+import { initNewReadonlyProviderConfig } from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
 import { addCountlyEvent } from "./countly.js";
@@ -112,7 +112,7 @@ type InitArg = {
   maybeProjectPath?: string | undefined;
   template?: Template | undefined;
   fluenceEnvFromFlags?: string | undefined;
-} & ProviderConfigArgs;
+} & Omit<ProviderConfigArgs, "env">;
 
 export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const projectPath =
@@ -151,7 +151,8 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   }
 
   if (fluenceEnv === "local") {
-    await initNewProviderConfig({
+    await initNewReadonlyProviderConfig({
+      env: "local",
       numberOfNoxes: options.numberOfNoxes,
     });
   }

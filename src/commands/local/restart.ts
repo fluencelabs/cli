@@ -15,7 +15,8 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { initReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -27,13 +28,15 @@ export default class Restart extends BaseCommand<typeof Restart> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    const { maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Restart),
-    );
+    await initCli(this, await this.parse(Restart));
 
-    const dockerComposeConfig =
-      await initNewDockerComposeConfig(maybeFluenceConfig);
+    const dockerComposeConfig = await initReadonlyDockerComposeConfig();
+
+    if (dockerComposeConfig === null) {
+      commandObj.error(
+        `Cannot find ${DOCKER_COMPOSE_FULL_FILE_NAME}. Aborting.`,
+      );
+    }
 
     await dockerCompose({
       args: ["restart"],

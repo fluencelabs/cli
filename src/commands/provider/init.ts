@@ -21,10 +21,10 @@ import { color } from "@oclif/color";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
-  initNewProviderConfig,
+  initNewReadonlyProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
-import { PROVIDER_CONFIG_FLAGS } from "../../lib/const.js";
+import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
 
@@ -33,6 +33,7 @@ export default class Init extends BaseCommand<typeof Init> {
     "Init provider config. Creates a config file in the current directory.";
   static override flags = {
     ...baseFlags,
+    ...NOXES_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
   };
 
@@ -62,9 +63,10 @@ export default class Init extends BaseCommand<typeof Init> {
       await rm(providerConfig.$getPath(), { force: true });
     }
 
-    providerConfig = await initNewProviderConfig({
+    providerConfig = await initNewReadonlyProviderConfig({
       path: flags["provider-config-path"],
       numberOfNoxes: flags.noxes,
+      env: flags.env,
     });
 
     commandObj.logToStderr(

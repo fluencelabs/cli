@@ -20,6 +20,7 @@ import { ensureConfigToml } from "../../lib/configs/project/dockerCompose.js";
 import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import {
   PROVIDER_CONFIG_FLAGS,
+  NOXES_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -30,6 +31,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    ...NOXES_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
   };
   async run(): Promise<void> {
@@ -40,6 +42,8 @@ export default class Gen extends BaseCommand<typeof Gen> {
 
     const providerConfig = await initNewReadonlyProviderConfig({
       numberOfNoxes: flags["noxes"],
+      env: flags.env,
+      path: flags["provider-config-path"],
     });
 
     await ensureConfigToml(maybeFluenceConfig, providerConfig);

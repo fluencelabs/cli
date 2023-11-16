@@ -52,7 +52,7 @@ import {
 import { projectRootDir } from "./paths.js";
 import { input, list } from "./prompt.js";
 
-export async function fluenceEnvPrompt(): Promise<FluenceEnv> {
+async function fluenceEnvPrompt(): Promise<FluenceEnv> {
   return list({
     message: `Select Fluence Environment to use by default with this project`,
     options: [...FLUENCE_ENVS],
@@ -66,7 +66,7 @@ export async function fluenceEnvPrompt(): Promise<FluenceEnv> {
   });
 }
 
-export async function ensureValidEnvFlag(
+async function ensureValidFluenceEnvFlag(
   envFlag: string | undefined,
 ): Promise<FluenceEnv | undefined> {
   if (envFlag === undefined) {
@@ -84,10 +84,14 @@ export async function ensureValidEnvFlag(
   return envFlag;
 }
 
+export async function ensureValidFluenceEnv(envFlag: string | undefined) {
+  return (await ensureValidFluenceEnvFlag(envFlag)) ?? fluenceEnvPrompt();
+}
+
 export async function resolveFluenceEnv(
   fluenceEnvFromFlagsNotValidated: string | undefined,
 ): Promise<FluenceEnv> {
-  const fluenceEnvFromFlags = await ensureValidEnvFlag(
+  const fluenceEnvFromFlags = await ensureValidFluenceEnvFlag(
     fluenceEnvFromFlagsNotValidated,
   );
 
@@ -123,8 +127,8 @@ export async function getPeerIdFromSecretKey(secretKey: string) {
   return keyPair.getPeerId();
 }
 
-async function ensureLocalAddrsAndPeerIds(numberOfNoxes?: number | undefined) {
-  return (await getResolvedProviderConfig({ numberOfNoxes })).map(
+async function ensureLocalAddrsAndPeerIds(args: ProviderConfigArgs) {
+  return (await getResolvedProviderConfig(args)).map(
     ({ peerId, webSocketPort }): AddrAndPeerId => {
       return {
         multiaddr: `/ip4/127.0.0.1/tcp/${webSocketPort}/ws/p2p/${peerId}`,
@@ -218,7 +222,7 @@ export async function resolveAddrsAndPeerIds({
   }
 
   if (fluenceEnv === "local") {
-    return ensureLocalAddrsAndPeerIds(numberOfNoxes);
+    return ensureLocalAddrsAndPeerIds({ numberOfNoxes, env: "local" });
   }
 
   return ADDR_MAP[fluenceEnv];
@@ -416,7 +420,9 @@ export async function updateRelaysJSON({
   );
 }
 
-export async function getResolvedProviderConfig(args: ProviderConfigArgs = {}) {
+export async function getResolvedProviderConfig(
+  args: Omit<ProviderConfigArgs, "env"> & { env: string | undefined },
+) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   return Promise.all(
     Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {

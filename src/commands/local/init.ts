@@ -21,11 +21,11 @@ import { color } from "@oclif/color";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
-  initNewDockerComposeConfig,
+  initNewReadonlyDockerComposeConfig,
   initReadonlyDockerComposeConfig,
 } from "../../lib/configs/project/dockerCompose.js";
 import {
-  PROVIDER_CONFIG_FLAGS,
+  NOXES_FLAG,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
@@ -37,7 +37,7 @@ export default class Init extends BaseCommand<typeof Init> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...NOXES_FLAG,
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig } = await initCli(
@@ -64,9 +64,13 @@ export default class Init extends BaseCommand<typeof Init> {
       await rm(existingDockerCompose.$getPath());
     }
 
-    const dockerCompose = await initNewDockerComposeConfig(maybeFluenceConfig, {
-      numberOfNoxes: flags.noxes,
-    });
+    const dockerCompose = await initNewReadonlyDockerComposeConfig(
+      maybeFluenceConfig,
+      {
+        env: "local",
+        numberOfNoxes: flags.noxes,
+      },
+    );
 
     commandObj.logToStderr(`Created new config at ${dockerCompose.$getPath()}`);
   }

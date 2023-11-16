@@ -15,8 +15,8 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
-import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
+import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { DOCKER_COMPOSE_FULL_FILE_NAME, NOXES_FLAG } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -25,12 +25,21 @@ export default class Up extends BaseCommand<typeof Up> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    ...NOXES_FLAG,
   };
   async run(): Promise<void> {
-    const { maybeFluenceConfig } = await initCli(this, await this.parse(Up));
+    const { maybeFluenceConfig, flags } = await initCli(
+      this,
+      await this.parse(Up),
+    );
 
-    const dockerComposeConfig =
-      await initNewDockerComposeConfig(maybeFluenceConfig);
+    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig(
+      maybeFluenceConfig,
+      {
+        env: "local",
+        numberOfNoxes: flags.noxes,
+      },
+    );
 
     await dockerCompose({
       args: ["up", "-d"],

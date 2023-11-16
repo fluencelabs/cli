@@ -60,6 +60,7 @@ export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
 export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
+export const isContractsEnv = getIsStringUnion(CONTRACTS_ENV);
 
 export type ChainConfig = {
   url: string;
@@ -307,13 +308,20 @@ export const TRACING_FLAG = {
   }),
 };
 
-export const PROVIDER_CONFIG_FLAGS = {
+export const NOXES_FLAG = {
   noxes: Flags.integer({
     description: "Number of Compute Peers to generate in your provider config",
   }),
+};
+
+export const PROVIDER_CONFIG_FLAGS = {
   "provider-config-path": Flags.string({
     description: "Path to the provider config file",
     aliases: ["p"],
+  }),
+  [ENV_FLAG_NAME]: Flags.string({
+    description: "Environment to use when generating the provider config",
+    helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
   }),
 };
 

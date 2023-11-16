@@ -20,6 +20,7 @@ import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import {
+  type ContractsENV,
   PROVIDER_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_CONFIG_FULL_FILE_NAME,
@@ -27,11 +28,13 @@ import {
   TCP_PORT_START,
   HTTP_PORT_START,
   DEFAULT_AQUAVM_POOL_SIZE,
+  CONTRACTS_ENV,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
   generateUserProviderConfig,
 } from "../../generateUserProviderConfig.js";
+import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
 import { getFluenceDir, projectRootDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -198,6 +201,7 @@ export type ComputePeer = {
 };
 
 type ConfigV0 = {
+  env: ContractsENV;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   nox?: NoxConfigYAML;
@@ -244,6 +248,12 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   additionalProperties: false,
   properties: {
+    env: {
+      description:
+        "Defines the the environment for which you intend to generate nox configuration",
+      type: "string",
+      enum: CONTRACTS_ENV,
+    },
     offers: {
       description: "A map with offer names as keys and offers as values",
       type: "object",
@@ -266,17 +276,24 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     nox: noxConfigYAMLSchema,
     version: { type: "number", const: 0 },
   },
-  required: ["version", "computePeers", "offers"],
+  required: ["version", "computePeers", "offers", "env"],
 };
 
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
 };
 
-function getDefault(args: ProviderConfigArgs) {
+function getDefault({
+  env,
+  numberOfNoxes,
+}: Omit<ProviderConfigArgs, "env"> & { env: string | undefined }) {
   return async () => {
     const { yamlDiffPatch } = await import("yaml-diff-patch");
-    const userProvidedConfig = await generateUserProviderConfig(args);
+
+    const userProvidedConfig = await generateUserProviderConfig({
+      env: await ensureValidContractsEnv(env),
+      numberOfNoxes,
+    });
 
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
@@ -358,21 +375,24 @@ export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
 export async function initNewProviderConfig({
   path,
-  ...restArgs
-}: ProviderConfigArgs & { path?: string | undefined } = {}) {
-  return getConfigInitFunction(
-    getInitConfigOptions(path),
-    getDefault(restArgs),
-  )();
+  ...args
+}: Omit<ProviderConfigArgs, "env"> & {
+  path?: string | undefined;
+  env: string | undefined;
+}) {
+  return getConfigInitFunction(getInitConfigOptions(path), getDefault(args))();
 }
 
 export async function initNewReadonlyProviderConfig({
   path,
-  ...restArgs
-}: ProviderConfigArgs & { path?: string | undefined } = {}) {
+  ...args
+}: Omit<ProviderConfigArgs, "env"> & {
+  path?: string | undefined;
+  env: string | undefined;
+}) {
   return getReadonlyConfigInitFunction(
     getInitConfigOptions(path),
-    getDefault(restArgs),
+    getDefault(args),
   )();
 }
 

@@ -15,7 +15,8 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { initNewDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { initReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -27,10 +28,14 @@ export default class Down extends BaseCommand<typeof Down> {
     ...baseFlags,
   };
   async run(): Promise<void> {
-    const { maybeFluenceConfig } = await initCli(this, await this.parse(Down));
+    await initCli(this, await this.parse(Down));
+    const dockerComposeConfig = await initReadonlyDockerComposeConfig();
 
-    const dockerComposeConfig =
-      await initNewDockerComposeConfig(maybeFluenceConfig);
+    if (dockerComposeConfig === null) {
+      commandObj.error(
+        `Cannot find ${DOCKER_COMPOSE_FULL_FILE_NAME}. Aborting.`,
+      );
+    }
 
     await dockerCompose({
       args: ["down"],

@@ -69,19 +69,10 @@ import {
 
 const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
 
-function getIsLocal() {
-  if (envConfig?.fluenceEnv === undefined) {
-    return true;
-  }
-
-  return envConfig.fluenceEnv === "local";
-}
-
 async function getDefaultNoxConfigYAML(
   fluenceConfig: FluenceConfigReadonly | null,
+  isLocal: boolean,
 ): Promise<NoxConfigYAML> {
-  const isLocal = getIsLocal();
-
   const contractsEnv: ContractsENV =
     envConfig?.fluenceEnv === "custom"
       ? fluenceConfig?.customFluenceEnv?.contractsEnv ?? "local"
@@ -376,7 +367,7 @@ function getConfigTomlName(noxName: string) {
 
 export async function initNewDockerComposeConfig(
   fluenceConfig: FluenceConfigReadonly | null,
-  args: ProviderConfigArgs = {},
+  args: ProviderConfigArgs,
 ) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   await ensureConfigToml(fluenceConfig, providerConfig);
@@ -388,7 +379,7 @@ export async function initNewDockerComposeConfig(
 
 export async function initNewReadonlyDockerComposeConfig(
   fluenceConfig: FluenceConfigReadonly | null,
-  args: ProviderConfigArgs = {},
+  args: ProviderConfigArgs,
 ) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   await ensureConfigToml(fluenceConfig, providerConfig);
@@ -410,7 +401,10 @@ export async function ensureConfigToml(
   providerConfig: ProviderConfigReadonly,
 ) {
   const baseNoxConfig = mergeNoxConfigYAML(
-    await getDefaultNoxConfigYAML(fluenceConfig),
+    await getDefaultNoxConfigYAML(
+      fluenceConfig,
+      providerConfig.env === "local",
+    ),
     providerConfig.nox ?? {},
   );
 
