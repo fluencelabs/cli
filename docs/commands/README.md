@@ -7,6 +7,7 @@
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence deal info [DEAL-ADDRESS]`](#fluence-deal-info-deal-address)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
@@ -30,9 +31,12 @@
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-peer`](#fluence-provider-add-peer)
-* [`fluence provider gen`](#fluence-provider-gen)
+* [`fluence provider add-units`](#fluence-provider-add-units)
+* [`fluence provider info`](#fluence-provider-info)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider register`](#fluence-provider-register)
+* [`fluence provider remove-peer`](#fluence-provider-remove-peer)
+* [`fluence provider remove-units`](#fluence-provider-remove-units)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
 * [`fluence service new [NAME]`](#fluence-service-new-name)
@@ -224,9 +228,10 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--env
-    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
-    [--tracing] [--marine-build-args <value>] [--auto-match]
+  $ fluence deal deploy [WORKER-NAMES] --collateral-per-worker <value> --min-workers <value> --target-workers
+    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [-k <value>]
+    [--off-aqua-logs] [--priv-key <value>] [--env <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [--import <value>] [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
@@ -235,6 +240,7 @@ ARGUMENTS
 FLAGS
   -k, --sk=<name>                                  Name of a peer's Network Private Key
   --[no-]auto-match                                Disable automatic matching
+  --collateral-per-worker=<value>                  (required) Collateral per worker
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -243,13 +249,17 @@ FLAGS
   --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
                                                    Overrides 'marineBuildArgs' property in fluence.yaml. Default:
                                                    --release
+  --max-workers-per-provider=<value>               (required) Max workers per provider
+  --min-workers=<value>                            (required) Required workers to activate the deal
   --no-build                                       Don't build the project before running the command
   --no-input                                       Don't interactively ask for any input from the user
   --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                                    Print particle ids when running Fluence js-client
+  --price-per-worker-epoch=<value>                 (required) Price per worker epoch
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
   --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --target-workers=<value>                         (required) Max workers in the deal
   --tracing                                        Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
@@ -262,6 +272,27 @@ EXAMPLES
 ```
 
 _See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/deal/deploy.ts)_
+
+## `fluence deal info [DEAL-ADDRESS]`
+
+Get info about provider
+
+```
+USAGE
+  $ fluence deal info [DEAL-ADDRESS] [--no-input] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Get info about provider
+```
+
+_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/deal/info.ts)_
 
 ## `fluence deal logs [WORKER-NAMES]`
 
@@ -830,27 +861,47 @@ DESCRIPTION
 
 _See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/add-peer.ts)_
 
-## `fluence provider gen`
+## `fluence provider add-units`
 
-Generate Config.toml files according to provider.yaml
+Add units to specific nox instance as a Compute Peer
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [--provider-config-path <value>]
+  $ fluence provider add-units [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units <value>]
 
 FLAGS
-  --no-input                      Don't interactively ask for any input from the user
-  --noxes=<value>                 Number of Compute Peers to generate in your provider config
-  --provider-config-path=<value>  Path to the provider config file
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>                              Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --units=<number>                                 Number of available worker units on this Compute Peer
 
 DESCRIPTION
-  Generate Config.toml files according to provider.yaml
-
-EXAMPLES
-  $ fluence provider gen
+  Add units to specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/gen.ts)_
+_See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/add-units.ts)_
+
+## `fluence provider info`
+
+Get info about provider
+
+```
+USAGE
+  $ fluence provider info --provider-address <value> [--no-input] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --provider-address=<value>                       (required) Compute provider address
+
+DESCRIPTION
+  Get info about provider
+```
+
+_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/info.ts)_
 
 ## `fluence provider init`
 
@@ -877,11 +928,14 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence provider register --max-collateral <value> --price-per-epoch <value> [--no-input] [--priv-key <value>]
+    [--env <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --max-collateral=<value>                         (required) Max collateral for provider offer
   --no-input                                       Don't interactively ask for any input from the user
+  --price-per-epoch=<value>                        (required) Price per epoch for provider offer
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
 
@@ -890,6 +944,52 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/register.ts)_
+
+## `fluence provider remove-peer`
+
+Remove specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence provider remove-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>                              Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Remove specific nox instance as a Compute Peer
+```
+
+_See code: [src/commands/provider/remove-peer.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/remove-peer.ts)_
+
+## `fluence provider remove-units`
+
+Sub units to specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence provider remove-units [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units
+  <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>                              Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --units=<number>                                 Number of available worker units on this Compute Peer
+
+DESCRIPTION
+  Sub units to specific nox instance as a Compute Peer
+```
+
+_See code: [src/commands/provider/remove-units.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/remove-units.ts)_
 
 ## `fluence run`
 

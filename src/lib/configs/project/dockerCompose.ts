@@ -115,7 +115,7 @@ async function getDefaultNoxConfigYAML(
         networkId: dealConfig.chainId,
         startBlock: "earliest",
         // TODO: use correct addr for env
-        matcherAddress: "0x0f68c702dC151D07038fA40ab3Ed1f9b8BAC2981",
+        matcherAddress: "0x0e1F3B362E22B2Dc82C9E35d6e62998C7E8e2349",
       },
     },
   });
@@ -236,6 +236,7 @@ function genNox({
     name,
     {
       image: versions.nox,
+      pull_policy: "always",
       ports: [`${tcpPort}:${tcpPort}`, `${webSocketPort}:${webSocketPort}`],
       environment: {
         WASM_LOG: "info",
