@@ -44,4 +44,4 @@ jobs:
         run: yarn on-each-commit
 
       - name: Auto-commit
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
