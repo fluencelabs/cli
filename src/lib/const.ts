@@ -475,6 +475,7 @@ data WorkerServices:
     host_id: string
     worker_id: ?string
     services: ?[]string
+    spells: ?[]string
 
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
@@ -491,15 +492,19 @@ func showSubnet() -> []WorkerServices:
                 -- get list of all services on this worker
                 srvs <- Srv.list()
 
-                -- gather aliases
-                aliases: *string
+                -- gather spells and services aliases
+                spells_aliases: *string
+                services_aliases: *string
                 for s <- srvs:
                     if s.aliases.length != 0:
-                        aliases <<- s.aliases[0]
+                        if s.service_type == "spell":
+                            spells_aliases <<- s.aliases[0]
+                        if s.service_type == "service":
+                            services_aliases <<- s.aliases[0]
 
-                services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[aliases])
+                services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[services_aliases], spells=?[spells_aliases])
         else:
-            services <<- WorkerServices(host_id=w.host_id, worker_id=nil, services=nil)
+            services <<- WorkerServices(host_id=w.host_id, worker_id=nil, services=nil, spells=nil)
 
     <- services
 `;
