@@ -493,16 +493,16 @@ func showSubnet() -> []WorkerServices:
                 srvs <- Srv.list()
 
                 -- gather spells and services aliases
-                spells: *string
-                services: *string
+                spells_aliases: *string
+                services_aliases: *string
                 for s <- srvs:
                     if s.aliases.length != 0:
                         if s.service_type == "spell":
-                            spells <<- s.aliases[0]
+                        spells_aliases <<- s.aliases[0]
                         if s.service_type == "service":
-                            services <<- s.aliases[0]
+                        services_aliases <<- s.aliases[0]
 
-                services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[services], spells=?[spells])
+                services <<- WorkerServices(host_id=w.host_id, worker_id=w.worker_id, services=?[services_aliases], spells=?[spells_aliases])
         else:
             services <<- WorkerServices(host_id=w.host_id, worker_id=nil, services=nil, spells=nil)
 
