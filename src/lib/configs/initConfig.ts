@@ -546,9 +546,9 @@ export function getConfigInitFunction<
 
     return {
       ...initializedReadonlyConfig,
-      async $commit(): Promise<void> {
-        // await here is mostly just to shut up typescript. `this` should not be a Promise but it's completely safe to await a non-promise value
-        const config = removeProperties({ ...(await this) }, ([, v]) => {
+      // have to type-cast `this` because TypeScript incorrectly thinks `this` can be a PromiseLike
+      async $commit(this: InitializedConfig<LatestConfig>): Promise<void> {
+        const config = removeProperties({ ...this }, ([, v]) => {
           return typeof v === "function";
         });
 
