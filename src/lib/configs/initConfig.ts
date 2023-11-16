@@ -548,7 +548,7 @@ export function getConfigInitFunction<
       ...initializedReadonlyConfig,
       // have to type-cast `this` because TypeScript incorrectly thinks `this` can be a PromiseLike
       async $commit(this: InitializedConfig<LatestConfig>): Promise<void> {
-        const config = removeProperties({ ...this }, ([, v]) => {
+        const config = removeProperties(this, ([, v]) => {
           return typeof v === "function";
         });
 
