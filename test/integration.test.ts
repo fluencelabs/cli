@@ -544,6 +544,11 @@ describe("integration tests", () => {
 
       function isWorkerService(unknown: unknown) {
         return (
+          hasKey("spells", unknown) &&
+          Array.isArray(unknown.spells) &&
+          unknown.spells.every((i) => {
+            return typeof i === "string";
+          }) &&
           hasKey("services", unknown) &&
           Array.isArray(unknown.services) &&
           unknown.services.every((i) => {
