@@ -88,6 +88,13 @@ export const getSigner = async (
     : getWallet(privKey, network);
 };
 
+export const getProvider = async (
+  network: ContractsENV,
+): Promise<ethers.Provider> => {
+  const { ethers } = await import("ethers");
+  return new ethers.JsonRpcProvider(DEAL_CONFIG[network].url);
+};
+
 async function getWalletConnectProvider(env: ContractsENV) {
   const { UniversalProvider } = await import(
     "@walletconnect/universal-provider"
@@ -153,10 +160,7 @@ const getWallet = async (
 ): Promise<ethers.Wallet> => {
   const { ethers } = await import("ethers");
 
-  return new ethers.Wallet(
-    privKey,
-    new ethers.JsonRpcProvider(DEAL_CONFIG[network].url),
-  );
+  return new ethers.Wallet(privKey, await getProvider(network));
 };
 
 export const waitTx = async (
