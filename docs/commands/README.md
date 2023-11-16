@@ -548,7 +548,6 @@ Initialize fluence project
 ```
 USAGE
   $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>] [--noxes <value>]
-    [--provider-config-path <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -558,7 +557,6 @@ FLAGS
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --noxes=<value>                                  Number of Compute Peers to generate in your provider config
-  --provider-config-path=<value>                   Path to the provider config file
 
 DESCRIPTION
   Initialize fluence project
@@ -668,12 +666,11 @@ Init docker-compose.yaml according to provider.yaml
 
 ```
 USAGE
-  $ fluence local init [--no-input] [--noxes <value>] [--provider-config-path <value>]
+  $ fluence local init [--no-input] [--noxes <value>]
 
 FLAGS
-  --no-input                      Don't interactively ask for any input from the user
-  --noxes=<value>                 Number of Compute Peers to generate in your provider config
-  --provider-config-path=<value>  Path to the provider config file
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -750,10 +747,11 @@ Run docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local up [--no-input]
+  $ fluence local up [--no-input] [--noxes <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose
@@ -891,12 +889,13 @@ Generate Config.toml files according to provider.yaml
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [--provider-config-path <value>]
+  $ fluence provider gen [--no-input] [--noxes <value>] [--provider-config-path <value>] [--env <value>]
 
 FLAGS
-  --no-input                      Don't interactively ask for any input from the user
-  --noxes=<value>                 Number of Compute Peers to generate in your provider config
-  --provider-config-path=<value>  Path to the provider config file
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
+  --provider-config-path=<value>          Path to the provider config file
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml
@@ -905,7 +904,7 @@ EXAMPLES
   $ fluence provider gen
 ```
 
-_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.12.5/src/commands/provider/gen.ts)_
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/gen.ts)_
 
 ## `fluence provider info`
 
@@ -932,12 +931,13 @@ Init provider config. Creates a config file in the current directory.
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [--provider-config-path <value>]
+  $ fluence provider init [--no-input] [--noxes <value>] [--provider-config-path <value>] [--env <value>]
 
 FLAGS
-  --no-input                      Don't interactively ask for any input from the user
-  --noxes=<value>                 Number of Compute Peers to generate in your provider config
-  --provider-config-path=<value>  Path to the provider config file
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
+  --provider-config-path=<value>          Path to the provider config file
 
 DESCRIPTION
   Init provider config. Creates a config file in the current directory.
