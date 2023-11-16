@@ -2,7 +2,7 @@
   "name": "@fluencelabs/cli",
   "packageManager": "yarn@3.6.4",
   "type": "module",
-  "version": "0.12.5",
+  "version": "0.13.0",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
@@ -90,7 +90,7 @@
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
-    "@fluencelabs/installation-spell": "0.5.28",
+    "@fluencelabs/installation-spell": "0.5.31",
     "@total-typescript/ts-reset": "^0.5.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/debug": "^4.1.10",

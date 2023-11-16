@@ -3,8 +3,8 @@
   "chain": "fluencelabs/chain-rpc:0.2.20",
   "rust-toolchain": "nightly-2023-08-27-x86_64",
   "npm": {
-    "@fluencelabs/aqua-lib": "0.7.7",
-    "@fluencelabs/spell": "0.5.28",
+    "@fluencelabs/aqua-lib": "0.8.0",
+    "@fluencelabs/spell": "0.5.31",
     "@fluencelabs/registry": "0.8.7"
   },
   "cargo": {
