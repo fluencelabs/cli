@@ -62,7 +62,7 @@ jobs:
 
     steps:
       - name: Checkout fluence-cli
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: fluencelabs/cli
           ref: ${{ inputs.ref }}
