@@ -408,6 +408,7 @@ const fluenceRun = async (args: RunArgs) => {
   const { Fluence, v5_callFunction } = await import("@fluencelabs/js-client");
 
   const runArgs = Object.values(args.runData ?? []);
+
   const result = await v5_callFunction(
     [Fluence.getClient(), ...runArgs],
     functionCall.funcDef,
