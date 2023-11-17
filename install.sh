@@ -29,8 +29,8 @@ fi
 if ! has "fluence"; then
   cat <<ERR
 fluence cli seems to be already installed.
-If it was installed with with npm unistall it first with 'npm uninstall -g @fluencelabs/cli' then rerun installation script.
-If it was installed with installation script you should use 'fluence update' command to update to latest versio version.
+If it was installed with with npm please unistall it first with 'npm uninstall -g @fluencelabs/cli' then rerun installation script.
+If it was installed with installation script you should use 'fluence update' command to update to latest version.
 ERR
   exit 1
 fi
@@ -80,6 +80,6 @@ if echo $PATH | grep -q $HOME/.local/bin; then
   mkdir -p $HOME/.local/bin
   ln -sf ${FLUENCE_USER_DIR}/cli/bin/fluence $HOME/.local/bin/fluence
 else
-  echo "Create a symlink to fluence binary in any directory that is in \$PATH, for example:"
-  echo "sudo ln -s ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/bin/fluence"
+  echo "Adding fluence cli to \$PATH with 'sudo ln -s ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/local/bin/fluence"
+  sudo ln -s ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/local/bin/fluence
 fi
