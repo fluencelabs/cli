@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { resolve } from "node:path";
-
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
@@ -35,7 +33,8 @@ import {
   generateUserProviderConfig,
 } from "../../generateUserProviderConfig.js";
 import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
-import { getFluenceDir, projectRootDir } from "../../paths.js";
+import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
+import { ensureProviderConfigPath, getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -44,6 +43,8 @@ import {
   type Migrations,
   type ConfigValidateFunction,
 } from "../initConfig.js";
+
+import { ensureConfigToml } from "./dockerCompose.js";
 
 export type Offer = {
   minPricePerWorkerEpoch: number;
@@ -280,7 +281,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
 };
 
 const getConfigOrConfigDirPath = () => {
-  return projectRootDir;
+  return ensureProviderConfigPath();
 };
 
 function getDefault({
@@ -355,16 +356,14 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
   return true;
 };
 
-function getInitConfigOptions(path: string | undefined) {
+function getInitConfigOptions() {
   return {
     allSchemas: [configSchemaV0],
     latestSchema: configSchemaV0,
     migrations,
     name: PROVIDER_CONFIG_FILE_NAME,
     getConfigOrConfigDirPath: () => {
-      return typeof path === "string"
-        ? resolve(path)
-        : getConfigOrConfigDirPath();
+      return getConfigOrConfigDirPath();
     },
     getSchemaDirPath: getFluenceDir,
     validate,
@@ -373,35 +372,50 @@ function getInitConfigOptions(path: string | undefined) {
 
 export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
+async function ensureSecrets(providerConfig: ProviderConfigReadonly) {
+  return Promise.all(
+    Object.keys(providerConfig.computePeers).map(async (name) => {
+      return getSecretKeyOrReturnExisting(name);
+    }),
+  );
+}
+
 export async function initNewProviderConfig({
-  path,
   ...args
 }: Omit<ProviderConfigArgs, "env"> & {
-  path?: string | undefined;
   env: string | undefined;
 }) {
-  return getConfigInitFunction(getInitConfigOptions(path), getDefault(args))();
+  const providerConfig = await getConfigInitFunction(
+    getInitConfigOptions(),
+    getDefault(args),
+  )();
+
+  await ensureSecrets(providerConfig);
+  await ensureConfigToml(providerConfig);
+  return providerConfig;
 }
 
 export async function initNewReadonlyProviderConfig({
-  path,
   ...args
 }: Omit<ProviderConfigArgs, "env"> & {
-  path?: string | undefined;
   env: string | undefined;
 }) {
-  return getReadonlyConfigInitFunction(
-    getInitConfigOptions(path),
+  const providerConfig = await getReadonlyConfigInitFunction(
+    getInitConfigOptions(),
     getDefault(args),
   )();
+
+  await ensureSecrets(providerConfig);
+  await ensureConfigToml(providerConfig);
+  return providerConfig;
 }
 
-export function initProviderConfig(path?: string | undefined) {
-  return getConfigInitFunction(getInitConfigOptions(path))();
+export function initProviderConfig() {
+  return getConfigInitFunction(getInitConfigOptions())();
 }
 
-export function initReadonlyProviderConfig(path?: string | undefined) {
-  return getReadonlyConfigInitFunction(getInitConfigOptions(path))();
+export function initReadonlyProviderConfig() {
+  return getReadonlyConfigInitFunction(getInitConfigOptions())();
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

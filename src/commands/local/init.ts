@@ -40,10 +40,7 @@ export default class Init extends BaseCommand<typeof Init> {
     ...NOXES_FLAG,
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Init),
-    );
+    const { flags } = await initCli(this, await this.parse(Init));
 
     const existingDockerCompose = await initReadonlyDockerComposeConfig();
 
@@ -64,13 +61,10 @@ export default class Init extends BaseCommand<typeof Init> {
       await rm(existingDockerCompose.$getPath());
     }
 
-    const dockerCompose = await initNewReadonlyDockerComposeConfig(
-      maybeFluenceConfig,
-      {
-        env: "local",
-        numberOfNoxes: flags.noxes,
-      },
-    );
+    const dockerCompose = await initNewReadonlyDockerComposeConfig({
+      env: "local",
+      numberOfNoxes: flags.noxes,
+    });
 
     commandObj.logToStderr(`Created new config at ${dockerCompose.$getPath()}`);
   }

@@ -26,6 +26,7 @@ import {
 } from "../../lib/configs/project/provider.js";
 import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { setProviderConfigName } from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
 
 export default class Init extends BaseCommand<typeof Init> {
@@ -39,10 +40,9 @@ export default class Init extends BaseCommand<typeof Init> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
+    setProviderConfigName(flags.name);
 
-    let providerConfig = await initReadonlyProviderConfig(
-      flags["provider-config-path"],
-    );
+    let providerConfig = await initReadonlyProviderConfig();
 
     if (providerConfig !== null) {
       const isOverwriting = await confirm({
@@ -64,7 +64,6 @@ export default class Init extends BaseCommand<typeof Init> {
     }
 
     providerConfig = await initNewReadonlyProviderConfig({
-      path: flags["provider-config-path"],
       numberOfNoxes: flags.noxes,
       env: flags.env,
     });

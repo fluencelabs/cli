@@ -315,9 +315,9 @@ export const NOXES_FLAG = {
 };
 
 export const PROVIDER_CONFIG_FLAGS = {
-  "provider-config-path": Flags.string({
-    description: "Path to the provider config file",
-    aliases: ["p"],
+  name: Flags.string({
+    description: "Provider config name",
+    aliases: ["n"],
   }),
   [ENV_FLAG_NAME]: Flags.string({
     description: "Environment to use when generating the provider config",

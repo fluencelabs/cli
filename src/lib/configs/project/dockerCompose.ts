@@ -42,14 +42,12 @@ import {
   TOML_EXT,
   CONFIGS_DIR_NAME,
   HTTP_PORT_START,
-  type ContractsENV,
   LOCAL_IPFS_ADDRESS,
   WALLET_KEYS_FOR_LOCAL_NETWORK,
 } from "../../const.js";
 import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
-import { envConfig } from "../globalConfigs.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -59,7 +57,6 @@ import {
   type Migrations,
 } from "../initConfig.js";
 
-import type { FluenceConfigReadonly } from "./fluence.js";
 import {
   commonNoxConfig,
   type NoxConfigYAML,
@@ -70,13 +67,10 @@ import {
 const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
 
 async function getDefaultNoxConfigYAML(
-  fluenceConfig: FluenceConfigReadonly | null,
-  isLocal: boolean,
+  providerConfig: ProviderConfigReadonly,
 ): Promise<NoxConfigYAML> {
-  const contractsEnv: ContractsENV =
-    envConfig?.fluenceEnv === "custom"
-      ? fluenceConfig?.customFluenceEnv?.contractsEnv ?? "local"
-      : envConfig?.fluenceEnv ?? "local";
+  const isLocal = providerConfig.env === "local";
+  const contractsEnv = providerConfig.env;
 
   const { DEAL_CONFIG } = await import(
     "@fluencelabs/deal-aurora/dist/client/config.js"
@@ -361,16 +355,13 @@ function getConfigName(noxName: string) {
   return `${noxName}_Config`;
 }
 
-function getConfigTomlName(noxName: string) {
+export function getConfigTomlName(noxName: string) {
   return `${getConfigName(noxName)}.${TOML_EXT}`;
 }
 
-export async function initNewDockerComposeConfig(
-  fluenceConfig: FluenceConfigReadonly | null,
-  args: ProviderConfigArgs,
-) {
+export async function initNewDockerComposeConfig(args: ProviderConfigArgs) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
-  await ensureConfigToml(fluenceConfig, providerConfig);
+  await ensureConfigToml(providerConfig);
   return getConfigInitFunction(
     initConfigOptions,
     await genDefaultDockerCompose(providerConfig),
@@ -378,11 +369,10 @@ export async function initNewDockerComposeConfig(
 }
 
 export async function initNewReadonlyDockerComposeConfig(
-  fluenceConfig: FluenceConfigReadonly | null,
   args: ProviderConfigArgs,
 ) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
-  await ensureConfigToml(fluenceConfig, providerConfig);
+  await ensureConfigToml(providerConfig);
   return getReadonlyConfigInitFunction(
     initConfigOptions,
     await genDefaultDockerCompose(providerConfig),
@@ -396,15 +386,9 @@ export const initReadonlyDockerComposeConfig =
 
 export const dockerComposeSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 
-export async function ensureConfigToml(
-  fluenceConfig: FluenceConfigReadonly | null,
-  providerConfig: ProviderConfigReadonly,
-) {
+export async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
   const baseNoxConfig = mergeNoxConfigYAML(
-    await getDefaultNoxConfigYAML(
-      fluenceConfig,
-      providerConfig.env === "local",
-    ),
+    await getDefaultNoxConfigYAML(providerConfig),
     providerConfig.nox ?? {},
   );
 

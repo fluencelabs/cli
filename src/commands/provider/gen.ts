@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { join } from "path";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ensureConfigToml } from "../../lib/configs/project/dockerCompose.js";
 import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import {
   PROVIDER_CONFIG_FLAGS,
@@ -24,7 +25,11 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureFluenceConfigsDir } from "../../lib/paths.js";
+import {
+  setProviderConfigName,
+  getFluenceDir,
+  projectRootDir,
+} from "../../lib/paths.js";
 
 export default class Gen extends BaseCommand<typeof Gen> {
   static override description = `Generate Config.toml files according to ${PROVIDER_CONFIG_FULL_FILE_NAME}`;
@@ -35,22 +40,21 @@ export default class Gen extends BaseCommand<typeof Gen> {
     ...PROVIDER_CONFIG_FLAGS,
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Gen),
-    );
+    const { flags } = await initCli(this, await this.parse(Gen));
 
-    const providerConfig = await initNewReadonlyProviderConfig({
+    setProviderConfigName(flags.name);
+
+    await initNewReadonlyProviderConfig({
       numberOfNoxes: flags["noxes"],
       env: flags.env,
-      path: flags["provider-config-path"],
     });
 
-    await ensureConfigToml(maybeFluenceConfig, providerConfig);
-    const configTomlPath = await ensureFluenceConfigsDir();
-
     commandObj.logToStderr(
-      `Config.toml files are generated at ${configTomlPath}`,
+      `Configuration is generated at ${
+        flags.name === undefined
+          ? getFluenceDir()
+          : join(projectRootDir, flags.name)
+      }`,
     );
   }
 }

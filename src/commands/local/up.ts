@@ -28,18 +28,12 @@ export default class Up extends BaseCommand<typeof Up> {
     ...NOXES_FLAG,
   };
   async run(): Promise<void> {
-    const { maybeFluenceConfig, flags } = await initCli(
-      this,
-      await this.parse(Up),
-    );
+    const { flags } = await initCli(this, await this.parse(Up));
 
-    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig(
-      maybeFluenceConfig,
-      {
-        env: "local",
-        numberOfNoxes: flags.noxes,
-      },
-    );
+    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig({
+      env: "local",
+      numberOfNoxes: flags.noxes,
+    });
 
     await dockerCompose({
       args: ["up", "-d"],
