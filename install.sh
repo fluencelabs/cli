@@ -12,16 +12,26 @@ echo "Starting Fluence installation..."
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
 ARCH="$(uname -m)"
 
-# Install in default fluence home dir
+# Install in fluence home dir
 FLUENCE_USER_DIR="${FLUENCE_USER_DIR-$HOME/.fluence}"
 
 # Temporary directory creation and cleanup setup
 TEMP="$(mktemp -d)"
 trap "rm -rf '$TEMP'" EXIT INT TERM
 
-# Check that wget is installed
+# Check that curl is installed
 if ! has "curl"; then
   echo "'curl' is required for the installation. Please install it and rerun the script"
+  exit 1
+fi
+
+# Check that fluence is not installed
+if ! has "fluence"; then
+  cat <<ERR
+fluence cli seems to be already installed.
+If it was installed with with npm unistall it first with 'npm uninstall -g @fluencelabs/cli' then rerun installation script.
+If it was installed with installation script you should use 'fluence update' command to update to latest versio version.
+ERR
   exit 1
 fi
 
@@ -29,23 +39,29 @@ fi
 if $(ls -1 ${FLUENCE_USER_DIR}/cli &>/dev/null); then
   cat <<ERR
 Error: ${FLUENCE_USER_DIR}/cli exists and is not empty.
-Remove with rm -rf ${FLUENCE_USER_DIR}/cli and rerun the script.
+If you want to reinstall fluence run 'rm -rf ${FLUENCE_USER_DIR}/cli' and rerun installation script.
+To update to latest version use 'fluence update' command instead.
 ERR
   exit 1
 fi
 
 # Validate and set system architecture
 case "$ARCH" in
-  "x86_64") arch="x64" ;;
-  "arm64" | "aarch64") arch="arm64" ;;
-  *) echo "Error: Unsupported architecture - $ARCH"; exit 1 ;;
+"x86_64") arch="x64" ;;
+"arm64" | "aarch64") arch="arm64" ;;
+*)
+  echo "Error: Unsupported architecture - $ARCH"
+  exit 1
+  ;;
 esac
 
 # Validate and set the operating system type
 case "$OS" in
-  "darwin") os="darwin" ;;
-  "linux") os="linux" ;;
-  *) echo "Error: Unsupported OS - $OS"; exit 1
+"darwin") os="darwin" ;;
+"linux") os="linux" ;;
+*)
+  echo "Error: Unsupported OS - $OS"
+  exit 1
   ;;
 esac
 
@@ -65,5 +81,5 @@ if echo $PATH | grep -q $HOME/.local/bin; then
   ln -sf ${FLUENCE_USER_DIR}/cli/bin/fluence $HOME/.local/bin/fluence
 else
   echo "Create a symlink to fluence binary in any directory that is in \$PATH, for example:"
-  echo "sudo ln -s ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/local/bin/fluence"
+  echo "sudo ln -s ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/bin/fluence"
 fi
