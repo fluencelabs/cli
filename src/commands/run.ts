@@ -410,8 +410,6 @@ const fluenceRun = async (args: RunArgs) => {
   const result = await callAquaFunction({
     args: args.runData ?? {},
     config: {},
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    def: functionCall.funcDef,
     peer: Fluence.getClient(),
     script: functionCall.script,
   });
