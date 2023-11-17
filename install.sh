@@ -26,7 +26,7 @@ if ! has "curl"; then
 fi
 
 # Check that fluence is not installed
-if ! has "fluence"; then
+if has "fluence"; then
   cat <<ERR
 fluence cli seems to be already installed.
 If it was installed with with npm please unistall it first with 'npm uninstall -g @fluencelabs/cli' then rerun installation script.
