@@ -405,14 +405,10 @@ const fluenceRun = async (args: RunArgs) => {
   }
 
   await initFluenceClient(args, args.maybeFluenceConfig);
-  const { Fluence, callAquaFunction } = await import("@fluencelabs/js-client");
+  const { Fluence, v5_callFunction } = await import("@fluencelabs/js-client");
 
-  const result = await callAquaFunction({
-    args: args.runData ?? {},
-    config: {},
-    peer: Fluence.getClient(),
-    script: functionCall.script,
-  });
+  const runArgs = Object.values(args.runData ?? []);
+  const result = await v5_callFunction([Fluence.getClient(), ...runArgs], functionCall.funcDef,  functionCall.script);
 
   return result;
 };
