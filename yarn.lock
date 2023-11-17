@@ -633,7 +633,7 @@ __metadata:
     "@fluencelabs/air-beautify-wasm": 0.3.4
     "@fluencelabs/aqua-api": 0.12.4
     "@fluencelabs/aqua-to-js": 0.1.0
-    "@fluencelabs/deal-aurora": 0.2.20
+    "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.31
     "@fluencelabs/js-client": 0.4.2
@@ -704,15 +704,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-aurora@npm:0.2.20":
-  version: 0.2.20
-  resolution: "@fluencelabs/deal-aurora@npm:0.2.20"
+"@fluencelabs/deal-aurora@npm:0.2.22":
+  version: 0.2.22
+  resolution: "@fluencelabs/deal-aurora@npm:0.2.22"
   dependencies:
     "@nomicfoundation/hardhat-toolbox": ^3.0.0
     "@openzeppelin/contracts": ^4.9.3
     "@openzeppelin/contracts-upgradeable": ^4.9.3
     dotenv: ^16.3.1
-  checksum: 7b3e31e2d8267f198e12df8259728175921cfacad1a98ed79fe2472a9ab574f3f3c1a9732c786d2b0a82657be62e38803e045a33ced5595470497144627853bb
+  checksum: 1c1174f63e55562d812718f58145f7486f3ea019e98d2e8fe3f013e5e4d737a52a632c714bf1daab306cbe46aee4f47a9b1d8088d4ea8540ac56ddd8cd451ce7
   languageName: node
   linkType: hard
 
