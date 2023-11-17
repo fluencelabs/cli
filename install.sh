@@ -20,8 +20,8 @@ TEMP="$(mktemp -d)"
 trap "rm -rf '$TEMP'" EXIT INT TERM
 
 # Check that wget is installed
-if ! has "wget"; then
-  echo "'wget' is required for the installation. Please install it and rerun the script"
+if ! has "curl"; then
+  echo "'curl' is required for the installation. Please install it and rerun the script"
   exit 1
 fi
 
@@ -38,19 +38,14 @@ fi
 case "$ARCH" in
   "x86_64") arch="x64" ;;
   "arm64" | "aarch64") arch="arm64" ;;
-  *)
-    echo "Error: Unsupported architecture - $ARCH"
-    exit 1
-  ;;
+  *) echo "Error: Unsupported architecture - $ARCH"; exit 1 ;;
 esac
 
 # Validate and set the operating system type
 case "$OS" in
   "darwin") os="darwin" ;;
   "linux") os="linux" ;;
-  *)
-    echo "Error: Unsupported OS - $OS"
-    exit 1
+  *) echo "Error: Unsupported OS - $OS"; exit 1
   ;;
 esac
 
@@ -61,7 +56,7 @@ url="https://fcli-binaries.s3.eu-west-1.amazonaws.com/channels/stable/${archive}
 
 echo "Downloading and extracting Fluence archive..."
 mkdir -p "${FLUENCE_USER_DIR}/cli"
-wget -q --show-progress -O "${TEMP}/${archive}" "$url"
+curl --progress-bar -o "${TEMP}/${archive}" "$url"
 tar --strip-components=1 -xzf "${TEMP}/${archive}" -C "${FLUENCE_USER_DIR}/cli"
 
 echo "Fluence CLI installation complete!"
