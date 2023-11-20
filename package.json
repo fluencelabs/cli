@@ -56,7 +56,7 @@
     "@fluencelabs/air-beautify-wasm": "0.3.4",
     "@fluencelabs/aqua-api": "0.12.4",
     "@fluencelabs/aqua-to-js": "0.1.0",
-    "@fluencelabs/deal-aurora": "0.2.20",
+    "@fluencelabs/deal-aurora": "0.2.22",
     "@fluencelabs/fluence-network-environment": "1.1.2",
     "@fluencelabs/js-client": "0.4.2",
     "@iarna/toml": "^2.2.5",
