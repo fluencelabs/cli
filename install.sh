@@ -82,7 +82,7 @@ if echo $PATH | grep -q $HOME/.local/bin; then
   mkdir -p $HOME/.local/bin
   ln -sf ${FLUENCE_USER_DIR}/cli/bin/fluence $HOME/.local/bin/fluence
 else
-  echo "Adding Fluence CLI symling to /usr/local/bin/fluence"
+  echo "Adding Fluence CLI symlink to /usr/local/bin/fluence"
   sudo ln -sf ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/local/bin/fluence
 fi
 echo "Fluence CLI installation complete."
