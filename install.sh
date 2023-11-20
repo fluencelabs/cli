@@ -30,7 +30,7 @@ fi
 if has "fluence"; then
   cat <<ERR
 Error: Fluence CLI appears to be already installed.
-If it was installed with with npm please unistall it first with 'npm uninstall -g @fluencelabs/cli' and then rerun installation script.
+If it was installed with npm please uninstall it first with 'npm uninstall -g @fluencelabs/cli' and then rerun installation script.
 If it was installed with installation script you should use 'fluence update' command to update to latest version.
 ERR
   exit 1
