@@ -16,7 +16,7 @@ installation, storage of keys and ids, etc.
 To download and install `fluence` use our `install.sh` script
 
 ```shell
-curl -qL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | bash
+curl -qsL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | bash
 ```
 
 To select `fluence` version compatible with certain network (`stage`, `testnet`,
