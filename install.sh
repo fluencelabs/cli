@@ -1,51 +1,52 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
 
+# Function to check if a command exists
 has() {
   [[ -z $1 ]] && return 1
   command -v $1 >/dev/null 2>&1
 }
 
-echo "Starting Fluence installation..."
+echo "Initiating Fluence CLI installation process..."
 
-# Identify OS and architecture
+# Determine the operating system and machine architecture
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
 ARCH="$(uname -m)"
 
-# Install in fluence home dir
+# Setting the installation directory for Fluence CLI
 FLUENCE_USER_DIR="${FLUENCE_USER_DIR-$HOME/.fluence}"
 
-# Temporary directory creation and cleanup setup
+# Creating a temporary directory and ensuring its cleanup on script exit
 TEMP="$(mktemp -d)"
 trap "rm -rf '$TEMP'" EXIT INT TERM
 
-# Check that curl is installed
+# Ensuring 'curl' is installed for downloading necessary files
 if ! has "curl"; then
-  echo "'curl' is required for the installation. Please install it and rerun the script"
+  echo "Error: Installation requires 'curl'. Please install 'curl' and try again."
   exit 1
 fi
 
 # Check that fluence is not installed
 if has "fluence"; then
   cat <<ERR
-fluence cli seems to be already installed.
-If it was installed with with npm please unistall it first with 'npm uninstall -g @fluencelabs/cli' then rerun installation script.
+Error: Fluence CLI appears to be already installed.
+If it was installed with with npm please unistall it first with 'npm uninstall -g @fluencelabs/cli' and then rerun installation script.
 If it was installed with installation script you should use 'fluence update' command to update to latest version.
 ERR
   exit 1
 fi
 
-# Verify if the cli directory is empty
+# Checking if the Fluence CLI was already installed
 if $(ls -1 ${FLUENCE_USER_DIR}/cli &>/dev/null); then
   cat <<ERR
-Error: ${FLUENCE_USER_DIR}/cli exists and is not empty.
-If you want to reinstall fluence run 'rm -rf ${FLUENCE_USER_DIR}/cli' and rerun installation script.
-To update to latest version use 'fluence update' command instead.
+Error: Installation path ${FLUENCE_USER_DIR}/cli already exists.
+If you want to reinstall delete it with 'rm -rf ${FLUENCE_USER_DIR}/cli' and rerun installation script.
+To update to latest version use 'fluence update' command.
 ERR
   exit 1
 fi
 
-# Validate and set system architecture
+# Confirming system architecture compatibility
 case "$ARCH" in
 "x86_64") arch="x64" ;;
 "arm64" | "aarch64") arch="arm64" ;;
@@ -55,7 +56,7 @@ case "$ARCH" in
   ;;
 esac
 
-# Validate and set the operating system type
+# Confirming operating system compatibility
 case "$OS" in
 "darwin") os="darwin" ;;
 "linux") os="linux" ;;
@@ -70,16 +71,18 @@ archive="fluence-${os}-${arch}.tar.gz"
 # TODO hide S3 URL under some pretty name
 url="https://fcli-binaries.s3.eu-west-1.amazonaws.com/channels/stable/${archive}"
 
-echo "Downloading and extracting Fluence archive..."
+echo "Downloading and extracting Fluence CLI to ${FLUENCE_USER_DIR}/cli"
 mkdir -p "${FLUENCE_USER_DIR}/cli"
 curl --progress-bar -o "${TEMP}/${archive}" "$url"
 tar --strip-components=1 -xzf "${TEMP}/${archive}" -C "${FLUENCE_USER_DIR}/cli"
 
-echo "Fluence CLI installation complete!"
+# Add Fluence CLI to path with symling
 if echo $PATH | grep -q $HOME/.local/bin; then
+  echo "Adding Fluence CLI symlink to ${HOME}/.local/fluence"
   mkdir -p $HOME/.local/bin
   ln -sf ${FLUENCE_USER_DIR}/cli/bin/fluence $HOME/.local/bin/fluence
 else
-  echo "Adding fluence cli to \$PATH with 'sudo ln -s ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/local/bin/fluence"
-  sudo ln -s ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/local/bin/fluence
+  echo "Adding Fluence CLI symling to /usr/local/bin/fluence"
+  sudo ln -sf ${FLUENCE_USER_DIR}/cli/bin/fluence /usr/local/bin/fluence
 fi
+echo "Fluence CLI installation complete."
