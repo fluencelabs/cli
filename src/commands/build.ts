@@ -16,11 +16,15 @@
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
+import { commandObj } from "../lib/commandObj.js";
 import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   MARINE_BUILD_ARGS_FLAG,
+  IMPORT_FLAG,
 } from "../lib/const.js";
+import { compileSpells } from "../lib/deployWorkers.js";
+import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 
@@ -30,6 +34,7 @@ export default class Build extends BaseCommand<typeof Build> {
   static override flags = {
     ...baseFlags,
     ...MARINE_BUILD_ARGS_FLAG,
+    ...IMPORT_FLAG,
   };
   async run(): Promise<void> {
     const { fluenceConfig, flags } = await initCli(
@@ -52,6 +57,13 @@ export default class Build extends BaseCommand<typeof Build> {
       "../lib/deployWorkers.js"
     );
 
+    const aquaImports = await ensureAquaImports({
+      maybeFluenceConfig: fluenceConfig,
+      flags,
+    });
+
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
+    await compileSpells(fluenceConfig, aquaImports);
+    commandObj.logToStderr(`All services and spells built successfully`);
   }
 }

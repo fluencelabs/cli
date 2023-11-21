@@ -40,7 +40,6 @@ import {
   MODULE_CONFIG_FULL_FILE_NAME,
   MODULE_TYPE_RUST,
   SERVICE_CONFIG_FULL_FILE_NAME,
-  CLI_NAME,
   DEFAULT_MARINE_BUILD_ARGS,
 } from "../lib/const.js";
 import {
@@ -82,19 +81,6 @@ const resolveServiceInfos = async ({
 }: ResolveServiceInfosArg): Promise<
   ServiceInfoWithUnresolvedModuleConfigs[]
 > => {
-  if (
-    fluenceConfig.services === undefined ||
-    Object.keys(fluenceConfig.services).length === 0
-  ) {
-    commandObj.logToStderr(
-      `No services to build. Use ${color.yellow(
-        `${CLI_NAME} service add`,
-      )} command to add services to ${color.yellow(fluenceConfig.$getPath())}`,
-    );
-
-    return [];
-  }
-
   type ServiceConfigPromises = Promise<{
     serviceName: string;
     serviceConfig: ServiceConfigReadonly;
@@ -103,7 +89,7 @@ const resolveServiceInfos = async ({
   startSpinner("Making sure all services are downloaded");
 
   const serviceConfigs = await Promise.all(
-    Object.entries(fluenceConfig.services).map(
+    Object.entries(fluenceConfig.services ?? []).map(
       async ([serviceName, { get }]): ServiceConfigPromises => {
         return {
           serviceName,
