@@ -65,6 +65,7 @@ const moduleSchemaForService: JSONSchemaType<ServiceModuleV0> = {
     ...overridableModuleProperties,
   },
   required: ["get"],
+  additionalProperties: false,
 };
 
 export const FACADE_MODULE_NAME = "facade";
@@ -104,6 +105,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     version: { type: "number", const: 0 },
   },
   required: ["version", "name", "modules"],
+  additionalProperties: false,
 };
 
 export function isValidServiceModules(

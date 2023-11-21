@@ -83,6 +83,7 @@ const spellProperties = {
   },
   clock: {
     type: "object",
+    additionalProperties: false,
     nullable: true,
     description: `Trigger the spell execution periodically. If you want to disable this property by overriding it in ${FLUENCE_CONFIG_FULL_FILE_NAME} - pass empty config for it like this: \`clock: {}\``,
     properties: {
@@ -146,6 +147,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   description: `Defines a spell. You can use \`${CLI_NAME} spell new\` command to generate a template for new spell`,
   properties: spellProperties,
   required: ["version", "function", "aquaFilePath"],
+  additionalProperties: false,
 };
 
 const migrations: Migrations<Config> = [];

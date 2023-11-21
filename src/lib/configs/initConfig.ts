@@ -546,18 +546,9 @@ export function getConfigInitFunction<
 
     return {
       ...initializedReadonlyConfig,
-      async $commit(): Promise<void> {
-        if (!initializedReadonlyConfig.$validateLatest(this)) {
-          throw new Error(
-            `Couldn't save config ${color.yellow(
-              configPath,
-            )}. ${await validationErrorToString(
-              initializedReadonlyConfig.$validateLatest.errors,
-            )}`,
-          );
-        }
-
-        const config = removeProperties({ ...this }, ([, v]) => {
+      // have to type-cast `this` because TypeScript incorrectly thinks `this` can be a PromiseLike
+      async $commit(this: InitializedConfig<LatestConfig>): Promise<void> {
+        const config = removeProperties(this, ([, v]) => {
           return typeof v === "function";
         });
 
@@ -571,6 +562,16 @@ export function getConfigInitFunction<
           parse(configString),
           config,
         ).trim()}\n`;
+
+        if (!initializedReadonlyConfig.$validateLatest(config)) {
+          throw new Error(
+            `Couldn't save config ${color.yellow(
+              configPath,
+            )}.\n\n${newConfigString}\n\n${await validationErrorToString(
+              initializedReadonlyConfig.$validateLatest.errors,
+            )}`,
+          );
+        }
 
         if (configString !== newConfigString) {
           configString = await saveConfig(configPath, newConfigString);

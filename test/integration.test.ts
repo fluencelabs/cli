@@ -19,6 +19,8 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { CLIError } from "@oclif/core/lib/errors/index.js";
+import type { JSONSchemaType } from "ajv";
+import Ajv from "ajv";
 
 import {
   setCommandObjAndIsInteractive,
@@ -46,7 +48,6 @@ import {
   getAquaMainPath,
   getSpellsDir,
 } from "../src/lib/paths.js";
-import { hasKey } from "../src/lib/typeHelpers.js";
 
 import {
   fluence,
@@ -368,7 +369,11 @@ describe("integration tests", () => {
 
       await fluence({
         args: ["provider", "register"],
-        flags: { "priv-key": PRIV_KEY },
+        flags: {
+          "priv-key": PRIV_KEY,
+          "max-collateral": 1,
+          "price-per-epoch": 1,
+        },
         cwd,
       });
 
@@ -429,7 +434,14 @@ describe("integration tests", () => {
 
       await fluence({
         args: ["deal", "deploy"],
-        flags: { "priv-key": PRIV_KEY },
+        flags: {
+          "priv-key": PRIV_KEY,
+          "collateral-per-worker": 1,
+          "max-workers-per-provider": 3,
+          "min-workers": 1,
+          "price-per-worker-epoch": 1,
+          "target-workers": 1,
+        },
         cwd,
       });
 
@@ -531,26 +543,37 @@ describe("integration tests", () => {
 
       const parsedShowSubnetResult = JSON.parse(showSubnetResult);
 
-      function isWorkerService(unknown: unknown) {
-        return (
-          hasKey("services", unknown) &&
-          Array.isArray(unknown.services) &&
-          unknown.services.every((i) => {
-            return typeof i === "string";
-          }) &&
-          hasKey("worker_id", unknown) &&
-          unknown.worker_id !== null &&
-          hasKey("host_id", unknown) &&
-          typeof unknown.host_id === "string"
+      if (!validateWorkerServices(parsedShowSubnetResult)) {
+        throw new Error(
+          `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
         );
       }
 
-      assert(
-        Array.isArray(parsedShowSubnetResult) &&
-          parsedShowSubnetResult.every((unknown) => {
-            return isWorkerService(unknown);
-          }),
-        `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
+      parsedShowSubnetResult
+        .sort((a, b) => {
+          if (a.host_id < b.host_id) {
+            return -1;
+          }
+
+          if (a.host_id > b.host_id) {
+            return 1;
+          }
+
+          return 0;
+        })
+        .forEach((w) => {
+          return w.spells.sort();
+        });
+
+      expect(parsedShowSubnetResult).toEqual(
+        peerIds.map((host_id, i) => {
+          return {
+            host_id,
+            services: [MY_SERVICE_NAME],
+            spells: [NEW_SPELL_NAME, "worker-spell"],
+            worker_id: parsedShowSubnetResult[i]?.worker_id,
+          };
+        }),
       );
 
       const logs = await fluence({ args: ["deal", "logs"], cwd });
@@ -648,3 +671,34 @@ function assertLogsAreValid(logs: string) {
     throw new Error(`Failed to get deal logs:\n\n${logs}`);
   }
 }
+
+type WorkerServices = {
+  host_id: string;
+  services: string[];
+  spells: string[];
+  worker_id: string;
+}[];
+
+const workerServiceSchema: JSONSchemaType<WorkerServices> = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      host_id: { type: "string" },
+      services: {
+        type: "array",
+        items: { type: "string" },
+      },
+      spells: {
+        type: "array",
+        items: { type: "string" },
+      },
+      worker_id: { type: "string" },
+    },
+    required: ["host_id", "services", "spells", "worker_id"],
+  },
+};
+
+const validateWorkerServices = new Ajv.default({
+  code: { esm: true },
+}).compile(workerServiceSchema);

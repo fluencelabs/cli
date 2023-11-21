@@ -7,6 +7,7 @@
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence deal info [DEAL-ADDRESS]`](#fluence-deal-info-deal-address)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
@@ -30,8 +31,13 @@
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-peer`](#fluence-provider-add-peer)
+* [`fluence provider add-units`](#fluence-provider-add-units)
+* [`fluence provider gen`](#fluence-provider-gen)
+* [`fluence provider info`](#fluence-provider-info)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider register`](#fluence-provider-register)
+* [`fluence provider remove-peer`](#fluence-provider-remove-peer)
+* [`fluence provider remove-units`](#fluence-provider-remove-units)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
 * [`fluence service new [NAME]`](#fluence-service-new-name)
@@ -66,7 +72,7 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/air/beautify.ts)_
+_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
@@ -103,7 +109,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/aqua.ts)_
+_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/aqua.ts)_
 
 ## `fluence aqua json [INPUT] [OUTPUT]`
 
@@ -131,7 +137,7 @@ DESCRIPTION
   what they translate into
 ```
 
-_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/aqua/json.ts)_
+_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/aqua/json.ts)_
 
 ## `fluence aqua yml [INPUT] [OUTPUT]`
 
@@ -162,7 +168,7 @@ ALIASES
   $ fluence aqua yaml
 ```
 
-_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/aqua/yml.ts)_
+_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -215,7 +221,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/build.ts)_
+_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/build.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -223,9 +229,10 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--env
-    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
-    [--tracing] [--marine-build-args <value>] [--auto-match]
+  $ fluence deal deploy [WORKER-NAMES] --collateral-per-worker <value> --min-workers <value> --target-workers
+    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [-k <value>]
+    [--off-aqua-logs] [--priv-key <value>] [--env <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
+    [--particle-id] [--import <value>] [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
@@ -234,6 +241,7 @@ ARGUMENTS
 FLAGS
   -k, --sk=<name>                                  Name of a peer's Network Private Key
   --[no-]auto-match                                Disable automatic matching
+  --collateral-per-worker=<value>                  (required) Collateral per worker
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -242,13 +250,17 @@ FLAGS
   --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
                                                    Overrides 'marineBuildArgs' property in fluence.yaml. Default:
                                                    --release
+  --max-workers-per-provider=<value>               (required) Max workers per provider
+  --min-workers=<value>                            (required) Required workers to activate the deal
   --no-build                                       Don't build the project before running the command
   --no-input                                       Don't interactively ask for any input from the user
   --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                                    Print particle ids when running Fluence js-client
+  --price-per-worker-epoch=<value>                 (required) Price per worker epoch
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
   --relay=<multiaddress>                           Relay for Fluence js-client to connect to
+  --target-workers=<value>                         (required) Max workers in the deal
   --tracing                                        Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
@@ -260,7 +272,28 @@ EXAMPLES
   $ fluence deal deploy
 ```
 
-_See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/deal/deploy.ts)_
+_See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/deal/deploy.ts)_
+
+## `fluence deal info [DEAL-ADDRESS]`
+
+Get info about provider
+
+```
+USAGE
+  $ fluence deal info [DEAL-ADDRESS] [--no-input] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Get info about provider
+```
+
+_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/deal/info.ts)_
 
 ## `fluence deal logs [WORKER-NAMES]`
 
@@ -296,7 +329,7 @@ EXAMPLES
   $ fluence deal logs
 ```
 
-_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/deal/logs.ts)_
+_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/deal/logs.ts)_
 
 ## `fluence default env [ENV]`
 
@@ -319,7 +352,7 @@ EXAMPLES
   $ fluence default env
 ```
 
-_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/default/env.ts)_
+_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/default/env.ts)_
 
 ## `fluence default peers [ENV]`
 
@@ -342,7 +375,7 @@ EXAMPLES
   $ fluence default peers
 ```
 
-_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/default/peers.ts)_
+_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/default/peers.ts)_
 
 ## `fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -379,7 +412,7 @@ EXAMPLES
   $ fluence dep cargo install
 ```
 
-_See code: [src/commands/dep/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/dep/cargo/install.ts)_
+_See code: [src/commands/dep/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/dep/cargo/install.ts)_
 
 ## `fluence dep install`
 
@@ -403,7 +436,7 @@ EXAMPLES
   $ fluence dep install
 ```
 
-_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/dep/install.ts)_
+_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/dep/install.ts)_
 
 ## `fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -436,7 +469,7 @@ EXAMPLES
   $ fluence dep npm install
 ```
 
-_See code: [src/commands/dep/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/dep/npm/install.ts)_
+_See code: [src/commands/dep/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/dep/npm/install.ts)_
 
 ## `fluence dep reset`
 
@@ -461,7 +494,7 @@ EXAMPLES
   $ fluence dep reset
 ```
 
-_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/dep/reset.ts)_
+_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/dep/reset.ts)_
 
 ## `fluence dep versions`
 
@@ -486,7 +519,7 @@ EXAMPLES
   $ fluence dep versions
 ```
 
-_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/dep/versions.ts)_
+_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/dep/versions.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -506,7 +539,7 @@ DESCRIPTION
   Display help for fluence.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.4/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.6/src/commands/help.ts)_
 
 ## `fluence init [PATH]`
 
@@ -532,7 +565,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -556,7 +589,7 @@ EXAMPLES
   $ fluence key default
 ```
 
-_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/key/default.ts)_
+_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/key/default.ts)_
 
 ## `fluence key new [NAME]`
 
@@ -581,7 +614,7 @@ EXAMPLES
   $ fluence key new
 ```
 
-_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/key/new.ts)_
+_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/key/new.ts)_
 
 ## `fluence key remove [NAME]`
 
@@ -605,7 +638,7 @@ EXAMPLES
   $ fluence key remove
 ```
 
-_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/key/remove.ts)_
+_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/key/remove.ts)_
 
 ## `fluence local down`
 
@@ -625,7 +658,7 @@ EXAMPLES
   $ fluence local down
 ```
 
-_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/local/down.ts)_
+_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/down.ts)_
 
 ## `fluence local init`
 
@@ -646,7 +679,7 @@ EXAMPLES
   $ fluence local init
 ```
 
-_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/local/init.ts)_
+_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/init.ts)_
 
 ## `fluence local logs`
 
@@ -666,7 +699,7 @@ EXAMPLES
   $ fluence local logs
 ```
 
-_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/local/logs.ts)_
+_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/logs.ts)_
 
 ## `fluence local ps`
 
@@ -686,7 +719,7 @@ EXAMPLES
   $ fluence local ps
 ```
 
-_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/local/ps.ts)_
+_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/ps.ts)_
 
 ## `fluence local restart`
 
@@ -706,7 +739,7 @@ EXAMPLES
   $ fluence local restart
 ```
 
-_See code: [src/commands/local/restart.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/local/restart.ts)_
+_See code: [src/commands/local/restart.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/restart.ts)_
 
 ## `fluence local up`
 
@@ -714,10 +747,11 @@ Run docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local up [--no-input]
+  $ fluence local up [--no-input] [--noxes <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose
@@ -726,7 +760,7 @@ EXAMPLES
   $ fluence local up
 ```
 
-_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/local/up.ts)_
+_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/up.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -752,7 +786,7 @@ EXAMPLES
   $ fluence module add
 ```
 
-_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/module/add.ts)_
+_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/module/add.ts)_
 
 ## `fluence module new [NAME]`
 
@@ -777,7 +811,7 @@ EXAMPLES
   $ fluence module new
 ```
 
-_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/module/new.ts)_
+_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/module/new.ts)_
 
 ## `fluence module remove [NAME | PATH | URL]`
 
@@ -801,7 +835,7 @@ EXAMPLES
   $ fluence module remove
 ```
 
-_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/module/remove.ts)_
+_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/module/remove.ts)_
 
 ## `fluence provider add-peer`
 
@@ -824,7 +858,72 @@ DESCRIPTION
   Register specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/provider/add-peer.ts)_
+_See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/add-peer.ts)_
+
+## `fluence provider add-units`
+
+Add units to specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence provider add-units [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>                              Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --units=<number>                                 Number of available worker units on this Compute Peer
+
+DESCRIPTION
+  Add units to specific nox instance as a Compute Peer
+```
+
+_See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/add-units.ts)_
+
+## `fluence provider gen`
+
+Generate Config.toml files according to provider.yaml
+
+```
+USAGE
+  $ fluence provider gen [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
+
+DESCRIPTION
+  Generate Config.toml files according to provider.yaml
+
+EXAMPLES
+  $ fluence provider gen
+```
+
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/gen.ts)_
+
+## `fluence provider info`
+
+Get info about provider
+
+```
+USAGE
+  $ fluence provider info --provider-address <value> [--no-input] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --provider-address=<value>                       (required) Compute provider address
+
+DESCRIPTION
+  Get info about provider
+```
+
+_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/info.ts)_
 
 ## `fluence provider init`
 
@@ -832,16 +931,19 @@ Init provider config. Creates a config file in the current directory.
 
 ```
 USAGE
-  $ fluence provider init [--no-input]
+  $ fluence provider init [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Init provider config. Creates a config file in the current directory.
 ```
 
-_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/provider/init.ts)_
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/init.ts)_
 
 ## `fluence provider register`
 
@@ -849,11 +951,14 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence provider register --max-collateral <value> --price-per-epoch <value> [--no-input] [--priv-key <value>]
+    [--env <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --max-collateral=<value>                         (required) Max collateral for provider offer
   --no-input                                       Don't interactively ask for any input from the user
+  --price-per-epoch=<value>                        (required) Price per epoch for provider offer
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
 
@@ -861,7 +966,53 @@ DESCRIPTION
   Register in matching contract
 ```
 
-_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/provider/register.ts)_
+_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/register.ts)_
+
+## `fluence provider remove-peer`
+
+Remove specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence provider remove-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>                              Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Remove specific nox instance as a Compute Peer
+```
+
+_See code: [src/commands/provider/remove-peer.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/remove-peer.ts)_
+
+## `fluence provider remove-units`
+
+Sub units to specific nox instance as a Compute Peer
+
+```
+USAGE
+  $ fluence provider remove-units [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--units
+  <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --peer-id=<peer-id>                              Peer id of the nox instance that you want to register as a Compute
+                                                   Peer
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --units=<number>                                 Number of available worker units on this Compute Peer
+
+DESCRIPTION
+  Sub units to specific nox instance as a Compute Peer
+```
+
+_See code: [src/commands/provider/remove-units.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/remove-units.ts)_
 
 ## `fluence run`
 
@@ -912,7 +1063,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/run.ts)_
+_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -939,7 +1090,7 @@ EXAMPLES
   $ fluence service add
 ```
 
-_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/service/add.ts)_
+_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/service/add.ts)_
 
 ## `fluence service new [NAME]`
 
@@ -963,7 +1114,7 @@ EXAMPLES
   $ fluence service new
 ```
 
-_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/service/new.ts)_
+_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/service/new.ts)_
 
 ## `fluence service remove [NAME | PATH | URL]`
 
@@ -986,7 +1137,7 @@ EXAMPLES
   $ fluence service remove
 ```
 
-_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/service/remove.ts)_
+_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -1011,7 +1162,7 @@ EXAMPLES
   $ fluence service repl
 ```
 
-_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/service/repl.ts)_
+_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/service/repl.ts)_
 
 ## `fluence spell new [NAME]`
 
@@ -1035,7 +1186,7 @@ EXAMPLES
   $ fluence spell new
 ```
 
-_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/spell/new.ts)_
+_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/spell/new.ts)_
 
 ## `fluence update [CHANNEL]`
 
@@ -1116,7 +1267,7 @@ EXAMPLES
   $ fluence workers deploy
 ```
 
-_See code: [src/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/workers/deploy.ts)_
+_See code: [src/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/workers/deploy.ts)_
 
 ## `fluence workers logs [WORKER-NAMES]`
 
@@ -1156,7 +1307,7 @@ EXAMPLES
   $ fluence workers logs
 ```
 
-_See code: [src/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/workers/logs.ts)_
+_See code: [src/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/workers/logs.ts)_
 
 ## `fluence workers remove [WORKER-NAMES]`
 
@@ -1193,7 +1344,7 @@ EXAMPLES
   $ fluence workers remove
 ```
 
-_See code: [src/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/workers/remove.ts)_
+_See code: [src/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/workers/remove.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
@@ -1236,5 +1387,5 @@ EXAMPLES
   $ fluence workers upload
 ```
 
-_See code: [src/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.12.4/src/commands/workers/upload.ts)_
+_See code: [src/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/workers/upload.ts)_
 <!-- commandsstop -->

@@ -33,12 +33,13 @@ import {
   validateBatch,
 } from "../../helpers/validations.js";
 import {
-  genSecretKeyString,
   createSecretKey,
+  genSecretKeyString,
   getUserSecretKey,
   writeSecretKey,
 } from "../../keyPairs.js";
 import { ensureUserFluenceDir } from "../../paths.js";
+import { setUserConfig } from "../globalConfigs.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -66,6 +67,7 @@ type ConfigV0 = {
 
 const configSchemaV0Obj = {
   type: "object",
+  additionalProperties: false,
   properties: {
     countlyConsent: {
       type: "boolean",
@@ -73,6 +75,7 @@ const configSchemaV0Obj = {
     },
     dependencies: {
       type: "object",
+      additionalProperties: false,
       description: "(For advanced users) Global overrides of dependencies",
       properties: {
         npm: {
@@ -147,17 +150,7 @@ const configSchemaV1Obj = {
 
 const configSchemaV1: JSONSchemaType<ConfigV1> = configSchemaV1Obj;
 
-async function getDefault() {
-  const userSecretKey = await getUserSecretKey(AUTO_GENERATED);
-
-  if (userSecretKey === undefined) {
-    await createSecretKey({
-      name: AUTO_GENERATED,
-      isUser: true,
-      maybeFluenceConfig: null,
-    });
-  }
-
+function getDefault() {
   return `# Defines global config for Fluence CLI
 
 # config version
@@ -264,10 +257,27 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
 
 export const initUserConfig = getConfigInitFunction(initConfigOptions);
 
-export const initNewUserConfig = getConfigInitFunction(
-  initConfigOptions,
-  getDefault,
-);
+export async function initNewUserConfig() {
+  const userConfig = await getConfigInitFunction(
+    initConfigOptions,
+    getDefault,
+  )();
+
+  setUserConfig(userConfig);
+
+  const userSecretKey = await getUserSecretKey(AUTO_GENERATED);
+
+  if (userSecretKey === undefined) {
+    await createSecretKey({
+      name: AUTO_GENERATED,
+      isUser: true,
+      maybeFluenceConfig: null,
+      askToSetKeyAsDefaultInteractively: false,
+    });
+  }
+
+  return userConfig;
+}
 
 export const initReadonlyUserConfig =
   getReadonlyConfigInitFunction(initConfigOptions);

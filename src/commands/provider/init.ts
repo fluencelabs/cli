@@ -21,10 +21,12 @@ import { color } from "@oclif/color";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
-  initNewProviderConfig,
+  initNewReadonlyProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
+import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { setProviderConfigName } from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
 
 export default class Init extends BaseCommand<typeof Init> {
@@ -32,16 +34,20 @@ export default class Init extends BaseCommand<typeof Init> {
     "Init provider config. Creates a config file in the current directory.";
   static override flags = {
     ...baseFlags,
+    ...NOXES_FLAG,
+    ...PROVIDER_CONFIG_FLAGS,
   };
 
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Init));
-    const maybeProviderConfig = await initReadonlyProviderConfig();
+    const { flags } = await initCli(this, await this.parse(Init));
+    setProviderConfigName(flags.name);
 
-    if (maybeProviderConfig !== null) {
+    let providerConfig = await initReadonlyProviderConfig();
+
+    if (providerConfig !== null) {
       const isOverwriting = await confirm({
         message: `Provider config already exists at ${color.yellow(
-          maybeProviderConfig.$getPath(),
+          providerConfig.$getPath(),
         )}. Do you want to overwrite it?`,
         default: false,
       });
@@ -49,15 +55,18 @@ export default class Init extends BaseCommand<typeof Init> {
       if (!isOverwriting) {
         return commandObj.error(
           `Provider config already exists at ${color.yellow(
-            maybeProviderConfig.$getPath(),
+            providerConfig.$getPath(),
           )}. Aborting.`,
         );
       }
 
-      await rm(maybeProviderConfig.$getPath(), { force: true });
+      await rm(providerConfig.$getPath(), { force: true });
     }
 
-    const providerConfig = await initNewProviderConfig();
+    providerConfig = await initNewReadonlyProviderConfig({
+      numberOfNoxes: flags.noxes,
+      env: flags.env,
+    });
 
     commandObj.logToStderr(
       `Successfully created provider config at ${color.yellow(
