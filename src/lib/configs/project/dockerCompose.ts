@@ -15,15 +15,9 @@
  */
 
 import assert from "assert";
-import { writeFile } from "fs/promises";
 import { join, relative } from "path";
 
-import type { JsonMap } from "@iarna/toml";
 import type { JSONSchemaType } from "ajv";
-import cloneDeep from "lodash-es/cloneDeep.js";
-import mapKeys from "lodash-es/mapKeys.js";
-import mergeWith from "lodash-es/mergeWith.js";
-import snakeCase from "lodash-es/snakeCase.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { versions } from "../../../versions.js";
@@ -38,12 +32,7 @@ import {
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
   PROVIDER_CONFIG_FULL_FILE_NAME,
-  FS_OPTIONS,
-  TOML_EXT,
   CONFIGS_DIR_NAME,
-  HTTP_PORT_START,
-  LOCAL_IPFS_ADDRESS,
-  WALLET_KEYS_FOR_LOCAL_NETWORK,
 } from "../../const.js";
 import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
@@ -58,53 +47,11 @@ import {
 } from "../initConfig.js";
 
 import {
-  commonNoxConfig,
-  type NoxConfigYAML,
   initNewReadonlyProviderConfig,
+  ensureConfigToml,
   type ProviderConfigReadonly,
 } from "./provider.js";
-
-const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
-
-async function getDefaultNoxConfigYAML(
-  providerConfig: ProviderConfigReadonly,
-): Promise<NoxConfigYAML> {
-  const isLocal = providerConfig.env === "local";
-  const contractsEnv = providerConfig.env;
-
-  const { DEAL_CONFIG } = await import(
-    "@fluencelabs/deal-aurora/dist/client/config.js"
-  );
-
-  const dealConfig = await DEAL_CONFIG[contractsEnv]();
-
-  return mergeNoxConfigYAML(commonNoxConfig, {
-    systemServices: {
-      enable: ["aqua-ipfs", "decider"],
-      aquaIpfs: {
-        externalApiMultiaddr: isLocal
-          ? LOCAL_IPFS_ADDRESS
-          : `/dns4/${contractsEnv}-ipfs.fluence.dev/tcp/5020`,
-        localApiMultiaddr: isLocal
-          ? NOX_IPFS_MULTIADDR
-          : `/dns4/${contractsEnv}-ipfs.fluence.dev/tcp/5020`,
-      },
-      decider: {
-        deciderPeriodSec: 10,
-        workerIpfsMultiaddr: isLocal
-          ? NOX_IPFS_MULTIADDR
-          : "http://ipfs.fluence.dev",
-        networkApiEndpoint: isLocal
-          ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
-          : "http://mumbai-polygon.ru:8545",
-        networkId: dealConfig.chainId,
-        startBlock: "earliest",
-        // TODO: use correct addr for env
-        matcherAddress: "0x0e1F3B362E22B2Dc82C9E35d6e62998C7E8e2349",
-      },
-    },
-  });
-}
+import { getConfigTomlName } from "./provider.js";
 
 type Service = {
   image?: string;
@@ -351,14 +298,6 @@ const initConfigOptions = {
   getConfigOrConfigDirPath: getFluenceDir,
 };
 
-function getConfigName(noxName: string) {
-  return `${noxName}_Config`;
-}
-
-export function getConfigTomlName(noxName: string) {
-  return `${getConfigName(noxName)}.${TOML_EXT}`;
-}
-
 export async function initNewDockerComposeConfig(args: ProviderConfigArgs) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   await ensureConfigToml(providerConfig);
@@ -385,96 +324,3 @@ export const initReadonlyDockerComposeConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
 export const dockerComposeSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
-
-export async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
-  const baseNoxConfig = mergeNoxConfigYAML(
-    await getDefaultNoxConfigYAML(providerConfig),
-    providerConfig.nox ?? {},
-  );
-
-  const configsDir = await ensureFluenceConfigsDir();
-  const { stringify } = await import("@iarna/toml");
-
-  await Promise.all(
-    Object.entries(providerConfig.computePeers).map(async ([key, value], i) => {
-      const overridden = mergeNoxConfigYAML(baseNoxConfig, value.nox ?? {});
-
-      if (overridden.tcpPort === undefined) {
-        overridden.tcpPort = TCP_PORT_START + i;
-      }
-
-      if (overridden.websocketPort === undefined) {
-        overridden.websocketPort = WEB_SOCKET_PORT_START + i;
-      }
-
-      if (overridden.httpPort === undefined) {
-        overridden.httpPort = HTTP_PORT_START + i;
-      }
-
-      if (overridden.systemServices?.decider?.walletKey === undefined) {
-        const walletKey =
-          WALLET_KEYS_FOR_LOCAL_NETWORK[
-            i % WALLET_KEYS_FOR_LOCAL_NETWORK.length
-          ];
-
-        assert(walletKey !== undefined, "Unreachable");
-
-        overridden.systemServices = {
-          ...overridden.systemServices,
-          decider: {
-            ...overridden.systemServices?.decider,
-            walletKey,
-          },
-        };
-      }
-
-      return writeFile(
-        join(configsDir, getConfigTomlName(key)),
-        [
-          stringify(configYAMLToConfigToml(overridden)),
-          providerConfig.nox?.rawConfig,
-          value.nox?.rawConfig,
-        ]
-          .filter(Boolean)
-          .join("\n"),
-        FS_OPTIONS,
-      );
-    }),
-  );
-}
-
-function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
-  return mergeWith(cloneDeep(a), b, (objValue, srcValue) => {
-    if (Array.isArray(objValue) && Array.isArray(srcValue)) {
-      return srcValue;
-    }
-
-    return undefined;
-  });
-}
-
-function configYAMLToConfigToml(config: NoxConfigYAML) {
-  // Would be too hard to properly type this
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return camelCaseKeysToSnakeCase(config) as JsonMap;
-}
-
-function camelCaseKeysToSnakeCase(val: unknown): unknown {
-  if (typeof val === "object" && val !== null) {
-    if (Array.isArray(val)) {
-      return val.map(camelCaseKeysToSnakeCase);
-    }
-
-    const objWithSnakeCaseKeys = mapKeys(val, (_, key) => {
-      return snakeCase(key);
-    });
-
-    return Object.fromEntries(
-      Object.entries(objWithSnakeCaseKeys).map(([key, value]) => {
-        return [key, camelCaseKeysToSnakeCase(value)];
-      }),
-    );
-  }
-
-  return val;
-}
