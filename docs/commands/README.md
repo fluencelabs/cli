@@ -43,6 +43,7 @@
 * [`fluence service new [NAME]`](#fluence-service-new-name)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence spell build [SPELL-NAMES]`](#fluence-spell-build-spell-names)
 * [`fluence spell new [NAME]`](#fluence-spell-new-name)
 * [`fluence update [CHANNEL]`](#fluence-update-channel)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
@@ -1164,6 +1165,31 @@ EXAMPLES
 ```
 
 _See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/service/repl.ts)_
+
+## `fluence spell build [SPELL-NAMES]`
+
+Create a new spell template
+
+```
+USAGE
+  $ fluence spell build [SPELL-NAMES] [--no-input] [--import <value>]
+
+ARGUMENTS
+  SPELL-NAMES  Comma separated names of spells to build. Example: "spell1,spell2" (by default all spells from 'spells'
+               property in fluence.yaml will be built)
+
+FLAGS
+  --import=<path>...  Path to a directory to import aqua files from. May be used several times
+  --no-input          Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Create a new spell template
+
+EXAMPLES
+  $ fluence spell build
+```
+
+_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/spell/build.ts)_
 
 ## `fluence spell new [NAME]`
 
