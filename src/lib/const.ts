@@ -27,7 +27,7 @@ import { getIsStringUnion } from "./typeHelpers.js";
 
 export const CLI_NAME = "fluence";
 export const CLI_NAME_FULL = "Fluence CLI";
-export const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
+const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
 export const PACKAGE_NAME = "@fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
@@ -60,6 +60,7 @@ export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
 export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ContractsENV = (typeof CONTRACTS_ENV)[number];
+export const isContractsEnv = getIsStringUnion(CONTRACTS_ENV);
 
 export type ChainConfig = {
   url: string;
@@ -119,6 +120,8 @@ export const CHAIN_CONTAINER_NAME = "chain";
 export const CHAIN_PORT = 8545;
 export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
+export const HTTP_PORT_START = 18080;
+export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
@@ -146,6 +149,7 @@ export const CARGO_DIR_NAME = "cargo";
 export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
 export const SECRETS_DIR_NAME = "secrets";
+export const CONFIGS_DIR_NAME = "configs";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
@@ -304,9 +308,20 @@ export const TRACING_FLAG = {
   }),
 };
 
-export const PROVIDER_CONFIG_FLAGS = {
+export const NOXES_FLAG = {
   noxes: Flags.integer({
     description: "Number of Compute Peers to generate in your provider config",
+  }),
+};
+
+export const PROVIDER_CONFIG_FLAGS = {
+  name: Flags.string({
+    description: "Provider config name",
+    aliases: ["n"],
+  }),
+  [ENV_FLAG_NAME]: Flags.string({
+    description: "Environment to use when generating the provider config",
+    helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
   }),
 };
 
@@ -639,3 +654,26 @@ export const READMEs: Record<Template, string> = {
   ts: getTsOrJsReadme(false),
   js: getTsOrJsReadme(true),
 };
+
+export const WALLET_KEYS_FOR_LOCAL_NETWORK = [
+  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5",
+  "0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41",
+  "0xdacd4b197ee7e9efdd5db1921c6c558d88e2c8b69902b8bafc812fb226a6b5e0",
+  "0xa22813cba71d9795475e88d8d84fd3ef6e9ed4e3d5f3c34462ae1645cd1f7f16",
+  "0xf96cde07b5743540fbad99faaabc7ac3158d5665f1eed0ec7ad913622b121903",
+  "0xfeb277a2fb0e226a729174c44bcc7dcb94dcfef7d4c1eb77e60e83a176f812cd",
+  "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
+  "0xc9b5b488586bf92ed1fe35a985b48b92392087e86da2011896c289e0010fc6bf",
+  "0xe6776a7310afaffed6aeca2b54b1547d72dbfc9268ed05850584ddce53cf87a1",
+  "0xb454e1649f031838a3b63b2fb693635266e048754f23cae6d9718250e3fb8905",
+  "0xb8849e63d7c25960af6eaff78fd82fe916b2c20cf569aaf4fa259c15faedd146",
+  "0x53513db9b03255c58b5f535e6d9e15bb3bfed583839094126b9a42ce2aa7469c",
+  "0x66486a3148467413a10cc8891b657bf092d307e066a08b833b892913607aede0",
+  "0x5918ecc0f743222dee4ae4f2be17965e785435af6223ad3bdff80354d893f0c2",
+  "0xb76b8ce771bfccf0167c3b2a51993e7687a4d8cbfb9ced61a98f601a772bda08",
+  "0xcb448613322f0ae09bb111e6bfd5be93480f1ec521b062a614f9af025c8f1852",
+  "0x147840cb64e7c4ae02917144897c37b521b859ac643bf55ec83444c11c3a8a30",
+  "0x1a1bf9026a097f33ce1a51f5aa0c4102e4a1432c757d922200ef37df168ae504",
+  "0xbb3457514f768615c8bc4061c7e47f817c8a570c5c3537479639d4fad052a98a",
+  "0xfbd9e512cc1b62db1ca689737c110afa9a3799e1bc04bf12c1c34ac39e0e2dd5",
+];

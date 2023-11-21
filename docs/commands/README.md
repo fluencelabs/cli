@@ -32,6 +32,7 @@
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-peer`](#fluence-provider-add-peer)
 * [`fluence provider add-units`](#fluence-provider-add-units)
+* [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider info`](#fluence-provider-info)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider register`](#fluence-provider-register)
@@ -746,10 +747,11 @@ Run docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local up [--no-input]
+  $ fluence local up [--no-input] [--noxes <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose
@@ -881,6 +883,29 @@ DESCRIPTION
 
 _See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/add-units.ts)_
 
+## `fluence provider gen`
+
+Generate Config.toml files according to provider.yaml
+
+```
+USAGE
+  $ fluence provider gen [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
+
+DESCRIPTION
+  Generate Config.toml files according to provider.yaml
+
+EXAMPLES
+  $ fluence provider gen
+```
+
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/gen.ts)_
+
 ## `fluence provider info`
 
 Get info about provider
@@ -906,10 +931,13 @@ Init provider config. Creates a config file in the current directory.
 
 ```
 USAGE
-  $ fluence provider init [--no-input]
+  $ fluence provider init [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Init provider config. Creates a config file in the current directory.

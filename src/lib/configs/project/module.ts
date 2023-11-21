@@ -138,6 +138,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     ...overridableModulePropertiesV0,
     version: { type: "number", const: 0 },
   },
+  additionalProperties: false,
   required: ["version", "name"],
 };
 

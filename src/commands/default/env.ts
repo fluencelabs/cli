@@ -24,8 +24,7 @@ import { envConfig } from "../../lib/configs/globalConfigs.js";
 import { ENV_ARG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
-  ensureValidEnvFlag,
-  fluenceEnvPrompt,
+  ensureValidFluenceEnv,
   ensureCustomAddrsAndPeerIds,
   updateRelaysJSON,
 } from "../../lib/multiaddres.js";
@@ -48,12 +47,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
     );
 
     assert(envConfig !== null, "this command requires fluence project");
-    const fluenceEnvFromArgs = await ensureValidEnvFlag(args.ENV);
-
-    const newFluenceEnv =
-      fluenceEnvFromArgs === undefined
-        ? await fluenceEnvPrompt()
-        : fluenceEnvFromArgs;
+    const newFluenceEnv = await ensureValidFluenceEnv(args.ENV);
 
     if (
       newFluenceEnv === "custom" &&

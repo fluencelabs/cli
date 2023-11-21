@@ -464,7 +464,11 @@ export async function getSecretKeyOrReturnExisting(name: string) {
     await writeFile(filePath, secretKey, FS_OPTIONS);
   }
 
-  return { name, path: relative(fluenceDir, filePath), secretKey } as const;
+  return {
+    name,
+    relativeSecretFilePath: relative(fluenceDir, filePath),
+    secretKey,
+  } as const;
 }
 
 export async function genSecretKeyString(): Promise<string> {

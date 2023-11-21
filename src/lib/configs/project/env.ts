@@ -55,6 +55,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     version: { type: "number", const: 0 },
   },
   required: ["version"],
+  additionalProperties: false,
 };
 
 const getDefault = (fluenceEnv: FluenceEnv | undefined): GetDefaultConfig => {

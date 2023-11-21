@@ -52,6 +52,10 @@ import {
   TS_EXT,
   JS_EXT,
   INDEX_HTML_FILE_NAME,
+  CONFIGS_DIR_NAME,
+  PROVIDER_CONFIG_FILE_NAME,
+  YAML_EXT,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -138,6 +142,27 @@ export let projectRootDir = initialCwd;
 
 export const setProjectRootDir = (dir: string): void => {
   projectRootDir = dir;
+};
+
+let providerConfigName: string | undefined;
+
+export const setProviderConfigName = (name: string | undefined): void => {
+  providerConfigName = name;
+};
+
+export const ensureProviderConfigDirPath = async (): Promise<string> => {
+  return ensureDir(join(projectRootDir, providerConfigName ?? ""));
+};
+
+export const ensureProviderConfigPath = async (): Promise<string> => {
+  const providerConfigDirPath = await ensureProviderConfigDirPath();
+
+  return join(
+    providerConfigDirPath,
+    providerConfigName === undefined
+      ? PROVIDER_CONFIG_FULL_FILE_NAME
+      : `${PROVIDER_CONFIG_FILE_NAME}_${providerConfigName}.${YAML_EXT}`,
+  );
 };
 
 const getAquaDir = (cwd?: string): string => {
@@ -235,11 +260,25 @@ export const ensureFluenceAquaDealsPath = async (): Promise<string> => {
 };
 
 export const getFluenceSecretsDir = (): string => {
+  if (providerConfigName !== undefined) {
+    return join(projectRootDir, providerConfigName, SECRETS_DIR_NAME);
+  }
+
   return join(getFluenceDir(), SECRETS_DIR_NAME);
 };
 
 export const ensureFluenceSecretsDir = async (): Promise<string> => {
   return ensureDir(getFluenceSecretsDir());
+};
+
+export const ensureFluenceConfigsDir = async (): Promise<string> => {
+  if (providerConfigName !== undefined) {
+    return ensureDir(
+      join(projectRootDir, providerConfigName, CONFIGS_DIR_NAME),
+    );
+  }
+
+  return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
 };
 
 export async function getSecretsPathForReading(isUser: boolean) {

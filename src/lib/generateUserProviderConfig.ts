@@ -22,6 +22,7 @@ import {
   defaultNumberProperties,
   type NumberProperty,
   numberProperties,
+  type ContractsENV,
 } from "./const.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import { validatePositiveNumberOrEmpty } from "./helpers/validations.js";
@@ -44,12 +45,15 @@ const DEFAULT_NUMBER_OF_NOXES = 3;
 
 export type ProviderConfigArgs = {
   numberOfNoxes?: number | undefined;
+  env: ContractsENV;
 };
 
 export async function generateUserProviderConfig({
   numberOfNoxes,
+  env,
 }: ProviderConfigArgs) {
   const userProvidedConfig: UserProvidedConfig = {
+    env,
     computePeers: {},
     offers: {},
   };
