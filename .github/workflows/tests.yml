@@ -226,8 +226,11 @@ jobs:
         if: always()
         uses: jwalton/gh-docker-logs@v2
 
+      - name: Stop containers
+        if: always()
+        working-directory: tmp/templates/quickstart
+        run: ../../linux-x64/fluence/bin/run.js local down
+
       - name: Cleanup
         if: always()
-        run: |
-          yarn fluence local down
-          rm -rf tmp ~/.fluence
+        run: rm -rf tmp ~/.fluence
