@@ -889,13 +889,13 @@ Generate Config.toml files according to provider.yaml
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [--provider-config-path <value>] [--env <value>]
+  $ fluence provider gen [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate in your provider config
-  --provider-config-path=<value>          Path to the provider config file
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml
@@ -931,13 +931,13 @@ Init provider config. Creates a config file in the current directory.
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [--provider-config-path <value>] [--env <value>]
+  $ fluence provider init [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate in your provider config
-  --provider-config-path=<value>          Path to the provider config file
 
 DESCRIPTION
   Init provider config. Creates a config file in the current directory.
