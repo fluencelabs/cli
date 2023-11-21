@@ -16,6 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
+import { commandObj } from "../lib/commandObj.js";
 import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -63,5 +64,6 @@ export default class Build extends BaseCommand<typeof Build> {
 
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
     await compileSpells(fluenceConfig, aquaImports);
+    commandObj.logToStderr(`All services and spells built successfully`);
   }
 }

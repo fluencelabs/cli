@@ -49,7 +49,12 @@ import type {
   Host,
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
-import { FS_OPTIONS, HOSTS_FILE_NAME, DEALS_FILE_NAME } from "./const.js";
+import {
+  FS_OPTIONS,
+  HOSTS_FILE_NAME,
+  DEALS_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+} from "./const.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -229,11 +234,41 @@ export const prepareForDeploy = async ({
     ),
   ];
 
-  const spellConfigs = await compileSpells(
-    fluenceConfig,
-    aquaImports,
-    spellNamesUsedInWorkers,
-  );
+  const spellConfigs = (
+    await compileSpells(fluenceConfig, aquaImports, spellNamesUsedInWorkers)
+  ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
+    const { script } = functions[spellConfig.function] ?? {};
+
+    if (script === undefined) {
+      commandObj.error(
+        `Failed to find spell function ${color.yellow(
+          spellConfig.function,
+        )} in aqua file at ${color.yellow(spellAquaFilePath)}`,
+      );
+    }
+
+    return {
+      name,
+      config: {
+        blockchain: { end_block: 0, start_block: 0 },
+        connections: { connect: false, disconnect: false },
+        clock:
+          spellConfig.clock?.periodSec === undefined
+            ? {
+                start_sec: 0,
+                end_sec: 0,
+                period_sec: 0,
+              }
+            : {
+                start_sec: resolveStartSec(spellConfig),
+                end_sec: resolveEndSec(spellConfig),
+                period_sec: spellConfig.clock.periodSec,
+              },
+      },
+      script,
+      init_args: spellConfig.initArgs ?? {},
+    };
+  });
 
   const serviceNames = [
     ...new Set(
@@ -584,90 +619,97 @@ export async function compileSpells(
   aquaImports: string[],
   spellNames?: string[],
 ) {
-  return Promise.all(
-    (spellNames ?? Object.keys(fluenceConfig.spells ?? {})).map(
-      async (name): Promise<UploadDeploySpellConfig> => {
-        const spellFromFluenceConfig = fluenceConfig.spells?.[name];
+  const spellsFromFluenceConfig = (
+    spellNames ?? Object.keys(fluenceConfig.spells ?? {})
+  ).map((name) => {
+    return {
+      spellFromFluenceConfig: fluenceConfig.spells?.[name],
+      name,
+    };
+  });
 
-        assert(
-          spellFromFluenceConfig !== undefined,
-          `Unreachable. can't find spell ${name} from workers property in ${fluenceConfig.$getPath()} in spells property. This has to be checked on config init. Looking for ${name} in ${JSON.stringify(
-            fluenceConfig.spells,
-          )}`,
-        );
-
-        const { get, ...spellOverridesFromFluenceConfig } =
-          spellFromFluenceConfig;
-
-        const spellConfig = await initReadonlySpellConfig(get, projectRootDir);
-
-        if (spellConfig === null) {
-          return commandObj.error(
-            isUrl(get)
-              ? `Downloaded invalid spell ${color.yellow(name)}`
-              : `Invalid spell ${color.yellow(name)} at ${color.yellow(get)}`,
-          );
-        }
-
-        const overriddenSpellConfig = {
-          ...spellConfig,
-          ...spellOverridesFromFluenceConfig,
-        };
-
-        const spellAquaFilePath = resolve(
-          spellConfig.$getDirPath(),
-          spellConfig.aquaFilePath,
-        );
-
-        const { compileFromPath } = await import("@fluencelabs/aqua-api");
-
-        const { errors, functions } = await compileFromPath({
-          filePath: spellAquaFilePath,
-          imports: aquaImports,
-        });
-
-        if (errors.length > 0) {
-          commandObj.error(
-            `Failed to compile aqua file with spell at ${color.yellow(
-              spellAquaFilePath,
-            )}:\n\n${errors.join("\n")}`,
-          );
-        }
-
-        const { script } = functions[spellConfig.function] ?? {};
-
-        if (script === undefined) {
-          commandObj.error(
-            `Failed to find spell function ${color.yellow(
-              spellConfig.function,
-            )} in aqua file at ${color.yellow(spellAquaFilePath)}`,
-          );
-        }
-
-        return {
-          name,
-          config: {
-            blockchain: { end_block: 0, start_block: 0 },
-            connections: { connect: false, disconnect: false },
-            clock:
-              overriddenSpellConfig.clock?.periodSec === undefined
-                ? {
-                    start_sec: 0,
-                    end_sec: 0,
-                    period_sec: 0,
-                  }
-                : {
-                    start_sec: resolveStartSec(overriddenSpellConfig),
-                    end_sec: resolveEndSec(overriddenSpellConfig),
-                    period_sec: overriddenSpellConfig.clock.periodSec,
-                  },
-          },
-          script,
-          init_args: overriddenSpellConfig.initArgs ?? {},
-        };
-      },
-    ),
+  const spellsNotFoundInFluenceConfig = spellsFromFluenceConfig.filter(
+    ({ spellFromFluenceConfig }) => {
+      return spellFromFluenceConfig === undefined;
+    },
   );
+
+  if (spellsNotFoundInFluenceConfig.length > 0) {
+    commandObj.error(
+      `Can't find the following spells in ${fluenceConfig.$getPath()} 'spells' property: ${color.yellow(
+        spellsNotFoundInFluenceConfig
+          .map(({ name }) => {
+            return name;
+          })
+          .join(", "),
+      )}`,
+    );
+  }
+
+  const compiledSpells = await Promise.all(
+    spellsFromFluenceConfig.map(async ({ spellFromFluenceConfig, name }) => {
+      assert(
+        spellFromFluenceConfig !== undefined,
+        `Unreachable. Wasn't able to find spell. Spell existence in ${FLUENCE_CONFIG_FULL_FILE_NAME} must have been checked in the previous step`,
+      );
+
+      const { get, ...spellOverridesFromFluenceConfig } =
+        spellFromFluenceConfig;
+
+      const spellConfig = await initReadonlySpellConfig(get, projectRootDir);
+
+      if (spellConfig === null) {
+        return commandObj.error(
+          isUrl(get)
+            ? `Downloaded invalid spell ${color.yellow(name)}`
+            : `Invalid spell ${color.yellow(name)} at ${color.yellow(get)}`,
+        );
+      }
+
+      const overriddenSpellConfig = {
+        ...spellConfig,
+        ...spellOverridesFromFluenceConfig,
+      };
+
+      const spellAquaFilePath = resolve(
+        spellConfig.$getDirPath(),
+        spellConfig.aquaFilePath,
+      );
+
+      const { compileFromPath } = await import("@fluencelabs/aqua-api");
+
+      const { errors, functions } = await compileFromPath({
+        filePath: spellAquaFilePath,
+        imports: aquaImports,
+      });
+
+      return {
+        errors,
+        functions,
+        spellAquaFilePath,
+        spellConfig: overriddenSpellConfig,
+        name,
+      };
+    }),
+  );
+
+  const compiledSpellsWithErrors = compiledSpells.filter(({ errors }) => {
+    return errors.length > 0;
+  });
+
+  if (compiledSpellsWithErrors.length > 0) {
+    commandObj.error(
+      compiledSpellsWithErrors
+        .map(({ errors, spellAquaFilePath }) => {
+          return `Failed to compile aqua file with spell at ${color.yellow(
+            spellAquaFilePath,
+          )}:\n\n${errors.join("\n")}`;
+        })
+        .join("\n\n"),
+    );
+  }
+
+  return compiledSpells;
 }
 
 async function resolveWorker({
