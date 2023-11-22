@@ -21,11 +21,11 @@ import { color } from "@oclif/color";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
-  initNewDockerComposeConfig,
+  initNewReadonlyDockerComposeConfig,
   initReadonlyDockerComposeConfig,
 } from "../../lib/configs/project/dockerCompose.js";
 import {
-  PROVIDER_CONFIG_FLAGS,
+  NOXES_FLAG,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
@@ -37,10 +37,11 @@ export default class Init extends BaseCommand<typeof Init> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...NOXES_FLAG,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
+
     const existingDockerCompose = await initReadonlyDockerComposeConfig();
 
     if (existingDockerCompose !== null) {
@@ -60,7 +61,8 @@ export default class Init extends BaseCommand<typeof Init> {
       await rm(existingDockerCompose.$getPath());
     }
 
-    const dockerCompose = await initNewDockerComposeConfig({
+    const dockerCompose = await initNewReadonlyDockerComposeConfig({
+      env: "local",
       numberOfNoxes: flags.noxes,
     });
 

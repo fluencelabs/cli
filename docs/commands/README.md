@@ -32,6 +32,7 @@
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-peer`](#fluence-provider-add-peer)
 * [`fluence provider add-units`](#fluence-provider-add-units)
+* [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider info`](#fluence-provider-info)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider register`](#fluence-provider-register)
@@ -42,6 +43,7 @@
 * [`fluence service new [NAME]`](#fluence-service-new-name)
 * [`fluence service remove [NAME | PATH | URL]`](#fluence-service-remove-name--path--url)
 * [`fluence service repl [NAME | PATH | URL]`](#fluence-service-repl-name--path--url)
+* [`fluence spell build [SPELL-NAMES]`](#fluence-spell-build-spell-names)
 * [`fluence spell new [NAME]`](#fluence-spell-new-name)
 * [`fluence update [CHANNEL]`](#fluence-update-channel)
 * [`fluence workers deploy [WORKER-NAMES]`](#fluence-workers-deploy-worker-names)
@@ -206,9 +208,10 @@ Build all application services, described in fluence.yaml and generate aqua inte
 
 ```
 USAGE
-  $ fluence build [--no-input] [--marine-build-args <value>]
+  $ fluence build [--no-input] [--marine-build-args <value>] [--import <value>]
 
 FLAGS
+  --import=<path>...                Path to a directory to import aqua files from. May be used several times
   --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
                                     'marineBuildArgs' property in fluence.yaml. Default: --release
   --no-input                        Don't interactively ask for any input from the user
@@ -746,10 +749,11 @@ Run docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local up [--no-input]
+  $ fluence local up [--no-input] [--noxes <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose
@@ -881,6 +885,29 @@ DESCRIPTION
 
 _See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/add-units.ts)_
 
+## `fluence provider gen`
+
+Generate Config.toml files according to provider.yaml
+
+```
+USAGE
+  $ fluence provider gen [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
+
+DESCRIPTION
+  Generate Config.toml files according to provider.yaml
+
+EXAMPLES
+  $ fluence provider gen
+```
+
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/gen.ts)_
+
 ## `fluence provider info`
 
 Get info about provider
@@ -906,10 +933,13 @@ Init provider config. Creates a config file in the current directory.
 
 ```
 USAGE
-  $ fluence provider init [--no-input]
+  $ fluence provider init [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --name=<value>                          Provider config name
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate in your provider config
 
 DESCRIPTION
   Init provider config. Creates a config file in the current directory.
@@ -1135,6 +1165,31 @@ EXAMPLES
 ```
 
 _See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/service/repl.ts)_
+
+## `fluence spell build [SPELL-NAMES]`
+
+Create a new spell template
+
+```
+USAGE
+  $ fluence spell build [SPELL-NAMES] [--no-input] [--import <value>]
+
+ARGUMENTS
+  SPELL-NAMES  Comma separated names of spells to build. Example: "spell1,spell2" (by default all spells from 'spells'
+               property in fluence.yaml will be built)
+
+FLAGS
+  --import=<path>...  Path to a directory to import aqua files from. May be used several times
+  --no-input          Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Create a new spell template
+
+EXAMPLES
+  $ fluence spell build
+```
+
+_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/spell/build.ts)_
 
 ## `fluence spell new [NAME]`
 

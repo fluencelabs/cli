@@ -68,7 +68,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
                 flags["compute-units"]?.[i] ?? defaultNumberOfComputeUnits,
             };
           })
-        : await getResolvedProviderConfig();
+        : await getResolvedProviderConfig({ env: flags.env });
 
     const [{ DealClient }, { digest }, { base58btc }] = await Promise.all([
       import("@fluencelabs/deal-aurora"),

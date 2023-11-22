@@ -52,6 +52,7 @@ const workerInfoSchema = {
     },
   },
   required: ["timestamp", "definition"],
+  additionalProperties: false,
 } as const satisfies JSONSchemaType<WorkerInfo>;
 
 export type Deal = WorkerInfo & {
@@ -102,6 +103,7 @@ const hostSchema: JSONSchemaType<Host> = {
           worker_id: { type: "string" },
         },
         required: ["host_id", "spell_id", "worker_id"],
+        additionalProperties: false,
       },
     },
     relayId: { type: "string" },
@@ -139,6 +141,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
   title: WORKERS_CONFIG_FULL_FILE_NAME,
   type: "object",
+  additionalProperties: false,
   description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
   properties: {
     version: { type: "number", const: 0 },
