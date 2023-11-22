@@ -55,7 +55,6 @@ import {
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
 
-
 // const perfObserver = new PerformanceObserver((items) => {
 //   items.getEntries().forEach((entry) => {
 //     console.log(entry);
@@ -263,7 +262,7 @@ const ensureAquaPath = async ({
   });
 };
 
-type RunData =  Record<string, Parameters<typeof v5_callFunction>[0][1]>;
+type RunData = Record<string, Parameters<typeof v5_callFunction>[0][1]>;
 
 const runDataSchema: JSONSchemaType<RunData> = {
   type: "object",
