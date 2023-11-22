@@ -6,7 +6,7 @@ on:
       ref:
         description: "Git ref to checkout to"
         type: string
-        default: "use-js-client-0.5.0"
+        default: "main"
       fluence-env:
         description: "Fluence environment to run tests against"
         type: string
