@@ -18,7 +18,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
-import type { callAquaFunction } from "@fluencelabs/js-client";
+import { v5_callFunction } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
@@ -54,6 +54,7 @@ import {
   setProjectRootDir,
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
+
 
 // const perfObserver = new PerformanceObserver((items) => {
 //   items.getEntries().forEach((entry) => {
@@ -262,7 +263,7 @@ const ensureAquaPath = async ({
   });
 };
 
-type RunData = Parameters<typeof callAquaFunction>[0]["args"];
+type RunData =  Record<string, Parameters<typeof v5_callFunction>[0][1]>;
 
 const runDataSchema: JSONSchemaType<RunData> = {
   type: "object",
