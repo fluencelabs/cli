@@ -111,7 +111,7 @@ export const ensureTemplate = ({
 type InitArg = {
   maybeProjectPath?: string | undefined;
   template?: Template | undefined;
-  fluenceEnvFromFlags?: string | undefined;
+  env?: string | undefined;
 } & Omit<ProviderConfigArgs, "env" | "name">;
 
 export async function init(options: InitArg = {}): Promise<FluenceConfig> {
@@ -141,7 +141,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
-  const fluenceEnv = await resolveFluenceEnv(options.fluenceEnvFromFlags);
+  const fluenceEnv = await resolveFluenceEnv(options.env);
 
   if (envConfig === null) {
     setEnvConfig(await initNewEnvConfig(fluenceEnv));
