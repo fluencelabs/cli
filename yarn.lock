@@ -610,12 +610,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-to-js@https://npm.fluence.dev/@fluencelabs/aqua-to-js/-/aqua-to-js-0.2.0-review-fixes-c26bcea-1928-1.tgz":
-  version: 0.2.0-review-fixes-c26bcea-1928-1
-  resolution: "@fluencelabs/aqua-to-js@https://npm.fluence.dev/@fluencelabs/aqua-to-js/-/aqua-to-js-0.2.0-review-fixes-c26bcea-1928-1.tgz"
+"@fluencelabs/aqua-to-js@npm:0.3.0":
+  version: 0.3.0
+  resolution: "@fluencelabs/aqua-to-js@npm:0.3.0"
   dependencies:
     ts-pattern: 5.0.5
-  checksum: b4e7dcc60ede9bca7c8bf01a99b786e844799f11e3543a989ad67f9200c0d488221ddba4fa89d70c8c1fcf415251852d6aa7c98555e95d4515b68cf4ea3b5c36
+  checksum: 0a572870eb3dd05d20be24aaee480ac5468ef5b68eaba2d7e81f24881aae4a1b331d82a44992c5c5fab6994baf62573ac6495fee581c511ebc3ba3a8147a7bf5
   languageName: node
   linkType: hard
 
@@ -632,11 +632,11 @@ __metadata:
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
     "@fluencelabs/aqua-api": 0.12.4
-    "@fluencelabs/aqua-to-js": "https://npm.fluence.dev/@fluencelabs/aqua-to-js/-/aqua-to-js-0.2.0-review-fixes-c26bcea-1928-1.tgz"
+    "@fluencelabs/aqua-to-js": 0.3.0
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.31
-    "@fluencelabs/js-client": "https://npm.fluence.dev/@fluencelabs/js-client/-/js-client-0.4.4-review-fixes-c26bcea-1928-1.tgz"
+    "@fluencelabs/js-client": 0.5.0
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -734,35 +734,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/interfaces@npm:0.8.2-review-fixes-c26bcea-1928-1":
-  version: 0.8.2-review-fixes-c26bcea-1928-1
-  resolution: "@fluencelabs/interfaces@npm:0.8.2-review-fixes-c26bcea-1928-1"
-  checksum: 23006290bc8fe58beedf8ad84bbe66f100284e672b889a34ff3db75dadc1961165c367f841818922e955fab5389392190ab0dfd7c1c528ca8af6ce6bf4d9e29e
+"@fluencelabs/interfaces@npm:0.8.2":
+  version: 0.8.2
+  resolution: "@fluencelabs/interfaces@npm:0.8.2"
+  checksum: 589186e0f77ba4986841de8bc9d76142c8da1f74af7846d71e056f5eb9f51a37b90db7db2d292a3601a56b5c416e8c7342a03bd68d19cd692b1df54e5373bc7e
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client-isomorphic@npm:0.2.2-review-fixes-c26bcea-1928-1":
-  version: 0.2.2-review-fixes-c26bcea-1928-1
-  resolution: "@fluencelabs/js-client-isomorphic@npm:0.2.2-review-fixes-c26bcea-1928-1"
+"@fluencelabs/js-client-isomorphic@npm:0.3.0":
+  version: 0.3.0
+  resolution: "@fluencelabs/js-client-isomorphic@npm:0.3.0"
   dependencies:
     "@fluencelabs/avm": 0.54.0
     "@fluencelabs/marine-js": 0.8.0
-    "@fluencelabs/marine-worker": 0.4.2-review-fixes-c26bcea-1928-1
+    "@fluencelabs/marine-worker": 0.5.0
     "@fluencelabs/threads": ^2.0.0
-  checksum: 9c68fd39d3a6e5bc654ada003396e950e131be11960b1a678ba76a429f71b7906d56658c545bd537c947254c1c566b22bf90cd0f19836a5399e15a12eb0a6904
+  checksum: 49f5919d4603c03ca7048f2750b6794950a5b7bf6ae8e0536bf6d16e7dad293c4a127227ef5cef0a123ac90a1a58f975a3c08ff0698314d0ea861070a8f9b0e7
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@https://npm.fluence.dev/@fluencelabs/js-client/-/js-client-0.4.4-review-fixes-c26bcea-1928-1.tgz":
-  version: 0.4.4-review-fixes-c26bcea-1928-1
-  resolution: "@fluencelabs/js-client@https://npm.fluence.dev/@fluencelabs/js-client/-/js-client-0.4.4-review-fixes-c26bcea-1928-1.tgz"
+"@fluencelabs/js-client@npm:0.5.0":
+  version: 0.5.0
+  resolution: "@fluencelabs/js-client@npm:0.5.0"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
     "@fluencelabs/avm": 0.54.0
-    "@fluencelabs/interfaces": 0.8.2-review-fixes-c26bcea-1928-1
-    "@fluencelabs/js-client-isomorphic": 0.2.2-review-fixes-c26bcea-1928-1
-    "@fluencelabs/marine-worker": 0.4.2-review-fixes-c26bcea-1928-1
+    "@fluencelabs/interfaces": 0.8.2
+    "@fluencelabs/js-client-isomorphic": 0.3.0
+    "@fluencelabs/marine-worker": 0.5.0
     "@fluencelabs/threads": ^2.0.0
     "@libp2p/crypto": 2.0.3
     "@libp2p/interface": 0.1.2
@@ -783,7 +783,7 @@ __metadata:
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: 45b8db1592198e607f44145745b380298d435c06e50c7607f46ba5ac4fcbb9eacd5af1e22efc5de8e70ea6c73b227127023ae94d33c453e28655c67ae927be51
+  checksum: f91c35957c287f95a8cc6033caba5e25500b181cb1d3ba9f88ba9414bd5b165459d65d5a39e13ce54999e1cf805364b286881cee078751e5d5de98d7eb015f15
   languageName: node
   linkType: hard
 
@@ -798,14 +798,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/marine-worker@npm:0.4.2-review-fixes-c26bcea-1928-1":
-  version: 0.4.2-review-fixes-c26bcea-1928-1
-  resolution: "@fluencelabs/marine-worker@npm:0.4.2-review-fixes-c26bcea-1928-1"
+"@fluencelabs/marine-worker@npm:0.5.0":
+  version: 0.5.0
+  resolution: "@fluencelabs/marine-worker@npm:0.5.0"
   dependencies:
     "@fluencelabs/marine-js": 0.8.0
     "@fluencelabs/threads": ^2.0.0
     observable-fns: 0.6.1
-  checksum: 72202cb713fb6045800f21e1bb40006997e861a5a59a1ef73e6b38d559d0dbef6f7a29dbccd13ecee2ee8b3666a17efdf1f1cf2bcc4956f7d1f4e19991a977bf
+  checksum: 3a73a45f969b4cc8a13c8871f9ce1d6bb3ab14078341a9349effa954de6a761103f8ae1d29785d978a30a9881056fe5499fdf124553b2486aaa94683a4dfdccd
   languageName: node
   linkType: hard
 

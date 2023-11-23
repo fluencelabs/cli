@@ -18,7 +18,7 @@ import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
-import { v5_callFunction } from "@fluencelabs/js-client";
+import type { callAquaFunction } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import type { JSONSchemaType } from "ajv";
@@ -263,7 +263,7 @@ const ensureAquaPath = async ({
   });
 };
 
-type RunData =  Record<string, Parameters<typeof v5_callFunction>[0][1]>;
+type RunData =  Parameters<typeof callAquaFunction>[0]['args'];
 
 const runDataSchema: JSONSchemaType<RunData> = {
   type: "object",
@@ -406,14 +406,15 @@ const fluenceRun = async (args: RunArgs) => {
   }
 
   await initFluenceClient(args, args.maybeFluenceConfig);
-  const { Fluence, v5_callFunction } = await import("@fluencelabs/js-client");
+  const { Fluence, callAquaFunction } = await import("@fluencelabs/js-client");
 
-  const runArgs = Object.values(args.runData ?? []);
-
-  const result = await v5_callFunction(
-    [Fluence.getClient(), ...runArgs],
-    functionCall.funcDef,
-    functionCall.script,
+  const result = await callAquaFunction(
+    {
+      script: functionCall.script,
+      config: {},
+      peer: Fluence.getClient(),
+      args: args.runData ?? {}
+    }
   );
 
   return result;
