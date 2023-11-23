@@ -29,6 +29,7 @@ import {
 import { initFluenceConfigWithPath } from "../src/lib/configs/project/fluence.js";
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
+  CURRENCY,
   DEFAULT_DEAL_NAME,
   DEFAULT_WORKER_NAME,
   DOT_FLUENCE_DIR_NAME,
@@ -427,6 +428,8 @@ describe("integration tests", () => {
       );
 
       fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].collateralPerWorker = 1 / CURRENCY;
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].pricePerWorkerEpoch = 1 / CURRENCY;
       fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
       fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
