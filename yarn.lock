@@ -587,10 +587,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@npm:0.12.4":
-  version: 0.12.4
-  resolution: "@fluencelabs/aqua-api@npm:0.12.4"
-  checksum: aed88bff10cc854f89e66212c050d136c47a14def516a56a9291d98afb148a91e1c6321c3f976f89db0c7b046e8477590ff13772425ad74de0d2f421e967253f
+"@fluencelabs/aqua-api@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@fluencelabs/aqua-api@npm:0.13.0"
+  checksum: 75dbfb37bc03ba51dd57612f31b67003fe1f49d9ae1db2c7ba975ed33abdc5f76e416e8387b112a48796571c063c8ce4d7448acf0601224f27df3ebedfd366d2
   languageName: node
   linkType: hard
 
@@ -631,12 +631,12 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
-    "@fluencelabs/aqua-api": 0.12.4
+    "@fluencelabs/aqua-api": 0.13.0
     "@fluencelabs/aqua-to-js": 0.3.0
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.31
-    "@fluencelabs/js-client": 0.5.0
+    "@fluencelabs/js-client": 0.5.1
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -753,9 +753,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.5.0":
-  version: 0.5.0
-  resolution: "@fluencelabs/js-client@npm:0.5.0"
+"@fluencelabs/js-client@npm:0.5.1":
+  version: 0.5.1
+  resolution: "@fluencelabs/js-client@npm:0.5.1"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
@@ -783,7 +783,7 @@ __metadata:
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: f91c35957c287f95a8cc6033caba5e25500b181cb1d3ba9f88ba9414bd5b165459d65d5a39e13ce54999e1cf805364b286881cee078751e5d5de98d7eb015f15
+  checksum: 22a9a8b5ceab7517a1776649bea71d1e1cbc4005767feddfc0dd7d4df10c7eda1b3b9aa630ffac957e5ca155f00b6b5359a6340c9a72daa8611a022da27e3c4a
   languageName: node
   linkType: hard
 

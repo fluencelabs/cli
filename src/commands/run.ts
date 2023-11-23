@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "node:assert";
 import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
@@ -405,14 +406,22 @@ const fluenceRun = async (args: RunArgs) => {
   }
 
   await initFluenceClient(args, args.maybeFluenceConfig);
-  const { Fluence, callAquaFunction } = await import("@fluencelabs/js-client");
+  const { Fluence, callAquaFunction, js2aqua } = await import("@fluencelabs/js-client");
+
+  const schema = functionCall.funcDef;
+
+  // TODO: remove this after DXJ-535 is done
+  const validatedRunData = Object.fromEntries(Object.entries(args.runData ?? {}).map(([argName, argValue]) => {
+    assert(schema.arrow.domain.tag === 'labeledProduct', 'Should be impossible');
+    return [argName, js2aqua(argValue, schema.arrow.domain.fields[argName], { path: [argName] })];
+  }));
 
   const result = await callAquaFunction(
     {
       script: functionCall.script,
       config: {},
       peer: Fluence.getClient(),
-      args: args.runData ?? {}
+      args: validatedRunData
     }
   );
 
