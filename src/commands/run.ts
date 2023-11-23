@@ -406,14 +406,21 @@ const fluenceRun = async (args: RunArgs) => {
   }
 
   await initFluenceClient(args, args.maybeFluenceConfig);
-  const { Fluence, callAquaFunction, js2aqua } = await import("@fluencelabs/js-client");
+  const { Fluence, callAquaFunction, js2aqua, aqua2js } = await import("@fluencelabs/js-client");
 
   const schema = functionCall.funcDef;
 
   // TODO: remove this after DXJ-535 is done
   const validatedRunData = Object.fromEntries(Object.entries(args.runData ?? {}).map(([argName, argValue]) => {
-    assert(schema.arrow.domain.tag === 'labeledProduct', 'Should be impossible');
-    return [argName, js2aqua(argValue, schema.arrow.domain.fields[argName], { path: [argName] })];
+    assert(typeof argValue !== 'function', 'Should be impossible to pass function as an argument to fluence run')
+
+    const fields = schema.arrow.domain.tag === 'nil' ? {} : schema.arrow.domain.fields;
+    const argSchema = fields[argName];
+
+    assert(argSchema !== undefined, 'Should be impossible because schema always contains same keys as runData');
+    assert(argSchema.tag !== 'arrow', 'Should be impossible to pass function as an argument to fluence run')
+
+    return [argName, js2aqua(argValue, argSchema, { path: [argName] })];
   }));
 
   const result = await callAquaFunction(
@@ -425,7 +432,15 @@ const fluenceRun = async (args: RunArgs) => {
     }
   );
 
-  return result;
+  const returnSchema =
+    schema.arrow.codomain.tag === "unlabeledProduct" &&
+    schema.arrow.codomain.items.length === 1
+      ? schema.arrow.codomain.items[0]
+      : schema.arrow.codomain;
+
+  assert(returnSchema !== undefined, "This value cannot be 'undefined'");
+
+  return aqua2js(result, returnSchema);
 };
 
 function formatConstants(

@@ -636,7 +636,7 @@ __metadata:
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.31
-    "@fluencelabs/js-client": 0.5.1
+    "@fluencelabs/js-client": 0.5.3
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -734,10 +734,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/interfaces@npm:0.8.2":
-  version: 0.8.2
-  resolution: "@fluencelabs/interfaces@npm:0.8.2"
-  checksum: 589186e0f77ba4986841de8bc9d76142c8da1f74af7846d71e056f5eb9f51a37b90db7db2d292a3601a56b5c416e8c7342a03bd68d19cd692b1df54e5373bc7e
+"@fluencelabs/interfaces@npm:0.9.0":
+  version: 0.9.0
+  resolution: "@fluencelabs/interfaces@npm:0.9.0"
+  checksum: af42119fb76be999cdabdcef321d5e4af174eadd60503fc1721e88637f87cbb3e15238034186e9c3e133172911d866c9256b0e1fcd31dfdf9d61ab8765766c2c
   languageName: node
   linkType: hard
 
@@ -753,14 +753,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.5.1":
-  version: 0.5.1
-  resolution: "@fluencelabs/js-client@npm:0.5.1"
+"@fluencelabs/js-client@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@fluencelabs/js-client@npm:0.5.3"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
     "@fluencelabs/avm": 0.54.0
-    "@fluencelabs/interfaces": 0.8.2
+    "@fluencelabs/interfaces": 0.9.0
     "@fluencelabs/js-client-isomorphic": 0.3.0
     "@fluencelabs/marine-worker": 0.5.0
     "@fluencelabs/threads": ^2.0.0
@@ -783,7 +783,7 @@ __metadata:
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: 22a9a8b5ceab7517a1776649bea71d1e1cbc4005767feddfc0dd7d4df10c7eda1b3b9aa630ffac957e5ca155f00b6b5359a6340c9a72daa8611a022da27e3c4a
+  checksum: db2fa5da14c57c5e3e2a1bbfbadf78b5ac4f58a30480b0e7b1432c4788a22c792492181fa5b380a598b0f760a46ffee2b64a94c8b348209c36d2f468ae80cabb
   languageName: node
   linkType: hard
 
