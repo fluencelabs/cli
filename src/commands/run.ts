@@ -263,7 +263,7 @@ const ensureAquaPath = async ({
   });
 };
 
-type RunData =  Parameters<typeof callAquaFunction>[0]['args'];
+type RunData = Parameters<typeof callAquaFunction>[0]["args"];
 
 const runDataSchema: JSONSchemaType<RunData> = {
   type: "object",
@@ -406,31 +406,43 @@ const fluenceRun = async (args: RunArgs) => {
   }
 
   await initFluenceClient(args, args.maybeFluenceConfig);
-  const { Fluence, callAquaFunction, js2aqua, aqua2js } = await import("@fluencelabs/js-client");
+  const { Fluence, callAquaFunction, js2aqua, aqua2js } = await import(
+    "@fluencelabs/js-client"
+  );
 
   const schema = functionCall.funcDef;
 
   // TODO: remove this after DXJ-535 is done
-  const validatedRunData = Object.fromEntries(Object.entries(args.runData ?? {}).map(([argName, argValue]) => {
-    assert(typeof argValue !== 'function', 'Should be impossible to pass function as an argument to fluence run')
+  const validatedRunData = Object.fromEntries(
+    Object.entries(args.runData ?? {}).map(([argName, argValue]) => {
+      assert(
+        typeof argValue !== "function",
+        "Should be impossible to pass function as an argument to fluence run",
+      );
 
-    const fields = schema.arrow.domain.tag === 'nil' ? {} : schema.arrow.domain.fields;
-    const argSchema = fields[argName];
+      const fields =
+        schema.arrow.domain.tag === "nil" ? {} : schema.arrow.domain.fields;
+      const argSchema = fields[argName];
 
-    assert(argSchema !== undefined, 'Should be impossible because schema always contains same keys as runData');
-    assert(argSchema.tag !== 'arrow', 'Should be impossible to pass function as an argument to fluence run')
+      assert(
+        argSchema !== undefined,
+        "Should be impossible because schema always contains same keys as runData",
+      );
+      assert(
+        argSchema.tag !== "arrow",
+        "Should be impossible to pass function as an argument to fluence run",
+      );
 
-    return [argName, js2aqua(argValue, argSchema, { path: [argName] })];
-  }));
-
-  const result = await callAquaFunction(
-    {
-      script: functionCall.script,
-      config: {},
-      peer: Fluence.getClient(),
-      args: validatedRunData
-    }
+      return [argName, js2aqua(argValue, argSchema, { path: [argName] })];
+    }),
   );
+
+  const result = await callAquaFunction({
+    script: functionCall.script,
+    config: {},
+    peer: Fluence.getClient(),
+    args: validatedRunData,
+  });
 
   const returnSchema =
     schema.arrow.codomain.tag === "unlabeledProduct" &&
