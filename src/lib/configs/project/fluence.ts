@@ -601,6 +601,7 @@ const configSchemaV5Obj = {
       nullable: true,
       additionalProperties: {
         ...workerConfigSchemaObj,
+        additionalProperties: false,
         properties: {
           ...workerConfigSchemaObj.properties,
           ...dealSchemaObj.properties,
@@ -609,6 +610,7 @@ const configSchemaV5Obj = {
       properties: {
         dealName: {
           ...workerConfigSchemaObj,
+          additionalProperties: false,
           properties: {
             ...workerConfigSchemaObj.properties,
             ...dealSchemaObj.properties,
@@ -668,7 +670,7 @@ aquaInputPath: ${relative(projectRootDir, await ensureAquaMainPath())}
 deals:
   ${DEFAULT_DEAL_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
-    maxPricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FL
+    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FL
     collateralPerWorker: ${COLLATERAL_DEFAULT} # collateral per worker in FL
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
