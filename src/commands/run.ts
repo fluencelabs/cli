@@ -55,7 +55,6 @@ import {
 } from "../lib/paths.js";
 import { input, list } from "../lib/prompt.js";
 
-
 // const perfObserver = new PerformanceObserver((items) => {
 //   items.getEntries().forEach((entry) => {
 //     console.log(entry);
