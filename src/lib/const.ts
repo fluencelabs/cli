@@ -43,12 +43,13 @@ export const numberProperties = [
 
 export type NumberProperty = (typeof numberProperties)[number];
 
-const ETH = 10 ** 18;
-const MILLI_ETH = 10 ** 15;
+export const CURRENCY = 10 ** 18;
+export const COLLATERAL_DEFAULT = 1;
+export const PRICE_PER_EPOCH_DEFAULT = 0.1;
 
 export const defaultNumberProperties: Record<NumberProperty, number> = {
-  maxCollateralPerWorker: ETH,
-  minPricePerWorkerEpoch: 83 * MILLI_ETH,
+  maxCollateralPerWorker: COLLATERAL_DEFAULT,
+  minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
 
 export const U32_MAX = 4_294_967_295;
@@ -229,26 +230,26 @@ export const NO_INPUT_FLAG = {
   }),
 } as const;
 
-const envFlagAndArg = {
+const fluenceEnvFlagAndArg = {
   description: "Fluence Environment to use when running the command",
   helpValue: `<${FLUENCE_ENVS.join(" | ")}>`,
 };
 
 export const ENV_FLAG_NAME = "env";
 export const ENV_FLAG = {
-  [ENV_FLAG_NAME]: Flags.string(envFlagAndArg),
+  [ENV_FLAG_NAME]: Flags.string(fluenceEnvFlagAndArg),
 };
 
 export const ENV_ARG_NAME = "ENV";
 export const ENV_ARG = {
-  [ENV_ARG_NAME]: Args.string(envFlagAndArg),
+  [ENV_ARG_NAME]: Args.string(fluenceEnvFlagAndArg),
 };
 
 export const GLOBAL_FLAG_NAME = "global";
 export const GLOBAL_FLAG = {
   [GLOBAL_FLAG_NAME]: Flags.boolean({
     default: false,
-    aliases: ["g"],
+    char: "g",
     description: `Will override dependencies in a global user's ${GLOBAL_CONFIG_FULL_FILE_NAME} instead of project's ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
   }),
 };
@@ -310,14 +311,21 @@ export const TRACING_FLAG = {
 
 export const NOXES_FLAG = {
   noxes: Flags.integer({
-    description: "Number of Compute Peers to generate in your provider config",
+    description: `Number of Compute Peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
+  }),
+};
+
+export const OFFER_FLAG = {
+  offer: Flags.string({
+    description: `Offer from ${PROVIDER_CONFIG_FULL_FILE_NAME} to use`,
+    helpValue: "<offer>",
   }),
 };
 
 export const PROVIDER_CONFIG_FLAGS = {
   name: Flags.string({
     description: "Provider config name",
-    aliases: ["n"],
+    char: "n",
   }),
   [ENV_FLAG_NAME]: Flags.string({
     description: "Environment to use when generating the provider config",

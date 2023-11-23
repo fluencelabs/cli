@@ -48,6 +48,9 @@ import {
   FLUENCE_ENVS,
   AUTO_GENERATED,
   LOCAL_IPFS_ADDRESS,
+  PRICE_PER_EPOCH_DEFAULT,
+  COLLATERAL_DEFAULT,
+  CURRENCY,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
@@ -80,8 +83,7 @@ import {
   type OverridableSpellProperties,
   overridableSpellProperties,
 } from "./spell.js";
-export const MIN_WORKERS = 1;
-export const TARGET_WORKERS = 3;
+export const TARGET_WORKERS_DEFAULT = 1;
 
 type ServiceV0 = { name: string; count?: number };
 
@@ -208,6 +210,9 @@ type FluenceConfigSpell = {
 type Deal = {
   minWorkers?: number;
   targetWorkers?: number;
+  maxWorkersPerProvider?: number;
+  pricePerWorkerEpoch?: number;
+  collateralPerWorker?: number;
 };
 
 type Worker = {
@@ -254,23 +259,44 @@ const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
 const dealSchemaObj = {
   type: "object",
   properties: {
-    minWorkers: {
-      type: "number",
-      description: "Required workers to activate the deal",
-      default: MIN_WORKERS,
-      nullable: true,
-      minimum: 1,
-    },
     targetWorkers: {
       type: "number",
       description: "Max workers in the deal",
-      default: TARGET_WORKERS,
+      default: TARGET_WORKERS_DEFAULT,
       nullable: true,
       minimum: 1,
     },
+    minWorkers: {
+      type: "number",
+      description:
+        "Required workers to activate the deal. Matches target workers by default",
+      nullable: true,
+      minimum: 1,
+    },
+    maxWorkersPerProvider: {
+      type: "number",
+      description:
+        "Max workers per provider. Matches target workers by default",
+      nullable: true,
+      minimum: 1,
+    },
+    pricePerWorkerEpoch: {
+      type: "number",
+      description: "Price per worker epoch in FL",
+      default: PRICE_PER_EPOCH_DEFAULT,
+      nullable: true,
+      minimum: 1 / CURRENCY,
+    },
+    collateralPerWorker: {
+      type: "number",
+      description: "Collateral per worker in FL",
+      default: COLLATERAL_DEFAULT,
+      nullable: true,
+      minimum: 1 / CURRENCY,
+    },
   },
   required: [],
-} as const;
+} as const satisfies JSONSchemaType<Deal>;
 
 const dealSchema: JSONSchemaType<Deal> = dealSchemaObj;
 
@@ -641,8 +667,9 @@ aquaInputPath: ${relative(projectRootDir, await ensureAquaMainPath())}
 # A map with worker names as keys and deals as values
 deals:
   ${DEFAULT_DEAL_NAME}:
-    minWorkers: ${MIN_WORKERS} # required amount of workers to activate the deal
-    targetWorkers: ${TARGET_WORKERS} # max amount of workers in the deal
+    targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
+    maxPricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FL
+    collateralPerWorker: ${COLLATERAL_DEFAULT} # collateral per worker in FL
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 

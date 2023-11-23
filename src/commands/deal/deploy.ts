@@ -22,10 +22,7 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import {
-  MIN_WORKERS,
-  TARGET_WORKERS,
-} from "../../lib/configs/project/fluence.js";
+import { TARGET_WORKERS_DEFAULT } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   LOCAL_IPFS_ADDRESS,
@@ -43,6 +40,8 @@ import {
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
   ENV_FLAG_NAME,
+  COLLATERAL_DEFAULT,
+  PRICE_PER_EPOCH_DEFAULT,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -71,29 +70,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     ...TRACING_FLAG,
     ...MARINE_BUILD_ARGS_FLAG,
     "auto-match": Flags.boolean({
-      description: `Disable automatic matching`,
+      description:
+        "Toggle automatic matching. Auto-matching is turned on by default",
       allowNo: true,
       default: true,
-    }),
-    "collateral-per-worker": Flags.string({
-      description: "Collateral per worker",
-      required: true,
-    }),
-    "min-workers": Flags.integer({
-      description: "Required workers to activate the deal",
-      required: true,
-    }),
-    "target-workers": Flags.integer({
-      description: "Max workers in the deal",
-      required: true,
-    }),
-    "max-workers-per-provider": Flags.integer({
-      description: "Max workers per provider",
-      required: true,
-    }),
-    "price-per-worker-epoch": Flags.string({
-      description: "Price per worker epoch",
-      required: true,
     }),
   };
   static override args = {
@@ -162,8 +142,19 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       definition: appCID,
     } of uploadResult.workers) {
       const deal = fluenceConfig.deals?.[workerName];
-      assert(deal !== undefined);
-      const { minWorkers = MIN_WORKERS, targetWorkers = TARGET_WORKERS } = deal;
+
+      assert(
+        deal !== undefined,
+        "Unreachable. All worker names are checked above",
+      );
+
+      const {
+        targetWorkers = TARGET_WORKERS_DEFAULT,
+        minWorkers = targetWorkers,
+        collateralPerWorker = COLLATERAL_DEFAULT,
+        pricePerWorkerEpoch = PRICE_PER_EPOCH_DEFAULT,
+        maxWorkersPerProvider = targetWorkers,
+      } = deal;
 
       const maybePreviouslyDeployedDeal = workersConfig.deals?.[workerName];
 
@@ -237,9 +228,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         appCID,
         minWorkers,
         targetWorkers,
-        collateralPerWorker: flags["collateral-per-worker"],
-        maxWorkersPerProvider: flags["max-workers-per-provider"],
-        pricePerWorkerEpoch: flags["price-per-worker-epoch"],
+        collateralPerWorker,
+        maxWorkersPerProvider,
+        pricePerWorkerEpoch,
         effectors: [],
       });
 

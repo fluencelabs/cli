@@ -63,7 +63,7 @@ export default class Init extends BaseCommand<typeof Init> {
 
     const dockerCompose = await initNewReadonlyDockerComposeConfig({
       env: "local",
-      numberOfNoxes: flags.noxes,
+      noxes: flags.noxes,
     });
 
     commandObj.logToStderr(`Created new config at ${dockerCompose.$getPath()}`);

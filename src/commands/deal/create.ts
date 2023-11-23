@@ -66,11 +66,11 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const dealAddress = await dealCreate({
       appCID: flags["app-cid"],
-      collateralPerWorker: flags["collateral-per-worker"],
+      collateralPerWorker: Number(flags["collateral-per-worker"]),
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],
-      pricePerWorkerEpoch: flags["price-per-worker-epoch"],
+      pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
       effectors: [],
       privKey: flags["priv-key"],
       chainNetwork: await ensureChainNetwork(flags.env, maybeFluenceConfig),

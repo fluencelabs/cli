@@ -112,7 +112,7 @@ type InitArg = {
   maybeProjectPath?: string | undefined;
   template?: Template | undefined;
   fluenceEnvFromFlags?: string | undefined;
-} & Omit<ProviderConfigArgs, "env">;
+} & Omit<ProviderConfigArgs, "env" | "name">;
 
 export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const projectPath =
@@ -153,7 +153,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   if (fluenceEnv === "local") {
     await initNewReadonlyProviderConfig({
       env: "local",
-      numberOfNoxes: options.numberOfNoxes,
+      noxes: options.noxes,
     });
   }
 
@@ -237,7 +237,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
   await updateRelaysJSON({
     fluenceConfig,
-    numberOfNoxes: options.numberOfNoxes,
+    noxes: options.noxes,
   });
 
   commandObj.logToStderr(
