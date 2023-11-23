@@ -231,10 +231,9 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] --collateral-per-worker <value> --min-workers <value> --target-workers
-    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [-k <value>]
-    [--off-aqua-logs] [--priv-key <value>] [--env <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--import <value>] [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match]
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--env
+    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>] [--auto-match]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
@@ -242,8 +241,7 @@ ARGUMENTS
 
 FLAGS
   -k, --sk=<name>                                  Name of a peer's Network Private Key
-  --[no-]auto-match                                Disable automatic matching
-  --collateral-per-worker=<value>                  (required) Collateral per worker
+  --[no-]auto-match                                Toggle automatic matching. Auto-matching is turned on by default
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -252,17 +250,13 @@ FLAGS
   --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
                                                    Overrides 'marineBuildArgs' property in fluence.yaml. Default:
                                                    --release
-  --max-workers-per-provider=<value>               (required) Max workers per provider
-  --min-workers=<value>                            (required) Required workers to activate the deal
   --no-build                                       Don't build the project before running the command
   --no-input                                       Don't interactively ask for any input from the user
   --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
   --particle-id                                    Print particle ids when running Fluence js-client
-  --price-per-worker-epoch=<value>                 (required) Price per worker epoch
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure
   --relay=<multiaddress>                           Relay for Fluence js-client to connect to
-  --target-workers=<value>                         (required) Max workers in the deal
   --tracing                                        Compile aqua in tracing mode (for debugging purposes)
   --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
@@ -385,8 +379,7 @@ _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/bl
 
 ```
 USAGE
-  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
-    [--global]
+  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force] [-g]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -396,9 +389,9 @@ ARGUMENTS
                                        example: package@version
 
 FLAGS
-  --force                       Force install even if the dependency/dependencies is/are already installed
-  --global                      Will override dependencies in a global user's config.yaml instead of project's
+  -g, --global                  Will override dependencies in a global user's config.yaml instead of project's
                                 fluence.yaml
+  --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
                                 flag is used. Default: nightly-2023-08-27-x86_64"]}
@@ -446,7 +439,7 @@ _See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob
 
 ```
 USAGE
-  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [--global]
+  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [-g]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -456,9 +449,9 @@ ARGUMENTS
                                        Example: package@version
 
 FLAGS
-  --force     Force install even if the dependency/dependencies is/are already installed
-  --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
-  --no-input  Don't interactively ask for any input from the user
+  -g, --global  Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
+  --force       Force install even if the dependency/dependencies is/are already installed
+  --no-input    Don't interactively ask for any input from the user
 
 DESCRIPTION
   (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm
@@ -479,12 +472,12 @@ Reset all project dependencies to recommended versions for the current Fluence C
 
 ```
 USAGE
-  $ fluence dep reset [--no-input] [--global] [--all]
+  $ fluence dep reset [--no-input] [-g] [--all]
 
 FLAGS
-  --all       Remove all dependencies, not only recommended ones
-  --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
-  --no-input  Don't interactively ask for any input from the user
+  -g, --global  Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
+  --all         Remove all dependencies, not only recommended ones
+  --no-input    Don't interactively ask for any input from the user
 
 DESCRIPTION
   Reset all project dependencies to recommended versions for the current Fluence CLI version
@@ -558,7 +551,8 @@ FLAGS
   -t, --template=<value>                           Template to use for the project. One of: quickstart, minimal, ts, js
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
-  --noxes=<value>                                  Number of Compute Peers to generate in your provider config
+  --noxes=<value>                                  Number of Compute Peers to generate when a new provider.yaml is
+                                                   created
 
 DESCRIPTION
   Initialize fluence project
@@ -672,7 +666,7 @@ USAGE
 
 FLAGS
   --no-input       Don't interactively ask for any input from the user
-  --noxes=<value>  Number of Compute Peers to generate in your provider config
+  --noxes=<value>  Number of Compute Peers to generate when a new provider.yaml is created
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -753,7 +747,7 @@ USAGE
 
 FLAGS
   --no-input       Don't interactively ask for any input from the user
-  --noxes=<value>  Number of Compute Peers to generate in your provider config
+  --noxes=<value>  Number of Compute Peers to generate when a new provider.yaml is created
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose
@@ -845,16 +839,17 @@ Register specific nox instance as a Compute Peer
 
 ```
 USAGE
-  $ fluence provider add-peer [--no-input] [--priv-key <value>] [--env <value>] [--peer-id <value>] [--compute-units
-    <value>]
+  $ fluence provider add-peer [--no-input] [--priv-key <value>] [-n <value>] [--env <value>] [--peer-id <value>]
+    [--compute-units <value>]
 
 FLAGS
-  --compute-units=<value>...                       Number of compute units to add for each peer
-  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                                       Don't interactively ask for any input from the user
-  --peer-id=<value>...                             Peer id of the compute peer
-  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
-                                                   is unsecure
+  -n, --name=<value>                      Provider config name
+  --compute-units=<value>...              Number of compute units to add for each peer
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --peer-id=<value>...                    Peer id of the compute peer
+  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
+                                          unsecure
 
 DESCRIPTION
   Register specific nox instance as a Compute Peer
@@ -891,13 +886,13 @@ Generate Config.toml files according to provider.yaml
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
+  $ fluence provider gen [--no-input] [--noxes <value>] [-n <value>] [--env <value>]
 
 FLAGS
+  -n, --name=<value>                      Provider config name
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
-  --name=<value>                          Provider config name
   --no-input                              Don't interactively ask for any input from the user
-  --noxes=<value>                         Number of Compute Peers to generate in your provider config
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml
@@ -929,20 +924,20 @@ _See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence provider init`
 
-Init provider config. Creates a config file in the current directory.
+Init provider config. Creates a config file
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [--name <value>] [--env <value>]
+  $ fluence provider init [--no-input] [--noxes <value>] [-n <value>] [--env <value>]
 
 FLAGS
+  -n, --name=<value>                      Provider config name
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
-  --name=<value>                          Provider config name
   --no-input                              Don't interactively ask for any input from the user
-  --noxes=<value>                         Number of Compute Peers to generate in your provider config
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
 
 DESCRIPTION
-  Init provider config. Creates a config file in the current directory.
+  Init provider config. Creates a config file
 ```
 
 _See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/init.ts)_
@@ -953,16 +948,17 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register --max-collateral <value> --price-per-epoch <value> [--no-input] [--priv-key <value>]
-    [--env <value>]
+  $ fluence provider register [--no-input] [--priv-key <value>] [-n <value>] [--env <value>] [--noxes <value>] [--offer
+    <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
-  --max-collateral=<value>                         (required) Max collateral for provider offer
-  --no-input                                       Don't interactively ask for any input from the user
-  --price-per-epoch=<value>                        (required) Price per epoch for provider offer
-  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
-                                                   is unsecure
+  -n, --name=<value>                      Provider config name
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --offer=<offer>                         Offer from provider.yaml to use
+  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
+                                          unsecure
 
 DESCRIPTION
   Register in matching contract

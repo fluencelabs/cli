@@ -50,12 +50,15 @@ Worker config
 
 #### Properties
 
-| Property        | Type     | Required | Description                                                                                       |
-|-----------------|----------|----------|---------------------------------------------------------------------------------------------------|
-| `minWorkers`    | number   | No       | Required workers to activate the deal                                                             |
-| `services`      | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
-| `spells`        | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
-| `targetWorkers` | number   | No       | Max workers in the deal                                                                           |
+| Property                | Type     | Required | Description                                                                                       |
+|-------------------------|----------|----------|---------------------------------------------------------------------------------------------------|
+| `collateralPerWorker`   | number   | No       | Collateral per worker in FL                                                                       |
+| `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                       |
+| `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                          |
+| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FL                                                                      |
+| `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
+| `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
+| `targetWorkers`         | number   | No       | Max workers in the deal                                                                           |
 
 ## dependencies
 

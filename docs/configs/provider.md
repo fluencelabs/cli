@@ -160,7 +160,7 @@ Defines a provider offer
 | Property                 | Type     | Required | Description                                   |
 |--------------------------|----------|----------|-----------------------------------------------|
 | `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
-| `maxCollateralPerWorker` | number   | **Yes**  |                                               |
-| `minPricePerWorkerEpoch` | number   | **Yes**  |                                               |
+| `maxCollateralPerWorker` | number   | **Yes**  | Max collateral per worker                     |
+| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch                |
 | `effectors`              | string[] | No       |                                               |
 
