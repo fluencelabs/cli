@@ -38,7 +38,7 @@ import {
 } from "./paths.js";
 import { list, type Choices, input, confirm } from "./prompt.js";
 
-type CreateSecretKeyArg = {
+type UpdateSecretKeyArg = {
   name: string | undefined;
   isUser: boolean;
   maybeFluenceConfig: FluenceConfig | null;
@@ -83,7 +83,8 @@ export async function createSecretKey({
   name,
   isUser,
   maybeFluenceConfig,
-}: CreateSecretKeyArg) {
+  askToSetKeyAsDefaultInteractively = true,
+}: UpdateSecretKeyArg & { askToSetKeyAsDefaultInteractively?: boolean }) {
   const userOrProjectConfig = await resolveUserOrProjectConfig({
     isUser,
     maybeFluenceConfig,
@@ -133,6 +134,7 @@ export async function createSecretKey({
   });
 
   if (
+    askToSetKeyAsDefaultInteractively &&
     isInteractive &&
     (await confirm({
       message: `Do you want to set ${color.yellow(
@@ -155,7 +157,7 @@ export async function removeSecretKey({
   name,
   isUser,
   maybeFluenceConfig,
-}: CreateSecretKeyArg) {
+}: UpdateSecretKeyArg) {
   const userOrProjectConfig = await resolveUserOrProjectConfig({
     isUser,
     maybeFluenceConfig,
@@ -263,7 +265,7 @@ export async function setDefaultSecretKey({
   name,
   isUser,
   maybeFluenceConfig,
-}: CreateSecretKeyArg) {
+}: UpdateSecretKeyArg) {
   const userOrProjectConfig = await resolveUserOrProjectConfig({
     isUser,
     maybeFluenceConfig,
