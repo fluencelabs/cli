@@ -406,6 +406,7 @@ const fluenceRun = async (args: RunArgs) => {
   }
 
   await initFluenceClient(args, args.maybeFluenceConfig);
+
   const { Fluence, callAquaFunction, js2aqua, aqua2js } = await import(
     "@fluencelabs/js-client"
   );
@@ -422,12 +423,14 @@ const fluenceRun = async (args: RunArgs) => {
 
       const fields =
         schema.arrow.domain.tag === "nil" ? {} : schema.arrow.domain.fields;
+
       const argSchema = fields[argName];
 
       assert(
         argSchema !== undefined,
         "Should be impossible because schema always contains same keys as runData",
       );
+
       assert(
         argSchema.tag !== "arrow",
         "Should be impossible to pass function as an argument to fluence run",
