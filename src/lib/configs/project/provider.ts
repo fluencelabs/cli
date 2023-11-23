@@ -314,19 +314,19 @@ const getConfigOrConfigDirPath = () => {
   return ensureProviderConfigPath();
 };
 
-function getDefault({ env, noxes }: Omit<ProviderConfigArgs, "name">) {
+function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
     commandObj.logToStderr("Creating new provider config\n");
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     const userProvidedConfig: UserProvidedConfig = {
-      env: await ensureValidContractsEnv(env),
+      env: await ensureValidContractsEnv(args.env),
       computePeers: {},
       offers: {},
     };
 
-    await addComputePeers(noxes, userProvidedConfig);
-    await addOffers(userProvidedConfig);
+    await addComputePeers(args.noxes, userProvidedConfig);
+    await addOffers(args, userProvidedConfig);
 
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template

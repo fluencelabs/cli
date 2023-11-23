@@ -365,6 +365,7 @@ describe("integration tests", () => {
   maybeConcurrentTest(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
+      const PRICE_TO_USE = 1 / CURRENCY;
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
       await init(cwd, "quickstart");
 
@@ -373,6 +374,8 @@ describe("integration tests", () => {
         flags: {
           "priv-key": PRIV_KEY,
           offer: "offer-0",
+          "price-per-epoch": PRICE_TO_USE,
+          "max-collateral": PRICE_TO_USE,
         },
         cwd,
       });
@@ -428,8 +431,8 @@ describe("integration tests", () => {
       );
 
       fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-      fluenceConfig.deals[DEFAULT_DEAL_NAME].collateralPerWorker = 1 / CURRENCY;
-      fluenceConfig.deals[DEFAULT_DEAL_NAME].pricePerWorkerEpoch = 1 / CURRENCY;
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].collateralPerWorker = PRICE_TO_USE;
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].pricePerWorkerEpoch = PRICE_TO_USE;
       fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
       fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();

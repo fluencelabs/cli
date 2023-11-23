@@ -30,11 +30,12 @@ import { checkboxes, confirm, input } from "./prompt.js";
 async function promptToSetNumberProperty(
   offer: Offer,
   property: NumberProperty,
+  valueFromFlags: string | undefined,
 ) {
   const propertyStr = await input({
     message: `Enter ${color.yellow(property)}`,
     validate: validatePositiveNumberOrEmpty,
-    default: `${defaultNumberProperties[property]}`,
+    default: valueFromFlags ?? `${defaultNumberProperties[property]}`,
   });
 
   offer[property] = Number(propertyStr);
@@ -42,17 +43,20 @@ async function promptToSetNumberProperty(
 
 const DEFAULT_NUMBER_OF_NOXES = 3;
 
-export type ProviderConfigArgs =
+export type ProviderConfigArgs = (
   | {
-      name: string | undefined;
       env: string | undefined;
-      noxes?: number | undefined;
+      name: string | undefined;
     }
   | {
       env: "local";
-      noxes?: number | undefined;
       name?: undefined;
-    };
+    }
+) & {
+  "max-collateral"?: string | undefined;
+  "price-per-epoch"?: string | undefined;
+  noxes?: number | undefined;
+};
 
 export async function addComputePeers(
   numberOfNoxes: number | undefined,
@@ -104,7 +108,10 @@ export async function addComputePeers(
   } while (isAddingMoreComputePeers);
 }
 
-export async function addOffers(userProvidedConfig: UserProvidedConfig) {
+export async function addOffers(
+  args: Omit<ProviderConfigArgs, "name">,
+  userProvidedConfig: UserProvidedConfig,
+) {
   let isAddingMoreOffers = true;
   let offersCounter = 0;
 
@@ -157,8 +164,17 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
       ...(effectors.length > 0 ? { effectors } : {}),
     };
 
+    const valuesFromFlags: Record<NumberProperty, string | undefined> = {
+      maxCollateralPerWorker: args["max-collateral"],
+      minPricePerWorkerEpoch: args["price-per-epoch"],
+    };
+
     for (const numberProperty of numberProperties) {
-      await promptToSetNumberProperty(offer, numberProperty);
+      await promptToSetNumberProperty(
+        offer,
+        numberProperty,
+        valuesFromFlags[numberProperty],
+      );
     }
 
     userProvidedConfig.offers[name] = offer;

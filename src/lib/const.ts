@@ -313,6 +313,12 @@ export const NOXES_FLAG = {
   noxes: Flags.integer({
     description: `Number of Compute Peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
   }),
+  "max-collateral": Flags.string({
+    description: "Max collateral for new provider offer",
+  }),
+  "price-per-epoch": Flags.string({
+    description: "Price per epoch for new provider offer",
+  }),
 };
 
 export const OFFER_FLAG = {
