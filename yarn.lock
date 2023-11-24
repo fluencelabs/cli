@@ -587,10 +587,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@npm:0.12.4":
-  version: 0.12.4
-  resolution: "@fluencelabs/aqua-api@npm:0.12.4"
-  checksum: aed88bff10cc854f89e66212c050d136c47a14def516a56a9291d98afb148a91e1c6321c3f976f89db0c7b046e8477590ff13772425ad74de0d2f421e967253f
+"@fluencelabs/aqua-api@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@fluencelabs/aqua-api@npm:0.13.0"
+  checksum: 75dbfb37bc03ba51dd57612f31b67003fe1f49d9ae1db2c7ba975ed33abdc5f76e416e8387b112a48796571c063c8ce4d7448acf0601224f27df3ebedfd366d2
   languageName: node
   linkType: hard
 
@@ -610,12 +610,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-to-js@npm:0.1.0":
-  version: 0.1.0
-  resolution: "@fluencelabs/aqua-to-js@npm:0.1.0"
+"@fluencelabs/aqua-to-js@npm:0.3.0":
+  version: 0.3.0
+  resolution: "@fluencelabs/aqua-to-js@npm:0.3.0"
   dependencies:
     ts-pattern: 5.0.5
-  checksum: 7760835d15752cc27fa0db50babf018ea49ca21d642383c2ea01cbc5437fe281c2c80cc8d47d9b69f575ea4288251d5ff910cc942dbc2306b79cd3f360fb0c57
+  checksum: 0a572870eb3dd05d20be24aaee480ac5468ef5b68eaba2d7e81f24881aae4a1b331d82a44992c5c5fab6994baf62573ac6495fee581c511ebc3ba3a8147a7bf5
   languageName: node
   linkType: hard
 
@@ -631,12 +631,12 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
-    "@fluencelabs/aqua-api": 0.12.4
-    "@fluencelabs/aqua-to-js": 0.1.0
+    "@fluencelabs/aqua-api": 0.13.0
+    "@fluencelabs/aqua-to-js": 0.3.0
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/installation-spell": 0.5.31
-    "@fluencelabs/js-client": 0.4.2
+    "@fluencelabs/js-client": 0.5.3
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -734,35 +734,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/interfaces@npm:0.8.2":
-  version: 0.8.2
-  resolution: "@fluencelabs/interfaces@npm:0.8.2"
-  checksum: 589186e0f77ba4986841de8bc9d76142c8da1f74af7846d71e056f5eb9f51a37b90db7db2d292a3601a56b5c416e8c7342a03bd68d19cd692b1df54e5373bc7e
+"@fluencelabs/interfaces@npm:0.9.0":
+  version: 0.9.0
+  resolution: "@fluencelabs/interfaces@npm:0.9.0"
+  checksum: af42119fb76be999cdabdcef321d5e4af174eadd60503fc1721e88637f87cbb3e15238034186e9c3e133172911d866c9256b0e1fcd31dfdf9d61ab8765766c2c
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client-isomorphic@npm:0.2.1":
-  version: 0.2.1
-  resolution: "@fluencelabs/js-client-isomorphic@npm:0.2.1"
+"@fluencelabs/js-client-isomorphic@npm:0.3.0":
+  version: 0.3.0
+  resolution: "@fluencelabs/js-client-isomorphic@npm:0.3.0"
   dependencies:
     "@fluencelabs/avm": 0.54.0
-    "@fluencelabs/marine-js": 0.7.2
-    "@fluencelabs/marine-worker": 0.4.1
+    "@fluencelabs/marine-js": 0.8.0
+    "@fluencelabs/marine-worker": 0.5.0
     "@fluencelabs/threads": ^2.0.0
-  checksum: e99c206b85844b022b97c8f728fc60b4d380cec3d486d6a3ecee8737661a86b4d0f588f574c6b4bb5fdc617213043282f795f9543cb1e84644e1aedf67b5435e
+  checksum: 49f5919d4603c03ca7048f2750b6794950a5b7bf6ae8e0536bf6d16e7dad293c4a127227ef5cef0a123ac90a1a58f975a3c08ff0698314d0ea861070a8f9b0e7
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.4.2":
-  version: 0.4.2
-  resolution: "@fluencelabs/js-client@npm:0.4.2"
+"@fluencelabs/js-client@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@fluencelabs/js-client@npm:0.5.3"
   dependencies:
     "@chainsafe/libp2p-noise": 13.0.0
     "@chainsafe/libp2p-yamux": 5.0.0
     "@fluencelabs/avm": 0.54.0
-    "@fluencelabs/interfaces": 0.8.2
-    "@fluencelabs/js-client-isomorphic": 0.2.1
-    "@fluencelabs/marine-worker": 0.4.1
+    "@fluencelabs/interfaces": 0.9.0
+    "@fluencelabs/js-client-isomorphic": 0.3.0
+    "@fluencelabs/marine-worker": 0.5.0
     "@fluencelabs/threads": ^2.0.0
     "@libp2p/crypto": 2.0.3
     "@libp2p/interface": 0.1.2
@@ -770,8 +770,6 @@ __metadata:
     "@libp2p/peer-id-factory": 3.0.3
     "@libp2p/websockets": 7.0.4
     "@multiformats/multiaddr": 11.3.0
-    assert: 2.1.0
-    async: 3.2.4
     bs58: 5.0.0
     buffer: 6.0.3
     debug: 4.3.4
@@ -782,33 +780,32 @@ __metadata:
     libp2p: 0.46.6
     multiformats: 11.0.1
     rxjs: 7.5.5
-    ts-pattern: 3.3.3
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: b16549d31cc5de20d6fbc38fe3b2b9b01e554dfb7fc5abb6adf7c5f5eb3f5231d5ecf3d031e399ecc55379279944d6130d246a47c01c0f1c8591333f8152e06e
+  checksum: db2fa5da14c57c5e3e2a1bbfbadf78b5ac4f58a30480b0e7b1432c4788a22c792492181fa5b380a598b0f760a46ffee2b64a94c8b348209c36d2f468ae80cabb
   languageName: node
   linkType: hard
 
-"@fluencelabs/marine-js@npm:0.7.2":
-  version: 0.7.2
-  resolution: "@fluencelabs/marine-js@npm:0.7.2"
+"@fluencelabs/marine-js@npm:0.8.0":
+  version: 0.8.0
+  resolution: "@fluencelabs/marine-js@npm:0.8.0"
   dependencies:
     "@wasmer/wasi": 0.12.0
     "@wasmer/wasmfs": 0.12.0
     default-import: 1.1.5
-  checksum: d81a7f15e39a90ac13e8d78c5e0a93979e52a842c2338755db102e760a2965fb80d134bda3f3f553e0e445f3a579866830d014534bdad96f69a8f3e9d3208da0
+  checksum: dcda6d37b6c58c583e16342556ed86f8fbea72e9e87f4531e20c60aa4fc4decfe733e2d8da93c89c35e0a0b658b16d4207807f5d5167331a48c470cbfea21b34
   languageName: node
   linkType: hard
 
-"@fluencelabs/marine-worker@npm:0.4.1":
-  version: 0.4.1
-  resolution: "@fluencelabs/marine-worker@npm:0.4.1"
+"@fluencelabs/marine-worker@npm:0.5.0":
+  version: 0.5.0
+  resolution: "@fluencelabs/marine-worker@npm:0.5.0"
   dependencies:
-    "@fluencelabs/marine-js": 0.7.2
+    "@fluencelabs/marine-js": 0.8.0
     "@fluencelabs/threads": ^2.0.0
     observable-fns: 0.6.1
-  checksum: 81cc8dae87b29ee829cbcec7362f5af12f7561866632e6defbf0983b32ce304167c59e9fe40becc96c69a0e57ac16a3c718b52d2b3df32c7301ede972fa58146
+  checksum: 3a73a45f969b4cc8a13c8871f9ce1d6bb3ab14078341a9349effa954de6a761103f8ae1d29785d978a30a9881056fe5499fdf124553b2486aaa94683a4dfdccd
   languageName: node
   linkType: hard
 
@@ -4502,19 +4499,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"assert@npm:2.1.0":
-  version: 2.1.0
-  resolution: "assert@npm:2.1.0"
-  dependencies:
-    call-bind: ^1.0.2
-    is-nan: ^1.3.2
-    object-is: ^1.1.5
-    object.assign: ^4.1.4
-    util: ^0.12.5
-  checksum: 1ed1cabba9abe55f4109b3f7292b4e4f3cf2953aad8dc148c0b3c3bd676675c31b1abb32ef563b7d5a19d1715bf90d1e5f09fad2a4ee655199468902da80f7c2
-  languageName: node
-  linkType: hard
-
 "assertion-error@npm:^1.1.0":
   version: 1.1.0
   resolution: "assertion-error@npm:1.1.0"
@@ -4556,13 +4540,6 @@ __metadata:
   dependencies:
     retry: 0.13.1
   checksum: 38a7152ff7265a9321ea214b9c69e8224ab1febbdec98efbbde6e562f17ff68405569b796b1c5271f354aef8783665d29953f051f68c1fc45306e61aec82fdc4
-  languageName: node
-  linkType: hard
-
-"async@npm:3.2.4":
-  version: 3.2.4
-  resolution: "async@npm:3.2.4"
-  checksum: 43d07459a4e1d09b84a20772414aa684ff4de085cbcaec6eea3c7a8f8150e8c62aa6cd4e699fe8ee93c3a5b324e777d34642531875a0817a35697522c1b02e89
   languageName: node
   linkType: hard
 
@@ -8997,16 +8974,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-nan@npm:^1.3.2":
-  version: 1.3.2
-  resolution: "is-nan@npm:1.3.2"
-  dependencies:
-    call-bind: ^1.0.0
-    define-properties: ^1.1.3
-  checksum: 5dfadcef6ad12d3029d43643d9800adbba21cf3ce2ec849f734b0e14ee8da4070d82b15fdb35138716d02587c6578225b9a22779cab34888a139cc43e4e3610a
-  languageName: node
-  linkType: hard
-
 "is-natural-number@npm:^4.0.1":
   version: 4.0.1
   resolution: "is-natural-number@npm:4.0.1"
@@ -12279,16 +12246,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-is@npm:^1.1.5":
-  version: 1.1.5
-  resolution: "object-is@npm:1.1.5"
-  dependencies:
-    call-bind: ^1.0.2
-    define-properties: ^1.1.3
-  checksum: 989b18c4cba258a6b74dc1d74a41805c1a1425bce29f6cabb50dcb1a6a651ea9104a1b07046739a49a5bb1bc49727bcb00efd5c55f932f6ea04ec8927a7901fe
-  languageName: node
-  linkType: hard
-
 "object-keys@npm:^1.1.1":
   version: 1.1.1
   resolution: "object-keys@npm:1.1.1"
@@ -15198,13 +15155,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-pattern@npm:3.3.3":
-  version: 3.3.3
-  resolution: "ts-pattern@npm:3.3.3"
-  checksum: 64c8535fbfc4f56bb9f00c4c4fa5a47471cc4e27c618cb25bc94df3e6f7fdaebff43be0071e117aa1d12ed0fa58ee960895b3311976c64b978559aac228ef0eb
-  languageName: node
-  linkType: hard
-
 "ts-pattern@npm:5.0.5":
   version: 5.0.5
   resolution: "ts-pattern@npm:5.0.5"
@@ -15886,7 +15836,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"util@npm:^0.12.4, util@npm:^0.12.5":
+"util@npm:^0.12.4":
   version: 0.12.5
   resolution: "util@npm:0.12.5"
   dependencies:
