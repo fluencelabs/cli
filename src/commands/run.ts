@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
 import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
@@ -46,7 +45,7 @@ import {
   TRACING_FLAG,
 } from "../lib/const.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
-import { jsonStringify } from "../lib/helpers/utils.js";
+import { jsonStringify, splitErrorsAndResults } from "../lib/helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
 import {
@@ -80,12 +79,12 @@ export default class Run extends BaseCommand<typeof Run> {
     ...baseFlags,
     data: Flags.string({
       description:
-        "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names",
+        "JSON in { [argumentName]: argumentValue } format. You can call a function using these argument names like this: -f 'myFunc(argumentName)'. Arguments in this flag override arguments in the --data-path flag",
       helpValue: "<json>",
     }),
     "data-path": Flags.file({
       description:
-        "Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function using these argument names",
+        "Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function using these argument names like this: -f 'myFunc(argumentName)'. Arguments in this flag can be overridden using --data flag",
       helpValue: "<path>",
     }),
     ...IMPORT_FLAG,
@@ -405,8 +404,6 @@ const fluenceRun = async (args: RunArgs) => {
     commandObj.log(beautify(functionCall.script));
   }
 
-  await initFluenceClient(args, args.maybeFluenceConfig);
-
   const { Fluence, callAquaFunction, js2aqua, aqua2js } = await import(
     "@fluencelabs/js-client"
   );
@@ -414,44 +411,95 @@ const fluenceRun = async (args: RunArgs) => {
   const schema = functionCall.funcDef;
 
   // TODO: remove this after DXJ-535 is done
-  const validatedRunData = Object.fromEntries(
-    Object.entries(args.runData ?? {}).map(([argName, argValue]) => {
-      const fields =
-        schema.arrow.domain.tag === "nil" ? {} : schema.arrow.domain.fields;
+  const argsExpectedFromFuncFlag =
+    schema.arrow.domain.tag === "nil" ? {} : schema.arrow.domain.fields;
 
-      const argSchema = fields[argName];
+  const runDataWithSchemas = Object.entries(args.runData ?? {})
+    .map(([argName, argValue]) => {
+      const argSchema = argsExpectedFromFuncFlag[argName];
+      return [argName, argValue, argSchema] as const;
+    })
+    // if user passes some args that he didn't mention in -f flag - we ignore them
+    .filter(
+      (
+        arg,
+      ): arg is [
+        (typeof arg)[0],
+        (typeof arg)[1],
+        NonNullable<(typeof arg)[2]>,
+      ] => {
+        return arg[2] !== undefined;
+      },
+    );
 
-      assert(
-        argSchema !== undefined,
-        "Should be impossible because schema always contains same keys as runData",
-      );
+  const [missingArgsErrors] = splitErrorsAndResults(
+    Object.keys(argsExpectedFromFuncFlag),
+    (argNameFromFuncFlag) => {
+      const isArgExpectedInFuncFlagPassedUsingDataFlags =
+        runDataWithSchemas.some(([argNameFromDataFlags]) => {
+          return argNameFromFuncFlag === argNameFromDataFlags;
+        });
 
-      assert(
-        argSchema.tag !== "arrow",
-        "Should be impossible to pass function as an argument to fluence run",
-      );
+      if (!isArgExpectedInFuncFlagPassedUsingDataFlags) {
+        return {
+          error: `You are using argument ${color.yellow(
+            argNameFromFuncFlag,
+          )} in the ${color.yellow(
+            args.funcCall,
+          )} call, but you didn't pass the value for this argument using ${color.yellow(
+            "--data",
+          )} or ${color.yellow("--data-path")} flags`,
+        };
+      }
 
-      return [argName, js2aqua(argValue, argSchema, { path: [argName] })];
-    }),
+      return { result: argNameFromFuncFlag };
+    },
   );
+
+  if (missingArgsErrors.length > 0) {
+    commandObj.error(missingArgsErrors.join("\n"));
+  }
+
+  const [runDataErrors, runDataResults] = splitErrorsAndResults(
+    runDataWithSchemas,
+    ([argName, argValue, argSchema]) => {
+      if (argSchema.tag === "arrow") {
+        return {
+          error: `Argument ${color.yellow(
+            argName,
+          )} is a function. Currently it can't be passed to ${color.yellow(
+            "fluence run",
+          )}. We suggest you two wrap this function in your aqua code so there is no need to pass a callback to it`,
+        };
+      }
+
+      return {
+        result: [
+          argName,
+          js2aqua(argValue, argSchema, { path: [argName] }),
+        ] as const,
+      };
+    },
+  );
+
+  if (runDataErrors.length > 0) {
+    commandObj.error(runDataErrors.join("\n"));
+  }
+
+  await initFluenceClient(args, args.maybeFluenceConfig);
 
   const result = await callAquaFunction({
     script: functionCall.script,
     config: {},
     peer: Fluence.getClient(),
-    args: validatedRunData,
+    args: Object.fromEntries(runDataResults),
   });
 
   const returnSchema =
-    schema.arrow.codomain.tag === "unlabeledProduct" &&
+    (schema.arrow.codomain.tag === "unlabeledProduct" &&
     schema.arrow.codomain.items.length === 1
       ? schema.arrow.codomain.items[0]
-      : schema.arrow.codomain;
-
-  assert(
-    returnSchema !== undefined,
-    "This value cannot be 'undefined' as we checked 'items' length before accessing it",
-  );
+      : undefined) ?? schema.arrow.codomain;
 
   return aqua2js(result, returnSchema);
 };

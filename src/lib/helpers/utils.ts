@@ -114,3 +114,23 @@ export function removeProperties<T>(
 
 export const LOGS_RESOLVE_SUBNET_ERROR_START = `Failed to resolve subnet:`;
 export const LOGS_GET_ERROR_START = `Failed to get logs:`;
+
+export function splitErrorsAndResults<T, U, V>(
+  array: Array<T>,
+  splitter: (v: T) => { error: NonNullable<U> } | { result: NonNullable<V> },
+) {
+  const errors: Array<NonNullable<U>> = [];
+  const results: Array<NonNullable<V>> = [];
+
+  for (const item of array) {
+    const splitted = splitter(item);
+
+    if ("error" in splitted) {
+      errors.push(splitted.error);
+    } else {
+      results.push(splitted.result);
+    }
+  }
+
+  return [errors, results] as const;
+}
