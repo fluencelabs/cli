@@ -435,12 +435,13 @@ const fluenceRun = async (args: RunArgs) => {
   const [missingArgsErrors] = splitErrorsAndResults(
     Object.keys(argsExpectedFromFuncFlag),
     (argNameFromFuncFlag) => {
-      const isArgExpectedInFuncFlagPassedUsingDataFlags =
-        runDataWithSchemas.some(([argNameFromDataFlags]) => {
+      const isArgMissing = !runDataWithSchemas.some(
+        ([argNameFromDataFlags]) => {
           return argNameFromFuncFlag === argNameFromDataFlags;
-        });
+        },
+      );
 
-      if (!isArgExpectedInFuncFlagPassedUsingDataFlags) {
+      if (isArgMissing) {
         return {
           error: `You are using argument ${color.yellow(
             argNameFromFuncFlag,
