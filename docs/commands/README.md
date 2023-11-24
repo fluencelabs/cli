@@ -1047,9 +1047,13 @@ FLAGS
                                                    aqua code: SOME_CONST ?= "default_value"). Constant name must be
                                                    upper cased.
   --data=<json>                                    JSON in { [argumentName]: argumentValue } format. You can call a
-                                                   function using these argument names
+                                                   function using these argument names like this: -f
+                                                   'myFunc(argumentName)'. Arguments in this flag override arguments in
+                                                   the --data-path flag
   --data-path=<path>                               Path to a JSON file in { [argumentName]: argumentValue } format. You
-                                                   can call a function using these argument names
+                                                   can call a function using these argument names like this: -f
+                                                   'myFunc(argumentName)'. Arguments in this flag can be overridden
+                                                   using --data flag
   --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
