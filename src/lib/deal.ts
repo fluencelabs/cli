@@ -25,6 +25,7 @@ import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL, CURRENCY } from "./const.js";
+import { dbg } from "./dbg.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
@@ -68,7 +69,9 @@ export const dealCreate = async ({
 
   promptConfirmTx(privKey);
   const pricePerWorkerEpochBigInt = BigInt(pricePerWorkerEpoch * CURRENCY);
+  dbg(`pricePerWorkerEpoch: ${pricePerWorkerEpochBigInt}`);
   const collateralPerWorkerBigInt = BigInt(collateralPerWorker * CURRENCY);
+  dbg(`collateralPerWorker: ${collateralPerWorkerBigInt}`);
 
   const approveTx = await flt.approve(
     await factory.getAddress(),

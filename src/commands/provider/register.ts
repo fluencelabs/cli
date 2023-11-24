@@ -30,6 +30,7 @@ import {
   PROVIDER_CONFIG_FLAGS,
   CURRENCY,
 } from "../../lib/const.js";
+import { dbg } from "../../lib/dbg.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { list, type Choices } from "../../lib/prompt.js";
 import {
@@ -79,9 +80,21 @@ export default class Register extends BaseCommand<typeof Register> {
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
 
+    const minPricePerWorkerEpochBigInt = BigInt(
+      offer.minPricePerWorkerEpoch * CURRENCY,
+    );
+
+    dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
+
+    const maxCollateralPerWorkerBigInt = BigInt(
+      offer.maxCollateralPerWorker * CURRENCY,
+    );
+
+    dbg(`maxCollateralPerWorker: ${maxCollateralPerWorkerBigInt}`);
+
     const tx = await matcher.registerComputeProvider(
-      BigInt(offer.minPricePerWorkerEpoch * CURRENCY),
-      BigInt(offer.maxCollateralPerWorker * CURRENCY),
+      minPricePerWorkerEpochBigInt,
+      maxCollateralPerWorkerBigInt,
       await flt.getAddress(),
       [],
     );
