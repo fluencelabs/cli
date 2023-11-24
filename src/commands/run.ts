@@ -263,7 +263,7 @@ const ensureAquaPath = async ({
   });
 };
 
-type RunData =  Record<string, Parameters<typeof js2aqua>[0]>;
+type RunData = Record<string, Parameters<typeof js2aqua>[0]>;
 
 const runDataSchema: JSONSchemaType<RunData> = {
   type: "object",
@@ -448,7 +448,10 @@ const fluenceRun = async (args: RunArgs) => {
       ? schema.arrow.codomain.items[0]
       : schema.arrow.codomain;
 
-  assert(returnSchema !== undefined, "This value cannot be 'undefined' as we checked 'items' length before accessing it");
+  assert(
+    returnSchema !== undefined,
+    "This value cannot be 'undefined' as we checked 'items' length before accessing it",
+  );
 
   return aqua2js(result, returnSchema);
 };
