@@ -542,8 +542,7 @@ Initialize fluence project
 
 ```
 USAGE
-  $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>] [--noxes <value>] [--max-collateral
-    <value>] [--price-per-epoch <value>]
+  $ fluence init [PATH] [--no-input] [-t <value>] [--env <value>] [--noxes <value>]
 
 ARGUMENTS
   PATH  Project path
@@ -551,11 +550,9 @@ ARGUMENTS
 FLAGS
   -t, --template=<value>                           Template to use for the project. One of: quickstart, minimal, ts, js
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
-  --max-collateral=<value>                         Max collateral for new provider offer
   --no-input                                       Don't interactively ask for any input from the user
   --noxes=<value>                                  Number of Compute Peers to generate when a new provider.yaml is
                                                    created
-  --price-per-epoch=<value>                        Price per epoch for new provider offer
 
 DESCRIPTION
   Initialize fluence project
@@ -665,13 +662,11 @@ Init docker-compose.yaml according to provider.yaml
 
 ```
 USAGE
-  $ fluence local init [--no-input] [--noxes <value>] [--max-collateral <value>] [--price-per-epoch <value>]
+  $ fluence local init [--no-input] [--noxes <value>]
 
 FLAGS
-  --max-collateral=<value>   Max collateral for new provider offer
-  --no-input                 Don't interactively ask for any input from the user
-  --noxes=<value>            Number of Compute Peers to generate when a new provider.yaml is created
-  --price-per-epoch=<value>  Price per epoch for new provider offer
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate when a new provider.yaml is created
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -748,13 +743,11 @@ Run docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local up [--no-input] [--noxes <value>] [--max-collateral <value>] [--price-per-epoch <value>]
+  $ fluence local up [--no-input] [--noxes <value>]
 
 FLAGS
-  --max-collateral=<value>   Max collateral for new provider offer
-  --no-input                 Don't interactively ask for any input from the user
-  --noxes=<value>            Number of Compute Peers to generate when a new provider.yaml is created
-  --price-per-epoch=<value>  Price per epoch for new provider offer
+  --no-input       Don't interactively ask for any input from the user
+  --noxes=<value>  Number of Compute Peers to generate when a new provider.yaml is created
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose
@@ -893,16 +886,13 @@ Generate Config.toml files according to provider.yaml
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [--max-collateral <value>] [--price-per-epoch <value>] [-n
-    <value>] [--env <value>]
+  $ fluence provider gen [--no-input] [--noxes <value>] [-n <value>] [--env <value>]
 
 FLAGS
   -n, --name=<value>                      Provider config name
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
-  --max-collateral=<value>                Max collateral for new provider offer
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
-  --price-per-epoch=<value>               Price per epoch for new provider offer
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml
@@ -938,16 +928,13 @@ Init provider config. Creates a config file
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [--max-collateral <value>] [--price-per-epoch <value>] [-n
-    <value>] [--env <value>]
+  $ fluence provider init [--no-input] [--noxes <value>] [-n <value>] [--env <value>]
 
 FLAGS
   -n, --name=<value>                      Provider config name
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
-  --max-collateral=<value>                Max collateral for new provider offer
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
-  --price-per-epoch=<value>               Price per epoch for new provider offer
 
 DESCRIPTION
   Init provider config. Creates a config file
@@ -961,17 +948,15 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [-n <value>] [--env <value>] [--noxes <value>]
-    [--max-collateral <value>] [--price-per-epoch <value>] [--offer <value>]
+  $ fluence provider register [--no-input] [--priv-key <value>] [-n <value>] [--env <value>] [--noxes <value>] [--offer
+    <value>]
 
 FLAGS
   -n, --name=<value>                      Provider config name
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
-  --max-collateral=<value>                Max collateral for new provider offer
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
   --offer=<offer>                         Offer from provider.yaml to use
-  --price-per-epoch=<value>               Price per epoch for new provider offer
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure
 
