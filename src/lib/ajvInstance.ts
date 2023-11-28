@@ -17,6 +17,8 @@
 import { color } from "@oclif/color";
 import Ajv from "ajv";
 
+import { jsonStringify } from "./helpers/utils.js";
+
 export const ajv = new Ajv.default({
   allowUnionTypes: true,
   code: { esm: true },
@@ -27,7 +29,10 @@ type AjvErrors =
   | null
   | undefined;
 
-export const validationErrorToString = async (errors: AjvErrors) => {
+export const validationErrorToString = async (
+  errors: AjvErrors,
+  latestConfigVersion?: string,
+) => {
   if (errors === null || errors === undefined) {
     return "";
   }
@@ -37,14 +42,34 @@ export const validationErrorToString = async (errors: AjvErrors) => {
   return (
     "Errors:\n\n" +
     errors
-      .filter(({ instancePath }) => {
-        return instancePath !== "";
-      })
-      .map(({ instancePath, params, message }) => {
+      .map(({ instancePath, params, message }, i) => {
         const paramsMessage = yamlDiffPatch("", {}, params);
-        return `${color.yellow(instancePath)} ${
+        const prev = errors[i - 1];
+
+        const isPreviousVersionError =
+          latestConfigVersion !== undefined &&
+          instancePath === "/version" &&
+          message === "must be equal to constant" &&
+          !paramsMessage.includes(latestConfigVersion);
+
+        const isDuplicateError =
+          prev?.instancePath === instancePath &&
+          jsonStringify(prev.params) === jsonStringify(params) &&
+          prev.message === message;
+
+        if (isPreviousVersionError || isDuplicateError) {
+          return "";
+        }
+
+        return `${instancePath === "" ? "" : `${color.yellow(instancePath)} `}${
           message ?? ""
-        }\n${paramsMessage}`;
+        }${paramsMessage === "" ? "" : `\n${paramsMessage}`}`;
+      })
+      .filter((s) => {
+        return (
+          s !== "" &&
+          s !== "must match exactly one schema in oneOf\npassingSchemas: null\n"
+        );
       })
       .join("\n")
   );

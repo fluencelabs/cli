@@ -72,6 +72,7 @@ type MigrateConfigOptions<
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
   validate: undefined | ConfigValidateFunction<LatestConfig>;
+  latestConfigVersion: string;
 };
 
 const migrateConfig = async <
@@ -84,6 +85,7 @@ const migrateConfig = async <
   validateLatestConfig,
   config,
   validate,
+  latestConfigVersion,
 }: MigrateConfigOptions<Config, LatestConfig>): Promise<{
   latestConfig: LatestConfig;
   configString: string;
@@ -112,7 +114,10 @@ const migrateConfig = async <
     return commandObj.error(
       `Couldn't migrate config ${color.yellow(
         configPath,
-      )}. ${await validationErrorToString(validateLatestConfig.errors)}`,
+      )}. ${await validationErrorToString(
+        validateLatestConfig.errors,
+        latestConfigVersion,
+      )}`,
     );
   }
 
@@ -145,6 +150,7 @@ type EnsureConfigOptions<
   validateLatestConfig: ValidateFunction<LatestConfig>;
   config: Config;
   validate: undefined | ConfigValidateFunction<LatestConfig>;
+  latestConfigVersion: string;
 };
 
 const ensureConfigIsValidLatest = async <
@@ -155,12 +161,16 @@ const ensureConfigIsValidLatest = async <
   validateLatestConfig,
   config,
   validate,
+  latestConfigVersion,
 }: EnsureConfigOptions<Config, LatestConfig>): Promise<LatestConfig> => {
   if (!validateLatestConfig(config)) {
     return commandObj.error(
       `Invalid config ${color.yellow(
         configPath,
-      )}. ${await validationErrorToString(validateLatestConfig.errors)}`,
+      )}. ${await validationErrorToString(
+        validateLatestConfig.errors,
+        latestConfigVersion,
+      )}`,
     );
   }
 
@@ -277,6 +287,9 @@ export function getReadonlyConfigInitFunction<
       getSchemaDirPath,
     } = options;
 
+    // every config schema has a version property by convention
+    // eslint-disable-next-line
+    const latestConfigVersion = latestSchema.properties.version.const as string;
     const configFullName = `${name}.${YAML_EXT}`;
 
     const getConfigPathResult = getConfigPath(
@@ -397,7 +410,10 @@ export function getReadonlyConfigInitFunction<
       return commandObj.error(
         `Invalid config at ${color.yellow(
           configPath,
-        )}. ${await validationErrorToString(validateAllConfigVersions.errors)}`,
+        )}. ${await validationErrorToString(
+          validateAllConfigVersions.errors,
+          latestConfigVersion,
+        )}`,
       );
     }
 
@@ -411,6 +427,7 @@ export function getReadonlyConfigInitFunction<
         migrations,
         validateLatestConfig,
         validate,
+        latestConfigVersion,
       }));
     } else {
       latestConfig = await ensureConfigIsValidLatest({
@@ -418,6 +435,7 @@ export function getReadonlyConfigInitFunction<
         configPath,
         validateLatestConfig,
         validate,
+        latestConfigVersion,
       });
     }
 
@@ -569,6 +587,9 @@ export function getConfigInitFunction<
               configPath,
             )}.\n\n${newConfigString}\n\n${await validationErrorToString(
               initializedReadonlyConfig.$validateLatest.errors,
+              // every config schema has a version property by convention
+              // eslint-disable-next-line
+              options.latestSchema.properties.version.const as string,
             )}`,
           );
         }
