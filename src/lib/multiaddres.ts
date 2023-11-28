@@ -420,16 +420,16 @@ export async function updateRelaysJSON({
   );
 }
 
+type ResolvedProviderConfig = {
+  name: string;
+  webSocketPort: number;
+  peerId: string;
+  computeUnits: number;
+};
+
 export async function getResolvedProviderConfig(
   args: ProviderConfigArgs,
-): Promise<
-  {
-    name: string;
-    webSocketPort: number;
-    peerId: string;
-    computeUnits: number;
-  }[]
-> {
+): Promise<ResolvedProviderConfig[]> {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   return Promise.all(
     Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {

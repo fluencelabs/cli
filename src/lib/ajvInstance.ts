@@ -29,6 +29,7 @@ type AjvErrors =
   | null
   | undefined;
 
+// TODO: attempt to make this error reliable DJX-538
 const NOT_USEFUL_AJV_ERROR =
   "must match exactly one schema in oneOf\npassingSchemas: null\n";
 

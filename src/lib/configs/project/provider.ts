@@ -449,7 +449,7 @@ export async function initNewReadonlyProviderConfig({
   return providerConfig;
 }
 
-export function initProviderConfig(name?: string | undefined) {
+export function initProviderConfig(name?: string) {
   if (name !== undefined) {
     setProviderConfigName(name);
   }
@@ -457,7 +457,7 @@ export function initProviderConfig(name?: string | undefined) {
   return getConfigInitFunction(getInitConfigOptions())();
 }
 
-export function initReadonlyProviderConfig(name?: string | undefined) {
+export function initReadonlyProviderConfig(name?: string) {
   if (name !== undefined) {
     setProviderConfigName(name);
   }
