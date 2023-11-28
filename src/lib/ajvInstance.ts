@@ -29,9 +29,12 @@ type AjvErrors =
   | null
   | undefined;
 
+const NOT_USEFUL_AJV_ERROR =
+  "must match exactly one schema in oneOf\npassingSchemas: null\n";
+
 export const validationErrorToString = async (
   errors: AjvErrors,
-  latestConfigVersion?: string,
+  latestConfigVersion?: string | number,
 ) => {
   if (errors === null || errors === undefined) {
     return "";
@@ -44,18 +47,18 @@ export const validationErrorToString = async (
     errors
       .map(({ instancePath, params, message }, i) => {
         const paramsMessage = yamlDiffPatch("", {}, params);
-        const prev = errors[i - 1];
+        const prevError = errors[i - 1];
 
         const isPreviousVersionError =
           latestConfigVersion !== undefined &&
           instancePath === "/version" &&
           message === "must be equal to constant" &&
-          !paramsMessage.includes(latestConfigVersion);
+          !paramsMessage.includes(`${latestConfigVersion}`);
 
         const isDuplicateError =
-          prev?.instancePath === instancePath &&
-          jsonStringify(prev.params) === jsonStringify(params) &&
-          prev.message === message;
+          prevError?.instancePath === instancePath &&
+          jsonStringify(prevError.params) === jsonStringify(params) &&
+          prevError.message === message;
 
         if (isPreviousVersionError || isDuplicateError) {
           return "";
@@ -66,10 +69,7 @@ export const validationErrorToString = async (
         }${paramsMessage === "" ? "" : `\n${paramsMessage}`}`;
       })
       .filter((s) => {
-        return (
-          s !== "" &&
-          s !== "must match exactly one schema in oneOf\npassingSchemas: null\n"
-        );
+        return s !== "" && s !== NOT_USEFUL_AJV_ERROR;
       })
       .join("\n")
   );

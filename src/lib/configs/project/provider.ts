@@ -326,7 +326,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
     };
 
     await addComputePeers(args.noxes, userProvidedConfig);
-    await addOffers(args, userProvidedConfig);
+    await addOffers(userProvidedConfig);
 
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
