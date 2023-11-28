@@ -157,10 +157,10 @@ Defines a provider offer
 
 #### Properties
 
-| Property                 | Type     | Required | Description                                   |
-|--------------------------|----------|----------|-----------------------------------------------|
-| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
-| `maxCollateralPerWorker` | number   | **Yes**  | Max collateral per worker                     |
-| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch                |
-| `effectors`              | string[] | No       |                                               |
+| Property                 | Type     | Required | Description                                                        |
+|--------------------------|----------|----------|--------------------------------------------------------------------|
+| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer                      |
+| `maxCollateralPerWorker` | number   | **Yes**  | Max collateral per worker. This number is multiplied by 10^18      |
+| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch. This number is multiplied by 10^18 |
+| `effectors`              | string[] | No       |                                                                    |
 
