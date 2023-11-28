@@ -24,7 +24,7 @@ import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
-import { CLI_NAME_FULL, CURRENCY } from "./const.js";
+import { CLI_NAME_FULL, CURRENCY_MULTIPLIER } from "./const.js";
 import { dbg } from "./dbg.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 
@@ -68,9 +68,17 @@ export const dealCreate = async ({
   const flt = await globalContracts.getFLT();
 
   promptConfirmTx(privKey);
-  const pricePerWorkerEpochBigInt = BigInt(pricePerWorkerEpoch * CURRENCY);
+
+  const pricePerWorkerEpochBigInt = BigInt(
+    pricePerWorkerEpoch * CURRENCY_MULTIPLIER,
+  );
+
   dbg(`pricePerWorkerEpoch: ${pricePerWorkerEpochBigInt}`);
-  const collateralPerWorkerBigInt = BigInt(collateralPerWorker * CURRENCY);
+
+  const collateralPerWorkerBigInt = BigInt(
+    collateralPerWorker * CURRENCY_MULTIPLIER,
+  );
+
   dbg(`collateralPerWorker: ${collateralPerWorkerBigInt}`);
 
   const approveTx = await flt.approve(

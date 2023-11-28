@@ -28,7 +28,7 @@ import {
   PRIV_KEY_FLAG,
   NOXES_FLAG,
   PROVIDER_CONFIG_FLAGS,
-  CURRENCY,
+  CURRENCY_MULTIPLIER,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -81,13 +81,13 @@ export default class Register extends BaseCommand<typeof Register> {
     const flt = await globalContracts.getFLT();
 
     const minPricePerWorkerEpochBigInt = BigInt(
-      offer.minPricePerWorkerEpoch * CURRENCY,
+      offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
     );
 
     dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
 
     const maxCollateralPerWorkerBigInt = BigInt(
-      offer.maxCollateralPerWorker * CURRENCY,
+      offer.maxCollateralPerWorker * CURRENCY_MULTIPLIER,
     );
 
     dbg(`maxCollateralPerWorker: ${maxCollateralPerWorkerBigInt}`);

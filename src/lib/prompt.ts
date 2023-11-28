@@ -83,7 +83,9 @@ const prompt = async <T, U extends Answers>({
       const validity = await question.validate?.(question.default);
 
       if (typeof validity === "string") {
-        commandObj.error(validity);
+        throw new Error(
+          `Default value is invalid. Please report it to Fluence team https://github.com/fluencelabs/cli/issues so we can fix this. Error\n${validity}`,
+        );
       }
 
       // TODO: fix inquirer types so this part is type-checked

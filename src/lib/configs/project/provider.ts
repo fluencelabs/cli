@@ -45,6 +45,7 @@ import {
   TOML_EXT,
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
+  CURRENCY_MULTIPLIER_TEXT,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
@@ -240,11 +241,11 @@ const offerSchema: JSONSchemaType<Offer> = {
   properties: {
     minPricePerWorkerEpoch: {
       type: "number",
-      description: "Minimum price per worker epoch",
+      description: `Minimum price per worker epoch. ${CURRENCY_MULTIPLIER_TEXT}`,
     },
     maxCollateralPerWorker: {
       type: "number",
-      description: "Max collateral per worker",
+      description: `Max collateral per worker. ${CURRENCY_MULTIPLIER_TEXT}`,
     },
     computePeers: {
       description: "Number of Compute Units for this Compute Peer",

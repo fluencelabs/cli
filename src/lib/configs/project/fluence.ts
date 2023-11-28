@@ -26,6 +26,7 @@ import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
+  CURRENCY_MULTIPLIER_TEXT,
   AQUA_LIB_NPM_DEPENDENCY,
   IPFS_ADDR_PROPERTY,
   DEFAULT_IPFS_ADDRESS,
@@ -50,7 +51,7 @@ import {
   LOCAL_IPFS_ADDRESS,
   PRICE_PER_EPOCH_DEFAULT,
   COLLATERAL_DEFAULT,
-  CURRENCY,
+  CURRENCY_MULTIPLIER,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
@@ -282,17 +283,17 @@ const dealSchemaObj = {
     },
     pricePerWorkerEpoch: {
       type: "number",
-      description: "Price per worker epoch in FL",
+      description: `Price per worker epoch in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
       default: PRICE_PER_EPOCH_DEFAULT,
       nullable: true,
-      minimum: 1 / CURRENCY,
+      minimum: 1 / CURRENCY_MULTIPLIER,
     },
     collateralPerWorker: {
       type: "number",
-      description: "Collateral per worker in FL",
+      description: `Collateral per worker in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
       default: COLLATERAL_DEFAULT,
       nullable: true,
-      minimum: 1 / CURRENCY,
+      minimum: 1 / CURRENCY_MULTIPLIER,
     },
   },
   required: [],

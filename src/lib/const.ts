@@ -43,7 +43,9 @@ export const numberProperties = [
 
 export type NumberProperty = (typeof numberProperties)[number];
 
-export const CURRENCY = 10 ** 18;
+export const CURRENCY_MULTIPLIER_POWER = 18;
+export const CURRENCY_MULTIPLIER_TEXT = `This number is multiplied by 10^${CURRENCY_MULTIPLIER_POWER}`;
+export const CURRENCY_MULTIPLIER = 10 ** CURRENCY_MULTIPLIER_POWER;
 export const COLLATERAL_DEFAULT = 1;
 export const PRICE_PER_EPOCH_DEFAULT = 0.1;
 
