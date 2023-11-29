@@ -62,8 +62,10 @@ import {
   fluenceEnv,
   pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
   NO_PROJECT_TEST_NAME,
-  multiaddrs,
+  getMultiaddrs,
 } from "./helpers.js";
+
+const multiaddrs = await getMultiaddrs();
 
 const peerIds = multiaddrs
   .map(({ peerId }) => {

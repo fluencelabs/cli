@@ -139,7 +139,7 @@ export async function setTryTimeout<T, U>(
   callbackToTry: () => T | Promise<T>,
   errorHandler: (error: unknown) => U,
   msToTryFor: number,
-  msBetweenTries?: number,
+  msBetweenTries = 1000,
 ): Promise<T | U> {
   let isTimeoutRunning = true;
 
@@ -153,11 +153,9 @@ export async function setTryTimeout<T, U>(
   while (isTrying) {
     isTrying = isTimeoutRunning;
 
-    if (msBetweenTries !== undefined) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, msBetweenTries);
-      });
-    }
+    await new Promise((resolve) => {
+      setTimeout(resolve, msBetweenTries);
+    });
 
     try {
       const res = await callbackToTry();

@@ -24,6 +24,7 @@ import {
   krasnodar,
   stage,
   testNet,
+  type Node,
 } from "@fluencelabs/fluence-network-environment";
 
 import {
@@ -201,23 +202,29 @@ export const pathToTheTemplateWhereLocalEnvironmentIsSpunUp = join(
 
 export const NO_PROJECT_TEST_NAME = "shouldWorkWithoutProject";
 
-const local =
-  fluenceEnv === "local"
-    ? addrsToNodes(
-        (
-          await fluence({
-            args: ["default", "peers", "local"],
-            cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-          })
-        )
-          .trim()
-          .split("\n"),
-      )
-    : [];
+let multiaddrs: Node[] | undefined;
 
-export const multiaddrs = {
-  kras: krasnodar,
-  stage: stage,
-  testnet: testNet,
-  local,
-}[fluenceEnv];
+export async function getMultiaddrs() {
+  const local =
+    fluenceEnv === "local"
+      ? multiaddrs === undefined
+        ? addrsToNodes(
+            (
+              await fluence({
+                args: ["default", "peers", "local"],
+                cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+              })
+            )
+              .trim()
+              .split("\n"),
+          )
+        : multiaddrs
+      : [];
+
+  return {
+    kras: krasnodar,
+    stage: stage,
+    testnet: testNet,
+    local,
+  }[fluenceEnv];
+}
