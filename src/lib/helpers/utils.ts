@@ -153,10 +153,6 @@ export async function setTryTimeout<T, U>(
   while (isTrying) {
     isTrying = isTimeoutRunning;
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, msBetweenTries);
-    });
-
     try {
       const res = await callbackToTry();
       clearTimeout(timeout);
@@ -165,6 +161,10 @@ export async function setTryTimeout<T, U>(
     } catch (e) {
       error = e;
     }
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, msBetweenTries);
+    });
   }
 
   return errorHandler(error);
