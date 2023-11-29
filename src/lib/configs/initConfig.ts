@@ -287,8 +287,9 @@ export function getReadonlyConfigInitFunction<
       getSchemaDirPath,
     } = options;
 
-    // every config schema has a version property by convention
-    // eslint-disable-next-line
+    // every config schema must have a version, because LatestConfig extends BaseConfig
+    // but ajv doesn't currently produce correct types for this unfortunately
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-member-access
     const latestConfigVersion = latestSchema.properties.version.const as string;
     const configFullName = `${name}.${YAML_EXT}`;
 
@@ -588,7 +589,7 @@ export function getConfigInitFunction<
             )}.\n\n${newConfigString}\n\n${await validationErrorToString(
               initializedReadonlyConfig.$validateLatest.errors,
               // every config schema has a version property by convention
-              // eslint-disable-next-line
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-member-access
               options.latestSchema.properties.version.const as string,
             )}`,
           );

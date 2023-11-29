@@ -19,7 +19,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { PROVIDER_CONFIG_FLAGS, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { getResolvedProviderConfig } from "../../lib/multiaddres.js";
 import {
@@ -37,7 +37,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...PROVIDER_CONFIG_FLAGS,
     "peer-id": Flags.string({
       description: "Peer id of the compute peer",
       multiple: true,
@@ -68,7 +68,7 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
                 flags["compute-units"]?.[i] ?? defaultNumberOfComputeUnits,
             };
           })
-        : await getResolvedProviderConfig({ env: flags.env });
+        : await getResolvedProviderConfig(flags);
 
     const [{ DealClient }, { digest }, { base58btc }] = await Promise.all([
       import("@fluencelabs/deal-aurora"),

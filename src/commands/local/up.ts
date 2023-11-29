@@ -32,7 +32,7 @@ export default class Up extends BaseCommand<typeof Up> {
 
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig({
       env: "local",
-      numberOfNoxes: flags.noxes,
+      noxes: flags.noxes,
     });
 
     await dockerCompose({

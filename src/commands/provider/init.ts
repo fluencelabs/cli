@@ -26,12 +26,10 @@ import {
 } from "../../lib/configs/project/provider.js";
 import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { setProviderConfigName } from "../../lib/paths.js";
 import { confirm } from "../../lib/prompt.js";
 
 export default class Init extends BaseCommand<typeof Init> {
-  static override description =
-    "Init provider config. Creates a config file in the current directory.";
+  static override description = "Init provider config. Creates a config file";
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,
@@ -40,9 +38,8 @@ export default class Init extends BaseCommand<typeof Init> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
-    setProviderConfigName(flags.name);
 
-    let providerConfig = await initReadonlyProviderConfig();
+    let providerConfig = await initReadonlyProviderConfig(flags.name);
 
     if (providerConfig !== null) {
       const isOverwriting = await confirm({
@@ -63,10 +60,7 @@ export default class Init extends BaseCommand<typeof Init> {
       await rm(providerConfig.$getPath(), { force: true });
     }
 
-    providerConfig = await initNewReadonlyProviderConfig({
-      numberOfNoxes: flags.noxes,
-      env: flags.env,
-    });
+    providerConfig = await initNewReadonlyProviderConfig(flags);
 
     commandObj.logToStderr(
       `Successfully created provider config at ${color.yellow(

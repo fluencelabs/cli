@@ -25,11 +25,7 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import {
-  setProviderConfigName,
-  getFluenceDir,
-  projectRootDir,
-} from "../../lib/paths.js";
+import { getFluenceDir, projectRootDir } from "../../lib/paths.js";
 
 export default class Gen extends BaseCommand<typeof Gen> {
   static override description = `Generate Config.toml files according to ${PROVIDER_CONFIG_FULL_FILE_NAME}`;
@@ -41,13 +37,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Gen));
-
-    setProviderConfigName(flags.name);
-
-    await initNewReadonlyProviderConfig({
-      numberOfNoxes: flags["noxes"],
-      env: flags.env,
-    });
+    await initNewReadonlyProviderConfig(flags);
 
     commandObj.logToStderr(
       `Configuration is generated at ${

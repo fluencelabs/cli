@@ -209,20 +209,20 @@ export async function ensureCustomAddrsAndPeerIds(
 type ResolveNodesArgs = {
   fluenceEnv: FluenceEnv;
   maybeFluenceConfig: FluenceConfig | null;
-  numberOfNoxes?: number | undefined;
+  noxes?: number | undefined;
 };
 
 export async function resolveAddrsAndPeerIds({
   fluenceEnv,
   maybeFluenceConfig,
-  numberOfNoxes,
+  noxes,
 }: ResolveNodesArgs): Promise<AddrAndPeerId[]> {
   if (fluenceEnv === "custom") {
     return ensureCustomAddrsAndPeerIds(maybeFluenceConfig);
   }
 
   if (fluenceEnv === "local") {
-    return ensureLocalAddrsAndPeerIds({ numberOfNoxes, env: "local" });
+    return ensureLocalAddrsAndPeerIds({ noxes, env: "local" });
   }
 
   return ADDR_MAP[fluenceEnv];
@@ -386,12 +386,12 @@ export function getPeerId(addr: string): string {
 
 type UpdateRelaysJSONArgs = {
   fluenceConfig: FluenceConfig | null;
-  numberOfNoxes?: number | undefined;
+  noxes?: number | undefined;
 };
 
 export async function updateRelaysJSON({
   fluenceConfig,
-  numberOfNoxes,
+  noxes,
 }: UpdateRelaysJSONArgs) {
   if (
     typeof fluenceConfig?.relaysPath !== "string" ||
@@ -411,7 +411,7 @@ export async function updateRelaysJSON({
   const relays = await resolveAddrsAndPeerIds({
     fluenceEnv: envConfig.fluenceEnv,
     maybeFluenceConfig: fluenceConfig,
-    numberOfNoxes,
+    noxes,
   });
 
   await writeFile(
@@ -420,9 +420,16 @@ export async function updateRelaysJSON({
   );
 }
 
+type ResolvedProviderConfig = {
+  name: string;
+  webSocketPort: number;
+  peerId: string;
+  computeUnits: number;
+};
+
 export async function getResolvedProviderConfig(
-  args: Omit<ProviderConfigArgs, "env"> & { env: string | undefined },
-) {
+  args: ProviderConfigArgs,
+): Promise<ResolvedProviderConfig[]> {
   const providerConfig = await initNewReadonlyProviderConfig(args);
   return Promise.all(
     Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {

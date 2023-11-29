@@ -371,8 +371,7 @@ describe("integration tests", () => {
         args: ["provider", "register"],
         flags: {
           "priv-key": PRIV_KEY,
-          "max-collateral": 1,
-          "price-per-epoch": 1,
+          offer: "offer-0",
         },
         cwd,
       });
@@ -427,7 +426,7 @@ describe("integration tests", () => {
         `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
       );
 
-      fluenceConfig.deals[DEFAULT_DEAL_NAME].minWorkers = 3;
+      fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
       fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
       fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [NEW_SPELL_NAME];
       await fluenceConfig.$commit();
@@ -436,11 +435,6 @@ describe("integration tests", () => {
         args: ["deal", "deploy"],
         flags: {
           "priv-key": PRIV_KEY,
-          "collateral-per-worker": 1,
-          "max-workers-per-provider": 3,
-          "min-workers": 1,
-          "price-per-worker-epoch": 1,
-          "target-workers": 1,
         },
         cwd,
       });

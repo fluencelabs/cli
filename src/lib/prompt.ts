@@ -80,6 +80,14 @@ const prompt = async <T, U extends Answers>({
 
   if (!isInteractive) {
     if (question.default !== undefined) {
+      const validity = await question.validate?.(question.default);
+
+      if (typeof validity === "string") {
+        throw new Error(
+          `Default value is invalid. Please report it to Fluence team https://github.com/fluencelabs/cli/issues so we can fix this. Error\n${validity}`,
+        );
+      }
+
       // TODO: fix inquirer types so this part is type-checked
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return question.default;

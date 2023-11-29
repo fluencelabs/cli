@@ -111,8 +111,8 @@ export const ensureTemplate = ({
 type InitArg = {
   maybeProjectPath?: string | undefined;
   template?: Template | undefined;
-  fluenceEnvFromFlags?: string | undefined;
-} & Omit<ProviderConfigArgs, "env">;
+  env?: string | undefined;
+} & Omit<ProviderConfigArgs, "env" | "name">;
 
 export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const projectPath =
@@ -141,7 +141,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
-  const fluenceEnv = await resolveFluenceEnv(options.fluenceEnvFromFlags);
+  const fluenceEnv = await resolveFluenceEnv(options.env);
 
   if (envConfig === null) {
     setEnvConfig(await initNewEnvConfig(fluenceEnv));
@@ -153,7 +153,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   if (fluenceEnv === "local") {
     await initNewReadonlyProviderConfig({
       env: "local",
-      numberOfNoxes: options.numberOfNoxes,
+      noxes: options.noxes,
     });
   }
 
@@ -237,7 +237,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
   await updateRelaysJSON({
     fluenceConfig,
-    numberOfNoxes: options.numberOfNoxes,
+    noxes: options.noxes,
   });
 
   commandObj.logToStderr(
