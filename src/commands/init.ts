@@ -44,12 +44,11 @@ export default class Init extends BaseCommand<typeof Init> {
     const { flags, args } = await initCli(this, await this.parse(Init));
 
     await init({
+      ...flags,
       maybeProjectPath: args.path,
       template: await ensureTemplate({
         templateOrUnknown: flags.template,
       }),
-      fluenceEnvFromFlags: flags.env,
-      numberOfNoxes: flags.noxes,
     });
   }
 }

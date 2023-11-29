@@ -21,10 +21,11 @@ import assert from "node:assert";
 import { Deal__factory, type Matcher } from "@fluencelabs/deal-aurora";
 import type { ContractsENV } from "@fluencelabs/deal-aurora/dist/client/config.js";
 import { color } from "@oclif/color";
-import { ethers } from "ethers";
+import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
-import { CLI_NAME_FULL } from "./const.js";
+import { CLI_NAME_FULL, CURRENCY_MULTIPLIER } from "./const.js";
+import { dbg } from "./dbg.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
@@ -34,11 +35,11 @@ type DealCreateArg = {
   chainNetwork: ContractsENV;
   privKey: string | undefined;
   appCID: string;
-  collateralPerWorker: string;
+  collateralPerWorker: number;
   minWorkers: number;
   targetWorkers: number;
   maxWorkersPerProvider: number;
-  pricePerWorkerEpoch: string;
+  pricePerWorkerEpoch: number;
   effectors: string[];
 };
 
@@ -68,14 +69,25 @@ export const dealCreate = async ({
 
   promptConfirmTx(privKey);
 
+  const pricePerWorkerEpochBigInt = BigInt(
+    pricePerWorkerEpoch * CURRENCY_MULTIPLIER,
+  );
+
+  dbg(`pricePerWorkerEpoch: ${pricePerWorkerEpochBigInt}`);
+
+  const collateralPerWorkerBigInt = BigInt(
+    collateralPerWorker * CURRENCY_MULTIPLIER,
+  );
+
+  dbg(`collateralPerWorker: ${collateralPerWorkerBigInt}`);
+
   const approveTx = await flt.approve(
     await factory.getAddress(),
-    BigInt(targetWorkers) * ethers.parseEther(pricePerWorkerEpoch) * 2n,
+    BigInt(targetWorkers) * pricePerWorkerEpochBigInt * 2n,
   );
 
   // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   await waitTx(approveTx);
-
   promptConfirmTx(privKey);
 
   const tx = await factory.deployDeal(
@@ -84,11 +96,11 @@ export const dealCreate = async ({
       hash: bytesCid.slice(4),
     },
     await flt.getAddress(),
-    ethers.parseEther(collateralPerWorker),
+    collateralPerWorkerBigInt,
     minWorkers,
     targetWorkers,
     maxWorkersPerProvider,
-    ethers.parseEther(pricePerWorkerEpoch),
+    pricePerWorkerEpochBigInt,
     effectors.map((effectorHash) => {
       const id = CID.parse(effectorHash).bytes;
       return {

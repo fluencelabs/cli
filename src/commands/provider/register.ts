@@ -15,12 +15,24 @@
  */
 
 import { color } from "@oclif/color";
-import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import {
+  initNewReadonlyProviderConfig,
+  type Offer,
+  type ProviderConfigReadonly,
+} from "../../lib/configs/project/provider.js";
+import {
+  OFFER_FLAG,
+  PRIV_KEY_FLAG,
+  NOXES_FLAG,
+  PROVIDER_CONFIG_FLAGS,
+  CURRENCY_MULTIPLIER,
+} from "../../lib/const.js";
+import { dbg } from "../../lib/dbg.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { list, type Choices } from "../../lib/prompt.js";
 import {
   ensureChainNetwork,
   getSigner,
@@ -32,16 +44,10 @@ export default class Register extends BaseCommand<typeof Register> {
   static override description = "Register in matching contract";
   static override flags = {
     ...baseFlags,
-    "max-collateral": Flags.string({
-      description: "Max collateral for provider offer",
-      required: true,
-    }),
-    "price-per-epoch": Flags.string({
-      description: "Price per epoch for provider offer",
-      required: true,
-    }),
     ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...PROVIDER_CONFIG_FLAGS,
+    ...NOXES_FLAG,
+    ...OFFER_FLAG,
   };
 
   async run(): Promise<void> {
@@ -49,6 +55,21 @@ export default class Register extends BaseCommand<typeof Register> {
       this,
       await this.parse(Register),
     );
+
+    const providerConfig = await initNewReadonlyProviderConfig(flags);
+
+    let offer =
+      flags.offer === undefined
+        ? undefined
+        : providerConfig.offers[flags.offer];
+
+    if (offer === undefined) {
+      if (flags.offer !== undefined) {
+        commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
+      }
+
+      offer = await promptForOffer(providerConfig.offers);
+    }
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
     const signer = await getSigner(network, flags["priv-key"]);
@@ -58,11 +79,22 @@ export default class Register extends BaseCommand<typeof Register> {
     const globalContracts = dealClient.getGlobalContracts();
     const matcher = await globalContracts.getMatcher();
     const flt = await globalContracts.getFLT();
-    const { ethers } = await import("ethers");
+
+    const minPricePerWorkerEpochBigInt = BigInt(
+      offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
+    );
+
+    dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
+
+    const maxCollateralPerWorkerBigInt = BigInt(
+      offer.maxCollateralPerWorker * CURRENCY_MULTIPLIER,
+    );
+
+    dbg(`maxCollateralPerWorker: ${maxCollateralPerWorkerBigInt}`);
 
     const tx = await matcher.registerComputeProvider(
-      ethers.parseEther(String(flags["price-per-epoch"])),
-      ethers.parseEther(String(flags["max-collateral"])),
+      minPricePerWorkerEpochBigInt,
+      maxCollateralPerWorkerBigInt,
       await flt.getAddress(),
       [],
     );
@@ -73,4 +105,26 @@ export default class Register extends BaseCommand<typeof Register> {
 
     commandObj.log(color.green(`Successfully joined to matching contract`));
   }
+}
+
+function promptForOffer(offers: ProviderConfigReadonly["offers"]) {
+  const options: Choices<Offer> = Object.entries(offers).map(
+    ([name, offer]) => {
+      return {
+        name,
+        value: offer,
+      };
+    },
+  );
+
+  return list({
+    message: "Select offer",
+    options,
+    oneChoiceMessage(choice) {
+      return `Select offer ${color.yellow(choice)}`;
+    },
+    onNoChoices() {
+      commandObj.error("No offers found");
+    },
+  });
 }

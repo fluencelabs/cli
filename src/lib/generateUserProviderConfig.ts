@@ -22,7 +22,6 @@ import {
   defaultNumberProperties,
   type NumberProperty,
   numberProperties,
-  type ContractsENV,
 } from "./const.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import { validatePositiveNumberOrEmpty } from "./helpers/validations.js";
@@ -43,27 +42,20 @@ async function promptToSetNumberProperty(
 
 const DEFAULT_NUMBER_OF_NOXES = 3;
 
-export type ProviderConfigArgs = {
-  numberOfNoxes?: number | undefined;
-  env: ContractsENV;
+export type ProviderConfigArgs = (
+  | {
+      env: string | undefined;
+      name: string | undefined;
+    }
+  | {
+      env: "local";
+      name?: undefined;
+    }
+) & {
+  noxes?: number | undefined;
 };
 
-export async function generateUserProviderConfig({
-  numberOfNoxes,
-  env,
-}: ProviderConfigArgs) {
-  const userProvidedConfig: UserProvidedConfig = {
-    env,
-    computePeers: {},
-    offers: {},
-  };
-
-  await addComputePeers(numberOfNoxes, userProvidedConfig);
-  await addOffers(userProvidedConfig);
-  return userProvidedConfig;
-}
-
-async function addComputePeers(
+export async function addComputePeers(
   numberOfNoxes: number | undefined,
   userProvidedConfig: UserProvidedConfig,
 ) {
@@ -113,7 +105,7 @@ async function addComputePeers(
   } while (isAddingMoreComputePeers);
 }
 
-async function addOffers(userProvidedConfig: UserProvidedConfig) {
+export async function addOffers(userProvidedConfig: UserProvidedConfig) {
   let isAddingMoreOffers = true;
   let offersCounter = 0;
 

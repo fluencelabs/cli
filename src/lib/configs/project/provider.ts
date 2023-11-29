@@ -26,6 +26,7 @@ import mapKeys from "lodash-es/mapKeys.js";
 import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 
+import { commandObj } from "../../commandObj.js";
 import {
   type ContractsENV,
   PROVIDER_CONFIG_FILE_NAME,
@@ -44,10 +45,12 @@ import {
   TOML_EXT,
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
+  CURRENCY_MULTIPLIER_TEXT,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
-  generateUserProviderConfig,
+  addComputePeers,
+  addOffers,
 } from "../../generateUserProviderConfig.js";
 import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
@@ -55,6 +58,7 @@ import {
   ensureFluenceConfigsDir,
   ensureProviderConfigPath,
   getFluenceDir,
+  setProviderConfigName,
 } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -235,8 +239,14 @@ const offerSchema: JSONSchemaType<Offer> = {
   description: "Defines a provider offer",
   additionalProperties: false,
   properties: {
-    minPricePerWorkerEpoch: { type: "number" },
-    maxCollateralPerWorker: { type: "number" },
+    minPricePerWorkerEpoch: {
+      type: "number",
+      description: `Minimum price per worker epoch. ${CURRENCY_MULTIPLIER_TEXT}`,
+    },
+    maxCollateralPerWorker: {
+      type: "number",
+      description: `Max collateral per worker. ${CURRENCY_MULTIPLIER_TEXT}`,
+    },
     computePeers: {
       description: "Number of Compute Units for this Compute Peer",
       type: "array",
@@ -305,17 +315,19 @@ const getConfigOrConfigDirPath = () => {
   return ensureProviderConfigPath();
 };
 
-function getDefault({
-  env,
-  numberOfNoxes,
-}: Omit<ProviderConfigArgs, "env"> & { env: string | undefined }) {
+function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
+    commandObj.logToStderr("Creating new provider config\n");
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
-    const userProvidedConfig = await generateUserProviderConfig({
-      env: await ensureValidContractsEnv(env),
-      numberOfNoxes,
-    });
+    const userProvidedConfig: UserProvidedConfig = {
+      env: await ensureValidContractsEnv(args.env),
+      computePeers: {},
+      offers: {},
+    };
+
+    await addComputePeers(args.noxes, userProvidedConfig);
+    await addOffers(userProvidedConfig);
 
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
@@ -402,10 +414,13 @@ async function ensureSecrets(providerConfig: ProviderConfigReadonly) {
 }
 
 export async function initNewProviderConfig({
+  name,
   ...args
-}: Omit<ProviderConfigArgs, "env"> & {
-  env: string | undefined;
-}) {
+}: ProviderConfigArgs) {
+  if (name !== undefined) {
+    setProviderConfigName(name);
+  }
+
   const providerConfig = await getConfigInitFunction(
     getInitConfigOptions(),
     getDefault(args),
@@ -417,10 +432,13 @@ export async function initNewProviderConfig({
 }
 
 export async function initNewReadonlyProviderConfig({
+  name,
   ...args
-}: Omit<ProviderConfigArgs, "env"> & {
-  env: string | undefined;
-}) {
+}: ProviderConfigArgs) {
+  if (name !== undefined) {
+    setProviderConfigName(name);
+  }
+
   const providerConfig = await getReadonlyConfigInitFunction(
     getInitConfigOptions(),
     getDefault(args),
@@ -431,11 +449,19 @@ export async function initNewReadonlyProviderConfig({
   return providerConfig;
 }
 
-export function initProviderConfig() {
+export function initProviderConfig(name?: string) {
+  if (name !== undefined) {
+    setProviderConfigName(name);
+  }
+
   return getConfigInitFunction(getInitConfigOptions())();
 }
 
-export function initReadonlyProviderConfig() {
+export function initReadonlyProviderConfig(name?: string) {
+  if (name !== undefined) {
+    setProviderConfigName(name);
+  }
+
   return getReadonlyConfigInitFunction(getInitConfigOptions())();
 }
 
