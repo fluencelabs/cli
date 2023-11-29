@@ -145,7 +145,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       assert(
         deal !== undefined,
-        "Unreachable. All worker names are checked above",
+        "Unreachable. All worker names are checked in prepareForDeploy. Then they are passed to upload aqua function which returns them back without modification",
       );
 
       const {
