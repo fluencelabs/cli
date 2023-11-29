@@ -21,12 +21,19 @@ import { arch, platform } from "node:os";
 import { join } from "node:path";
 
 import {
+  krasnodar,
+  stage,
+  testNet,
+} from "@fluencelabs/fluence-network-environment";
+
+import {
   CLI_NAME,
   type Template,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
 } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/utils.js";
+import { addrsToNodes } from "../src/lib/multiaddres.js";
 import {
   FLUENCE_ENV,
   RUN_TESTS_IN_PARALLEL,
@@ -191,3 +198,26 @@ export const pathToTheTemplateWhereLocalEnvironmentIsSpunUp = join(
   "templates",
   "quickstart",
 );
+
+export const NO_PROJECT_TEST_NAME = "shouldWorkWithoutProject";
+
+const local =
+  fluenceEnv === "local"
+    ? addrsToNodes(
+        (
+          await fluence({
+            args: ["default", "peers", "local"],
+            cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+          })
+        )
+          .trim()
+          .split("\n"),
+      )
+    : [];
+
+export const multiaddrs = {
+  kras: krasnodar,
+  stage: stage,
+  testnet: testNet,
+  local,
+}[fluenceEnv];

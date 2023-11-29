@@ -25,6 +25,7 @@ import cloneDeep from "lodash-es/cloneDeep.js";
 import mapKeys from "lodash-es/mapKeys.js";
 import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
+import times from "lodash-es/times.js";
 
 import { commandObj } from "../../commandObj.js";
 import {
@@ -332,16 +333,14 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
 
     if (userProvidedConfig.env === "local") {
       userProvidedConfig.computePeers = Object.fromEntries(
-        new Array(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES)
-          .fill(null)
-          .map((_, i) => {
-            return [
-              `nox-${i}`,
-              {
-                computeUnits: 1,
-              },
-            ] as const;
-          }),
+        times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
+          return [
+            `nox-${i}`,
+            {
+              computeUnits: 1,
+            },
+          ] as const;
+        }),
       );
 
       userProvidedConfig.offers = {

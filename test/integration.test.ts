@@ -61,8 +61,9 @@ import {
   assertHasPeer,
   fluenceEnv,
   pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+  NO_PROJECT_TEST_NAME,
+  multiaddrs,
 } from "./helpers.js";
-import { NO_PROJECT, multiaddrs } from "./setupTests.js";
 
 const peerIds = multiaddrs
   .map(({ peerId }) => {
@@ -110,7 +111,7 @@ describe("integration tests", () => {
   });
 
   maybeConcurrentTest("should work without project", async () => {
-    const cwd = join("tmp", NO_PROJECT);
+    const cwd = join("tmp", NO_PROJECT_TEST_NAME);
     await mkdir(cwd, { recursive: true });
 
     const result = await fluence({

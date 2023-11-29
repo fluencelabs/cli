@@ -18,26 +18,26 @@ import { cp } from "fs/promises";
 import { join } from "path";
 
 import {
-  krasnodar,
-  stage,
-  testNet,
-} from "@fluencelabs/fluence-network-environment";
-
-import {
   DOT_FLUENCE_DIR_NAME,
   SECRETS_DIR_NAME,
   TEMPLATES,
   TMP_DIR_NAME,
 } from "../src/lib/const.js";
 import "../src/lib/setupEnvironment.js";
-import { addrsToNodes } from "../src/lib/multiaddres.js";
 
 import {
   pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
   fluenceEnv,
   fluence,
   initFirstTime,
+  NO_PROJECT_TEST_NAME,
 } from "./helpers.js";
+
+/**
+ * IMPORTANT: this file is executed before all tests
+ * so it must not export anything that can be imported in tests
+ * because it will execute a second time in this case
+ */
 
 // eslint-disable-next-line no-console
 console.log("Setting up tests...");
@@ -71,37 +71,20 @@ const secretsPath = join(
   SECRETS_DIR_NAME,
 );
 
-export const NO_PROJECT = "shouldWorkWithoutProject";
-
 await Promise.all(
-  [...restTemplatePaths, join(TMP_DIR_NAME, NO_PROJECT)].map((path) => {
-    return cp(secretsPath, join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME), {
-      force: true,
-      recursive: true,
-    });
-  }),
+  [...restTemplatePaths, join(TMP_DIR_NAME, NO_PROJECT_TEST_NAME)].map(
+    (path) => {
+      return cp(
+        secretsPath,
+        join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME),
+        {
+          force: true,
+          recursive: true,
+        },
+      );
+    },
+  ),
 );
-
-const local =
-  fluenceEnv === "local"
-    ? addrsToNodes(
-        (
-          await fluence({
-            args: ["default", "peers", "local"],
-            cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-          })
-        )
-          .trim()
-          .split("\n"),
-      )
-    : [];
-
-export const multiaddrs = {
-  kras: krasnodar,
-  stage: stage,
-  testnet: testNet,
-  local,
-}[fluenceEnv];
 
 // eslint-disable-next-line no-console
 console.log("Tests are ready to run!");
