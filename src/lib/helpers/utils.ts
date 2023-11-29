@@ -134,3 +134,40 @@ export function splitErrorsAndResults<T, U, V>(
 
   return [errors, results] as const;
 }
+
+export async function setTryTimeout<T, U>(
+  callbackToTry: () => T | Promise<T>,
+  errorHandler: (error: unknown) => U,
+  msToTryFor: number,
+  msBetweenTries?: number,
+): Promise<T | U> {
+  let isTimeoutRunning = true;
+
+  const timeout = setTimeout(() => {
+    isTimeoutRunning = false;
+  }, msToTryFor);
+
+  let error: unknown;
+  let isTrying = true;
+
+  while (isTrying) {
+    isTrying = isTimeoutRunning;
+
+    if (msBetweenTries !== undefined) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, msBetweenTries);
+      });
+    }
+
+    try {
+      const res = await callbackToTry();
+      clearTimeout(timeout);
+      isTrying = false;
+      return res;
+    } catch (e) {
+      error = e;
+    }
+  }
+
+  return errorHandler(error);
+}

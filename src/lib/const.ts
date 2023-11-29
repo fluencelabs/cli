@@ -665,8 +665,11 @@ export const READMEs: Record<Template, string> = {
   js: getTsOrJsReadme(true),
 };
 
-export const WALLET_KEYS_FOR_LOCAL_NETWORK = [
-  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5",
+export const LOCAL_NET_DEFAULT_WALLET_KEY =
+  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5";
+
+export const LOCAL_NET_WALLET_KEYS = [
+  LOCAL_NET_DEFAULT_WALLET_KEY,
   "0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41",
   "0xdacd4b197ee7e9efdd5db1921c6c558d88e2c8b69902b8bafc812fb226a6b5e0",
   "0xa22813cba71d9795475e88d8d84fd3ef6e9ed4e3d5f3c34462ae1645cd1f7f16",
@@ -687,3 +690,5 @@ export const WALLET_KEYS_FOR_LOCAL_NETWORK = [
   "0xbb3457514f768615c8bc4061c7e47f817c8a570c5c3537479639d4fad052a98a",
   "0xfbd9e512cc1b62db1ca689737c110afa9a3799e1bc04bf12c1c34ac39e0e2dd5",
 ];
+
+export const DEFAULT_OFFER_NAME = "offer";
