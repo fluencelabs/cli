@@ -35,39 +35,52 @@ import {
 } from "./helpers/package.js";
 import { stringifyUnknown } from "./helpers/utils.js";
 
-const getNpmPath = async () => {
-  const node_modules = (await import("node_modules-path")).default;
-  return join(node_modules(), ".bin", "npm");
-};
+const commandCache: Record<string, string> = {};
 
-let npmExecutable: string | undefined;
+async function resolveCommand(
+  executablePath: string,
+  command: string,
+): Promise<string> {
+  const cachedCommand = commandCache[command];
 
-async function runNpm(args: Omit<ExecPromiseArg, "command">) {
-  if (typeof npmExecutable === "string") {
-    return execPromise({ command: npmExecutable, ...args });
+  if (cachedCommand !== undefined) {
+    return cachedCommand;
   }
 
-  const npmPath = await getNpmPath();
-
   try {
-    await access(npmPath);
-    npmExecutable = npmPath;
+    await access(executablePath);
+    commandCache[command] = executablePath;
+    return executablePath;
   } catch {
     try {
-      await execPromise({ command: "npm", args: ["--version"] });
-      npmExecutable = "npm";
+      await execPromise({ command, args: ["--version"] });
+      commandCache[command] = command;
+      return command;
     } catch {
       commandObj.error(
-        `Couldn't find npm executable. Tried at ${color.yellow(
-          npmPath,
-        )} and also tried finding npm in your ${color.yellow(
+        `Couldn't find ${command} executable. Tried at ${color.yellow(
+          executablePath,
+        )} and also tried finding ${command} in your ${color.yellow(
           "$PATH",
-        )}. Please make sure npm is available`,
+        )}. Please make sure ${command} is available`,
       );
     }
   }
+}
 
-  return execPromise({ command: npmExecutable, ...args });
+async function runNpm(args: Omit<ExecPromiseArg, "command">) {
+  const nodeModulesPath = (await import("node_modules-path")).default();
+  const npmExecutablePath = join(nodeModulesPath, "npm", "index.js");
+  const nodeExecutablePath = join(nodeModulesPath, "..", "bin", "node");
+
+  return execPromise({
+    ...args,
+    command: await resolveCommand(nodeExecutablePath, "node"),
+    args: [
+      await resolveCommand(npmExecutablePath, "npm"),
+      ...(args.args ?? []),
+    ],
+  });
 }
 
 export const getLatestVersionOfNPMDependency = async (
