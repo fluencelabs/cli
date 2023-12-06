@@ -54,5 +54,3 @@ jobs:
     needs:
       - fluence-cli
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
-    with:
-      fcli-version: "${{ needs.fluence-cli.outputs.version }}"
