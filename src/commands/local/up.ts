@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
+import { Flags } from "@oclif/core";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
-import { DOCKER_COMPOSE_FULL_FILE_NAME, NOXES_FLAG } from "../../lib/const.js";
+import {
+  DEFAULT_OFFER_NAME,
+  DOCKER_COMPOSE_FULL_FILE_NAME,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
+  NOXES_FLAG,
+  PRIV_KEY_FLAG,
+} from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
+import { setTryTimeout, stringifyUnknown } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { addPeer } from "../provider/add-peer.js";
+import { register } from "../provider/register.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
@@ -26,6 +38,12 @@ export default class Up extends BaseCommand<typeof Up> {
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,
+    timeout: Flags.integer({
+      description:
+        "Timeout in seconds for attempting to register local network on local peers",
+      default: 120,
+    }),
+    ...PRIV_KEY_FLAG,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Up));
@@ -41,6 +59,35 @@ export default class Up extends BaseCommand<typeof Up> {
       options: {
         cwd: dockerComposeConfig.$getDirPath(),
       },
+    });
+
+    const env = "local";
+    const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
+
+    await setTryTimeout(
+      async () => {
+        await register({
+          ...flags,
+          "priv-key": privKey,
+          env,
+          offer: DEFAULT_OFFER_NAME,
+        });
+      },
+      (error) => {
+        commandObj.error(
+          `Wasn't able to register local network on local peers in ${
+            flags.timeout
+          } seconds: ${stringifyUnknown(error)}`,
+        );
+      },
+      flags.timeout * 1000,
+      10000,
+    );
+
+    await addPeer({
+      ...flags,
+      env,
+      "priv-key": privKey,
     });
   }
 }

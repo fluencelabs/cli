@@ -112,13 +112,12 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
   do {
     const defaultName = `offer-${offersCounter}`;
 
-    let name = await input({
+    const name = await input({
       message: `Enter name for offer`,
       default: defaultName,
     });
 
     if (name === defaultName) {
-      name = defaultName;
       offersCounter = offersCounter + 1;
     }
 

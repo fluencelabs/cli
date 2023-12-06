@@ -18,6 +18,7 @@ import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
 import {
   initNewReadonlyProviderConfig,
   type Offer,
@@ -56,55 +57,70 @@ export default class Register extends BaseCommand<typeof Register> {
       await this.parse(Register),
     );
 
-    const providerConfig = await initNewReadonlyProviderConfig(flags);
+    await register(flags, maybeFluenceConfig);
+  }
+}
 
-    let offer =
-      flags.offer === undefined
-        ? undefined
-        : providerConfig.offers[flags.offer];
+export async function register(
+  flags: {
+    offer?: string | undefined;
+    noxes?: number | undefined;
+    name?: string | undefined;
+    env: string | undefined;
+    "priv-key": string | undefined;
+  },
+  maybeFluenceConfig?: FluenceConfig | null,
+) {
+  const providerConfig = await initNewReadonlyProviderConfig(flags);
 
-    if (offer === undefined) {
-      if (flags.offer !== undefined) {
-        commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
-      }
+  let offer =
+    flags.offer === undefined ? undefined : providerConfig.offers[flags.offer];
 
-      offer = await promptForOffer(providerConfig.offers);
+  if (offer === undefined) {
+    if (flags.offer !== undefined) {
+      commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
     }
 
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const signer = await getSigner(network, flags["priv-key"]);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-    const dealClient = new DealClient(network, signer);
-    const globalContracts = dealClient.getGlobalContracts();
-    const matcher = await globalContracts.getMatcher();
-    const flt = await globalContracts.getFLT();
-
-    const minPricePerWorkerEpochBigInt = BigInt(
-      offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
-    );
-
-    dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
-
-    const maxCollateralPerWorkerBigInt = BigInt(
-      offer.maxCollateralPerWorker * CURRENCY_MULTIPLIER,
-    );
-
-    dbg(`maxCollateralPerWorker: ${maxCollateralPerWorkerBigInt}`);
-
-    const tx = await matcher.registerComputeProvider(
-      minPricePerWorkerEpochBigInt,
-      maxCollateralPerWorkerBigInt,
-      await flt.getAddress(),
-      [],
-    );
-
-    promptConfirmTx(flags["priv-key"]);
-    // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-    await waitTx(tx);
-
-    commandObj.log(color.green(`Successfully joined to matching contract`));
+    offer = await promptForOffer(providerConfig.offers);
   }
+
+  const network = await ensureChainNetwork(
+    flags.env,
+    maybeFluenceConfig ?? null,
+  );
+
+  const signer = await getSigner(network, flags["priv-key"]);
+  const { DealClient } = await import("@fluencelabs/deal-aurora");
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+  const dealClient = new DealClient(network, signer);
+  const globalContracts = dealClient.getGlobalContracts();
+  const matcher = await globalContracts.getMatcher();
+  const flt = await globalContracts.getFLT();
+
+  const minPricePerWorkerEpochBigInt = BigInt(
+    offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
+  );
+
+  dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
+
+  const maxCollateralPerWorkerBigInt = BigInt(
+    offer.maxCollateralPerWorker * CURRENCY_MULTIPLIER,
+  );
+
+  dbg(`maxCollateralPerWorker: ${maxCollateralPerWorkerBigInt}`);
+
+  const tx = await matcher.registerComputeProvider(
+    minPricePerWorkerEpochBigInt,
+    maxCollateralPerWorkerBigInt,
+    await flt.getAddress(),
+    [],
+  );
+
+  promptConfirmTx(flags["priv-key"]);
+  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+  await waitTx(tx);
+
+  commandObj.log(color.green(`Successfully joined to matching contract`));
 }
 
 function promptForOffer(offers: ProviderConfigReadonly["offers"]) {

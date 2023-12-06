@@ -19,6 +19,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
 import { PROVIDER_CONFIG_FLAGS, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { getResolvedProviderConfig } from "../../lib/multiaddres.js";
@@ -54,66 +55,82 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
       await this.parse(AddPeer),
     );
 
-    const defaultNumberOfComputeUnits =
-      flags["compute-units"]?.[0] ?? DEFAULT_NUMBER_OF_COMPUTE_UNITS;
+    await addPeer(flags, maybeFluenceConfig);
+  }
+}
 
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
+export async function addPeer(
+  flags: {
+    "peer-id"?: string[] | undefined;
+    "compute-units"?: number[] | undefined;
+    name?: string | undefined;
+    env: string | undefined;
+    "priv-key": string | undefined;
+  },
+  maybeFluenceConfig?: FluenceConfig | null,
+) {
+  const defaultNumberOfComputeUnits =
+    flags["compute-units"]?.[0] ?? DEFAULT_NUMBER_OF_COMPUTE_UNITS;
 
-    const peerIds =
-      flags["peer-id"] !== undefined && flags["peer-id"].length !== 0
-        ? flags["peer-id"].map((peerId, i) => {
-            return {
-              peerId,
-              computeUnits:
-                flags["compute-units"]?.[i] ?? defaultNumberOfComputeUnits,
-            };
-          })
-        : await getResolvedProviderConfig(flags);
+  const network = await ensureChainNetwork(
+    flags.env,
+    maybeFluenceConfig ?? null,
+  );
 
-    const [{ DealClient }, { digest }, { base58btc }] = await Promise.all([
-      import("@fluencelabs/deal-aurora"),
-      import("multiformats"),
-      // eslint-disable-next-line import/extensions
-      import("multiformats/bases/base58"),
-    ]);
+  const peerIds =
+    flags["peer-id"] !== undefined && flags["peer-id"].length !== 0
+      ? flags["peer-id"].map((peerId, i) => {
+          return {
+            peerId,
+            computeUnits:
+              flags["compute-units"]?.[i] ?? defaultNumberOfComputeUnits,
+          };
+        })
+      : await getResolvedProviderConfig(flags);
 
-    for (const { peerId, computeUnits } of peerIds) {
-      const signer = await getSigner(network, flags["priv-key"]);
-      // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-      const dealClient = new DealClient(network, signer);
-      const globalContracts = dealClient.getGlobalContracts();
-      const matcher = await globalContracts.getMatcher();
-      const flt = await globalContracts.getFLT();
+  const [{ DealClient }, { digest }, { base58btc }] = await Promise.all([
+    import("@fluencelabs/deal-aurora"),
+    import("multiformats"),
+    // eslint-disable-next-line import/extensions
+    import("multiformats/bases/base58"),
+  ]);
 
-      const collateral = (
-        await matcher.getComputeProviderInfo(await signer.getAddress())
-      ).maxCollateral;
+  for (const { peerId, computeUnits } of peerIds) {
+    const signer = await getSigner(network, flags["priv-key"]);
+    // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+    const dealClient = new DealClient(network, signer);
+    const globalContracts = dealClient.getGlobalContracts();
+    const matcher = await globalContracts.getMatcher();
+    const flt = await globalContracts.getFLT();
 
-      const approveTx = await flt.approve(
-        await matcher.getAddress(),
-        collateral * BigInt(computeUnits),
-      );
+    const collateral = (
+      await matcher.getComputeProviderInfo(await signer.getAddress())
+    ).maxCollateral;
 
-      promptConfirmTx(flags["priv-key"]);
-      // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-      await waitTx(approveTx);
+    const approveTx = await flt.approve(
+      await matcher.getAddress(),
+      collateral * BigInt(computeUnits),
+    );
 
-      const multihash = digest.decode(base58btc.decode("z" + peerId));
-      const bytes = multihash.bytes.subarray(6);
-      const tx = await matcher.addWorkersSlots(bytes, computeUnits);
-      promptConfirmTx(flags["priv-key"]);
-      // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-      await waitTx(tx);
+    promptConfirmTx(flags["priv-key"]);
+    // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+    await waitTx(approveTx);
 
-      const free = (await matcher.getComputePeerInfo(bytes)).freeWorkerSlots;
+    const multihash = digest.decode(base58btc.decode("z" + peerId));
+    const bytes = multihash.bytes.subarray(6);
+    const tx = await matcher.addWorkersSlots(bytes, computeUnits);
+    promptConfirmTx(flags["priv-key"]);
+    // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
+    await waitTx(tx);
 
-      commandObj.logToStderr(
-        `Added ${color.yellow(
-          computeUnits,
-        )} worker slots. Compute peer ${color.yellow(
-          peerId,
-        )} has ${color.yellow(free)} free worker slots now.`,
-      );
-    }
+    const free = (await matcher.getComputePeerInfo(bytes)).freeWorkerSlots;
+
+    commandObj.logToStderr(
+      `Added ${color.yellow(
+        computeUnits,
+      )} worker slots. Compute peer ${color.yellow(peerId)} has ${color.yellow(
+        free,
+      )} free worker slots now.`,
+    );
   }
 }

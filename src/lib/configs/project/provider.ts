@@ -25,9 +25,11 @@ import cloneDeep from "lodash-es/cloneDeep.js";
 import mapKeys from "lodash-es/mapKeys.js";
 import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
+import times from "lodash-es/times.js";
 
 import { commandObj } from "../../commandObj.js";
 import {
+  DEFAULT_OFFER_NAME,
   type ContractsENV,
   PROVIDER_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -37,7 +39,7 @@ import {
   FS_OPTIONS,
   HTTP_PORT_START,
   TCP_PORT_START,
-  WALLET_KEYS_FOR_LOCAL_NETWORK,
+  LOCAL_NET_WALLET_KEYS,
   WEB_SOCKET_PORT_START,
   CHAIN_CONTAINER_NAME,
   CHAIN_PORT,
@@ -46,6 +48,7 @@ import {
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
   CURRENCY_MULTIPLIER_TEXT,
+  defaultNumberProperties,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
@@ -315,6 +318,8 @@ const getConfigOrConfigDirPath = () => {
   return ensureProviderConfigPath();
 };
 
+const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
+
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
     commandObj.logToStderr("Creating new provider config\n");
@@ -326,8 +331,28 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       offers: {},
     };
 
-    await addComputePeers(args.noxes, userProvidedConfig);
-    await addOffers(userProvidedConfig);
+    if (userProvidedConfig.env === "local") {
+      userProvidedConfig.computePeers = Object.fromEntries(
+        times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
+          return [
+            `nox-${i}`,
+            {
+              computeUnits: 1,
+            },
+          ] as const;
+        }),
+      );
+
+      userProvidedConfig.offers = {
+        [DEFAULT_OFFER_NAME]: {
+          ...defaultNumberProperties,
+          computePeers: Object.keys(userProvidedConfig.computePeers),
+        },
+      };
+    } else {
+      await addComputePeers(args.noxes, userProvidedConfig);
+      await addOffers(userProvidedConfig);
+    }
 
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
@@ -494,9 +519,7 @@ export async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
 
       if (overridden.systemServices?.decider?.walletKey === undefined) {
         const walletKey =
-          WALLET_KEYS_FOR_LOCAL_NETWORK[
-            i % WALLET_KEYS_FOR_LOCAL_NETWORK.length
-          ];
+          LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length];
 
         assert(walletKey !== undefined, "Unreachable");
 
