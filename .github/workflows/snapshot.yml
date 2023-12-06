@@ -154,3 +154,15 @@ jobs:
           id: ${{ steps.version.outputs.id }}
           package-manager: yarn npm
           flags: --tag snapshot
+
+      - name: Pack fluence-cli
+        run: yarn pack-linux-x64
+
+      - name: Rename archive
+        run: mv dist/fluence-*linux-x64*.tar.gz fluence-cli-linux-x64.tar.gz
+
+      - name: Upload archive to CI checks
+        uses: actions/upload-artifact@v3
+        with:
+          name: fcli
+          path: fluence-cli-linux-x64.tar.gz
