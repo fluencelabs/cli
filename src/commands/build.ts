@@ -17,16 +17,19 @@
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { build } from "../lib/build.js";
 import { commandObj } from "../lib/commandObj.js";
-import { initNewWorkersConfig } from "../lib/configs/project/workers.js";
+import { initNewWorkersConfigReadonly } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   MARINE_BUILD_ARGS_FLAG,
   IMPORT_FLAG,
+  ENV_FLAG,
+  ENV_FLAG_NAME,
 } from "../lib/const.js";
 import { compileSpells } from "../lib/deployWorkers.js";
 import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
+import { resolveFluenceEnv } from "../lib/multiaddres.js";
 
 export default class Build extends BaseCommand<typeof Build> {
   static override description = `Build all application services, described in ${FLUENCE_CONFIG_FULL_FILE_NAME} and generate aqua interfaces for them`;
@@ -35,6 +38,7 @@ export default class Build extends BaseCommand<typeof Build> {
     ...baseFlags,
     ...MARINE_BUILD_ARGS_FLAG,
     ...IMPORT_FLAG,
+    ...ENV_FLAG,
   };
   async run(): Promise<void> {
     const { fluenceConfig, flags } = await initCli(
@@ -51,8 +55,6 @@ export default class Build extends BaseCommand<typeof Build> {
       marineBuildArgs: flags["marine-build-args"],
     });
 
-    const workerConfig = await initNewWorkersConfig();
-
     const { ensureAquaFileWithWorkerInfo } = await import(
       "../lib/deployWorkers.js"
     );
@@ -62,7 +64,9 @@ export default class Build extends BaseCommand<typeof Build> {
       flags,
     });
 
-    await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig);
+    const workerConfig = await initNewWorkersConfigReadonly();
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig, fluenceEnv);
     await compileSpells(fluenceConfig, aquaImports);
     commandObj.logToStderr(`All services and spells built successfully`);
   }

@@ -54,6 +54,7 @@ import {
   HOSTS_FILE_NAME,
   DEALS_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
+  type FluenceEnv,
 } from "./const.js";
 import {
   downloadModule,
@@ -138,6 +139,7 @@ type PrepareForDeployArg = {
   aquaImports: Array<string>;
   noBuild: boolean;
   marineBuildArgs: undefined | string;
+  fluenceEnv: FluenceEnv;
   initPeerId?: string;
   workersConfig?: WorkersConfigReadonly;
 };
@@ -148,6 +150,7 @@ export const prepareForDeploy = async ({
   aquaImports,
   noBuild,
   marineBuildArgs,
+  fluenceEnv,
   initPeerId,
   workersConfig: maybeWorkersConfig,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
@@ -440,6 +443,7 @@ export const prepareForDeploy = async ({
           spellConfigs,
           maybeWorkersConfig,
           initPeerId,
+          fluenceEnv,
         });
       }),
   );
@@ -536,29 +540,32 @@ const emptyHosts: Host = {
 export const ensureAquaFileWithWorkerInfo = async (
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly,
+  fluenceEnv: FluenceEnv,
 ) => {
   const dealWorkers = Object.fromEntries(
-    Object.entries({ ...fluenceConfig.deals, ...workersConfig.deals }).map(
-      ([workerName, info]) => {
-        const key = workerName;
-        // if worker was deployed put deal info, otherwise put null
-        const maybeDeal = "dealId" in info ? info : null;
-        const value = makeOptional(maybeDeal, emptyDeal);
-        return [key, value];
-      },
-    ),
+    Object.entries({
+      ...fluenceConfig.deals,
+      ...(workersConfig.deals?.[fluenceEnv] ?? {}),
+    }).map(([workerName, info]) => {
+      const key = workerName;
+      // if worker was deployed put deal info, otherwise put null
+      const maybeDeal = "dealId" in info ? info : null;
+      const value = makeOptional(maybeDeal, emptyDeal);
+      return [key, value];
+    }),
   );
 
   const directHostingWorkers = Object.fromEntries(
-    Object.entries({ ...fluenceConfig.hosts, ...workersConfig.hosts }).map(
-      ([workerName, info]) => {
-        const key = workerName;
-        // if worker was deployed put hosts info, otherwise put null
-        const maybeHost = "relayId" in info ? info : null;
-        const value = makeOptional(maybeHost, emptyHosts);
-        return [key, value];
-      },
-    ),
+    Object.entries({
+      ...fluenceConfig.hosts,
+      ...(workersConfig.hosts?.[fluenceEnv] ?? {}),
+    }).map(([workerName, info]) => {
+      const key = workerName;
+      // if worker was deployed put hosts info, otherwise put null
+      const maybeHost = "relayId" in info ? info : null;
+      const value = makeOptional(maybeHost, emptyHosts);
+      return [key, value];
+    }),
   );
 
   const customHostsTypes: CustomTypes = [
@@ -612,6 +619,7 @@ type ResolveWorkerArgs = {
   spellConfigs: UploadDeploySpellConfig[];
   maybeWorkersConfig: WorkersConfigReadonly | undefined;
   initPeerId: string | undefined;
+  fluenceEnv: FluenceEnv;
 };
 
 export async function compileSpells(
@@ -722,13 +730,14 @@ async function resolveWorker({
   spellConfigs,
   maybeWorkersConfig,
   initPeerId,
+  fluenceEnv,
 }: ResolveWorkerArgs) {
   let dummyDealId = "deal_deploy_does_not_need_dummy_deal_id";
   const isDealDeploy = initPeerId === undefined;
 
   if (!isDealDeploy) {
     dummyDealId =
-      maybeWorkersConfig?.hosts?.[workerName]?.dummyDealId ??
+      maybeWorkersConfig?.hosts?.[fluenceEnv]?.[workerName]?.dummyDealId ??
       `${workerName}_${initPeerId}_${Math.random().toString().slice(2)}`;
   }
 

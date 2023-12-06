@@ -52,9 +52,12 @@ import {
 import { projectRootDir } from "./paths.js";
 import { input, list } from "./prompt.js";
 
-async function fluenceEnvPrompt(): Promise<FluenceEnv> {
+export async function fluenceEnvPrompt(
+  message = "Select Fluence Environment to use by default with this project",
+  defaultVal: FluenceEnv = "kras",
+): Promise<FluenceEnv> {
   return list({
-    message: `Select Fluence Environment to use by default with this project`,
+    message,
     options: [...FLUENCE_ENVS],
     oneChoiceMessage() {
       throw new Error("Unreachable. There are multiple envs");
@@ -62,7 +65,7 @@ async function fluenceEnvPrompt(): Promise<FluenceEnv> {
     onNoChoices() {
       throw new Error("Unreachable. There are multiple envs");
     },
-    default: "kras" as const,
+    default: defaultVal,
   });
 }
 

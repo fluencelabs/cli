@@ -101,6 +101,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       "../../lib/deployWorkers.js"
     );
 
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       workersConfig,
@@ -108,13 +110,13 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       aquaImports,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
+      fluenceEnv,
     });
 
     dbg("start connecting to fluence network");
     await initFluenceClient(flags, fluenceConfig);
     await doRegisterIpfsClient(true);
     dbg("start running upload");
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
     const uploadResult = await upload(
       flags.tracing,
@@ -156,7 +158,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         maxWorkersPerProvider = targetWorkers,
       } = deal;
 
-      const maybePreviouslyDeployedDeal = workersConfig.deals?.[workerName];
+      const maybePreviouslyDeployedDeal =
+        workersConfig.deals?.[fluenceEnv]?.[workerName];
 
       if (maybePreviouslyDeployedDeal !== undefined) {
         if (maybePreviouslyDeployedDeal.definition === appCID) {
@@ -202,7 +205,14 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           workersConfig.deals = {};
         }
 
-        workersConfig.deals[workerName] = {
+        let dealsPerEnv = workersConfig.deals[fluenceEnv];
+
+        if (dealsPerEnv === undefined) {
+          dealsPerEnv = {};
+          workersConfig.deals[fluenceEnv] = dealsPerEnv;
+        }
+
+        dealsPerEnv[workerName] = {
           timestamp: new Date().toISOString(),
           definition: appCID,
           chainNetwork,
@@ -244,9 +254,16 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         workersConfig.deals = {};
       }
 
+      let dealsPerEnv = workersConfig.deals[fluenceEnv];
+
+      if (dealsPerEnv === undefined) {
+        dealsPerEnv = {};
+        workersConfig.deals[fluenceEnv] = dealsPerEnv;
+      }
+
       const timestamp = new Date().toISOString();
 
-      workersConfig.deals[workerName] = {
+      dealsPerEnv[workerName] = {
         definition: appCID,
         timestamp,
         dealIdOriginal,
@@ -265,7 +282,13 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     }
 
     dbg("start creating aqua files with worker info");
-    await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+
+    await ensureAquaFileWithWorkerInfo(
+      workersConfig,
+      fluenceConfig,
+      fluenceEnv,
+    );
+
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     const createdDealsText =

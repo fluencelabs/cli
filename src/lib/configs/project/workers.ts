@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import { join } from "path";
+
 import type { JSONSchemaType } from "ajv";
 
+import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   WORKERS_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -25,7 +28,10 @@ import {
   CONTRACTS_ENV,
   DEFAULT_DEAL_NAME,
   DEFAULT_WORKER_NAME,
+  type FluenceEnv,
+  FLUENCE_ENVS,
 } from "../../const.js";
+import { fluenceEnvPrompt } from "../../multiaddres.js";
 import { getFluenceDir } from "../../paths.js";
 import {
   getReadonlyConfigInitFunction,
@@ -62,8 +68,6 @@ export type Deal = WorkerInfo & {
   chainNetworkId: number;
 };
 
-type Deals = Record<string, Deal>;
-
 export type Host = WorkerInfo & {
   relayId: string;
   dummyDealId: string;
@@ -74,16 +78,11 @@ export type Host = WorkerInfo & {
   }[];
 };
 
-type Hosts = Record<string, Host>;
-
-export type DealsAndHosts = {
-  deals?: Deals;
-  hosts?: Hosts;
-};
-
 type ConfigV0 = {
   version: 0;
-} & DealsAndHosts;
+  deals?: Record<string, Deal>;
+  hosts?: Record<string, Host>;
+};
 
 const hostSchema: JSONSchemaType<Host> = {
   ...workerInfoSchema,
@@ -137,48 +136,152 @@ const dealSchema: JSONSchemaType<Deal> = {
   ],
 } as const;
 
+const mapOfDealsSchema = {
+  type: "object",
+  description: "A map of created deals",
+  additionalProperties: dealSchema,
+  properties: {
+    Worker_deployed_using_deals: dealSchema,
+  },
+  required: [],
+  nullable: true,
+} as const satisfies JSONSchemaType<Record<string, Deal>>;
+
+const mapOfHostsSchema = {
+  type: "object",
+  description: "A map of directly deployed workers",
+  additionalProperties: hostSchema,
+  properties: {
+    Worker_deployed_using_direct_hosting: hostSchema,
+  },
+  required: [],
+  nullable: true,
+} as const satisfies JSONSchemaType<Record<string, Host>>;
+
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
-  title: WORKERS_CONFIG_FULL_FILE_NAME,
   type: "object",
   additionalProperties: false,
-  description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
   properties: {
     version: { type: "number", const: 0 },
-    deals: {
-      type: "object",
-      description: "A map of created deals",
-      additionalProperties: dealSchema,
-      properties: {
-        Worker_deployed_using_deals: dealSchema,
-      },
-      required: [],
-      nullable: true,
-    },
-    hosts: {
-      type: "object",
-      description: "A map of deployed workers",
-      additionalProperties: hostSchema,
-      properties: {
-        Worker_deployed_using_direct_hosting: hostSchema,
-      },
-      required: [],
-      nullable: true,
-    },
+    deals: mapOfDealsSchema,
+    hosts: mapOfHostsSchema,
   },
   required: ["version"],
 } as const;
 
-const migrations: Migrations<Config> = [];
+type Deals = Partial<Record<FluenceEnv, Record<string, Deal>>>;
+type Hosts = Partial<Record<FluenceEnv, Record<string, Host>>>;
 
-type Config = ConfigV0;
-type LatestConfig = ConfigV0;
+type ConfigV1 = {
+  version: 1;
+  deals?: Deals;
+  hosts?: Hosts;
+};
+
+const configSchemaV1: JSONSchemaType<ConfigV1> = {
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${WORKERS_CONFIG_FULL_FILE_NAME}`,
+  title: WORKERS_CONFIG_FULL_FILE_NAME,
+  description: `A result of app deployment. This file is created automatically after successful deployment using \`${CLI_NAME} workers deploy\` command`,
+  type: "object",
+  additionalProperties: false,
+  required: ["version"],
+  properties: {
+    version: { type: "number", const: 1 },
+    deals: {
+      type: "object",
+      additionalProperties: false,
+      nullable: true,
+      required: [],
+      properties: {
+        custom: mapOfDealsSchema,
+        testnet: mapOfDealsSchema,
+        kras: mapOfDealsSchema,
+        local: mapOfDealsSchema,
+        stage: mapOfDealsSchema,
+      },
+    },
+    hosts: {
+      type: "object",
+      additionalProperties: false,
+      nullable: true,
+      required: [],
+      properties: {
+        custom: mapOfHostsSchema,
+        testnet: mapOfHostsSchema,
+        kras: mapOfHostsSchema,
+        local: mapOfHostsSchema,
+        stage: mapOfHostsSchema,
+      },
+    },
+  },
+};
+
+const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
+
+const migrations: Migrations<Config> = [
+  async (config: Config): Promise<ConfigV1> => {
+    if (!validateConfigSchemaV0(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
+
+    const configPath = join(getFluenceDir(), WORKERS_CONFIG_FULL_FILE_NAME);
+
+    const deals: Deals = {};
+
+    for (const [workerName, deal] of Object.entries(config.deals ?? {})) {
+      const env = await fluenceEnvPrompt(
+        `Select the environment that you used for deploying worker ${workerName} with dealId: ${deal.dealId} at ${configPath}`,
+        deal.chainNetwork,
+      );
+
+      let dealsForEnv = deals[env];
+
+      if (dealsForEnv === undefined) {
+        dealsForEnv = {};
+        deals[deal.chainNetwork] = dealsForEnv;
+      }
+
+      dealsForEnv[workerName] = deal;
+    }
+
+    const hosts: Hosts = {};
+
+    for (const [workerName, host] of Object.entries(config.hosts ?? {})) {
+      const env = await fluenceEnvPrompt(
+        `Select the environment that you used for deploying worker ${workerName} with dummyDealId: ${host.dummyDealId} at ${configPath}`,
+        "custom",
+      );
+
+      let hostsForEnv = hosts[env];
+
+      if (hostsForEnv === undefined) {
+        hostsForEnv = {};
+        hosts[env] = hostsForEnv;
+      }
+
+      hostsForEnv[workerName] = host;
+    }
+
+    return {
+      version: 1,
+      ...(Object.keys(deals).length === 0 ? {} : { deals }),
+      ...(Object.keys(hosts).length === 0 ? {} : { hosts }),
+    };
+  },
+];
+
+type Config = ConfigV0 | ConfigV1;
+type LatestConfig = ConfigV1;
 export type WorkersConfig = InitializedConfig<LatestConfig>;
 export type WorkersConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
+  allSchemas: [configSchemaV0, configSchemaV1],
+  latestSchema: configSchemaV1,
   migrations,
   name: WORKERS_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: getFluenceDir,
@@ -191,37 +294,39 @@ const getDefault: GetDefaultConfig = () => {
 # config version
 version: 0
 
-# # A map of created deals
 # deals:
-#   ${DEFAULT_DEAL_NAME}:
-#     # worker CID
-#     definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
-#     # ISO timestamp of the time when the worker was deployed
-#     timestamp: 2023-07-07T11:23:52.353Z
-#     # deal ID used in aqua to resolve workers
-#     dealId: 799c4beb18ae084d57a90582c2cb8bb19098139e
-#     # original deal ID that you get after signing the contract
-#     dealIdOriginal: "0x799C4BEB18Ae084D57a90582c2Cb8Bb19098139E"
-#     # network name that was used when deploying worker
-#     chainNetwork: testnet
-#     # network ID that was used when deploying worker
-#     chainNetworkId: 1313161555
+# # A map of created deals
+#   ${FLUENCE_ENVS[0]}:
+#     ${DEFAULT_DEAL_NAME}:
+#       # worker CID
+#       definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
+#       # ISO timestamp of the time when the worker was deployed
+#       timestamp: 2023-07-07T11:23:52.353Z
+#       # deal ID used in aqua to resolve workers
+#       dealId: 799c4beb18ae084d57a90582c2cb8bb19098139e
+#       # original deal ID that you get after signing the contract
+#       dealIdOriginal: "0x799C4BEB18Ae084D57a90582c2Cb8Bb19098139E"
+#       # network name that was used when deploying worker
+#       chainNetwork: testnet
+#       # network ID that was used when deploying worker
+#       chainNetworkId: 1313161555
 
-# # A map of deployed workers
 # hosts:
-#   ${DEFAULT_WORKER_NAME}:
-#     # worker CID
-#     definition: bafkreicoctafgctpxf7jk4nynpnma4wdxpcecjtspsjmuidmag6enctnqa
-#     # worker installation spells
-#     # host_id and worker_id can be used to access the worker
-#     installation_spells:
-#       - host_id: 12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR
-#         spell_id: 9dbe4003-1232-4a20-9d52-5651c5cf4c5c
-#         worker_id: 12D3KooWLBQAdDFXz9vWnmgs6MyMfo25bhUTUEiLPsG94ppYq35w
-#     # ISO timestamp of the time when the worker was deployed
-#     timestamp: 2023-07-07T11:39:57.610Z
-#     # relay that was used when connecting to the network
-#     relayId: 12D3KooWPisGn7JhooWhggndz25WM7vQ2JmA121EV8jUDQ5xMovJ
+# # A map of directly deployed workers
+#   ${FLUENCE_ENVS[0]}:
+#     ${DEFAULT_WORKER_NAME}:
+#       # worker CID
+#       definition: bafkreicoctafgctpxf7jk4nynpnma4wdxpcecjtspsjmuidmag6enctnqa
+#       # worker installation spells
+#       # host_id and worker_id can be used to access the worker
+#       installation_spells:
+#         - host_id: 12D3KooWBM3SdXWqGaawQDGQ6JprtwswEg3FWGvGhmgmMez1vRbR
+#           spell_id: 9dbe4003-1232-4a20-9d52-5651c5cf4c5c
+#           worker_id: 12D3KooWLBQAdDFXz9vWnmgs6MyMfo25bhUTUEiLPsG94ppYq35w
+#       # ISO timestamp of the time when the worker was deployed
+#       timestamp: 2023-07-07T11:39:57.610Z
+#       # relay that was used when connecting to the network
+#       relayId: 12D3KooWPisGn7JhooWhggndz25WM7vQ2JmA121EV8jUDQ5xMovJ
 `;
 };
 
@@ -235,7 +340,4 @@ export const initNewWorkersConfigReadonly = getReadonlyConfigInitFunction(
   getDefault,
 );
 
-export const initReadonlyWorkersConfig =
-  getReadonlyConfigInitFunction(initConfigOptions);
-
-export const workersSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export const workersSchema: JSONSchemaType<LatestConfig> = configSchemaV1;
