@@ -434,10 +434,9 @@ function getInitConfigOptions() {
 
 export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
-async function createProviderConfigWithSecretsAndConfigTomls(
-  name: string | undefined,
-  ensureProviderConfig: () => Promise<ProviderConfigReadonly | null>,
-) {
+async function createProviderConfigWithSecretsAndConfigTomls<
+  T extends ProviderConfigReadonly | null,
+>(name: string | undefined, ensureProviderConfig: () => Promise<T>) {
   let providerSecretsConfig: ProviderSecretesConfigReadonly | null = null;
 
   if (name !== undefined) {
@@ -547,7 +546,7 @@ export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 
 export async function ensureConfigToml(
   providerConfig: ProviderConfigReadonly,
-  providerSecretsConfig: ProviderSecretesConfigReadonly | null,
+  providerSecretsConfig?: ProviderSecretesConfigReadonly | null,
 ) {
   const baseNoxConfig = mergeNoxConfigYAML(
     await getDefaultNoxConfigYAML(providerConfig),
