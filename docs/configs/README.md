@@ -6,6 +6,9 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 ## [provider.yaml](./provider.md)
 
 Defines config used for provider set up
+## [provider-secrets.yaml](./provider-secrets.md)
+
+Defines secrets config used for provider set up
 ## [module.yaml](./module.md)
 
 Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use `fluence module new` command to generate a template for new module

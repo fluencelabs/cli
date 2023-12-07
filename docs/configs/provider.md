@@ -9,7 +9,7 @@ Defines config used for provider set up
 | `computePeers` | [object](#computepeers) | **Yes**  | A map with compute peer names as keys and compute peers as values                                                                        |
 | `env`          | string                  | **Yes**  | Defines the the environment for which you intend to generate nox configuration Possible values are: `kras`, `testnet`, `stage`, `local`. |
 | `offers`       | [object](#offers)       | **Yes**  | A map with offer names as keys and offers as values                                                                                      |
-| `version`      | number                  | **Yes**  |                                                                                                                                          |
+| `version`      | number                  | **Yes**  | Config version                                                                                                                           |
 | `nox`          | [object](#nox)          | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config                                          |
 
 ## computePeers
