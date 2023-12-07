@@ -184,7 +184,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
   const workersConfig = await initNewWorkersConfigReadonly();
   const { ensureAquaFileWithWorkerInfo } = await import("./deployWorkers.js");
-  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+  await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig, fluenceEnv);
   await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
 
   switch (template) {

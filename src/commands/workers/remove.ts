@@ -25,10 +25,11 @@ import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
   TRACING_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
+  ENV_FLAG,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
@@ -36,6 +37,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove workers from hosts, described in 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
@@ -47,6 +49,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     ...PRIV_KEY_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...TRACING_FLAG,
+    ...ENV_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -69,20 +72,25 @@ export default class Remove extends BaseCommand<typeof Remove> {
     await initFluenceClient(flags, fluenceConfig);
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = Fluence.getClient().getRelayPeerId();
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
-    if (workersConfig.hosts === undefined) {
-      return commandObj.error(
-        `There are no workers in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+    const deployedWorkersForEnv =
+      workersConfig.hosts?.[fluenceEnv] ??
+      commandObj.error(
+        `No deployed workers found at ${color.yellow(
+          `hosts.${fluenceEnv}`,
+        )} in ${color.yellow(workersConfig.$getPath())}`,
       );
-    }
 
     const workersToRemove =
       args["WORKER-NAMES"] === undefined
-        ? Object.keys(workersConfig.hosts)
+        ? Object.keys(deployedWorkersForEnv)
         : commaSepStrToArr(args["WORKER-NAMES"]);
 
+    const deployedWorkersForEnvArr = Object.entries(deployedWorkersForEnv);
+
     const removeArg: RemoveArgWorkers = {
-      workers: Object.entries(workersConfig.hosts)
+      workers: deployedWorkersForEnvArr
         .filter(([workerName]) => {
           return workersToRemove.includes(workerName);
         })
@@ -99,7 +107,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     const removeResult = await remove(flags.tracing, removeArg);
 
     const newHosts = Object.fromEntries(
-      Object.entries(workersConfig.hosts)
+      deployedWorkersForEnvArr
         .map(([name, { installation_spells: prevInstSp, ...rest }]) => {
           const currentWorkerResult = removeResult.find((r) => {
             return r.name === name;
@@ -131,7 +139,13 @@ export default class Remove extends BaseCommand<typeof Remove> {
     }
 
     await workersConfig.$commit();
-    await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+
+    await ensureAquaFileWithWorkerInfo(
+      workersConfig,
+      fluenceConfig,
+      fluenceEnv,
+    );
+
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     commandObj.log(

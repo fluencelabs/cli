@@ -31,6 +31,7 @@ import {
   NO_BUILD_FLAG,
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import {
@@ -39,6 +40,7 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -82,12 +84,14 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = Fluence.getClient().getRelayPeerId();
     const initPeerId = Fluence.getClient().getPeerId();
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
       workersConfig,
       aquaImports,
+      fluenceEnv,
       noBuild: flags["no-build"],
       marineBuildArgs: flags["marine-build-args"],
       initPeerId,
@@ -133,9 +137,22 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         { newDeployedWorkers: {}, infoToPrint: {} },
       );
 
-    workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
+    workersConfig.hosts = {
+      ...workersConfig.hosts,
+      [fluenceEnv]: {
+        ...(workersConfig.hosts?.[fluenceEnv] ?? {}),
+        ...newDeployedWorkers,
+      },
+    };
+
     await workersConfig.$commit();
-    await ensureAquaFileWithWorkerInfo(workersConfig, fluenceConfig);
+
+    await ensureAquaFileWithWorkerInfo(
+      workersConfig,
+      fluenceConfig,
+      fluenceEnv,
+    );
+
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
     commandObj.log(

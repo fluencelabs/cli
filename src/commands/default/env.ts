@@ -21,7 +21,9 @@ import { color } from "@oclif/color";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { envConfig } from "../../lib/configs/globalConfigs.js";
+import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import { ENV_ARG } from "../../lib/const.js";
+import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
   ensureValidFluenceEnv,
@@ -47,22 +49,29 @@ export default class Peers extends BaseCommand<typeof Peers> {
     );
 
     assert(envConfig !== null, "this command requires fluence project");
-    const newFluenceEnv = await ensureValidFluenceEnv(args.ENV);
+    const fluenceEnv = await ensureValidFluenceEnv(args.ENV);
 
     if (
-      newFluenceEnv === "custom" &&
+      fluenceEnv === "custom" &&
       fluenceConfig.customFluenceEnv === undefined
     ) {
       await ensureCustomAddrsAndPeerIds(fluenceConfig);
     }
 
-    envConfig.fluenceEnv = newFluenceEnv;
+    envConfig.fluenceEnv = fluenceEnv;
     await envConfig.$commit();
     await updateRelaysJSON({ fluenceConfig });
+    const workersConfig = await initNewWorkersConfigReadonly();
+
+    await ensureAquaFileWithWorkerInfo(
+      workersConfig,
+      fluenceConfig,
+      fluenceEnv,
+    );
 
     commandObj.log(
       `Successfully set default fluence environment to ${color.yellow(
-        newFluenceEnv,
+        fluenceEnv,
       )}`,
     );
   }

@@ -19,17 +19,18 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
+import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
-  DOT_FLUENCE_DIR_NAME,
   FLUENCE_CLIENT_FLAGS,
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
+  type FluenceEnv,
+  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import {
   formatAquaLogsHeader,
@@ -45,6 +46,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
   static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
@@ -69,9 +71,11 @@ export default class Logs extends BaseCommand<typeof Logs> {
     );
 
     await initFluenceClient(flags, maybeFluenceConfig);
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
     const dealIdWorkerNameMap = await getDealIdWorkerNameMap(
       args["WORKER-NAMES"],
+      fluenceEnv,
     );
 
     let logs;
@@ -121,25 +125,16 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
 const getDealIdWorkerNameMap = async (
   maybeWorkerNamesString: string | undefined,
+  fluenceEnv: FluenceEnv,
 ): Promise<Record<string, string>> => {
-  const maybeWorkersConfig = await initReadonlyWorkersConfig();
-
-  if (maybeWorkersConfig === null) {
-    return commandObj.error(
-      `Wasn't able to find ${color.yellow(
-        WORKERS_CONFIG_FULL_FILE_NAME,
-      )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed before trying to get logs`,
-    );
-  }
-
-  const workersConfig = maybeWorkersConfig;
+  const workersConfig = await initNewWorkersConfigReadonly();
 
   const deals =
-    workersConfig.deals ??
+    workersConfig.deals?.[fluenceEnv] ??
     commandObj.error(
-      `No deployed workers found in ${color.yellow(
-        "deals",
-      )} property in ${color.yellow(workersConfig.$getPath())} file`,
+      `No deployed workers found at ${color.yellow(
+        `deals.${fluenceEnv}`,
+      )} in ${color.yellow(workersConfig.$getPath())}`,
     );
 
   const workerNamesSet = Object.keys(deals);
