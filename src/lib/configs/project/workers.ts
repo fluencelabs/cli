@@ -140,7 +140,7 @@ const hostSchema: JSONSchemaType<Host> = {
 
 const dealSchema: JSONSchemaType<Deal> = {
   ...workerInfoSchema,
-  descriptions:
+  description:
     "Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua",
   properties: {
     ...workerInfoSchema.properties,
