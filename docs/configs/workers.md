@@ -30,11 +30,13 @@ A map of created deals
 
 #### Properties
 
-| Property                      | Type                                   | Required | Description |
-|-------------------------------|----------------------------------------|----------|-------------|
-| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       |             |
+| Property                      | Type                                   | Required | Description                                                                                                                 |
+|-------------------------------|----------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       | Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_deals
+
+Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -53,11 +55,13 @@ A map of created deals
 
 #### Properties
 
-| Property                      | Type                                   | Required | Description |
-|-------------------------------|----------------------------------------|----------|-------------|
-| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       |             |
+| Property                      | Type                                   | Required | Description                                                                                                                 |
+|-------------------------------|----------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       | Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_deals
+
+Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -76,11 +80,13 @@ A map of created deals
 
 #### Properties
 
-| Property                      | Type                                   | Required | Description |
-|-------------------------------|----------------------------------------|----------|-------------|
-| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       |             |
+| Property                      | Type                                   | Required | Description                                                                                                                 |
+|-------------------------------|----------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       | Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_deals
+
+Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -99,11 +105,13 @@ A map of created deals
 
 #### Properties
 
-| Property                      | Type                                   | Required | Description |
-|-------------------------------|----------------------------------------|----------|-------------|
-| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       |             |
+| Property                      | Type                                   | Required | Description                                                                                                                 |
+|-------------------------------|----------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       | Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_deals
+
+Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -122,11 +130,13 @@ A map of created deals
 
 #### Properties
 
-| Property                      | Type                                   | Required | Description |
-|-------------------------------|----------------------------------------|----------|-------------|
-| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       |             |
+| Property                      | Type                                   | Required | Description                                                                                                                 |
+|-------------------------------|----------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_deals` | [object](#worker_deployed_using_deals) | No       | Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_deals
+
+Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -159,11 +169,13 @@ A map of directly deployed workers
 
 #### Properties
 
-| Property                               | Type                                            | Required | Description |
-|----------------------------------------|-------------------------------------------------|----------|-------------|
-| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       |             |
+| Property                               | Type                                            | Required | Description                                                                                                                                                    |
+|----------------------------------------|-------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       | Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_direct_hosting
+
+Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -191,11 +203,13 @@ A map of directly deployed workers
 
 #### Properties
 
-| Property                               | Type                                            | Required | Description |
-|----------------------------------------|-------------------------------------------------|----------|-------------|
-| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       |             |
+| Property                               | Type                                            | Required | Description                                                                                                                                                    |
+|----------------------------------------|-------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       | Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_direct_hosting
+
+Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -223,11 +237,13 @@ A map of directly deployed workers
 
 #### Properties
 
-| Property                               | Type                                            | Required | Description |
-|----------------------------------------|-------------------------------------------------|----------|-------------|
-| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       |             |
+| Property                               | Type                                            | Required | Description                                                                                                                                                    |
+|----------------------------------------|-------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       | Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_direct_hosting
+
+Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -255,11 +271,13 @@ A map of directly deployed workers
 
 #### Properties
 
-| Property                               | Type                                            | Required | Description |
-|----------------------------------------|-------------------------------------------------|----------|-------------|
-| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       |             |
+| Property                               | Type                                            | Required | Description                                                                                                                                                    |
+|----------------------------------------|-------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       | Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_direct_hosting
+
+Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua
 
 ##### Properties
 
@@ -287,11 +305,13 @@ A map of directly deployed workers
 
 #### Properties
 
-| Property                               | Type                                            | Required | Description |
-|----------------------------------------|-------------------------------------------------|----------|-------------|
-| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       |             |
+| Property                               | Type                                            | Required | Description                                                                                                                                                    |
+|----------------------------------------|-------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Worker_deployed_using_direct_hosting` | [object](#worker_deployed_using_direct_hosting) | No       | Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua |
 
 #### Worker_deployed_using_direct_hosting
+
+Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua
 
 ##### Properties
 
