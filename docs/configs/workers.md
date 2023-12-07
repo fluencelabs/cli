@@ -6,7 +6,7 @@ A result of app deployment. This file is created automatically after successful 
 
 | Property  | Type             | Required | Description                                                                                        |
 |-----------|------------------|----------|----------------------------------------------------------------------------------------------------|
-| `version` | number           | **Yes**  |                                                                                                    |
+| `version` | number           | **Yes**  | Config version                                                                                     |
 | `deals`   | [object](#deals) | No       | Info about deals created when deploying workers that is stored by environment that you deployed to |
 | `hosts`   | [object](#hosts) | No       | Info about directly deployed workers that is stored by environment that you deployed to            |
 
