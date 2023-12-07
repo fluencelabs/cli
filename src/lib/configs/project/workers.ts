@@ -90,6 +90,8 @@ type ConfigV0 = {
 
 const hostSchema: JSONSchemaType<Host> = {
   ...workerInfoSchema,
+  description:
+    "Contains data related to your direct deployment. Most importantly, it contains ids in installation_spells property that can be used to resolve workers in aqua",
   properties: {
     ...workerInfoSchema.properties,
     dummyDealId: {
@@ -138,6 +140,8 @@ const hostSchema: JSONSchemaType<Host> = {
 
 const dealSchema: JSONSchemaType<Deal> = {
   ...workerInfoSchema,
+  descriptions:
+    "Contains data related to your deployment, including, most importantly, deal id, that can be used to resolve workers in aqua",
   properties: {
     ...workerInfoSchema.properties,
     dealId: {
