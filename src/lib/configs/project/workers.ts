@@ -224,7 +224,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
   additionalProperties: false,
   required: ["version"],
   properties: {
-    version: { type: "number", const: 1 },
+    version: { type: "number", const: 1, description: "Config version" },
     deals: {
       type: "object",
       description:
