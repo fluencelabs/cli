@@ -137,7 +137,14 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         { newDeployedWorkers: {}, infoToPrint: {} },
       );
 
-    workersConfig.hosts = { ...workersConfig.hosts, ...newDeployedWorkers };
+    workersConfig.hosts = {
+      ...workersConfig.hosts,
+      [fluenceEnv]: {
+        ...(workersConfig.hosts?.[fluenceEnv] ?? {}),
+        ...newDeployedWorkers,
+      },
+    };
+
     await workersConfig.$commit();
 
     await ensureAquaFileWithWorkerInfo(

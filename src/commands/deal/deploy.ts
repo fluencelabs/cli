@@ -158,11 +158,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         maxWorkersPerProvider = targetWorkers,
       } = deal;
 
-      const maybePreviouslyDeployedDeal =
+      const previouslyDeployedDeal =
         workersConfig.deals?.[fluenceEnv]?.[workerName];
 
-      if (maybePreviouslyDeployedDeal !== undefined) {
-        if (maybePreviouslyDeployedDeal.definition === appCID) {
+      if (previouslyDeployedDeal !== undefined) {
+        if (previouslyDeployedDeal.definition === appCID) {
           commandObj.logToStderr(
             `\nWorker ${color.yellow(
               workerName,
@@ -180,7 +180,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           network: chainNetwork,
           privKey: flags["priv-key"],
           appCID,
-          dealAddress: maybePreviouslyDeployedDeal.dealIdOriginal,
+          dealAddress: previouslyDeployedDeal.dealIdOriginal,
         });
 
         if (flags["auto-match"]) {
@@ -189,15 +189,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           await match(
             chainNetwork,
             flags["priv-key"],
-            maybePreviouslyDeployedDeal.dealIdOriginal,
+            previouslyDeployedDeal.dealIdOriginal,
           );
 
           dbg("done matching");
         }
 
         updatedDeals[workerName] = {
-          deal: getLinkToAddress(maybePreviouslyDeployedDeal.dealIdOriginal),
-          "old worker definition": maybePreviouslyDeployedDeal.definition,
+          deal: getLinkToAddress(previouslyDeployedDeal.dealIdOriginal),
+          "old worker definition": previouslyDeployedDeal.definition,
           "new worker definition": appCID,
         };
 
@@ -217,8 +217,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           definition: appCID,
           chainNetwork,
           chainNetworkId,
-          dealIdOriginal: maybePreviouslyDeployedDeal.dealIdOriginal,
-          dealId: maybePreviouslyDeployedDeal.dealId,
+          dealIdOriginal: previouslyDeployedDeal.dealIdOriginal,
+          dealId: previouslyDeployedDeal.dealId,
         };
 
         await workersConfig.$commit();
