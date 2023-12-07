@@ -208,13 +208,16 @@ Build all application services, described in fluence.yaml and generate aqua inte
 
 ```
 USAGE
-  $ fluence build [--no-input] [--marine-build-args <value>] [--import <value>]
+  $ fluence build [--no-input] [--marine-build-args <value>] [--import <value>] [--env <value>]
 
 FLAGS
-  --import=<path>...                Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                    'marineBuildArgs' property in fluence.yaml. Default: --release
-  --no-input                        Don't interactively ask for any input from the user
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                               Path to a directory to import aqua files from. May be used several
+                                                   times
+  --marine-build-args=<--flag arg>                 Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+  --no-input                                       Don't interactively ask for any input from the user
 
 DESCRIPTION
   Build all application services, described in fluence.yaml and generate aqua interfaces for them

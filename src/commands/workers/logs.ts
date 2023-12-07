@@ -20,17 +20,18 @@ import { Args, Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Get_logsArgApp_workers } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initReadonlyWorkersConfig } from "../../lib/configs/project/workers.js";
+import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import {
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
-  DOT_FLUENCE_DIR_NAME,
   FLUENCE_CLIENT_FLAGS,
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
+  ENV_FLAG_NAME,
+  type FluenceEnv,
 } from "../../lib/const.js";
 import { formatAquaLogs } from "../../lib/helpers/formatAquaLogs.js";
 import { stringifyUnknown, commaSepStrToArr } from "../../lib/helpers/utils.js";
@@ -39,6 +40,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveFluenceEnv } from "../../lib/multiaddres.js";
 import { input } from "../../lib/prompt.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
@@ -77,12 +79,14 @@ export default class Logs extends BaseCommand<typeof Logs> {
     );
 
     await initFluenceClient(flags, maybeFluenceConfig);
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
     const logsArg = await getLogsArg({
       maybeWorkerNamesString: args["WORKER-NAMES"],
       maybeWorkerId: flags["worker-id"],
       maybeHostId: flags["host-id"],
       spellId: flags["spell-id"],
+      fluenceEnv,
     });
 
     let logs;
@@ -114,6 +118,7 @@ type GetLogsArgArg = {
   maybeWorkerId: string | undefined;
   maybeHostId: string | undefined;
   spellId: string;
+  fluenceEnv: FluenceEnv;
 };
 
 const getLogsArg = async ({
@@ -121,6 +126,7 @@ const getLogsArg = async ({
   maybeWorkerId,
   maybeHostId,
   spellId,
+  fluenceEnv,
 }: GetLogsArgArg): Promise<Get_logsArgApp_workers> => {
   if (maybeWorkerId !== undefined || maybeHostId !== undefined) {
     const workerId =
@@ -146,24 +152,14 @@ const getLogsArg = async ({
     };
   }
 
-  const maybeWorkersConfig = await initReadonlyWorkersConfig();
-
-  if (maybeWorkersConfig === null) {
-    return commandObj.error(
-      `Wasn't able to find ${color.yellow(
-        WORKERS_CONFIG_FULL_FILE_NAME,
-      )} in project's ${DOT_FLUENCE_DIR_NAME} directory. Make sure you have deployed workers before trying to get logs`,
-    );
-  }
-
-  const workersConfig = maybeWorkersConfig;
+  const workersConfig = await initNewWorkersConfigReadonly();
 
   const hosts =
-    workersConfig.hosts ??
+    workersConfig.hosts?.[fluenceEnv] ??
     commandObj.error(
-      `No deployed workers found in ${color.yellow(
-        "hosts",
-      )} property in ${color.yellow(workersConfig.$getPath())} file`,
+      `No deployed workers found at ${color.yellow(
+        `hosts.${fluenceEnv}`,
+      )} in ${color.yellow(workersConfig.$getPath())}`,
     );
 
   const workerNamesSet = Object.keys(hosts);
