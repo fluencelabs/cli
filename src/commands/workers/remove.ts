@@ -16,6 +16,7 @@
 
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
+import isEmpty from "lodash-es/isEmpty.js";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -134,7 +135,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
 
     workersConfig.hosts = newHosts;
 
-    if (Object.keys(workersConfig.hosts).length === 0) {
+    if (isEmpty(workersConfig.hosts)) {
       delete workersConfig.hosts;
     }
 

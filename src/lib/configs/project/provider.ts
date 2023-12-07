@@ -22,6 +22,7 @@ import type { JsonMap } from "@iarna/toml";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import cloneDeep from "lodash-es/cloneDeep.js";
+import isEmpty from "lodash-es/isEmpty.js";
 import mapKeys from "lodash-es/mapKeys.js";
 import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
@@ -56,12 +57,14 @@ import {
   addOffers,
 } from "../../generateUserProviderConfig.js";
 import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
+import { splitErrorsAndResults } from "../../helpers/utils.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import {
   ensureFluenceConfigsDir,
   ensureProviderConfigPath,
   getFluenceDir,
   setProviderConfigName,
+  ensureFluenceSecretsFilePath,
 } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -71,6 +74,11 @@ import {
   type Migrations,
   type ConfigValidateFunction,
 } from "../initConfig.js";
+
+import {
+  initReadonlyProviderSecretsConfig,
+  type ProviderSecretesConfigReadonly,
+} from "./providerSecrets.js";
 
 export type Offer = {
   minPricePerWorkerEpoch: number;
@@ -309,13 +317,9 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       required: [],
     },
     nox: noxConfigYAMLSchema,
-    version: { type: "number", const: 0 },
+    version: { type: "number", const: 0, description: "Config version" },
   },
   required: ["version", "computePeers", "offers", "env"],
-};
-
-const getConfigOrConfigDirPath = () => {
-  return ensureProviderConfigPath();
 };
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
@@ -378,7 +382,7 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
     missingComputePeerNames: Array<string>;
   }> = [];
 
-  if (Object.keys(config.computePeers).length === 0) {
+  if (isEmpty(config.computePeers)) {
     return `There should be at least one computePeer defined in the config`;
   }
 
@@ -421,7 +425,7 @@ function getInitConfigOptions() {
     migrations,
     name: PROVIDER_CONFIG_FILE_NAME,
     getConfigOrConfigDirPath: () => {
-      return getConfigOrConfigDirPath();
+      return ensureProviderConfigPath();
     },
     getSchemaDirPath: getFluenceDir,
     validate,
@@ -430,9 +434,77 @@ function getInitConfigOptions() {
 
 export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
+async function createProviderConfigWithSecretsAndConfigTomls(
+  name: string | undefined,
+  ensureProviderConfig: () => Promise<ProviderConfigReadonly | null>,
+) {
+  let providerSecretsConfig: ProviderSecretesConfigReadonly | null = null;
+
+  if (name !== undefined) {
+    setProviderConfigName(name);
+    providerSecretsConfig = await initReadonlyProviderSecretsConfig();
+  }
+
+  const providerConfig = await ensureProviderConfig();
+
+  if (providerConfig !== null) {
+    if (providerSecretsConfig !== null) {
+      await ensureKeysFromProviderSecretsConfig(
+        providerConfig,
+        providerSecretsConfig,
+      );
+    }
+
+    await Promise.all([
+      ensureSecrets(providerConfig),
+      ensureConfigToml(providerConfig, providerSecretsConfig),
+    ]);
+  }
+
+  return providerConfig;
+}
+
+async function ensureKeysFromProviderSecretsConfig(
+  providerConfig: ProviderConfigReadonly,
+  providerSecretsConfig: ProviderSecretesConfigReadonly,
+) {
+  const [errors, results] = splitErrorsAndResults(
+    Object.keys(providerConfig.computePeers),
+    (name) => {
+      const keys = providerSecretsConfig.noxes[name];
+
+      if (keys === undefined) {
+        return { error: name };
+      }
+
+      return { result: { ...keys, name } };
+    },
+  );
+
+  if (errors.length > 0) {
+    commandObj.error(
+      `Missing nox secret keys for compute peers at ${providerSecretsConfig.$getPath()}:\n${errors.join(
+        ", ",
+      )}`,
+    );
+  }
+
+  await Promise.all(
+    results.map(async ({ name, networkKey }) => {
+      await writeFile(
+        await ensureFluenceSecretsFilePath(name),
+        networkKey,
+        FS_OPTIONS,
+      );
+    }),
+  );
+}
+
 async function ensureSecrets(providerConfig: ProviderConfigReadonly) {
+  const computePeerNames = Object.keys(providerConfig.computePeers);
+
   return Promise.all(
-    Object.keys(providerConfig.computePeers).map(async (name) => {
+    computePeerNames.map(async (name) => {
       return getSecretKeyOrReturnExisting(name);
     }),
   );
@@ -442,57 +514,41 @@ export async function initNewProviderConfig({
   name,
   ...args
 }: ProviderConfigArgs) {
-  if (name !== undefined) {
-    setProviderConfigName(name);
-  }
-
-  const providerConfig = await getConfigInitFunction(
-    getInitConfigOptions(),
-    getDefault(args),
-  )();
-
-  await ensureSecrets(providerConfig);
-  await ensureConfigToml(providerConfig);
-  return providerConfig;
+  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
+    return getConfigInitFunction(getInitConfigOptions(), getDefault(args))();
+  });
 }
 
 export async function initNewReadonlyProviderConfig({
   name,
   ...args
 }: ProviderConfigArgs) {
-  if (name !== undefined) {
-    setProviderConfigName(name);
-  }
-
-  const providerConfig = await getReadonlyConfigInitFunction(
-    getInitConfigOptions(),
-    getDefault(args),
-  )();
-
-  await ensureSecrets(providerConfig);
-  await ensureConfigToml(providerConfig);
-  return providerConfig;
+  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
+    return getReadonlyConfigInitFunction(
+      getInitConfigOptions(),
+      getDefault(args),
+    )();
+  });
 }
 
 export function initProviderConfig(name?: string) {
-  if (name !== undefined) {
-    setProviderConfigName(name);
-  }
-
-  return getConfigInitFunction(getInitConfigOptions())();
+  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
+    return getConfigInitFunction(getInitConfigOptions())();
+  });
 }
 
 export function initReadonlyProviderConfig(name?: string) {
-  if (name !== undefined) {
-    setProviderConfigName(name);
-  }
-
-  return getReadonlyConfigInitFunction(getInitConfigOptions())();
+  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
+    return getReadonlyConfigInitFunction(getInitConfigOptions())();
+  });
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 
-export async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
+export async function ensureConfigToml(
+  providerConfig: ProviderConfigReadonly,
+  providerSecretsConfig: ProviderSecretesConfigReadonly | null,
+) {
   const baseNoxConfig = mergeNoxConfigYAML(
     await getDefaultNoxConfigYAML(providerConfig),
     providerConfig.nox ?? {},
@@ -501,9 +557,14 @@ export async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
   const configsDir = await ensureFluenceConfigsDir();
   const { stringify } = await import("@iarna/toml");
 
+  const computePeers = Object.entries(providerConfig.computePeers);
+
   await Promise.all(
-    Object.entries(providerConfig.computePeers).map(async ([key, value], i) => {
-      const overridden = mergeNoxConfigYAML(baseNoxConfig, value.nox ?? {});
+    computePeers.map(async ([computePeerName, computePeerConfig], i) => {
+      const overridden = mergeNoxConfigYAML(
+        baseNoxConfig,
+        computePeerConfig.nox ?? {},
+      );
 
       if (overridden.tcpPort === undefined) {
         overridden.tcpPort = TCP_PORT_START + i;
@@ -519,6 +580,7 @@ export async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
 
       if (overridden.systemServices?.decider?.walletKey === undefined) {
         const walletKey =
+          providerSecretsConfig?.noxes[computePeerName]?.signingWallet ??
           LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length];
 
         assert(walletKey !== undefined, "Unreachable");
@@ -533,11 +595,11 @@ export async function ensureConfigToml(providerConfig: ProviderConfigReadonly) {
       }
 
       return writeFile(
-        join(configsDir, getConfigTomlName(key)),
+        join(configsDir, getConfigTomlName(computePeerName)),
         [
           stringify(configYAMLToConfigToml(overridden)),
           providerConfig.nox?.rawConfig,
-          value.nox?.rawConfig,
+          computePeerConfig.nox?.rawConfig,
         ]
           .filter(Boolean)
           .join("\n"),

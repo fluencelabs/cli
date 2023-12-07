@@ -33,7 +33,7 @@ import {
   getFluenceSecretsDir,
   getSecretsPathForWriting,
   getSecretsPathForReading,
-  ensureFluenceSecretsDir,
+  ensureFluenceSecretsFilePath,
   getFluenceDir,
 } from "./paths.js";
 import { list, type Choices, input, confirm } from "./prompt.js";
@@ -453,8 +453,7 @@ export async function getSecretKeys(
 
 export async function getSecretKeyOrReturnExisting(name: string) {
   const fluenceDir = getFluenceDir();
-  const secretsPath = await ensureFluenceSecretsDir();
-  const filePath = join(secretsPath, `${name}.txt`);
+  const filePath = await ensureFluenceSecretsFilePath(name);
   let secretKey;
 
   try {
