@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ERC20__factory } from "@fluencelabs/deal-aurora";
+import { DealClient, ERC20__factory } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -67,20 +67,14 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
     );
 
     const signer = await getSigner(network, privKey);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
+
+    const dealClient = new DealClient(signer, network);
     const deal = dealClient.getDeal(dealAddress);
 
     promptConfirmTx(privKey);
 
     const approveTx = await ERC20__factory.connect(
       await deal.paymentToken(),
-      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       signer,
     ).approve(await deal.getAddress(), amount);
 
@@ -90,9 +84,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
 
     const tx = await deal.deposit(amount);
 
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+
     await waitTx(tx);
 
     color.green(`Tokens were deposited to the deal ${dealAddress}`);

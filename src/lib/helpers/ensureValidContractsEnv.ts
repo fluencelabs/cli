@@ -18,8 +18,8 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import {
-  type ContractsENV,
-  CONTRACTS_ENV,
+  type Network,
+  NETWORK_NAME,
   isContractsEnv,
   ENV_FLAG_NAME,
 } from "../const.js";
@@ -29,10 +29,10 @@ export async function ensureValidContractsEnv(envFlag: string | undefined) {
   return (await ensureValidContractsEnvFlag(envFlag)) ?? contractsEnvPrompt();
 }
 
-async function contractsEnvPrompt(): Promise<ContractsENV> {
+async function contractsEnvPrompt(): Promise<Network> {
   return list({
     message: `Select environment to use`,
-    options: [...CONTRACTS_ENV],
+    options: [...NETWORK_NAME],
     oneChoiceMessage() {
       throw new Error("Unreachable. There are multiple envs");
     },
@@ -45,7 +45,7 @@ async function contractsEnvPrompt(): Promise<ContractsENV> {
 
 async function ensureValidContractsEnvFlag(
   envFlag: string | undefined,
-): Promise<ContractsENV | undefined> {
+): Promise<Network | undefined> {
   if (envFlag === undefined) {
     return undefined;
   }

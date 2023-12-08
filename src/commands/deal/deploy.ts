@@ -40,7 +40,6 @@ import {
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
   ENV_FLAG_NAME,
-  COLLATERAL_DEFAULT,
   PRICE_PER_EPOCH_DEFAULT,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
@@ -153,7 +152,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       const {
         targetWorkers = TARGET_WORKERS_DEFAULT,
         minWorkers = targetWorkers,
-        collateralPerWorker = COLLATERAL_DEFAULT,
         pricePerWorkerEpoch = PRICE_PER_EPOCH_DEFAULT,
         maxWorkersPerProvider = targetWorkers,
       } = deal;
@@ -228,7 +226,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         appCID,
         minWorkers,
         targetWorkers,
-        collateralPerWorker,
         maxWorkersPerProvider,
         pricePerWorkerEpoch,
         effectors: [],

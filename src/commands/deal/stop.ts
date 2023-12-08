@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -56,20 +57,16 @@ export default class Stop extends BaseCommand<typeof Stop> {
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
     const signer = await getSigner(network, privKey);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
+
+
+    const dealClient = new DealClient(signer, network);
     const deal = dealClient.getDeal(dealAddress);
 
     promptConfirmTx(privKey);
 
     const tx = await deal.stop();
 
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+
     await waitTx(tx);
 
     color.green(`Tokens were deposited to the deal ${dealAddress}`);

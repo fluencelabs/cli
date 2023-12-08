@@ -29,7 +29,6 @@ import {
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { setTryTimeout, stringifyUnknown } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { addPeer } from "../provider/add-peer.js";
 import { register } from "../provider/register.js";
 
 export default class Up extends BaseCommand<typeof Up> {
@@ -83,11 +82,5 @@ export default class Up extends BaseCommand<typeof Up> {
       flags.timeout * 1000,
       10000,
     );
-
-    await addPeer({
-      ...flags,
-      env,
-      "priv-key": privKey,
-    });
   }
 }

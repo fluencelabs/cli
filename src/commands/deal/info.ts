@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -44,11 +45,9 @@ export default class Info extends BaseCommand<typeof Info> {
     );
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, await getProvider(network));
+
+
+    const dealClient = new DealClient(await getProvider(network), network);
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -74,14 +73,6 @@ export default class Info extends BaseCommand<typeof Info> {
 
     commandObj.log(color.gray(`Balance: ${await deal.getFreeBalance()}`));
     const { ethers } = await import("ethers");
-
-    commandObj.log(
-      color.gray(
-        `Collateral per worker: ${ethers.formatEther(
-          await deal.collateralPerWorker(),
-        )} FLT`,
-      ),
-    );
 
     commandObj.log(
       color.gray(
@@ -112,7 +103,7 @@ export default class Info extends BaseCommand<typeof Info> {
 
       for (const unit of computeUnits) {
         commandObj.log(color.gray(`\nCompute unit: ${unit.id}`));
-        commandObj.log(color.gray(`Owner: ${unit.owner}`));
+        commandObj.log(color.gray(`Provider: ${unit.provider}`));
 
         if (unit.workerId === ethers.ZeroHash) {
           commandObj.log(color.gray(`Worker Id: None`));

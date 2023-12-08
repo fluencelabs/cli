@@ -23,6 +23,7 @@ import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
+import { DealClient } from "@fluencelabs/deal-aurora";
 
 export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   static override hidden = true;
@@ -56,11 +57,8 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
     const unitId =
       args["UNIT-ID"] ?? (await input({ message: "Enter unit id" }));
 
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, await getProvider(network));
+
+    const dealClient = new DealClient(await getProvider(network), network);
     const deal = dealClient.getDeal(dealAddress);
 
     const rewardAmount = await deal.getRewardAmount(unitId);

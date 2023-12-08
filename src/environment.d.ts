@@ -21,12 +21,12 @@ import {
   CI,
 } from "../src/lib/setupEnvironment.js";
 
-import { ContractsENV } from "./lib/const.js";
+import { Network } from "./lib/const.js";
 
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      [FLUENCE_ENV]: ContractsENV;
+      [FLUENCE_ENV]: Network;
       [DEBUG_COUNTLY]: "true" | "false";
       [FLUENCE_USER_DIR]?: string;
       [CI]: "true" | "false";

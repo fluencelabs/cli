@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
+import type { BytesLike, BigNumberish,AddressLike } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -90,12 +92,10 @@ export async function register(
   );
 
   const signer = await getSigner(network, flags["priv-key"]);
-  const { DealClient } = await import("@fluencelabs/deal-aurora");
-  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-  const dealClient = new DealClient(network, signer);
-  const globalContracts = dealClient.getGlobalContracts();
-  const matcher = await globalContracts.getMatcher();
-  const flt = await globalContracts.getFLT();
+
+  const dealClient = new DealClient(signer, network);
+  const core = await dealClient.getCore();
+  const flt = await dealClient.getFLT();
 
   const minPricePerWorkerEpochBigInt = BigInt(
     offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
@@ -103,21 +103,33 @@ export async function register(
 
   dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
 
-  const maxCollateralPerWorkerBigInt = BigInt(
-    offer.maxCollateralPerWorker * CURRENCY_MULTIPLIER,
-  );
 
-  dbg(`maxCollateralPerWorker: ${maxCollateralPerWorkerBigInt}`);
+  const registerPeers: {
+        peerId: BytesLike;
+        unitCount: BigNumberish;
+        owner: AddressLike;
+    }[] = Object.keys(providerConfig.computePeers).map((peerId) => {
+      const peer = providerConfig.computePeers[peerId];
 
-  const tx = await matcher.registerComputeProvider(
+      if (peer === undefined || peer.computeUnits === undefined) {
+        throw new Error(`Peer ${peerId} not found`);
+      }
+
+      return {
+        peerId: peerId,
+        unitCount: peer.computeUnits,
+        owner: ""
+      };
+    });
+
+  const tx = await core.registerMarketOffer(
     minPricePerWorkerEpochBigInt,
-    maxCollateralPerWorkerBigInt,
     await flt.getAddress(),
     [],
+    registerPeers
   );
 
   promptConfirmTx(flags["priv-key"]);
-  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
   await waitTx(tx);
 
   commandObj.log(color.green(`Successfully joined to matching contract`));

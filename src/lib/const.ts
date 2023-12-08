@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { NETWORK_NAME, type Network } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 import type {
@@ -21,6 +22,9 @@ import type {
   OutputFlags,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
+
+export type { Network } from "@fluencelabs/deal-aurora";
+export {  NETWORK_NAME } from "@fluencelabs/deal-aurora";
 
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
@@ -38,7 +42,6 @@ export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
 export const numberProperties = [
   "minPricePerWorkerEpoch",
-  "maxCollateralPerWorker",
 ] as const;
 
 export type NumberProperty = (typeof numberProperties)[number];
@@ -50,7 +53,6 @@ export const COLLATERAL_DEFAULT = 1;
 export const PRICE_PER_EPOCH_DEFAULT = 0.1;
 
 export const defaultNumberProperties: Record<NumberProperty, number> = {
-  maxCollateralPerWorker: COLLATERAL_DEFAULT,
   minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
 
@@ -60,10 +62,9 @@ export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
+export const isContractsEnv = getIsStringUnion(NETWORK_NAME);
 
-export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
-export type ContractsENV = (typeof CONTRACTS_ENV)[number];
-export const isContractsEnv = getIsStringUnion(CONTRACTS_ENV);
+export const isNetwork = getIsStringUnion(NETWORK_NAME);
 
 export type ChainConfig = {
   url: string;
@@ -79,11 +80,11 @@ export const WC_METADATA = {
   icons: [],
 };
 
-export const FLUENCE_ENVS = [...CONTRACTS_ENV, "custom"] as const;
+export const FLUENCE_ENVS = [...NETWORK_NAME, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
-export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
+export const DEAL_CONFIG: Record<Network, ChainConfig> = {
   kras: {
     url: "https://polygon-mumbai.g.alchemy.com/v2/lSTLbdQejAUJ854kpjvyFXrmKocI2N-z",
     id: 80001,
@@ -108,8 +109,8 @@ export const DEAL_RPC_CONFIG = Object.fromEntries(
   }),
 );
 
-// @ts-expect-error we know that keys are ContractsEnv, not just string
-export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
+// @ts-expect-error we know that keys are Network, not just string
+export const CONTRACTS_ENV_TO_CHAIN_ID: Record<Network, number> =
   Object.fromEntries(
     Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
       return [name, id];
@@ -331,7 +332,7 @@ export const PROVIDER_CONFIG_FLAGS = {
   }),
   [ENV_FLAG_NAME]: Flags.string({
     description: "Environment to use when generating the provider config",
-    helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
+    helpValue: `<${NETWORK_NAME.join(" | ")}>`,
   }),
 };
 

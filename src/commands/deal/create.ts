@@ -66,7 +66,6 @@ export default class Create extends BaseCommand<typeof Create> {
 
     const dealAddress = await dealCreate({
       appCID: flags["app-cid"],
-      collateralPerWorker: Number(flags["collateral-per-worker"]),
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],

@@ -30,12 +30,11 @@ import times from "lodash-es/times.js";
 import { commandObj } from "../../commandObj.js";
 import {
   DEFAULT_OFFER_NAME,
-  type ContractsENV,
   PROVIDER_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   DEFAULT_AQUAVM_POOL_SIZE,
-  CONTRACTS_ENV,
+  NETWORK_NAME,
   FS_OPTIONS,
   HTTP_PORT_START,
   TCP_PORT_START,
@@ -49,6 +48,8 @@ import {
   IPFS_PORT,
   CURRENCY_MULTIPLIER_TEXT,
   defaultNumberProperties,
+  type Network,
+  DEAL_CONFIG,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
@@ -74,7 +75,6 @@ import {
 
 export type Offer = {
   minPricePerWorkerEpoch: number;
-  maxCollateralPerWorker: number;
   computePeers: Array<string>;
   effectors?: Array<string>;
 };
@@ -230,7 +230,7 @@ type ComputePeer = {
 };
 
 type ConfigV0 = {
-  env: ContractsENV;
+  env: Network;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   nox?: NoxConfigYAML;
@@ -246,10 +246,6 @@ const offerSchema: JSONSchemaType<Offer> = {
       type: "number",
       description: `Minimum price per worker epoch. ${CURRENCY_MULTIPLIER_TEXT}`,
     },
-    maxCollateralPerWorker: {
-      type: "number",
-      description: `Max collateral per worker. ${CURRENCY_MULTIPLIER_TEXT}`,
-    },
     computePeers: {
       description: "Number of Compute Units for this Compute Peer",
       type: "array",
@@ -260,7 +256,6 @@ const offerSchema: JSONSchemaType<Offer> = {
   },
   required: [
     "minPricePerWorkerEpoch",
-    "maxCollateralPerWorker",
     "computePeers",
   ],
 };
@@ -287,7 +282,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description:
         "Defines the the environment for which you intend to generate nox configuration",
       type: "string",
-      enum: CONTRACTS_ENV,
+      enum: NETWORK_NAME,
     },
     offers: {
       description: "A map with offer names as keys and offers as values",
@@ -583,17 +578,13 @@ function camelCaseKeysToSnakeCase(val: unknown): unknown {
   return val;
 }
 
-async function getDefaultNoxConfigYAML(
+function getDefaultNoxConfigYAML(
   providerConfig: ProviderConfigReadonly,
-): Promise<NoxConfigYAML> {
+): NoxConfigYAML {
   const isLocal = providerConfig.env === "local";
   const contractsEnv = providerConfig.env;
 
-  const { DEAL_CONFIG } = await import(
-    "@fluencelabs/deal-aurora/dist/client/config.js"
-  );
-
-  const dealConfig = await DEAL_CONFIG[contractsEnv]();
+  const dealConfig = DEAL_CONFIG[contractsEnv];
 
   return mergeNoxConfigYAML(commonNoxConfig, {
     systemServices: {
@@ -614,7 +605,7 @@ async function getDefaultNoxConfigYAML(
         networkApiEndpoint: isLocal
           ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
           : "http://mumbai-polygon.ru:8545",
-        networkId: dealConfig.chainId,
+        networkId: dealConfig.id,
         startBlock: "earliest",
         // TODO: use correct addr for env
         matcherAddress: "0x0e1F3B362E22B2Dc82C9E35d6e62998C7E8e2349",

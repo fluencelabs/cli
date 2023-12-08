@@ -28,6 +28,7 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../lib/provider.js";
+import { DealClient } from "@fluencelabs/deal-aurora";
 
 export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   static override hidden = true;
@@ -63,11 +64,9 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
       args["UNIT-ID"] ?? (await input({ message: "Enter unit CID" }));
 
     const signer = await getSigner(network, privKey);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
+
+
+    const dealClient = new DealClient(signer, network);
     const deal = dealClient.getDeal(dealAddress);
 
     promptConfirmTx(privKey);
@@ -76,9 +75,7 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
 
     const tx = await deal.withdrawRewards(unitId);
 
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+
     await waitTx(tx);
 
     color.green(
