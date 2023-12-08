@@ -17,7 +17,7 @@
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { commandObj } from "../lib/commandObj.js";
 import { initCli } from "../lib/lifeCycle.js";
-import { createTransactions } from "../lib/server.js";
+import { createTransaction } from "../lib/server.js";
 
 export default class UI extends BaseCommand<typeof UI> {
   static override description = "ui";
@@ -28,29 +28,16 @@ export default class UI extends BaseCommand<typeof UI> {
   async run(): Promise<void> {
     await initCli(this, await this.parse(UI));
 
-    const { step1, step2, step3 } = createTransactions({
-      name: "Deploying deal",
-      steps: {
-        step1: {
-          name: "Sign transaction 1",
-          dataForEthersJs: "some data 1",
-        },
-        step2: {
-          name: "Sign transaction 2",
-          dataForEthersJs: "some data 2",
-        },
-        step3: {
-          name: "Sign transaction 3",
-          dataForEthersJs: "some data 3",
-        },
-      },
+    const res1 = await createTransaction({
+      name: "Step 1",
+      transactionData: "DataForStep1",
     });
 
-    const res1 = await step1();
-    commandObj.log(res1);
-    const res2 = await step2();
+    const res2 = await createTransaction({
+      name: "Step 2",
+      transactionData: `DataForStep2: ${res1}`,
+    });
+
     commandObj.log(res2);
-    const res3 = await step3();
-    commandObj.log(res3);
   }
 }

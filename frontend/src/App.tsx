@@ -1,4 +1,4 @@
-import { For, Match, Switch } from "solid-js";
+import { Match, Switch } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 
 export default function App() {
@@ -9,14 +9,17 @@ export default function App() {
           tag: "transaction";
           data: TransactionProps;
         }
-      | {
-          tag: "success";
-          data: TransactionSuccessProps;
-        };
+      | { tag: "closeTab"; data: never };
   }>({});
 
   events.onmessage = (event) => {
     const parsedData = JSON.parse(event.data);
+
+    if (parsedData.tag === "closeTab") {
+      window.close();
+      return;
+    }
+
     setState(
       produce((prev) => {
         prev.server = parsedData;
@@ -31,10 +34,6 @@ export default function App() {
           {/* @ts-ignore */}
           <Transaction {...state.server?.data} />
         </Match>
-        <Match when={state.server?.tag === "success"}>
-          {/* @ts-ignore */}
-          <TransactionSuccess {...state.server?.data} />
-        </Match>
       </Switch>
     </>
   );
@@ -42,66 +41,14 @@ export default function App() {
 
 type TransactionProps = {
   name: string;
-  steps: string[];
-  currentStep: number;
-  data: string;
+  transactionData: string;
 };
 
 function Transaction(props: TransactionProps) {
   return (
     <>
       <h1>{props.name}</h1>
-      <ol>
-        <For each={props.steps}>
-          {(step, index) => (
-            <li
-              style={
-                index() < props.currentStep
-                  ? { opacity: 0.5 }
-                  : index() === props.currentStep
-                  ? { color: "green" }
-                  : {}
-              }
-            >
-              {step}
-            </li>
-          )}
-        </For>
-      </ol>
-      <button
-        onClick={() => {
-          void fetch("/response", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ message: `signed: ${props.data}` }),
-          });
-        }}
-      >
-        Sign transaction
-      </button>
-    </>
-  );
-}
-
-type TransactionSuccessProps = {
-  name: string;
-};
-
-function TransactionSuccess(props: TransactionSuccessProps) {
-  void fetch("/response", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({}),
-  });
-
-  return (
-    <>
-      <h1>{props.name}</h1>
-      <p>Success</p>
+      <div>{props.transactionData}</div>
     </>
   );
 }

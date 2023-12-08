@@ -18,7 +18,6 @@ import { createRequire } from "module";
 import { dirname, join } from "path";
 
 import express from "express";
-import type { Fn, Objects, Pipe, Unions } from "hotscript";
 import open from "open";
 
 import { commandObj } from "./commandObj.js";
@@ -85,64 +84,19 @@ async function sendEvent(dataToSend: unknown) {
   });
 }
 
-type Steps = Record<
-  string,
-  {
-    name: string;
-    dataForEthersJs: string;
-  }
->;
-
-type CreateTransactionArgs<T extends Steps> = {
+type CreateTransactionArgs = {
   name: string;
-  steps: T;
+  transactionData: string;
 };
 
-interface Sus extends Fn {
-  return: [this["arg0"][0], () => Promise<string>];
-}
+export async function createTransaction(
+  data: CreateTransactionArgs,
+): Promise<string> {
+  const res = await sendEvent({ tag: "transaction", data });
 
-export function createTransactions<T extends Steps>(
-  args: CreateTransactionArgs<T>,
-): Pipe<T, [Objects.Entries, Unions.Map<Sus>, Objects.FromEntries]> {
-  // @ts-expect-error don't know how to fix this
-  return Object.fromEntries(
-    Object.entries(args.steps).map(([name, data], i, arr) => {
-      return [
-        name,
-        () => {
-          function transactionEvent() {
-            return sendEvent({
-              tag: "transaction",
-              data: {
-                name: args.name,
-                steps: arr.map(([, v]) => {
-                  return v.name;
-                }),
-                currentStep: i,
-                data: data.dataForEthersJs,
-              },
-            });
-          }
+  try {
+    await sendEvent({ tag: "closeTab" });
+  } catch {}
 
-          if (i === arr.length - 1) {
-            return (async () => {
-              const res = await transactionEvent();
-
-              await sendEvent({
-                tag: "success",
-                data: {
-                  name: args.name,
-                },
-              });
-
-              return res;
-            })();
-          }
-
-          return transactionEvent();
-        },
-      ];
-    }),
-  );
+  return String(res);
 }
