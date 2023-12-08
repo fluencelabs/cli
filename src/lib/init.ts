@@ -48,7 +48,6 @@ import {
   getPackageJSONPath,
   getFrontendSrcPath,
   getFrontendCompiledAquaPath,
-  getViteConfigPath,
   getIndexHTMLPath,
   getTsConfigPath,
   getFrontendPath,
@@ -317,7 +316,6 @@ async function initTSorJSProject({
   await Promise.all([
     fluenceConfig.$commit(),
     writeFile(indexFilePath, getIndexJsContent(isJS), FS_OPTIONS),
-    writeFile(getViteConfigPath(isJS), VITE_CONFIG_CONTENT, FS_OPTIONS),
     writeFile(packageJSONPath, jsonStringify(getPackageJSON(isJS)), FS_OPTIONS),
     writeFile(getIndexHTMLPath(), getIndexHTMLContent(isJS), FS_OPTIONS),
     isJS
@@ -476,14 +474,6 @@ function stringifyError(e${isJS ? "" : ": unknown"}) {
 `;
 }
 
-const VITE_CONFIG_CONTENT = `import { defineConfig } from "vite";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
-
-export default defineConfig({
-  plugins: [nodePolyfills()],
-});
-`;
-
 const TS_CONFIG_CONTENT = `{
   "compilerOptions": {
     "target": "ES2020",
@@ -525,7 +515,6 @@ function getPackageJSON(isJS: boolean) {
     },
     devDependencies: {
       vite: "4.4.5",
-      "vite-plugin-node-polyfills": "0.16.0",
       ...(isJS ? {} : { typescript: "5.0.2" }),
     },
   };
