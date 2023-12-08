@@ -49,8 +49,6 @@ import {
   TS_CONFIG_FILE_NAME,
   FRONTEND_DIR_NAME,
   COMPILED_AQUA_DIR_NAME,
-  TS_EXT,
-  JS_EXT,
   INDEX_HTML_FILE_NAME,
   CONFIGS_DIR_NAME,
   PROVIDER_CONFIG_FILE_NAME,
@@ -339,10 +337,6 @@ export const getFrontendCompiledAquaPath = (): string => {
 
 export const ensureFrontendCompiledAquaPath = async (): Promise<string> => {
   return ensureDir(getFrontendCompiledAquaPath());
-};
-
-export const getViteConfigPath = (isJS: boolean): string => {
-  return join(getFrontendPath(), `vite.config.${isJS ? JS_EXT : TS_EXT}`);
 };
 
 export const getIndexHTMLPath = (): string => {
