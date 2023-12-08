@@ -1,0 +1,37 @@
+html {
+  display: flex;
+  min-height: 100%;
+  font-size: 18px;
+  background-color: #1b1b1d;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+body {
+  flex: 1;
+  display: flex;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  margin-top: 20px;
+  width: 32px;
+  height: 32px;
+  border: 5px solid #fff;
+  border-top-color: #1b1b1d;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

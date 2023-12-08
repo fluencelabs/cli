@@ -33,6 +33,10 @@ export default class UI extends BaseCommand<typeof UI> {
       transactionData: "DataForStep1",
     });
 
+    await new Promise((res) => {
+      return setTimeout(res, 5000);
+    });
+
     const res2 = await createTransaction({
       name: "Step 2",
       transactionData: `DataForStep2: ${res1}`,

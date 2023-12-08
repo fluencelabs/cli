@@ -23,6 +23,7 @@ import open from "open";
 import { commandObj } from "./commandObj.js";
 
 const PORT = 5173;
+const SERVER_URL = `http://localhost:${PORT}`;
 
 const require = createRequire(import.meta.url);
 
@@ -59,9 +60,10 @@ function initServer() {
     });
 
     app.listen(PORT, () => {
-      commandObj.logToStderr(`Server started on http://localhost:${PORT}`);
-      void open(`http://localhost:${PORT}`);
-      res(true);
+      void open(SERVER_URL).then(() => {
+        commandObj.logToStderr(`Server started on ${SERVER_URL}`);
+        res(true);
+      });
     });
   });
 }
@@ -79,7 +81,10 @@ async function sendEvent(dataToSend: unknown) {
   };
 
   return new Promise((res) => {
-    sendResultBack = res;
+    sendResultBack = (value: unknown) => {
+      res(value);
+    };
+
     currentClientResponse?.();
   });
 }
@@ -93,10 +98,5 @@ export async function createTransaction(
   data: CreateTransactionArgs,
 ): Promise<string> {
   const res = await sendEvent({ tag: "transaction", data });
-
-  try {
-    await sendEvent({ tag: "closeTab" });
-  } catch {}
-
-  return String(res);
+  return JSON.stringify(res);
 }
