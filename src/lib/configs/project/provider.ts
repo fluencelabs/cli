@@ -513,33 +513,34 @@ export async function initNewProviderConfig({
   name,
   ...args
 }: ProviderConfigArgs) {
-  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
-    return getConfigInitFunction(getInitConfigOptions(), getDefault(args))();
-  });
+  return createProviderConfigWithSecretsAndConfigTomls(
+    name,
+    getConfigInitFunction(getInitConfigOptions(), getDefault(args)),
+  );
 }
 
 export async function initNewReadonlyProviderConfig({
   name,
   ...args
 }: ProviderConfigArgs) {
-  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
-    return getReadonlyConfigInitFunction(
-      getInitConfigOptions(),
-      getDefault(args),
-    )();
-  });
+  return createProviderConfigWithSecretsAndConfigTomls(
+    name,
+    getReadonlyConfigInitFunction(getInitConfigOptions(), getDefault(args)),
+  );
 }
 
 export function initProviderConfig(name?: string) {
-  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
-    return getConfigInitFunction(getInitConfigOptions())();
-  });
+  return createProviderConfigWithSecretsAndConfigTomls(
+    name,
+    getConfigInitFunction(getInitConfigOptions()),
+  );
 }
 
 export function initReadonlyProviderConfig(name?: string) {
-  return createProviderConfigWithSecretsAndConfigTomls(name, () => {
-    return getReadonlyConfigInitFunction(getInitConfigOptions())();
-  });
+  return createProviderConfigWithSecretsAndConfigTomls(
+    name,
+    getReadonlyConfigInitFunction(getInitConfigOptions()),
+  );
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
