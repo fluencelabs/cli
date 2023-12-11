@@ -37,12 +37,13 @@ export default class Logs extends BaseCommand<typeof Logs> {
       );
     }
 
-    await dockerCompose({
+    const logs = await dockerCompose({
       args: ["logs"],
-      printOutput: true,
       options: {
         cwd: dockerComposeConfig.$getDirPath(),
       },
     });
+
+    commandObj.log(logs);
   }
 }
