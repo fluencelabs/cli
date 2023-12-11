@@ -1173,7 +1173,7 @@ _See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blo
 
 ## `fluence spell build [SPELL-NAMES]`
 
-Create a new spell template
+Compile spells aqua
 
 ```
 USAGE
@@ -1188,7 +1188,7 @@ FLAGS
   --no-input          Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Create a new spell template
+  Compile spells aqua
 
 EXAMPLES
   $ fluence spell build

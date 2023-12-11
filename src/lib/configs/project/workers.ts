@@ -17,6 +17,7 @@
 import { join } from "path";
 
 import type { JSONSchemaType } from "ajv";
+import isEmpty from "lodash-es/isEmpty.js";
 
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
@@ -310,8 +311,8 @@ const migrations: Migrations<Config> = [
 
     return {
       version: 1,
-      ...(Object.keys(deals).length === 0 ? {} : { deals }),
-      ...(Object.keys(hosts).length === 0 ? {} : { hosts }),
+      ...(isEmpty(deals) ? {} : { deals }),
+      ...(isEmpty(hosts) ? {} : { hosts }),
     };
   },
 ];
