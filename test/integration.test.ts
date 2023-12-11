@@ -529,14 +529,37 @@ describe("integration tests", () => {
 
       const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-      if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
-        throw new Error(
-          `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
-        );
-      }
-
       assertLogsAreValid(logs);
     },
+  );
+
+  maybeConcurrentTest(
+    "should update deal after new spell is crated",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
+      await init(cwd, "quickstart");
+
+      const MY_SERVICE_NAME = "myService";
+      const pathToNewServiceDir = join(getServicesDir(cwd), MY_SERVICE_NAME);
+
+      await initDefaultServiceConfig(cwd, pathToNewServiceDir);
+
+      await initDefaultFluenceConfig(cwd, MY_SERVICE_NAME);
+
+      await deployDealAndWaitUntilDeployed(cwd);
+
+      const NEW_SPELL_NAME = "newSpell";
+
+      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME)
+
+      await deployDealAndWaitUntilDeployed(cwd);
+
+      await waitUntilShowSubnetReturnsSpell(cwd, MY_SERVICE_NAME, NEW_SPELL_NAME);
+
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+      assertLogsAreValid(logs);
+    }
   );
 });
 
@@ -592,7 +615,221 @@ service NewService("${WD_NEW_SERVICE_NAME}"):
 ${WD_NEW_SERVICE_2_INTERFACE}
 `;
 
+const waitUntilDealDeployed = async (cwd: string) => {
+  const result = await fluence({
+    args: ["run"],
+    flags: {
+      f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+      quiet: true,
+    },
+    cwd,
+  });
+
+  const parsedResult = JSON.parse(result);
+
+  assert(
+    Array.isArray(parsedResult),
+    `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array, but it is: ${result}`,
+  );
+
+  const arrayOfResults = parsedResult.map((u) => {
+    return assertHasWorkerAndAnswer(u);
+  });
+
+  const resultsWithNoAnswer = arrayOfResults.filter(({ answer }) => {
+    return answer === null;
+  });
+
+  assert(
+    resultsWithNoAnswer.length === 0,
+    `When running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} nox returned workers from blockchain that has worker_id == null: ${resultsWithNoAnswer
+      .map(({ worker }) => {
+        return jsonStringify(worker);
+      })
+      .join("\n")}`,
+  );
+
+  const expected = multiaddrs
+    .map((peer) => {
+      return {
+        answer: "Hi, fluence",
+        peer: peer.peerId,
+      };
+    })
+    .sort((a, b) => {
+      return sortPeers(a, b);
+    });
+
+  const res = arrayOfResults
+    .map(({ answer, worker }) => {
+      return {
+        answer,
+        peer: worker.host_id,
+      };
+    })
+    .sort((a, b) => {
+      return sortPeers(a, b);
+    });
+
+  // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
+  expect(res).toEqual(expected);
+}
+
+async function deployDealAndWaitUntilDeployed(cwd: string) {
+  await fluence({
+    args: ["deal", "deploy"],
+    flags: {
+      "priv-key": LOCAL_NET_DEFAULT_WALLET_KEY
+    },
+    cwd
+  });
+
+  await setTryTimeout(
+    async () => {
+      return waitUntilDealDeployed(cwd);
+    },
+    (error) => {
+      throw new Error(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error
+        )}`
+      );
+    },
+    RUN_DEPLOYED_SERVICES_TIMEOUT
+  );
+}
+
+async function waitUntilShowSubnetReturnsSpell(cwd: string, serviceName: string, spellName: string) {
+  await setTryTimeout(
+    async () => {
+      const showSubnetResult = await fluence({
+        args: ["run"],
+        flags: {
+          f: "showSubnet()",
+          quiet: true
+        },
+        cwd
+      });
+
+      const parsedShowSubnetResult = JSON.parse(showSubnetResult);
+
+      if (!validateWorkerServices(parsedShowSubnetResult)) {
+        throw new Error(
+          `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`
+        );
+      }
+
+      parsedShowSubnetResult
+        .sort((a, b) => {
+          if (a.host_id < b.host_id) {
+            return -1;
+          }
+
+          if (a.host_id > b.host_id) {
+            return 1;
+          }
+
+          return 0;
+        })
+        .forEach((w) => {
+          return w.spells.sort();
+        });
+
+      expect(parsedShowSubnetResult).toEqual(
+        peerIds.map((host_id, i) => {
+          return {
+            host_id,
+            services: [serviceName],
+            spells: [spellName, "worker-spell"],
+            worker_id: parsedShowSubnetResult[i]?.worker_id
+          };
+        })
+      );
+    },
+    (error) => {
+      throw new Error(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${20 * 60 * 1000} ms, error: ${stringifyUnknown(
+          error
+        )}`
+      );
+    },
+    RUN_DEPLOYED_SERVICES_TIMEOUT
+  );
+}
+
+export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
+  await fluence({
+    args: ["spell", "new", spellName],
+    cwd,
+  });
+
+  const fluenceConfig = await initFluenceConfigWithPath(cwd);
+
+  assert(
+    fluenceConfig !== null,
+    `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`
+  );
+
+  assert(
+    fluenceConfig.deals !== undefined &&
+    fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
+    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`
+  );
+
+  const pathToNewSpell = join(getSpellsDir(cwd), spellName);
+
+  fluenceConfig.spells = {
+    newSpell: {
+      get: relative(cwd, pathToNewSpell),
+    },
+  };
+
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [spellName];
+  await fluenceConfig.$commit();
+}
+
+async function initDefaultFluenceConfig(cwd: string, MY_SERVICE_NAME: string) {
+  const fluenceConfig = await initFluenceConfigWithPath(cwd);
+
+  assert(
+    fluenceConfig !== null,
+    `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`
+  );
+
+  assert(
+    fluenceConfig.deals !== undefined &&
+    fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
+    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`
+  );
+
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].minWorkers = 3;
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+  await fluenceConfig.$commit();
+}
+
+async function initDefaultServiceConfig(cwd: string, pathToNewServiceDir: string) {
+  const serviceConfig = await initServiceConfig(
+    relative(cwd, pathToNewServiceDir),
+    cwd
+  );
+
+  assert(
+    serviceConfig !== null,
+    `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`
+  );
+
+  serviceConfig.modules.facade.envs = { A: "B" };
+  await serviceConfig.$commit();
+}
+
 function assertLogsAreValid(logs: string) {
+  if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
+    throw new Error(
+      `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
+    );
+  }
+
   assert(logs.trim() !== "", "logs are expected to be non-empty");
 
   if (logs.includes(LOGS_GET_ERROR_START)) {

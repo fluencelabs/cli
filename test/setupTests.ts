@@ -43,6 +43,10 @@ import {
 console.log("Setting up tests...");
 
 await fluence({
+  args: ["--version"],
+});
+
+await fluence({
   args: ["dep", "i"],
 });
 
