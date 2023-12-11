@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { NETWORK_NAME, type Network } from "@fluencelabs/deal-aurora";
+import {NETWORK_NAME as NETWORK_NAME_CHAIN } from "@fluencelabs/deal-aurora/dist/client/config.js"
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 import type {
@@ -22,9 +22,6 @@ import type {
   OutputFlags,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
-
-export type { Network } from "@fluencelabs/deal-aurora";
-export {  NETWORK_NAME } from "@fluencelabs/deal-aurora";
 
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
@@ -62,9 +59,12 @@ export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
+
+export const NETWORK_NAME = NETWORK_NAME_CHAIN;
+export type Network = (typeof NETWORK_NAME)[number];
+
 export const isContractsEnv = getIsStringUnion(NETWORK_NAME);
 
-export const isNetwork = getIsStringUnion(NETWORK_NAME);
 
 export type ChainConfig = {
   url: string;
