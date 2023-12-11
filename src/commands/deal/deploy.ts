@@ -162,16 +162,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         workersConfig.deals?.[fluenceEnv]?.[workerName];
 
       if (previouslyDeployedDeal !== undefined) {
-        if (previouslyDeployedDeal.definition === appCID) {
-          commandObj.logToStderr(
-            `\nWorker ${color.yellow(
-              workerName,
-            )} didn't change. Skipping deal update`,
-          );
-
-          continue;
-        }
-
         commandObj.logToStderr(
           `\nUpdating deal for worker ${color.yellow(workerName)}\n`,
         );
