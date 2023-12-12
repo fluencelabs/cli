@@ -54,7 +54,7 @@ export function stringifyUnknown(unknown: unknown): string {
     }
 
     if (unknown instanceof Error) {
-      return jsonStringify(unknown, Object.getOwnPropertyNames(unknown));
+      return `${unknown.message}\n${unknown.stack ?? ""}`;
     }
 
     if (unknown === undefined) {
