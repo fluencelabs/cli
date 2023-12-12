@@ -540,7 +540,7 @@ describe("integration tests", () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
     await init(cwd, "quickstart");
 
-    const fluenceConfig = await initDefaultFluenceConfig(cwd);
+    const fluenceConfig = await getFluenceConfig(cwd);
 
     assert(
       fluenceConfig.deals !== undefined &&
@@ -621,7 +621,7 @@ service NewService("${WD_NEW_SERVICE_NAME}"):
 ${WD_NEW_SERVICE_2_INTERFACE}
 `;
 
-async function initDefaultFluenceConfig(cwd: string) {
+async function getFluenceConfig(cwd: string) {
   const fluenceConfig = await initFluenceConfigWithPath(cwd);
 
   assert(
