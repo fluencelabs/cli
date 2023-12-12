@@ -136,6 +136,7 @@ export const WASM_EXT = "wasm";
 export const TOML_EXT = "toml";
 
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
+export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const FRONTEND_DIR_NAME = "frontend";

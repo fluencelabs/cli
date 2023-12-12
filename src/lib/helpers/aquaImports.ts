@@ -15,6 +15,7 @@
  */
 
 import { writeFile, readFile, access } from "node:fs/promises";
+import { join } from "node:path";
 
 import type { JSONSchemaType } from "ajv";
 
@@ -22,11 +23,11 @@ import { ajv } from "../ajvInstance.js";
 import { commandObj } from "../commandObj.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
 import { FS_OPTIONS } from "../const.js";
-import { installAllNPMDependencies } from "../npm.js";
 import {
   getFluenceAquaDir,
   ensureUserFluenceNpmDir,
   ensureVSCodeSettingsJsonPath,
+  ensureFluenceAquaDependenciesPath,
 } from "../paths.js";
 
 import { jsonStringify } from "./utils.js";
@@ -34,14 +35,12 @@ import { jsonStringify } from "./utils.js";
 type GetAquaImportsArg = {
   maybeFluenceConfig: FluenceConfig | null;
   generateSettingsJson?: boolean;
-  force?: boolean;
   flags?: { import?: string[] | undefined };
 };
 
 export async function ensureAquaImports({
   flags,
   maybeFluenceConfig = null,
-  force,
   generateSettingsJson = false,
 }: GetAquaImportsArg): Promise<string[]> {
   const fluenceAquaDirPath = getFluenceAquaDir();
@@ -54,16 +53,12 @@ export async function ensureAquaImports({
     }
   } catch {}
 
-  const allNpmDependencies = await installAllNPMDependencies({
-    maybeFluenceConfig,
-    force,
-  });
-
   const aquaImports = [
     ...(flags?.import ?? []),
     ...(maybeFluenceConfig?.aquaImports ?? []),
     ...defaultImports,
-    ...allNpmDependencies,
+    // TODO: use aqua imports in the new format
+    join(await ensureFluenceAquaDependenciesPath(), "node_modules"),
   ];
 
   if (maybeFluenceConfig !== null) {

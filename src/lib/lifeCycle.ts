@@ -27,38 +27,25 @@ import {
   setCommandObjAndIsInteractive,
   type CommandObj,
 } from "./commandObj.js";
-import {
-  setEnvConfig,
-  setUserConfig,
-  userConfig,
-} from "./configs/globalConfigs.js";
+import { setEnvConfig, setUserConfig } from "./configs/globalConfigs.js";
 import { initEnvConfig, initNewEnvConfig } from "./configs/project/env.js";
 import {
   type FluenceConfig,
   initFluenceConfig,
 } from "./configs/project/fluence.js";
-import {
-  CHECK_FOR_UPDATES_DISABLED,
-  initNewUserConfig,
-  initUserConfig,
-} from "./configs/user/config.js";
+import { initNewUserConfig, initUserConfig } from "./configs/user/config.js";
 import {
   NODE_JS_MAJOR_VERSION,
-  CHECK_FOR_UPDATES_INTERVAL,
-  SEPARATOR,
   CLI_NAME_FULL,
   type NO_INPUT_FLAG_NAME,
   CLI_NAME,
-  PACKAGE_NAME,
 } from "./const.js";
-import { haltCountly, initCountly, logErrorToCountly } from "./countly.js";
+import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
-import { stringifyUnknown } from "./helpers/utils.js";
 import { updateRelaysJSON } from "./multiaddres.js";
-import { getLatestVersionOfNPMDependency } from "./npm.js";
 import {
   projectRootDir,
   recursivelyFindProjectRootDir,
@@ -165,7 +152,7 @@ export async function initCli<
 
   const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
   await initCountly({ maybeFluenceConfig });
-  await ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
+  ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
 
   if (requiresFluenceProject) {
     setEnvConfig(await initNewEnvConfig());
@@ -188,33 +175,7 @@ export async function initCli<
   };
 }
 
-const isCheckForUpdatesRequired = async () => {
-  const { lastCheckForUpdates } = userConfig;
-
-  if (lastCheckForUpdates === CHECK_FOR_UPDATES_DISABLED) {
-    return false;
-  }
-
-  const now = new Date();
-  const lastCheckForUpdatesDate = new Date(lastCheckForUpdates ?? 0);
-  const lastCheckForUpdatesMilliseconds = lastCheckForUpdatesDate.getTime();
-
-  if (
-    lastCheckForUpdates === undefined ||
-    Number.isNaN(lastCheckForUpdatesMilliseconds) ||
-    now.getTime() - lastCheckForUpdatesMilliseconds > CHECK_FOR_UPDATES_INTERVAL
-  ) {
-    userConfig.lastCheckForUpdates = now.toISOString();
-    await userConfig.$commit();
-    return true;
-  }
-
-  return false;
-};
-
-const ensureCorrectCliVersion = async (
-  maybeCliVersion: string | undefined,
-): Promise<void> => {
+function ensureCorrectCliVersion(maybeCliVersion: string | undefined): void {
   const currentVersion = commandObj.config.version;
 
   if (
@@ -228,61 +189,11 @@ const ensureCorrectCliVersion = async (
       )}, but this project is compatible only with ${CLI_NAME_FULL} version ${color.yellow(
         cliVersion,
       )}\n\nPlease install it with:\n\n${color.yellow(
-        `npm i -g ${PACKAGE_NAME}@${cliVersion}`,
-      )}\n\nAfter that, run:\n\n${color.yellow(
-        `${CLI_NAME} dep v`,
-      )}\n\nto find out which version of rust-peer you need to use to make sure you are running ${CLI_NAME_FULL} against the compatible version of rust-peer\n\n`,
+        `${CLI_NAME} update --version ${cliVersion}`,
+      )}`,
     );
   }
-
-  if (!isInteractive || !(await isCheckForUpdatesRequired())) {
-    return;
-  }
-
-  try {
-    const [stableVersion, unstableVersion] = await Promise.all([
-      getLatestVersionOfNPMDependency(`${PACKAGE_NAME}`),
-      getLatestVersionOfNPMDependency(`${PACKAGE_NAME}@unstable`),
-    ]);
-
-    const semver = await import("semver");
-    const isOlderThanStable = semver.lt(currentVersion, stableVersion);
-    const isStable = semver.eq(currentVersion, stableVersion);
-    const isOlderThenUnstable = semver.lt(currentVersion, unstableVersion);
-    const hasUpdates = isOlderThanStable || isOlderThenUnstable;
-
-    if (isStable || !hasUpdates) {
-      return;
-    }
-
-    const version = isOlderThanStable ? stableVersion : unstableVersion;
-
-    commandObj.logToStderr(
-      `${SEPARATOR}New ${color.yellow(
-        isOlderThanStable ? "stable" : "unstable",
-      )} version ${color.yellow(
-        version,
-      )} of ${CLI_NAME_FULL} is available\n\nYou can install it with:\n\n${color.yellow(
-        `npm i -g ${PACKAGE_NAME}@${version}`,
-      )}${SEPARATOR}`,
-    );
-
-    const isCheckingForUpdates = await confirm({
-      message: "Do you want me to continue checking for updates once per day?",
-    });
-
-    if (!isCheckingForUpdates) {
-      userConfig.lastCheckForUpdates = CHECK_FOR_UPDATES_DISABLED;
-      await userConfig.$commit();
-
-      commandObj.logToStderr(
-        `\nUpdates checking is now disabled. You can enable it again by removing 'lastCheckForUpdates' property from ${userConfig.$getPath()}\n`,
-      );
-    }
-  } catch (e) {
-    await logErrorToCountly(`npm version check failed: ${stringifyUnknown(e)}`);
-  }
-};
+}
 
 export const exitCli = async (): Promise<never> => {
   await haltCountly();

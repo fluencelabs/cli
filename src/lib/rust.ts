@@ -34,7 +34,7 @@ import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import {
   handleInstallation,
-  resolveDependencies,
+  resolveCargoDependencies,
   resolveDependencyDirPathAndTmpPath,
   resolveVersionToInstall,
   splitPackageNameAndVersion,
@@ -408,7 +408,7 @@ export const installAllCargoDependencies = async ({
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
-    await resolveDependencies("cargo", maybeFluenceConfig),
+    await resolveCargoDependencies(maybeFluenceConfig),
   )) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable

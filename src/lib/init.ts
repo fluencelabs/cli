@@ -70,6 +70,7 @@ import { ensureAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { updateRelaysJSON, resolveFluenceEnv } from "./multiaddres.js";
+import { copyDefaultDependencies } from "./npm.js";
 import { getFrontendIndexTSorJSPath, ensureAquaMainPath } from "./paths.js";
 
 const selectTemplate = (): Promise<Template> => {
@@ -238,6 +239,8 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     fluenceConfig,
     noxes: options.noxes,
   });
+
+  await copyDefaultDependencies();
 
   commandObj.logToStderr(
     color.magentaBright(

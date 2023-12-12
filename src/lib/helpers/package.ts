@@ -37,25 +37,16 @@ import {
   fluenceCargoDependencies,
   fluenceNPMDependencies,
   isFluenceCargoDependency,
-  isFluenceNPMDependency,
 } from "../const.js";
 import {
   ensureUserFluenceCargoDir,
-  ensureUserFluenceNpmDir,
   ensureUserFluenceTmpCargoDir,
-  ensureUserFluenceTmpNpmDir,
 } from "../paths.js";
 
 import { isExactVersion } from "./validations.js";
 
-const packageManagers = ["npm", "cargo"] as const;
+const packageManagers = ["cargo"] as const;
 type PackageManager = (typeof packageManagers)[number];
-
-function isDefaultNpmPackage(
-  str: string,
-): str is keyof (typeof versions)["npm"] {
-  return str in versions.npm;
-}
 
 function isDefaultCargoPackage(
   str: string,
@@ -81,11 +72,7 @@ function getCurrentlyUsedVersion(
     return versionFromConfig;
   }
 
-  if (packageManager === "npm" && isDefaultNpmPackage(name)) {
-    return versions.npm[name];
-  }
-
-  if (packageManager === "cargo" && isDefaultCargoPackage(name)) {
+  if (isDefaultCargoPackage(name)) {
     return versions.cargo[name];
   }
 
@@ -213,10 +200,8 @@ export const resolveVersionToInstall = async ({
   }
 
   const maybeRecommendedVersion = (() => {
-    if (packageManager === "cargo" && isFluenceCargoDependency(name)) {
+    if (isFluenceCargoDependency(name)) {
       return versions.cargo[name];
-    } else if (packageManager === "npm" && isFluenceNPMDependency(name)) {
-      return versions.npm[name];
     } else {
       return undefined;
     }
@@ -240,9 +225,6 @@ const dependenciesPathsGettersMap: Record<
   PackageManager,
   () => [Promise<string>, Promise<string>]
 > = {
-  npm: () => {
-    return [ensureUserFluenceNpmDir(), ensureUserFluenceTmpNpmDir()];
-  },
   cargo: () => {
     return [ensureUserFluenceCargoDir(), ensureUserFluenceTmpCargoDir()];
   },
@@ -338,7 +320,7 @@ export const splitPackageNameAndVersion = (
   return [packageName, version];
 };
 
-export const getRecommendedDependencies = (packageManager: PackageManager) => {
+export const getRecommendedDependencies = (packageManager: "npm" | "cargo") => {
   const versionsPerPackageManager =
     packageManager === "cargo" ? versions.cargo : versions.npm;
 
@@ -356,19 +338,17 @@ export const getRecommendedDependencies = (packageManager: PackageManager) => {
   );
 };
 
-export const resolveDependencies = async (
-  packageManager: PackageManager,
+export const resolveCargoDependencies = async (
   maybeFluenceConfig: FluenceConfigReadonly | null,
   doWarn = false,
 ) => {
-  const recommendedDependencies = getRecommendedDependencies(packageManager);
+  const recommendedDependencies = getRecommendedDependencies("cargo");
   const userFluenceConfig = await initReadonlyUserConfig();
 
-  const userDependencyOverrides =
-    userFluenceConfig?.dependencies?.[packageManager] ?? {};
+  const userDependencyOverrides = userFluenceConfig?.dependencies?.cargo ?? {};
 
   const projectDependencyOverrides =
-    maybeFluenceConfig?.dependencies?.[packageManager] ?? {};
+    maybeFluenceConfig?.dependencies?.cargo ?? {};
 
   const finalDependencies: Record<string, string> = {
     ...recommendedDependencies,

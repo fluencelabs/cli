@@ -55,6 +55,7 @@ import {
   YAML_EXT,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
+  AQUA_DEPENDENCIES_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -362,3 +363,7 @@ const ensureFluenceTmpDir = async (): Promise<string> => {
 export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
   return join(await ensureFluenceTmpDir(), CONFIG_TOML);
 };
+
+export async function ensureFluenceAquaDependenciesPath(): Promise<string> {
+  return ensureDir(join(await ensureFluenceDir(), AQUA_DEPENDENCIES_DIR_NAME));
+}

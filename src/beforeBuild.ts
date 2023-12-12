@@ -20,7 +20,24 @@ import { join } from "node:path";
 import { compileFromPath } from "@fluencelabs/aqua-api";
 import aquaToJs from "@fluencelabs/aqua-to-js";
 
-import { AQUA_EXT, FS_OPTIONS } from "./lib/const.js";
+import {
+  AQUA_DEPENDENCIES_DIR_NAME,
+  AQUA_EXT,
+  FS_OPTIONS,
+} from "./lib/const.js";
+import { npmInstall } from "./lib/npm.js";
+import { versions } from "./versions.js";
+
+const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
+await mkdir(aquaDependenciesDirPath, { recursive: true });
+
+await writeFile(
+  join(aquaDependenciesDirPath, "package.json"),
+  JSON.stringify({ dependencies: versions.npm }, null, 2),
+  FS_OPTIONS,
+);
+
+await npmInstall({ cwd: aquaDependenciesDirPath });
 
 const VERSIONS_DIR_PATH = join("src", "versions");
 const SRC_LIB_PATH = join("src", "lib");

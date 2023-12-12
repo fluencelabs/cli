@@ -14,83 +14,31 @@
  * limitations under the License.
  */
 
-import { join } from "node:path";
-
-import { Args, Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { commandObj } from "../../../lib/commandObj.js";
-import {
-  GLOBAL_CONFIG_FULL_FILE_NAME,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
-  DOT_FLUENCE_DIR_NAME,
-  GLOBAL_FLAG,
-  GLOBAL_FLAG_NAME,
-  NPM_DIR_NAME,
-  PACKAGE_NAME_AND_VERSION_ARG_NAME,
-} from "../../../lib/const.js";
+import { PACKAGE_NAME_AND_VERSION_ARG_NAME } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
-import {
-  ensureNpmDependency,
-  installAllNPMDependencies,
-} from "../../../lib/npm.js";
+import { npmInstall } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dep:npm:i"];
-  static override description = `(For advanced users) Install npm project dependencies (all dependencies are cached inside user's ${join(
-    DOT_FLUENCE_DIR_NAME,
-    NPM_DIR_NAME,
-  )} directory)`;
+  static override description = `Install project aqua dependencies (currently npm is used under the hood to installing aqua dependencies)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    force: Flags.boolean({
-      default: false,
-      description:
-        "Force install even if the dependency/dependencies is/are already installed",
-    }),
-    ...GLOBAL_FLAG,
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
-      description: `Package name. Installs a first version it can find in the following list: ${FLUENCE_CONFIG_FULL_FILE_NAME}, user's ${join(
-        DOT_FLUENCE_DIR_NAME,
-        GLOBAL_CONFIG_FULL_FILE_NAME,
-      )}, dependency versions recommended by fluence, latest version npm is aware of. If you want to install a specific version, you can do so by appending @ and the version to the package name. Example: package@version`,
+      description: `valid package spec for npm install command`,
     }),
   };
 
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Install),
-    );
+    const { args } = await initCli(this, await this.parse(Install), true);
 
-    const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
-
-    // if packageNameAndVersion not provided just install all npm dependencies
-    if (packageNameAndVersion === undefined) {
-      await installAllNPMDependencies({
-        maybeFluenceConfig,
-        force: flags.force,
-      });
-
-      commandObj.log("npm dependencies successfully installed");
-      return;
-    }
-
-    if (!flags.global && maybeFluenceConfig === null) {
-      return commandObj.error(
-        `Not a fluence project. If you wanted to install npm dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`,
-      );
-    }
-
-    await ensureNpmDependency({
-      nameAndVersion: packageNameAndVersion,
-      maybeFluenceConfig,
-      explicitInstallation: true,
-      force: flags.force,
-      global: flags.global,
+    await npmInstall({
+      packageNameAndVersion: args[PACKAGE_NAME_AND_VERSION_ARG_NAME],
     });
   }
 }

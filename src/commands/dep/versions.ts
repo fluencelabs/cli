@@ -21,7 +21,7 @@ import { commandObj } from "../../lib/commandObj.js";
 import { CLI_NAME_FULL, CLI_NAME } from "../../lib/const.js";
 import {
   getRecommendedDependencies,
-  resolveDependencies,
+  resolveCargoDependencies,
 } from "../../lib/helpers/package.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
@@ -54,9 +54,9 @@ export default class Versions extends BaseCommand<typeof Versions> {
           {},
           {
             "cli version": commandObj.config.version,
-            "default npm dependencies. Can be overridden with 'fluence dependency npm install <name>@<version>'":
+            "default npm dependencies. Can installed with 'fluence dep npm install <name>@<version>'":
               getRecommendedDependencies("npm"),
-            "default cargo dependencies. Can be overridden with 'fluence dependency cargo install <name>@<version>'":
+            "default cargo dependencies. Can be overridden with 'fluence dep cargo install <name>@<version>'":
               getRecommendedDependencies("cargo"),
           },
         ),
@@ -73,10 +73,12 @@ export default class Versions extends BaseCommand<typeof Versions> {
           [`${CLI_NAME_FULL} version`]: commandObj.config.version,
           "nox version": versions["nox"],
           "rust toolchain": versions["rust-toolchain"],
-          [`npm dependencies that can be overridden with \`${CLI_NAME} dependency npm install <name>@<version>\``]:
-            await resolveDependencies("npm", maybeFluenceConfig, true),
-          [`cargo dependencies that can be overridden with \`${CLI_NAME} dependency cargo install <name>@<version>\``]:
-            await resolveDependencies("cargo", maybeFluenceConfig, true),
+          [`aqua dependencies that you can install with \`${CLI_NAME} dep npm i <name>@<version>\``]:
+            maybeFluenceConfig === null
+              ? getRecommendedDependencies("npm")
+              : maybeFluenceConfig.dependencies?.npm ?? {},
+          [`cargo dependencies that can be overridden with \`${CLI_NAME} dep cargo install <name>@<version>\``]:
+            await resolveCargoDependencies(maybeFluenceConfig, true),
           "internal dependencies": filterOutNonFluenceDependencies(
             CLIPackageJSON.dependencies,
           ),
