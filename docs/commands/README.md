@@ -438,27 +438,20 @@ _See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob
 
 ## `fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-(For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm directory)
+Install project aqua dependencies (currently npm is used under the hood to installing aqua dependencies)
 
 ```
 USAGE
-  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [-g]
+  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
-                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
-                                       fluence, latest version npm is aware of. If you want to install a specific
-                                       version, you can do so by appending @ and the version to the package name.
-                                       Example: package@version
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  valid package spec for npm install command
 
 FLAGS
-  -g, --global  Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
-  --force       Force install even if the dependency/dependencies is/are already installed
-  --no-input    Don't interactively ask for any input from the user
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm
-  directory)
+  Install project aqua dependencies (currently npm is used under the hood to installing aqua dependencies)
 
 ALIASES
   $ fluence dep npm i
