@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { CLIError } from "@oclif/core/lib/errors/index.js";
@@ -23,12 +23,12 @@ import type { JSONSchemaType } from "ajv";
 import Ajv from "ajv";
 
 import {
-  setCommandObjAndIsInteractive,
   type CommandObj,
+  setCommandObjAndIsInteractive,
 } from "../src/lib/commandObj.js";
 import {
-  initFluenceConfigWithPath,
   type FluenceConfig,
+  initFluenceConfigWithPath,
 } from "../src/lib/configs/project/fluence.js";
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
@@ -37,35 +37,35 @@ import {
   DOT_FLUENCE_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   WORKERS_CONFIG_FULL_FILE_NAME,
-  LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "../src/lib/const.js";
 import {
-  setTryTimeout,
   jsonStringify,
-  LOGS_RESOLVE_SUBNET_ERROR_START,
   LOGS_GET_ERROR_START,
+  LOGS_RESOLVE_SUBNET_ERROR_START,
+  setTryTimeout,
   stringifyUnknown,
 } from "../src/lib/helpers/utils.js";
 import {
-  getServicesDir,
-  getFluenceAquaServicesPath,
   getAquaMainPath,
+  getFluenceAquaServicesPath,
+  getServicesDir,
   getSpellsDir,
 } from "../src/lib/paths.js";
 
 import {
+  assertHasPeer,
+  assertHasWorkerAndAnswer,
   fluence,
+  fluenceEnv,
+  getMultiaddrs,
   init,
   maybeConcurrentTest,
-  sortPeers,
-  assertHasWorkerAndAnswer,
-  assertHasPeer,
-  fluenceEnv,
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
   NO_PROJECT_TEST_NAME,
-  getMultiaddrs,
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+  sortPeers,
 } from "./helpers.js";
 
 const multiaddrs = await getMultiaddrs();
@@ -535,42 +535,35 @@ describe("integration tests", () => {
     },
   );
 
-  maybeConcurrentTest(
-    "should update deal after new spell is created",
-    async () => {
-      const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
-      await init(cwd, "quickstart");
+  // TODO: test skipped until NET-649 is released
+  test.skip("should update deal after new spell is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
+    await init(cwd, "quickstart");
 
-      const pathToNewServiceDir = join(getServicesDir(cwd), MY_SERVICE_NAME);
+    const fluenceConfig = await initDefaultFluenceConfig(cwd);
 
-      await initDefaultServiceConfig(cwd, pathToNewServiceDir);
+    assert(
+      fluenceConfig.deals !== undefined &&
+        fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
+      `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    );
 
-      const fluenceConfig = await initFluenceConfigWithPath(cwd);
+    fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
+    fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+    await fluenceConfig.$commit();
 
-      assert(
-        fluenceConfig !== null,
-        `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`,
-      );
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await initDefaultFluenceConfig(fluenceConfig, MY_SERVICE_NAME);
+    await createSpellAndAddToDeal(cwd, fluenceConfig, NEW_SPELL_NAME);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await createSpellAndAddToDeal(cwd, fluenceConfig, NEW_SPELL_NAME);
+    await waitUntilShowSubnetReturnsSpell(cwd, MY_SERVICE_NAME, NEW_SPELL_NAME);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-      await waitUntilShowSubnetReturnsSpell(
-        cwd,
-        MY_SERVICE_NAME,
-        NEW_SPELL_NAME,
-      );
-
-      const logs = await fluence({ args: ["deal", "logs"], cwd });
-
-      assertLogsAreValid(logs);
-    },
-  );
+    assertLogsAreValid(logs);
+  });
 });
 
 const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
@@ -627,6 +620,41 @@ service NewService("${WD_NEW_SERVICE_NAME}"):
 
 ${WD_NEW_SERVICE_2_INTERFACE}
 `;
+
+async function initDefaultFluenceConfig(cwd: string) {
+  const fluenceConfig = await initFluenceConfigWithPath(cwd);
+
+  assert(
+    fluenceConfig !== null,
+    `every fluence template is expected to have a ${FLUENCE_CONFIG_FULL_FILE_NAME}, but found nothing at ${cwd}`,
+  );
+
+  return fluenceConfig;
+}
+
+async function deployDealAndWaitUntilDeployed(cwd: string) {
+  await fluence({
+    args: ["deal", "deploy"],
+    flags: {
+      "priv-key": LOCAL_NET_DEFAULT_WALLET_KEY,
+    },
+    cwd,
+  });
+
+  await setTryTimeout(
+    async () => {
+      return waitUntilDealDeployed(cwd);
+    },
+    (error) => {
+      throw new Error(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error,
+        )}`,
+      );
+    },
+    RUN_DEPLOYED_SERVICES_TIMEOUT,
+  );
+}
 
 const waitUntilDealDeployed = async (cwd: string) => {
   const result = await fluence({
@@ -688,30 +716,6 @@ const waitUntilDealDeployed = async (cwd: string) => {
   expect(res).toEqual(expected);
 };
 
-async function deployDealAndWaitUntilDeployed(cwd: string) {
-  await fluence({
-    args: ["deal", "deploy"],
-    flags: {
-      "priv-key": LOCAL_NET_DEFAULT_WALLET_KEY,
-    },
-    cwd,
-  });
-
-  await setTryTimeout(
-    async () => {
-      return waitUntilDealDeployed(cwd);
-    },
-    (error) => {
-      throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
-          error,
-        )}`,
-      );
-    },
-    RUN_DEPLOYED_SERVICES_TIMEOUT,
-  );
-}
-
 async function waitUntilShowSubnetReturnsSpell(
   cwd: string,
   serviceName: string,
@@ -765,9 +769,9 @@ async function waitUntilShowSubnetReturnsSpell(
     },
     (error) => {
       throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${
-          20 * 60 * 1000
-        } ms, error: ${stringifyUnknown(error)}`,
+        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error,
+        )}`,
       );
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
@@ -793,47 +797,13 @@ export async function createSpellAndAddToDeal(
   const pathToNewSpell = join(getSpellsDir(cwd), spellName);
 
   fluenceConfig.spells = {
-    newSpell: {
+    [spellName]: {
       get: relative(cwd, pathToNewSpell),
     },
   };
 
   fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [spellName];
   await fluenceConfig.$commit();
-}
-
-async function initDefaultFluenceConfig(
-  fluenceConfig: FluenceConfig,
-  serviceName: string,
-) {
-  assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-  );
-
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].minWorkers = 3;
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [serviceName];
-  await fluenceConfig.$commit();
-}
-
-async function initDefaultServiceConfig(
-  cwd: string,
-  pathToNewServiceDir: string,
-) {
-  const serviceConfig = await initServiceConfig(
-    relative(cwd, pathToNewServiceDir),
-    cwd,
-  );
-
-  assert(
-    serviceConfig !== null,
-    `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
-  );
-
-  serviceConfig.modules.facade.envs = { A: "B" };
-  await serviceConfig.$commit();
 }
 
 function assertLogsAreValid(logs: string) {
