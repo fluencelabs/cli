@@ -382,7 +382,7 @@ _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/bl
 
 ```
 USAGE
-  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force] [-g]
+  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -392,8 +392,6 @@ ARGUMENTS
                                        example: package@version
 
 FLAGS
-  -g, --global                  Will override dependencies in a global user's config.yaml instead of project's
-                                fluence.yaml
   --force                       Force install even if the dependency/dependencies is/are already installed
   --no-input                    Don't interactively ask for any input from the user
   --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
@@ -468,12 +466,10 @@ Reset all project dependencies to recommended versions for the current Fluence C
 
 ```
 USAGE
-  $ fluence dep reset [--no-input] [-g] [--all]
+  $ fluence dep reset [--no-input]
 
 FLAGS
-  -g, --global  Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
-  --all         Remove all dependencies, not only recommended ones
-  --no-input    Don't interactively ask for any input from the user
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
   Reset all project dependencies to recommended versions for the current Fluence CLI version
