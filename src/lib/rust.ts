@@ -15,7 +15,7 @@
  */
 
 import { access } from "node:fs/promises";
-import { arch, platform } from "node:os";
+import { arch, homedir, platform } from "node:os";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
@@ -125,11 +125,7 @@ async function isRustInstalled(): Promise<boolean> {
     return true;
   }
 
-  if (process.env.PATH === undefined || process.env.HOME === undefined) {
-    return false;
-  }
-
-  const cargoPath = `${process.env.HOME}/.cargo/bin`;
+  const cargoPath = join(homedir(), ".cargo", "bin");
 
   if (!process.env.PATH.split(":").includes(cargoPath)) {
     // try updating PATH to include cargo
