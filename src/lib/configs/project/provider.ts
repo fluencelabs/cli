@@ -572,38 +572,46 @@ export async function ensureConfigToml(
       const { rawConfig: computePeerRawNoxConfig, ...computePeerNoxConfig } =
         computePeerConfig.nox ?? {};
 
-      let overridden = mergeNoxConfigYAML(baseNoxConfig, computePeerNoxConfig);
+      let overriddenNoxConfig = mergeNoxConfigYAML(
+        baseNoxConfig,
+        computePeerNoxConfig,
+      );
 
-      if (overridden.tcpPort === undefined) {
-        overridden.tcpPort = TCP_PORT_START + i;
+      if (overriddenNoxConfig.tcpPort === undefined) {
+        overriddenNoxConfig.tcpPort = TCP_PORT_START + i;
       }
 
-      if (overridden.websocketPort === undefined) {
-        overridden.websocketPort = WEB_SOCKET_PORT_START + i;
+      if (overriddenNoxConfig.websocketPort === undefined) {
+        overriddenNoxConfig.websocketPort = WEB_SOCKET_PORT_START + i;
       }
 
-      if (overridden.httpPort === undefined) {
-        overridden.httpPort = HTTP_PORT_START + i;
+      if (overriddenNoxConfig.httpPort === undefined) {
+        overriddenNoxConfig.httpPort = HTTP_PORT_START + i;
       }
 
-      if (overridden.systemServices?.decider?.walletKey === undefined) {
+      if (
+        overriddenNoxConfig.systemServices?.decider?.walletKey === undefined
+      ) {
         const walletKey =
           providerSecretsConfig?.noxes[computePeerName]?.signingWallet ??
           LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length];
 
         assert(walletKey !== undefined, "Unreachable");
 
-        overridden.systemServices = {
-          ...overridden.systemServices,
+        overriddenNoxConfig.systemServices = {
+          ...overriddenNoxConfig.systemServices,
           decider: {
-            ...overridden.systemServices?.decider,
+            ...overriddenNoxConfig.systemServices?.decider,
             walletKey,
           },
         };
       }
 
       if (parsedProviderRawConfig !== undefined) {
-        overridden = mergeNoxConfigYAML(overridden, parsedProviderRawConfig);
+        overriddenNoxConfig = mergeNoxConfigYAML(
+          overriddenNoxConfig,
+          parsedProviderRawConfig,
+        );
       }
 
       const parsedComputePeerRawConfig =
@@ -612,12 +620,15 @@ export async function ensureConfigToml(
           : parse(computePeerRawNoxConfig);
 
       if (parsedComputePeerRawConfig !== undefined) {
-        overridden = mergeNoxConfigYAML(overridden, parsedComputePeerRawConfig);
+        overriddenNoxConfig = mergeNoxConfigYAML(
+          overriddenNoxConfig,
+          parsedComputePeerRawConfig,
+        );
       }
 
       return writeFile(
         join(configsDir, getConfigTomlName(computePeerName)),
-        stringify(configYAMLToConfigToml(overridden)),
+        stringify(configYAMLToConfigToml(overriddenNoxConfig)),
         FS_OPTIONS,
       );
     }),
