@@ -18,10 +18,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import {
-  initNewReadonlyDockerComposeConfig,
-  type DockerComposeConfigReadonly,
-} from "../../lib/configs/project/dockerCompose.js";
+import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   DEFAULT_OFFER_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
@@ -55,7 +52,7 @@ export default class Up extends BaseCommand<typeof Up> {
       noxes: flags.noxes,
     });
 
-    if (await isLocalNetworkRunning(dockerComposeConfig)) {
+    try {
       await dockerCompose({
         args: ["restart"],
         printOutput: true,
@@ -63,7 +60,7 @@ export default class Up extends BaseCommand<typeof Up> {
           cwd: dockerComposeConfig.$getDirPath(),
         },
       });
-    } else {
+    } catch {
       await dockerCompose({
         args: ["up", "-d"],
         flags: {
@@ -78,19 +75,6 @@ export default class Up extends BaseCommand<typeof Up> {
 
     await setUpProvider(flags);
   }
-}
-
-export async function isLocalNetworkRunning(
-  dockerComposeConfig: DockerComposeConfigReadonly,
-) {
-  const psResult = await dockerCompose({
-    args: ["ps"],
-    options: {
-      cwd: dockerComposeConfig.$getDirPath(),
-    },
-  });
-
-  return psResult.trim().split("\n").length > 1;
 }
 
 export async function setUpProvider(flags: {
