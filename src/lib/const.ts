@@ -418,12 +418,12 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
+/${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}
 **/node_modules
 **/target/
 .repl_history
-/.vscode/settings.json
-/src/ts/src/aqua
-/src/js/src/aqua`;
+`;
 export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 

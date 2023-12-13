@@ -141,6 +141,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
+  await copyDefaultDependencies();
   const fluenceEnv = await resolveFluenceEnv(options.env);
 
   if (envConfig === null) {
@@ -239,8 +240,6 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     fluenceConfig,
     noxes: options.noxes,
   });
-
-  await copyDefaultDependencies();
 
   commandObj.logToStderr(
     color.magentaBright(
