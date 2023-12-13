@@ -73,42 +73,33 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
-    await setUpProvider(flags);
+    const env = "local";
+    const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
+
+    await setTryTimeout(
+      async () => {
+        await register({
+          ...flags,
+          "priv-key": privKey,
+          env,
+          offer: DEFAULT_OFFER_NAME,
+        });
+      },
+      (error) => {
+        commandObj.error(
+          `Wasn't able to register local network on local peers in ${
+            flags.timeout
+          } seconds: ${stringifyUnknown(error)}`,
+        );
+      },
+      flags.timeout * 1000,
+      10000,
+    );
+
+    await addPeer({
+      ...flags,
+      env,
+      "priv-key": privKey,
+    });
   }
-}
-
-export async function setUpProvider(flags: {
-  "priv-key": string | undefined;
-  timeout: number;
-  noxes: number | undefined;
-  "no-input": boolean;
-}) {
-  const env = "local";
-  const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
-
-  await setTryTimeout(
-    async () => {
-      await register({
-        ...flags,
-        "priv-key": privKey,
-        env,
-        offer: DEFAULT_OFFER_NAME,
-      });
-    },
-    (error) => {
-      commandObj.error(
-        `Wasn't able to register local network on local peers in ${
-          flags.timeout
-        } seconds: ${stringifyUnknown(error)}`,
-      );
-    },
-    flags.timeout * 1000,
-    10000,
-  );
-
-  await addPeer({
-    ...flags,
-    env,
-    "priv-key": privKey,
-  });
 }
