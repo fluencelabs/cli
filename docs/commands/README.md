@@ -25,7 +25,6 @@
 * [`fluence local init`](#fluence-local-init)
 * [`fluence local logs`](#fluence-local-logs)
 * [`fluence local ps`](#fluence-local-ps)
-* [`fluence local restart`](#fluence-local-restart)
 * [`fluence local up`](#fluence-local-up)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
@@ -719,29 +718,6 @@ EXAMPLES
 ```
 
 _See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/ps.ts)_
-
-## `fluence local restart`
-
-Restart docker-compose.yaml using docker compose
-
-```
-USAGE
-  $ fluence local restart [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>]
-
-FLAGS
-  --no-input                Don't interactively ask for any input from the user
-  --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
-  --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local peers
-
-DESCRIPTION
-  Restart docker-compose.yaml using docker compose
-
-EXAMPLES
-  $ fluence local restart
-```
-
-_See code: [src/commands/local/restart.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/restart.ts)_
 
 ## `fluence local up`
 
