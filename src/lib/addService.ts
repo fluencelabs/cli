@@ -105,13 +105,6 @@ export const addService = async ({
     );
   }
 
-  await resolveSingleServiceModuleConfigsAndBuild(
-    serviceConfig,
-    fluenceConfig,
-    marineCli,
-    marineBuildArgs,
-  );
-
   const facadeModuleConfig = await initReadonlyModuleConfig(
     serviceConfig.modules[FACADE_MODULE_NAME].get,
     serviceConfig.$getDirPath(),
@@ -120,14 +113,6 @@ export const addService = async ({
   assert(
     facadeModuleConfig !== null,
     "Unreachable. Facade module is always present in service config",
-  );
-
-  await updateAquaServiceInterfaceFile(
-    {
-      [serviceName]: getModuleWasmPath(facadeModuleConfig),
-    },
-    fluenceConfig.services,
-    marineCli,
   );
 
   await fluenceConfig.$commit();
@@ -141,41 +126,52 @@ export const addService = async ({
   }
 
   if (
-    !(
-      isInteractive &&
-      fluenceConfig.deals !== undefined &&
-      DEFAULT_DEAL_NAME in fluenceConfig.deals &&
-      !(fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? []).includes(
-        serviceName,
-      ) &&
-      (interactive
-        ? await confirm({
-            message: `Do you want to add service ${color.yellow(
-              serviceName,
-            )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
-          })
-        : true)
-    )
+    isInteractive &&
+    fluenceConfig.deals !== undefined &&
+    DEFAULT_DEAL_NAME in fluenceConfig.deals &&
+    !(fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? []).includes(
+      serviceName,
+    ) &&
+    (interactive
+      ? await confirm({
+          message: `Do you want to add service ${color.yellow(
+            serviceName,
+          )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
+        })
+      : true)
   ) {
-    return serviceName;
+    const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
+
+    fluenceConfig.deals[DEFAULT_DEAL_NAME] = {
+      ...defaultDeal,
+      services: [...(defaultDeal.services ?? []), serviceName],
+    };
+
+    await fluenceConfig.$commit();
+
+    if (interactive) {
+      commandObj.log(
+        `Added ${color.yellow(serviceName)} to ${color.yellow(
+          DEFAULT_DEAL_NAME,
+        )}`,
+      );
+    }
   }
 
-  const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
+  await resolveSingleServiceModuleConfigsAndBuild(
+    serviceConfig,
+    fluenceConfig,
+    marineCli,
+    marineBuildArgs,
+  );
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME] = {
-    ...defaultDeal,
-    services: [...(defaultDeal.services ?? []), serviceName],
-  };
-
-  await fluenceConfig.$commit();
-
-  if (interactive) {
-    commandObj.log(
-      `Added ${color.yellow(serviceName)} to ${color.yellow(
-        DEFAULT_DEAL_NAME,
-      )}`,
-    );
-  }
+  await updateAquaServiceInterfaceFile(
+    {
+      [serviceName]: getModuleWasmPath(facadeModuleConfig),
+    },
+    fluenceConfig.services,
+    marineCli,
+  );
 
   return serviceName;
 };

@@ -49,17 +49,33 @@ export default class Up extends BaseCommand<typeof Up> {
     const { flags } = await initCli(this, await this.parse(Up));
 
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig({
-      env: "local",
       noxes: flags.noxes,
     });
 
-    await dockerCompose({
-      args: ["up", "-d"],
-      printOutput: true,
-      options: {
-        cwd: dockerComposeConfig.$getDirPath(),
-      },
-    });
+    try {
+      const res = await dockerCompose({
+        args: ["restart"],
+        printOutput: true,
+        options: {
+          cwd: dockerComposeConfig.$getDirPath(),
+        },
+      });
+
+      if (res.trim() === "") {
+        throw new Error("docker-compose restart failed");
+      }
+    } catch {
+      await dockerCompose({
+        args: ["up", "-d"],
+        flags: {
+          "quiet-pull": true,
+        },
+        printOutput: true,
+        options: {
+          cwd: dockerComposeConfig.$getDirPath(),
+        },
+      });
+    }
 
     const env = "local";
     const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
