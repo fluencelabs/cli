@@ -15,7 +15,7 @@
  */
 
 import { access } from "node:fs/promises";
-import { arch, platform } from "node:os";
+import { arch, homedir, platform } from "node:os";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
@@ -120,23 +120,40 @@ const ensureRust = async (): Promise<void> => {
   }
 };
 
-const isRustInstalled = async (): Promise<boolean> => {
-  try {
-    await execPromise({
-      command: CARGO,
-      args: ["--version"],
-    });
+async function isRustInstalled(): Promise<boolean> {
+  if (await isRustInstalledCheck()) {
+    return true;
+  }
 
-    await execPromise({
-      command: RUSTUP,
-      args: ["--version"],
-    });
+  const cargoPath = join(homedir(), ".cargo", "bin");
+
+  if (!process.env.PATH.split(":").includes(cargoPath)) {
+    // try updating PATH to include cargo
+    process.env.PATH = `${cargoPath}:${process.env.PATH}`;
+    return isRustInstalledCheck();
+  }
+
+  return false;
+}
+
+async function isRustInstalledCheck() {
+  try {
+    await Promise.all([
+      execPromise({
+        command: CARGO,
+        args: ["--version"],
+      }),
+      execPromise({
+        command: RUSTUP,
+        args: ["--version"],
+      }),
+    ]);
 
     return true;
   } catch {
     return false;
   }
-};
+}
 
 const regExpRecommendedToolchain = new RegExp(
   `^${versions["rust-toolchain"]}.*\\(override\\)$`,

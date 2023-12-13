@@ -30,6 +30,7 @@ declare global {
       [DEBUG_COUNTLY]: "true" | "false";
       [FLUENCE_USER_DIR]?: string;
       [CI]: "true" | "false";
+      PATH: string;
     }
   }
 }
