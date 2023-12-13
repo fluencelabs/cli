@@ -129,14 +129,15 @@ async function isRustInstalled(): Promise<boolean> {
     return false;
   }
 
-  // try updating PATH to include cargo
   const cargoPath = `${process.env.HOME}/.cargo/bin`;
 
   if (!process.env.PATH.split(":").includes(cargoPath)) {
+    // try updating PATH to include cargo
     process.env.PATH = `${cargoPath}:${process.env.PATH}`;
+    return isRustInstalledCheck();
   }
 
-  return isRustInstalledCheck();
+  return false;
 }
 
 async function isRustInstalledCheck() {
