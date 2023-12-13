@@ -90,7 +90,7 @@ export async function isLocalNetworkRunning(
     },
   });
 
-  return psResult.split("\n").length > 2;
+  return psResult.trim().split("\n").length > 1;
 }
 
 export async function setUpProvider(flags: {
