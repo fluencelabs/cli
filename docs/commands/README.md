@@ -726,10 +726,13 @@ Restart docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local restart [--no-input]
+  $ fluence local restart [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --no-input                Don't interactively ask for any input from the user
+  --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
+  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local peers
 
 DESCRIPTION
   Restart docker-compose.yaml using docker compose
