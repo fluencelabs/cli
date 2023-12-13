@@ -14,36 +14,61 @@
  * limitations under the License.
  */
 
+import { Flags } from "@oclif/core";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import { initReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
-import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
+import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import {
+  DOCKER_COMPOSE_FULL_FILE_NAME,
+  NOXES_FLAG,
+  PRIV_KEY_FLAG,
+} from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
+
+import { setUpProvider, isLocalNetworkRunning } from "./up.js";
 
 export default class Restart extends BaseCommand<typeof Restart> {
   static override description = `Restart ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    ...NOXES_FLAG,
+    timeout: Flags.integer({
+      description:
+        "Timeout in seconds for attempting to register local network on local peers",
+      default: 120,
+    }),
+    ...PRIV_KEY_FLAG,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Restart));
+    const { flags } = await initCli(this, await this.parse(Restart));
 
-    const dockerComposeConfig = await initReadonlyDockerComposeConfig();
+    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig({
+      noxes: flags.noxes,
+    });
 
-    if (dockerComposeConfig === null) {
-      commandObj.error(
-        `Cannot find ${DOCKER_COMPOSE_FULL_FILE_NAME}. Aborting.`,
-      );
+    if (await isLocalNetworkRunning(dockerComposeConfig)) {
+      await dockerCompose({
+        args: ["restart"],
+        printOutput: true,
+        options: {
+          cwd: dockerComposeConfig.$getDirPath(),
+        },
+      });
+    } else {
+      await dockerCompose({
+        args: ["up", "-d"],
+        flags: {
+          "quiet-pull": true,
+        },
+        printOutput: true,
+        options: {
+          cwd: dockerComposeConfig.$getDirPath(),
+        },
+      });
     }
 
-    await dockerCompose({
-      args: ["restart"],
-      printOutput: true,
-      options: {
-        cwd: dockerComposeConfig.$getDirPath(),
-      },
-    });
+    await setUpProvider(flags);
   }
 }

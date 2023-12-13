@@ -120,23 +120,43 @@ const ensureRust = async (): Promise<void> => {
   }
 };
 
-const isRustInstalled = async (): Promise<boolean> => {
-  try {
-    await execPromise({
-      command: CARGO,
-      args: ["--version"],
-    });
+async function isRustInstalled(): Promise<boolean> {
+  if (await isRustInstalledCheck()) {
+    return true;
+  }
 
-    await execPromise({
-      command: RUSTUP,
-      args: ["--version"],
-    });
+  if (process.env.PATH === undefined || process.env.HOME === undefined) {
+    return false;
+  }
+
+  // try updating PATH to include cargo
+  const cargoPath = `${process.env.HOME}/.cargo/bin`;
+
+  if (!process.env.PATH.split(":").includes(cargoPath)) {
+    process.env.PATH = `${cargoPath}:${process.env.PATH}`;
+  }
+
+  return isRustInstalledCheck();
+}
+
+async function isRustInstalledCheck() {
+  try {
+    await Promise.all([
+      execPromise({
+        command: CARGO,
+        args: ["--version"],
+      }),
+      execPromise({
+        command: RUSTUP,
+        args: ["--version"],
+      }),
+    ]);
 
     return true;
   } catch {
     return false;
   }
-};
+}
 
 const regExpRecommendedToolchain = new RegExp(
   `^${versions["rust-toolchain"]}.*\\(override\\)$`,

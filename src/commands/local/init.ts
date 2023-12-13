@@ -62,7 +62,6 @@ export default class Init extends BaseCommand<typeof Init> {
     }
 
     const dockerCompose = await initNewReadonlyDockerComposeConfig({
-      env: "local",
       noxes: flags.noxes,
     });
 
