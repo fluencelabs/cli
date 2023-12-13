@@ -250,15 +250,6 @@ export const ENV_ARG = {
   [ENV_ARG_NAME]: Args.string(fluenceEnvFlagAndArg),
 };
 
-export const GLOBAL_FLAG_NAME = "global";
-export const GLOBAL_FLAG = {
-  [GLOBAL_FLAG_NAME]: Flags.boolean({
-    default: false,
-    char: "g",
-    description: `Will override dependencies in a global user's ${GLOBAL_CONFIG_FULL_FILE_NAME} instead of project's ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  }),
-};
-
 export const PRIV_KEY_FLAG = {
   "priv-key": Flags.string({
     description:

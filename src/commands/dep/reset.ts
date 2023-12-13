@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { userConfig } from "../../lib/configs/globalConfigs.js";
-import {
-  CLI_NAME_FULL,
-  GLOBAL_FLAG,
-  GLOBAL_FLAG_NAME,
-  fluenceCargoDependencies,
-  fluenceNPMDependencies,
-} from "../../lib/const.js";
+import { CLI_NAME_FULL, fluenceCargoDependencies } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { versions } from "../../versions.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
   static override aliases = ["dep:r"];
@@ -34,54 +26,20 @@ export default class Reset extends BaseCommand<typeof Reset> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...GLOBAL_FLAG,
-    all: Flags.boolean({
-      default: false,
-      description: "Remove all dependencies, not only recommended ones",
-    }),
   };
   async run(): Promise<void> {
-    const { maybeFluenceConfig, flags } = await initCli(
-      this,
-      await this.parse(Reset),
-    );
+    const { maybeFluenceConfig } = await initCli(this, await this.parse(Reset));
 
-    if (flags.global) {
-      const removedDependencies = await removeRecommendedDependencies(
-        userConfig.dependencies,
-      );
-
-      if (flags.all || removedDependencies === undefined) {
-        delete userConfig.dependencies;
-      } else {
-        userConfig.dependencies = removedDependencies;
-      }
-
-      await userConfig.$commit();
-      commandObj.log("successfully reset user's global dependency versions");
-      return;
+    if (maybeFluenceConfig === null) {
+      commandObj.error("Not a fluence project");
     }
 
-    if (maybeFluenceConfig !== null) {
-      const removedDependencies = await removeRecommendedDependencies(
-        maybeFluenceConfig.dependencies,
-      );
-
-      if (flags.all || removedDependencies === undefined) {
-        delete maybeFluenceConfig.dependencies;
-      } else {
-        maybeFluenceConfig.dependencies = removedDependencies;
-      }
-
-      await maybeFluenceConfig.$commit();
-
-      commandObj.log("successfully reset project's dependency versions");
-      return;
-    }
-
-    commandObj.error(
-      `Not a fluence project. If you wanted to reset global dependencies, use --${GLOBAL_FLAG_NAME} flag for that`,
+    maybeFluenceConfig.dependencies = await removeRecommendedDependencies(
+      maybeFluenceConfig.dependencies,
     );
+
+    await maybeFluenceConfig.$commit();
+    commandObj.log("successfully reset project's dependency versions");
   }
 }
 
@@ -93,30 +51,18 @@ const removeRecommendedDependencies = async ({
   cargo?: Record<string, string>;
 } = {}) => {
   const omit = (await import("lodash-es/omit.js")).default;
-  const resetNpmDependencies = omit(npm, fluenceNPMDependencies);
   const resetCargoDependencies = omit(cargo, fluenceCargoDependencies);
-
-  const resetNpmDependenciesOrUndefined =
-    Object.keys(resetNpmDependencies).length > 0
-      ? resetNpmDependencies
-      : undefined;
 
   const resetCargoDependenciesOrUndefined =
     Object.keys(resetCargoDependencies).length > 0
       ? resetCargoDependencies
       : undefined;
 
-  if (
-    resetNpmDependenciesOrUndefined === undefined &&
-    resetCargoDependenciesOrUndefined === undefined
-  ) {
-    return undefined;
-  }
-
   return {
-    ...(resetNpmDependenciesOrUndefined === undefined
-      ? {}
-      : { npm: resetNpmDependenciesOrUndefined }),
+    npm: {
+      ...npm,
+      ...versions.npm,
+    },
     ...(resetCargoDependenciesOrUndefined === undefined
       ? {}
       : { cargo: resetCargoDependenciesOrUndefined }),
