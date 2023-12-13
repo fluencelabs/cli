@@ -53,13 +53,17 @@ export default class Up extends BaseCommand<typeof Up> {
     });
 
     try {
-      await dockerCompose({
+      const res = await dockerCompose({
         args: ["restart"],
         printOutput: true,
         options: {
           cwd: dockerComposeConfig.$getDirPath(),
         },
       });
+
+      if (res.trim() === "") {
+        throw new Error("docker-compose restart failed");
+      }
     } catch {
       await dockerCompose({
         args: ["up", "-d"],
