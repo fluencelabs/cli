@@ -22,15 +22,15 @@ import { join } from "node:path";
 
 import {
   krasnodar,
+  type Node,
   stage,
   testNet,
-  type Node,
 } from "@fluencelabs/fluence-network-environment";
 
 import {
   CLI_NAME,
-  type Template,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+  type Template,
 } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
 import { jsonStringify } from "../src/lib/helpers/utils.js";
