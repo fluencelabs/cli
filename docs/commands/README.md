@@ -25,7 +25,6 @@
 * [`fluence local init`](#fluence-local-init)
 * [`fluence local logs`](#fluence-local-logs)
 * [`fluence local ps`](#fluence-local-ps)
-* [`fluence local restart`](#fluence-local-restart)
 * [`fluence local up`](#fluence-local-up)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
@@ -719,26 +718,6 @@ EXAMPLES
 ```
 
 _See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/ps.ts)_
-
-## `fluence local restart`
-
-Restart docker-compose.yaml using docker compose
-
-```
-USAGE
-  $ fluence local restart [--no-input]
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Restart docker-compose.yaml using docker compose
-
-EXAMPLES
-  $ fluence local restart
-```
-
-_See code: [src/commands/local/restart.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/local/restart.ts)_
 
 ## `fluence local up`
 

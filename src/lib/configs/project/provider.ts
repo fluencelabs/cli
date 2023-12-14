@@ -18,7 +18,7 @@ import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
-import type { JsonMap } from "@iarna/toml";
+import { type JsonMap, parse } from "@iarna/toml";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 import cloneDeep from "lodash-es/cloneDeep.js";
@@ -224,7 +224,7 @@ const noxConfigYAMLSchema = {
     rawConfig: {
       nullable: true,
       type: "string",
-      description: `Raw TOML config string to append to the generated config. Default: empty string`,
+      description: `Raw TOML config string to parse and merge with the rest of the config. Has the highest priority`,
     },
   },
   required: [],
@@ -549,9 +549,12 @@ export async function ensureConfigToml(
   providerConfig: ProviderConfigReadonly,
   providerSecretsConfig?: ProviderSecretesConfigReadonly | null,
 ) {
+  const { rawConfig: providerRawNoxConfig, ...providerNoxConfig } =
+    providerConfig.nox ?? {};
+
   const baseNoxConfig = mergeNoxConfigYAML(
     await getDefaultNoxConfigYAML(providerConfig),
-    providerConfig.nox ?? {},
+    providerNoxConfig,
   );
 
   const configsDir = await ensureFluenceConfigsDir();
@@ -559,50 +562,73 @@ export async function ensureConfigToml(
 
   const computePeers = Object.entries(providerConfig.computePeers);
 
+  const parsedProviderRawConfig =
+    providerRawNoxConfig === undefined
+      ? undefined
+      : parse(providerRawNoxConfig);
+
   await Promise.all(
     computePeers.map(async ([computePeerName, computePeerConfig], i) => {
-      const overridden = mergeNoxConfigYAML(
+      const { rawConfig: computePeerRawNoxConfig, ...computePeerNoxConfig } =
+        computePeerConfig.nox ?? {};
+
+      let overriddenNoxConfig = mergeNoxConfigYAML(
         baseNoxConfig,
-        computePeerConfig.nox ?? {},
+        computePeerNoxConfig,
       );
 
-      if (overridden.tcpPort === undefined) {
-        overridden.tcpPort = TCP_PORT_START + i;
+      if (overriddenNoxConfig.tcpPort === undefined) {
+        overriddenNoxConfig.tcpPort = TCP_PORT_START + i;
       }
 
-      if (overridden.websocketPort === undefined) {
-        overridden.websocketPort = WEB_SOCKET_PORT_START + i;
+      if (overriddenNoxConfig.websocketPort === undefined) {
+        overriddenNoxConfig.websocketPort = WEB_SOCKET_PORT_START + i;
       }
 
-      if (overridden.httpPort === undefined) {
-        overridden.httpPort = HTTP_PORT_START + i;
+      if (overriddenNoxConfig.httpPort === undefined) {
+        overriddenNoxConfig.httpPort = HTTP_PORT_START + i;
       }
 
-      if (overridden.systemServices?.decider?.walletKey === undefined) {
+      if (
+        overriddenNoxConfig.systemServices?.decider?.walletKey === undefined
+      ) {
         const walletKey =
           providerSecretsConfig?.noxes[computePeerName]?.signingWallet ??
           LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length];
 
         assert(walletKey !== undefined, "Unreachable");
 
-        overridden.systemServices = {
-          ...overridden.systemServices,
+        overriddenNoxConfig.systemServices = {
+          ...overriddenNoxConfig.systemServices,
           decider: {
-            ...overridden.systemServices?.decider,
+            ...overriddenNoxConfig.systemServices?.decider,
             walletKey,
           },
         };
       }
 
+      if (parsedProviderRawConfig !== undefined) {
+        overriddenNoxConfig = mergeNoxConfigYAML(
+          overriddenNoxConfig,
+          parsedProviderRawConfig,
+        );
+      }
+
+      const parsedComputePeerRawConfig =
+        computePeerRawNoxConfig === undefined
+          ? undefined
+          : parse(computePeerRawNoxConfig);
+
+      if (parsedComputePeerRawConfig !== undefined) {
+        overriddenNoxConfig = mergeNoxConfigYAML(
+          overriddenNoxConfig,
+          parsedComputePeerRawConfig,
+        );
+      }
+
       return writeFile(
         join(configsDir, getConfigTomlName(computePeerName)),
-        [
-          stringify(configYAMLToConfigToml(overridden)),
-          providerConfig.nox?.rawConfig,
-          computePeerConfig.nox?.rawConfig,
-        ]
-          .filter(Boolean)
-          .join("\n"),
+        stringify(configYAMLToConfigToml(overriddenNoxConfig)),
         FS_OPTIONS,
       );
     }),
