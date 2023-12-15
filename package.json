@@ -58,7 +58,7 @@
     "@fluencelabs/aqua-to-js": "0.3.0",
     "@fluencelabs/deal-aurora": "0.2.22",
     "@fluencelabs/fluence-network-environment": "1.1.2",
-    "@fluencelabs/js-client": "0.5.3",
+    "@fluencelabs/js-client": "0.5.4-DXJ-562-6db9e47-2164-1",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.25.7",
     "@multiformats/multiaddr": "^12.1.7",
