@@ -24,7 +24,7 @@ import {
   setCommandObjAndIsInteractive,
 } from "../../src/lib/commandObj.js";
 import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
-import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../const.js"; // TODO: test skipped until NET-649 is released
+import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../const.js";
 import { fluence, init } from "../helpers.js";
 import {
   assertLogsAreValid,
@@ -40,7 +40,6 @@ describe("Deal update tests", () => {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       {
         log(msg: string) {
-          // eslint-disable-next-line no-console
           console.log(msg);
         },
         error(msg: string) {

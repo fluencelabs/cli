@@ -26,6 +26,7 @@ import {
   stage,
   testNet,
 } from "@fluencelabs/fluence-network-environment";
+import { CustomColors } from "@oclif/color";
 
 import {
   CLI_NAME,
@@ -33,13 +34,14 @@ import {
   type Template,
 } from "../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../src/lib/execPromise.js";
-import { jsonStringify } from "../src/lib/helpers/utils.js";
+import { flagsToArgs, jsonStringify } from "../src/lib/helpers/utils.js";
 import { addrsToNodes } from "../src/lib/multiaddres.js";
 import {
   FLUENCE_ENV,
   RUN_TESTS_IN_PARALLEL,
 } from "../src/lib/setupEnvironment.js";
 import { assertHasKey } from "../src/lib/typeHelpers.js";
+
 
 export const fluenceEnv = process.env[FLUENCE_ENV];
 
@@ -66,14 +68,26 @@ export const fluence = async ({
 }: CliArg): ReturnType<typeof execPromise> => {
   let res: string;
 
+  args = ["--no-warnings", pathToCliRunJS, ...args];
+
+  flags = {
+    "no-input": true,
+    ...flags,
+  };
+
+  console.log(
+    CustomColors.addon(
+      `${cwd} % ${pathToNodeJS} ${args.join(" ")} ${flagsToArgs(
+        flags,
+      ).toString()}`,
+    ),
+  );
+
   try {
     res = await execPromise({
       command: pathToNodeJS,
-      args: ["--no-warnings", pathToCliRunJS, ...args],
-      flags: {
-        "no-input": true,
-        ...flags,
-      },
+      args,
+      flags,
       options: { cwd },
       printOutput: true,
       timeout,
