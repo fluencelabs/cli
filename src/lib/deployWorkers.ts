@@ -56,6 +56,7 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
 } from "./const.js";
+import { getAquaImports } from "./helpers/aquaImports.js";
 import {
   downloadModule,
   getModuleWasmPath,
@@ -136,24 +137,28 @@ type UploadDeploySpellConfig =
 type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
-  aquaImports: Array<string>;
-  noBuild: boolean;
-  marineBuildArgs: undefined | string;
+  flags: {
+    import: Array<string> | undefined;
+    "no-build": boolean;
+    "marine-build-args": undefined | string;
+  };
   fluenceEnv: FluenceEnv;
   initPeerId?: string;
   workersConfig?: WorkersConfigReadonly;
 };
 
-export const prepareForDeploy = async ({
+export async function prepareForDeploy({
   workerNames: workerNamesString,
   fluenceConfig,
-  aquaImports,
-  noBuild,
-  marineBuildArgs,
+  flags: {
+    "marine-build-args": marineBuildArgs,
+    import: aquaImportsFromFlags,
+    "no-build": noBuild,
+  },
   fluenceEnv,
   initPeerId,
   workersConfig: maybeWorkersConfig,
-}: PrepareForDeployArg): Promise<Upload_deployArgConfig> => {
+}: PrepareForDeployArg): Promise<Upload_deployArgConfig> {
   const isDealDeploy = initPeerId === undefined;
   const hostsOrDealsString = isDealDeploy ? "deals" : "hosts";
 
@@ -238,7 +243,11 @@ export const prepareForDeploy = async ({
   ];
 
   const spellConfigs = (
-    await compileSpells(fluenceConfig, aquaImports, spellNamesUsedInWorkers)
+    await compileSpells(
+      fluenceConfig,
+      aquaImportsFromFlags,
+      spellNamesUsedInWorkers,
+    )
   ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
     const { script } = functions[spellConfig.function] ?? {};
 
@@ -467,7 +476,7 @@ export const prepareForDeploy = async ({
       blockchain: { start_block: 0, end_block: 0 },
     },
   };
-};
+}
 
 const validateWasmExist = async (
   workers: Upload_deployArgConfig["workers"],
@@ -624,7 +633,7 @@ type ResolveWorkerArgs = {
 
 export async function compileSpells(
   fluenceConfig: FluenceConfig,
-  aquaImports: string[],
+  aquaImportsFromFlags: string[] | undefined = [],
   spellNames?: string[],
 ) {
   const spellsFromFluenceConfig = (
@@ -688,7 +697,10 @@ export async function compileSpells(
 
       const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,
-        imports: aquaImports,
+        imports: await getAquaImports({
+          aquaImportsFromFlags,
+          maybeFluenceConfig: fluenceConfig,
+        }),
       });
 
       return {

@@ -86,5 +86,10 @@ await Promise.all(
   ),
 );
 
+await cp(
+  join("test", "aqua", "smoke.aqua"),
+  join("tmp", NO_PROJECT_TEST_NAME, "smoke.aqua"),
+);
+
 // eslint-disable-next-line no-console
 console.log("Tests are ready to run!");

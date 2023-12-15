@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
+import { join, relative } from "node:path";
 
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 import type { JSONSchemaType } from "ajv";
@@ -122,7 +122,7 @@ describe("integration tests", () => {
         relay: multiaddrs[0]?.multiaddr,
         env: fluenceEnv,
         f: "identify()",
-        i: resolve(join("test", "aqua", "smoke.aqua")),
+        i: "smoke.aqua",
         quiet: true,
       },
       cwd,

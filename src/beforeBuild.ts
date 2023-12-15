@@ -15,17 +15,18 @@
  */
 
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 import { compileFromPath } from "@fluencelabs/aqua-api";
 import aquaToJs from "@fluencelabs/aqua-to-js";
+import { gatherImportsFromNpm } from "@fluencelabs/npm-aqua-compiler";
 
 import {
   AQUA_DEPENDENCIES_DIR_NAME,
   AQUA_EXT,
   FS_OPTIONS,
+  NODE_MODULES_DIR_NAME,
 } from "./lib/const.js";
-import { npmInstall } from "./lib/npm.js";
 import { versions } from "./versions.js";
 
 const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
@@ -36,8 +37,6 @@ await writeFile(
   JSON.stringify({ dependencies: versions.npm }, null, 2),
   FS_OPTIONS,
 );
-
-await npmInstall({ cwd: aquaDependenciesDirPath });
 
 const VERSIONS_DIR_PATH = join("src", "versions");
 const SRC_LIB_PATH = join("src", "lib");
@@ -58,15 +57,29 @@ const COMPILED_INSTALLATION_SPELL_AQUA_WITH_TRACING_PATH = join(
   "installation-spell",
 );
 
-const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
-  "node_modules",
+const CLI_AQUA_DEPENDENCIES_DIR_PATH = resolve(
+  join("src", "cli-aqua-dependencies"),
+);
+
+const INSTALLATION_SPELL_DIR_PATH = join(
+  CLI_AQUA_DEPENDENCIES_DIR_PATH,
+  NODE_MODULES_DIR_NAME,
   "@fluencelabs",
   "installation-spell",
+);
+
+const INSTALLATION_SPELL_AQUA_DIR_PATH = join(
+  INSTALLATION_SPELL_DIR_PATH,
   "src",
   "aqua",
 );
 
-const compileInstallationSpellAqua = async (tracing = false) => {
+const imports = await gatherImportsFromNpm({
+  npmProjectDirPath: CLI_AQUA_DEPENDENCIES_DIR_PATH,
+  aquaToCompileDirPath: INSTALLATION_SPELL_DIR_PATH,
+});
+
+async function compileInstallationSpellAqua(tracing = false) {
   return Promise.all(
     ["upload", "cli", "deal_spell", "files", "deploy"].map(async (fileName) => {
       const filePath = join(
@@ -76,7 +89,7 @@ const compileInstallationSpellAqua = async (tracing = false) => {
 
       const compilationResult = await compileFromPath({
         filePath,
-        imports: ["node_modules"],
+        imports,
         tracing,
       });
 
@@ -104,14 +117,14 @@ const compileInstallationSpellAqua = async (tracing = false) => {
       );
     }),
   );
-};
+}
 
 await rm(VERSIONS_DIR_PATH, { recursive: true, force: true });
 await mkdir(VERSIONS_DIR_PATH, { recursive: true });
 await cp("package.json", join(VERSIONS_DIR_PATH, "cli.package.json"));
 
 await cp(
-  join("node_modules", "@fluencelabs", "js-client", "package.json"),
+  join(NODE_MODULES_DIR_NAME, "@fluencelabs", "js-client", "package.json"),
   join(VERSIONS_DIR_PATH, "js-client.package.json"),
 );
 
@@ -126,7 +139,7 @@ await compileInstallationSpellAqua();
 await compileInstallationSpellAqua(true);
 
 const BIN_FILE_PATH = join(
-  join("node_modules", "oclif", "lib", "tarballs"),
+  join(NODE_MODULES_DIR_NAME, "oclif", "lib", "tarballs"),
   "bin.js",
 );
 

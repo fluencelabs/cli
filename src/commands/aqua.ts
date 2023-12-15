@@ -30,7 +30,7 @@ import {
   TRACING_FLAG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
 } from "../lib/const.js";
-import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
+import { getAquaImports } from "../lib/helpers/aquaImports.js";
 import { stringifyUnknown } from "../lib/helpers/utils.js";
 import { initCli, exitCli } from "../lib/lifeCycle.js";
 import { projectRootDir, validatePath } from "../lib/paths.js";
@@ -136,8 +136,8 @@ export default class Aqua extends Command {
       (flags.output === undefined &&
         maybeFluenceConfig?.aquaOutputJSPath !== undefined);
 
-    const importFlag = await ensureAquaImports({
-      flags,
+    const imports = await getAquaImports({
+      aquaImportsFromFlags: flags.import,
       maybeFluenceConfig,
     });
 
@@ -147,7 +147,7 @@ export default class Aqua extends Command {
       compileArgs: {
         filePath: inputFlag,
         constants: flags.const,
-        imports: importFlag,
+        imports,
         logLevel: flags["log-level-compiler"],
         noRelay: flags["no-relay"],
         noXor: flags["no-xor"],

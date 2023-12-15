@@ -41,7 +41,11 @@ export default class Install extends BaseCommand<typeof Install> {
       await this.parse(Install),
     );
 
-    await npmInstall();
+    if (maybeFluenceConfig !== null) {
+      await npmInstall({
+        fluenceConfig: maybeFluenceConfig,
+      });
+    }
 
     await installAllCargoDependencies({
       maybeFluenceConfig,

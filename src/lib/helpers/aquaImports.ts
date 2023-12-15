@@ -14,169 +14,51 @@
  * limitations under the License.
  */
 
-import { writeFile, readFile, access } from "node:fs/promises";
-import { join } from "node:path";
+import { access } from "node:fs/promises";
 
-import type { JSONSchemaType } from "ajv";
+import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 
-import { ajv } from "../ajvInstance.js";
-import { commandObj } from "../commandObj.js";
 import type { FluenceConfig } from "../configs/project/fluence.js";
-import { FS_OPTIONS } from "../const.js";
+import { builtInAquaDependenciesDirPath } from "../npm.js";
 import {
   getFluenceAquaDir,
-  ensureUserFluenceNpmDir,
-  ensureVSCodeSettingsJsonPath,
   ensureFluenceAquaDependenciesPath,
+  projectRootDir,
 } from "../paths.js";
-
-import { jsonStringify } from "./utils.js";
 
 type GetAquaImportsArg = {
   maybeFluenceConfig: FluenceConfig | null;
-  generateSettingsJson?: boolean;
-  flags?: { import?: string[] | undefined };
+  aquaImportsFromFlags?: string[] | undefined;
 };
 
-export async function ensureAquaImports({
-  flags,
+export async function getAquaImports({
+  aquaImportsFromFlags,
   maybeFluenceConfig = null,
-  generateSettingsJson = false,
-}: GetAquaImportsArg): Promise<string[]> {
+}: GetAquaImportsArg): Promise<GatherImportsResult> {
   const fluenceAquaDirPath = getFluenceAquaDir();
-  const defaultImports = [];
+
+  const globalImports = [
+    ...(aquaImportsFromFlags ?? []),
+    ...(maybeFluenceConfig?.aquaImports ?? []),
+  ];
 
   try {
     if (maybeFluenceConfig !== null) {
       await access(fluenceAquaDirPath);
-      defaultImports.push(fluenceAquaDirPath);
+      globalImports.push(fluenceAquaDirPath);
     }
   } catch {}
 
-  const aquaImports = [
-    ...(flags?.import ?? []),
-    ...(maybeFluenceConfig?.aquaImports ?? []),
-    ...defaultImports,
-    // TODO: use aqua imports in the new format
-    join(await ensureFluenceAquaDependenciesPath(), "node_modules"),
-  ];
+  const { gatherImportsFromNpm } = await import(
+    "@fluencelabs/npm-aqua-compiler"
+  );
 
-  if (maybeFluenceConfig !== null) {
-    await ensureVSCodeSettingsJSON({
-      aquaImports,
-      generateSettingsJson,
-    });
-  }
-
-  return aquaImports;
+  return gatherImportsFromNpm({
+    npmProjectDirPath:
+      maybeFluenceConfig === null
+        ? builtInAquaDependenciesDirPath
+        : await ensureFluenceAquaDependenciesPath(),
+    globalImports,
+    aquaToCompileDirPath: projectRootDir,
+  });
 }
-
-const AQUA_SETTINGS_IMPORTS = "aquaSettings.imports";
-
-type SettingsJson = {
-  [AQUA_SETTINGS_IMPORTS]?: Array<string>;
-};
-
-const settingsJsonSchema: JSONSchemaType<SettingsJson> = {
-  type: "object",
-  properties: {
-    [AQUA_SETTINGS_IMPORTS]: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-  },
-  required: [],
-};
-
-const validateSettingsJson = ajv.compile(settingsJsonSchema);
-
-type EnsureRecommendedSettings = {
-  aquaImports: string[];
-  generateSettingsJson?: boolean;
-};
-
-const ensureVSCodeSettingsJSON = async ({
-  aquaImports,
-  generateSettingsJson = false,
-}: EnsureRecommendedSettings): Promise<void> => {
-  const settingsJsonPath = await ensureVSCodeSettingsJsonPath();
-
-  let fileContent: string;
-
-  try {
-    fileContent = await readFile(settingsJsonPath, FS_OPTIONS);
-  } catch {
-    if (generateSettingsJson) {
-      await writeFile(
-        settingsJsonPath,
-        jsonStringify({
-          [AQUA_SETTINGS_IMPORTS]: aquaImports,
-        }) + "\n",
-        FS_OPTIONS,
-      );
-    }
-
-    return;
-  }
-
-  let parsedFileContent: unknown;
-
-  try {
-    parsedFileContent = JSON.parse(fileContent);
-  } catch {
-    commandObj.warn(`${settingsJsonPath} is not a valid JSON file`);
-    return;
-  }
-
-  if (validateSettingsJson(parsedFileContent)) {
-    const userFluenceNpmDir = await ensureUserFluenceNpmDir();
-
-    const newAquaImportPathStartsFromUserFluenceNpmDir = new Set(
-      aquaImports
-        .filter((aquaImport): boolean => {
-          return aquaImport.startsWith(userFluenceNpmDir);
-        })
-        .map((aquaImport): string => {
-          return getUserFluenceNpmImportPathStart(aquaImport);
-        }),
-    );
-
-    const previousAquaImports = parsedFileContent[AQUA_SETTINGS_IMPORTS] ?? [];
-
-    const previousAquaImportsFromUserFluenceNpmDir = previousAquaImports.filter(
-      (aquaImport): boolean => {
-        return aquaImport.startsWith(userFluenceNpmDir);
-      },
-    );
-
-    const deduplicatedPreviousAquaImportsFromUserFluenceNpmDir =
-      previousAquaImportsFromUserFluenceNpmDir.filter(
-        (previousAquaImport): boolean => {
-          return !newAquaImportPathStartsFromUserFluenceNpmDir.has(
-            getUserFluenceNpmImportPathStart(previousAquaImport),
-          );
-        },
-      );
-
-    parsedFileContent[AQUA_SETTINGS_IMPORTS] = [
-      ...new Set([
-        ...aquaImports,
-        ...previousAquaImports.filter((aquaImport): boolean => {
-          return !aquaImport.startsWith(userFluenceNpmDir);
-        }),
-        ...deduplicatedPreviousAquaImportsFromUserFluenceNpmDir,
-      ]),
-    ];
-
-    await writeFile(
-      settingsJsonPath,
-      JSON.stringify(parsedFileContent, null, 2) + "\n",
-      FS_OPTIONS,
-    );
-  }
-};
-
-const getUserFluenceNpmImportPathStart = (fullPath: string): string => {
-  return fullPath.split("/").slice(0, -2).join("/");
-};

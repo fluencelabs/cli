@@ -14,19 +14,34 @@
  * limitations under the License.
  */
 
-import { access, cp } from "node:fs/promises";
+import assert from "node:assert";
+import { access, cp, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "url";
 
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
-import { AQUA_DEPENDENCIES_DIR_NAME } from "./const.js";
+import type { FluenceConfig } from "./configs/project/fluence.js";
+import {
+  AQUA_DEPENDENCIES_DIR_NAME,
+  FS_OPTIONS,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+} from "./const.js";
 import { type ExecPromiseArg, execPromise } from "./execPromise.js";
-import { ensureFluenceAquaDependenciesPath } from "./paths.js";
+import { splitPackageNameAndVersion } from "./helpers/package.js";
+import {
+  jsonStringify,
+  removeProperties,
+  stringifyUnknown,
+} from "./helpers/utils.js";
+import {
+  getFluenceAquaDependenciesPackageJsonPath,
+  ensureFluenceAquaDependenciesPath,
+} from "./paths.js";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
-const aquaDependenciesDirPath = join(
+export const builtInAquaDependenciesDirPath = join(
   __dirname,
   "..",
   AQUA_DEPENDENCIES_DIR_NAME,
@@ -73,6 +88,33 @@ async function resolveCommand(
   }
 }
 
+export async function getLatestVersionOfNPMDependency(
+  name: string,
+): Promise<string> {
+  try {
+    const versions = await runNpm({
+      args: ["view", name, "version"],
+    });
+
+    const lastVersion = versions.trim().split("\n").pop();
+
+    assert(
+      lastVersion !== undefined,
+      `Couldn't find last version of your ${name} using npm. Got:\n\n${versions}`,
+    );
+
+    return lastVersion;
+  } catch (error) {
+    commandObj.error(
+      `Failed to get latest version of ${color.yellow(
+        name,
+      )} from npm registry. Please make sure ${color.yellow(
+        name,
+      )} is spelled correctly\n${stringifyUnknown(error)}`,
+    );
+  }
+}
+
 async function runNpm(args: Omit<ExecPromiseArg, "command">) {
   const nodeModulesPath = (await import("node_modules-path")).default();
   const npmExecutablePath = join(nodeModulesPath, "npm", "index.js");
@@ -88,29 +130,101 @@ async function runNpm(args: Omit<ExecPromiseArg, "command">) {
   });
 }
 
+function assertDependenciesPresent(
+  fluenceConfig: FluenceConfig,
+): asserts fluenceConfig is FluenceConfig & {
+  dependencies: { npm: Record<string, string> };
+} {
+  assert(
+    fluenceConfig.dependencies?.npm,
+    `Unreachable. CLI now makes sure that dependencies are always present in ${color.yellow(
+      "initCLI",
+    )} function inside each command in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  );
+}
+
 type NpmInstallArgs = {
-  cwd?: string | undefined;
   packageNameAndVersion?: string | undefined;
+  fluenceConfig: FluenceConfig;
 };
 
 export async function npmInstall({
-  cwd,
   packageNameAndVersion,
-}: NpmInstallArgs = {}) {
-  return await runNpm({
-    args: [
-      "i",
-      ...(packageNameAndVersion === undefined ? [] : [packageNameAndVersion]),
-    ],
+  fluenceConfig,
+}: NpmInstallArgs) {
+  assertDependenciesPresent(fluenceConfig);
+
+  if (packageNameAndVersion === undefined) {
+    await writeFile(
+      await getFluenceAquaDependenciesPackageJsonPath(),
+      jsonStringify({ dependencies: fluenceConfig.dependencies.npm }),
+      FS_OPTIONS,
+    );
+
+    await runNpm({
+      args: ["i"],
+      options: {
+        cwd: await ensureFluenceAquaDependenciesPath(),
+      },
+    });
+
+    return;
+  }
+
+  const packageNameAndVersionTuple = splitPackageNameAndVersion(
+    packageNameAndVersion,
+  );
+
+  const [packageName] = packageNameAndVersionTuple;
+  let [, version] = packageNameAndVersionTuple;
+
+  if (version === undefined) {
+    version = await getLatestVersionOfNPMDependency(packageName);
+  }
+
+  await runNpm({
+    args: ["i", packageNameAndVersion],
     options: {
-      cwd: cwd ?? (await ensureFluenceAquaDependenciesPath()),
+      cwd: await ensureFluenceAquaDependenciesPath(),
     },
   });
+
+  fluenceConfig.dependencies.npm[packageName] = version;
+  await fluenceConfig.$commit();
+}
+
+type NpmUninstallArgs = {
+  packageNameAndVersion: string;
+  fluenceConfig: FluenceConfig;
+};
+
+export async function npmUninstall({
+  packageNameAndVersion,
+  fluenceConfig,
+}: NpmUninstallArgs) {
+  assertDependenciesPresent(fluenceConfig);
+  const [packageName] = splitPackageNameAndVersion(packageNameAndVersion);
+
+  await runNpm({
+    args: ["un", packageNameAndVersion],
+    options: {
+      cwd: await ensureFluenceAquaDependenciesPath(),
+    },
+  });
+
+  fluenceConfig.dependencies.npm = removeProperties(
+    fluenceConfig.dependencies.npm,
+    ([p]) => {
+      return p === packageName;
+    },
+  );
+
+  await fluenceConfig.$commit();
 }
 
 export async function copyDefaultDependencies() {
   return cp(
-    aquaDependenciesDirPath,
+    builtInAquaDependenciesDirPath,
     await ensureFluenceAquaDependenciesPath(),
     { recursive: true },
   );

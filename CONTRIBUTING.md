@@ -27,3 +27,4 @@ When you contribute, you have to be aware that your contribution is covered by *
     1. [Docker](https://docs.docker.com/get-docker/)
     1. run e.g. for linux: `DEBUG=fcli:* yarn test-linux-x64` which will lint and check the code, build it, package it, prepare the tests and run them (for fish shell: `env DEBUG='fcli:*' yarn test-linux-x64`)
 -   for your convenience a dir `.f` is added to gitignore so you can generate projects in this dir for testing and development purposes
+-   To install packages from fluence npm registry that are published in CI for testing purposes - add `npmRegistryServer: https://npm.fluence.dev` to `.yarnrc.yml`. Don't forget removing that before merging your changes into the main branch. You would also need to be logged into npm account that is allowed to access fluence npm registry
