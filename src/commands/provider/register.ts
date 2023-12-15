@@ -16,7 +16,7 @@
 
 import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
-import type { BytesLike, BigNumberish,AddressLike } from "ethers";
+import { ethers } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -42,7 +42,9 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../lib/provider.js";
+import assert from "assert";
 
+const CAPACITY_COMMITMENT_CREATED_EVENT = "CapacityCommitmentCreated";
 export default class Register extends BaseCommand<typeof Register> {
   static override description = "Register in matching contract";
   static override flags = {
@@ -94,7 +96,9 @@ export async function register(
   const signer = await getSigner(network, flags["priv-key"]);
 
   const dealClient = new DealClient(signer, network);
+  const market = await dealClient.getMarket();
   const core = await dealClient.getCore();
+  const capacity = await dealClient.getCapacity();
   const flt = await dealClient.getFLT();
 
   const minPricePerWorkerEpochBigInt = BigInt(
@@ -103,36 +107,118 @@ export async function register(
 
   dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
 
+  const [{ digest }, { base58btc }] = await Promise.all([
+    import("multiformats"),
+    // eslint-disable-next-line import/extensions
+    import("multiformats/bases/base58"),
+  ]);
+
+  const PRECISION = await core.PRECISION();
 
   const registerPeers: {
-        peerId: BytesLike;
-        unitCount: BigNumberish;
-        owner: AddressLike;
-    }[] = Object.keys(providerConfig.computePeers).map((peerId) => {
-      const peer = providerConfig.computePeers[peerId];
+    originPeerId: string;
+    peerId: Uint8Array;
+    unitCount: number;
+    owner: string;
+    ccDuration: number;
+    ccDelegator: string;
+    ccRewardDelegationRate: number;
+  }[] = Object.keys(providerConfig.computePeers).map((name) => {
+    const peer = providerConfig.computePeers[name];
 
-      if (peer === undefined || peer.computeUnits === undefined) {
-        throw new Error(`Peer ${peerId} not found`);
-      }
+    if (peer === undefined) {
+      throw new Error(`Peer ${name} not found`);
+    }
 
-      return {
-        peerId: peerId,
-        unitCount: peer.computeUnits,
-        owner: ""
-      };
-    });
+    return {
+      originPeerId: peer.peerId,
+      peerId: digest
+        .decode(base58btc.decode("z" + peer.peerId))
+        .bytes.subarray(6),
+      unitCount: peer.computeUnits!,
+      owner: ethers.ZeroAddress, //TODO: get owner for peer,
+      ccDuration: Math.floor(peer.capacityCommitment.duration * 60), //TODO: magic number
+      ccDelegator: peer.capacityCommitment.delegator,
+      ccRewardDelegationRate: Math.floor(
+        (peer.capacityCommitment.rewardDelegationRate / 100) *
+          Number(PRECISION),
+      ),
+    };
+  });
 
-  const tx = await core.registerMarketOffer(
+  //TODO: if offer exists, update it
+  const registerOfferTx = await market.registerMarketOffer(
     minPricePerWorkerEpochBigInt,
     await flt.getAddress(),
+    // offer.effectors!.map((effector) => {
+    //   const bytesCid = CID.parse(effector).bytes;
+
+    //   return {
+    //     prefixes: bytesCid.slice(0, 4),
+    //     hash: bytesCid.slice(4),
+    //   };
+    // })
     [],
-    registerPeers
+    registerPeers.map((peer) => {
+      return {
+        peerId: peer.peerId,
+        unitIds: new Array(peer.unitCount).fill(0).map(() => {
+          return ethers.randomBytes(32);
+        }),
+        owner: peer.owner,
+      };
+    }),
   );
 
   promptConfirmTx(flags["priv-key"]);
-  await waitTx(tx);
+  await waitTx(registerOfferTx);
 
-  commandObj.log(color.green(`Successfully joined to matching contract`));
+  for (const peer of registerPeers) {
+    commandObj.log(
+      color.gray(`Create capacity commitment for ${peer.originPeerId}`),
+    );
+
+    promptConfirmTx(flags["priv-key"]);
+
+    const registerPeerTx = await capacity.createCapacityCommitment(
+      peer.peerId,
+      peer.ccDuration,
+      peer.ccDelegator,
+      peer.ccRewardDelegationRate,
+    );
+
+    const res = await waitTx(registerPeerTx);
+    const event = capacity.getEvent(CAPACITY_COMMITMENT_CREATED_EVENT);
+
+    const log = res.logs.find((log) => {
+      if (log.topics[0] !== event.fragment.topicHash) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (log === undefined) {
+      throw new Error(`Capacity commitment created event not found.`);
+    }
+
+    const id: unknown = capacity.interface
+      .parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      ?.args.getValue("commitmentId");
+
+    assert(typeof id === "string");
+
+    commandObj.log(
+      color.green(
+        `Capacity commitment was created with id ${color.yellow(id)}`,
+      ),
+    );
+  }
+
+  commandObj.log(color.green(`Offer and commitments were registered`));
 }
 
 function promptForOffer(offers: ProviderConfigReadonly["offers"]) {

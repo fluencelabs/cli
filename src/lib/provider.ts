@@ -20,7 +20,7 @@ import assert from "node:assert";
 import { URL } from "node:url";
 
 import { color } from "@oclif/color";
-import type { ethers } from "ethers";
+import { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfigReadonly } from "./configs/project/fluence.js";
@@ -30,7 +30,7 @@ import {
   DEAL_RPC_CONFIG,
   WC_PROJECT_ID,
   WC_METADATA,
-  type Network,
+  type ContractsENV,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   CLI_NAME,
   CONTRACTS_ENV_TO_CHAIN_ID,
@@ -45,7 +45,7 @@ const KEY_QUERY_PARAM_NAME = "symKey";
 export async function ensureChainNetwork(
   fluenceEnvFromFlags: string | undefined,
   maybeFluenceConfig: FluenceConfigReadonly | null,
-): Promise<Network> {
+): Promise<ContractsENV> {
   const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
 
   if (fluenceEnv !== "custom") {
@@ -80,22 +80,19 @@ export async function ensureChainNetwork(
 }
 
 export const getSigner = async (
-  network: Network,
+  contractsENV: ContractsENV,
   privKey: string | undefined,
 ): Promise<ethers.Signer> => {
   return privKey === undefined
-    ? getWalletConnectProvider(network)
-    : getWallet(privKey, network);
+    ? getWalletConnectProvider(contractsENV)
+    : getWallet(privKey, contractsENV);
 };
 
-export const getProvider = async (
-  network: Network,
-): Promise<ethers.Provider> => {
-  const { ethers } = await import("ethers");
-  return new ethers.JsonRpcProvider(DEAL_CONFIG[network].url);
+export const getProvider = (contractsENV: ContractsENV): ethers.Provider => {
+  return new ethers.JsonRpcProvider(DEAL_CONFIG[contractsENV].url);
 };
 
-async function getWalletConnectProvider(env: Network) {
+async function getWalletConnectProvider(contractsENV: ContractsENV) {
   const { UniversalProvider } = await import(
     "@walletconnect/universal-provider"
   );
@@ -134,7 +131,7 @@ async function getWalletConnectProvider(env: Network) {
           "personal_sign",
           "eth_signTypedData",
         ],
-        chains: [`eip155:${CONTRACTS_ENV_TO_CHAIN_ID[env]}`],
+        chains: [`eip155:${CONTRACTS_ENV_TO_CHAIN_ID[contractsENV]}`],
         events: ["chainChanged", "accountsChanged"],
         rpcMap: DEAL_RPC_CONFIG,
       },
@@ -156,11 +153,11 @@ async function getWalletConnectProvider(env: Network) {
 
 const getWallet = async (
   privKey: string,
-  network: Network,
+  contractsENV: ContractsENV,
 ): Promise<ethers.Wallet> => {
   const { ethers } = await import("ethers");
 
-  return new ethers.Wallet(privKey, await getProvider(network));
+  return new ethers.Wallet(privKey, await getProvider(contractsENV));
 };
 
 export const waitTx = async (

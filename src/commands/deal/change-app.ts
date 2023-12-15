@@ -55,7 +55,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
         (await input({ message: "Enter deal address" })),
       appCID:
         args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
-      network: await ensureChainNetwork(flags.env, maybeFluenceConfig),
+      contractsENV: await ensureChainNetwork(flags.env, maybeFluenceConfig),
       privKey: flags["priv-key"],
     });
 

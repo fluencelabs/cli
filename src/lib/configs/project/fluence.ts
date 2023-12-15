@@ -43,7 +43,8 @@ import {
   CLI_NAME_FULL,
   CLI_NAME,
   DEFAULT_MARINE_BUILD_ARGS,
-  type Network,
+  type ContractsENV,
+  CONTRACTS_ENV,
   type FluenceEnv,
   FLUENCE_ENVS,
   AUTO_GENERATED,
@@ -51,7 +52,6 @@ import {
   PRICE_PER_EPOCH_DEFAULT,
   COLLATERAL_DEFAULT,
   CURRENCY_MULTIPLIER,
-  NETWORK_NAME,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
@@ -236,7 +236,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   hosts?: Record<string, Host>;
   workers?: Record<string, Worker>;
   deals?: Record<string, Deal>;
-  chainNetwork?: Network;
+  chainNetwork?: ContractsENV;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
@@ -449,7 +449,7 @@ const configSchemaV2Obj = {
     chainNetwork: {
       type: "string",
       description: "The network in which the transactions will be carried out",
-      enum: NETWORK_NAME,
+      enum: CONTRACTS_ENV,
       default: "testnet",
       nullable: true,
     },
@@ -499,7 +499,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = configSchemaV2Obj;
 type ConfigV3 = Omit<ConfigV2, "version" | "relays" | "chainNetwork"> & {
   version: 3;
   customFluenceEnv?: {
-    contractsEnv: Network;
+    contractsEnv: ContractsENV;
     relays: Array<string>;
   };
 };
@@ -527,7 +527,7 @@ const configSchemaV3Obj = {
         contractsEnv: {
           type: "string",
           description: `Contracts environment to use for this fluence network to sign contracts on the blockchain`,
-          enum: NETWORK_NAME,
+          enum: CONTRACTS_ENV,
         },
         relays: {
           type: "array",

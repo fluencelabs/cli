@@ -18,7 +18,7 @@ import { isAbsolute } from "node:path";
 
 import dotenv from "dotenv";
 
-import { type Network, FLUENCE_ENVS } from "./const.js";
+import { type ContractsENV, FLUENCE_ENVS } from "./const.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
 export const FLUENCE_ENV = "FLUENCE_ENV";
@@ -71,7 +71,7 @@ const isAbsolutePath = (v: unknown): v is string => {
 };
 
 const isFluenceEnvWithoutCustom = getIsStringUnion(
-  FLUENCE_ENVS.filter((e): e is Network => {
+  FLUENCE_ENVS.filter((e): e is ContractsENV => {
     return e !== "custom";
   }),
 );

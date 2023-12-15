@@ -34,7 +34,6 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   DEFAULT_AQUAVM_POOL_SIZE,
-  NETWORK_NAME,
   FS_OPTIONS,
   HTTP_PORT_START,
   TCP_PORT_START,
@@ -42,13 +41,14 @@ import {
   WEB_SOCKET_PORT_START,
   CHAIN_CONTAINER_NAME,
   CHAIN_PORT,
+  CONTRACTS_ENV,
   LOCAL_IPFS_ADDRESS,
   TOML_EXT,
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
   CURRENCY_MULTIPLIER_TEXT,
+  type ContractsENV,
   defaultNumberProperties,
-  type Network,
   DEAL_CONFIG,
 } from "../../const.js";
 import {
@@ -72,6 +72,12 @@ import {
   type Migrations,
   type ConfigValidateFunction,
 } from "../initConfig.js";
+
+export type CapacityCommitment = {
+  duration: number;
+  delegator: string;
+  rewardDelegationRate: number;
+};
 
 export type Offer = {
   minPricePerWorkerEpoch: number;
@@ -225,12 +231,14 @@ const noxConfigYAMLSchema = {
 } as const satisfies JSONSchemaType<NoxConfigYAML>;
 
 type ComputePeer = {
+  peerId: string;
+  capacityCommitment: CapacityCommitment;
   computeUnits?: number;
   nox?: NoxConfigYAML;
 };
 
 type ConfigV0 = {
-  env: Network;
+  env: ContractsENV;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   nox?: NoxConfigYAML;
@@ -254,10 +262,7 @@ const offerSchema: JSONSchemaType<Offer> = {
     },
     effectors: { type: "array", items: { type: "string" }, nullable: true },
   },
-  required: [
-    "minPricePerWorkerEpoch",
-    "computePeers",
-  ],
+  required: ["minPricePerWorkerEpoch", "computePeers"],
 };
 
 const computePeerSchema: JSONSchemaType<ComputePeer> = {
@@ -265,7 +270,28 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
   description: "Defines a compute peer",
   additionalProperties: false,
   properties: {
+    peerId: { type: "string", nullable: false },
     computeUnits: { type: "number", nullable: true },
+    capacityCommitment: {
+      type: "object",
+      description: "Defines a capacity commitment",
+      required: ["duration", "delegator", "rewardDelegationRate"],
+      additionalProperties: false,
+      properties: {
+        duration: {
+          type: "number",
+          description: `Duration of the commitment in days`,
+        },
+        delegator: {
+          type: "string",
+          description: `Delegator address`,
+        },
+        rewardDelegationRate: {
+          type: "number",
+          description: `Reward delegation rate.`,
+        },
+      },
+    },
     nox: noxConfigYAMLSchema,
   },
   required: [],
@@ -282,7 +308,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description:
         "Defines the the environment for which you intend to generate nox configuration",
       type: "string",
-      enum: NETWORK_NAME,
+      enum: CONTRACTS_ENV,
     },
     offers: {
       description: "A map with offer names as keys and offers as values",
@@ -332,7 +358,13 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
           return [
             `nox-${i}`,
             {
+              peerId: "", //TODO: do we have default peerId?
               computeUnits: 1,
+              capacityCommitment: {
+                duration: 1, // TODO: do we have default duration?
+                delegator: "", // TODO: do we have default delegator?
+                rewardDelegationRate: 0,
+              },
             },
           ] as const;
         }),
@@ -605,7 +637,7 @@ function getDefaultNoxConfigYAML(
         networkApiEndpoint: isLocal
           ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
           : "http://mumbai-polygon.ru:8545",
-        networkId: dealConfig.id,
+        networkId: dealConfig!.id,
         startBlock: "earliest",
         // TODO: use correct addr for env
         matcherAddress: "0x0e1F3B362E22B2Dc82C9E35d6e62998C7E8e2349",

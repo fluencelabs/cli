@@ -43,21 +43,17 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
 
-
-    const dealClient = new DealClient(await getProvider(network), network);
-    const core = await dealClient.getCore();
+    const dealClient = new DealClient(getProvider(network), network);
+    const market = await dealClient.getMarket();
 
     const offerId = flags["offer-id"];
 
-    const offerInfo =
-      await core.getOffer(offerId);
+    const offerInfo = await market.getOffer(offerId);
 
     commandObj.log(color.gray(`Offer Info:`));
     const { ethers } = await import("ethers");
 
-    commandObj.log(
-      color.gray(`Provider address: ${offerInfo.provider}`),
-    );
+    commandObj.log(color.gray(`Provider address: ${offerInfo.provider}`));
 
     //TODO: add to units in payment token
     commandObj.log(
@@ -68,10 +64,7 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
       ),
     );
 
-    commandObj.log(
-      color.gray(`Payment token: ${offerInfo.paymentToken}`),
-    );
-
+    commandObj.log(color.gray(`Payment token: ${offerInfo.paymentToken}`));
 
     commandObj.log(color.gray(`--Peers--`));
 

@@ -39,11 +39,8 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   };
 
   static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
-    }),
     "UNIT-ID": Args.string({
-      description: "Compute unit CID",
+      description: "Compute unitId",
     }),
   };
 
@@ -56,26 +53,19 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
     const privKey = flags["priv-key"];
 
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
+    const unitId =
+      args["UNIT-ID"] ?? (await input({ message: "Enter compute unit CID" }));
 
     const signer = await getSigner(network, privKey);
 
-
     const dealClient = new DealClient(signer, network);
-    const deal = dealClient.getDeal(dealAddress);
+    const market = await dealClient.getMarket();
 
     promptConfirmTx(privKey);
-
-    const tx = await deal.removeComputeUnit(
-      args["UNIT-ID"] ?? (await input({ message: "Enter compute unit CID" })),
-    );
-
+    const tx = await market.returnComputeUnitFromDeal(unitId);
 
     await waitTx(tx);
 
-    color.green(
-      `Unit ${args["UNIT-ID"]} was removed from the deal ${dealAddress}`,
-    );
+    color.green(`Unit ${unitId} was removed from the deal`);
   }
 }

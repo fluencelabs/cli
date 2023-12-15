@@ -39,6 +39,13 @@ export default class Init extends BaseCommand<typeof Init> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
 
+    // uint256 minPricePerWorkerEpoch,
+    //   address paymentToken,
+    //   CIDV1[] calldata effectors,
+    //   RegisterComputePeer[] calldata peers
+
+    // duration, address delegator, uint256 rewardDelegationRate
+
     let providerConfig = await initReadonlyProviderConfig(flags.name);
 
     if (providerConfig !== null) {

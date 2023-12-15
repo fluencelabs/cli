@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {NETWORK_NAME as NETWORK_NAME_CHAIN } from "@fluencelabs/deal-aurora/dist/client/config.js"
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 import type {
@@ -37,9 +36,7 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
-export const numberProperties = [
-  "minPricePerWorkerEpoch",
-] as const;
+export const numberProperties = ["minPricePerWorkerEpoch"] as const;
 
 export type NumberProperty = (typeof numberProperties)[number];
 
@@ -60,11 +57,9 @@ export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
-export const NETWORK_NAME = NETWORK_NAME_CHAIN;
-export type Network = (typeof NETWORK_NAME)[number];
-
-export const isContractsEnv = getIsStringUnion(NETWORK_NAME);
-
+export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
+export type ContractsENV = (typeof CONTRACTS_ENV)[number];
+export const isContractsEnv = getIsStringUnion(CONTRACTS_ENV);
 
 export type ChainConfig = {
   url: string;
@@ -80,11 +75,11 @@ export const WC_METADATA = {
   icons: [],
 };
 
-export const FLUENCE_ENVS = [...NETWORK_NAME, "custom"] as const;
+export const FLUENCE_ENVS = [...CONTRACTS_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
-export const DEAL_CONFIG: Record<Network, ChainConfig> = {
+export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
   kras: {
     url: "https://polygon-mumbai.g.alchemy.com/v2/lSTLbdQejAUJ854kpjvyFXrmKocI2N-z",
     id: 80001,
@@ -109,8 +104,8 @@ export const DEAL_RPC_CONFIG = Object.fromEntries(
   }),
 );
 
-// @ts-expect-error we know that keys are Network, not just string
-export const CONTRACTS_ENV_TO_CHAIN_ID: Record<Network, number> =
+// @ts-expect-error we know that keys are ContractsEnv, not just string
+export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
   Object.fromEntries(
     Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
       return [name, id];
@@ -157,6 +152,7 @@ export const CONFIGS_DIR_NAME = "configs";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
+export const PROVIDER_SECRETS_CONFIG_FILE_NAME = `provider-secrets`;
 export const WORKERS_CONFIG_FILE_NAME = `workers`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets`;
@@ -169,6 +165,7 @@ export const DOCKER_COMPOSE_FILE_NAME = `docker-compose`;
 
 export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROVIDER_CONFIG_FULL_FILE_NAME = `${PROVIDER_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME = `${PROVIDER_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const WORKERS_CONFIG_FULL_FILE_NAME = `${WORKERS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROJECT_SECRETS_FULL_CONFIG_FILE_NAME = `${PROJECT_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FULL_FILE_NAME = `${USER_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
@@ -332,7 +329,7 @@ export const PROVIDER_CONFIG_FLAGS = {
   }),
   [ENV_FLAG_NAME]: Flags.string({
     description: "Environment to use when generating the provider config",
-    helpValue: `<${NETWORK_NAME.join(" | ")}>`,
+    helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
   }),
 };
 

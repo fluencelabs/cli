@@ -24,8 +24,8 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
-  type Network,
-  NETWORK_NAME,
+  type ContractsENV,
+  CONTRACTS_ENV,
   DEFAULT_DEAL_NAME,
   DEFAULT_WORKER_NAME,
   type FluenceEnv,
@@ -68,7 +68,7 @@ const workerInfoSchema = {
 export type Deal = WorkerInfo & {
   dealId: string;
   dealIdOriginal: string;
-  chainNetwork: Network;
+  chainNetwork: ContractsENV;
   chainNetworkId: number;
 };
 
@@ -156,7 +156,7 @@ const dealSchema: JSONSchemaType<Deal> = {
     },
     chainNetwork: {
       type: "string",
-      enum: NETWORK_NAME,
+      enum: CONTRACTS_ENV,
       description:
         "Blockchain network name that was used when deploying workers",
     },

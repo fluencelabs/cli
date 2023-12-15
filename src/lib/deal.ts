@@ -23,7 +23,11 @@ import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
-import { CLI_NAME_FULL, CURRENCY_MULTIPLIER, type Network } from "./const.js";
+import {
+  CLI_NAME_FULL,
+  CURRENCY_MULTIPLIER,
+  type ContractsENV,
+} from "./const.js";
 import { dbg } from "./dbg.js";
 import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
 
@@ -31,7 +35,7 @@ const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
 type DealCreateArg = {
-  chainNetwork: Network;
+  contractsENV: ContractsENV;
   privKey: string | undefined;
   appCID: string;
   minWorkers: number;
@@ -42,7 +46,7 @@ type DealCreateArg = {
 };
 
 export const dealCreate = async ({
-  chainNetwork,
+  contractsENV,
   privKey,
   appCID,
   minWorkers,
@@ -51,10 +55,11 @@ export const dealCreate = async ({
   pricePerWorkerEpoch,
   effectors,
 }: DealCreateArg) => {
-  const signer = await getSigner(chainNetwork, privKey);
+  const signer = await getSigner(contractsENV, privKey);
 
-  const dealClient = new DealClient(signer, chainNetwork);
+  const dealClient = new DealClient(signer, contractsENV);
   const core = await dealClient.getCore();
+  const market = await dealClient.getMarket();
   const flt = await dealClient.getFLT();
 
   const { CID } = await import("ipfs-http-client");
@@ -69,15 +74,16 @@ export const dealCreate = async ({
   dbg(`pricePerWorkerEpoch: ${pricePerWorkerEpochBigInt}`);
 
   const approveTx = await flt.approve(
-    await core.getAddress(),
-    BigInt(targetWorkers) * pricePerWorkerEpochBigInt * await core.minDealDepositedEpoches(),
+    await market.getAddress(),
+    BigInt(targetWorkers) *
+      pricePerWorkerEpochBigInt *
+      (await core.minDealDepositedEpoches()),
   );
-
 
   await waitTx(approveTx);
   promptConfirmTx(privKey);
 
-  const tx = await core.deployDeal(
+  const tx = await market.deployDeal(
     {
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
@@ -98,10 +104,9 @@ export const dealCreate = async ({
     [],
   );
 
-
   const res = await waitTx(tx);
 
-  const eventTopic = core.interface.getEvent(EVENT_TOPIC_FRAGMENT);
+  const eventTopic = market.interface.getEvent(EVENT_TOPIC_FRAGMENT);
 
   const log = res.logs.find((log) => {
     return log.topics[0] === eventTopic.topicHash;
@@ -123,22 +128,21 @@ export const dealCreate = async ({
 };
 
 type DealUpdateArg = {
-  network: Network;
+  contractsENV: ContractsENV;
   privKey: string | undefined;
   dealAddress: string;
   appCID: string;
 };
 
 export const dealUpdate = async ({
-  network,
+  contractsENV,
   privKey,
   dealAddress,
   appCID,
 }: DealUpdateArg) => {
-  const signer = await getSigner(network, privKey);
+  const signer = await getSigner(contractsENV, privKey);
 
-
-  const dealClient = new DealClient(signer, network);
+  const dealClient = new DealClient(signer, contractsENV);
   const deal = dealClient.getDeal(dealAddress);
 
   const { CID } = await import("ipfs-http-client");
@@ -151,7 +155,6 @@ export const dealUpdate = async ({
     hash: bytesCid.slice(4),
   });
 
-
   await waitTx(tx);
 
   return tx;
@@ -160,30 +163,28 @@ export const dealUpdate = async ({
 const COMPUTE_UNIT_CREATED_EVENT_TOPIC = "ComputeUnitCreated";
 
 export async function match(
-  network: Network,
+  contractsENV: ContractsENV,
   privKey: string | undefined,
   dealAddress: string,
 ) {
-  const signer = await getSigner(network, privKey);
+  const signer = await getSigner(contractsENV, privKey);
 
-  const dealClient = new DealClient(signer, network);
-  const core = await dealClient.getCore();
+  const dealClient = new DealClient(signer, contractsENV);
+  const market = await dealClient.getMarket();
 
-  const tx = await core.matchDeal(
-    dealAddress
-  );
+  const tx = await market.matchDeal(dealAddress);
 
   promptConfirmTx(privKey);
 
   const res = await waitTx(tx);
-  const event = core.getEvent(COMPUTE_UNIT_CREATED_EVENT_TOPIC);
+  const event = market.getEvent(COMPUTE_UNIT_CREATED_EVENT_TOPIC);
 
   const patCount = res.logs.filter((log) => {
     if (log.topics[0] !== event.fragment.topicHash) {
       return false;
     }
 
-    const id: unknown = core.interface
+    const id: unknown = market.interface
       .parseLog({
         topics: [...log.topics],
         data: log.data,

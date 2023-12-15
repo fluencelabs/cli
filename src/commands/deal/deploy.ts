@@ -87,8 +87,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true,
     );
 
-    const chainNetwork = await ensureChainNetwork(flags.env, fluenceConfig);
-    const chainNetworkId = DEAL_CONFIG[chainNetwork].id;
+    const contractsENV = await ensureChainNetwork(flags.env, fluenceConfig);
+    const chainNetworkId = DEAL_CONFIG[contractsENV]!.id;
     const workersConfig = await initNewWorkersConfig();
 
     const aquaImports = await ensureAquaImports({
@@ -165,7 +165,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         );
 
         await dealUpdate({
-          network: chainNetwork,
+          contractsENV: contractsENV,
           privKey: flags["priv-key"],
           appCID,
           dealAddress: previouslyDeployedDeal.dealIdOriginal,
@@ -175,7 +175,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           dbg("start matching");
 
           await match(
-            chainNetwork,
+            contractsENV,
             flags["priv-key"],
             previouslyDeployedDeal.dealIdOriginal,
           );
@@ -203,7 +203,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         dealsPerEnv[workerName] = {
           timestamp: new Date().toISOString(),
           definition: appCID,
-          chainNetwork,
+          chainNetwork: contractsENV,
           chainNetworkId,
           dealIdOriginal: previouslyDeployedDeal.dealIdOriginal,
           dealId: previouslyDeployedDeal.dealId,
@@ -221,7 +221,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       );
 
       const dealIdOriginal = await dealCreate({
-        chainNetwork,
+        contractsENV,
         privKey: flags["priv-key"],
         appCID,
         minWorkers,
@@ -233,7 +233,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       if (flags["auto-match"]) {
         dbg("start matching");
-        await match(chainNetwork, flags["priv-key"], dealIdOriginal);
+        await match(contractsENV, flags["priv-key"], dealIdOriginal);
         dbg("done matching");
       }
 
@@ -255,7 +255,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         timestamp,
         dealIdOriginal,
         dealId: dealIdOriginal.slice(2).toLowerCase(),
-        chainNetwork,
+        chainNetwork: contractsENV,
         chainNetworkId,
       };
 

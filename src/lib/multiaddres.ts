@@ -39,9 +39,9 @@ import {
   FLUENCE_ENVS,
   isFluenceEnv,
   type FluenceEnv,
-  NETWORK_NAME,
   type PublicFluenceEnv,
   WEB_SOCKET_PORT_START,
+  CONTRACTS_ENV,
 } from "./const.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { commaSepStrToArr, jsonStringify } from "./helpers/utils.js";
@@ -176,7 +176,7 @@ export async function ensureCustomAddrsAndPeerIds(
 
   const contractsEnv = await list({
     message: "Select contracts environment for your custom network",
-    options: [...NETWORK_NAME],
+    options: [...CONTRACTS_ENV],
     oneChoiceMessage: (): never => {
       throw new Error("Unreachable: only one contracts env");
     },

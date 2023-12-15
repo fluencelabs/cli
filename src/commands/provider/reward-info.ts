@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -23,7 +24,6 @@ import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
-import { DealClient } from "@fluencelabs/deal-aurora";
 
 export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   static override hidden = true;
@@ -57,8 +57,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
     const unitId =
       args["UNIT-ID"] ?? (await input({ message: "Enter unit id" }));
 
-
-    const dealClient = new DealClient(await getProvider(network), network);
+    const dealClient = new DealClient(getProvider(network), network);
     const deal = dealClient.getDeal(dealAddress);
 
     const rewardAmount = await deal.getRewardAmount(unitId);

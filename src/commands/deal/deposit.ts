@@ -84,7 +84,6 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
 
     const tx = await deal.deposit(amount);
 
-
     await waitTx(tx);
 
     color.green(`Tokens were deposited to the deal ${dealAddress}`);

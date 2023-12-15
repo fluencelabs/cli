@@ -46,8 +46,7 @@ export default class Info extends BaseCommand<typeof Info> {
 
     const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
 
-
-    const dealClient = new DealClient(await getProvider(network), network);
+    const dealClient = new DealClient(getProvider(network), network);
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));

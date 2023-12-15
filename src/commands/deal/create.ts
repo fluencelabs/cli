@@ -72,7 +72,7 @@ export default class Create extends BaseCommand<typeof Create> {
       pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
       effectors: [],
       privKey: flags["priv-key"],
-      chainNetwork: await ensureChainNetwork(flags.env, maybeFluenceConfig),
+      contractsENV: await ensureChainNetwork(flags.env, maybeFluenceConfig),
     });
 
     commandObj.logToStderr(
