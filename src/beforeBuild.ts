@@ -27,6 +27,7 @@ import {
   FS_OPTIONS,
   NODE_MODULES_DIR_NAME,
 } from "./lib/const.js";
+import { runNpm } from "./lib/npm.js";
 import { versions } from "./versions.js";
 
 const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
@@ -37,6 +38,13 @@ await writeFile(
   JSON.stringify({ dependencies: versions.npm }, null, 2),
   FS_OPTIONS,
 );
+
+await runNpm({
+  args: ["i"],
+  options: {
+    cwd: aquaDependenciesDirPath,
+  },
+});
 
 const VERSIONS_DIR_PATH = join("src", "versions");
 const SRC_LIB_PATH = join("src", "lib");

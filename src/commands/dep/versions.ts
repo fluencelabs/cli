@@ -54,9 +54,9 @@ export default class Versions extends BaseCommand<typeof Versions> {
           {},
           {
             "cli version": commandObj.config.version,
-            "default npm dependencies. Can installed with 'fluence dep npm install <name>@<version>'":
+            [`default ${depInstallCommandExplanation}`]:
               getRecommendedDependencies("npm"),
-            "default cargo dependencies. Can be overridden with 'fluence dep cargo install <name>@<version>'":
+            [`default ${marineAndMreplExplanation}`]:
               getRecommendedDependencies("cargo"),
           },
         ),
@@ -73,12 +73,14 @@ export default class Versions extends BaseCommand<typeof Versions> {
           [`${CLI_NAME_FULL} version`]: commandObj.config.version,
           "nox version": versions["nox"],
           "rust toolchain": versions["rust-toolchain"],
-          [`aqua dependencies that you can install with \`${CLI_NAME} dep npm i <name>@<version>\``]:
+          [depInstallCommandExplanation]:
             maybeFluenceConfig === null
               ? getRecommendedDependencies("npm")
               : maybeFluenceConfig.dependencies?.npm ?? {},
-          [`cargo dependencies that can be overridden with \`${CLI_NAME} dep cargo install <name>@<version>\``]:
-            await resolveCargoDependencies(maybeFluenceConfig, true),
+          [marineAndMreplExplanation]: await resolveCargoDependencies(
+            maybeFluenceConfig,
+            true,
+          ),
           "internal dependencies": filterOutNonFluenceDependencies(
             CLIPackageJSON.dependencies,
           ),
@@ -103,3 +105,6 @@ const filterOutNonFluenceDependencies = (
     }),
   );
 };
+
+const depInstallCommandExplanation = `aqua dependencies that you can install using '${CLI_NAME} dep npm i <name>@<version>'`;
+const marineAndMreplExplanation = `marine and mrepl dependencies that can be overridden using '${CLI_NAME} dep cargo i <name>@<version>'`;

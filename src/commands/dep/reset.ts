@@ -16,7 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CLI_NAME_FULL, fluenceCargoDependencies } from "../../lib/const.js";
+import { CLI_NAME_FULL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { versions } from "../../versions.js";
 
@@ -34,37 +34,14 @@ export default class Reset extends BaseCommand<typeof Reset> {
       commandObj.error("Not a fluence project");
     }
 
-    maybeFluenceConfig.dependencies = await removeRecommendedDependencies(
-      maybeFluenceConfig.dependencies,
-    );
+    maybeFluenceConfig.dependencies = {
+      npm: {
+        ...maybeFluenceConfig.dependencies?.npm,
+        ...versions.npm,
+      },
+    };
 
     await maybeFluenceConfig.$commit();
     commandObj.log("successfully reset project's dependency versions");
   }
 }
-
-const removeRecommendedDependencies = async ({
-  npm = {},
-  cargo = {},
-}: {
-  npm?: Record<string, string>;
-  cargo?: Record<string, string>;
-} = {}) => {
-  const omit = (await import("lodash-es/omit.js")).default;
-  const resetCargoDependencies = omit(cargo, fluenceCargoDependencies);
-
-  const resetCargoDependenciesOrUndefined =
-    Object.keys(resetCargoDependencies).length > 0
-      ? resetCargoDependencies
-      : undefined;
-
-  return {
-    npm: {
-      ...npm,
-      ...versions.npm,
-    },
-    ...(resetCargoDependenciesOrUndefined === undefined
-      ? {}
-      : { cargo: resetCargoDependenciesOrUndefined }),
-  };
-};

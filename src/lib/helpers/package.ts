@@ -118,52 +118,15 @@ const updateFluenceConfigIfVersionChanged = async ({
   await fluenceConfig.$commit();
 };
 
-type UpdateUserConfigIfVersionChangedArgs = {
-  name: string;
-  version: string;
-  packageManager: PackageManager;
-};
-
-const updateUserConfigIfVersionChanged = async ({
-  name,
-  version,
-  packageManager,
-}: UpdateUserConfigIfVersionChangedArgs): Promise<void> => {
-  const currentlyUsedVersion = getCurrentlyUsedVersion(
-    packageManager,
-    userConfig,
-    name,
-  );
-
-  if (version === currentlyUsedVersion) {
-    return;
-  }
-
-  if (userConfig.dependencies === undefined) {
-    userConfig.dependencies = {};
-  }
-
-  const dependenciesForPackageManager =
-    userConfig.dependencies[packageManager] ?? {};
-
-  dependenciesForPackageManager[name] = version;
-  userConfig.dependencies[packageManager] = dependenciesForPackageManager;
-
-  await userConfig.$commit();
-};
-
 export const updateConfigsIfVersionChanged = async ({
-  global,
   maybeFluenceConfig,
   ...restArgs
-}: UpdateFluenceConfigIfVersionChangedArgs & {
-  global: boolean;
-}): Promise<void> => {
-  if (global) {
-    await updateUserConfigIfVersionChanged(restArgs);
-  } else if (maybeFluenceConfig !== null) {
-    const fluenceConfig = maybeFluenceConfig;
-    await updateFluenceConfigIfVersionChanged({ ...restArgs, fluenceConfig });
+}: UpdateFluenceConfigIfVersionChangedArgs): Promise<void> => {
+  if (maybeFluenceConfig !== null) {
+    await updateFluenceConfigIfVersionChanged({
+      ...restArgs,
+      fluenceConfig: maybeFluenceConfig,
+    });
   }
 };
 

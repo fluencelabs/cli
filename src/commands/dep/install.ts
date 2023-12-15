@@ -52,8 +52,6 @@ export default class Install extends BaseCommand<typeof Install> {
       force: flags.force,
     });
 
-    commandObj.logToStderr(
-      "cargo and aqua dependencies successfully installed",
-    );
+    commandObj.logToStderr("Dependencies successfully installed");
   }
 }

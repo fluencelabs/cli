@@ -332,7 +332,6 @@ const tryDownloadingBinary = async ({
 type CargoDependencyArg = {
   nameAndVersion: string;
   maybeFluenceConfig: FluenceConfig | null;
-  global?: boolean;
   force?: boolean;
   toolchain?: string | undefined;
   explicitInstallation?: boolean;
@@ -341,7 +340,6 @@ type CargoDependencyArg = {
 export const ensureCargoDependency = async ({
   nameAndVersion,
   maybeFluenceConfig,
-  global = true,
   force = false,
   toolchain: toolchainFromArgs,
   explicitInstallation = false,
@@ -407,7 +405,6 @@ export const ensureCargoDependency = async ({
     maybeFluenceConfig,
     name,
     version,
-    global,
     packageManager: "cargo",
   });
 

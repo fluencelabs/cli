@@ -23,7 +23,7 @@ import { npmInstall } from "../../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dep:npm:i"];
-  static override description = `Install project aqua dependencies (currently npm is used under the hood to installing aqua dependencies)`;
+  static override description = `Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

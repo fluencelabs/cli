@@ -115,7 +115,7 @@ export async function getLatestVersionOfNPMDependency(
   }
 }
 
-async function runNpm(args: Omit<ExecPromiseArg, "command">) {
+export async function runNpm(args: Omit<ExecPromiseArg, "command">) {
   const nodeModulesPath = (await import("node_modules-path")).default();
   const npmExecutablePath = join(nodeModulesPath, "npm", "index.js");
   const nodeExecutablePath = join(nodeModulesPath, "..", "bin", "node");
@@ -144,13 +144,13 @@ function assertDependenciesPresent(
 }
 
 type NpmInstallArgs = {
-  packageNameAndVersion?: string | undefined;
   fluenceConfig: FluenceConfig;
+  packageNameAndVersion?: string | undefined;
 };
 
 export async function npmInstall({
-  packageNameAndVersion,
   fluenceConfig,
+  packageNameAndVersion,
 }: NpmInstallArgs) {
   assertDependenciesPresent(fluenceConfig);
 
