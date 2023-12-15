@@ -42,7 +42,6 @@ import {
 } from "../src/lib/setupEnvironment.js";
 import { assertHasKey } from "../src/lib/typeHelpers.js";
 
-
 export const fluenceEnv = process.env[FLUENCE_ENV];
 
 type CliArg = {

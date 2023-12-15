@@ -71,7 +71,6 @@ service NewService("${WD_NEW_SERVICE_NAME}"):
 ${WD_NEW_SERVICE_2_INTERFACE}
 `;
 
-
 type WorkerServices = {
   host_id: string;
   services: string[];

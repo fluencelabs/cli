@@ -21,7 +21,7 @@ import {
   DOT_FLUENCE_DIR_NAME,
   SECRETS_DIR_NAME,
   TEMPLATES,
-  TMP_DIR_NAME
+  TMP_DIR_NAME,
 } from "../src/lib/const.js";
 import "../src/lib/setupEnvironment.js";
 
@@ -30,7 +30,7 @@ import {
   fluenceEnv,
   initFirstTime,
   NO_PROJECT_TEST_NAME,
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
 } from "./helpers.js";
 
 /**

@@ -16,7 +16,7 @@
 
 import {
   fluence,
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
 } from "./helpers.js";
 
 if (process.env.CI === "false") {
