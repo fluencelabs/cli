@@ -499,7 +499,7 @@ const fluenceRun = async (args: RunArgs) => {
     config: {},
     peer: Fluence.getClient(),
     args: Object.fromEntries(runDataResults),
-    fireAndForget: returnTypeVoid
+    fireAndForget: returnTypeVoid,
   });
 
   const returnSchema =
