@@ -489,11 +489,15 @@ const fluenceRun = async (args: RunArgs) => {
 
   await initFluenceClient(args, args.maybeFluenceConfig);
 
+  const { codomain } = functionCall.funcDef.arrow;
+  const returnTypeVoid = codomain.tag === "nil" || codomain.items.length === 0;
+
   const result = await callAquaFunction({
     script: functionCall.script,
     config: {},
     peer: Fluence.getClient(),
     args: Object.fromEntries(runDataResults),
+    fireAndForget: returnTypeVoid,
   });
 
   const returnSchema =
