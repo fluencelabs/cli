@@ -587,10 +587,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@npm:0.13.1-main-f7bfa83-2467-1":
-  version: 0.13.1-main-f7bfa83-2467-1
-  resolution: "@fluencelabs/aqua-api@npm:0.13.1-main-f7bfa83-2467-1"
-  checksum: 43d99e45aec68c797fd2be4765ae65a5a58ba1c0b7c073ab60ac8d4c6513da0a1fb8439176f4ad24d902606d48bd88cc8b912d76487456857ee2aeea899e9e38
+"@fluencelabs/aqua-api@npm:0.13.2":
+  version: 0.13.2
+  resolution: "@fluencelabs/aqua-api@npm:0.13.2"
+  checksum: d671c0416f9c892fe599c2a8babfb8209236dcd1a6e8d4102d83de38f0efcaa1e9fb724cfd86a03372497a41ac84afd165c51ae4ae972874d04612b74af4bb80
   languageName: node
   linkType: hard
 
@@ -615,12 +615,12 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
-    "@fluencelabs/aqua-api": 0.13.1-main-f7bfa83-2467-1
+    "@fluencelabs/aqua-api": 0.13.2
     "@fluencelabs/aqua-to-js": 0.3.0
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.5.3
-    "@fluencelabs/npm-aqua-compiler": 0.0.0-DXJ-566-4ccdf70-2144-1
+    "@fluencelabs/npm-aqua-compiler": 0.0.2
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -782,13 +782,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/npm-aqua-compiler@npm:0.0.0-DXJ-566-4ccdf70-2144-1":
-  version: 0.0.0-DXJ-566-4ccdf70-2144-1
-  resolution: "@fluencelabs/npm-aqua-compiler@npm:0.0.0-DXJ-566-4ccdf70-2144-1"
+"@fluencelabs/npm-aqua-compiler@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@fluencelabs/npm-aqua-compiler@npm:0.0.2"
   dependencies:
     "@npmcli/arborist": ^7.2.1
     treeverse: 3.0.0
-  checksum: 3aa117e595e829b59dd393113b75dddf9627ed54cd185c24db55bd8995525254e27c5ec94c1ae6edd0d442c2a1bc27c3229dd4576a091da74829408eb92f62af
+  checksum: ec08ec984e21cb63fc20eb34b05bc062d49919723549cc61e1d3622695d3dec6cd25f0518095dd378237eaaa732850e432d8ea39dc0e1a3d06f8dfcde80460e3
   languageName: node
   linkType: hard
 
