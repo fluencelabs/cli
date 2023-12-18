@@ -68,7 +68,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   });
 
   const dealId = res
-    .split("deal: https://mumbai.polygonscan.com/address/")[0]
+    .split("deal: https://mumbai.polygonscan.com/address/")[1]
     ?.split("\n")[0];
 
   assert(dealId);
