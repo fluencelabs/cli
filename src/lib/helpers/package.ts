@@ -22,7 +22,6 @@ import { color } from "@oclif/color";
 
 import { versions } from "../../versions.js";
 import { commandObj } from "../commandObj.js";
-import { userConfig } from "../configs/globalConfigs.js";
 import type {
   FluenceConfig,
   FluenceConfigReadonly,
@@ -36,14 +35,11 @@ import {
   FLUENCE_CONFIG_FILE_NAME,
   fluenceCargoDependencies,
   fluenceNPMDependencies,
-  isFluenceCargoDependency,
 } from "../const.js";
 import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceTmpCargoDir,
 } from "../paths.js";
-
-import { isExactVersion } from "./validations.js";
 
 const packageManagers = ["cargo"] as const;
 type PackageManager = (typeof packageManagers)[number];
@@ -128,60 +124,6 @@ export const updateConfigsIfVersionChanged = async ({
       fluenceConfig: maybeFluenceConfig,
     });
   }
-};
-
-type ResolveVersionArg = {
-  name: string;
-  maybeVersion: string | undefined;
-  packageManager: PackageManager;
-  maybeFluenceConfig: FluenceConfig | null;
-};
-
-export const resolveVersionToInstall = async ({
-  name,
-  maybeVersion,
-  packageManager,
-  maybeFluenceConfig,
-}: ResolveVersionArg): Promise<
-  | {
-      versionToInstall: string;
-    }
-  | {
-      maybeVersionToCheck: string | undefined;
-    }
-> => {
-  if (typeof maybeVersion === "string") {
-    if (!(await isExactVersion(maybeVersion))) {
-      return {
-        maybeVersionToCheck: maybeVersion,
-      };
-    }
-
-    return {
-      versionToInstall: maybeVersion,
-    };
-  }
-
-  const maybeRecommendedVersion = (() => {
-    if (isFluenceCargoDependency(name)) {
-      return versions.cargo[name];
-    } else {
-      return undefined;
-    }
-  })();
-
-  const maybeKnownVersion =
-    maybeFluenceConfig?.dependencies?.[packageManager]?.[name] ??
-    userConfig.dependencies?.[packageManager]?.[name] ??
-    maybeRecommendedVersion;
-
-  if (typeof maybeKnownVersion === "string") {
-    return {
-      versionToInstall: maybeKnownVersion,
-    };
-  }
-
-  return { maybeVersionToCheck: undefined };
 };
 
 const dependenciesPathsGettersMap: Record<

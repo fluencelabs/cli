@@ -28,6 +28,7 @@ import {
   MARINE_CARGO_DEPENDENCY,
   MREPL_CARGO_DEPENDENCY,
   RUST_WASM32_WASI_TARGET,
+  isFluenceCargoDependency,
 } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
@@ -36,12 +37,12 @@ import {
   handleInstallation,
   resolveCargoDependencies,
   resolveDependencyDirPathAndTmpPath,
-  resolveVersionToInstall,
   splitPackageNameAndVersion,
   updateConfigsIfVersionChanged,
 } from "./helpers/package.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { jsonStringify } from "./helpers/utils.js";
+import { isExactVersion } from "./helpers/validations.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -347,17 +348,12 @@ export const ensureCargoDependency = async ({
   await ensureRust();
   const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
 
-  const resolveVersionToInstallResult = await resolveVersionToInstall({
-    name,
-    maybeVersion,
-    packageManager: "cargo",
-    maybeFluenceConfig,
-  });
-
   const version =
-    "versionToInstall" in resolveVersionToInstallResult
-      ? resolveVersionToInstallResult.versionToInstall
-      : await getLatestVersionOfCargoDependency(name);
+    (await resolveVersionToInstall({
+      name,
+      maybeVersion,
+      maybeFluenceConfig,
+    })) ?? (await getLatestVersionOfCargoDependency(name));
 
   const toolchain =
     toolchainFromArgs ??
@@ -434,3 +430,28 @@ export const installAllCargoDependencies = async ({
     });
   }
 };
+
+type ResolveVersionArg = {
+  name: string;
+  maybeVersion: string | undefined;
+  maybeFluenceConfig: FluenceConfig | null;
+};
+
+async function resolveVersionToInstall({
+  name,
+  maybeVersion,
+  maybeFluenceConfig,
+}: ResolveVersionArg): Promise<string | undefined> {
+  if (typeof maybeVersion === "string") {
+    return (await isExactVersion(maybeVersion)) ? maybeVersion : undefined;
+  }
+
+  const maybeRecommendedVersion = isFluenceCargoDependency(name)
+    ? versions.cargo[name]
+    : undefined;
+
+  const maybeKnownVersion =
+    maybeFluenceConfig?.dependencies?.cargo?.[name] ?? maybeRecommendedVersion;
+
+  return maybeKnownVersion;
+}
