@@ -15,22 +15,13 @@
  */
 
 import {
-  DEBUG_COUNTLY,
-  FLUENCE_ENV,
-  FLUENCE_USER_DIR,
-  CI,
-} from "../src/lib/setupEnvironment.js";
+  fluence,
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+} from "./helpers.js";
 
-import { ContractsENV } from "./lib/const.js";
-
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      [FLUENCE_ENV]: ContractsENV;
-      [DEBUG_COUNTLY]: "true" | "false";
-      [FLUENCE_USER_DIR]?: string;
-      [CI]: "true" | "false";
-      PATH: string;
-    }
-  }
+if (process.env.CI === "false") {
+  await fluence({
+    args: ["local", "down"],
+    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+  });
 }

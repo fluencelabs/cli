@@ -37,12 +37,13 @@ export default class PS extends BaseCommand<typeof PS> {
       );
     }
 
-    await dockerCompose({
+    const psResult = await dockerCompose({
       args: ["ps"],
-      printOutput: true,
       options: {
         cwd: dockerComposeConfig.$getDirPath(),
       },
     });
+
+    commandObj.log(psResult);
   }
 }

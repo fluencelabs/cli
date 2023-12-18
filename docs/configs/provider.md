@@ -9,7 +9,7 @@ Defines config used for provider set up
 | `computePeers` | [object](#computepeers) | **Yes**  | A map with compute peer names as keys and compute peers as values                                                                        |
 | `env`          | string                  | **Yes**  | Defines the the environment for which you intend to generate nox configuration Possible values are: `kras`, `testnet`, `stage`, `local`. |
 | `offers`       | [object](#offers)       | **Yes**  | A map with offer names as keys and offers as values                                                                                      |
-| `version`      | number                  | **Yes**  |                                                                                                                                          |
+| `version`      | number                  | **Yes**  | Config version                                                                                                                           |
 | `nox`          | [object](#nox)          | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config                                          |
 
 ## computePeers
@@ -43,7 +43,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
-| `rawConfig`      | string                    | No       | Raw TOML config string to append to the generated config. Default: empty string                                   |
+| `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
@@ -97,7 +97,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
-| `rawConfig`      | string                    | No       | Raw TOML config string to append to the generated config. Default: empty string                                   |
+| `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |

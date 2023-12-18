@@ -26,21 +26,40 @@ import {
 import "../src/lib/setupEnvironment.js";
 
 import {
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-  fluenceEnv,
   fluence,
+  fluenceEnv,
   initFirstTime,
   NO_PROJECT_TEST_NAME,
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
 } from "./helpers.js";
 
 /**
- * IMPORTANT: this file is executed before all tests
+ * IMPORTANT: this file is executed before all tests,
  * so it must not export anything that can be imported in tests
  * because it will execute a second time in this case
  */
 
-// eslint-disable-next-line no-console
-console.log("Setting up tests...");
+console.log("\nSetting up tests...");
+
+await fluence({
+  args: ["--version"],
+});
+
+try {
+  const localPsResult = await fluence({
+    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+    args: ["local", "ps"],
+  });
+
+  if (localPsResult.includes("fluence")) {
+    await fluence({
+      cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+      args: ["local", "down"],
+    });
+  }
+} catch (e) {
+  console.log(e);
+}
 
 await fluence({
   args: ["dep", "i"],
@@ -86,5 +105,4 @@ await Promise.all(
   ),
 );
 
-// eslint-disable-next-line no-console
-console.log("Tests are ready to run!");
+console.log("\nTests are ready to run!");
