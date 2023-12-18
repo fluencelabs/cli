@@ -15,16 +15,21 @@
  */
 
 import { access } from "node:fs/promises";
+import { dirname } from "node:path";
+import { cwd } from "node:process";
 
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 
 import type { FluenceConfig } from "../configs/project/fluence.js";
+import { PACKAGE_JSON_FILE_NAME } from "../const.js";
 import { builtInAquaDependenciesDirPath } from "../npm.js";
 import {
   getFluenceAquaDir,
   ensureFluenceAquaDependenciesPath,
   projectRootDir,
 } from "../paths.js";
+
+import { recursivelyFindFile } from "./recursivelyFindFile.js";
 
 type GetAquaImportsArg = {
   maybeFluenceConfig: FluenceConfig | null;
@@ -56,9 +61,22 @@ export async function getAquaImports({
   return gatherImportsFromNpm({
     npmProjectDirPath:
       maybeFluenceConfig === null
-        ? builtInAquaDependenciesDirPath
+        ? await npmProjectDirPath()
         : await ensureFluenceAquaDependenciesPath(),
     globalImports,
     aquaToCompileDirPath: projectRootDir,
   });
+}
+
+async function npmProjectDirPath() {
+  const packageJSONPath = await recursivelyFindFile(
+    PACKAGE_JSON_FILE_NAME,
+    cwd(),
+  );
+
+  if (packageJSONPath === null) {
+    return builtInAquaDependenciesDirPath;
+  }
+
+  return dirname(packageJSONPath);
 }
