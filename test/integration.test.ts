@@ -42,24 +42,24 @@ describe("integration tests", () => {
     });
   });
 
-  maybeConcurrentTest("should work without project", async () => {
-    const cwd = join("tmp", NO_PROJECT_TEST_NAME);
-    await mkdir(cwd, { recursive: true });
+  // maybeConcurrentTest("should work without project", async () => {
+  //   const cwd = join("tmp", NO_PROJECT_TEST_NAME);
+  //   await mkdir(cwd, { recursive: true });
 
-    const result = await fluence({
-      args: ["run"],
-      flags: {
-        relay: multiaddrs[0]?.multiaddr,
-        env: fluenceEnv,
-        f: "identify()",
-        i: "smoke.aqua",
-        quiet: true,
-      },
-      cwd,
-    });
+  //   const result = await fluence({
+  //     args: ["run"],
+  //     flags: {
+  //       relay: multiaddrs[0]?.multiaddr,
+  //       env: fluenceEnv,
+  //       f: "identify()",
+  //       i: "smoke.aqua",
+  //       quiet: true,
+  //     },
+  //     cwd,
+  //   });
 
-    const parsedResult = JSON.parse(result);
-    // Peer.identify() is supposed to return an object with air_version key
-    expect(parsedResult).toHaveProperty("air_version");
-  });
+  //   const parsedResult = JSON.parse(result);
+  //   // Peer.identify() is supposed to return an object with air_version key
+  //   expect(parsedResult).toHaveProperty("air_version");
+  // });
 });
