@@ -206,7 +206,7 @@ export async function npmUninstall({
   const [packageName] = splitPackageNameAndVersion(packageNameAndVersion);
 
   await runNpm({
-    args: ["un", packageNameAndVersion],
+    args: ["uninstall", packageNameAndVersion],
     options: {
       cwd: await ensureFluenceAquaDependenciesPath(),
     },
