@@ -347,7 +347,17 @@
         "error",
         "./resources/license-header.js"
       ]
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "test/**/*"
+        ],
+        "rules": {
+          "no-console": "off"
+        }
+      }
+    ]
   },
   "eslintIgnore": [
     "/dist",

@@ -15,10 +15,20 @@
  */
 
 import type { Command } from "@oclif/core";
+import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 export type CommandObj = InstanceType<typeof Command>;
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-export let commandObj: CommandObj;
+export let commandObj: CommandObj =
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  {
+    log(msg: string) {
+      // eslint-disable-next-line no-console
+      console.log(msg);
+    },
+    error(msg: string): never {
+      throw new CLIError(msg);
+    },
+  } as CommandObj;
 export let isInteractive: boolean;
 
 export const setCommandObjAndIsInteractive = (
