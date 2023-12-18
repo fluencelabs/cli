@@ -54,7 +54,25 @@ export function stringifyUnknown(unknown: unknown): string {
     }
 
     if (unknown instanceof Error) {
-      return jsonStringify(unknown, Object.getOwnPropertyNames(unknown));
+      const errorMessage =
+        typeof unknown.stack === "string" &&
+        unknown.stack.includes(unknown.message)
+          ? unknown.stack
+          : `${unknown.message}${
+              unknown.stack === undefined ? "" : `\n${unknown.stack}`
+            }`;
+
+      const otherErrorProperties = Object.getOwnPropertyNames(unknown).filter(
+        (p) => {
+          return p !== "message" && p !== "stack";
+        },
+      );
+
+      return `${errorMessage}${
+        otherErrorProperties.length > 0
+          ? `\n${jsonStringify(unknown, otherErrorProperties)}`
+          : ""
+      }`;
     }
 
     if (unknown === undefined) {
