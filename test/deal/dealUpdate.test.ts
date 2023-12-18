@@ -17,12 +17,6 @@
 import assert from "node:assert";
 import { join } from "node:path";
 
-import { CLIError } from "@oclif/core/lib/errors/index.js";
-
-import {
-  type CommandObj,
-  setCommandObjAndIsInteractive,
-} from "../../src/lib/commandObj.js";
 import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
 import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../const.js";
 import { fluence, init } from "../helpers.js";
@@ -35,21 +29,6 @@ import {
 } from "../sharedSteps.js";
 
 describe("Deal update tests", () => {
-  beforeAll(() => {
-    setCommandObjAndIsInteractive(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      {
-        log(msg: string) {
-          console.log(msg);
-        },
-        error(msg: string) {
-          throw new CLIError(msg);
-        },
-      } as CommandObj,
-      false,
-    );
-  });
-
   // TODO: test skipped until NET-649 is released
   test.skip("should update deal after new spell is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");

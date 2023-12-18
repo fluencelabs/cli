@@ -17,13 +17,6 @@
 import { mkdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
-import { CLIError } from "@oclif/core/lib/errors/index.js";
-
-import {
-  type CommandObj,
-  setCommandObjAndIsInteractive,
-} from "../src/lib/commandObj.js";
-
 import {
   fluence,
   fluenceEnv,
@@ -36,21 +29,6 @@ import {
 const multiaddrs = await getMultiaddrs();
 
 describe("integration tests", () => {
-  beforeAll(() => {
-    setCommandObjAndIsInteractive(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      {
-        log(msg: string) {
-          console.log(msg);
-        },
-        error(msg: string) {
-          throw new CLIError(msg);
-        },
-      } as CommandObj,
-      false,
-    );
-  });
-
   maybeConcurrentTest("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await init(cwd, "minimal");

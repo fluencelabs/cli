@@ -17,12 +17,6 @@
 import assert from "node:assert";
 import { join, relative } from "node:path";
 
-import { CLIError } from "@oclif/core/lib/errors/index.js";
-
-import {
-  type CommandObj,
-  setCommandObjAndIsInteractive,
-} from "../../src/lib/commandObj.js";
 import { initServiceConfig } from "../../src/lib/configs/project/service.js";
 import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
 import { getServicesDir } from "../../src/lib/paths.js";
@@ -37,21 +31,6 @@ import {
 } from "../sharedSteps.js";
 
 describe("Deal deploy tests", () => {
-  beforeAll(() => {
-    setCommandObjAndIsInteractive(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      {
-        log(msg: string) {
-          console.log(msg);
-        },
-        error(msg: string) {
-          throw new CLIError(msg);
-        },
-      } as CommandObj,
-      false,
-    );
-  });
-
   maybeConcurrentTest(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {

@@ -18,12 +18,6 @@ import assert from "node:assert";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { CLIError } from "@oclif/core/lib/errors/index.js";
-
-import {
-  type CommandObj,
-  setCommandObjAndIsInteractive,
-} from "../../src/lib/commandObj.js";
 import {
   DEFAULT_WORKER_NAME,
   DOT_FLUENCE_DIR_NAME,
@@ -71,21 +65,6 @@ const peerIds = (await getMultiaddrs())
   .sort();
 
 describe("integration tests", () => {
-  beforeAll(() => {
-    setCommandObjAndIsInteractive(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      {
-        log(msg: string) {
-          console.log(msg);
-        },
-        error(msg: string) {
-          throw new CLIError(msg);
-        },
-      } as CommandObj,
-      false,
-    );
-  });
-
   maybeConcurrentTest(
     "should deploy workers with spell and service, resolve, run services on them and remove them",
     async () => {
