@@ -367,7 +367,7 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
   maybeFluenceConfig: FluenceConfig | null;
   funcCall: string;
   filePath: string;
-  import: undefined | string[];
+  import: string[] | undefined;
   logLevelCompiler: AquaLogLevel | undefined;
   runData: RunData | undefined;
 };
