@@ -59,8 +59,23 @@ export async function getFluenceConfig(cwd: string) {
 }
 
 export async function deployDealAndWaitUntilDeployed(cwd: string) {
-  await fluence({
+  const res = await fluence({
     args: ["deal", "deploy"],
+    flags: {
+      "priv-key": LOCAL_NET_DEFAULT_WALLET_KEY,
+    },
+    cwd,
+  });
+
+  const dealId = res
+    .split("deal: https://mumbai.polygonscan.com/address/")[0]
+    ?.split("\n")[0];
+
+  assert(dealId);
+  console.log(dealId);
+
+  await fluence({
+    args: ["deal", "deposit", dealId, "100000000000000000000"],
     flags: {
       "priv-key": LOCAL_NET_DEFAULT_WALLET_KEY,
     },
