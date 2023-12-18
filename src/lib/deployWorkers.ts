@@ -140,7 +140,7 @@ type PrepareForDeployArg = {
   flags: {
     import: Array<string> | undefined;
     "no-build": boolean;
-    "marine-build-args": undefined | string;
+    "marine-build-args": string | undefined;
   };
   fluenceEnv: FluenceEnv;
   initPeerId?: string;
