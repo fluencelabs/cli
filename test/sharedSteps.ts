@@ -82,7 +82,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   );
 }
 
-const waitUntilDealDeployed = async (cwd: string) => {
+async function waitUntilDealDeployed(cwd: string) {
   const result = await fluence({
     args: ["run"],
     flags: {
@@ -142,7 +142,7 @@ const waitUntilDealDeployed = async (cwd: string) => {
 
   // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
   expect(res).toEqual(expected);
-};
+}
 
 export async function createSpellAndAddToDeal(
   cwd: string,
@@ -241,7 +241,7 @@ export async function waitUntilShowSubnetReturnsSpell(
   );
 }
 
-export const validateWorkerServices = new Ajv.default({
+const validateWorkerServices = new Ajv.default({
   code: { esm: true },
 }).compile(workerServiceSchema);
 
