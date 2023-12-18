@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
-import {
-  fluence,
-  fluenceEnv,
-  getMultiaddrs,
-  init,
-  maybeConcurrentTest,
-  NO_PROJECT_TEST_NAME,
-} from "./helpers.js";
+import { fluence, init, maybeConcurrentTest } from "./helpers.js";
 
-const multiaddrs = await getMultiaddrs();
+// const multiaddrs = await getMultiaddrs();
 
 describe("integration tests", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
