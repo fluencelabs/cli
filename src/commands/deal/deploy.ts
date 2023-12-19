@@ -44,6 +44,7 @@ import {
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import {
   disconnectFluenceClient,
@@ -52,7 +53,6 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { resolveFluenceEnv } from "../../lib/multiaddres.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -88,7 +88,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     );
 
     const contractsENV = await ensureChainNetwork(flags.env, fluenceConfig);
-    const chainNetworkId = DEAL_CONFIG[contractsENV]!.id;
+    const chainNetworkId = DEAL_CONFIG[contractsENV].id;
     const workersConfig = await initNewWorkersConfig();
 
     const aquaImports = await ensureAquaImports({
@@ -154,6 +154,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         minWorkers = targetWorkers,
         pricePerWorkerEpoch = PRICE_PER_EPOCH_DEFAULT,
         maxWorkersPerProvider = targetWorkers,
+        effectors = [],
       } = deal;
 
       const previouslyDeployedDeal =
@@ -228,7 +229,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         targetWorkers,
         maxWorkersPerProvider,
         pricePerWorkerEpoch,
-        effectors: [],
+        effectors,
       });
 
       if (flags["auto-match"]) {

@@ -76,26 +76,6 @@ export async function addComputePeers(
           })
         : defaultName;
 
-    const peerId = await input({
-      message: `Enter id for compute peer`,
-      default: "",
-      validate: async (input: string) => {
-        if (input === "") {
-          return "Must be a non-empty string";
-        }
-
-        const [{ digest }, { base58btc }] = await Promise.all([
-          import("multiformats"),
-          // eslint-disable-next-line import/extensions
-          import("multiformats/bases/base58"),
-        ]);
-
-        digest.decode(base58btc.decode("z" + input));
-
-        return true;
-      },
-    });
-
     if (name === defaultName) {
       name = defaultName;
       computePeersCounter = computePeersCounter + 1;
@@ -165,7 +145,6 @@ export async function addComputePeers(
     });
 
     userProvidedConfig.computePeers[name] = {
-      peerId: peerId,
       capacityCommitment: {
         duration: Number(capacityCommitmentDuration),
         delegator: capacityCommitmentDelegator,

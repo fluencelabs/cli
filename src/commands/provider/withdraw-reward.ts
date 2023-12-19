@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
+import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 import { ethers } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
-import { DealClient } from "@fluencelabs/deal-aurora";
+import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   static override hidden = true;
@@ -65,7 +61,6 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
 
     const signer = await getSigner(network, privKey);
 
-
     const dealClient = new DealClient(signer, network);
     const deal = dealClient.getDeal(dealAddress);
 
@@ -74,7 +69,6 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
     const rewardAmount = await deal.getRewardAmount(unitId);
 
     const tx = await deal.withdrawRewards(unitId);
-
 
     await waitTx(tx);
 

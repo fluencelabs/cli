@@ -215,6 +215,7 @@ type Deal = {
   maxWorkersPerProvider?: number;
   pricePerWorkerEpoch?: number;
   collateralPerWorker?: number;
+  effectors?: string[];
 };
 
 type Worker = {
@@ -295,6 +296,12 @@ const dealSchemaObj = {
       default: COLLATERAL_DEFAULT,
       nullable: true,
       minimum: 1 / CURRENCY_MULTIPLIER,
+    },
+    effectors: {
+      type: "array",
+      description: "Effector to be used in the deal",
+      items: { type: "string" },
+      nullable: true,
     },
   },
   required: [],

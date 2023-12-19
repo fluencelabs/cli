@@ -239,9 +239,8 @@ const noxConfigYAMLSchema = {
 } as const satisfies JSONSchemaType<NoxConfigYAML>;
 
 type ComputePeer = {
-  peerId: string;
   capacityCommitment: CapacityCommitment;
-  computeUnits?: number;
+  computeUnits: number;
   nox?: NoxConfigYAML;
 };
 
@@ -278,8 +277,7 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
   description: "Defines a compute peer",
   additionalProperties: false,
   properties: {
-    peerId: { type: "string", nullable: false },
-    computeUnits: { type: "number", nullable: true },
+    computeUnits: { type: "number" },
     capacityCommitment: {
       type: "object",
       description: "Defines a capacity commitment",
@@ -302,7 +300,7 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
     },
     nox: noxConfigYAMLSchema,
   },
-  required: [],
+  required: ["computeUnits", "capacityCommitment"],
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -362,7 +360,6 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
           return [
             `nox-${i}`,
             {
-              peerId: "", //TODO: do we have default peerId?
               computeUnits: 1,
               capacityCommitment: {
                 duration: 1, // TODO: do we have default duration?
@@ -580,7 +577,7 @@ export async function ensureConfigToml(
     providerConfig.nox ?? {};
 
   const baseNoxConfig = mergeNoxConfigYAML(
-    await getDefaultNoxConfigYAML(providerConfig),
+    getDefaultNoxConfigYAML(providerConfig),
     providerNoxConfig,
   );
 
@@ -725,7 +722,7 @@ function getDefaultNoxConfigYAML(
         networkApiEndpoint: isLocal
           ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
           : "http://mumbai-polygon.ru:8545",
-        networkId: dealConfig!.id,
+        networkId: dealConfig.id,
         startBlock: "earliest",
         // TODO: use correct addr for env
         matcherAddress: "0x0e1F3B362E22B2Dc82C9E35d6e62998C7E8e2349",

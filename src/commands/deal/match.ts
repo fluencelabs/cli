@@ -19,9 +19,9 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { match } from "../../lib/deal.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Match extends BaseCommand<typeof Match> {
   static override hidden = true;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import assert from "assert";
+
 import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { ethers } from "ethers";
@@ -34,15 +36,12 @@ import {
   CURRENCY_MULTIPLIER,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import { getSecretKeyOrReturnExisting } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { getPeerIdFromSecretKey } from "../../lib/multiaddres.js";
 import { list, type Choices } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
-import assert from "assert";
+import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 const CAPACITY_COMMITMENT_CREATED_EVENT = "CapacityCommitmentCreated";
 export default class Register extends BaseCommand<typeof Register> {
@@ -115,36 +114,30 @@ export async function register(
 
   const PRECISION = await core.PRECISION();
 
-  const registerPeers: {
-    originPeerId: string;
-    peerId: Uint8Array;
-    unitCount: number;
-    owner: string;
-    ccDuration: number;
-    ccDelegator: string;
-    ccRewardDelegationRate: number;
-  }[] = Object.keys(providerConfig.computePeers).map((name) => {
-    const peer = providerConfig.computePeers[name];
+  const computePeersToRegister = await Promise.all(
+    Object.entries(providerConfig.computePeers).map(
+      async ([name, computePeer]) => {
+        const { secretKey } = await getSecretKeyOrReturnExisting(name);
+        const peerId = await getPeerIdFromSecretKey(secretKey);
 
-    if (peer === undefined) {
-      throw new Error(`Peer ${name} not found`);
-    }
-
-    return {
-      originPeerId: peer.peerId,
-      peerId: digest
-        .decode(base58btc.decode("z" + peer.peerId))
-        .bytes.subarray(6),
-      unitCount: peer.computeUnits!,
-      owner: ethers.ZeroAddress, //TODO: get owner for peer,
-      ccDuration: Math.floor(peer.capacityCommitment.duration * 60), //TODO: magic number
-      ccDelegator: peer.capacityCommitment.delegator,
-      ccRewardDelegationRate: Math.floor(
-        (peer.capacityCommitment.rewardDelegationRate / 100) *
-          Number(PRECISION),
-      ),
-    };
-  });
+        return {
+          name,
+          peerId,
+          peerIdUint8Arr: digest
+            .decode(base58btc.decode("z" + peerId))
+            .bytes.subarray(6),
+          unitCount: computePeer.computeUnits,
+          owner: ethers.ZeroAddress, //TODO: get owner for peer,
+          ccDuration: Math.floor(computePeer.capacityCommitment.duration * 60), //TODO: magic number
+          ccDelegator: computePeer.capacityCommitment.delegator,
+          ccRewardDelegationRate: Math.floor(
+            (computePeer.capacityCommitment.rewardDelegationRate / 100) *
+              Number(PRECISION),
+          ),
+        };
+      },
+    ),
+  );
 
   //TODO: if offer exists, update it
   const registerOfferTx = await market.registerMarketOffer(
@@ -159,9 +152,9 @@ export async function register(
     //   };
     // })
     [],
-    registerPeers.map((peer) => {
+    computePeersToRegister.map((peer) => {
       return {
-        peerId: peer.peerId,
+        peerId: peer.peerIdUint8Arr,
         unitIds: new Array(peer.unitCount).fill(0).map(() => {
           return ethers.randomBytes(32);
         }),
@@ -173,15 +166,13 @@ export async function register(
   promptConfirmTx(flags["priv-key"]);
   await waitTx(registerOfferTx);
 
-  for (const peer of registerPeers) {
-    commandObj.log(
-      color.gray(`Create capacity commitment for ${peer.originPeerId}`),
-    );
+  for (const peer of computePeersToRegister) {
+    commandObj.log(color.gray(`Create capacity commitment for ${peer.name}`));
 
     promptConfirmTx(flags["priv-key"]);
 
     const registerPeerTx = await capacity.createCapacityCommitment(
-      peer.peerId,
+      peer.peerIdUint8Arr,
       peer.ccDuration,
       peer.ccDelegator,
       peer.ccRewardDelegationRate,
@@ -198,9 +189,7 @@ export async function register(
       return true;
     });
 
-    if (log === undefined) {
-      throw new Error(`Capacity commitment created event not found.`);
-    }
+    assert(log !== undefined, "Capacity commitment created event not found.");
 
     const id: unknown = capacity.interface
       .parseLog({
@@ -209,7 +198,10 @@ export async function register(
       })
       ?.args.getValue("commitmentId");
 
-    assert(typeof id === "string");
+    assert(
+      typeof id === "string",
+      "Capacity commitment created but id not found in the event log",
+    );
 
     commandObj.log(
       color.green(

@@ -21,8 +21,8 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Create extends BaseCommand<typeof Create> {
   static override hidden = true;
@@ -54,6 +54,11 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Price per worker epoch",
       required: true,
     }),
+    effector: Flags.string({
+      description: "Effector to be used in the deal",
+      multiple: true,
+      required: true,
+    }),
     ...ENV_FLAG,
     ...PRIV_KEY_FLAG,
   };
@@ -70,7 +75,7 @@ export default class Create extends BaseCommand<typeof Create> {
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],
       pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
-      effectors: [],
+      effectors: flags.effector,
       privKey: flags["priv-key"],
       contractsENV: await ensureChainNetwork(flags.env, maybeFluenceConfig),
     });

@@ -77,7 +77,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
 
     if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
-      const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
+      const serviceGet = maybeFluenceConfig.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
       serviceOrServiceDirPathOrUrl = serviceGet;
     }

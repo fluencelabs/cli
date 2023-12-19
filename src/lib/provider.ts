@@ -23,7 +23,6 @@ import { color } from "@oclif/color";
 import { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
-import type { FluenceConfigReadonly } from "./configs/project/fluence.js";
 import {
   DEAL_CONFIG,
   CLI_CONNECTOR_URL,
@@ -31,53 +30,13 @@ import {
   WC_PROJECT_ID,
   WC_METADATA,
   type ContractsENV,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
-  CLI_NAME,
   CONTRACTS_ENV_TO_CHAIN_ID,
 } from "./const.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { resolveFluenceEnv } from "./multiaddres.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
 const KEY_QUERY_PARAM_NAME = "symKey";
-
-export async function ensureChainNetwork(
-  fluenceEnvFromFlags: string | undefined,
-  maybeFluenceConfig: FluenceConfigReadonly | null,
-): Promise<ContractsENV> {
-  const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
-
-  if (fluenceEnv !== "custom") {
-    commandObj.logToStderr(
-      `Using ${color.yellow(
-        fluenceEnv,
-      )} blockchain environment to send transactions`,
-    );
-
-    return fluenceEnv;
-  }
-
-  const customContractsEnv = maybeFluenceConfig?.customFluenceEnv?.contractsEnv;
-
-  if (customContractsEnv === undefined) {
-    commandObj.error(
-      `${color.yellow("customFluenceEnv")} is not defined in ${color.yellow(
-        maybeFluenceConfig?.$getPath() ?? FLUENCE_CONFIG_FULL_FILE_NAME,
-      )}. Please make sure it's there or choose some other fluence environment using ${color.yellow(
-        `${CLI_NAME} default env`,
-      )}`,
-    );
-  }
-
-  commandObj.logToStderr(
-    `Using ${color.yellow(
-      customContractsEnv,
-    )} blockchain environment to send transactions`,
-  );
-
-  return customContractsEnv;
-}
 
 export const getSigner = async (
   contractsENV: ContractsENV,
@@ -156,8 +115,7 @@ const getWallet = async (
   contractsENV: ContractsENV,
 ): Promise<ethers.Wallet> => {
   const { ethers } = await import("ethers");
-
-  return new ethers.Wallet(privKey, await getProvider(contractsENV));
+  return new ethers.Wallet(privKey, getProvider(contractsENV));
 };
 
 export const waitTx = async (

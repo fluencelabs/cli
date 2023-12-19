@@ -241,7 +241,7 @@ const ensureCorrectCliVersion = async (
 
   try {
     const [stableVersion, unstableVersion] = await Promise.all([
-      getLatestVersionOfNPMDependency(`${PACKAGE_NAME}`),
+      getLatestVersionOfNPMDependency(PACKAGE_NAME),
       getLatestVersionOfNPMDependency(`${PACKAGE_NAME}@unstable`),
     ]);
 

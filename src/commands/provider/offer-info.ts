@@ -21,8 +21,9 @@ import { Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG } from "../../lib/const.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
+import { getProvider } from "../../lib/provider.js";
 
 export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
   static override description = "Get info about provider";

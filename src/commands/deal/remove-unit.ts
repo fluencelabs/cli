@@ -20,14 +20,10 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
+import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   static override hidden = true;

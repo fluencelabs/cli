@@ -21,9 +21,10 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG } from "../../lib/const.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { ensureChainNetwork, getProvider } from "../../lib/provider.js";
+import { getProvider } from "../../lib/provider.js";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about provider";
