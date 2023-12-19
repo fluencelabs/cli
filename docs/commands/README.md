@@ -30,6 +30,7 @@
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence provider create-commitment`](#fluence-provider-create-commitment)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
@@ -837,6 +838,35 @@ EXAMPLES
 ```
 
 _See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/module/remove.ts)_
+
+## `fluence provider create-commitment`
+
+Create Capacity commitment
+
+```
+USAGE
+  $ fluence provider create-commitment [--no-input] [--priv-key <value>] [-n <value>] [--env <value>] [--noxes <value>] [--offer
+    <value>] [--nox-names <value>]
+
+FLAGS
+  -n, --name=<value>                          Provider config name
+      --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+      --no-input                              Don't interactively ask for any input from the user
+      --nox-names=<value>                     Comma-separated names of noxes to create capacity commitment for. Default:
+                                              all noxes in the offer
+      --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+      --offer=<offer>                         Offer from provider.yaml to use
+      --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
+                                              unsecure
+
+DESCRIPTION
+  Create Capacity commitment
+
+ALIASES
+  $ fluence provider cc
+```
+
+_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/provider/create-commitment.ts)_
 
 ## `fluence provider gen`
 
