@@ -53,6 +53,7 @@ Worker config
 | Property                | Type     | Required | Description                                                                                       |
 |-------------------------|----------|----------|---------------------------------------------------------------------------------------------------|
 | `collateralPerWorker`   | number   | No       | Collateral per worker in FL. This number is multiplied by 10^18                                   |
+| `effectors`             | string[] | No       | Effector to be used in the deal                                                                   |
 | `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                       |
 | `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                          |
 | `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FL. This number is multiplied by 10^18                                  |

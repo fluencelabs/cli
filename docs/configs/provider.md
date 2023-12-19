@@ -28,10 +28,23 @@ Defines a compute peer
 
 #### Properties
 
-| Property       | Type           | Required | Description                                                                                     |
-|----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
-| `computeUnits` | number         | No       |                                                                                                 |
-| `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
+| Property             | Type                          | Required | Description                                                                                     |
+|----------------------|-------------------------------|----------|-------------------------------------------------------------------------------------------------|
+| `capacityCommitment` | [object](#capacitycommitment) | **Yes**  | Defines a capacity commitment                                                                   |
+| `computeUnits`       | number                        | **Yes**  |                                                                                                 |
+| `nox`                | [object](#nox)                | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
+
+#### capacityCommitment
+
+Defines a capacity commitment
+
+##### Properties
+
+| Property               | Type   | Required | Description                        |
+|------------------------|--------|----------|------------------------------------|
+| `delegator`            | string | **Yes**  | Delegator address                  |
+| `duration`             | number | **Yes**  | Duration of the commitment in days |
+| `rewardDelegationRate` | number | **Yes**  | Reward delegation rate.            |
 
 #### nox
 
@@ -160,7 +173,6 @@ Defines a provider offer
 | Property                 | Type     | Required | Description                                                        |
 |--------------------------|----------|----------|--------------------------------------------------------------------|
 | `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer                      |
-| `maxCollateralPerWorker` | number   | **Yes**  | Max collateral per worker. This number is multiplied by 10^18      |
 | `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch. This number is multiplied by 10^18 |
 | `effectors`              | string[] | No       |                                                                    |
 
