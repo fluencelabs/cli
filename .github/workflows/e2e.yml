@@ -53,4 +53,4 @@ jobs:
   registry:
     needs:
       - fluence-cli
-    uses: fluencelabs/registry/.github/workflows/tests.yml@cf6e393
+    uses: fluencelabs/registry/.github/workflows/tests.yml@new-aqua-packages
