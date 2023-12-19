@@ -67,6 +67,7 @@ import {
   setProviderConfigName,
   ensureFluenceSecretsFilePath,
 } from "../../paths.js";
+import { type Choices, list } from "../../prompt.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -737,4 +738,26 @@ function getConfigName(noxName: string) {
 
 export function getConfigTomlName(noxName: string) {
   return `${getConfigName(noxName)}.${TOML_EXT}`;
+}
+
+export function promptForOffer(offers: ProviderConfigReadonly["offers"]) {
+  const options: Choices<Offer> = Object.entries(offers).map(
+    ([name, offer]) => {
+      return {
+        name,
+        value: offer,
+      };
+    },
+  );
+
+  return list({
+    message: "Select offer",
+    options,
+    oneChoiceMessage(choice) {
+      return `Select offer ${color.yellow(choice)}`;
+    },
+    onNoChoices() {
+      commandObj.error("No offers found");
+    },
+  });
 }
