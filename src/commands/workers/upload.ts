@@ -31,7 +31,6 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   ENV_FLAG_NAME,
 } from "../../lib/const.js";
-import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
@@ -72,22 +71,15 @@ export default class Upload extends BaseCommand<typeof Upload> {
     const { Fluence } = await import("@fluencelabs/js-client");
     const initPeerId = Fluence.getClient().getPeerId();
 
-    const aquaImports = await ensureAquaImports({
-      maybeFluenceConfig: fluenceConfig,
-      flags,
-    });
-
     const { prepareForDeploy } = await import("../../lib/deployWorkers.js");
     const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
-      aquaImports,
       fluenceEnv,
-      noBuild: flags["no-build"],
-      marineBuildArgs: flags["marine-build-args"],
       initPeerId,
+      flags,
     });
 
     const uploadResult = await upload(flags.tracing, uploadArg);

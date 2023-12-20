@@ -25,8 +25,6 @@ import {
   GLOBAL_CONFIG_FULL_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   DOT_FLUENCE_DIR_NAME,
-  GLOBAL_FLAG,
-  GLOBAL_FLAG_NAME,
   PACKAGE_NAME_AND_VERSION_ARG_NAME,
 } from "../../../lib/const.js";
 import { initCli } from "../../../lib/lifeCycle.js";
@@ -56,7 +54,6 @@ export default class Install extends BaseCommand<typeof Install> {
       description:
         "Force install even if the dependency/dependencies is/are already installed",
     }),
-    ...GLOBAL_FLAG,
   };
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
@@ -68,9 +65,10 @@ export default class Install extends BaseCommand<typeof Install> {
   };
 
   async run(): Promise<void> {
-    const { args, flags, maybeFluenceConfig } = await initCli(
+    const { args, flags, fluenceConfig } = await initCli(
       this,
       await this.parse(Install),
+      true,
     );
 
     const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
@@ -78,7 +76,7 @@ export default class Install extends BaseCommand<typeof Install> {
     // if packageNameAndVersion not provided just install all cargo dependencies
     if (packageNameAndVersion === undefined) {
       await installAllCargoDependencies({
-        maybeFluenceConfig,
+        maybeFluenceConfig: fluenceConfig,
         force: flags.force,
       });
 
@@ -86,19 +84,12 @@ export default class Install extends BaseCommand<typeof Install> {
       return;
     }
 
-    if (!flags.global && maybeFluenceConfig === null) {
-      return commandObj.error(
-        `Not a fluence project. If you wanted to install cargo dependencies globally for the current user, use --${GLOBAL_FLAG_NAME} flag`,
-      );
-    }
-
     await ensureCargoDependency({
       nameAndVersion: packageNameAndVersion,
-      maybeFluenceConfig,
+      maybeFluenceConfig: fluenceConfig,
       explicitInstallation: true,
       force: flags.force,
       toolchain: flags.toolchain,
-      global: flags.global,
     });
   }
 }

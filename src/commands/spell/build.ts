@@ -21,7 +21,6 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { FLUENCE_CONFIG_FULL_FILE_NAME, IMPORT_FLAG } from "../../lib/const.js";
 import { compileSpells } from "../../lib/deployWorkers.js";
-import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -48,12 +47,7 @@ export default class Build extends BaseCommand<typeof Build> {
       args["SPELL-NAMES"] ?? Object.keys(fluenceConfig.spells ?? {}).join(","),
     );
 
-    const aquaImports = await ensureAquaImports({
-      maybeFluenceConfig: fluenceConfig,
-      flags,
-    });
-
-    await compileSpells(fluenceConfig, aquaImports, spellNames);
+    await compileSpells(fluenceConfig, flags.import, spellNames);
 
     commandObj.log(
       `Compiled ${color.yellow(spellNames.join(", "))} successfully`,

@@ -21,6 +21,7 @@ import { join, relative } from "node:path";
 import { kras } from "@fluencelabs/fluence-network-environment";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import { versions } from "../../../versions.js";
@@ -675,6 +676,16 @@ deals:
     collateralPerWorker: ${COLLATERAL_DEFAULT} # collateral per worker in FL
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
+
+${yamlDiffPatch(
+  "",
+  {},
+  {
+    dependencies: {
+      npm: versions.npm,
+    },
+  },
+)}
 
 # # A list of custom relay multiaddresses to use when connecting to Fluence network
 # customFluenceEnv:

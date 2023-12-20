@@ -20,7 +20,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { DOT_FLUENCE_DIR_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { installAllNPMDependencies } from "../../lib/npm.js";
+import { npmInstall } from "../../lib/npm.js";
 import { installAllCargoDependencies } from "../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
@@ -41,16 +41,17 @@ export default class Install extends BaseCommand<typeof Install> {
       await this.parse(Install),
     );
 
-    await installAllNPMDependencies({
-      maybeFluenceConfig,
-      force: flags.force,
-    });
+    if (maybeFluenceConfig !== null) {
+      await npmInstall({
+        fluenceConfig: maybeFluenceConfig,
+      });
+    }
 
     await installAllCargoDependencies({
       maybeFluenceConfig,
       force: flags.force,
     });
 
-    commandObj.logToStderr("cargo and npm dependencies successfully installed");
+    commandObj.logToStderr("Dependencies successfully installed");
   }
 }

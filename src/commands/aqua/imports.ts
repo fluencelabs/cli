@@ -16,7 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
+import { getAquaImports } from "../../lib/helpers/aquaImports.js";
 import { jsonStringify } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -31,10 +31,6 @@ export default class Json extends BaseCommand<typeof Json> {
   async run(): Promise<void> {
     const { maybeFluenceConfig } = await initCli(this, await this.parse(Json));
 
-    commandObj.log(
-      jsonStringify(
-        await ensureAquaImports({ flags: { import: [] }, maybeFluenceConfig }),
-      ),
-    );
+    commandObj.log(jsonStringify(await getAquaImports({ maybeFluenceConfig })));
   }
 }

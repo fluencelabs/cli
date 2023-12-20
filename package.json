@@ -22,8 +22,8 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "before-build": "node --loader ts-node/esm --no-warnings src/beforeBuild.ts",
-    "build": "shx rm -rf dist && tsc -b",
+    "before-build": "npm i --prefix './src/cli-aqua-dependencies' && node --loader ts-node/esm --no-warnings src/beforeBuild.ts && npm i --prefix './src/aqua-dependencies'",
+    "build": "shx rm -rf dist && tsc -b && shx cp -r ./src/aqua-dependencies ./dist/aqua-dependencies",
     "lint": "eslint . --ext .ts --ext .js",
     "lint-fix": "eslint . --ext .ts --ext .js --cache --fix",
     "prettier": "prettier --write .",
@@ -54,11 +54,12 @@
   },
   "dependencies": {
     "@fluencelabs/air-beautify-wasm": "0.3.4",
-    "@fluencelabs/aqua-api": "0.13.0",
+    "@fluencelabs/aqua-api": "0.13.2",
     "@fluencelabs/aqua-to-js": "0.3.0",
     "@fluencelabs/deal-aurora": "0.2.22",
     "@fluencelabs/fluence-network-environment": "1.1.2",
     "@fluencelabs/js-client": "0.5.5",
+    "@fluencelabs/npm-aqua-compiler": "0.0.2",
     "@iarna/toml": "^2.2.5",
     "@mswjs/interceptors": "^0.25.7",
     "@multiformats/multiaddr": "^12.1.7",
@@ -90,7 +91,6 @@
     "yaml-diff-patch": "^2.0.0"
   },
   "devDependencies": {
-    "@fluencelabs/installation-spell": "0.5.31",
     "@total-typescript/ts-reset": "^0.5.1",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/debug": "^4.1.10",
