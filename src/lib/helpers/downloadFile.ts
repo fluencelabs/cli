@@ -35,7 +35,6 @@ import {
   ensureFluenceSpellsDir,
   projectRootDir,
 } from "../paths.js";
-import { input } from "../prompt.js";
 
 const getHashOfString = (str: string): Promise<string> => {
   const md5Hash = crypto.createHash("md5");
@@ -69,39 +68,21 @@ export const downloadFile = async (
   return outputPath;
 };
 
-type EnsureValidAquaNameArg = {
-  stringToValidate: string | undefined;
-} & Parameters<typeof input>[0];
-
 export const AQUA_NAME_REQUIREMENTS =
   "must start with a lowercase letter and contain only letters, numbers, and underscores";
 
-export const ensureValidAquaName = async ({
-  stringToValidate,
-  ...inputArg
-}: EnsureValidAquaNameArg): Promise<string> => {
-  if (
-    stringToValidate === undefined ||
-    validateAquaName(stringToValidate) !== true
-  ) {
-    return input({
-      ...inputArg,
-      message: `${inputArg.message} (${AQUA_NAME_REQUIREMENTS})`,
-      validate: validateAquaName,
-    });
-  }
-
-  return stringToValidate;
-};
-
 export const validateAquaName = (text: string): true | string => {
-  return /^[a-z]\w*$/.test(text) || AQUA_NAME_REQUIREMENTS;
+  return (
+    /^[a-z]\w*$/.test(text) || `${color.yellow(text)} ${AQUA_NAME_REQUIREMENTS}`
+  );
 };
 
 export const validateAquaTypeName = (text: string): true | string => {
   return (
     /^[A-Z]\w*$/.test(text) ||
-    "must start with an uppercase letter and contain only letters, numbers, and underscores"
+    `${color.yellow(
+      text,
+    )} must start with an uppercase letter and contain only letters, numbers, and underscores`
   );
 };
 
