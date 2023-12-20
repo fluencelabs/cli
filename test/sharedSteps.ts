@@ -39,7 +39,12 @@ import {
 } from "../src/lib/helpers/utils.js";
 import { getServicesDir, getSpellsDir } from "../src/lib/paths.js";
 
-import { RUN_DEPLOYED_SERVICES_TIMEOUT, workerServiceSchema } from "./const.js";
+import {
+  RUN_DEPLOYED_SERVICES_TIMEOUT,
+  WORKER_SPELL,
+  type WorkerServices,
+  workerServiceSchema,
+} from "./const.js";
 import {
   assertHasWorkerAndAnswer,
   fluence,
@@ -56,6 +61,10 @@ export async function getFluenceConfig(cwd: string) {
   );
 
   return fluenceConfig;
+}
+
+export async function build(cwd: string) {
+  await fluence({ args: ["build"], cwd });
 }
 
 export async function deployDealAndWaitUntilDeployed(cwd: string) {
@@ -187,6 +196,25 @@ export async function createSpellAndAddToDeal(
   await fluenceConfig.$commit();
 }
 
+function sortSubnetResult(result: WorkerServices) {
+  return result
+    .sort((a, b) => {
+      if (a.host_id < b.host_id) {
+        return -1;
+      }
+
+      if (a.host_id > b.host_id) {
+        return 1;
+      }
+
+      return 0;
+    })
+    .map((w) => {
+      return w.spells.sort();
+    });
+}
+
+// TODO: combine this function with waitUntilShowSubnetReturnsService()
 export async function waitUntilShowSubnetReturnsSpell(
   cwd: string,
   serviceName: string,
@@ -203,30 +231,15 @@ export async function waitUntilShowSubnetReturnsSpell(
         cwd,
       });
 
-      const parsedShowSubnetResult = JSON.parse(showSubnetResult);
+      const subnet = JSON.parse(showSubnetResult);
 
-      if (!validateWorkerServices(parsedShowSubnetResult)) {
+      if (!validateWorkerServices(subnet)) {
         throw new Error(
           `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
         );
       }
 
-      parsedShowSubnetResult
-        .sort((a, b) => {
-          if (a.host_id < b.host_id) {
-            return -1;
-          }
-
-          if (a.host_id > b.host_id) {
-            return 1;
-          }
-
-          return 0;
-        })
-        .forEach((w) => {
-          return w.spells.sort();
-        });
-
+      sortSubnetResult(subnet);
       const multiaddrs = await getMultiaddrs();
 
       const expected = multiaddrs
@@ -238,12 +251,66 @@ export async function waitUntilShowSubnetReturnsSpell(
           return {
             host_id,
             services: [serviceName],
-            spells: [spellName, "worker-spell"],
-            worker_id: parsedShowSubnetResult[i]?.worker_id,
+            spells: [spellName, WORKER_SPELL],
+            worker_id: subnet[i]?.worker_id,
           };
         });
 
-      expect(parsedShowSubnetResult).toEqual(expected);
+      expect(subnet).toEqual(expected);
+    },
+    (error) => {
+      throw new Error(
+        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error,
+        )}`,
+      );
+    },
+    RUN_DEPLOYED_SERVICES_TIMEOUT,
+  );
+}
+
+export async function waitUntilShowSubnetReturnsService(
+  cwd: string,
+  serviceName: string,
+  newServiceName: string,
+) {
+  await setTryTimeout(
+    async () => {
+      const showSubnetResult = await fluence({
+        args: ["run"],
+        flags: {
+          f: "showSubnet()",
+          quiet: true,
+        },
+        cwd,
+      });
+
+      const subnet = JSON.parse(showSubnetResult);
+
+      if (!validateWorkerServices(subnet)) {
+        throw new Error(
+          `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
+        );
+      }
+
+      sortSubnetResult(subnet);
+      const multiaddrs = await getMultiaddrs();
+
+      const expected = multiaddrs
+        .map(({ peerId }) => {
+          return peerId;
+        })
+        .sort()
+        .map((host_id, i) => {
+          return {
+            host_id,
+            services: [serviceName, newServiceName],
+            spells: [WORKER_SPELL],
+            worker_id: subnet[i]?.worker_id,
+          };
+        });
+
+      expect(subnet).toEqual(expected);
     },
     (error) => {
       throw new Error(
@@ -288,4 +355,59 @@ export async function getServiceConfig(cwd: string, serviceName: string) {
   );
 
   return serviceConfig;
+}
+
+// TODO: Fix the problem with initialization of mutable config
+async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
+  const checkConfig = async () => {
+    console.log("checking config", Date.now());
+    const config = await getFluenceConfig(cwd);
+    console.log("config", JSON.stringify(config, null, 2));
+
+    expect(
+      config.services !== undefined &&
+        Object.prototype.hasOwnProperty.call(config.services, serviceName),
+    ).toBeTruthy();
+
+    return config;
+  };
+
+  return await setTryTimeout(
+    checkConfig,
+    (error) => {
+      throw new Error(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error,
+        )}`,
+      );
+    },
+    5000,
+  );
+}
+
+export async function createServiceAndAddToDeal(
+  cwd: string,
+  serviceName: string,
+) {
+  await fluence({
+    args: ["service", "new", serviceName],
+    cwd,
+  });
+
+  const fluenceConfig = await waitUntilFluenceConfigUpdated(cwd, serviceName);
+
+  assert(
+    fluenceConfig.deals !== undefined &&
+      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
+    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+  );
+
+  const currentServices = fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? [];
+
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [
+    ...currentServices,
+    serviceName,
+  ];
+
+  await fluenceConfig.$commit();
 }

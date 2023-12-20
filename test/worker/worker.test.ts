@@ -35,14 +35,14 @@ import {
   getServicesDir,
 } from "../../src/lib/paths.js";
 import {
+  MAIN_RS_CONTENT,
+  NEW_SERVICE_2_NAME,
+  NEW_SERVICE_INTERFACE,
+  NEW_SERVICE_NAME,
   NEW_SPELL_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
-  WD_MAIN_RS_CONTENT,
-  WD_NEW_SERVICE_2_NAME,
-  WD_NEW_SERVICE_INTERFACE,
-  WD_NEW_SERVICE_NAME,
-  WD_SERVICE_INTERFACES,
-  WD_UPDATED_SERVICE_INTERFACES,
+  SERVICE_INTERFACES,
+  UPDATED_SERVICE_INTERFACES,
 } from "../const.js";
 import {
   assertHasPeer,
@@ -81,7 +81,7 @@ describe("integration tests", () => {
       );
 
       await fluence({
-        args: ["service", "new", WD_NEW_SERVICE_NAME],
+        args: ["service", "new", NEW_SERVICE_NAME],
         cwd,
       });
 
@@ -91,9 +91,9 @@ describe("integration tests", () => {
 
       let interfacesFileContent = await readInterfacesFile();
       // we expect to a NewService interface in services.aqua file
-      expect(interfacesFileContent).toBe(`${WD_NEW_SERVICE_INTERFACE}\n`);
+      expect(interfacesFileContent).toBe(`${NEW_SERVICE_INTERFACE}\n`);
 
-      const newServiceConfig = await getServiceConfig(cwd, WD_NEW_SERVICE_NAME);
+      const newServiceConfig = await getServiceConfig(cwd, NEW_SERVICE_NAME);
 
       newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
@@ -101,15 +101,15 @@ describe("integration tests", () => {
       // update first service module source code so it contains a struct
       await writeFile(
         join(
-          join(getServicesDir(cwd), WD_NEW_SERVICE_NAME),
-          join("modules", WD_NEW_SERVICE_NAME, "src", "main.rs"),
+          join(getServicesDir(cwd), NEW_SERVICE_NAME),
+          join("modules", NEW_SERVICE_NAME, "src", "main.rs"),
         ),
-        WD_MAIN_RS_CONTENT,
+        MAIN_RS_CONTENT,
         FS_OPTIONS,
       );
 
       await fluence({
-        args: ["service", "new", WD_NEW_SERVICE_2_NAME],
+        args: ["service", "new", NEW_SERVICE_2_NAME],
         cwd,
       });
 
@@ -117,7 +117,7 @@ describe("integration tests", () => {
 
       // we expect to see both service interfaces in services.aqua file and the first one
       // should not be updated because we didn't build it, even though we changed it above
-      expect(interfacesFileContent).toBe(WD_SERVICE_INTERFACES);
+      expect(interfacesFileContent).toBe(SERVICE_INTERFACES);
 
       await fluence({
         args: ["build"],
@@ -128,7 +128,7 @@ describe("integration tests", () => {
 
       // we expect to see both service interfaces in services.aqua file and the first one
       // should be updated because we built all the services above including the first one
-      expect(interfacesFileContent).toBe(WD_UPDATED_SERVICE_INTERFACES);
+      expect(interfacesFileContent).toBe(UPDATED_SERVICE_INTERFACES);
 
       const fluenceConfig = await getFluenceConfig(cwd);
 
@@ -137,7 +137,7 @@ describe("integration tests", () => {
       fluenceConfig.hosts = {
         [DEFAULT_WORKER_NAME]: {
           peerIds,
-          services: [WD_NEW_SERVICE_2_NAME],
+          services: [NEW_SERVICE_2_NAME],
           spells: [NEW_SPELL_NAME],
         },
       };
