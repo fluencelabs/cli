@@ -126,19 +126,14 @@ export const addService = async ({
   }
 
   if (
-    isInteractive &&
-    fluenceConfig.deals !== undefined &&
-    DEFAULT_DEAL_NAME in fluenceConfig.deals &&
-    !(fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? []).includes(
-      serviceName,
-    ) &&
-    (interactive
-      ? await confirm({
+    isServiceMissingInDefaultDeal(fluenceConfig, serviceName) &&
+    (!interactive ||
+      (isInteractive &&
+        (await confirm({
           message: `Do you want to add service ${color.yellow(
             serviceName,
           )} to a default deal ${color.yellow(DEFAULT_DEAL_NAME)}`,
-        })
-      : true)
+        }))))
   ) {
     const defaultDeal = fluenceConfig.deals[DEFAULT_DEAL_NAME];
 
@@ -175,3 +170,18 @@ export const addService = async ({
 
   return serviceName;
 };
+
+function isServiceMissingInDefaultDeal(
+  fluenceConfig: FluenceConfig,
+  serviceName: string,
+): fluenceConfig is FluenceConfig & {
+  deals: { [DEFAULT_DEAL_NAME]: { services?: string[] } };
+} {
+  return (
+    fluenceConfig.deals !== undefined &&
+    DEFAULT_DEAL_NAME in fluenceConfig.deals &&
+    !(fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? []).includes(
+      serviceName,
+    )
+  );
+}
