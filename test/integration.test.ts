@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import { mkdir } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
+import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../src/lib/const.js";
 
 import {
+  NO_PROJECT_TEST_NAME,
   fluence,
   fluenceEnv,
   getMultiaddrs,
   init,
   maybeConcurrentTest,
-  NO_PROJECT_TEST_NAME,
 } from "./helpers.js";
 
 const multiaddrs = await getMultiaddrs();
@@ -44,22 +46,32 @@ describe("integration tests", () => {
 
   maybeConcurrentTest("should work without project", async () => {
     const cwd = join("tmp", NO_PROJECT_TEST_NAME);
-    await mkdir(cwd, { recursive: true });
 
-    const result = await fluence({
-      args: ["run"],
-      flags: {
-        relay: multiaddrs[0]?.multiaddr,
-        env: fluenceEnv,
-        f: "identify()",
-        i: resolve(join("test", "_resources", "aqua", "smoke.aqua")),
-        quiet: true,
-      },
-      cwd,
-    });
+    const packageJSONContent = await readFile(
+      PACKAGE_JSON_FILE_NAME,
+      FS_OPTIONS,
+    );
 
-    const parsedResult = JSON.parse(result);
-    // Peer.identify() is supposed to return an object with air_version key
-    expect(parsedResult).toHaveProperty("air_version");
+    await rm(PACKAGE_JSON_FILE_NAME);
+
+    try {
+      const result = await fluence({
+        args: ["run"],
+        flags: {
+          relay: multiaddrs[0]?.multiaddr,
+          env: fluenceEnv,
+          f: "identify()",
+          i: "smoke.aqua",
+          quiet: true,
+        },
+        cwd,
+      });
+
+      const parsedResult = JSON.parse(result);
+      // Peer.identify() is supposed to return an object with air_version key
+      expect(parsedResult).toHaveProperty("air_version");
+    } finally {
+      await writeFile(PACKAGE_JSON_FILE_NAME, packageJSONContent, FS_OPTIONS);
+    }
   });
 });

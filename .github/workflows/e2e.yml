@@ -54,3 +54,5 @@ jobs:
     needs:
       - fluence-cli
     uses: fluencelabs/registry/.github/workflows/tests.yml@main
+    with:
+      ref: new-aqua-packages

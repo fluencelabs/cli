@@ -52,7 +52,7 @@ import {
 
 import { initReadonlyUserSecretsConfig } from "./userSecrets.js";
 
-export const CHECK_FOR_UPDATES_DISABLED = "disabled";
+const CHECK_FOR_UPDATES_DISABLED = "disabled";
 
 type ConfigV0 = {
   version: 0;
@@ -76,11 +76,13 @@ const configSchemaV0Obj = {
     dependencies: {
       type: "object",
       additionalProperties: false,
-      description: "(For advanced users) Global overrides of dependencies",
+      description:
+        "DEPRECATED: You can install dependencies only per-project. (For advanced users) Global overrides of dependencies",
       properties: {
         npm: {
           type: "object",
-          description: "Overrides of npm dependencies",
+          description:
+            "DEPRECATED: You can install dependencies only per-project. Overrides of npm dependencies",
           additionalProperties: { type: "string" },
           properties: {
             npm_dependency_name: {
@@ -93,7 +95,8 @@ const configSchemaV0Obj = {
         },
         cargo: {
           type: "object",
-          description: "Overrides of cargo dependencies",
+          description:
+            "DEPRECATED: You can install dependencies only per-project. Overrides of cargo dependencies",
           additionalProperties: { type: "string" },
           properties: {
             Cargo_dependency_name: {
@@ -110,7 +113,7 @@ const configSchemaV0Obj = {
     },
     lastCheckForUpdates: {
       type: "string",
-      description: `Last time when ${CLI_NAME_FULL} checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
+      description: `DEPRECATED. It's currently advised to install CLI without using npm (See README.md: https://github.com/fluencelabs/cli?tab=readme-ov-file#installation-and-usage). Last time when ${CLI_NAME_FULL} checked for updates. Updates are checked daily unless this field is set to '${CHECK_FOR_UPDATES_DISABLED}'`,
       nullable: true,
     },
     docsInConfigs: {

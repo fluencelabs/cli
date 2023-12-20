@@ -66,10 +66,11 @@ import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
-import { ensureAquaImports } from "./helpers/aquaImports.js";
+import { getAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { updateRelaysJSON, resolveFluenceEnv } from "./multiaddres.js";
+import { copyDefaultDependencies } from "./npm.js";
 import { getFrontendIndexTSorJSPath, ensureAquaMainPath } from "./paths.js";
 
 const selectTemplate = (): Promise<Template> => {
@@ -140,6 +141,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   setProjectRootDir(projectPath);
   await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
   const fluenceConfig = await initNewFluenceConfig();
+  await copyDefaultDependencies();
   const fluenceEnv = await resolveFluenceEnv(options.env);
 
   if (envConfig === null) {
@@ -169,11 +171,6 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     }) + "\n",
     FS_OPTIONS,
   );
-
-  await ensureAquaImports({
-    generateSettingsJson: true,
-    maybeFluenceConfig: fluenceConfig,
-  });
 
   await writeFile(
     getGitignorePath(),
@@ -326,7 +323,7 @@ async function initTSorJSProject({
       return compileToFiles({
         compileArgs: {
           filePath: await ensureAquaMainPath(),
-          imports: await ensureAquaImports({
+          imports: await getAquaImports({
             maybeFluenceConfig: fluenceConfig,
           }),
         },
