@@ -44,7 +44,7 @@ import {
   type FromFlagsDef,
   TRACING_FLAG,
 } from "../lib/const.js";
-import { ensureAquaImports } from "../lib/helpers/aquaImports.js";
+import { getAquaImports } from "../lib/helpers/aquaImports.js";
 import { jsonStringify, splitErrorsAndResults } from "../lib/helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
@@ -193,15 +193,9 @@ export default class Run extends BaseCommand<typeof Run> {
       getRunData(flags),
     ]);
 
-    const aquaImports = await ensureAquaImports({
-      flags,
-      maybeFluenceConfig,
-    });
-
     const runArgs: RunArgs = {
       ...flags,
       filePath: aquaFilePath,
-      imports: aquaImports,
       runData,
       funcCall,
       logLevelCompiler,
@@ -373,7 +367,7 @@ type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
   maybeFluenceConfig: FluenceConfig | null;
   funcCall: string;
   filePath: string;
-  imports: string[];
+  import: string[] | undefined;
   logLevelCompiler: AquaLogLevel | undefined;
   runData: RunData | undefined;
 };
@@ -385,7 +379,10 @@ const fluenceRun = async (args: RunArgs) => {
     funcCall: args.funcCall,
     data: args.runData,
     filePath: args.filePath,
-    imports: args.imports,
+    imports: await getAquaImports({
+      aquaImportsFromFlags: args.import,
+      maybeFluenceConfig: args.maybeFluenceConfig,
+    }),
     constants: formatConstants(args.const),
     logLevel: args.logLevelCompiler,
     noXor: args["no-xor"],

@@ -105,4 +105,9 @@ await Promise.all(
   ),
 );
 
+await cp(
+  join("test", "_resources", "aqua", "smoke.aqua"),
+  join("tmp", NO_PROJECT_TEST_NAME, "smoke.aqua"),
+);
+
 console.log("\nTests are ready to run!");

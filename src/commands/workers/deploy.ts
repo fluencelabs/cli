@@ -33,7 +33,6 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   ENV_FLAG_NAME,
 } from "../../lib/const.js";
-import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
@@ -70,11 +69,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
     const workersConfig = await initNewWorkersConfig();
 
-    const aquaImports = await ensureAquaImports({
-      maybeFluenceConfig: fluenceConfig,
-      flags,
-    });
-
     const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
       "../../lib/deployWorkers.js"
     );
@@ -90,11 +84,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       workerNames: args["WORKER-NAMES"],
       fluenceConfig,
       workersConfig,
-      aquaImports,
       fluenceEnv,
-      noBuild: flags["no-build"],
-      marineBuildArgs: flags["marine-build-args"],
       initPeerId,
+      flags,
     });
 
     const uploadDeployResult = await uploadDeploy(

@@ -92,7 +92,7 @@ export default class Add extends BaseCommand<typeof Add> {
     let serviceOrServiceDirPathOrUrl = serviceNameOrPath;
 
     if (hasKey(serviceNameOrPath, maybeFluenceConfig?.services)) {
-      const serviceGet = maybeFluenceConfig?.services[serviceNameOrPath]?.get;
+      const serviceGet = maybeFluenceConfig.services[serviceNameOrPath]?.get;
       assert(typeof serviceGet === "string");
       serviceOrServiceDirPathOrUrl = serviceGet;
     }

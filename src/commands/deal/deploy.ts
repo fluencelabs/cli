@@ -45,7 +45,6 @@ import {
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
-import { ensureAquaImports } from "../../lib/helpers/aquaImports.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
@@ -92,11 +91,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const chainNetworkId = DEAL_CONFIG[chainNetwork].id;
     const workersConfig = await initNewWorkersConfig();
 
-    const aquaImports = await ensureAquaImports({
-      maybeFluenceConfig: fluenceConfig,
-      flags,
-    });
-
     const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
       "../../lib/deployWorkers.js"
     );
@@ -107,10 +101,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       workerNames: args["WORKER-NAMES"],
       workersConfig,
       fluenceConfig,
-      aquaImports,
-      noBuild: flags["no-build"],
-      marineBuildArgs: flags["marine-build-args"],
       fluenceEnv,
+      flags,
     });
 
     dbg("start connecting to fluence network");

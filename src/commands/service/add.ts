@@ -20,7 +20,7 @@ import { cwd } from "node:process";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { addService } from "../../lib/addService.js";
+import { ensureValidServiceName, addService } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import {
@@ -75,10 +75,15 @@ export default class Add extends BaseCommand<typeof Add> {
       );
     }
 
+    const serviceName = await ensureValidServiceName(
+      fluenceConfig,
+      flags.name ?? serviceConfig.name,
+    );
+
     const marineCli = await initMarineCli(fluenceConfig);
 
     await addService({
-      serviceName: flags.name ?? serviceConfig.name,
+      serviceName,
       absolutePathOrUrl: resolveServicePathOrUrl(serviceOrServiceDirPathOrUrl),
       fluenceConfig,
       marineCli,
