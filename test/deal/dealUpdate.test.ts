@@ -22,7 +22,7 @@ import {
   MY_SERVICE_NAME,
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
-} from "../const.js";
+} from "../constants.js";
 import { fluence, init, maybeConcurrentTest } from "../helpers.js";
 import {
   assertLogsAreValid,
@@ -31,8 +31,7 @@ import {
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
   getFluenceConfig,
-  waitUntilShowSubnetReturnsService,
-  waitUntilShowSubnetReturnsSpell,
+  waitUntilShowSubnetReturnsExpected,
 } from "../sharedSteps.js";
 
 async function updateFluenceConfigForTest(cwd: string) {
@@ -64,7 +63,11 @@ describe("Deal update tests", () => {
 
     await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilShowSubnetReturnsSpell(cwd, MY_SERVICE_NAME, NEW_SPELL_NAME);
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME],
+      [NEW_SPELL_NAME],
+    );
 
     const logs = await fluence({ args: ["deal", "logs"], cwd });
 
@@ -88,10 +91,10 @@ describe("Deal update tests", () => {
 
       await deployDealAndWaitUntilDeployed(cwd);
 
-      await waitUntilShowSubnetReturnsService(
+      await waitUntilShowSubnetReturnsExpected(
         cwd,
-        MY_SERVICE_NAME,
-        NEW_SERVICE_2_NAME,
+        [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+        [],
       );
 
       const logs = await fluence({ args: ["deal", "logs"], cwd });

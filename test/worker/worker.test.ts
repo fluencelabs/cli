@@ -43,7 +43,7 @@ import {
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   SERVICE_INTERFACES,
   UPDATED_SERVICE_INTERFACES,
-} from "../const.js";
+} from "../constants.js";
 import {
   assertHasPeer,
   fluence,

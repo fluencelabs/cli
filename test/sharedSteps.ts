@@ -44,7 +44,7 @@ import {
   WORKER_SPELL,
   type WorkerServices,
   workerServiceSchema,
-} from "./const.js";
+} from "./constants.js";
 import {
   assertHasWorkerAndAnswer,
   fluence,
@@ -214,11 +214,10 @@ function sortSubnetResult(result: WorkerServices) {
     });
 }
 
-// TODO: combine this function with waitUntilShowSubnetReturnsService()
-export async function waitUntilShowSubnetReturnsSpell(
+export async function waitUntilShowSubnetReturnsExpected(
   cwd: string,
-  serviceName: string,
-  spellName: string,
+  services: string[],
+  spells: string[],
 ) {
   await setTryTimeout(
     async () => {
@@ -250,62 +249,8 @@ export async function waitUntilShowSubnetReturnsSpell(
         .map((host_id, i) => {
           return {
             host_id,
-            services: [serviceName],
-            spells: [spellName, WORKER_SPELL],
-            worker_id: subnet[i]?.worker_id,
-          };
-        });
-
-      expect(subnet).toEqual(expected);
-    },
-    (error) => {
-      throw new Error(
-        `showSubnet() didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
-          error,
-        )}`,
-      );
-    },
-    RUN_DEPLOYED_SERVICES_TIMEOUT,
-  );
-}
-
-export async function waitUntilShowSubnetReturnsService(
-  cwd: string,
-  serviceName: string,
-  newServiceName: string,
-) {
-  await setTryTimeout(
-    async () => {
-      const showSubnetResult = await fluence({
-        args: ["run"],
-        flags: {
-          f: "showSubnet()",
-          quiet: true,
-        },
-        cwd,
-      });
-
-      const subnet = JSON.parse(showSubnetResult);
-
-      if (!validateWorkerServices(subnet)) {
-        throw new Error(
-          `result of running showSubnet aqua function is expected to be an array of WorkerServices, but it is: ${showSubnetResult}`,
-        );
-      }
-
-      sortSubnetResult(subnet);
-      const multiaddrs = await getMultiaddrs();
-
-      const expected = multiaddrs
-        .map(({ peerId }) => {
-          return peerId;
-        })
-        .sort()
-        .map((host_id, i) => {
-          return {
-            host_id,
-            services: [serviceName, newServiceName],
-            spells: [WORKER_SPELL],
+            services,
+            spells: [...spells, WORKER_SPELL],
             worker_id: subnet[i]?.worker_id,
           };
         });
