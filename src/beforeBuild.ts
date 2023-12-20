@@ -27,6 +27,7 @@ import {
   FS_OPTIONS,
   NODE_MODULES_DIR_NAME,
 } from "./lib/const.js";
+import { jsonStringify } from "./lib/helpers/utils.js";
 import { versions } from "./versions.js";
 
 const aquaDependenciesDirPath = join("src", AQUA_DEPENDENCIES_DIR_NAME);
@@ -34,7 +35,7 @@ await mkdir(aquaDependenciesDirPath, { recursive: true });
 
 await writeFile(
   join(aquaDependenciesDirPath, "package.json"),
-  JSON.stringify({ dependencies: versions.npm }, null, 2),
+  jsonStringify({ dependencies: versions.npm }),
   FS_OPTIONS,
 );
 
