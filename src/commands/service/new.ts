@@ -20,14 +20,11 @@ import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { addService } from "../../lib/addService.js";
+import { addService, ensureValidServiceName } from "../../lib/addService.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initNewReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import { generateNewModule } from "../../lib/generateNewModule.js";
-import {
-  AQUA_NAME_REQUIREMENTS,
-  ensureValidAquaName,
-} from "../../lib/helpers/downloadFile.js";
+import { AQUA_NAME_REQUIREMENTS } from "../../lib/helpers/downloadFile.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { ensureServicesDir } from "../../lib/paths.js";
@@ -54,24 +51,10 @@ export default class New extends BaseCommand<typeof New> {
       await this.parse(New),
     );
 
-    let serviceName = await ensureValidAquaName({
-      stringToValidate:
-        args.name ?? (await input({ message: "Enter service name" })),
-      message: "Enter service name",
-    });
-
-    if (serviceName in (maybeFluenceConfig?.services ?? {})) {
-      serviceName = await input({
-        message: serviceAlreadyExistsError(serviceName),
-        validate: (serviceName: string) => {
-          if (serviceName in (maybeFluenceConfig?.services ?? {})) {
-            return serviceAlreadyExistsError(serviceName);
-          }
-
-          return true;
-        },
-      });
-    }
+    const serviceName = await ensureValidServiceName(
+      maybeFluenceConfig,
+      args.name ?? (await input({ message: "Enter service name" })),
+    );
 
     const absoluteServicePath = resolve(
       join(flags.path ?? (await ensureServicesDir()), serviceName),
@@ -104,9 +87,3 @@ export default class New extends BaseCommand<typeof New> {
     }
   }
 }
-
-const serviceAlreadyExistsError = (serviceName: string) => {
-  return `Service with name ${color.yellow(
-    serviceName,
-  )} already exists. Please enter another name`;
-};

@@ -38,6 +38,41 @@ import type { MarineCLI } from "./marineCli.js";
 import { projectRootDir } from "./paths.js";
 import { confirm, input } from "./prompt.js";
 
+export async function ensureValidServiceName(
+  fluenceConfig: FluenceConfig | null,
+  serviceName: string,
+) {
+  const validateServiceName = createServiceNameValidator(fluenceConfig);
+  const serviceNameValidity = validateServiceName(serviceName);
+
+  if (typeof serviceNameValidity === "string") {
+    serviceName = await input({
+      message: serviceNameValidity,
+      validate: validateServiceName,
+    });
+  }
+
+  return serviceName;
+}
+
+function createServiceNameValidator(fluenceConfig: FluenceConfig | null) {
+  return function validateServiceName(serviceName: string): true | string {
+    if (serviceName in (fluenceConfig?.services ?? {})) {
+      return `Service with name ${color.yellow(
+        serviceName,
+      )} already exists in ${fluenceConfig?.$getPath()}. Please enter another name`;
+    }
+
+    const validity = validateAquaName(serviceName);
+
+    if (typeof validity === "string") {
+      return validity;
+    }
+
+    return true;
+  };
+}
+
 type AddServiceArg = {
   serviceName: string;
   absolutePathOrUrl: string;
@@ -47,14 +82,14 @@ type AddServiceArg = {
   interactive?: boolean;
 };
 
-export const addService = async ({
+export async function addService({
   serviceName: serviceNameFromArgs,
   absolutePathOrUrl,
   fluenceConfig,
   marineCli,
   marineBuildArgs,
   interactive = true,
-}: AddServiceArg): Promise<string> => {
+}: AddServiceArg): Promise<string> {
   let serviceName = serviceNameFromArgs;
 
   if (fluenceConfig.services === undefined) {
@@ -126,7 +161,7 @@ export const addService = async ({
   }
 
   if (
-    isServiceMissingInDefaultDeal(fluenceConfig, serviceName) &&
+    hasDefaultDeal(fluenceConfig) &&
     (!interactive ||
       (isInteractive &&
         (await confirm({
@@ -169,19 +204,15 @@ export const addService = async ({
   );
 
   return serviceName;
-};
+}
 
-function isServiceMissingInDefaultDeal(
+function hasDefaultDeal(
   fluenceConfig: FluenceConfig,
-  serviceName: string,
 ): fluenceConfig is FluenceConfig & {
-  deals: { [DEFAULT_DEAL_NAME]: { services?: string[] } };
+  deals: { [DEFAULT_DEAL_NAME]: NonNullable<FluenceConfig["deals"]>[string] };
 } {
   return (
     fluenceConfig.deals !== undefined &&
-    DEFAULT_DEAL_NAME in fluenceConfig.deals &&
-    !(fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? []).includes(
-      serviceName,
-    )
+    DEFAULT_DEAL_NAME in fluenceConfig.deals
   );
 }
