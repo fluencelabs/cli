@@ -861,17 +861,16 @@ Create Capacity commitment
 
 ```
 USAGE
-  $ fluence provider create-commitment [--no-input] [--priv-key <value>] [-n <value>] [--env <value>] [--noxes <value>] [--offer
-    <value>] [--nox-names <value>]
+  $ fluence provider create-commitment [--no-input] [--priv-key <value>] [-c <value>] [--env <value>] [--noxes <value>]
+    [--nox-names <value>]
 
 FLAGS
-  -n, --name=<value>                          Provider config name
+  -c, --config=<value>                        Name of the directory with provider config
       --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
       --no-input                              Don't interactively ask for any input from the user
       --nox-names=<value>                     Comma-separated names of noxes to create capacity commitment for. Default:
-                                              all noxes in the offer
+                                              all noxes from capacityCommitments property of the provider config
       --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
-      --offer=<offer>                         Offer from provider.yaml to use
       --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                               unsecure
 
@@ -890,10 +889,10 @@ Generate Config.toml files according to provider.yaml
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [-n <value>] [--env <value>]
+  $ fluence provider gen [--no-input] [--noxes <value>] [-c <value>] [--env <value>]
 
 FLAGS
-  -n, --name=<value>                          Provider config name
+  -c, --config=<value>                        Name of the directory with provider config
       --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
       --no-input                              Don't interactively ask for any input from the user
       --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
@@ -913,10 +912,10 @@ Init provider config. Creates a config file
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [-n <value>] [--env <value>]
+  $ fluence provider init [--no-input] [--noxes <value>] [-c <value>] [--env <value>]
 
 FLAGS
-  -n, --name=<value>                          Provider config name
+  -c, --config=<value>                        Name of the directory with provider config
       --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
       --no-input                              Don't interactively ask for any input from the user
       --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
@@ -952,11 +951,11 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [-n <value>] [--env <value>] [--noxes <value>] [--offer
+  $ fluence provider register [--no-input] [--priv-key <value>] [-c <value>] [--env <value>] [--noxes <value>] [--offer
     <value>]
 
 FLAGS
-  -n, --name=<value>                          Provider config name
+  -c, --config=<value>                        Name of the directory with provider config
       --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
       --no-input                              Don't interactively ask for any input from the user
       --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
