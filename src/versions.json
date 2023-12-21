@@ -4,7 +4,7 @@
   "rust-toolchain": "nightly-2023-08-27-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.8.1",
-    "@fluencelabs/spell": "0.5.33",
+    "@fluencelabs/spell": "0.6.0",
     "@fluencelabs/registry": "0.8.7"
   },
   "cargo": {
