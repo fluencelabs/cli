@@ -303,31 +303,26 @@ export async function getServiceConfig(cwd: string, serviceName: string) {
   return serviceConfig;
 }
 
-// TODO: Fix the problem with initialization of mutable config
 async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
   const checkConfig = async () => {
-    console.log("checking config", Date.now());
     const config = await initReadonlyFluenceConfigWithPath(cwd);
 
-    if (config === null) {
-      throw new Error(
-        `Failed to initialize readonly fluence config at ${cwd} when waiting for ${serviceName} to be added to it`,
-      );
-    }
+    assert(config !== null, `config is expected to exist at ${cwd}`);
 
-    console.log("config", JSON.stringify(config, null, 2));
-
-    expect(
+    assert(
       config.services !== undefined &&
         Object.prototype.hasOwnProperty.call(config.services, serviceName),
-    ).toBeTruthy();
+      `${serviceName} is expected to be in services property of ${config.$getPath()} after ${serviceName} is added to it`,
+    );
+
+    return config;
   };
 
-  await setTryTimeout(
+  return await setTryTimeout(
     checkConfig,
     (error) => {
       throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+        `Config is expected to be updated after ${serviceName} is added to it, error: ${stringifyUnknown(
           error,
         )}`,
       );
@@ -345,8 +340,25 @@ export async function createServiceAndAddToDeal(
     cwd,
   });
 
-  await waitUntilFluenceConfigUpdated(cwd, serviceName);
+  const updatedReadonlyConfig = await waitUntilFluenceConfigUpdated(
+    cwd,
+    serviceName,
+  );
+
   const fluenceConfig = await getFluenceConfig(cwd);
+
+  assert(
+    updatedReadonlyConfig.services !== undefined,
+    `services property is expected to be in ${updatedReadonlyConfig.$getPath()} after ${serviceName} is added to it`,
+  );
+
+  const readonlyServices = updatedReadonlyConfig.services[serviceName];
+  assert(readonlyServices !== undefined);
+
+  fluenceConfig.services = {
+    ...fluenceConfig.services,
+    [serviceName]: readonlyServices,
+  };
 
   assert(
     fluenceConfig.deals !== undefined &&
