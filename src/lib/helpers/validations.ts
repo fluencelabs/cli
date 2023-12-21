@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import { color } from "@oclif/color";
+import parse from "parse-duration";
+
+import type { ContractsENV } from "../const.js";
+import { DEFAULT_CC_DURATION } from "../const.js";
+import { getProvider } from "../provider.js";
+
 export type ValidationResult = string | true;
 
 export const validateUnique = <T>(
@@ -86,12 +93,84 @@ export const validateAllVersionsAreExact = async (
         .join(", ")}`;
 };
 
-export const validatePositiveNumberOrEmpty = (
+export function validatePositiveNumberOrEmpty(
   input: unknown,
-): ValidationResult => {
+): ValidationResult {
   if (input === "" || Number(input) > 0) {
     return true;
   }
 
   return "Must be a positive number";
-};
+}
+
+export function lessThenValidator(lessThen: number) {
+  return function validateLessThen(input: unknown): ValidationResult {
+    if (input === "" || Number(input) < lessThen) {
+      return true;
+    }
+
+    return `Must be less then ${lessThen}`;
+  };
+}
+
+export function greaterThenValidator(greaterThen: number) {
+  return function validateGreaterThen(input: unknown): ValidationResult {
+    if (input === "" || Number(input) > greaterThen) {
+      return true;
+    }
+
+    return `Must be greater then ${greaterThen}`;
+  };
+}
+
+export function validatePercent(input: unknown): ValidationResult {
+  return validateBatch(
+    validatePositiveNumberOrEmpty(input),
+    lessThenValidator(100)(input),
+  );
+}
+
+export async function validateAddress(
+  input: unknown,
+): Promise<ValidationResult> {
+  const { ethers } = await import("ethers");
+
+  if (ethers.isAddress(input)) {
+    return true;
+  }
+
+  return `Must be a valid address. Got: ${color.yellow(String(input))}`;
+}
+
+export async function getMinCCDuration(env: ContractsENV): Promise<bigint> {
+  const { DealClient } = await import("@fluencelabs/deal-aurora");
+  let minDuration: bigint = BigInt((parse(DEFAULT_CC_DURATION) ?? 0) / 1000);
+
+  try {
+    const client = new DealClient(getProvider(env), env);
+    const core = await client.getCore();
+    minDuration = await core.minCCDuration();
+  } catch {}
+
+  return minDuration;
+}
+
+export async function ccDurationValidator(env: ContractsENV) {
+  const minDuration = await getMinCCDuration(env);
+
+  return function validateCCDuration(input: string): ValidationResult {
+    const parsed = parse(input);
+
+    if (parsed === undefined) {
+      return "Failed to parse duration";
+    }
+
+    const parsedSeconds = parsed / 1000;
+
+    if (parsedSeconds < minDuration) {
+      return `Must be at least ${minDuration} sec. Got: ${parsedSeconds} sec`;
+    }
+
+    return true;
+  };
+}

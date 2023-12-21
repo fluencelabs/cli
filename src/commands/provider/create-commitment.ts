@@ -19,22 +19,17 @@ import assert from "assert";
 import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
+import parse from "parse-duration";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
+import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import {
-  initNewReadonlyProviderConfig,
-  promptForOffer,
-} from "../../lib/configs/project/provider.js";
-import {
-  OFFER_FLAG,
   PRIV_KEY_FLAG,
   NOXES_FLAG,
   PROVIDER_CONFIG_FLAGS,
-  CURRENCY_MULTIPLIER,
 } from "../../lib/const.js";
-import { dbg } from "../../lib/dbg.js";
 import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import {
   commaSepStrToArr,
@@ -56,10 +51,9 @@ export default class CreateCommitment extends BaseCommand<
     ...PRIV_KEY_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
     ...NOXES_FLAG,
-    ...OFFER_FLAG,
     "nox-names": Flags.string({
       description:
-        "Comma-separated names of noxes to create capacity commitment for. Default: all noxes in the offer",
+        "Comma-separated names of noxes to create capacity commitment for. Default: all noxes from capacityCommitments property of the provider config",
     }),
   };
 
@@ -75,44 +69,21 @@ export default class CreateCommitment extends BaseCommand<
 
 export async function createCommitment(
   flags: {
-    offer?: string | undefined;
     noxes?: number | undefined;
     name?: string | undefined;
     env: string | undefined;
     "priv-key": string | undefined;
     "nox-names"?: string | undefined;
   },
-  maybeFluenceConfig?: FluenceConfig | null,
+  maybeFluenceConfig: FluenceConfig | null,
 ) {
   const providerConfig = await initNewReadonlyProviderConfig(flags);
-
-  let offer =
-    flags.offer === undefined ? undefined : providerConfig.offers[flags.offer];
-
-  if (offer === undefined) {
-    if (flags.offer !== undefined) {
-      commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
-    }
-
-    offer = await promptForOffer(providerConfig.offers);
-  }
-
-  const network = await ensureChainNetwork(
-    flags.env,
-    maybeFluenceConfig ?? null,
-  );
-
+  const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
   const signer = await getSigner(network, flags["priv-key"]);
 
   const dealClient = new DealClient(signer, network);
   const core = await dealClient.getCore();
   const capacity = await dealClient.getCapacity();
-
-  const minPricePerWorkerEpochBigInt = BigInt(
-    offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
-  );
-
-  dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
 
   const [{ digest }, { base58btc }] = await Promise.all([
     import("multiformats"),
@@ -127,26 +98,34 @@ export async function createCommitment(
       ? []
       : commaSepStrToArr(flags["nox-names"]);
 
-  const allComputePeers = Object.entries(providerConfig.computePeers);
-
-  const [unknownNoxNameErrors, computePeersToRegister] = splitErrorsAndResults(
-    allComputePeers,
-    (computerPeer) => {
-      if (noxNames.length === 0) {
-        return { result: computerPeer };
-      }
-
-      if (noxNames.includes(computerPeer[0])) {
-        return { result: computerPeer };
-      }
-
-      return {
-        error: `Compute peer ${color.yellow(
-          computerPeer[0],
-        )} is not in the list of noxes in the offer`,
-      };
-    },
+  const allCommitments = Object.entries(
+    providerConfig.capacityCommitments ?? {},
   );
+
+  if (allCommitments.length === 0) {
+    commandObj.error(
+      `No capacity commitments found at ${color.yellow(
+        providerConfig.$getPath(),
+      )}`,
+    );
+  }
+
+  const [unknownNoxNameErrors, computePeersToRegister] =
+    noxNames.length === 0
+      ? [[], allCommitments]
+      : splitErrorsAndResults(allCommitments, (result) => {
+          const [name] = result;
+
+          if (noxNames.includes(name)) {
+            return { result };
+          }
+
+          return {
+            error: `Compute peer ${color.yellow(
+              name,
+            )} is not in the list of noxes in the offer`,
+          };
+        });
 
   if (unknownNoxNameErrors.length > 0) {
     commandObj.error(unknownNoxNameErrors.join("\n"));
@@ -162,12 +141,11 @@ export async function createCommitment(
       .decode(base58btc.decode("z" + peerId))
       .bytes.subarray(6);
 
-    const ccDuration = Math.floor(computePeer.capacityCommitment.duration * 60); //TODO: magic number
-    const ccDelegator = computePeer.capacityCommitment.delegator;
+    const ccDuration = (parse(computePeer.duration) ?? 0) / 1000;
+    const ccDelegator = computePeer.delegator;
 
     const ccRewardDelegationRate = Math.floor(
-      (computePeer.capacityCommitment.rewardDelegationRate / 100) *
-        Number(PRECISION),
+      (computePeer.rewardDelegationRate / 100) * Number(PRECISION),
     );
 
     promptConfirmTx(flags["priv-key"]);

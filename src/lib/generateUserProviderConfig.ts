@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
-import { ethers } from "ethers";
 
 import { isInteractive } from "./commandObj.js";
 import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
@@ -24,11 +22,19 @@ import {
   defaultNumberProperties,
   type NumberProperty,
   numberProperties,
+  DEFAULT_CC_DELEGATOR,
+  DEFAULT_CC_REWARD_DELEGATION_RATE,
+  DURATION_EXAMPLE,
 } from "./const.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
-import { validatePositiveNumberOrEmpty } from "./helpers/validations.js";
+import {
+  validatePercent,
+  validatePositiveNumberOrEmpty,
+  validateAddress,
+  ccDurationValidator,
+  getMinCCDuration,
+} from "./helpers/validations.js";
 import { checkboxes, confirm, input } from "./prompt.js";
-import { getProvider } from "./provider.js";
 
 async function promptToSetNumberProperty(
   offer: Offer,
@@ -64,6 +70,7 @@ export async function addComputePeers(
 ) {
   let computePeersCounter = 0;
   let isAddingMoreComputePeers = true;
+  const validateCCDuration = await ccDurationValidator(userProvidedConfig.env);
 
   do {
     const defaultName = `nox-${computePeersCounter}`;
@@ -81,76 +88,46 @@ export async function addComputePeers(
       computePeersCounter = computePeersCounter + 1;
     }
 
-    const slotsStr = await input({
-      message: `Enter number of workers for ${color.yellow(name)}`,
+    const computeUnitsString = await input({
+      message: `Enter number of compute units for ${color.yellow(name)}`,
       default: "1",
       validate: validatePositiveNumberOrEmpty,
     });
 
-    const client = new DealClient(
-      getProvider(userProvidedConfig.env),
-      userProvidedConfig.env,
-    );
-
-    const core = await client.getCore();
-    const minDuration = await core.minCCDuration();
-    const minDurationDays = Number(minDuration) / 60;
+    const minDuration = await getMinCCDuration(userProvidedConfig.env);
 
     const capacityCommitmentDuration = await input({
-      message: `Enter capacity commitment duration (min)`,
-      default: minDurationDays,
-      validate: (input: string) => {
-        const days = Number(input);
-
-        if (isNaN(days)) {
-          return "Must be a number";
-        }
-
-        if (days < minDurationDays) {
-          return `Must be at least ${minDurationDays} min`;
-        }
-
-        return true;
-      },
+      message: `Enter capacity commitment duration ${DURATION_EXAMPLE}`,
+      default: `${minDuration} sec`,
+      validate: validateCCDuration,
     });
 
     const capacityCommitmentDelegator = await input({
-      message: `Enter capacity commitment delegator`,
-      default: "",
-      validate: (input: string) => {
-        if (!ethers.isAddress(input)) {
-          return "Must be a valid address";
-        }
-
-        return true;
-      },
+      // default: anybody can activate capacity commitment
+      // optional
+      message: `Enter capacity commitment delegator address`,
+      default: DEFAULT_CC_DELEGATOR,
+      validate: validateAddress,
     });
 
     const capacityCommitmentRewardDelegationRate = await input({
-      message: `Enter capacity commitment reward delegation rate (%)`,
-      default: "0",
-      validate: (input: string) => {
-        if (isNaN(Number(input))) {
-          return "Must be a number";
-        }
-
-        if (Number(input) < 0) {
-          return "Must be a positive number";
-        } else if (Number(input) > 100) {
-          return "Must be less than 100";
-        }
-
-        return true;
-      },
+      message: `Enter capacity commitment reward delegation rate (in %)`,
+      default: `${DEFAULT_CC_REWARD_DELEGATION_RATE}`,
+      validate: validatePercent,
     });
 
+    if (!("capacityCommitments" in userProvidedConfig)) {
+      userProvidedConfig.capacityCommitments = {};
+    }
+
+    userProvidedConfig.capacityCommitments[name] = {
+      duration: capacityCommitmentDuration,
+      delegator: capacityCommitmentDelegator,
+      rewardDelegationRate: Number(capacityCommitmentRewardDelegationRate),
+    };
+
     userProvidedConfig.computePeers[name] = {
-      capacityCommitment: {
-        duration: Number(capacityCommitmentDuration),
-        delegator: capacityCommitmentDelegator,
-        rewardDelegationRate: Number(capacityCommitmentRewardDelegationRate),
-      },
-      computeUnits: Number(slotsStr),
+      computeUnits: Number(computeUnitsString),
     };
 
     if (numberOfNoxes !== undefined) {

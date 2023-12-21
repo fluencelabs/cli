@@ -658,6 +658,7 @@ __metadata:
     npm: ^10.2.1
     npm-check-updates: ^16.14.6
     oclif: ^4.0.3
+    parse-duration: ^1.1.0
     platform: ^1.3.6
     prettier: ^3.0.3
     semver: ^7.5.4
@@ -12550,7 +12551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse-duration@npm:^1.0.0":
+"parse-duration@npm:^1.0.0, parse-duration@npm:^1.1.0":
   version: 1.1.0
   resolution: "parse-duration@npm:1.1.0"
   checksum: 3cfc10aa61b3a06373a347289e1704de47d5d845c79330bbab20b54c02567f3710ba84544a3a44a986c3381c68670d89542fe9de607fb0814e52f78b34893cd9

@@ -17,6 +17,7 @@
 import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { ethers } from "ethers";
+import times from "lodash-es/times.js";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -115,7 +116,7 @@ export async function register(
           peerId: digest
             .decode(base58btc.decode("z" + peerId))
             .bytes.subarray(6),
-          unitIds: new Array(computePeer.computeUnits).fill(0).map(() => {
+          unitIds: times(computePeer.computeUnits).map(() => {
             return ethers.randomBytes(32);
           }),
           owner: ethers.ZeroAddress, //TODO: get owner for peer,

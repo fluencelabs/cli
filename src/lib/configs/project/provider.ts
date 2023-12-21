@@ -53,12 +53,22 @@ import {
   DEAL_CONFIG,
 } from "../../const.js";
 import {
+  DEFAULT_CC_DURATION,
+  DEFAULT_CC_DELEGATOR,
+  DEFAULT_CC_REWARD_DELEGATION_RATE,
+  DURATION_EXAMPLE,
+} from "../../const.js";
+import {
   type ProviderConfigArgs,
-  addComputePeers,
   addOffers,
+  addComputePeers,
 } from "../../generateUserProviderConfig.js";
 import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
+import {
+  ccDurationValidator,
+  validateAddress,
+} from "../../helpers/validations.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import {
   ensureFluenceConfigsDir,
@@ -83,10 +93,36 @@ import {
 } from "./providerSecrets.js";
 
 export type CapacityCommitment = {
-  duration: number;
+  duration: string;
   delegator: string;
   rewardDelegationRate: number;
 };
+
+const capacityCommitmentSchema = {
+  type: "object",
+  description: "Defines a capacity commitment",
+  required: ["duration", "delegator", "rewardDelegationRate"],
+  additionalProperties: false,
+  properties: {
+    duration: {
+      type: "string",
+      default: DEFAULT_CC_DURATION,
+      description: `Duration of the commitment ${DURATION_EXAMPLE}`,
+    },
+    delegator: {
+      type: "string",
+      description: "Delegator address",
+      default: DEFAULT_CC_DELEGATOR,
+    },
+    rewardDelegationRate: {
+      type: "number",
+      minimum: 0,
+      maximum: 100,
+      description: "Reward delegation rate in percent",
+      default: DEFAULT_CC_REWARD_DELEGATION_RATE,
+    },
+  },
+} as const satisfies JSONSchemaType<CapacityCommitment>;
 
 export type Offer = {
   minPricePerWorkerEpoch: number;
@@ -240,7 +276,6 @@ const noxConfigYAMLSchema = {
 } as const satisfies JSONSchemaType<NoxConfigYAML>;
 
 type ComputePeer = {
-  capacityCommitment: CapacityCommitment;
   computeUnits: number;
   nox?: NoxConfigYAML;
 };
@@ -249,11 +284,12 @@ type ConfigV0 = {
   env: ContractsENV;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
+  capacityCommitments?: Record<string, CapacityCommitment>;
   nox?: NoxConfigYAML;
   version: 0;
 };
 
-const offerSchema: JSONSchemaType<Offer> = {
+const offerSchema = {
   type: "object",
   description: "Defines a provider offer",
   additionalProperties: false,
@@ -271,40 +307,20 @@ const offerSchema: JSONSchemaType<Offer> = {
     effectors: { type: "array", items: { type: "string" }, nullable: true },
   },
   required: ["minPricePerWorkerEpoch", "computePeers"],
-};
+} as const satisfies JSONSchemaType<Offer>;
 
-const computePeerSchema: JSONSchemaType<ComputePeer> = {
+const computePeerSchema = {
   type: "object",
   description: "Defines a compute peer",
   additionalProperties: false,
   properties: {
     computeUnits: { type: "number" },
-    capacityCommitment: {
-      type: "object",
-      description: "Defines a capacity commitment",
-      required: ["duration", "delegator", "rewardDelegationRate"],
-      additionalProperties: false,
-      properties: {
-        duration: {
-          type: "number",
-          description: `Duration of the commitment in days`,
-        },
-        delegator: {
-          type: "string",
-          description: `Delegator address`,
-        },
-        rewardDelegationRate: {
-          type: "number",
-          description: `Reward delegation rate.`,
-        },
-      },
-    },
     nox: noxConfigYAMLSchema,
   },
-  required: ["computeUnits", "capacityCommitment"],
-};
+  required: ["computeUnits"],
+} as const satisfies JSONSchemaType<ComputePeer>;
 
-const configSchemaV0: JSONSchemaType<ConfigV0> = {
+const configSchemaV0 = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_CONFIG_FULL_FILE_NAME}`,
   title: PROVIDER_CONFIG_FULL_FILE_NAME,
   description: `Defines config used for provider set up`,
@@ -337,10 +353,21 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       required: [],
     },
     nox: noxConfigYAMLSchema,
+    capacityCommitments: {
+      description:
+        "A map with nox names as keys and capacity commitments as values",
+      type: "object",
+      additionalProperties: capacityCommitmentSchema,
+      properties: {
+        noxName: capacityCommitmentSchema,
+      },
+      required: [],
+      nullable: true,
+    },
     version: { type: "number", const: 0, description: "Config version" },
   },
   required: ["version", "computePeers", "offers", "env"],
-};
+} as const satisfies JSONSchemaType<ConfigV0>;
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
@@ -358,15 +385,18 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
     if (userProvidedConfig.env === "local") {
       userProvidedConfig.computePeers = Object.fromEntries(
         times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
+          return [`nox-${i}`, { computeUnits: 1 }] as const;
+        }),
+      );
+
+      userProvidedConfig.capacityCommitments = Object.fromEntries(
+        Object.keys(userProvidedConfig.computePeers).map((noxName) => {
           return [
-            `nox-${i}`,
+            noxName,
             {
-              computeUnits: 1,
-              capacityCommitment: {
-                duration: 1, // TODO: do we have default duration?
-                delegator: "", // TODO: do we have default delegator?
-                rewardDelegationRate: 0,
-              },
+              duration: DEFAULT_CC_DURATION,
+              delegator: DEFAULT_CC_DELEGATOR,
+              rewardDelegationRate: DEFAULT_CC_REWARD_DELEGATION_RATE,
             },
           ] as const;
         }),
@@ -401,7 +431,7 @@ type LatestConfig = ConfigV0;
 export type ProviderConfig = InitializedConfig<LatestConfig>;
 export type ProviderConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const validate: ConfigValidateFunction<LatestConfig> = (config) => {
+const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   const invalid: Array<{
     offerName: string;
     missingComputePeerNames: Array<string>;
@@ -438,6 +468,35 @@ const validate: ConfigValidateFunction<LatestConfig> = (config) => {
         )}`;
       })
       .join("\n");
+  }
+
+  const validateCCDuration = await ccDurationValidator(config.env);
+
+  const capacityCommitmentErrors = (
+    await Promise.all(
+      Object.entries(config.capacityCommitments ?? {}).map(
+        async ([name, cc]) => {
+          const errors = [
+            await validateAddress(cc.delegator),
+            validateCCDuration(cc.duration),
+          ].filter((e) => {
+            return e !== true;
+          });
+
+          return errors.length === 0
+            ? true
+            : `Invalid capacity commitment for ${color.yellow(
+                name,
+              )}:\n${errors.join("\n")}`;
+        },
+      ),
+    )
+  ).filter((e) => {
+    return e !== true;
+  });
+
+  if (capacityCommitmentErrors.length > 0) {
+    return capacityCommitmentErrors.join("\n\n");
   }
 
   return true;

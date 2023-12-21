@@ -311,9 +311,9 @@ export const OFFER_FLAG = {
 };
 
 export const PROVIDER_CONFIG_FLAGS = {
-  name: Flags.string({
-    description: "Provider config name",
-    char: "n",
+  config: Flags.string({
+    description: "Name of the directory with provider config",
+    char: "c",
   }),
   [ENV_FLAG_NAME]: Flags.string({
     description: "Environment to use when generating the provider config",
@@ -676,3 +676,10 @@ export const LOCAL_NET_WALLET_KEYS = [
 ];
 
 export const DEFAULT_OFFER_NAME = "offer";
+
+export const DEFAULT_CC_DELEGATOR =
+  "0x8ba1f109551bD432803012645Ac136ddd64DBA72";
+export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
+export const DEFAULT_CC_DURATION = "5 minutes";
+export const DURATION_EXAMPLE =
+  "in human-readable format. Example: 1 months 1 days";
