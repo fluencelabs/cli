@@ -54,11 +54,11 @@ const DEFAULT_NUMBER_OF_NOXES = 3;
 export type ProviderConfigArgs = (
   | {
       env: string | undefined;
-      name: string | undefined;
+      config: string | undefined;
     }
   | {
       env: "local";
-      name?: undefined;
+      config?: undefined;
     }
 ) & {
   noxes?: number | undefined;

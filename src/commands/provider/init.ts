@@ -46,7 +46,7 @@ export default class Init extends BaseCommand<typeof Init> {
 
     // duration, address delegator, uint256 rewardDelegationRate
 
-    let providerConfig = await initReadonlyProviderConfig(flags.name);
+    let providerConfig = await initReadonlyProviderConfig(flags.config);
 
     if (providerConfig !== null) {
       const isOverwriting = await confirm({

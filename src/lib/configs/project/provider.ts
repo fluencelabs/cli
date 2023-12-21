@@ -594,21 +594,21 @@ async function ensureSecrets(providerConfig: ProviderConfigReadonly) {
 }
 
 export async function initNewProviderConfig({
-  name,
+  config,
   ...args
 }: ProviderConfigArgs) {
   return createProviderConfigWithSecretsAndConfigTomls(
-    name,
+    config,
     getConfigInitFunction(getInitConfigOptions(), getDefault(args)),
   );
 }
 
 export async function initNewReadonlyProviderConfig({
-  name,
+  config,
   ...args
 }: ProviderConfigArgs) {
   return createProviderConfigWithSecretsAndConfigTomls(
-    name,
+    config,
     getReadonlyConfigInitFunction(getInitConfigOptions(), getDefault(args)),
   );
 }

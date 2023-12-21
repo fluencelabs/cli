@@ -70,7 +70,7 @@ export default class CreateCommitment extends BaseCommand<
 export async function createCommitment(
   flags: {
     noxes?: number | undefined;
-    name?: string | undefined;
+    config?: string | undefined;
     env: string | undefined;
     "priv-key": string | undefined;
     "nox-names"?: string | undefined;

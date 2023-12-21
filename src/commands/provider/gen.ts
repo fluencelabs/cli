@@ -41,9 +41,9 @@ export default class Gen extends BaseCommand<typeof Gen> {
 
     commandObj.logToStderr(
       `Configuration is generated at ${
-        flags.name === undefined
+        flags.config === undefined
           ? getFluenceDir()
-          : join(projectRootDir, flags.name)
+          : join(projectRootDir, flags.config)
       }`,
     );
   }
