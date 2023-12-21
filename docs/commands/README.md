@@ -866,10 +866,12 @@ USAGE
 
 FLAGS
   -n, --name=<value>                          Provider config name
-      --compute-units=<value>...              Number of compute units to add for each peer
       --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
       --no-input                              Don't interactively ask for any input from the user
-      --peer-id=<value>...                    Peer id of the compute peer
+      --nox-names=<value>                     Comma-separated names of noxes to create capacity commitment for. Default:
+                                              all noxes in the offer
+      --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+      --offer=<offer>                         Offer from provider.yaml to use
       --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                               unsecure
 
