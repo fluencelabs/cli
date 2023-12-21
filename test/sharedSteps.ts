@@ -18,6 +18,7 @@ import assert from "node:assert";
 import { join, relative } from "node:path";
 
 import Ajv from "ajv";
+import { map, sortBy } from "lodash-es";
 
 import {
   type FluenceConfig,
@@ -41,17 +42,13 @@ import {
 import { getServicesDir, getSpellsDir } from "../src/lib/paths.js";
 
 import {
+  multiaddrs,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   WORKER_SPELL,
   type WorkerServices,
   workerServiceSchema,
 } from "./constants.js";
-import {
-  assertHasWorkerAndAnswer,
-  fluence,
-  getMultiaddrs,
-  sortPeers,
-} from "./helpers.js";
+import { assertHasWorkerAndAnswer, fluence } from "./helpers.js";
 
 export async function getFluenceConfig(cwd: string) {
   const fluenceConfig = await initFluenceConfigWithPath(cwd);
@@ -141,29 +138,25 @@ async function waitUntilDealDeployed(cwd: string) {
       .join("\n")}`,
   );
 
-  const multiaddrs = await getMultiaddrs();
-
-  const expected = multiaddrs
-    .map((peer) => {
+  const expected = sortBy(
+    map(multiaddrs, (peer) => {
       return {
         answer: "Hi, fluence",
         peer: peer.peerId,
       };
-    })
-    .sort((a, b) => {
-      return sortPeers(a, b);
-    });
+    }),
+    ["peer"],
+  );
 
-  const res = arrayOfResults
-    .map(({ answer, worker }) => {
+  const res = sortBy(
+    map(arrayOfResults, ({ answer, worker }) => {
       return {
         answer,
         peer: worker.host_id,
       };
-    })
-    .sort((a, b) => {
-      return sortPeers(a, b);
-    });
+    }),
+    ["peer"],
+  );
 
   // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
   expect(res).toEqual(expected);
@@ -198,21 +191,13 @@ export async function createSpellAndAddToDeal(
 }
 
 function sortSubnetResult(result: WorkerServices) {
-  return result
-    .sort((a, b) => {
-      if (a.host_id < b.host_id) {
-        return -1;
-      }
+  const sortedResult = sortBy(result, ["host_id"]);
 
-      if (a.host_id > b.host_id) {
-        return 1;
-      }
+  map(sortedResult, (w) => {
+    return w.spells.sort();
+  });
 
-      return 0;
-    })
-    .map((w) => {
-      return w.spells.sort();
-    });
+  return sortedResult;
 }
 
 export async function waitUntilShowSubnetReturnsExpected(
@@ -239,24 +224,25 @@ export async function waitUntilShowSubnetReturnsExpected(
         );
       }
 
-      sortSubnetResult(subnet);
-      const multiaddrs = await getMultiaddrs();
+      const sortedSubnet = sortSubnetResult(subnet);
 
-      const expected = multiaddrs
-        .map(({ peerId }) => {
-          return peerId;
-        })
-        .sort()
-        .map((host_id, i) => {
+      const expected = map(
+        sortBy(
+          map(multiaddrs, ({ peerId }) => {
+            return peerId;
+          }),
+        ),
+        (host_id, i) => {
           return {
             host_id,
             services,
-            spells: [...spells, WORKER_SPELL],
-            worker_id: subnet[i]?.worker_id,
+            spells: [...spells, WORKER_SPELL].sort(),
+            worker_id: sortedSubnet[i]?.worker_id,
           };
-        });
+        },
+      );
 
-      expect(subnet).toEqual(expected);
+      expect(sortedSubnet).toEqual(expected);
     },
     (error) => {
       throw new Error(

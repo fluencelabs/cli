@@ -16,6 +16,10 @@
 
 import type { JSONSchemaType } from "ajv";
 
+import { getMultiaddrs } from "./helpers.js";
+
+export const multiaddrs = await getMultiaddrs();
+
 export const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 
 export const MY_SERVICE_NAME = "myService";
