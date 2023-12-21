@@ -456,7 +456,7 @@ export function getReadonlyConfigInitFunction<
   };
 }
 
-const initializedConfigs = new Set<string>();
+const initializedConfigs = new Map<string, InitializedConfig<unknown>>();
 
 function formatConfig(configString: string) {
   const formattedConfig = configString
@@ -536,10 +536,12 @@ export function getConfigInitFunction<
       configFullName,
     );
 
-    if (initializedConfigs.has(configPath)) {
-      throw new Error(
-        `Mutable config ${configPath} was already initialized. Please initialize readonly config instead or use previously initialized mutable config`,
-      );
+    const previouslyInitializedConfig = initializedConfigs.get(configPath);
+
+    if (previouslyInitializedConfig !== undefined) {
+      // It's safe to assert here because we know that previouslyInitializedConfig has the same type
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return previouslyInitializedConfig as InitializedConfig<LatestConfig>;
     }
 
     let maybeInitializedReadonlyConfig: InitializedReadonlyConfig<LatestConfig> | null;
@@ -560,10 +562,10 @@ export function getConfigInitFunction<
 
     const initializedReadonlyConfig = maybeInitializedReadonlyConfig;
     configPath = initializedReadonlyConfig.$getPath();
-    initializedConfigs.add(configPath);
+
     let configString = initializedReadonlyConfig.$getConfigString();
 
-    return {
+    const config = {
       ...initializedReadonlyConfig,
       // have to type-cast `this` because TypeScript incorrectly thinks `this` can be a PromiseLike
       async $commit(this: InitializedConfig<LatestConfig>): Promise<void> {
@@ -603,5 +605,8 @@ export function getConfigInitFunction<
         return configString;
       },
     };
+
+    initializedConfigs.set(configPath, config);
+    return config;
   };
 }
