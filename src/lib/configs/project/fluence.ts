@@ -27,32 +27,32 @@ import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
-  CURRENCY_MULTIPLIER_TEXT,
+  AQUA_DIR_NAME,
   AQUA_LIB_NPM_DEPENDENCY,
-  IPFS_ADDR_PROPERTY,
+  AUTO_GENERATED,
+  CLI_NAME,
+  CLI_NAME_FULL,
+  COLLATERAL_DEFAULT,
+  CONTRACTS_ENV,
+  type ContractsENV,
+  CURRENCY_MULTIPLIER,
+  CURRENCY_MULTIPLIER_TEXT,
+  DEFAULT_DEAL_NAME,
   DEFAULT_IPFS_ADDRESS,
+  DEFAULT_MARINE_BUILD_ARGS,
+  DOT_FLUENCE_DIR_NAME,
+  FLUENCE_CONFIG_FILE_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  FLUENCE_ENVS,
+  type FluenceEnv,
+  GLOBAL_CONFIG_FULL_FILE_NAME,
+  IPFS_ADDR_PROPERTY,
+  LOCAL_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  DEFAULT_DEAL_NAME,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
-  TOP_LEVEL_SCHEMA_ID,
-  GLOBAL_CONFIG_FULL_FILE_NAME,
-  DOT_FLUENCE_DIR_NAME,
-  AQUA_DIR_NAME,
   MARINE_CARGO_DEPENDENCY,
-  FLUENCE_CONFIG_FILE_NAME,
-  CLI_NAME_FULL,
-  CLI_NAME,
-  DEFAULT_MARINE_BUILD_ARGS,
-  type ContractsENV,
-  CONTRACTS_ENV,
-  type FluenceEnv,
-  FLUENCE_ENVS,
-  AUTO_GENERATED,
-  LOCAL_IPFS_ADDRESS,
   PRICE_PER_EPOCH_DEFAULT,
-  COLLATERAL_DEFAULT,
-  CURRENCY_MULTIPLIER,
+  TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
 import {
   validateAllVersionsAreExact,
@@ -67,13 +67,13 @@ import {
 } from "../../paths.js";
 import type { Mutable } from "../../typeHelpers.js";
 import {
+  type ConfigValidateFunction,
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
+  type InitConfigOptions,
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
-  type ConfigValidateFunction,
-  type InitConfigOptions,
 } from "../initConfig.js";
 
 import {
@@ -85,6 +85,7 @@ import {
   type OverridableSpellProperties,
   overridableSpellProperties,
 } from "./spell.js";
+
 export const TARGET_WORKERS_DEFAULT = 1;
 
 type ServiceV0 = { name: string; count?: number };
@@ -1177,6 +1178,17 @@ export const initFluenceConfigWithPath = async (
   path: string,
 ): Promise<InitializedConfig<LatestConfig> | null> => {
   return getConfigInitFunction({
+    ...initConfigOptions,
+    getConfigOrConfigDirPath: () => {
+      return path;
+    },
+  })();
+};
+
+export const initReadonlyFluenceConfigWithPath = async (
+  path: string,
+): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
+  return getReadonlyConfigInitFunction({
     ...initConfigOptions,
     getConfigOrConfigDirPath: () => {
       return path;

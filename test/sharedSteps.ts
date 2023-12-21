@@ -22,6 +22,7 @@ import Ajv from "ajv";
 import {
   type FluenceConfig,
   initFluenceConfigWithPath,
+  initReadonlyFluenceConfigWithPath,
 } from "../src/lib/configs/project/fluence.js";
 import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
@@ -306,18 +307,23 @@ export async function getServiceConfig(cwd: string, serviceName: string) {
 async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
   const checkConfig = async () => {
     console.log("checking config", Date.now());
-    const config = await getFluenceConfig(cwd);
+    const config = await initReadonlyFluenceConfigWithPath(cwd);
+
+    if (config === null) {
+      throw new Error(
+        `Failed to initialize readonly fluence config at ${cwd} when waiting for ${serviceName} to be added to it`,
+      );
+    }
+
     console.log("config", JSON.stringify(config, null, 2));
 
     expect(
       config.services !== undefined &&
         Object.prototype.hasOwnProperty.call(config.services, serviceName),
     ).toBeTruthy();
-
-    return config;
   };
 
-  return await setTryTimeout(
+  await setTryTimeout(
     checkConfig,
     (error) => {
       throw new Error(
@@ -339,7 +345,8 @@ export async function createServiceAndAddToDeal(
     cwd,
   });
 
-  const fluenceConfig = await waitUntilFluenceConfigUpdated(cwd, serviceName);
+  await waitUntilFluenceConfigUpdated(cwd, serviceName);
+  const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
     fluenceConfig.deals !== undefined &&
