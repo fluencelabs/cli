@@ -23,7 +23,7 @@ import {
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
 } from "../constants.js";
-import { fluence, init, maybeConcurrentTest } from "../helpers.js";
+import { fluence, init } from "../helpers.js";
 import {
   assertLogsAreValid,
   build,
@@ -75,31 +75,28 @@ describe("Deal update tests", () => {
   });
 
   // TODO: test skipped until NET-649 is released
-  maybeConcurrentTest(
-    "should update deal after new service is created",
-    async () => {
-      const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
-      await init(cwd, "quickstart");
+  test.skip("should update deal after new service is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
+    await init(cwd, "quickstart");
 
-      await updateFluenceConfigForTest(cwd);
+    await updateFluenceConfigForTest(cwd);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
+    await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
 
-      await build(cwd);
+    await build(cwd);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await waitUntilShowSubnetReturnsExpected(
-        cwd,
-        [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
-        [],
-      );
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+      [],
+    );
 
-      const logs = await fluence({ args: ["deal", "logs"], cwd });
+    const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-      assertLogsAreValid(logs);
-    },
-  );
+    assertLogsAreValid(logs);
+  });
 });
