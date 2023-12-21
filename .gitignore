@@ -20,13 +20,12 @@ oclif.manifest.json
 **/target/
 .repl_history
 .vscode/settings.json
-src/ts/src/aqua
-src/js/src/aqua
 
 # ignore compiled files
 src/lib/compiled-aqua
 src/lib/compiled-aqua-with-tracing
 src/versions
+src/aqua-dependencies
 
 # yarn
 .pnp.*

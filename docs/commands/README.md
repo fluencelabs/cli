@@ -15,6 +15,7 @@
 * [`fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-install-package-name--package-nameversion)
 * [`fluence dep install`](#fluence-dep-install)
 * [`fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-install-package-name--package-nameversion)
+* [`fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION`](#fluence-dep-npm-uninstall-package-name--package-nameversion)
 * [`fluence dep reset`](#fluence-dep-reset)
 * [`fluence dep versions`](#fluence-dep-versions)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
@@ -402,7 +403,7 @@ _See code: [src/commands/delegator/deposit.ts](https://github.com/fluencelabs/cl
 
 ```
 USAGE
-  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force] [-g]
+  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
 
 ARGUMENTS
   PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
@@ -412,12 +413,10 @@ ARGUMENTS
                                        example: package@version
 
 FLAGS
-  -g, --global                      Will override dependencies in a global user's config.yaml instead of project's
-                                    fluence.yaml
-      --force                       Force install even if the dependency/dependencies is/are already installed
-      --no-input                    Don't interactively ask for any input from the user
-      --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or
-                                    --force flag is used. Default: nightly-2023-08-27-x86_64"]}
+  --force                       Force install even if the dependency/dependencies is/are already installed
+  --no-input                    Don't interactively ask for any input from the user
+  --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
+                                flag is used. Default: nightly-2023-08-27-x86_64"]}
 
 DESCRIPTION
   (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo
@@ -458,27 +457,20 @@ _See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob
 
 ## `fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-(For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm directory)
+Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ```
 USAGE
-  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--force] [-g]
+  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
-                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
-                                       fluence, latest version npm is aware of. If you want to install a specific
-                                       version, you can do so by appending @ and the version to the package name.
-                                       Example: package@version
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  valid package spec for npm install command
 
 FLAGS
-  -g, --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
-      --force     Force install even if the dependency/dependencies is/are already installed
-      --no-input  Don't interactively ask for any input from the user
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  (For advanced users) Install npm project dependencies (all dependencies are cached inside user's .fluence/npm
-  directory)
+  Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ALIASES
   $ fluence dep npm i
@@ -489,18 +481,42 @@ EXAMPLES
 
 _See code: [src/commands/dep/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/dep/npm/install.ts)_
 
+## `fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION`
+
+Uninstall project aqua dependency (currently npm is used under the hood for managing aqua dependencies)
+
+```
+USAGE
+  $ fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION [--no-input]
+
+ARGUMENTS
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  valid package spec for npm install command
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Uninstall project aqua dependency (currently npm is used under the hood for managing aqua dependencies)
+
+ALIASES
+  $ fluence dep npm un
+
+EXAMPLES
+  $ fluence dep npm uninstall
+```
+
+_See code: [src/commands/dep/npm/uninstall.ts](https://github.com/fluencelabs/cli/blob/v0.13.0/src/commands/dep/npm/uninstall.ts)_
+
 ## `fluence dep reset`
 
 Reset all project dependencies to recommended versions for the current Fluence CLI version
 
 ```
 USAGE
-  $ fluence dep reset [--no-input] [-g] [--all]
+  $ fluence dep reset [--no-input]
 
 FLAGS
-  -g, --global    Will override dependencies in a global user's config.yaml instead of project's fluence.yaml
-      --all       Remove all dependencies, not only recommended ones
-      --no-input  Don't interactively ask for any input from the user
+  --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
   Reset all project dependencies to recommended versions for the current Fluence CLI version
@@ -850,12 +866,10 @@ USAGE
 
 FLAGS
   -n, --name=<value>                          Provider config name
+      --compute-units=<value>...              Number of compute units to add for each peer
       --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
       --no-input                              Don't interactively ask for any input from the user
-      --nox-names=<value>                     Comma-separated names of noxes to create capacity commitment for. Default:
-                                              all noxes in the offer
-      --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
-      --offer=<offer>                         Offer from provider.yaml to use
+      --peer-id=<value>...                    Peer id of the compute peer
       --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                               unsecure
 

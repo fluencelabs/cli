@@ -28,7 +28,6 @@ import { getIsStringUnion } from "./typeHelpers.js";
 export const CLI_NAME = "fluence";
 export const CLI_NAME_FULL = "Fluence CLI";
 const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
-export const PACKAGE_NAME = "@fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
 
@@ -40,7 +39,7 @@ export const numberProperties = ["minPricePerWorkerEpoch"] as const;
 
 export type NumberProperty = (typeof numberProperties)[number];
 
-export const CURRENCY_MULTIPLIER_POWER = 18;
+const CURRENCY_MULTIPLIER_POWER = 18;
 export const CURRENCY_MULTIPLIER_TEXT = `This number is multiplied by 10^${CURRENCY_MULTIPLIER_POWER}`;
 export const CURRENCY_MULTIPLIER = 10 ** CURRENCY_MULTIPLIER_POWER;
 export const COLLATERAL_DEFAULT = 1;
@@ -51,7 +50,6 @@ export const defaultNumberProperties: Record<NumberProperty, number> = {
 };
 
 export const U32_MAX = 4_294_967_295;
-export const CHECK_FOR_UPDATES_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
 export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
@@ -132,6 +130,7 @@ export const WASM_EXT = "wasm";
 export const TOML_EXT = "toml";
 
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
+export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const FRONTEND_DIR_NAME = "frontend";
@@ -189,7 +188,6 @@ export const GITIGNORE_FILE_NAME = ".gitignore";
 export const PACKAGE_JSON_FILE_NAME = `package.${JSON_EXT}`;
 export const TS_CONFIG_FILE_NAME = `tsconfig.${JSON_EXT}`;
 export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
-export const SETTINGS_JSON_FILE_NAME = `settings.${JSON_EXT}`;
 
 export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
 export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
@@ -207,7 +205,6 @@ export const FS_OPTIONS = {
 export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
-export const DEFAULT_DEPLOY_NAME = "default";
 export const DEFAULT_DEAL_NAME = "dealName";
 export const DEFAULT_WORKER_NAME = "workerName";
 
@@ -243,15 +240,6 @@ export const ENV_FLAG = {
 export const ENV_ARG_NAME = "ENV";
 export const ENV_ARG = {
   [ENV_ARG_NAME]: Args.string(fluenceEnvFlagAndArg),
-};
-
-export const GLOBAL_FLAG_NAME = "global";
-export const GLOBAL_FLAG = {
-  [GLOBAL_FLAG_NAME]: Flags.boolean({
-    default: false,
-    char: "g",
-    description: `Will override dependencies in a global user's ${GLOBAL_CONFIG_FULL_FILE_NAME} instead of project's ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  }),
 };
 
 export const PRIV_KEY_FLAG = {
@@ -422,12 +410,12 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
+/${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}
 **/node_modules
 **/target/
 .repl_history
-/.vscode/settings.json
-/src/ts/src/aqua
-/src/js/src/aqua`;
+`;
 export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
@@ -446,8 +434,6 @@ export const fluenceNPMDependencies = [
   REGISTRY_NPM_DEPENDENCY,
   SPELL_NPM_DEPENDENCY,
 ] as const;
-
-export const isFluenceNPMDependency = getIsStringUnion(fluenceNPMDependencies);
 
 export const fluenceCargoDependencies = [
   MARINE_CARGO_DEPENDENCY,

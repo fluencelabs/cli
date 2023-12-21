@@ -575,26 +575,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@npm:0.13.0":
-  version: 0.13.0
-  resolution: "@fluencelabs/aqua-api@npm:0.13.0"
-  checksum: 75dbfb37bc03ba51dd57612f31b67003fe1f49d9ae1db2c7ba975ed33abdc5f76e416e8387b112a48796571c063c8ce4d7448acf0601224f27df3ebedfd366d2
-  languageName: node
-  linkType: hard
-
-"@fluencelabs/aqua-ipfs@npm:0.5.24":
-  version: 0.5.24
-  resolution: "@fluencelabs/aqua-ipfs@npm:0.5.24"
-  dependencies:
-    "@fluencelabs/aqua-lib": 0.8.1
-  checksum: f3d3db82236ba4be120c27e30e2ef42cdff71bffbefea4073464cd2ff65abc0e8c5ed63cdc20ca3022c1674cf5779e01d22cf4d292e937fd07335376a78fe5a7
-  languageName: node
-  linkType: hard
-
-"@fluencelabs/aqua-lib@npm:0.8.1":
-  version: 0.8.1
-  resolution: "@fluencelabs/aqua-lib@npm:0.8.1"
-  checksum: 2b98073a28b2327941c3ae353f1f92e0400d674ee634b2cfb012c5822c318df0afec538a7337e10b12c7ae3d3e5b7ca240e7fd0ff8b299a743380309e8a760e1
+"@fluencelabs/aqua-api@npm:0.13.2":
+  version: 0.13.2
+  resolution: "@fluencelabs/aqua-api@npm:0.13.2"
+  checksum: d671c0416f9c892fe599c2a8babfb8209236dcd1a6e8d4102d83de38f0efcaa1e9fb724cfd86a03372497a41ac84afd165c51ae4ae972874d04612b74af4bb80
   languageName: node
   linkType: hard
 
@@ -619,12 +603,12 @@ __metadata:
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
     "@fluencelabs/air-beautify-wasm": 0.3.4
-    "@fluencelabs/aqua-api": 0.13.0
+    "@fluencelabs/aqua-api": 0.13.2
     "@fluencelabs/aqua-to-js": 0.3.0
     "@fluencelabs/deal-aurora": "file:./fluencelabs-deal-aurora-0.2.22.tgz"
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/installation-spell": 0.5.31
     "@fluencelabs/js-client": 0.5.5
+    "@fluencelabs/npm-aqua-compiler": 0.0.2
     "@iarna/toml": ^2.2.5
     "@mswjs/interceptors": ^0.25.7
     "@multiformats/multiaddr": ^12.1.7
@@ -714,17 +698,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/installation-spell@npm:0.5.31":
-  version: 0.5.31
-  resolution: "@fluencelabs/installation-spell@npm:0.5.31"
-  dependencies:
-    "@fluencelabs/aqua-ipfs": 0.5.24
-    "@fluencelabs/aqua-lib": 0.8.1
-    "@fluencelabs/spell": 0.5.31
-  checksum: f310d8545436d2dc220322fe8c29859c0559bb5563aeaedf56525892aabf097cb4743b629b786a8df0fa332686ba2ab7367e3a4dfecc59bea4b8236b68823dab
-  languageName: node
-  linkType: hard
-
 "@fluencelabs/interfaces@npm:0.9.0":
   version: 0.9.0
   resolution: "@fluencelabs/interfaces@npm:0.9.0"
@@ -801,10 +774,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/spell@npm:0.5.31":
-  version: 0.5.31
-  resolution: "@fluencelabs/spell@npm:0.5.31"
-  checksum: a14a18466482c7cbab7ff13bbba4d7ab58d44684922bee110e2b3fe60af49ef2b4074b63075b52200ed62b7745afdce489fcd65e92645d85df0db2a7e1a20eb8
+"@fluencelabs/npm-aqua-compiler@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@fluencelabs/npm-aqua-compiler@npm:0.0.2"
+  dependencies:
+    "@npmcli/arborist": ^7.2.1
+    treeverse: 3.0.0
+  checksum: ec08ec984e21cb63fc20eb34b05bc062d49919723549cc61e1d3622695d3dec6cd25f0518095dd378237eaaa732850e432d8ea39dc0e1a3d06f8dfcde80460e3
   languageName: node
   linkType: hard
 
@@ -1441,8 +1417,8 @@ __metadata:
   linkType: hard
 
 "@libp2p/multistream-select@npm:^5.0.1":
-  version: 5.0.2
-  resolution: "@libp2p/multistream-select@npm:5.0.2"
+  version: 5.0.3
+  resolution: "@libp2p/multistream-select@npm:5.0.3"
   dependencies:
     "@libp2p/interface": ^1.0.2
     it-length-prefixed: ^9.0.3
@@ -1450,10 +1426,11 @@ __metadata:
     it-pipe: ^3.0.1
     it-stream-types: ^2.0.1
     p-defer: ^4.0.0
+    race-signal: ^1.0.2
     uint8-varint: ^2.0.2
     uint8arraylist: ^2.4.3
     uint8arrays: ^5.0.0
-  checksum: e32e5b018879006062007bff914709f876a1766b8fed26ecc1d86472ea1c3c8f749effcc3c0f159e691fb9afc6f7f63b38a722b9571519d7b4ae38b6e77d598b
+  checksum: 5d7ad0302ffd934ceb2a3de955bf13575b1d9178d9b8a5d437a3e8df15d4ce323ebab4c233a2dd5932102b4ba9d6cf3db61b756bc584b754faf681f400280855
   languageName: node
   linkType: hard
 
@@ -1531,32 +1508,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@libp2p/peer-record@npm:^7.0.0, @libp2p/peer-record@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "@libp2p/peer-record@npm:7.0.1"
+"@libp2p/peer-record@npm:^7.0.0, @libp2p/peer-record@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "@libp2p/peer-record@npm:7.0.2"
   dependencies:
     "@libp2p/crypto": ^3.0.2
     "@libp2p/interface": ^1.0.2
     "@libp2p/peer-id": ^4.0.2
-    "@libp2p/utils": ^5.0.3
+    "@libp2p/utils": ^5.1.0
     "@multiformats/multiaddr": ^12.1.10
     protons-runtime: ^5.0.0
     uint8-varint: ^2.0.0
     uint8arraylist: ^2.4.3
     uint8arrays: ^5.0.0
-  checksum: b95add0fe5cbc0dae1db9cd03cc50336923c3064faa0573b4784b91c68aac161426fe06724cb5216240862b2785129adc771bda6a4539d0810b20b2576bee3e2
+  checksum: 3a85eb8ff3ba14121b358cf7915a86d756ee450180180ae7112261e95ef84adc204682e7df21edd739b3d76276a43b3b3cf5b7876f5a218362eedd7cf7fc282e
   languageName: node
   linkType: hard
 
 "@libp2p/peer-store@npm:^10.0.0":
-  version: 10.0.2
-  resolution: "@libp2p/peer-store@npm:10.0.2"
+  version: 10.0.3
+  resolution: "@libp2p/peer-store@npm:10.0.3"
   dependencies:
     "@libp2p/interface": ^1.0.2
     "@libp2p/peer-collections": ^5.1.1
     "@libp2p/peer-id": ^4.0.2
     "@libp2p/peer-id-factory": ^4.0.1
-    "@libp2p/peer-record": ^7.0.1
+    "@libp2p/peer-record": ^7.0.2
     "@multiformats/multiaddr": ^12.1.10
     interface-datastore: ^8.2.0
     it-all: ^3.0.2
@@ -1565,7 +1542,7 @@ __metadata:
     protons-runtime: ^5.0.0
     uint8arraylist: ^2.4.3
     uint8arrays: ^5.0.0
-  checksum: 065434a98e6fbab440fccbd2dc4c5f889a1e5becb2bb0e04f9b49fd49c03721ea0c6b5c984a81d383043bc383fb599a79077918160b160e6ac5519b655185efd
+  checksum: 039de760f6eb8f75a6ab86d8be2aa1c19b79433d06bfa46ca2740764b0825c97b4222e10eeba1d7561a3c52d24144e279f094e28894dfbbef634a6ad91bfbbfb
   languageName: node
   linkType: hard
 
@@ -1585,23 +1562,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@libp2p/utils@npm:^5.0.0, @libp2p/utils@npm:^5.0.2, @libp2p/utils@npm:^5.0.3":
-  version: 5.0.3
-  resolution: "@libp2p/utils@npm:5.0.3"
+"@libp2p/utils@npm:^5.0.0, @libp2p/utils@npm:^5.0.2, @libp2p/utils@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@libp2p/utils@npm:5.1.0"
   dependencies:
     "@chainsafe/is-ip": ^2.0.2
     "@libp2p/interface": ^1.0.2
+    "@libp2p/peer-collections": ^5.1.1
     "@multiformats/multiaddr": ^12.1.10
     "@multiformats/multiaddr-matcher": ^1.1.0
     get-iterator: ^2.0.1
     is-loopback-addr: ^2.0.1
     it-pushable: ^3.2.2
     it-stream-types: ^2.0.1
-    p-queue: ^7.4.1
+    p-queue: ^8.0.0
     private-ip: ^3.0.1
     race-signal: ^1.0.1
     uint8arraylist: ^2.4.3
-  checksum: b8f79eeee699499836bbb3df2645f105324dc2de2e8e9f27ac4435fd935cf7b548e798d94fb33f4f3b2d62400dbd8d918900d80bfb70b46a906dce42ae82b7de
+  checksum: 5f01bf4fca4871b9f2bf0a969c8de165bb04e69327aee4c97381da1b1ce107ea3e598b90c4ff1182a3ff2983c0e78495bb99dee282dce32bb11fec1474a07a03
   languageName: node
   linkType: hard
 
@@ -4478,8 +4456,8 @@ __metadata:
   linkType: hard
 
 "aws-sdk@npm:^2.1231.0":
-  version: 2.1520.0
-  resolution: "aws-sdk@npm:2.1520.0"
+  version: 2.1523.0
+  resolution: "aws-sdk@npm:2.1523.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -4491,7 +4469,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.5.0
-  checksum: 30917348b16bc8d4573e42e6907649d0864b44e56c4f48a314cbf1dcbfb35ea3225961fcba5e9771c44c1af87159f633be0a3c828b99c21a015707c72c5c47a9
+  checksum: 874126907b553171073916c36c4cb421eee093a9d9dd53aa86722cf5a35664dc25b116a8e1b29d741b2c0c71e65b62efa6f62d2e8b2157a82ce728a8b05c886e
   languageName: node
   linkType: hard
 
@@ -6456,9 +6434,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.601":
-  version: 1.4.614
-  resolution: "electron-to-chromium@npm:1.4.614"
-  checksum: e99e6c8600aa76b4d385a4381b943ec2cfeebfdc36a2675fbf87b334256428b92f5d79ab287b8bab0e1875a992284a8a95a03b41b71e9d64a75b5088daf1dc5e
+  version: 1.4.615
+  resolution: "electron-to-chromium@npm:1.4.615"
+  checksum: 9ffb1d0dac11c629bd8aa38efa7d2e3f41de943cf81fb41ab05e960e954c464c168d1f2f7e571813805e85b895279f2882bcafa551a2f23089646008d7a5bd06
   languageName: node
   linkType: hard
 
@@ -12377,7 +12355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-queue@npm:^8.0.1":
+"p-queue@npm:^8.0.0, p-queue@npm:^8.0.1":
   version: 8.0.1
   resolution: "p-queue@npm:8.0.1"
   dependencies:
@@ -13242,7 +13220,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"race-signal@npm:^1.0.1":
+"race-signal@npm:^1.0.1, race-signal@npm:^1.0.2":
   version: 1.0.2
   resolution: "race-signal@npm:1.0.2"
   checksum: 01ea1f70059673cd239acbe9523eaf1649f3b02ec786b5266770d9b045018aa96e316150447f0a12e7b0f8aa02522deb23e7d3a2c3a58d37135c505f595f2e49
@@ -14834,17 +14812,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"treeverse@npm:3.0.0, treeverse@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "treeverse@npm:3.0.0"
+  checksum: 73168d9887fa57b0719218f176c5a3cfbaaf310922879acb4adf76665bc17dcdb6ed3e4163f0c27eee17e346886186a1515ea6f87e96cdc10df1dce13bf622a0
+  languageName: node
+  linkType: hard
+
 "treeverse@npm:^1.0.4":
   version: 1.0.4
   resolution: "treeverse@npm:1.0.4"
   checksum: 712640acd811060ff552a3c761f700d18d22a4da544d31b4e290817ac4bbbfcfe33b58f85e7a5787e6ff7351d3a9100670721a289ca14eb87b36ad8a0c20ebd8
-  languageName: node
-  linkType: hard
-
-"treeverse@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "treeverse@npm:3.0.0"
-  checksum: 73168d9887fa57b0719218f176c5a3cfbaaf310922879acb4adf76665bc17dcdb6ed3e4163f0c27eee17e346886186a1515ea6f87e96cdc10df1dce13bf622a0
   languageName: node
   linkType: hard
 

@@ -32,9 +32,7 @@ import {
   DOT_FLUENCE_DIR_NAME,
   GITIGNORE_FILE_NAME,
   MODULES_DIR_NAME,
-  NPM_DIR_NAME,
   SERVICES_DIR_NAME,
-  SETTINGS_JSON_FILE_NAME,
   SRC_DIR_NAME,
   TMP_DIR_NAME,
   VSCODE_DIR_NAME,
@@ -55,6 +53,7 @@ import {
   YAML_EXT,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
+  AQUA_DEPENDENCIES_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -92,16 +91,6 @@ export const ensureUserFluenceDir = (): Promise<string> => {
 
 export const getUserCountlyDir = async (): Promise<string> => {
   return join(await ensureUserFluenceDir(), COUNTLY_DIR_NAME, COUNTLY_DIR_NAME);
-};
-
-export const ensureUserFluenceTmpNpmDir = async (): Promise<string> => {
-  return ensureDir(
-    join(await ensureUserFluenceDir(), TMP_DIR_NAME, NPM_DIR_NAME),
-  );
-};
-
-export const ensureUserFluenceNpmDir = async (): Promise<string> => {
-  return ensureDir(join(await ensureUserFluenceDir(), NPM_DIR_NAME));
 };
 
 export const ensureUserFluenceTmpCargoDir = async (): Promise<string> => {
@@ -149,9 +138,9 @@ export const setProviderConfigName = (name: string | undefined): void => {
   providerConfigName = name;
 };
 
-export const ensureProviderConfigDirPath = async (): Promise<string> => {
+async function ensureProviderConfigDirPath(): Promise<string> {
   return ensureDir(join(projectRootDir, providerConfigName ?? ""));
-};
+}
 
 export async function ensureProviderConfigPath(): Promise<string> {
   const providerConfigDirPath = await ensureProviderConfigDirPath();
@@ -207,10 +196,6 @@ export const ensureSpellsDir = async (): Promise<string> => {
 
 const ensureVSCodeDir = async (): Promise<string> => {
   return ensureDir(join(projectRootDir, VSCODE_DIR_NAME));
-};
-
-export const ensureVSCodeSettingsJsonPath = async (): Promise<string> => {
-  return join(await ensureVSCodeDir(), SETTINGS_JSON_FILE_NAME);
 };
 
 export const ensureVSCodeExtensionsJsonPath = async (): Promise<string> => {
@@ -271,9 +256,9 @@ export const getFluenceSecretsDir = (): string => {
   return join(getFluenceDir(), SECRETS_DIR_NAME);
 };
 
-export const ensureFluenceSecretsDir = async (): Promise<string> => {
+async function ensureFluenceSecretsDir(): Promise<string> {
   return ensureDir(getFluenceSecretsDir());
-};
+}
 
 export const ensureFluenceSecretsFilePath = async (
   name: string,
@@ -362,3 +347,14 @@ const ensureFluenceTmpDir = async (): Promise<string> => {
 export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
   return join(await ensureFluenceTmpDir(), CONFIG_TOML);
 };
+
+export async function ensureFluenceAquaDependenciesPath(): Promise<string> {
+  return ensureDir(join(await ensureFluenceDir(), AQUA_DEPENDENCIES_DIR_NAME));
+}
+
+export async function getFluenceAquaDependenciesPackageJsonPath(): Promise<string> {
+  return join(
+    await ensureFluenceAquaDependenciesPath(),
+    PACKAGE_JSON_FILE_NAME,
+  );
+}
