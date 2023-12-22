@@ -77,7 +77,6 @@ export async function register(flags: {
   }
 
   const { dealClient } = await getDealClient();
-  await dealClient.getMarket();
   const market = await dealClient.getMarket();
   const flt = await dealClient.getFLT();
 

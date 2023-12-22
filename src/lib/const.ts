@@ -242,10 +242,12 @@ export const ENV_ARG = {
   [ENV_ARG_NAME]: Args.string(fluenceEnvFlagAndArg),
 };
 
+export const LOCAL_NET_DEFAULT_WALLET_KEY =
+  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5";
+
 export const PRIV_KEY_FLAG = {
   "priv-key": Flags.string({
-    description:
-      "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
+    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} will be used by default`,
     helpValue: "<private-key>",
   }),
 };
@@ -648,9 +650,6 @@ export const READMEs: Record<Template, string> = {
   ts: getTsOrJsReadme(false),
   js: getTsOrJsReadme(true),
 };
-
-export const LOCAL_NET_DEFAULT_WALLET_KEY =
-  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5";
 
 export const LOCAL_NET_WALLET_KEYS = [
   LOCAL_NET_DEFAULT_WALLET_KEY,

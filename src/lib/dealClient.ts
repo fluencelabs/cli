@@ -33,6 +33,7 @@ import {
   WC_METADATA,
   type ContractsENV,
   CONTRACTS_ENV_TO_CHAIN_ID,
+  LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "./const.js";
 import { ensureChainNetwork } from "./ensureChainNetwork.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
@@ -78,10 +79,15 @@ let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
 let dealClient: DealClient | undefined = undefined;
 
 export async function getDealClient() {
-  const { env: envFromFlags, ["priv-key"]: privKey } = dealClientFlags;
+  const { env: envFromFlags } = dealClientFlags;
 
   const fluenceConfig = await initReadonlyFluenceConfig();
   const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
+
+  const privKey =
+    dealClientFlags["priv-key"] ??
+    // use default wallet key for local network
+    (env === "local" ? LOCAL_NET_DEFAULT_WALLET_KEY : undefined);
 
   if (signerOrWallet === undefined || dealClient === undefined) {
     signerOrWallet =
