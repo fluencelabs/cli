@@ -37,7 +37,7 @@ import {
 } from "./const.js";
 import { ensureChainNetwork } from "./ensureChainNetwork.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { setTryTimeout } from "./helpers/utils.js";
+import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
@@ -113,7 +113,9 @@ async function createDealClient(
       // By calling this method we ensure that the client is connected
       await client.getMarket();
     },
-    () => {},
+    (err) => {
+      throw new Error(stringifyUnknown(err));
+    },
     1000 * 60 * 3,
   );
 
