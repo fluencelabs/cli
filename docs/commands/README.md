@@ -256,7 +256,8 @@ FLAGS
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure
+                                                       flags is unsecure. On local network 0x3cc23e0227bd17ea5d6ea9d42b5
+                                                       eaa53ad41b1974de4755c79fe236d361a6fd5 will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -313,7 +314,8 @@ FLAGS
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure
+                                                       flags is unsecure. On local network 0x3cc23e0227bd17ea5d6ea9d42b5
+                                                       eaa53ad41b1974de4755c79fe236d361a6fd5 will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -389,7 +391,9 @@ FLAGS
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
-                                                   is unsecure
+                                                   is unsecure. On local network
+                                                   0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5
+                                                   will be used by default
 
 DESCRIPTION
   Deposit to capacity commitment
@@ -768,7 +772,9 @@ USAGE
 FLAGS
   --no-input                Don't interactively ask for any input from the user
   --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure
+  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local
+                            network 0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5 will be used by
+                            default
   --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local peers
 
 DESCRIPTION
@@ -872,7 +878,9 @@ FLAGS
                                               all noxes from capacityCommitments property of the provider config
       --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
       --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                              unsecure
+                                              unsecure. On local network
+                                              0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5 will be
+                                              used by default
 
 DESCRIPTION
   Create Capacity commitment
@@ -961,7 +969,9 @@ FLAGS
       --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
       --offer=<offer>                         Offer from provider.yaml to use
       --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                              unsecure
+                                              unsecure. On local network
+                                              0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5 will be
+                                              used by default
 
 DESCRIPTION
   Register in matching contract
@@ -1238,7 +1248,8 @@ FLAGS
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure
+                                                       flags is unsecure. On local network 0x3cc23e0227bd17ea5d6ea9d42b5
+                                                       eaa53ad41b1974de4755c79fe236d361a6fd5 will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -1276,7 +1287,8 @@ FLAGS
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure
+                                                       flags is unsecure. On local network 0x3cc23e0227bd17ea5d6ea9d42b5
+                                                       eaa53ad41b1974de4755c79fe236d361a6fd5 will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --spell-id=<spell-id>                            [default: worker-spell] Spell id
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
@@ -1315,7 +1327,8 @@ FLAGS
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure
+                                                       flags is unsecure. On local network 0x3cc23e0227bd17ea5d6ea9d42b5
+                                                       eaa53ad41b1974de4755c79fe236d361a6fd5 will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -1358,7 +1371,8 @@ FLAGS
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure
+                                                       flags is unsecure. On local network 0x3cc23e0227bd17ea5d6ea9d42b5
+                                                       eaa53ad41b1974de4755c79fe236d361a6fd5 will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
