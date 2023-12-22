@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { getProvider } from "../../lib/provider.js";
 
 export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   static override hidden = true;
@@ -45,12 +43,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(RewardInfo),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
+    const { args } = await initCli(this, await this.parse(RewardInfo));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -58,8 +51,8 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
     const unitId =
       args["UNIT-ID"] ?? (await input({ message: "Enter unit id" }));
 
-    const dealClient = new DealClient(getProvider(network), network);
-    const deal = dealClient.getDeal(dealAddress);
+    const { readonlyDealClient } = await getReadonlyDealClient();
+    const deal = readonlyDealClient.getDeal(dealAddress);
 
     const rewardAmount = await deal.getRewardAmount(unitId);
     const { ethers } = await import("ethers");

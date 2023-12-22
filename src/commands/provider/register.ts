@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
-import { ethers } from "ethers";
 import times from "lodash-es/times.js";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
 import {
   initNewReadonlyProviderConfig,
   promptForOffer,
@@ -34,11 +31,14 @@ import {
   CURRENCY_MULTIPLIER,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import {
+  getDealClient,
+  promptConfirmTx,
+  waitTx,
+} from "../../lib/dealClient.js";
 import { getSecretKeyOrReturnExisting } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { getPeerIdFromSecretKey } from "../../lib/multiaddres.js";
-import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 export default class Register extends BaseCommand<typeof Register> {
   static override description = "Register in matching contract";
@@ -51,25 +51,18 @@ export default class Register extends BaseCommand<typeof Register> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Register),
-    );
-
-    await register(flags, maybeFluenceConfig);
+    const { flags } = await initCli(this, await this.parse(Register));
+    await register(flags);
   }
 }
 
-export async function register(
-  flags: {
-    offer?: string | undefined;
-    noxes?: number | undefined;
-    config?: string | undefined;
-    env: string | undefined;
-    "priv-key": string | undefined;
-  },
-  maybeFluenceConfig?: FluenceConfig | null,
-) {
+export async function register(flags: {
+  offer?: string | undefined;
+  noxes?: number | undefined;
+  config?: string | undefined;
+  env: string | undefined;
+  "priv-key": string | undefined;
+}) {
   const providerConfig = await initNewReadonlyProviderConfig(flags);
 
   let offer =
@@ -83,14 +76,8 @@ export async function register(
     offer = await promptForOffer(providerConfig.offers);
   }
 
-  const network = await ensureChainNetwork(
-    flags.env,
-    maybeFluenceConfig ?? null,
-  );
-
-  const signer = await getSigner(network, flags["priv-key"]);
-
-  const dealClient = new DealClient(signer, network);
+  const { dealClient } = await getDealClient();
+  await dealClient.getMarket();
   const market = await dealClient.getMarket();
   const flt = await dealClient.getFLT();
 
@@ -100,10 +87,11 @@ export async function register(
 
   dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
 
-  const [{ digest, CID }, { base58btc }] = await Promise.all([
+  const [{ digest, CID }, { base58btc }, { ethers }] = await Promise.all([
     import("multiformats"),
     // eslint-disable-next-line import/extensions
     import("multiformats/bases/base58"),
+    import("ethers"),
   ]);
 
   const computePeersToRegister = await Promise.all(

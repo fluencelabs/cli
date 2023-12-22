@@ -46,7 +46,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
+import { resolveFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
   static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;

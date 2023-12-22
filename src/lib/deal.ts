@@ -18,24 +18,18 @@
 
 import assert from "node:assert";
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
-import {
-  CLI_NAME_FULL,
-  CURRENCY_MULTIPLIER,
-  type ContractsENV,
-} from "./const.js";
+import { CLI_NAME_FULL, CURRENCY_MULTIPLIER } from "./const.js";
 import { dbg } from "./dbg.js";
-import { getSigner, waitTx, promptConfirmTx } from "./provider.js";
+import { waitTx, promptConfirmTx, getDealClient } from "./dealClient.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
 type DealCreateArg = {
-  contractsENV: ContractsENV;
   privKey: string | undefined;
   appCID: string;
   minWorkers: number;
@@ -45,8 +39,7 @@ type DealCreateArg = {
   effectors: string[];
 };
 
-export const dealCreate = async ({
-  contractsENV,
+export async function dealCreate({
   privKey,
   appCID,
   minWorkers,
@@ -54,10 +47,8 @@ export const dealCreate = async ({
   maxWorkersPerProvider,
   pricePerWorkerEpoch,
   effectors,
-}: DealCreateArg) => {
-  const signer = await getSigner(contractsENV, privKey);
-
-  const dealClient = new DealClient(signer, contractsENV);
+}: DealCreateArg) {
+  const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
   const market = await dealClient.getMarket();
   const flt = await dealClient.getFLT();
@@ -125,24 +116,20 @@ export const dealCreate = async ({
     ?.args.getValue(DEAL_LOG_ARG_NAME);
 
   return dealInfoEvent.toString();
-};
+}
 
 type DealUpdateArg = {
-  contractsENV: ContractsENV;
   privKey: string | undefined;
   dealAddress: string;
   appCID: string;
 };
 
-export const dealUpdate = async ({
-  contractsENV,
+export async function dealUpdate({
   privKey,
   dealAddress,
   appCID,
-}: DealUpdateArg) => {
-  const signer = await getSigner(contractsENV, privKey);
-
-  const dealClient = new DealClient(signer, contractsENV);
+}: DealUpdateArg) {
+  const { dealClient } = await getDealClient();
   const deal = dealClient.getDeal(dealAddress);
 
   const { CID } = await import("ipfs-http-client");
@@ -158,18 +145,12 @@ export const dealUpdate = async ({
   await waitTx(tx);
 
   return tx;
-};
+}
 
 const COMPUTE_UNIT_CREATED_EVENT_TOPIC = "ComputeUnitCreated";
 
-export async function match(
-  contractsENV: ContractsENV,
-  privKey: string | undefined,
-  dealAddress: string,
-) {
-  const signer = await getSigner(contractsENV, privKey);
-
-  const dealClient = new DealClient(signer, contractsENV);
+export async function match(privKey: string | undefined, dealAddress: string) {
+  const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
 
   const tx = await market.matchDeal(dealAddress);

@@ -28,7 +28,7 @@ import {
 import { compileSpells } from "../lib/deployWorkers.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
-import { resolveFluenceEnv } from "../lib/multiaddres.js";
+import { resolveFluenceEnv } from "../lib/resolveFluenceEnv.js";
 
 export default class Build extends BaseCommand<typeof Build> {
   static override description = `Build all application services, described in ${FLUENCE_CONFIG_FULL_FILE_NAME} and generate aqua interfaces for them`;

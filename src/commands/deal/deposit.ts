@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import { DealClient, ERC20__factory } from "@fluencelabs/deal-aurora";
+import { ERC20__factory } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import {
+  getDealClient,
+  promptConfirmTx,
+  waitTx,
+} from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
   static override hidden = true;
@@ -44,12 +47,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Deposit),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
+    const { flags, args } = await initCli(this, await this.parse(Deposit));
     const privKey = flags["priv-key"];
 
     const dealAddress =
@@ -62,16 +60,14 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
         (await input({ message: "Enter amount of tokens to deposit" })),
     );
 
-    const signer = await getSigner(network, privKey);
-
-    const dealClient = new DealClient(signer, network);
+    const { dealClient, signerOrWallet } = await getDealClient();
     const deal = dealClient.getDeal(dealAddress);
 
     promptConfirmTx(privKey);
 
     const approveTx = await ERC20__factory.connect(
       await deal.paymentToken(),
-      signer,
+      signerOrWallet,
     ).approve(await deal.getAddress(), amount);
 
     await approveTx.wait();

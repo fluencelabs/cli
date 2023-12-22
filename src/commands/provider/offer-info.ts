@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { getProvider } from "../../lib/provider.js";
 
 export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
   static override description = "Get info about provider";
@@ -37,15 +35,9 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(OfferInfo),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-
-    const dealClient = new DealClient(getProvider(network), network);
-    const market = await dealClient.getMarket();
+    const { flags } = await initCli(this, await this.parse(OfferInfo));
+    const { readonlyDealClient } = await getReadonlyDealClient();
+    const market = await readonlyDealClient.getMarket();
 
     const offerId = flags["offer-id"];
 

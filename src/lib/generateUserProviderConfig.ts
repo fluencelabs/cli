@@ -28,11 +28,13 @@ import {
 } from "./const.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import {
-  validatePercent,
-  validatePositiveNumberOrEmpty,
-  validateAddress,
   ccDurationValidator,
   getMinCCDuration,
+  validateAddress,
+} from "./helpers/validateCapacityCommitment.js";
+import {
+  validatePercent,
+  validatePositiveNumberOrEmpty,
 } from "./helpers/validations.js";
 import { checkboxes, confirm, input } from "./prompt.js";
 
@@ -70,7 +72,9 @@ export async function addComputePeers(
 ) {
   let computePeersCounter = 0;
   let isAddingMoreComputePeers = true;
-  const validateCCDuration = await ccDurationValidator(userProvidedConfig.env);
+  const isLocal = userProvidedConfig.env === "local";
+  const validateCCDuration = await ccDurationValidator(isLocal);
+  const minDuration = await getMinCCDuration(isLocal);
 
   do {
     const defaultName = `nox-${computePeersCounter}`;
@@ -93,8 +97,6 @@ export async function addComputePeers(
       default: "1",
       validate: validatePositiveNumberOrEmpty,
     });
-
-    const minDuration = await getMinCCDuration(userProvidedConfig.env);
 
     const capacityCommitmentDuration = await input({
       message: `Enter capacity commitment duration ${DURATION_EXAMPLE}`,

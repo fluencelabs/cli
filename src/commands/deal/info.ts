@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import { getDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { getProvider } from "../../lib/provider.js";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about provider";
@@ -40,14 +38,8 @@ export default class Info extends BaseCommand<typeof Info> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Info),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-
-    const dealClient = new DealClient(getProvider(network), network);
+    const { args } = await initCli(this, await this.parse(Info));
+    const { dealClient } = await getDealClient();
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));

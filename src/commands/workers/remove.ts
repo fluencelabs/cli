@@ -38,7 +38,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
+import { resolveFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
   static override description = `Remove workers from hosts, described in 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME}`;

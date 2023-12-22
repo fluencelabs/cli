@@ -38,7 +38,7 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
+import { resolveFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Upload extends BaseCommand<typeof Upload> {
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;

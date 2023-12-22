@@ -23,7 +23,7 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   CLI_NAME,
 } from "./const.js";
-import { resolveFluenceEnv } from "./multiaddres.js";
+import { resolveFluenceEnv } from "./resolveFluenceEnv.js";
 
 export async function ensureChainNetwork(
   fluenceEnvFromFlags: string | undefined,

@@ -69,9 +69,10 @@ import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
-import { updateRelaysJSON, resolveFluenceEnv } from "./multiaddres.js";
+import { updateRelaysJSON } from "./multiaddres.js";
 import { copyDefaultDependencies } from "./npm.js";
 import { getFrontendIndexTSorJSPath, ensureAquaMainPath } from "./paths.js";
+import { resolveFluenceEnv } from "./resolveFluenceEnv.js";
 
 const selectTemplate = (): Promise<Template> => {
   return list({

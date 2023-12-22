@@ -32,8 +32,8 @@ import {
   type FluenceEnv,
   FLUENCE_ENVS,
 } from "../../const.js";
-import { fluenceEnvPrompt } from "../../multiaddres.js";
 import { getFluenceDir } from "../../paths.js";
+import { fluenceEnvPrompt } from "../../resolveFluenceEnv.js";
 import {
   getReadonlyConfigInitFunction,
   getConfigInitFunction,

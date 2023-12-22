@@ -68,7 +68,7 @@ import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   ccDurationValidator,
   validateAddress,
-} from "../../helpers/validations.js";
+} from "../../helpers/validateCapacityCommitment.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import {
   ensureFluenceConfigsDir,
@@ -470,7 +470,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
       .join("\n");
   }
 
-  const validateCCDuration = await ccDurationValidator(config.env);
+  const validateCCDuration = await ccDurationValidator(config.env === "local");
 
   const capacityCommitmentErrors = (
     await Promise.all(

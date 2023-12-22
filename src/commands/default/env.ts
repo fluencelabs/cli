@@ -26,10 +26,10 @@ import { ENV_ARG } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
-  ensureValidFluenceEnv,
   ensureCustomAddrsAndPeerIds,
   updateRelaysJSON,
 } from "../../lib/multiaddres.js";
+import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Peers extends BaseCommand<typeof Peers> {
   static override description =

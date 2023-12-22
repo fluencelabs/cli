@@ -51,7 +51,7 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
+import { resolveFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -158,7 +158,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         );
 
         await dealUpdate({
-          contractsENV: contractsENV,
           privKey: flags["priv-key"],
           appCID,
           dealAddress: previouslyDeployedDeal.dealIdOriginal,
@@ -167,11 +166,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         if (flags["auto-match"]) {
           dbg("start matching");
 
-          await match(
-            contractsENV,
-            flags["priv-key"],
-            previouslyDeployedDeal.dealIdOriginal,
-          );
+          await match(flags["priv-key"], previouslyDeployedDeal.dealIdOriginal);
 
           dbg("done matching");
         }
@@ -214,7 +209,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       );
 
       const dealIdOriginal = await dealCreate({
-        contractsENV,
         privKey: flags["priv-key"],
         appCID,
         minWorkers,
@@ -226,7 +220,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
 
       if (flags["auto-match"]) {
         dbg("start matching");
-        await match(contractsENV, flags["priv-key"], dealIdOriginal);
+        await match(flags["priv-key"], dealIdOriginal);
         dbg("done matching");
       }
 

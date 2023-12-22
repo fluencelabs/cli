@@ -46,6 +46,7 @@ import {
 import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
+import { setDealClientFlags, type DealClientFlags } from "./dealClient.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
 import { updateRelaysJSON } from "./multiaddres.js";
@@ -93,7 +94,7 @@ type ParserOutputWithNoInputFlag<
 > = ParserOutput<F, F2, A> & {
   flags: {
     [NO_INPUT_FLAG_NAME]: boolean;
-  };
+  } & DealClientFlags;
 };
 
 export async function initCli<
@@ -189,6 +190,11 @@ export async function initCli<
 
   await updateRelaysJSON({
     fluenceConfig: maybeFluenceConfig,
+  });
+
+  setDealClientFlags({
+    env: flags.env,
+    "priv-key": flags["priv-key"],
   });
 
   return {

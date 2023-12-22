@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { PRIV_KEY_FLAG, ENV_FLAG, ENV_FLAG_NAME } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import {
+  getDealClient,
+  promptConfirmTx,
+  waitTx,
+} from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
   static override description = "Deposit to capacity commitment";
@@ -41,19 +43,9 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Deposit),
-    );
+    const { flags, args } = await initCli(this, await this.parse(Deposit));
+    const { dealClient } = await getDealClient();
 
-    const network = await ensureChainNetwork(
-      flags[ENV_FLAG_NAME],
-      maybeFluenceConfig,
-    );
-
-    const signer = await getSigner(network, flags["priv-key"]);
-
-    const dealClient = new DealClient(signer, network);
     const capacity = await dealClient.getCapacity();
     const market = await dealClient.getMarket();
     const flt = await dealClient.getFLT();

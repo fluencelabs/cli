@@ -16,21 +16,23 @@
 
 import assert from "assert";
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 import parse from "parse-duration";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
 import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import {
   PRIV_KEY_FLAG,
   NOXES_FLAG,
   PROVIDER_CONFIG_FLAGS,
 } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import {
+  getDealClient,
+  promptConfirmTx,
+  waitTx,
+} from "../../lib/dealClient.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
@@ -38,7 +40,6 @@ import {
 import { getSecretKeyOrReturnExisting } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { getPeerIdFromSecretKey } from "../../lib/multiaddres.js";
-import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 const CAPACITY_COMMITMENT_CREATED_EVENT = "CapacityCommitmentCreated";
 export default class CreateCommitment extends BaseCommand<
@@ -58,30 +59,19 @@ export default class CreateCommitment extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(CreateCommitment),
-    );
-
-    await createCommitment(flags, maybeFluenceConfig);
+    const { flags } = await initCli(this, await this.parse(CreateCommitment));
+    await createCommitment(flags);
   }
 }
 
-export async function createCommitment(
-  flags: {
-    noxes?: number | undefined;
-    config?: string | undefined;
-    env: string | undefined;
-    "priv-key": string | undefined;
-    "nox-names"?: string | undefined;
-  },
-  maybeFluenceConfig: FluenceConfig | null,
-) {
-  const providerConfig = await initNewReadonlyProviderConfig(flags);
-  const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-  const signer = await getSigner(network, flags["priv-key"]);
-
-  const dealClient = new DealClient(signer, network);
+export async function createCommitment(flags: {
+  noxes?: number | undefined;
+  config?: string | undefined;
+  env: string | undefined;
+  "priv-key": string | undefined;
+  "nox-names"?: string | undefined;
+}) {
+  const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
   const capacity = await dealClient.getCapacity();
 
@@ -97,6 +87,8 @@ export async function createCommitment(
     flags["nox-names"] === undefined
       ? []
       : commaSepStrToArr(flags["nox-names"]);
+
+  const providerConfig = await initNewReadonlyProviderConfig(flags);
 
   const allCommitments = Object.entries(
     providerConfig.capacityCommitments ?? {},

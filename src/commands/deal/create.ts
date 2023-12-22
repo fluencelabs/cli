@@ -21,7 +21,6 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Create extends BaseCommand<typeof Create> {
@@ -64,10 +63,7 @@ export default class Create extends BaseCommand<typeof Create> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Create),
-    );
+    const { flags } = await initCli(this, await this.parse(Create));
 
     const dealAddress = await dealCreate({
       appCID: flags["app-cid"],
@@ -77,7 +73,6 @@ export default class Create extends BaseCommand<typeof Create> {
       pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
       effectors: flags.effector,
       privKey: flags["priv-key"],
-      contractsENV: await ensureChainNetwork(flags.env, maybeFluenceConfig),
     });
 
     commandObj.logToStderr(

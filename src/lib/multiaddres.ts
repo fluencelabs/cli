@@ -35,9 +35,7 @@ import { envConfig } from "./configs/globalConfigs.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { initNewReadonlyProviderConfig } from "./configs/project/provider.js";
 import {
-  ENV_FLAG_NAME,
   FLUENCE_ENVS,
-  isFluenceEnv,
   type FluenceEnv,
   type PublicFluenceEnv,
   WEB_SOCKET_PORT_START,
@@ -51,69 +49,7 @@ import {
 } from "./keyPairs.js";
 import { projectRootDir } from "./paths.js";
 import { input, list } from "./prompt.js";
-
-export async function fluenceEnvPrompt(
-  message = "Select Fluence Environment to use by default with this project",
-  defaultVal: FluenceEnv = "kras",
-): Promise<FluenceEnv> {
-  return list({
-    message,
-    options: [...FLUENCE_ENVS],
-    oneChoiceMessage() {
-      throw new Error("Unreachable. There are multiple envs");
-    },
-    onNoChoices() {
-      throw new Error("Unreachable. There are multiple envs");
-    },
-    default: defaultVal,
-  });
-}
-
-async function ensureValidFluenceEnvFlag(
-  envFlag: string | undefined,
-): Promise<FluenceEnv | undefined> {
-  if (envFlag === undefined) {
-    return undefined;
-  }
-
-  if (!isFluenceEnv(envFlag)) {
-    commandObj.warn(
-      `Invalid flag: ${color.yellow(`--${ENV_FLAG_NAME} ${envFlag}`)}`,
-    );
-
-    return fluenceEnvPrompt();
-  }
-
-  return envFlag;
-}
-
-export async function ensureValidFluenceEnv(envFlag: string | undefined) {
-  return (await ensureValidFluenceEnvFlag(envFlag)) ?? fluenceEnvPrompt();
-}
-
-export async function resolveFluenceEnv(
-  fluenceEnvFromFlagsNotValidated: string | undefined,
-): Promise<FluenceEnv> {
-  const fluenceEnvFromFlags = await ensureValidFluenceEnvFlag(
-    fluenceEnvFromFlagsNotValidated,
-  );
-
-  const fluenceEnv = fluenceEnvFromFlags ?? envConfig?.fluenceEnv;
-
-  if (fluenceEnv !== undefined) {
-    return fluenceEnv;
-  }
-
-  const fluenceEnvFromPrompt = await fluenceEnvPrompt();
-
-  if (envConfig === null) {
-    return fluenceEnvFromPrompt;
-  }
-
-  envConfig.fluenceEnv = fluenceEnvFromPrompt;
-  await envConfig.$commit();
-  return fluenceEnvFromPrompt;
-}
+import { resolveFluenceEnv } from "./resolveFluenceEnv.js";
 
 export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   return multiaddrs.map((multiaddr) => {

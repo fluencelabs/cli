@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import {
+  promptConfirmTx,
+  waitTx,
+  getDealClient,
+} from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   static override hidden = true;
@@ -41,20 +43,14 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(RemoveUnit),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
+    const { flags, args } = await initCli(this, await this.parse(RemoveUnit));
     const privKey = flags["priv-key"];
 
     const unitId =
       args["UNIT-ID"] ?? (await input({ message: "Enter compute unit CID" }));
 
-    const signer = await getSigner(network, privKey);
+    const { dealClient } = await getDealClient();
 
-    const dealClient = new DealClient(signer, network);
     const market = await dealClient.getMarket();
 
     promptConfirmTx(privKey);

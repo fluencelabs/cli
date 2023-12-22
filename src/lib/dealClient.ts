@@ -19,10 +19,12 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
+import type { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
-import { ethers } from "ethers";
+import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
+import { initReadonlyFluenceConfig } from "./configs/project/fluence.js";
 import {
   DEAL_CONFIG,
   CLI_CONNECTOR_URL,
@@ -32,24 +34,97 @@ import {
   type ContractsENV,
   CONTRACTS_ENV_TO_CHAIN_ID,
 } from "./const.js";
+import { ensureChainNetwork } from "./ensureChainNetwork.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
+import { setTryTimeout } from "./helpers/utils.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
 const KEY_QUERY_PARAM_NAME = "symKey";
 
-export const getSigner = async (
-  contractsENV: ContractsENV,
-  privKey: string | undefined,
-): Promise<ethers.Signer> => {
-  return privKey === undefined
-    ? getWalletConnectProvider(contractsENV)
-    : getWallet(privKey, contractsENV);
+export type DealClientFlags = {
+  env?: string | undefined;
+  "priv-key"?: string | undefined;
 };
 
-export const getProvider = (contractsENV: ContractsENV): ethers.Provider => {
-  return new ethers.JsonRpcProvider(DEAL_CONFIG[contractsENV].url);
-};
+let dealClientFlags: DealClientFlags;
+
+export function setDealClientFlags(flags: DealClientFlags) {
+  dealClientFlags = flags;
+}
+
+let provider: ethers.Provider | undefined = undefined;
+let readonlyDealClient: DealClient | undefined = undefined;
+
+export async function getReadonlyDealClient() {
+  const { env: envFromFlags } = dealClientFlags;
+  const fluenceConfig = await initReadonlyFluenceConfig();
+  const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
+
+  if (provider === undefined) {
+    provider = await ensureProvider(env);
+  }
+
+  if (readonlyDealClient === undefined) {
+    readonlyDealClient = await createDealClient(provider, env);
+  }
+
+  return { readonlyDealClient, provider };
+}
+
+let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
+  undefined;
+
+let dealClient: DealClient | undefined = undefined;
+
+export async function getDealClient() {
+  const { env: envFromFlags, ["priv-key"]: privKey } = dealClientFlags;
+
+  const fluenceConfig = await initReadonlyFluenceConfig();
+  const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
+
+  if (signerOrWallet === undefined || dealClient === undefined) {
+    signerOrWallet =
+      privKey === undefined
+        ? await getWalletConnectProvider(env)
+        : await getWallet(privKey, env);
+
+    dealClient = await createDealClient(signerOrWallet, env);
+  }
+
+  return { dealClient, signerOrWallet };
+}
+
+async function createDealClient(
+  signerOrProvider: ethers.Provider | ethers.Signer,
+  env: ContractsENV,
+) {
+  const { DealClient } = await import("@fluencelabs/deal-aurora");
+  const client = new DealClient(signerOrProvider, env);
+
+  await setTryTimeout(
+    async () => {
+      // By calling this method we ensure that the client is connected
+      await client.getMarket();
+    },
+    () => {},
+    1000 * 60 * 3,
+  );
+
+  return client;
+}
+
+export async function ensureProvider(
+  env: ContractsENV,
+): Promise<ethers.Provider> {
+  const { ethers } = await import("ethers");
+
+  if (provider === undefined) {
+    provider = new ethers.JsonRpcProvider(DEAL_CONFIG[env].url);
+  }
+
+  return provider;
+}
 
 async function getWalletConnectProvider(contractsENV: ContractsENV) {
   const { UniversalProvider } = await import(
@@ -110,13 +185,13 @@ async function getWalletConnectProvider(contractsENV: ContractsENV) {
   return new ethers.BrowserProvider(provider).getSigner();
 }
 
-const getWallet = async (
+async function getWallet(
   privKey: string,
   contractsENV: ContractsENV,
-): Promise<ethers.Wallet> => {
+): Promise<ethers.Wallet> {
   const { ethers } = await import("ethers");
-  return new ethers.Wallet(privKey, getProvider(contractsENV));
-};
+  return new ethers.Wallet(privKey, await ensureProvider(contractsENV));
+}
 
 export const waitTx = async (
   tx: ethers.ContractTransactionResponse,

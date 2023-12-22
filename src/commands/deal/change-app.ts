@@ -21,7 +21,6 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { dealUpdate } from "../../lib/deal.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -44,10 +43,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(ChangeApp),
-    );
+    const { flags, args } = await initCli(this, await this.parse(ChangeApp));
 
     const tx = await dealUpdate({
       dealAddress:
@@ -55,7 +51,6 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
         (await input({ message: "Enter deal address" })),
       appCID:
         args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
-      contractsENV: await ensureChainNetwork(flags.env, maybeFluenceConfig),
       privKey: flags["priv-key"],
     });
 

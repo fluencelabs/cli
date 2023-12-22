@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { DealClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
-import { ethers } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import {
+  getDealClient,
+  promptConfirmTx,
+  waitTx,
+} from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { getSigner, promptConfirmTx, waitTx } from "../../lib/provider.js";
 
 export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   static override hidden = true;
@@ -45,12 +46,11 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
+    const { flags, args } = await initCli(
       this,
       await this.parse(WithdrawReward),
     );
 
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
     const privKey = flags["priv-key"];
 
     const dealAddress =
@@ -59,9 +59,7 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
     const unitId =
       args["UNIT-ID"] ?? (await input({ message: "Enter unit CID" }));
 
-    const signer = await getSigner(network, privKey);
-
-    const dealClient = new DealClient(signer, network);
+    const { dealClient } = await getDealClient();
     const deal = dealClient.getDeal(dealAddress);
 
     promptConfirmTx(privKey);
@@ -71,6 +69,8 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
     const tx = await deal.withdrawRewards(unitId);
 
     await waitTx(tx);
+
+    const { ethers } = await import("ethers");
 
     color.green(
       `Reward ${ethers.formatEther(

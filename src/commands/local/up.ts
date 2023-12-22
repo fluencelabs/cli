@@ -17,7 +17,6 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   DEFAULT_OFFER_NAME,
@@ -27,7 +26,6 @@ import {
   PRIV_KEY_FLAG,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
-import { setTryTimeout, stringifyUnknown } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { register } from "../provider/register.js";
 
@@ -79,24 +77,11 @@ export default class Up extends BaseCommand<typeof Up> {
     const env = "local";
     const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
 
-    await setTryTimeout(
-      async () => {
-        await register({
-          ...flags,
-          "priv-key": privKey,
-          env,
-          offer: DEFAULT_OFFER_NAME,
-        });
-      },
-      (error) => {
-        commandObj.error(
-          `Wasn't able to register local network on local peers in ${
-            flags.timeout
-          } seconds: ${stringifyUnknown(error)}`,
-        );
-      },
-      flags.timeout * 1000,
-      10000,
-    );
+    await register({
+      ...flags,
+      "priv-key": privKey,
+      env,
+      offer: DEFAULT_OFFER_NAME,
+    });
   }
 }
