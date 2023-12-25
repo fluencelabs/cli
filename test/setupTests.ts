@@ -45,22 +45,6 @@ await fluence({
   args: ["--version"],
 });
 
-try {
-  const localPsResult = await fluence({
-    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-    args: ["local", "ps"],
-  });
-
-  if (localPsResult.includes("fluence")) {
-    await fluence({
-      cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-      args: ["local", "down"],
-    });
-  }
-} catch (e) {
-  console.log(e);
-}
-
 await fluence({
   args: ["dep", "i"],
 });
@@ -76,6 +60,22 @@ const [, ...restTemplatePaths] = await Promise.all(
     return initFirstTime(template);
   }),
 );
+
+try {
+  const localPsResult = await fluence({
+    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+    args: ["local", "ps"],
+  });
+
+  if (localPsResult.includes("fluence")) {
+    await fluence({
+      cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+      args: ["local", "down"],
+    });
+  }
+} catch (e) {
+  console.log(e);
+}
 
 if (fluenceEnv === "local") {
   await fluence({

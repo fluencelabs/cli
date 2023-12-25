@@ -18,15 +18,36 @@ import assert from "node:assert";
 import { join } from "node:path";
 
 import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
-import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../const.js";
+import {
+  MY_SERVICE_NAME,
+  NEW_SERVICE_2_NAME,
+  NEW_SPELL_NAME,
+} from "../constants.js";
 import { fluence, init } from "../helpers.js";
 import {
   assertLogsAreValid,
+  build,
+  createServiceAndAddToDeal,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
   getFluenceConfig,
-  waitUntilShowSubnetReturnsSpell,
+  waitUntilShowSubnetReturnsExpected,
 } from "../sharedSteps.js";
+
+async function updateFluenceConfigForTest(cwd: string) {
+  const fluenceConfig = await getFluenceConfig(cwd);
+
+  assert(
+    fluenceConfig.deals !== undefined &&
+      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
+    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+  );
+
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+  await fluenceConfig.$commit();
+  return fluenceConfig;
+}
 
 describe("Deal update tests", () => {
   // TODO: test skipped until NET-649 is released
@@ -34,17 +55,7 @@ describe("Deal update tests", () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
     await init(cwd, "quickstart");
 
-    const fluenceConfig = await getFluenceConfig(cwd);
-
-    assert(
-      fluenceConfig.deals !== undefined &&
-        fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-      `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-    );
-
-    fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-    fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
-    await fluenceConfig.$commit();
+    const fluenceConfig = await updateFluenceConfigForTest(cwd);
 
     await deployDealAndWaitUntilDeployed(cwd);
 
@@ -52,7 +63,37 @@ describe("Deal update tests", () => {
 
     await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilShowSubnetReturnsSpell(cwd, MY_SERVICE_NAME, NEW_SPELL_NAME);
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME],
+      [NEW_SPELL_NAME],
+    );
+
+    const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+    assertLogsAreValid(logs);
+  });
+
+  // TODO: test skipped until NET-649 is released
+  test.skip("should update deal after new service is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
+    await init(cwd, "quickstart");
+
+    await updateFluenceConfigForTest(cwd);
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
+
+    await build(cwd);
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+      [],
+    );
 
     const logs = await fluence({ args: ["deal", "logs"], cwd });
 

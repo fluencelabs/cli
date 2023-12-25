@@ -16,12 +16,17 @@
 
 import type { JSONSchemaType } from "ajv";
 
+import { getMultiaddrs } from "./helpers.js";
+
+export const multiaddrs = await getMultiaddrs();
+
 export const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 
 export const MY_SERVICE_NAME = "myService";
 export const NEW_SPELL_NAME = "newSpell";
+export const WORKER_SPELL = "worker-spell";
 
-export const WD_MAIN_RS_CONTENT = `#![allow(non_snake_case)]
+export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;
 use marine_rs_sdk::module_manifest;
 
@@ -44,34 +49,34 @@ pub fn greeting() -> MyStruct {
 }
 `;
 
-export const WD_NEW_SERVICE_NAME = "newService";
+export const NEW_SERVICE_NAME = "newService";
 
-export const WD_NEW_SERVICE_INTERFACE = `service NewService("${WD_NEW_SERVICE_NAME}"):
+export const NEW_SERVICE_INTERFACE = `service NewService("${NEW_SERVICE_NAME}"):
   greeting(name: string) -> string`;
 
-export const WD_NEW_SERVICE_2_NAME = "newService2";
+export const NEW_SERVICE_2_NAME = "newService2";
 
-export const WD_NEW_SERVICE_2_INTERFACE = `service NewService2("${WD_NEW_SERVICE_2_NAME}"):
+export const NEW_SERVICE_2_INTERFACE = `service NewService2("${NEW_SERVICE_2_NAME}"):
   greeting(name: string) -> string`;
 
-export const WD_SERVICE_INTERFACES = `${WD_NEW_SERVICE_INTERFACE}
+export const SERVICE_INTERFACES = `${NEW_SERVICE_INTERFACE}
 
 
-${WD_NEW_SERVICE_2_INTERFACE}
+${NEW_SERVICE_2_INTERFACE}
 `;
 
-export const WD_UPDATED_SERVICE_INTERFACES = `data MyStruct:
+export const UPDATED_SERVICE_INTERFACES = `data MyStruct:
   a: i32
   b: i32
 
-service NewService("${WD_NEW_SERVICE_NAME}"):
+service NewService("${NEW_SERVICE_NAME}"):
   greeting() -> MyStruct
 
 
-${WD_NEW_SERVICE_2_INTERFACE}
+${NEW_SERVICE_2_INTERFACE}
 `;
 
-type WorkerServices = {
+export type WorkerServices = {
   host_id: string;
   services: string[];
   spells: string[];
