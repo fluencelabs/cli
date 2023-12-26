@@ -108,7 +108,7 @@ export async function dealCreate({
     `DealCreated event not found. Try updating ${CLI_NAME_FULL} to the latest version`,
   );
 
-  const dealInfoEvent: ethers.Result = core.interface
+  const dealInfoEvent: ethers.Result = market.interface
     .parseLog({
       data: log.data,
       topics: [...log.topics],
