@@ -15,6 +15,7 @@
  */
 
 import assert from "node:assert";
+import { writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 
 import Ajv from "ajv";
@@ -39,16 +40,19 @@ import {
   setTryTimeout,
   stringifyUnknown,
 } from "../src/lib/helpers/utils.js";
-import { getServicesDir, getSpellsDir } from "../src/lib/paths.js";
+import { getServicesDir, getSpellsDir, getSrcPath } from "../src/lib/paths.js";
 
 import {
   multiaddrs,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   WORKER_SPELL,
-  type WorkerServices,
-  workerServiceSchema,
 } from "./constants.js";
 import { assertHasWorkerAndAnswer, fluence } from "./helpers.js";
+import {
+  deployedServicesAnswerSchema,
+  type WorkerServices,
+  workerServiceSchema,
+} from "./schemas.js";
 
 export async function getFluenceConfig(cwd: string) {
   const fluenceConfig = await initFluenceConfigWithPath(cwd);
@@ -255,9 +259,58 @@ export async function waitUntilShowSubnetReturnsExpected(
   );
 }
 
-const validateWorkerServices = new Ajv.default({
+export async function waitUntilRunDeployedServicesReturnsExpected(
+  cwd: string,
+  answer: string,
+) {
+  await setTryTimeout(
+    async () => {
+      const result = await fluence({
+        args: ["run"],
+        flags: {
+          f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+          quiet: true,
+        },
+        cwd,
+      });
+
+      const runDeployedServicesResult = JSON.parse(result);
+
+      if (!validateDeployedServicesAnswerSchema(runDeployedServicesResult)) {
+        throw new Error(
+          `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array of Answer, but it is: ${result}`,
+        );
+      }
+
+      runDeployedServicesResult.forEach((r) => {
+        assert(
+          r.answer === answer,
+          `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} answer is expected to be ${answer}`,
+        );
+      });
+    },
+    (error) => {
+      throw new Error(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error,
+        )}`,
+      );
+    },
+    RUN_DEPLOYED_SERVICES_TIMEOUT,
+  );
+}
+
+const ajvOptions = {
   code: { esm: true },
-}).compile(workerServiceSchema);
+};
+
+const validateWorkerServices = new Ajv.default(ajvOptions).compile(
+  workerServiceSchema,
+);
+
+const validateDeployedServicesAnswerSchema = new Ajv.default(
+  ajvOptions,
+).compile(deployedServicesAnswerSchema);
 
 export function assertLogsAreValid(logs: string) {
   if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
@@ -360,4 +413,62 @@ export async function createServiceAndAddToDeal(
   ];
 
   await fluenceConfig.$commit();
+}
+
+export function getServiceDirPath(cwd: string, serviceName: string) {
+  return join(getServicesDir(cwd), serviceName);
+}
+
+export function getModuleDirPath(
+  cwd: string,
+  moduleName: string,
+  serviceName?: string,
+) {
+  if (serviceName === undefined) {
+    return join(getSrcPath(cwd), "modules", moduleName);
+  }
+
+  return join(getServiceDirPath(cwd, serviceName), "modules", moduleName);
+}
+
+export function getMainRsPath(
+  cwd: string,
+  moduleName: string,
+  serviceName?: string,
+) {
+  return join(getModuleDirPath(cwd, moduleName, serviceName), "src", "main.rs");
+}
+
+export async function updateMainRs(
+  cwd: string,
+  moduleName: string,
+  content: string,
+  serviceName?: string,
+) {
+  await writeFile(getMainRsPath(cwd, moduleName, serviceName), content);
+}
+
+export async function createModuleAndAddToService(
+  cwd: string,
+  moduleName: string,
+  serviceName: string,
+) {
+  await fluence({
+    args: ["module", "new", moduleName],
+    cwd,
+  });
+
+  const serviceConfig = await getServiceConfig(cwd, serviceName);
+
+  const relativePathToNewModule = relative(
+    getServiceDirPath(cwd, serviceName),
+    getModuleDirPath(cwd, moduleName, serviceName),
+  );
+
+  serviceConfig.modules = {
+    ...serviceConfig.modules,
+    [moduleName]: {
+      get: relativePathToNewModule,
+    },
+  };
 }
