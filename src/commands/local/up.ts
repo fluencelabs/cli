@@ -74,6 +74,8 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
+    // make sure ENV is correct according to provider
+
     const env = "local";
     const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
 

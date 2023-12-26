@@ -27,8 +27,8 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   IPFS_PORT,
   IPFS_CONTAINER_NAME,
-  CHAIN_CONTAINER_NAME,
-  CHAIN_PORT,
+  // CHAIN_CONTAINER_NAME,
+  // CHAIN_PORT,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
   PROVIDER_CONFIG_FULL_FILE_NAME,
@@ -189,6 +189,13 @@ function genNox({
       ],
       depends_on: [IPFS_CONTAINER_NAME],
       volumes: [`./${CONFIGS_DIR_NAME}/${configTomlName}:${configLocation}`],
+      // volumes: [
+      //   `${relative(
+      //     TMP_DOCKER_COMPOSE_PATH,
+      //     // `/home/shams/Projects/work/fluence-cli/.f/.fluence/configs/${configTomlName}`,
+      //     `/home/shams/Projects/work/fluence-cli/tmp/templates/quickstart/.fluence/configs/${configTomlName}`,
+      //   )}:${configLocation}`,
+      // ],
       secrets: [name],
     },
   ];
@@ -232,10 +239,10 @@ async function genDockerCompose(
   return {
     version: "3",
     services: {
-      [CHAIN_CONTAINER_NAME]: {
-        image: versions.chain,
-        ports: [`${CHAIN_PORT}:${CHAIN_PORT}`],
-      },
+      // [CHAIN_CONTAINER_NAME]: {
+      //   image: versions.chain,
+      //   ports: [`${CHAIN_PORT}:${CHAIN_PORT}`],
+      // },
       [IPFS_CONTAINER_NAME]: {
         image: "ipfs/go-ipfs",
         ports: [`${IPFS_PORT}:${IPFS_PORT}`, "4001:4001"],
