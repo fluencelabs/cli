@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import type { JSONSchemaType } from "ajv";
+import Ajv, { type JSONSchemaType } from "ajv";
+
+const ajvOptions = {
+  code: { esm: true },
+};
 
 export type WorkerServices = {
   host_id: string;
@@ -41,6 +45,10 @@ export const workerServiceSchema: JSONSchemaType<WorkerServices> = {
     required: ["host_id", "services", "spells", "worker_id"],
   },
 };
+
+export const validateWorkerServices = new Ajv.default(ajvOptions).compile(
+  workerServiceSchema,
+);
 
 export type DeployedServicesAnswer = {
   answer: string;
@@ -71,3 +79,7 @@ export const deployedServicesAnswerSchema: JSONSchemaType<DeployedServicesAnswer
       required: ["worker"],
     },
   };
+
+export const validateDeployedServicesAnswerSchema = new Ajv.default(
+  ajvOptions,
+).compile(deployedServicesAnswerSchema);
