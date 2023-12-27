@@ -5,7 +5,7 @@
   "npm": {
     "@fluencelabs/aqua-lib": "0.8.1",
     "@fluencelabs/spell": "0.6.1",
-    "@fluencelabs/registry": "0.8.7"
+    "@fluencelabs/registry": "0.9.2"
   },
   "cargo": {
     "marine": "0.17.0",
