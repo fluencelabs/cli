@@ -359,7 +359,7 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
 
       if (!validateDeployedServicesAnswerSchema(runDeployedServicesResult)) {
         throw new Error(
-          `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array of Answer, but it is: ${result}`,
+          `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array of Answer, but actual result is: ${result}`,
         );
       }
 
