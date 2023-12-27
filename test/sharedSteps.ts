@@ -112,7 +112,7 @@ export async function getServiceConfig(cwd: string, serviceName: string) {
 
   assert(
     serviceConfig !== null,
-    `we create a service at ${pathToServiceDir} above - so the config is expected to exist`,
+    `the service, owning this config, must be created at the path ${pathToServiceDir}`,
   );
 
   return serviceConfig;
