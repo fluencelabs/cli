@@ -15,9 +15,9 @@
  */
 
 import assert from "node:assert";
+import { writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-import Ajv from "ajv";
 import { map, sortBy } from "lodash-es";
 
 import {
@@ -29,6 +29,7 @@ import { initServiceConfig } from "../src/lib/configs/project/service.js";
 import {
   DEFAULT_DEAL_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
+  FS_OPTIONS,
   LOCAL_NET_DEFAULT_WALLET_KEY,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
 } from "../src/lib/const.js";
@@ -39,16 +40,56 @@ import {
   setTryTimeout,
   stringifyUnknown,
 } from "../src/lib/helpers/utils.js";
-import { getServicesDir, getSpellsDir } from "../src/lib/paths.js";
+import { getServicesDir, getSpellsDir, getSrcPath } from "../src/lib/paths.js";
 
 import {
   multiaddrs,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   WORKER_SPELL,
-  type WorkerServices,
-  workerServiceSchema,
 } from "./constants.js";
 import { assertHasWorkerAndAnswer, fluence } from "./helpers.js";
+import { validateDeployedServicesAnswerSchema } from "./validators/deployedServicesAnswerValidator.js";
+import {
+  validateWorkerServices,
+  type WorkerServices,
+} from "./validators/workerServiceValidator.js";
+
+export function getServiceDirPath(cwd: string, serviceName: string) {
+  return join(getServicesDir(cwd), serviceName);
+}
+
+export function getModuleDirPath(
+  cwd: string,
+  moduleName: string,
+  serviceName?: string,
+) {
+  if (serviceName === undefined) {
+    return join(getSrcPath(cwd), "modules", moduleName);
+  }
+
+  return join(getServiceDirPath(cwd, serviceName), "modules", moduleName);
+}
+
+export function getMainRsPath(
+  cwd: string,
+  moduleName: string,
+  serviceName?: string,
+) {
+  return join(getModuleDirPath(cwd, moduleName, serviceName), "src", "main.rs");
+}
+
+export async function updateMainRs(
+  cwd: string,
+  moduleName: string,
+  content: string,
+  serviceName?: string,
+) {
+  await writeFile(
+    getMainRsPath(cwd, moduleName, serviceName),
+    content,
+    FS_OPTIONS,
+  );
+}
 
 export async function getFluenceConfig(cwd: string) {
   const fluenceConfig = await initFluenceConfigWithPath(cwd);
@@ -59,6 +100,50 @@ export async function getFluenceConfig(cwd: string) {
   );
 
   return fluenceConfig;
+}
+
+export async function getServiceConfig(cwd: string, serviceName: string) {
+  const pathToServiceDir = getServiceDirPath(cwd, serviceName);
+
+  const serviceConfig = await initServiceConfig(
+    relative(cwd, pathToServiceDir),
+    cwd,
+  );
+
+  assert(
+    serviceConfig !== null,
+    `the service, owning this config, must be created at the path ${pathToServiceDir}`,
+  );
+
+  return serviceConfig;
+}
+
+async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
+  const checkConfig = async () => {
+    const config = await initReadonlyFluenceConfigWithPath(cwd);
+
+    assert(config !== null, `config is expected to exist at ${cwd}`);
+
+    assert(
+      config.services !== undefined &&
+        Object.prototype.hasOwnProperty.call(config.services, serviceName),
+      `${serviceName} is expected to be in services property of ${config.$getPath()} after ${serviceName} is added to it`,
+    );
+
+    return config;
+  };
+
+  return await setTryTimeout(
+    checkConfig,
+    (error) => {
+      throw new Error(
+        `Config is expected to be updated after ${serviceName} is added to it, error: ${stringifyUnknown(
+          error,
+        )}`,
+      );
+    },
+    5000,
+  );
 }
 
 export async function build(cwd: string) {
@@ -255,65 +340,44 @@ export async function waitUntilShowSubnetReturnsExpected(
   );
 }
 
-const validateWorkerServices = new Ajv.default({
-  code: { esm: true },
-}).compile(workerServiceSchema);
+export async function waitUntilRunDeployedServicesReturnsExpected(
+  cwd: string,
+  answer: string,
+) {
+  await setTryTimeout(
+    async () => {
+      const result = await fluence({
+        args: ["run"],
+        flags: {
+          f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+          quiet: true,
+        },
+        cwd,
+      });
 
-export function assertLogsAreValid(logs: string) {
-  if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
-    throw new Error(
-      `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
-    );
-  }
+      const runDeployedServicesResult = JSON.parse(result);
 
-  assert(logs.trim() !== "", "logs are expected to be non-empty");
+      if (!validateDeployedServicesAnswerSchema(runDeployedServicesResult)) {
+        throw new Error(
+          `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array of Answer, but actual result is: ${result}`,
+        );
+      }
 
-  if (logs.includes(LOGS_GET_ERROR_START)) {
-    throw new Error(`Failed to get deal logs:\n\n${logs}`);
-  }
-}
-
-export async function getServiceConfig(cwd: string, serviceName: string) {
-  const pathToServiceDir = join(getServicesDir(cwd), serviceName);
-
-  const serviceConfig = await initServiceConfig(
-    relative(cwd, pathToServiceDir),
-    cwd,
-  );
-
-  assert(
-    serviceConfig !== null,
-    `we create a service at ${pathToServiceDir} above - so the config is expected to exist`,
-  );
-
-  return serviceConfig;
-}
-
-async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
-  const checkConfig = async () => {
-    const config = await initReadonlyFluenceConfigWithPath(cwd);
-
-    assert(config !== null, `config is expected to exist at ${cwd}`);
-
-    assert(
-      config.services !== undefined &&
-        Object.prototype.hasOwnProperty.call(config.services, serviceName),
-      `${serviceName} is expected to be in services property of ${config.$getPath()} after ${serviceName} is added to it`,
-    );
-
-    return config;
-  };
-
-  return await setTryTimeout(
-    checkConfig,
+      runDeployedServicesResult.forEach((r) => {
+        assert(
+          r.answer === answer,
+          `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} answer is expected to be ${answer}`,
+        );
+      });
+    },
     (error) => {
       throw new Error(
-        `Config is expected to be updated after ${serviceName} is added to it, error: ${stringifyUnknown(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
           error,
         )}`,
       );
     },
-    5000,
+    RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
 }
 
@@ -360,4 +424,43 @@ export async function createServiceAndAddToDeal(
   ];
 
   await fluenceConfig.$commit();
+}
+
+export async function createModuleAndAddToService(
+  cwd: string,
+  moduleName: string,
+  serviceName: string,
+) {
+  await fluence({
+    args: ["module", "new", moduleName],
+    cwd,
+  });
+
+  const serviceConfig = await getServiceConfig(cwd, serviceName);
+
+  const relativePathToNewModule = relative(
+    getServiceDirPath(cwd, serviceName),
+    getModuleDirPath(cwd, moduleName, serviceName),
+  );
+
+  serviceConfig.modules = {
+    ...serviceConfig.modules,
+    [moduleName]: {
+      get: relativePathToNewModule,
+    },
+  };
+}
+
+export function assertLogsAreValid(logs: string) {
+  if (logs.includes(LOGS_RESOLVE_SUBNET_ERROR_START)) {
+    throw new Error(
+      `Failed to resolve subnet when getting deal logs:\n\n${logs}`,
+    );
+  }
+
+  assert(logs.trim() !== "", "logs are expected to be non-empty");
+
+  if (logs.includes(LOGS_GET_ERROR_START)) {
+    throw new Error(`Failed to get deal logs:\n\n${logs}`);
+  }
 }

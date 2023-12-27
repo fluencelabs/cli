@@ -32,7 +32,6 @@ import {
 import {
   getAquaMainPath,
   getFluenceAquaServicesPath,
-  getServicesDir,
 } from "../../src/lib/paths.js";
 import {
   MAIN_RS_CONTENT,
@@ -56,6 +55,7 @@ import {
   createSpellAndAddToDeal,
   getFluenceConfig,
   getServiceConfig,
+  updateMainRs,
 } from "../sharedSteps.js";
 
 const peerIds = (await getMultiaddrs())
@@ -99,13 +99,11 @@ describe("integration tests", () => {
       await newServiceConfig.$commit();
 
       // update first service module source code so it contains a struct
-      await writeFile(
-        join(
-          join(getServicesDir(cwd), NEW_SERVICE_NAME),
-          join("modules", NEW_SERVICE_NAME, "src", "main.rs"),
-        ),
+      await updateMainRs(
+        cwd,
+        NEW_SERVICE_NAME,
         MAIN_RS_CONTENT,
-        FS_OPTIONS,
+        NEW_SERVICE_NAME,
       );
 
       await fluence({
