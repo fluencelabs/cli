@@ -20,6 +20,7 @@ import { join } from "node:path";
 import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
 import {
   MY_SERVICE_NAME,
+  NEW_MODULE_NAME,
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
 } from "../constants.js";
@@ -27,10 +28,13 @@ import { fluence, init } from "../helpers.js";
 import {
   assertLogsAreValid,
   build,
+  createModuleAndAddToService,
   createServiceAndAddToDeal,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
   getFluenceConfig,
+  updateMainRs,
+  waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
 } from "../sharedSteps.js";
 
@@ -99,4 +103,69 @@ describe("Deal update tests", () => {
 
     assertLogsAreValid(logs);
   });
+
+  // TODO: test skipped until NET-649 is released
+  test.skip("should update deal after new module is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
+    await init(cwd, "quickstart");
+
+    await updateFluenceConfigForTest(cwd);
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await createModuleAndAddToService(cwd, NEW_MODULE_NAME, MY_SERVICE_NAME);
+
+    await updateMainRs(cwd, NEW_MODULE_NAME, NEW_MODULE_CONTENT);
+
+    await updateMainRs(
+      cwd,
+      MY_SERVICE_NAME,
+      FACADE_MODULE_CONTENT,
+      MY_SERVICE_NAME,
+    );
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await waitUntilRunDeployedServicesReturnsExpected(
+      cwd,
+      `Hey, fluence! I'm The New Module.`,
+    );
+
+    const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+    assertLogsAreValid(logs);
+  });
 });
+
+const NEW_MODULE_CONTENT = `#![allow(non_snake_case)]
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
+
+module_manifest!();
+
+pub fn main() {}
+
+#[marine]
+pub fn newModuleGreeting(name: String) -> String {
+    format!("Hey, {}! I'm The New Module.", name)
+}
+`;
+
+const FACADE_MODULE_CONTENT = `#![allow(non_snake_case)]
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
+
+module_manifest!();
+
+pub fn main() {}
+
+#[marine]
+pub fn greeting(name: String) -> String {
+    newModuleGreeting(name)
+}
+
+#[marine]
+#[link(wasm_import_module = "${NEW_MODULE_NAME}")]
+extern "C" {
+    fn newModuleGreeting(name: String) -> String;
+}`;
