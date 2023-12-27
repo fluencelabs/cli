@@ -16,39 +16,7 @@
 
 import Ajv, { type JSONSchemaType } from "ajv";
 
-const ajvOptions = {
-  code: { esm: true },
-};
-
-export type WorkerServices = {
-  host_id: string;
-  services: string[];
-  spells: string[];
-  worker_id: string;
-}[];
-export const workerServiceSchema: JSONSchemaType<WorkerServices> = {
-  type: "array",
-  items: {
-    type: "object",
-    properties: {
-      host_id: { type: "string" },
-      services: {
-        type: "array",
-        items: { type: "string" },
-      },
-      spells: {
-        type: "array",
-        items: { type: "string" },
-      },
-      worker_id: { type: "string" },
-    },
-    required: ["host_id", "services", "spells", "worker_id"],
-  },
-};
-
-export const validateWorkerServices = new Ajv.default(ajvOptions).compile(
-  workerServiceSchema,
-);
+import { ajvOptions } from "./ajvOptions.js";
 
 export type DeployedServicesAnswer = {
   answer: string;

@@ -48,11 +48,11 @@ import {
   WORKER_SPELL,
 } from "./constants.js";
 import { assertHasWorkerAndAnswer, fluence } from "./helpers.js";
+import { validateDeployedServicesAnswerSchema } from "./validators/deployedServicesAnswerValidator.js";
 import {
-  validateDeployedServicesAnswerSchema,
   validateWorkerServices,
   type WorkerServices,
-} from "./schemasAndValidation.js";
+} from "./validators/workerServiceValidator.js";
 
 export function getServiceDirPath(cwd: string, serviceName: string) {
   return join(getServicesDir(cwd), serviceName);
