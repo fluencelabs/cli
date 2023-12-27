@@ -579,7 +579,12 @@ func getInfos(peers: []PeerId) -> []Info:
 `;
 };
 
-export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
+export const SPELL_AQUA_FILE_CONTENT = `aqua DefaultSpell
+
+-- Note: spell main function must be exported
+export spell
+
+import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
