@@ -135,6 +135,34 @@ describe("Deal update tests", () => {
 
     assertLogsAreValid(logs);
   });
+
+  // TODO: test skipped until NET-649 is released
+  test.skip("should update deal after changing a service", async () => {
+    const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
+    await init(cwd, "quickstart");
+
+    await updateFluenceConfigForTest(cwd);
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await updateMainRs(
+      cwd,
+      MY_SERVICE_NAME,
+      UPDATED_SERVICE_CONTENT,
+      MY_SERVICE_NAME,
+    );
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await waitUntilRunDeployedServicesReturnsExpected(
+      cwd,
+      `Hey, fluence! I've been updated.`,
+    );
+
+    const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+    assertLogsAreValid(logs);
+  });
 });
 
 const NEW_MODULE_CONTENT = `#![allow(non_snake_case)]
@@ -169,3 +197,17 @@ pub fn greeting(name: String) -> String {
 extern "C" {
     fn newModuleGreeting(name: String) -> String;
 }`;
+
+const UPDATED_SERVICE_CONTENT = `#![allow(non_snake_case)]
+use marine_rs_sdk::marine;
+use marine_rs_sdk::module_manifest;
+
+module_manifest!();
+
+pub fn main() {}
+
+#[marine]
+pub fn greeting(name: String) -> String {
+    format!("Hey, {}! I've been updated.", name)
+}
+`;
