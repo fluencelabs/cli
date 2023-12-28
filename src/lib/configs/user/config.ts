@@ -29,10 +29,6 @@ import {
   AUTO_GENERATED,
 } from "../../const.js";
 import {
-  validateAllVersionsAreExact,
-  validateBatch,
-} from "../../helpers/validations.js";
-import {
   createSecretKey,
   genSecretKeyString,
   getUserSecretKey,
@@ -47,7 +43,6 @@ import {
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
-  type ConfigValidateFunction,
 } from "../initConfig.js";
 
 import { initReadonlyUserSecretsConfig } from "./userSecrets.js";
@@ -242,20 +237,12 @@ type LatestConfig = ConfigV1;
 export type UserConfig = InitializedConfig<LatestConfig>;
 export type UserConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  return validateBatch(
-    await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
-    await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
-  );
-};
-
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
   allSchemas: [configSchemaV0, configSchemaV1],
   latestSchema: configSchemaV1,
   migrations,
   name: GLOBAL_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: ensureUserFluenceDir,
-  validate,
 };
 
 export const initUserConfig = getConfigInitFunction(initConfigOptions);

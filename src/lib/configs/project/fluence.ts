@@ -1146,7 +1146,6 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
 
   const validity = validateBatch(
     validateWorkers(config),
-    await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
     await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
 
