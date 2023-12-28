@@ -1140,13 +1140,8 @@ const validateWorkers = (
 };
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  if (config.services === undefined) {
-    return true;
-  }
-
   const validity = validateBatch(
     validateWorkers(config),
-    await validateAllVersionsAreExact(config.dependencies?.npm ?? {}),
     await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
   );
 
