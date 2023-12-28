@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.13.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.0...fluence-cli-v0.13.1) (2023-12-28)
+
+
+### Features
+
+* add secrets config [fixes DXJ-543] ([#645](https://github.com/fluencelabs/cli/issues/645)) ([97a0b9a](https://github.com/fluencelabs/cli/commit/97a0b9aa4561c544eed49e42405c172bcec2ebf4))
+* compile all spells on `fluence build` [fixes DXJ-353] ([#634](https://github.com/fluencelabs/cli/issues/634)) ([c18253b](https://github.com/fluencelabs/cli/commit/c18253b7ffd0dd0d44506e28c345ee5f67b6969a))
+* create a working local env automatically [fixes DXJ-528] ([#640](https://github.com/fluencelabs/cli/issues/640)) ([6108503](https://github.com/fluencelabs/cli/commit/61085030cafc5d66aa7e21295a652afcdf297ef9))
+* deposit check ([#653](https://github.com/fluencelabs/cli/issues/653)) ([6cf91df](https://github.com/fluencelabs/cli/commit/6cf91df2443f2fcf26d7f1dcd1fdf50fe1125a30))
+* move some flags into configs for provider and deploy ([#635](https://github.com/fluencelabs/cli/issues/635)) ([93a3588](https://github.com/fluencelabs/cli/commit/93a3588bc38cd961d6abfd88089380a698a58e36))
+* remove CID change check ([#647](https://github.com/fluencelabs/cli/issues/647)) ([b917b6e](https://github.com/fluencelabs/cli/commit/b917b6e4a8f5c828d6e1b118330f2f46ee5d3a4c))
+* remove exact validation from npm ([#672](https://github.com/fluencelabs/cli/issues/672)) ([7534648](https://github.com/fluencelabs/cli/commit/7534648f8a0ef90d4564ceb2293ea2cd8a1932f7))
+* remove vite polyfills ([#646](https://github.com/fluencelabs/cli/issues/646)) ([e31dde5](https://github.com/fluencelabs/cli/commit/e31dde5288ba6d0722d41ae28114fe9804f41e23))
+* show spells separately in showSubnet [NET-635] ([#624](https://github.com/fluencelabs/cli/issues/624)) ([d481934](https://github.com/fluencelabs/cli/commit/d4819340deda066dd5729956608f52a21375351f))
+* store deployment artifacts per-env [fixes DXJ-500] ([#644](https://github.com/fluencelabs/cli/issues/644)) ([42cd42c](https://github.com/fluencelabs/cli/commit/42cd42c6d9112398dddc7b5adef64779f2d4a0a9))
+* update default aqua dependencies ([#667](https://github.com/fluencelabs/cli/issues/667)) ([490e42e](https://github.com/fluencelabs/cli/commit/490e42e6c410256f51feb2bf8f16522067917c2e))
+* Use js-client 0.5.0 ([#630](https://github.com/fluencelabs/cli/issues/630)) ([2fa61d0](https://github.com/fluencelabs/cli/commit/2fa61d007c1c91bc77b4c2f4174d68fcecdd317a))
+* use new aqua packages [fixes DXJ-534, DXJ-529, DXJ-478, DXJ-370] ([#648](https://github.com/fluencelabs/cli/issues/648)) ([6d1b92e](https://github.com/fluencelabs/cli/commit/6d1b92e74ffb60d3861677cb3f61efa435249fec))
+
+
+### Bug Fixes
+
+* **deps:** update spell to v0.6.1 ([#664](https://github.com/fluencelabs/cli/issues/664)) ([64f64f7](https://github.com/fluencelabs/cli/commit/64f64f7194889abc6d2eaf2d2d33157953218247))
+* **deps:** update spell to v0.6.4 ([#674](https://github.com/fluencelabs/cli/issues/674)) ([a79b6bc](https://github.com/fluencelabs/cli/commit/a79b6bcc6bb58287c2afeefb8bab4dcef1b471b6))
+* don't update dependencies that are already present ([#666](https://github.com/fluencelabs/cli/issues/666)) ([213670b](https://github.com/fluencelabs/cli/commit/213670b7c1cbb3a76d831703d328da3ad35fa30a))
+* improve errors for configs ([#637](https://github.com/fluencelabs/cli/issues/637)) ([5afc8f5](https://github.com/fluencelabs/cli/commit/5afc8f5c2bc4626fb881c98993c141c6bbd633b2))
+* npm to be used by cli internal nodejs executable [fixes DXJ-540] ([#642](https://github.com/fluencelabs/cli/issues/642)) ([df67287](https://github.com/fluencelabs/cli/commit/df67287e9c7d1d8b548ea32917363b456a1cb0db))
+* ps output ([#650](https://github.com/fluencelabs/cli/issues/650)) ([fe165d6](https://github.com/fluencelabs/cli/commit/fe165d6f64eafb20417b588cbe78cafb5bf2dd5f))
+* raw config to be parsed, improve local up and service new [fixes DXJ-564] ([#649](https://github.com/fluencelabs/cli/issues/649)) ([ca308df](https://github.com/fluencelabs/cli/commit/ca308df6e43fe847665095183f002fcfc53b0d6c))
+* service not added to default deal services ([#655](https://github.com/fluencelabs/cli/issues/655)) ([f832f83](https://github.com/fluencelabs/cli/commit/f832f83cf3bae8fa1b6f4caac849c2864191661d))
+* Support fire and forget (DXJ-562) ([#652](https://github.com/fluencelabs/cli/issues/652)) ([abf4b74](https://github.com/fluencelabs/cli/commit/abf4b74002365b03dcdf8a4cf22b4031beee2130))
+* update deal pkg ([#631](https://github.com/fluencelabs/cli/issues/631)) ([a8e3e9c](https://github.com/fluencelabs/cli/commit/a8e3e9cad48b068119c042717721fed45881a066))
+
 ## [0.13.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.12.5...fluence-cli-v0.13.0) (2023-11-16)
 
 
