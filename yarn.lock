@@ -568,26 +568,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/air-beautify-wasm@npm:0.3.4":
-  version: 0.3.4
-  resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.4"
-  checksum: aa3ff8ee80e4ccf1ba89211df17748554f6b754360859820f3445ebd9ad8c8aa0b362d30dd0e4085700cca6929e1c2d84c34dc0dc2a94cbb58b9d0326c1b6ee9
+"@fluencelabs/air-beautify-wasm@npm:0.3.6":
+  version: 0.3.6
+  resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.6"
+  checksum: 817d2ae02e6e0ff5138e37d796ffcc79e8fd74306b3ce2d8badae2d6aae640dcf19c8e725b62d835cfc70554b307a76f355378dfa627705320e7dddb82a93faf
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-api@npm:0.13.2":
-  version: 0.13.2
-  resolution: "@fluencelabs/aqua-api@npm:0.13.2"
-  checksum: d671c0416f9c892fe599c2a8babfb8209236dcd1a6e8d4102d83de38f0efcaa1e9fb724cfd86a03372497a41ac84afd165c51ae4ae972874d04612b74af4bb80
+"@fluencelabs/aqua-api@npm:0.13.3":
+  version: 0.13.3
+  resolution: "@fluencelabs/aqua-api@npm:0.13.3"
+  checksum: 66eab0a791fcd8e459e53f0410a4949586802997f3fb939a2c2bec54a70fd05c8f22b16c661f392520bd874695a689b4bb28543abff2a8b465ff8c790ae1c6f6
   languageName: node
   linkType: hard
 
-"@fluencelabs/aqua-to-js@npm:0.3.0":
-  version: 0.3.0
-  resolution: "@fluencelabs/aqua-to-js@npm:0.3.0"
+"@fluencelabs/aqua-to-js@npm:0.3.5":
+  version: 0.3.5
+  resolution: "@fluencelabs/aqua-to-js@npm:0.3.5"
   dependencies:
     ts-pattern: 5.0.5
-  checksum: 0a572870eb3dd05d20be24aaee480ac5468ef5b68eaba2d7e81f24881aae4a1b331d82a44992c5c5fab6994baf62573ac6495fee581c511ebc3ba3a8147a7bf5
+  checksum: d8f911dcc792fd418cd06ecd3c7f693a17b0e0188331748039d3ed0f90512a903e167f3af03ccc41e20b8f714be5f94298beb2ac4465ad7aa19610dc06cb14d2
   languageName: node
   linkType: hard
 
@@ -602,9 +602,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
-    "@fluencelabs/air-beautify-wasm": 0.3.4
-    "@fluencelabs/aqua-api": 0.13.2
-    "@fluencelabs/aqua-to-js": 0.3.0
+    "@fluencelabs/air-beautify-wasm": 0.3.6
+    "@fluencelabs/aqua-api": 0.13.3
+    "@fluencelabs/aqua-to-js": 0.3.5
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.5.5
