@@ -53,9 +53,9 @@
     "oclif-upload": "oclif upload tarballs -t 'linux-x64,darwin-x64,darwin-arm64'"
   },
   "dependencies": {
-    "@fluencelabs/air-beautify-wasm": "0.3.4",
-    "@fluencelabs/aqua-api": "0.13.2",
-    "@fluencelabs/aqua-to-js": "0.3.0",
+    "@fluencelabs/air-beautify-wasm": "0.3.6",
+    "@fluencelabs/aqua-api": "0.13.3",
+    "@fluencelabs/aqua-to-js": "0.3.5",
     "@fluencelabs/deal-aurora": "0.2.22",
     "@fluencelabs/fluence-network-environment": "1.1.2",
     "@fluencelabs/js-client": "0.5.5",
