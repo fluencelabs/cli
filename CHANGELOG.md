@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.13.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.1...fluence-cli-v0.13.2) (2023-12-29)
+
+
+### Features
+
+* **cli:** Add header to default spell aqua ([#671](https://github.com/fluencelabs/cli/issues/671)) ([cc9b841](https://github.com/fluencelabs/cli/commit/cc9b841751d6aa6350abbafce32770fc40153d47))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/air-beautify-wasm to v0.3.6 ([#658](https://github.com/fluencelabs/cli/issues/658)) ([6b827d9](https://github.com/fluencelabs/cli/commit/6b827d9b87c08f07df7e9761faf4dc06d28996f9))
+* **deps:** update dependency @fluencelabs/aqua-api to v0.13.3 ([#668](https://github.com/fluencelabs/cli/issues/668)) ([a9f8678](https://github.com/fluencelabs/cli/commit/a9f867800cb6ce7bdb3825293f4f719bcd03b0d0))
+* **deps:** update dependency @fluencelabs/aqua-to-js to v0.3.5 ([#591](https://github.com/fluencelabs/cli/issues/591)) ([2c82d84](https://github.com/fluencelabs/cli/commit/2c82d84cd6dccd02e7240c868b98c4a30dc22e73))
+
 ## [0.13.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.0...fluence-cli-v0.13.1) (2023-12-28)
 
 
