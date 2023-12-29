@@ -568,10 +568,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/air-beautify-wasm@npm:0.3.4":
-  version: 0.3.4
-  resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.4"
-  checksum: aa3ff8ee80e4ccf1ba89211df17748554f6b754360859820f3445ebd9ad8c8aa0b362d30dd0e4085700cca6929e1c2d84c34dc0dc2a94cbb58b9d0326c1b6ee9
+"@fluencelabs/air-beautify-wasm@npm:0.3.6":
+  version: 0.3.6
+  resolution: "@fluencelabs/air-beautify-wasm@npm:0.3.6"
+  checksum: 817d2ae02e6e0ff5138e37d796ffcc79e8fd74306b3ce2d8badae2d6aae640dcf19c8e725b62d835cfc70554b307a76f355378dfa627705320e7dddb82a93faf
   languageName: node
   linkType: hard
 
@@ -602,7 +602,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@fluencelabs/cli@workspace:."
   dependencies:
-    "@fluencelabs/air-beautify-wasm": 0.3.4
+    "@fluencelabs/air-beautify-wasm": 0.3.6
     "@fluencelabs/aqua-api": 0.13.2
     "@fluencelabs/aqua-to-js": 0.3.0
     "@fluencelabs/deal-aurora": 0.2.22
