@@ -2238,7 +2238,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^3.0.4, @oclif/core@npm:^3.14.1, @oclif/core@npm:^3.15.0, @oclif/core@npm:^3.6.0":
+"@oclif/core@npm:^3.0.4, @oclif/core@npm:^3.15.0, @oclif/core@npm:^3.6.0":
   version: 3.15.0
   resolution: "@oclif/core@npm:3.15.0"
   dependencies:
@@ -2270,6 +2270,41 @@ __metadata:
     wordwrap: ^1.0.0
     wrap-ansi: ^7.0.0
   checksum: 7825cf4ce4db27400c8392c8c385b8e189e0fe3df8e1a74e820803977dbc0c7e06d2378ebf6ee2b61cd635073abc309cdc4717fb1f4e572d498bb27b542c00fa
+  languageName: node
+  linkType: hard
+
+"@oclif/core@npm:^3.15.1":
+  version: 3.15.1
+  resolution: "@oclif/core@npm:3.15.1"
+  dependencies:
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.12.0
+    color: ^4.2.3
+    debug: ^4.3.4
+    ejs: ^3.1.9
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.3
+    slice-ansi: ^4.0.0
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    tsconfck: ^3.0.0
+    widest-line: ^3.1.0
+    wordwrap: ^1.0.0
+    wrap-ansi: ^7.0.0
+  checksum: 092e43507fbf653477b5577e8543b6a2f6b52d07605a396a5791f18f9a77779c30fe2a48841b0a553b7f53500bd406e9dc63b4b5e7d0fdc2654d46d6a02f0abe
   languageName: node
   linkType: hard
 
@@ -2325,10 +2360,10 @@ __metadata:
   linkType: hard
 
 "@oclif/plugin-update@npm:^4.1.3":
-  version: 4.1.5
-  resolution: "@oclif/plugin-update@npm:4.1.5"
+  version: 4.1.6
+  resolution: "@oclif/plugin-update@npm:4.1.6"
   dependencies:
-    "@oclif/core": ^3.14.1
+    "@oclif/core": ^3.15.1
     chalk: ^5
     cross-spawn: ^7.0.3
     debug: ^4.3.1
@@ -2338,7 +2373,7 @@ __metadata:
     lodash.throttle: ^4.1.1
     semver: ^7.5.4
     tar-fs: ^2.1.1
-  checksum: df408107752a4b5c7d18c722c79e4759a19ee343ee425b8560ebc5166199855df1b24228ef17580ecb581b49e6fb8f857b72631eb6ef242b6152c5e7514e86bd
+  checksum: 05b96efaa68e693a2e51ce255a65c432691e5ecfefe264b1a8ed7bbe55358e926e3ff7cd811d80d8a7c4fe09ddc4082ff4c263fbc8914258178da5018f0c1f84
   languageName: node
   linkType: hard
 
@@ -12579,7 +12614,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"password-prompt@npm:^1.1.2":
+"password-prompt@npm:^1.1.2, password-prompt@npm:^1.1.3":
   version: 1.1.3
   resolution: "password-prompt@npm:1.1.3"
   dependencies:
