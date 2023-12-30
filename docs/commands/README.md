@@ -1251,7 +1251,7 @@ EXAMPLES
     $ fluence update --available
 ```
 
-_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.1.5/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.1.6/src/commands/update.ts)_
 
 ## `fluence workers deploy [WORKER-NAMES]`
 
