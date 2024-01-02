@@ -76,9 +76,9 @@ export const fluence = async ({
 
   console.log(
     CustomColors.addon(
-      `${cwd} % ${pathToNodeJS} ${args.join(" ")} ${flagsToArgs(
-        flags,
-      ).toString()}`,
+      `${cwd} % ${pathToNodeJS} ${args.join(" ")} ${flagsToArgs(flags).join(
+        " ",
+      )}`,
     ),
   );
 

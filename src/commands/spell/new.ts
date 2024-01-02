@@ -26,7 +26,7 @@ import { initNewReadonlySpellConfig } from "../../lib/configs/project/spell.js";
 import {
   DEFAULT_DEAL_NAME,
   FS_OPTIONS,
-  SPELL_AQUA_FILE_CONTENT,
+  getSpellAquaFileContent,
   SPELL_AQUA_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -59,7 +59,7 @@ export default class New extends BaseCommand<typeof New> {
 
     const pathToSpellsDir = flags.path ?? (await ensureSpellsDir());
     const pathToSpellDir = join(pathToSpellsDir, spellName);
-    await generateNewSpell(pathToSpellDir);
+    await generateNewSpell(pathToSpellDir, spellName);
 
     commandObj.log(
       `Successfully generated template for new spell at ${color.yellow(
@@ -116,14 +116,14 @@ export default class New extends BaseCommand<typeof New> {
   }
 }
 
-const generateNewSpell = async (pathToSpellDir: string) => {
+async function generateNewSpell(pathToSpellDir: string, spellName: string) {
   await mkdir(pathToSpellDir, { recursive: true });
 
   await writeFile(
     join(pathToSpellDir, SPELL_AQUA_FILE_NAME),
-    SPELL_AQUA_FILE_CONTENT,
+    getSpellAquaFileContent(spellName),
     FS_OPTIONS,
   );
 
   await initNewReadonlySpellConfig(pathToSpellDir);
-};
+}

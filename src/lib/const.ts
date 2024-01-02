@@ -21,6 +21,8 @@ import type {
   OutputFlags,
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
+import camelCase from "lodash-es/camelCase.js";
+import upperFirst from "lodash-es/upperFirst.js";
 
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
@@ -577,7 +579,15 @@ func getInfos(peers: []PeerId) -> []Info:
 `;
 };
 
-export const SPELL_AQUA_FILE_CONTENT = `import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
+export function getSpellAquaFileContent(spellName: string) {
+  const moduleName = upperFirst(camelCase(spellName));
+
+  return `aqua ${moduleName}
+
+-- Note: spell main function must be exported
+export spell
+
+import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
@@ -586,6 +596,7 @@ func spell():
     Spell "worker-spell"
     Spell.store_log(str)
 `;
+}
 
 const QUICKSTART_README = `# Fluence Quickstart Template
 

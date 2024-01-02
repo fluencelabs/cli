@@ -19,15 +19,15 @@ import { join, relative } from "node:path";
 
 import { initServiceConfig } from "../../src/lib/configs/project/service.js";
 import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
-import { getServicesDir } from "../../src/lib/paths.js";
-import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../const.js";
+import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../constants.js";
 import { fluence, init, maybeConcurrentTest } from "../helpers.js";
 import {
   assertLogsAreValid,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
   getFluenceConfig,
-  waitUntilShowSubnetReturnsSpell,
+  getServiceDirPath,
+  waitUntilShowSubnetReturnsExpected,
 } from "../sharedSteps.js";
 
 describe("Deal deploy tests", () => {
@@ -36,7 +36,7 @@ describe("Deal deploy tests", () => {
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
       await init(cwd, "quickstart");
-      const pathToNewServiceDir = join(getServicesDir(cwd), MY_SERVICE_NAME);
+      const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
 
       const newServiceConfig = await initServiceConfig(
         relative(cwd, pathToNewServiceDir),
@@ -66,10 +66,10 @@ describe("Deal deploy tests", () => {
 
       await deployDealAndWaitUntilDeployed(cwd);
 
-      await waitUntilShowSubnetReturnsSpell(
+      await waitUntilShowSubnetReturnsExpected(
         cwd,
-        MY_SERVICE_NAME,
-        NEW_SPELL_NAME,
+        [MY_SERVICE_NAME],
+        [NEW_SPELL_NAME],
       );
 
       const logs = await fluence({ args: ["deal", "logs"], cwd });

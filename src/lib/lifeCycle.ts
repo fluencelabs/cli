@@ -167,8 +167,8 @@ export async function initCli<
     maybeFluenceConfig.dependencies = {
       ...maybeFluenceConfig.dependencies,
       npm: {
-        ...maybeFluenceConfig.dependencies?.npm,
         ...versions.npm,
+        ...maybeFluenceConfig.dependencies?.npm,
       },
     };
 
