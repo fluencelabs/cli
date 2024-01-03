@@ -605,7 +605,7 @@ __metadata:
     "@fluencelabs/air-beautify-wasm": 0.3.6
     "@fluencelabs/aqua-api": 0.13.3
     "@fluencelabs/aqua-to-js": 0.3.5
-    "@fluencelabs/deal-aurora": "file:./deal-2.tgz"
+    "@fluencelabs/deal-aurora": 0.2.23-FLU-560-369c793-885-1.0
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.5.5
     "@fluencelabs/npm-aqua-compiler": 0.0.2
@@ -677,9 +677,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-aurora@file:./deal-2.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A.":
-  version: 0.2.22
-  resolution: "@fluencelabs/deal-aurora@file:./deal-2.tgz::locator=%40fluencelabs%2Fcli%40workspace%3A."
+"@fluencelabs/deal-aurora@npm:0.2.23-FLU-560-369c793-885-1.0":
+  version: 0.2.23-FLU-560-369c793-885-1.0
+  resolution: "@fluencelabs/deal-aurora@npm:0.2.23-FLU-560-369c793-885-1.0"
   dependencies:
     "@graphql-typed-document-node/core": ^3.2.0
     dotenv: ^16.3.1
@@ -688,7 +688,7 @@ __metadata:
     graphql-request: ^6.1.0
     graphql-scalars: ^1.22.4
     graphql-tag: ^2.12.6
-  checksum: e7787045fb11fca0b06a5a93f2bfdacafe77e507d1864dee2aa693b863a69165409f91c95f07b5302d5d34b712e25869aa61383b71bde09acfb508cb881f6a80
+  checksum: 2b8626f6b2542e7dc5e5096116c54449f848c9f61e93c4ed4c6f92b09a436b555824d34f5bee3f71264a6c82839f175f79d7ddde3459c0c621d4c48c72492320
   languageName: node
   linkType: hard
 

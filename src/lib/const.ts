@@ -114,9 +114,14 @@ export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = 5001;
+export const GRAPH_NODE_CONTAINER_NAME = "graph-node";
+export const GRAPH_NODE_PORT = 8020;
+export const POSTGRES_CONTAINER_NAME = "postgres";
 export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
-export const CHAIN_CONTAINER_NAME = "chain";
-export const CHAIN_PORT = 8545;
+export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
+export const CHAIN_RPC_PORT = 8545;
+export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
+export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
 export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
@@ -683,6 +688,3 @@ export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
 export const DEFAULT_CC_DURATION = "5 minutes";
 export const DURATION_EXAMPLE =
   "in human-readable format. Example: 1 months 1 days";
-
-export const TMP_DOCKER_COMPOSE_PATH =
-  "/home/shams/Projects/work/deal/docker/docker-compose.yml";

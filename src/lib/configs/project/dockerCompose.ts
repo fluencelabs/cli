@@ -22,17 +22,22 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { versions } from "../../../versions.js";
 import {
+  CHAIN_DEPLOY_SCRIPT_NAME,
+  GRAPH_NODE_PORT,
+  POSTGRES_CONTAINER_NAME,
   DOCKER_COMPOSE_FILE_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   IPFS_PORT,
   IPFS_CONTAINER_NAME,
-  // CHAIN_CONTAINER_NAME,
-  // CHAIN_PORT,
+  CHAIN_RPC_PORT,
+  CHAIN_RPC_CONTAINER_NAME,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   CONFIGS_DIR_NAME,
+  GRAPH_NODE_CONTAINER_NAME,
+  SUBGRAPH_DEPLOY_SCRIPT_NAME,
 } from "../../const.js";
 import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
@@ -107,6 +112,7 @@ const serviceSchema: JSONSchemaType<Service> = {
 type ConfigV0 = {
   version: "3";
   services: Record<string, Service>;
+  volumes?: Record<string, null>;
   include?: string[];
   secrets?: Record<string, { file?: string }>;
 };
@@ -118,6 +124,15 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   description: "Defines a multi-containers based application.",
   properties: {
     version: { type: "string", const: "3" },
+    volumes: {
+      type: "object",
+      nullable: true,
+      additionalProperties: {
+        type: "null",
+        nullable: true,
+      },
+      required: [],
+    },
     services: {
       type: "object",
       additionalProperties: serviceSchema,
@@ -168,12 +183,9 @@ function genNox({
     name,
     {
       image: versions.nox,
-      pull_policy: "always",
       ports: [`${tcpPort}:${tcpPort}`, `${webSocketPort}:${webSocketPort}`],
       environment: {
         WASM_LOG: "info",
-        RUST_LOG:
-          "debug,particle_reap=debug,aquamarine=warn,aquamarine::particle_functions=debug,aquamarine::log=debug,aquamarine::aqua_runtime=error,ipfs_effector=off,ipfs_pure=off,system_services=debug,marine_core::module::marine_module=info,tokio_threadpool=info,tokio_reactor=info,mio=info,tokio_io=info,soketto=info,yamux=info,multistream_select=info,libp2p_secio=info,libp2p_websocket::framed=info,libp2p_ping=info,libp2p_core::upgrade::apply=info,libp2p_kad::kbucket=info,cranelift_codegen=info,wasmer_wasi=info,cranelift_codegen=info,wasmer_wasi=info,run-console=trace,wasmtime_cranelift=off,wasmtime_jit=off,libp2p_tcp=off,libp2p_swarm=off,particle_protocol::libp2p_protocol::upgrade=info,libp2p_mplex=off,particle_reap=off,netlink_proto=warn",
         FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
       },
@@ -187,15 +199,15 @@ function genNox({
           ? "--local"
           : `--bootstraps=/dns/${bootstrapName}/tcp/${bootstrapTcpPort}`,
       ],
-      depends_on: [IPFS_CONTAINER_NAME],
-      volumes: [`./${CONFIGS_DIR_NAME}/${configTomlName}:${configLocation}`],
-      // volumes: [
-      //   `${relative(
-      //     TMP_DOCKER_COMPOSE_PATH,
-      //     // `/home/shams/Projects/work/fluence-cli/.f/.fluence/configs/${configTomlName}`,
-      //     `/home/shams/Projects/work/fluence-cli/tmp/templates/quickstart/.fluence/configs/${configTomlName}`,
-      //   )}:${configLocation}`,
-      // ],
+      depends_on: [
+        IPFS_CONTAINER_NAME,
+        CHAIN_RPC_CONTAINER_NAME,
+        CHAIN_DEPLOY_SCRIPT_NAME,
+      ],
+      volumes: [
+        `./${CONFIGS_DIR_NAME}/${configTomlName}:${configLocation}`,
+        `${name}:/.fluence`,
+      ],
       secrets: [name],
     },
   ];
@@ -238,18 +250,88 @@ async function genDockerCompose(
 
   return {
     version: "3",
+    volumes: {
+      [IPFS_CONTAINER_NAME]: null,
+      [POSTGRES_CONTAINER_NAME]: null,
+      [CHAIN_RPC_CONTAINER_NAME]: null,
+      ...Object.fromEntries(
+        peers.map(({ name }) => {
+          return [name, null] as const;
+        }),
+      ),
+    },
+    secrets: Object.fromEntries(
+      peers.map(({ name, relativeSecretFilePath: file }) => {
+        return [name, { file }] as const;
+      }),
+    ),
     services: {
-      // [CHAIN_CONTAINER_NAME]: {
-      //   image: versions.chain,
-      //   ports: [`${CHAIN_PORT}:${CHAIN_PORT}`],
-      // },
       [IPFS_CONTAINER_NAME]: {
-        image: "ipfs/go-ipfs",
+        image: "ipfs/kubo",
         ports: [`${IPFS_PORT}:${IPFS_PORT}`, "4001:4001"],
         environment: {
           IPFS_PROFILE: "server",
         },
-        volumes: [`./${IPFS_CONTAINER_NAME}/:/container-init.d/`],
+        volumes: [`${IPFS_CONTAINER_NAME}:/data/ipfs`],
+      },
+      [POSTGRES_CONTAINER_NAME]: {
+        image: "postgres:14",
+        ports: ["5432:5432"],
+        command: ["postgres", "-cshared_preload_libraries=pg_stat_statements"],
+        environment: {
+          POSTGRES_USER: "graph-node",
+          POSTGRES_PASSWORD: "let-me-in",
+          POSTGRES_DB: "graph-node",
+          PGDATA: "/var/lib/postgresql/data",
+          POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C",
+        },
+        volumes: [`${POSTGRES_CONTAINER_NAME}:/var/lib/postgresql/data`],
+      },
+      [CHAIN_RPC_CONTAINER_NAME]: {
+        image: versions[CHAIN_RPC_CONTAINER_NAME],
+        ports: [`${CHAIN_RPC_PORT}:${CHAIN_RPC_PORT}`],
+        volumes: [`${CHAIN_RPC_CONTAINER_NAME}:/data`],
+      },
+      [CHAIN_DEPLOY_SCRIPT_NAME]: {
+        image: versions[CHAIN_DEPLOY_SCRIPT_NAME],
+        environment: {
+          CHAIN_RPC_URL: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+        },
+        depends_on: [CHAIN_RPC_CONTAINER_NAME],
+      },
+      [GRAPH_NODE_CONTAINER_NAME]: {
+        image: "graphprotocol/graph-node:v0.33.0",
+        ports: [
+          "8000:8000",
+          "8001:8001",
+          `${GRAPH_NODE_PORT}:${GRAPH_NODE_PORT}`,
+          "8030:8030",
+          "8040:8040",
+        ],
+        depends_on: [
+          IPFS_CONTAINER_NAME,
+          POSTGRES_CONTAINER_NAME,
+          CHAIN_RPC_CONTAINER_NAME,
+        ],
+        environment: {
+          postgres_host: "postgres",
+          postgres_user: "graph-node",
+          postgres_pass: "let-me-in",
+          postgres_db: "graph-node",
+          ipfs: `${IPFS_CONTAINER_NAME}:${IPFS_PORT}`,
+          ethereum: `local:http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+          GRAPH_LOG: "info",
+          ETHEREUM_REORG_THRESHOLD: 1,
+          ETHEREUM_ANCESTOR_COUNT: 1,
+        },
+      },
+      [SUBGRAPH_DEPLOY_SCRIPT_NAME]: {
+        image: versions[SUBGRAPH_DEPLOY_SCRIPT_NAME],
+        environment: {
+          GRAPHNODE_URL: `http://${GRAPH_NODE_CONTAINER_NAME}:${GRAPH_NODE_PORT}`,
+          IPFS_URL: `http://${IPFS_CONTAINER_NAME}:${IPFS_PORT}`,
+        },
+        depends_on: [GRAPH_NODE_CONTAINER_NAME],
       },
       ...Object.fromEntries([
         genNox({
@@ -271,11 +353,6 @@ async function genDockerCompose(
         }),
       ),
     },
-    secrets: Object.fromEntries(
-      peers.map(({ name, relativeSecretFilePath: file }) => {
-        return [name, { file }] as const;
-      }),
-    ),
   };
 }
 

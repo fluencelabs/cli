@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { TMP_DOCKER_COMPOSE_PATH } from "./const.js";
 import { execPromise, type ExecPromiseArg } from "./execPromise.js";
 
 let useDockerComposeV2: boolean | undefined;
@@ -38,15 +37,6 @@ export async function dockerCompose(
   return execPromise({
     command: useDockerComposeV2 ? "docker" : "docker-compose",
     ...args,
-    args: useDockerComposeV2
-      ? [
-          "compose",
-          "-f",
-          TMP_DOCKER_COMPOSE_PATH,
-          "-f",
-          "./docker-compose.yaml",
-          ...args.args,
-        ]
-      : args.args,
+    args: useDockerComposeV2 ? ["compose", ...args.args] : args.args,
   });
 }

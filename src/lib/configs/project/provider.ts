@@ -40,8 +40,8 @@ import {
   TCP_PORT_START,
   LOCAL_NET_WALLET_KEYS,
   WEB_SOCKET_PORT_START,
-  CHAIN_CONTAINER_NAME,
-  CHAIN_PORT,
+  CHAIN_RPC_CONTAINER_NAME,
+  CHAIN_RPC_PORT,
   CONTRACTS_ENV,
   LOCAL_IPFS_ADDRESS,
   TOML_EXT,
@@ -780,7 +780,7 @@ function getDefaultNoxConfigYAML(
           ? NOX_IPFS_MULTIADDR
           : "http://ipfs.fluence.dev",
         networkApiEndpoint: isLocal
-          ? `http://${CHAIN_CONTAINER_NAME}:${CHAIN_PORT}`
+          ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
           : "http://mumbai-polygon.ru:8545",
         networkId: dealConfig.id,
         startBlock: "earliest",
