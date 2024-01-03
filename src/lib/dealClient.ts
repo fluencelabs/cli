@@ -19,7 +19,10 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import type { DealClient, DealMatcherClient } from "@fluencelabs/deal-ts-clients";
+import type {
+  DealClient,
+  DealMatcherClient,
+} from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
