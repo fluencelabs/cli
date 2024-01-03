@@ -50,7 +50,6 @@ import {
   overridableModuleProperties,
 } from "./module.js";
 
-
 export type ServiceModuleV0 = {
   get: string;
 } & OverridableModuleProperties;
