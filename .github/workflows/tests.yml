@@ -134,9 +134,9 @@ jobs:
           # set deal images
           case ${{ inputs.chain-rpc-image }} in
           'null')
-            chain_rpc="$(jq .chain-rpc src/versions.json -r)"
-            chain_deploy_script="$(jq .chain-deploy-script src/versions.json -r)"
-            subgraph_deploy_script="$(jq .chain-deploy-script src/versions.json -r)"
+            chain_rpc="$(jq '.["chain-rpc"]' src/versions.json -r)"
+            chain_deploy_script="$(jq '.["chain-deploy-script"]' src/versions.json -r)"
+            subgraph_deploy_script="$(jq '.["chain-deploy-script"]' src/versions.json -r)"
           ;;
           # else set deal images to snapshots passed from e2e
           *)
