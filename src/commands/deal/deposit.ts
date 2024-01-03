@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ERC20__factory } from "@fluencelabs/deal-aurora";
+import { ERC20__factory } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 

@@ -19,7 +19,10 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import type { DealClient, DealMatcherClient } from "@fluencelabs/deal-aurora";
+import type {
+  DealClient,
+  DealMatcherClient,
+} from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
@@ -107,7 +110,7 @@ export async function getDealMatcherClient() {
   const { env: envFromFlags } = dealClientFlags;
   const fluenceConfig = await initReadonlyFluenceConfig();
   const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
-  const { DealMatcherClient } = await import("@fluencelabs/deal-aurora");
+  const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
 
   if (dealMatcherClient === undefined) {
     dealMatcherClient = new DealMatcherClient(env);
@@ -120,7 +123,7 @@ async function createDealClient(
   signerOrProvider: ethers.Provider | ethers.Signer,
   env: ContractsENV,
 ) {
-  const { DealClient } = await import("@fluencelabs/deal-aurora");
+  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
   const client = new DealClient(signerOrProvider, env);
 
   await setTryTimeout(
