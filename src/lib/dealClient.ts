@@ -19,7 +19,7 @@
 import assert from "node:assert";
 import { URL } from "node:url";
 
-import type { DealClient } from "@fluencelabs/deal-aurora";
+import type { DealClient, DealMatcherClient } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
@@ -99,6 +99,21 @@ export async function getDealClient() {
   }
 
   return { dealClient, signerOrWallet };
+}
+
+let dealMatcherClient: DealMatcherClient | undefined = undefined;
+
+export async function getDealMatcherClient() {
+  const { env: envFromFlags } = dealClientFlags;
+  const fluenceConfig = await initReadonlyFluenceConfig();
+  const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
+  const { DealMatcherClient } = await import("@fluencelabs/deal-aurora");
+
+  if (dealMatcherClient === undefined) {
+    dealMatcherClient = new DealMatcherClient(env);
+  }
+
+  return dealMatcherClient;
 }
 
 async function createDealClient(

@@ -24,7 +24,12 @@ import type { ethers } from "ethers";
 import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL, CURRENCY_MULTIPLIER } from "./const.js";
 import { dbg } from "./dbg.js";
-import { waitTx, promptConfirmTx, getDealClient } from "./dealClient.js";
+import {
+  waitTx,
+  promptConfirmTx,
+  getDealClient,
+  getDealMatcherClient,
+} from "./dealClient.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -151,9 +156,18 @@ const COMPUTE_UNIT_CREATED_EVENT_TOPIC = "ComputeUnitCreated";
 
 export async function match(privKey: string | undefined, dealAddress: string) {
   const { dealClient } = await getDealClient();
+  const dealMatcherClient = await getDealMatcherClient();
+
+  const matchedOffers =
+    await dealMatcherClient.getMatchedOffersByDealId(dealAddress);
+
   const market = await dealClient.getMarket();
 
-  const tx = await market.matchDeal(dealAddress);
+  const tx = await market.matchDeal(
+    dealAddress,
+    matchedOffers.offers,
+    matchedOffers.computeUnitsPerOffers,
+  );
 
   promptConfirmTx(privKey);
 
