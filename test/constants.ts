@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { JSONSchemaType } from "ajv";
-
 import { getMultiaddrs } from "./helpers.js";
 
 export const multiaddrs = await getMultiaddrs();
@@ -24,6 +22,7 @@ export const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 
 export const MY_SERVICE_NAME = "myService";
 export const NEW_SPELL_NAME = "newSpell";
+export const NEW_MODULE_NAME = "newModule";
 export const WORKER_SPELL = "worker-spell";
 
 export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
@@ -75,30 +74,3 @@ service NewService("${NEW_SERVICE_NAME}"):
 
 ${NEW_SERVICE_2_INTERFACE}
 `;
-
-export type WorkerServices = {
-  host_id: string;
-  services: string[];
-  spells: string[];
-  worker_id: string;
-}[];
-
-export const workerServiceSchema: JSONSchemaType<WorkerServices> = {
-  type: "array",
-  items: {
-    type: "object",
-    properties: {
-      host_id: { type: "string" },
-      services: {
-        type: "array",
-        items: { type: "string" },
-      },
-      spells: {
-        type: "array",
-        items: { type: "string" },
-      },
-      worker_id: { type: "string" },
-    },
-    required: ["host_id", "services", "spells", "worker_id"],
-  },
-};
