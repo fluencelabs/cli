@@ -30,6 +30,7 @@ import {
   getDealClient,
   getDealMatcherClient,
 } from "./dealClient.js";
+import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -158,8 +159,17 @@ export async function match(privKey: string | undefined, dealAddress: string) {
   const { dealClient } = await getDealClient();
   const dealMatcherClient = await getDealMatcherClient();
 
-  const matchedOffers =
-    await dealMatcherClient.getMatchedOffersByDealId(dealAddress);
+  dbg(`dealAddress: ${dealAddress}`);
+
+  const matchedOffers = await setTryTimeout(
+    () => {
+      return dealMatcherClient.getMatchedOffersByDealId(dealAddress);
+    },
+    (error) => {
+      commandObj.error(stringifyUnknown(error));
+    },
+    1000 * 60 * 3,
+  );
 
   const market = await dealClient.getMarket();
 
