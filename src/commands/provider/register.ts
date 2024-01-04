@@ -65,7 +65,6 @@ export async function register(
   flags: {
     offer?: string | undefined;
     noxes?: number | undefined;
-    name?: string | undefined;
     env: string | undefined;
     "priv-key": string | undefined;
   },
