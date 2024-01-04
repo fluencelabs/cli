@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { sep, posix } from "node:path";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -49,7 +48,6 @@ import {
   type OverridableModuleProperties,
   overridableModuleProperties,
 } from "./module.js";
-
 
 export type ServiceModuleV0 = {
   get: string;
@@ -207,10 +205,6 @@ const getDefault: (
   relativePathToFacade: string,
   name: string,
 ): GetDefaultConfig => {
-  // All paths in config should be kept in platform independent way for consistency
-  // Also yaml parser would complain about backslashes, so it's better to avoid them instead of shielding
-  const posixRelativePath = relativePathToFacade.split(sep).join(posix.sep);
-
   return () => {
     return `# Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services),
 # most importantly the modules that the service consists of.
@@ -230,7 +224,7 @@ modules:
   facade:
     # Either path to the module directory or
     # URL to the tar.gz archive which contains the content of the module directory
-    get: "${posixRelativePath}"
+    get: '${relativePathToFacade}'
 
     # You can override module configuration here:
 
