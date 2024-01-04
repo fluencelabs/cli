@@ -317,10 +317,6 @@ export const OFFER_FLAG = {
 };
 
 export const PROVIDER_CONFIG_FLAGS = {
-  name: Flags.string({
-    description: "Provider config name",
-    char: "n",
-  }),
   [ENV_FLAG_NAME]: Flags.string({
     description: "Environment to use when generating the provider config",
     helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
