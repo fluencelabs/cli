@@ -882,7 +882,7 @@ _See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/c
 
 ## `fluence provider gen`
 
-Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml}
+Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
 
 ```
 USAGE
@@ -894,7 +894,7 @@ FLAGS
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
 
 DESCRIPTION
-  Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml}
+  Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
 
 EXAMPLES
   $ fluence provider gen
