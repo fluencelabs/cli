@@ -1,7 +1,11 @@
+!include "winmessages.nsh"
+
 ShowInstDetails show
 ShowUninstDetails show
 
 !addplugindir "../../nsis/Plugins/x86-unicode"
+
+!define env_hkcu 'HKCU "Environment"'
 
 Section "@fluencelabs/cli CLI ${VERSION}"
   SetOutPath $INSTDIR
@@ -19,6 +23,9 @@ Section "@fluencelabs/cli CLI ${VERSION}"
                    "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\fluence" \
                    "Publisher" "Fluence Labs"
+
+  WriteRegExpandStr ${env_hkcu} "FLUENCE_OCLIF_CLIENT_HOME" $INSTDIR
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 SectionEnd
 
 Section "Set PATH to @fluencelabs/cli"
@@ -40,6 +47,9 @@ Section "Uninstall"
   RMDir /r "$LOCALAPPDATA\fluence"
   DeleteRegKey /ifempty HKCU "Software\fluence"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\fluence"
+
+  DeleteRegValue ${env_hkcu} "FLUENCE_OCLIF_CLIENT_HOME"
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 SectionEnd
 
 # TODO: Make a PR to oclif's repo with the proposal to upgrade their codebase
