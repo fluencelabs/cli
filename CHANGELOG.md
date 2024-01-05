@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.13.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.2...fluence-cli-v0.13.3) (2024-01-05)
+
+
+### Features
+
+* add memory limit in mrepl by default ([#696](https://github.com/fluencelabs/cli/issues/696)) ([6de1dea](https://github.com/fluencelabs/cli/commit/6de1deac3af0feec5b9e9cfea8ece9191fb5825f))
+* improve provider config management ([#691](https://github.com/fluencelabs/cli/issues/691)) ([8fa0b3e](https://github.com/fluencelabs/cli/commit/8fa0b3efd43dd8a9244ec9bd152c612ac0233aae))
+* **test:** DXJ-575 updating the deal by changing a service ([#670](https://github.com/fluencelabs/cli/issues/670)) ([a6c44e6](https://github.com/fluencelabs/cli/commit/a6c44e686a548e783391a3f876958c63ad86e135))
+* unhide provider commands ([#694](https://github.com/fluencelabs/cli/issues/694)) ([50972b5](https://github.com/fluencelabs/cli/commit/50972b56ae036b08ca4a64838c2341db6d881595))
+
+
+### Bug Fixes
+
+* try `local down` only when not in CI ([#692](https://github.com/fluencelabs/cli/issues/692)) ([7f20b8b](https://github.com/fluencelabs/cli/commit/7f20b8b918744e4392bd36d58113bf95782ce616))
+
 ## [0.13.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.1...fluence-cli-v0.13.2) (2023-12-29)
 
 
