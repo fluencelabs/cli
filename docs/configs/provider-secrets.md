@@ -1,4 +1,4 @@
-# provider.yaml
+# provider-secrets.yaml
 
 Defines secrets config used for provider set up
 
