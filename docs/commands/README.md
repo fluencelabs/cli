@@ -354,7 +354,7 @@ _See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob
 
 ## `fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`
 
-Remove unit from the deal
+Deposit do the deal
 
 ```
 USAGE
@@ -371,7 +371,7 @@ FLAGS
                                                    is unsecure
 
 DESCRIPTION
-  Remove unit from the deal
+  Deposit do the deal
 ```
 
 _See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/deposit.ts)_
@@ -482,7 +482,7 @@ _See code: [src/commands/deal/remove-unit.ts](https://github.com/fluencelabs/cli
 
 ## `fluence deal stop [DEAL-ADDRESS]`
 
-Remove unit from the deal
+Stop the deal
 
 ```
 USAGE
@@ -498,14 +498,14 @@ FLAGS
                                                    is unsecure
 
 DESCRIPTION
-  Remove unit from the deal
+  Stop the deal
 ```
 
 _See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/stop.ts)_
 
 ## `fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`
 
-Remove unit from the deal
+Withdraw tokens from the deal
 
 ```
 USAGE
@@ -522,7 +522,7 @@ FLAGS
                                                    is unsecure
 
 DESCRIPTION
-  Remove unit from the deal
+  Withdraw tokens from the deal
 ```
 
 _See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/withdraw.ts)_
