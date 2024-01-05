@@ -30,7 +30,6 @@ import {
 } from "../../lib/provider.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
-  static override hidden = true;
   static override description = "Remove unit from the deal";
   static override flags = {
     ...baseFlags,
