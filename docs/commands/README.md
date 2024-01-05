@@ -2,13 +2,21 @@
 <!-- commands -->
 * [`fluence air beautify [PATH]`](#fluence-air-beautify-path)
 * [`fluence aqua`](#fluence-aqua)
+* [`fluence aqua imports`](#fluence-aqua-imports)
 * [`fluence aqua json [INPUT] [OUTPUT]`](#fluence-aqua-json-input-output)
 * [`fluence aqua yml [INPUT] [OUTPUT]`](#fluence-aqua-yml-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
+* [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
+* [`fluence deal create`](#fluence-deal-create)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
+* [`fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-deposit-deal-address-amount)
 * [`fluence deal info [DEAL-ADDRESS]`](#fluence-deal-info-deal-address)
 * [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
+* [`fluence deal match [DEAL-ADDRESS]`](#fluence-deal-match-deal-address)
+* [`fluence deal remove-unit [DEAL-ADDRESS] [UNIT-ID]`](#fluence-deal-remove-unit-deal-address-unit-id)
+* [`fluence deal stop [DEAL-ADDRESS]`](#fluence-deal-stop-deal-address)
+* [`fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-withdraw-deal-address-amount)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
 * [`fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-install-package-name--package-nameversion)
@@ -38,6 +46,8 @@
 * [`fluence provider register`](#fluence-provider-register)
 * [`fluence provider remove-peer`](#fluence-provider-remove-peer)
 * [`fluence provider remove-units`](#fluence-provider-remove-units)
+* [`fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-reward-info-deal-address-unit-id)
+* [`fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-withdraw-reward-deal-address-unit-id)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
 * [`fluence service new [NAME]`](#fluence-service-new-name)
@@ -111,6 +121,23 @@ EXAMPLES
 ```
 
 _See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/aqua.ts)_
+
+## `fluence aqua imports`
+
+Returns a list of aqua imports that CLI produces
+
+```
+USAGE
+  $ fluence aqua imports [--no-input]
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Returns a list of aqua imports that CLI produces
+```
+
+_See code: [src/commands/aqua/imports.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/aqua/imports.ts)_
 
 ## `fluence aqua json [INPUT] [OUTPUT]`
 
@@ -228,6 +255,58 @@ EXAMPLES
 
 _See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/build.ts)_
 
+## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
+
+Change app id in the deal
+
+```
+USAGE
+  $ fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+  NEW-APP-CID   New app CID for the deal
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Change app id in the deal
+```
+
+_See code: [src/commands/deal/change-app.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/change-app.ts)_
+
+## `fluence deal create`
+
+Create your deal with the specified parameters
+
+```
+USAGE
+  $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
+    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [--env <value>] [--priv-key
+    <value>]
+
+FLAGS
+  --app-cid=<value>                                (required) CID of the application that will be deployed
+  --collateral-per-worker=<value>                  (required) Collateral per worker
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --max-workers-per-provider=<value>               (required) Max workers per provider
+  --min-workers=<value>                            (required) Required workers to activate the deal
+  --no-input                                       Don't interactively ask for any input from the user
+  --price-per-worker-epoch=<value>                 (required) Price per worker epoch
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+  --target-workers=<value>                         (required) Max workers in the deal
+
+DESCRIPTION
+  Create your deal with the specified parameters
+```
+
+_See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/create.ts)_
+
 ## `fluence deal deploy [WORKER-NAMES]`
 
 Deploy workers according to deal in 'deals' property in fluence.yaml
@@ -272,6 +351,30 @@ EXAMPLES
 ```
 
 _See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/deploy.ts)_
+
+## `fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`
+
+Deposit do the deal
+
+```
+USAGE
+  $ fluence deal deposit [DEAL-ADDRESS] [AMOUNT] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+  AMOUNT        Amount of tokens to deposit
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Deposit do the deal
+```
+
+_See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/deposit.ts)_
 
 ## `fluence deal info [DEAL-ADDRESS]`
 
@@ -329,6 +432,100 @@ EXAMPLES
 ```
 
 _See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/logs.ts)_
+
+## `fluence deal match [DEAL-ADDRESS]`
+
+Match deal with resource owners
+
+```
+USAGE
+  $ fluence deal match [DEAL-ADDRESS] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Match deal with resource owners
+```
+
+_See code: [src/commands/deal/match.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/match.ts)_
+
+## `fluence deal remove-unit [DEAL-ADDRESS] [UNIT-ID]`
+
+Remove unit from the deal
+
+```
+USAGE
+  $ fluence deal remove-unit [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+  UNIT-ID       Compute unit CID
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Remove unit from the deal
+```
+
+_See code: [src/commands/deal/remove-unit.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/remove-unit.ts)_
+
+## `fluence deal stop [DEAL-ADDRESS]`
+
+Stop the deal
+
+```
+USAGE
+  $ fluence deal stop [DEAL-ADDRESS] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Stop the deal
+```
+
+_See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/stop.ts)_
+
+## `fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`
+
+Withdraw tokens from the deal
+
+```
+USAGE
+  $ fluence deal withdraw [DEAL-ADDRESS] [AMOUNT] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+  AMOUNT        Amount of tokens to deposit
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Withdraw tokens from the deal
+```
+
+_See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/deal/withdraw.ts)_
 
 ## `fluence default env [ENV]`
 
@@ -1012,6 +1209,54 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/provider/remove-units.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/provider/remove-units.ts)_
+
+## `fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`
+
+Reward info
+
+```
+USAGE
+  $ fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+  UNIT-ID       Compute unit ID
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Reward info
+```
+
+_See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/provider/reward-info.ts)_
+
+## `fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID]`
+
+Withdraw reward
+
+```
+USAGE
+  $ fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+  UNIT-ID       Compute unit CID
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure
+
+DESCRIPTION
+  Withdraw reward
+```
+
+_See code: [src/commands/provider/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.13.2/src/commands/provider/withdraw-reward.ts)_
 
 ## `fluence run`
 

@@ -24,7 +24,6 @@ import { input } from "../../lib/prompt.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Match extends BaseCommand<typeof Match> {
-  static override hidden = true;
   static override description = "Match deal with resource owners";
   static override flags = {
     ...baseFlags,

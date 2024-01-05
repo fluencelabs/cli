@@ -26,7 +26,6 @@ export default class Json extends BaseCommand<typeof Json> {
   static override flags = {
     ...baseFlags,
   };
-  static override hidden = true;
 
   async run(): Promise<void> {
     const { maybeFluenceConfig } = await initCli(this, await this.parse(Json));
