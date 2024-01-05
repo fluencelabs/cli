@@ -62,20 +62,20 @@ const [, ...restTemplatePaths] = await Promise.all(
   }),
 );
 
-try {
-  const localPsResult = await fluence({
-    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-    args: ["local", "ps"],
-  });
-
-  if (localPsResult.includes("fluence")) {
-    await fluence({
+if (process.env.CI !== "true") {
+  try {
+    const localPsResult = await fluence({
       cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-      args: ["local", "down"],
+      args: ["local", "ps"],
     });
-  }
-} catch (e) {
-  console.log(e);
+
+    if (localPsResult.includes("fluence")) {
+      await fluence({
+        cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+        args: ["local", "down"],
+      });
+    }
+  } catch {}
 }
 
 if (fluenceEnv === "local") {
