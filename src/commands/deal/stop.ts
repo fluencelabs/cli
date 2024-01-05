@@ -29,7 +29,7 @@ import {
 } from "../../lib/provider.js";
 
 export default class Stop extends BaseCommand<typeof Stop> {
-  static override description = "Remove unit from the deal";
+  static override description = "Stop the deal";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,

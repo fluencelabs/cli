@@ -29,7 +29,7 @@ import {
 } from "../../lib/provider.js";
 
 export default class Withdraw extends BaseCommand<typeof Withdraw> {
-  static override description = "Remove unit from the deal";
+  static override description = "Withdraw tokens from the deal";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
