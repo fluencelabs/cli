@@ -4,11 +4,18 @@ Defines a [Marine service](https://fluence.dev/docs/build/concepts/#services), m
 
 ## Properties
 
-| Property  | Type               | Required | Description                                                                                                                                                                                                          |
-|-----------|--------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `modules` | [object](#modules) | **Yes**  | Service must have a facade module. Each module properties can be overridden by the same properties in the service config                                                                                             |
-| `name`    | string             | **Yes**  | Service name. Currently it is used for the service name only when you add service to fluence.yaml using "add" command. But this name can be overridden to any other with the --name flag or manually in fluence.yaml |
-| `version` | number             | **Yes**  |                                                                                                                                                                                                                      |
+| Property           | Type               | Required | Description                                                                                                                                                                                                                  |
+|--------------------|--------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `modules`          | [object](#modules) | **Yes**  | Service must have a facade module. Each module properties can be overridden by the same properties in the service config                                                                                                     |
+| `name`             | string             | **Yes**  | Service name. Currently it is used for the service name only when you add service to fluence.yaml using "add" command. But this name can be overridden to any other with the --name flag or manually in fluence.yaml         |
+| `version`          | number             | **Yes**  |                                                                                                                                                                                                                              |
+| `totalMemoryLimit` | string             | No       | Default: Infinity. Currently used only in repl. Total memory limit for a service in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive): |
+|                    |                    |          | K, Kb - kilobyte                                                                                                                                                                                                             |
+|                    |                    |          | Ki, KiB - kibibyte                                                                                                                                                                                                           |
+|                    |                    |          | M, Mb - megabyte                                                                                                                                                                                                             |
+|                    |                    |          | Mi, MiB - mebibyte                                                                                                                                                                                                           |
+|                    |                    |          | G, Gb - gigabyte                                                                                                                                                                                                             |
+|                    |                    |          | Gi, GiB - gibibyte                                                                                                                                                                                                           |
 
 ## modules
 
