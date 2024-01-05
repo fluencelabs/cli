@@ -39,7 +39,7 @@ export default class Init extends BaseCommand<typeof Init> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
 
-    let providerConfig = await initReadonlyProviderConfig(flags.name);
+    let providerConfig = await initReadonlyProviderConfig();
 
     if (providerConfig !== null) {
       const isOverwriting = await confirm({
