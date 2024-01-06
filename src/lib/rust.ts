@@ -31,6 +31,7 @@ import {
   isFluenceCargoDependency,
 } from "./const.js";
 import { addCountlyLog } from "./countly.js";
+import { findEntryInPATH, prependEntryToPATH } from "./env.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
 import {
@@ -128,9 +129,9 @@ async function isRustInstalled(): Promise<boolean> {
 
   const cargoPath = join(homedir(), ".cargo", "bin");
 
-  if (!process.env.PATH.split(":").includes(cargoPath)) {
+  if (!findEntryInPATH(cargoPath)) {
     // try updating PATH to include cargo
-    process.env.PATH = `${cargoPath}:${process.env.PATH}`;
+    prependEntryToPATH(cargoPath);
     return isRustInstalledCheck();
   }
 
