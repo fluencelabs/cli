@@ -25,7 +25,6 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Create extends BaseCommand<typeof Create> {
-  static override hidden = true;
   static override description =
     "Create your deal with the specified parameters";
   static override flags = {

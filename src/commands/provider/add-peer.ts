@@ -63,7 +63,6 @@ export async function addPeer(
   flags: {
     "peer-id"?: string[] | undefined;
     "compute-units"?: number[] | undefined;
-    name?: string | undefined;
     env: string | undefined;
     "priv-key": string | undefined;
   },

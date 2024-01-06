@@ -117,7 +117,13 @@ export default class REPL extends Command {
 
     await writeFile(
       fluenceTmpConfigTomlPath,
-      stringifyToTOML({ module: ensureModuleConfigsForToml(moduleConfigs) }),
+      stringifyToTOML({
+        total_memory_limit:
+          typeof serviceConfig.totalMemoryLimit === "string"
+            ? serviceConfig.totalMemoryLimit
+            : "Infinity",
+        module: ensureModuleConfigsForToml(moduleConfigs),
+      }),
       FS_OPTIONS,
     );
 

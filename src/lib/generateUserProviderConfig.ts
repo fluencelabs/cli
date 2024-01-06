@@ -42,16 +42,8 @@ async function promptToSetNumberProperty(
 
 const DEFAULT_NUMBER_OF_NOXES = 3;
 
-export type ProviderConfigArgs = (
-  | {
-      env: string | undefined;
-      name: string | undefined;
-    }
-  | {
-      env: "local";
-      name?: undefined;
-    }
-) & {
+export type ProviderConfigArgs = {
+  env: string | undefined;
   noxes?: number | undefined;
 };
 
@@ -110,7 +102,8 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
   let offersCounter = 0;
 
   do {
-    const defaultName = `offer-${offersCounter}`;
+    const defaultName =
+      offersCounter === 0 ? "offer" : `offer-${offersCounter}`;
 
     const name = await input({
       message: `Enter name for offer`,

@@ -79,6 +79,7 @@ type ConfigV0 = {
   version: 0;
   name: string;
   modules: Modules;
+  totalMemoryLimit?: string | null;
 };
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
@@ -101,6 +102,12 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
         Other_module_name: moduleSchemaForService,
       },
       required: [FACADE_MODULE_NAME],
+    },
+    totalMemoryLimit: {
+      type: "string",
+      nullable: true,
+      description:
+        "Default: Infinity. Currently used only in repl. Total memory limit for a service in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):\nK, Kb - kilobyte\nKi, KiB - kibibyte\nM, Mb - megabyte\nMi, MiB - mebibyte\nG, Gb - gigabyte\nGi, GiB - gibibyte",
     },
     version: { type: "number", const: 0 },
   },
