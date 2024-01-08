@@ -42,28 +42,25 @@ import {
   WEB_SOCKET_PORT_START,
   CHAIN_RPC_CONTAINER_NAME,
   CHAIN_RPC_PORT,
-  CONTRACTS_ENV,
   LOCAL_IPFS_ADDRESS,
   TOML_EXT,
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
   CURRENCY_MULTIPLIER_TEXT,
-  type ContractsENV,
   defaultNumberProperties,
   DEAL_CONFIG,
-} from "../../const.js";
-import {
   DEFAULT_CC_DURATION,
   DEFAULT_CC_DELEGATOR,
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
+  type ContractsENV,
 } from "../../const.js";
+import { ensureChainNetwork } from "../../ensureChainNetwork.js";
 import {
   type ProviderConfigArgs,
   addOffers,
   addComputePeers,
 } from "../../generateUserProviderConfig.js";
-import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   ccDurationValidator,
@@ -78,7 +75,6 @@ import {
 } from "../../paths.js";
 import { type Choices, list } from "../../prompt.js";
 import {
-  getConfigInitFunction,
   getReadonlyConfigInitFunction,
   type InitializedConfig,
   type InitializedReadonlyConfig,
@@ -280,10 +276,10 @@ type ComputePeer = {
 };
 
 type ConfigV0 = {
-  env: ContractsENV;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   capacityCommitments?: Record<string, CapacityCommitment>;
+  env?: string;
   nox?: NoxConfigYAML;
   version: 0;
 };
@@ -328,9 +324,9 @@ const configSchemaV0 = {
   properties: {
     env: {
       description:
-        "Defines the the environment for which you intend to generate nox configuration",
+        "DEPRECATED: for simplicity, your project env determines chain environment that is used both for provider and for fluence application developer. To set your project env, use `fluence default env` command.",
       type: "string",
-      enum: CONTRACTS_ENV,
+      nullable: true,
     },
     offers: {
       description: "A map with offer names as keys and offers as values",
@@ -365,7 +361,7 @@ const configSchemaV0 = {
     },
     version: { type: "number", const: 0, description: "Config version" },
   },
-  required: ["version", "computePeers", "offers", "env"],
+  required: ["version", "computePeers", "offers"],
 } as const satisfies JSONSchemaType<ConfigV0>;
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
@@ -375,13 +371,14 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
     commandObj.logToStderr("Creating new provider config\n");
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
+    const env = await ensureChainNetwork(args.env);
+
     const userProvidedConfig: UserProvidedConfig = {
-      env: await ensureValidContractsEnv(args.env),
       computePeers: {},
       offers: {},
     };
 
-    if (userProvidedConfig.env === "local") {
+    if (env === "local") {
       userProvidedConfig.computePeers = Object.fromEntries(
         times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
           return [`nox-${i}`, { computeUnits: 1 }] as const;
@@ -430,78 +427,83 @@ type LatestConfig = ConfigV0;
 export type ProviderConfig = InitializedConfig<LatestConfig>;
 export type ProviderConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  const invalid: Array<{
-    offerName: string;
-    missingComputePeerNames: Array<string>;
-  }> = [];
+const getValidate: (
+  args: ProviderConfigArgs,
+) => ConfigValidateFunction<LatestConfig> = (args) => {
+  return async (config) => {
+    const invalid: Array<{
+      offerName: string;
+      missingComputePeerNames: Array<string>;
+    }> = [];
 
-  if (isEmpty(config.computePeers)) {
-    return `There should be at least one computePeer defined in the config`;
-  }
+    if (isEmpty(config.computePeers)) {
+      return `There should be at least one computePeer defined in the config`;
+    }
 
-  const offers = Object.entries(config.offers);
+    const offers = Object.entries(config.offers);
 
-  if (offers.length === 0) {
-    return `There should be at least one offer defined in the config`;
-  }
+    if (offers.length === 0) {
+      return `There should be at least one offer defined in the config`;
+    }
 
-  // Checking that all computePeers referenced in offers are defined
-  for (const [offerName, { computePeers }] of offers) {
-    const missingComputePeerNames = computePeers.filter((cp) => {
-      return !(cp in config.computePeers);
+    // Checking that all computePeers referenced in offers are defined
+    for (const [offerName, { computePeers }] of offers) {
+      const missingComputePeerNames = computePeers.filter((cp) => {
+        return !(cp in config.computePeers);
+      });
+
+      if (missingComputePeerNames.length > 0) {
+        invalid.push({ offerName, missingComputePeerNames });
+      }
+    }
+
+    if (invalid.length > 0) {
+      return invalid
+        .map(({ offerName, missingComputePeerNames }) => {
+          return `Offer ${color.yellow(
+            offerName,
+          )} has computePeers missing from the config's top level computePeers property: ${color.yellow(
+            missingComputePeerNames.join(", "),
+          )}`;
+        })
+        .join("\n");
+    }
+
+    const env = await ensureChainNetwork(args.env);
+    const validateCCDuration = await ccDurationValidator(env === "local");
+
+    const capacityCommitmentErrors = (
+      await Promise.all(
+        Object.entries(config.capacityCommitments ?? {}).map(
+          async ([name, cc]) => {
+            const errors = [
+              await validateAddress(cc.delegator),
+              validateCCDuration(cc.duration),
+            ].filter((e) => {
+              return e !== true;
+            });
+
+            return errors.length === 0
+              ? true
+              : `Invalid capacity commitment for ${color.yellow(
+                  name,
+                )}:\n${errors.join("\n")}`;
+          },
+        ),
+      )
+    ).filter((e) => {
+      return e !== true;
     });
 
-    if (missingComputePeerNames.length > 0) {
-      invalid.push({ offerName, missingComputePeerNames });
+    if (capacityCommitmentErrors.length > 0) {
+      return capacityCommitmentErrors.join("\n\n");
     }
-  }
 
-  if (invalid.length > 0) {
-    return invalid
-      .map(({ offerName, missingComputePeerNames }) => {
-        return `Offer ${color.yellow(
-          offerName,
-        )} has computePeers missing from the config's top level computePeers property: ${color.yellow(
-          missingComputePeerNames.join(", "),
-        )}`;
-      })
-      .join("\n");
-  }
-
-  const validateCCDuration = await ccDurationValidator(config.env === "local");
-
-  const capacityCommitmentErrors = (
-    await Promise.all(
-      Object.entries(config.capacityCommitments ?? {}).map(
-        async ([name, cc]) => {
-          const errors = [
-            await validateAddress(cc.delegator),
-            validateCCDuration(cc.duration),
-          ].filter((e) => {
-            return e !== true;
-          });
-
-          return errors.length === 0
-            ? true
-            : `Invalid capacity commitment for ${color.yellow(
-                name,
-              )}:\n${errors.join("\n")}`;
-        },
-      ),
-    )
-  ).filter((e) => {
-    return e !== true;
-  });
-
-  if (capacityCommitmentErrors.length > 0) {
-    return capacityCommitmentErrors.join("\n\n");
-  }
-
-  return true;
+    return true;
+  };
 };
 
-function getInitConfigOptions() {
+function getInitConfigOptions(args: ProviderConfigArgs) {
   return {
     allSchemas: [configSchemaV0],
     latestSchema: configSchemaV0,
@@ -511,34 +513,11 @@ function getInitConfigOptions() {
       return getProviderConfigPath();
     },
     getSchemaDirPath: getFluenceDir,
-    validate,
+    validate: getValidate(args),
   };
 }
 
 export type UserProvidedConfig = Omit<LatestConfig, "version">;
-
-async function createProviderConfigWithSecretsAndConfigTomls<
-  T extends ProviderConfigReadonly | null,
->(ensureProviderConfig: () => Promise<T>) {
-  const providerConfig = await ensureProviderConfig();
-
-  if (providerConfig !== null) {
-    const providerSecretsConfig =
-      await initNewReadonlyProviderSecretsConfig(providerConfig);
-
-    await ensureKeysFromProviderSecretsConfig(
-      providerConfig,
-      providerSecretsConfig,
-    );
-
-    await Promise.all([
-      ensureSecrets(providerConfig),
-      ensureConfigToml(providerConfig, providerSecretsConfig),
-    ]);
-  }
-
-  return providerConfig;
-}
 
 async function ensureKeysFromProviderSecretsConfig(
   providerConfig: ProviderConfigReadonly,
@@ -586,41 +565,42 @@ async function ensureSecrets(providerConfig: ProviderConfigReadonly) {
   );
 }
 
-export async function initNewProviderConfig(args: ProviderConfigArgs) {
-  return createProviderConfigWithSecretsAndConfigTomls(
-    getConfigInitFunction(getInitConfigOptions(), getDefault(args)),
-  );
-}
-
 export async function initNewReadonlyProviderConfig(args: ProviderConfigArgs) {
-  return createProviderConfigWithSecretsAndConfigTomls(
-    getReadonlyConfigInitFunction(getInitConfigOptions(), getDefault(args)),
-  );
-}
+  const providerConfig = await getReadonlyConfigInitFunction(
+    getInitConfigOptions(args),
+    getDefault(args),
+  )();
 
-export function initProviderConfig() {
-  return createProviderConfigWithSecretsAndConfigTomls(
-    getConfigInitFunction(getInitConfigOptions()),
-  );
-}
+  const providerSecretsConfig =
+    await initNewReadonlyProviderSecretsConfig(providerConfig);
 
-export function initReadonlyProviderConfig() {
-  return createProviderConfigWithSecretsAndConfigTomls(
-    getReadonlyConfigInitFunction(getInitConfigOptions()),
+  await ensureKeysFromProviderSecretsConfig(
+    providerConfig,
+    providerSecretsConfig,
   );
+
+  await Promise.all([
+    ensureSecrets(providerConfig),
+    ensureConfigToml(providerConfig, args, providerSecretsConfig),
+  ]);
+
+  return providerConfig;
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 
 export async function ensureConfigToml(
   providerConfig: ProviderConfigReadonly,
+  args: ProviderConfigArgs,
   providerSecretsConfig?: ProviderSecretesConfigReadonly | null,
 ) {
   const { rawConfig: providerRawNoxConfig, ...providerNoxConfig } =
     providerConfig.nox ?? {};
 
+  const env = await ensureChainNetwork(args.env);
+
   const baseNoxConfig = mergeNoxConfigYAML(
-    getDefaultNoxConfigYAML(providerConfig),
+    getDefaultNoxConfigYAML(env),
     providerNoxConfig,
   );
 
@@ -738,13 +718,9 @@ function camelCaseKeysToSnakeCase(val: unknown): unknown {
   return val;
 }
 
-function getDefaultNoxConfigYAML(
-  providerConfig: ProviderConfigReadonly,
-): NoxConfigYAML {
-  const isLocal = providerConfig.env === "local";
-  const contractsEnv = providerConfig.env;
-
-  const dealConfig = DEAL_CONFIG[contractsEnv];
+function getDefaultNoxConfigYAML(env: ContractsENV): NoxConfigYAML {
+  const isLocal = env === "local";
+  const dealConfig = DEAL_CONFIG[env];
 
   return mergeNoxConfigYAML(commonNoxConfig, {
     systemServices: {
@@ -752,10 +728,10 @@ function getDefaultNoxConfigYAML(
       aquaIpfs: {
         externalApiMultiaddr: isLocal
           ? LOCAL_IPFS_ADDRESS
-          : `/dns4/${contractsEnv}-ipfs.fluence.dev/tcp/5020`,
+          : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`,
         localApiMultiaddr: isLocal
           ? NOX_IPFS_MULTIADDR
-          : `/dns4/${contractsEnv}-ipfs.fluence.dev/tcp/5020`,
+          : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`,
       },
       decider: {
         deciderPeriodSec: 10,

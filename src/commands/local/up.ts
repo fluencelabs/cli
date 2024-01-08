@@ -24,6 +24,7 @@ import {
   LOCAL_NET_DEFAULT_WALLET_KEY,
   NOXES_FLAG,
   PRIV_KEY_FLAG,
+  PROVIDER_CONFIG_FLAGS,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -41,13 +42,12 @@ export default class Up extends BaseCommand<typeof Up> {
       default: 120,
     }),
     ...PRIV_KEY_FLAG,
+    ...PROVIDER_CONFIG_FLAGS,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Up));
 
-    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig({
-      noxes: flags.noxes,
-    });
+    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig(flags);
 
     try {
       const res = await dockerCompose({

@@ -27,7 +27,6 @@ import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
-import { initReadonlyFluenceConfig } from "./configs/project/fluence.js";
 import {
   DEAL_CONFIG,
   CLI_CONNECTOR_URL,
@@ -62,8 +61,7 @@ let readonlyDealClient: DealClient | undefined = undefined;
 
 export async function getReadonlyDealClient() {
   const { env: envFromFlags } = dealClientFlags;
-  const fluenceConfig = await initReadonlyFluenceConfig();
-  const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
+  const env = await ensureChainNetwork(envFromFlags);
 
   if (provider === undefined) {
     provider = await ensureProvider(env);
@@ -83,9 +81,7 @@ let dealClient: DealClient | undefined = undefined;
 
 export async function getDealClient() {
   const { env: envFromFlags } = dealClientFlags;
-
-  const fluenceConfig = await initReadonlyFluenceConfig();
-  const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
+  const env = await ensureChainNetwork(envFromFlags);
 
   const privKey =
     dealClientFlags["priv-key"] ??
@@ -108,8 +104,7 @@ let dealMatcherClient: DealMatcherClient | undefined = undefined;
 
 export async function getDealMatcherClient() {
   const { env: envFromFlags } = dealClientFlags;
-  const fluenceConfig = await initReadonlyFluenceConfig();
-  const env = await ensureChainNetwork(envFromFlags, fluenceConfig);
+  const env = await ensureChainNetwork(envFromFlags);
   const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
 
   if (dealMatcherClient === undefined) {

@@ -17,47 +17,50 @@
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
-import type { FluenceConfigReadonly } from "./configs/project/fluence.js";
-import {
-  type ContractsENV,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
-  CLI_NAME,
-} from "./const.js";
+import { initReadonlyFluenceConfig } from "./configs/project/fluence.js";
+import { type ContractsENV, CLI_NAME } from "./const.js";
 import { resolveFluenceEnv } from "./resolveFluenceEnv.js";
+
+let env: ContractsENV | undefined = undefined;
+
+function setEnv(e: ContractsENV): ContractsENV {
+  env = e;
+  commandObj.logToStderr(`Using ${color.yellow(env)} blockchain environment`);
+  return env;
+}
 
 export async function ensureChainNetwork(
   fluenceEnvFromFlags: string | undefined,
-  maybeFluenceConfig: FluenceConfigReadonly | null,
 ): Promise<ContractsENV> {
+  if (env !== undefined) {
+    return env;
+  }
+
   const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
 
   if (fluenceEnv !== "custom") {
-    commandObj.logToStderr(
-      `Using ${color.yellow(
-        fluenceEnv,
-      )} blockchain environment to send transactions`,
-    );
-
-    return fluenceEnv;
+    return setEnv(fluenceEnv);
   }
 
-  const customContractsEnv = maybeFluenceConfig?.customFluenceEnv?.contractsEnv;
+  const maybeFluenceConfig = await initReadonlyFluenceConfig();
+
+  if (maybeFluenceConfig === null) {
+    commandObj.error(
+      "Fluence project is required to use custom env. Please make sure you're in the project directory or specify the environment using --env flag",
+    );
+  }
+
+  const customContractsEnv = maybeFluenceConfig.customFluenceEnv?.contractsEnv;
 
   if (customContractsEnv === undefined) {
     commandObj.error(
       `${color.yellow("customFluenceEnv")} is not defined in ${color.yellow(
-        maybeFluenceConfig?.$getPath() ?? FLUENCE_CONFIG_FULL_FILE_NAME,
+        maybeFluenceConfig.$getPath(),
       )}. Please make sure it's there or choose some other fluence environment using ${color.yellow(
         `${CLI_NAME} default env`,
       )}`,
     );
   }
 
-  commandObj.logToStderr(
-    `Using ${color.yellow(
-      customContractsEnv,
-    )} blockchain environment to send transactions`,
-  );
-
-  return customContractsEnv;
+  return setEnv(customContractsEnv);
 }

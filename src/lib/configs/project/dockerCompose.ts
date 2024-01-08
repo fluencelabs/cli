@@ -384,7 +384,7 @@ const initConfigOptions = {
 
 export async function initNewDockerComposeConfig(args: ProviderConfigArgs) {
   const providerConfig = await initNewReadonlyProviderConfig(args);
-  await ensureConfigToml(providerConfig);
+  await ensureConfigToml(providerConfig, args);
   return getConfigInitFunction(
     initConfigOptions,
     await genDefaultDockerCompose(providerConfig),
@@ -392,14 +392,10 @@ export async function initNewDockerComposeConfig(args: ProviderConfigArgs) {
 }
 
 export async function initNewReadonlyDockerComposeConfig(
-  args: Omit<ProviderConfigArgs, "env">,
+  args: ProviderConfigArgs,
 ) {
-  const providerConfig = await initNewReadonlyProviderConfig({
-    ...args,
-    env: "local",
-  });
-
-  await ensureConfigToml(providerConfig);
+  const providerConfig = await initNewReadonlyProviderConfig(args);
+  await ensureConfigToml(providerConfig, args);
   return getReadonlyConfigInitFunction(
     initConfigOptions,
     await genDefaultDockerCompose(providerConfig),

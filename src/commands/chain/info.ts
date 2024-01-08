@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
-import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
+import { ENV_FLAG_NAME, PROVIDER_CONFIG_FLAGS } from "../../lib/const.js";
+import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import { jsonStringify } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Init extends BaseCommand<typeof Init> {
-  static override description = "Init provider config. Creates a config file";
+export default class Info extends BaseCommand<typeof Info> {
+  static override description = "Show contract addresses for the fluence env";
   static override flags = {
     ...baseFlags,
-    ...NOXES_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Init));
-    const providerConfig = await initNewReadonlyProviderConfig(flags);
+    const { flags } = await initCli(this, await this.parse(Info));
+    const env = await ensureChainNetwork(flags[ENV_FLAG_NAME]);
 
-    commandObj.logToStderr(
-      `Provider config is at ${color.yellow(providerConfig.$getPath())}`,
+    const addresses: unknown = await import(
+      `@fluencelabs/deal-ts-clients/dist/deployments/${env}.json`,
+      {
+        assert: { type: "json" },
+      }
     );
+
+    // @ts-expect-error each json module has default export
+    commandObj.log(jsonStringify(addresses.default));
   }
 }

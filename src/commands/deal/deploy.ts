@@ -86,7 +86,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true,
     );
 
-    const contractsENV = await ensureChainNetwork(flags.env, fluenceConfig);
+    const contractsENV = await ensureChainNetwork(flags.env);
     const chainNetworkId = DEAL_CONFIG[contractsENV].id;
     const workersConfig = await initNewWorkersConfig();
 
