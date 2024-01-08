@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import assert from "node:assert";
+import { cp } from "fs/promises";
 import { join } from "node:path";
 
-import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
 import {
   MY_SERVICE_NAME,
   NEW_MODULE_NAME,
@@ -32,26 +31,14 @@ import {
   createServiceAndAddToDeal,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
-  getFluenceConfig,
+  getTestAquaDirPath,
+  updateFluenceConfigForTest,
   updateMainRs,
+  updateSpellAqua,
+  waitUntilAquaScriptReturnsExpected,
   waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
 } from "../sharedSteps.js";
-
-async function updateFluenceConfigForTest(cwd: string) {
-  const fluenceConfig = await getFluenceConfig(cwd);
-
-  assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-  );
-
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
-  await fluenceConfig.$commit();
-  return fluenceConfig;
-}
 
 describe("Deal update tests", () => {
   // TODO: test skipped until NET-649 is released
@@ -59,11 +46,11 @@ describe("Deal update tests", () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
     await init(cwd, "quickstart");
 
-    const fluenceConfig = await updateFluenceConfigForTest(cwd);
+    await updateFluenceConfigForTest(cwd);
 
     await deployDealAndWaitUntilDeployed(cwd);
 
-    await createSpellAndAddToDeal(cwd, fluenceConfig, NEW_SPELL_NAME);
+    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
     await deployDealAndWaitUntilDeployed(cwd);
 
@@ -163,6 +150,39 @@ describe("Deal update tests", () => {
 
     assertLogsAreValid(logs);
   });
+
+  // TODO: test skipped until FLU-575 is released
+  test.skip("should update deal after changing a spell", async () => {
+    const cwd = join("tmp", "shouldUpdateDealAfterChangingASpell");
+    await init(cwd, "quickstart");
+
+    await cp(
+      join(getTestAquaDirPath(), "getSpellLogs.aqua"),
+      join(cwd, "getSpellLogs.aqua"),
+    );
+
+    await updateFluenceConfigForTest(cwd);
+
+    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await updateSpellAqua(cwd, NEW_SPELL_NAME, UPDATED_SPELL_CONTENT);
+
+    await deployDealAndWaitUntilDeployed(cwd);
+
+    await waitUntilAquaScriptReturnsExpected(
+      cwd,
+      NEW_SPELL_NAME,
+      "getSpellLogs",
+      "getSpellLogs.aqua",
+      "if you see this, then the spell is working",
+    );
+
+    const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+    assertLogsAreValid(logs);
+  });
 });
 
 const NEW_MODULE_CONTENT = `#![allow(non_snake_case)]
@@ -210,4 +230,14 @@ pub fn main() {}
 pub fn greeting(name: String) -> String {
     format!("Hey, {}! I've been updated.", name)
 }
+`;
+
+const UPDATED_SPELL_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
+import Spell from "@fluencelabs/spell/spell_service.aqua"
+
+func spell():
+    msg = "if you see this, then the spell is working"
+    str <- Debug.stringify(msg)
+    Spell "worker-spell"
+    Spell.store_log(str)
 `;

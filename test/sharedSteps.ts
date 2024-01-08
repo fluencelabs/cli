@@ -21,7 +21,6 @@ import { join, relative } from "node:path";
 import { map, sortBy } from "lodash-es";
 
 import {
-  type FluenceConfig,
   initFluenceConfigWithPath,
   initReadonlyFluenceConfigWithPath,
 } from "../src/lib/configs/project/fluence.js";
@@ -44,15 +43,21 @@ import { getServicesDir, getSpellsDir, getSrcPath } from "../src/lib/paths.js";
 
 import {
   multiaddrs,
+  MY_SERVICE_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   WORKER_SPELL,
 } from "./constants.js";
 import { assertHasWorkerAndAnswer, fluence } from "./helpers.js";
 import { validateDeployedServicesAnswerSchema } from "./validators/deployedServicesAnswerValidator.js";
+import { validateSpellLogs } from "./validators/spellLogsValidator.js";
 import {
   validateWorkerServices,
   type WorkerServices,
 } from "./validators/workerServiceValidator.js";
+
+export function getTestAquaDirPath() {
+  return join("test", "_resources", "aqua");
+}
 
 export function getServiceDirPath(cwd: string, serviceName: string) {
   return join(getServicesDir(cwd), serviceName);
@@ -78,6 +83,10 @@ export function getMainRsPath(
   return join(getModuleDirPath(cwd, moduleName, serviceName), "src", "main.rs");
 }
 
+export function getSpellAquaPath(cwd: string, spellName: string) {
+  return join(getSrcPath(cwd), "spells", spellName, "spell.aqua");
+}
+
 export async function updateMainRs(
   cwd: string,
   moduleName: string,
@@ -89,6 +98,14 @@ export async function updateMainRs(
     content,
     FS_OPTIONS,
   );
+}
+
+export async function updateSpellAqua(
+  cwd: string,
+  spellName: string,
+  content: string,
+) {
+  await writeFile(getSpellAquaPath(cwd, spellName), content, FS_OPTIONS);
 }
 
 export async function getFluenceConfig(cwd: string) {
@@ -116,6 +133,21 @@ export async function getServiceConfig(cwd: string, serviceName: string) {
   );
 
   return serviceConfig;
+}
+
+export async function updateFluenceConfigForTest(cwd: string) {
+  const fluenceConfig = await getFluenceConfig(cwd);
+
+  assert(
+    fluenceConfig.deals !== undefined &&
+      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
+    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+  );
+
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
+  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+  await fluenceConfig.$commit();
+  return fluenceConfig;
 }
 
 async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
@@ -247,15 +279,13 @@ async function waitUntilDealDeployed(cwd: string) {
   expect(res).toEqual(expected);
 }
 
-export async function createSpellAndAddToDeal(
-  cwd: string,
-  fluenceConfig: FluenceConfig,
-  spellName: string,
-) {
+export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
   await fluence({
     args: ["spell", "new", spellName],
     cwd,
   });
+
+  const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
     fluenceConfig.deals !== undefined &&
@@ -373,6 +403,60 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
     (error) => {
       throw new Error(
         `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error,
+        )}`,
+      );
+    },
+    RUN_DEPLOYED_SERVICES_TIMEOUT,
+  );
+}
+
+export async function waitUntilAquaScriptReturnsExpected(
+  cwd: string,
+  spellName: string,
+  functionName: string,
+  aquaFileName: string,
+  answer: string,
+) {
+  await setTryTimeout(
+    async () => {
+      const result = await fluence({
+        args: ["run"],
+        flags: {
+          f: `${functionName}("${spellName}")`,
+          i: aquaFileName,
+          quiet: true,
+        },
+        cwd,
+      });
+
+      const spellLogs = JSON.parse(result);
+
+      if (!validateSpellLogs(spellLogs)) {
+        throw new Error(
+          `result of running ${functionName} aqua function has unexpected structure: ${validateSpellLogs.errors?.toString()}`,
+        );
+      }
+
+      spellLogs[0].forEach((w) => {
+        assert(
+          w.logs.length > 0,
+          `Worker ${w.worker_id} doesn't have any logs`,
+        );
+
+        const lastLogMessage = w.logs[w.logs.length - 1]?.message;
+
+        assert(
+          lastLogMessage === answer,
+          `Worker ${w.worker_id} last log message is expected to be ${answer}, but it is ${lastLogMessage}`,
+        );
+      });
+
+      assert(spellLogs[1].length === 0, `Errors: ${spellLogs[1].join("\n")}`);
+    },
+    (error) => {
+      throw new Error(
+        `${functionName} didn't return expected response in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
           error,
         )}`,
       );

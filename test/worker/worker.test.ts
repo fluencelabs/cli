@@ -130,7 +130,7 @@ describe("integration tests", () => {
 
       const fluenceConfig = await getFluenceConfig(cwd);
 
-      await createSpellAndAddToDeal(cwd, fluenceConfig, NEW_SPELL_NAME);
+      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
       fluenceConfig.hosts = {
         [DEFAULT_WORKER_NAME]: {
