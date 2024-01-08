@@ -27,12 +27,7 @@ import type {
   FluenceConfigReadonly,
 } from "../configs/project/fluence.js";
 import {
-  initReadonlyUserConfig,
-  type UserConfigReadonly,
-} from "../configs/user/config.js";
-import {
   CLI_NAME,
-  FLUENCE_CONFIG_FILE_NAME,
   fluenceCargoDependencies,
   fluenceNPMDependencies,
 } from "../const.js";
@@ -243,21 +238,17 @@ export const getRecommendedDependencies = (packageManager: "npm" | "cargo") => {
   );
 };
 
-export const resolveCargoDependencies = async (
+export function resolveCargoDependencies(
   maybeFluenceConfig: FluenceConfigReadonly | null,
   doWarn = false,
-) => {
+) {
   const recommendedDependencies = getRecommendedDependencies("cargo");
-  const userFluenceConfig = await initReadonlyUserConfig();
-
-  const userDependencyOverrides = userFluenceConfig?.dependencies?.cargo ?? {};
 
   const projectDependencyOverrides =
     maybeFluenceConfig?.dependencies?.cargo ?? {};
 
   const finalDependencies: Record<string, string> = {
     ...recommendedDependencies,
-    ...userDependencyOverrides,
     ...projectDependencyOverrides,
   };
 
@@ -267,21 +258,17 @@ export const resolveCargoDependencies = async (
       finalDependencies,
       projectDependencyOverrides,
       maybeFluenceConfig,
-      userDependencyOverrides,
-      userFluenceConfig,
     });
   }
 
   return finalDependencies;
-};
+}
 
 type WarnAboutOverriddenDependenciesArg = {
   recommendedDependencies: Record<string, string>;
   finalDependencies: Record<string, string>;
   projectDependencyOverrides: Record<string, string>;
   maybeFluenceConfig: FluenceConfigReadonly | null;
-  userDependencyOverrides: Record<string, string>;
-  userFluenceConfig: UserConfigReadonly | null;
 };
 
 function warnAboutOverriddenDependencies({
@@ -289,10 +276,7 @@ function warnAboutOverriddenDependencies({
   finalDependencies,
   projectDependencyOverrides,
   maybeFluenceConfig,
-  userDependencyOverrides,
-  userFluenceConfig,
 }: WarnAboutOverriddenDependenciesArg) {
-  // Warn about overridden recommended dependencies
   Object.entries(recommendedDependencies).forEach(([name, defaultVersion]) => {
     const versionToUse = finalDependencies[name];
 
@@ -310,35 +294,6 @@ function warnAboutOverriddenDependencies({
       );
 
       return;
-    }
-
-    if (versionToUse === userDependencyOverrides[name]) {
-      assert(userFluenceConfig !== null);
-
-      commandObj.logToStderr(
-        color.yellow(
-          `Using version ${versionToUse} of ${name} defined at ${userFluenceConfig.$getPath()} instead of the recommended version ${defaultVersion}. You may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}. You can reset it to the recommended version by running \`${CLI_NAME} dep r -g\``,
-        ),
-      );
-
-      return;
-    }
-  });
-
-  // Warn about using user dependencies from .fluence/config.json
-  Object.entries(userDependencyOverrides).forEach(([name, version]) => {
-    if (
-      finalDependencies[name] === version &&
-      projectDependencyOverrides[name] !== version &&
-      !(name in recommendedDependencies)
-    ) {
-      assert(userFluenceConfig !== null);
-
-      commandObj.logToStderr(
-        color.yellow(
-          `Using version ${version} of ${name} defined at ${userFluenceConfig.$getPath()}, you may want to consider adding it to your project's ${FLUENCE_CONFIG_FILE_NAME}`,
-        ),
-      );
     }
   });
 }
