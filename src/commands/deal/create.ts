@@ -24,7 +24,6 @@ import { dealCreate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Create extends BaseCommand<typeof Create> {
-  static override hidden = true;
   static override description =
     "Create your deal with the specified parameters";
   static override flags = {

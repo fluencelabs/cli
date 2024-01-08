@@ -19,6 +19,7 @@ import { join } from "path";
 
 import {
   DOT_FLUENCE_DIR_NAME,
+  PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   SECRETS_DIR_NAME,
   TEMPLATES,
   TMP_DIR_NAME,
@@ -61,20 +62,20 @@ const [, ...restTemplatePaths] = await Promise.all(
   }),
 );
 
-try {
-  const localPsResult = await fluence({
-    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-    args: ["local", "ps"],
-  });
-
-  if (localPsResult.includes("fluence")) {
-    await fluence({
+if (process.env.CI !== "true") {
+  try {
+    const localPsResult = await fluence({
       cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-      args: ["local", "down"],
+      args: ["local", "ps"],
     });
-  }
-} catch (e) {
-  console.log(e);
+
+    if (localPsResult.includes("fluence")) {
+      await fluence({
+        cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+        args: ["local", "down"],
+      });
+    }
+  } catch {}
 }
 
 if (fluenceEnv === "local") {
@@ -90,17 +91,33 @@ const secretsPath = join(
   SECRETS_DIR_NAME,
 );
 
+const secretsConfigPath = join(
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+  DOT_FLUENCE_DIR_NAME,
+  PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
+);
+
 await Promise.all(
   [...restTemplatePaths, join(TMP_DIR_NAME, NO_PROJECT_TEST_NAME)].map(
     (path) => {
-      return cp(
-        secretsPath,
-        join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME),
-        {
+      return Promise.all([
+        cp(secretsPath, join(path, DOT_FLUENCE_DIR_NAME, SECRETS_DIR_NAME), {
           force: true,
           recursive: true,
-        },
-      );
+        }),
+        cp(
+          secretsConfigPath,
+          join(
+            path,
+            DOT_FLUENCE_DIR_NAME,
+            PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
+          ),
+          {
+            force: true,
+            recursive: true,
+          },
+        ),
+      ]);
     },
   ),
 );

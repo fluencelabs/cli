@@ -28,8 +28,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class Stop extends BaseCommand<typeof Stop> {
-  static override hidden = true;
-  static override description = "Remove unit from the deal";
+  static override description = "Stop the deal";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,

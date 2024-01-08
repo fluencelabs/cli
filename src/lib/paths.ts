@@ -49,8 +49,6 @@ import {
   COMPILED_AQUA_DIR_NAME,
   INDEX_HTML_FILE_NAME,
   CONFIGS_DIR_NAME,
-  PROVIDER_CONFIG_FILE_NAME,
-  YAML_EXT,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   AQUA_DEPENDENCIES_DIR_NAME,
@@ -132,30 +130,8 @@ export const setProjectRootDir = (dir: string): void => {
   projectRootDir = dir;
 };
 
-let providerConfigName: string | undefined;
-
-export const setProviderConfigName = (name: string | undefined): void => {
-  providerConfigName = name;
-};
-
-async function ensureProviderConfigDirPath(): Promise<string> {
-  return ensureDir(join(projectRootDir, providerConfigName ?? ""));
-}
-
-export async function ensureProviderConfigPath(): Promise<string> {
-  const providerConfigDirPath = await ensureProviderConfigDirPath();
-
-  return join(
-    providerConfigDirPath,
-    providerConfigName === undefined
-      ? PROVIDER_CONFIG_FULL_FILE_NAME
-      : `${PROVIDER_CONFIG_FILE_NAME}_${providerConfigName}.${YAML_EXT}`,
-  );
-}
-
-export async function ensureProviderSecretsConfigPath(): Promise<string> {
-  const providerConfigDirPath = await ensureProviderConfigDirPath();
-  return join(providerConfigDirPath, PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME);
+export function getProviderConfigPath(): string {
+  return join(projectRootDir, PROVIDER_CONFIG_FULL_FILE_NAME);
 }
 
 const getAquaDir = (cwd?: string): string => {
@@ -224,6 +200,10 @@ const ensureFluenceDir = async (): Promise<string> => {
   return ensureDir(getFluenceDir());
 };
 
+export async function ensureProviderSecretsConfigPath(): Promise<string> {
+  return join(await ensureFluenceDir(), PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME);
+}
+
 export const getFluenceAquaDir = (cwd?: string): string => {
   return join(getFluenceDir(cwd), AQUA_DIR_NAME);
 };
@@ -248,13 +228,9 @@ export const ensureFluenceAquaDealsPath = async (): Promise<string> => {
   return join(await ensureFluenceAquaDir(), DEALS_FULL_FILE_NAME);
 };
 
-export const getFluenceSecretsDir = (): string => {
-  if (providerConfigName !== undefined) {
-    return join(projectRootDir, providerConfigName, SECRETS_DIR_NAME);
-  }
-
+export function getFluenceSecretsDir(): string {
   return join(getFluenceDir(), SECRETS_DIR_NAME);
-};
+}
 
 async function ensureFluenceSecretsDir(): Promise<string> {
   return ensureDir(getFluenceSecretsDir());
@@ -266,15 +242,9 @@ export const ensureFluenceSecretsFilePath = async (
   return join(await ensureFluenceSecretsDir(), `${name}.txt`);
 };
 
-export const ensureFluenceConfigsDir = async (): Promise<string> => {
-  if (providerConfigName !== undefined) {
-    return ensureDir(
-      join(projectRootDir, providerConfigName, CONFIGS_DIR_NAME),
-    );
-  }
-
+export async function ensureFluenceConfigsDir(): Promise<string> {
   return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
-};
+}
 
 export async function getSecretsPathForReading(isUser: boolean) {
   return isUser ? await ensureUserFluenceSecretsDir() : getFluenceSecretsDir();

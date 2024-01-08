@@ -15,21 +15,24 @@
  */
 
 import type { JSONSchemaType } from "ajv";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import {
   TOP_LEVEL_SCHEMA_ID,
-  PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FILE_NAME,
+  LOCAL_NET_WALLET_KEYS,
 } from "../../const.js";
+import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureProviderSecretsConfigPath, getFluenceDir } from "../../paths.js";
 import {
-  getConfigInitFunction,
   getReadonlyConfigInitFunction,
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
 } from "../initConfig.js";
+
+import type { ProviderConfigReadonly } from "./provider.js";
 
 type SecretsConfig = {
   networkKey: string;
@@ -61,7 +64,7 @@ const secretesConfig = {
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}`,
-  title: PROVIDER_CONFIG_FULL_FILE_NAME,
+  title: PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   description: `Defines secrets config used for provider set up`,
   type: "object",
   additionalProperties: false,
@@ -105,10 +108,36 @@ export function initReadonlyProviderSecretsConfig() {
   return getReadonlyConfigInitFunction(getInitConfigOptions())();
 }
 
-export function initNewProviderSecretsConfig() {
-  return getConfigInitFunction(getInitConfigOptions(), () => {
-    return `version: 0
-noxes: {}
+export async function initNewReadonlyProviderSecretsConfig(
+  providerConfig: ProviderConfigReadonly,
+) {
+  const noxes: Record<string, SecretsConfig> = Object.fromEntries(
+    await Promise.all(
+      Object.keys(providerConfig.computePeers).map(async (name, i) => {
+        return [
+          name,
+          {
+            networkKey: (await getSecretKeyOrReturnExisting(name)).secretKey,
+            signingWallet:
+              // because we use length we can be sure it's never undefined
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length] as string,
+          },
+        ] as const;
+      }),
+    ),
+  );
+
+  return getReadonlyConfigInitFunction(getInitConfigOptions(), () => {
+    return `
+version: 0
+${yamlDiffPatch(
+  "",
+  {},
+  {
+    noxes,
+  },
+)}
 `;
   })();
 }

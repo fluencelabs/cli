@@ -72,9 +72,8 @@ import {
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import {
   ensureFluenceConfigsDir,
-  ensureProviderConfigPath,
+  getProviderConfigPath,
   getFluenceDir,
-  setProviderConfigName,
   ensureFluenceSecretsFilePath,
 } from "../../paths.js";
 import { type Choices, list } from "../../prompt.js";
@@ -88,8 +87,8 @@ import {
 } from "../initConfig.js";
 
 import {
-  initReadonlyProviderSecretsConfig,
   type ProviderSecretesConfigReadonly,
+  initNewReadonlyProviderSecretsConfig,
 } from "./providerSecrets.js";
 
 export type CapacityCommitment = {
@@ -509,7 +508,7 @@ function getInitConfigOptions() {
     migrations,
     name: PROVIDER_CONFIG_FILE_NAME,
     getConfigOrConfigDirPath: () => {
-      return ensureProviderConfigPath();
+      return getProviderConfigPath();
     },
     getSchemaDirPath: getFluenceDir,
     validate,
@@ -520,23 +519,17 @@ export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
 async function createProviderConfigWithSecretsAndConfigTomls<
   T extends ProviderConfigReadonly | null,
->(name: string | undefined, ensureProviderConfig: () => Promise<T>) {
-  let providerSecretsConfig: ProviderSecretesConfigReadonly | null = null;
-
-  if (name !== undefined) {
-    setProviderConfigName(name);
-    providerSecretsConfig = await initReadonlyProviderSecretsConfig();
-  }
-
+>(ensureProviderConfig: () => Promise<T>) {
   const providerConfig = await ensureProviderConfig();
 
   if (providerConfig !== null) {
-    if (providerSecretsConfig !== null) {
-      await ensureKeysFromProviderSecretsConfig(
-        providerConfig,
-        providerSecretsConfig,
-      );
-    }
+    const providerSecretsConfig =
+      await initNewReadonlyProviderSecretsConfig(providerConfig);
+
+    await ensureKeysFromProviderSecretsConfig(
+      providerConfig,
+      providerSecretsConfig,
+    );
 
     await Promise.all([
       ensureSecrets(providerConfig),
@@ -593,36 +586,26 @@ async function ensureSecrets(providerConfig: ProviderConfigReadonly) {
   );
 }
 
-export async function initNewProviderConfig({
-  config,
-  ...args
-}: ProviderConfigArgs) {
+export async function initNewProviderConfig(args: ProviderConfigArgs) {
   return createProviderConfigWithSecretsAndConfigTomls(
-    config,
     getConfigInitFunction(getInitConfigOptions(), getDefault(args)),
   );
 }
 
-export async function initNewReadonlyProviderConfig({
-  config,
-  ...args
-}: ProviderConfigArgs) {
+export async function initNewReadonlyProviderConfig(args: ProviderConfigArgs) {
   return createProviderConfigWithSecretsAndConfigTomls(
-    config,
     getReadonlyConfigInitFunction(getInitConfigOptions(), getDefault(args)),
   );
 }
 
-export function initProviderConfig(name?: string) {
+export function initProviderConfig() {
   return createProviderConfigWithSecretsAndConfigTomls(
-    name,
     getConfigInitFunction(getInitConfigOptions()),
   );
 }
 
-export function initReadonlyProviderConfig(name?: string) {
+export function initReadonlyProviderConfig() {
   return createProviderConfigWithSecretsAndConfigTomls(
-    name,
     getReadonlyConfigInitFunction(getInitConfigOptions()),
   );
 }

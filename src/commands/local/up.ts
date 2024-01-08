@@ -74,15 +74,10 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
-    // make sure ENV is correct according to provider
-
-    const env = "local";
-    const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
-
     await register({
       ...flags,
-      "priv-key": privKey,
-      env,
+      "priv-key": flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY,
+      env: "local",
       offer: DEFAULT_OFFER_NAME,
     });
   }

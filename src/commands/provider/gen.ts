@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { join } from "path";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
@@ -23,12 +21,16 @@ import {
   PROVIDER_CONFIG_FLAGS,
   NOXES_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { getFluenceDir, projectRootDir } from "../../lib/paths.js";
+import {
+  getFluenceSecretsDir,
+  ensureFluenceConfigsDir,
+} from "../../lib/paths.js";
 
 export default class Gen extends BaseCommand<typeof Gen> {
-  static override description = `Generate Config.toml files according to ${PROVIDER_CONFIG_FULL_FILE_NAME}`;
+  static override description = `Generate Config.toml files according to ${PROVIDER_CONFIG_FULL_FILE_NAME} and secrets according to ${PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -40,11 +42,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
     await initNewReadonlyProviderConfig(flags);
 
     commandObj.logToStderr(
-      `Configuration is generated at ${
-        flags.config === undefined
-          ? getFluenceDir()
-          : join(projectRootDir, flags.config)
-      }`,
+      `Config.toml files for nox are generated at:\n${await ensureFluenceConfigsDir()}\n\nsecrets are generated at:\n${getFluenceSecretsDir()}`,
     );
   }
 }

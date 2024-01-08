@@ -25,8 +25,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
-  static override hidden = true;
-  static override description = "Remove unit from the deal";
+  static override description = "Reward info";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,

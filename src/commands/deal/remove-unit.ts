@@ -28,7 +28,6 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
-  static override hidden = true;
   static override description = "Remove unit from the deal";
   static override flags = {
     ...baseFlags,

@@ -23,7 +23,6 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class Match extends BaseCommand<typeof Match> {
-  static override hidden = true;
   static override description = "Match deal with resource owners";
   static override flags = {
     ...baseFlags,
