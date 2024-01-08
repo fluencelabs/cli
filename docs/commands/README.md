@@ -7,6 +7,7 @@
 * [`fluence aqua yml [INPUT] [OUTPUT]`](#fluence-aqua-yml-input-output)
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
+* [`fluence chain info`](#fluence-chain-info)
 * [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
@@ -252,6 +253,24 @@ EXAMPLES
 ```
 
 _See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.13.3/src/commands/build.ts)_
+
+## `fluence chain info`
+
+Show contract addresses for the fluence env
+
+```
+USAGE
+  $ fluence chain info [--no-input] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Show contract addresses for the fluence env
+```
+
+_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.3/src/commands/chain/info.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -917,11 +936,11 @@ Init docker-compose.yaml according to provider.yaml
 
 ```
 USAGE
-  $ fluence local init [--no-input] [--noxes <value>]
+  $ fluence local init [--no-input] [--env <value>]
 
 FLAGS
-  --no-input       Don't interactively ask for any input from the user
-  --noxes=<value>  Number of Compute Peers to generate when a new provider.yaml is created
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -978,15 +997,18 @@ Run docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>]
+  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --no-input                Don't interactively ask for any input from the user
-  --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local
-                            network 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be used by
-                            default
-  --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local peers
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
+                                          unsecure. On local network
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          used by default
+  --timeout=<value>                       [default: 120] Timeout in seconds for attempting to register local network on
+                                          local peers
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose

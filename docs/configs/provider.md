@@ -4,14 +4,14 @@ Defines config used for provider set up
 
 ## Properties
 
-| Property              | Type                           | Required | Description                                                                                                                              |
-|-----------------------|--------------------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peers as values                                                                        |
-| `env`                 | string                         | **Yes**  | Defines the the environment for which you intend to generate nox configuration Possible values are: `kras`, `testnet`, `stage`, `local`. |
-| `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offers as values                                                                                      |
-| `version`             | number                         | **Yes**  | Config version                                                                                                                           |
-| `capacityCommitments` | [object](#capacitycommitments) | No       | A map with nox names as keys and capacity commitments as values                                                                          |
-| `nox`                 | [object](#nox)                 | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config                                          |
+| Property              | Type                           | Required | Description                                                                                                                                                                                                 |
+|-----------------------|--------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peers as values                                                                                                                                           |
+| `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offers as values                                                                                                                                                         |
+| `version`             | number                         | **Yes**  | Config version                                                                                                                                                                                              |
+| `capacityCommitments` | [object](#capacitycommitments) | No       | A map with nox names as keys and capacity commitments as values                                                                                                                                             |
+| `env`                 | string                         | No       | DEPRECATED: for simplicity, your project env determines chain environment that is used both for provider and for fluence application developer. To set your project env, use `fluence default env` command. |
+| `nox`                 | [object](#nox)                 | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config                                                                                                             |
 
 ## capacityCommitments
 
