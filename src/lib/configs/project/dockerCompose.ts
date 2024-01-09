@@ -253,7 +253,6 @@ async function genDockerCompose(
     volumes: {
       [IPFS_CONTAINER_NAME]: null,
       [POSTGRES_CONTAINER_NAME]: null,
-      [CHAIN_RPC_CONTAINER_NAME]: null,
       ...Object.fromEntries(
         peers.map(({ name }) => {
           return [name, null] as const;
@@ -290,7 +289,6 @@ async function genDockerCompose(
       [CHAIN_RPC_CONTAINER_NAME]: {
         image: versions[CHAIN_RPC_CONTAINER_NAME],
         ports: [`${CHAIN_RPC_PORT}:${CHAIN_RPC_PORT}`],
-        volumes: [`${CHAIN_RPC_CONTAINER_NAME}:/data`],
       },
       [CHAIN_DEPLOY_SCRIPT_NAME]: {
         image: versions[CHAIN_DEPLOY_SCRIPT_NAME],

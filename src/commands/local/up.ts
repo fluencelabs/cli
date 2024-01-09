@@ -51,7 +51,10 @@ export default class Up extends BaseCommand<typeof Up> {
 
     try {
       const res = await dockerCompose({
-        args: ["restart"],
+        args: ["down"],
+        flags: {
+          v: true,
+        },
         printOutput: true,
         options: {
           cwd: dockerComposeConfig.$getDirPath(),
@@ -59,13 +62,15 @@ export default class Up extends BaseCommand<typeof Up> {
       });
 
       if (res.trim() === "") {
-        throw new Error("docker-compose restart failed");
+        throw new Error("docker-compose down failed");
       }
     } catch {
       await dockerCompose({
-        args: ["up", "-d"],
+        args: ["up"],
         flags: {
           "quiet-pull": true,
+          d: true,
+          build: true,
         },
         printOutput: true,
         options: {

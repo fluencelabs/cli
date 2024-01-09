@@ -19,6 +19,7 @@
 import assert from "node:assert";
 
 import { color } from "@oclif/color";
+import { wait } from "@oclif/core/lib/cli-ux/index.js";
 import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
@@ -30,7 +31,7 @@ import {
   getDealClient,
   getDealMatcherClient,
 } from "./dealClient.js";
-import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
+import { stringifyUnknown } from "./helpers/utils.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -159,17 +160,15 @@ export async function match(privKey: string | undefined, dealAddress: string) {
   const { dealClient } = await getDealClient();
   const dealMatcherClient = await getDealMatcherClient();
 
-  dbg(`dealAddress: ${dealAddress}`);
+  dbg(`waiting 10 seconds before getMatchedOffersByDealId...`);
+  await wait(1000 * 10);
 
-  const matchedOffers = await setTryTimeout(
-    () => {
-      return dealMatcherClient.getMatchedOffersByDealId(dealAddress);
-    },
-    (error) => {
-      commandObj.error(stringifyUnknown(error));
-    },
-    1000 * 60 * 3,
-  );
+  dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
+
+  const matchedOffers =
+    await dealMatcherClient.getMatchedOffersByDealId(dealAddress);
+
+  dbg(`got matchedOffers: ${stringifyUnknown(matchedOffers)}`);
 
   const market = await dealClient.getMarket();
 

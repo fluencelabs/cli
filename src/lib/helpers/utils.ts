@@ -16,6 +16,8 @@
 
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
+import { dbg } from "../dbg.js";
+
 export function commaSepStrToArr(commaSepStr: string) {
   return commaSepStr.split(",").map((s) => {
     return s.trim();
@@ -172,11 +174,13 @@ export async function setTryTimeout<T, U>(
     isTrying = isTimeoutRunning;
 
     try {
+      dbg(`Trying to execute: ${callbackToTry.toString()}`);
       const res = await callbackToTry();
       clearTimeout(timeout);
       isTrying = false;
       return res;
     } catch (e) {
+      dbg(`Failed to execute. Reason: ${stringifyUnknown(e)}`);
       error = e;
     }
 
