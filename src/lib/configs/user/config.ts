@@ -18,14 +18,12 @@ import { rm } from "fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
-import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   GLOBAL_CONFIG_FILE_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   CLI_NAME_FULL,
-  AQUA_LIB_NPM_DEPENDENCY,
   AUTO_GENERATED,
 } from "../../const.js";
 import {
