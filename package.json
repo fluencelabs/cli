@@ -87,6 +87,7 @@
     "npm": "^10.2.1",
     "platform": "^1.3.6",
     "semver": "^7.5.4",
+    "xbytes": "^1.8.0",
     "yaml": "^2.3.3",
     "yaml-diff-patch": "^2.0.0"
   },

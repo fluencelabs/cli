@@ -23,6 +23,7 @@ import type {
 } from "@oclif/core/lib/interfaces/parser.js";
 import camelCase from "lodash-es/camelCase.js";
 import upperFirst from "lodash-es/upperFirst.js";
+import xbytes from "xbytes";
 
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
@@ -54,6 +55,16 @@ export const defaultNumberProperties: Record<NumberProperty, number> = {
   maxCollateralPerWorker: COLLATERAL_DEFAULT,
   minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
+
+export const PER_WORKER_MEMORY_LIMIT_STR = "2GB";
+export const PER_WORKER_MEMORY_LIMIT = xbytes.parseSize(
+  PER_WORKER_MEMORY_LIMIT_STR,
+);
+
+const byteUnits = "kB|KB|kiB|KiB|KIB|mB|MB|miB|MiB|MIB|gB|GB|giB|GiB|GIB";
+export const BYTES_PATTERN = `^\\d+(\\.\\d+)?(\\s?)(${byteUnits})$`;
+export const BYTES_FORMAT = `[number][whitespace?][specificator] where ? is an optional field and specificator is one of the following: ${byteUnits}`;
+export const MAX_HEAP_SIZE_DESCRIPTION = `Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
 
 export const U32_MAX = 4_294_967_295;
 
