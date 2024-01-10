@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { join } from "node:path";
+
 import { getMultiaddrs } from "./helpers.js";
 
 export const multiaddrs = await getMultiaddrs();
@@ -24,6 +26,8 @@ export const MY_SERVICE_NAME = "myService";
 export const NEW_SPELL_NAME = "newSpell";
 export const NEW_MODULE_NAME = "newModule";
 export const WORKER_SPELL = "worker-spell";
+
+export const TEST_AQUA_DIR_PATH = join("test", "_resources", "aqua");
 
 export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;

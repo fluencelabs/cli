@@ -55,10 +55,6 @@ import {
   type WorkerServices,
 } from "./validators/workerServiceValidator.js";
 
-export function getTestAquaDirPath() {
-  return join("test", "_resources", "aqua");
-}
-
 export function getServiceDirPath(cwd: string, serviceName: string) {
   return join(getServicesDir(cwd), serviceName);
 }

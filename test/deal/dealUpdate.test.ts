@@ -22,6 +22,7 @@ import {
   NEW_MODULE_NAME,
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
+  TEST_AQUA_DIR_PATH,
 } from "../constants.js";
 import { fluence, init } from "../helpers.js";
 import {
@@ -31,7 +32,6 @@ import {
   createServiceAndAddToDeal,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
-  getTestAquaDirPath,
   updateFluenceConfigForTest,
   updateMainRs,
   updateSpellAqua,
@@ -157,8 +157,8 @@ describe("Deal update tests", () => {
     await init(cwd, "quickstart");
 
     await cp(
-      join(getTestAquaDirPath(), "getSpellLogs.aqua"),
-      join(cwd, "getSpellLogs.aqua"),
+      join(TEST_AQUA_DIR_PATH, GET_SPELL_LOGS_AQUA_FILE_NAME),
+      join(cwd, GET_SPELL_LOGS_AQUA_FILE_NAME),
     );
 
     await updateFluenceConfigForTest(cwd);
@@ -231,6 +231,8 @@ pub fn greeting(name: String) -> String {
     format!("Hey, {}! I've been updated.", name)
 }
 `;
+
+const GET_SPELL_LOGS_AQUA_FILE_NAME = "getSpellLogs.aqua";
 
 const UPDATED_SPELL_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
