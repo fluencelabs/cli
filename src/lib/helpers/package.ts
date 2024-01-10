@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { access, rm } from "node:fs/promises";
+import { access, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
@@ -40,7 +40,6 @@ import {
   ensureUserFluenceCargoDir,
   ensureUserFluenceTmpCargoDir,
 } from "../paths.js";
-import { confirm } from "../prompt.js";
 
 const packageManagers = ["cargo"] as const;
 type PackageManager = (typeof packageManagers)[number];
@@ -175,30 +174,29 @@ export const handleInstallation = async ({
   force,
   installDependency,
   dependencyDirPath,
+  dependencyTmpDirPath,
   explicitInstallation,
   name,
   version,
 }: HandleInstallationArg): Promise<void> => {
-  try {
-    // if dependency is already installed it will be there
-    await access(dependencyDirPath);
-  } catch {
-    if (!force) {
-      const isDependencyOverwrite = await confirm({
-        message: `Dependency ${name}@${version} already installed. Do you want to replace it?`,
-      });
-
-      if (!isDependencyOverwrite) {
-        commandObj.error(
-          `Cannot finish installation. Reason: dependency ${name}@${version} already installed`,
-        );
-      }
-    }
-
+  const installAndMoveToDependencyPath = async (): Promise<void> => {
+    await rm(dependencyTmpDirPath, { recursive: true, force: true });
+    await installDependency();
     await rm(dependencyDirPath, { recursive: true, force: true });
-  }
+    await rename(dependencyTmpDirPath, dependencyDirPath);
+  };
 
-  await installDependency();
+  if (force) {
+    await installAndMoveToDependencyPath();
+  } else {
+    try {
+      // if dependency is already installed it will be there
+      // so there is no need to install
+      await access(dependencyDirPath);
+    } catch {
+      await installAndMoveToDependencyPath();
+    }
+  }
 
   if (explicitInstallation) {
     commandObj.log(
