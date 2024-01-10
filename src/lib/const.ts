@@ -61,9 +61,28 @@ export const PER_WORKER_MEMORY_LIMIT = xbytes.parseSize(
   PER_WORKER_MEMORY_LIMIT_STR,
 );
 
-const byteUnits = "kB|KB|kiB|KiB|KIB|mB|MB|miB|MiB|MIB|gB|GB|giB|GiB|GIB";
-export const BYTES_PATTERN = `^\\d+(\\.\\d+)?(\\s?)(${byteUnits})$`;
-export const BYTES_FORMAT = `[number][whitespace?][specificator] where ? is an optional field and specificator is one of the following: ${byteUnits}`;
+const byteUnits = [
+  "kB",
+  "KB",
+  "kiB",
+  "KiB",
+  "KIB",
+  "mB",
+  "MB",
+  "miB",
+  "MiB",
+  "MIB",
+  "gB",
+  "GB",
+  "giB",
+  "GiB",
+  "GIB",
+];
+
+export const BYTES_PATTERN = `^\\d+(\\.\\d+)?(\\s?)(${byteUnits.join("|")})$`;
+export const BYTES_FORMAT = `[number][whitespace?][B] where ? is an optional field and B is one of the following: ${byteUnits.join(
+  ", ",
+)}`;
 export const MAX_HEAP_SIZE_DESCRIPTION = `Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
 
 export const U32_MAX = 4_294_967_295;

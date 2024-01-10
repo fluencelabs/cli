@@ -100,7 +100,7 @@ export const overridableServiceProperties = {
       type: "string",
       pattern: BYTES_PATTERN,
       nullable: true,
-      description: `Memory limit for all service modules. In repl default is: Infinity. When deploying service as part of the worker default is: ${PER_WORKER_MEMORY_LIMIT_STR}/(amount of services in the worker). Format: ${BYTES_FORMAT}`,
+      description: `Memory limit for all service modules. In repl default is: Infinity. When deploying service as part of the worker default is: ${PER_WORKER_MEMORY_LIMIT_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
     },
   },
   required: [],
