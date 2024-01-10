@@ -216,7 +216,6 @@ type InstallCargoDependencyArg = {
   toolchain: string | undefined;
   name: string;
   version: string;
-  dependencyTmpDirPath: string;
   dependencyDirPath: string;
 };
 
@@ -225,7 +224,6 @@ const installCargoDependency = async ({
   name,
   version,
   dependencyDirPath,
-  dependencyTmpDirPath,
 }: InstallCargoDependencyArg) => {
   await execPromise({
     command: CARGO,
@@ -236,7 +234,7 @@ const installCargoDependency = async ({
     ],
     flags: {
       version,
-      root: dependencyTmpDirPath,
+      root: dependencyDirPath,
     },
     spinnerMessage: `Installing ${name}@${version} to ${dependencyDirPath}`,
     printOutput: true,
@@ -389,7 +387,6 @@ export const ensureCargoDependency = async ({
       installDependency: () => {
         return installCargoDependency({
           dependencyDirPath,
-          dependencyTmpDirPath,
           name,
           toolchain,
           version,

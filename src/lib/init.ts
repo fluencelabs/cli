@@ -280,11 +280,7 @@ const shouldInit = async (projectPath: string): Promise<boolean> => {
     message: `Directory ${color.yellow(projectPath)} is not empty. Proceed?`,
   });
 
-  if (hasUserConfirmedInitInNonEmptyDir) {
-    return true;
-  }
-
-  return false;
+  return hasUserConfirmedInitInNonEmptyDir;
 };
 
 type InitTSorJSProjectArg = {
