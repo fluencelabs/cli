@@ -141,6 +141,11 @@ const handlePreviouslyDeployedWorkers = async (
 type UploadDeploySpellConfig =
   Upload_deployArgConfig["workers"][number]["config"]["spells"][number];
 
+type UploadDeployServiceConfig =
+  Upload_deployArgConfig["workers"][number]["config"]["services"][number] & {
+    total_memory_limit: string | undefined;
+  };
+
 type PrepareForDeployArg = {
   workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
@@ -774,11 +779,7 @@ async function resolveWorker({
   );
 
   const servicesWithUnresolvedMemoryLimit = (workerConfig.services ?? []).map(
-    (
-      serviceName,
-    ): Upload_deployArgConfig["workers"][number]["config"]["services"][number] & {
-      total_memory_limit: string | undefined;
-    } => {
+    (serviceName): UploadDeployServiceConfig => {
       const maybeServiceConfig = serviceConfigs.find((c) => {
         return c.serviceName === serviceName;
       });
@@ -858,24 +859,10 @@ async function resolveWorker({
   );
 
   if (specifiedServicesMemoryLimit > PER_WORKER_MEMORY_LIMIT) {
-    commandObj.error(
-      `Total memory limit for services in worker ${color.yellow(
-        workerName,
-      )} is ${color.yellow(
-        xbytes(specifiedServicesMemoryLimit),
-      )}, which exceeds per-worker memory limit: ${color.yellow(
-        PER_WORKER_MEMORY_LIMIT_STR,
-      )}. Decrease ${color.yellow(
-        "totalMemoryLimit",
-      )} in one or more of the following services:\n${yamlDiffPatch(
-        "",
-        {},
-        Object.fromEntries(
-          servicesWithSpecifiedMemoryLimit.map((service) => {
-            return [service.name, service.total_memory_limit];
-          }),
-        ),
-      )}`,
+    throwMemoryExceedsError(
+      workerName,
+      specifiedServicesMemoryLimit,
+      servicesWithSpecifiedMemoryLimit,
     );
   }
 
@@ -895,15 +882,7 @@ async function resolveWorker({
   commandObj.logToStderr(
     `Service memory limits for worker ${color.yellow(
       workerName,
-    )}:\n${yamlDiffPatch(
-      "",
-      {},
-      Object.fromEntries(
-        services.map((service) => {
-          return [service.name, service.total_memory_limit];
-        }),
-      ),
-    )}`,
+    )}:\n${formatServiceMemoryLimits(services)}`,
   );
 
   const spells = (workerConfig.spells ?? []).map((spellName) => {
@@ -934,6 +913,42 @@ async function resolveWorker({
     },
     dummy_deal_id: dummyDealId,
   };
+}
+
+function throwMemoryExceedsError(
+  workerName: string,
+  specifiedServicesMemoryLimit: number,
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+) {
+  const formattedServiceMemoryLimit = color.yellow(
+    xbytes(specifiedServicesMemoryLimit),
+  );
+
+  commandObj.error(
+    `Total memory limit for services in worker ${color.yellow(
+      workerName,
+    )} is ${formattedServiceMemoryLimit}, which exceeds per-worker memory limit: ${color.yellow(
+      PER_WORKER_MEMORY_LIMIT_STR,
+    )}. Decrease ${color.yellow(
+      "totalMemoryLimit",
+    )} in one or more of the following services:\n${formatServiceMemoryLimits(
+      servicesWithSpecifiedMemoryLimit,
+    )}`,
+  );
+}
+
+function formatServiceMemoryLimits(
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+) {
+  return yamlDiffPatch(
+    "",
+    {},
+    Object.fromEntries(
+      servicesWithSpecifiedMemoryLimit.map((service) => {
+        return [service.name, service.total_memory_limit];
+      }),
+    ),
+  );
 }
 
 function hasTotalMemoryLimit(
