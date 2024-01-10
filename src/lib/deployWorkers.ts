@@ -302,7 +302,7 @@ export async function prepareForDeploy({
     ),
   ];
 
-  const serviceConfigs = await Promise.all(
+  const serviceConfigsWithOverrides = await Promise.all(
     serviceNames.map(async (serviceName) => {
       const service = servicesFromFluenceConfig[serviceName];
 
@@ -343,7 +343,7 @@ export async function prepareForDeploy({
 
   const modulesUrls = [
     ...new Set(
-      serviceConfigs
+      serviceConfigsWithOverrides
         .flatMap(({ serviceConfig }) => {
           return Object.values(serviceConfig.modules).map(({ get }) => {
             return get;
@@ -363,7 +363,7 @@ export async function prepareForDeploy({
     ),
   );
 
-  const localModuleAbsolutePaths = serviceConfigs
+  const localModuleAbsolutePaths = serviceConfigsWithOverrides
     .flatMap(({ serviceConfig }) => {
       return Object.values(serviceConfig.modules).map(({ get }) => {
         return {
@@ -422,7 +422,7 @@ export async function prepareForDeploy({
 
     const serviceNamePathToFacadeMap: Record<string, string> =
       Object.fromEntries(
-        serviceConfigs.map(({ serviceName, serviceConfig }) => {
+        serviceConfigsWithOverrides.map(({ serviceName, serviceConfig }) => {
           const { get } = serviceConfig.modules[FACADE_MODULE_NAME];
 
           const urlOrAbsolutePath = getUrlOrAbsolutePath(
@@ -460,7 +460,7 @@ export async function prepareForDeploy({
           hostsOrDeals,
           fluenceConfig,
           workersFromFluenceConfig,
-          serviceConfigs,
+          serviceConfigsWithOverrides,
           moduleAbsolutePathOrURLToModuleConfigsMap,
           spellConfigs,
           maybeWorkersConfig,
@@ -629,7 +629,7 @@ type ResolveWorkerArgs = {
   workersFromFluenceConfig: NonNullable<
     FluenceConfig["deals"] | FluenceConfig["hosts"]
   >;
-  serviceConfigs: ({
+  serviceConfigsWithOverrides: ({
     serviceName: string;
     overrideModules: OverrideModules | undefined;
     serviceConfig: ServiceConfigReadonly;
@@ -750,7 +750,7 @@ async function resolveWorker({
   workerName,
   fluenceConfig,
   workersFromFluenceConfig,
-  serviceConfigs,
+  serviceConfigsWithOverrides,
   moduleAbsolutePathOrURLToModuleConfigsMap,
   spellConfigs,
   maybeWorkersConfig,
@@ -780,19 +780,21 @@ async function resolveWorker({
 
   const servicesWithUnresolvedMemoryLimit = (workerConfig.services ?? []).map(
     (serviceName): UploadDeployServiceConfig => {
-      const maybeServiceConfig = serviceConfigs.find((c) => {
-        return c.serviceName === serviceName;
-      });
+      const serviceConfigWithOverrides = serviceConfigsWithOverrides.find(
+        (c) => {
+          return c.serviceName === serviceName;
+        },
+      );
 
       assert(
-        maybeServiceConfig !== undefined,
+        serviceConfigWithOverrides !== undefined,
         `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
-          serviceConfigs,
+          serviceConfigsWithOverrides,
         )}`,
       );
 
       const { overrideModules, serviceConfig, totalMemoryLimit } =
-        maybeServiceConfig;
+        serviceConfigWithOverrides;
 
       const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
         serviceConfig.modules;
