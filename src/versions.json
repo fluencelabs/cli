@@ -1,8 +1,8 @@
 {
   "nox": "fluencelabs/nox:0.16.13",
-  "chain-rpc": "docker.fluence.dev/chain-rpc:fix-into-capacity-CHAIN-268-90e890a-935-3",
-  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:fix-into-capacity-CHAIN-268-90e890a-935-3",
-  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script-image:fix-into-capacity-CHAIN-268-90e890a-935-3",
+  "chain-rpc": "docker.fluence.dev/chain-rpc:fix-offchain-matching-inf-loop-f60dd15-946-1",
+  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:fix-offchain-matching-inf-loop-f60dd15-946-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script-image:fix-offchain-matching-inf-loop-f60dd15-946-1",
   "rust-toolchain": "nightly-2023-08-27-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.9.0",

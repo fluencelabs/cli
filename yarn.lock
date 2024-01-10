@@ -605,7 +605,7 @@ __metadata:
     "@fluencelabs/air-beautify-wasm": 0.3.6
     "@fluencelabs/aqua-api": 0.13.3
     "@fluencelabs/aqua-to-js": 0.3.5
-    "@fluencelabs/deal-ts-clients": 0.2.23-fix-into-capacity-CHAIN-268-90e890a-935-3.0
+    "@fluencelabs/deal-ts-clients": 0.2.23-fix-offchain-matching-inf-loop-f60dd15-946-1.0
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.5.5
     "@fluencelabs/npm-aqua-compiler": 0.0.2
@@ -677,9 +677,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-ts-clients@npm:0.2.23-fix-into-capacity-CHAIN-268-90e890a-935-3.0":
-  version: 0.2.23-fix-into-capacity-CHAIN-268-90e890a-935-3.0
-  resolution: "@fluencelabs/deal-ts-clients@npm:0.2.23-fix-into-capacity-CHAIN-268-90e890a-935-3.0"
+"@fluencelabs/deal-ts-clients@npm:0.2.23-fix-offchain-matching-inf-loop-f60dd15-946-1.0":
+  version: 0.2.23-fix-offchain-matching-inf-loop-f60dd15-946-1.0
+  resolution: "@fluencelabs/deal-ts-clients@npm:0.2.23-fix-offchain-matching-inf-loop-f60dd15-946-1.0"
   dependencies:
     "@graphql-typed-document-node/core": ^3.2.0
     dotenv: ^16.3.1
@@ -688,7 +688,7 @@ __metadata:
     graphql-request: ^6.1.0
     graphql-scalars: ^1.22.4
     graphql-tag: ^2.12.6
-  checksum: ec9d42e5887dd73d099475f857a4c2c2c381c9dd4e235b98925f336ffa81c7ca06646f3dac078e243f02f274b22e92c4fae68abd6a1c44b61660766da02b1f0c
+  checksum: 9ad3c5836d7991840e34089fb8e75d803d01246c450d384e7a884f77065e93271b044bb1d6b05996c4f984e6afe37339ab6acce1009e19fb2d86f8e8edff3d03
   languageName: node
   linkType: hard
 
