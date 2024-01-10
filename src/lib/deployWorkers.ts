@@ -19,6 +19,9 @@ import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { color } from "@oclif/color";
+import sum from "lodash-es/sum.js";
+import xbytes from "xbytes";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
@@ -37,6 +40,7 @@ import {
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
+  type OverridableServiceProperties,
   type ServiceConfigReadonly,
 } from "./configs/project/service.js";
 import {
@@ -55,6 +59,8 @@ import {
   DEALS_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
+  PER_WORKER_MEMORY_LIMIT,
+  PER_WORKER_MEMORY_LIMIT_STR,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -70,7 +76,7 @@ import {
   type CustomTypes,
 } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
-import { commaSepStrToArr } from "./helpers/utils.js";
+import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
 import {
@@ -79,6 +85,7 @@ import {
   projectRootDir,
 } from "./paths.js";
 import { checkboxes } from "./prompt.js";
+import { hasKey } from "./typeHelpers.js";
 
 const handlePreviouslyDeployedWorkers = async (
   deployedHostsOrDeals:
@@ -133,6 +140,11 @@ const handlePreviouslyDeployedWorkers = async (
 
 type UploadDeploySpellConfig =
   Upload_deployArgConfig["workers"][number]["config"]["spells"][number];
+
+type UploadDeployServiceConfig =
+  Upload_deployArgConfig["workers"][number]["config"]["services"][number] & {
+    total_memory_limit: string | undefined;
+  };
 
 type PrepareForDeployArg = {
   workerNames: string | undefined;
@@ -290,18 +302,18 @@ export async function prepareForDeploy({
     ),
   ];
 
-  const serviceConfigs = await Promise.all(
+  const serviceConfigsWithOverrides = await Promise.all(
     serviceNames.map(async (serviceName) => {
-      const maybeService = servicesFromFluenceConfig[serviceName];
+      const service = servicesFromFluenceConfig[serviceName];
 
       assert(
-        maybeService !== undefined,
+        service !== undefined,
         `Unreachable. can't find service ${serviceName} from workers property in ${fluenceConfig.$getPath()} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
           servicesFromFluenceConfig,
         )}`,
       );
 
-      const { get, overrideModules } = maybeService;
+      const { get, overrideModules, ...overridableProperties } = service;
 
       const serviceConfig = await initReadonlyServiceConfig(
         get,
@@ -324,13 +336,14 @@ export async function prepareForDeploy({
         serviceName,
         overrideModules,
         serviceConfig,
+        ...overridableProperties,
       };
     }),
   );
 
   const modulesUrls = [
     ...new Set(
-      serviceConfigs
+      serviceConfigsWithOverrides
         .flatMap(({ serviceConfig }) => {
           return Object.values(serviceConfig.modules).map(({ get }) => {
             return get;
@@ -350,7 +363,7 @@ export async function prepareForDeploy({
     ),
   );
 
-  const localModuleAbsolutePaths = serviceConfigs
+  const localModuleAbsolutePaths = serviceConfigsWithOverrides
     .flatMap(({ serviceConfig }) => {
       return Object.values(serviceConfig.modules).map(({ get }) => {
         return {
@@ -409,7 +422,7 @@ export async function prepareForDeploy({
 
     const serviceNamePathToFacadeMap: Record<string, string> =
       Object.fromEntries(
-        serviceConfigs.map(({ serviceName, serviceConfig }) => {
+        serviceConfigsWithOverrides.map(({ serviceName, serviceConfig }) => {
           const { get } = serviceConfig.modules[FACADE_MODULE_NAME];
 
           const urlOrAbsolutePath = getUrlOrAbsolutePath(
@@ -447,7 +460,7 @@ export async function prepareForDeploy({
           hostsOrDeals,
           fluenceConfig,
           workersFromFluenceConfig,
-          serviceConfigs,
+          serviceConfigsWithOverrides,
           moduleAbsolutePathOrURLToModuleConfigsMap,
           spellConfigs,
           maybeWorkersConfig,
@@ -616,11 +629,11 @@ type ResolveWorkerArgs = {
   workersFromFluenceConfig: NonNullable<
     FluenceConfig["deals"] | FluenceConfig["hosts"]
   >;
-  serviceConfigs: {
+  serviceConfigsWithOverrides: ({
     serviceName: string;
     overrideModules: OverrideModules | undefined;
     serviceConfig: ServiceConfigReadonly;
-  }[];
+  } & OverridableServiceProperties)[];
   moduleAbsolutePathOrURLToModuleConfigsMap: Map<
     string,
     InitializedReadonlyConfig<ConfigV0>
@@ -737,7 +750,7 @@ async function resolveWorker({
   workerName,
   fluenceConfig,
   workersFromFluenceConfig,
-  serviceConfigs,
+  serviceConfigsWithOverrides,
   moduleAbsolutePathOrURLToModuleConfigsMap,
   spellConfigs,
   maybeWorkersConfig,
@@ -765,20 +778,23 @@ async function resolveWorker({
     )}`,
   );
 
-  const services: Upload_deployArgConfig["workers"][number]["config"]["services"] =
-    (workerConfig.services ?? []).map((serviceName) => {
-      const maybeServiceConfig = serviceConfigs.find((c) => {
-        return c.serviceName === serviceName;
-      });
+  const servicesWithUnresolvedMemoryLimit = (workerConfig.services ?? []).map(
+    (serviceName): UploadDeployServiceConfig => {
+      const serviceConfigWithOverrides = serviceConfigsWithOverrides.find(
+        (c) => {
+          return c.serviceName === serviceName;
+        },
+      );
 
       assert(
-        maybeServiceConfig !== undefined,
+        serviceConfigWithOverrides !== undefined,
         `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
-          serviceConfigs,
+          serviceConfigsWithOverrides,
         )}`,
       );
 
-      const { overrideModules, serviceConfig } = maybeServiceConfig;
+      const { overrideModules, serviceConfig, totalMemoryLimit } =
+        serviceConfigWithOverrides;
 
       const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
         serviceConfig.modules;
@@ -824,8 +840,52 @@ async function resolveWorker({
       return {
         name: serviceName,
         modules,
+        total_memory_limit: totalMemoryLimit ?? serviceConfig.totalMemoryLimit,
       };
-    });
+    },
+  );
+
+  const [
+    servicesWithoutSpecifiedMemoryLimit,
+    servicesWithSpecifiedMemoryLimit,
+  ] = splitErrorsAndResults(servicesWithUnresolvedMemoryLimit, (service) => {
+    return hasTotalMemoryLimit(service)
+      ? { result: service }
+      : { error: service };
+  });
+
+  const specifiedServicesMemoryLimit = sum(
+    servicesWithSpecifiedMemoryLimit.map((service) => {
+      return xbytes.parseSize(service.total_memory_limit);
+    }),
+  );
+
+  if (specifiedServicesMemoryLimit > PER_WORKER_MEMORY_LIMIT) {
+    throwMemoryExceedsError(
+      workerName,
+      specifiedServicesMemoryLimit,
+      servicesWithSpecifiedMemoryLimit,
+    );
+  }
+
+  const remainingMemoryPerService = xbytes(
+    (PER_WORKER_MEMORY_LIMIT - specifiedServicesMemoryLimit) /
+      servicesWithoutSpecifiedMemoryLimit.length,
+  );
+
+  const services = [
+    ...servicesWithSpecifiedMemoryLimit,
+    ...servicesWithoutSpecifiedMemoryLimit.map((service) => {
+      service.total_memory_limit = remainingMemoryPerService;
+      return service;
+    }),
+  ];
+
+  commandObj.logToStderr(
+    `Service memory limits for worker ${color.yellow(
+      workerName,
+    )}:\n${formatServiceMemoryLimits(services)}`,
+  );
 
   const spells = (workerConfig.spells ?? []).map((spellName) => {
     const spellConfig = spellConfigs.find((c) => {
@@ -855,4 +915,49 @@ async function resolveWorker({
     },
     dummy_deal_id: dummyDealId,
   };
+}
+
+function throwMemoryExceedsError(
+  workerName: string,
+  specifiedServicesMemoryLimit: number,
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+) {
+  const formattedServiceMemoryLimit = color.yellow(
+    xbytes(specifiedServicesMemoryLimit),
+  );
+
+  commandObj.error(
+    `Total memory limit for services in worker ${color.yellow(
+      workerName,
+    )} is ${formattedServiceMemoryLimit}, which exceeds per-worker memory limit: ${color.yellow(
+      PER_WORKER_MEMORY_LIMIT_STR,
+    )}. Decrease ${color.yellow(
+      "totalMemoryLimit",
+    )} in one or more of the following services:\n${formatServiceMemoryLimits(
+      servicesWithSpecifiedMemoryLimit,
+    )}`,
+  );
+}
+
+function formatServiceMemoryLimits(
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+) {
+  return yamlDiffPatch(
+    "",
+    {},
+    Object.fromEntries(
+      servicesWithSpecifiedMemoryLimit.map((service) => {
+        return [service.name, service.total_memory_limit];
+      }),
+    ),
+  );
+}
+
+function hasTotalMemoryLimit(
+  arg: Record<string, unknown>,
+): arg is { total_memory_limit: string } {
+  return (
+    hasKey("total_memory_limit", arg) &&
+    typeof arg["total_memory_limit"] === "string"
+  );
 }
