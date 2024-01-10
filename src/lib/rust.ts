@@ -189,9 +189,9 @@ const hasRequiredRustTarget = async (): Promise<boolean> => {
   return (
     await execPromise({
       command: RUSTUP,
-      args: ["target", "list"],
+      args: ["target", "list", "--installed"],
     })
-  ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
+  ).includes(RUST_WASM32_WASI_TARGET);
 };
 
 const getLatestVersionOfCargoDependency = async (
