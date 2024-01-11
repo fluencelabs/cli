@@ -180,6 +180,7 @@ export const handleInstallation = async ({
   version,
 }: HandleInstallationArg): Promise<void> => {
   const installAndMoveToDependencyPath = async (): Promise<void> => {
+    await rm(dependencyTmpDirPath, { recursive: true, force: true });
     await installDependency();
     await rm(dependencyDirPath, { recursive: true, force: true });
     // Make sure the parent directory exists before moving the dependency folder inside it.
