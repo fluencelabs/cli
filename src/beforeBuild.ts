@@ -149,9 +149,12 @@ interface InsertContentEntry {
   insert: string;
 }
 
-async function insertContentNextLine(entries: InsertContentEntry[]) {
+async function insertContentNextLine(
+  fileName: string,
+  entries: InsertContentEntry[],
+) {
   try {
-    let binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
+    let binFileContent = await readFile(fileName, FS_OPTIONS);
 
     for (const { search, insert } of entries) {
       const hasSearch = binFileContent.includes(search);
@@ -160,19 +163,19 @@ async function insertContentNextLine(entries: InsertContentEntry[]) {
       if (hasSearch && !hasInsert) {
         binFileContent = binFileContent.replace(search, `${search}\n${insert}`);
       } else if (!hasSearch) {
-        throw new Error(`Wasn't able to find '${search}' in ${BIN_FILE_PATH}`);
+        throw new Error(`Wasn't able to find '${search}' in ${fileName}`);
       }
     }
 
-    await writeFile(BIN_FILE_PATH, binFileContent, FS_OPTIONS);
+    await writeFile(fileName, binFileContent, FS_OPTIONS);
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error(`Error while modifying ${BIN_FILE_PATH}`);
+    console.error(`Error while modifying ${fileName}`);
     throw err;
   }
 }
 
-await insertContentNextLine([
+await insertContentNextLine(BIN_FILE_PATH, [
   // Unix replacement
   { search: "#!/usr/bin/env bash", insert: "export NODE_NO_WARNINGS=1" },
   // Windows replacement
