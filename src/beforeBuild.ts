@@ -144,26 +144,37 @@ const BIN_FILE_PATH = join(
   "bin.js",
 );
 
-try {
-  const binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
-
-  const search = `#!/usr/bin/env bash`;
-  const insert = `export NODE_NO_WARNINGS=1`;
-  const hasSearch = binFileContent.includes(search);
-  const hasInsert = binFileContent.includes(insert);
-
-  if (hasSearch && !hasInsert) {
-    const newBinFileContent = binFileContent.replace(
-      search,
-      `${search}\n${insert}`,
-    );
-
-    await writeFile(BIN_FILE_PATH, newBinFileContent, FS_OPTIONS);
-  } else if (!hasSearch) {
-    throw new Error(`Wasn't able to find '${search}' in ${BIN_FILE_PATH}`);
-  }
-} catch (err) {
-  // eslint-disable-next-line no-console
-  console.error(`Error while modifying ${BIN_FILE_PATH}`);
-  throw err;
+interface InsertContentEntry {
+  search: string;
+  insert: string;
 }
+
+async function insertContentNextLine(entries: InsertContentEntry[]) {
+  try {
+    let binFileContent = await readFile(BIN_FILE_PATH, FS_OPTIONS);
+
+    for (const { search, insert } of entries) {
+      const hasSearch = binFileContent.includes(search);
+      const hasInsert = binFileContent.includes(insert);
+
+      if (hasSearch && !hasInsert) {
+        binFileContent = binFileContent.replace(search, `${search}\n${insert}`);
+      } else if (!hasSearch) {
+        throw new Error(`Wasn't able to find '${search}' in ${BIN_FILE_PATH}`);
+      }
+    }
+
+    await writeFile(BIN_FILE_PATH, binFileContent, FS_OPTIONS);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(`Error while modifying ${BIN_FILE_PATH}`);
+    throw err;
+  }
+}
+
+await insertContentNextLine([
+  // Unix replacement
+  { search: "#!/usr/bin/env bash", insert: "export NODE_NO_WARNINGS=1" },
+  // Windows replacement
+  { search: "setlocal enableextensions", insert: "set NODE_NO_WARNINGS=1" },
+]);
