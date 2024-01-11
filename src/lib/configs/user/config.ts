@@ -18,14 +18,12 @@ import { rm } from "fs/promises";
 
 import type { JSONSchemaType } from "ajv";
 
-import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
   GLOBAL_CONFIG_FILE_NAME,
   GLOBAL_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   CLI_NAME_FULL,
-  AQUA_LIB_NPM_DEPENDENCY,
   AUTO_GENERATED,
 } from "../../const.js";
 import {
@@ -166,23 +164,6 @@ defaultSecretKeyName: ${AUTO_GENERATED}
 # # Last time when CLI checked for updates.
 # # Updates are checked daily unless this field is set to 'disabled'
 # lastCheckForUpdates: 2023-07-07T09:31:00.961Z
-
-# # (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies globally
-# # You can check out current project dependencies using \`fluence dep v\` command
-# dependencies:
-#   # A map of npm dependency versions
-#   # CLI ensures dependencies are installed each time you run aqua
-#   # There are also some dependencies that are installed by default (e.g. ${AQUA_LIB_NPM_DEPENDENCY})
-#   # You can check default dependencies using \`fluence dep v --default\`
-#   # use \`fluence dep npm i --global\` to install global npm dependencies
-#   npm:
-#     "${AQUA_LIB_NPM_DEPENDENCY}": ${versions.npm[AQUA_LIB_NPM_DEPENDENCY]}
-#
-#   # A map of cargo dependency versions
-#   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
-#   # use \`fluence dep cargo i --global\` to install global cargo dependencies
-#   cargo:
-#     marine: 0.14.0
 `;
 }
 

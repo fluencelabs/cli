@@ -23,6 +23,7 @@ import type {
 } from "@oclif/core/lib/interfaces/parser.js";
 import camelCase from "lodash-es/camelCase.js";
 import upperFirst from "lodash-es/upperFirst.js";
+import xbytes from "xbytes";
 
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
@@ -55,7 +56,38 @@ export const defaultNumberProperties: Record<NumberProperty, number> = {
   minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
 
+export const PER_WORKER_MEMORY_LIMIT_STR = "2GB";
+export const PER_WORKER_MEMORY_LIMIT = xbytes.parseSize(
+  PER_WORKER_MEMORY_LIMIT_STR,
+);
+
+const byteUnits = [
+  "kB",
+  "KB",
+  "kiB",
+  "KiB",
+  "KIB",
+  "mB",
+  "MB",
+  "miB",
+  "MiB",
+  "MIB",
+  "gB",
+  "GB",
+  "giB",
+  "GiB",
+  "GIB",
+];
+
+export const BYTES_PATTERN = `^\\d+(\\.\\d+)?(\\s?)(${byteUnits.join("|")})$`;
+export const BYTES_FORMAT = `[number][whitespace?][B] where ? is an optional field and B is one of the following: ${byteUnits.join(
+  ", ",
+)}`;
+export const MAX_HEAP_SIZE_DESCRIPTION = `Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
+
 export const U32_MAX = 4_294_967_295;
+
+export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
 export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];

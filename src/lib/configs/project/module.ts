@@ -16,6 +16,7 @@
 
 import type { JSONSchemaType } from "ajv";
 
+import { BYTES_PATTERN, MAX_HEAP_SIZE_DESCRIPTION } from "../../const.js";
 import {
   type ModuleType,
   MODULE_CONFIG_FULL_FILE_NAME,
@@ -56,8 +57,8 @@ const overridableModulePropertiesV0 = {
   maxHeapSize: {
     type: "string",
     nullable: true,
-    description:
-      "Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):\nK, Kb - kilobyte\nKi, KiB - kibibyte\nM, Mb - megabyte\nMi, MiB - mebibyte\nG, Gb - gigabyte\nGi, GiB - gibibyte\nCurrent limit is 4 GiB",
+    pattern: BYTES_PATTERN,
+    description: MAX_HEAP_SIZE_DESCRIPTION,
   },
   loggerEnabled: {
     type: "boolean",
@@ -202,16 +203,7 @@ name: ${name}
 # # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
 # loggingMask: 1
 #
-# # Max size of the heap that a module can allocate in format:
-# # [number][whitespace?][specificator?]
-# # where ? is an optional field and specificator is one from the following (case-insensitive):
-# # K, Kb - kilobyte
-# # Ki, KiB - kibibyte
-# # M, Mb - megabyte
-# # Mi, MiB - mebibyte
-# # G, Gb - gigabyte
-# # Gi, GiB - gibibyte
-# # Current limit is 4 GiB
+# # ${MAX_HEAP_SIZE_DESCRIPTION}
 # maxHeapSize: 1KiB
 #
 # # A map of binary executable files that module is allowed to call
