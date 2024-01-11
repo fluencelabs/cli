@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.13.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.3...fluence-cli-v0.13.4) (2024-01-11)
+
+
+### Features
+
+* ensure memory limit of worker services is less then 2GB and pass it to installation spell [fixes DXJ-579 DXJ-545 DXJ-580 DXJ-546] ([#700](https://github.com/fluencelabs/cli/issues/700)) ([88a0e5f](https://github.com/fluencelabs/cli/commit/88a0e5fbf8f267ead868d8b6aeb7d810c5429b83))
+* update dependencies ([#701](https://github.com/fluencelabs/cli/issues/701)) ([16e293f](https://github.com/fluencelabs/cli/commit/16e293f803d111c7ff663182df078adc37a7f456))
+
+
+### Bug Fixes
+
+* module remove ([#703](https://github.com/fluencelabs/cli/issues/703)) ([8103c46](https://github.com/fluencelabs/cli/commit/8103c463b1ff4170906ab4e7bc44197f70096272))
+* remove global deps completely ([#698](https://github.com/fluencelabs/cli/issues/698)) ([34bb519](https://github.com/fluencelabs/cli/commit/34bb51965fbbc2e0ed77d43935ad6e8f2dec4523))
+* secret key remove ([#702](https://github.com/fluencelabs/cli/issues/702)) ([5216e96](https://github.com/fluencelabs/cli/commit/5216e96f59692b0b5a005a8076dd85f4ac6bdb3b))
+
 ## [0.13.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.2...fluence-cli-v0.13.3) (2024-01-05)
 
 
