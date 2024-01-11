@@ -669,6 +669,7 @@ __metadata:
     tslib: ^2.6.2
     typescript: ^5.2.2
     undici: ^5.26.5
+    xbytes: ^1.8.0
     yaml: ^2.3.3
     yaml-diff-patch: ^2.0.0
   bin:
@@ -15975,6 +15976,13 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 8c67365f6e6134278ad635d558bfce466d7ef7543a043baea333aaa430429f0af8a130c0c36e7dd78f918d68167a659ba9b5067330b77c4b279e91533395952b
+  languageName: node
+  linkType: hard
+
+"xbytes@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "xbytes@npm:1.8.0"
+  checksum: cf8d758a0bcf376ac62ea1b0aa77d981b1ef66e06604f45d52e237a05b7a36e30f69d5ceb82f0961db754d394de3ad4731791f49aaf201cf5a11f8526c323482
   languageName: node
   linkType: hard
 
