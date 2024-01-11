@@ -164,8 +164,8 @@ export async function removeSecretKey({
   });
 
   const secretsPath = isUser
-    ? getFluenceSecretsDir()
-    : await ensureUserFluenceSecretsDir();
+    ? await ensureUserFluenceSecretsDir()
+    : getFluenceSecretsDir();
 
   const secrets = await getSecretKeys(isUser);
 
