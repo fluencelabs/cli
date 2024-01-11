@@ -1669,17 +1669,17 @@ __metadata:
   linkType: hard
 
 "@multiformats/multiaddr@npm:^12.0.0, @multiformats/multiaddr@npm:^12.1.10, @multiformats/multiaddr@npm:^12.1.3, @multiformats/multiaddr@npm:^12.1.7":
-  version: 12.1.11
-  resolution: "@multiformats/multiaddr@npm:12.1.11"
+  version: 12.1.12
+  resolution: "@multiformats/multiaddr@npm:12.1.12"
   dependencies:
     "@chainsafe/is-ip": ^2.0.1
     "@chainsafe/netmask": ^2.0.0
     "@libp2p/interface": ^1.0.0
     dns-over-http-resolver: 3.0.0
-    multiformats: ^12.0.1
+    multiformats: ^13.0.0
     uint8-varint: ^2.0.1
-    uint8arrays: ^4.0.2
-  checksum: 371b86c12443557691210edb2a971697585238807de16dee7c7af2141bf817fff2d6d8b916dc954c30bbe88a36c38f12c5c92719aa17647a3b193104cff16da2
+    uint8arrays: ^5.0.0
+  checksum: a50d62aeb330ef9df0d5b9a36980eba28dc619fce9adba9a5d5da4344091c42457501969cbc15e1d705dbf90513fb4730f91eabe1b68ceada56e3e721ebb3249
   languageName: node
   linkType: hard
 
@@ -11251,6 +11251,13 @@ __metadata:
   version: 12.1.3
   resolution: "multiformats@npm:12.1.3"
   checksum: 1060488612f8e6729c600f47a8741b91aa6e7b807ce165eca3c8cf07ab7465d2d9b212415a9c18886938b9e35b30ea7b9ae19b5ab5122589c65063440643e6bb
+  languageName: node
+  linkType: hard
+
+"multiformats@npm:^13.0.0":
+  version: 13.0.1
+  resolution: "multiformats@npm:13.0.1"
+  checksum: 63e5d6ee2c2a1d1e8fbd4b8c76fa41cf3d8204ceed1d57bc44cb30ff3d06b880ad58c3de52ae6d4397a662a6f1e3285dae74ee5d445fd1597516e1baec96d22a
   languageName: node
   linkType: hard
 
