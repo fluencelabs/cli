@@ -2240,9 +2240,10 @@ __metadata:
   linkType: hard
 
 "@oclif/core@npm:^3.0.4, @oclif/core@npm:^3.14.1, @oclif/core@npm:^3.15.0, @oclif/core@npm:^3.6.0":
-  version: 3.15.0
-  resolution: "@oclif/core@npm:3.15.0"
+  version: 3.18.1
+  resolution: "@oclif/core@npm:3.18.1"
   dependencies:
+    "@types/cli-progress": ^3.11.5
     ansi-escapes: ^4.3.2
     ansi-styles: ^4.3.0
     cardinal: ^2.1.1
@@ -2260,17 +2261,16 @@ __metadata:
     js-yaml: ^3.14.1
     natural-orderby: ^2.0.3
     object-treeify: ^1.1.33
-    password-prompt: ^1.1.2
+    password-prompt: ^1.1.3
     slice-ansi: ^4.0.0
     string-width: ^4.2.3
     strip-ansi: ^6.0.1
     supports-color: ^8.1.1
     supports-hyperlinks: ^2.2.0
-    tsconfck: ^3.0.0
     widest-line: ^3.1.0
     wordwrap: ^1.0.0
     wrap-ansi: ^7.0.0
-  checksum: 7825cf4ce4db27400c8392c8c385b8e189e0fe3df8e1a74e820803977dbc0c7e06d2378ebf6ee2b61cd635073abc309cdc4717fb1f4e572d498bb27b542c00fa
+  checksum: 6105cad54c03d38be8a769063db81dc13922088912e55606f9172671b7860d3137e640c823582fd9b6dc6a21561e1f469c66e26fb460e220bdb6f100c265d2e2
   languageName: node
   linkType: hard
 
@@ -3233,7 +3233,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cli-progress@npm:^3.11.0":
+"@types/cli-progress@npm:^3.11.0, @types/cli-progress@npm:^3.11.5":
   version: 3.11.5
   resolution: "@types/cli-progress@npm:3.11.5"
   dependencies:
@@ -12580,7 +12580,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"password-prompt@npm:^1.1.2":
+"password-prompt@npm:^1.1.2, password-prompt@npm:^1.1.3":
   version: 1.1.3
   resolution: "password-prompt@npm:1.1.3"
   dependencies:
@@ -14942,20 +14942,6 @@ __metadata:
   bin:
     ts-unused-exports: bin/ts-unused-exports
   checksum: d5248b4c1c3b970b594db4955582dbdc1c56852a61f69fd18e680e87bad4df879a052c84c0ca6e1d1ea4f63eab39c1a9beff23e8e38e4fcdefc5c03e83487256
-  languageName: node
-  linkType: hard
-
-"tsconfck@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "tsconfck@npm:3.0.0"
-  peerDependencies:
-    typescript: ^5.0.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  bin:
-    tsconfck: bin/tsconfck.js
-  checksum: a9fd941dfbeb3cb095ff079e1177c219bf7b900edb36bb273f081c226436e1561e8f78aa482240450097da3463dc0f57353ef4e2cda2df7d472ecded16843379
   languageName: node
   linkType: hard
 
