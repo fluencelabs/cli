@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { access, rename, rm } from "node:fs/promises";
+import { access, mkdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import { color } from "@oclif/color";
@@ -180,9 +180,10 @@ export const handleInstallation = async ({
   version,
 }: HandleInstallationArg): Promise<void> => {
   const installAndMoveToDependencyPath = async (): Promise<void> => {
-    await rm(dependencyTmpDirPath, { recursive: true, force: true });
     await installDependency();
     await rm(dependencyDirPath, { recursive: true, force: true });
+    // Make sure the parent directory exists before moving the dependency folder inside it.
+    await mkdir(join(dependencyDirPath, ".."), { recursive: true });
     await rename(dependencyTmpDirPath, dependencyDirPath);
   };
 
