@@ -144,30 +144,36 @@ const BIN_FILE_PATH = join(
   "bin.js",
 );
 
-interface InsertContentEntry {
-  search: string;
-  insert: string;
-}
+const WIN_BIN_FILE_PATH = join(
+  NODE_MODULES_DIR_NAME,
+  "oclif",
+  "lib",
+  "commands",
+  "pack",
+  "win.js",
+);
 
 async function insertContentNextLine(
   fileName: string,
-  entries: InsertContentEntry[],
+  search: string,
+  insert: string,
 ) {
   try {
-    let binFileContent = await readFile(fileName, FS_OPTIONS);
+    const binFileContent = await readFile(fileName, FS_OPTIONS);
 
-    for (const { search, insert } of entries) {
-      const hasSearch = binFileContent.includes(search);
-      const hasInsert = binFileContent.includes(insert);
+    const hasSearch = binFileContent.includes(search);
+    const hasInsert = binFileContent.includes(insert);
 
-      if (hasSearch && !hasInsert) {
-        binFileContent = binFileContent.replace(search, `${search}\n${insert}`);
-      } else if (!hasSearch) {
-        throw new Error(`Wasn't able to find '${search}' in ${fileName}`);
-      }
+    if (hasSearch && !hasInsert) {
+      const newBinFileContent = binFileContent.replace(
+        search,
+        `${search}\n${insert}`,
+      );
+
+      await writeFile(fileName, newBinFileContent, FS_OPTIONS);
+    } else if (!hasSearch) {
+      throw new Error(`Wasn't able to find '${search}' in ${fileName}`);
     }
-
-    await writeFile(fileName, binFileContent, FS_OPTIONS);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(`Error while modifying ${fileName}`);
@@ -175,9 +181,16 @@ async function insertContentNextLine(
   }
 }
 
-await insertContentNextLine(BIN_FILE_PATH, [
-  // Unix replacement
-  { search: "#!/usr/bin/env bash", insert: "export NODE_NO_WARNINGS=1" },
-  // Windows replacement
-  { search: "setlocal enableextensions", insert: "set NODE_NO_WARNINGS=1" },
-]);
+// Unix replacement
+await insertContentNextLine(
+  BIN_FILE_PATH,
+  "#!/usr/bin/env bash",
+  "export NODE_NO_WARNINGS=1",
+);
+
+// Windows replacement
+await insertContentNextLine(
+  WIN_BIN_FILE_PATH,
+  "setlocal enableextensions",
+  "set NODE_NO_WARNINGS=1",
+);
