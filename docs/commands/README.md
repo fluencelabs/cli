@@ -1041,10 +1041,12 @@ USAGE
     <value>]
 
 FLAGS
-  --compute-units=<value>...              Number of compute units to add for each peer
+  --compute-units=<value>...              This flag works only when peer-id flags are provided. Defines the number of
+                                          compute units to add for each peer. Default: 32
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
   --no-input                              Don't interactively ask for any input from the user
-  --peer-id=<value>...                    Peer id of the compute peer
+  --peer-id=<value>...                    Peer id of the compute peer. If this flag is not provided, provider.yaml is
+                                          used instead
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure
 
