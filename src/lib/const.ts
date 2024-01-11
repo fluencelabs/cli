@@ -87,6 +87,8 @@ export const MAX_HEAP_SIZE_DESCRIPTION = `Max size of the heap that a module can
 
 export const U32_MAX = 4_294_967_295;
 
+export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
+
 export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);

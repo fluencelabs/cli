@@ -20,7 +20,12 @@ import { Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
-import { PROVIDER_CONFIG_FLAGS, PRIV_KEY_FLAG } from "../../lib/const.js";
+import {
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+  PROVIDER_CONFIG_FLAGS,
+  PRIV_KEY_FLAG,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { getResolvedProviderConfig } from "../../lib/multiaddres.js";
 import {
@@ -30,8 +35,6 @@ import {
   waitTx,
 } from "../../lib/provider.js";
 
-const DEFAULT_NUMBER_OF_COMPUTE_UNITS = 1;
-
 export default class AddPeer extends BaseCommand<typeof AddPeer> {
   static override description =
     "Register specific nox instance as a Compute Peer";
@@ -40,11 +43,11 @@ export default class AddPeer extends BaseCommand<typeof AddPeer> {
     ...PRIV_KEY_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
     "peer-id": Flags.string({
-      description: "Peer id of the compute peer",
+      description: `Peer id of the compute peer. If this flag is not provided, ${PROVIDER_CONFIG_FULL_FILE_NAME} is used instead`,
       multiple: true,
     }),
     "compute-units": Flags.integer({
-      description: "Number of compute units to add for each peer",
+      description: `This flag works only when peer-id flags are provided. Defines the number of compute units to add for each peer. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX}`,
       multiple: true,
     }),
   };
@@ -68,9 +71,6 @@ export async function addPeer(
   },
   maybeFluenceConfig?: FluenceConfig | null,
 ) {
-  const defaultNumberOfComputeUnits =
-    flags["compute-units"]?.[0] ?? DEFAULT_NUMBER_OF_COMPUTE_UNITS;
-
   const network = await ensureChainNetwork(
     flags.env,
     maybeFluenceConfig ?? null,
@@ -82,7 +82,8 @@ export async function addPeer(
           return {
             peerId,
             computeUnits:
-              flags["compute-units"]?.[i] ?? defaultNumberOfComputeUnits,
+              flags["compute-units"]?.[i] ??
+              DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
           };
         })
       : await getResolvedProviderConfig(flags);
