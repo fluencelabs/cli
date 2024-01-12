@@ -16,8 +16,7 @@
 
 import { writeFile } from "fs/promises";
 import assert from "node:assert";
-import { join } from "node:path";
-import { isAbsolute, resolve } from "path/posix";
+import { isAbsolute, join, resolve } from "node:path";
 
 import {
   krasnodar,
