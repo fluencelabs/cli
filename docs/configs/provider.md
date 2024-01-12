@@ -30,7 +30,7 @@ Defines a compute peer
 
 | Property       | Type           | Required | Description                                                                                     |
 |----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
-| `computeUnits` | number         | No       |                                                                                                 |
+| `computeUnits` | number         | No       | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
 | `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 #### nox

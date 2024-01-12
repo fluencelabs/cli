@@ -42,6 +42,7 @@ import {
   CONTRACTS_ENV,
   type PublicFluenceEnv,
   WEB_SOCKET_PORT_START,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { commaSepStrToArr, jsonStringify } from "./helpers/utils.js";
@@ -438,7 +439,7 @@ export async function getResolvedProviderConfig(
     Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {
       const {
         nox: { websocketPort: webSocketPortFromConfig } = {},
-        computeUnits = 1,
+        computeUnits = DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
       } = peer;
 
       const webSocketPort =
