@@ -35,6 +35,9 @@ import {
   getMainAquaFileContent,
   READMEs,
   JS_CLIENT_NPM_DEPENDENCY,
+  COMPILED_AQUA_DIR_NAME,
+  INDEX_JS_FILE_NAME,
+  INDEX_TS_FILE_NAME,
 } from "../lib/const.js";
 import {
   ensureFrontendCompiledAquaPath,
@@ -47,10 +50,8 @@ import {
   projectRootDir,
   getPackageJSONPath,
   getFrontendSrcPath,
-  getFrontendCompiledAquaPath,
   getIndexHTMLPath,
   getTsConfigPath,
-  getFrontendPath,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -344,10 +345,9 @@ function getIndexHTMLContent(isJS: boolean) {
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/${relative(
-      getFrontendPath(),
-      getFrontendIndexTSorJSPath(isJS),
-    )}"></script>
+    <script type="module" src="/src/${
+      isJS ? INDEX_JS_FILE_NAME : INDEX_TS_FILE_NAME
+    }"></script>
   </body>
 </html>
 `;
@@ -361,10 +361,7 @@ import {
   helloWorldRemote,
   runDeployedServices,
   showSubnet,
-} from "./${relative(
-    getFrontendSrcPath(),
-    join(getFrontendCompiledAquaPath(), "main.js"),
-  )}";
+} from "./${COMPILED_AQUA_DIR_NAME}/main.js";
 
 const appEl =
   document.querySelector("#app") ??
