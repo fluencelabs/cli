@@ -216,8 +216,8 @@ type InstallCargoDependencyArg = {
   toolchain: string | undefined;
   name: string;
   version: string;
-  dependencyDirPath: string;
   dependencyTmpDirPath: string;
+  dependencyDirPath: string;
 };
 
 const installCargoDependency = async ({

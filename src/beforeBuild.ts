@@ -153,11 +153,7 @@ const WIN_BIN_FILE_PATH = join(
   "win.js",
 );
 
-async function insertContentNextLine(
-  fileName: string,
-  search: string,
-  insert: string,
-) {
+async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
 
@@ -182,14 +178,14 @@ async function insertContentNextLine(
 }
 
 // Unix replacement
-await insertContentNextLine(
+await patchOclif(
   BIN_FILE_PATH,
   "#!/usr/bin/env bash",
   "export NODE_NO_WARNINGS=1",
 );
 
 // Windows replacement
-await insertContentNextLine(
+await patchOclif(
   WIN_BIN_FILE_PATH,
   "setlocal enableextensions",
   "set NODE_NO_WARNINGS=1",
