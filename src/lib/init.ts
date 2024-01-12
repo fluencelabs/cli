@@ -16,7 +16,8 @@
 
 import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
+import { sep as posixSep } from "node:path/posix";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -35,9 +36,6 @@ import {
   getMainAquaFileContent,
   READMEs,
   JS_CLIENT_NPM_DEPENDENCY,
-  COMPILED_AQUA_DIR_NAME,
-  INDEX_JS_FILE_NAME,
-  INDEX_TS_FILE_NAME,
 } from "../lib/const.js";
 import {
   ensureFrontendCompiledAquaPath,
@@ -52,6 +50,8 @@ import {
   getFrontendSrcPath,
   getIndexHTMLPath,
   getTsConfigPath,
+  getFrontendPath,
+  getFrontendCompiledAquaPath,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -289,6 +289,10 @@ type InitTSorJSProjectArg = {
   fluenceConfig: FluenceConfig;
 };
 
+const convertPathToModuleImport = (path: string) => {
+  return path.split(sep).join(posixSep);
+};
+
 async function initTSorJSProject({
   isJS,
   fluenceConfig,
@@ -345,9 +349,9 @@ function getIndexHTMLContent(isJS: boolean) {
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/${
-      isJS ? INDEX_JS_FILE_NAME : INDEX_TS_FILE_NAME
-    }"></script>
+    <script type="module" src="/${convertPathToModuleImport(
+      relative(getFrontendPath(), getFrontendIndexTSorJSPath(isJS)),
+    )}"></script>
   </body>
 </html>
 `;
@@ -361,7 +365,12 @@ import {
   helloWorldRemote,
   runDeployedServices,
   showSubnet,
-} from "./${COMPILED_AQUA_DIR_NAME}/main.js";
+} from "./${convertPathToModuleImport(
+    relative(
+      getFrontendSrcPath(),
+      join(getFrontendCompiledAquaPath(), "main.js"),
+    ),
+  )}";
 
 const appEl =
   document.querySelector("#app") ??
