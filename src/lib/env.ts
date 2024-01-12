@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-import { commandObj } from "./commandObj.js";
-
-const getPathEnvSeparator = () => {
-  // It's unreliable to use commandObj in a global scope as it's value could be undefined when this file it resolved.
-  return commandObj.config.windows ? ";" : ":";
-};
+import { delimiter } from "node:path";
 
 export const findEntryInPATH = (entry: string): boolean => {
-  return process.env.PATH.split(getPathEnvSeparator()).includes(entry);
+  return process.env.PATH.split(delimiter).includes(entry);
 };
 
 export const prependEntryToPATH = (entry: string) => {
-  process.env.PATH = `${entry}${getPathEnvSeparator()}${process.env.PATH}`;
+  process.env.PATH = `${entry}${delimiter}${process.env.PATH}`;
 };
