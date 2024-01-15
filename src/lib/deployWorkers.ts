@@ -144,9 +144,7 @@ type UploadDeploySpellConfig =
   Upload_deployArgConfig["workers"][number]["config"]["spells"][number];
 
 type UploadDeployServiceConfig =
-  Upload_deployArgConfig["workers"][number]["config"]["services"][number] & {
-    total_memory_limit: number;
-  };
+  Upload_deployArgConfig["workers"][number]["config"]["services"][number];
 
 type PrepareForDeployArg = {
   fluenceConfig: FluenceConfig;
