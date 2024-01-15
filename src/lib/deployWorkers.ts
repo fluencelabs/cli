@@ -154,8 +154,8 @@ type PrepareForDeployArg = {
   };
   fluenceEnv: FluenceEnv;
   /**
-   * only used in build command so all the spells are compiled and
-   * so no error happens if some worker doesn't have any services or spells
+   * only used in build command so all the spells are compiled, all services are built
+   * and so no error happens if some worker doesn't have any services or spells
    */
   isBuildCheck?: boolean;
   workerNames?: string | undefined;
@@ -298,13 +298,15 @@ export async function prepareForDeploy({
     };
   });
 
-  const serviceNames = [
-    ...new Set(
-      workerConfigs.flatMap(({ workerConfig }) => {
-        return workerConfig.services ?? [];
-      }),
-    ),
-  ];
+  const serviceNames = isBuildCheck
+    ? Object.keys(fluenceConfig.services ?? {})
+    : [
+        ...new Set(
+          workerConfigs.flatMap(({ workerConfig }) => {
+            return workerConfig.services ?? [];
+          }),
+        ),
+      ];
 
   const serviceConfigsWithOverrides = await Promise.all(
     serviceNames.map(async (serviceName) => {
