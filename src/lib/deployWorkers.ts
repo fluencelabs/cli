@@ -59,8 +59,7 @@ import {
   DEALS_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
-  PER_WORKER_MEMORY_LIMIT,
-  PER_WORKER_MEMORY_LIMIT_STR,
+  COMPUTE_UNIT_MEMORY,
   MIN_MEMORY_PER_MODULE,
   MIN_MEMORY_PER_MODULE_STR,
 } from "./const.js";
@@ -875,16 +874,21 @@ async function resolveWorker({
     }),
   );
 
-  if (specifiedServicesMemoryLimit > PER_WORKER_MEMORY_LIMIT) {
+  const workerMemory =
+    ("computeUnits" in workerConfig ? workerConfig.computeUnits : 1) *
+    COMPUTE_UNIT_MEMORY;
+
+  if (specifiedServicesMemoryLimit > workerMemory) {
     throwMemoryExceedsError(
       workerName,
       specifiedServicesMemoryLimit,
       servicesWithSpecifiedMemoryLimit,
+      workerMemory,
     );
   }
 
   const remainingMemoryPerService = Math.floor(
-    (PER_WORKER_MEMORY_LIMIT - specifiedServicesMemoryLimit) /
+    (workerMemory - specifiedServicesMemoryLimit) /
       servicesWithoutSpecifiedMemoryLimit.length,
   );
 
@@ -999,6 +1003,7 @@ function throwMemoryExceedsError(
   workerName: string,
   specifiedServicesMemoryLimit: number,
   servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+  workerMemory: number,
 ) {
   const formattedServiceMemoryLimit = color.yellow(
     xbytes(specifiedServicesMemoryLimit),
@@ -1008,7 +1013,7 @@ function throwMemoryExceedsError(
     `Total memory limit for services in worker ${color.yellow(
       workerName,
     )} is ${formattedServiceMemoryLimit}, which exceeds per-worker memory limit: ${color.yellow(
-      PER_WORKER_MEMORY_LIMIT_STR,
+      xbytes(workerMemory),
     )}. Decrease ${color.yellow(
       "totalMemoryLimit",
     )} in one or more of the following services:\n${formatServiceMemoryLimits(

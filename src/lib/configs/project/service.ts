@@ -29,7 +29,7 @@ import {
   SERVICE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
-  PER_WORKER_MEMORY_LIMIT_STR,
+  COMPUTE_UNIT_MEMORY_STR,
   BYTES_FORMAT,
 } from "../../const.js";
 import {
@@ -101,7 +101,7 @@ export const overridableServiceProperties = {
       type: "string",
       pattern: BYTES_PATTERN,
       nullable: true,
-      description: `Memory limit for all service modules. If you specify this property please make sure it's at least \`${MIN_MEMORY_PER_MODULE_STR} * numberOfModulesInTheService\`. In repl default is: Infinity. When deploying service as part of the worker default is: ${PER_WORKER_MEMORY_LIMIT_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
+      description: `Memory limit for all service modules. If you specify this property please make sure it's at least \`${MIN_MEMORY_PER_MODULE_STR} * numberOfModulesInTheService\`. In repl default is: Infinity. When deploying service as part of the worker default is: computeUnits * ${COMPUTE_UNIT_MEMORY_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
     },
   },
   required: [],

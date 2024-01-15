@@ -61,10 +61,8 @@ export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
   MIN_MEMORY_PER_MODULE_STR,
 );
 
-export const PER_WORKER_MEMORY_LIMIT_STR = "2GB";
-export const PER_WORKER_MEMORY_LIMIT = xbytes.parseSize(
-  PER_WORKER_MEMORY_LIMIT_STR,
-);
+export const COMPUTE_UNIT_MEMORY_STR = "2GB";
+export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 
 const byteUnits = [
   "kB",
