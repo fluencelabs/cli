@@ -56,6 +56,11 @@ export const defaultNumberProperties: Record<NumberProperty, number> = {
   minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
 
+export const MIN_MEMORY_PER_MODULE_STR = "2 MiB";
+export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
+  MIN_MEMORY_PER_MODULE_STR,
+);
+
 export const PER_WORKER_MEMORY_LIMIT_STR = "2GB";
 export const PER_WORKER_MEMORY_LIMIT = xbytes.parseSize(
   PER_WORKER_MEMORY_LIMIT_STR,
@@ -83,7 +88,7 @@ export const BYTES_PATTERN = `^\\d+(\\.\\d+)?(\\s?)(${byteUnits.join("|")})$`;
 export const BYTES_FORMAT = `[number][whitespace?][B] where ? is an optional field and B is one of the following: ${byteUnits.join(
   ", ",
 )}`;
-export const MAX_HEAP_SIZE_DESCRIPTION = `Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
+export const MAX_HEAP_SIZE_DESCRIPTION = `DEPRECATED. Use \`totalMemoryLimit\` service property instead. Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
 
 export const U32_MAX = 4_294_967_295;
 

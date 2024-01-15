@@ -61,6 +61,8 @@ import {
   type FluenceEnv,
   PER_WORKER_MEMORY_LIMIT,
   PER_WORKER_MEMORY_LIMIT_STR,
+  MIN_MEMORY_PER_MODULE,
+  MIN_MEMORY_PER_MODULE_STR,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -143,11 +145,10 @@ type UploadDeploySpellConfig =
 
 type UploadDeployServiceConfig =
   Upload_deployArgConfig["workers"][number]["config"]["services"][number] & {
-    total_memory_limit: string | undefined;
+    total_memory_limit: number;
   };
 
 type PrepareForDeployArg = {
-  workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
   flags: {
     import: Array<string> | undefined;
@@ -155,12 +156,13 @@ type PrepareForDeployArg = {
     "marine-build-args": string | undefined;
   };
   fluenceEnv: FluenceEnv;
+  isBuildCheck?: boolean;
+  workerNames?: string | undefined;
   initPeerId?: string;
   workersConfig?: WorkersConfigReadonly;
 };
 
 export async function prepareForDeploy({
-  workerNames: workerNamesString,
   fluenceConfig,
   flags: {
     "marine-build-args": marineBuildArgs,
@@ -168,6 +170,8 @@ export async function prepareForDeploy({
     "no-build": noBuild,
   },
   fluenceEnv,
+  isBuildCheck = false,
+  workerNames: workerNamesString,
   initPeerId,
   workersConfig: maybeWorkersConfig,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> {
@@ -228,6 +232,7 @@ export async function prepareForDeploy({
     );
 
     if (
+      !isBuildCheck &&
       (workerConfig.services ?? []).length === 0 &&
       (workerConfig.spells ?? []).length === 0
     ) {
@@ -246,20 +251,18 @@ export async function prepareForDeploy({
     };
   });
 
-  const spellNamesUsedInWorkers = [
-    ...new Set(
-      workerConfigs.flatMap(({ workerConfig }) => {
-        return workerConfig.spells ?? [];
-      }),
-    ),
-  ];
+  const spellsToCompile = isBuildCheck
+    ? Object.keys(fluenceConfig.spells ?? {})
+    : [
+        ...new Set(
+          workerConfigs.flatMap(({ workerConfig }) => {
+            return workerConfig.spells ?? [];
+          }),
+        ),
+      ];
 
   const spellConfigs = (
-    await compileSpells(
-      fluenceConfig,
-      aquaImportsFromFlags,
-      spellNamesUsedInWorkers,
-    )
+    await compileSpells(fluenceConfig, aquaImportsFromFlags, spellsToCompile)
   ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
     const { script } = functions[spellConfig.function] ?? {};
 
@@ -779,7 +782,11 @@ async function resolveWorker({
   );
 
   const servicesWithUnresolvedMemoryLimit = (workerConfig.services ?? []).map(
-    (serviceName): UploadDeployServiceConfig => {
+    (
+      serviceName,
+    ): Omit<UploadDeployServiceConfig, "total_memory_limit"> & {
+      total_memory_limit: number | undefined;
+    } => {
       const serviceConfigWithOverrides = serviceConfigsWithOverrides.find(
         (c) => {
           return c.serviceName === serviceName;
@@ -837,10 +844,16 @@ async function resolveWorker({
         };
       });
 
+      const totalMemoryLimitString =
+        totalMemoryLimit ?? serviceConfig.totalMemoryLimit;
+
       return {
         name: serviceName,
         modules,
-        total_memory_limit: totalMemoryLimit ?? serviceConfig.totalMemoryLimit,
+        total_memory_limit:
+          totalMemoryLimitString === undefined
+            ? undefined
+            : xbytes.parseSize(totalMemoryLimitString),
       };
     },
   );
@@ -856,7 +869,7 @@ async function resolveWorker({
 
   const specifiedServicesMemoryLimit = sum(
     servicesWithSpecifiedMemoryLimit.map((service) => {
-      return xbytes.parseSize(service.total_memory_limit);
+      return service.total_memory_limit;
     }),
   );
 
@@ -868,24 +881,51 @@ async function resolveWorker({
     );
   }
 
-  const remainingMemoryPerService = xbytes(
+  const remainingMemoryPerService = Math.floor(
     (PER_WORKER_MEMORY_LIMIT - specifiedServicesMemoryLimit) /
       servicesWithoutSpecifiedMemoryLimit.length,
   );
 
-  const services = [
+  const servicesWithNotValidatedMemoryLimit = [
     ...servicesWithSpecifiedMemoryLimit,
     ...servicesWithoutSpecifiedMemoryLimit.map((service) => {
       service.total_memory_limit = remainingMemoryPerService;
+      assert(hasTotalMemoryLimit(service), "Unreachable");
       return service;
     }),
   ];
 
-  commandObj.logToStderr(
-    `Service memory limits for worker ${color.yellow(
-      workerName,
-    )}:\n${formatServiceMemoryLimits(services)}`,
+  const [servicesWithNotEnoughMemory, services] = splitErrorsAndResults(
+    servicesWithNotValidatedMemoryLimit,
+    (service) => {
+      const minMemoryForService =
+        MIN_MEMORY_PER_MODULE * service.modules.length;
+
+      if (service.total_memory_limit < minMemoryForService) {
+        return {
+          error: { service, minMemoryForService },
+        };
+      }
+
+      return { result: service };
+    },
   );
+
+  if (servicesWithNotEnoughMemory.length > 0) {
+    throwNotEnoughMemoryError(
+      workerName,
+      servicesWithNotEnoughMemory,
+      services,
+    );
+  }
+
+  if (services.length > 0) {
+    commandObj.logToStderr(
+      `Service memory limits for worker ${color.yellow(
+        workerName,
+      )}:\n${formatServiceMemoryLimits(services)}`,
+    );
+  }
 
   const spells = (workerConfig.spells ?? []).map((spellName) => {
     const spellConfig = spellConfigs.find((c) => {
@@ -915,6 +955,42 @@ async function resolveWorker({
     },
     dummy_deal_id: dummyDealId,
   };
+}
+
+function throwNotEnoughMemoryError(
+  workerName: string,
+  servicesWithNotEnoughMemory: {
+    service: UploadDeployServiceConfig;
+    minMemoryForService: number;
+  }[],
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+) {
+  const formattedServiceMemoryLimits = servicesWithNotEnoughMemory.map(
+    ({ service, minMemoryForService }) => {
+      return `${service.name}: ${color.yellow(
+        xbytes(service.total_memory_limit),
+      )} < minimum memory limit for this service ${color.yellow(
+        xbytes(minMemoryForService),
+      )}`;
+    },
+  );
+
+  const decreaseOtherServicesMessage =
+    servicesWithSpecifiedMemoryLimit.length > 0
+      ? ` or decrease the totalMemoryLimit for one or more of these service in the worker:\n${formatServiceMemoryLimits(
+          servicesWithSpecifiedMemoryLimit,
+        )}`
+      : "";
+
+  commandObj.error(
+    `The following services of the worker ${color.yellow(
+      workerName,
+    )} don't have a big enough totalMemoryLimit:\n${formattedServiceMemoryLimits.join(
+      "\n",
+    )}\n\nEach service must have at least ${color.yellow(
+      MIN_MEMORY_PER_MODULE_STR,
+    )} for each module it has. Please make sure to specify a bigger totalMemoryLimit${decreaseOtherServicesMessage}`,
+  );
 }
 
 function throwMemoryExceedsError(
@@ -947,7 +1023,7 @@ function formatServiceMemoryLimits(
     {},
     Object.fromEntries(
       servicesWithSpecifiedMemoryLimit.map((service) => {
-        return [service.name, service.total_memory_limit];
+        return [service.name, xbytes(service.total_memory_limit)];
       }),
     ),
   );
@@ -955,9 +1031,9 @@ function formatServiceMemoryLimits(
 
 function hasTotalMemoryLimit(
   arg: Record<string, unknown>,
-): arg is { total_memory_limit: string } {
+): arg is { total_memory_limit: number } {
   return (
     hasKey("total_memory_limit", arg) &&
-    typeof arg["total_memory_limit"] === "string"
+    typeof arg["total_memory_limit"] === "number"
   );
 }

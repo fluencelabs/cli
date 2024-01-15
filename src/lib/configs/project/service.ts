@@ -21,6 +21,7 @@ import type { JSONSchemaType } from "ajv";
 
 import { commandObj } from "../../commandObj.js";
 import {
+  MIN_MEMORY_PER_MODULE_STR,
   MAX_HEAP_SIZE_DESCRIPTION,
   BYTES_PATTERN,
   CLI_NAME,
@@ -100,7 +101,7 @@ export const overridableServiceProperties = {
       type: "string",
       pattern: BYTES_PATTERN,
       nullable: true,
-      description: `Memory limit for all service modules. In repl default is: Infinity. When deploying service as part of the worker default is: ${PER_WORKER_MEMORY_LIMIT_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
+      description: `Memory limit for all service modules. If you specify this property please make sure it's at least \`${MIN_MEMORY_PER_MODULE_STR} * numberOfModulesInTheService\`. In repl default is: Infinity. When deploying service as part of the worker default is: ${PER_WORKER_MEMORY_LIMIT_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
     },
   },
   required: [],

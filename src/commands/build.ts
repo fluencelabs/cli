@@ -25,7 +25,7 @@ import {
   ENV_FLAG,
   ENV_FLAG_NAME,
 } from "../lib/const.js";
-import { compileSpells } from "../lib/deployWorkers.js";
+import { prepareForDeploy } from "../lib/deployWorkers.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { initMarineCli } from "../lib/marineCli.js";
 import { resolveFluenceEnv } from "../lib/multiaddres.js";
@@ -54,14 +54,23 @@ export default class Build extends BaseCommand<typeof Build> {
       marineBuildArgs: flags["marine-build-args"],
     });
 
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+
+    await prepareForDeploy({
+      flags: {
+        ...flags,
+        "no-build": true,
+      },
+      fluenceConfig,
+      fluenceEnv,
+    });
+
     const { ensureAquaFileWithWorkerInfo } = await import(
       "../lib/deployWorkers.js"
     );
 
     const workerConfig = await initNewWorkersConfigReadonly();
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig, fluenceEnv);
-    await compileSpells(fluenceConfig, flags.import);
     commandObj.logToStderr(`All services and spells built successfully`);
   }
 }
