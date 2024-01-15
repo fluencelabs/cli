@@ -63,6 +63,7 @@ export default class Build extends BaseCommand<typeof Build> {
       },
       fluenceConfig,
       fluenceEnv,
+      isBuildCheck: true,
     });
 
     const { ensureAquaFileWithWorkerInfo } = await import(
