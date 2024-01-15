@@ -156,6 +156,10 @@ type PrepareForDeployArg = {
     "marine-build-args": string | undefined;
   };
   fluenceEnv: FluenceEnv;
+  /**
+   * only used in build command so all the spells are compiled and
+   * so no error happens if some worker doesn't have any services or spells
+   */
   isBuildCheck?: boolean;
   workerNames?: string | undefined;
   initPeerId?: string;
