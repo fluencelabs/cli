@@ -42,6 +42,7 @@ import {
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   SERVICE_INTERFACES,
   UPDATED_SERVICE_INTERFACES,
+  composeInterfacesFileContents,
 } from "../constants.js";
 import {
   assertHasPeer,
@@ -90,8 +91,11 @@ describe("integration tests", () => {
       };
 
       let interfacesFileContent = await readInterfacesFile();
+
       // we expect to a NewService interface in services.aqua file
-      expect(interfacesFileContent).toBe(`${NEW_SERVICE_INTERFACE}\n`);
+      expect(interfacesFileContent).toBe(
+        composeInterfacesFileContents(NEW_SERVICE_INTERFACE),
+      );
 
       const newServiceConfig = await getServiceConfig(cwd, NEW_SERVICE_NAME);
 
@@ -115,7 +119,9 @@ describe("integration tests", () => {
 
       // we expect to see both service interfaces in services.aqua file and the first one
       // should not be updated because we didn't build it, even though we changed it above
-      expect(interfacesFileContent).toBe(SERVICE_INTERFACES);
+      expect(interfacesFileContent).toBe(
+        composeInterfacesFileContents(SERVICE_INTERFACES),
+      );
 
       await fluence({
         args: ["build"],
@@ -126,7 +132,9 @@ describe("integration tests", () => {
 
       // we expect to see both service interfaces in services.aqua file and the first one
       // should be updated because we built all the services above including the first one
-      expect(interfacesFileContent).toBe(UPDATED_SERVICE_INTERFACES);
+      expect(interfacesFileContent).toBe(
+        composeInterfacesFileContents(UPDATED_SERVICE_INTERFACES),
+      );
 
       const fluenceConfig = await getFluenceConfig(cwd);
 
