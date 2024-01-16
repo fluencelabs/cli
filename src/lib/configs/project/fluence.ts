@@ -55,6 +55,7 @@ import {
   TOP_LEVEL_SCHEMA_ID,
 } from "../../const.js";
 import {
+  validateEffectors,
   validateAllVersionsAreExact,
   validateBatch,
 } from "../../helpers/validations.js";
@@ -1147,16 +1148,20 @@ const validateWorkers = (
 };
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  const validity = validateBatch(
+  return validateBatch(
     validateWorkers(config),
     await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
+    await validateEffectors(
+      Object.entries(config.deals ?? {}).flatMap(([name, { effectors }]) => {
+        return (effectors ?? []).map((effector) => {
+          return {
+            effector,
+            location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deals > ${name} > effectors > ${effector}`,
+          };
+        });
+      }),
+    ),
   );
-
-  if (typeof validity === "string") {
-    return validity;
-  }
-
-  return true;
 };
 
 const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {

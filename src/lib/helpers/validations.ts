@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { splitErrorsAndResults, stringifyUnknown } from "./utils.js";
+
 export type ValidationResult = string | true;
 
 export const validateUnique = <T>(
@@ -121,4 +123,31 @@ export function validatePercent(input: unknown): ValidationResult {
     validatePositiveNumberOrEmpty(input),
     lessThenValidator(100)(input),
   );
+}
+
+export async function validateEffectors(
+  effectors: Array<{
+    effector: string;
+    location: string;
+  }>,
+): Promise<ValidationResult> {
+  const { CID } = await import("ipfs-http-client");
+
+  const [errors] = splitErrorsAndResults(
+    effectors,
+    ({ location, effector }) => {
+      try {
+        CID.parse(effector);
+        return { result: true };
+      } catch (e) {
+        return { error: `${location}:\n${stringifyUnknown(e)}` };
+      }
+    },
+  );
+
+  if (errors.length > 0) {
+    return `Invalid effectors:\n\n${errors.join("\n\n")}`;
+  }
+
+  return true;
 }

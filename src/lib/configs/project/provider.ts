@@ -66,6 +66,7 @@ import {
   ccDurationValidator,
   validateAddress,
 } from "../../helpers/validateCapacityCommitment.js";
+import { validateEffectors } from "../../helpers/validations.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import {
   ensureFluenceConfigsDir,
@@ -499,7 +500,16 @@ const getValidate: (
       return capacityCommitmentErrors.join("\n\n");
     }
 
-    return true;
+    return validateEffectors(
+      Object.entries(config.offers).flatMap(([name, { effectors }]) => {
+        return (effectors ?? []).map((effector) => {
+          return {
+            effector,
+            location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > offers > ${name} > effectors > ${effector}`,
+          };
+        });
+      }),
+    );
   };
 };
 
