@@ -272,9 +272,9 @@ const dealSchemaObj = {
   properties: {
     computeUnits: {
       type: "number",
-      // These is the correct schema but Ajv thinks type here is incorrect
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const: 1 as unknown as null,
+      minimum: 1,
+      maximum: 1,
+      default: 1,
       description: `Number of compute units you require. 1 compute unit = ${COMPUTE_UNIT_MEMORY_STR}. Currently the only allowed value is 1. This will change in the future. Default: 1`,
       nullable: true,
     },
