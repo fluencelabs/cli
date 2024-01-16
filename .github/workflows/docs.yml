@@ -33,7 +33,7 @@ jobs:
       - run: yarn install
 
       - name: Setup golang
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
 
       - name: Install json-schema-docs
         run: go install github.com/marcusolsson/json-schema-docs@latest
