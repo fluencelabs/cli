@@ -103,7 +103,10 @@ export const updateAquaServiceInterfaceFile = async (
       return serviceDefinition.trim();
     })
     .filter((serviceDefinition) => {
-      return serviceDefinition !== "";
+      return (
+        serviceDefinition !== "" &&
+        serviceDefinition !== SERVICE_INTERFACE_FILE_HEADER
+      );
     });
 
   const serviceNamesFromFluenceConfig = new Set(
