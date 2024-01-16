@@ -12,7 +12,7 @@
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-deposit-deal-address-amount)
 * [`fluence deal info [DEAL-ADDRESS]`](#fluence-deal-info-deal-address)
-* [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
+* [`fluence deal logs [WORKER-NAMES] [SPELL-NAME]`](#fluence-deal-logs-worker-names-spell-name)
 * [`fluence deal match [DEAL-ADDRESS]`](#fluence-deal-match-deal-address)
 * [`fluence deal remove-unit [DEAL-ADDRESS] [UNIT-ID]`](#fluence-deal-remove-unit-deal-address-unit-id)
 * [`fluence deal stop [DEAL-ADDRESS]`](#fluence-deal-stop-deal-address)
@@ -397,17 +397,19 @@ DESCRIPTION
 
 _See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/info.ts)_
 
-## `fluence deal logs [WORKER-NAMES]`
+## `fluence deal logs [WORKER-NAMES] [SPELL-NAME]`
 
 Get logs from deployed workers for deals listed in workers.yaml
 
 ```
 USAGE
-  $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
+  $ fluence deal logs [WORKER-NAMES] [SPELL-NAME] [--no-input] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>]
+    [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
+  SPELL-NAME    Spell name to get logs for (Default: worker-spell)
 
 FLAGS
   -k, --sk=<name>                                      Name of a peer's Network Private Key
