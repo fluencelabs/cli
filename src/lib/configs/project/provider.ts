@@ -30,7 +30,7 @@ import times from "lodash-es/times.js";
 
 import { commandObj } from "../../commandObj.js";
 import {
-  PER_WORKER_MEMORY_LIMIT_STR,
+  COMPUTE_UNIT_MEMORY_STR,
   DEFAULT_OFFER_NAME,
   type ContractsENV,
   PROVIDER_CONFIG_FILE_NAME,
@@ -282,7 +282,7 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
     computeUnits: {
       type: "number",
       nullable: true,
-      description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${PER_WORKER_MEMORY_LIMIT_STR} of RAM)`,
+      description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     nox: noxConfigYAMLSchema,
   },
