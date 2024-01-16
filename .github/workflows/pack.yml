@@ -157,7 +157,7 @@ jobs:
         run: mv dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
 
       - name: Upload archive to CI
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}
           path: fluence-cli-${{ inputs.platform }}.tar.gz
