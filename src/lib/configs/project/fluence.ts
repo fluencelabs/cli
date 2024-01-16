@@ -27,6 +27,8 @@ import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import {
+  COMPUTE_UNIT_MEMORY_STR,
+  MAX_HEAP_SIZE_DESCRIPTION,
   AQUA_DIR_NAME,
   AQUA_LIB_NPM_DEPENDENCY,
   AUTO_GENERATED,
@@ -82,6 +84,10 @@ import {
 } from "./module.js";
 import { initReadonlyProjectSecretsConfig } from "./projectSecrets.js";
 import {
+  overridableServiceProperties,
+  type OverridableServiceProperties,
+} from "./service.js";
+import {
   type OverridableSpellProperties,
   overridableSpellProperties,
 } from "./spell.js";
@@ -122,7 +128,7 @@ export type OverrideModules = Record<string, OverridableModuleProperties>;
 type ServiceV1 = {
   get: string;
   overrideModules?: OverrideModules;
-};
+} & OverridableServiceProperties;
 
 type ConfigV1 = {
   version: 1;
@@ -152,6 +158,7 @@ const serviceSchema: JSONSchemaType<ServiceV1> = {
       type: "string",
       description: `Path to service directory or URL to the tar.gz archive with the service`,
     },
+    ...overridableServiceProperties.properties,
     overrideModules: {
       type: "object",
       title: "Overrides",
@@ -164,7 +171,7 @@ const serviceSchema: JSONSchemaType<ServiceV1> = {
       required: [],
     },
   },
-  required: ["get"],
+  required: ["get", ...overridableServiceProperties.required],
   additionalProperties: false,
 } as const;
 
@@ -211,6 +218,7 @@ type FluenceConfigSpell = {
 } & OverridableSpellProperties;
 
 type Deal = {
+  computeUnits?: 1;
   minWorkers?: number;
   targetWorkers?: number;
   maxWorkersPerProvider?: number;
@@ -262,6 +270,14 @@ const spellSchema: JSONSchemaType<FluenceConfigSpell> = {
 const dealSchemaObj = {
   type: "object",
   properties: {
+    computeUnits: {
+      type: "number",
+      minimum: 1,
+      maximum: 1,
+      default: 1,
+      description: `Number of compute units you require. 1 compute unit = ${COMPUTE_UNIT_MEMORY_STR}. Currently the only allowed value is 1. This will change in the future. Default: 1`,
+      nullable: true,
+    },
     targetWorkers: {
       type: "number",
       description: "Max workers in the deal",
@@ -717,16 +733,7 @@ ${yamlDiffPatch(
 #         # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
 #         loggingMask: 1
 #
-#         # Max size of the heap that a module can allocate in format:
-#         # [number][whitespace?][specificator?]
-#         # where ? is an optional field and specificator is one from the following (case-insensitive):
-#         # K, Kb - kilobyte
-#         # Ki, KiB - kibibyte
-#         # M, Mb - megabyte
-#         # Mi, MiB - mebibyte
-#         # G, Gb - gigabyte
-#         # Gi, GiB - gibibyte
-#         # Current limit is 4 GiB
+#         # ${MAX_HEAP_SIZE_DESCRIPTION}
 #         maxHeapSize: 1KiB
 #
 #         # A map of binary executable files that module is allowed to call

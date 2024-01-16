@@ -30,6 +30,7 @@ import times from "lodash-es/times.js";
 
 import { commandObj } from "../../commandObj.js";
 import {
+  COMPUTE_UNIT_MEMORY_STR,
   DEFAULT_OFFER_NAME,
   type ContractsENV,
   PROVIDER_CONFIG_FILE_NAME,
@@ -50,6 +51,7 @@ import {
   IPFS_PORT,
   CURRENCY_MULTIPLIER_TEXT,
   defaultNumberProperties,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "../../const.js";
 import {
   type ProviderConfigArgs,
@@ -277,7 +279,11 @@ const computePeerSchema: JSONSchemaType<ComputePeer> = {
   description: "Defines a compute peer",
   additionalProperties: false,
   properties: {
-    computeUnits: { type: "number", nullable: true },
+    computeUnits: {
+      type: "number",
+      nullable: true,
+      description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
+    },
     nox: noxConfigYAMLSchema,
   },
   required: [],
@@ -340,7 +346,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
           return [
             `nox-${i}`,
             {
-              computeUnits: 1,
+              computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
             },
           ] as const;
         }),

@@ -62,11 +62,8 @@ export const NEW_SERVICE_2_NAME = "newService2";
 export const NEW_SERVICE_2_INTERFACE = `service NewService2("${NEW_SERVICE_2_NAME}"):
   greeting(name: string) -> string`;
 
-export const SERVICE_INTERFACES = `${NEW_SERVICE_INTERFACE}
-
-
-${NEW_SERVICE_2_INTERFACE}
-`;
+export const SERVICE_INTERFACES =
+  NEW_SERVICE_INTERFACE + "\n\n\n" + NEW_SERVICE_2_INTERFACE;
 
 export const UPDATED_SERVICE_INTERFACES = `data MyStruct:
   a: i32
@@ -76,5 +73,8 @@ service NewService("${NEW_SERVICE_NAME}"):
   greeting() -> MyStruct
 
 
-${NEW_SERVICE_2_INTERFACE}
-`;
+${NEW_SERVICE_2_INTERFACE}`;
+
+export const composeInterfacesFileContents = (interfaces: string) => {
+  return `aqua Services declares *\n\n\n${interfaces}\n`;
+};

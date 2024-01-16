@@ -50,15 +50,16 @@ Worker config
 
 #### Properties
 
-| Property                | Type     | Required | Description                                                                                       |
-|-------------------------|----------|----------|---------------------------------------------------------------------------------------------------|
-| `collateralPerWorker`   | number   | No       | Collateral per worker in FL. This number is multiplied by 10^18                                   |
-| `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                       |
-| `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                          |
-| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FL. This number is multiplied by 10^18                                  |
-| `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
-| `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
-| `targetWorkers`         | number   | No       | Max workers in the deal                                                                           |
+| Property                | Type     | Required | Description                                                                                                                                  |
+|-------------------------|----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `collateralPerWorker`   | number   | No       | Collateral per worker in FL. This number is multiplied by 10^18                                                                              |
+| `computeUnits`          | number   | No       | Number of compute units you require. 1 compute unit = 2GB. Currently the only allowed value is 1. This will change in the future. Default: 1 |
+| `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                                                                  |
+| `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                                                                     |
+| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FL. This number is multiplied by 10^18                                                                             |
+| `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                            |
+| `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                |
+| `targetWorkers`         | number   | No       | Max workers in the deal                                                                                                                      |
 
 ## dependencies
 
@@ -129,10 +130,11 @@ Service config. Defines where the service is and how to deploy it
 
 #### Properties
 
-| Property          | Type                       | Required | Description                                                             |
-|-------------------|----------------------------|----------|-------------------------------------------------------------------------|
-| `get`             | string                     | **Yes**  | Path to service directory or URL to the tar.gz archive with the service |
-| `overrideModules` | [object](#overridemodules) | No       | A map of modules to override                                            |
+| Property           | Type                       | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|--------------------|----------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `get`              | string                     | **Yes**  | Path to service directory or URL to the tar.gz archive with the service                                                                                                                                                                                                                                                                                                                                                                                   |
+| `overrideModules`  | [object](#overridemodules) | No       | A map of modules to override                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `totalMemoryLimit` | string                     | No       | Memory limit for all service modules. If you specify this property please make sure it's at least `2 MiB * numberOfModulesInTheService`. In repl default is: Infinity. When deploying service as part of the worker default is: computeUnits * 2GB / (amount of services in the worker). Format: [number][whitespace?][B] where ? is an optional field and B is one of the following: kB, KB, kiB, KiB, KIB, mB, MB, miB, MiB, MIB, gB, GB, giB, GiB, GIB |
 
 #### overrideModules
 
@@ -150,21 +152,14 @@ Overrides for the module config
 
 ###### Properties
 
-| Property          | Type                       | Required | Description                                                                                                                                                                                                                                                    |
-|-------------------|----------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `envs`            | [object](#envs)            | No       | environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl |
-| `loggerEnabled`   | boolean                    | No       | Set true to allow module to use the Marine SDK logger                                                                                                                                                                                                          |
-| `loggingMask`     | number                     | No       | manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map                                                                                                                     |
-| `maxHeapSize`     | string                     | No       | Max size of the heap that a module can allocate in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):                                                                    |
-|                   |                            |          | K, Kb - kilobyte                                                                                                                                                                                                                                               |
-|                   |                            |          | Ki, KiB - kibibyte                                                                                                                                                                                                                                             |
-|                   |                            |          | M, Mb - megabyte                                                                                                                                                                                                                                               |
-|                   |                            |          | Mi, MiB - mebibyte                                                                                                                                                                                                                                             |
-|                   |                            |          | G, Gb - gigabyte                                                                                                                                                                                                                                               |
-|                   |                            |          | Gi, GiB - gibibyte                                                                                                                                                                                                                                             |
-|                   |                            |          | Current limit is 4 GiB                                                                                                                                                                                                                                         |
-| `mountedBinaries` | [object](#mountedbinaries) | No       | A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl                                                                                                                                                                  |
-| `volumes`         | [object](#volumes)         | No       | A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file                                                                                                             |
+| Property          | Type                       | Required | Description                                                                                                                                                                                                                                                                      |
+|-------------------|----------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `envs`            | [object](#envs)            | No       | environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl                   |
+| `loggerEnabled`   | boolean                    | No       | Set true to allow module to use the Marine SDK logger                                                                                                                                                                                                                            |
+| `loggingMask`     | number                     | No       | manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map                                                                                                                                       |
+| `maxHeapSize`     | string                     | No       | DEPRECATED. Use `totalMemoryLimit` service property instead. Max size of the heap that a module can allocate in format: [number][whitespace?][B] where ? is an optional field and B is one of the following: kB, KB, kiB, KiB, KIB, mB, MB, miB, MiB, MIB, gB, GB, giB, GiB, GIB |
+| `mountedBinaries` | [object](#mountedbinaries) | No       | A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl                                                                                                                                                                                    |
+| `volumes`         | [object](#volumes)         | No       | A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file                                                                                                                               |
 
 ###### envs
 

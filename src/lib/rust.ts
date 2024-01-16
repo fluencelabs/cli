@@ -418,7 +418,7 @@ export const installAllCargoDependencies = async ({
   force,
 }: InstallAllDependenciesArg): Promise<void> => {
   for (const [name, version] of Object.entries(
-    await resolveCargoDependencies(maybeFluenceConfig),
+    resolveCargoDependencies(maybeFluenceConfig),
   )) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable

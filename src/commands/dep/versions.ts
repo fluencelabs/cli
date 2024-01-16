@@ -77,7 +77,7 @@ export default class Versions extends BaseCommand<typeof Versions> {
             maybeFluenceConfig === null
               ? getRecommendedDependencies("npm")
               : maybeFluenceConfig.dependencies?.npm ?? {},
-          [marineAndMreplExplanation]: await resolveCargoDependencies(
+          [marineAndMreplExplanation]: resolveCargoDependencies(
             maybeFluenceConfig,
             true,
           ),

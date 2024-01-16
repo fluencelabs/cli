@@ -21,11 +21,16 @@ import type { JSONSchemaType } from "ajv";
 
 import { commandObj } from "../../commandObj.js";
 import {
+  MIN_MEMORY_PER_MODULE_STR,
+  MAX_HEAP_SIZE_DESCRIPTION,
+  BYTES_PATTERN,
   CLI_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   SERVICE_CONFIG_FILE_NAME,
   SERVICE_CONFIG_FULL_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
+  COMPUTE_UNIT_MEMORY_STR,
+  BYTES_FORMAT,
 } from "../../const.js";
 import {
   ensureServiceAbsolutePath,
@@ -79,8 +84,28 @@ type ConfigV0 = {
   version: 0;
   name: string;
   modules: Modules;
-  totalMemoryLimit?: string | null;
+  totalMemoryLimit?: string;
 };
+
+const OVERRIDABLE_SERVICE_PROPERTIES = ["totalMemoryLimit"] as const;
+
+export type OverridableServiceProperties = Pick<
+  ConfigV0,
+  (typeof OVERRIDABLE_SERVICE_PROPERTIES)[number]
+>;
+
+export const overridableServiceProperties = {
+  type: "object",
+  properties: {
+    totalMemoryLimit: {
+      type: "string",
+      pattern: BYTES_PATTERN,
+      nullable: true,
+      description: `Memory limit for all service modules. If you specify this property please make sure it's at least \`${MIN_MEMORY_PER_MODULE_STR} * numberOfModulesInTheService\`. In repl default is: Infinity. When deploying service as part of the worker default is: computeUnits * ${COMPUTE_UNIT_MEMORY_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
+    },
+  },
+  required: [],
+} as const satisfies JSONSchemaType<OverridableServiceProperties>;
 
 const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
@@ -103,15 +128,15 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       },
       required: [FACADE_MODULE_NAME],
     },
-    totalMemoryLimit: {
-      type: "string",
-      nullable: true,
-      description:
-        "Default: Infinity. Currently used only in repl. Total memory limit for a service in format: [number][whitespace?][specificator?] where ? is an optional field and specificator is one from the following (case-insensitive):\nK, Kb - kilobyte\nKi, KiB - kibibyte\nM, Mb - megabyte\nMi, MiB - mebibyte\nG, Gb - gigabyte\nGi, GiB - gibibyte",
-    },
+    ...overridableServiceProperties.properties,
     version: { type: "number", const: 0 },
   },
-  required: ["version", "name", "modules"],
+  required: [
+    "version",
+    "name",
+    "modules",
+    ...overridableServiceProperties.required,
+  ],
   additionalProperties: false,
 };
 
@@ -247,16 +272,7 @@ modules:
 #     # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
 #     loggingMask: 1
 #
-#     # Max size of the heap that a module can allocate in format:
-#     # [number][whitespace?][specificator?]
-#     # where ? is an optional field and specificator is one from the following (case-insensitive):
-#     # K, Kb - kilobyte
-#     # Ki, KiB - kibibyte
-#     # M, Mb - megabyte
-#     # Mi, MiB - mebibyte
-#     # G, Gb - gigabyte
-#     # Gi, GiB - gibibyte
-#     # Current limit is 4 GiB
+#     # ${MAX_HEAP_SIZE_DESCRIPTION}
 #     maxHeapSize: 1KiB
 #
 #     # A map of binary executable files that module is allowed to call

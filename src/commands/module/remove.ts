@@ -109,7 +109,7 @@ export default class Remove extends BaseCommand<typeof Remove> {
     );
 
     const newModules = removeProperties(serviceConfig.modules, ([name]) => {
-      return name !== moduleNameToRemove;
+      return name === moduleNameToRemove;
     });
 
     if (!isValidServiceModules(newModules)) {

@@ -188,7 +188,6 @@ const ensureServiceConfig = async (
 type TomlModuleConfig = {
   name: string;
   load_from?: string;
-  max_heap_size?: string;
   logger_enabled?: boolean;
   logging_mask?: number;
   wasi?: {
@@ -202,15 +201,8 @@ const ensureModuleConfigsForToml = (
   moduleConfigs: Array<ModuleConfigReadonly>,
 ) => {
   return moduleConfigs.map((moduleConfig) => {
-    const {
-      name,
-      envs,
-      loggerEnabled,
-      volumes,
-      mountedBinaries,
-      maxHeapSize,
-      loggingMask,
-    } = moduleConfig;
+    const { name, envs, loggerEnabled, volumes, mountedBinaries, loggingMask } =
+      moduleConfig;
 
     const load_from = getModuleWasmPath(moduleConfig);
 
@@ -225,10 +217,6 @@ const ensureModuleConfigsForToml = (
 
     if (typeof loggingMask === "number") {
       tomlModuleConfig.logging_mask = loggingMask;
-    }
-
-    if (typeof maxHeapSize === "string") {
-      tomlModuleConfig.max_heap_size = maxHeapSize;
     }
 
     if (volumes !== undefined) {
