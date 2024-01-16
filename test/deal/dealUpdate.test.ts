@@ -24,7 +24,7 @@ import {
   NEW_SPELL_NAME,
   TEST_AQUA_DIR_PATH,
 } from "../constants.js";
-import { fluence, init } from "../helpers.js";
+import { fluence, init, maybeConcurrentTest } from "../helpers.js";
 import {
   assertLogsAreValid,
   build,
@@ -41,118 +41,125 @@ import {
 } from "../sharedSteps.js";
 
 describe("Deal update tests", () => {
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after new spell is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
-    await init(cwd, "quickstart");
+  maybeConcurrentTest(
+    "should update deal after new spell is created",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
+      await init(cwd, "quickstart");
 
-    await updateFluenceConfigForTest(cwd);
+      await updateFluenceConfigForTest(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilShowSubnetReturnsExpected(
-      cwd,
-      [MY_SERVICE_NAME],
-      [NEW_SPELL_NAME],
-    );
+      await waitUntilShowSubnetReturnsExpected(
+        cwd,
+        [MY_SERVICE_NAME],
+        [NEW_SPELL_NAME],
+      );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after new service is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
-    await init(cwd, "quickstart");
+  maybeConcurrentTest(
+    "should update deal after new service is created",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
+      await init(cwd, "quickstart");
 
-    await updateFluenceConfigForTest(cwd);
+      await updateFluenceConfigForTest(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
+      await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
 
-    await build(cwd);
+      await build(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilShowSubnetReturnsExpected(
-      cwd,
-      [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
-      [],
-    );
+      await waitUntilShowSubnetReturnsExpected(
+        cwd,
+        [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+        [],
+      );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after new module is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
-    await init(cwd, "quickstart");
+  maybeConcurrentTest(
+    "should update deal after new module is created",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
+      await init(cwd, "quickstart");
 
-    await updateFluenceConfigForTest(cwd);
+      await updateFluenceConfigForTest(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await createModuleAndAddToService(cwd, NEW_MODULE_NAME, MY_SERVICE_NAME);
+      await createModuleAndAddToService(cwd, NEW_MODULE_NAME, MY_SERVICE_NAME);
 
-    await updateMainRs(cwd, NEW_MODULE_NAME, NEW_MODULE_CONTENT);
+      await updateMainRs(cwd, NEW_MODULE_NAME, NEW_MODULE_CONTENT);
 
-    await updateMainRs(
-      cwd,
-      MY_SERVICE_NAME,
-      FACADE_MODULE_CONTENT,
-      MY_SERVICE_NAME,
-    );
+      await updateMainRs(
+        cwd,
+        MY_SERVICE_NAME,
+        FACADE_MODULE_CONTENT,
+        MY_SERVICE_NAME,
+      );
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilRunDeployedServicesReturnsExpected(
-      cwd,
-      `Hey, fluence! I'm The New Module.`,
-    );
+      await waitUntilRunDeployedServicesReturnsExpected(
+        cwd,
+        `Hey, fluence! I'm The New Module.`,
+      );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after changing a service", async () => {
-    const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
-    await init(cwd, "quickstart");
+  maybeConcurrentTest(
+    "should update deal after changing a service",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
+      await init(cwd, "quickstart");
 
-    await updateFluenceConfigForTest(cwd);
+      await updateFluenceConfigForTest(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await updateMainRs(
-      cwd,
-      MY_SERVICE_NAME,
-      UPDATED_SERVICE_CONTENT,
-      MY_SERVICE_NAME,
-    );
+      await updateMainRs(
+        cwd,
+        MY_SERVICE_NAME,
+        UPDATED_SERVICE_CONTENT,
+        MY_SERVICE_NAME,
+      );
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilRunDeployedServicesReturnsExpected(
-      cwd,
-      `Hey, fluence! I've been updated.`,
-    );
+      await waitUntilRunDeployedServicesReturnsExpected(
+        cwd,
+        `Hey, fluence! I've been updated.`,
+      );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 
-  // TODO: test skipped until FLU-575 is released
-  test.skip("should update deal after changing a spell", async () => {
+  maybeConcurrentTest("should update deal after changing a spell", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingASpell");
     await init(cwd, "quickstart");
 

@@ -29,11 +29,9 @@ import {
   DEFAULT_DEAL_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
-  LOCAL_NET_DEFAULT_WALLET_KEY,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
 } from "../src/lib/const.js";
 import {
-  jsonStringify,
   LOGS_GET_ERROR_START,
   LOGS_RESOLVE_SUBNET_ERROR_START,
   setTryTimeout,
@@ -47,7 +45,7 @@ import {
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   WORKER_SPELL,
 } from "./constants.js";
-import { assertHasWorkerAndAnswer, fluence } from "./helpers.js";
+import { DEFAULT_UNIQUE_PRIVATE_KEY, fluence } from "./helpers.js";
 import { validateDeployedServicesAnswerSchema } from "./validators/deployedServicesAnswerValidator.js";
 import { validateSpellLogs } from "./validators/spellLogsValidator.js";
 import {
@@ -182,7 +180,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   const res = await fluence({
     args: ["deal", "deploy"],
     flags: {
-      "priv-key": LOCAL_NET_DEFAULT_WALLET_KEY,
+      "priv-key": DEFAULT_UNIQUE_PRIVATE_KEY,
     },
     cwd,
   });
@@ -195,16 +193,16 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   console.log(dealId);
 
   await fluence({
-    args: ["deal", "deposit", dealId, "100000000000000000000"],
+    args: ["deal", "deposit", dealId, "100"],
     flags: {
-      "priv-key": LOCAL_NET_DEFAULT_WALLET_KEY,
+      "priv-key": DEFAULT_UNIQUE_PRIVATE_KEY,
     },
     cwd,
   });
 
   await setTryTimeout(
     async () => {
-      return waitUntilDealDeployed(cwd);
+      return isDealDeployed(cwd, dealId);
     },
     (error) => {
       throw new Error(
@@ -217,7 +215,12 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   );
 }
 
-async function waitUntilDealDeployed(cwd: string) {
+async function isDealDeployed(cwd: string, dealId: string) {
+  await fluence({
+    args: ["deal", "info", dealId],
+    cwd,
+  });
+
   const result = await fluence({
     args: ["run"],
     flags: {
@@ -227,52 +230,13 @@ async function waitUntilDealDeployed(cwd: string) {
     cwd,
   });
 
-  const parsedResult = JSON.parse(result);
+  const runDeployedServicesResult = JSON.parse(result);
 
-  assert(
-    Array.isArray(parsedResult),
-    `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array, but it is: ${result}`,
-  );
-
-  const arrayOfResults = parsedResult.map((u) => {
-    return assertHasWorkerAndAnswer(u);
-  });
-
-  const resultsWithNoAnswer = arrayOfResults.filter(({ answer }) => {
-    return answer === null;
-  });
-
-  assert(
-    resultsWithNoAnswer.length === 0,
-    `When running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} nox returned workers from blockchain that has worker_id == null: ${resultsWithNoAnswer
-      .map(({ worker }) => {
-        return jsonStringify(worker);
-      })
-      .join("\n")}`,
-  );
-
-  const expected = sortBy(
-    map(multiaddrs, (peer) => {
-      return {
-        answer: "Hi, fluence",
-        peer: peer.peerId,
-      };
-    }),
-    ["peer"],
-  );
-
-  const res = sortBy(
-    map(arrayOfResults, ({ answer, worker }) => {
-      return {
-        answer,
-        peer: worker.host_id,
-      };
-    }),
-    ["peer"],
-  );
-
-  // We expect to have one result from each of the local peers, because we requested 3 workers and we have 3 local peers
-  expect(res).toEqual(expected);
+  if (!validateDeployedServicesAnswerSchema(runDeployedServicesResult)) {
+    throw new Error(
+      `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is expected to be an array of DeployedServicesAnswer, but actual result is: ${result}`,
+    );
+  }
 }
 
 export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
@@ -303,6 +267,10 @@ export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
 
 function sortSubnetResult(result: WorkerServices) {
   const sortedResult = sortBy(result, ["host_id"]);
+
+  map(sortedResult, (w) => {
+    return w.services.sort();
+  });
 
   map(sortedResult, (w) => {
     return w.spells.sort();
@@ -389,12 +357,27 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
         );
       }
 
-      runDeployedServicesResult.forEach((r) => {
-        assert(
-          r.answer === answer,
-          `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} answer is expected to be ${answer}`,
-        );
-      });
+      const expected = sortBy(
+        map(multiaddrs, (peer) => {
+          return {
+            answer,
+            peer: peer.peerId,
+          };
+        }),
+        ["peer"],
+      );
+
+      const res = sortBy(
+        map(runDeployedServicesResult, ({ answer, worker }) => {
+          return {
+            answer,
+            peer: worker.host_id,
+          };
+        }),
+        ["peer"],
+      );
+
+      expect(res).toEqual(expected);
     },
     (error) => {
       throw new Error(

@@ -16,7 +16,7 @@
 
 import "@total-typescript/ts-reset";
 import assert from "node:assert";
-import { access, cp, rm } from "node:fs/promises";
+import { access, cp, readFile, rm, writeFile } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 
@@ -27,9 +27,11 @@ import {
   testNet,
 } from "@fluencelabs/fluence-network-environment";
 import { CustomColors } from "@oclif/color";
+import lockfile from "proper-lockfile";
 
 import {
   CLI_NAME,
+  LOCAL_NET_WALLET_KEYS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   type Template,
 } from "../src/lib/const.js";
@@ -43,6 +45,7 @@ import {
 import { assertHasKey } from "../src/lib/typeHelpers.js";
 
 export const fluenceEnv = process.env[FLUENCE_ENV];
+export const DEFAULT_UNIQUE_PRIVATE_KEY = await getUniquePrivateKey();
 
 type CliArg = {
   args?: ExecPromiseArg["args"];
@@ -135,6 +138,10 @@ export const init = async (cwd: string, template: Template): Promise<void> => {
 };
 
 export const maybeConcurrentTest = (...args: Parameters<typeof test>): void => {
+  console.log(
+    `Running "${args[0]}" with private key: ${DEFAULT_UNIQUE_PRIVATE_KEY}`,
+  );
+
   if (process.env[RUN_TESTS_IN_PARALLEL] === "false") {
     test(...args);
     return;
@@ -178,12 +185,7 @@ export const assertHasPeer = (result: unknown): { peer: string } => {
   }
 };
 
-export const assertHasWorkerAndAnswer = (
-  result: unknown,
-): {
-  worker: { host_id: string; worker_id: string | null; pat_id: string };
-  answer: string | null;
-} => {
+export const assertHasWorkerAndAnswer = (result: unknown) => {
   try {
     assertHasKey("worker", result);
     assertHasKey("answer", result);
@@ -196,8 +198,6 @@ export const assertHasWorkerAndAnswer = (
     assert(typeof host_id === "string");
     assert(typeof worker_id === "string" || worker_id === null);
     assert(typeof pat_id === "string");
-
-    return { worker: { host_id, worker_id, pat_id }, answer };
   } catch (err) {
     throw new Error(
       `Running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is supposed to return an array of objects of a particular shape: { worker: { host_id: string, worker_id: string | null, pat_id: string }, answer: string | null }. One of the received objects doesn't match the shape: ${jsonStringify(
@@ -240,4 +240,69 @@ export async function getMultiaddrs() {
     testnet: testNet,
     local,
   }[fluenceEnv];
+}
+
+async function processFile(
+  filePath: string,
+  processDataFunction: (data: string) => number,
+): Promise<number> {
+  try {
+    await access(filePath);
+  } catch {
+    await writeFile(filePath, "");
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const release = await lockfile.lock(filePath, {
+      retries: {
+        retries: 30,
+        minTimeout: 100,
+        maxTimeout: 500,
+      },
+    });
+
+    try {
+      const data = await readFile(filePath, "utf-8");
+      const processedData = processDataFunction(data);
+      await writeFile(filePath, processedData.toString());
+
+      return processedData;
+    } finally {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      await release();
+    }
+  } catch (error) {
+    console.error("Error during working with a file:", error);
+    throw error;
+  }
+}
+
+function processData(data: string): number {
+  let index: number;
+
+  if (data === "") {
+    index = 0;
+  } else {
+    index = Number(data) + 1;
+  }
+
+  if (isNaN(index)) {
+    throw Error(`Data is not a number: ${data}`);
+  }
+
+  if (index >= LOCAL_NET_WALLET_KEYS.length) {
+    index = 0;
+  }
+
+  return index;
+}
+
+export async function getUniquePrivateKey() {
+  const privateKeyIndexFilePath = "tmp/private_key_index.txt";
+  const index = await processFile(privateKeyIndexFilePath, processData);
+  const privateKey = LOCAL_NET_WALLET_KEYS[index];
+  console.log(`Using private key ${privateKey}. Index: ${index}`);
+
+  return privateKey;
 }

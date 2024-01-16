@@ -16,6 +16,8 @@
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
+  maxConcurrency: 5,
+  maxWorkers: 5,
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
