@@ -1,3 +1,5 @@
+aqua Main
+
 import "@fluencelabs/aqua-lib/builtin.aqua"
 
 func identify() -> Info:
