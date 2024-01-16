@@ -18,11 +18,10 @@ import assert from "node:assert";
 import { readFile, writeFile } from "node:fs/promises";
 
 import type { FluenceConfig } from "../configs/project/fluence.js";
-import { FS_OPTIONS } from "../const.js";
+import { FS_OPTIONS, SERVICE_INTERFACE_FILE_HEADER } from "../const.js";
 import type { MarineCLI } from "../marineCli.js";
 import { ensureFluenceAquaServicesPath } from "../paths.js";
 
-const SERVICE_INTERFACE_FILE_HEADER = "aqua Services declares *";
 const SERVICE_DEFINITION_SEPARATOR = "\n\n\n";
 
 type GenerateServiceInterfaceArg = {

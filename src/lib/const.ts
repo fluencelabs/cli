@@ -685,6 +685,8 @@ fluence aqua
 `;
 }
 
+export const SERVICE_INTERFACE_FILE_HEADER = "aqua Services declares *";
+
 export const READMEs: Record<Template, string> = {
   quickstart: QUICKSTART_README,
   minimal: MINIMAL_README,
