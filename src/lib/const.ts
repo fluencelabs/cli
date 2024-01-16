@@ -620,14 +620,11 @@ export function getSpellAquaFileContent(spellName: string) {
 -- Note: spell main function must be exported
 export spell
 
-import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    msg = "Spell is working!"
-    str <- Debug.stringify(msg)
-    Spell "worker-spell"
-    Spell.store_log(str)
+    Spell "${spellName}"
+    Spell.store_log("Spell '${spellName}' is working!")
 `;
 }
 
@@ -722,3 +719,4 @@ export const LOCAL_NET_WALLET_KEYS = [
 ];
 
 export const DEFAULT_OFFER_NAME = "offer";
+export const WORKER_SPELL = "worker-spell";

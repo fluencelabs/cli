@@ -31,6 +31,7 @@ import {
   FS_OPTIONS,
   LOCAL_NET_DEFAULT_WALLET_KEY,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+  WORKER_SPELL,
 } from "../src/lib/const.js";
 import {
   jsonStringify,
@@ -45,7 +46,6 @@ import {
   multiaddrs,
   MY_SERVICE_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
-  WORKER_SPELL,
 } from "./constants.js";
 import { assertHasWorkerAndAnswer, fluence } from "./helpers.js";
 import { validateDeployedServicesAnswerSchema } from "./validators/deployedServicesAnswerValidator.js";
