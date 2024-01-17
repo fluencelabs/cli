@@ -44,6 +44,8 @@ type DealCreateArg = {
   maxWorkersPerProvider: number;
   pricePerWorkerEpoch: number;
   effectors: string[];
+  initialBalance: number;
+  workerName?: string;
 };
 
 export async function dealCreate({
@@ -54,6 +56,8 @@ export async function dealCreate({
   maxWorkersPerProvider,
   pricePerWorkerEpoch,
   effectors,
+  initialBalance,
+  workerName,
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
@@ -69,13 +73,30 @@ export async function dealCreate({
     pricePerWorkerEpoch * CURRENCY_MULTIPLIER,
   );
 
+  const minDealDepositedEpochs = await core.minDealDepositedEpoches();
+
+  const minInitialBalanceBigInt =
+    BigInt(targetWorkers) * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
+
+  const initialBalanceBigInt = BigInt(initialBalance * CURRENCY_MULTIPLIER);
+
+  if (initialBalanceBigInt < minInitialBalanceBigInt) {
+    commandObj.error(
+      `${
+        workerName === undefined ? "" : `${color.yellow(workerName)} :`
+      }initialBalance ${color.yellow(
+        initialBalance,
+      )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${minDealDepositedEpochs} = ${color.yellow(
+        Number(minInitialBalanceBigInt) / CURRENCY_MULTIPLIER,
+      )}. Please, increase initialBalance or decrease targetWorkers or pricePerWorkerEpoch`,
+    );
+  }
+
   dbg(`pricePerWorkerEpoch: ${pricePerWorkerEpochBigInt}`);
 
   const approveTx = await flt.approve(
     await market.getAddress(),
-    BigInt(targetWorkers) *
-      pricePerWorkerEpochBigInt *
-      (await core.minDealDepositedEpoches()),
+    initialBalanceBigInt,
   );
 
   await waitTx(approveTx);

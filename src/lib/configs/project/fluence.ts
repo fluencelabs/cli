@@ -32,11 +32,9 @@ import {
   AUTO_GENERATED,
   CLI_NAME,
   CLI_NAME_FULL,
-  COLLATERAL_DEFAULT,
   CONTRACTS_ENV,
   type ContractsENV,
   CURRENCY_MULTIPLIER,
-  CURRENCY_MULTIPLIER_TEXT,
   DEFAULT_DEAL_NAME,
   DEFAULT_IPFS_ADDRESS,
   DEFAULT_MARINE_BUILD_ARGS,
@@ -53,6 +51,7 @@ import {
   MARINE_CARGO_DEPENDENCY,
   PRICE_PER_EPOCH_DEFAULT,
   TOP_LEVEL_SCHEMA_ID,
+  DEFAULT_INITIAL_BALANCE,
 } from "../../const.js";
 import {
   validateEffectors,
@@ -216,7 +215,7 @@ type Deal = {
   targetWorkers?: number;
   maxWorkersPerProvider?: number;
   pricePerWorkerEpoch?: number;
-  collateralPerWorker?: number;
+  initialBalance?: number;
   effectors?: string[];
 };
 
@@ -287,17 +286,16 @@ const dealSchemaObj = {
     },
     pricePerWorkerEpoch: {
       type: "number",
-      description: `Price per worker epoch in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
+      description: `Price per worker epoch in FLT`,
       default: PRICE_PER_EPOCH_DEFAULT,
       nullable: true,
       minimum: 1 / CURRENCY_MULTIPLIER,
     },
-    collateralPerWorker: {
+    initialBalance: {
       type: "number",
-      description: `Collateral per worker in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
-      default: COLLATERAL_DEFAULT,
+      description: `Initial balance after deploy in FLT`,
+      default: DEFAULT_INITIAL_BALANCE,
       nullable: true,
-      minimum: 1 / CURRENCY_MULTIPLIER,
     },
     effectors: {
       type: "array",
@@ -681,8 +679,8 @@ aquaInputPath: ${relative(projectRootDir, await ensureAquaMainPath())}
 deals:
   ${DEFAULT_DEAL_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
-    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FL
-    collateralPerWorker: ${COLLATERAL_DEFAULT} # collateral per worker in FL
+    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FLT
+    initialBalance: ${DEFAULT_INITIAL_BALANCE} # initial balance  after deploy in FLT
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 

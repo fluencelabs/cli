@@ -46,7 +46,6 @@ import {
   TOML_EXT,
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
-  CURRENCY_MULTIPLIER_TEXT,
   defaultNumberProperties,
   DEAL_CONFIG,
   DEFAULT_CC_DURATION,
@@ -292,7 +291,7 @@ const offerSchema = {
   properties: {
     minPricePerWorkerEpoch: {
       type: "number",
-      description: `Minimum price per worker epoch. ${CURRENCY_MULTIPLIER_TEXT}`,
+      description: `Minimum price per worker epoch in FLT`,
     },
     computePeers: {
       description: "Number of Compute Units for this Compute Peer",

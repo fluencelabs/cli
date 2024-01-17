@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { ERC20__factory } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
@@ -63,6 +62,8 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
     const deal = dealClient.getDeal(dealAddress);
 
     promptConfirmTx(privKey);
+
+    const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
 
     const approveTx = await ERC20__factory.connect(
       await deal.paymentToken(),

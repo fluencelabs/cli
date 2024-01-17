@@ -19,7 +19,11 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import {
+  ENV_FLAG,
+  PRIV_KEY_FLAG,
+  DEFAULT_INITIAL_BALANCE,
+} from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -52,6 +56,10 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Price per worker epoch",
       required: true,
     }),
+    "initial-balance": Flags.string({
+      description: "Initial balance",
+      required: false,
+    }),
     effector: Flags.string({
       description: "Effector to be used in the deal",
       multiple: true,
@@ -72,6 +80,10 @@ export default class Create extends BaseCommand<typeof Create> {
       pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
       effectors: flags.effector,
       privKey: flags["priv-key"],
+      initialBalance:
+        flags["initial-balance"] === undefined
+          ? DEFAULT_INITIAL_BALANCE
+          : Number(flags["initial-balance"]),
     });
 
     commandObj.logToStderr(

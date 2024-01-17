@@ -41,6 +41,7 @@ import {
   IPFS_ADDR_PROPERTY,
   ENV_FLAG_NAME,
   PRICE_PER_EPOCH_DEFAULT,
+  DEFAULT_INITIAL_BALANCE,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -216,6 +217,8 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         maxWorkersPerProvider,
         pricePerWorkerEpoch,
         effectors,
+        workerName,
+        initialBalance: deal.initialBalance ?? DEFAULT_INITIAL_BALANCE,
       });
 
       if (flags["auto-match"]) {
