@@ -6,7 +6,7 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 
 | Property               | Type                        | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                          |
 |------------------------|-----------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `aquaDependencies`     | [object](#aquadependencies) | **Yes**  |                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `aquaDependencies`     | [object](#aquadependencies) | **Yes**  | A map of npm aqua dependency versions                                                                                                                                                                                                                                                                                                                                                                                                |
 | `version`              | number                      | **Yes**  |                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `aquaImports`          | string[]                    | No       | A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in fluence.yaml, project's .fluence/aqua dir, npm dependencies from fluence.yaml, npm dependencies from user's .fluence/config.yaml, npm dependencies recommended by fluence |
 | `aquaInputPath`        | string                      | No       | Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                     |
@@ -27,8 +27,13 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 
 ## aquaDependencies
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
+A map of npm aqua dependency versions
+
+### Properties
+
+| Property                   | Type   | Required | Description                                                                                                                     |
+|----------------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------------|
+| `npm-aqua-dependency-name` | string | No       | Valid npm dependency version specification (check out https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies) |
 
 ## customFluenceEnv
 
