@@ -56,7 +56,7 @@
     "@fluencelabs/air-beautify-wasm": "0.3.6",
     "@fluencelabs/aqua-api": "0.13.4",
     "@fluencelabs/aqua-to-js": "0.3.5",
-    "@fluencelabs/deal-ts-clients": "0.2.23-fix-offchain-matching-inf-loop-f60dd15-946-1.0",
+    "@fluencelabs/deal-ts-clients": "./fluencelabs-deal-ts-clients-0.2.22.tgz",
     "@fluencelabs/fluence-network-environment": "1.1.2",
     "@fluencelabs/js-client": "0.5.5",
     "@fluencelabs/npm-aqua-compiler": "0.0.2",

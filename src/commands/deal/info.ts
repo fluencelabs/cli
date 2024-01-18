@@ -80,7 +80,7 @@ export default class Info extends BaseCommand<typeof Info> {
 
     commandObj.log(color.gray(`Target worker: ${await deal.targetWorkers()}`));
 
-    const currentComputeUnitCount = await deal.getComputeUnitCount();
+    const currentComputeUnitCount = await deal["getComputeUnitCount()"]();
 
     commandObj.log(
       color.gray(`Current compute units: ${currentComputeUnitCount}`),

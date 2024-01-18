@@ -54,8 +54,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
       args["CAPACITY_COMMITMENT-ID"] ??
       (await input({ message: "Enter capacity commitment id" }));
 
-    const commitment =
-      await capacity.getCapacityCommitment(capacityCommitmentId);
+    const commitment = await capacity.getCommitment(capacityCommitmentId);
 
     const peer = await market.getComputePeer(commitment.peerId);
 
@@ -67,8 +66,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
 
     promptConfirmTx(flags["priv-key"]);
 
-    const depositTx =
-      await capacity.depositCapacityCommitmentCollateral(capacityCommitmentId);
+    const depositTx = await capacity.depositCollateral(capacityCommitmentId);
 
     await waitTx(depositTx);
 

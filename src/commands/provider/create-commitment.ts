@@ -41,7 +41,7 @@ import { getSecretKeyOrReturnExisting } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { getPeerIdFromSecretKey } from "../../lib/multiaddres.js";
 
-const CAPACITY_COMMITMENT_CREATED_EVENT = "CapacityCommitmentCreated";
+const CAPACITY_COMMITMENT_CREATED_EVENT = "CommitmentCreated";
 export default class CreateCommitment extends BaseCommand<
   typeof CreateCommitment
 > {
@@ -81,7 +81,7 @@ export async function createCommitment(flags: {
     import("multiformats/bases/base58"),
   ]);
 
-  const PRECISION = await core.PRECISION();
+  const PRECISION = await core.precision();
 
   const noxNames =
     flags["nox-names"] === undefined
@@ -142,7 +142,7 @@ export async function createCommitment(flags: {
 
     promptConfirmTx(flags["priv-key"]);
 
-    const registerPeerTx = await capacity.createCapacityCommitment(
+    const registerPeerTx = await capacity.createCommitment(
       peerIdUint8Arr,
       ccDuration,
       ccDelegator,

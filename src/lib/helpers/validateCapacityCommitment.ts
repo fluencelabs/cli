@@ -30,8 +30,8 @@ export async function getMinCCDuration(isLocal: boolean): Promise<bigint> {
   if (!isLocal) {
     try {
       const { readonlyDealClient } = await getReadonlyDealClient();
-      const core = await readonlyDealClient.getCore();
-      minDuration = await core.minCCDuration();
+      const capacity = await readonlyDealClient.getCapacity();
+      minDuration = await capacity.minDuration();
     } catch {}
   }
 
