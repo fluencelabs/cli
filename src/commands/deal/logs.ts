@@ -19,8 +19,10 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
+import type { Get_logs_dealParams } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import {
+  WORKER_SPELL,
   KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
@@ -63,6 +65,9 @@ export default class Logs extends BaseCommand<typeof Logs> {
     "WORKER-NAMES": Args.string({
       description: `Worker names to get logs for (by default all worker names from 'deals' property of ${WORKERS_CONFIG_FULL_FILE_NAME})`,
     }),
+    "SPELL-NAME": Args.string({
+      description: `Spell name to get logs for (Default: ${WORKER_SPELL})`,
+    }),
   };
   async run(): Promise<void> {
     const { flags, maybeFluenceConfig, args } = await initCli(
@@ -75,13 +80,16 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
     const dealIdWorkerNameMap = await getDealIdWorkerNameMap(
       args["WORKER-NAMES"],
+      args["SPELL-NAME"],
       fluenceEnv,
     );
 
     let logs;
 
     try {
-      logs = await getLogsDeal(flags.tracing, Object.keys(dealIdWorkerNameMap));
+      logs = await getLogsDeal(flags.tracing, [
+        Object.values(dealIdWorkerNameMap),
+      ]);
     } catch (e) {
       commandObj.error(
         `Wasn't able to get logs. You can try increasing --${TTL_FLAG_NAME} and --${DIAL_TIMEOUT_FLAG_NAME}: ${stringifyUnknown(
@@ -93,7 +101,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
     commandObj.log(
       logs
         .flatMap(({ error, logs, deal_id }) => {
-          const worker_name = dealIdWorkerNameMap[deal_id];
+          const worker_name = dealIdWorkerNameMap[deal_id]?.worker_name;
 
           if (typeof error === "string") {
             const header = formatAquaLogsHeader({
@@ -123,10 +131,13 @@ export default class Logs extends BaseCommand<typeof Logs> {
   }
 }
 
-const getDealIdWorkerNameMap = async (
+async function getDealIdWorkerNameMap(
   maybeWorkerNamesString: string | undefined,
+  spellName: string | undefined,
   fluenceEnv: FluenceEnv,
-): Promise<Record<string, string>> => {
+): Promise<
+  Record<string, { deal_id: string; spell_name: string; worker_name: string }>
+> {
   const workersConfig = await initNewWorkersConfigReadonly();
 
   const deals =
@@ -162,28 +173,39 @@ const getDealIdWorkerNameMap = async (
     );
   }
 
-  return Object.entries(deals)
-    .filter(([name]) => {
-      return workersToGetLogsFor.includes(name);
-    })
-    .reduce<Record<string, string>>((acc, [name, config]) => {
-      acc[config.dealIdOriginal] = name;
-      return acc;
-    }, {});
-};
+  return Object.fromEntries(
+    Object.entries(deals)
+      .filter(([name]) => {
+        return workersToGetLogsFor.includes(name);
+      })
+      .map(([name, deal]) => {
+        return [
+          deal.dealIdOriginal,
+          {
+            deal_id: deal.dealIdOriginal,
+            spell_name: spellName ?? WORKER_SPELL,
+            worker_name: name,
+          },
+        ] as const;
+      }),
+  );
+}
 
-async function getLogsDeal(tracing: boolean, dealIds: string[]) {
+async function getLogsDeal(
+  tracing: boolean,
+  getLogDealParams: Get_logs_dealParams,
+) {
   if (tracing) {
     const { get_logs_deal } = await import(
       "../../lib/compiled-aqua-with-tracing/installation-spell/cli.js"
     );
 
-    return get_logs_deal(dealIds);
+    return get_logs_deal(...getLogDealParams);
   }
 
   const { get_logs_deal } = await import(
     "../../lib/compiled-aqua/installation-spell/cli.js"
   );
 
-  return get_logs_deal(dealIds);
+  return get_logs_deal(...getLogDealParams);
 }

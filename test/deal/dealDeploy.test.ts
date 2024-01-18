@@ -18,15 +18,14 @@ import assert from "node:assert";
 import { join, relative } from "node:path";
 
 import { initServiceConfig } from "../../src/lib/configs/project/service.js";
-import { DEFAULT_DEAL_NAME } from "../../src/lib/const.js";
 import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../constants.js";
 import { fluence, init, maybeConcurrentTest } from "../helpers.js";
 import {
   assertLogsAreValid,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
-  getFluenceConfig,
   getServiceDirPath,
+  updateFluenceConfigForTest,
   waitUntilShowSubnetReturnsExpected,
 } from "../sharedSteps.js";
 
@@ -51,18 +50,8 @@ describe("Deal deploy tests", () => {
       newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
-      const fluenceConfig = await getFluenceConfig(cwd);
-      await createSpellAndAddToDeal(cwd, fluenceConfig, NEW_SPELL_NAME);
-
-      assert(
-        fluenceConfig.deals !== undefined &&
-          fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-        `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
-      );
-
-      fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-      fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
-      await fluenceConfig.$commit();
+      await updateFluenceConfigForTest(cwd);
+      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
       await deployDealAndWaitUntilDeployed(cwd);
 

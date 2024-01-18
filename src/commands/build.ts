@@ -15,7 +15,6 @@
  */
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
-import { build } from "../lib/build.js";
 import { commandObj } from "../lib/commandObj.js";
 import { initNewWorkersConfigReadonly } from "../lib/configs/project/workers.js";
 import {
@@ -25,9 +24,8 @@ import {
   ENV_FLAG,
   ENV_FLAG_NAME,
 } from "../lib/const.js";
-import { compileSpells } from "../lib/deployWorkers.js";
+import { prepareForDeploy } from "../lib/deployWorkers.js";
 import { initCli } from "../lib/lifeCycle.js";
-import { initMarineCli } from "../lib/marineCli.js";
 import { resolveFluenceEnv } from "../lib/resolveFluenceEnv.js";
 
 export default class Build extends BaseCommand<typeof Build> {
@@ -46,12 +44,16 @@ export default class Build extends BaseCommand<typeof Build> {
       true,
     );
 
-    const marineCli = await initMarineCli(fluenceConfig);
+    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
-    await build({
+    await prepareForDeploy({
+      flags: {
+        ...flags,
+        "no-build": false,
+      },
       fluenceConfig,
-      marineCli,
-      marineBuildArgs: flags["marine-build-args"],
+      fluenceEnv,
+      isBuildCheck: true,
     });
 
     const { ensureAquaFileWithWorkerInfo } = await import(
@@ -59,9 +61,7 @@ export default class Build extends BaseCommand<typeof Build> {
     );
 
     const workerConfig = await initNewWorkersConfigReadonly();
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig, fluenceEnv);
-    await compileSpells(fluenceConfig, flags.import);
     commandObj.logToStderr(`All services and spells built successfully`);
   }
 }

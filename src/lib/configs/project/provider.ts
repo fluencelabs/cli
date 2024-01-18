@@ -30,6 +30,7 @@ import times from "lodash-es/times.js";
 
 import { commandObj } from "../../commandObj.js";
 import {
+  COMPUTE_UNIT_MEMORY_STR,
   DEFAULT_OFFER_NAME,
   PROVIDER_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
@@ -53,6 +54,7 @@ import {
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
   type ContractsENV,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "../../const.js";
 import { ensureChainNetwork } from "../../ensureChainNetwork.js";
 import {
@@ -309,7 +311,10 @@ const computePeerSchema = {
   description: "Defines a compute peer",
   additionalProperties: false,
   properties: {
-    computeUnits: { type: "number" },
+    computeUnits: {
+      type: "number",
+      description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
+    },
     nox: noxConfigYAMLSchema,
   },
   required: ["computeUnits"],

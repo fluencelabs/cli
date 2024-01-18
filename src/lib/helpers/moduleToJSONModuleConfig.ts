@@ -37,7 +37,6 @@ type JSONModuleConfWASI = {
 
 type JSONModuleConf = {
   name: string;
-  max_heap_size?: string;
   logger_enabled?: boolean;
   logging_mask?: number;
   mounted_binaries?: Record<string, string>;
@@ -47,15 +46,8 @@ type JSONModuleConf = {
 export function moduleToJSONModuleConfig(
   moduleConfig: ModuleConfigReadonly & { wasmPath?: string | undefined },
 ): JSONModuleConf {
-  const {
-    name,
-    loggerEnabled,
-    loggingMask,
-    volumes,
-    envs,
-    maxHeapSize,
-    mountedBinaries,
-  } = moduleConfig;
+  const { name, loggerEnabled, loggingMask, volumes, envs, mountedBinaries } =
+    moduleConfig;
 
   const jsonModuleConfig: JSONModuleConf = {
     name,
@@ -68,10 +60,6 @@ export function moduleToJSONModuleConfig(
 
   if (typeof loggingMask === "number") {
     jsonModuleConfig.logging_mask = loggingMask;
-  }
-
-  if (typeof maxHeapSize === "string") {
-    jsonModuleConfig.max_heap_size = maxHeapSize;
   }
 
   if (volumes !== undefined) {

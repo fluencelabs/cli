@@ -87,7 +87,13 @@ export function formatAquaLogs({
 }
 
 function formatAquaLogsMessage(message: string) {
-  const parsedMessage = JSON.parse(message);
+  let parsedMessage;
+
+  try {
+    parsedMessage = JSON.parse(message);
+  } catch {
+    return message;
+  }
 
   if (Array.isArray(parsedMessage)) {
     return parsedMessage

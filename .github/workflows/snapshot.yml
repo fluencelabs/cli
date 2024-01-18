@@ -68,7 +68,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
+        uses: hashicorp/vault-action@v2.7.4
         id: secrets
         with:
           url: https://vault.fluence.dev
@@ -88,7 +88,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Setup node with self-hosted npm registry
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           registry-url: "https://npm.fluence.dev"
@@ -162,7 +162,7 @@ jobs:
         run: mv dist/fluence-*linux-x64*.tar.gz fluence-cli-linux-x64.tar.gz
 
       - name: Upload archive to CI checks
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fcli
           path: fluence-cli-linux-x64.tar.gz

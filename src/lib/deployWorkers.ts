@@ -19,6 +19,9 @@ import { access, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { color } from "@oclif/color";
+import sum from "lodash-es/sum.js";
+import xbytes from "xbytes";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
@@ -37,6 +40,7 @@ import {
 import {
   FACADE_MODULE_NAME,
   initReadonlyServiceConfig,
+  type OverridableServiceProperties,
   type ServiceConfigReadonly,
 } from "./configs/project/service.js";
 import {
@@ -55,6 +59,9 @@ import {
   DEALS_FILE_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
+  COMPUTE_UNIT_MEMORY,
+  MIN_MEMORY_PER_MODULE,
+  MIN_MEMORY_PER_MODULE_STR,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -70,7 +77,7 @@ import {
   type CustomTypes,
 } from "./helpers/jsToAqua.js";
 import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
-import { commaSepStrToArr } from "./helpers/utils.js";
+import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
 import {
@@ -79,6 +86,7 @@ import {
   projectRootDir,
 } from "./paths.js";
 import { checkboxes } from "./prompt.js";
+import { hasKey } from "./typeHelpers.js";
 
 const handlePreviouslyDeployedWorkers = async (
   deployedHostsOrDeals:
@@ -134,8 +142,10 @@ const handlePreviouslyDeployedWorkers = async (
 type UploadDeploySpellConfig =
   Upload_deployArgConfig["workers"][number]["config"]["spells"][number];
 
+type UploadDeployServiceConfig =
+  Upload_deployArgConfig["workers"][number]["config"]["services"][number];
+
 type PrepareForDeployArg = {
-  workerNames: string | undefined;
   fluenceConfig: FluenceConfig;
   flags: {
     import: Array<string> | undefined;
@@ -143,12 +153,17 @@ type PrepareForDeployArg = {
     "marine-build-args": string | undefined;
   };
   fluenceEnv: FluenceEnv;
+  /**
+   * only used in build command so all the spells are compiled, all services are built
+   * and so no error happens if some worker doesn't have any services or spells
+   */
+  isBuildCheck?: boolean;
+  workerNames?: string | undefined;
   initPeerId?: string;
   workersConfig?: WorkersConfigReadonly;
 };
 
 export async function prepareForDeploy({
-  workerNames: workerNamesString,
   fluenceConfig,
   flags: {
     "marine-build-args": marineBuildArgs,
@@ -156,6 +171,8 @@ export async function prepareForDeploy({
     "no-build": noBuild,
   },
   fluenceEnv,
+  isBuildCheck = false,
+  workerNames: workerNamesString,
   initPeerId,
   workersConfig: maybeWorkersConfig,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> {
@@ -216,6 +233,7 @@ export async function prepareForDeploy({
     );
 
     if (
+      !isBuildCheck &&
       (workerConfig.services ?? []).length === 0 &&
       (workerConfig.spells ?? []).length === 0
     ) {
@@ -234,20 +252,18 @@ export async function prepareForDeploy({
     };
   });
 
-  const spellNamesUsedInWorkers = [
-    ...new Set(
-      workerConfigs.flatMap(({ workerConfig }) => {
-        return workerConfig.spells ?? [];
-      }),
-    ),
-  ];
+  const spellsToCompile = isBuildCheck
+    ? Object.keys(fluenceConfig.spells ?? {})
+    : [
+        ...new Set(
+          workerConfigs.flatMap(({ workerConfig }) => {
+            return workerConfig.spells ?? [];
+          }),
+        ),
+      ];
 
   const spellConfigs = (
-    await compileSpells(
-      fluenceConfig,
-      aquaImportsFromFlags,
-      spellNamesUsedInWorkers,
-    )
+    await compileSpells(fluenceConfig, aquaImportsFromFlags, spellsToCompile)
   ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
     const { script } = functions[spellConfig.function] ?? {};
 
@@ -282,26 +298,28 @@ export async function prepareForDeploy({
     };
   });
 
-  const serviceNames = [
-    ...new Set(
-      workerConfigs.flatMap(({ workerConfig }) => {
-        return workerConfig.services ?? [];
-      }),
-    ),
-  ];
+  const serviceNames = isBuildCheck
+    ? Object.keys(fluenceConfig.services ?? {})
+    : [
+        ...new Set(
+          workerConfigs.flatMap(({ workerConfig }) => {
+            return workerConfig.services ?? [];
+          }),
+        ),
+      ];
 
-  const serviceConfigs = await Promise.all(
+  const serviceConfigsWithOverrides = await Promise.all(
     serviceNames.map(async (serviceName) => {
-      const maybeService = servicesFromFluenceConfig[serviceName];
+      const service = servicesFromFluenceConfig[serviceName];
 
       assert(
-        maybeService !== undefined,
+        service !== undefined,
         `Unreachable. can't find service ${serviceName} from workers property in ${fluenceConfig.$getPath()} in services property. This has to be checked on config init. Looking for ${serviceName} in ${JSON.stringify(
           servicesFromFluenceConfig,
         )}`,
       );
 
-      const { get, overrideModules } = maybeService;
+      const { get, overrideModules, ...overridableProperties } = service;
 
       const serviceConfig = await initReadonlyServiceConfig(
         get,
@@ -324,13 +342,14 @@ export async function prepareForDeploy({
         serviceName,
         overrideModules,
         serviceConfig,
+        ...overridableProperties,
       };
     }),
   );
 
   const modulesUrls = [
     ...new Set(
-      serviceConfigs
+      serviceConfigsWithOverrides
         .flatMap(({ serviceConfig }) => {
           return Object.values(serviceConfig.modules).map(({ get }) => {
             return get;
@@ -350,7 +369,7 @@ export async function prepareForDeploy({
     ),
   );
 
-  const localModuleAbsolutePaths = serviceConfigs
+  const localModuleAbsolutePaths = serviceConfigsWithOverrides
     .flatMap(({ serviceConfig }) => {
       return Object.values(serviceConfig.modules).map(({ get }) => {
         return {
@@ -409,7 +428,7 @@ export async function prepareForDeploy({
 
     const serviceNamePathToFacadeMap: Record<string, string> =
       Object.fromEntries(
-        serviceConfigs.map(({ serviceName, serviceConfig }) => {
+        serviceConfigsWithOverrides.map(({ serviceName, serviceConfig }) => {
           const { get } = serviceConfig.modules[FACADE_MODULE_NAME];
 
           const urlOrAbsolutePath = getUrlOrAbsolutePath(
@@ -447,7 +466,7 @@ export async function prepareForDeploy({
           hostsOrDeals,
           fluenceConfig,
           workersFromFluenceConfig,
-          serviceConfigs,
+          serviceConfigsWithOverrides,
           moduleAbsolutePathOrURLToModuleConfigsMap,
           spellConfigs,
           maybeWorkersConfig,
@@ -616,11 +635,11 @@ type ResolveWorkerArgs = {
   workersFromFluenceConfig: NonNullable<
     FluenceConfig["deals"] | FluenceConfig["hosts"]
   >;
-  serviceConfigs: {
+  serviceConfigsWithOverrides: ({
     serviceName: string;
     overrideModules: OverrideModules | undefined;
     serviceConfig: ServiceConfigReadonly;
-  }[];
+  } & OverridableServiceProperties)[];
   moduleAbsolutePathOrURLToModuleConfigsMap: Map<
     string,
     InitializedReadonlyConfig<ConfigV0>
@@ -737,7 +756,7 @@ async function resolveWorker({
   workerName,
   fluenceConfig,
   workersFromFluenceConfig,
-  serviceConfigs,
+  serviceConfigsWithOverrides,
   moduleAbsolutePathOrURLToModuleConfigsMap,
   spellConfigs,
   maybeWorkersConfig,
@@ -765,20 +784,27 @@ async function resolveWorker({
     )}`,
   );
 
-  const services: Upload_deployArgConfig["workers"][number]["config"]["services"] =
-    (workerConfig.services ?? []).map((serviceName) => {
-      const maybeServiceConfig = serviceConfigs.find((c) => {
-        return c.serviceName === serviceName;
-      });
+  const servicesWithUnresolvedMemoryLimit = (workerConfig.services ?? []).map(
+    (
+      serviceName,
+    ): Omit<UploadDeployServiceConfig, "total_memory_limit"> & {
+      total_memory_limit: number | undefined;
+    } => {
+      const serviceConfigWithOverrides = serviceConfigsWithOverrides.find(
+        (c) => {
+          return c.serviceName === serviceName;
+        },
+      );
 
       assert(
-        maybeServiceConfig !== undefined,
+        serviceConfigWithOverrides !== undefined,
         `Unreachable. Service should not be undefined because serviceConfigs where created from workerConfig.services. Looking for ${serviceName} in ${JSON.stringify(
-          serviceConfigs,
+          serviceConfigsWithOverrides,
         )}`,
       );
 
-      const { overrideModules, serviceConfig } = maybeServiceConfig;
+      const { overrideModules, serviceConfig, totalMemoryLimit } =
+        serviceConfigWithOverrides;
 
       const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
         serviceConfig.modules;
@@ -821,11 +847,93 @@ async function resolveWorker({
         };
       });
 
+      const totalMemoryLimitString =
+        totalMemoryLimit ?? serviceConfig.totalMemoryLimit;
+
       return {
         name: serviceName,
         modules,
+        total_memory_limit:
+          totalMemoryLimitString === undefined
+            ? undefined
+            : xbytes.parseSize(totalMemoryLimitString),
       };
-    });
+    },
+  );
+
+  const [
+    servicesWithoutSpecifiedMemoryLimit,
+    servicesWithSpecifiedMemoryLimit,
+  ] = splitErrorsAndResults(servicesWithUnresolvedMemoryLimit, (service) => {
+    return hasTotalMemoryLimit(service)
+      ? { result: service }
+      : { error: service };
+  });
+
+  const specifiedServicesMemoryLimit = sum(
+    servicesWithSpecifiedMemoryLimit.map((service) => {
+      return service.total_memory_limit;
+    }),
+  );
+
+  const workerMemory =
+    ("computeUnits" in workerConfig ? workerConfig.computeUnits : 1) *
+    COMPUTE_UNIT_MEMORY;
+
+  if (specifiedServicesMemoryLimit > workerMemory) {
+    throwMemoryExceedsError(
+      workerName,
+      specifiedServicesMemoryLimit,
+      servicesWithSpecifiedMemoryLimit,
+      workerMemory,
+    );
+  }
+
+  const remainingMemoryPerService = Math.floor(
+    (workerMemory - specifiedServicesMemoryLimit) /
+      servicesWithoutSpecifiedMemoryLimit.length,
+  );
+
+  const servicesWithNotValidatedMemoryLimit = [
+    ...servicesWithSpecifiedMemoryLimit,
+    ...servicesWithoutSpecifiedMemoryLimit.map((service) => {
+      service.total_memory_limit = remainingMemoryPerService;
+      assert(hasTotalMemoryLimit(service), "Unreachable");
+      return service;
+    }),
+  ];
+
+  const [servicesWithNotEnoughMemory, services] = splitErrorsAndResults(
+    servicesWithNotValidatedMemoryLimit,
+    (service) => {
+      const minMemoryForService =
+        MIN_MEMORY_PER_MODULE * service.modules.length;
+
+      if (service.total_memory_limit < minMemoryForService) {
+        return {
+          error: { service, minMemoryForService },
+        };
+      }
+
+      return { result: service };
+    },
+  );
+
+  if (servicesWithNotEnoughMemory.length > 0) {
+    throwNotEnoughMemoryError(
+      workerName,
+      servicesWithNotEnoughMemory,
+      services,
+    );
+  }
+
+  if (services.length > 0) {
+    commandObj.logToStderr(
+      `Service memory limits for worker ${color.yellow(
+        workerName,
+      )}:\n${formatServiceMemoryLimits(services)}`,
+    );
+  }
 
   const spells = (workerConfig.spells ?? []).map((spellName) => {
     const spellConfig = spellConfigs.find((c) => {
@@ -855,4 +963,86 @@ async function resolveWorker({
     },
     dummy_deal_id: dummyDealId,
   };
+}
+
+function throwNotEnoughMemoryError(
+  workerName: string,
+  servicesWithNotEnoughMemory: {
+    service: UploadDeployServiceConfig;
+    minMemoryForService: number;
+  }[],
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+) {
+  const formattedServiceMemoryLimits = servicesWithNotEnoughMemory.map(
+    ({ service, minMemoryForService }) => {
+      return `${service.name}: ${color.yellow(
+        xbytes(service.total_memory_limit),
+      )} < minimum memory limit for this service ${color.yellow(
+        xbytes(minMemoryForService),
+      )}`;
+    },
+  );
+
+  const decreaseOtherServicesMessage =
+    servicesWithSpecifiedMemoryLimit.length > 0
+      ? ` or decrease the totalMemoryLimit for one or more of these service in the worker:\n${formatServiceMemoryLimits(
+          servicesWithSpecifiedMemoryLimit,
+        )}`
+      : "";
+
+  commandObj.error(
+    `The following services of the worker ${color.yellow(
+      workerName,
+    )} don't have a big enough totalMemoryLimit:\n${formattedServiceMemoryLimits.join(
+      "\n",
+    )}\n\nEach service must have at least ${color.yellow(
+      MIN_MEMORY_PER_MODULE_STR,
+    )} for each module it has. Please make sure to specify a bigger totalMemoryLimit${decreaseOtherServicesMessage}`,
+  );
+}
+
+function throwMemoryExceedsError(
+  workerName: string,
+  specifiedServicesMemoryLimit: number,
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+  workerMemory: number,
+) {
+  const formattedServiceMemoryLimit = color.yellow(
+    xbytes(specifiedServicesMemoryLimit),
+  );
+
+  commandObj.error(
+    `Total memory limit for services in worker ${color.yellow(
+      workerName,
+    )} is ${formattedServiceMemoryLimit}, which exceeds per-worker memory limit: ${color.yellow(
+      xbytes(workerMemory),
+    )}. Decrease ${color.yellow(
+      "totalMemoryLimit",
+    )} in one or more of the following services:\n${formatServiceMemoryLimits(
+      servicesWithSpecifiedMemoryLimit,
+    )}`,
+  );
+}
+
+function formatServiceMemoryLimits(
+  servicesWithSpecifiedMemoryLimit: UploadDeployServiceConfig[],
+) {
+  return yamlDiffPatch(
+    "",
+    {},
+    Object.fromEntries(
+      servicesWithSpecifiedMemoryLimit.map((service) => {
+        return [service.name, xbytes(service.total_memory_limit)];
+      }),
+    ),
+  );
+}
+
+function hasTotalMemoryLimit(
+  arg: Record<string, unknown>,
+): arg is { total_memory_limit: number } {
+  return (
+    hasKey("total_memory_limit", arg) &&
+    typeof arg["total_memory_limit"] === "number"
+  );
 }

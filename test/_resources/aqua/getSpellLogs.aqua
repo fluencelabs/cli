@@ -1,0 +1,40 @@
+aqua Main
+
+import "@fluencelabs/aqua-lib/builtin.aqua"
+import "@fluencelabs/aqua-lib/subnet.aqua"
+import "@fluencelabs/spell/spell_service.aqua"
+
+use "deals.aqua"
+use "hosts.aqua"
+import "services.aqua"
+
+export getSpellLogs
+
+data SpellLogs:
+    worker_id: string
+    logs: []Log
+
+func getSpellLogs(name: string) -> []SpellLogs, []string:
+    errors: *string
+    results: *SpellLogs
+
+    deals <- Deals.get()
+    dealId = deals.dealName!.dealIdOriginal
+    on HOST_PEER_ID:
+        subnet <- Subnet.resolve(dealId)
+    if subnet.success == false:
+        errors <<- "Unresolved subnet"
+    else:
+        for w <- subnet.workers:
+            if w.worker_id == nil:
+                errors <<- "Unresolved worker"
+            else:
+                on w.worker_id! via w.host_id:
+                    Spell name
+                    logs <- Spell.get_logs()
+                    if !logs.success:
+                        errors <<- logs.error
+                    else:
+                        results <<- SpellLogs(worker_id=w.worker_id!, logs=logs.logs)
+
+    <- results, errors

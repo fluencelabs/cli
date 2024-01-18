@@ -94,7 +94,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Import secrets
-        uses: hashicorp/vault-action@v2.7.3
+        uses: hashicorp/vault-action@v2.7.4
         id: secrets
         with:
           url: https://vault.fluence.dev
@@ -172,7 +172,7 @@ jobs:
         uses: dsherret/rust-toolchain-file@v1
 
       - name: Setup node with self-hosted npm registry
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           registry-url: "https://npm.fluence.dev"

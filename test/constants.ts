@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { join } from "node:path";
+
 import { getMultiaddrs } from "./helpers.js";
 
 export const multiaddrs = await getMultiaddrs();
@@ -23,7 +25,7 @@ export const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 export const MY_SERVICE_NAME = "myService";
 export const NEW_SPELL_NAME = "newSpell";
 export const NEW_MODULE_NAME = "newModule";
-export const WORKER_SPELL = "worker-spell";
+export const TEST_AQUA_DIR_PATH = join("test", "_resources", "aqua");
 
 export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;
@@ -58,11 +60,8 @@ export const NEW_SERVICE_2_NAME = "newService2";
 export const NEW_SERVICE_2_INTERFACE = `service NewService2("${NEW_SERVICE_2_NAME}"):
   greeting(name: string) -> string`;
 
-export const SERVICE_INTERFACES = `${NEW_SERVICE_INTERFACE}
-
-
-${NEW_SERVICE_2_INTERFACE}
-`;
+export const SERVICE_INTERFACES =
+  NEW_SERVICE_INTERFACE + "\n\n\n" + NEW_SERVICE_2_INTERFACE;
 
 export const UPDATED_SERVICE_INTERFACES = `data MyStruct:
   a: i32
@@ -72,5 +71,8 @@ service NewService("${NEW_SERVICE_NAME}"):
   greeting() -> MyStruct
 
 
-${NEW_SERVICE_2_INTERFACE}
-`;
+${NEW_SERVICE_2_INTERFACE}`;
+
+export const composeInterfacesFileContents = (interfaces: string) => {
+  return `aqua Services declares *\n\n\n${interfaces}\n`;
+};

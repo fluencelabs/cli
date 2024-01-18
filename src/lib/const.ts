@@ -23,6 +23,7 @@ import type {
 } from "@oclif/core/lib/interfaces/parser.js";
 import camelCase from "lodash-es/camelCase.js";
 import upperFirst from "lodash-es/upperFirst.js";
+import xbytes from "xbytes";
 
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
@@ -51,7 +52,41 @@ export const defaultNumberProperties: Record<NumberProperty, number> = {
   minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
 
+export const MIN_MEMORY_PER_MODULE_STR = "2 MiB";
+export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
+  MIN_MEMORY_PER_MODULE_STR,
+);
+
+export const COMPUTE_UNIT_MEMORY_STR = "2GB";
+export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
+
+const byteUnits = [
+  "kB",
+  "KB",
+  "kiB",
+  "KiB",
+  "KIB",
+  "mB",
+  "MB",
+  "miB",
+  "MiB",
+  "MIB",
+  "gB",
+  "GB",
+  "giB",
+  "GiB",
+  "GIB",
+];
+
+export const BYTES_PATTERN = `^\\d+(\\.\\d+)?(\\s?)(${byteUnits.join("|")})$`;
+export const BYTES_FORMAT = `[number][whitespace?][B] where ? is an optional field and B is one of the following: ${byteUnits.join(
+  ", ",
+)}`;
+export const MAX_HEAP_SIZE_DESCRIPTION = `DEPRECATED. Use \`totalMemoryLimit\` service property instead. Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
+
 export const U32_MAX = 4_294_967_295;
+
+export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
 export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
@@ -588,14 +623,11 @@ export function getSpellAquaFileContent(spellName: string) {
 -- Note: spell main function must be exported
 export spell
 
-import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    msg = "Spell is working!"
-    str <- Debug.stringify(msg)
-    Spell "worker-spell"
-    Spell.store_log(str)
+    Spell "${spellName}"
+    Spell.store_log("Spell '${spellName}' is working!")
 `;
 }
 
@@ -656,6 +688,8 @@ fluence aqua
 `;
 }
 
+export const SERVICE_INTERFACE_FILE_HEADER = "aqua Services declares *";
+
 export const READMEs: Record<Template, string> = {
   quickstart: QUICKSTART_README,
   minimal: MINIMAL_README,
@@ -684,3 +718,5 @@ export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
 export const DEFAULT_CC_DURATION = "5 minutes";
 export const DURATION_EXAMPLE =
   "in human-readable format. Example: 1 months 1 days";
+
+export const WORKER_SPELL = "worker-spell";
