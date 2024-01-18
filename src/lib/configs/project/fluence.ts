@@ -692,11 +692,15 @@ const configSchemaV6Obj = {
     ...configSchemaV5ObjPropertiesWithoutDependencies,
     version: { type: "number", const: 6 },
     aquaDependencies: {
+      description: "A map of npm aqua dependency versions",
       type: "object",
-      additionalProperties: {
-        type: "string",
-        description:
-          "Valid npm dependency specification (check out https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies)",
+      additionalProperties: { type: "string" },
+      properties: {
+        "npm-aqua-dependency-name": {
+          type: "string",
+          description:
+            "Valid npm dependency version specification (check out https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies)",
+        },
       },
       required: [],
     },
