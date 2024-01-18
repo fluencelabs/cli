@@ -1,5 +1,5 @@
 {
-  "nox": "fluencelabs/nox:0.16.13",
+  "nox": "docker.fluence.dev/nox:update-subnet-resolve_4385_1",
   "chain-rpc": "docker.fluence.dev/chain-rpc:fix-offchain-matching-inf-loop-f60dd15-946-1",
   "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:fix-offchain-matching-inf-loop-f60dd15-946-1",
   "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script-image:fix-offchain-matching-inf-loop-f60dd15-946-1",
