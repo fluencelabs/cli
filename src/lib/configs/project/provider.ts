@@ -758,7 +758,7 @@ function getDefaultNoxConfigYAML(env: ContractsENV): NoxConfigYAML {
         networkId: dealConfig.id,
         startBlock: "earliest",
         // TODO: use correct addr for env
-        matcherAddress: "0x0e1F3B362E22B2Dc82C9E35d6e62998C7E8e2349",
+        matcherAddress: "0xc5a5C42992dECbae36851359345FE25997F5C42d",
       },
     },
   });
