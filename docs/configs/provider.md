@@ -53,7 +53,7 @@ Defines a compute peer
 
 | Property       | Type           | Required | Description                                                                                     |
 |----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
-| `computeUnits` | number         | **Yes**  |                                                                                                 |
+| `computeUnits` | number         | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
 | `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 #### nox
@@ -180,9 +180,9 @@ Defines a provider offer
 
 #### Properties
 
-| Property                 | Type     | Required | Description                                                        |
-|--------------------------|----------|----------|--------------------------------------------------------------------|
-| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer                      |
-| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch. This number is multiplied by 10^18 |
-| `effectors`              | string[] | No       |                                                                    |
+| Property                 | Type     | Required | Description                                   |
+|--------------------------|----------|----------|-----------------------------------------------|
+| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
+| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch in FLT         |
+| `effectors`              | string[] | No       |                                               |
 

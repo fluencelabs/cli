@@ -270,7 +270,7 @@ DESCRIPTION
   Show contract addresses for the fluence env
 ```
 
-_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.3/src/commands/chain/info.ts)_
+_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/chain/info.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -305,14 +305,15 @@ Create your deal with the specified parameters
 ```
 USAGE
   $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
-    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> --effector <value> [--no-input] [--env
-    <value>] [--priv-key <value>]
+    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> --effector <value> [--no-input]
+    [--initial-balance <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --app-cid=<value>                                (required) CID of the application that will be deployed
   --collateral-per-worker=<value>                  (required) Collateral per worker
   --effector=<value>...                            (required) Effector to be used in the deal
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --initial-balance=<value>                        Initial balance
   --max-workers-per-provider=<value>               (required) Max workers per provider
   --min-workers=<value>                            (required) Required workers to activate the deal
   --no-input                                       Don't interactively ask for any input from the user
@@ -631,7 +632,7 @@ DESCRIPTION
   Deposit to capacity commitment
 ```
 
-_See code: [src/commands/delegator/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.3/src/commands/delegator/deposit.ts)_
+_See code: [src/commands/delegator/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/delegator/deposit.ts)_
 
 ## `fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -1123,7 +1124,7 @@ ALIASES
   $ fluence provider cc
 ```
 
-_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.13.3/src/commands/provider/create-commitment.ts)_
+_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/create-commitment.ts)_
 
 ## `fluence provider gen`
 
@@ -1183,7 +1184,7 @@ DESCRIPTION
   Get info about provider
 ```
 
-_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.13.3/src/commands/provider/offer-info.ts)_
+_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/offer-info.ts)_
 
 ## `fluence provider register`
 

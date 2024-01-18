@@ -50,16 +50,17 @@ Worker config
 
 #### Properties
 
-| Property                | Type     | Required | Description                                                                                       |
-|-------------------------|----------|----------|---------------------------------------------------------------------------------------------------|
-| `collateralPerWorker`   | number   | No       | Collateral per worker in FL. This number is multiplied by 10^18                                   |
-| `effectors`             | string[] | No       | Effector to be used in the deal                                                                   |
-| `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                       |
-| `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                          |
-| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FL. This number is multiplied by 10^18                                  |
-| `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml |
-| `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml     |
-| `targetWorkers`         | number   | No       | Max workers in the deal                                                                           |
+| Property                | Type     | Required | Description                                                                                                                                  |
+|-------------------------|----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `computeUnits`          | number   | No       | Number of compute units you require. 1 compute unit = 2GB. Currently the only allowed value is 1. This will change in the future. Default: 1 |
+| `effectors`             | string[] | No       | Effector to be used in the deal                                                                                                              |
+| `initialBalance`        | number   | No       | Initial balance after deploy in FLT                                                                                                          |
+| `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                                                                  |
+| `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                                                                     |
+| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FLT                                                                                                                |
+| `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                            |
+| `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                |
+| `targetWorkers`         | number   | No       | Max workers in the deal                                                                                                                      |
 
 ## dependencies
 
