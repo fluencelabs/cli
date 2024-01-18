@@ -521,5 +521,17 @@ function getPackageJSON(isJS: boolean) {
       vite: "4.4.5",
       ...(isJS ? {} : { typescript: "5.0.2" }),
     },
+    // overrides for js-client
+    resolutions: {
+      "@libp2p/utils": "5.1.1",
+    },
+    overrides: {
+      "@libp2p/utils": "5.1.1",
+    },
+    pnpm: {
+      overrides: {
+        "@libp2p/utils": "5.1.1",
+      },
+    },
   };
 }
