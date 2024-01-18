@@ -17,10 +17,9 @@
 import { join } from "node:path";
 
 import { commandObj } from "./commandObj.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
 import { BIN_DIR_NAME, MARINE_CARGO_DEPENDENCY } from "./const.js";
 import { execPromise } from "./execPromise.js";
-import { ensureCargoDependency } from "./rust.js";
+import { ensureMarineOrMreplDependency } from "./rust.js";
 import { type Flags } from "./typeHelpers.js";
 
 type MarineCliInput =
@@ -43,12 +42,9 @@ export type MarineCLI = {
   ): Promise<string>;
 };
 
-export const initMarineCli = async (
-  maybeFluenceConfig: FluenceConfig | null,
-): Promise<MarineCLI> => {
-  const marineCLIDirPath = await ensureCargoDependency({
-    nameAndVersion: MARINE_CARGO_DEPENDENCY,
-    maybeFluenceConfig,
+export async function initMarineCli(): Promise<MarineCLI> {
+  const marineCLIDirPath = await ensureMarineOrMreplDependency({
+    name: MARINE_CARGO_DEPENDENCY,
   });
 
   const marineCLIPath = join(marineCLIDirPath, BIN_DIR_NAME, "marine");
@@ -77,4 +73,4 @@ export const initMarineCli = async (
       throw e;
     }
   };
-};
+}

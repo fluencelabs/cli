@@ -23,13 +23,9 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import {
-  AQUA_DEPENDENCIES_DIR_NAME,
-  FS_OPTIONS,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
-} from "./const.js";
+import { AQUA_DEPENDENCIES_DIR_NAME, FS_OPTIONS } from "./const.js";
 import { type ExecPromiseArg, execPromise } from "./execPromise.js";
-import { splitPackageNameAndVersion } from "./helpers/package.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import {
   jsonStringify,
   removeProperties,
@@ -130,47 +126,30 @@ export async function runNpm(args: Omit<ExecPromiseArg, "command">) {
   });
 }
 
-function assertDependenciesPresent(
-  fluenceConfig: FluenceConfig,
-): asserts fluenceConfig is FluenceConfig & {
-  dependencies: { npm: Record<string, string> };
-} {
-  assert(
-    fluenceConfig.dependencies?.npm,
-    `Unreachable. CLI now makes sure that dependencies are always present in ${color.yellow(
-      "initCLI",
-    )} function inside each command in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+export async function npmInstallAll(fluenceConfig: FluenceConfig) {
+  await writeFile(
+    await getFluenceAquaDependenciesPackageJsonPath(),
+    jsonStringify({ dependencies: fluenceConfig.aquaDependencies }),
+    FS_OPTIONS,
   );
+
+  await runNpm({
+    args: ["i"],
+    options: {
+      cwd: await ensureFluenceAquaDependenciesPath(),
+    },
+  });
 }
 
 type NpmInstallArgs = {
   fluenceConfig: FluenceConfig;
-  packageNameAndVersion?: string | undefined;
+  packageNameAndVersion: string;
 };
 
 export async function npmInstall({
   fluenceConfig,
   packageNameAndVersion,
 }: NpmInstallArgs) {
-  assertDependenciesPresent(fluenceConfig);
-
-  if (packageNameAndVersion === undefined) {
-    await writeFile(
-      await getFluenceAquaDependenciesPackageJsonPath(),
-      jsonStringify({ dependencies: fluenceConfig.dependencies.npm }),
-      FS_OPTIONS,
-    );
-
-    await runNpm({
-      args: ["i"],
-      options: {
-        cwd: await ensureFluenceAquaDependenciesPath(),
-      },
-    });
-
-    return;
-  }
-
   const packageNameAndVersionTuple = splitPackageNameAndVersion(
     packageNameAndVersion,
   );
@@ -182,38 +161,35 @@ export async function npmInstall({
     version = await getLatestVersionOfNPMDependency(packageName);
   }
 
-  await runNpm({
-    args: ["i", packageNameAndVersion],
-    options: {
-      cwd: await ensureFluenceAquaDependenciesPath(),
-    },
-  });
-
-  fluenceConfig.dependencies.npm[packageName] = version;
+  startSpinner(`Installing ${packageName}@${version} aqua dependency`);
+  fluenceConfig.aquaDependencies[packageName] = version;
+  await npmInstallAll(fluenceConfig);
   await fluenceConfig.$commit();
+  stopSpinner();
+
+  commandObj.logToStderr(
+    `${packageName}@${version} aqua dependency is successfully installed`,
+  );
 }
 
 type NpmUninstallArgs = {
-  packageNameAndVersion: string;
+  packageName: string;
   fluenceConfig: FluenceConfig;
 };
 
 export async function npmUninstall({
-  packageNameAndVersion,
+  packageName,
   fluenceConfig,
 }: NpmUninstallArgs) {
-  assertDependenciesPresent(fluenceConfig);
-  const [packageName] = splitPackageNameAndVersion(packageNameAndVersion);
-
   await runNpm({
-    args: ["uninstall", packageNameAndVersion],
+    args: ["uninstall", packageName],
     options: {
       cwd: await ensureFluenceAquaDependenciesPath(),
     },
   });
 
-  fluenceConfig.dependencies.npm = removeProperties(
-    fluenceConfig.dependencies.npm,
+  fluenceConfig.aquaDependencies = removeProperties(
+    fluenceConfig.aquaDependencies,
     ([p]) => {
       return p === packageName;
     },
@@ -228,4 +204,23 @@ export async function copyDefaultDependencies() {
     await ensureFluenceAquaDependenciesPath(),
     { recursive: true },
   );
+}
+
+export function splitPackageNameAndVersion(
+  packageNameAndMaybeVersion: string,
+): [string] | [string, string] {
+  const hasVersion = /.+@.+/.test(packageNameAndMaybeVersion);
+
+  if (!hasVersion) {
+    const packageName = packageNameAndMaybeVersion;
+
+    return [packageName];
+  }
+
+  const packageNameAndVersionArray = packageNameAndMaybeVersion.split("@");
+  const version = packageNameAndVersionArray.pop();
+  assert(version !== undefined);
+  const packageName = packageNameAndVersionArray.join("@");
+
+  return [packageName, version];
 }

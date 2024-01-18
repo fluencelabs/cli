@@ -16,8 +16,9 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CLI_NAME_FULL } from "../../lib/const.js";
+import { CLI_NAME, CLI_NAME_FULL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { npmInstallAll } from "../../lib/npm.js";
 import { versions } from "../../versions.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
@@ -31,17 +32,22 @@ export default class Reset extends BaseCommand<typeof Reset> {
     const { maybeFluenceConfig } = await initCli(this, await this.parse(Reset));
 
     if (maybeFluenceConfig === null) {
-      commandObj.error("Not a fluence project");
+      commandObj.error(
+        `Not a fluence project. Default versions are always used outside if running cli of the fluence project. Run '${CLI_NAME} dep v' to check them out`,
+      );
     }
 
-    maybeFluenceConfig.dependencies = {
-      npm: {
-        ...maybeFluenceConfig.dependencies?.npm,
-        ...versions.npm,
-      },
+    delete maybeFluenceConfig.mreplVersion;
+    delete maybeFluenceConfig.marineVersion;
+    await maybeFluenceConfig.$commit();
+
+    maybeFluenceConfig.aquaDependencies = {
+      ...maybeFluenceConfig.aquaDependencies,
+      ...versions.npm,
     };
 
+    await npmInstallAll(maybeFluenceConfig);
     await maybeFluenceConfig.$commit();
-    commandObj.log("successfully reset project's dependency versions");
+    commandObj.log("Successfully reset project's dependency versions");
   }
 }

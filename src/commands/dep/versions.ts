@@ -19,11 +19,8 @@ import { Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { CLI_NAME_FULL, CLI_NAME } from "../../lib/const.js";
-import {
-  getRecommendedDependencies,
-  resolveCargoDependencies,
-} from "../../lib/helpers/package.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveMarineAndMreplDependencies } from "../../lib/rust.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
 import JSClientPackageJSON from "../../versions/js-client.package.json" assert { type: "json" };
 import { versions } from "../../versions.js";
@@ -54,10 +51,11 @@ export default class Versions extends BaseCommand<typeof Versions> {
           {},
           {
             "cli version": commandObj.config.version,
-            [`default ${depInstallCommandExplanation}`]:
-              getRecommendedDependencies("npm"),
-            [`default ${marineAndMreplExplanation}`]:
-              getRecommendedDependencies("cargo"),
+            [`default ${depInstallCommandExplanation}`]: versions.npm,
+            [`default ${marineAndMreplExplanation}`]: {
+              marine: versions.cargo.marine,
+              mrepl: versions.cargo.mrepl,
+            },
           },
         ),
       );
@@ -75,11 +73,10 @@ export default class Versions extends BaseCommand<typeof Versions> {
           "rust toolchain": versions["rust-toolchain"],
           [depInstallCommandExplanation]:
             maybeFluenceConfig === null
-              ? getRecommendedDependencies("npm")
-              : maybeFluenceConfig.dependencies?.npm ?? {},
-          [marineAndMreplExplanation]: resolveCargoDependencies(
-            maybeFluenceConfig,
-            true,
+              ? versions.npm
+              : maybeFluenceConfig.aquaDependencies,
+          [marineAndMreplExplanation]: Object.fromEntries(
+            await resolveMarineAndMreplDependencies(),
           ),
           "internal dependencies": filterOutNonFluenceDependencies(
             CLIPackageJSON.dependencies,
@@ -106,5 +103,5 @@ const filterOutNonFluenceDependencies = (
   );
 };
 
-const depInstallCommandExplanation = `aqua dependencies that you can install using '${CLI_NAME} dep npm i <name>@<version>'`;
-const marineAndMreplExplanation = `marine and mrepl dependencies that can be overridden using '${CLI_NAME} dep cargo i <name>@<version>'`;
+const depInstallCommandExplanation = `aqua dependencies that you can install using '${CLI_NAME} dep aqua i <name>@<version>'`;
+const marineAndMreplExplanation = `marine and mrepl dependencies that can be overridden using '${CLI_NAME} dep install <narine | mrepl>@<version>'`;

@@ -55,12 +55,24 @@ export async function initCountly({
         userAgent: commandObj.config.userAgent,
         platform: commandObj.config.platform,
         ...dependenciesToSegmentation(
-          maybeFluenceConfig?.dependencies?.npm,
-          "npm",
+          maybeFluenceConfig?.aquaDependencies,
+          "aqua",
         ),
         ...dependenciesToSegmentation(
-          maybeFluenceConfig?.dependencies?.cargo,
-          "cargo",
+          maybeFluenceConfig?.marineVersion === undefined
+            ? {}
+            : {
+                marine: maybeFluenceConfig.marineVersion,
+              },
+          "marine",
+        ),
+        ...dependenciesToSegmentation(
+          maybeFluenceConfig?.mreplVersion === undefined
+            ? {}
+            : {
+                mrepl: maybeFluenceConfig.mreplVersion,
+              },
+          "mrepl",
         ),
       },
     });

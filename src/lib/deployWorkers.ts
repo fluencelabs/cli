@@ -417,7 +417,7 @@ export async function prepareForDeploy({
   );
 
   if (!noBuild) {
-    const marineCli = await initMarineCli(fluenceConfig);
+    const marineCli = await initMarineCli();
 
     await buildModules(
       [...moduleAbsolutePathOrURLToModuleConfigsMap.values()],

@@ -16,21 +16,22 @@
 
 import { Args } from "@oclif/core";
 
-import { BaseCommand, baseFlags } from "../../../baseCommand.js";
-import { PACKAGE_NAME_AND_VERSION_ARG_NAME } from "../../../lib/const.js";
-import { initCli } from "../../../lib/lifeCycle.js";
-import { npmInstall } from "../../../lib/npm.js";
+import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { PACKAGE_NAME } from "../../lib/const.js";
+import { initCli } from "../../lib/lifeCycle.js";
+import { npmUninstall } from "../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
-  static override aliases = ["dep:npm:i"];
-  static override description = `Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)`;
+  static override aliases = ["dep:un"];
+  static override description = `Uninstall aqua dependencies (currently npm is used under the hood for managing aqua dependencies)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
   };
   static override args = {
-    [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
-      description: `valid package spec for npm install command`,
+    [PACKAGE_NAME]: Args.string({
+      description: `Aqua dependency name`,
+      required: true,
     }),
   };
 
@@ -41,8 +42,8 @@ export default class Install extends BaseCommand<typeof Install> {
       true,
     );
 
-    await npmInstall({
-      packageNameAndVersion: args[PACKAGE_NAME_AND_VERSION_ARG_NAME],
+    await npmUninstall({
+      packageName: args[PACKAGE_NAME],
       fluenceConfig,
     });
   }

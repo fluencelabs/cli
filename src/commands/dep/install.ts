@@ -14,44 +14,58 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { DOT_FLUENCE_DIR_NAME } from "../../lib/const.js";
+import { PACKAGE_NAME_AND_VERSION_ARG_NAME } from "../../lib/const.js";
+import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { npmInstall } from "../../lib/npm.js";
-import { installAllCargoDependencies } from "../../lib/rust.js";
+import { npmInstall, npmInstallAll } from "../../lib/npm.js";
+import { ensureMarineAndMreplDependencies } from "../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dep:i"];
-  static override description = `Install all project dependencies (dependencies are cached inside user's ${DOT_FLUENCE_DIR_NAME} directory)`;
+  static override description = `Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    force: Flags.boolean({
-      default: false,
+  };
+  static override args = {
+    [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
       description:
-        "Force install even if the dependency/dependencies is/are already installed",
+        "Valid argument for npm install command. If this argument is omitted command will also make sure marine and mrepl are installed",
     }),
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
+    const { args, maybeFluenceConfig } = await initCli(
       this,
       await this.parse(Install),
     );
 
-    if (maybeFluenceConfig !== null) {
-      await npmInstall({
-        fluenceConfig: maybeFluenceConfig,
-      });
+    const packageNameAndVersion = args[PACKAGE_NAME_AND_VERSION_ARG_NAME];
+
+    if (packageNameAndVersion === undefined) {
+      if (maybeFluenceConfig !== null) {
+        startSpinner("Installing aqua dependencies");
+        await npmInstallAll(maybeFluenceConfig);
+        stopSpinner();
+        commandObj.logToStderr("Aqua dependencies are successfully installed");
+      }
+
+      await ensureMarineAndMreplDependencies();
+      return;
     }
 
-    await installAllCargoDependencies({
-      maybeFluenceConfig,
-      force: flags.force,
-    });
+    if (maybeFluenceConfig === null) {
+      commandObj.error(
+        "Not a fluence project. Please init fluence project to install specific aqua dependencies",
+      );
+    }
 
-    commandObj.logToStderr("Dependencies successfully installed");
+    await npmInstall({
+      packageNameAndVersion,
+      fluenceConfig: maybeFluenceConfig,
+    });
   }
 }
