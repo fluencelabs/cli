@@ -849,12 +849,7 @@ ${yamlDiffPatch(
 # # 1. imports from --import flags,
 # # 2. imports from aquaImports property in ${FLUENCE_CONFIG_FULL_FILE_NAME}
 # # 3. project's ${join(DOT_FLUENCE_DIR_NAME, AQUA_DIR_NAME)} dir
-# # 4. npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# # 5. npm dependencies from user's ${join(
-    DOT_FLUENCE_DIR_NAME,
-    GLOBAL_CONFIG_FULL_FILE_NAME,
-  )}
-# # 6. npm dependencies recommended by fluence
+# # 4. aqua dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
 # aquaImports:
 #   - "./node_modules"
 #
