@@ -265,7 +265,7 @@ async function getDependenciesFromPackageJSON(
     throw new Error(
       `Dependency was installed but for some reason wasn't able to get 'dependencies' property at ${color.yellow(
         packageJSONPath,
-      )}. Please fix it manually. E.g. by removing ${color.yellow(
+      )}. Please fix it manually, e.g. by removing ${color.yellow(
         packageJSONPath,
       )} and running install command again`,
     );
