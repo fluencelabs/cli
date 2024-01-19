@@ -24,7 +24,8 @@ import {
   NEW_SPELL_NAME,
   TEST_AQUA_DIR_PATH,
 } from "../constants.js";
-import { fluence, init, maybeConcurrentTest } from "../helpers.js";
+import { fluence, initializeTemplate } from "../helpers/common.js";
+import { maybeConcurrentTest } from "../helpers/testWrapper.js";
 import {
   assertLogsAreValid,
   build,
@@ -45,7 +46,7 @@ describe("Deal update tests", () => {
     "should update deal after new spell is created",
     async () => {
       const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
-      await init(cwd, "quickstart");
+      await initializeTemplate(cwd, "quickstart");
 
       await updateFluenceConfigForTest(cwd);
 
@@ -71,7 +72,7 @@ describe("Deal update tests", () => {
     "should update deal after new service is created",
     async () => {
       const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
-      await init(cwd, "quickstart");
+      await initializeTemplate(cwd, "quickstart");
 
       await updateFluenceConfigForTest(cwd);
 
@@ -99,7 +100,7 @@ describe("Deal update tests", () => {
     "should update deal after new module is created",
     async () => {
       const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
-      await init(cwd, "quickstart");
+      await initializeTemplate(cwd, "quickstart");
 
       await updateFluenceConfigForTest(cwd);
 
@@ -133,7 +134,7 @@ describe("Deal update tests", () => {
     "should update deal after changing a service",
     async () => {
       const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
-      await init(cwd, "quickstart");
+      await initializeTemplate(cwd, "quickstart");
 
       await updateFluenceConfigForTest(cwd);
 
@@ -161,7 +162,7 @@ describe("Deal update tests", () => {
 
   maybeConcurrentTest("should update deal after changing a spell", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingASpell");
-    await init(cwd, "quickstart");
+    await initializeTemplate(cwd, "quickstart");
 
     await cp(
       join(TEST_AQUA_DIR_PATH, GET_SPELL_LOGS_AQUA_FILE_NAME),
@@ -183,7 +184,7 @@ describe("Deal update tests", () => {
       NEW_SPELL_NAME,
       "getSpellLogs",
       "getSpellLogs.aqua",
-      "if you see this, then the spell is working",
+      SPELL_MESSAGE,
     );
 
     const logs = await fluence({ args: ["deal", "logs"], cwd });
@@ -240,13 +241,14 @@ pub fn greeting(name: String) -> String {
 `;
 
 const GET_SPELL_LOGS_AQUA_FILE_NAME = "getSpellLogs.aqua";
+const SPELL_MESSAGE = '"if you see this, then the spell is working"';
 
 const UPDATED_SPELL_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    msg = "if you see this, then the spell is working"
+    msg = ${SPELL_MESSAGE}
     str <- Debug.stringify(msg)
-    Spell "worker-spell"
+    Spell "spell"
     Spell.store_log(str)
 `;

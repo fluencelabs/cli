@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+import { RUN_TESTS_IN_PARALLEL } from "./dist/lib/setupEnvironment.js";
+
+/** @type {import("ts-jest").JestConfigWithTsJest} */
 export default {
-  maxConcurrency: 5,
-  maxWorkers: 5,
+  maxConcurrency: process.env[RUN_TESTS_IN_PARALLEL] === "false" ? 1 : 1, // increasing number of concurrent tests leads to a problem with nonce
+  maxWorkers: process.env[RUN_TESTS_IN_PARALLEL] === "false" ? 1 : 5,
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",

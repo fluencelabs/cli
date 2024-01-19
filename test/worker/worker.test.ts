@@ -34,6 +34,7 @@ import {
   getFluenceAquaServicesPath,
 } from "../../src/lib/paths.js";
 import {
+  composeInterfacesFileContents,
   MAIN_RS_CONTENT,
   NEW_SERVICE_2_NAME,
   NEW_SERVICE_INTERFACE,
@@ -42,24 +43,19 @@ import {
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   SERVICE_INTERFACES,
   UPDATED_SERVICE_INTERFACES,
-  composeInterfacesFileContents,
 } from "../constants.js";
-import {
-  assertHasPeer,
-  fluence,
-  getMultiaddrs,
-  init,
-  maybeConcurrentTest,
-  sortPeers,
-} from "../helpers.js";
+import { fluence, initializeTemplate } from "../helpers/common.js";
+import { maybeConcurrentTest } from "../helpers/testWrapper.js";
+import { assertHasPeer, sortPeers } from "../helpers.js";
 import {
   createSpellAndAddToDeal,
   getFluenceConfig,
   getServiceConfig,
+  multiaddrs,
   updateMainRs,
 } from "../sharedSteps.js";
 
-const peerIds = (await getMultiaddrs())
+const peerIds = multiaddrs
   .map(({ peerId }) => {
     return peerId;
   })
@@ -70,7 +66,7 @@ describe("integration tests", () => {
     "should deploy workers with spell and service, resolve, run services on them and remove them",
     async () => {
       const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
-      await init(cwd, "minimal");
+      await initializeTemplate(cwd, "minimal");
 
       await writeFile(
         getAquaMainPath(cwd),
@@ -155,6 +151,7 @@ describe("integration tests", () => {
         cwd,
       });
 
+      // TODO: use waitUntilRunDeployedServicesReturnsExpected()
       await setTryTimeout(
         async () => {
           const result = await fluence({

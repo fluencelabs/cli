@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "./constants.js";
-import { fluence } from "./helpers/common.js";
+import { TEST_DEFAULT_SENDER_ACCOUNT } from "./localNetAccounts.js";
 
-if (process.env.CI === "false") {
-  await fluence({
-    args: ["local", "down"],
-    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-  });
-}
+export const maybeConcurrentTest = (...args: Parameters<typeof test>): void => {
+  console.log(
+    `Running "${args[0]}" with sender account: ${TEST_DEFAULT_SENDER_ACCOUNT.address}`,
+  );
+
+  test.concurrent(...args);
+};

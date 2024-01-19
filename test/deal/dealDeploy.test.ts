@@ -19,7 +19,8 @@ import { join, relative } from "node:path";
 
 import { initServiceConfig } from "../../src/lib/configs/project/service.js";
 import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../constants.js";
-import { fluence, init, maybeConcurrentTest } from "../helpers.js";
+import { fluence, initializeTemplate } from "../helpers/common.js";
+import { maybeConcurrentTest } from "../helpers/testWrapper.js";
 import {
   assertLogsAreValid,
   createSpellAndAddToDeal,
@@ -34,7 +35,7 @@ describe("Deal deploy tests", () => {
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
-      await init(cwd, "quickstart");
+      await initializeTemplate(cwd, "quickstart");
       const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
 
       const newServiceConfig = await initServiceConfig(

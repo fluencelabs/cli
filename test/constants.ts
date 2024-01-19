@@ -16,18 +16,27 @@
 
 import { join } from "node:path";
 
-import { getMultiaddrs } from "./helpers.js";
+import { FLUENCE_ENV } from "../src/lib/setupEnvironment.js";
 
-export const multiaddrs = await getMultiaddrs();
+export const fluenceEnv = process.env[FLUENCE_ENV];
 
 export const RUN_DEPLOYED_SERVICES_TIMEOUT = 1000 * 60 * 3;
 
 export const MY_SERVICE_NAME = "myService";
+export const NEW_SERVICE_NAME = "newService";
+export const NEW_SERVICE_2_NAME = "newService2";
 export const NEW_SPELL_NAME = "newSpell";
 export const NEW_MODULE_NAME = "newModule";
 export const WORKER_SPELL = "worker-spell";
 
+export const NO_PROJECT_TEST_NAME = "shouldWorkWithoutProject";
+
 export const TEST_AQUA_DIR_PATH = join("test", "_resources", "aqua");
+export const pathToTheTemplateWhereLocalEnvironmentIsSpunUp = join(
+  "tmp",
+  "templates",
+  "quickstart",
+);
 
 export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;
@@ -52,12 +61,8 @@ pub fn greeting() -> MyStruct {
 }
 `;
 
-export const NEW_SERVICE_NAME = "newService";
-
 export const NEW_SERVICE_INTERFACE = `service NewService("${NEW_SERVICE_NAME}"):
   greeting(name: string) -> string`;
-
-export const NEW_SERVICE_2_NAME = "newService2";
 
 export const NEW_SERVICE_2_INTERFACE = `service NewService2("${NEW_SERVICE_2_NAME}"):
   greeting(name: string) -> string`;

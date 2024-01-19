@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "./constants.js";
-import { fluence } from "./helpers/common.js";
-
-if (process.env.CI === "false") {
-  await fluence({
-    args: ["local", "down"],
-    cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+export const sleepSeconds = (s: number) => {
+  return new Promise<void>((resolve) => {
+    return setTimeout(resolve, s * 1000);
   });
-}
+};

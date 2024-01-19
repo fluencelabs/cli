@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
+import { cp } from "fs/promises";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../src/lib/const.js";
 
-import {
-  fluence,
-  fluenceEnv,
-  getMultiaddrs,
-  init,
-  maybeConcurrentTest,
-  NO_PROJECT_TEST_NAME,
-} from "./helpers.js";
-
-const multiaddrs = await getMultiaddrs();
+import { fluenceEnv, NO_PROJECT_TEST_NAME } from "./constants.js";
+import { fluence, initializeTemplate } from "./helpers/common.js";
+import { maybeConcurrentTest } from "./helpers/testWrapper.js";
+import { multiaddrs } from "./sharedSteps.js";
 
 describe("integration tests", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
-    await init(cwd, "minimal");
+    await initializeTemplate(cwd, "minimal");
 
     await fluence({
       args: ["run"],
@@ -46,6 +41,11 @@ describe("integration tests", () => {
 
   maybeConcurrentTest("should work without project", async () => {
     const cwd = join("tmp", NO_PROJECT_TEST_NAME);
+
+    await cp(
+      join("test", "_resources", "aqua", "smoke.aqua"),
+      join(cwd, "smoke.aqua"),
+    );
 
     const packageJSONContent = await readFile(
       PACKAGE_JSON_FILE_NAME,

@@ -18,6 +18,12 @@ import assert from "node:assert";
 import { writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 
+import {
+  krasnodar,
+  type Node,
+  stage,
+  testNet,
+} from "@fluencelabs/fluence-network-environment";
 import { map, sortBy } from "lodash-es";
 
 import {
@@ -37,21 +43,51 @@ import {
   setTryTimeout,
   stringifyUnknown,
 } from "../src/lib/helpers/utils.js";
+import { addrsToNodes } from "../src/lib/multiaddres.js";
 import { getServicesDir, getSpellsDir, getSrcPath } from "../src/lib/paths.js";
 
 import {
-  multiaddrs,
+  fluenceEnv,
   MY_SERVICE_NAME,
+  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   WORKER_SPELL,
 } from "./constants.js";
-import { DEFAULT_UNIQUE_PRIVATE_KEY, fluence } from "./helpers.js";
+import { fluence } from "./helpers/common.js";
+import { TEST_DEFAULT_SENDER_ACCOUNT } from "./helpers/localNetAccounts.js";
 import { validateDeployedServicesAnswerSchema } from "./validators/deployedServicesAnswerValidator.js";
 import { validateSpellLogs } from "./validators/spellLogsValidator.js";
 import {
   validateWorkerServices,
   type WorkerServices,
 } from "./validators/workerServiceValidator.js";
+
+export const multiaddrs = await getMultiaddrs();
+
+export async function getMultiaddrs(): Promise<Node[]> {
+  console.log("getMultiaddrs() is ran");
+
+  const local =
+    fluenceEnv === "local"
+      ? addrsToNodes(
+          (
+            await fluence({
+              args: ["default", "peers", "local"],
+              cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+            })
+          )
+            .trim()
+            .split("\n"),
+        )
+      : [];
+
+  return {
+    kras: krasnodar,
+    stage: stage,
+    testnet: testNet,
+    local,
+  }[fluenceEnv];
+}
 
 export function getServiceDirPath(cwd: string, serviceName: string) {
   return join(getServicesDir(cwd), serviceName);
@@ -180,7 +216,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   const res = await fluence({
     args: ["deal", "deploy"],
     flags: {
-      "priv-key": DEFAULT_UNIQUE_PRIVATE_KEY,
+      "priv-key": TEST_DEFAULT_SENDER_ACCOUNT.privateKey,
     },
     cwd,
   });
@@ -193,16 +229,16 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   console.log(dealId);
 
   await fluence({
-    args: ["deal", "deposit", dealId, "100"],
+    args: ["deal", "deposit", dealId, "1"],
     flags: {
-      "priv-key": DEFAULT_UNIQUE_PRIVATE_KEY,
+      "priv-key": TEST_DEFAULT_SENDER_ACCOUNT.privateKey,
     },
     cwd,
   });
 
   await setTryTimeout(
     async () => {
-      return isDealDeployed(cwd, dealId);
+      return isDealDeployed(cwd);
     },
     (error) => {
       throw new Error(
@@ -215,12 +251,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   );
 }
 
-async function isDealDeployed(cwd: string, dealId: string) {
-  await fluence({
-    args: ["deal", "info", dealId],
-    cwd,
-  });
-
+async function isDealDeployed(cwd: string) {
   const result = await fluence({
     args: ["run"],
     flags: {
@@ -503,7 +534,7 @@ export async function createModuleAndAddToService(
 
   const relativePathToNewModule = relative(
     getServiceDirPath(cwd, serviceName),
-    getModuleDirPath(cwd, moduleName, serviceName),
+    getModuleDirPath(cwd, moduleName),
   );
 
   serviceConfig.modules = {
@@ -512,6 +543,8 @@ export async function createModuleAndAddToService(
       get: relativePathToNewModule,
     },
   };
+
+  await serviceConfig.$commit();
 }
 
 export function assertLogsAreValid(logs: string) {
