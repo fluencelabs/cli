@@ -36,6 +36,7 @@ import {
   promptConfirmTx,
   waitTx,
 } from "../../lib/dealClient.js";
+import { jsonStringify } from "../../lib/helpers/utils.js";
 import { getSecretKeyOrReturnExisting } from "../../lib/keyPairs.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { getPeerIdFromSecretKey } from "../../lib/multiaddres.js";
@@ -111,8 +112,9 @@ export async function register(flags: {
     ),
   );
 
-  //TODO: if offer exists, update it
-  const registerOfferTx = await market.registerMarketOffer(
+  const registerMarketOfferParams: Parameters<
+    typeof market.registerMarketOffer
+  > = [
     minPricePerWorkerEpochBigInt,
     await flt.getAddress(),
     (offer.effectors ?? []).map((effector) => {
@@ -124,6 +126,17 @@ export async function register(flags: {
       };
     }),
     computePeersToRegister,
+  ];
+
+  dbg(
+    `calling market.registerMarketOffer using: ${jsonStringify(
+      registerMarketOfferParams,
+    )}`,
+  );
+
+  //TODO: if offer exists, update it
+  const registerOfferTx = await market.registerMarketOffer(
+    ...registerMarketOfferParams,
   );
 
   promptConfirmTx(flags["priv-key"]);

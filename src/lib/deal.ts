@@ -31,7 +31,7 @@ import {
   getDealClient,
   getDealMatcherClient,
 } from "./dealClient.js";
-import { stringifyUnknown } from "./helpers/utils.js";
+import { jsonStringify, stringifyUnknown } from "./helpers/utils.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
@@ -102,7 +102,7 @@ export async function dealCreate({
   await waitTx(approveTx);
   promptConfirmTx(privKey);
 
-  const tx = await market.deployDeal(
+  const deployDealParams: Parameters<typeof market.deployDeal> = [
     {
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
@@ -121,10 +121,12 @@ export async function dealCreate({
     }),
     0,
     [],
-  );
+  ];
 
+  dbg(`deployDealParams: ${jsonStringify(deployDealParams)}`);
+
+  const tx = await market.deployDeal(...deployDealParams);
   const res = await waitTx(tx);
-
   const eventTopic = market.interface.getEvent(EVENT_TOPIC_FRAGMENT);
 
   const log = res.logs.find((log) => {

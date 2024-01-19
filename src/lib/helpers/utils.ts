@@ -42,11 +42,14 @@ function comment(commentToken: string) {
 export const jsComment = comment("//");
 export const aquaComment = comment("--");
 
-export function jsonStringify(
-  unknown: unknown,
-  replacer: Parameters<typeof JSON.stringify>[1] = null,
-): string {
-  return JSON.stringify(unknown, replacer, 2);
+export function jsonStringify(unknown: unknown): string {
+  return JSON.stringify(
+    unknown,
+    (_key, value: unknown) => {
+      return typeof value === "bigint" ? value.toString() : value;
+    },
+    2,
+  );
 }
 
 export function stringifyUnknown(unknown: unknown): string {
@@ -72,7 +75,7 @@ export function stringifyUnknown(unknown: unknown): string {
 
       return `${errorMessage}${
         otherErrorProperties.length > 0
-          ? `\n${jsonStringify(unknown, otherErrorProperties)}`
+          ? `\n${JSON.stringify(unknown, otherErrorProperties, 2)}`
           : ""
       }`;
     }
