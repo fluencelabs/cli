@@ -26,7 +26,8 @@ import { ensureMarineAndMreplDependencies } from "../../lib/rust.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dep:i"];
-  static override description = `Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)`;
+  static override description =
+    "Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -34,7 +35,7 @@ export default class Install extends BaseCommand<typeof Install> {
   static override args = {
     [PACKAGE_NAME_AND_VERSION_ARG_NAME]: Args.string({
       description:
-        "Valid argument for npm install command. If this argument is omitted command will also make sure marine and mrepl are installed",
+        "Valid argument for npm install command. If this argument is omitted all project aqua dependencies will be installed and command will also make sure marine and mrepl are installed",
     }),
   };
   async run(): Promise<void> {

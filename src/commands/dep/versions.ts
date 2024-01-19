@@ -18,7 +18,11 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CLI_NAME_FULL, CLI_NAME } from "../../lib/const.js";
+import {
+  CLI_NAME_FULL,
+  CLI_NAME,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveMarineAndMreplDependencies } from "../../lib/rust.js";
 import CLIPackageJSON from "../../versions/cli.package.json" assert { type: "json" };
@@ -27,7 +31,8 @@ import { versions } from "../../versions.js";
 
 export default class Versions extends BaseCommand<typeof Versions> {
   static override aliases = ["dep:v"];
-  static override description = "Get versions of all dependencies";
+  static override description =
+    "Get versions of all cli dependencies, including aqua, marine, mrepl and internal";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -103,5 +108,5 @@ const filterOutNonFluenceDependencies = (
   );
 };
 
-const depInstallCommandExplanation = `aqua dependencies that you can install using '${CLI_NAME} dep aqua i <name>@<version>'`;
-const marineAndMreplExplanation = `marine and mrepl dependencies that can be overridden using '${CLI_NAME} dep install <narine | mrepl>@<version>'`;
+const depInstallCommandExplanation = `aqua dependencies that you can install or update using '${CLI_NAME} dep i <name>@<version>'`;
+const marineAndMreplExplanation = `marine and mrepl dependencies that can be overridden in ${FLUENCE_CONFIG_FULL_FILE_NAME} using marineVersion and mreplVersion properties`;

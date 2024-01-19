@@ -17,13 +17,15 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { PACKAGE_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { npmUninstall } from "../../lib/npm.js";
 
 export default class Install extends BaseCommand<typeof Install> {
   static override aliases = ["dep:un"];
-  static override description = `Uninstall aqua dependencies (currently npm is used under the hood for managing aqua dependencies)`;
+  static override description =
+    "Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -46,5 +48,7 @@ export default class Install extends BaseCommand<typeof Install> {
       packageName: args[PACKAGE_NAME],
       fluenceConfig,
     });
+
+    commandObj.logToStderr(`Uninstalled ${args[PACKAGE_NAME]} successfully`);
   }
 }
