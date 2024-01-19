@@ -157,8 +157,6 @@ export async function npmInstall({
     FS_OPTIONS,
   );
 
-  const [packageName] = splitPackageNameAndVersion(packageNameAndVersion);
-
   startSpinner(
     `Installing ${color.yellow(packageNameAndVersion)} aqua dependency`,
   );
@@ -176,15 +174,13 @@ export async function npmInstall({
     await readFile(packageJSONPath, FS_OPTIONS),
   );
 
-  const version = getDependencyVersion(parsedPackageJSON, packageName);
+  const aquaDependencies = getAquaDependencies(parsedPackageJSON);
 
   stopSpinner();
 
-  if (version === null) {
-    return commandObj.error(
-      `Dependency was installed but for some reason wasn't able to find ${color.yellow(
-        `dependencies.${packageName}`,
-      )} property at ${color.yellow(
+  if (aquaDependencies === null) {
+    throw new Error(
+      `Dependency was installed but for some reason wasn't able to get 'dependencies' property at ${color.yellow(
         packageJSONPath,
       )}. Please fix it manually. E.g. by removing ${color.yellow(
         packageJSONPath,
@@ -192,29 +188,36 @@ export async function npmInstall({
     );
   }
 
-  fluenceConfig.aquaDependencies[packageName] = version;
+  fluenceConfig.aquaDependencies = aquaDependencies;
   await fluenceConfig.$commit();
 
   commandObj.logToStderr(
-    `${packageName}@${version} aqua dependency is successfully installed`,
+    `${packageNameAndVersion} aqua dependency is successfully installed`,
   );
 }
 
-function getDependencyVersion(parsedPackageJSON: unknown, packageName: string) {
+function getAquaDependencies(parsedPackageJSON: unknown) {
   if (
     !hasKey("dependencies", parsedPackageJSON) ||
-    !hasKey(packageName, parsedPackageJSON.dependencies)
+    typeof parsedPackageJSON.dependencies !== "object" ||
+    parsedPackageJSON.dependencies === null
   ) {
     return null;
   }
 
-  const version = parsedPackageJSON.dependencies[packageName];
+  const dependenciesWithVersions = Object.entries(
+    parsedPackageJSON.dependencies,
+  );
 
-  if (typeof version !== "string") {
+  if (
+    !dependenciesWithVersions.every((a): a is [string, string] => {
+      return typeof a[1] === "string";
+    })
+  ) {
     return null;
   }
 
-  return version;
+  return Object.fromEntries(dependenciesWithVersions);
 }
 
 type NpmUninstallArgs = {
