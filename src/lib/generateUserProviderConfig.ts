@@ -25,6 +25,7 @@ import {
   DEFAULT_CC_DELEGATOR,
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import {
@@ -86,7 +87,7 @@ export async function addComputePeers(
 
     const computeUnitsString = await input({
       message: `Enter number of compute units for ${color.yellow(name)}`,
-      default: "1",
+      default: `${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX}`,
       validate: validatePositiveNumberOrEmpty,
     });
 

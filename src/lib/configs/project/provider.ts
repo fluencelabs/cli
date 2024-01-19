@@ -386,7 +386,10 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
     if (env === "local") {
       userProvidedConfig.computePeers = Object.fromEntries(
         times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
-          return [`nox-${i}`, { computeUnits: 1 }] as const;
+          return [
+            `nox-${i}`,
+            { computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX },
+          ] as const;
         }),
       );
 
