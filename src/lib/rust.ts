@@ -413,18 +413,8 @@ export async function resolveMarineAndMreplDependencies() {
   const fluenceConfig = await initFluenceConfig();
 
   return [
-    [
-      "marine",
-      fluenceConfig?.marineVersion === undefined
-        ? versions.cargo.marine
-        : fluenceConfig.marineVersion,
-    ],
-    [
-      "mrepl",
-      fluenceConfig?.mreplVersion === undefined
-        ? versions.cargo.mrepl
-        : fluenceConfig.mreplVersion,
-    ],
+    ["marine", fluenceConfig?.marineVersion ?? versions.cargo.marine],
+    ["mrepl", fluenceConfig?.mreplVersion ?? versions.cargo.mrepl],
   ] as const;
 }
 
