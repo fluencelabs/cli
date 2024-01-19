@@ -311,7 +311,13 @@ function ensurePathInVersionIsCorrect(
     [pathA, pathB] = [pathB, pathA];
   }
 
-  return `file:${relative(pathB, resolve(pathA, filePath))}`;
+  const absoluteDependencyPath = resolve(pathA, filePath);
+  // generate the correct relative path
+  // because fluence.yaml and package.json are in different directories
+  // relative paths must be updated to be correct both when writing from
+  // fluence.yaml to package.json and vice versa
+  const newRelativeDependencyPath = relative(pathB, absoluteDependencyPath);
+  return `file:${newRelativeDependencyPath}`;
 }
 
 type NpmUninstallArgs = {
