@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import { access, cp, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "url";
 
 import { color } from "@oclif/color";
@@ -34,6 +34,7 @@ import {
 import {
   getFluenceAquaDependenciesPackageJsonPath,
   ensureFluenceAquaDependenciesPath,
+  projectRootDir,
 } from "./paths.js";
 import { hasKey } from "./typeHelpers.js";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -128,11 +129,7 @@ export async function runNpm(args: Omit<ExecPromiseArg, "command">) {
 }
 
 export async function npmInstallAll(fluenceConfig: FluenceConfig) {
-  await writeFile(
-    await getFluenceAquaDependenciesPackageJsonPath(),
-    jsonStringify({ dependencies: fluenceConfig.aquaDependencies }),
-    FS_OPTIONS,
-  );
+  await updatePackageJSON(fluenceConfig);
 
   await runNpm({
     args: ["i"],
@@ -151,10 +148,10 @@ export async function npmInstall({
   fluenceConfig,
   packageNameAndVersion,
 }: NpmInstallArgs) {
-  await writeFile(
-    await getFluenceAquaDependenciesPackageJsonPath(),
-    jsonStringify({ dependencies: fluenceConfig.aquaDependencies }),
-    FS_OPTIONS,
+  await updatePackageJSON(fluenceConfig);
+
+  const correctPackageNameAndVersion = await ensureNpmInstallArgIsCorrect(
+    packageNameAndVersion,
   );
 
   startSpinner(
@@ -162,7 +159,7 @@ export async function npmInstall({
   );
 
   await runNpm({
-    args: ["i", packageNameAndVersion],
+    args: ["i", correctPackageNameAndVersion],
     options: {
       cwd: await ensureFluenceAquaDependenciesPath(),
     },
@@ -174,7 +171,8 @@ export async function npmInstall({
     await readFile(packageJSONPath, FS_OPTIONS),
   );
 
-  const aquaDependencies = getAquaDependencies(parsedPackageJSON);
+  const aquaDependencies =
+    await getDependenciesFromPackageJSON(parsedPackageJSON);
 
   stopSpinner();
 
@@ -196,7 +194,57 @@ export async function npmInstall({
   );
 }
 
-function getAquaDependencies(parsedPackageJSON: unknown) {
+async function ensureNpmInstallArgIsCorrect(packageNameAndVersion: string) {
+  const filePath = getFilePath(packageNameAndVersion);
+  const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
+
+  if (filePath === undefined) {
+    const packageNameAndVersionTuple = splitPackageNameAndVersion(
+      packageNameAndVersion,
+    );
+
+    let [, versionToInstall] = packageNameAndVersionTuple;
+
+    if (versionToInstall !== undefined) {
+      versionToInstall = ensurePathInVersionIsCorrect(
+        versionToInstall,
+        fluenceAquaDependenciesPath,
+      );
+    }
+
+    return [packageNameAndVersionTuple[0], versionToInstall]
+      .filter(Boolean)
+      .join("@");
+  }
+
+  return ensurePathInVersionIsCorrect(
+    packageNameAndVersion,
+    fluenceAquaDependenciesPath,
+  );
+}
+
+async function updatePackageJSON(fluenceConfig: FluenceConfig) {
+  const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
+
+  const dependenciesWithFixedRelativePath = Object.fromEntries(
+    Object.entries(fluenceConfig.aquaDependencies).map(
+      ([packageName, version]) => {
+        return [
+          packageName,
+          ensurePathInVersionIsCorrect(version, fluenceAquaDependenciesPath),
+        ];
+      },
+    ),
+  );
+
+  await writeFile(
+    await getFluenceAquaDependenciesPackageJsonPath(),
+    jsonStringify({ dependencies: dependenciesWithFixedRelativePath }),
+    FS_OPTIONS,
+  );
+}
+
+async function getDependenciesFromPackageJSON(parsedPackageJSON: unknown) {
   if (
     !hasKey("dependencies", parsedPackageJSON) ||
     typeof parsedPackageJSON.dependencies !== "object" ||
@@ -217,7 +265,45 @@ function getAquaDependencies(parsedPackageJSON: unknown) {
     return null;
   }
 
-  return Object.fromEntries(dependenciesWithVersions);
+  const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
+
+  return Object.fromEntries(
+    dependenciesWithVersions.map(([packageName, version]) => {
+      return [
+        packageName,
+        ensurePathInVersionIsCorrect(
+          version,
+          fluenceAquaDependenciesPath,
+          true,
+        ),
+      ];
+    }),
+  );
+}
+
+function getFilePath(version: string) {
+  const [, filePath] = [...(version.match(/^file:(.+)$/) ?? [])];
+  return filePath;
+}
+
+function ensurePathInVersionIsCorrect(
+  version: string,
+  fluenceAquaDependenciesPath: string,
+  isBackToFluenceYAML: boolean = false,
+) {
+  const filePath = getFilePath(version);
+
+  if (filePath === undefined) {
+    return version;
+  }
+
+  let [pathA, pathB] = [projectRootDir, fluenceAquaDependenciesPath];
+
+  if (isBackToFluenceYAML) {
+    [pathA, pathB] = [pathB, pathA];
+  }
+
+  return `file:${relative(pathB, resolve(pathA, filePath))}`;
 }
 
 type NpmUninstallArgs = {
