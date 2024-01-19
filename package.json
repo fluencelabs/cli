@@ -92,9 +92,6 @@
     "yaml": "2.3.4",
     "yaml-diff-patch": "2.0.0"
   },
-  "resolutions": {
-    "@libp2p/utils": "5.1.1"
-  },
   "devDependencies": {
     "@total-typescript/ts-reset": "0.5.1",
     "@tsconfig/node18-strictest-esm": "1.0.1",
