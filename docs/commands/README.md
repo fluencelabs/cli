@@ -582,8 +582,9 @@ USAGE
   $ fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Valid argument for npm install command. If this argument is omitted command will
-                                       also make sure marine and mrepl are installed
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Valid argument for npm install command. If this argument is omitted all project
+                                       aqua dependencies will be installed and command will also make sure marine and
+                                       mrepl are installed
 
 FLAGS
   --no-input  Don't interactively ask for any input from the user
@@ -602,7 +603,7 @@ _See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob
 
 ## `fluence dep reset`
 
-Reset all project dependencies to recommended versions for the current Fluence CLI version
+Reset all project dependencies to recommended versions
 
 ```
 USAGE
@@ -612,7 +613,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Reset all project dependencies to recommended versions for the current Fluence CLI version
+  Reset all project dependencies to recommended versions
 
 ALIASES
   $ fluence dep r
@@ -625,7 +626,7 @@ _See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v
 
 ## `fluence dep uninstall PACKAGE-NAME`
 
-Uninstall aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
+Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ```
 USAGE
@@ -638,7 +639,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Uninstall aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
+  Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ALIASES
   $ fluence dep un
@@ -651,7 +652,7 @@ _See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence dep versions`
 
-Get versions of all dependencies
+Get versions of all cli dependencies, including aqua, marine, mrepl and internal
 
 ```
 USAGE
@@ -663,7 +664,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Get versions of all dependencies
+  Get versions of all cli dependencies, including aqua, marine, mrepl and internal
 
 ALIASES
   $ fluence dep v
