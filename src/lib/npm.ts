@@ -20,7 +20,9 @@ import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "url";
 
 import { color } from "@oclif/color";
+import type { JSONSchemaType } from "ajv";
 
+import { ajv } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
 import { AQUA_DEPENDENCIES_DIR_NAME, FS_OPTIONS } from "./const.js";
@@ -36,7 +38,6 @@ import {
   ensureFluenceAquaDependenciesPath,
   projectRootDir,
 } from "./paths.js";
-import { hasKey } from "./typeHelpers.js";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 export const builtInAquaDependenciesDirPath = join(
@@ -171,20 +172,12 @@ export async function npmInstall({
     await readFile(packageJSONPath, FS_OPTIONS),
   );
 
-  const aquaDependencies =
-    await getDependenciesFromPackageJSON(parsedPackageJSON);
+  const aquaDependencies = await getDependenciesFromPackageJSON(
+    parsedPackageJSON,
+    packageJSONPath,
+  );
 
   stopSpinner();
-
-  if (aquaDependencies === null) {
-    throw new Error(
-      `Dependency was installed but for some reason wasn't able to get 'dependencies' property at ${color.yellow(
-        packageJSONPath,
-      )}. Please fix it manually. E.g. by removing ${color.yellow(
-        packageJSONPath,
-      )} and running install command again`,
-    );
-  }
 
   fluenceConfig.aquaDependencies = aquaDependencies;
   await fluenceConfig.$commit();
@@ -244,40 +237,55 @@ async function updatePackageJSON(fluenceConfig: FluenceConfig) {
   );
 }
 
-async function getDependenciesFromPackageJSON(parsedPackageJSON: unknown) {
-  if (
-    !hasKey("dependencies", parsedPackageJSON) ||
-    typeof parsedPackageJSON.dependencies !== "object" ||
-    parsedPackageJSON.dependencies === null
-  ) {
-    return null;
-  }
+type PackageJSON = {
+  dependencies: Record<string, string>;
+};
 
-  const dependenciesWithVersions = Object.entries(
-    parsedPackageJSON.dependencies,
-  );
+const packageJSONSchema: JSONSchemaType<PackageJSON> = {
+  type: "object",
+  properties: {
+    dependencies: {
+      type: "object",
+      additionalProperties: {
+        type: "string",
+      },
+      required: [],
+    },
+  },
+  required: ["dependencies"],
+};
 
-  if (
-    !dependenciesWithVersions.every((a): a is [string, string] => {
-      return typeof a[1] === "string";
-    })
-  ) {
-    return null;
+const validatePackageJSON = ajv.compile(packageJSONSchema);
+
+async function getDependenciesFromPackageJSON(
+  parsedPackageJSON: unknown,
+  packageJSONPath: string,
+) {
+  if (!validatePackageJSON(parsedPackageJSON)) {
+    throw new Error(
+      `Dependency was installed but for some reason wasn't able to get 'dependencies' property at ${color.yellow(
+        packageJSONPath,
+      )}. Please fix it manually. E.g. by removing ${color.yellow(
+        packageJSONPath,
+      )} and running install command again`,
+    );
   }
 
   const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
 
   return Object.fromEntries(
-    dependenciesWithVersions.map(([packageName, version]) => {
-      return [
-        packageName,
-        ensurePathInVersionIsCorrect(
-          version,
-          fluenceAquaDependenciesPath,
-          true,
-        ),
-      ];
-    }),
+    Object.entries(parsedPackageJSON.dependencies).map(
+      ([packageName, version]) => {
+        return [
+          packageName,
+          ensurePathInVersionIsCorrect(
+            version,
+            fluenceAquaDependenciesPath,
+            true,
+          ),
+        ];
+      },
+    ),
   );
 }
 
