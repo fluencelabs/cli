@@ -17,6 +17,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import InternalAquaDependenciesPackageJSON from "../../cli-aqua-dependencies/package.json" assert { type: "json" };
 import { commandObj } from "../../lib/commandObj.js";
 import {
   CLI_NAME_FULL,
@@ -68,6 +69,10 @@ export default class Versions extends BaseCommand<typeof Versions> {
       return;
     }
 
+    const devDependencies = filterOutNonFluenceDependencies(
+      CLIPackageJSON.devDependencies,
+    );
+
     commandObj.log(
       yamlDiffPatch(
         "",
@@ -86,9 +91,15 @@ export default class Versions extends BaseCommand<typeof Versions> {
           "internal dependencies": filterOutNonFluenceDependencies(
             CLIPackageJSON.dependencies,
           ),
-          "dev dependencies": filterOutNonFluenceDependencies(
-            CLIPackageJSON.devDependencies,
-          ),
+          ...(Object.keys(devDependencies).length === 0
+            ? {}
+            : {
+                "dev dependencies": filterOutNonFluenceDependencies(
+                  CLIPackageJSON.devDependencies,
+                ),
+              }),
+          "internal aqua dependencies":
+            InternalAquaDependenciesPackageJSON.dependencies,
           "js-client dependencies": filterOutNonFluenceDependencies(
             JSClientPackageJSON.dependencies,
           ),
