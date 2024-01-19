@@ -15,7 +15,7 @@
  */
 
 import assert from "node:assert";
-import { access, cp, writeFile } from "node:fs/promises";
+import { access, cp, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "url";
 
@@ -35,6 +35,7 @@ import {
   getFluenceAquaDependenciesPackageJsonPath,
   ensureFluenceAquaDependenciesPath,
 } from "./paths.js";
+import { hasKey } from "./typeHelpers.js";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 export const builtInAquaDependenciesDirPath = join(
@@ -150,26 +151,70 @@ export async function npmInstall({
   fluenceConfig,
   packageNameAndVersion,
 }: NpmInstallArgs) {
-  const packageNameAndVersionTuple = splitPackageNameAndVersion(
-    packageNameAndVersion,
+  await writeFile(
+    await getFluenceAquaDependenciesPackageJsonPath(),
+    jsonStringify({ dependencies: fluenceConfig.aquaDependencies }),
+    FS_OPTIONS,
   );
 
-  const [packageName] = packageNameAndVersionTuple;
-  let [, version] = packageNameAndVersionTuple;
+  const [packageName] = splitPackageNameAndVersion(packageNameAndVersion);
 
-  if (version === undefined) {
-    version = await getLatestVersionOfNPMDependency(packageName);
+  startSpinner(
+    `Installing ${color.yellow(packageNameAndVersion)} aqua dependency`,
+  );
+
+  await runNpm({
+    args: ["i", packageNameAndVersion],
+    options: {
+      cwd: await ensureFluenceAquaDependenciesPath(),
+    },
+  });
+
+  const packageJSONPath = await getFluenceAquaDependenciesPackageJsonPath();
+
+  const parsedPackageJSON = JSON.parse(
+    await readFile(packageJSONPath, FS_OPTIONS),
+  );
+
+  const version = getDependencyVersion(parsedPackageJSON, packageName);
+
+  stopSpinner();
+
+  if (version === null) {
+    return commandObj.error(
+      `Dependency was installed but for some reason wasn't able to find ${color.yellow(
+        `dependencies.${packageName}`,
+      )} property at ${color.yellow(
+        packageJSONPath,
+      )}. Please fix it manually. E.g. by removing ${color.yellow(
+        packageJSONPath,
+      )} and running install command again`,
+    );
   }
 
-  startSpinner(`Installing ${packageName}@${version} aqua dependency`);
   fluenceConfig.aquaDependencies[packageName] = version;
-  await npmInstallAll(fluenceConfig);
   await fluenceConfig.$commit();
-  stopSpinner();
 
   commandObj.logToStderr(
     `${packageName}@${version} aqua dependency is successfully installed`,
   );
+}
+
+function getDependencyVersion(parsedPackageJSON: unknown, packageName: string) {
+  if (
+    !hasKey("dependencies", parsedPackageJSON) ||
+    !hasKey(packageName, parsedPackageJSON.dependencies)
+  ) {
+    return null;
+  }
+
+  const version = parsedPackageJSON.dependencies[packageName];
+
+  if (typeof version !== "string") {
+    return null;
+  }
+
+  return version;
 }
 
 type NpmUninstallArgs = {
