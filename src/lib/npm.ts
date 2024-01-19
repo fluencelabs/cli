@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import { access, cp, readFile, writeFile } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "url";
 
 import { color } from "@oclif/color";
@@ -293,7 +293,7 @@ function ensurePathInVersionIsCorrect(
 ) {
   const filePath = getFilePath(version);
 
-  if (filePath === undefined) {
+  if (filePath === undefined || isAbsolute(filePath)) {
     return version;
   }
 
