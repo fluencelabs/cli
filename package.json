@@ -68,7 +68,7 @@
     "@oclif/plugin-autocomplete": "3.0.5",
     "@oclif/plugin-help": "6.0.11",
     "@oclif/plugin-not-found": "3.0.8",
-    "@oclif/plugin-update": "4.1.7",
+    "@oclif/plugin-update": "4.1.8",
     "@walletconnect/universal-provider": "2.4.7",
     "ajv": "8.12.0",
     "chokidar": "3.5.3",
