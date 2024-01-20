@@ -46,7 +46,15 @@ export function jsonStringify(unknown: unknown): string {
   return JSON.stringify(
     unknown,
     (_key, value: unknown) => {
-      return typeof value === "bigint" ? value.toString() : value;
+      if (value instanceof Uint8Array) {
+        return `Uint8Array<${JSON.stringify([...value])}>`;
+      }
+
+      if (typeof value === "bigint") {
+        return value.toString();
+      }
+
+      return value;
     },
     2,
   );
