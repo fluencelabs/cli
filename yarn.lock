@@ -615,7 +615,7 @@ __metadata:
     "@oclif/color": 1.0.13
     "@oclif/core": 3.18.1
     "@oclif/plugin-autocomplete": 3.0.5
-    "@oclif/plugin-help": 6.0.11
+    "@oclif/plugin-help": 6.0.12
     "@oclif/plugin-not-found": 3.0.8
     "@oclif/plugin-update": 4.1.7
     "@total-typescript/ts-reset": 0.5.1
@@ -2245,7 +2245,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:3.18.1, @oclif/core@npm:^3.0.4, @oclif/core@npm:^3.15.1, @oclif/core@npm:^3.16.0":
+"@oclif/core@npm:3.18.1, @oclif/core@npm:^3.0.4, @oclif/core@npm:^3.15.1, @oclif/core@npm:^3.16.0, @oclif/core@npm:^3.18.1":
   version: 3.18.1
   resolution: "@oclif/core@npm:3.18.1"
   dependencies:
@@ -2328,12 +2328,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-help@npm:6.0.11":
-  version: 6.0.11
-  resolution: "@oclif/plugin-help@npm:6.0.11"
+"@oclif/plugin-help@npm:6.0.12":
+  version: 6.0.12
+  resolution: "@oclif/plugin-help@npm:6.0.12"
   dependencies:
-    "@oclif/core": ^3.16.0
-  checksum: 40d6d08c0ad0ae326d63420cc1deb4e483827d786d02b6a608be82f95fd93237d8dc7ed064817c772fd6d07f8ccdbaf4c4e59fd9b6f9ef2b45315fccabd5fa02
+    "@oclif/core": ^3.18.1
+  checksum: ff2ed511eb6965d3440df4d2748f61f3c86ea829b66df5f2fcc704acade45ece8b7de1983eca126531894817d743c784879bcd0a3429bf6a3cfd792185eeaf0d
   languageName: node
   linkType: hard
 
