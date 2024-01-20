@@ -617,7 +617,7 @@ __metadata:
     "@oclif/plugin-autocomplete": 3.0.5
     "@oclif/plugin-help": 6.0.11
     "@oclif/plugin-not-found": 3.0.8
-    "@oclif/plugin-update": 4.1.7
+    "@oclif/plugin-update": 4.1.8
     "@total-typescript/ts-reset": 0.5.1
     "@tsconfig/node18-strictest-esm": 1.0.1
     "@types/debug": 4.1.12
@@ -2245,7 +2245,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:3.18.1, @oclif/core@npm:^3.0.4, @oclif/core@npm:^3.15.1, @oclif/core@npm:^3.16.0":
+"@oclif/core@npm:3.18.1, @oclif/core@npm:^3.0.4, @oclif/core@npm:^3.16.0, @oclif/core@npm:^3.18.1":
   version: 3.18.1
   resolution: "@oclif/core@npm:3.18.1"
   dependencies:
@@ -2368,11 +2368,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-update@npm:4.1.7":
-  version: 4.1.7
-  resolution: "@oclif/plugin-update@npm:4.1.7"
+"@oclif/plugin-update@npm:4.1.8":
+  version: 4.1.8
+  resolution: "@oclif/plugin-update@npm:4.1.8"
   dependencies:
-    "@oclif/core": ^3.15.1
+    "@oclif/core": ^3.18.1
     chalk: ^5
     cross-spawn: ^7.0.3
     debug: ^4.3.1
@@ -2382,7 +2382,7 @@ __metadata:
     lodash.throttle: ^4.1.1
     semver: ^7.5.4
     tar-fs: ^2.1.1
-  checksum: faf6537e895a712e70e608f11319d13fdd8415b98cbf229ee56a1662b9f30737d2b64954cb65c22b84ebdf919e3c5e9ca4eee3321961cf0c9a98f2ce42b9246e
+  checksum: b5304e7d686b141427e9856723b750cb345ae84efad1a5f7f11c431b8e23eb43c9bf19e69cc96dde67fa067f8b253c693b0848d0c20303f498496040e5861f0e
   languageName: node
   linkType: hard
 
