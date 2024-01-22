@@ -20,12 +20,9 @@
 * [`fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-withdraw-deal-address-amount)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
-* [`fluence delegator deposit [CAPACITY_COMMITMENT-ID]`](#fluence-delegator-deposit-capacity_commitment-id)
-* [`fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-install-package-name--package-nameversion)
-* [`fluence dep install`](#fluence-dep-install)
-* [`fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-install-package-name--package-nameversion)
-* [`fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION`](#fluence-dep-npm-uninstall-package-name--package-nameversion)
+* [`fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-install-package-name--package-nameversion)
 * [`fluence dep reset`](#fluence-dep-reset)
+* [`fluence dep uninstall PACKAGE-NAME`](#fluence-dep-uninstall-package-name)
 * [`fluence dep versions`](#fluence-dep-versions)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
@@ -609,79 +606,24 @@ EXAMPLES
 
 _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/default/peers.ts)_
 
-## `fluence delegator deposit [CAPACITY_COMMITMENT-ID]`
+## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-Deposit to capacity commitment
+Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ```
 USAGE
-  $ fluence delegator deposit [CAPACITY_COMMITMENT-ID] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
 
 ARGUMENTS
-  CAPACITY_COMMITMENT-ID  Capacity commitment ID
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Valid argument for npm install command. If this argument is omitted all project
+                                       aqua dependencies will be installed and command will also make sure marine and
+                                       mrepl are installed
 
 FLAGS
-  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                                       Don't interactively ask for any input from the user
-  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
-                                                   is unsecure. On local network
-                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
-
-DESCRIPTION
-  Deposit to capacity commitment
-```
-
-_See code: [src/commands/delegator/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/delegator/deposit.ts)_
-
-## `fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
-
-(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo directory)
-
-```
-USAGE
-  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
-
-ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
-                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
-                                       fluence, latest version cargo is aware of. If you want to install a specific
-                                       version, you can do so by appending @ and the version to the package name. For
-                                       example: package@version
-
-FLAGS
-  --force                       Force install even if the dependency/dependencies is/are already installed
-  --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
-                                flag is used. Default: nightly-2023-08-27-x86_64"]}
-
-DESCRIPTION
-  (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo
-  directory)
-
-ALIASES
-  $ fluence dep cargo i
-
-EXAMPLES
-  $ fluence dep cargo install
-```
-
-_See code: [src/commands/dep/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/cargo/install.ts)_
-
-## `fluence dep install`
-
-Install all project dependencies (dependencies are cached inside user's .fluence directory)
-
-```
-USAGE
-  $ fluence dep install [--no-input] [--force]
-
-FLAGS
-  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Install all project dependencies (dependencies are cached inside user's .fluence directory)
+  Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ALIASES
   $ fluence dep i
@@ -692,61 +634,9 @@ EXAMPLES
 
 _See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/install.ts)_
 
-## `fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
-
-Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
-
-```
-USAGE
-  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
-
-ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  valid package spec for npm install command
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
-
-ALIASES
-  $ fluence dep npm i
-
-EXAMPLES
-  $ fluence dep npm install
-```
-
-_See code: [src/commands/dep/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/npm/install.ts)_
-
-## `fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION`
-
-Uninstall project aqua dependency (currently npm is used under the hood for managing aqua dependencies)
-
-```
-USAGE
-  $ fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION [--no-input]
-
-ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  valid package spec for npm install command
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Uninstall project aqua dependency (currently npm is used under the hood for managing aqua dependencies)
-
-ALIASES
-  $ fluence dep npm un
-
-EXAMPLES
-  $ fluence dep npm uninstall
-```
-
-_See code: [src/commands/dep/npm/uninstall.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/npm/uninstall.ts)_
-
 ## `fluence dep reset`
 
-Reset all project dependencies to recommended versions for the current Fluence CLI version
+Reset all project dependencies to recommended versions
 
 ```
 USAGE
@@ -756,7 +646,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Reset all project dependencies to recommended versions for the current Fluence CLI version
+  Reset all project dependencies to recommended versions
 
 ALIASES
   $ fluence dep r
@@ -767,9 +657,35 @@ EXAMPLES
 
 _See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/reset.ts)_
 
+## `fluence dep uninstall PACKAGE-NAME`
+
+Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
+
+```
+USAGE
+  $ fluence dep uninstall PACKAGE-NAME [--no-input]
+
+ARGUMENTS
+  PACKAGE-NAME  Aqua dependency name
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
+
+ALIASES
+  $ fluence dep un
+
+EXAMPLES
+  $ fluence dep uninstall
+```
+
+_See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/uninstall.ts)_
+
 ## `fluence dep versions`
 
-Get versions of all dependencies
+Get versions of all cli dependencies, including aqua, marine, mrepl and internal
 
 ```
 USAGE
@@ -781,7 +697,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Get versions of all dependencies
+  Get versions of all cli dependencies, including aqua, marine, mrepl and internal
 
 ALIASES
   $ fluence dep v

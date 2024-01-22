@@ -21,8 +21,6 @@ import type {
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
-import { versions } from "../versions.js";
-
 import {
   commandObj,
   isInteractive,
@@ -36,7 +34,6 @@ import {
   initFluenceConfig,
 } from "./configs/project/fluence.js";
 import { initNewUserConfig, initUserConfig } from "./configs/user/config.js";
-import { fluenceNPMDependencies } from "./const.js";
 import {
   NODE_JS_MAJOR_VERSION,
   CLI_NAME_FULL,
@@ -155,25 +152,6 @@ export async function initCli<
     : { maybeFluenceConfig: await initFluenceConfig() };
 
   const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
-
-  // ensure default dependencies are always present
-  if (
-    maybeFluenceConfig !== null &&
-    (maybeFluenceConfig.dependencies?.npm === undefined ||
-      !fluenceNPMDependencies.every((d) => {
-        return typeof maybeFluenceConfig.dependencies?.npm?.[d] === "string";
-      }))
-  ) {
-    maybeFluenceConfig.dependencies = {
-      ...maybeFluenceConfig.dependencies,
-      npm: {
-        ...versions.npm,
-        ...maybeFluenceConfig.dependencies?.npm,
-      },
-    };
-
-    await maybeFluenceConfig.$commit();
-  }
 
   await initCountly({ maybeFluenceConfig });
   ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);

@@ -441,8 +441,8 @@ export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
   ", ",
 )}`;
 
-export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
-  "PACKAGE-NAME | PACKAGE-NAME@VERSION";
+export const PACKAGE_NAME = "PACKAGE-NAME";
+export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME@VERSION`;
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
@@ -460,7 +460,7 @@ export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
-export const MREPL_CARGO_DEPENDENCY = "mrepl";
+const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
@@ -475,14 +475,13 @@ export const fluenceNPMDependencies = [
   SPELL_NPM_DEPENDENCY,
 ] as const;
 
-export const fluenceCargoDependencies = [
+export const marineAndMreplDependencies = [
   MARINE_CARGO_DEPENDENCY,
   MREPL_CARGO_DEPENDENCY,
 ] as const;
 
-export const isFluenceCargoDependency = getIsStringUnion(
-  fluenceCargoDependencies,
-);
+export type MarineOrMrepl = (typeof marineAndMreplDependencies)[number];
+export const isMarineOrMrepl = getIsStringUnion(marineAndMreplDependencies);
 
 export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,

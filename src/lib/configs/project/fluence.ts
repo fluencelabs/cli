@@ -50,14 +50,13 @@ import {
   LOCAL_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  MARINE_CARGO_DEPENDENCY,
   PRICE_PER_EPOCH_DEFAULT,
   TOP_LEVEL_SCHEMA_ID,
   DEFAULT_INITIAL_BALANCE,
 } from "../../const.js";
 import {
   validateEffectors,
-  validateAllVersionsAreExact,
+  validateVersionsIsExact,
   validateBatch,
 } from "../../helpers/validations.js";
 import { writeSecretKey } from "../../keyPairs.js";
@@ -613,9 +612,6 @@ delete configSchemaV4ObjPropertiesWithoutWorkers.workers;
 
 const configSchemaV5Obj = {
   ...configSchemaV4Obj,
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  title: FLUENCE_CONFIG_FULL_FILE_NAME,
-  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV4ObjPropertiesWithoutWorkers,
     version: { type: "number", const: 5 },
@@ -675,6 +671,62 @@ const configSchemaV5Obj = {
 
 const configSchemaV5: JSONSchemaType<ConfigV5> = configSchemaV5Obj;
 
+type ConfigV6 = Omit<ConfigV5, "dependencies" | "version"> & {
+  version: 6;
+  aquaDependencies: Record<string, string>;
+  marineVersion?: string;
+  mreplVersion?: string;
+};
+
+const configSchemaV5ObjPropertiesWithoutDependencies: Omit<
+  typeof configSchemaV5Obj.properties,
+  "dependencies"
+> &
+  Mutable<Partial<Pick<typeof configSchemaV5Obj.properties, "dependencies">>> =
+  {
+    ...configSchemaV5Obj.properties,
+  };
+
+delete configSchemaV5ObjPropertiesWithoutDependencies.dependencies;
+
+const configSchemaV6Obj = {
+  ...configSchemaV5Obj,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FULL_FILE_NAME,
+  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
+  properties: {
+    ...configSchemaV5ObjPropertiesWithoutDependencies,
+    version: { type: "number", const: 6 },
+    aquaDependencies: {
+      description: "A map of npm aqua dependency versions",
+      type: "object",
+      additionalProperties: { type: "string" },
+      properties: {
+        "npm-aqua-dependency-name": {
+          type: "string",
+          description:
+            "Valid npm dependency version specification (check out https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies)",
+        },
+      },
+      required: [],
+    },
+    marineVersion: {
+      type: "string",
+      description: "Marine version",
+      nullable: true,
+    },
+    mreplVersion: {
+      type: "string",
+      description: "Mrepl version",
+      nullable: true,
+    },
+  },
+  additionalProperties: false,
+  required: [...configSchemaV5Obj.required, "aquaDependencies"],
+} as const satisfies JSONSchemaType<ConfigV6>;
+
+const configSchemaV6: JSONSchemaType<ConfigV6> = configSchemaV6Obj;
+
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
 };
@@ -685,7 +737,7 @@ const getDefaultConfig = async (): Promise<string> => {
 # You can use \`fluence init\` command to generate a template for new Fluence project
 
 # config version
-version: 5
+version: 6
 
 # Path to the aqua file or directory with aqua files that you want to compile by default.
 # Must be relative to the project root dir
@@ -704,9 +756,7 @@ ${yamlDiffPatch(
   "",
   {},
   {
-    dependencies: {
-      npm: versions.npm,
-    },
+    aquaDependencies: versions.npm,
   },
 )}
 
@@ -805,12 +855,7 @@ ${yamlDiffPatch(
 # # 1. imports from --import flags,
 # # 2. imports from aquaImports property in ${FLUENCE_CONFIG_FULL_FILE_NAME}
 # # 3. project's ${join(DOT_FLUENCE_DIR_NAME, AQUA_DIR_NAME)} dir
-# # 4. npm dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
-# # 5. npm dependencies from user's ${join(
-    DOT_FLUENCE_DIR_NAME,
-    GLOBAL_CONFIG_FULL_FILE_NAME,
-  )}
-# # 6. npm dependencies recommended by fluence
+# # 4. aqua dependencies from ${FLUENCE_CONFIG_FULL_FILE_NAME}
 # aquaImports:
 #   - "./node_modules"
 #
@@ -830,23 +875,18 @@ ${yamlDiffPatch(
 # # You can set this to enforce a particular set of versions of all fluence components
 # cliVersion: ${CLIPackageJSON.version}
 #
+# # A map of npm aqua dependency versions
+# # CLI ensures dependencies are installed each time you run aqua
+# # There are also some dependencies that are installed by default (e.g. ${AQUA_LIB_NPM_DEPENDENCY})
+# # You can check default dependencies using \`fluence dep v --default\`
+# # use \`fluence dep i\` to install project aqua dependencies
+# aquaDependencies:
+#   "${AQUA_LIB_NPM_DEPENDENCY}": ${versions.npm[AQUA_LIB_NPM_DEPENDENCY]}
 #
-# # (For advanced users) Overrides for the marine and mrepl dependencies and enumerates npm aqua dependencies
-# # You can check out current project dependencies using \`fluence dep v\` command
-# dependencies:
-#   # A map of npm aqua dependency versions
-#   # CLI ensures dependencies are installed each time you run aqua
-#   # There are also some dependencies that are installed by default (e.g. ${AQUA_LIB_NPM_DEPENDENCY})
-#   # You can check default dependencies using \`fluence dep v --default\`
-#   # use \`fluence dep npm i\` to install project npm dependencies
-#   npm:
-#     "${AQUA_LIB_NPM_DEPENDENCY}": ${versions.npm[AQUA_LIB_NPM_DEPENDENCY]}
-#
-#   # A map of cargo dependency versions
-#   # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
-#   # use \`fluence dep cargo i\` to install project cargo dependencies
-#   cargo:
-#     ${MARINE_CARGO_DEPENDENCY}: ${versions.cargo.marine}
+# # CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
+# # use \`fluence dep i\` to install marine and mrepl
+# marineVersion: ${versions.cargo.marine}
+# mreplVersion: ${versions.cargo.mrepl}
 #
 # # If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain
 # hosts:
@@ -875,6 +915,7 @@ const validateConfigSchemaV1 = ajv.compile(configSchemaV1);
 const validateConfigSchemaV2 = ajv.compile(configSchemaV2);
 const validateConfigSchemaV3 = ajv.compile(configSchemaV3);
 const validateConfigSchemaV4 = ajv.compile(configSchemaV4);
+const validateConfigSchemaV5 = ajv.compile(configSchemaV5);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -1026,10 +1067,40 @@ const migrations: Migrations<Config> = [
 
     return res;
   },
+  async (config: Config): Promise<ConfigV6> => {
+    if (!validateConfigSchemaV5(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV5.errors,
+        )}`,
+      );
+    }
+
+    const { dependencies, ...restConfig } = config;
+    const marine = dependencies?.cargo?.["marine"];
+    const mrepl = dependencies?.cargo?.["mrepl"];
+
+    const res: ConfigV6 = {
+      ...restConfig,
+      version: 6,
+      aquaDependencies: dependencies?.npm ?? versions.npm,
+      ...(marine === undefined ? {} : { marineVersion: marine }),
+      ...(mrepl === undefined ? {} : { mreplVersion: mrepl }),
+    };
+
+    return res;
+  },
 ];
 
-type Config = ConfigV0 | ConfigV1 | ConfigV2 | ConfigV3 | ConfigV4 | ConfigV5;
-type LatestConfig = ConfigV5;
+type Config =
+  | ConfigV0
+  | ConfigV1
+  | ConfigV2
+  | ConfigV3
+  | ConfigV4
+  | ConfigV5
+  | ConfigV6;
+type LatestConfig = ConfigV6;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 export type FluenceConfigWithServices = FluenceConfig & {
@@ -1155,7 +1226,6 @@ const validateWorkers = (
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatch(
     validateWorkers(config),
-    await validateAllVersionsAreExact(config.dependencies?.cargo ?? {}),
     await validateEffectors(
       Object.entries(config.deals ?? {}).flatMap(([name, { effectors }]) => {
         return (effectors ?? []).map((effector) => {
@@ -1166,6 +1236,8 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
         });
       }),
     ),
+    await validateVersionsIsExact("marineVersion", config.marineVersion),
+    await validateVersionsIsExact("mreplVersion", config.mreplVersion),
   );
 };
 
@@ -1177,8 +1249,9 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
     configSchemaV3,
     configSchemaV4,
     configSchemaV5,
+    configSchemaV6,
   ],
-  latestSchema: configSchemaV5,
+  latestSchema: configSchemaV6,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath,
@@ -1216,4 +1289,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV5;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV6;

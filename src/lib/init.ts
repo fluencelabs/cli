@@ -233,7 +233,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     await addService({
       serviceName,
       fluenceConfig,
-      marineCli: await initMarineCli(fluenceConfig),
+      marineCli: await initMarineCli(),
       absolutePathOrUrl: absoluteServicePath,
       interactive: false,
     });
