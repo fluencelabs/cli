@@ -86,7 +86,7 @@ export const MAX_HEAP_SIZE_DESCRIPTION = `DEPRECATED. Use \`totalMemoryLimit\` s
 
 export const U32_MAX = 4_294_967_295;
 
-export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
+export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 16;
 
 export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
