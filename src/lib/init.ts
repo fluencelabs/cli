@@ -35,6 +35,7 @@ import {
   getMainAquaFileContent,
   READMEs,
   JS_CLIENT_NPM_DEPENDENCY,
+  README_MD_FILE_NAME,
 } from "../lib/const.js";
 import {
   ensureFrontendCompiledAquaPath,
@@ -49,12 +50,14 @@ import {
   getFrontendSrcPath,
   getFrontendCompiledAquaPath,
   getIndexHTMLPath,
-  getTsConfigPath,
+  getFrontendTsConfigPath,
   getFrontendPath,
   ensureGatewayCompiledAquaPath,
   getGatewayServerTSorJSPath,
   getGatewayPackageJSONPath,
   getGatewaySrcPath,
+  getGatewayTsConfigPath,
+  getGatewayPath,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -307,7 +310,11 @@ async function initTSorJSProject({
     writeFile(getIndexHTMLPath(), getIndexHTMLContent(isJS), FS_OPTIONS),
     isJS
       ? Promise.resolve()
-      : writeFile(getTsConfigPath(), FRONTEND_TS_CONFIG_CONTENT, FS_OPTIONS),
+      : writeFile(
+          getFrontendTsConfigPath(),
+          FRONTEND_TS_CONFIG_CONTENT,
+          FS_OPTIONS,
+        ),
 
     (async () => {
       return compileToFiles({
@@ -337,6 +344,7 @@ async function initTSorJSGatewayProject({
   const indexFilePath = getGatewayServerTSorJSPath(isJS);
   const packageJSONPath = getGatewayPackageJSONPath();
   const gatewaySrcPath = getGatewaySrcPath();
+  const gatewayReadmePath = join(getGatewayPath(), README_MD_FILE_NAME);
 
   addRelayPathEntryToConfig(
     fluenceConfig,
@@ -351,9 +359,14 @@ async function initTSorJSGatewayProject({
       jsonStringify(getGatewayPackageJSON(isJS)),
       FS_OPTIONS,
     ),
+    writeFile(gatewayReadmePath, GATEWAY_README_CONTENT, FS_OPTIONS),
     isJS
       ? Promise.resolve()
-      : writeFile(getTsConfigPath(), GATEWAY_TS_CONFIG_CONTENT, FS_OPTIONS),
+      : writeFile(
+          getGatewayTsConfigPath(),
+          GATEWAY_TS_CONFIG_CONTENT,
+          FS_OPTIONS,
+        ),
 
     (async () => {
       return compileToFiles({
@@ -511,9 +524,8 @@ function getGatewayIndexJsContent(isJS: boolean) {
   return `${
     isJS
       ? ""
-      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";'
-  }
-import { Fluence } from "@fluencelabs/js-client";
+      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";\n'
+  }import { Fluence } from "@fluencelabs/js-client";
 import relays from "./relays.json" assert { type: "json" };
 import { ${isJS ? "" : "type Static, "}Type } from "@sinclair/typebox";
 import fastify from "fastify";
@@ -585,7 +597,7 @@ server.post${
 );
 
 // Fire and forget
-server.post("/my/webhook/hello", async (request, reply) => {
+server.post("/my/webhook/hello", async (_request, reply) => {
   void helloWorld("Fluence");
   return reply.send();
 });
@@ -682,7 +694,9 @@ function getGatewayPackageJSON(isJS: boolean) {
         : {
             build: "rm -rf ./dist && tsc -p tsconfig.json",
           }),
-      start: isJS ? "node src/server.js" : "node dist/server.js",
+      start: isJS
+        ? "node src/server.js"
+        : "node --loader ts-node/esm src/server.ts",
     },
     dependencies: {
       [JS_CLIENT_NPM_DEPENDENCY]:
@@ -697,9 +711,27 @@ function getGatewayPackageJSON(isJS: boolean) {
           "@types/node": "20.11.5",
           "@fastify/type-provider-typebox": "4.0.0",
           typescript: "5.3.3",
+          "ts-node": "10.9.2",
         },
   };
 }
+
+const GATEWAY_README_CONTENT = `## Fluence HTTP Gateway
+
+Here you can find an example of simple Fluence HTTP gateway.
+The gateway allows you to map Aqua functions to http requests i.e., you can create HTTP route and handle the incoming request by executing some Aqua function.
+You can check it out and test this repo.
+
+### Start gateway
+
+- \`npm install\`
+- \`npm run start\`
+- \`curl -X POST http://localhost:8080/my/callback/hello -H "ACCESS_TOKEN: abcdefhi" -H 'Content-Type: application/json' -d '{"name": "Fluence" }'\`
+
+After running these commands you should see: \`Hello, Fluence\`
+
+> Remember to replace hardcoded token and peer private key. You can achieve that by placing these credentials in env variables, for example.
+`;
 
 function addRelayPathEntryToConfig(fluenceConfig: FluenceConfig, path: string) {
   if (fluenceConfig.relaysPath === undefined) {

@@ -307,8 +307,12 @@ export const getGatewayPackageJSONPath = (): string => {
   return join(getGatewayPath(), PACKAGE_JSON_FILE_NAME);
 };
 
-export const getTsConfigPath = (): string => {
+export const getFrontendTsConfigPath = (): string => {
   return join(getFrontendPath(), TS_CONFIG_FILE_NAME);
+};
+
+export const getGatewayTsConfigPath = (): string => {
+  return join(getGatewayPath(), TS_CONFIG_FILE_NAME);
 };
 
 export const getFrontendCompiledAquaPath = (): string => {
