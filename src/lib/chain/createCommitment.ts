@@ -179,11 +179,7 @@ export async function createCommitment(flags: {
       commitment.collateralPerUnit * commitment.unitCount;
 
     commandObj.logToStderr(
-      "Collateral for commitmentId: ",
-      commitmentId,
-      " = ",
-      collateralToApproveCommitment,
-      "...",
+      `Collateral for commitmentId: ${commitmentId} = ${collateralToApproveCommitment}...`,
     );
 
     collateralToApproveCommitments =
@@ -208,9 +204,7 @@ export async function createCommitment(flags: {
 
   for (const commitmentId of commitmentIds) {
     commandObj.logToStderr(
-      "Deposit collateral for commitmentId: ",
-      commitmentId,
-      "...",
+      `Deposit collateral for commitmentId: ${commitmentId}...`,
     );
 
     const depositCollateralTx = await capacity.depositCollateral(commitmentId);
