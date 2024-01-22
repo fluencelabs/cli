@@ -50,7 +50,6 @@ import {
   defaultNumberProperties,
   DEAL_CONFIG,
   DEFAULT_CC_DURATION,
-  DEFAULT_CC_DELEGATOR,
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
   type ContractsENV,
@@ -91,14 +90,14 @@ import {
 
 export type CapacityCommitment = {
   duration: string;
-  delegator: string;
   rewardDelegationRate: number;
+  delegator?: string;
 };
 
 const capacityCommitmentSchema = {
   type: "object",
   description: "Defines a capacity commitment",
-  required: ["duration", "delegator", "rewardDelegationRate"],
+  required: ["duration", "rewardDelegationRate"],
   additionalProperties: false,
   properties: {
     duration: {
@@ -109,7 +108,7 @@ const capacityCommitmentSchema = {
     delegator: {
       type: "string",
       description: "Delegator address",
-      default: DEFAULT_CC_DELEGATOR,
+      nullable: true,
     },
     rewardDelegationRate: {
       type: "number",
@@ -399,7 +398,6 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
             noxName,
             {
               duration: DEFAULT_CC_DURATION,
-              delegator: DEFAULT_CC_DELEGATOR,
               rewardDelegationRate: DEFAULT_CC_REWARD_DELEGATION_RATE,
             },
           ] as const;

@@ -36,7 +36,7 @@ export async function createCommitment(flags: {
   "priv-key": string | undefined;
   "nox-names"?: string | undefined;
 }) {
-  const { dealClient } = await getDealClient();
+  const { dealClient, signerOrWallet } = await getDealClient();
   const core = await dealClient.getCore();
   const capacity = await dealClient.getCapacity();
 
@@ -109,10 +109,12 @@ export async function createCommitment(flags: {
 
     promptConfirmTx(flags["priv-key"]);
 
+    const signerAddress = await signerOrWallet.getAddress();
+
     const registerPeerTx = await capacity.createCommitment(
       peerIdUint8Arr,
       ccDuration,
-      ccDelegator,
+      ccDelegator ?? signerAddress,
       ccRewardDelegationRate,
     );
 

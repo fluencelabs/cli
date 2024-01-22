@@ -22,7 +22,6 @@ import {
   defaultNumberProperties,
   type NumberProperty,
   numberProperties,
-  DEFAULT_CC_DELEGATOR,
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
@@ -101,7 +100,6 @@ export async function addComputePeers(
       // default: anybody can activate capacity commitment
       // optional
       message: `Enter capacity commitment delegator address`,
-      default: DEFAULT_CC_DELEGATOR,
       validate: validateAddress,
     });
 

@@ -711,8 +711,6 @@ export const LOCAL_NET_WALLET_KEYS = [
 
 export const DEFAULT_OFFER_NAME = "offer";
 
-export const DEFAULT_CC_DELEGATOR =
-  "0x8ba1f109551bD432803012645Ac136ddd64DBA72";
 export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
 export const DEFAULT_CC_DURATION = "5 minutes";
 export const DURATION_EXAMPLE =
