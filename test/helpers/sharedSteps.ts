@@ -38,6 +38,7 @@ import {
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   RUN_DEPLOYED_SERVICES_FUNCTION_NAME,
   type Template,
+  WORKER_SPELL,
 } from "../../src/lib/const.js";
 import {
   LOGS_GET_ERROR_START,
