@@ -24,15 +24,15 @@ import {
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   WORKERS_CONFIG_FULL_FILE_NAME,
-} from "../../src/lib/const.js";
+} from "../../../src/lib/const.js";
 import {
+  jsonStringify,
   setTryTimeout,
   stringifyUnknown,
-} from "../../src/lib/helpers/utils.js";
-import {
-  getAquaMainPath,
-  getFluenceAquaServicesPath,
-} from "../../src/lib/paths.js";
+} from "../../../src/lib/helpers/utils.js";
+import { getFluenceAquaServicesPath } from "../../../src/lib/paths.js";
+import { assertHasKey } from "../../../src/lib/typeHelpers.js";
+import { fluence } from "../../helpers/commonWithSetupTests.js";
 import {
   composeInterfacesFileContents,
   MAIN_RS_CONTENT,
@@ -43,23 +43,54 @@ import {
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   SERVICE_INTERFACES,
   UPDATED_SERVICE_INTERFACES,
-} from "../constants.js";
-import { fluence, initializeTemplate } from "../helpers/common.js";
-import { maybeConcurrentTest } from "../helpers/testWrapper.js";
-import { assertHasPeer, sortPeers } from "../helpers.js";
+} from "../../helpers/constants.js";
+import { TEST_AQUA_DIR_PATH } from "../../helpers/paths.js";
 import {
   createSpellAndAddToDeal,
   getFluenceConfig,
   getServiceConfig,
+  initializeTemplate,
   multiaddrs,
+  runAquaFunction,
+  updateMainAqua,
   updateMainRs,
-} from "../sharedSteps.js";
+} from "../../helpers/sharedSteps.js";
+import { maybeConcurrentTest } from "../../helpers/testWrapper.js";
 
 const peerIds = multiaddrs
   .map(({ peerId }) => {
     return peerId;
   })
   .sort();
+
+const sortPeers = <T extends { peer: string }>(
+  { peer: peerA }: T,
+  { peer: peerB }: T,
+) => {
+  if (peerA < peerB) {
+    return -1;
+  }
+
+  if (peerA > peerB) {
+    return 1;
+  }
+
+  return 0;
+};
+
+const assertHasPeer = (result: unknown): { peer: string } => {
+  try {
+    assertHasKey("peer", result);
+    assert(typeof result.peer === "string");
+    return { ...result, peer: result.peer };
+  } catch (err) {
+    throw new Error(
+      `Running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is supposed to return an array of objects of a particular shape: { peer: string }. One of the received objects doesn't match the shape: ${jsonStringify(
+        result,
+      )}. Error: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+};
 
 describe("integration tests", () => {
   maybeConcurrentTest(
@@ -68,13 +99,12 @@ describe("integration tests", () => {
       const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
       await initializeTemplate(cwd, "minimal");
 
-      await writeFile(
-        getAquaMainPath(cwd),
+      await updateMainAqua(
+        cwd,
         await readFile(
-          join("test", "_resources", "aqua", "runDeployedWorkers.aqua"),
+          join(TEST_AQUA_DIR_PATH, "runDeployedWorkers.aqua"),
           FS_OPTIONS,
         ),
-        FS_OPTIONS,
       );
 
       await fluence({
@@ -151,7 +181,6 @@ describe("integration tests", () => {
         cwd,
       });
 
-      // TODO: use waitUntilRunDeployedServicesReturnsExpected()
       await setTryTimeout(
         async () => {
           const result = await fluence({
@@ -209,13 +238,10 @@ describe("integration tests", () => {
 
       const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
 
-      let allWorkersAreRemoved = await fluence({
-        args: ["run"],
-        flags: {
-          f: "areAllWorkersRemoved()",
-        },
+      let allWorkersAreRemoved = await runAquaFunction(
         cwd,
-      });
+        "areAllWorkersRemoved",
+      );
 
       expect(allWorkersAreRemoved.trim()).toBe("false");
 
@@ -240,13 +266,7 @@ describe("integration tests", () => {
         cwd,
       });
 
-      allWorkersAreRemoved = await fluence({
-        args: ["run"],
-        flags: {
-          f: "areAllWorkersRemoved()",
-        },
-        cwd,
-      });
+      allWorkersAreRemoved = await runAquaFunction(cwd, "areAllWorkersRemoved");
 
       expect(allWorkersAreRemoved.trim()).toBe("true");
     },

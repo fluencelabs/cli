@@ -17,15 +17,14 @@
 import { cp } from "fs/promises";
 import { join } from "node:path";
 
+import { fluence } from "../../helpers/commonWithSetupTests.js";
 import {
   MY_SERVICE_NAME,
   NEW_MODULE_NAME,
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
-  TEST_AQUA_DIR_PATH,
-} from "../constants.js";
-import { fluence, initializeTemplate } from "../helpers/common.js";
-import { maybeConcurrentTest } from "../helpers/testWrapper.js";
+} from "../../helpers/constants.js";
+import { TEST_AQUA_DIR_PATH } from "../../helpers/paths.js";
 import {
   assertLogsAreValid,
   build,
@@ -33,13 +32,15 @@ import {
   createServiceAndAddToDeal,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
+  initializeTemplate,
   updateFluenceConfigForTest,
   updateMainRs,
   updateSpellAqua,
   waitUntilAquaScriptReturnsExpected,
   waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
-} from "../sharedSteps.js";
+} from "../../helpers/sharedSteps.js";
+import { maybeConcurrentTest } from "../../helpers/testWrapper.js";
 
 describe("Deal update tests", () => {
   maybeConcurrentTest(

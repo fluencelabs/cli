@@ -19,7 +19,7 @@ import { access, readFile, writeFile } from "node:fs/promises";
 
 import lockfile from "proper-lockfile";
 
-export type Account = {
+type Account = {
   address: string;
   privateKey: string;
 };
@@ -137,7 +137,6 @@ async function processFile(
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const release = await lockfile.lock(filePath, {
       retries: {
         retries: 30,
@@ -153,7 +152,6 @@ async function processFile(
 
       return processedData;
     } finally {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       await release();
     }
   } catch (error) {
@@ -183,21 +181,10 @@ function processData(data: string): number {
 }
 
 export async function getTestDefaultSenderAccount(): Promise<Account> {
-  try {
-    // eslint-disable-next-line no-unused-expressions
-    test.name;
-  } catch {
-    console.log("Not running in the setup-script.");
-    return LOCAL_NET_SENDER_ACCOUNT;
-  }
-
   const privateKeyIndexFilePath = "tmp/private_key_index.txt";
   const index = await processFile(privateKeyIndexFilePath, processData);
   const account = LOCAL_NET_DEFAULT_ACCOUNTS[index];
   assert(account !== undefined);
-
-  const privateKey = account.privateKey;
-  console.log(`Using private key ${privateKey}. Index: ${index}`);
 
   return account;
 }

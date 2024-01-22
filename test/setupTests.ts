@@ -28,12 +28,12 @@ import {
 } from "../src/lib/const.js";
 
 import "../src/lib/setupEnvironment.js";
+import { fluence } from "./helpers/commonWithSetupTests.js";
+import { fluenceEnv, NO_PROJECT_TEST_NAME } from "./helpers/constants.js";
 import {
-  fluenceEnv,
-  NO_PROJECT_TEST_NAME,
+  getInitializedTemplatePath,
   pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-} from "./constants.js";
-import { fluence, getInitializedTemplatePath } from "./helpers/common.js";
+} from "./helpers/paths.js";
 
 /**
  * IMPORTANT: this file is executed before all tests,

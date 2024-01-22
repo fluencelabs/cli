@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { cp, rm } from "node:fs/promises";
 import { arch, platform } from "node:os";
 import { join } from "node:path";
 
 import { CustomColors } from "@oclif/color";
 
-import { CLI_NAME, type Template } from "../../src/lib/const.js";
+import { CLI_NAME } from "../../src/lib/const.js";
 import { execPromise, type ExecPromiseArg } from "../../src/lib/execPromise.js";
 import { flagsToArgs } from "../../src/lib/helpers/utils.js";
 
@@ -83,21 +82,4 @@ export const fluence = async ({
   }
 
   return res;
-};
-
-export const getInitializedTemplatePath = (template: Template) => {
-  return join("tmp", "templates", template);
-};
-
-export const initializeTemplate = async (
-  cwd: string,
-  template: Template,
-): Promise<void> => {
-  const templatePath = getInitializedTemplatePath(template);
-
-  try {
-    await rm(cwd, { recursive: true });
-  } catch {}
-
-  await cp(templatePath, cwd, { recursive: true });
 };

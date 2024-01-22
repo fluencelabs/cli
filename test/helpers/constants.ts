@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { join } from "node:path";
-
-import { FLUENCE_ENV } from "../src/lib/setupEnvironment.js";
+import { FLUENCE_ENV } from "../../src/lib/setupEnvironment.js";
 
 export const fluenceEnv = process.env[FLUENCE_ENV];
 
@@ -30,13 +28,6 @@ export const NEW_MODULE_NAME = "newModule";
 export const WORKER_SPELL = "worker-spell";
 
 export const NO_PROJECT_TEST_NAME = "shouldWorkWithoutProject";
-
-export const TEST_AQUA_DIR_PATH = join("test", "_resources", "aqua");
-export const pathToTheTemplateWhereLocalEnvironmentIsSpunUp = join(
-  "tmp",
-  "templates",
-  "quickstart",
-);
 
 export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]
 use marine_rs_sdk::marine;

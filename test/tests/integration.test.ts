@@ -15,28 +15,25 @@
  */
 
 import { cp } from "fs/promises";
+import assert from "node:assert";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../src/lib/const.js";
-
-import { fluenceEnv, NO_PROJECT_TEST_NAME } from "./constants.js";
-import { fluence, initializeTemplate } from "./helpers/common.js";
-import { maybeConcurrentTest } from "./helpers/testWrapper.js";
-import { multiaddrs } from "./sharedSteps.js";
+import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../../src/lib/const.js";
+import { fluenceEnv, NO_PROJECT_TEST_NAME } from "../helpers/constants.js";
+import {
+  initializeTemplate,
+  multiaddrs,
+  runAquaFunction,
+} from "../helpers/sharedSteps.js";
+import { maybeConcurrentTest } from "../helpers/testWrapper.js";
 
 describe("integration tests", () => {
   maybeConcurrentTest("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await initializeTemplate(cwd, "minimal");
 
-    await fluence({
-      args: ["run"],
-      flags: {
-        f: 'helloWorld("Fluence")',
-      },
-      cwd,
-    });
+    await runAquaFunction(cwd, "helloWorld", ["Fluence"]);
   });
 
   maybeConcurrentTest("should work without project", async () => {
@@ -55,16 +52,12 @@ describe("integration tests", () => {
     await rm(PACKAGE_JSON_FILE_NAME);
 
     try {
-      const result = await fluence({
-        args: ["run"],
-        flags: {
-          relay: multiaddrs[0]?.multiaddr,
-          env: fluenceEnv,
-          f: "identify()",
-          i: "smoke.aqua",
-          quiet: true,
-        },
-        cwd,
+      assert(multiaddrs[0] !== undefined, "multiaddrs is undefined");
+
+      const result = await runAquaFunction(cwd, "identify", [], {
+        relay: multiaddrs[0].multiaddr,
+        env: fluenceEnv,
+        i: "smoke.aqua",
       });
 
       const parsedResult = JSON.parse(result);
