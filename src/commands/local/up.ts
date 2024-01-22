@@ -17,6 +17,8 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { createCommitment } from "../../lib/chain/createCommitment.js";
+import { register } from "../../lib/chain/register.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   DEFAULT_OFFER_NAME,
@@ -28,7 +30,6 @@ import {
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { register } from "../provider/register.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
@@ -79,11 +80,14 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
+    flags["priv-key"] = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
+    flags.env = "local";
+
     await register({
       ...flags,
-      "priv-key": flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY,
-      env: "local",
       offer: DEFAULT_OFFER_NAME,
     });
+
+    await createCommitment(flags);
   }
 }
