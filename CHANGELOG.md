@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.13.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.4...fluence-cli-v0.13.5) (2024-01-22)
+
+
+### Features
+
+* add `dep i` reminder ([#730](https://github.com/fluencelabs/cli/issues/730)) ([256c56c](https://github.com/fluencelabs/cli/commit/256c56c9333a07d9c2a51bfd124adcb675e0b0ed))
+* add aqua header to services empty file ([#717](https://github.com/fluencelabs/cli/issues/717)) ([d340813](https://github.com/fluencelabs/cli/commit/d340813470b7cdee3d3fa839c21abf20d397bb7a))
+* add SPELL-NAME arg to deal logs ([#718](https://github.com/fluencelabs/cli/issues/718)) ([b20a571](https://github.com/fluencelabs/cli/commit/b20a571b4dbd7700a36b216c49331e4100505772))
+* **cli:** Add `aqua` header to `services.aqua` file ([#716](https://github.com/fluencelabs/cli/issues/716)) ([66dd9eb](https://github.com/fluencelabs/cli/commit/66dd9ebb38d077e7fa0a4181851dc2d585865982))
+* improve docs and validation for memory limit [fixes DXJ-619 DXJ-546 DXJ-620] ([#713](https://github.com/fluencelabs/cli/issues/713)) ([a939c6e](https://github.com/fluencelabs/cli/commit/a939c6ef8a2f18bbd35d8c7a8c34dca44b591f54))
+* set default number of compute units to 32 ([#704](https://github.com/fluencelabs/cli/issues/704)) ([eac6aa3](https://github.com/fluencelabs/cli/commit/eac6aa3fbb0963c71ec1c9a97f83234c6bbaac45))
+* simplify dependency related commands and rename dependency related properties in fluence.yaml [fixes DXJ-634 DXJ-598] ([#721](https://github.com/fluencelabs/cli/issues/721)) ([7ee6bd0](https://github.com/fluencelabs/cli/commit/7ee6bd013c6b1f9fd03f5638283b3493456a9c5a))
+* **test:** DXJ-574 updating the deal by changing a spell ([#697](https://github.com/fluencelabs/cli/issues/697)) ([c4cc310](https://github.com/fluencelabs/cli/commit/c4cc310ed8de0525a05981dac58e951e1a507b6a))
+* up js client 0.6.0 ([#725](https://github.com/fluencelabs/cli/issues/725)) ([c410c7a](https://github.com/fluencelabs/cli/commit/c410c7ab2d946c21908d129f63311b4892e8bd4f))
+
+
+### Bug Fixes
+
+* **deps:** update spell to v0.6.6 ([#706](https://github.com/fluencelabs/cli/issues/706)) ([6d10586](https://github.com/fluencelabs/cli/commit/6d10586814ac81929897f762aac37d8516a17642))
+* **deps:** update spell to v0.6.7 ([#715](https://github.com/fluencelabs/cli/issues/715)) ([f542353](https://github.com/fluencelabs/cli/commit/f542353dc8acfddd5cbb0420cfd342478c14f775))
+* **tests:** Add `aqua` header to `smoke.aqua` ([#719](https://github.com/fluencelabs/cli/issues/719)) ([1400b66](https://github.com/fluencelabs/cli/commit/1400b660439838f0a4a45f6beaeaefc407fd73ae))
+
 ## [0.13.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.3...fluence-cli-v0.13.4) (2024-01-11)
 
 

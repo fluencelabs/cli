@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { rm, mkdir, rename } from "fs/promises";
 import { access } from "node:fs/promises";
 import { arch, homedir, platform } from "node:os";
 import { join } from "node:path";
@@ -23,26 +24,22 @@ import { color } from "@oclif/color";
 import { versions } from "../versions.js";
 
 import { commandObj } from "./commandObj.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
 import {
-  MARINE_CARGO_DEPENDENCY,
-  MREPL_CARGO_DEPENDENCY,
   RUST_WASM32_WASI_TARGET,
-  isFluenceCargoDependency,
+  isMarineOrMrepl,
+  type MarineOrMrepl,
 } from "./const.js";
 import { addCountlyLog } from "./countly.js";
 import { execPromise } from "./execPromise.js";
 import { downloadFile } from "./helpers/downloadFile.js";
-import {
-  handleInstallation,
-  resolveCargoDependencies,
-  resolveDependencyDirPathAndTmpPath,
-  splitPackageNameAndVersion,
-  updateConfigsIfVersionChanged,
-} from "./helpers/package.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { isExactVersion } from "./helpers/validations.js";
+import {
+  ensureUserFluenceCargoDir,
+  ensureUserFluenceTmpCargoDir,
+} from "./paths.js";
 
 const CARGO = "cargo";
 const RUSTUP = "rustup";
@@ -193,9 +190,11 @@ const hasRequiredRustTarget = async (): Promise<boolean> => {
   ).includes(`${RUST_WASM32_WASI_TARGET} (installed)`);
 };
 
-const getLatestVersionOfCargoDependency = async (
+async function getLatestVersionOfCargoDependency(
   name: string,
-): Promise<string> => {
+): Promise<string> {
+  await ensureRust();
+
   return (
     (
       await execPromise({
@@ -209,7 +208,7 @@ const getLatestVersionOfCargoDependency = async (
       )}. Please make sure ${color.yellow(name)} is spelled correctly`,
     )
   ).trim();
-};
+}
 
 type InstallCargoDependencyArg = {
   toolchain: string | undefined;
@@ -219,13 +218,13 @@ type InstallCargoDependencyArg = {
   dependencyDirPath: string;
 };
 
-const installCargoDependency = async ({
+async function installCargoDependency({
   toolchain,
   name,
   version,
   dependencyDirPath,
   dependencyTmpDirPath,
-}: InstallCargoDependencyArg) => {
+}: InstallCargoDependencyArg) {
   await execPromise({
     command: CARGO,
     args: [
@@ -237,37 +236,27 @@ const installCargoDependency = async ({
       version,
       root: dependencyTmpDirPath,
     },
-    spinnerMessage: `Installing ${name}@${version} to ${dependencyDirPath}`,
+    spinnerMessage: `Installing ${name}@${version} using cargo to ${dependencyDirPath}`,
     printOutput: true,
   });
-};
+}
 
 type TryDownloadingBinaryArg = {
-  name: string;
+  name: MarineOrMrepl;
   version: string;
   dependencyDirPath: string;
-  force: boolean;
 };
 
 /**
  * Attempts to download pre-built binary from github releases
  * @return true if binary was downloaded successfully and is working. Otherwise returns error message
  */
-const tryDownloadingBinary = async ({
+async function tryDownloadingBinary({
   name,
   version,
   dependencyDirPath,
-  force,
-}: TryDownloadingBinaryArg): Promise<string | true> => {
-  if (![MARINE_CARGO_DEPENDENCY, MREPL_CARGO_DEPENDENCY].includes(name)) {
-    return 'Only "marine" and "mrepl" cargo dependencies can be downloaded as pre-built binaries';
-  }
-
+}: TryDownloadingBinaryArg): Promise<string | true> {
   const binaryPath = join(dependencyDirPath, "bin", name);
-
-  if (force) {
-    return "`--force` flag was used";
-  }
 
   try {
     await access(binaryPath);
@@ -328,31 +317,23 @@ const tryDownloadingBinary = async ({
   }
 
   return true;
-};
+}
 
 type CargoDependencyArg = {
-  nameAndVersion: string;
-  maybeFluenceConfig: FluenceConfig | null;
-  force?: boolean;
+  name: MarineOrMrepl;
+  version?: string | undefined;
   toolchain?: string | undefined;
-  explicitInstallation?: boolean;
 };
 
-export const ensureCargoDependency = async ({
-  nameAndVersion,
-  maybeFluenceConfig,
-  force = false,
+export async function ensureMarineOrMreplDependency({
+  name,
+  version: versionFromArgs,
   toolchain: toolchainFromArgs,
-  explicitInstallation = false,
-}: CargoDependencyArg): Promise<string> => {
-  await ensureRust();
-  const [name, maybeVersion] = splitPackageNameAndVersion(nameAndVersion);
-
+}: CargoDependencyArg): Promise<string> {
   const version =
     (await resolveVersionToInstall({
       name,
-      maybeVersion,
-      maybeFluenceConfig,
+      version: versionFromArgs,
     })) ?? (await getLatestVersionOfCargoDependency(name));
 
   const toolchain =
@@ -360,98 +341,144 @@ export const ensureCargoDependency = async ({
     (name in versions.cargo ? versions["rust-toolchain"] : undefined);
 
   const { dependencyDirPath, dependencyTmpDirPath } =
-    await resolveDependencyDirPathAndTmpPath({
-      name,
-      packageManager: "cargo",
-      version,
-    });
+    await resolveDependencyDirPathAndTmpPath({ name, version });
 
-  const maybeErrorMessage = await tryDownloadingBinary({
+  const errorMessage = await tryDownloadingBinary({
     name,
     version,
     dependencyDirPath,
-    force,
   });
 
-  if (typeof maybeErrorMessage === "string") {
-    commandObj.warn(
-      `Using cargo to install ${name}@${version} instead of using downloaded pre-built binary. Reason: ${maybeErrorMessage}`,
-    );
+  if (typeof errorMessage === "string") {
+    commandObj.warn(errorMessage);
 
-    await handleInstallation({
-      force,
+    await installUsingCargo({
       dependencyDirPath,
       dependencyTmpDirPath,
-      explicitInstallation,
       name,
       version,
-      installDependency: () => {
-        return installCargoDependency({
-          dependencyDirPath,
-          dependencyTmpDirPath,
-          name,
-          toolchain,
-          version,
-        });
-      },
+      toolchain,
     });
   }
 
-  await updateConfigsIfVersionChanged({
-    maybeFluenceConfig,
-    name,
-    version,
-    packageManager: "cargo",
-  });
+  const hasInstalledNotDefaultVersion = version !== versions.cargo[name];
+  const fluenceConfig = await initFluenceConfig();
+
+  const hasInstalledDefaultVersionButPreviouslyNotDefaultVersionWasUsed =
+    fluenceConfig?.[`${name}Version`] !== undefined &&
+    version === versions.cargo[name];
+
+  if (
+    fluenceConfig !== null &&
+    (hasInstalledNotDefaultVersion ||
+      hasInstalledDefaultVersionButPreviouslyNotDefaultVersionWasUsed)
+  ) {
+    fluenceConfig[`${name}Version`] = version;
+    await fluenceConfig.$commit();
+  }
 
   await addCountlyLog(`Using ${name}@${version} cargo dependency`);
   return dependencyDirPath;
-};
+}
 
-type InstallAllDependenciesArg = {
-  maybeFluenceConfig: FluenceConfig | null;
-  force: boolean;
-};
-
-export const installAllCargoDependencies = async ({
-  maybeFluenceConfig,
-  force,
-}: InstallAllDependenciesArg): Promise<void> => {
-  for (const [name, version] of Object.entries(
-    resolveCargoDependencies(maybeFluenceConfig),
-  )) {
+export async function ensureMarineAndMreplDependencies(): Promise<void> {
+  for (const [name, version] of await resolveMarineAndMreplDependencies()) {
     // Not installing dependencies in parallel
     // for cargo logs to be clearly readable
     // eslint-disable-next-line no-await-in-loop
-    await ensureCargoDependency({
-      nameAndVersion: `${name}@${version}`,
-      maybeFluenceConfig,
-      force,
-    });
+    await ensureMarineOrMreplDependency({ name, version });
   }
-};
+}
 
 type ResolveVersionArg = {
   name: string;
-  maybeVersion: string | undefined;
-  maybeFluenceConfig: FluenceConfig | null;
+  version: string | undefined;
 };
 
 async function resolveVersionToInstall({
   name,
-  maybeVersion,
-  maybeFluenceConfig,
+  version,
 }: ResolveVersionArg): Promise<string | undefined> {
-  if (typeof maybeVersion === "string") {
-    return (await isExactVersion(maybeVersion)) ? maybeVersion : undefined;
+  if (typeof version === "string") {
+    return (await isExactVersion(version)) ? version : undefined;
   }
 
-  const maybeRecommendedVersion = isFluenceCargoDependency(name)
-    ? versions.cargo[name]
+  const fluenceConfig = await initFluenceConfig();
+  return isMarineOrMrepl(name)
+    ? fluenceConfig?.[`${name}Version`] ?? versions.cargo[name]
     : undefined;
+}
 
-  const maybeKnownVersion =
-    maybeFluenceConfig?.dependencies?.cargo?.[name] ?? maybeRecommendedVersion;
+export async function resolveMarineAndMreplDependencies() {
+  const fluenceConfig = await initFluenceConfig();
 
-  return maybeKnownVersion;
+  return [
+    ["marine", fluenceConfig?.marineVersion ?? versions.cargo.marine],
+    ["mrepl", fluenceConfig?.mreplVersion ?? versions.cargo.mrepl],
+  ] as const;
+}
+
+type ResolveDependencyDirPathAndTmpPath = {
+  name: string;
+  version: string;
+};
+
+export async function resolveDependencyDirPathAndTmpPath({
+  name,
+  version,
+}: ResolveDependencyDirPathAndTmpPath): Promise<{
+  dependencyTmpDirPath: string;
+  dependencyDirPath: string;
+}> {
+  const [depDirPath, depTmpDirPath] = await Promise.all([
+    ensureUserFluenceCargoDir(),
+    ensureUserFluenceTmpCargoDir(),
+  ]);
+
+  const dependencyPathEnding = join(...name.split("/"), version);
+  return {
+    dependencyTmpDirPath: join(depTmpDirPath, dependencyPathEnding),
+    dependencyDirPath: join(depDirPath, dependencyPathEnding),
+  };
+}
+
+type HandleInstallationArg = {
+  dependencyDirPath: string;
+  dependencyTmpDirPath: string;
+  name: string;
+  version: string;
+  toolchain: string | undefined;
+};
+
+export async function installUsingCargo({
+  dependencyDirPath,
+  dependencyTmpDirPath,
+  name,
+  version,
+  toolchain,
+}: HandleInstallationArg): Promise<void> {
+  try {
+    // if dependency is already installed it will be there
+    // so there is no need to install
+    await access(dependencyDirPath);
+  } catch {
+    await rm(dependencyTmpDirPath, { recursive: true, force: true });
+
+    await installCargoDependency({
+      dependencyDirPath,
+      dependencyTmpDirPath,
+      name,
+      toolchain,
+      version,
+    });
+
+    await rm(dependencyDirPath, { recursive: true, force: true });
+    // Make sure the parent directory exists before moving the dependency folder inside it.
+    await mkdir(join(dependencyDirPath, ".."), { recursive: true });
+    await rename(dependencyTmpDirPath, dependencyDirPath);
+
+    commandObj.log(
+      `Successfully installed ${name}@${version} to ${dependencyDirPath}`,
+    );
+  }
 }

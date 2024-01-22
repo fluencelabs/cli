@@ -63,6 +63,7 @@ import { initNewEnvConfig } from "./configs/project/env.js";
 import { initNewReadonlyProviderConfig } from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
+import { SERVICE_INTERFACE_FILE_HEADER } from "./const.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
@@ -139,7 +140,13 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   await addCountlyEvent(`init:template:${template}`);
   await mkdir(projectPath, { recursive: true });
   setProjectRootDir(projectPath);
-  await writeFile(await ensureFluenceAquaServicesPath(), "", FS_OPTIONS);
+
+  await writeFile(
+    await ensureFluenceAquaServicesPath(),
+    `${SERVICE_INTERFACE_FILE_HEADER}\n`,
+    FS_OPTIONS,
+  );
+
   const fluenceConfig = await initNewFluenceConfig();
   await copyDefaultDependencies();
   const fluenceEnv = await resolveFluenceEnv(options.env);
@@ -225,7 +232,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     await addService({
       serviceName,
       fluenceConfig,
-      marineCli: await initMarineCli(fluenceConfig),
+      marineCli: await initMarineCli(),
       absolutePathOrUrl: absoluteServicePath,
       interactive: false,
     });

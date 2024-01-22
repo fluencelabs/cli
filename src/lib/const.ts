@@ -438,8 +438,8 @@ export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
   ", ",
 )}`;
 
-export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
-  "PACKAGE-NAME | PACKAGE-NAME@VERSION";
+export const PACKAGE_NAME = "PACKAGE-NAME";
+export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME@VERSION`;
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
@@ -457,7 +457,7 @@ export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
-export const MREPL_CARGO_DEPENDENCY = "mrepl";
+const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
@@ -472,14 +472,13 @@ export const fluenceNPMDependencies = [
   SPELL_NPM_DEPENDENCY,
 ] as const;
 
-export const fluenceCargoDependencies = [
+export const marineAndMreplDependencies = [
   MARINE_CARGO_DEPENDENCY,
   MREPL_CARGO_DEPENDENCY,
 ] as const;
 
-export const isFluenceCargoDependency = getIsStringUnion(
-  fluenceCargoDependencies,
-);
+export type MarineOrMrepl = (typeof marineAndMreplDependencies)[number];
+export const isMarineOrMrepl = getIsStringUnion(marineAndMreplDependencies);
 
 export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
@@ -620,14 +619,11 @@ export function getSpellAquaFileContent(spellName: string) {
 -- Note: spell main function must be exported
 export spell
 
-import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    msg = "Spell is working!"
-    str <- Debug.stringify(msg)
-    Spell "worker-spell"
-    Spell.store_log(str)
+    Spell "${spellName}"
+    Spell.store_log("Spell '${spellName}' is working!")
 `;
 }
 
@@ -688,6 +684,8 @@ fluence aqua
 `;
 }
 
+export const SERVICE_INTERFACE_FILE_HEADER = "aqua Services declares *";
+
 export const READMEs: Record<Template, string> = {
   quickstart: QUICKSTART_README,
   minimal: MINIMAL_README,
@@ -722,3 +720,4 @@ export const LOCAL_NET_WALLET_KEYS = [
 ];
 
 export const DEFAULT_OFFER_NAME = "offer";
+export const WORKER_SPELL = "worker-spell";

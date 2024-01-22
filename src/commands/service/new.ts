@@ -76,7 +76,7 @@ export default class New extends BaseCommand<typeof New> {
     );
 
     if (maybeFluenceConfig !== null) {
-      const marineCli = await initMarineCli(maybeFluenceConfig);
+      const marineCli = await initMarineCli();
 
       await addService({
         marineCli,

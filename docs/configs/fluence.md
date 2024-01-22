@@ -6,6 +6,7 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 
 | Property               | Type                        | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                          |
 |------------------------|-----------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aquaDependencies`     | [object](#aquadependencies) | **Yes**  | A map of npm aqua dependency versions                                                                                                                                                                                                                                                                                                                                                                                                |
 | `version`              | number                      | **Yes**  |                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `aquaImports`          | string[]                    | No       | A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in fluence.yaml, project's .fluence/aqua dir, npm dependencies from fluence.yaml, npm dependencies from user's .fluence/config.yaml, npm dependencies recommended by fluence |
 | `aquaInputPath`        | string                      | No       | Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                     |
@@ -15,13 +16,24 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 | `customFluenceEnv`     | [object](#customfluenceenv) | No       | Custom Fluence environment to use when connecting to Fluence network                                                                                                                                                                                                                                                                                                                                                                 |
 | `deals`                | [object](#deals)            | No       | A map of objects with worker names as keys, each object defines a deal                                                                                                                                                                                                                                                                                                                                                               |
 | `defaultSecretKeyName` | string                      | No       | Secret key with this name will be used by default by js-client inside CLI to run Aqua code                                                                                                                                                                                                                                                                                                                                           |
-| `dependencies`         | [object](#dependencies)     | No       | (For advanced users) Overrides for the project dependencies                                                                                                                                                                                                                                                                                                                                                                          |
 | `hosts`                | [object](#hosts)            | No       | A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on. Intended to be used by providers to deploy directly without using the blockchain                                                                                                                                                                                                                                           |
 | `ipfsAddr`             | string                      | No       | IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: /dns4/ipfs.fluence.dev/tcp/5001 or /ip4/127.0.0.1/tcp/5001 if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)                                                                                                                                                                             |
 | `marineBuildArgs`      | string                      | No       | Space separated `cargo build` flags and args to pass to marine build. Can be overridden using --marine-build-args flag Default: --release                                                                                                                                                                                                                                                                                            |
+| `marineVersion`        | string                      | No       | Marine version                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `mreplVersion`         | string                      | No       | Mrepl version                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `relaysPath`           | string                      | No       | Path to the directory where you want relays.json file to be generated. Must be relative to the project root dir. This file contains a list of relays to use when connecting to Fluence network and depends on the default environment that you use in your project                                                                                                                                                                   |
 | `services`             | [object](#services)         | No       | A map with service names as keys and Service configs as values. You can have any number of services listed here as long as service name keys start with a lowercase letter and contain only letters numbers and underscores. You can use `fluence service add` command to add a service to this config                                                                                                                               |
 | `spells`               | [object](#spells)           | No       | A map with spell names as keys and spell configs as values                                                                                                                                                                                                                                                                                                                                                                           |
+
+## aquaDependencies
+
+A map of npm aqua dependency versions
+
+### Properties
+
+| Property                   | Type   | Required | Description                                                                                                                     |
+|----------------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------------|
+| `npm-aqua-dependency-name` | string | No       | Valid npm dependency version specification (check out https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies) |
 
 ## customFluenceEnv
 
@@ -60,37 +72,6 @@ Worker config
 | `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                            |
 | `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                |
 | `targetWorkers`         | number   | No       | Max workers in the deal                                                                                                                      |
-
-## dependencies
-
-(For advanced users) Overrides for the project dependencies
-
-### Properties
-
-| Property | Type             | Required | Description                                                                                                                                        |
-|----------|------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `cargo`  | [object](#cargo) | No       | A map of cargo dependency versions. Fluence CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL |
-| `npm`    | [object](#npm)   | No       | A map of npm aqua dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua                                       |
-
-### cargo
-
-A map of cargo dependency versions. Fluence CLI ensures dependencies are installed each time you run commands that depend on Marine or Marine REPL
-
-#### Properties
-
-| Property                | Type   | Required | Description              |
-|-------------------------|--------|----------|--------------------------|
-| `Cargo_dependency_name` | string | No       | cargo dependency version |
-
-### npm
-
-A map of npm aqua dependency versions. Fluence CLI ensures dependencies are installed each time you run aqua
-
-#### Properties
-
-| Property              | Type   | Required | Description            |
-|-----------------------|--------|----------|------------------------|
-| `npm_dependency_name` | string | No       | npm dependency version |
 
 ## hosts
 

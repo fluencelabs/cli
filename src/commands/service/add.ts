@@ -80,7 +80,7 @@ export default class Add extends BaseCommand<typeof Add> {
       flags.name ?? serviceConfig.name,
     );
 
-    const marineCli = await initMarineCli(fluenceConfig);
+    const marineCli = await initMarineCli();
 
     await addService({
       serviceName,

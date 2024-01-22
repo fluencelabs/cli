@@ -25,8 +25,6 @@ export const NEW_SERVICE_NAME = "newService";
 export const NEW_SERVICE_2_NAME = "newService2";
 export const NEW_SPELL_NAME = "newSpell";
 export const NEW_MODULE_NAME = "newModule";
-export const WORKER_SPELL = "worker-spell";
-
 export const NO_PROJECT_TEST_NAME = "shouldWorkWithoutProject";
 
 export const MAIN_RS_CONTENT = `#![allow(non_snake_case)]

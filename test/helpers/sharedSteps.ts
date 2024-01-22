@@ -59,7 +59,6 @@ import {
   fluenceEnv,
   MY_SERVICE_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
-  WORKER_SPELL,
 } from "./constants.js";
 import { TEST_DEFAULT_SENDER_ACCOUNT } from "./localNetAccounts.js";
 import {
