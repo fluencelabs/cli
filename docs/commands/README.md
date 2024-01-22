@@ -268,7 +268,7 @@ DESCRIPTION
   Show contract addresses for the fluence env
 ```
 
-_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/chain/info.ts)_
+_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/chain/info.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -630,7 +630,7 @@ DESCRIPTION
   Deposit to capacity commitment
 ```
 
-_See code: [src/commands/delegator/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/delegator/deposit.ts)_
+_See code: [src/commands/delegator/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/delegator/deposit.ts)_
 
 ## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -1061,6 +1061,96 @@ FLAGS
 
 DESCRIPTION
   Create Capacity commitment
+
+ALIASES
+  $ fluence provider cc
+```
+
+_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/create-commitment.ts)_
+
+## `fluence provider gen`
+
+Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
+
+```
+USAGE
+  $ fluence provider gen [--no-input] [--noxes <value>] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+
+DESCRIPTION
+  Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
+
+EXAMPLES
+  $ fluence provider gen
+```
+
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/gen.ts)_
+
+## `fluence provider init`
+
+Init provider config. Creates a config file
+
+```
+USAGE
+  $ fluence provider init [--no-input] [--noxes <value>] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+
+DESCRIPTION
+  Init provider config. Creates a config file
+```
+
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/init.ts)_
+
+## `fluence provider offer-info`
+
+Get info about provider
+
+```
+USAGE
+  $ fluence provider offer-info --offer-id <value> [--no-input] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --offer-id=<value>                               (required) Offer ID
+
+DESCRIPTION
+  Get info about provider
+```
+
+_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/offer-info.ts)_
+
+## `fluence provider register`
+
+Register in matching contract
+
+```
+USAGE
+  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>] [--noxes <value>] [--offer <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --offer=<offer>                         Offer from provider.yaml to use
+  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
+                                          unsecure. On local network
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          used by default
+
+DESCRIPTION
+  Register in matching contract
+```
+
+_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/register.ts)_
 
 ## `fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`
 
