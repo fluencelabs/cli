@@ -483,7 +483,9 @@ const getValidate: (
         Object.entries(config.capacityCommitments ?? {}).map(
           async ([name, cc]) => {
             const errors = [
-              await validateAddress(cc.delegator),
+              cc.delegator === undefined
+                ? true
+                : await validateAddress(cc.delegator),
               validateCCDuration(cc.duration),
             ].filter((e) => {
               return e !== true;
