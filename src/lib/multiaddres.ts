@@ -398,19 +398,16 @@ export async function updateRelaysJSON({
   noxes,
 }: UpdateRelaysJSONArgs) {
   if (
-    typeof fluenceConfig?.relaysPath !== "string" ||
+    typeof fluenceConfig?.relaysPath === "undefined" ||
     envConfig?.fluenceEnv === undefined
   ) {
     return;
   }
 
-  if (isAbsolute(fluenceConfig.relaysPath)) {
-    commandObj.error(
-      `relaysPath must be relative to the root project directory. Found: ${
-        fluenceConfig.relaysPath
-      } at ${fluenceConfig.$getPath()}}`,
-    );
-  }
+  const relayPaths =
+    typeof fluenceConfig.relaysPath === "string"
+      ? [fluenceConfig.relaysPath]
+      : fluenceConfig.relaysPath;
 
   const relays = await resolveAddrsAndPeerIds({
     fluenceEnv: envConfig.fluenceEnv,
@@ -418,10 +415,18 @@ export async function updateRelaysJSON({
     noxes,
   });
 
-  await writeFile(
-    join(resolve(projectRootDir, fluenceConfig.relaysPath), "relays.json"),
-    jsonStringify(relays),
-  );
+  for (const relayPath of relayPaths) {
+    if (isAbsolute(relayPath)) {
+      commandObj.error(
+        `relaysPath must be relative to the root project directory. Found: ${relayPath} at ${fluenceConfig.$getPath()}}`,
+      );
+    }
+
+    await writeFile(
+      join(resolve(projectRootDir, relayPath), "relays.json"),
+      jsonStringify(relays),
+    );
+  }
 }
 
 type ResolvedProviderConfig = {
