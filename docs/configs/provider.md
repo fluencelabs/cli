@@ -31,9 +31,9 @@ Defines a capacity commitment
 
 | Property               | Type   | Required | Description                                                                   |
 |------------------------|--------|----------|-------------------------------------------------------------------------------|
-| `delegator`            | string | **Yes**  | Delegator address                                                             |
 | `duration`             | string | **Yes**  | Duration of the commitment in human-readable format. Example: 1 months 1 days |
 | `rewardDelegationRate` | number | **Yes**  | Reward delegation rate in percent                                             |
+| `delegator`            | string | No       | Delegator address                                                             |
 
 ## computePeers
 
