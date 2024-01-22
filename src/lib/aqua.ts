@@ -22,7 +22,7 @@ import type { compileFromPath } from "@fluencelabs/aqua-api";
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
-import { FS_OPTIONS, JS_EXT, TS_EXT } from "./const.js";
+import { FS_OPTIONS, JS_EXT, TS_EXT, CLI_NAME } from "./const.js";
 
 const getAquaFilesRecursively = async (dirPath: string): Promise<string[]> => {
   const files = await readdir(dirPath);
@@ -119,9 +119,18 @@ export const compileToFiles = async ({
     return commandObj.error(
       resultsWithErrors
         .map(({ compilationResult, aquaFilePath }) => {
+          const possiblyForgotToInstallDependenciesText =
+            compilationResult.errors.some((e) => {
+              return e.includes("Cannot resolve imports");
+            })
+              ? possiblyForgotToInstallDependenciesError
+              : "";
+
           return `${color.yellow(
             aquaFilePath,
-          )}\n\n${compilationResult.errors.join("\n")}`;
+          )}\n\n${compilationResult.errors.join(
+            "\n",
+          )}${possiblyForgotToInstallDependenciesText}`;
         })
         .join("\n\n"),
     );
@@ -194,3 +203,15 @@ export const compileToFiles = async ({
     ),
   );
 };
+
+const possiblyForgotToInstallDependenciesError = `
+--------------------------------------------------------------------------------
+
+
+Also make sure you installed dependencies using ${color.yellow(
+  `${CLI_NAME} dep i`,
+)}
+
+
+--------------------------------------------------------------------------------
+`;
