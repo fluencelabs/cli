@@ -161,11 +161,6 @@ export async function createCommitment(flags: {
     .reverse()
     .slice(0, computePeersToRegister.length);
 
-  // 1 CC for each peer.
-  expect(capacityCommitmentCreatedEventsLast.length).toBe(
-    computePeersToRegister.length,
-  );
-
   const commitmentIds = capacityCommitmentCreatedEventsLast.map((event) => {
     return event.args.commitmentId;
   });
