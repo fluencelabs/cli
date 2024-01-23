@@ -317,18 +317,16 @@ async function initTSorJSProject({
           FS_OPTIONS,
         ),
 
-    (async () => {
-      return compileToFiles({
-        compileArgs: {
-          filePath: await ensureAquaMainPath(),
-          imports: await getAquaImports({
-            maybeFluenceConfig: fluenceConfig,
-          }),
-        },
-        targetType: isJS ? "js" : "ts",
-        outputPath: frontendCompiledAquaPath,
-      });
-    })(),
+    compileToFiles({
+      compileArgs: {
+        filePath: await ensureAquaMainPath(),
+        imports: await getAquaImports({
+          maybeFluenceConfig: fluenceConfig,
+        }),
+      },
+      targetType: isJS ? "js" : "ts",
+      outputPath: frontendCompiledAquaPath,
+    }),
   ]);
 }
 
@@ -369,18 +367,16 @@ async function initTSorJSGatewayProject({
           FS_OPTIONS,
         ),
 
-    (async () => {
-      return compileToFiles({
-        compileArgs: {
-          filePath: await ensureAquaMainPath(),
-          imports: await getAquaImports({
-            maybeFluenceConfig: fluenceConfig,
-          }),
-        },
-        targetType: isJS ? "js" : "ts",
-        outputPath: gatewayCompiledAquaPath,
-      });
-    })(),
+    compileToFiles({
+      compileArgs: {
+        filePath: await ensureAquaMainPath(),
+        imports: await getAquaImports({
+          maybeFluenceConfig: fluenceConfig,
+        }),
+      },
+      targetType: isJS ? "js" : "ts",
+      outputPath: gatewayCompiledAquaPath,
+    }),
   ]);
 }
 
