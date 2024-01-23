@@ -711,15 +711,17 @@ function getGatewayPackageJSON(isJS: boolean) {
       "@fastify/rate-limit": "9.1.0",
       "@sinclair/typebox": "0.32.11",
     },
-    devDependencies: isJS
+    ...(isJS
       ? {}
       : {
-          "@types/node": "20.11.5",
-          "@fastify/type-provider-typebox": "4.0.0",
-          [TYPESCRIPT_NPM_DEPENDENCY]:
-            CLIPackageJSON.devDependencies[TYPESCRIPT_NPM_DEPENDENCY],
-          "ts-node": "10.9.2",
-        },
+          devDependencies: {
+            "@types/node": "20.11.5",
+            "@fastify/type-provider-typebox": "4.0.0",
+            [TYPESCRIPT_NPM_DEPENDENCY]:
+              CLIPackageJSON.devDependencies[TYPESCRIPT_NPM_DEPENDENCY],
+            "ts-node": "10.9.2",
+          },
+        }),
   };
 }
 
