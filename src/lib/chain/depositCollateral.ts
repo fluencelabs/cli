@@ -66,11 +66,10 @@ export async function depositCollateral(commitmentIds: string[]) {
 
 async function getCollateral(commitmentId: string) {
   const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
-  const commitment = await capacity.getCommitment(commitmentId);
 
-  const collateralToApproveCommitment =
-    commitment.collateralPerUnit * commitment.unitCount;
+  const commitment = await (
+    await dealClient.getCapacity()
+  ).getCommitment(commitmentId);
 
-  return collateralToApproveCommitment;
+  return commitment.collateralPerUnit * commitment.unitCount;
 }
