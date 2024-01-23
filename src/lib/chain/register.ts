@@ -48,7 +48,7 @@ export async function register(flags: {
     offer = await promptForOffer(providerConfig.offers);
   }
 
-  const { dealClient } = await getDealClient();
+  const { dealClient, signerOrWallet } = await getDealClient();
   const market = await dealClient.getMarket();
   const flt = await dealClient.getFLT();
 
@@ -65,6 +65,8 @@ export async function register(flags: {
     import("ethers"),
   ]);
 
+  const signerAddress = await signerOrWallet.getAddress();
+
   const computePeersToRegister = await Promise.all(
     Object.entries(providerConfig.computePeers).map(
       async ([name, computePeer]) => {
@@ -78,7 +80,7 @@ export async function register(flags: {
           unitIds: times(computePeer.computeUnits).map(() => {
             return ethers.randomBytes(32);
           }),
-          owner: ethers.ZeroAddress, //TODO: get owner for peer,
+          owner: signerAddress, //TODO: get owner for peer,
         };
       },
     ),

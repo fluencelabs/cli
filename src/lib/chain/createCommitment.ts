@@ -21,8 +21,13 @@ import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
 import { initNewReadonlyProviderConfig } from "../configs/project/provider.js";
+import { dbg } from "../dbg.js";
 import { getDealClient, promptConfirmTx, waitTx } from "../dealClient.js";
-import { commaSepStrToArr, splitErrorsAndResults } from "../helpers/utils.js";
+import {
+  commaSepStrToArr,
+  jsonStringify,
+  splitErrorsAndResults,
+} from "../helpers/utils.js";
 import { getSecretKeyOrReturnExisting } from "../keyPairs.js";
 import { getPeerIdFromSecretKey } from "../multiaddres.js";
 
@@ -88,6 +93,8 @@ export async function createCommitment(flags: {
     commandObj.error(unknownNoxNameErrors.join("\n"));
   }
 
+  const signerAddress = await signerOrWallet.getAddress();
+
   for (const [name, computePeer] of computePeersToRegister) {
     commandObj.logToStderr(
       color.gray(`Create capacity commitment for ${name}`),
@@ -109,13 +116,18 @@ export async function createCommitment(flags: {
 
     promptConfirmTx(flags["priv-key"]);
 
-    const signerAddress = await signerOrWallet.getAddress();
+    const createCommitmentParams: Parameters<typeof capacity.createCommitment> =
+      [
+        peerIdUint8Arr,
+        ccDuration,
+        ccDelegator ?? signerAddress,
+        ccRewardDelegationRate,
+      ];
+
+    dbg(`createCommitmentParams: ${jsonStringify(createCommitmentParams)}`);
 
     const registerPeerTx = await capacity.createCommitment(
-      peerIdUint8Arr,
-      ccDuration,
-      ccDelegator ?? signerAddress,
-      ccRewardDelegationRate,
+      ...createCommitmentParams,
     );
 
     const res = await waitTx(registerPeerTx);
