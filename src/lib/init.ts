@@ -695,8 +695,8 @@ function getGatewayPackageJSON(isJS: boolean) {
             build: "rm -rf ./dist && tsc -p tsconfig.json",
           }),
       start: isJS
-        ? "node src/server.js"
-        : "node --loader ts-node/esm src/server.ts",
+        ? "node --no-warnings src/server.js"
+        : "node --no-warnings --loader ts-node/esm src/server.ts",
     },
     dependencies: {
       [JS_CLIENT_NPM_DEPENDENCY]:
