@@ -23,31 +23,31 @@ export async function depositCollateral(commitmentIds: string[]) {
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
   commandObj.logToStderr("Approve collateral for all sent CC...");
-  let collateralToApproveCommitments = 0n;
+  // let collateralToApproveCommitments = 0n;
 
-  for (const commitmentId of commitmentIds) {
-    const collateralToApproveCommitment = await getCollateral(commitmentId);
+  // for (const commitmentId of commitmentIds) {
+  //   const collateralToApproveCommitment = await getCollateral(commitmentId);
 
-    commandObj.logToStderr(
-      `Collateral for commitmentId: ${commitmentId} = ${collateralToApproveCommitment}...`,
-    );
+  //   commandObj.logToStderr(
+  //     `Collateral for commitmentId: ${commitmentId} = ${collateralToApproveCommitment}...`,
+  //   );
 
-    collateralToApproveCommitments =
-      collateralToApproveCommitments + collateralToApproveCommitment;
-  }
+  //   collateralToApproveCommitments =
+  //     collateralToApproveCommitments + collateralToApproveCommitment;
+  // }
 
-  commandObj.logToStderr(
-    `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
-  );
+  // commandObj.logToStderr(
+  //   `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
+  // );
 
   const flt = await dealClient.getFLT();
 
-  const collateralToApproveCommitmentsTx = await flt.approve(
-    await capacity.getAddress(),
-    collateralToApproveCommitments,
-  );
+  // const collateralToApproveCommitmentsTx = await flt.approve(
+  //   await capacity.getAddress(),
+  //   collateralToApproveCommitments,
+  // );
 
-  await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS);
+  // await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS);
 
   for (const commitmentId of commitmentIds) {
     commandObj.logToStderr(
