@@ -26,10 +26,7 @@ export async function depositCollateral(commitmentIds: string[]) {
   let collateralToApproveCommitments = 0n;
 
   for (const commitmentId of commitmentIds) {
-    const commitment = await capacity.getCommitment(commitmentId);
-
-    const collateralToApproveCommitment =
-      commitment.collateralPerUnit * commitment.unitCount;
+    const collateralToApproveCommitment = await getCollateral(commitmentId);
 
     commandObj.logToStderr(
       `Collateral for commitmentId: ${commitmentId} = ${collateralToApproveCommitment}...`,
@@ -52,14 +49,28 @@ export async function depositCollateral(commitmentIds: string[]) {
 
   await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS);
 
-  commandObj.logToStderr("Deposit collateral for all sent CC...");
-
   for (const commitmentId of commitmentIds) {
     commandObj.logToStderr(
       `Deposit collateral for commitmentId: ${commitmentId}...`,
     );
 
+    await flt.approve(
+      await capacity.getAddress(),
+      await getCollateral(commitmentId),
+    );
+
     const depositCollateralTx = await capacity.depositCollateral(commitmentId);
     await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
   }
+}
+
+async function getCollateral(commitmentId: string) {
+  const { dealClient } = await getDealClient();
+  const capacity = await dealClient.getCapacity();
+  const commitment = await capacity.getCommitment(commitmentId);
+
+  const collateralToApproveCommitment =
+    commitment.collateralPerUnit * commitment.unitCount;
+
+  return collateralToApproveCommitment;
 }
