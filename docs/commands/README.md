@@ -37,7 +37,7 @@
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
-* [`fluence provider add-collateral [CAPACITY-COMMITMENT-IDS]`](#fluence-provider-add-collateral-capacity-commitment-ids)
+* [`fluence provider add-collateral`](#fluence-provider-add-collateral)
 * [`fluence provider create-commitment`](#fluence-provider-create-commitment)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
@@ -1014,27 +1014,32 @@ EXAMPLES
 
 _See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/module/remove.ts)_
 
-## `fluence provider add-collateral [CAPACITY-COMMITMENT-IDS]`
+## `fluence provider add-collateral`
 
-Deposit to capacity commitment
+Add collateral to capacity commitment
 
 ```
 USAGE
-  $ fluence provider add-collateral [CAPACITY-COMMITMENT-IDS] [--no-input] [--priv-key <value>] [--env <value>]
-
-ARGUMENTS
-  CAPACITY-COMMITMENT-IDS  Comma separated capacity commitment IDs
+  $ fluence provider add-collateral [--no-input] [--priv-key <value>] [--env <value>] [--nox-names <value> | --ids
+  <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                                    Comma separated capacity commitment IDs. Default: all noxes from
+                                                   capacityCommitments property of the provider config
   --no-input                                       Don't interactively ask for any input from the user
+  --nox-names=<value>                              Comma-separated names of noxes to add collateral for. Default: all
+                                                   noxes from capacityCommitments property of the provider config
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
                                                    will be used by default
 
 DESCRIPTION
-  Deposit to capacity commitment
+  Add collateral to capacity commitment
+
+ALIASES
+  $ fluence provider ac
 ```
 
 _See code: [src/commands/provider/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/add-collateral.ts)_
