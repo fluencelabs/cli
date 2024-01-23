@@ -780,8 +780,14 @@ You can check it out and test this repo.
 - \`npm install\`
 - \`npm run start\`
 - \`curl -X POST http://localhost:8080/my/callback/hello -H "ACCESS_TOKEN: abcdefhi" -H 'Content-Type: application/json' -d '{"name": "Fluence" }'\`
+- After running these commands you should see: \`Hello, Fluence\`
 
-After running these commands you should see: \`Hello, Fluence\`
+### Notes:
+
+Gateway contains four routes corresponding to Aqua functions: \`helloWorld\`, \`helloWorldRemote\`, \`showSubnet\` and \`runDeployedServices\`.
+
+You can run \`helloWorld\` and \`helloWorldRemote\` right away.
+To run \`showSubnet\` and \`runDeployedServices\` successfully, it is required to do \`fluence deal deploy\` then compile Aqua and restart the server.
 
 > Remember to replace hardcoded token and peer private key. You can achieve that by placing these credentials in env variables, for example.
 `;
