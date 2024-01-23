@@ -94,6 +94,7 @@ export async function createCommitment(flags: {
   }
 
   const signerAddress = await signerOrWallet.getAddress();
+  const commitmentIds: string[] = [];
 
   for (const [name, computePeer] of computePeersToRegister) {
     commandObj.logToStderr(
@@ -160,24 +161,26 @@ export async function createCommitment(flags: {
         `Capacity commitment was created with id ${color.yellow(id)}`,
       ),
     );
+
+    commitmentIds.push(id);
   }
 
   commandObj.logToStderr(color.green(`Commitments were registered`));
 
   commandObj.logToStderr("Approve collateral for all sent CC...");
   // Fetch created commitmentIds from chain.
-  const filterCreatedCC = capacity.filters.CommitmentCreated;
+  // const filterCreatedCC = capacity.filters.CommitmentCreated;
 
-  const capacityCommitmentCreatedEvents =
-    await capacity.queryFilter(filterCreatedCC);
+  // const capacityCommitmentCreatedEvents =
+  //   await capacity.queryFilter(filterCreatedCC);
 
-  const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents
-    .reverse()
-    .slice(0, computePeersToRegister.length);
+  // const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents
+  //   .reverse()
+  //   .slice(0, computePeersToRegister.length);
 
-  const commitmentIds = capacityCommitmentCreatedEventsLast.map((event) => {
-    return event.args.commitmentId;
-  });
+  // const commitmentIds = capacityCommitmentCreatedEventsLast.map((event) => {
+  //   return event.args.commitmentId;
+  // });
 
   let collateralToApproveCommitments = 0n;
 
@@ -217,7 +220,6 @@ export async function createCommitment(flags: {
     );
 
     const depositCollateralTx = await capacity.depositCollateral(commitmentId);
-
     await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
   }
 }
