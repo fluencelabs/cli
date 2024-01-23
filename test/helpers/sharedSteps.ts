@@ -103,9 +103,7 @@ export const initializeTemplate = async (
 ): Promise<void> => {
   const templatePath = getInitializedTemplatePath(template);
 
-  try {
-    await rm(cwd, { recursive: true });
-  } catch {}
+  await rm(cwd, { recursive: true, force: true });
 
   await cp(templatePath, cwd, { recursive: true });
 };

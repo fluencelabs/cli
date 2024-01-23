@@ -29,10 +29,9 @@ import {
   updateFluenceConfigForTest,
   waitUntilShowSubnetReturnsExpected,
 } from "../../helpers/sharedSteps.js";
-import { maybeConcurrentTest } from "../../helpers/testWrapper.js";
 
 describe("Deal deploy tests", () => {
-  maybeConcurrentTest(
+  test.concurrent(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");

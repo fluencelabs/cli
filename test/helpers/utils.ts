@@ -14,8 +14,57 @@
  * limitations under the License.
  */
 
+import { access, readFile, writeFile } from "node:fs/promises";
+
+import lockfile from "proper-lockfile";
+
 export const sleepSeconds = (s: number) => {
   return new Promise<void>((resolve) => {
     return setTimeout(resolve, s * 1000);
   });
 };
+
+async function createFileIfNotExists(filePath: string) {
+  try {
+    await access(filePath);
+  } catch {
+    await writeFile(filePath, "");
+  }
+}
+
+/**
+ * Locks the given file, processes its content using the provided function,
+ * save the result to the file and returns the result.
+ *
+ * @param {string} filePath - The path of the file to lock and process.
+ * @param {(data: string) => string} processDataFunction - The function to process the file's content.
+ * @return {Promise<string>} A promise that resolves with the processed data.
+ * @throws {Error} If an error occurs during the file operations.
+ */
+export async function lockAndProcessFile(
+  filePath: string,
+  processDataFunction: (data: string) => string,
+): Promise<string> {
+  await createFileIfNotExists(filePath);
+  let release: ReturnType<typeof lockfile.lock>;
+
+  try {
+    release = await lockfile.lock(filePath, {
+      retries: {
+        retries: 30,
+        minTimeout: 100,
+        maxTimeout: 500,
+      },
+    });
+
+    const data = await readFile(filePath, "utf-8");
+    const processedData = processDataFunction(data);
+    await writeFile(filePath, processedData);
+    return processedData;
+  } catch (error) {
+    console.error(`Error during working with a file '${filePath}':`, error);
+    throw error;
+  } finally {
+    await release();
+  }
+}

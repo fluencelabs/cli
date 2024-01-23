@@ -15,9 +15,8 @@
  */
 
 import assert from "node:assert";
-import { access, readFile, writeFile } from "node:fs/promises";
 
-import lockfile from "proper-lockfile";
+import { lockAndProcessFile } from "./utils.js";
 
 type Account = {
   address: string;
@@ -126,64 +125,48 @@ export const LOCAL_NET_DEFAULT_ACCOUNTS: Account[] = [
   },
 ];
 
-async function processFile(
-  filePath: string,
-  processDataFunction: (data: string) => number,
-): Promise<number> {
-  try {
-    await access(filePath);
-  } catch {
-    await writeFile(filePath, "");
-  }
-
-  try {
-    const release = await lockfile.lock(filePath, {
-      retries: {
-        retries: 30,
-        minTimeout: 100,
-        maxTimeout: 500,
-      },
-    });
-
-    try {
-      const data = await readFile(filePath, "utf-8");
-      const processedData = processDataFunction(data);
-      await writeFile(filePath, processedData.toString());
-
-      return processedData;
-    } finally {
-      await release();
-    }
-  } catch (error) {
-    console.error("Error during working with a file:", error);
-    throw error;
-  }
-}
-
-function processData(data: string): number {
+/**
+ * Increases the index based on the given data from a file.
+ *
+ * @param {string} dataFromFile - The data obtained from a file.
+ * @throws {Error} If the data is not a valid number.
+ * @returns {string} The resulting index as a string.
+ */
+function increaseIndex(dataFromFile: string): string {
   let index: number;
 
-  if (data === "") {
+  if (dataFromFile === "") {
     index = 0;
   } else {
-    index = Number(data) + 1;
+    index = Number(dataFromFile) + 1;
   }
 
   if (isNaN(index)) {
-    throw Error(`Data is not a number: ${data}`);
+    throw Error(`Data is not a number: ${dataFromFile}`);
   }
 
+  // if the index is out of bounds, reset it
   if (index >= LOCAL_NET_DEFAULT_ACCOUNTS.length) {
     index = 0;
   }
 
-  return index;
+  return index.toString();
 }
 
+/**
+ * Retrieves the default sender account to provide a unique account for each test worker.
+ *
+ * @returns {Promise<Account>} - A promise that resolves to the default sender account.
+ */
 export async function getTestDefaultSenderAccount(): Promise<Account> {
   const privateKeyIndexFilePath = "tmp/private_key_index.txt";
-  const index = await processFile(privateKeyIndexFilePath, processData);
-  const account = LOCAL_NET_DEFAULT_ACCOUNTS[index];
+
+  const index = await lockAndProcessFile(
+    privateKeyIndexFilePath,
+    increaseIndex,
+  );
+
+  const account = LOCAL_NET_DEFAULT_ACCOUNTS[Number(index)];
   assert(account !== undefined);
 
   return account;

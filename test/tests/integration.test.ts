@@ -26,17 +26,16 @@ import {
   multiaddrs,
   runAquaFunction,
 } from "../helpers/sharedSteps.js";
-import { maybeConcurrentTest } from "../helpers/testWrapper.js";
 
 describe("integration tests", () => {
-  maybeConcurrentTest("should work with minimal template", async () => {
+  test.concurrent("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await initializeTemplate(cwd, "minimal");
 
     await runAquaFunction(cwd, "helloWorld", ["Fluence"]);
   });
 
-  maybeConcurrentTest("should work without project", async () => {
+  test.concurrent("should work without project", async () => {
     const cwd = join("tmp", NO_PROJECT_TEST_NAME);
 
     await cp(

@@ -55,7 +55,6 @@ import {
   updateMainAqua,
   updateMainRs,
 } from "../../helpers/sharedSteps.js";
-import { maybeConcurrentTest } from "../../helpers/testWrapper.js";
 
 const peerIds = multiaddrs
   .map(({ peerId }) => {
@@ -93,7 +92,7 @@ const assertHasPeer = (result: unknown): { peer: string } => {
 };
 
 describe("integration tests", () => {
-  maybeConcurrentTest(
+  test.concurrent(
     "should deploy workers with spell and service, resolve, run services on them and remove them",
     async () => {
       const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");

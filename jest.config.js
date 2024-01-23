@@ -18,7 +18,7 @@ import { RUN_TESTS_IN_PARALLEL } from "./dist/lib/setupEnvironment.js";
 
 /** @type {import("ts-jest").JestConfigWithTsJest} */
 export default {
-  maxConcurrency: process.env[RUN_TESTS_IN_PARALLEL] === "false" ? 1 : 1, // increasing number of concurrent tests leads to a problem with nonce
+  maxConcurrency: 1, // increasing number of concurrent tests leads to a problem with nonce
   maxWorkers: process.env[RUN_TESTS_IN_PARALLEL] === "false" ? 1 : 5,
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {

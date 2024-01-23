@@ -51,11 +51,7 @@ export function jsonStringify(
 
 export function stringifyUnknown(unknown: unknown): string {
   try {
-    if (unknown instanceof CLIError) {
-      return String(unknown);
-    }
-
-    if (unknown instanceof AssertionError) {
+    if (unknown instanceof CLIError || unknown instanceof AssertionError) {
       return String(unknown);
     }
 
