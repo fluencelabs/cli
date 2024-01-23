@@ -20,7 +20,6 @@
 * [`fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-withdraw-deal-address-amount)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
-* [`fluence delegator deposit [CAPACITY_COMMITMENT-ID]`](#fluence-delegator-deposit-capacity_commitment-id)
 * [`fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-install-package-name--package-nameversion)
 * [`fluence dep reset`](#fluence-dep-reset)
 * [`fluence dep uninstall PACKAGE-NAME`](#fluence-dep-uninstall-package-name)
@@ -38,6 +37,7 @@
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
+* [`fluence provider add-collateral [CAPACITY-COMMITMENT-IDS]`](#fluence-provider-add-collateral-capacity-commitment-ids)
 * [`fluence provider create-commitment`](#fluence-provider-create-commitment)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
@@ -607,31 +607,6 @@ EXAMPLES
 
 _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/default/peers.ts)_
 
-## `fluence delegator deposit [CAPACITY_COMMITMENT-ID]`
-
-Deposit to capacity commitment
-
-```
-USAGE
-  $ fluence delegator deposit [CAPACITY_COMMITMENT-ID] [--no-input] [--priv-key <value>] [--env <value>]
-
-ARGUMENTS
-  CAPACITY_COMMITMENT-ID  Capacity commitment ID
-
-FLAGS
-  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                                       Don't interactively ask for any input from the user
-  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
-                                                   is unsecure. On local network
-                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
-
-DESCRIPTION
-  Deposit to capacity commitment
-```
-
-_See code: [src/commands/delegator/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/delegator/deposit.ts)_
-
 ## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
 Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
@@ -1038,6 +1013,31 @@ EXAMPLES
 ```
 
 _See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/module/remove.ts)_
+
+## `fluence provider add-collateral [CAPACITY-COMMITMENT-IDS]`
+
+Deposit to capacity commitment
+
+```
+USAGE
+  $ fluence provider add-collateral [CAPACITY-COMMITMENT-IDS] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  CAPACITY-COMMITMENT-IDS  Comma separated capacity commitment IDs
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   will be used by default
+
+DESCRIPTION
+  Deposit to capacity commitment
+```
+
+_See code: [src/commands/provider/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/add-collateral.ts)_
 
 ## `fluence provider create-commitment`
 
