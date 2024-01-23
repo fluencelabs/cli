@@ -18,6 +18,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitment } from "../../lib/chain/createCommitment.js";
+import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { register } from "../../lib/chain/register.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
@@ -88,6 +89,7 @@ export default class Up extends BaseCommand<typeof Up> {
       offer: DEFAULT_OFFER_NAME,
     });
 
-    await createCommitment(flags);
+    const ccIds = await createCommitment(flags);
+    await depositCollateral(ccIds);
   }
 }

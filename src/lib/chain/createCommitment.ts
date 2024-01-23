@@ -32,7 +32,6 @@ import { getSecretKeyOrReturnExisting } from "../keyPairs.js";
 import { getPeerIdFromSecretKey } from "../multiaddres.js";
 
 const CAPACITY_COMMITMENT_CREATED_EVENT = "CommitmentCreated";
-const DEFAULT_CONFIRMATIONS = 1;
 
 export async function createCommitment(flags: {
   noxes?: number | undefined;
@@ -166,60 +165,5 @@ export async function createCommitment(flags: {
   }
 
   commandObj.logToStderr(color.green(`Commitments were registered`));
-
-  commandObj.logToStderr("Approve collateral for all sent CC...");
-  // Fetch created commitmentIds from chain.
-  // const filterCreatedCC = capacity.filters.CommitmentCreated;
-
-  // const capacityCommitmentCreatedEvents =
-  //   await capacity.queryFilter(filterCreatedCC);
-
-  // const capacityCommitmentCreatedEventsLast = capacityCommitmentCreatedEvents
-  //   .reverse()
-  //   .slice(0, computePeersToRegister.length);
-
-  // const commitmentIds = capacityCommitmentCreatedEventsLast.map((event) => {
-  //   return event.args.commitmentId;
-  // });
-
-  let collateralToApproveCommitments = 0n;
-
-  for (const commitmentId of commitmentIds) {
-    const commitment = await capacity.getCommitment(commitmentId);
-
-    const collateralToApproveCommitment =
-      commitment.collateralPerUnit * commitment.unitCount;
-
-    commandObj.logToStderr(
-      `Collateral for commitmentId: ${commitmentId} = ${collateralToApproveCommitment}...`,
-    );
-
-    collateralToApproveCommitments =
-      collateralToApproveCommitments + collateralToApproveCommitment;
-  }
-
-  commandObj.logToStderr(
-    `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
-  );
-
-  const fltContract = await dealClient.getFLT();
-  const capacityContractAddress = await capacity.getAddress();
-
-  const collateralToApproveCommitmentsTx = await fltContract.approve(
-    capacityContractAddress,
-    collateralToApproveCommitments,
-  );
-
-  await collateralToApproveCommitmentsTx.wait(DEFAULT_CONFIRMATIONS);
-
-  commandObj.logToStderr("Deposit collateral for all sent CC...");
-
-  for (const commitmentId of commitmentIds) {
-    commandObj.logToStderr(
-      `Deposit collateral for commitmentId: ${commitmentId}...`,
-    );
-
-    const depositCollateralTx = await capacity.depositCollateral(commitmentId);
-    await depositCollateralTx.wait(DEFAULT_CONFIRMATIONS);
-  }
+  return commitmentIds;
 }
