@@ -527,7 +527,7 @@ import relays from "./relays.json" assert { type: "json" };
 import { ${isJS ? "" : "type Static, "}Type } from "@sinclair/typebox";
 import fastify from "fastify";
 
-import { helloWorld } from "./compiled-aqua/main.js";
+import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "./compiled-aqua/main.js";
 
 // This is an authorization token for the gateway service.
 // Remember to generate the appropriate token and save it in env variables.
@@ -580,6 +580,36 @@ const callbackResponse = Type.String();
 
 ${isJS ? "" : "type callbackResponseType = Static<typeof callbackResponse>;"}
 
+const showSubnetResponse = Type.Array(
+  Type.Object({
+    host_id: Type.Union([Type.String(), Type.Null()]),
+    services: Type.Union([Type.Array(Type.String()), Type.Null()]),
+    spells: Type.Union([Type.Array(Type.String()), Type.Null()]),
+    worker_id: Type.Union([Type.String(), Type.Null()]),
+  }),
+);
+
+${
+  isJS ? "" : "type showSubnetResponseType = Static<typeof showSubnetResponse>;"
+}
+
+const runDeployedServicesResponse = Type.Array(
+  Type.Object({
+    answer: Type.Union([Type.String(), Type.Null()]),
+    worker: Type.Object({
+      host_id: Type.String(),
+      pat_id: Type.String(),
+      worker_id: Type.Union([Type.String(), Type.Null()]),
+    }),
+  }),
+);
+
+${
+  isJS
+    ? ""
+    : "type runDeployedServicesResponseType = Static<typeof runDeployedServicesResponse>;"
+}
+
 // Request and response
 server.post${
     isJS ? "" : "<{ Body: callbackBodyType; Reply: callbackResponseType }>"
@@ -595,11 +625,29 @@ server.post${
 
 // Fire and forget
 server.post("/my/webhook/hello", async (_request, reply) => {
-  void helloWorld("Fluence");
+  void helloWorldRemote("Fluence");
   return reply.send();
 });
 
-server.listen({ port: 8080 }, (err, address) => {
+server.post${isJS ? "" : "<{ Reply: showSubnetResponseType }>"}(
+  "/my/callback/showSubnet",
+  { schema: { response: { 200: showSubnetResponse } } },
+  async (_request, reply) => {
+    const result = await showSubnet();
+    return reply.send(result);
+  },
+);
+
+server.post${isJS ? "" : "<{ Reply: runDeployedServicesResponseType }>"}(
+  "/my/callback/runDeployedServices",
+  { schema: { response: { 200: runDeployedServicesResponse } } },
+  async (_request, reply) => {
+    const result = await runDeployedServices();
+    return reply.send(result);
+  },
+);
+
+server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
   if (err !== null) {
     console.error(err);
     process.exit(1);
