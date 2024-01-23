@@ -32,6 +32,21 @@ async function createFileIfNotExists(filePath: string) {
   }
 }
 
+async function lockFile(filePath: string) {
+  try {
+    return await lockfile.lock(filePath, {
+      retries: {
+        retries: 30,
+        minTimeout: 100,
+        maxTimeout: 500,
+      },
+    });
+  } catch (error) {
+    console.error(`Error during locking a file '${filePath}':`, error);
+    throw error;
+  }
+}
+
 /**
  * Locks the given file, processes its content using the provided function,
  * save the result to the file and returns the result.
@@ -46,17 +61,9 @@ export async function lockAndProcessFile(
   processDataFunction: (data: string) => string,
 ): Promise<string> {
   await createFileIfNotExists(filePath);
-  let release: ReturnType<typeof lockfile.lock>;
+  const release = await lockFile(filePath);
 
   try {
-    release = await lockfile.lock(filePath, {
-      retries: {
-        retries: 30,
-        minTimeout: 100,
-        maxTimeout: 500,
-      },
-    });
-
     const data = await readFile(filePath, "utf-8");
     const processedData = processDataFunction(data);
     await writeFile(filePath, processedData);
