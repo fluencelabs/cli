@@ -19,7 +19,6 @@
 import assert from "node:assert";
 
 import { color } from "@oclif/color";
-import { wait } from "@oclif/core/lib/cli-ux/index.js";
 import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
@@ -182,9 +181,6 @@ const COMPUTE_UNIT_CREATED_EVENT_TOPIC = "ComputeUnitCreated";
 export async function match(privKey: string | undefined, dealAddress: string) {
   const { dealClient } = await getDealClient();
   const dealMatcherClient = await getDealMatcherClient();
-
-  dbg(`waiting 10 seconds before getMatchedOffersByDealId...`);
-  await wait(1000 * 10);
 
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
 

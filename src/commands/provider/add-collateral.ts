@@ -14,39 +14,53 @@
  * limitations under the License.
  */
 
-import { Args } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { depositCollateral } from "../../lib/chain/depositCollateral.js";
+import {
+  depositCollateral,
+  depositCollateralByNoxName,
+} from "../../lib/chain/depositCollateral.js";
+import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
-  static override description = "Deposit to capacity commitment";
+  static override description = "Add collateral to capacity commitment";
+  static override aliases = ["provider:ac"];
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...ENV_FLAG,
-  };
-
-  static override args = {
-    // TODO replace using nox names instead of ids
-    "CAPACITY-COMMITMENT-IDS": Args.string({
-      description: "Comma separated capacity commitment IDs",
+    "nox-names": Flags.string({
+      description:
+        "Comma-separated names of noxes to add collateral for. Default: all noxes from capacityCommitments property of the provider config",
+      exclusive: ["ids"],
+    }),
+    ids: Flags.string({
+      description:
+        "Comma separated capacity commitment IDs. Default: all noxes from capacityCommitments property of the provider config",
+      exclusive: ["nox-names"],
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(Deposit));
+    const { flags } = await initCli(this, await this.parse(Deposit));
 
-    const capacityCommitmentIds =
-      args["CAPACITY-COMMITMENT-IDS"] ??
-      (await input({
-        message: "Enter comma separated capacity commitment IDs",
-      }));
+    if (flags.ids !== undefined) {
+      await depositCollateral(commaSepStrToArr(flags.ids));
+      return;
+    }
 
-    await depositCollateral(commaSepStrToArr(capacityCommitmentIds));
+    const providerConfig = await initNewReadonlyProviderConfig(flags);
+    const noxNamesString = flags["nox-names"];
+
+    const noxNames =
+      noxNamesString === undefined
+        ? Object.keys(providerConfig.capacityCommitments ?? {})
+        : commaSepStrToArr(noxNamesString);
+
+    await depositCollateralByNoxName(noxNames);
   }
 }

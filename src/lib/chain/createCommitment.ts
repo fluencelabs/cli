@@ -31,6 +31,8 @@ import {
 import { getSecretKeyOrReturnExisting } from "../keyPairs.js";
 import { getPeerIdFromSecretKey } from "../multiaddres.js";
 
+import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
+
 const CAPACITY_COMMITMENT_CREATED_EVENT = "CommitmentCreated";
 
 export async function createCommitment(flags: {
@@ -43,13 +45,6 @@ export async function createCommitment(flags: {
   const { dealClient, signerOrWallet } = await getDealClient();
   const core = await dealClient.getCore();
   const capacity = await dealClient.getCapacity();
-
-  const [{ digest }, { base58btc }] = await Promise.all([
-    import("multiformats"),
-    // eslint-disable-next-line import/extensions
-    import("multiformats/bases/base58"),
-  ]);
-
   const PRECISION = await core.precision();
 
   const noxNames =
@@ -102,10 +97,7 @@ export async function createCommitment(flags: {
 
     const { secretKey } = await getSecretKeyOrReturnExisting(name);
     const peerId = await getPeerIdFromSecretKey(secretKey);
-
-    const peerIdUint8Arr = digest
-      .decode(base58btc.decode("z" + peerId))
-      .bytes.subarray(6);
+    const peerIdUint8Arr = await peerIdToUint8Array(peerId);
 
     const ccDuration = (parse(computePeer.duration) ?? 0) / 1000;
     const ccDelegator = computePeer.delegator;
@@ -134,11 +126,7 @@ export async function createCommitment(flags: {
     const event = capacity.getEvent(CAPACITY_COMMITMENT_CREATED_EVENT);
 
     const log = res.logs.find((log) => {
-      if (log.topics[0] !== event.fragment.topicHash) {
-        return false;
-      }
-
-      return true;
+      return log.topics[0] === event.fragment.topicHash;
     });
 
     assert(log !== undefined, "Capacity commitment created event not found.");
@@ -164,6 +152,9 @@ export async function createCommitment(flags: {
     commitmentIds.push(id);
   }
 
-  commandObj.logToStderr(color.green(`Commitments were registered`));
+  commandObj.logToStderr(
+    color.green(`Commitments ${commitmentIds.join(", ")} were registered`),
+  );
+
   return commitmentIds;
 }
