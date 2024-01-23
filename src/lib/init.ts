@@ -36,6 +36,7 @@ import {
   READMEs,
   JS_CLIENT_NPM_DEPENDENCY,
   README_MD_FILE_NAME,
+  TYPESCRIPT_NPM_DEPENDENCY,
 } from "../lib/const.js";
 import {
   ensureFrontendCompiledAquaPath,
@@ -675,7 +676,12 @@ function getFrontendPackageJSON(isJS: boolean) {
     },
     devDependencies: {
       vite: "4.4.5",
-      ...(isJS ? {} : { typescript: "5.0.2" }),
+      ...(isJS
+        ? {}
+        : {
+            [TYPESCRIPT_NPM_DEPENDENCY]:
+              CLIPackageJSON.devDependencies[TYPESCRIPT_NPM_DEPENDENCY],
+          }),
     },
   };
 }
@@ -710,7 +716,8 @@ function getGatewayPackageJSON(isJS: boolean) {
       : {
           "@types/node": "20.11.5",
           "@fastify/type-provider-typebox": "4.0.0",
-          typescript: "5.3.3",
+          [TYPESCRIPT_NPM_DEPENDENCY]:
+            CLIPackageJSON.devDependencies[TYPESCRIPT_NPM_DEPENDENCY],
           "ts-node": "10.9.2",
         },
   };

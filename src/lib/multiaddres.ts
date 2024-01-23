@@ -398,7 +398,7 @@ export async function updateRelaysJSON({
   noxes,
 }: UpdateRelaysJSONArgs) {
   if (
-    typeof fluenceConfig?.relaysPath === "undefined" ||
+    fluenceConfig?.relaysPath === undefined ||
     envConfig?.fluenceEnv === undefined
   ) {
     return;

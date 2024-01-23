@@ -469,6 +469,7 @@ export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
+export const TYPESCRIPT_NPM_DEPENDENCY = "typescript";
 
 export const fluenceNPMDependencies = [
   AQUA_LIB_NPM_DEPENDENCY,
