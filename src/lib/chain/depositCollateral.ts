@@ -53,27 +53,27 @@ export async function depositCollateralByNoxName(noxNames: string[]) {
 export async function depositCollateral(commitmentIds: string[]) {
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
-  let collateralToApproveCommitments = 0n;
+  // let collateralToApproveCommitments = 0n;
 
-  for (const commitmentId of commitmentIds) {
-    const collateralToApproveCommitment = await getCollateral(commitmentId);
+  // for (const commitmentId of commitmentIds) {
+  //   const collateralToApproveCommitment = await getCollateral(commitmentId);
 
-    collateralToApproveCommitments =
-      collateralToApproveCommitments + collateralToApproveCommitment;
-  }
+  //   collateralToApproveCommitments =
+  //     collateralToApproveCommitments + collateralToApproveCommitment;
+  // }
 
-  commandObj.logToStderr(
-    `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
-  );
+  // commandObj.logToStderr(
+  //   `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
+  // );
 
   const flt = await dealClient.getFLT();
 
-  const collateralToApproveCommitmentsTx = await flt.approve(
-    await capacity.getAddress(),
-    collateralToApproveCommitments,
-  );
+  // const collateralToApproveCommitmentsTx = await flt.approve(
+  //   await capacity.getAddress(),
+  //   collateralToApproveCommitments,
+  // );
 
-  await collateralToApproveCommitmentsTx.wait();
+  // await collateralToApproveCommitmentsTx.wait();
 
   for (const commitmentId of commitmentIds) {
     const collateralToApproveCommitment = await getCollateral(commitmentId);
