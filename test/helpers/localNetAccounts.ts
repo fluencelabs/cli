@@ -142,6 +142,7 @@ function getNextIndex(dataFromFile: string): string {
   if (dataFromFile === "") {
     index = 0;
   } else {
+    // increase the index that has already been used in the previous test worker
     index = Number(dataFromFile) + 1;
   }
 
