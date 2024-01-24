@@ -28,6 +28,7 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
+import { LOCAL_NET_WALLET_KEYS } from "../../accounts.js";
 import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
@@ -39,7 +40,6 @@ import {
   FS_OPTIONS,
   HTTP_PORT_START,
   TCP_PORT_START,
-  LOCAL_NET_WALLET_KEYS,
   WEB_SOCKET_PORT_START,
   CHAIN_RPC_CONTAINER_NAME,
   CHAIN_RPC_PORT,

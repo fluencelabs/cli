@@ -17,6 +17,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../lib/accounts.js";
 import { createCommitment } from "../../lib/chain/createCommitment.js";
 import { createOffer } from "../../lib/chain/createOffer.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
@@ -25,7 +26,6 @@ import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/do
 import {
   DEFAULT_OFFER_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
-  LOCAL_NET_DEFAULT_WALLET_KEY,
   NOXES_FLAG,
   PRIV_KEY_FLAG,
   PROVIDER_CONFIG_FLAGS,

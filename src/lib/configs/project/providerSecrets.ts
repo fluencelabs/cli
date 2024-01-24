@@ -17,11 +17,11 @@
 import type { JSONSchemaType } from "ajv";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { LOCAL_NET_WALLET_KEYS } from "../../accounts.js";
 import {
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FILE_NAME,
-  LOCAL_NET_WALLET_KEYS,
 } from "../../const.js";
 import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureProviderSecretsConfigPath, getFluenceDir } from "../../paths.js";

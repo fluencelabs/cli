@@ -26,6 +26,7 @@ import type {
 import { color } from "@oclif/color";
 import type { ethers } from "ethers";
 
+import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { commandObj } from "./commandObj.js";
 import {
   DEAL_CONFIG,
@@ -35,7 +36,6 @@ import {
   WC_METADATA,
   type ContractsENV,
   CONTRACTS_ENV_TO_CHAIN_ID,
-  LOCAL_NET_DEFAULT_WALLET_KEY,
 } from "./const.js";
 import { ensureChainNetwork } from "./ensureChainNetwork.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
