@@ -789,6 +789,8 @@ Gateway contains four routes corresponding to Aqua functions: \`helloWorld\`, \`
 You can run \`helloWorld\` and \`helloWorldRemote\` right away.
 To run \`showSubnet\` and \`runDeployedServices\` successfully, it is required to do \`fluence deal deploy\` then compile Aqua and restart the server.
 
+Currently, \`fluence aqua\` won't put generated files to gateway dir automatically. Remember to pass \`-o/--output\` flag to CLI for that or change the config in \`fluence.yaml\`.
+
 > Remember to replace hardcoded token and peer private key. You can achieve that by placing these credentials in env variables, for example.
 `;
 
