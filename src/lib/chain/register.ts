@@ -31,7 +31,9 @@ export async function register(flags: {
   const market = await dealClient.getMarket();
   const { CID } = await import("ipfs-http-client");
 
-  const id = CID.parse("QmXzjoFG1pJscBc8SAzrH7Qu4GvZ1xRysUg2ih1EPQtSQv").bytes;
+  const id = CID.parse(
+    "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+  ).bytes;
 
   const tx = await market.setProviderInfo(providerConfig.providerName, {
     prefixes: id.slice(0, 4),
