@@ -135,6 +135,7 @@ async function setupLocalEnvironment() {
     await fluence({
       args: ["local", "up"],
       cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+      timeout: 1000 * 60 * 8, // 8 minutes
     });
   }
 }

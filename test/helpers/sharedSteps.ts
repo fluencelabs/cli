@@ -371,7 +371,7 @@ async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
     return config;
   };
 
-  return await setTryTimeout(
+  return setTryTimeout(
     checkConfig,
     (error) => {
       throw new Error(
