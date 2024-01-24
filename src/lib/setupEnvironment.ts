@@ -78,6 +78,6 @@ const isFluenceEnvWithoutCustom = getIsStringUnion(
 
 setEnvVariable(FLUENCE_ENV, isFluenceEnvWithoutCustom, "local");
 setEnvVariable(DEBUG_COUNTLY, isTrueOrFalseString, "false");
-setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "false");
+setEnvVariable(RUN_TESTS_IN_PARALLEL, isTrueOrFalseString, "true");
 setEnvVariable(CI, isTrueOrFalseString, "false");
 setEnvVariable(FLUENCE_USER_DIR, isAbsolutePath);

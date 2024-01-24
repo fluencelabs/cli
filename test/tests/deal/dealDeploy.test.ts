@@ -17,24 +17,25 @@
 import assert from "node:assert";
 import { join, relative } from "node:path";
 
-import { initServiceConfig } from "../../src/lib/configs/project/service.js";
-import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../constants.js";
-import { fluence, init, maybeConcurrentTest } from "../helpers.js";
+import { initServiceConfig } from "../../../src/lib/configs/project/service.js";
+import { fluence } from "../../helpers/commonWithSetupTests.js";
+import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../../helpers/constants.js";
+import { getServiceDirPath } from "../../helpers/paths.js";
 import {
   assertLogsAreValid,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
-  getServiceDirPath,
+  initializeTemplate,
   updateFluenceConfigForTest,
   waitUntilShowSubnetReturnsExpected,
-} from "../sharedSteps.js";
+} from "../../helpers/sharedSteps.js";
 
 describe("Deal deploy tests", () => {
-  maybeConcurrentTest(
+  test.concurrent(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
-      await init(cwd, "quickstart");
+      await initializeTemplate(cwd, "quickstart");
       const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
 
       const newServiceConfig = await initServiceConfig(
