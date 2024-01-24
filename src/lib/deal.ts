@@ -91,7 +91,8 @@ export async function dealCreate({
     );
   }
 
-  dbg(`pricePerWorkerEpoch: ${pricePerWorkerEpochBigInt}`);
+  dbg(`minInitialBalanceBigInt: ${minInitialBalanceBigInt}`);
+  dbg(`initialBalanceBigInt: ${initialBalanceBigInt}`);
 
   const approveTx = await flt.approve(
     await market.getAddress(),
