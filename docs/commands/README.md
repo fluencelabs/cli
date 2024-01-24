@@ -39,6 +39,7 @@
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-collateral`](#fluence-provider-add-collateral)
 * [`fluence provider create-commitment`](#fluence-provider-create-commitment)
+* [`fluence provider create-offer`](#fluence-provider-create-offer)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
@@ -1073,6 +1074,33 @@ ALIASES
 
 _See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/create-commitment.ts)_
 
+## `fluence provider create-offer`
+
+Create an offer
+
+```
+USAGE
+  $ fluence provider create-offer [--no-input] [--priv-key <value>] [--env <value>] [--noxes <value>] [--offer <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --no-input                              Don't interactively ask for any input from the user
+  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --offer=<offer>                         Offer from provider.yaml to use
+  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
+                                          unsecure. On local network
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          used by default
+
+DESCRIPTION
+  Create an offer
+
+ALIASES
+  $ fluence provider co
+```
+
+_See code: [src/commands/provider/create-offer.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/create-offer.ts)_
+
 ## `fluence provider gen`
 
 Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
@@ -1139,13 +1167,11 @@ Register in matching contract
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>] [--noxes <value>] [--offer <value>]
+  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
   --no-input                              Don't interactively ask for any input from the user
-  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
-  --offer=<offer>                         Offer from provider.yaml to use
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
                                           0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
