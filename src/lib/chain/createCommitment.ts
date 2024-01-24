@@ -20,7 +20,7 @@ import { color } from "@oclif/color";
 import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
-import { initNewReadonlyProviderConfig } from "../configs/project/provider.js";
+import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
 import { dbg } from "../dbg.js";
 import { getDealClient, promptConfirmTx, waitTx } from "../dealClient.js";
 import {
@@ -52,7 +52,7 @@ export async function createCommitment(flags: {
       ? []
       : commaSepStrToArr(flags["nox-names"]);
 
-  const providerConfig = await initNewReadonlyProviderConfig(flags);
+  const providerConfig = await ensureReadonlyProviderConfig(flags);
 
   const allCommitments = Object.entries(
     providerConfig.capacityCommitments ?? {},

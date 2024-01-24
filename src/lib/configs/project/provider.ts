@@ -54,6 +54,7 @@ import {
   DURATION_EXAMPLE,
   type ContractsENV,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+  CLI_NAME,
 } from "../../const.js";
 import { ensureChainNetwork } from "../../ensureChainNetwork.js";
 import {
@@ -277,6 +278,7 @@ type ComputePeer = {
 };
 
 type ConfigV0 = {
+  providerName: string;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   capacityCommitments?: Record<string, CapacityCommitment>;
@@ -326,6 +328,10 @@ const configSchemaV0 = {
   type: "object",
   additionalProperties: false,
   properties: {
+    providerName: {
+      description: "Provider name",
+      type: "string",
+    },
     env: {
       description:
         "DEPRECATED: for simplicity, your project env determines chain environment that is used both for provider and for fluence application developer. To set your project env, use `fluence default env` command.",
@@ -365,7 +371,7 @@ const configSchemaV0 = {
     },
     version: { type: "number", const: 0, description: "Config version" },
   },
-  required: ["version", "computePeers", "offers"],
+  required: ["version", "computePeers", "offers", "providerName"],
 } as const satisfies JSONSchemaType<ConfigV0>;
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
@@ -378,6 +384,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
     const env = await ensureChainNetwork(args.env);
 
     const userProvidedConfig: UserProvidedConfig = {
+      providerName: "defaultProvider",
       computePeers: {},
       offers: {},
     };
@@ -602,6 +609,22 @@ export async function initNewReadonlyProviderConfig(args: ProviderConfigArgs) {
   ]);
 
   return providerConfig;
+}
+
+export async function ensureReadonlyProviderConfig(args: ProviderConfigArgs) {
+  const providerConfig = await getReadonlyConfigInitFunction(
+    getInitConfigOptions(args),
+  )();
+
+  if (providerConfig === null) {
+    commandObj.error(
+      `You need to run ${color.yellow(
+        `${CLI_NAME} provider init`,
+      )} first to create a provider config`,
+    );
+  }
+
+  return initNewReadonlyProviderConfig(args);
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;

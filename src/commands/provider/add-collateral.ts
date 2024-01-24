@@ -21,12 +21,12 @@ import {
   depositCollateral,
   depositCollateralByNoxName,
 } from "../../lib/chain/depositCollateral.js";
-import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import { ensureReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Deposit extends BaseCommand<typeof Deposit> {
+export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   static override description = "Add collateral to capacity commitment";
   static override aliases = ["provider:ac"];
   static override flags = {
@@ -46,14 +46,14 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Deposit));
+    const { flags } = await initCli(this, await this.parse(AddCollateral));
 
     if (flags.ids !== undefined) {
       await depositCollateral(commaSepStrToArr(flags.ids));
       return;
     }
 
-    const providerConfig = await initNewReadonlyProviderConfig(flags);
+    const providerConfig = await ensureReadonlyProviderConfig(flags);
     const noxNamesString = flags["nox-names"];
 
     const noxNames =

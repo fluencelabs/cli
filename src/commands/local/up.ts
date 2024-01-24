@@ -18,6 +18,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitment } from "../../lib/chain/createCommitment.js";
+import { createOffer } from "../../lib/chain/createOffer.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { register } from "../../lib/chain/register.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
@@ -84,7 +85,9 @@ export default class Up extends BaseCommand<typeof Up> {
     flags["priv-key"] = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
     flags.env = "local";
 
-    await register({
+    await register(flags);
+
+    await createOffer({
       ...flags,
       offer: DEFAULT_OFFER_NAME,
     });

@@ -15,20 +15,28 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { register } from "../../lib/chain/register.js";
-import { PRIV_KEY_FLAG, PROVIDER_CONFIG_FLAGS } from "../../lib/const.js";
+import { createOffer } from "../../lib/chain/createOffer.js";
+import {
+  OFFER_FLAG,
+  PRIV_KEY_FLAG,
+  NOXES_FLAG,
+  PROVIDER_CONFIG_FLAGS,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register in matching contract";
+export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
+  static override description = "Create an offer";
+  static override aliases = ["provider:co"];
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
+    ...NOXES_FLAG,
+    ...OFFER_FLAG,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Register));
-    await register(flags);
+    const { flags } = await initCli(this, await this.parse(CreateOffer));
+    await createOffer(flags);
   }
 }

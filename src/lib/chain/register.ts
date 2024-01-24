@@ -15,105 +15,30 @@
  */
 
 import { color } from "@oclif/color";
-import times from "lodash-es/times.js";
 
 import { commandObj } from "../commandObj.js";
-import {
-  initNewReadonlyProviderConfig,
-  promptForOffer,
-} from "../configs/project/provider.js";
-import { CURRENCY_MULTIPLIER } from "../const.js";
-import { dbg } from "../dbg.js";
-import { getDealClient, promptConfirmTx, waitTx } from "../dealClient.js";
-import { jsonStringify } from "../helpers/utils.js";
-import { getSecretKeyOrReturnExisting } from "../keyPairs.js";
-import { getPeerIdFromSecretKey } from "../multiaddres.js";
+import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
+import { getDealClient } from "../dealClient.js";
 
 export async function register(flags: {
-  offer?: string | undefined;
   noxes?: number | undefined;
   env: string | undefined;
   "priv-key": string | undefined;
 }) {
-  const providerConfig = await initNewReadonlyProviderConfig(flags);
+  const providerConfig = await ensureReadonlyProviderConfig(flags);
 
-  let offer =
-    flags.offer === undefined ? undefined : providerConfig.offers[flags.offer];
-
-  if (offer === undefined) {
-    if (flags.offer !== undefined) {
-      commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
-    }
-
-    offer = await promptForOffer(providerConfig.offers);
-  }
-
-  const { dealClient, signerOrWallet } = await getDealClient();
+  const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
-  const flt = await dealClient.getFLT();
+  const { CID } = await import("ipfs-http-client");
 
-  const minPricePerWorkerEpochBigInt = BigInt(
-    offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
-  );
+  const id = CID.parse("QmXzjoFG1pJscBc8SAzrH7Qu4GvZ1xRysUg2ih1EPQtSQv").bytes;
 
-  dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
+  const tx = await market.setProviderInfo(providerConfig.providerName, {
+    prefixes: id.slice(0, 4),
+    hash: id.slice(4),
+  });
 
-  const [{ digest, CID }, { base58btc }, { ethers }] = await Promise.all([
-    import("multiformats"),
-    // eslint-disable-next-line import/extensions
-    import("multiformats/bases/base58"),
-    import("ethers"),
-  ]);
+  await tx.wait();
 
-  const signerAddress = await signerOrWallet.getAddress();
-
-  const computePeersToRegister = await Promise.all(
-    Object.entries(providerConfig.computePeers).map(
-      async ([name, computePeer]) => {
-        const { secretKey } = await getSecretKeyOrReturnExisting(name);
-        const peerId = await getPeerIdFromSecretKey(secretKey);
-
-        return {
-          peerId: digest
-            .decode(base58btc.decode("z" + peerId))
-            .bytes.subarray(6),
-          unitIds: times(computePeer.computeUnits).map(() => {
-            return ethers.randomBytes(32);
-          }),
-          owner: signerAddress, //TODO: get owner for peer,
-        };
-      },
-    ),
-  );
-
-  const registerMarketOfferParams: Parameters<
-    typeof market.registerMarketOffer
-  > = [
-    minPricePerWorkerEpochBigInt,
-    await flt.getAddress(),
-    (offer.effectors ?? []).map((effector) => {
-      const bytesCid = CID.parse(effector).bytes;
-
-      return {
-        prefixes: bytesCid.slice(0, 4),
-        hash: bytesCid.slice(4),
-      };
-    }),
-    computePeersToRegister,
-  ];
-
-  dbg(
-    `calling market.registerMarketOffer using: ${jsonStringify(
-      registerMarketOfferParams,
-    )}`,
-  );
-
-  //TODO: if offer exists, update it
-  const registerOfferTx = await market.registerMarketOffer(
-    ...registerMarketOfferParams,
-  );
-
-  promptConfirmTx(flags["priv-key"]);
-  await waitTx(registerOfferTx);
-  commandObj.log(color.green(`Offer registered`));
+  commandObj.logToStderr(color.green(`Provider registered`));
 }
