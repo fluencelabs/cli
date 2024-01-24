@@ -18,6 +18,8 @@ import assert from "node:assert";
 
 import { lockAndProcessFile } from "./utils.js";
 
+const PRIVATE_KEY_INDEX_FILE_PATH = "tmp/private_key_index.txt";
+
 type Account = {
   address: string;
   privateKey: string;
@@ -126,13 +128,15 @@ export const LOCAL_NET_DEFAULT_ACCOUNTS: Account[] = [
 ];
 
 /**
- * Increases the index based on the given data from a file.
+ * Increases the index of the default sender account to provide a unique account for each test worker
+ * If the data is empty, the index is set to 0. Otherwise, the index is increased by 1.
+ * If the index is out of bounds, it is reset to 0. The resulting index is returned as a string.
  *
  * @param {string} dataFromFile - The data obtained from a file.
  * @throws {Error} If the data is not a valid number.
  * @returns {string} The resulting index as a string.
  */
-function increaseIndex(dataFromFile: string): string {
+function getNextIndex(dataFromFile: string): string {
   let index: number;
 
   if (dataFromFile === "") {
@@ -154,16 +158,16 @@ function increaseIndex(dataFromFile: string): string {
 }
 
 /**
- * Retrieves the default sender account to provide a unique account for each test worker.
+ * Retrieves the unique sender account to provide it for the current test worker.
+ * The account is retrieved from the LOCAL_NET_DEFAULT_ACCOUNTS array
+ * using the index from the PRIVATE_KEY_INDEX_FILE_PATH file.
  *
  * @returns {Promise<Account>} - A promise that resolves to the default sender account.
  */
 export async function getTestDefaultSenderAccount(): Promise<Account> {
-  const privateKeyIndexFilePath = "tmp/private_key_index.txt";
-
   const index = await lockAndProcessFile(
-    privateKeyIndexFilePath,
-    increaseIndex,
+    PRIVATE_KEY_INDEX_FILE_PATH,
+    getNextIndex,
   );
 
   const account = LOCAL_NET_DEFAULT_ACCOUNTS[Number(index)];
