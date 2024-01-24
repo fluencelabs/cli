@@ -92,7 +92,7 @@ const assertHasPeer = (result: unknown): { peer: string } => {
 };
 
 describe("integration tests", () => {
-  test.skip.concurrent(
+  test.concurrent.skip(
     "should deploy workers with spell and service, resolve, run services on them and remove them",
     async () => {
       const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
