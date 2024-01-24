@@ -91,6 +91,10 @@ export async function depositCollateral(commitmentIds: string[]) {
 
     const depositCollateralTx = await capacity.depositCollateral(commitmentId);
     await depositCollateralTx.wait();
+
+    commandObj.logToStderr(
+      `Collateral successfully deposited for commitmentId: ${commitmentId}`,
+    );
   }
 }
 
