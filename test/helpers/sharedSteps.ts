@@ -24,7 +24,7 @@ import {
   stage,
   testNet,
 } from "@fluencelabs/fluence-network-environment";
-import { map, sortBy } from "lodash-es";
+import sortBy from "lodash-es/sortBy.js";
 
 import {
   initFluenceConfigWithPath,
@@ -50,10 +50,7 @@ import { addrsToNodes } from "../../src/lib/multiaddres.js";
 import { getAquaMainPath } from "../../src/lib/paths.js";
 import { validateDeployedServicesAnswerSchema } from "../validators/deployedServicesAnswerValidator.js";
 import { validateSpellLogs } from "../validators/spellLogsValidator.js";
-import {
-  validateWorkerServices,
-  type WorkerServices,
-} from "../validators/workerServiceValidator.js";
+import { validateWorkerServices } from "../validators/workerServiceValidator.js";
 
 import { fluence } from "./commonWithSetupTests.js";
 import {
@@ -69,19 +66,22 @@ import {
   getServiceDirPath,
   getSpellAquaPath,
   getSpellDirPath,
-  pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
 } from "./paths.js";
 
-export const multiaddrs = await getMultiaddrs();
+let multiaddrs: Node[] | undefined;
 
-export async function getMultiaddrs(): Promise<Node[]> {
+export async function getMultiaddrs(cwd: string): Promise<Node[]> {
+  if (multiaddrs !== undefined) {
+    return multiaddrs;
+  }
+
   const local =
     fluenceEnv === "local"
       ? addrsToNodes(
           (
             await fluence({
               args: ["default", "peers", "local"],
-              cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+              cwd,
             })
           )
             .trim()
@@ -89,24 +89,39 @@ export async function getMultiaddrs(): Promise<Node[]> {
         )
       : [];
 
-  return {
-    kras: krasnodar,
-    stage: stage,
-    testnet: testNet,
-    local,
-  }[fluenceEnv];
+  multiaddrs = sortBy(
+    {
+      kras: krasnodar,
+      stage: stage,
+      testnet: testNet,
+      local,
+    }[fluenceEnv],
+    ["peerId"],
+  );
+
+  return multiaddrs;
 }
 
-export const initializeTemplate = async (
+export async function getPeerIds(cwd: string): Promise<string[]> {
+  return (await getMultiaddrs(cwd)).map(({ peerId }) => {
+    return peerId;
+  });
+}
+
+export async function initializeTemplate(
   cwd: string,
   template: Template,
-): Promise<void> => {
+): Promise<void> {
   const templatePath = getInitializedTemplatePath(template);
-
   await rm(cwd, { recursive: true, force: true });
-
   await cp(templatePath, cwd, { recursive: true });
-};
+
+  // so that each test has it's own key for fluence-js
+  await fluence({
+    args: ["key", "new", "defaultKey", "--default"],
+    cwd,
+  });
+}
 
 export async function getFluenceConfig(cwd: string) {
   const fluenceConfig = await initFluenceConfigWithPath(cwd);
@@ -390,26 +405,23 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
 ) {
   await setTryTimeout(
     async () => {
-      const runDeployedServicesResult = await callRunDeployedServices(cwd);
-
-      const expected = sortBy(
-        map(multiaddrs, (peer) => {
-          return {
-            answer,
-            peer: peer.peerId,
-          };
-        }),
-        ["peer"],
-      );
+      const expected = (await getMultiaddrs(cwd)).map(({ peerId }) => {
+        return {
+          answer,
+          peerId,
+        };
+      });
 
       const result = sortBy(
-        map(runDeployedServicesResult, ({ answer, worker }) => {
-          return {
-            answer,
-            peer: worker.host_id,
-          };
-        }),
-        ["peer"],
+        (await callRunDeployedServices(cwd)).map(
+          ({ answer, worker: { host_id: peerId } }) => {
+            return {
+              answer,
+              peerId,
+            };
+          },
+        ),
+        ["peerId"],
       );
 
       expect(result).toEqual(expected);
@@ -423,20 +435,6 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
-}
-
-function sortSubnetResult(result: WorkerServices) {
-  const sortedResult = sortBy(result, ["host_id"]);
-
-  map(sortedResult, (w) => {
-    return w.services.sort();
-  });
-
-  map(sortedResult, (w) => {
-    return w.spells.sort();
-  });
-
-  return sortedResult;
 }
 
 export async function waitUntilShowSubnetReturnsExpected(
@@ -456,23 +454,20 @@ export async function waitUntilShowSubnetReturnsExpected(
         );
       }
 
-      const sortedSubnet = sortSubnetResult(subnet);
+      const sortedSubnet = sortBy(subnet, ["host_id"]).map((w) => {
+        w.services.sort();
+        w.spells.sort();
+        return w;
+      });
 
-      const expected = map(
-        sortBy(
-          map(multiaddrs, ({ peerId }) => {
-            return peerId;
-          }),
-        ),
-        (host_id, i) => {
-          return {
-            host_id,
-            services,
-            spells: [...spells, WORKER_SPELL].sort(),
-            worker_id: sortedSubnet[i]?.worker_id,
-          };
-        },
-      );
+      const expected = (await getPeerIds(cwd)).map((host_id, i) => {
+        return {
+          host_id,
+          services,
+          spells: [...spells, WORKER_SPELL].sort(),
+          worker_id: sortedSubnet[i]?.worker_id,
+        };
+      });
 
       expect(sortedSubnet).toEqual(expected);
     },
