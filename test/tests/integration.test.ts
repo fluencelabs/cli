@@ -21,9 +21,10 @@ import { join } from "node:path";
 
 import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../../src/lib/const.js";
 import { fluenceEnv, NO_PROJECT_TEST_NAME } from "../helpers/constants.js";
+import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "../helpers/paths.js";
 import {
+  getMultiaddrs,
   initializeTemplate,
-  multiaddrs,
   runAquaFunction,
 } from "../helpers/sharedSteps.js";
 
@@ -50,11 +51,18 @@ describe("integration tests", () => {
 
     await rm(PACKAGE_JSON_FILE_NAME);
 
-    try {
-      assert(multiaddrs[0] !== undefined, "multiaddrs is undefined");
+    const [{ multiaddr: relay = undefined } = {}] = await getMultiaddrs(
+      pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+    );
 
+    assert(
+      relay !== undefined,
+      "Unreachable. We always have multiaddrs for local network",
+    );
+
+    try {
       const result = await runAquaFunction(cwd, "identify", [], {
-        relay: multiaddrs[0].multiaddr,
+        relay,
         env: fluenceEnv,
         i: "smoke.aqua",
       });

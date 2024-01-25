@@ -50,17 +50,11 @@ import {
   getFluenceConfig,
   getServiceConfig,
   initializeTemplate,
-  multiaddrs,
+  getPeerIds,
   runAquaFunction,
   updateMainAqua,
   updateMainRs,
 } from "../../helpers/sharedSteps.js";
-
-const peerIds = multiaddrs
-  .map(({ peerId }) => {
-    return peerId;
-  })
-  .sort();
 
 const sortPeers = <T extends { peer: string }>(
   { peer: peerA }: T,
@@ -164,6 +158,8 @@ describe("integration tests", () => {
       const fluenceConfig = await getFluenceConfig(cwd);
 
       await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+
+      const peerIds = await getPeerIds(cwd);
 
       fluenceConfig.hosts = {
         [DEFAULT_WORKER_NAME]: {
