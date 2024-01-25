@@ -89,7 +89,7 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
         )
       : [];
 
-  return sortBy(
+  multiaddrs = sortBy(
     {
       kras: krasnodar,
       stage: stage,
@@ -98,6 +98,8 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
     }[fluenceEnv],
     ["peerId"],
   );
+
+  return multiaddrs;
 }
 
 export async function getPeerIds(cwd: string): Promise<string[]> {
