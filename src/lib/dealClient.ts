@@ -123,7 +123,7 @@ async function createDealClient(
 
   await setTryTimeout(
     async () => {
-      // By calling this method we ensure that the client is connected
+      // By calling this method we ensure that the blockchain client is connected
       await client.getMarket();
     },
     (err) => {
