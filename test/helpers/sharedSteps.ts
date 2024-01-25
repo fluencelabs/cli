@@ -68,19 +68,23 @@ import {
   getSpellDirPath,
 } from "./paths.js";
 
+let localMultiaddrs: Node[] | undefined;
+
 export async function getMultiaddrs(cwd: string): Promise<Node[]> {
   const local =
     fluenceEnv === "local"
-      ? addrsToNodes(
-          (
-            await fluence({
-              args: ["default", "peers", "local"],
-              cwd,
-            })
+      ? localMultiaddrs === undefined
+        ? addrsToNodes(
+            (
+              await fluence({
+                args: ["default", "peers", "local"],
+                cwd,
+              })
+            )
+              .trim()
+              .split("\n"),
           )
-            .trim()
-            .split("\n"),
-        )
+        : localMultiaddrs
       : [];
 
   return sortBy(
