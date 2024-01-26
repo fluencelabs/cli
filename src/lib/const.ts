@@ -49,7 +49,7 @@ const CURRENCY_MULTIPLIER_POWER = 18;
 export const CURRENCY_MULTIPLIER_TEXT = `This number is multiplied by 10^${CURRENCY_MULTIPLIER_POWER}`;
 export const CURRENCY_MULTIPLIER = 10 ** CURRENCY_MULTIPLIER_POWER;
 export const COLLATERAL_DEFAULT = 1;
-export const PRICE_PER_EPOCH_DEFAULT = 0.1;
+export const PRICE_PER_EPOCH_DEFAULT = 0.00001;
 
 export const defaultNumberProperties: Record<NumberProperty, number> = {
   maxCollateralPerWorker: COLLATERAL_DEFAULT,
@@ -489,8 +489,8 @@ export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
 )}\n\n`;
 
-const RUN_DEPLOYED_SERVICES_FUNCTION = "runDeployedServices";
-export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION}()`;
+export const RUN_DEPLOYED_SERVICES_FUNCTION_NAME = "runDeployedServices";
+export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}()`;
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
@@ -502,7 +502,7 @@ data Answer:
     answer: ?string
     worker: Worker
 
-func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
+func ${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}() -> []Answer:
     deals <- Deals.get()
     dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
     answers: *Answer

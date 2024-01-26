@@ -14,38 +14,35 @@
  * limitations under the License.
  */
 
+import { cp } from "fs/promises";
+import assert from "node:assert";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../src/lib/const.js";
-
+import { FS_OPTIONS, PACKAGE_JSON_FILE_NAME } from "../../src/lib/const.js";
+import { fluenceEnv, NO_PROJECT_TEST_NAME } from "../helpers/constants.js";
+import { pathToTheTemplateWhereLocalEnvironmentIsSpunUp } from "../helpers/paths.js";
 import {
-  NO_PROJECT_TEST_NAME,
-  fluence,
-  fluenceEnv,
   getMultiaddrs,
-  init,
-  maybeConcurrentTest,
-} from "./helpers.js";
-
-const multiaddrs = await getMultiaddrs();
+  initializeTemplate,
+  runAquaFunction,
+} from "../helpers/sharedSteps.js";
 
 describe("integration tests", () => {
-  maybeConcurrentTest("should work with minimal template", async () => {
+  test.concurrent("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
-    await init(cwd, "minimal");
+    await initializeTemplate(cwd, "minimal");
 
-    await fluence({
-      args: ["run"],
-      flags: {
-        f: 'helloWorld("Fluence")',
-      },
-      cwd,
-    });
+    await runAquaFunction(cwd, "helloWorld", ["Fluence"]);
   });
 
-  maybeConcurrentTest("should work without project", async () => {
+  test.concurrent("should work without project", async () => {
     const cwd = join("tmp", NO_PROJECT_TEST_NAME);
+
+    await cp(
+      join("test", "_resources", "aqua", "smoke.aqua"),
+      join(cwd, "smoke.aqua"),
+    );
 
     const packageJSONContent = await readFile(
       PACKAGE_JSON_FILE_NAME,
@@ -54,17 +51,20 @@ describe("integration tests", () => {
 
     await rm(PACKAGE_JSON_FILE_NAME);
 
+    const [{ multiaddr: relay = undefined } = {}] = await getMultiaddrs(
+      pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
+    );
+
+    assert(
+      relay !== undefined,
+      "Unreachable. We always have multiaddrs for local network",
+    );
+
     try {
-      const result = await fluence({
-        args: ["run"],
-        flags: {
-          relay: multiaddrs[0]?.multiaddr,
-          env: fluenceEnv,
-          f: "identify()",
-          i: "smoke.aqua",
-          quiet: true,
-        },
-        cwd,
+      const result = await runAquaFunction(cwd, "identify", [], {
+        relay,
+        env: fluenceEnv,
+        i: "smoke.aqua",
       });
 
       const parsedResult = JSON.parse(result);

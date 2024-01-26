@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { AssertionError } from "node:assert";
+
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
@@ -49,7 +51,7 @@ export function jsonStringify(
 
 export function stringifyUnknown(unknown: unknown): string {
   try {
-    if (unknown instanceof CLIError) {
+    if (unknown instanceof CLIError || unknown instanceof AssertionError) {
       return String(unknown);
     }
 
