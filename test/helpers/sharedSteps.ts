@@ -261,7 +261,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   });
 
   await setTryTimeout(
-    async () => {
+    async function callRunDeployedServicesCallback() {
       return callRunDeployedServices(cwd);
     },
     (error) => {
@@ -372,7 +372,7 @@ export async function createModuleAndAddToService(
 }
 
 async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
-  const checkConfig = async () => {
+  async function checkConfig() {
     const config = await initReadonlyFluenceConfigWithPath(cwd);
 
     assert(config !== null, `config is expected to exist at ${cwd}`);
@@ -384,7 +384,7 @@ async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
     );
 
     return config;
-  };
+  }
 
   return setTryTimeout(
     checkConfig,
@@ -404,7 +404,7 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
   answer: string,
 ) {
   await setTryTimeout(
-    async () => {
+    async function checkIfRunDeployedServicesReturnsExpected() {
       const expected = (await getMultiaddrs(cwd)).map(({ peerId }) => {
         return {
           answer,
@@ -443,7 +443,7 @@ export async function waitUntilShowSubnetReturnsExpected(
   spells: string[],
 ) {
   await setTryTimeout(
-    async () => {
+    async function checkIfShowSubnetReturnsExpected() {
       const showSubnetResult = await runAquaFunction(cwd, "showSubnet");
 
       const subnet = JSON.parse(showSubnetResult);
@@ -490,7 +490,7 @@ export async function waitUntilAquaScriptReturnsExpected(
   answer: string,
 ) {
   await setTryTimeout(
-    async () => {
+    async function checkIfAquaScriptReturnsExpected() {
       const result = await runAquaFunction(cwd, functionName, [spellName], {
         i: aquaFileName,
       });

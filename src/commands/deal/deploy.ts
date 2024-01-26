@@ -159,17 +159,12 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         );
 
         await dealUpdate({
-          privKey: flags["priv-key"],
           appCID,
           dealAddress: previouslyDeployedDeal.dealIdOriginal,
         });
 
         if (flags["auto-match"]) {
-          dbg("start matching");
-
-          await match(flags["priv-key"], previouslyDeployedDeal.dealIdOriginal);
-
-          dbg("done matching");
+          await match(previouslyDeployedDeal.dealIdOriginal);
         }
 
         updatedDeals[workerName] = {
@@ -210,7 +205,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       );
 
       const dealIdOriginal = await dealCreate({
-        privKey: flags["priv-key"],
         appCID,
         minWorkers,
         targetWorkers,
@@ -222,9 +216,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       });
 
       if (flags["auto-match"]) {
-        dbg("start matching");
-        await match(flags["priv-key"], dealIdOriginal);
-        dbg("done matching");
+        await match(dealIdOriginal);
       }
 
       if (workersConfig.deals === undefined) {

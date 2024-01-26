@@ -20,18 +20,14 @@ import times from "lodash-es/times.js";
 import { commandObj } from "../commandObj.js";
 import {
   ensureReadonlyProviderConfig,
+  ensureComputerPeerConfigs,
   promptForOffer,
 } from "../configs/project/provider.js";
 import { CURRENCY_MULTIPLIER } from "../const.js";
-import { dbg } from "../dbg.js";
-import { getDealClient, promptConfirmTx, waitTx } from "../dealClient.js";
-import { jsonStringify } from "../helpers/utils.js";
-import { getSecretKeyOrReturnExisting } from "../keyPairs.js";
-import { getPeerIdFromSecretKey } from "../multiaddres.js";
+import { getDealClient, sign } from "../dealClient.js";
 
 export async function createOffer(flags: {
   offer?: string | undefined;
-  noxes?: number | undefined;
   env: string | undefined;
   "priv-key": string | undefined;
 }) {
@@ -48,15 +44,13 @@ export async function createOffer(flags: {
     offer = await promptForOffer(providerConfig.offers);
   }
 
-  const { dealClient, signerOrWallet } = await getDealClient();
+  const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
   const flt = await dealClient.getFLT();
 
   const minPricePerWorkerEpochBigInt = BigInt(
     offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
   );
-
-  dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
 
   const [{ digest, CID }, { base58btc }, { ethers }] = await Promise.all([
     import("multiformats"),
@@ -65,30 +59,23 @@ export async function createOffer(flags: {
     import("ethers"),
   ]);
 
-  const signerAddress = await signerOrWallet.getAddress();
+  const computePeers = await ensureComputerPeerConfigs(flags);
 
-  const computePeersToRegister = await Promise.all(
-    Object.entries(providerConfig.computePeers).map(
-      async ([name, computePeer]) => {
-        const { secretKey } = await getSecretKeyOrReturnExisting(name);
-        const peerId = await getPeerIdFromSecretKey(secretKey);
-
-        return {
-          peerId: digest
-            .decode(base58btc.decode("z" + peerId))
-            .bytes.subarray(6),
-          unitIds: times(computePeer.computeUnits).map(() => {
-            return ethers.randomBytes(32);
-          }),
-          owner: signerAddress, //TODO: get owner for peer,
-        };
-      },
-    ),
+  const computePeersToRegister = computePeers.map(
+    ({ computeUnits, walletAddress, peerId }) => {
+      return {
+        peerId: digest.decode(base58btc.decode("z" + peerId)).bytes.subarray(6),
+        unitIds: times(computeUnits).map(() => {
+          return ethers.randomBytes(32);
+        }),
+        owner: walletAddress,
+      };
+    },
   );
 
-  const registerMarketOfferParams: Parameters<
-    typeof market.registerMarketOffer
-  > = [
+  //TODO: if offer exists, update it
+  await sign(
+    market.registerMarketOffer,
     minPricePerWorkerEpochBigInt,
     await flt.getAddress(),
     (offer.effectors ?? []).map((effector) => {
@@ -100,20 +87,7 @@ export async function createOffer(flags: {
       };
     }),
     computePeersToRegister,
-  ];
-
-  dbg(
-    `calling market.registerMarketOffer using: ${jsonStringify(
-      registerMarketOfferParams,
-    )}`,
   );
 
-  //TODO: if offer exists, update it
-  const registerOfferTx = await market.registerMarketOffer(
-    ...registerMarketOfferParams,
-  );
-
-  promptConfirmTx(flags["priv-key"]);
-  await waitTx(registerOfferTx);
   commandObj.logToStderr(color.green(`Offer registered`));
 }

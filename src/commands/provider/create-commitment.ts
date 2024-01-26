@@ -17,7 +17,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { createCommitment } from "../../lib/chain/createCommitment.js";
+import { createCommitments } from "../../lib/chain/createCommitment.js";
 import {
   PRIV_KEY_FLAG,
   NOXES_FLAG,
@@ -43,6 +43,6 @@ export default class CreateCommitment extends BaseCommand<
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CreateCommitment));
-    await createCommitment(flags);
+    await createCommitments(flags);
   }
 }

@@ -18,12 +18,9 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import {
-  getDealClient,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/dealClient.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -45,12 +42,7 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   };
 
   async run(): Promise<void> {
-    const { flags, args } = await initCli(
-      this,
-      await this.parse(WithdrawReward),
-    );
-
-    const privKey = flags["priv-key"];
+    const { args } = await initCli(this, await this.parse(WithdrawReward));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -60,20 +52,13 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
 
     const { dealClient } = await getDealClient();
     const deal = dealClient.getDeal(dealAddress);
-
-    promptConfirmTx(privKey);
-
     const rewardAmount = await deal.getRewardAmount(unitId);
-
-    const tx = await deal.withdrawRewards(unitId);
-
-    await waitTx(tx);
-
+    await sign(deal.withdrawRewards, unitId);
     const { ethers } = await import("ethers");
 
-    color.green(
-      `Reward ${ethers.formatEther(
-        rewardAmount,
+    commandObj.logToStderr(
+      `Reward ${color.yellow(
+        ethers.formatEther(rewardAmount),
       )} was withdrawn from the deal ${dealAddress}`,
     );
   }

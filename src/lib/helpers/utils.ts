@@ -16,6 +16,7 @@
 
 import { AssertionError } from "node:assert";
 
+import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
 import { dbg } from "../dbg.js";
@@ -181,20 +182,38 @@ export async function setTryTimeout<T, U>(
   }, msToTryFor);
 
   let error: unknown;
+  let attemptCounter = 1;
   let isTrying = true;
+
+  const functionName = color.yellow(
+    callbackToTry.name === "" ? "anonymous function" : callbackToTry.name,
+  );
 
   while (isTrying) {
     isTrying = isTimeoutRunning;
 
     try {
-      dbg(`Trying to execute: ${callbackToTry.toString()}`);
+      dbg(`Trying to execute ${functionName}`);
       const res = await callbackToTry();
       clearTimeout(timeout);
       isTrying = false;
       return res;
     } catch (e) {
-      dbg(`Failed to execute. Reason: ${stringifyUnknown(e)}`);
+      const errorString = stringifyUnknown(e);
+      const previousErrorString = stringifyUnknown(error);
+
+      if (errorString === previousErrorString) {
+        dbg(
+          `Attempt #${attemptCounter} to execute ${functionName} failed with the same error`,
+        );
+      } else {
+        dbg(
+          `Failed to execute ${functionName}. Reason: ${stringifyUnknown(e)}`,
+        );
+      }
+
       error = e;
+      attemptCounter++;
     }
 
     await new Promise((resolve) => {

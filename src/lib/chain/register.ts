@@ -18,7 +18,7 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
-import { getDealClient } from "../dealClient.js";
+import { getDealClient, sign } from "../dealClient.js";
 
 export async function register(flags: {
   noxes?: number | undefined;
@@ -35,12 +35,10 @@ export async function register(flags: {
     "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
   ).bytes;
 
-  const tx = await market.setProviderInfo(providerConfig.providerName, {
+  await sign(market.setProviderInfo, providerConfig.providerName, {
     prefixes: id.slice(0, 4),
     hash: id.slice(4),
   });
 
-  await tx.wait();
-
-  commandObj.logToStderr(color.green(`Provider registered`));
+  commandObj.logToStderr(color.green("Provider registered"));
 }

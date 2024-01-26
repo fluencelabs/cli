@@ -60,7 +60,7 @@ import { compileToFiles } from "./aqua.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
 import { initNewEnvConfig } from "./configs/project/env.js";
-import { initNewReadonlyProviderConfig } from "./configs/project/provider.js";
+import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
 import { SERVICE_INTERFACE_FILE_HEADER } from "./const.js";
@@ -160,7 +160,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   }
 
   if (fluenceEnv === "local") {
-    await initNewReadonlyProviderConfig({
+    await ensureComputerPeerConfigs({
       env: "local",
       noxes: options.noxes,
     });

@@ -18,7 +18,10 @@ import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import {
+  initNewReadonlyProviderConfig,
+  ensureComputerPeerConfigs,
+} from "../../lib/configs/project/provider.js";
 import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -33,6 +36,7 @@ export default class Init extends BaseCommand<typeof Init> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
     const providerConfig = await initNewReadonlyProviderConfig(flags);
+    await ensureComputerPeerConfigs(flags);
 
     commandObj.logToStderr(
       `Provider config is at ${color.yellow(providerConfig.$getPath())}`,

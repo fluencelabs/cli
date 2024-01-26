@@ -79,7 +79,6 @@ export default class Create extends BaseCommand<typeof Create> {
       maxWorkersPerProvider: flags["max-workers-per-provider"],
       pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
       effectors: flags.effector,
-      privKey: flags["priv-key"],
       initialBalance:
         flags["initial-balance"] === undefined
           ? DEFAULT_INITIAL_BALANCE

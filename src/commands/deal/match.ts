@@ -37,11 +37,10 @@ export default class Match extends BaseCommand<typeof Match> {
   };
 
   async run(): Promise<void> {
-    const { flags, args } = await initCli(this, await this.parse(Match));
+    const { args } = await initCli(this, await this.parse(Match));
 
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
-
-    await match(flags["priv-key"], dealAddress);
+    await match(
+      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" })),
+    );
   }
 }

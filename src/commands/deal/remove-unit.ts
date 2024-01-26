@@ -19,11 +19,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import {
-  promptConfirmTx,
-  waitTx,
-  getDealClient,
-} from "../../lib/dealClient.js";
+import { sign, getDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -42,21 +38,14 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   };
 
   async run(): Promise<void> {
-    const { flags, args } = await initCli(this, await this.parse(RemoveUnit));
-    const privKey = flags["priv-key"];
+    const { args } = await initCli(this, await this.parse(RemoveUnit));
 
     const unitId =
       args["UNIT-ID"] ?? (await input({ message: "Enter compute unit CID" }));
 
     const { dealClient } = await getDealClient();
-
     const market = await dealClient.getMarket();
-
-    promptConfirmTx(privKey);
-    const tx = await market.returnComputeUnitFromDeal(unitId);
-
-    await waitTx(tx);
-
+    await sign(market.returnComputeUnitFromDeal, unitId);
     color.green(`Unit ${unitId} was removed from the deal`);
   }
 }

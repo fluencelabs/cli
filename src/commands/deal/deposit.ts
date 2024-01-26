@@ -19,11 +19,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import {
-  getDealClient,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/dealClient.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -45,8 +41,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
   };
 
   async run(): Promise<void> {
-    const { flags, args } = await initCli(this, await this.parse(Deposit));
-    const privKey = flags["priv-key"];
+    const { args } = await initCli(this, await this.parse(Deposit));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -60,24 +55,15 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
 
     const { dealClient, signerOrWallet } = await getDealClient();
     const deal = dealClient.getDeal(dealAddress);
-
-    promptConfirmTx(privKey);
-
     const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
 
-    const approveTx = await ERC20__factory.connect(
-      await deal.paymentToken(),
-      signerOrWallet,
-    ).approve(await deal.getAddress(), amount);
+    await sign(
+      ERC20__factory.connect(await deal.paymentToken(), signerOrWallet).approve,
+      await deal.getAddress(),
+      amount,
+    );
 
-    await approveTx.wait();
-
-    promptConfirmTx(privKey);
-
-    const tx = await deal.deposit(amount);
-
-    await waitTx(tx);
-
+    await sign(deal.deposit, amount);
     color.green(`Tokens were deposited to the deal ${dealAddress}`);
   }
 }

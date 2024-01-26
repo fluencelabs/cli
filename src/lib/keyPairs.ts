@@ -451,7 +451,7 @@ export async function getSecretKeys(
   );
 }
 
-export async function getSecretKeyOrReturnExisting(name: string) {
+export async function genSecretKeyOrReturnExisting(name: string) {
   const fluenceDir = getFluenceDir();
   const filePath = await ensureFluenceSecretsFilePath(name);
   let secretKey;

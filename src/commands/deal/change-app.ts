@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { dealUpdate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -42,17 +40,14 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   };
 
   async run(): Promise<void> {
-    const { flags, args } = await initCli(this, await this.parse(ChangeApp));
+    const { args } = await initCli(this, await this.parse(ChangeApp));
 
-    const tx = await dealUpdate({
+    await dealUpdate({
       dealAddress:
         args["DEAL-ADDRESS"] ??
         (await input({ message: "Enter deal address" })),
       appCID:
         args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
-      privKey: flags["priv-key"],
     });
-
-    commandObj.logToStderr(`Tx hash: ${color.yellow(tx.hash)}`);
   }
 }

@@ -24,23 +24,13 @@ import type { ethers } from "ethers";
 import { commandObj } from "./commandObj.js";
 import { CLI_NAME_FULL, CURRENCY_MULTIPLIER } from "./const.js";
 import { dbg } from "./dbg.js";
-import {
-  waitTx,
-  promptConfirmTx,
-  getDealClient,
-  getDealMatcherClient,
-} from "./dealClient.js";
-import {
-  jsonStringify,
-  setTryTimeout,
-  stringifyUnknown,
-} from "./helpers/utils.js";
+import { sign, getDealClient, getDealMatcherClient } from "./dealClient.js";
+import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
 const EVENT_TOPIC_FRAGMENT = "DealCreated";
 const DEAL_LOG_ARG_NAME = "deal";
 
 type DealCreateArg = {
-  privKey: string | undefined;
   appCID: string;
   minWorkers: number;
   targetWorkers: number;
@@ -52,7 +42,6 @@ type DealCreateArg = {
 };
 
 export async function dealCreate({
-  privKey,
   appCID,
   minWorkers,
   targetWorkers,
@@ -69,8 +58,6 @@ export async function dealCreate({
 
   const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
-
-  promptConfirmTx(privKey);
 
   const pricePerWorkerEpochBigInt = BigInt(
     pricePerWorkerEpoch * CURRENCY_MULTIPLIER,
@@ -95,18 +82,10 @@ export async function dealCreate({
     );
   }
 
-  dbg(`minInitialBalanceBigInt: ${minInitialBalanceBigInt}`);
-  dbg(`initialBalanceBigInt: ${initialBalanceBigInt}`);
+  await sign(flt.approve, await market.getAddress(), initialBalanceBigInt);
 
-  const approveTx = await flt.approve(
-    await market.getAddress(),
-    initialBalanceBigInt,
-  );
-
-  await waitTx(approveTx);
-  promptConfirmTx(privKey);
-
-  const deployDealParams: Parameters<typeof market.deployDeal> = [
+  const res = await sign(
+    market.deployDeal,
     {
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
@@ -123,14 +102,12 @@ export async function dealCreate({
         hash: id.slice(4),
       };
     }),
+    // TODO: provider access type
     0,
+    // TODO: provider access list
     [],
-  ];
+  );
 
-  dbg(`deployDealParams: ${jsonStringify(deployDealParams)}`);
-
-  const tx = await market.deployDeal(...deployDealParams);
-  const res = await waitTx(tx);
   const eventTopic = market.interface.getEvent(EVENT_TOPIC_FRAGMENT);
 
   const log = res.logs.find((log) => {
@@ -153,44 +130,33 @@ export async function dealCreate({
 }
 
 type DealUpdateArg = {
-  privKey: string | undefined;
   dealAddress: string;
   appCID: string;
 };
 
-export async function dealUpdate({
-  privKey,
-  dealAddress,
-  appCID,
-}: DealUpdateArg) {
+export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
   const { dealClient } = await getDealClient();
   const deal = dealClient.getDeal(dealAddress);
 
   const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
 
-  promptConfirmTx(privKey);
-
-  const tx = await deal.setAppCID({
+  await sign(deal.setAppCID, {
     prefixes: bytesCid.slice(0, 4),
     hash: bytesCid.slice(4),
   });
-
-  await waitTx(tx);
-
-  return tx;
 }
 
 const COMPUTE_UNIT_CREATED_EVENT_TOPIC = "ComputeUnitCreated";
 
-export async function match(privKey: string | undefined, dealAddress: string) {
+export async function match(dealAddress: string) {
   const { dealClient } = await getDealClient();
   const dealMatcherClient = await getDealMatcherClient();
 
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
 
   const matchedOffers = await setTryTimeout(
-    () => {
+    function getMatchedOffersByDealId() {
       return dealMatcherClient.getMatchedOffersByDealId(dealAddress);
     },
     (err) => {
@@ -203,15 +169,13 @@ export async function match(privKey: string | undefined, dealAddress: string) {
 
   const market = await dealClient.getMarket();
 
-  const tx = await market.matchDeal(
+  const res = await sign(
+    market.matchDeal,
     dealAddress,
     matchedOffers.offers,
     matchedOffers.computeUnitsPerOffers,
   );
 
-  promptConfirmTx(privKey);
-
-  const res = await waitTx(tx);
   const event = market.getEvent(COMPUTE_UNIT_CREATED_EVENT_TOPIC);
 
   const patCount = res.logs.filter((log) => {

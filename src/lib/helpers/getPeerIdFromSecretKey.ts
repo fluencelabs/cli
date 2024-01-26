@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
+import { base64ToUint8Array } from "../keyPairs.js";
 
-import { commandObj } from "../commandObj.js";
-
-export function startSpinner(message: string) {
-  commandObj.logToStderr(`${color.yellow("#")} ${message}...`);
-}
-
-export function stopSpinner(message: string | undefined = "done") {
-  commandObj.logToStderr(message);
+export async function getPeerIdFromSecretKey(secretKey: string) {
+  const { KeyPair } = await import("@fluencelabs/js-client");
+  const keyPair = await KeyPair.fromEd25519SK(base64ToUint8Array(secretKey));
+  return keyPair.getPeerId();
 }

@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import { commandObj } from "../commandObj.js";
-import { getDealClient } from "../dealClient.js";
-import { getSecretKeyOrReturnExisting } from "../keyPairs.js";
-import { getPeerIdFromSecretKey } from "../multiaddres.js";
+import { resolveComputePeersByNames } from "../configs/project/provider.js";
+import { getDealClient, sign } from "../dealClient.js";
 
 import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
-export async function depositCollateralByNoxName(noxNames: string[]) {
+export async function depositCollateralByNoxNames(flags: {
+  "nox-names": string | undefined;
+  env: string | undefined;
+  "priv-key": string | undefined;
+}) {
   const { dealClient } = await getDealClient();
+  const computePeers = await resolveComputePeersByNames(flags);
   const capacity = await dealClient.getCapacity();
   const { ethers } = await import("ethers");
 
   const PeerIdHexes = await Promise.all(
-    noxNames.map(async (noxName) => {
-      const { secretKey } = await getSecretKeyOrReturnExisting(noxName);
-      const peerId = await getPeerIdFromSecretKey(secretKey);
-      const peerIdUint8Arr = await peerIdToUint8Array(peerId);
-      return ethers.hexlify(peerIdUint8Arr);
+    computePeers.map(async ({ peerId }) => {
+      return ethers.hexlify(await peerIdToUint8Array(peerId));
     }),
   );
 
@@ -53,6 +53,8 @@ export async function depositCollateralByNoxName(noxNames: string[]) {
 export async function depositCollateral(commitmentIds: string[]) {
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
+  const flt = await dealClient.getFLT();
+
   // let collateralToApproveCommitments = 0n;
 
   // for (const commitmentId of commitmentIds) {
@@ -62,39 +64,18 @@ export async function depositCollateral(commitmentIds: string[]) {
   //     collateralToApproveCommitments + collateralToApproveCommitment;
   // }
 
-  // commandObj.logToStderr(
-  //   `Send approve of FLT for all commitments for value: ${collateralToApproveCommitments}...`,
-  // );
-
-  const flt = await dealClient.getFLT();
-
-  // const collateralToApproveCommitmentsTx = await flt.approve(
+  // await sign(
+  //   flt.approve,
   //   await capacity.getAddress(),
   //   collateralToApproveCommitments,
-  // );
+  // )
 
-  // await collateralToApproveCommitmentsTx.wait();
+  const address = capacity.getAddress();
 
   for (const commitmentId of commitmentIds) {
     const collateralToApproveCommitment = await getCollateral(commitmentId);
-
-    const collateralToApproveCommitmentsTx = await flt.approve(
-      await capacity.getAddress(),
-      collateralToApproveCommitment,
-    );
-
-    await collateralToApproveCommitmentsTx.wait();
-
-    commandObj.logToStderr(
-      `Depositing collateral: ${collateralToApproveCommitment} for commitmentId: ${commitmentId}...`,
-    );
-
-    const depositCollateralTx = await capacity.depositCollateral(commitmentId);
-    await depositCollateralTx.wait();
-
-    commandObj.logToStderr(
-      `Collateral successfully deposited for commitmentId: ${commitmentId}`,
-    );
+    await sign(flt.approve, address, collateralToApproveCommitment);
+    await sign(capacity.depositCollateral, commitmentId);
   }
 }
 

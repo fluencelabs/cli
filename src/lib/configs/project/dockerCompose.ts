@@ -40,7 +40,7 @@ import {
   SUBGRAPH_DEPLOY_SCRIPT_NAME,
 } from "../../const.js";
 import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
-import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
+import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -51,12 +51,7 @@ import {
   type Migrations,
 } from "../initConfig.js";
 
-import {
-  initNewReadonlyProviderConfig,
-  ensureConfigToml,
-  type ProviderConfigReadonly,
-} from "./provider.js";
-import { getConfigTomlName } from "./provider.js";
+import { ensureComputerPeerConfigs, getConfigTomlName } from "./provider.js";
 
 type Service = {
   image?: string;
@@ -214,23 +209,22 @@ function genNox({
 }
 
 async function genDockerCompose(
-  providerConfig: ProviderConfigReadonly,
+  args: ProviderConfigArgs,
 ): Promise<LatestConfig> {
   const configsDir = await ensureFluenceConfigsDir();
   const fluenceDir = getFluenceDir();
+  const computePeers = await ensureComputerPeerConfigs(args);
 
   const peers = await Promise.all(
-    Object.entries(providerConfig.computePeers).map(async ([name, { nox }]) => {
-      const relativeConfigFilePath = relative(
-        fluenceDir,
-        join(configsDir, getConfigTomlName(name)),
-      );
-
+    computePeers.map(async ({ name, overriddenNoxConfig }) => {
       return {
-        ...(await getSecretKeyOrReturnExisting(name)),
-        webSocketPort: nox?.websocketPort,
-        tcpPort: nox?.tcpPort,
-        relativeConfigFilePath,
+        ...(await genSecretKeyOrReturnExisting(name)),
+        webSocketPort: overriddenNoxConfig.websocketPort,
+        tcpPort: overriddenNoxConfig.tcpPort,
+        relativeConfigFilePath: relative(
+          fluenceDir,
+          join(configsDir, getConfigTomlName(name)),
+        ),
       };
     }),
   );
@@ -355,9 +349,9 @@ async function genDockerCompose(
 }
 
 async function genDefaultDockerCompose(
-  providerConfig: ProviderConfigReadonly,
+  args: ProviderConfigArgs,
 ): Promise<GetDefaultConfig> {
-  const def = await genDockerCompose(providerConfig);
+  const def = await genDockerCompose(args);
 
   return () => {
     return yamlDiffPatch("", {}, def);
@@ -381,22 +375,18 @@ const initConfigOptions = {
 };
 
 export async function initNewDockerComposeConfig(args: ProviderConfigArgs) {
-  const providerConfig = await initNewReadonlyProviderConfig(args);
-  await ensureConfigToml(providerConfig, args);
   return getConfigInitFunction(
     initConfigOptions,
-    await genDefaultDockerCompose(providerConfig),
+    await genDefaultDockerCompose(args),
   )();
 }
 
 export async function initNewReadonlyDockerComposeConfig(
   args: ProviderConfigArgs,
 ) {
-  const providerConfig = await initNewReadonlyProviderConfig(args);
-  await ensureConfigToml(providerConfig, args);
   return getReadonlyConfigInitFunction(
     initConfigOptions,
-    await genDefaultDockerCompose(providerConfig),
+    await genDefaultDockerCompose(args),
   )();
 }
 

@@ -177,7 +177,7 @@ describe("integration tests", () => {
       });
 
       await setTryTimeout(
-        async () => {
+        async function checkIfRunDeployedWorkerServicesReturnsExpected() {
           const result = await fluence({
             args: ["run"],
             flags: {

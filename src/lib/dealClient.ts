@@ -28,6 +28,7 @@ import type { ethers } from "ethers";
 
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { commandObj } from "./commandObj.js";
+import { envConfig } from "./configs/globalConfigs.js";
 import {
   DEAL_CONFIG,
   CLI_CONNECTOR_URL,
@@ -37,6 +38,7 @@ import {
   type ContractsENV,
   CONTRACTS_ENV_TO_CHAIN_ID,
 } from "./const.js";
+import { dbg } from "./dbg.js";
 import { ensureChainNetwork } from "./ensureChainNetwork.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
@@ -50,7 +52,7 @@ export type DealClientFlags = {
   "priv-key"?: string | undefined;
 };
 
-let dealClientFlags: DealClientFlags;
+let dealClientFlags: DealClientFlags = {};
 
 export function setDealClientFlags(flags: DealClientFlags) {
   dealClientFlags = flags;
@@ -122,7 +124,7 @@ async function createDealClient(
   const client = new DealClient(signerOrProvider, env);
 
   await setTryTimeout(
-    async () => {
+    async function checkIfBlockChainClientIsConnected() {
       // By calling this method we ensure that the blockchain client is connected
       await client.getMarket();
     },
@@ -214,22 +216,35 @@ async function getWallet(
   return new ethers.Wallet(privKey, await ensureProvider(contractsENV));
 }
 
-export const waitTx = async (
-  tx: ethers.ContractTransactionResponse,
-): Promise<ethers.ContractTransactionReceipt> => {
-  startSpinner("Waiting for transaction to be mined...");
+export async function sign<T extends unknown[]>(
+  method: (...args: T) => Promise<ethers.ContractTransactionResponse>,
+  ...args: T
+) {
+  if (
+    dealClientFlags["priv-key"] === undefined &&
+    envConfig?.fluenceEnv !== "local"
+  ) {
+    commandObj.logToStderr(
+      `Confirm ${color.yellow(method.name)} transaction in your wallet...`,
+    );
+  }
+
+  const debugInfo = `calling contract method: ${method.name}(${stringifyUnknown(
+    args,
+  ).slice(1, -1)})`;
+
+  dbg(debugInfo);
+  const tx = await method(...args);
+
+  startSpinner(
+    `Waiting for ${color.yellow(method.name)} transaction ${color.yellow(
+      tx.hash,
+    )} to be mined`,
+  );
 
   const res = await tx.wait();
   stopSpinner();
-
-  assert(res !== null, "Transaction hash is not defined");
-  assert(res.status === 1, "Transaction failed");
-
+  assert(res !== null, `Transaction hash is not defined after ${debugInfo}`);
+  assert(res.status === 1, `Transaction failed after ${debugInfo}`);
   return res;
-};
-
-export const promptConfirmTx = (privKey: string | undefined) => {
-  if (privKey === undefined) {
-    commandObj.logToStderr(`Confirm transaction in your wallet...`);
-  }
-};
+}

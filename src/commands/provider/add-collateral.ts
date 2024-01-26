@@ -19,9 +19,8 @@ import { Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import {
   depositCollateral,
-  depositCollateralByNoxName,
+  depositCollateralByNoxNames,
 } from "../../lib/chain/depositCollateral.js";
-import { ensureReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -53,14 +52,6 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
       return;
     }
 
-    const providerConfig = await ensureReadonlyProviderConfig(flags);
-    const noxNamesString = flags["nox-names"];
-
-    const noxNames =
-      noxNamesString === undefined
-        ? Object.keys(providerConfig.capacityCommitments ?? {})
-        : commaSepStrToArr(noxNamesString);
-
-    await depositCollateralByNoxName(noxNames);
+    await depositCollateralByNoxNames(flags);
   }
 }

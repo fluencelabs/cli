@@ -234,7 +234,6 @@
           "allowEmptyCatch": true
         }
       ],
-      "no-plusplus": "error",
       "operator-assignment": [
         "error",
         "never"

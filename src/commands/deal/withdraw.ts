@@ -19,11 +19,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
-import {
-  getDealClient,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/dealClient.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -45,8 +41,7 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
   };
 
   async run(): Promise<void> {
-    const { flags, args } = await initCli(this, await this.parse(Withdraw));
-    const privKey = flags["priv-key"];
+    const { args } = await initCli(this, await this.parse(Withdraw));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -57,13 +52,7 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
 
     const { dealClient } = await getDealClient();
     const deal = dealClient.getDeal(dealAddress);
-
-    promptConfirmTx(privKey);
-
-    const tx = await deal.withdraw(amount);
-
-    await waitTx(tx);
-
+    await sign(deal.withdraw, amount);
     color.green(`Tokens were deposited to the deal ${dealAddress}`);
   }
 }

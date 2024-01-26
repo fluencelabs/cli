@@ -33,21 +33,15 @@ import sample from "lodash-es/sample.js";
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import { initNewReadonlyProviderConfig } from "./configs/project/provider.js";
+import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
 import {
   FLUENCE_ENVS,
   type FluenceEnv,
   type PublicFluenceEnv,
-  WEB_SOCKET_PORT_START,
   CONTRACTS_ENV,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { commaSepStrToArr, jsonStringify } from "./helpers/utils.js";
-import {
-  base64ToUint8Array,
-  getSecretKeyOrReturnExisting,
-} from "./keyPairs.js";
 import { projectRootDir } from "./paths.js";
 import { input, list } from "./prompt.js";
 import { resolveFluenceEnv } from "./resolveFluenceEnv.js";
@@ -61,17 +55,11 @@ export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   });
 }
 
-export async function getPeerIdFromSecretKey(secretKey: string) {
-  const { KeyPair } = await import("@fluencelabs/js-client");
-  const keyPair = await KeyPair.fromEd25519SK(base64ToUint8Array(secretKey));
-  return keyPair.getPeerId();
-}
-
 async function ensureLocalAddrsAndPeerIds(args: ProviderConfigArgs) {
-  return (await getResolvedProviderConfig(args)).map(
-    ({ peerId, webSocketPort }): AddrAndPeerId => {
+  return (await ensureComputerPeerConfigs(args)).map(
+    ({ peerId, overriddenNoxConfig }): AddrAndPeerId => {
       return {
-        multiaddr: `/ip4/127.0.0.1/tcp/${webSocketPort}/ws/p2p/${peerId}`,
+        multiaddr: `/ip4/127.0.0.1/tcp/${overriddenNoxConfig.websocketPort}/ws/p2p/${peerId}`,
         peerId,
       };
     },
@@ -357,38 +345,5 @@ export async function updateRelaysJSON({
   await writeFile(
     join(resolve(projectRootDir, fluenceConfig.relaysPath), "relays.json"),
     jsonStringify(relays),
-  );
-}
-
-type ResolvedProviderConfig = {
-  name: string;
-  webSocketPort: number;
-  peerId: string;
-  computeUnits: number;
-};
-
-export async function getResolvedProviderConfig(
-  args: ProviderConfigArgs,
-): Promise<ResolvedProviderConfig[]> {
-  const providerConfig = await initNewReadonlyProviderConfig(args);
-  return Promise.all(
-    Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {
-      const {
-        nox: { websocketPort: webSocketPortFromConfig } = {},
-        computeUnits = DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-      } = peer;
-
-      const webSocketPort =
-        webSocketPortFromConfig ?? WEB_SOCKET_PORT_START + i;
-
-      const { secretKey } = await getSecretKeyOrReturnExisting(name);
-
-      return {
-        name,
-        webSocketPort,
-        peerId: await getPeerIdFromSecretKey(secretKey),
-        computeUnits,
-      };
-    }),
   );
 }
