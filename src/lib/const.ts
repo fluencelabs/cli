@@ -175,6 +175,7 @@ export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const FRONTEND_DIR_NAME = "frontend";
+export const GATEWAY_DIR_NAME = "gateway";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
@@ -233,6 +234,9 @@ export const EXTENSIONS_JSON_FILE_NAME = `extensions.${JSON_EXT}`;
 export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
 export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
 export const INDEX_HTML_FILE_NAME = `index.html`;
+
+export const SERVER_TS_FILE_NAME = `server.${TS_EXT}`;
+export const SERVER_JS_FILE_NAME = `server.${JS_EXT}`;
 
 export const CONFIG_TOML = `Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
@@ -448,7 +452,7 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
-/${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}
+${COMPILED_AQUA_DIR_NAME}/
 **/node_modules
 **/target/
 .repl_history
@@ -465,6 +469,7 @@ export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
 const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
 const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
+export const TYPESCRIPT_NPM_DEPENDENCY = "typescript";
 
 export const fluenceNPMDependencies = [
   AQUA_LIB_NPM_DEPENDENCY,

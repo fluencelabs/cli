@@ -45,7 +45,11 @@ import {
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
-import { commaSepStrToArr, jsonStringify } from "./helpers/utils.js";
+import {
+  commaSepStrToArr,
+  jsonStringify,
+  splitErrorsAndResults,
+} from "./helpers/utils.js";
 import {
   base64ToUint8Array,
   getSecretKeyOrReturnExisting,
@@ -398,19 +402,16 @@ export async function updateRelaysJSON({
   noxes,
 }: UpdateRelaysJSONArgs) {
   if (
-    typeof fluenceConfig?.relaysPath !== "string" ||
+    fluenceConfig?.relaysPath === undefined ||
     envConfig?.fluenceEnv === undefined
   ) {
     return;
   }
 
-  if (isAbsolute(fluenceConfig.relaysPath)) {
-    commandObj.error(
-      `relaysPath must be relative to the root project directory. Found: ${
-        fluenceConfig.relaysPath
-      } at ${fluenceConfig.$getPath()}}`,
-    );
-  }
+  const relayPaths =
+    typeof fluenceConfig.relaysPath === "string"
+      ? [fluenceConfig.relaysPath]
+      : fluenceConfig.relaysPath;
 
   const relays = await resolveAddrsAndPeerIds({
     fluenceEnv: envConfig.fluenceEnv,
@@ -418,9 +419,30 @@ export async function updateRelaysJSON({
     noxes,
   });
 
-  await writeFile(
-    join(resolve(projectRootDir, fluenceConfig.relaysPath), "relays.json"),
-    jsonStringify(relays),
+  const [absolutePaths, relativePaths] = splitErrorsAndResults(
+    relayPaths,
+    (relayPath) => {
+      return isAbsolute(relayPath)
+        ? { error: relayPath }
+        : { result: relayPath };
+    },
+  );
+
+  if (absolutePaths.length > 0) {
+    commandObj.error(
+      `relaysPath must contain only paths relative to the root project directory. Found: ${absolutePaths.join(
+        "\n",
+      )}`,
+    );
+  }
+
+  await Promise.all(
+    relativePaths.map((relativePath) => {
+      return writeFile(
+        join(resolve(projectRootDir, relativePath), "relays.json"),
+        jsonStringify(relays),
+      );
+    }),
   );
 }
 
