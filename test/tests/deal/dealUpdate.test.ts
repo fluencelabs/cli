@@ -237,7 +237,10 @@ pub fn greeting(name: String) -> String {
 const GET_SPELL_LOGS_AQUA_FILE_NAME = "getSpellLogs.aqua";
 const SPELL_MESSAGE = '"if you see this, then the spell is working"';
 
-const UPDATED_SPELL_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
+const UPDATED_SPELL_CONTENT = `aqua Spell
+export spell
+
+import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
