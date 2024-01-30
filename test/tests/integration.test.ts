@@ -29,14 +29,14 @@ import {
 } from "../helpers/sharedSteps.js";
 
 describe("integration tests", () => {
-  test.concurrent("should work with minimal template", async () => {
+  test("should work with minimal template", async () => {
     const cwd = join("tmp", "shouldWorkWithMinimalTemplate");
     await initializeTemplate(cwd, "minimal");
 
     await runAquaFunction(cwd, "helloWorld", ["Fluence"]);
   });
 
-  test.concurrent("should work without project", async () => {
+  test("should work without project", async () => {
     const cwd = join("tmp", NO_PROJECT_TEST_NAME);
 
     await cp(

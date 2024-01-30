@@ -236,7 +236,9 @@ export async function callRunDeployedServices(cwd: string) {
   return runDeployedServicesResult;
 }
 
-export async function deployDealAndWaitUntilDeployed(cwd: string) {
+export async function deployDealAndWaitUntilDeployed(
+  cwd: string,
+): Promise<string> {
   const res = await fluence({
     args: ["deal", "deploy"],
     flags: {
@@ -273,6 +275,8 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
     },
     RUN_DEPLOYED_SERVICES_TIMEOUT,
   );
+
+  return dealId;
 }
 
 export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
