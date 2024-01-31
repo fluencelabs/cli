@@ -611,7 +611,7 @@ __metadata:
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.7.0
-    "@fluencelabs/npm-aqua-compiler": 0.0.2
+    "@fluencelabs/npm-aqua-compiler": 0.0.2-DXJ-569-9561e68-2499-1
     "@iarna/toml": 2.2.5
     "@mswjs/interceptors": 0.25.14
     "@multiformats/multiaddr": 12.1.12
@@ -778,13 +778,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/npm-aqua-compiler@npm:0.0.2":
-  version: 0.0.2
-  resolution: "@fluencelabs/npm-aqua-compiler@npm:0.0.2"
+"@fluencelabs/npm-aqua-compiler@npm:0.0.2-DXJ-569-9561e68-2499-1":
+  version: 0.0.2-DXJ-569-9561e68-2499-1
+  resolution: "@fluencelabs/npm-aqua-compiler@npm:0.0.2-DXJ-569-9561e68-2499-1"
   dependencies:
     "@npmcli/arborist": ^7.2.1
     treeverse: 3.0.0
-  checksum: ec08ec984e21cb63fc20eb34b05bc062d49919723549cc61e1d3622695d3dec6cd25f0518095dd378237eaaa732850e432d8ea39dc0e1a3d06f8dfcde80460e3
+  checksum: 283d81bb1d327c9ea3a846aaeb2431cb549d76346d41e21e74611e27742784f5c2d63ae1f35dccab07baba95d4a310828bdac120918022c1e21d803a1041291c
   languageName: node
   linkType: hard
 
