@@ -610,7 +610,7 @@ __metadata:
     "@fluencelabs/aqua-to-js": 0.3.5
     "@fluencelabs/deal-aurora": 0.2.22
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/js-client": 0.7.0
+    "@fluencelabs/js-client": 0.8.0
     "@fluencelabs/npm-aqua-compiler": 0.0.2
     "@iarna/toml": 2.2.5
     "@mswjs/interceptors": 0.25.14
@@ -720,9 +720,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.7.0":
-  version: 0.7.0
-  resolution: "@fluencelabs/js-client@npm:0.7.0"
+"@fluencelabs/js-client@npm:0.8.0":
+  version: 0.8.0
+  resolution: "@fluencelabs/js-client@npm:0.8.0"
   dependencies:
     "@chainsafe/libp2p-noise": 14.0.0
     "@chainsafe/libp2p-yamux": 6.0.1
@@ -742,6 +742,7 @@ __metadata:
     "@multiformats/multiaddr": 12.1.12
     bs58: 5.0.0
     debug: 4.3.4
+    int64-buffer: 1.0.1
     it-length-prefixed: 9.0.3
     it-map: 3.0.5
     it-pipe: 3.0.1
@@ -752,7 +753,7 @@ __metadata:
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: b068aea1e5abc9d7824dae798d034a177166b435befe243601d77a233f411318d32bad0167ed1324c894d3e8215657b7886663a587f8e5de5d2f0a6187eb1187
+  checksum: 8be38d40229eeb6b359cfe3be174feca069a10bc20fbdcd949377c9888b1b8d9945af87cc905c9d667b53d64c7ea0e4ce4a305f7da18672a5cb0e95766599c87
   languageName: node
   linkType: hard
 
@@ -8648,6 +8649,13 @@ __metadata:
     through: ^2.3.6
     wrap-ansi: ^6.0.1
   checksum: 387ffb0a513559cc7414eb42c57556a60e302f820d6960e89d376d092e257a919961cd485a1b4de693dbb5c0de8bc58320bfd6247dfd827a873aa82a4215a240
+  languageName: node
+  linkType: hard
+
+"int64-buffer@npm:1.0.1":
+  version: 1.0.1
+  resolution: "int64-buffer@npm:1.0.1"
+  checksum: 9962be285f4a0d6bd8f6fba3cffcfd80b15848af370bd9ec6cb2d9c8a8adf83b230cdf66b694f87c992c1a33724385b28ba7cac61602a7fcf9b9c8691015c7e2
   languageName: node
   linkType: hard
 
