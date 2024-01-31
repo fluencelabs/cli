@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-import { printFullContainerLogs } from "./helpers/docker.js";
+import { saveFullContainerLogs } from "./helpers/docker.js";
 
-await printFullContainerLogs();
+await saveFullContainerLogs();

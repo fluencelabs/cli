@@ -15,6 +15,8 @@
  */
 
 import assert from "node:assert";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 
 import Dockerode, { type ContainerInfo } from "dockerode";
 
@@ -96,7 +98,7 @@ export async function printNoxContainerLogs(substring: string): Promise<void> {
   await Promise.all(logsPromises);
 }
 
-export async function printFullContainerLogs(): Promise<void> {
+export async function saveFullContainerLogs(): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const containers: ContainerInfo[] = await docker.listContainers();
 
@@ -125,7 +127,10 @@ export async function printFullContainerLogs(): Promise<void> {
         : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           containerInfo.Names[0];
 
-    console.log(`\nLogs for container ${containerName}:`, resultLines);
+    const logFilePath = `tmp/logs/${containerName.replaceAll("/", "")}.log`;
+    await mkdir(dirname(logFilePath), { recursive: true });
+
+    await writeFile(logFilePath, resultLines.join("\n"));
   });
 
   await Promise.all(logsPromises);
