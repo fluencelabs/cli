@@ -48,9 +48,9 @@ import { TEST_AQUA_DIR_PATH } from "../../helpers/paths.js";
 import {
   createSpellAndAddToDeal,
   getFluenceConfig,
+  getPeerIds,
   getServiceConfig,
   initializeTemplate,
-  getPeerIds,
   runAquaFunction,
   updateMainAqua,
   updateMainRs,
@@ -86,184 +86,181 @@ const assertHasPeer = (result: unknown): { peer: string } => {
 };
 
 describe("integration tests", () => {
-  test.concurrent.skip(
-    "should deploy workers with spell and service, resolve, run services on them and remove them",
-    async () => {
-      const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
-      await initializeTemplate(cwd, "minimal");
+  test("should deploy workers with spell and service, resolve, run services on them and remove them", async () => {
+    const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
+    await initializeTemplate(cwd, "minimal");
 
-      await updateMainAqua(
-        cwd,
-        await readFile(
-          join(TEST_AQUA_DIR_PATH, "runDeployedWorkers.aqua"),
-          FS_OPTIONS,
-        ),
-      );
+    await updateMainAqua(
+      cwd,
+      await readFile(
+        join(TEST_AQUA_DIR_PATH, "runDeployedWorkers.aqua"),
+        FS_OPTIONS,
+      ),
+    );
 
-      await fluence({
-        args: ["service", "new", NEW_SERVICE_NAME],
-        cwd,
-      });
+    await fluence({
+      args: ["service", "new", NEW_SERVICE_NAME],
+      cwd,
+    });
 
-      const readInterfacesFile = async () => {
-        return readFile(getFluenceAquaServicesPath(cwd), FS_OPTIONS);
-      };
+    const readInterfacesFile = async () => {
+      return readFile(getFluenceAquaServicesPath(cwd), FS_OPTIONS);
+    };
 
-      let interfacesFileContent = await readInterfacesFile();
+    let interfacesFileContent = await readInterfacesFile();
 
-      // we expect to a NewService interface in services.aqua file
-      expect(interfacesFileContent).toBe(
-        composeInterfacesFileContents(NEW_SERVICE_INTERFACE),
-      );
+    // we expect to a NewService interface in services.aqua file
+    expect(interfacesFileContent).toBe(
+      composeInterfacesFileContents(NEW_SERVICE_INTERFACE),
+    );
 
-      const newServiceConfig = await getServiceConfig(cwd, NEW_SERVICE_NAME);
+    const newServiceConfig = await getServiceConfig(cwd, NEW_SERVICE_NAME);
 
-      newServiceConfig.modules.facade.envs = { A: "B" };
-      await newServiceConfig.$commit();
+    newServiceConfig.modules.facade.envs = { A: "B" };
+    await newServiceConfig.$commit();
 
-      // update first service module source code so it contains a struct
-      await updateMainRs(
-        cwd,
-        NEW_SERVICE_NAME,
-        MAIN_RS_CONTENT,
-        NEW_SERVICE_NAME,
-      );
+    // update first service module source code so it contains a struct
+    await updateMainRs(
+      cwd,
+      NEW_SERVICE_NAME,
+      MAIN_RS_CONTENT,
+      NEW_SERVICE_NAME,
+    );
 
-      await fluence({
-        args: ["service", "new", NEW_SERVICE_2_NAME],
-        cwd,
-      });
+    await fluence({
+      args: ["service", "new", NEW_SERVICE_2_NAME],
+      cwd,
+    });
 
-      interfacesFileContent = await readInterfacesFile();
+    interfacesFileContent = await readInterfacesFile();
 
-      // we expect to see both service interfaces in services.aqua file and the first one
-      // should not be updated because we didn't build it, even though we changed it above
-      expect(interfacesFileContent).toBe(
-        composeInterfacesFileContents(SERVICE_INTERFACES),
-      );
+    // we expect to see both service interfaces in services.aqua file and the first one
+    // should not be updated because we didn't build it, even though we changed it above
+    expect(interfacesFileContent).toBe(
+      composeInterfacesFileContents(SERVICE_INTERFACES),
+    );
 
-      await fluence({
-        args: ["build"],
-        cwd,
-      });
+    await fluence({
+      args: ["build"],
+      cwd,
+    });
 
-      interfacesFileContent = await readInterfacesFile();
+    interfacesFileContent = await readInterfacesFile();
 
-      // we expect to see both service interfaces in services.aqua file and the first one
-      // should be updated because we built all the services above including the first one
-      expect(interfacesFileContent).toBe(
-        composeInterfacesFileContents(UPDATED_SERVICE_INTERFACES),
-      );
+    // we expect to see both service interfaces in services.aqua file and the first one
+    // should be updated because we built all the services above including the first one
+    expect(interfacesFileContent).toBe(
+      composeInterfacesFileContents(UPDATED_SERVICE_INTERFACES),
+    );
 
-      const fluenceConfig = await getFluenceConfig(cwd);
+    const fluenceConfig = await getFluenceConfig(cwd);
 
-      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
-      const peerIds = await getPeerIds(cwd);
+    const peerIds = await getPeerIds(cwd);
 
-      fluenceConfig.hosts = {
-        [DEFAULT_WORKER_NAME]: {
-          peerIds,
-          services: [NEW_SERVICE_2_NAME],
-          spells: [NEW_SPELL_NAME],
-        },
-      };
+    fluenceConfig.hosts = {
+      [DEFAULT_WORKER_NAME]: {
+        peerIds,
+        services: [NEW_SERVICE_2_NAME],
+        spells: [NEW_SPELL_NAME],
+      },
+    };
 
-      await fluenceConfig.$commit();
+    await fluenceConfig.$commit();
 
-      await fluence({
-        args: ["workers", "deploy"],
-        cwd,
-      });
+    await fluence({
+      args: ["workers", "deploy"],
+      cwd,
+    });
 
-      await setTryTimeout(
-        async () => {
-          const result = await fluence({
-            args: ["run"],
-            flags: {
-              f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
-            },
-            cwd,
+    await setTryTimeout(
+      async () => {
+        const result = await fluence({
+          args: ["run"],
+          flags: {
+            f: RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
+          },
+          cwd,
+        });
+
+        const parsedResult = JSON.parse(result);
+
+        assert(
+          Array.isArray(parsedResult),
+          `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} is expected to be an array but it is: ${result}`,
+        );
+
+        const arrayOfResults = parsedResult
+          .map((u) => {
+            return assertHasPeer(u);
+          })
+          .sort((a, b) => {
+            return sortPeers(a, b);
           });
 
-          const parsedResult = JSON.parse(result);
+        const expected = peerIds.map((peer) => {
+          return {
+            answer: "Hi, fluence",
+            peer,
+          };
+        });
 
-          assert(
-            Array.isArray(parsedResult),
-            `result of running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} is expected to be an array but it is: ${result}`,
-          );
+        // running the deployed services is expected to return a result from each of the localPeers we deployed to
+        expect(arrayOfResults).toEqual(expected);
+      },
+      (error) => {
+        throw new Error(
+          `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+            error,
+          )}`,
+        );
+      },
+      RUN_DEPLOYED_SERVICES_TIMEOUT,
+    );
 
-          const arrayOfResults = parsedResult
-            .map((u) => {
-              return assertHasPeer(u);
-            })
-            .sort((a, b) => {
-              return sortPeers(a, b);
-            });
+    // TODO: check worker logs
+    // const logs = await fluence({ args: ["workers", "logs"], cwd });
+    // assertLogsAreValid(logs);
 
-          const expected = peerIds.map((peer) => {
-            return {
-              answer: "Hi, fluence",
-              peer,
-            };
-          });
+    const workersConfigPath = join(
+      cwd,
+      DOT_FLUENCE_DIR_NAME,
+      WORKERS_CONFIG_FULL_FILE_NAME,
+    );
 
-          // running the deployed services is expected to return a result from each of the localPeers we deployed to
-          expect(arrayOfResults).toEqual(expected);
-        },
-        (error) => {
-          throw new Error(
-            `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
-              error,
-            )}`,
-          );
-        },
-        RUN_DEPLOYED_SERVICES_TIMEOUT,
-      );
+    const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
 
-      // TODO: check worker logs
-      // const logs = await fluence({ args: ["workers", "logs"], cwd });
-      // assertLogsAreValid(logs);
+    let allWorkersAreRemoved = await runAquaFunction(
+      cwd,
+      "areAllWorkersRemoved",
+    );
 
-      const workersConfigPath = join(
-        cwd,
-        DOT_FLUENCE_DIR_NAME,
-        WORKERS_CONFIG_FULL_FILE_NAME,
-      );
+    expect(allWorkersAreRemoved.trim()).toBe("false");
 
-      const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+    await fluence({
+      args: ["workers", "remove"],
+      cwd,
+    });
 
-      let allWorkersAreRemoved = await runAquaFunction(
-        cwd,
-        "areAllWorkersRemoved",
-      );
+    const newWorkersConfig = await readFile(workersConfigPath, FS_OPTIONS);
 
-      expect(allWorkersAreRemoved.trim()).toBe("false");
+    assert(
+      !newWorkersConfig.includes("hosts:"),
+      `'hosts' property in workers.yaml config is expected to be removed. Got:\n\n${newWorkersConfig}`,
+    );
 
-      await fluence({
-        args: ["workers", "remove"],
-        cwd,
-      });
+    // Check workers where actually removed
+    await writeFile(workersConfigPath, workersConfig, FS_OPTIONS);
 
-      const newWorkersConfig = await readFile(workersConfigPath, FS_OPTIONS);
+    // Update "hosts.aqua" to contain previously removed workers
+    await fluence({
+      args: ["build"],
+      cwd,
+    });
 
-      assert(
-        !newWorkersConfig.includes("hosts:"),
-        `'hosts' property in workers.yaml config is expected to be removed. Got:\n\n${newWorkersConfig}`,
-      );
+    allWorkersAreRemoved = await runAquaFunction(cwd, "areAllWorkersRemoved");
 
-      // Check workers where actually removed
-      await writeFile(workersConfigPath, workersConfig, FS_OPTIONS);
-
-      // Update "hosts.aqua" to contain previously removed workers
-      await fluence({
-        args: ["build"],
-        cwd,
-      });
-
-      allWorkersAreRemoved = await runAquaFunction(cwd, "areAllWorkersRemoved");
-
-      expect(allWorkersAreRemoved.trim()).toBe("true");
-    },
-  );
+    expect(allWorkersAreRemoved.trim()).toBe("true");
+  });
 });

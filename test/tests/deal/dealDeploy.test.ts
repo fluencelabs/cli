@@ -31,40 +31,51 @@ import {
 } from "../../helpers/sharedSteps.js";
 
 describe("Deal deploy tests", () => {
-  test.concurrent(
-    "should deploy deals with spell and service, resolve and run services on them",
-    async () => {
-      const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
-      await initializeTemplate(cwd, "quickstart");
-      const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
+  let dealId: string | undefined;
+  let cwd: string;
 
-      const newServiceConfig = await initServiceConfig(
-        relative(cwd, pathToNewServiceDir),
+  afterEach(async function () {
+    console.log(`dealId: ${dealId}, cwd: ${cwd}`);
+
+    if (dealId !== undefined) {
+      await fluence({
+        args: ["deal", "info", dealId],
         cwd,
-      );
+      });
+    }
+  });
 
-      assert(
-        newServiceConfig !== null,
-        `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
-      );
+  test("should deploy deals with spell and service, resolve and run services on them", async () => {
+    cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
+    await initializeTemplate(cwd, "quickstart");
+    const pathToNewServiceDir = getServiceDirPath(cwd, MY_SERVICE_NAME);
 
-      newServiceConfig.modules.facade.envs = { A: "B" };
-      await newServiceConfig.$commit();
+    const newServiceConfig = await initServiceConfig(
+      relative(cwd, pathToNewServiceDir),
+      cwd,
+    );
 
-      await updateFluenceConfigForTest(cwd);
-      await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+    assert(
+      newServiceConfig !== null,
+      `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
+    );
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    newServiceConfig.modules.facade.envs = { A: "B" };
+    await newServiceConfig.$commit();
 
-      await waitUntilShowSubnetReturnsExpected(
-        cwd,
-        [MY_SERVICE_NAME],
-        [NEW_SPELL_NAME],
-      );
+    await updateFluenceConfigForTest(cwd);
+    await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
-      const logs = await fluence({ args: ["deal", "logs"], cwd });
+    dealId = await deployDealAndWaitUntilDeployed(cwd);
 
-      assertLogsAreValid(logs);
-    },
-  );
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME],
+      [NEW_SPELL_NAME],
+    );
+
+    const logs = await fluence({ args: ["deal", "logs"], cwd });
+
+    assertLogsAreValid(logs);
+  });
 });
