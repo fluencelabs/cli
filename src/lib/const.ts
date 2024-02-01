@@ -504,16 +504,8 @@ export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
-const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
-const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
 export const TYPESCRIPT_NPM_DEPENDENCY = "typescript";
-
-export const fluenceNPMDependencies = [
-  AQUA_LIB_NPM_DEPENDENCY,
-  REGISTRY_NPM_DEPENDENCY,
-  SPELL_NPM_DEPENDENCY,
-] as const;
 
 export const marineAndMreplDependencies = [
   MARINE_CARGO_DEPENDENCY,
