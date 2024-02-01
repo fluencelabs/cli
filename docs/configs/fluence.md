@@ -9,10 +9,8 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 | `aquaDependencies`     | [object](#aquadependencies) | **Yes**  | A map of npm aqua dependency versions                                                                                                                                                                                                                                                                                                                                                                                                |
 | `version`              | number                      | **Yes**  |                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `aquaImports`          | string[]                    | No       | A list of path to be considered by aqua compiler to be used as imports. First dependency in the list has the highest priority. Priority of imports is considered in the following order: imports from --import flags, imports from aquaImports property in fluence.yaml, project's .fluence/aqua dir, npm dependencies from fluence.yaml, npm dependencies from user's .fluence/config.yaml, npm dependencies recommended by fluence |
-| `aquaInputPath`        | string                      | No       | Path to the aqua file or directory with aqua files that you want to compile by default. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                     |
-| `aquaOutputJSPath`     | string                      | No       | Path to the default compilation target dir from aqua to js. Must be relative to the project root dir. Overrides 'aquaOutputTSPath' property                                                                                                                                                                                                                                                                                          |
-| `aquaOutputTSPath`     | string                      | No       | Path to the default compilation target dir from aqua to ts. Must be relative to the project root dir                                                                                                                                                                                                                                                                                                                                 |
 | `cliVersion`           | string                      | No       | The version of the Fluence CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components                                                                                                                                                                                                                                                                                      |
+| `compileAqua`          | [object](#compileaqua)      | No       | A map of aqua files to compile                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `customFluenceEnv`     | [object](#customfluenceenv) | No       | Custom Fluence environment to use when connecting to Fluence network                                                                                                                                                                                                                                                                                                                                                                 |
 | `deals`                | [object](#deals)            | No       | A map of objects with worker names as keys, each object defines a deal                                                                                                                                                                                                                                                                                                                                                               |
 | `defaultSecretKeyName` | string                      | No       | Secret key with this name will be used by default by js-client inside CLI to run Aqua code                                                                                                                                                                                                                                                                                                                                           |
@@ -34,6 +32,42 @@ A map of npm aqua dependency versions
 | Property                   | Type   | Required | Description                                                                                                                     |
 |----------------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------------|
 | `npm-aqua-dependency-name` | string | No       | Valid npm dependency version specification (check out https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies) |
+
+## compileAqua
+
+A map of aqua files to compile
+
+### Properties
+
+| Property           | Type                        | Required | Description |
+|--------------------|-----------------------------|----------|-------------|
+| `aqua-config-name` | [object](#aqua-config-name) | No       |             |
+
+### aqua-config-name
+
+#### Properties
+
+| Property          | Type                 | Required | Description                                                                                                                                                                                        |
+|-------------------|----------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `input`           | string               | **Yes**  | Relative path to the aqua file or directory with aqua files                                                                                                                                        |
+| `output`          | string               | **Yes**  | Relative path to the output directory                                                                                                                                                              |
+| `target`          | string               | **Yes**  | Compilation target Possible values are: `ts`, `js`, `air`.                                                                                                                                         |
+| `constants`       | [object](#constants) | No       | A list of constants to pass to the compiler. Constant name must be uppercase                                                                                                                       |
+| `logLevel`        | string               | No       | Log level for the compiler. Default: info. Must be one of: Must be one of: all, trace, debug, info, warn, error, off Possible values are: `all`, `trace`, `debug`, `info`, `warn`, `error`, `off`. |
+| `noEmptyResponse` | boolean              | No       | Do not generate response call if there are no returned values. Default: false                                                                                                                      |
+| `noRelay`         | boolean              | No       | Do not generate a pass through the relay node. Default: false                                                                                                                                      |
+| `noXor`           | boolean              | No       | Do not generate a wrapper that catches and displays errors. Default: false                                                                                                                         |
+| `tracing`         | boolean              | No       | Compile aqua in tracing mode (for debugging purposes). Default: false                                                                                                                              |
+
+#### constants
+
+A list of constants to pass to the compiler. Constant name must be uppercase
+
+##### Properties
+
+| Property        | Type                       | Required | Description |
+|-----------------|----------------------------|----------|-------------|
+| `SOME_CONSTANT` | string, number, or boolean | No       |             |
 
 ## customFluenceEnv
 

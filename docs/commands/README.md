@@ -85,34 +85,37 @@ _See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blo
 
 ## `fluence aqua`
 
-Compile aqua file or directory that contains your .aqua files
+Compile aqua defined in 'compileAqua' property of fluence.yaml. If --input flag is used - then content of 'compileAqua' property in fluence.yaml will be ignored
 
 ```
 USAGE
-  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air |
-    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
+  $ fluence aqua [-n <value>] [--no-input] [-w] [-o <value>] [--air | --js] [--import <value>] [-i
+    <value>] [--const <value>] [--log-level-compiler <value>] [--no-relay] [--no-xor] [--tracing] [--no-empty-response]
+    [--dry]
 
 FLAGS
-  -i, --input=<path>                Path to an aqua file or an input directory that contains your .aqua files. Must be
-                                    relative to the current working directory or absolute
+  -i, --input=<path>                Path to an aqua file or a directory that contains your aqua files
+  -n, --names=<value>               Comma-separated names of the configs from 'compileAqua' property of fluence.yaml to
+                                    compile. If not specified, all configs will be compiled
   -o, --output=<path>               Path to the output directory. Must be relative to the current working directory or
                                     absolute. Will be created if it doesn't exists
   -w, --watch                       Watch aqua file or folder for changes and recompile
       --air                         Generate .air file instead of .ts
-      --common-js                   Use no extension in generated .ts file imports
       --const=<NAME=value>...       Constants to be passed to the compiler
       --dry                         Checks if compilation succeeded, without output
       --import=<path>...            Path to a directory to import aqua files from. May be used several times
       --js                          Generate .js file instead of .ts
       --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
                                     info, warn, error, off
+      --no-empty-response           Do not generate response call if there are no returned values
       --no-input                    Don't interactively ask for any input from the user
       --no-relay                    Do not generate a pass through the relay node
       --no-xor                      Do not generate a wrapper that catches and displays errors
       --tracing                     Compile aqua in tracing mode (for debugging purposes)
 
 DESCRIPTION
-  Compile aqua file or directory that contains your .aqua files
+  Compile aqua defined in 'compileAqua' property of fluence.yaml. If --input flag is used - then content of
+  'compileAqua' property in fluence.yaml will be ignored
 
 EXAMPLES
   $ fluence aqua
@@ -311,7 +314,7 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--env
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [--env <value>] [-k
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
     [--tracing] [--marine-build-args <value>] [--auto-match]
 
@@ -320,7 +323,10 @@ ARGUMENTS
                 'deals' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --[no-]auto-match                                Toggle automatic matching. Auto-matching is turned on by default
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
@@ -401,16 +407,18 @@ Get logs from deployed workers for deals listed in workers.yaml
 
 ```
 USAGE
-  $ fluence deal logs [WORKER-NAMES] [SPELL-NAME] [--no-input] [--relay <value>] [--ttl <value>]
-    [--dial-timeout <value>] [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>]
-    [--tracing]
+  $ fluence deal logs [WORKER-NAMES] [SPELL-NAME] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
   SPELL-NAME    Spell name to get logs for (Default: worker-spell)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1201,23 +1209,24 @@ _See code: [src/commands/provider/withdraw-reward.ts](https://github.com/fluence
 
 ## `fluence run`
 
-Run aqua script
+Run the first aqua function CLI is able to find and compile among all aqua files specified in 'compileAqua' property of fluence.yaml file. If --input flag is used - then content of 'compileAqua' property in fluence.yaml will be ignored
 
 ```
 USAGE
-  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
-    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [--tracing]
+  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--quiet] [-f <value>] [--print-air |
+    -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env
+    <value>] [--import <value>] [-i <value>] [--const <value>] [--log-level-compiler <value>] [--no-relay] [--no-xor]
+    [--tracing] [--no-empty-response]
 
 FLAGS
-  -b, --print-beautified-air                           Prints beautified AIR code before function execution
+  -b, --print-beautified-air                           Prints beautified AIR code instead of function execution
   -f, --func=<function-call>                           Function call. Example: funcName("stringArg")
-  -i, --input=<path>                                   Path to an aqua file or to a directory that contains aqua files
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
-      --const=<NAME="value">...                        Constant that will be used in the aqua code that you run (example
-                                                       of aqua code: SOME_CONST ?= "default_value"). Constant name must
-                                                       be upper cased.
+  -i, --input=<path>                                   Path to an aqua file or a directory that contains your aqua files
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
+      --const=<NAME=value>...                          Constants to be passed to the compiler
       --data=<json>                                    JSON in { [argumentName]: argumentValue } format. You can call a
                                                        function using these argument names like this: -f
                                                        'myFunc(argumentName)'. Arguments in this flag override arguments
@@ -1233,12 +1242,13 @@ FLAGS
                                                        several times
       --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: Must be one of:
                                                        all, trace, debug, info, warn, error, off
+      --no-empty-response                              Do not generate response call if there are no returned values
       --no-input                                       Don't interactively ask for any input from the user
       --no-relay                                       Do not generate a pass through the relay node
       --no-xor                                         Do not generate a wrapper that catches and displays errors
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
-      --print-air                                      Prints generated AIR code before function execution
+      --print-air                                      Prints generated AIR code instead of function execution
       --quiet                                          Print only execution result. Overrides all --log-level-* flags
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
@@ -1246,7 +1256,8 @@ FLAGS
                                                        particle is expired and not processed.
 
 DESCRIPTION
-  Run aqua script
+  Run the first aqua function CLI is able to find and compile among all aqua files specified in 'compileAqua' property
+  of fluence.yaml file. If --input flag is used - then content of 'compileAqua' property in fluence.yaml will be ignored
 
 EXAMPLES
   $ fluence run
@@ -1445,7 +1456,7 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [-k <value>] [--relay
     <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--import <value>] [--no-build]
     [--tracing] [--marine-build-args <value>]
 
@@ -1454,7 +1465,10 @@ ARGUMENTS
                 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1489,15 +1503,18 @@ Get logs from deployed workers for hosts listed in workers.yaml
 
 ```
 USAGE
-  $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id <value>] [--host-id
-    <value>] [--spell-id <value>] [--tracing]
+  $ fluence workers logs [WORKER-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id
+    <value>] [--host-id <value>] [--spell-id <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1529,7 +1546,7 @@ Remove workers from hosts, described in 'hosts' property in workers.yaml
 
 ```
 USAGE
-  $ fluence workers remove [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
+  $ fluence workers remove [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [-k <value>] [--relay
     <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--tracing]
 
 ARGUMENTS
@@ -1537,7 +1554,10 @@ ARGUMENTS
                 'hosts' property in workers.yaml are removed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1566,15 +1586,18 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>] [--no-build]
-    [--tracing] [--marine-build-args <value>]
+  $ fluence workers upload [WORKER-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>]
+    [--no-build] [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
