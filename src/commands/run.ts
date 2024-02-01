@@ -306,9 +306,9 @@ type RunArgs = {
 
 async function fluenceRun(args: RunArgs) {
   const compilationResults = await Promise.all(
-    args.compileFuncCallArgs.map((a) => {
+    args.compileFuncCallArgs.map((compileFunctionCallArgs) => {
       return compileFunctionCall({
-        ...a,
+        ...compileFunctionCallArgs,
         data: args.runData,
         funcCall: args.funcCall,
       });
