@@ -26,7 +26,6 @@ import { TARGET_WORKERS_DEFAULT } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   LOCAL_IPFS_ADDRESS,
-  KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   ENV_FLAG,
   OFF_AQUA_LOGS_FLAG,
@@ -59,7 +58,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...ENV_FLAG,

@@ -253,17 +253,6 @@ export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEAL_NAME = "dealName";
 export const DEFAULT_WORKER_NAME = "workerName";
 
-const SK_FLAG_NAME = "sk";
-export const KEY_PAIR_FLAG = {
-  [SK_FLAG_NAME]: Flags.string({
-    char: "k",
-    description: "Name of a peer's Network Private Key",
-    helpValue: "<name>",
-  }),
-} as const;
-
-export type KeyPairFlag = FromFlagsDef<typeof KEY_PAIR_FLAG>;
-
 export const NO_INPUT_FLAG_NAME = "no-input";
 export const NO_INPUT_FLAG = {
   [NO_INPUT_FLAG_NAME]: Flags.boolean({
@@ -342,6 +331,66 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
+
+export const AQUA_LOG_LEVELS = [
+  "all",
+  "trace",
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "off",
+] as const;
+
+export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
+export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
+
+export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
+  ", ",
+)}`;
+
+export const INPUT_FLAG_NAME = "input";
+export const COMPILE_AQUA_PROPERTY_NAME = "compileAqua";
+export const INPUT_FLAG_EXPLANATION = `. If --${INPUT_FLAG_NAME} flag is used - then content of '${COMPILE_AQUA_PROPERTY_NAME}' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} will be ignored`;
+
+export const COMMON_AQUA_COMPILATION_FLAGS = {
+  ...IMPORT_FLAG,
+  [INPUT_FLAG_NAME]: Flags.string({
+    description:
+      "Path to an aqua file or a directory that contains your aqua files",
+    helpValue: "<path>",
+    char: "i",
+  }),
+  const: Flags.string({
+    description: "Constants to be passed to the compiler",
+    helpValue: "<NAME=value>",
+    multiple: true,
+  }),
+  [LOG_LEVEL_COMPILER_FLAG_NAME]: Flags.string({
+    description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
+    helpValue: "<level>",
+  }),
+  "no-relay": Flags.boolean({
+    default: false,
+    description: "Do not generate a pass through the relay node",
+  }),
+  "no-xor": Flags.boolean({
+    default: false,
+    description: "Do not generate a wrapper that catches and displays errors",
+  }),
+  ...TRACING_FLAG,
+  "no-empty-response": Flags.boolean({
+    default: false,
+    description:
+      "Do not generate response call if there are no returned values",
+  }),
+} as const;
+
+export type CommonAquaCompilationFlags = FromFlagsDef<
+  typeof COMMON_AQUA_COMPILATION_FLAGS
+>;
+
 export const NOXES_FLAG = {
   noxes: Flags.integer({
     description: `Number of Compute Peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
@@ -377,6 +426,12 @@ export const TTL_FLAG_NAME = "ttl";
 export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
 
 export const FLUENCE_CLIENT_FLAGS = {
+  sk: Flags.string({
+    char: "k",
+    description:
+      "Name of the secret key for js-client inside CLI to use. If not specified, will use the default key for the project. If there is no fluence project or there is no default key, will use user's default key",
+    helpValue: "<name>",
+  }),
   relay: Flags.string({
     description: "Relay for Fluence js-client to connect to",
     helpValue: "<multiaddress>",
@@ -424,23 +479,6 @@ export const isToken = getIsStringUnion(TOKENS);
 export const TEMPLATES = ["quickstart", "minimal", "ts", "js"] as const;
 export type Template = (typeof TEMPLATES)[number];
 export const isTemplate = getIsStringUnion(TEMPLATES);
-
-export const AQUA_LOG_LEVELS = [
-  "all",
-  "trace",
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "off",
-] as const;
-
-export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
-export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
-
-export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
-  ", ",
-)}`;
 
 export const PACKAGE_NAME = "PACKAGE-NAME";
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME@VERSION`;

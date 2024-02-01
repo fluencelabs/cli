@@ -141,7 +141,7 @@ const getAquaDir = (cwd?: string): string => {
   return join(getSrcPath(cwd), AQUA_DIR_NAME);
 };
 
-const ensureAquaDir = async (): Promise<string> => {
+export const ensureAquaDir = async (): Promise<string> => {
   return ensureDir(getAquaDir());
 };
 

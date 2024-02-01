@@ -23,7 +23,6 @@ import { commandObj } from "../../lib/commandObj.js";
 import type { RemoveArgWorkers } from "../../lib/compiled-aqua/installation-spell/deploy.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
-  KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CLIENT_FLAGS,
@@ -45,7 +44,6 @@ export default class Remove extends BaseCommand<typeof Remove> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
