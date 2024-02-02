@@ -54,7 +54,7 @@ export async function dealCreate({
   const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
   const market = await dealClient.getMarket();
-  const flt = await dealClient.getFLT();
+  const usdc = await dealClient.getUSDC();
 
   const { CID } = await import("ipfs-http-client");
   const bytesCid = CID.parse(appCID).bytes;
@@ -82,7 +82,7 @@ export async function dealCreate({
     );
   }
 
-  await sign(flt.approve, await market.getAddress(), initialBalanceBigInt);
+  await sign(usdc.approve, await market.getAddress(), initialBalanceBigInt);
 
   const res = await sign(
     market.deployDeal,
@@ -90,7 +90,7 @@ export async function dealCreate({
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
     },
-    await flt.getAddress(),
+    usdc.getAddress(),
     minWorkers,
     targetWorkers,
     maxWorkersPerProvider,

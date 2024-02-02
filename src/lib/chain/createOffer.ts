@@ -46,7 +46,7 @@ export async function createOffer(flags: {
 
   const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
-  const flt = await dealClient.getFLT();
+  const usdc = await dealClient.getUSDC();
 
   const minPricePerWorkerEpochBigInt = BigInt(
     offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
@@ -77,7 +77,7 @@ export async function createOffer(flags: {
   await sign(
     market.registerMarketOffer,
     minPricePerWorkerEpochBigInt,
-    await flt.getAddress(),
+    await usdc.getAddress(),
     (offer.effectors ?? []).map((effector) => {
       const bytesCid = CID.parse(effector).bytes;
 
