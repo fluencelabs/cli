@@ -269,7 +269,7 @@ DESCRIPTION
   Show contract addresses for the fluence env
 ```
 
-_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/chain/info.ts)_
+_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/chain/info.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -1043,7 +1043,7 @@ ALIASES
   $ fluence provider ac
 ```
 
-_See code: [src/commands/provider/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/add-collateral.ts)_
+_See code: [src/commands/provider/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/add-collateral.ts)_
 
 ## `fluence provider create-commitment`
 
@@ -1072,7 +1072,7 @@ ALIASES
   $ fluence provider cc
 ```
 
-_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/create-commitment.ts)_
+_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/create-commitment.ts)_
 
 ## `fluence provider create-offer`
 
@@ -1099,7 +1099,7 @@ ALIASES
   $ fluence provider co
 ```
 
-_See code: [src/commands/provider/create-offer.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/create-offer.ts)_
+_See code: [src/commands/provider/create-offer.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/create-offer.ts)_
 
 ## `fluence provider gen`
 
@@ -1159,7 +1159,7 @@ DESCRIPTION
   Get info about provider
 ```
 
-_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.13.5/src/commands/provider/offer-info.ts)_
+_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/offer-info.ts)_
 
 ## `fluence provider register`
 
