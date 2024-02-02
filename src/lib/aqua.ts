@@ -362,7 +362,7 @@ async function resolveAquaLogLevel(
   }
 
   commandObj.warn(
-    `Invalid --${LOG_LEVEL_COMPILER_FLAG_NAME} flag value: ${maybeAquaLogLevel}. Must be one of: ${aquaLogLevelsString}`,
+    `Invalid --${LOG_LEVEL_COMPILER_FLAG_NAME} flag value: '${maybeAquaLogLevel}' ${aquaLogLevelsString}`,
   );
 
   return list({

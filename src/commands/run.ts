@@ -389,7 +389,9 @@ async function fluenceRun(args: RunArgs) {
   if (args["print-air"]) {
     commandObj.log(functionCall.script);
     return;
-  } else if (args["print-beautified-air"]) {
+  }
+
+  if (args["print-beautified-air"]) {
     const { beautify } = await import("@fluencelabs/air-beautify-wasm");
     commandObj.log(beautify(functionCall.script));
     return;

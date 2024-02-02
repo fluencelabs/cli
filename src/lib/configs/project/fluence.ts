@@ -807,7 +807,7 @@ const compileAquaConfigSchema = {
     },
     logLevel: {
       type: "string",
-      description: `Log level for the compiler. Default: info. Must be one of: ${aquaLogLevelsString}`,
+      description: `Log level for the compiler. Default: info`,
       nullable: true,
       enum: AQUA_LOG_LEVELS,
     },

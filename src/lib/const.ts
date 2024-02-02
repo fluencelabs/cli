@@ -368,7 +368,7 @@ export const COMMON_AQUA_COMPILATION_FLAGS = {
     multiple: true,
   }),
   [LOG_LEVEL_COMPILER_FLAG_NAME]: Flags.string({
-    description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
+    description: `Set log level for the compiler. ${aquaLogLevelsString}`,
     helpValue: "<level>",
   }),
   "no-relay": Flags.boolean({
