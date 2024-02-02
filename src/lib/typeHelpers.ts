@@ -37,6 +37,7 @@ export type Mutable<Type> = {
  * const requiredObject: WithRequired<typeof object, "a" | "b"> = { a: 1, b: "b" };
  */
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type Required<T> = WithRequired<T, keyof T>;
 
 export type Flags<T extends string> = Record<
   T,

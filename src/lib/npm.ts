@@ -232,7 +232,7 @@ async function updatePackageJSON(fluenceConfig: FluenceConfig) {
 
   await writeFile(
     await getFluenceAquaDependenciesPackageJsonPath(),
-    jsonStringify({ dependencies: dependenciesWithFixedRelativePath }),
+    `${jsonStringify({ dependencies: dependenciesWithFixedRelativePath })}\n`,
     FS_OPTIONS,
   );
 }

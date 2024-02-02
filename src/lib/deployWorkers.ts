@@ -714,11 +714,12 @@ export async function compileSpells(
 
       const { compileFromPath } = await import("@fluencelabs/aqua-api");
 
+      // TODO: consider how to compile spells with aqua compilation args
       const { errors, functions } = await compileFromPath({
         filePath: spellAquaFilePath,
         imports: await getAquaImports({
           aquaImportsFromFlags,
-          maybeFluenceConfig: fluenceConfig,
+          fluenceConfig,
         }),
       });
 

@@ -32,23 +32,23 @@ import {
 import { recursivelyFindFile } from "./recursivelyFindFile.js";
 
 type GetAquaImportsArg = {
-  maybeFluenceConfig: FluenceConfig | null;
+  fluenceConfig: FluenceConfig | null;
   aquaImportsFromFlags?: string[] | undefined;
 };
 
 export async function getAquaImports({
   aquaImportsFromFlags,
-  maybeFluenceConfig = null,
+  fluenceConfig = null,
 }: GetAquaImportsArg): Promise<GatherImportsResult> {
   const fluenceAquaDirPath = getFluenceAquaDir();
 
   const globalImports = [
     ...(aquaImportsFromFlags ?? []),
-    ...(maybeFluenceConfig?.aquaImports ?? []),
+    ...(fluenceConfig?.aquaImports ?? []),
   ];
 
   try {
-    if (maybeFluenceConfig !== null) {
+    if (fluenceConfig !== null) {
       await access(fluenceAquaDirPath);
       globalImports.push(fluenceAquaDirPath);
     }
@@ -60,7 +60,7 @@ export async function getAquaImports({
 
   return gatherImportsFromNpm({
     npmProjectDirPath:
-      maybeFluenceConfig === null
+      fluenceConfig === null
         ? await npmProjectDirPath()
         : await ensureFluenceAquaDependenciesPath(),
     globalImports,
