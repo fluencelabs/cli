@@ -207,6 +207,7 @@ export async function compileFunctionCall(args: CompileFuncCallFromPathArgs) {
   return compileDirOrFile(compileAquaCallFromPath, args);
 }
 
+// TODO: think about the way to improve this https://github.com/fluencelabs/cli/pull/743#discussion_r1475857293
 async function compileDirOrFile<
   T extends { filePath: string },
   U extends { errors: string[] },
