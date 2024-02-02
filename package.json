@@ -59,7 +59,7 @@
     "@fluencelabs/deal-aurora": "0.2.22",
     "@fluencelabs/fluence-network-environment": "1.1.2",
     "@fluencelabs/js-client": "0.8.0",
-    "@fluencelabs/npm-aqua-compiler": "0.0.2",
+    "@fluencelabs/npm-aqua-compiler": "0.0.3",
     "@iarna/toml": "2.2.5",
     "@mswjs/interceptors": "0.25.14",
     "@multiformats/multiaddr": "12.1.12",
