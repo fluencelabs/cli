@@ -18,11 +18,7 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import {
-  ENV_FLAG_NAME,
-  type FluenceClientFlags,
-  type KeyPairFlag,
-} from "./const.js";
+import { ENV_FLAG_NAME, type FluenceClientFlags } from "./const.js";
 import { stringifyUnknown } from "./helpers/utils.js";
 import { base64ToUint8Array, getExistingSecretKey } from "./keyPairs.js";
 import { resolveRelay } from "./multiaddres.js";
@@ -35,7 +31,7 @@ export const initFluenceClient = async (
     ttl,
     "particle-id": printParticleId,
     [ENV_FLAG_NAME]: fluenceEnvFromFlags,
-  }: FluenceClientFlags & KeyPairFlag,
+  }: FluenceClientFlags,
   maybeFluenceConfig: FluenceConfig | null,
 ): Promise<void> => {
   const relay = await resolveRelay({
