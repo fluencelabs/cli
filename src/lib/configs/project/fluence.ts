@@ -566,10 +566,12 @@ const configSchemaV3Obj = {
 
 const configSchemaV3: JSONSchemaType<ConfigV3> = configSchemaV3Obj;
 
+type RelayPath = string;
+
 type ConfigV4 = Omit<ConfigV3, "version"> & {
   version: 4;
   defaultSecretKeyName?: string;
-  relaysPath?: string;
+  relaysPath?: RelayPath | Array<RelayPath>;
 };
 
 const configSchemaV4Obj = {
@@ -584,9 +586,17 @@ const configSchemaV4Obj = {
       nullable: true,
     },
     relaysPath: {
+      type: ["string", "array"],
       description:
-        "Path to the directory where you want relays.json file to be generated. Must be relative to the project root dir. This file contains a list of relays to use when connecting to Fluence network and depends on the default environment that you use in your project",
-      type: "string",
+        "Single or multiple paths to the directories where you want relays.json file to be generated. Must be relative to the project root dir. This file contains a list of relays to use when connecting to Fluence network and depends on the default environment that you use in your project",
+      oneOf: [
+        { type: "string" },
+        {
+          type: "array",
+          items: { type: "string" },
+          minItems: 1,
+        },
+      ],
       nullable: true,
     },
   },

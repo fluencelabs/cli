@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.14.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.5...fluence-cli-v0.14.0) (2024-01-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update dependency @fluencelabs/js-client to v0.7.0 ([#735](https://github.com/fluencelabs/cli/issues/735))
+
+### Features
+
+* Introduce gateway template ([#732](https://github.com/fluencelabs/cli/issues/732)) ([c3e594b](https://github.com/fluencelabs/cli/commit/c3e594b7416ff07a1167822f9946870f7eea0603))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/js-client to v0.7.0 ([#735](https://github.com/fluencelabs/cli/issues/735)) ([f56f451](https://github.com/fluencelabs/cli/commit/f56f45177f7bebd939e9148b0c1986b79a63009c))
+* maybe fix seed bug [fixes DXJ-639] ([#734](https://github.com/fluencelabs/cli/issues/734)) ([85c5a96](https://github.com/fluencelabs/cli/commit/85c5a966f768d7743b97103e8467a6eda5389b86))
+* **tests:** DXJ-617 fix environment problems ([#731](https://github.com/fluencelabs/cli/issues/731)) ([dc4a098](https://github.com/fluencelabs/cli/commit/dc4a098c146d83859636d93dcdfaca5665de382a))
+
 ## [0.13.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.4...fluence-cli-v0.13.5) (2024-01-22)
 
 
