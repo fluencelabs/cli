@@ -53,7 +53,6 @@ export async function depositCollateralByNoxNames(flags: {
 export async function depositCollateral(commitmentIds: string[]) {
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
-  const usdc = await dealClient.getUSDC();
 
   // let collateralToApproveCommitments = 0n;
 
@@ -70,12 +69,12 @@ export async function depositCollateral(commitmentIds: string[]) {
   //   collateralToApproveCommitments,
   // )
 
-  const address = await capacity.getAddress();
-
   for (const commitmentId of commitmentIds) {
     const collateralToApproveCommitment = await getCollateral(commitmentId);
-    await sign(usdc.approve, address, collateralToApproveCommitment);
-    await sign(capacity.depositCollateral, commitmentId);
+
+    await sign(capacity.depositCollateral, commitmentId, {
+      value: collateralToApproveCommitment,
+    });
   }
 }
 
