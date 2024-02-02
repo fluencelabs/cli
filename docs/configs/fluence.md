@@ -47,17 +47,17 @@ A map of aqua files to compile
 
 #### Properties
 
-| Property          | Type                 | Required | Description                                                                                                                                                                                        |
-|-------------------|----------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `input`           | string               | **Yes**  | Relative path to the aqua file or directory with aqua files                                                                                                                                        |
-| `output`          | string               | **Yes**  | Relative path to the output directory                                                                                                                                                              |
-| `target`          | string               | **Yes**  | Compilation target Possible values are: `ts`, `js`, `air`.                                                                                                                                         |
-| `constants`       | [object](#constants) | No       | A list of constants to pass to the compiler. Constant name must be uppercase                                                                                                                       |
-| `logLevel`        | string               | No       | Log level for the compiler. Default: info. Must be one of: Must be one of: all, trace, debug, info, warn, error, off Possible values are: `all`, `trace`, `debug`, `info`, `warn`, `error`, `off`. |
-| `noEmptyResponse` | boolean              | No       | Do not generate response call if there are no returned values. Default: false                                                                                                                      |
-| `noRelay`         | boolean              | No       | Do not generate a pass through the relay node. Default: false                                                                                                                                      |
-| `noXor`           | boolean              | No       | Do not generate a wrapper that catches and displays errors. Default: false                                                                                                                         |
-| `tracing`         | boolean              | No       | Compile aqua in tracing mode (for debugging purposes). Default: false                                                                                                                              |
+| Property          | Type                 | Required | Description                                                                                                             |
+|-------------------|----------------------|----------|-------------------------------------------------------------------------------------------------------------------------|
+| `input`           | string               | **Yes**  | Relative path to the aqua file or directory with aqua files                                                             |
+| `output`          | string               | **Yes**  | Relative path to the output directory                                                                                   |
+| `target`          | string               | **Yes**  | Compilation target Possible values are: `ts`, `js`, `air`.                                                              |
+| `constants`       | [object](#constants) | No       | A list of constants to pass to the compiler. Constant name must be uppercase                                            |
+| `logLevel`        | string               | No       | Log level for the compiler. Default: info Possible values are: `all`, `trace`, `debug`, `info`, `warn`, `error`, `off`. |
+| `noEmptyResponse` | boolean              | No       | Do not generate response call if there are no returned values. Default: false                                           |
+| `noRelay`         | boolean              | No       | Do not generate a pass through the relay node. Default: false                                                           |
+| `noXor`           | boolean              | No       | Do not generate a wrapper that catches and displays errors. Default: false                                              |
+| `tracing`         | boolean              | No       | Compile aqua in tracing mode (for debugging purposes). Default: false                                                   |
 
 #### constants
 

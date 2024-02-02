@@ -105,8 +105,8 @@ FLAGS
       --dry                         Checks if compilation succeeded, without output
       --import=<path>...            Path to a directory to import aqua files from. May be used several times
       --js                          Generate .js file instead of .ts
-      --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
-                                    info, warn, error, off
+      --log-level-compiler=<level>  Set log level for the compiler. Must be one of: all, trace, debug, info, warn,
+                                    error, off
       --no-empty-response           Do not generate response call if there are no returned values
       --no-input                    Don't interactively ask for any input from the user
       --no-relay                    Do not generate a pass through the relay node
@@ -1240,8 +1240,8 @@ FLAGS
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
       --import=<path>...                               Path to a directory to import aqua files from. May be used
                                                        several times
-      --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: Must be one of:
-                                                       all, trace, debug, info, warn, error, off
+      --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: all, trace,
+                                                       debug, info, warn, error, off
       --no-empty-response                              Do not generate response call if there are no returned values
       --no-input                                       Don't interactively ask for any input from the user
       --no-relay                                       Do not generate a pass through the relay node
