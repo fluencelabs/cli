@@ -70,7 +70,7 @@ export async function depositCollateral(commitmentIds: string[]) {
   //   collateralToApproveCommitments,
   // )
 
-  const address = capacity.getAddress();
+  const address = await capacity.getAddress();
 
   for (const commitmentId of commitmentIds) {
     const collateralToApproveCommitment = await getCollateral(commitmentId);
