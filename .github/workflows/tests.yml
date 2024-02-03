@@ -19,7 +19,7 @@ on:
         description: "Which runner to use to run tests"
         type: string
         default: "linux-amd64-m-2xlarge"
-      platfrom:
+      platform:
         description: "For what platform to run tests (linux-x64, darwin-x64 etc)"
         type: string
         default: "linux-x64"
