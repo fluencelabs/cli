@@ -240,7 +240,7 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: yarn test-${{ inputs.platfrom }}
+        run: yarn test-${{ inputs.platform }}
 
       - name: Dump container logs
         if: always()
