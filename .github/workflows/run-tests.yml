@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   fluence-cli:
-    name: "fluence-cli ${{ matrix.platform}}"
+    name: "fluence-cli (${{ matrix.platform }})"
     uses: ./.github/workflows/tests.yml
 
     strategy:
