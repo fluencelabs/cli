@@ -15,21 +15,19 @@
  */
 
 import assert from "node:assert";
-import { access, cp, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { access, cp, readFile, writeFile } from "node:fs/promises";
+import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "url";
 
 import { color } from "@oclif/color";
+import type { JSONSchemaType } from "ajv";
 
+import { ajv } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
 import type { FluenceConfig } from "./configs/project/fluence.js";
-import {
-  AQUA_DEPENDENCIES_DIR_NAME,
-  FS_OPTIONS,
-  FLUENCE_CONFIG_FULL_FILE_NAME,
-} from "./const.js";
+import { AQUA_DEPENDENCIES_DIR_NAME, FS_OPTIONS } from "./const.js";
 import { type ExecPromiseArg, execPromise } from "./execPromise.js";
-import { splitPackageNameAndVersion } from "./helpers/package.js";
+import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import {
   jsonStringify,
   removeProperties,
@@ -38,6 +36,7 @@ import {
 import {
   getFluenceAquaDependenciesPackageJsonPath,
   ensureFluenceAquaDependenciesPath,
+  projectRootDir,
 } from "./paths.js";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -130,90 +129,215 @@ export async function runNpm(args: Omit<ExecPromiseArg, "command">) {
   });
 }
 
-function assertDependenciesPresent(
-  fluenceConfig: FluenceConfig,
-): asserts fluenceConfig is FluenceConfig & {
-  dependencies: { npm: Record<string, string> };
-} {
-  assert(
-    fluenceConfig.dependencies?.npm,
-    `Unreachable. CLI now makes sure that dependencies are always present in ${color.yellow(
-      "initCLI",
-    )} function inside each command in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  );
+export async function npmInstallAll(fluenceConfig: FluenceConfig) {
+  await updatePackageJSON(fluenceConfig);
+
+  await runNpm({
+    args: ["i"],
+    options: {
+      cwd: await ensureFluenceAquaDependenciesPath(),
+    },
+  });
 }
 
 type NpmInstallArgs = {
   fluenceConfig: FluenceConfig;
-  packageNameAndVersion?: string | undefined;
+  packageNameAndVersion: string;
 };
 
 export async function npmInstall({
   fluenceConfig,
   packageNameAndVersion,
 }: NpmInstallArgs) {
-  assertDependenciesPresent(fluenceConfig);
+  await updatePackageJSON(fluenceConfig);
 
-  if (packageNameAndVersion === undefined) {
-    await writeFile(
-      await getFluenceAquaDependenciesPackageJsonPath(),
-      jsonStringify({ dependencies: fluenceConfig.dependencies.npm }),
-      FS_OPTIONS,
-    );
-
-    await runNpm({
-      args: ["i"],
-      options: {
-        cwd: await ensureFluenceAquaDependenciesPath(),
-      },
-    });
-
-    return;
-  }
-
-  const packageNameAndVersionTuple = splitPackageNameAndVersion(
+  const correctPackageNameAndVersion = await ensureNpmInstallArgIsCorrect(
     packageNameAndVersion,
   );
 
-  const [packageName] = packageNameAndVersionTuple;
-  let [, version] = packageNameAndVersionTuple;
-
-  if (version === undefined) {
-    version = await getLatestVersionOfNPMDependency(packageName);
-  }
+  startSpinner(
+    `Installing ${color.yellow(packageNameAndVersion)} aqua dependency`,
+  );
 
   await runNpm({
-    args: ["i", packageNameAndVersion],
+    args: ["i", correctPackageNameAndVersion],
     options: {
       cwd: await ensureFluenceAquaDependenciesPath(),
     },
   });
 
-  fluenceConfig.dependencies.npm[packageName] = version;
+  const packageJSONPath = await getFluenceAquaDependenciesPackageJsonPath();
+
+  const parsedPackageJSON = JSON.parse(
+    await readFile(packageJSONPath, FS_OPTIONS),
+  );
+
+  const aquaDependencies = await getDependenciesFromPackageJSON(
+    parsedPackageJSON,
+    packageJSONPath,
+  );
+
+  stopSpinner();
+
+  fluenceConfig.aquaDependencies = aquaDependencies;
   await fluenceConfig.$commit();
+
+  commandObj.logToStderr(
+    `${packageNameAndVersion} aqua dependency is successfully installed`,
+  );
+}
+
+async function ensureNpmInstallArgIsCorrect(packageNameAndVersion: string) {
+  const filePath = getFilePath(packageNameAndVersion);
+  const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
+
+  if (filePath === undefined) {
+    const packageNameAndVersionTuple = splitPackageNameAndVersion(
+      packageNameAndVersion,
+    );
+
+    let [, versionToInstall] = packageNameAndVersionTuple;
+
+    if (versionToInstall !== undefined) {
+      versionToInstall = ensurePathInVersionIsCorrect(
+        versionToInstall,
+        fluenceAquaDependenciesPath,
+      );
+    }
+
+    return [packageNameAndVersionTuple[0], versionToInstall]
+      .filter(Boolean)
+      .join("@");
+  }
+
+  return ensurePathInVersionIsCorrect(
+    packageNameAndVersion,
+    fluenceAquaDependenciesPath,
+  );
+}
+
+async function updatePackageJSON(fluenceConfig: FluenceConfig) {
+  const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
+
+  const dependenciesWithFixedRelativePath = Object.fromEntries(
+    Object.entries(fluenceConfig.aquaDependencies).map(
+      ([packageName, version]) => {
+        return [
+          packageName,
+          ensurePathInVersionIsCorrect(version, fluenceAquaDependenciesPath),
+        ];
+      },
+    ),
+  );
+
+  await writeFile(
+    await getFluenceAquaDependenciesPackageJsonPath(),
+    `${jsonStringify({ dependencies: dependenciesWithFixedRelativePath })}\n`,
+    FS_OPTIONS,
+  );
+}
+
+type PackageJSON = {
+  dependencies: Record<string, string>;
+};
+
+const packageJSONSchema: JSONSchemaType<PackageJSON> = {
+  type: "object",
+  properties: {
+    dependencies: {
+      type: "object",
+      additionalProperties: {
+        type: "string",
+      },
+      required: [],
+    },
+  },
+  required: ["dependencies"],
+};
+
+const validatePackageJSON = ajv.compile(packageJSONSchema);
+
+async function getDependenciesFromPackageJSON(
+  parsedPackageJSON: unknown,
+  packageJSONPath: string,
+) {
+  if (!validatePackageJSON(parsedPackageJSON)) {
+    throw new Error(
+      `Dependency was installed but for some reason wasn't able to get 'dependencies' property at ${color.yellow(
+        packageJSONPath,
+      )}. Please fix it manually, e.g. by removing ${color.yellow(
+        packageJSONPath,
+      )} and running install command again`,
+    );
+  }
+
+  const fluenceAquaDependenciesPath = await ensureFluenceAquaDependenciesPath();
+
+  return Object.fromEntries(
+    Object.entries(parsedPackageJSON.dependencies).map(
+      ([packageName, version]) => {
+        return [
+          packageName,
+          ensurePathInVersionIsCorrect(
+            version,
+            fluenceAquaDependenciesPath,
+            true,
+          ),
+        ];
+      },
+    ),
+  );
+}
+
+function getFilePath(version: string) {
+  const [, filePath] = [...(version.match(/^file:(.+)$/) ?? [])];
+  return filePath;
+}
+
+function ensurePathInVersionIsCorrect(
+  version: string,
+  fluenceAquaDependenciesPath: string,
+  isBackToFluenceYAML: boolean = false,
+) {
+  const filePath = getFilePath(version);
+
+  if (filePath === undefined || isAbsolute(filePath)) {
+    return version;
+  }
+
+  let [pathA, pathB] = [projectRootDir, fluenceAquaDependenciesPath];
+
+  if (isBackToFluenceYAML) {
+    [pathA, pathB] = [pathB, pathA];
+  }
+
+  const absoluteDependencyPath = resolve(pathA, filePath);
+  // generate the correct relative path
+  // because fluence.yaml and package.json are in different directories
+  // relative paths must be updated to be correct both when writing from
+  // fluence.yaml to package.json and vice versa
+  const newRelativeDependencyPath = relative(pathB, absoluteDependencyPath);
+  return `file:${newRelativeDependencyPath}`;
 }
 
 type NpmUninstallArgs = {
-  packageNameAndVersion: string;
+  packageName: string;
   fluenceConfig: FluenceConfig;
 };
 
 export async function npmUninstall({
-  packageNameAndVersion,
+  packageName,
   fluenceConfig,
 }: NpmUninstallArgs) {
-  assertDependenciesPresent(fluenceConfig);
-  const [packageName] = splitPackageNameAndVersion(packageNameAndVersion);
-
   await runNpm({
-    args: ["uninstall", packageNameAndVersion],
+    args: ["uninstall", packageName],
     options: {
       cwd: await ensureFluenceAquaDependenciesPath(),
     },
   });
 
-  fluenceConfig.dependencies.npm = removeProperties(
-    fluenceConfig.dependencies.npm,
+  fluenceConfig.aquaDependencies = removeProperties(
+    fluenceConfig.aquaDependencies,
     ([p]) => {
       return p === packageName;
     },
@@ -228,4 +352,23 @@ export async function copyDefaultDependencies() {
     await ensureFluenceAquaDependenciesPath(),
     { recursive: true },
   );
+}
+
+export function splitPackageNameAndVersion(
+  packageNameAndMaybeVersion: string,
+): [string] | [string, string] {
+  const hasVersion = /.+@.+/.test(packageNameAndMaybeVersion);
+
+  if (!hasVersion) {
+    const packageName = packageNameAndMaybeVersion;
+
+    return [packageName];
+  }
+
+  const packageNameAndVersionArray = packageNameAndMaybeVersion.split("@");
+  const version = packageNameAndVersionArray.pop();
+  assert(version !== undefined);
+  const packageName = packageNameAndVersionArray.join("@");
+
+  return [packageName, version];
 }

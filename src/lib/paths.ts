@@ -52,6 +52,9 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   AQUA_DEPENDENCIES_DIR_NAME,
+  GATEWAY_DIR_NAME,
+  SERVER_JS_FILE_NAME,
+  SERVER_TS_FILE_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -138,9 +141,9 @@ const getAquaDir = (cwd?: string): string => {
   return join(getSrcPath(cwd), AQUA_DIR_NAME);
 };
 
-const ensureAquaDir = async (): Promise<string> => {
+export async function ensureAquaDir(): Promise<string> {
   return ensureDir(getAquaDir());
-};
+}
 
 export const getAquaMainPath = (cwd?: string): string => {
   return join(getAquaDir(cwd), MAIN_AQUA_FILE_NAME);
@@ -268,6 +271,14 @@ export const getFrontendSrcPath = (cwd?: string): string => {
   return join(getFrontendPath(cwd), SRC_DIR_NAME);
 };
 
+export const getGatewayPath = (cwd?: string): string => {
+  return join(getSrcPath(cwd), GATEWAY_DIR_NAME);
+};
+
+export const getGatewaySrcPath = (cwd?: string): string => {
+  return join(getGatewayPath(cwd), SRC_DIR_NAME);
+};
+
 export const getFrontendIndexTSorJSPath = (
   isJs: boolean,
   cwd?: string,
@@ -278,12 +289,30 @@ export const getFrontendIndexTSorJSPath = (
   );
 };
 
-export const getPackageJSONPath = (): string => {
+export const getGatewayServerTSorJSPath = (
+  isJs: boolean,
+  cwd?: string,
+): string => {
+  return join(
+    getGatewaySrcPath(cwd),
+    isJs ? SERVER_JS_FILE_NAME : SERVER_TS_FILE_NAME,
+  );
+};
+
+export const getFrontendPackageJSONPath = (): string => {
   return join(getFrontendPath(), PACKAGE_JSON_FILE_NAME);
 };
 
-export const getTsConfigPath = (): string => {
+export const getGatewayPackageJSONPath = (): string => {
+  return join(getGatewayPath(), PACKAGE_JSON_FILE_NAME);
+};
+
+export const getFrontendTsConfigPath = (): string => {
   return join(getFrontendPath(), TS_CONFIG_FILE_NAME);
+};
+
+export const getGatewayTsConfigPath = (): string => {
+  return join(getGatewayPath(), TS_CONFIG_FILE_NAME);
 };
 
 export const getFrontendCompiledAquaPath = (): string => {
@@ -292,6 +321,14 @@ export const getFrontendCompiledAquaPath = (): string => {
 
 export const ensureFrontendCompiledAquaPath = async (): Promise<string> => {
   return ensureDir(getFrontendCompiledAquaPath());
+};
+
+export const getGatewayCompiledAquaPath = (): string => {
+  return join(getGatewaySrcPath(), COMPILED_AQUA_DIR_NAME);
+};
+
+export const ensureGatewayCompiledAquaPath = async (): Promise<string> => {
+  return ensureDir(getGatewayCompiledAquaPath());
 };
 
 export const getIndexHTMLPath = (): string => {

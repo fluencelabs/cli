@@ -64,27 +64,16 @@ export const isExactVersion = async (version: string): Promise<boolean> => {
   return semver.clean(version) === version;
 };
 
-export const validateAllVersionsAreExact = async (
-  versions: Record<string, string>,
-): Promise<ValidationResult> => {
-  const versionsWithExactness = await Promise.all(
-    Object.entries(versions).map(async ([name, version]) => {
-      return [name, version, await isExactVersion(version)] as const;
-    }),
-  );
+export async function validateVersionsIsExact(
+  dependency: string,
+  version: string | undefined,
+): Promise<ValidationResult> {
+  if (version === undefined || (await isExactVersion(version))) {
+    return true;
+  }
 
-  const notExactVersions = versionsWithExactness.filter(([, , isExact]) => {
-    return !isExact;
-  });
-
-  return notExactVersions.length === 0
-    ? true
-    : `The following dependencies don't have exact versions: ${notExactVersions
-        .map(([name, version]) => {
-          return `${name}: ${version}`;
-        })
-        .join(", ")}`;
-};
+  return `${dependency} version must have exact version. Found: ${version}`;
+}
 
 export const validatePositiveNumberOrEmpty = (
   input: unknown,

@@ -16,13 +16,15 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CLI_NAME_FULL } from "../../lib/const.js";
+import { CLI_NAME } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { npmInstallAll } from "../../lib/npm.js";
 import { versions } from "../../versions.js";
 
 export default class Reset extends BaseCommand<typeof Reset> {
   static override aliases = ["dep:r"];
-  static override description = `Reset all project dependencies to recommended versions for the current ${CLI_NAME_FULL} version`;
+  static override description =
+    "Reset all project dependencies to recommended versions";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -31,17 +33,28 @@ export default class Reset extends BaseCommand<typeof Reset> {
     const { maybeFluenceConfig } = await initCli(this, await this.parse(Reset));
 
     if (maybeFluenceConfig === null) {
-      commandObj.error("Not a fluence project");
+      commandObj.error(
+        `Not a fluence project. Default dependency versions are always used if running cli outside of the fluence project. Run '${CLI_NAME} dep v' to check them out`,
+      );
     }
 
-    maybeFluenceConfig.dependencies = {
-      npm: {
-        ...maybeFluenceConfig.dependencies?.npm,
-        ...versions.npm,
-      },
-    };
+    if (maybeFluenceConfig.mreplVersion !== undefined) {
+      maybeFluenceConfig.mreplVersion = versions.cargo.mrepl;
+    }
+
+    if (maybeFluenceConfig.marineVersion !== undefined) {
+      maybeFluenceConfig.marineVersion = versions.cargo.marine;
+    }
 
     await maybeFluenceConfig.$commit();
-    commandObj.log("successfully reset project's dependency versions");
+
+    maybeFluenceConfig.aquaDependencies = {
+      ...maybeFluenceConfig.aquaDependencies,
+      ...versions.npm,
+    };
+
+    await npmInstallAll(maybeFluenceConfig);
+    await maybeFluenceConfig.$commit();
+    commandObj.log("Successfully reset project dependencies versions");
   }
 }

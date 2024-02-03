@@ -12,18 +12,16 @@
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
 * [`fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-deposit-deal-address-amount)
 * [`fluence deal info [DEAL-ADDRESS]`](#fluence-deal-info-deal-address)
-* [`fluence deal logs [WORKER-NAMES]`](#fluence-deal-logs-worker-names)
+* [`fluence deal logs [WORKER-NAMES] [SPELL-NAME]`](#fluence-deal-logs-worker-names-spell-name)
 * [`fluence deal match [DEAL-ADDRESS]`](#fluence-deal-match-deal-address)
 * [`fluence deal remove-unit [DEAL-ADDRESS] [UNIT-ID]`](#fluence-deal-remove-unit-deal-address-unit-id)
 * [`fluence deal stop [DEAL-ADDRESS]`](#fluence-deal-stop-deal-address)
 * [`fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-withdraw-deal-address-amount)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
-* [`fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-cargo-install-package-name--package-nameversion)
-* [`fluence dep install`](#fluence-dep-install)
-* [`fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-npm-install-package-name--package-nameversion)
-* [`fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION`](#fluence-dep-npm-uninstall-package-name--package-nameversion)
+* [`fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-install-package-name--package-nameversion)
 * [`fluence dep reset`](#fluence-dep-reset)
+* [`fluence dep uninstall PACKAGE-NAME`](#fluence-dep-uninstall-package-name)
 * [`fluence dep versions`](#fluence-dep-versions)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
@@ -83,44 +81,47 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/air/beautify.ts)_
+_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
-Compile aqua file or directory that contains your .aqua files
+Compile aqua defined in 'compileAqua' property of fluence.yaml. If --input flag is used - then content of 'compileAqua' property in fluence.yaml will be ignored
 
 ```
 USAGE
-  $ fluence aqua [-w] [--common-js] [--no-input] [-i <value>] [-o <value>] [--import <value>] [--air |
-    --js] [--log-level-compiler <value>] [--const <value>] [--no-relay] [--no-xor] [--dry] [--tracing]
+  $ fluence aqua [-n <value>] [--no-input] [-w] [-o <value>] [--air | --js] [--import <value>] [-i
+    <value>] [--const <value>] [--log-level-compiler <value>] [--no-relay] [--no-xor] [--tracing] [--no-empty-response]
+    [--dry]
 
 FLAGS
-  -i, --input=<path>                Path to an aqua file or an input directory that contains your .aqua files. Must be
-                                    relative to the current working directory or absolute
+  -i, --input=<path>                Path to an aqua file or a directory that contains your aqua files
+  -n, --names=<value>               Comma-separated names of the configs from 'compileAqua' property of fluence.yaml to
+                                    compile. If not specified, all configs will be compiled
   -o, --output=<path>               Path to the output directory. Must be relative to the current working directory or
                                     absolute. Will be created if it doesn't exists
   -w, --watch                       Watch aqua file or folder for changes and recompile
       --air                         Generate .air file instead of .ts
-      --common-js                   Use no extension in generated .ts file imports
       --const=<NAME=value>...       Constants to be passed to the compiler
       --dry                         Checks if compilation succeeded, without output
       --import=<path>...            Path to a directory to import aqua files from. May be used several times
       --js                          Generate .js file instead of .ts
-      --log-level-compiler=<level>  Set log level for the compiler. Must be one of: Must be one of: all, trace, debug,
-                                    info, warn, error, off
+      --log-level-compiler=<level>  Set log level for the compiler. Must be one of: all, trace, debug, info, warn,
+                                    error, off
+      --no-empty-response           Do not generate response call if there are no returned values
       --no-input                    Don't interactively ask for any input from the user
       --no-relay                    Do not generate a pass through the relay node
       --no-xor                      Do not generate a wrapper that catches and displays errors
       --tracing                     Compile aqua in tracing mode (for debugging purposes)
 
 DESCRIPTION
-  Compile aqua file or directory that contains your .aqua files
+  Compile aqua defined in 'compileAqua' property of fluence.yaml. If --input flag is used - then content of
+  'compileAqua' property in fluence.yaml will be ignored
 
 EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/aqua.ts)_
+_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/aqua.ts)_
 
 ## `fluence aqua imports`
 
@@ -137,7 +138,7 @@ DESCRIPTION
   Returns a list of aqua imports that CLI produces
 ```
 
-_See code: [src/commands/aqua/imports.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/aqua/imports.ts)_
+_See code: [src/commands/aqua/imports.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/aqua/imports.ts)_
 
 ## `fluence aqua json [INPUT] [OUTPUT]`
 
@@ -165,7 +166,7 @@ DESCRIPTION
   what they translate into
 ```
 
-_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/aqua/json.ts)_
+_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/aqua/json.ts)_
 
 ## `fluence aqua yml [INPUT] [OUTPUT]`
 
@@ -196,7 +197,7 @@ ALIASES
   $ fluence aqua yaml
 ```
 
-_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/aqua/yml.ts)_
+_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -253,7 +254,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/build.ts)_
+_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/build.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -277,7 +278,7 @@ DESCRIPTION
   Change app id in the deal
 ```
 
-_See code: [src/commands/deal/change-app.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/change-app.ts)_
+_See code: [src/commands/deal/change-app.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/change-app.ts)_
 
 ## `fluence deal create`
 
@@ -305,7 +306,7 @@ DESCRIPTION
   Create your deal with the specified parameters
 ```
 
-_See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/create.ts)_
+_See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/create.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -313,7 +314,7 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--env
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [--env <value>] [-k
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
     [--tracing] [--marine-build-args <value>] [--auto-match]
 
@@ -322,7 +323,10 @@ ARGUMENTS
                 'deals' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --[no-]auto-match                                Toggle automatic matching. Auto-matching is turned on by default
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
@@ -350,7 +354,7 @@ EXAMPLES
   $ fluence deal deploy
 ```
 
-_See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/deploy.ts)_
+_See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/deploy.ts)_
 
 ## `fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`
 
@@ -374,7 +378,7 @@ DESCRIPTION
   Deposit do the deal
 ```
 
-_See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/deposit.ts)_
+_See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/deposit.ts)_
 
 ## `fluence deal info [DEAL-ADDRESS]`
 
@@ -395,22 +399,26 @@ DESCRIPTION
   Get info about provider
 ```
 
-_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/info.ts)_
+_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/info.ts)_
 
-## `fluence deal logs [WORKER-NAMES]`
+## `fluence deal logs [WORKER-NAMES] [SPELL-NAME]`
 
 Get logs from deployed workers for deals listed in workers.yaml
 
 ```
 USAGE
-  $ fluence deal logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
+  $ fluence deal logs [WORKER-NAMES] [SPELL-NAME] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
+  SPELL-NAME    Spell name to get logs for (Default: worker-spell)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -431,7 +439,7 @@ EXAMPLES
   $ fluence deal logs
 ```
 
-_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/logs.ts)_
+_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/logs.ts)_
 
 ## `fluence deal match [DEAL-ADDRESS]`
 
@@ -454,7 +462,7 @@ DESCRIPTION
   Match deal with resource owners
 ```
 
-_See code: [src/commands/deal/match.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/match.ts)_
+_See code: [src/commands/deal/match.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/match.ts)_
 
 ## `fluence deal remove-unit [DEAL-ADDRESS] [UNIT-ID]`
 
@@ -478,7 +486,7 @@ DESCRIPTION
   Remove unit from the deal
 ```
 
-_See code: [src/commands/deal/remove-unit.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/remove-unit.ts)_
+_See code: [src/commands/deal/remove-unit.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/remove-unit.ts)_
 
 ## `fluence deal stop [DEAL-ADDRESS]`
 
@@ -501,7 +509,7 @@ DESCRIPTION
   Stop the deal
 ```
 
-_See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/stop.ts)_
+_See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/stop.ts)_
 
 ## `fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`
 
@@ -525,7 +533,7 @@ DESCRIPTION
   Withdraw tokens from the deal
 ```
 
-_See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/deal/withdraw.ts)_
+_See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/deal/withdraw.ts)_
 
 ## `fluence default env [ENV]`
 
@@ -548,7 +556,7 @@ EXAMPLES
   $ fluence default env
 ```
 
-_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/default/env.ts)_
+_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/default/env.ts)_
 
 ## `fluence default peers [ENV]`
 
@@ -571,56 +579,26 @@ EXAMPLES
   $ fluence default peers
 ```
 
-_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/default/peers.ts)_
+_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/default/peers.ts)_
 
-## `fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
+## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
-(For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo directory)
+Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ```
 USAGE
-  $ fluence dep cargo install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input] [--toolchain <value>] [--force]
+  $ fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
 
 ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  Package name. Installs a first version it can find in the following list:
-                                       fluence.yaml, user's .fluence/config.yaml, dependency versions recommended by
-                                       fluence, latest version cargo is aware of. If you want to install a specific
-                                       version, you can do so by appending @ and the version to the package name. For
-                                       example: package@version
+  PACKAGE-NAME | PACKAGE-NAME@VERSION  Valid argument for npm install command. If this argument is omitted all project
+                                       aqua dependencies will be installed and command will also make sure marine and
+                                       mrepl are installed
 
 FLAGS
-  --force                       Force install even if the dependency/dependencies is/are already installed
-  --no-input                    Don't interactively ask for any input from the user
-  --toolchain=<toolchain_name>  Rust toolchain name that will be used in case pre-built binary download fails or --force
-                                flag is used. Default: nightly-2023-08-27-x86_64"]}
-
-DESCRIPTION
-  (For advanced users) Install cargo project dependencies (all dependencies are cached inside user's .fluence/cargo
-  directory)
-
-ALIASES
-  $ fluence dep cargo i
-
-EXAMPLES
-  $ fluence dep cargo install
-```
-
-_See code: [src/commands/dep/cargo/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/cargo/install.ts)_
-
-## `fluence dep install`
-
-Install all project dependencies (dependencies are cached inside user's .fluence directory)
-
-```
-USAGE
-  $ fluence dep install [--no-input] [--force]
-
-FLAGS
-  --force     Force install even if the dependency/dependencies is/are already installed
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Install all project dependencies (dependencies are cached inside user's .fluence directory)
+  Install aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
 
 ALIASES
   $ fluence dep i
@@ -629,63 +607,11 @@ EXAMPLES
   $ fluence dep install
 ```
 
-_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/install.ts)_
-
-## `fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
-
-Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
-
-```
-USAGE
-  $ fluence dep npm install [PACKAGE-NAME | PACKAGE-NAME@VERSION] [--no-input]
-
-ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  valid package spec for npm install command
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Install project aqua dependencies (currently npm is used under the hood for managing aqua dependencies)
-
-ALIASES
-  $ fluence dep npm i
-
-EXAMPLES
-  $ fluence dep npm install
-```
-
-_See code: [src/commands/dep/npm/install.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/npm/install.ts)_
-
-## `fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION`
-
-Uninstall project aqua dependency (currently npm is used under the hood for managing aqua dependencies)
-
-```
-USAGE
-  $ fluence dep npm uninstall PACKAGE-NAME | PACKAGE-NAME@VERSION [--no-input]
-
-ARGUMENTS
-  PACKAGE-NAME | PACKAGE-NAME@VERSION  valid package spec for npm install command
-
-FLAGS
-  --no-input  Don't interactively ask for any input from the user
-
-DESCRIPTION
-  Uninstall project aqua dependency (currently npm is used under the hood for managing aqua dependencies)
-
-ALIASES
-  $ fluence dep npm un
-
-EXAMPLES
-  $ fluence dep npm uninstall
-```
-
-_See code: [src/commands/dep/npm/uninstall.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/npm/uninstall.ts)_
+_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/dep/install.ts)_
 
 ## `fluence dep reset`
 
-Reset all project dependencies to recommended versions for the current Fluence CLI version
+Reset all project dependencies to recommended versions
 
 ```
 USAGE
@@ -695,7 +621,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Reset all project dependencies to recommended versions for the current Fluence CLI version
+  Reset all project dependencies to recommended versions
 
 ALIASES
   $ fluence dep r
@@ -704,11 +630,37 @@ EXAMPLES
   $ fluence dep reset
 ```
 
-_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/reset.ts)_
+_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/dep/reset.ts)_
+
+## `fluence dep uninstall PACKAGE-NAME`
+
+Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
+
+```
+USAGE
+  $ fluence dep uninstall PACKAGE-NAME [--no-input]
+
+ARGUMENTS
+  PACKAGE-NAME  Aqua dependency name
+
+FLAGS
+  --no-input  Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Uninstall aqua project dependencies (currently npm is used under the hood for managing aqua dependencies)
+
+ALIASES
+  $ fluence dep un
+
+EXAMPLES
+  $ fluence dep uninstall
+```
+
+_See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/dep/uninstall.ts)_
 
 ## `fluence dep versions`
 
-Get versions of all dependencies
+Get versions of all cli dependencies, including aqua, marine, mrepl and internal
 
 ```
 USAGE
@@ -720,7 +672,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Get versions of all dependencies
+  Get versions of all cli dependencies, including aqua, marine, mrepl and internal
 
 ALIASES
   $ fluence dep v
@@ -729,7 +681,7 @@ EXAMPLES
   $ fluence dep versions
 ```
 
-_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/dep/versions.ts)_
+_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/dep/versions.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -777,7 +729,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -801,7 +753,7 @@ EXAMPLES
   $ fluence key default
 ```
 
-_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/key/default.ts)_
+_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/key/default.ts)_
 
 ## `fluence key new [NAME]`
 
@@ -826,7 +778,7 @@ EXAMPLES
   $ fluence key new
 ```
 
-_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/key/new.ts)_
+_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/key/new.ts)_
 
 ## `fluence key remove [NAME]`
 
@@ -850,7 +802,7 @@ EXAMPLES
   $ fluence key remove
 ```
 
-_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/key/remove.ts)_
+_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/key/remove.ts)_
 
 ## `fluence local down`
 
@@ -870,7 +822,7 @@ EXAMPLES
   $ fluence local down
 ```
 
-_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/local/down.ts)_
+_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/local/down.ts)_
 
 ## `fluence local init`
 
@@ -891,7 +843,7 @@ EXAMPLES
   $ fluence local init
 ```
 
-_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/local/init.ts)_
+_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/local/init.ts)_
 
 ## `fluence local logs`
 
@@ -911,7 +863,7 @@ EXAMPLES
   $ fluence local logs
 ```
 
-_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/local/logs.ts)_
+_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/local/logs.ts)_
 
 ## `fluence local ps`
 
@@ -931,7 +883,7 @@ EXAMPLES
   $ fluence local ps
 ```
 
-_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/local/ps.ts)_
+_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/local/ps.ts)_
 
 ## `fluence local up`
 
@@ -954,7 +906,7 @@ EXAMPLES
   $ fluence local up
 ```
 
-_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/local/up.ts)_
+_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/local/up.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -980,7 +932,7 @@ EXAMPLES
   $ fluence module add
 ```
 
-_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/module/add.ts)_
+_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/module/add.ts)_
 
 ## `fluence module new [NAME]`
 
@@ -1005,7 +957,7 @@ EXAMPLES
   $ fluence module new
 ```
 
-_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/module/new.ts)_
+_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/module/new.ts)_
 
 ## `fluence module remove [NAME | PATH | URL]`
 
@@ -1029,7 +981,7 @@ EXAMPLES
   $ fluence module remove
 ```
 
-_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/module/remove.ts)_
+_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/module/remove.ts)_
 
 ## `fluence provider add-peer`
 
@@ -1054,7 +1006,7 @@ DESCRIPTION
   Register specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/add-peer.ts)_
+_See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/add-peer.ts)_
 
 ## `fluence provider add-units`
 
@@ -1077,7 +1029,7 @@ DESCRIPTION
   Add units to specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/add-units.ts)_
+_See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/add-units.ts)_
 
 ## `fluence provider gen`
 
@@ -1099,7 +1051,7 @@ EXAMPLES
   $ fluence provider gen
 ```
 
-_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/gen.ts)_
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/gen.ts)_
 
 ## `fluence provider info`
 
@@ -1118,7 +1070,7 @@ DESCRIPTION
   Get info about provider
 ```
 
-_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/info.ts)_
+_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/info.ts)_
 
 ## `fluence provider init`
 
@@ -1137,7 +1089,7 @@ DESCRIPTION
   Init provider config. Creates a config file
 ```
 
-_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/init.ts)_
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/init.ts)_
 
 ## `fluence provider register`
 
@@ -1159,7 +1111,7 @@ DESCRIPTION
   Register in matching contract
 ```
 
-_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/register.ts)_
+_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/register.ts)_
 
 ## `fluence provider remove-peer`
 
@@ -1181,7 +1133,7 @@ DESCRIPTION
   Remove specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/remove-peer.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/remove-peer.ts)_
+_See code: [src/commands/provider/remove-peer.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/remove-peer.ts)_
 
 ## `fluence provider remove-units`
 
@@ -1205,7 +1157,7 @@ DESCRIPTION
   Sub units to specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/remove-units.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/remove-units.ts)_
+_See code: [src/commands/provider/remove-units.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/remove-units.ts)_
 
 ## `fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`
 
@@ -1229,7 +1181,7 @@ DESCRIPTION
   Reward info
 ```
 
-_See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/reward-info.ts)_
+_See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/reward-info.ts)_
 
 ## `fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID]`
 
@@ -1253,27 +1205,28 @@ DESCRIPTION
   Withdraw reward
 ```
 
-_See code: [src/commands/provider/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/provider/withdraw-reward.ts)_
+_See code: [src/commands/provider/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/withdraw-reward.ts)_
 
 ## `fluence run`
 
-Run aqua script
+Run the first aqua function CLI is able to find and compile among all aqua files specified in 'compileAqua' property of fluence.yaml file. If --input flag is used - then content of 'compileAqua' property in fluence.yaml will be ignored
 
 ```
 USAGE
-  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--import <value>]
-    [--log-level-compiler <value>] [--quiet] [--const <value>] [-i <value>] [-f <value>] [--no-xor] [--no-relay]
-    [--print-air | -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [--tracing]
+  $ fluence run [--no-input] [--data <value>] [--data-path <value>] [--quiet] [-f <value>] [--print-air |
+    -b] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env
+    <value>] [--import <value>] [-i <value>] [--const <value>] [--log-level-compiler <value>] [--no-relay] [--no-xor]
+    [--tracing] [--no-empty-response]
 
 FLAGS
-  -b, --print-beautified-air                           Prints beautified AIR code before function execution
+  -b, --print-beautified-air                           Prints beautified AIR code instead of function execution
   -f, --func=<function-call>                           Function call. Example: funcName("stringArg")
-  -i, --input=<path>                                   Path to an aqua file or to a directory that contains aqua files
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
-      --const=<NAME="value">...                        Constant that will be used in the aqua code that you run (example
-                                                       of aqua code: SOME_CONST ?= "default_value"). Constant name must
-                                                       be upper cased.
+  -i, --input=<path>                                   Path to an aqua file or a directory that contains your aqua files
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
+      --const=<NAME=value>...                          Constants to be passed to the compiler
       --data=<json>                                    JSON in { [argumentName]: argumentValue } format. You can call a
                                                        function using these argument names like this: -f
                                                        'myFunc(argumentName)'. Arguments in this flag override arguments
@@ -1287,14 +1240,15 @@ FLAGS
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
       --import=<path>...                               Path to a directory to import aqua files from. May be used
                                                        several times
-      --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: Must be one of:
-                                                       all, trace, debug, info, warn, error, off
+      --log-level-compiler=<level>                     Set log level for the compiler. Must be one of: all, trace,
+                                                       debug, info, warn, error, off
+      --no-empty-response                              Do not generate response call if there are no returned values
       --no-input                                       Don't interactively ask for any input from the user
       --no-relay                                       Do not generate a pass through the relay node
       --no-xor                                         Do not generate a wrapper that catches and displays errors
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
-      --print-air                                      Prints generated AIR code before function execution
+      --print-air                                      Prints generated AIR code instead of function execution
       --quiet                                          Print only execution result. Overrides all --log-level-* flags
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
@@ -1302,13 +1256,14 @@ FLAGS
                                                        particle is expired and not processed.
 
 DESCRIPTION
-  Run aqua script
+  Run the first aqua function CLI is able to find and compile among all aqua files specified in 'compileAqua' property
+  of fluence.yaml file. If --input flag is used - then content of 'compileAqua' property in fluence.yaml will be ignored
 
 EXAMPLES
   $ fluence run
 ```
 
-_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/run.ts)_
+_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -1335,7 +1290,7 @@ EXAMPLES
   $ fluence service add
 ```
 
-_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/service/add.ts)_
+_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/service/add.ts)_
 
 ## `fluence service new [NAME]`
 
@@ -1359,7 +1314,7 @@ EXAMPLES
   $ fluence service new
 ```
 
-_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/service/new.ts)_
+_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/service/new.ts)_
 
 ## `fluence service remove [NAME | PATH | URL]`
 
@@ -1382,7 +1337,7 @@ EXAMPLES
   $ fluence service remove
 ```
 
-_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/service/remove.ts)_
+_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -1407,7 +1362,7 @@ EXAMPLES
   $ fluence service repl
 ```
 
-_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/service/repl.ts)_
+_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/service/repl.ts)_
 
 ## `fluence spell build [SPELL-NAMES]`
 
@@ -1432,7 +1387,7 @@ EXAMPLES
   $ fluence spell build
 ```
 
-_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/spell/build.ts)_
+_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/spell/build.ts)_
 
 ## `fluence spell new [NAME]`
 
@@ -1456,7 +1411,7 @@ EXAMPLES
   $ fluence spell new
 ```
 
-_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/spell/new.ts)_
+_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/spell/new.ts)_
 
 ## `fluence update [CHANNEL]`
 
@@ -1501,7 +1456,7 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers deploy [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [-k <value>] [--relay
     <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--import <value>] [--no-build]
     [--tracing] [--marine-build-args <value>]
 
@@ -1510,7 +1465,10 @@ ARGUMENTS
                 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1537,7 +1495,7 @@ EXAMPLES
   $ fluence workers deploy
 ```
 
-_See code: [src/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/workers/deploy.ts)_
+_See code: [src/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/workers/deploy.ts)_
 
 ## `fluence workers logs [WORKER-NAMES]`
 
@@ -1545,15 +1503,18 @@ Get logs from deployed workers for hosts listed in workers.yaml
 
 ```
 USAGE
-  $ fluence workers logs [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id <value>] [--host-id
-    <value>] [--spell-id <value>] [--tracing]
+  $ fluence workers logs [WORKER-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id
+    <value>] [--host-id <value>] [--spell-id <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1577,7 +1538,7 @@ EXAMPLES
   $ fluence workers logs
 ```
 
-_See code: [src/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/workers/logs.ts)_
+_See code: [src/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/workers/logs.ts)_
 
 ## `fluence workers remove [WORKER-NAMES]`
 
@@ -1585,7 +1546,7 @@ Remove workers from hosts, described in 'hosts' property in workers.yaml
 
 ```
 USAGE
-  $ fluence workers remove [WORKER-NAMES] [--no-input] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--relay
+  $ fluence workers remove [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [-k <value>] [--relay
     <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--tracing]
 
 ARGUMENTS
@@ -1593,7 +1554,10 @@ ARGUMENTS
                 'hosts' property in workers.yaml are removed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1614,7 +1578,7 @@ EXAMPLES
   $ fluence workers remove
 ```
 
-_See code: [src/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/workers/remove.ts)_
+_See code: [src/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/workers/remove.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
@@ -1622,15 +1586,18 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers upload [WORKER-NAMES] [--no-input] [--relay <value>] [--ttl <value>] [--dial-timeout <value>]
-    [--particle-id] [--env <value>] [-k <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>] [--no-build]
-    [--tracing] [--marine-build-args <value>]
+  $ fluence workers upload [WORKER-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>]
+    [--no-build] [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
 
 FLAGS
-  -k, --sk=<name>                                      Name of a peer's Network Private Key
+  -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
+                                                       specified, will use the default key for the project. If there is
+                                                       no fluence project or there is no default key, will use user's
+                                                       default key
       --dial-timeout=<milliseconds>                    [default: 60000] Timeout for Fluence js-client to connect to
                                                        relay peer
       --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
@@ -1657,5 +1624,5 @@ EXAMPLES
   $ fluence workers upload
 ```
 
-_See code: [src/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.13.4/src/commands/workers/upload.ts)_
+_See code: [src/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/workers/upload.ts)_
 <!-- commandsstop -->

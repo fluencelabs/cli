@@ -24,16 +24,17 @@ import {
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
   WORKERS_CONFIG_FULL_FILE_NAME,
-} from "../../src/lib/const.js";
+} from "../../../src/lib/const.js";
 import {
+  jsonStringify,
   setTryTimeout,
   stringifyUnknown,
-} from "../../src/lib/helpers/utils.js";
+} from "../../../src/lib/helpers/utils.js";
+import { getFluenceAquaServicesPath } from "../../../src/lib/paths.js";
+import { assertHasKey } from "../../../src/lib/typeHelpers.js";
+import { fluence } from "../../helpers/commonWithSetupTests.js";
 import {
-  getAquaMainPath,
-  getFluenceAquaServicesPath,
-} from "../../src/lib/paths.js";
-import {
+  composeInterfacesFileContents,
   MAIN_RS_CONTENT,
   NEW_SERVICE_2_NAME,
   NEW_SERVICE_INTERFACE,
@@ -42,42 +43,61 @@ import {
   RUN_DEPLOYED_SERVICES_TIMEOUT,
   SERVICE_INTERFACES,
   UPDATED_SERVICE_INTERFACES,
-} from "../constants.js";
-import {
-  assertHasPeer,
-  fluence,
-  getMultiaddrs,
-  init,
-  maybeConcurrentTest,
-  sortPeers,
-} from "../helpers.js";
+} from "../../helpers/constants.js";
+import { TEST_AQUA_DIR_PATH } from "../../helpers/paths.js";
 import {
   createSpellAndAddToDeal,
   getFluenceConfig,
   getServiceConfig,
+  initializeTemplate,
+  getPeerIds,
+  runAquaFunction,
+  updateMainAqua,
   updateMainRs,
-} from "../sharedSteps.js";
+} from "../../helpers/sharedSteps.js";
 
-const peerIds = (await getMultiaddrs())
-  .map(({ peerId }) => {
-    return peerId;
-  })
-  .sort();
+const sortPeers = <T extends { peer: string }>(
+  { peer: peerA }: T,
+  { peer: peerB }: T,
+) => {
+  if (peerA < peerB) {
+    return -1;
+  }
+
+  if (peerA > peerB) {
+    return 1;
+  }
+
+  return 0;
+};
+
+const assertHasPeer = (result: unknown): { peer: string } => {
+  try {
+    assertHasKey("peer", result);
+    assert(typeof result.peer === "string");
+    return { ...result, peer: result.peer };
+  } catch (err) {
+    throw new Error(
+      `Running ${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} aqua function is supposed to return an array of objects of a particular shape: { peer: string }. One of the received objects doesn't match the shape: ${jsonStringify(
+        result,
+      )}. Error: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+};
 
 describe("integration tests", () => {
-  maybeConcurrentTest(
+  test.concurrent.skip(
     "should deploy workers with spell and service, resolve, run services on them and remove them",
     async () => {
       const cwd = join("tmp", "shouldDeployWorkersAndRunCodeOnThem");
-      await init(cwd, "minimal");
+      await initializeTemplate(cwd, "minimal");
 
-      await writeFile(
-        getAquaMainPath(cwd),
+      await updateMainAqua(
+        cwd,
         await readFile(
-          join("test", "_resources", "aqua", "runDeployedWorkers.aqua"),
+          join(TEST_AQUA_DIR_PATH, "runDeployedWorkers.aqua"),
           FS_OPTIONS,
         ),
-        FS_OPTIONS,
       );
 
       await fluence({
@@ -90,8 +110,11 @@ describe("integration tests", () => {
       };
 
       let interfacesFileContent = await readInterfacesFile();
+
       // we expect to a NewService interface in services.aqua file
-      expect(interfacesFileContent).toBe(`${NEW_SERVICE_INTERFACE}\n`);
+      expect(interfacesFileContent).toBe(
+        composeInterfacesFileContents(NEW_SERVICE_INTERFACE),
+      );
 
       const newServiceConfig = await getServiceConfig(cwd, NEW_SERVICE_NAME);
 
@@ -115,7 +138,9 @@ describe("integration tests", () => {
 
       // we expect to see both service interfaces in services.aqua file and the first one
       // should not be updated because we didn't build it, even though we changed it above
-      expect(interfacesFileContent).toBe(SERVICE_INTERFACES);
+      expect(interfacesFileContent).toBe(
+        composeInterfacesFileContents(SERVICE_INTERFACES),
+      );
 
       await fluence({
         args: ["build"],
@@ -126,11 +151,15 @@ describe("integration tests", () => {
 
       // we expect to see both service interfaces in services.aqua file and the first one
       // should be updated because we built all the services above including the first one
-      expect(interfacesFileContent).toBe(UPDATED_SERVICE_INTERFACES);
+      expect(interfacesFileContent).toBe(
+        composeInterfacesFileContents(UPDATED_SERVICE_INTERFACES),
+      );
 
       const fluenceConfig = await getFluenceConfig(cwd);
 
       await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
+
+      const peerIds = await getPeerIds(cwd);
 
       fluenceConfig.hosts = {
         [DEFAULT_WORKER_NAME]: {
@@ -204,13 +233,10 @@ describe("integration tests", () => {
 
       const workersConfig = await readFile(workersConfigPath, FS_OPTIONS);
 
-      let allWorkersAreRemoved = await fluence({
-        args: ["run"],
-        flags: {
-          f: "areAllWorkersRemoved()",
-        },
+      let allWorkersAreRemoved = await runAquaFunction(
         cwd,
-      });
+        "areAllWorkersRemoved",
+      );
 
       expect(allWorkersAreRemoved.trim()).toBe("false");
 
@@ -235,13 +261,7 @@ describe("integration tests", () => {
         cwd,
       });
 
-      allWorkersAreRemoved = await fluence({
-        args: ["run"],
-        flags: {
-          f: "areAllWorkersRemoved()",
-        },
-        cwd,
-      });
+      allWorkersAreRemoved = await runAquaFunction(cwd, "areAllWorkersRemoved");
 
       expect(allWorkersAreRemoved.trim()).toBe("true");
     },

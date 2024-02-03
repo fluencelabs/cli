@@ -22,7 +22,6 @@ import { commandObj } from "../../lib/commandObj.js";
 import type { Get_logsArgApp_workers } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import {
-  KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
@@ -49,7 +48,6 @@ export default class Logs extends BaseCommand<typeof Logs> {
   static override flags = {
     ...baseFlags,
     ...FLUENCE_CLIENT_FLAGS,
-    ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     "worker-id": Flags.string({

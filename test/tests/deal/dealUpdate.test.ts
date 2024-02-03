@@ -17,14 +17,14 @@
 import { cp } from "fs/promises";
 import { join } from "node:path";
 
+import { fluence } from "../../helpers/commonWithSetupTests.js";
 import {
   MY_SERVICE_NAME,
   NEW_MODULE_NAME,
   NEW_SERVICE_2_NAME,
   NEW_SPELL_NAME,
-  TEST_AQUA_DIR_PATH,
-} from "../constants.js";
-import { fluence, init } from "../helpers.js";
+} from "../../helpers/constants.js";
+import { TEST_AQUA_DIR_PATH } from "../../helpers/paths.js";
 import {
   assertLogsAreValid,
   build,
@@ -32,19 +32,19 @@ import {
   createServiceAndAddToDeal,
   createSpellAndAddToDeal,
   deployDealAndWaitUntilDeployed,
+  initializeTemplate,
   updateFluenceConfigForTest,
   updateMainRs,
   updateSpellAqua,
   waitUntilAquaScriptReturnsExpected,
   waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
-} from "../sharedSteps.js";
+} from "../../helpers/sharedSteps.js";
 
 describe("Deal update tests", () => {
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after new spell is created", async () => {
+  test.concurrent("should update deal after new spell is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
-    await init(cwd, "quickstart");
+    await initializeTemplate(cwd, "quickstart");
 
     await updateFluenceConfigForTest(cwd);
 
@@ -65,68 +65,71 @@ describe("Deal update tests", () => {
     assertLogsAreValid(logs);
   });
 
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after new service is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
-    await init(cwd, "quickstart");
+  test.concurrent(
+    "should update deal after new service is created",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
+      await initializeTemplate(cwd, "quickstart");
 
-    await updateFluenceConfigForTest(cwd);
+      await updateFluenceConfigForTest(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
+      await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
 
-    await build(cwd);
+      await build(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilShowSubnetReturnsExpected(
-      cwd,
-      [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
-      [],
-    );
+      await waitUntilShowSubnetReturnsExpected(
+        cwd,
+        [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+        [],
+      );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after new module is created", async () => {
-    const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
-    await init(cwd, "quickstart");
+  test.concurrent(
+    "should update deal after new module is created",
+    async () => {
+      const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
+      await initializeTemplate(cwd, "quickstart");
 
-    await updateFluenceConfigForTest(cwd);
+      await updateFluenceConfigForTest(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await createModuleAndAddToService(cwd, NEW_MODULE_NAME, MY_SERVICE_NAME);
+      await createModuleAndAddToService(cwd, NEW_MODULE_NAME, MY_SERVICE_NAME);
 
-    await updateMainRs(cwd, NEW_MODULE_NAME, NEW_MODULE_CONTENT);
+      await updateMainRs(cwd, NEW_MODULE_NAME, NEW_MODULE_CONTENT);
 
-    await updateMainRs(
-      cwd,
-      MY_SERVICE_NAME,
-      FACADE_MODULE_CONTENT,
-      MY_SERVICE_NAME,
-    );
+      await updateMainRs(
+        cwd,
+        MY_SERVICE_NAME,
+        FACADE_MODULE_CONTENT,
+        MY_SERVICE_NAME,
+      );
 
-    await deployDealAndWaitUntilDeployed(cwd);
+      await deployDealAndWaitUntilDeployed(cwd);
 
-    await waitUntilRunDeployedServicesReturnsExpected(
-      cwd,
-      `Hey, fluence! I'm The New Module.`,
-    );
+      await waitUntilRunDeployedServicesReturnsExpected(
+        cwd,
+        `Hey, fluence! I'm The New Module.`,
+      );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+      const logs = await fluence({ args: ["deal", "logs"], cwd });
 
-    assertLogsAreValid(logs);
-  });
+      assertLogsAreValid(logs);
+    },
+  );
 
-  // TODO: test skipped until NET-649 is released
-  test.skip("should update deal after changing a service", async () => {
+  test.concurrent("should update deal after changing a service", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
-    await init(cwd, "quickstart");
+    await initializeTemplate(cwd, "quickstart");
 
     await updateFluenceConfigForTest(cwd);
 
@@ -151,10 +154,9 @@ describe("Deal update tests", () => {
     assertLogsAreValid(logs);
   });
 
-  // TODO: test skipped until FLU-575 is released
-  test.skip("should update deal after changing a spell", async () => {
+  test.concurrent("should update deal after changing a spell", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingASpell");
-    await init(cwd, "quickstart");
+    await initializeTemplate(cwd, "quickstart");
 
     await cp(
       join(TEST_AQUA_DIR_PATH, GET_SPELL_LOGS_AQUA_FILE_NAME),
@@ -176,7 +178,7 @@ describe("Deal update tests", () => {
       NEW_SPELL_NAME,
       "getSpellLogs",
       "getSpellLogs.aqua",
-      "if you see this, then the spell is working",
+      SPELL_MESSAGE,
     );
 
     const logs = await fluence({ args: ["deal", "logs"], cwd });
@@ -233,13 +235,17 @@ pub fn greeting(name: String) -> String {
 `;
 
 const GET_SPELL_LOGS_AQUA_FILE_NAME = "getSpellLogs.aqua";
+const SPELL_MESSAGE = '"if you see this, then the spell is working"';
 
-const UPDATED_SPELL_CONTENT = `import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
+const UPDATED_SPELL_CONTENT = `aqua Spell
+export spell
+
+import Op, Debug from "@fluencelabs/aqua-lib/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    msg = "if you see this, then the spell is working"
+    msg = ${SPELL_MESSAGE}
     str <- Debug.stringify(msg)
-    Spell "worker-spell"
+    Spell "spell"
     Spell.store_log(str)
 `;

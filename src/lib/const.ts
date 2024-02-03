@@ -49,17 +49,20 @@ const CURRENCY_MULTIPLIER_POWER = 18;
 export const CURRENCY_MULTIPLIER_TEXT = `This number is multiplied by 10^${CURRENCY_MULTIPLIER_POWER}`;
 export const CURRENCY_MULTIPLIER = 10 ** CURRENCY_MULTIPLIER_POWER;
 export const COLLATERAL_DEFAULT = 1;
-export const PRICE_PER_EPOCH_DEFAULT = 0.1;
+export const PRICE_PER_EPOCH_DEFAULT = 0.00001;
 
 export const defaultNumberProperties: Record<NumberProperty, number> = {
   maxCollateralPerWorker: COLLATERAL_DEFAULT,
   minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
 
-export const PER_WORKER_MEMORY_LIMIT_STR = "2GB";
-export const PER_WORKER_MEMORY_LIMIT = xbytes.parseSize(
-  PER_WORKER_MEMORY_LIMIT_STR,
+export const MIN_MEMORY_PER_MODULE_STR = "2 MiB";
+export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
+  MIN_MEMORY_PER_MODULE_STR,
 );
+
+export const COMPUTE_UNIT_MEMORY_STR = "2GB";
+export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 
 const byteUnits = [
   "kB",
@@ -83,7 +86,7 @@ export const BYTES_PATTERN = `^\\d+(\\.\\d+)?(\\s?)(${byteUnits.join("|")})$`;
 export const BYTES_FORMAT = `[number][whitespace?][B] where ? is an optional field and B is one of the following: ${byteUnits.join(
   ", ",
 )}`;
-export const MAX_HEAP_SIZE_DESCRIPTION = `Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
+export const MAX_HEAP_SIZE_DESCRIPTION = `DEPRECATED. Use \`totalMemoryLimit\` service property instead. Max size of the heap that a module can allocate in format: ${BYTES_FORMAT}`;
 
 export const U32_MAX = 4_294_967_295;
 
@@ -172,6 +175,7 @@ export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const FRONTEND_DIR_NAME = "frontend";
+export const GATEWAY_DIR_NAME = "gateway";
 export const TMP_DIR_NAME = "tmp";
 export const VSCODE_DIR_NAME = ".vscode";
 export const NODE_MODULES_DIR_NAME = "node_modules";
@@ -231,6 +235,9 @@ export const INDEX_TS_FILE_NAME = `index.${TS_EXT}`;
 export const INDEX_JS_FILE_NAME = `index.${JS_EXT}`;
 export const INDEX_HTML_FILE_NAME = `index.html`;
 
+export const SERVER_TS_FILE_NAME = `server.${TS_EXT}`;
+export const SERVER_JS_FILE_NAME = `server.${JS_EXT}`;
+
 export const CONFIG_TOML = `Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
@@ -245,17 +252,6 @@ export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 export const AUTO_GENERATED = "auto-generated";
 export const DEFAULT_DEAL_NAME = "dealName";
 export const DEFAULT_WORKER_NAME = "workerName";
-
-const SK_FLAG_NAME = "sk";
-export const KEY_PAIR_FLAG = {
-  [SK_FLAG_NAME]: Flags.string({
-    char: "k",
-    description: "Name of a peer's Network Private Key",
-    helpValue: "<name>",
-  }),
-} as const;
-
-export type KeyPairFlag = FromFlagsDef<typeof KEY_PAIR_FLAG>;
 
 export const NO_INPUT_FLAG_NAME = "no-input";
 export const NO_INPUT_FLAG = {
@@ -335,6 +331,66 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
+
+export const AQUA_LOG_LEVELS = [
+  "all",
+  "trace",
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "off",
+] as const;
+
+export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
+export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
+
+export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
+  ", ",
+)}`;
+
+export const INPUT_FLAG_NAME = "input";
+export const COMPILE_AQUA_PROPERTY_NAME = "compileAqua";
+export const INPUT_FLAG_EXPLANATION = `. If --${INPUT_FLAG_NAME} flag is used - then content of '${COMPILE_AQUA_PROPERTY_NAME}' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} will be ignored`;
+
+export const COMMON_AQUA_COMPILATION_FLAGS = {
+  ...IMPORT_FLAG,
+  [INPUT_FLAG_NAME]: Flags.string({
+    description:
+      "Path to an aqua file or a directory that contains your aqua files",
+    helpValue: "<path>",
+    char: "i",
+  }),
+  const: Flags.string({
+    description: "Constants to be passed to the compiler",
+    helpValue: "<NAME=value>",
+    multiple: true,
+  }),
+  [LOG_LEVEL_COMPILER_FLAG_NAME]: Flags.string({
+    description: `Set log level for the compiler. ${aquaLogLevelsString}`,
+    helpValue: "<level>",
+  }),
+  "no-relay": Flags.boolean({
+    default: false,
+    description: "Do not generate a pass through the relay node",
+  }),
+  "no-xor": Flags.boolean({
+    default: false,
+    description: "Do not generate a wrapper that catches and displays errors",
+  }),
+  ...TRACING_FLAG,
+  "no-empty-response": Flags.boolean({
+    default: false,
+    description:
+      "Do not generate response call if there are no returned values",
+  }),
+} as const;
+
+export type CommonAquaCompilationFlags = FromFlagsDef<
+  typeof COMMON_AQUA_COMPILATION_FLAGS
+>;
+
 export const NOXES_FLAG = {
   noxes: Flags.integer({
     description: `Number of Compute Peers to generate when a new ${PROVIDER_CONFIG_FULL_FILE_NAME} is created`,
@@ -370,6 +426,12 @@ export const TTL_FLAG_NAME = "ttl";
 export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
 
 export const FLUENCE_CLIENT_FLAGS = {
+  sk: Flags.string({
+    char: "k",
+    description:
+      "Name of the secret key for js-client inside CLI to use. If not specified, will use the default key for the project. If there is no fluence project or there is no default key, will use user's default key",
+    helpValue: "<name>",
+  }),
   relay: Flags.string({
     description: "Relay for Fluence js-client to connect to",
     helpValue: "<multiaddress>",
@@ -418,25 +480,8 @@ export const TEMPLATES = ["quickstart", "minimal", "ts", "js"] as const;
 export type Template = (typeof TEMPLATES)[number];
 export const isTemplate = getIsStringUnion(TEMPLATES);
 
-export const AQUA_LOG_LEVELS = [
-  "all",
-  "trace",
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "off",
-] as const;
-
-export type AquaLogLevel = (typeof AQUA_LOG_LEVELS)[number];
-export const isAquaLogLevel = getIsStringUnion(AQUA_LOG_LEVELS);
-
-export const aquaLogLevelsString = `Must be one of: ${AQUA_LOG_LEVELS.join(
-  ", ",
-)}`;
-
-export const PACKAGE_NAME_AND_VERSION_ARG_NAME =
-  "PACKAGE-NAME | PACKAGE-NAME@VERSION";
+export const PACKAGE_NAME = "PACKAGE-NAME";
+export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME@VERSION`;
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
@@ -445,7 +490,7 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
-/${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}
+${COMPILED_AQUA_DIR_NAME}/
 **/node_modules
 **/target/
 .repl_history
@@ -454,36 +499,28 @@ export const IS_TTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
 export const IS_DEVELOPMENT = process.env["NODE_ENV"] === "development";
 
 export const MARINE_CARGO_DEPENDENCY = "marine";
-export const MREPL_CARGO_DEPENDENCY = "mrepl";
+const MREPL_CARGO_DEPENDENCY = "mrepl";
 export const MARINE_RS_SDK_CARGO_DEPENDENCY = "marine-rs-sdk";
 export const MARINE_RS_SDK_TEST_CARGO_DEPENDENCY = "marine-rs-sdk-test";
 
 export const AQUA_LIB_NPM_DEPENDENCY = "@fluencelabs/aqua-lib";
-const REGISTRY_NPM_DEPENDENCY = "@fluencelabs/registry";
-const SPELL_NPM_DEPENDENCY = "@fluencelabs/spell";
 export const JS_CLIENT_NPM_DEPENDENCY = "@fluencelabs/js-client";
+export const TYPESCRIPT_NPM_DEPENDENCY = "typescript";
 
-export const fluenceNPMDependencies = [
-  AQUA_LIB_NPM_DEPENDENCY,
-  REGISTRY_NPM_DEPENDENCY,
-  SPELL_NPM_DEPENDENCY,
-] as const;
-
-export const fluenceCargoDependencies = [
+export const marineAndMreplDependencies = [
   MARINE_CARGO_DEPENDENCY,
   MREPL_CARGO_DEPENDENCY,
 ] as const;
 
-export const isFluenceCargoDependency = getIsStringUnion(
-  fluenceCargoDependencies,
-);
+export type MarineOrMrepl = (typeof marineAndMreplDependencies)[number];
+export const isMarineOrMrepl = getIsStringUnion(marineAndMreplDependencies);
 
 export const SEPARATOR = `\n\n${color.yellow(
   `^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
 )}\n\n`;
 
-const RUN_DEPLOYED_SERVICES_FUNCTION = "runDeployedServices";
-export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION}()`;
+export const RUN_DEPLOYED_SERVICES_FUNCTION_NAME = "runDeployedServices";
+export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}()`;
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
@@ -495,7 +532,7 @@ data Answer:
     answer: ?string
     worker: Worker
 
-func ${RUN_DEPLOYED_SERVICES_FUNCTION}() -> []Answer:
+func ${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}() -> []Answer:
     deals <- Deals.get()
     dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
     answers: *Answer
@@ -617,14 +654,11 @@ export function getSpellAquaFileContent(spellName: string) {
 -- Note: spell main function must be exported
 export spell
 
-import Op, Debug from "${AQUA_LIB_NPM_DEPENDENCY}/builtin.aqua"
 import Spell from "@fluencelabs/spell/spell_service.aqua"
 
 func spell():
-    msg = "Spell is working!"
-    str <- Debug.stringify(msg)
-    Spell "worker-spell"
-    Spell.store_log(str)
+    Spell "${spellName}"
+    Spell.store_log("Spell '${spellName}' is working!")
 `;
 }
 
@@ -685,6 +719,8 @@ fluence aqua
 `;
 }
 
+export const SERVICE_INTERFACE_FILE_HEADER = "aqua Services declares *";
+
 export const READMEs: Record<Template, string> = {
   quickstart: QUICKSTART_README,
   minimal: MINIMAL_README,
@@ -719,3 +755,4 @@ export const LOCAL_NET_WALLET_KEYS = [
 ];
 
 export const DEFAULT_OFFER_NAME = "offer";
+export const WORKER_SPELL = "worker-spell";

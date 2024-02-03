@@ -18,7 +18,7 @@ import assert from "node:assert";
 import { readFile, writeFile } from "node:fs/promises";
 
 import type { FluenceConfig } from "../configs/project/fluence.js";
-import { FS_OPTIONS } from "../const.js";
+import { FS_OPTIONS, SERVICE_INTERFACE_FILE_HEADER } from "../const.js";
 import type { MarineCLI } from "../marineCli.js";
 import { ensureFluenceAquaServicesPath } from "../paths.js";
 
@@ -73,6 +73,14 @@ const getServiceIdFromServiceInterface = (dataAndServiceDefinition: string) => {
   return serviceId;
 };
 
+const getServiceInterfaceFileContent = (serviceInterfaces: string[]) => {
+  return (
+    [SERVICE_INTERFACE_FILE_HEADER, ...serviceInterfaces].join(
+      SERVICE_DEFINITION_SEPARATOR,
+    ) + "\n"
+  );
+};
+
 export const updateAquaServiceInterfaceFile = async (
   serviceNamePathToFacadeMap: Record<string, string>,
   servicesFromFluenceConfig: FluenceConfig["services"],
@@ -94,7 +102,10 @@ export const updateAquaServiceInterfaceFile = async (
       return serviceDefinition.trim();
     })
     .filter((serviceDefinition) => {
-      return serviceDefinition !== "";
+      return (
+        serviceDefinition !== "" &&
+        serviceDefinition !== SERVICE_INTERFACE_FILE_HEADER
+      );
     });
 
   const serviceNamesFromFluenceConfig = new Set(
@@ -155,7 +166,7 @@ export const updateAquaServiceInterfaceFile = async (
 
   await writeFile(
     await ensureFluenceAquaServicesPath(),
-    `${serviceInterfacesToWrite.join(SERVICE_DEFINITION_SEPARATOR)}\n`,
+    getServiceInterfaceFileContent(serviceInterfacesToWrite),
     FS_OPTIONS,
   );
 };

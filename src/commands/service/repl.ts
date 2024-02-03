@@ -38,7 +38,6 @@ import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   MARINE_BUILD_ARGS_FLAG,
-  MREPL_CARGO_DEPENDENCY,
   NO_INPUT_FLAG,
   SEPARATOR,
 } from "../../lib/const.js";
@@ -53,7 +52,7 @@ import {
   projectRootDir,
 } from "../../lib/paths.js";
 import { input, list } from "../../lib/prompt.js";
-import { ensureCargoDependency } from "../../lib/rust.js";
+import { ensureMarineOrMreplDependency } from "../../lib/rust.js";
 
 const NAME_OR_PATH_OR_URL = "NAME | PATH | URL";
 
@@ -87,7 +86,7 @@ export default class REPL extends Command {
       (await promptForNamePathOrUrl(maybeFluenceConfig));
 
     const serviceConfig = await ensureServiceConfig(nameOrPathOrUrl);
-    const marineCli = await initMarineCli(maybeFluenceConfig);
+    const marineCli = await initMarineCli();
 
     startSpinner("Making sure service and modules are downloaded and built");
 
@@ -132,11 +131,7 @@ export default class REPL extends Command {
       return;
     }
 
-    const mreplDirPath = await ensureCargoDependency({
-      nameAndVersion: MREPL_CARGO_DEPENDENCY,
-      maybeFluenceConfig,
-    });
-
+    const mreplDirPath = await ensureMarineOrMreplDependency({ name: "mrepl" });
     const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 
     commandObj.logToStderr(`${SEPARATOR}Execute ${color.yellow(
@@ -187,7 +182,6 @@ const ensureServiceConfig = async (
 type TomlModuleConfig = {
   name: string;
   load_from?: string;
-  max_heap_size?: string;
   logger_enabled?: boolean;
   logging_mask?: number;
   wasi?: {
@@ -201,15 +195,8 @@ const ensureModuleConfigsForToml = (
   moduleConfigs: Array<ModuleConfigReadonly>,
 ) => {
   return moduleConfigs.map((moduleConfig) => {
-    const {
-      name,
-      envs,
-      loggerEnabled,
-      volumes,
-      mountedBinaries,
-      maxHeapSize,
-      loggingMask,
-    } = moduleConfig;
+    const { name, envs, loggerEnabled, volumes, mountedBinaries, loggingMask } =
+      moduleConfig;
 
     const load_from = getModuleWasmPath(moduleConfig);
 
@@ -224,10 +211,6 @@ const ensureModuleConfigsForToml = (
 
     if (typeof loggingMask === "number") {
       tomlModuleConfig.logging_mask = loggingMask;
-    }
-
-    if (typeof maxHeapSize === "string") {
-      tomlModuleConfig.max_heap_size = maxHeapSize;
     }
 
     if (volumes !== undefined) {

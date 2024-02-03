@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { access, readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 // import { performance, PerformanceObserver } from "node:perf_hooks";
 
+import type { CompileFuncCallFromPathArgs } from "@fluencelabs/aqua-api";
 import type { js2aqua } from "@fluencelabs/js-client";
 import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
@@ -25,35 +26,33 @@ import type { JSONSchemaType } from "ajv";
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { validationErrorToString, ajv } from "../lib/ajvInstance.js";
+import {
+  resolveAquaConfig,
+  compileFunctionCall,
+  resolveCommonAquaCompilationFlags,
+} from "../lib/aqua.js";
+import type { ResolvedCommonAquaCompilationFlags } from "../lib/aqua.js";
 import { commandObj } from "../lib/commandObj.js";
 import {
-  AQUA_INPUT_PATH_PROPERTY,
   type FluenceConfig,
   type FluenceConfigReadonly,
 } from "../lib/configs/project/fluence.js";
 import {
+  COMPILE_AQUA_PROPERTY_NAME,
+  INPUT_FLAG_NAME,
   FS_OPTIONS,
-  KEY_PAIR_FLAG,
-  aquaLogLevelsString,
-  isAquaLogLevel,
-  AQUA_LOG_LEVELS,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CLIENT_FLAGS,
-  IMPORT_FLAG,
-  type AquaLogLevel,
-  type FromFlagsDef,
-  TRACING_FLAG,
+  COMMON_AQUA_COMPILATION_FLAGS,
+  type FluenceClientFlags,
+  FLUENCE_CONFIG_FULL_FILE_NAME,
+  INPUT_FLAG_EXPLANATION,
 } from "../lib/const.js";
-import { getAquaImports } from "../lib/helpers/aquaImports.js";
 import { jsonStringify, splitErrorsAndResults } from "../lib/helpers/utils.js";
 import { disconnectFluenceClient, initFluenceClient } from "../lib/jsClient.js";
 import { initCli } from "../lib/lifeCycle.js";
-import {
-  projectRootDir,
-  recursivelyFindProjectRootDir,
-  setProjectRootDir,
-} from "../lib/paths.js";
-import { input, list } from "../lib/prompt.js";
+import { projectRootDir } from "../lib/paths.js";
+import { input } from "../lib/prompt.js";
 
 // const perfObserver = new PerformanceObserver((items) => {
 //   items.getEntries().forEach((entry) => {
@@ -65,15 +64,12 @@ import { input, list } from "../lib/prompt.js";
 // performance.mark("whole-start");
 
 const FUNC_FLAG_NAME = "func";
-const INPUT_FLAG_NAME = "input";
 // const ON_FLAG_NAME = "on";
 const DATA_FLAG_NAME = "data";
-const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
-
 const FUNC_CALL_EXAMPLE = 'funcName("stringArg")';
 
 export default class Run extends BaseCommand<typeof Run> {
-  static override description = "Run aqua script";
+  static override description = `Run the first aqua function CLI is able to find and compile among all aqua files specified in '${COMPILE_AQUA_PROPERTY_NAME}' property of ${FLUENCE_CONFIG_FULL_FILE_NAME} file${INPUT_FLAG_EXPLANATION}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -87,73 +83,41 @@ export default class Run extends BaseCommand<typeof Run> {
         "Path to a JSON file in { [argumentName]: argumentValue } format. You can call a function using these argument names like this: -f 'myFunc(argumentName)'. Arguments in this flag can be overridden using --data flag",
       helpValue: "<path>",
     }),
-    ...IMPORT_FLAG,
-    [LOG_LEVEL_COMPILER_FLAG_NAME]: Flags.string({
-      description: `Set log level for the compiler. Must be one of: ${aquaLogLevelsString}`,
-      helpValue: "<level>",
-    }),
     quiet: Flags.boolean({
       default: false,
       description:
         "Print only execution result. Overrides all --log-level-* flags",
-    }),
-    const: Flags.string({
-      description:
-        'Constant that will be used in the aqua code that you run (example of aqua code: SOME_CONST ?= "default_value"). Constant name must be upper cased.',
-      helpValue: '<NAME="value">',
-      multiple: true,
     }),
     // TODO: DXJ-207
     // [ON_FLAG_NAME]: Flags.string({
     //   description: "PeerId of a peer where you want to run the function",
     //   helpValue: "<peer_id>",
     // }),
-    [INPUT_FLAG_NAME]: Flags.string({
-      description:
-        "Path to an aqua file or to a directory that contains aqua files",
-      helpValue: "<path>",
-      char: "i",
-    }),
     [FUNC_FLAG_NAME]: Flags.string({
       char: "f",
       description: `Function call. Example: ${FUNC_CALL_EXAMPLE}`,
       helpValue: "<function-call>",
     }),
-    "no-xor": Flags.boolean({
-      default: false,
-      description: "Do not generate a wrapper that catches and displays errors",
-    }),
-    "no-relay": Flags.boolean({
-      default: false,
-      description: "Do not generate a pass through the relay node",
-    }),
     "print-air": Flags.boolean({
       default: false,
-      description: "Prints generated AIR code before function execution",
+      description: "Prints generated AIR code instead of function execution",
       exclusive: ["print-beautified-air"],
     }),
     "print-beautified-air": Flags.boolean({
       default: false,
-      description: "Prints beautified AIR code before function execution",
+      description: "Prints beautified AIR code instead of function execution",
       char: "b",
       exclusive: ["print-air"],
     }),
     ...OFF_AQUA_LOGS_FLAG,
-    ...KEY_PAIR_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
-    ...TRACING_FLAG,
+    ...COMMON_AQUA_COMPILATION_FLAGS,
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
+    const { flags, maybeFluenceConfig: fluenceConfig } = await initCli(
       this,
       await this.parse(Run),
     );
-
-    if (typeof flags.input === "string") {
-      setProjectRootDir(
-        await recursivelyFindProjectRootDir(resolve(dirname(flags.input))),
-      );
-    }
 
     if (flags.quiet) {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -171,14 +135,13 @@ export default class Run extends BaseCommand<typeof Run> {
     //       : [...flags.const, onPeerConst];
     // }
 
-    const logLevelCompiler = await resolveAquaLogLevel({
-      maybeAquaLogLevel: flags["log-level-compiler"],
-      isQuite: flags.quiet,
-    });
-
-    const aquaFilePath = await ensureAquaPath({
+    const compileFuncCallArgs = await ensureCompileFuncCallArgs({
       aquaPathFromFlags: flags.input,
-      maybeFluenceConfig,
+      fluenceConfig,
+      aquaCompilationFlags: await resolveCommonAquaCompilationFlags(
+        flags,
+        fluenceConfig,
+      ),
     });
 
     const [funcCall, runData] = await Promise.all([
@@ -193,16 +156,13 @@ export default class Run extends BaseCommand<typeof Run> {
       getRunData(flags),
     ]);
 
-    const runArgs: RunArgs = {
+    const result = await fluenceRun({
       ...flags,
-      filePath: aquaFilePath,
+      compileFuncCallArgs,
       runData,
       funcCall,
-      logLevelCompiler,
-      maybeFluenceConfig,
-    };
-
-    const result = await fluenceRun(runArgs);
+      fluenceConfig,
+    });
 
     const stringResult =
       typeof result === "string" ? result : jsonStringify(result);
@@ -221,40 +181,49 @@ export default class Run extends BaseCommand<typeof Run> {
 
 type EnsureAquaPathArg = {
   aquaPathFromFlags: string | undefined;
-  maybeFluenceConfig: FluenceConfigReadonly | null;
+  fluenceConfig: FluenceConfigReadonly | null;
+  aquaCompilationFlags: ResolvedCommonAquaCompilationFlags;
 };
 
-const ensureAquaPath = async ({
+async function ensureCompileFuncCallArgs({
   aquaPathFromFlags,
-  maybeFluenceConfig,
-}: EnsureAquaPathArg): Promise<string> => {
+  fluenceConfig,
+  aquaCompilationFlags,
+}: EnsureAquaPathArg): Promise<
+  Omit<CompileFuncCallFromPathArgs, "funcCall">[]
+> {
   if (typeof aquaPathFromFlags === "string") {
-    return aquaPathFromFlags;
+    return [{ ...aquaCompilationFlags, filePath: resolve(aquaPathFromFlags) }];
   }
 
-  if (typeof maybeFluenceConfig?.aquaInputPath === "string") {
-    const aquaInputPath = resolve(
-      projectRootDir,
-      maybeFluenceConfig.aquaInputPath,
-    );
+  const { compileAqua } = fluenceConfig ?? {};
 
-    try {
-      await access(aquaInputPath);
-      return aquaInputPath;
-    } catch {
-      commandObj.warn(
-        `Invalid ${color.yellow(
-          `${AQUA_INPUT_PATH_PROPERTY}: ${aquaInputPath}`,
-        )} in ${color.yellow(maybeFluenceConfig.$getPath())}`,
+  if (compileAqua !== undefined) {
+    return Object.values(compileAqua).map((config) => {
+      const resolvedAquaConfig = resolveAquaConfig(
+        config,
+        aquaCompilationFlags.imports,
       );
-    }
+
+      return {
+        ...resolvedAquaConfig,
+        filePath: resolve(projectRootDir, resolvedAquaConfig.filePath),
+      };
+    });
   }
 
-  return input({
-    message: "Enter path to the input file or directory",
-    flagName: INPUT_FLAG_NAME,
-  });
-};
+  return [
+    {
+      ...aquaCompilationFlags,
+      filePath: resolve(
+        await input({
+          message: "Enter path to the input file",
+          flagName: INPUT_FLAG_NAME,
+        }),
+      ),
+    },
+  ];
+}
 
 type RunData = Record<string, Parameters<typeof js2aqua>[0]>;
 
@@ -326,79 +295,106 @@ const getRunData = async (flags: {
   return dataString === "{}" ? undefined : runData;
 };
 
-type ResolveAquaLogLevelArgs = {
-  maybeAquaLogLevel: string | undefined;
-  isQuite: boolean;
-};
+type RunArgs = {
+  fluenceConfig: FluenceConfig | null;
+  compileFuncCallArgs: Omit<CompileFuncCallFromPathArgs, "funcCall">[];
+  funcCall: string;
+  runData: RunData | undefined;
+  "print-air": boolean;
+  "print-beautified-air": boolean;
+} & FluenceClientFlags;
 
-const resolveAquaLogLevel = async ({
-  maybeAquaLogLevel,
-  isQuite,
-}: ResolveAquaLogLevelArgs): Promise<AquaLogLevel | undefined> => {
-  if (isQuite) {
-    return "off";
-  }
-
-  if (maybeAquaLogLevel === undefined) {
-    return undefined;
-  }
-
-  if (isAquaLogLevel(maybeAquaLogLevel)) {
-    return maybeAquaLogLevel;
-  }
-
-  commandObj.warn(
-    `Invalid --${LOG_LEVEL_COMPILER_FLAG_NAME} flag value: ${maybeAquaLogLevel}. Must be one of: ${aquaLogLevelsString}`,
+async function fluenceRun(args: RunArgs) {
+  const compilationResults = await Promise.all(
+    args.compileFuncCallArgs.map((compileFunctionCallArgs) => {
+      return compileFunctionCall({
+        ...compileFunctionCallArgs,
+        data: args.runData,
+        funcCall: args.funcCall,
+      });
+    }),
   );
 
-  return list({
-    message: "Select a valid compiler log level",
-    oneChoiceMessage() {
-      throw new Error("Unreachable");
+  const [firstSuccessfulCompilationResult] = compilationResults.flatMap(
+    ([, successfulCompilationResults]) => {
+      return successfulCompilationResults;
     },
-    onNoChoices() {
-      throw new Error("Unreachable");
-    },
-    options: [...AQUA_LOG_LEVELS],
-  });
-};
+  );
 
-type RunArgs = FromFlagsDef<(typeof Run)["flags"]> & {
-  maybeFluenceConfig: FluenceConfig | null;
-  funcCall: string;
-  filePath: string;
-  import: string[] | undefined;
-  logLevelCompiler: AquaLogLevel | undefined;
-  runData: RunData | undefined;
-};
+  if (firstSuccessfulCompilationResult === undefined) {
+    const functionNotFoundPaths: string[] = [];
 
-const fluenceRun = async (args: RunArgs) => {
-  const { compileAquaCallFromPath } = await import("@fluencelabs/aqua-api");
+    const errors = compilationResults
+      .flatMap(([err]) => {
+        return err;
+      })
+      // extract function not found errors
+      .map(({ aquaFilePath, compilationResult }) => {
+        const [functionNotFound, restErrors] = splitErrorsAndResults(
+          compilationResult.errors,
+          (error) => {
+            if (
+              error.startsWith("There is no function") &&
+              error.includes("or it is not exported")
+            ) {
+              return { error: aquaFilePath };
+            }
 
-  const { functionCall, errors } = await compileAquaCallFromPath({
-    funcCall: args.funcCall,
-    data: args.runData,
-    filePath: args.filePath,
-    imports: await getAquaImports({
-      aquaImportsFromFlags: args.import,
-      maybeFluenceConfig: args.maybeFluenceConfig,
-    }),
-    constants: formatConstants(args.const),
-    logLevel: args.logLevelCompiler,
-    noXor: args["no-xor"],
-    noRelay: args["no-relay"],
-    tracing: args.tracing,
-  });
+            return { result: error };
+          },
+        );
 
-  if (errors.length > 0) {
-    commandObj.error(errors.join("\n"));
+        functionNotFoundPaths.push(...functionNotFound);
+
+        return {
+          aquaFilePath,
+          errors: restErrors,
+        };
+      })
+      .filter(({ errors }) => {
+        return errors.length !== 0;
+      })
+      .map(({ aquaFilePath, errors }) => {
+        return `${color.yellow(aquaFilePath)}\n\n${errors.join("\n")}`;
+      });
+
+    const functionName = args.funcCall.split("(")[0];
+
+    const functionNotFoundErrorText =
+      functionNotFoundPaths.length === 0
+        ? ""
+        : `\n\nChecked the following files and function ${color.yellow(
+            functionName,
+          )} is not exported from them:\n\n${color.yellow(
+            functionNotFoundPaths.join("\n"),
+          )}`;
+
+    const restErrorsText =
+      errors.length === 0
+        ? ""
+        : `\n\nFound some errors when trying to compile:\n\n${color.yellow(
+            errors.join("\n\n"),
+          )}`;
+
+    commandObj.error(
+      `Can't find function ${color.yellow(
+        functionName,
+      )}${functionNotFoundErrorText}${restErrorsText}`,
+    );
   }
+
+  const functionCall =
+    firstSuccessfulCompilationResult.compilationResult.functionCall;
 
   if (args["print-air"]) {
     commandObj.log(functionCall.script);
-  } else if (args["print-beautified-air"]) {
+    return;
+  }
+
+  if (args["print-beautified-air"]) {
     const { beautify } = await import("@fluencelabs/air-beautify-wasm");
     commandObj.log(beautify(functionCall.script));
+    return;
   }
 
   const { Fluence, callAquaFunction, js2aqua, aqua2js } = await import(
@@ -484,10 +480,16 @@ const fluenceRun = async (args: RunArgs) => {
     commandObj.error(runDataErrors.join("\n"));
   }
 
-  await initFluenceClient(args, args.maybeFluenceConfig);
+  await initFluenceClient(args, args.fluenceConfig);
 
   const { codomain } = functionCall.funcDef.arrow;
   const returnTypeVoid = codomain.tag === "nil" || codomain.items.length === 0;
+
+  commandObj.logToStderr(
+    `Running ${color.yellow(args.funcCall)} from ${color.yellow(
+      firstSuccessfulCompilationResult.aquaFilePath,
+    )}\n`,
+  );
 
   const result = await callAquaFunction({
     script: functionCall.script,
@@ -504,17 +506,4 @@ const fluenceRun = async (args: RunArgs) => {
       : undefined) ?? schema.arrow.codomain;
 
   return aqua2js(result, returnSchema);
-};
-
-function formatConstants(
-  constants: string[] | undefined,
-): string[] | undefined {
-  return (constants ?? []).map((c) => {
-    return c
-      .split("=")
-      .map((s) => {
-        return s.trim();
-      })
-      .join(" = ");
-  });
 }

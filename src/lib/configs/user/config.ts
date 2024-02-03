@@ -51,10 +51,6 @@ type ConfigV0 = {
   version: 0;
   countlyConsent: boolean;
   docsInConfigs?: boolean;
-  dependencies?: {
-    npm?: Record<string, string>;
-    cargo?: Record<string, string>;
-  };
   lastCheckForUpdates?: string;
 };
 
@@ -65,44 +61,6 @@ const configSchemaV0Obj = {
     countlyConsent: {
       type: "boolean",
       description: "Weather you consent to send usage data to Countly",
-    },
-    dependencies: {
-      type: "object",
-      additionalProperties: false,
-      description:
-        "DEPRECATED: You can install dependencies only per-project. (For advanced users) Global overrides of dependencies",
-      properties: {
-        npm: {
-          type: "object",
-          description:
-            "DEPRECATED: You can install dependencies only per-project. Overrides of npm dependencies",
-          additionalProperties: { type: "string" },
-          properties: {
-            npm_dependency_name: {
-              type: "string",
-              description: "npm dependency version",
-            },
-          },
-          nullable: true,
-          required: [],
-        },
-        cargo: {
-          type: "object",
-          description:
-            "DEPRECATED: You can install dependencies only per-project. Overrides of cargo dependencies",
-          additionalProperties: { type: "string" },
-          properties: {
-            Cargo_dependency_name: {
-              type: "string",
-              description: "cargo dependency version",
-            },
-          },
-          nullable: true,
-          required: [],
-        },
-      },
-      nullable: true,
-      required: [],
     },
     lastCheckForUpdates: {
       type: "string",
