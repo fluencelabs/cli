@@ -90,7 +90,7 @@ export async function dealCreate({
       prefixes: bytesCid.slice(0, 4),
       hash: bytesCid.slice(4),
     },
-    usdc.getAddress(),
+    await usdc.getAddress(),
     minWorkers,
     targetWorkers,
     maxWorkersPerProvider,

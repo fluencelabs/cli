@@ -25,6 +25,7 @@ import {
   DEFAULT_INITIAL_BALANCE,
 } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Create extends BaseCommand<typeof Create> {
@@ -60,10 +61,8 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Initial balance",
       required: false,
     }),
-    effector: Flags.string({
-      description: "Effector to be used in the deal",
-      multiple: true,
-      required: true,
+    effectors: Flags.string({
+      description: "Comma-separated list of effector to be used in the deal",
     }),
     ...ENV_FLAG,
     ...PRIV_KEY_FLAG,
@@ -78,7 +77,8 @@ export default class Create extends BaseCommand<typeof Create> {
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],
       pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
-      effectors: flags.effector,
+      effectors:
+        flags.effectors === undefined ? [] : commaSepStrToArr(flags.effectors),
       initialBalance:
         flags["initial-balance"] === undefined
           ? DEFAULT_INITIAL_BALANCE

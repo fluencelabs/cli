@@ -39,8 +39,8 @@ import {
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
   ENV_FLAG_NAME,
-  PRICE_PER_EPOCH_DEFAULT,
   DEFAULT_INITIAL_BALANCE,
+  PRICE_PER_EPOCH_DEFAULT,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -143,9 +143,9 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       const {
         targetWorkers = TARGET_WORKERS_DEFAULT,
         minWorkers = targetWorkers,
+        effectors = [],
         pricePerWorkerEpoch = PRICE_PER_EPOCH_DEFAULT,
         maxWorkersPerProvider = targetWorkers,
-        effectors = [],
       } = deal;
 
       const previouslyDeployedDeal =
