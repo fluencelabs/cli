@@ -22,7 +22,6 @@ import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
-  KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -46,7 +45,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...FLUENCE_CLIENT_FLAGS,

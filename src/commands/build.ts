@@ -16,6 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { commandObj } from "../lib/commandObj.js";
+import { compileAquaFromFluenceConfig } from "../lib/compileAquaAndWatch.js";
 import { initNewWorkersConfigReadonly } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -25,6 +26,7 @@ import {
   ENV_FLAG_NAME,
 } from "../lib/const.js";
 import { prepareForDeploy } from "../lib/deployWorkers.js";
+import { getAquaImports } from "../lib/helpers/aquaImports.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { resolveFluenceEnv } from "../lib/resolveFluenceEnv.js";
 
@@ -45,6 +47,14 @@ export default class Build extends BaseCommand<typeof Build> {
     );
 
     const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+
+    await compileAquaFromFluenceConfig({
+      fluenceConfig,
+      imports: await getAquaImports({
+        aquaImportsFromFlags: flags.import,
+        fluenceConfig,
+      }),
+    });
 
     await prepareForDeploy({
       flags: {

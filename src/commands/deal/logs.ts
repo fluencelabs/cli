@@ -23,7 +23,6 @@ import type { Get_logs_dealParams } from "../../lib/compiled-aqua/installation-s
 import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import {
   WORKER_SPELL,
-  KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
@@ -56,7 +55,6 @@ export default class Logs extends BaseCommand<typeof Logs> {
   static override flags = {
     ...baseFlags,
     ...FLUENCE_CLIENT_FLAGS,
-    ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...TRACING_FLAG,

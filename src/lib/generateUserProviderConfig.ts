@@ -17,6 +17,7 @@
 import { color } from "@oclif/color";
 
 import { isInteractive } from "./commandObj.js";
+import { envConfig } from "./configs/globalConfigs.js";
 import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
 import {
   defaultNumberProperties,
@@ -64,7 +65,7 @@ export async function addComputePeers(
 ) {
   let computePeersCounter = 0;
   let isAddingMoreComputePeers = true;
-  const isLocal = userProvidedConfig.env === "local";
+  const isLocal = envConfig?.fluenceEnv === "local";
   const validateCCDuration = await ccDurationValidator(isLocal);
   const minDuration = await getMinCCDuration(isLocal);
 

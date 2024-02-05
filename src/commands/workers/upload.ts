@@ -20,7 +20,6 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
-  KEY_PAIR_FLAG,
   PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -46,7 +45,6 @@ export default class Upload extends BaseCommand<typeof Upload> {
   static override flags = {
     ...baseFlags,
     ...FLUENCE_CLIENT_FLAGS,
-    ...KEY_PAIR_FLAG,
     ...OFF_AQUA_LOGS_FLAG,
     ...PRIV_KEY_FLAG,
     ...IMPORT_FLAG,

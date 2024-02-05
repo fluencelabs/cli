@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import assert from "node:assert";
 import { join } from "node:path";
 import { isAbsolute, resolve } from "path/posix";
@@ -361,11 +361,10 @@ export async function updateRelaysJSON({
   }
 
   await Promise.all(
-    relativePaths.map((relativePath) => {
-      return writeFile(
-        join(resolve(projectRootDir, relativePath), "relays.json"),
-        jsonStringify(relays),
-      );
+    relativePaths.map(async (relativePath) => {
+      const relaysDir = resolve(projectRootDir, relativePath);
+      await mkdir(relaysDir, { recursive: true });
+      return writeFile(join(relaysDir, "relays.json"), jsonStringify(relays));
     }),
   );
 }

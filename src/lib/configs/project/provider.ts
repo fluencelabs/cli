@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
@@ -27,6 +28,7 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
+import { LOCAL_NET_WALLET_KEYS } from "../../accounts.js";
 import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
@@ -50,7 +52,6 @@ import {
   DEFAULT_CC_DURATION,
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
-  type ContractsENV,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
   CLI_NAME,
 } from "../../const.js";
@@ -60,6 +61,7 @@ import {
   addOffers,
   addComputePeers,
 } from "../../generateUserProviderConfig.js";
+import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
 import {
   commaSepStrToArr,
@@ -78,6 +80,7 @@ import {
   ensureFluenceSecretsFilePath,
 } from "../../paths.js";
 import { type Choices, list } from "../../prompt.js";
+import { envConfig, setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
   type InitializedConfig,
@@ -86,7 +89,9 @@ import {
   type ConfigValidateFunction,
 } from "../initConfig.js";
 
+import { initNewEnvConfig } from "./env.js";
 import { initNewProviderSecretsConfig } from "./providerSecrets.js";
+import { type ProviderSecretesConfigReadonly } from "./providerSecrets.js";
 
 export type CapacityCommitment = {
   duration: string;
@@ -281,7 +286,6 @@ type ConfigV0 = {
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   capacityCommitments?: Record<string, CapacityCommitment>;
-  env?: string;
   nox?: NoxConfigYAML;
   version: 0;
 };
@@ -331,12 +335,6 @@ const configSchemaV0 = {
       description: "Provider name",
       type: "string",
     },
-    env: {
-      description:
-        "DEPRECATED: for simplicity, your project env determines chain environment that is used both for provider and for fluence application developer. To set your project env, use `fluence default env` command.",
-      type: "string",
-      nullable: true,
-    },
     offers: {
       description: "A map with offer names as keys and offers as values",
       type: "object",
@@ -382,13 +380,15 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
 
     const env = await ensureChainNetwork(args.env);
 
+    setEnvConfig(await initNewEnvConfig(await ensureValidContractsEnv(env)));
+
     const userProvidedConfig: UserProvidedConfig = {
       providerName: "defaultProvider",
       computePeers: {},
       offers: {},
     };
 
-    if (env === "local") {
+    if (envConfig?.fluenceEnv === "local") {
       userProvidedConfig.computePeers = Object.fromEntries(
         times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
           return [
@@ -549,6 +549,10 @@ export async function initNewReadonlyProviderConfig(args: ProviderConfigArgs) {
   )();
 }
 
+export function initReadonlyProviderConfig(args: ProviderConfigArgs) {
+  return getReadonlyConfigInitFunction(getInitConfigOptions(args))();
+}
+
 export async function ensureReadonlyProviderConfig(args: ProviderConfigArgs) {
   const providerConfig = await getReadonlyConfigInitFunction(
     getInitConfigOptions(args),
@@ -566,6 +570,96 @@ export async function ensureReadonlyProviderConfig(args: ProviderConfigArgs) {
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+
+export async function ensureConfigToml(
+  providerConfig: ProviderConfigReadonly,
+  providerSecretsConfig?: ProviderSecretesConfigReadonly | null,
+) {
+  const { rawConfig: providerRawNoxConfig, ...providerNoxConfig } =
+    providerConfig.nox ?? {};
+
+  const baseNoxConfig = mergeNoxConfigYAML(
+    await getDefaultNoxConfigYAML(),
+    providerNoxConfig,
+  );
+
+  const configsDir = await ensureFluenceConfigsDir();
+  const { stringify } = await import("@iarna/toml");
+
+  const computePeers = Object.entries(providerConfig.computePeers);
+
+  const parsedProviderRawConfig =
+    providerRawNoxConfig === undefined
+      ? undefined
+      : parse(providerRawNoxConfig);
+
+  await Promise.all(
+    computePeers.map(async ([computePeerName, computePeerConfig], i) => {
+      const { rawConfig: computePeerRawNoxConfig, ...computePeerNoxConfig } =
+        computePeerConfig.nox ?? {};
+
+      let overriddenNoxConfig = mergeNoxConfigYAML(
+        baseNoxConfig,
+        computePeerNoxConfig,
+      );
+
+      if (overriddenNoxConfig.tcpPort === undefined) {
+        overriddenNoxConfig.tcpPort = TCP_PORT_START + i;
+      }
+
+      if (overriddenNoxConfig.websocketPort === undefined) {
+        overriddenNoxConfig.websocketPort = WEB_SOCKET_PORT_START + i;
+      }
+
+      if (overriddenNoxConfig.httpPort === undefined) {
+        overriddenNoxConfig.httpPort = HTTP_PORT_START + i;
+      }
+
+      if (
+        overriddenNoxConfig.systemServices?.decider?.walletKey === undefined
+      ) {
+        const walletKey =
+          providerSecretsConfig?.noxes[computePeerName]?.signingWallet ??
+          LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length];
+
+        assert(walletKey !== undefined, "Unreachable");
+
+        overriddenNoxConfig.systemServices = {
+          ...overriddenNoxConfig.systemServices,
+          decider: {
+            ...overriddenNoxConfig.systemServices?.decider,
+            walletKey,
+          },
+        };
+      }
+
+      if (parsedProviderRawConfig !== undefined) {
+        overriddenNoxConfig = mergeNoxConfigYAML(
+          overriddenNoxConfig,
+          parsedProviderRawConfig,
+        );
+      }
+
+      const parsedComputePeerRawConfig =
+        computePeerRawNoxConfig === undefined
+          ? undefined
+          : parse(computePeerRawNoxConfig);
+
+      if (parsedComputePeerRawConfig !== undefined) {
+        overriddenNoxConfig = mergeNoxConfigYAML(
+          overriddenNoxConfig,
+          parsedComputePeerRawConfig,
+        );
+      }
+
+      return writeFile(
+        join(configsDir, getConfigTomlName(computePeerName)),
+        stringify(configYAMLToConfigToml(overriddenNoxConfig)),
+        FS_OPTIONS,
+      );
+    }),
+  );
+}
 
 function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
   return mergeWith(cloneDeep(a), b, (objValue, srcValue) => {
@@ -603,8 +697,9 @@ function camelCaseKeysToSnakeCase(val: unknown): unknown {
   return val;
 }
 
-function getDefaultNoxConfigYAML(env: ContractsENV): NoxConfigYAML {
-  const isLocal = env === "local";
+async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
+  const isLocal = envConfig?.fluenceEnv === "local";
+  const env = await ensureValidContractsEnv(envConfig?.fluenceEnv);
   const dealConfig = DEAL_CONFIG[env];
 
   return mergeNoxConfigYAML(commonNoxConfig, {
@@ -676,10 +771,8 @@ export async function ensureComputerPeerConfigs(args: ProviderConfigArgs) {
   const { rawConfig: providerRawNoxConfig, ...providerNoxConfig } =
     providerConfig.nox ?? {};
 
-  const env = await ensureChainNetwork(args.env);
-
   const baseNoxConfig = mergeNoxConfigYAML(
-    getDefaultNoxConfigYAML(env),
+    await getDefaultNoxConfigYAML(),
     providerNoxConfig,
   );
 

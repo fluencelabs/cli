@@ -20,7 +20,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   initNewReadonlyProviderConfig,
-  ensureComputerPeerConfigs,
+  initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
 import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -35,8 +35,18 @@ export default class Init extends BaseCommand<typeof Init> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
-    const providerConfig = await initNewReadonlyProviderConfig(flags);
-    await ensureComputerPeerConfigs(flags);
+
+    let providerConfig = await initReadonlyProviderConfig(flags);
+
+    if (providerConfig !== null) {
+      return commandObj.error(
+        `Provider config already exists at ${color.yellow(
+          providerConfig.$getPath(),
+        )}. If you want to init a new provider config, please do it in another directory`,
+      );
+    }
+
+    providerConfig = await initNewReadonlyProviderConfig(flags);
 
     commandObj.logToStderr(
       `Provider config is at ${color.yellow(providerConfig.$getPath())}`,

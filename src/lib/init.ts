@@ -59,6 +59,7 @@ import {
   getGatewaySrcPath,
   getGatewayTsConfigPath,
   getGatewayPath,
+  ensureAquaDir,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -71,7 +72,10 @@ import { initNewEnvConfig } from "./configs/project/env.js";
 import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
-import { SERVICE_INTERFACE_FILE_HEADER } from "./const.js";
+import {
+  COMPILE_AQUA_PROPERTY_NAME,
+  SERVICE_INTERFACE_FILE_HEADER,
+} from "./const.js";
 import { addCountlyEvent } from "./countly.js";
 import { generateNewModule } from "./generateNewModule.js";
 import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
@@ -200,8 +204,21 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   await writeFile(getREADMEPath(), READMEs[template], FS_OPTIONS);
 
   switch (template) {
-    case "minimal":
+    case "minimal": {
+      const aquaDir = await ensureAquaDir();
+
+      fluenceConfig[COMPILE_AQUA_PROPERTY_NAME] = {
+        ...fluenceConfig[COMPILE_AQUA_PROPERTY_NAME],
+        default: {
+          input: relative(projectRootDir, aquaDir),
+          output: join("src", "compiled-aqua"),
+          target: "ts",
+        },
+      };
+
+      await fluenceConfig.$commit();
       break;
+    }
 
     case "quickstart": {
       await quickstart();
@@ -287,19 +304,21 @@ async function initTSorJSProject({
   const indexFilePath = getFrontendIndexTSorJSPath(isJS);
   const packageJSONPath = getFrontendPackageJSONPath();
   const frontendSrcPath = getFrontendSrcPath();
+  const aquaDir = await ensureAquaDir();
 
   addRelayPathEntryToConfig(
     fluenceConfig,
     relative(projectRootDir, frontendSrcPath),
   );
 
-  const relativeFrontendCompiledAquaPath = relative(
-    projectRootDir,
-    frontendCompiledAquaPath,
-  );
-
-  fluenceConfig[isJS ? "aquaOutputJSPath" : "aquaOutputTSPath"] =
-    relativeFrontendCompiledAquaPath;
+  fluenceConfig[COMPILE_AQUA_PROPERTY_NAME] = {
+    ...fluenceConfig[COMPILE_AQUA_PROPERTY_NAME],
+    frontend: {
+      input: relative(projectRootDir, aquaDir),
+      output: relative(projectRootDir, frontendCompiledAquaPath),
+      target: isJS ? "js" : "ts",
+    },
+  };
 
   await Promise.all([
     fluenceConfig.$commit(),
@@ -317,14 +336,11 @@ async function initTSorJSProject({
           FRONTEND_TS_CONFIG_CONTENT,
           FS_OPTIONS,
         ),
-
     compileToFiles({
-      compileArgs: {
-        filePath: await ensureAquaMainPath(),
-        imports: await getAquaImports({
-          maybeFluenceConfig: fluenceConfig,
-        }),
-      },
+      filePath: aquaDir,
+      imports: await getAquaImports({
+        fluenceConfig: fluenceConfig,
+      }),
       targetType: isJS ? "js" : "ts",
       outputPath: frontendCompiledAquaPath,
     }),
@@ -345,11 +361,21 @@ async function initTSorJSGatewayProject({
   const packageJSONPath = getGatewayPackageJSONPath();
   const gatewaySrcPath = getGatewaySrcPath();
   const gatewayReadmePath = join(getGatewayPath(), README_MD_FILE_NAME);
+  const aquaDir = await ensureAquaDir();
 
   addRelayPathEntryToConfig(
     fluenceConfig,
     relative(projectRootDir, gatewaySrcPath),
   );
+
+  fluenceConfig[COMPILE_AQUA_PROPERTY_NAME] = {
+    ...fluenceConfig[COMPILE_AQUA_PROPERTY_NAME],
+    gateway: {
+      input: relative(projectRootDir, aquaDir),
+      output: relative(projectRootDir, gatewayCompiledAquaPath),
+      target: isJS ? "js" : "ts",
+    },
+  };
 
   await Promise.all([
     fluenceConfig.$commit(),
@@ -367,14 +393,9 @@ async function initTSorJSGatewayProject({
           GATEWAY_TS_CONFIG_CONTENT,
           FS_OPTIONS,
         ),
-
     compileToFiles({
-      compileArgs: {
-        filePath: await ensureAquaMainPath(),
-        imports: await getAquaImports({
-          maybeFluenceConfig: fluenceConfig,
-        }),
-      },
+      filePath: aquaDir,
+      imports: await getAquaImports({ fluenceConfig }),
       targetType: isJS ? "js" : "ts",
       outputPath: gatewayCompiledAquaPath,
     }),
