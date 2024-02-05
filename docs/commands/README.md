@@ -537,7 +537,7 @@ _See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence default env [ENV]`
 
-Switch default Fluence Environment used in the current Fluence project
+Switch default Fluence Environment
 
 ```
 USAGE
@@ -550,7 +550,7 @@ FLAGS
   --no-input  Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Switch default Fluence Environment used in the current Fluence project
+  Switch default Fluence Environment
 
 EXAMPLES
   $ fluence default env

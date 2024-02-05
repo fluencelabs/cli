@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { rm } from "fs/promises";
-
 import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -26,7 +24,6 @@ import {
 } from "../../lib/configs/project/provider.js";
 import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { confirm } from "../../lib/prompt.js";
 
 export default class Init extends BaseCommand<typeof Init> {
   static override description = "Init provider config. Creates a config file";
@@ -42,22 +39,11 @@ export default class Init extends BaseCommand<typeof Init> {
     let providerConfig = await initReadonlyProviderConfig();
 
     if (providerConfig !== null) {
-      const isOverwriting = await confirm({
-        message: `Provider config already exists at ${color.yellow(
+      return commandObj.error(
+        `Provider config already exists at ${color.yellow(
           providerConfig.$getPath(),
-        )}. Do you want to overwrite it?`,
-        default: false,
-      });
-
-      if (!isOverwriting) {
-        return commandObj.error(
-          `Provider config already exists at ${color.yellow(
-            providerConfig.$getPath(),
-          )}. Aborting.`,
-        );
-      }
-
-      await rm(providerConfig.$getPath(), { force: true });
+        )}. If you want to init a new provider config, please do it in another directory`,
+      );
     }
 
     providerConfig = await initNewReadonlyProviderConfig(flags);
