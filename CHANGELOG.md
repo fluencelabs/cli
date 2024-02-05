@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.14.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.0...fluence-cli-v0.14.1) (2024-02-05)
+
+
+### Features
+
+* add default env for provider ([#744](https://github.com/fluencelabs/cli/issues/744)) ([cbf69fc](https://github.com/fluencelabs/cli/commit/cbf69fc0478f27731817f1bb951e3a5357ad222a))
+* support multiple aqua configs [fixes DXJ-641] ([#743](https://github.com/fluencelabs/cli/issues/743)) ([f7213f8](https://github.com/fluencelabs/cli/commit/f7213f893e11dc0df8328740ff8fcc746157c249))
+* update aqua to 0.14.0 ([#739](https://github.com/fluencelabs/cli/issues/739)) ([7f81e7e](https://github.com/fluencelabs/cli/commit/7f81e7eecf57f04c3126dee66456a81c160640bb))
+* use npm-aqua-compiler 0.0.3 ([#741](https://github.com/fluencelabs/cli/issues/741)) ([c2ee892](https://github.com/fluencelabs/cli/commit/c2ee89282c3ac762459af3c123997945778109d7))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/js-client to v0.8.0 ([#742](https://github.com/fluencelabs/cli/issues/742)) ([deeb9ca](https://github.com/fluencelabs/cli/commit/deeb9caf61f6364976f3e370c854f8d1a86323ac))
+* Improve gateway template readme content  ([#746](https://github.com/fluencelabs/cli/issues/746)) ([671dab8](https://github.com/fluencelabs/cli/commit/671dab83286cd8a2e5222ec86e25a326eeca9ad2))
+* **test:** Add `aqua` header to spell file ([#737](https://github.com/fluencelabs/cli/issues/737)) ([8c23c19](https://github.com/fluencelabs/cli/commit/8c23c19b24c83c75ee77af9d44b046113e102d88))
+
 ## [0.14.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.5...fluence-cli-v0.14.0) (2024-01-26)
 
 
