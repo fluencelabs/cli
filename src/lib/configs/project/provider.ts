@@ -32,12 +32,10 @@ import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
   DEFAULT_OFFER_NAME,
-  type ContractsENV,
   PROVIDER_CONFIG_FILE_NAME,
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   DEFAULT_AQUAVM_POOL_SIZE,
-  CONTRACTS_ENV,
   FS_OPTIONS,
   HTTP_PORT_START,
   TCP_PORT_START,
@@ -67,6 +65,7 @@ import {
   getFluenceDir,
   ensureFluenceSecretsFilePath,
 } from "../../paths.js";
+import { envConfig, setEnvConfig } from "../globalConfigs.js";
 import {
   getConfigInitFunction,
   getReadonlyConfigInitFunction,
@@ -76,6 +75,7 @@ import {
   type ConfigValidateFunction,
 } from "../initConfig.js";
 
+import { initNewEnvConfig } from "./env.js";
 import {
   type ProviderSecretesConfigReadonly,
   initNewReadonlyProviderSecretsConfig,
@@ -239,7 +239,6 @@ type ComputePeer = {
 };
 
 type ConfigV0 = {
-  env: ContractsENV;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
   nox?: NoxConfigYAML;
@@ -296,12 +295,6 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   additionalProperties: false,
   properties: {
-    env: {
-      description:
-        "Defines the the environment for which you intend to generate nox configuration",
-      type: "string",
-      enum: CONTRACTS_ENV,
-    },
     offers: {
       description: "A map with offer names as keys and offers as values",
       type: "object",
@@ -324,7 +317,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
     nox: noxConfigYAMLSchema,
     version: { type: "number", const: 0, description: "Config version" },
   },
-  required: ["version", "computePeers", "offers", "env"],
+  required: ["version", "computePeers", "offers"],
 };
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
@@ -334,13 +327,16 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
     commandObj.logToStderr("Creating new provider config\n");
     const { yamlDiffPatch } = await import("yaml-diff-patch");
 
+    setEnvConfig(
+      await initNewEnvConfig(await ensureValidContractsEnv(args.env)),
+    );
+
     const userProvidedConfig: UserProvidedConfig = {
-      env: await ensureValidContractsEnv(args.env),
       computePeers: {},
       offers: {},
     };
 
-    if (userProvidedConfig.env === "local") {
+    if (envConfig?.fluenceEnv === "local") {
       userProvidedConfig.computePeers = Object.fromEntries(
         times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
           return [
@@ -542,7 +538,7 @@ export async function ensureConfigToml(
     providerConfig.nox ?? {};
 
   const baseNoxConfig = mergeNoxConfigYAML(
-    await getDefaultNoxConfigYAML(providerConfig),
+    await getDefaultNoxConfigYAML(),
     providerNoxConfig,
   );
 
@@ -660,11 +656,9 @@ function camelCaseKeysToSnakeCase(val: unknown): unknown {
   return val;
 }
 
-async function getDefaultNoxConfigYAML(
-  providerConfig: ProviderConfigReadonly,
-): Promise<NoxConfigYAML> {
-  const isLocal = providerConfig.env === "local";
-  const contractsEnv = providerConfig.env;
+async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
+  const isLocal = envConfig?.fluenceEnv === "local";
+  const contractsEnv = await ensureValidContractsEnv(envConfig?.fluenceEnv);
 
   const { DEAL_CONFIG } = await import(
     "@fluencelabs/deal-aurora/dist/client/config.js"
