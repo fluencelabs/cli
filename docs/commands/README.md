@@ -307,13 +307,13 @@ Create your deal with the specified parameters
 ```
 USAGE
   $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
-    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> --effector <value> [--no-input]
-    [--initial-balance <value>] [--env <value>] [--priv-key <value>]
+    <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [--initial-balance <value>]
+    [--effectors <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --app-cid=<value>                                (required) CID of the application that will be deployed
   --collateral-per-worker=<value>                  (required) Collateral per worker
-  --effector=<value>...                            (required) Effector to be used in the deal
+  --effectors=<value>                              Comma-separated list of effector to be used in the deal
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --initial-balance=<value>                        Initial balance
   --max-workers-per-provider=<value>               (required) Max workers per provider
