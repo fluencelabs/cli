@@ -20,6 +20,9 @@
 * [`fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-withdraw-deal-address-amount)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
+* [`fluence delegator add-collateral [IDS]`](#fluence-delegator-add-collateral-ids)
+* [`fluence delegator withdraw-collateral [IDS]`](#fluence-delegator-withdraw-collateral-ids)
+* [`fluence delegator withdraw-reward [IDS]`](#fluence-delegator-withdraw-reward-ids)
 * [`fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`](#fluence-dep-install-package-name--package-nameversion)
 * [`fluence dep reset`](#fluence-dep-reset)
 * [`fluence dep uninstall PACKAGE-NAME`](#fluence-dep-uninstall-package-name)
@@ -615,6 +618,90 @@ EXAMPLES
 ```
 
 _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/default/peers.ts)_
+
+## `fluence delegator add-collateral [IDS]`
+
+Add collateral to capacity commitment
+
+```
+USAGE
+  $ fluence delegator add-collateral [IDS] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  IDS  Comma separated capacity commitment IDs
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   will be used by default
+
+DESCRIPTION
+  Add collateral to capacity commitment
+
+ALIASES
+  $ fluence delegator ac
+```
+
+_See code: [src/commands/delegator/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/delegator/add-collateral.ts)_
+
+## `fluence delegator withdraw-collateral [IDS]`
+
+Withdraw collateral from capacity commitment
+
+```
+USAGE
+  $ fluence delegator withdraw-collateral [IDS] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  IDS  Comma separated capacity commitment IDs
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   will be used by default
+
+DESCRIPTION
+  Withdraw collateral from capacity commitment
+
+ALIASES
+  $ fluence delegator wc
+```
+
+_See code: [src/commands/delegator/withdraw-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/delegator/withdraw-collateral.ts)_
+
+## `fluence delegator withdraw-reward [IDS]`
+
+Withdraw reward from capacity commitment
+
+```
+USAGE
+  $ fluence delegator withdraw-reward [IDS] [--no-input] [--priv-key <value>] [--env <value>]
+
+ARGUMENTS
+  IDS  Comma separated capacity commitment IDs
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   will be used by default
+
+DESCRIPTION
+  Withdraw reward from capacity commitment
+
+ALIASES
+  $ fluence delegator wr
+```
+
+_See code: [src/commands/delegator/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/delegator/withdraw-reward.ts)_
 
 ## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
