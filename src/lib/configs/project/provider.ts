@@ -55,6 +55,7 @@ import {
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
   CLI_NAME,
 } from "../../const.js";
+import { getReadonlyDealClient } from "../../dealClient.js";
 import { ensureChainNetwork } from "../../ensureChainNetwork.js";
 import {
   type ProviderConfigArgs,
@@ -701,6 +702,9 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
   const isLocal = envConfig?.fluenceEnv === "local";
   const env = await ensureValidContractsEnv(envConfig?.fluenceEnv);
   const dealConfig = DEAL_CONFIG[env];
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const market = await readonlyDealClient.getMarket();
+  const matcherAddress = await market.getAddress();
 
   return mergeNoxConfigYAML(commonNoxConfig, {
     systemServices: {
@@ -723,8 +727,7 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
           : "http://mumbai-polygon.ru:8545",
         networkId: dealConfig.id,
         startBlock: "earliest",
-        // TODO: use correct addr for env
-        matcherAddress: "0xc5a5C42992dECbae36851359345FE25997F5C42d",
+        matcherAddress,
       },
     },
   });
