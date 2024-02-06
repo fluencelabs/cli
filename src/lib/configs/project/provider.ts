@@ -79,7 +79,7 @@ import {
   getFluenceDir,
   ensureFluenceSecretsFilePath,
 } from "../../paths.js";
-import { type Choices, list } from "../../prompt.js";
+import { list } from "../../prompt.js";
 import { envConfig, setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
@@ -738,19 +738,10 @@ export function getConfigTomlName(noxName: string) {
   return `${getConfigName(noxName)}.${TOML_EXT}`;
 }
 
-export function promptForOffer(offers: ProviderConfigReadonly["offers"]) {
-  const options: Choices<Offer> = Object.entries(offers).map(
-    ([name, offer]) => {
-      return {
-        name,
-        value: offer,
-      };
-    },
-  );
-
+export function promptForOfferName(offers: ProviderConfigReadonly["offers"]) {
   return list({
     message: "Select offer",
-    options,
+    options: Object.keys(offers),
     oneChoiceMessage(choice) {
       return `Select offer ${color.yellow(choice)}`;
     },

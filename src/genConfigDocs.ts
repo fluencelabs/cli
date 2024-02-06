@@ -22,6 +22,7 @@ import { envSchema } from "./lib/configs/project/env.js";
 import { fluenceSchema } from "./lib/configs/project/fluence.js";
 import { moduleSchema } from "./lib/configs/project/module.js";
 import { providerSchema } from "./lib/configs/project/provider.js";
+import { providerArtifactsSchema } from "./lib/configs/project/providerArtifacts.js";
 import { providerSecretsSchema } from "./lib/configs/project/providerSecrets.js";
 import { serviceSchema } from "./lib/configs/project/service.js";
 import { spellSchema } from "./lib/configs/project/spell.js";
@@ -43,6 +44,7 @@ import {
   ENV_CONFIG_FILE_NAME,
   DOCKER_COMPOSE_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FILE_NAME,
+  PROVIDER_ARTIFACTS_CONFIG_FILE_NAME,
 } from "./lib/const.js";
 import { execPromise } from "./lib/execPromise.js";
 import { jsonStringify } from "./lib/helpers/utils.js";
@@ -60,6 +62,7 @@ const configsInfo = Object.entries({
   [GLOBAL_CONFIG_FILE_NAME]: userConfigSchema,
   [ENV_CONFIG_FILE_NAME]: envSchema,
   [DOCKER_COMPOSE_FILE_NAME]: dockerComposeSchema,
+  [PROVIDER_ARTIFACTS_CONFIG_FILE_NAME]: providerArtifactsSchema,
 }).map(([filename, schema]) => {
   return {
     schemaPath: join(SCHEMAS_DIR_NAME, `${filename}.schema.${JSON_EXT}`),

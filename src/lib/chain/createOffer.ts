@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import assert from "assert";
+
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 
@@ -21,7 +23,7 @@ import { commandObj } from "../commandObj.js";
 import {
   ensureReadonlyProviderConfig,
   ensureComputerPeerConfigs,
-  promptForOffer,
+  promptForOfferName,
 } from "../configs/project/provider.js";
 import { CURRENCY_MULTIPLIER } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
@@ -33,15 +35,20 @@ export async function createOffer(flags: {
 }) {
   const providerConfig = await ensureReadonlyProviderConfig(flags);
 
-  let offer =
-    flags.offer === undefined ? undefined : providerConfig.offers[flags.offer];
+  let offerName =
+    flags.offer ?? (await promptForOfferName(providerConfig.offers));
+
+  let offer = providerConfig.offers[offerName];
 
   if (offer === undefined) {
-    if (flags.offer !== undefined) {
-      commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
-    }
+    commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
+    offerName = await promptForOfferName(providerConfig.offers);
+    offer = providerConfig.offers[offerName];
 
-    offer = await promptForOffer(providerConfig.offers);
+    assert(
+      offer !== undefined,
+      `Unreachable. Offer name was selected from the list`,
+    );
   }
 
   const { dealClient } = await getDealClient();
@@ -72,6 +79,9 @@ export async function createOffer(flags: {
       };
     },
   );
+
+  // const providerArtifactsConfig = await initNewProviderArtifactsConfig();
+  // const previouslyCreatedOffer = providerArtifactsConfig.offers[offerName]
 
   //TODO: if offer exists, update it
   await sign(
