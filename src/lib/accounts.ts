@@ -22,12 +22,11 @@ export type Account = {
 export const LOCAL_NET_DEFAULT_WALLET_KEY =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
-export const LOCAL_NET_SENDER_ACCOUNT: Account = {
-  address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-  privateKey: LOCAL_NET_DEFAULT_WALLET_KEY,
-};
-
 export const LOCAL_NET_DEFAULT_ACCOUNTS: Account[] = [
+  {
+    address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    privateKey: LOCAL_NET_DEFAULT_WALLET_KEY,
+  },
   {
     address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
     privateKey:
