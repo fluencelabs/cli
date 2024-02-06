@@ -16,16 +16,12 @@
 
 import assert from "assert";
 
-import type { DealClient } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
-import {
-  resolveComputePeersByNames,
-  type EnsureComputerPeerConfigs,
-} from "../configs/project/provider.js";
-import { getDealClient, sign } from "../dealClient.js";
+import { resolveComputePeersByNames } from "../configs/project/provider.js";
+import { getDealClient, signBatch } from "../dealClient.js";
 
 import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
@@ -39,84 +35,62 @@ export async function createCommitments(flags: {
   "nox-names"?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
-  const commitmentIds: string[] = [];
   const { dealClient, signerOrWallet } = await getDealClient();
   const core = await dealClient.getCore();
   const capacity = await dealClient.getCapacity();
   const precision = await core.precision();
   const signerAddress = await signerOrWallet.getAddress();
 
-  for (const computePeer of computePeers) {
-    commitmentIds.push(
-      await createCommitment({
-        ...computePeer,
-        capacity,
-        precision,
-        signerAddress,
-      }),
+  const res = await signBatch(
+    computePeers.map(async ({ peerId, capacityCommitment }) => {
+      const peerIdUint8Arr = await peerIdToUint8Array(peerId);
+      const ccDuration = (parse(capacityCommitment.duration) ?? 0) / 1000;
+      const ccDelegator = capacityCommitment.delegator;
+
+      const ccRewardDelegationRate = Math.floor(
+        (capacityCommitment.rewardDelegationRate / 100) * Number(precision),
+      );
+
+      return capacity.createCommitment.populateTransaction(
+        peerIdUint8Arr,
+        ccDuration,
+        ccDelegator ?? signerAddress,
+        ccRewardDelegationRate,
+      );
+    }),
+  );
+
+  if (res === undefined) {
+    return commandObj.error(
+      "The are no compute peers to create commitments for",
     );
   }
+
+  const event = capacity.getEvent(CAPACITY_COMMITMENT_CREATED_EVENT);
+
+  const logs = res.logs.filter((log) => {
+    return log.topics[0] === event.fragment.topicHash;
+  });
+
+  const commitmentIds = logs.map((log) => {
+    const id: unknown = capacity.interface
+      .parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      ?.args.getValue("commitmentId");
+
+    assert(
+      typeof id === "string",
+      "Capacity commitment created but id not found in the event log",
+    );
+
+    return id;
+  });
 
   commandObj.logToStderr(
     color.green(`Commitments ${commitmentIds.join(", ")} were registered`),
   );
 
   return commitmentIds;
-}
-
-async function createCommitment({
-  name,
-  peerId,
-  capacityCommitment,
-  capacity,
-  precision,
-  signerAddress,
-}: EnsureComputerPeerConfigs & {
-  capacity: Awaited<ReturnType<DealClient["getCapacity"]>>;
-  precision: bigint;
-  signerAddress: string;
-}) {
-  commandObj.logToStderr(color.gray(`Create capacity commitment for ${name}`));
-
-  const peerIdUint8Arr = await peerIdToUint8Array(peerId);
-  const ccDuration = (parse(capacityCommitment.duration) ?? 0) / 1000;
-  const ccDelegator = capacityCommitment.delegator;
-
-  const ccRewardDelegationRate = Math.floor(
-    (capacityCommitment.rewardDelegationRate / 100) * Number(precision),
-  );
-
-  const res = await sign(
-    capacity.createCommitment,
-    peerIdUint8Arr,
-    ccDuration,
-    ccDelegator ?? signerAddress,
-    ccRewardDelegationRate,
-  );
-
-  const event = capacity.getEvent(CAPACITY_COMMITMENT_CREATED_EVENT);
-
-  const log = res.logs.find((log) => {
-    return log.topics[0] === event.fragment.topicHash;
-  });
-
-  assert(log !== undefined, "Capacity commitment created event not found");
-
-  const id: unknown = capacity.interface
-    .parseLog({
-      topics: [...log.topics],
-      data: log.data,
-    })
-    ?.args.getValue("commitmentId");
-
-  assert(
-    typeof id === "string",
-    "Capacity commitment created but id not found in the event log",
-  );
-
-  commandObj.logToStderr(
-    color.green(`Capacity commitment was created with id ${color.yellow(id)}`),
-  );
-
-  return id;
 }

@@ -248,3 +248,34 @@ export async function sign<T extends unknown[]>(
   assert(res.status === 1, `Transaction failed after ${debugInfo}`);
   return res;
 }
+
+export async function signBatch(
+  populatedTxsPromises: Array<Promise<ethers.ContractTransaction>>,
+) {
+  const populatedTxs = await Promise.all(populatedTxsPromises);
+
+  const [{ to: firstAddr } = { to: undefined }, ...restPopulatedTxs] =
+    populatedTxs;
+
+  if (firstAddr === undefined) {
+    // if populatedTxsPromises is an empty array - do nothing
+    return;
+  }
+
+  if (
+    restPopulatedTxs.some(({ to }) => {
+      return to !== firstAddr;
+    })
+  ) {
+    throw new Error("All transactions must be to the same address");
+  }
+
+  const data = populatedTxs.map(({ data }) => {
+    return data;
+  });
+
+  const { Multicall__factory } = await import("@fluencelabs/deal-ts-clients");
+  const { signerOrWallet } = await getDealClient();
+  const { multicall } = Multicall__factory.connect(firstAddr, signerOrWallet);
+  return sign(multicall, data);
+}
