@@ -261,7 +261,7 @@ _See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.14
 
 ## `fluence chain info`
 
-Show contract addresses for the fluence env
+Show contract addresses for the fluence environment and accounts for the local environment
 
 ```
 USAGE
@@ -272,10 +272,10 @@ FLAGS
   --no-input                              Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Show contract addresses for the fluence env
+  Show contract addresses for the fluence environment and accounts for the local environment
 ```
 
-_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/chain/info.ts)_
+_See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/chain/info.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -645,7 +645,7 @@ ALIASES
   $ fluence delegator ac
 ```
 
-_See code: [src/commands/delegator/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/delegator/add-collateral.ts)_
+_See code: [src/commands/delegator/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/delegator/add-collateral.ts)_
 
 ## `fluence delegator withdraw-collateral [IDS]`
 
@@ -673,7 +673,7 @@ ALIASES
   $ fluence delegator wc
 ```
 
-_See code: [src/commands/delegator/withdraw-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/delegator/withdraw-collateral.ts)_
+_See code: [src/commands/delegator/withdraw-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/delegator/withdraw-collateral.ts)_
 
 ## `fluence delegator withdraw-reward [IDS]`
 
@@ -701,7 +701,7 @@ ALIASES
   $ fluence delegator wr
 ```
 
-_See code: [src/commands/delegator/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/delegator/withdraw-reward.ts)_
+_See code: [src/commands/delegator/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/delegator/withdraw-reward.ts)_
 
 ## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -1138,7 +1138,7 @@ ALIASES
   $ fluence provider ac
 ```
 
-_See code: [src/commands/provider/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/add-collateral.ts)_
+_See code: [src/commands/provider/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/provider/add-collateral.ts)_
 
 ## `fluence provider create-commitment`
 
@@ -1167,11 +1167,11 @@ ALIASES
   $ fluence provider cc
 ```
 
-_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/create-commitment.ts)_
+_See code: [src/commands/provider/create-commitment.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/provider/create-commitment.ts)_
 
 ## `fluence provider create-offer`
 
-Create an offer
+Create an offer or update existing one
 
 ```
 USAGE
@@ -1188,13 +1188,13 @@ FLAGS
                                           used by default
 
 DESCRIPTION
-  Create an offer
+  Create an offer or update existing one
 
 ALIASES
   $ fluence provider co
 ```
 
-_See code: [src/commands/provider/create-offer.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/create-offer.ts)_
+_See code: [src/commands/provider/create-offer.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/provider/create-offer.ts)_
 
 ## `fluence provider gen`
 
@@ -1254,7 +1254,7 @@ DESCRIPTION
   Get info about provider
 ```
 
-_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.0/src/commands/provider/offer-info.ts)_
+_See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.1/src/commands/provider/offer-info.ts)_
 
 ## `fluence provider register`
 

@@ -30,3 +30,6 @@ Defines user project preferences
 ## [docker-compose.yaml](./docker-compose.md)
 
 Defines a multi-containers based application.
+## [provider-artifacts.yaml](./provider-artifacts.md)
+
+Defines artifacts created by the provider
