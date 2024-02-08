@@ -57,11 +57,7 @@ import {
 } from "../../const.js";
 import { getReadonlyDealClient } from "../../dealClient.js";
 import { ensureChainNetwork } from "../../ensureChainNetwork.js";
-import {
-  type ProviderConfigArgs,
-  addOffers,
-  addComputePeers,
-} from "../../generateUserProviderConfig.js";
+import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
 import {
@@ -389,38 +385,41 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       offers: {},
     };
 
-    if (envConfig?.fluenceEnv === "local") {
-      userProvidedConfig.computePeers = Object.fromEntries(
-        times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
-          return [
-            `nox-${i}`,
-            { computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX },
-          ] as const;
-        }),
-      );
+    // For now we remove interactive mode cause it's too complex and unnecessary
+    // if (envConfig?.fluenceEnv === "local") {
 
-      userProvidedConfig.capacityCommitments = Object.fromEntries(
-        Object.keys(userProvidedConfig.computePeers).map((noxName) => {
-          return [
-            noxName,
-            {
-              duration: DEFAULT_CC_DURATION,
-              rewardDelegationRate: DEFAULT_CC_REWARD_DELEGATION_RATE,
-            },
-          ] as const;
-        }),
-      );
+    userProvidedConfig.computePeers = Object.fromEntries(
+      times(args.noxes ?? DEFAULT_NUMBER_OF_LOCAL_NET_NOXES).map((i) => {
+        return [
+          `nox-${i}`,
+          { computeUnits: DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX },
+        ] as const;
+      }),
+    );
 
-      userProvidedConfig.offers = {
-        [DEFAULT_OFFER_NAME]: {
-          ...defaultNumberProperties,
-          computePeers: Object.keys(userProvidedConfig.computePeers),
-        },
-      };
-    } else {
-      await addComputePeers(args.noxes, userProvidedConfig);
-      await addOffers(userProvidedConfig);
-    }
+    userProvidedConfig.capacityCommitments = Object.fromEntries(
+      Object.keys(userProvidedConfig.computePeers).map((noxName) => {
+        return [
+          noxName,
+          {
+            duration: DEFAULT_CC_DURATION,
+            rewardDelegationRate: DEFAULT_CC_REWARD_DELEGATION_RATE,
+          },
+        ] as const;
+      }),
+    );
+
+    userProvidedConfig.offers = {
+      [DEFAULT_OFFER_NAME]: {
+        ...defaultNumberProperties,
+        computePeers: Object.keys(userProvidedConfig.computePeers),
+      },
+    };
+
+    // } else {
+    //   await addComputePeers(args.noxes, userProvidedConfig);
+    //   await addOffers(userProvidedConfig);
+    // }
 
     return `# Defines Provider configuration
 # You can use \`fluence provider init\` command to generate this config template
