@@ -246,11 +246,16 @@ jobs:
         if: always()
         uses: jwalton/gh-docker-logs@v2
 
-      - name: Stop containers
-        if: always()
+      - name: Cleanup on Linux
+        if: always() && runner.os != 'Windows'
         working-directory: tmp/templates/quickstart
-        run: ../../${{ inputs.platform }}/fluence/bin/run.js local down
+        run: |
+          ../../${{ inputs.platform }}/fluence/bin/run.js local down
+          rm -rf tmp ~/.fluence
 
-      - name: Cleanup
-        if: always()
-        run: rm -rf tmp ~/.fluence
+      - name: Cleanup on Windows
+        if: always() && runner.os == 'Windows'
+        working-directory: tmp/templates/quickstart
+        run: |
+          ..\..\${{ inputs.platform }}\fluence\bin\run.js local down
+          rm -rf tmp ~\.fluence
