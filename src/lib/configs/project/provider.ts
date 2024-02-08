@@ -55,7 +55,6 @@ import {
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
   CLI_NAME,
 } from "../../const.js";
-import { getReadonlyDealClient } from "../../dealClient.js";
 import { ensureChainNetwork } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
@@ -701,9 +700,10 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
   const isLocal = envConfig?.fluenceEnv === "local";
   const env = await ensureValidContractsEnv(envConfig?.fluenceEnv);
   const dealConfig = DEAL_CONFIG[env];
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const market = await readonlyDealClient.getMarket();
-  const matcherAddress = await market.getAddress();
+
+  // const { readonlyDealClient } = await getReadonlyDealClient();
+  // const market = await readonlyDealClient.getMarket();
+  // const matcherAddress = await market.getAddress();
 
   return mergeNoxConfigYAML(commonNoxConfig, {
     systemServices: {
@@ -726,7 +726,7 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
           : "http://mumbai-polygon.ru:8545",
         networkId: dealConfig.id,
         startBlock: "earliest",
-        matcherAddress,
+        matcherAddress: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
       },
     },
   });

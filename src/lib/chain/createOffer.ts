@@ -30,6 +30,7 @@ import { initNewProviderArtifactsConfig } from "../configs/project/providerArtif
 import { CURRENCY_MULTIPLIER } from "../const.js";
 import {
   getDealClient,
+  getDealExplorerClient,
   getEventValue,
   sign,
   signBatch,
@@ -131,6 +132,10 @@ export async function createOrUpdateOffer(flags: {
     commandObj.logToStderr(color.green(`Offer ${id} registered`));
   } else {
     const offerInfo = await market.getOffer(id);
+    const dealExplorerClient = await getDealExplorerClient();
+    const offerExplorerInfo = await dealExplorerClient.getOffer(id);
+    // TODO: USE IT
+    void offerExplorerInfo;
     const populatedTxPromises: Promise<ContractTransaction>[] = [];
 
     if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {

@@ -1,8 +1,8 @@
 {
   "nox": "docker.fluence.dev/distro:compute-unit-matched_421_1",
-  "chain-rpc": "docker.fluence.dev/chain-rpc:main-68e9e86-189-1",
-  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:main-68e9e86-189-1",
-  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script-image:main-68e9e86-189-1",
+  "chain-rpc": "docker.fluence.dev/chain-rpc:main-94b621f-1507-1",
+  "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:main-94b621f-1507-1",
+  "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script-image:main-94b621f-1507-1",
   "rust-toolchain": "nightly-2023-08-27-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.9.1",

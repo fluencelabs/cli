@@ -105,6 +105,9 @@ export async function dealCreate({
       };
     }),
     // TODO: provider access type
+    // 0 - no access list
+    // 1 - white list
+    // 2 - black list
     0,
     // TODO: provider access list
     [],

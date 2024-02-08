@@ -69,13 +69,19 @@ export async function depositCollateral(commitmentIds: string[]) {
   //   collateralToApproveCommitments,
   // )
 
-  for (const commitmentId of commitmentIds) {
-    const collateralToApproveCommitment = await getCollateral(commitmentId);
+  const collateralToApproveCommitment = (
+    await Promise.all(
+      commitmentIds.map((commitmentId) => {
+        return getCollateral(commitmentId);
+      }),
+    )
+  ).reduce((acc, v) => {
+    return acc + v;
+  }, 0n);
 
-    await sign(capacity.depositCollateral, commitmentId, {
-      value: collateralToApproveCommitment,
-    });
-  }
+  await sign(capacity.depositCollateral, commitmentIds, {
+    value: collateralToApproveCommitment,
+  });
 }
 
 async function getCollateral(commitmentId: string) {
