@@ -19,16 +19,18 @@
 import assert from "node:assert";
 
 import { color } from "@oclif/color";
-import type { ethers } from "ethers";
 
 import { commandObj } from "./commandObj.js";
-import { CLI_NAME_FULL, CURRENCY_MULTIPLIER } from "./const.js";
+import { CURRENCY_MULTIPLIER } from "./const.js";
 import { dbg } from "./dbg.js";
-import { sign, getDealClient, getDealMatcherClient } from "./dealClient.js";
+import {
+  sign,
+  getDealClient,
+  getDealMatcherClient,
+  getEventValue,
+  getEventValues,
+} from "./dealClient.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
-
-const EVENT_TOPIC_FRAGMENT = "DealCreated";
-const DEAL_LOG_ARG_NAME = "deal";
 
 type DealCreateArg = {
   appCID: string;
@@ -84,7 +86,7 @@ export async function dealCreate({
 
   await sign(usdc.approve, await market.getAddress(), initialBalanceBigInt);
 
-  const res = await sign(
+  const deployDealTxReceipt = await sign(
     market.deployDeal,
     {
       prefixes: bytesCid.slice(0, 4),
@@ -108,25 +110,15 @@ export async function dealCreate({
     [],
   );
 
-  const eventTopic = market.interface.getEvent(EVENT_TOPIC_FRAGMENT);
-
-  const log = res.logs.find((log) => {
-    return log.topics[0] === eventTopic.topicHash;
+  const dealId = getEventValue({
+    contract: market,
+    txReceipt: deployDealTxReceipt,
+    eventName: "DealCreated",
+    value: "deal",
   });
 
-  assert(
-    log !== undefined,
-    `DealCreated event not found. Try updating ${CLI_NAME_FULL} to the latest version`,
-  );
-
-  const dealInfoEvent: ethers.Result = market.interface
-    .parseLog({
-      data: log.data,
-      topics: [...log.topics],
-    })
-    ?.args.getValue(DEAL_LOG_ARG_NAME);
-
-  return dealInfoEvent.toString();
+  assert(typeof dealId === "string", "dealId is not a string");
+  return dealId;
 }
 
 type DealUpdateArg = {
@@ -146,8 +138,6 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
     hash: bytesCid.slice(4),
   });
 }
-
-const COMPUTE_UNIT_CREATED_EVENT_TOPIC = "ComputeUnitCreated";
 
 export async function match(dealAddress: string) {
   const { dealClient } = await getDealClient();
@@ -169,33 +159,24 @@ export async function match(dealAddress: string) {
 
   const market = await dealClient.getMarket();
 
-  const res = await sign(
+  const matchDealTxReceipt = await sign(
     market.matchDeal,
     dealAddress,
     matchedOffers.offers,
     matchedOffers.computeUnitsPerOffers,
   );
 
-  const event = market.getEvent(COMPUTE_UNIT_CREATED_EVENT_TOPIC);
+  const pats = getEventValues({
+    contract: market,
+    txReceipt: matchDealTxReceipt,
+    eventName: "ComputeUnitCreated",
+    value: "unitId",
+  });
 
-  const patCount = res.logs.filter((log) => {
-    if (log.topics[0] !== event.fragment.topicHash) {
-      return false;
-    }
-
-    const id: unknown = market.interface
-      .parseLog({
-        topics: [...log.topics],
-        data: log.data,
-      })
-      ?.args.getValue("unitId");
-
-    assert(typeof id === "string");
-    return true;
-  }).length;
+  dbg(`got pats: ${stringifyUnknown(pats)}`);
 
   commandObj.logToStderr(
-    `${color.yellow(patCount)} workers joined the deal ${color.yellow(
+    `${color.yellow(pats.length)} workers joined the deal ${color.yellow(
       dealAddress,
     )}`,
   );

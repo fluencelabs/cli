@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import assert from "assert";
-
 import { color } from "@oclif/color";
 import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
-import { getDealClient, signBatch } from "../dealClient.js";
+import { getDealClient, getEventValues, signBatch } from "../dealClient.js";
+import { splitErrorsAndResults, stringifyUnknown } from "../helpers/utils.js";
 
 import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
-
-const CAPACITY_COMMITMENT_CREATED_EVENT = "CommitmentCreated";
 
 export async function createCommitments(flags: {
   noxes?: number | undefined;
@@ -41,7 +38,7 @@ export async function createCommitments(flags: {
   const precision = await core.precision();
   const signerAddress = await signerOrWallet.getAddress();
 
-  const res = await signBatch(
+  const createCommitmentsTxReceipt = await signBatch(
     computePeers.map(async ({ peerId, capacityCommitment }) => {
       const peerIdUint8Arr = await peerIdToUint8Array(peerId);
       const ccDuration = (parse(capacityCommitment.duration) ?? 0) / 1000;
@@ -60,37 +57,43 @@ export async function createCommitments(flags: {
     }),
   );
 
-  if (res === undefined) {
+  if (createCommitmentsTxReceipt === undefined) {
     return commandObj.error(
       "The are no compute peers to create commitments for",
     );
   }
 
-  const event = capacity.getEvent(CAPACITY_COMMITMENT_CREATED_EVENT);
-
-  const logs = res.logs.filter((log) => {
-    return log.topics[0] === event.fragment.topicHash;
+  const commitmentIds = getEventValues({
+    txReceipt: createCommitmentsTxReceipt,
+    contract: capacity,
+    eventName: "CommitmentCreated",
+    value: "commitmentId",
   });
 
-  const commitmentIds = logs.map((log) => {
-    const id: unknown = capacity.interface
-      .parseLog({
-        topics: [...log.topics],
-        data: log.data,
-      })
-      ?.args.getValue("commitmentId");
+  const [notStringCommitmentIds, stringCommitmentIds] = splitErrorsAndResults(
+    commitmentIds,
+    (id) => {
+      if (typeof id !== "string") {
+        return { error: stringifyUnknown(id) };
+      }
 
-    assert(
-      typeof id === "string",
-      "Capacity commitment created but id not found in the event log",
-    );
-
-    return id;
-  });
-
-  commandObj.logToStderr(
-    color.green(`Commitments ${commitmentIds.join(", ")} were registered`),
+      return { result: id };
+    },
   );
 
-  return commitmentIds;
+  if (notStringCommitmentIds.length > 0) {
+    return commandObj.error(
+      `Wasn't able to get id for some of the commitments. Got: ${notStringCommitmentIds.join(
+        ", ",
+      )}`,
+    );
+  }
+
+  commandObj.logToStderr(
+    color.green(
+      `Commitments ${stringCommitmentIds.join(", ")} were registered`,
+    ),
+  );
+
+  return stringCommitmentIds;
 }

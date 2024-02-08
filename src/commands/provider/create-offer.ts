@@ -15,7 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { createOffer } from "../../lib/chain/createOffer.js";
+import { createOrUpdateOffer } from "../../lib/chain/createOffer.js";
 import {
   OFFER_FLAG,
   PRIV_KEY_FLAG,
@@ -25,7 +25,7 @@ import {
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
-  static override description = "Create an offer";
+  static override description = "Create an offer or update existing one";
   static override aliases = ["provider:co"];
   static override flags = {
     ...baseFlags,
@@ -37,6 +37,6 @@ export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CreateOffer));
-    await createOffer(flags);
+    await createOrUpdateOffer(flags);
   }
 }

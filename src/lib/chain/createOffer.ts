@@ -17,6 +17,7 @@
 import assert from "assert";
 
 import { color } from "@oclif/color";
+import type { ContractTransaction } from "ethers";
 import times from "lodash-es/times.js";
 
 import { commandObj } from "../commandObj.js";
@@ -25,10 +26,17 @@ import {
   ensureComputerPeerConfigs,
   promptForOfferName,
 } from "../configs/project/provider.js";
+import { initNewProviderArtifactsConfig } from "../configs/project/providerArtifacts.js";
 import { CURRENCY_MULTIPLIER } from "../const.js";
-import { getDealClient, sign } from "../dealClient.js";
+import {
+  getDealClient,
+  getEventValue,
+  sign,
+  signBatch,
+} from "../dealClient.js";
+import { stringifyUnknown } from "../helpers/utils.js";
 
-export async function createOffer(flags: {
+export async function createOrUpdateOffer(flags: {
   offer?: string | undefined;
   env: string | undefined;
   "priv-key": string | undefined;
@@ -80,24 +88,60 @@ export async function createOffer(flags: {
     },
   );
 
-  // const providerArtifactsConfig = await initNewProviderArtifactsConfig();
-  // const previouslyCreatedOffer = providerArtifactsConfig.offers[offerName]
+  const providerArtifactsConfig = await initNewProviderArtifactsConfig();
+  const { id } = providerArtifactsConfig.offers[offerName] ?? {};
 
-  //TODO: if offer exists, update it
-  await sign(
-    market.registerMarketOffer,
-    minPricePerWorkerEpochBigInt,
-    await usdc.getAddress(),
-    (offer.effectors ?? []).map((effector) => {
-      const bytesCid = CID.parse(effector).bytes;
+  const effectors = (offer.effectors ?? []).map((effector) => {
+    const bytesCid = CID.parse(effector).bytes;
 
-      return {
-        prefixes: bytesCid.slice(0, 4),
-        hash: bytesCid.slice(4),
-      };
-    }),
-    computePeersToRegister,
-  );
+    return {
+      prefixes: bytesCid.slice(0, 4),
+      hash: bytesCid.slice(4),
+    };
+  });
 
-  commandObj.logToStderr(color.green(`Offer registered`));
+  if (id === undefined) {
+    const registerMarketOfferTxReceipt = await sign(
+      market.registerMarketOffer,
+      minPricePerWorkerEpochBigInt,
+      await usdc.getAddress(),
+      effectors,
+      computePeersToRegister,
+    );
+
+    const id = getEventValue({
+      contract: market,
+      eventName: "MarketOfferRegistered",
+      txReceipt: registerMarketOfferTxReceipt,
+      value: "offerId",
+    });
+
+    assert(
+      typeof id === "string",
+      `Offer created, but id is expected to be of type 'string', found: '${typeof id}'. ${stringifyUnknown(
+        id,
+      )}`,
+    );
+
+    providerArtifactsConfig.offers[offerName] = {
+      id,
+    };
+
+    await providerArtifactsConfig.$commit();
+    commandObj.logToStderr(color.green(`Offer ${id} registered`));
+  } else {
+    const offerInfo = await market.getOffer(id);
+    const populatedTxPromises: Promise<ContractTransaction>[] = [];
+
+    if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
+      populatedTxPromises.push(
+        market.changeMinPricePerWorkerEpoch.populateTransaction(
+          id,
+          minPricePerWorkerEpochBigInt,
+        ),
+      );
+    }
+
+    await signBatch(populatedTxPromises);
+  }
 }

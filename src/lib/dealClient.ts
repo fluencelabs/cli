@@ -22,9 +22,10 @@ import { URL } from "node:url";
 import type {
   DealClient,
   DealMatcherClient,
+  DealExplorerClient,
 } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
-import type { ethers } from "ethers";
+import type { ethers, LogDescription } from "ethers";
 
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { commandObj } from "./commandObj.js";
@@ -37,6 +38,7 @@ import {
   WC_METADATA,
   type ContractsENV,
   CONTRACTS_ENV_TO_CHAIN_ID,
+  CLI_NAME_FULL,
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainNetwork } from "./ensureChainNetwork.js";
@@ -114,6 +116,20 @@ export async function getDealMatcherClient() {
   }
 
   return dealMatcherClient;
+}
+
+let dealExplorerClient: DealExplorerClient | undefined = undefined;
+
+export async function getDealExplorerClient() {
+  const { env: envFromFlags } = dealClientFlags;
+  const env = await ensureChainNetwork(envFromFlags);
+  const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
+
+  if (dealExplorerClient === undefined) {
+    dealExplorerClient = new DealExplorerClient(env);
+  }
+
+  return dealExplorerClient;
 }
 
 async function createDealClient(
@@ -278,4 +294,71 @@ export async function signBatch(
   const { signerOrWallet } = await getDealClient();
   const { multicall } = Multicall__factory.connect(firstAddr, signerOrWallet);
   return sign(multicall, data);
+}
+
+type Contract<T> = {
+  getEvent(name: T): {
+    fragment: { topicHash: string };
+  };
+  interface: {
+    parseLog(log: { topics: string[]; data: string }): LogDescription | null;
+  };
+};
+
+type GetEventValueArgs<T extends string, U extends Contract<T>> = {
+  txReceipt: ethers.ContractTransactionReceipt;
+  contract: U;
+  eventName: T;
+  value: string;
+};
+
+export function getEventValue<T extends string, U extends Contract<T>>({
+  txReceipt,
+  contract,
+  eventName,
+  value,
+}: GetEventValueArgs<T, U>) {
+  const { topicHash } = contract.getEvent(eventName).fragment;
+
+  const log = txReceipt.logs.find((log) => {
+    return log.topics[0] === topicHash;
+  });
+
+  assert(
+    log !== undefined,
+    `Event '${eventName}' not found in logs of the successful transaction. Try updating ${CLI_NAME_FULL} to the latest version`,
+  );
+
+  const res: unknown = contract.interface
+    .parseLog({
+      data: log.data,
+      topics: [...log.topics],
+    })
+    ?.args.getValue(value);
+
+  return res;
+}
+
+export function getEventValues<T extends string, U extends Contract<T>>({
+  txReceipt,
+  contract,
+  eventName,
+  value,
+}: GetEventValueArgs<T, U>) {
+  const { topicHash } = contract.getEvent(eventName).fragment;
+
+  const logs = txReceipt.logs.filter((log) => {
+    return log.topics[0] === topicHash;
+  });
+
+  return logs.map((log) => {
+    const res: unknown = contract.interface
+      .parseLog({
+        data: log.data,
+        topics: [...log.topics],
+      })
+      ?.args.getValue(value);
+
+    return res;
+  });
 }
