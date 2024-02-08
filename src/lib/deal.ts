@@ -172,7 +172,7 @@ export async function match(dealAddress: string) {
   const pats = getEventValues({
     contract: market,
     txReceipt: matchDealTxReceipt,
-    eventName: "ComputeUnitCreated",
+    eventName: "ComputeUnitMatched",
     value: "unitId",
   });
 
