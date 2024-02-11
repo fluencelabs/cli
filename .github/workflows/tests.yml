@@ -233,6 +233,24 @@ jobs:
             }
 
       - name: Run tests
+        if: runner.os =! 'Windows'
+        env:
+          FLUENCE_ENV: "${{ inputs.fluence-env }}"
+          RUN_TESTS_IN_PARALLEL: "${{ inputs.run-tests-in-parallel }}"
+          FLUENCE_USER_DIR: "${{ github.workspace }}/tmp/.fluence"
+          CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
+          CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
+          NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
+        run: yarn test-${{ inputs.platform }}
+
+      - uses: Vampire/setup-wsl@v3
+        if: runner.os == 'Windows'
+        with:
+          distribution: Ubuntu-22.04
+
+      - name: Run tests on Windows
+        if: runner.os == 'Windows'
+        shell: wsl-bash {0}
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
           RUN_TESTS_IN_PARALLEL: "${{ inputs.run-tests-in-parallel }}"
