@@ -233,7 +233,7 @@ jobs:
             }
 
       - name: Run tests
-        if: runner.os =! 'Windows'
+        if: runner.os != 'Windows'
         env:
           FLUENCE_ENV: "${{ inputs.fluence-env }}"
           RUN_TESTS_IN_PARALLEL: "${{ inputs.run-tests-in-parallel }}"
