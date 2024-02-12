@@ -550,15 +550,27 @@ import fastify from "fastify";
 
 import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "./compiled-aqua/main.js";
 
+const DEFAULT_ACCESS_TOKEN = "abcdefhi";
+const DEFAULT_PEER_PRIVATE_KEY = new Array(32).fill("a").join("");
+
 // This is an authorization token for the gateway service.
-// Remember to generate the appropriate token and save it in env variables.
-const ACCESS_TOKEN = "abcdefhi";
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN ?? DEFAULT_ACCESS_TOKEN;
+if (ACCESS_TOKEN === DEFAULT_ACCESS_TOKEN) {
+  console.warn(
+    "Default access token is used. Remember to generate the appropriate token and save it in env variables.",
+  );
+}
 
 // This is the peer's private key.
-// It must be regenerated and properly hidden otherwise one could steal it and pretend to be this gateway.
-const PEER_PRIVATE_KEY = new TextEncoder().encode(
-  new Array(32).fill("a").join(""),
-);
+const PEER_PRIVATE_KEY =
+  process.env.PEER_PRIVATE_KEY ?? DEFAULT_PEER_PRIVATE_KEY;
+if (PEER_PRIVATE_KEY === DEFAULT_PEER_PRIVATE_KEY) {
+  console.warn(
+    "Default peer private key is used. It must be regenerated and properly hidden otherwise one could steal it and pretend to be this gateway.",
+  );
+}
+
+const PEER_PRIVATE_KEY_BYTES = new TextEncoder().encode(PEER_PRIVATE_KEY);
 
 const server = fastify({
   logger: true,
@@ -573,7 +585,7 @@ server.addHook("onReady", async () => {
   await Fluence.connect(relays[0], {
     keyPair: {
       type: "Ed25519",
-      source: PEER_PRIVATE_KEY,
+      source: PEER_PRIVATE_KEY_BYTES,
     },
   });
 });
