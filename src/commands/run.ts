@@ -505,5 +505,7 @@ async function fluenceRun(args: RunArgs) {
       ? schema.arrow.codomain.items[0]
       : undefined) ?? schema.arrow.codomain;
 
-  return aqua2js(result, returnSchema);
+  return aqua2js(result, returnSchema, {
+    path: [`${functionCall.funcDef.functionName}ReturnValue`],
+  });
 }

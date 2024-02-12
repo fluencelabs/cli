@@ -610,7 +610,7 @@ __metadata:
     "@fluencelabs/aqua-to-js": 0.3.5
     "@fluencelabs/deal-ts-clients": 0.5.0
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/js-client": 0.8.0
+    "@fluencelabs/js-client": 0.8.3
     "@fluencelabs/npm-aqua-compiler": 0.0.3
     "@iarna/toml": 2.2.5
     "@mswjs/interceptors": 0.25.14
@@ -724,9 +724,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.8.0":
-  version: 0.8.0
-  resolution: "@fluencelabs/js-client@npm:0.8.0"
+"@fluencelabs/js-client@npm:0.8.3":
+  version: 0.8.3
+  resolution: "@fluencelabs/js-client@npm:0.8.3"
   dependencies:
     "@chainsafe/libp2p-noise": 14.0.0
     "@chainsafe/libp2p-yamux": 6.0.1
@@ -757,7 +757,7 @@ __metadata:
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: 8be38d40229eeb6b359cfe3be174feca069a10bc20fbdcd949377c9888b1b8d9945af87cc905c9d667b53d64c7ea0e4ce4a305f7da18672a5cb0e95766599c87
+  checksum: 3791b5da3cf5399c46a5dc364ada21949218f9323898e114afb324313a36634eeb5c2a3a61b76c5e9b723dc3eb68048ba2f3956aa663733e990f1d08ee425892
   languageName: node
   linkType: hard
 

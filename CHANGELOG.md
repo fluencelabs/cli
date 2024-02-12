@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.1...fluence-cli-v0.14.2) (2024-02-09)
+
+
+### Bug Fixes
+
+* Adopt new serialization API from JS client ([#747](https://github.com/fluencelabs/cli/issues/747)) ([baff9d5](https://github.com/fluencelabs/cli/commit/baff9d5b9d2449161cec88ed66a4a701cb222cf2))
+* **deps:** update dependency @fluencelabs/js-client to v0.8.3 ([#749](https://github.com/fluencelabs/cli/issues/749)) ([40fa9ef](https://github.com/fluencelabs/cli/commit/40fa9effdb33fa1be48c54a533fa964816942795))
+
 ## [0.14.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.0...fluence-cli-v0.14.1) (2024-02-05)
 
 
