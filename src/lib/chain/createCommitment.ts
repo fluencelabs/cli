@@ -25,8 +25,6 @@ import { splitErrorsAndResults, stringifyUnknown } from "../helpers/utils.js";
 import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
 export async function createCommitments(flags: {
-  noxes?: number | undefined;
-  config?: string | undefined;
   env: string | undefined;
   "priv-key": string | undefined;
   "nox-names"?: string | undefined;

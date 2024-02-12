@@ -141,13 +141,14 @@ async function createDealClient(
 
   await setTryTimeout(
     async function checkIfBlockChainClientIsConnected() {
+      const core = await client.getCore();
       // By calling this method we ensure that the blockchain client is connected
-      await client.getMarket();
+      await core.minDealDepositedEpoches();
     },
     (err) => {
       throw new Error(stringifyUnknown(err));
     },
-    1000 * 60 * 3,
+    1000 * 60 * 5,
   );
 
   return client;
@@ -233,7 +234,7 @@ async function getWallet(
 }
 
 export async function sign<T extends unknown[]>(
-  method: (...args: T) => Promise<ethers.ContractTransactionResponse>,
+  method: (...args: T) => Promise<ethers.TransactionResponse>,
   ...args: T
 ) {
   if (
@@ -306,7 +307,7 @@ type Contract<T> = {
 };
 
 type GetEventValueArgs<T extends string, U extends Contract<T>> = {
-  txReceipt: ethers.ContractTransactionReceipt;
+  txReceipt: ethers.TransactionReceipt;
   contract: U;
   eventName: T;
   value: string;
@@ -326,7 +327,7 @@ export function getEventValue<T extends string, U extends Contract<T>>({
 
   assert(
     log !== undefined,
-    `Event '${eventName}' not found in logs of the successful transaction. Try updating ${CLI_NAME_FULL} to the latest version`,
+    `Event '${eventName}' with hash '${topicHash}' not found in logs of the successful transaction. Try updating ${CLI_NAME_FULL} to the latest version`,
   );
 
   const res: unknown = contract.interface
@@ -350,6 +351,11 @@ export function getEventValues<T extends string, U extends Contract<T>>({
   const logs = txReceipt.logs.filter((log) => {
     return log.topics[0] === topicHash;
   });
+
+  assert(
+    logs.length !== 0,
+    `Events '${eventName}' with hash '${topicHash}' not found in logs of the successful transaction. Try updating ${CLI_NAME_FULL} to the latest version`,
+  );
 
   return logs.map((log) => {
     const res: unknown = contract.interface

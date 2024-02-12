@@ -700,10 +700,7 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
   const isLocal = envConfig?.fluenceEnv === "local";
   const env = await ensureValidContractsEnv(envConfig?.fluenceEnv);
   const dealConfig = DEAL_CONFIG[env];
-
-  // const { readonlyDealClient } = await getReadonlyDealClient();
-  // const market = await readonlyDealClient.getMarket();
-  // const matcherAddress = await market.getAddress();
+  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
 
   return mergeNoxConfigYAML(commonNoxConfig, {
     systemServices: {
@@ -726,7 +723,7 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
           : "http://mumbai-polygon.ru:8545",
         networkId: dealConfig.id,
         startBlock: "earliest",
-        matcherAddress: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+        matcherAddress: (await DealClient.getContractAddresses(env)).market,
       },
     },
   });

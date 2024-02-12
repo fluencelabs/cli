@@ -58,7 +58,6 @@ import {
   MY_SERVICE_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
 } from "./constants.js";
-import { TEST_DEFAULT_SENDER_ACCOUNT } from "./localNetAccounts.js";
 import {
   getInitializedTemplatePath,
   getMainRsPath,
@@ -239,26 +238,30 @@ export async function callRunDeployedServices(cwd: string) {
 export async function deployDealAndWaitUntilDeployed(cwd: string) {
   const res = await fluence({
     args: ["deal", "deploy"],
-    flags: {
-      "priv-key": TEST_DEFAULT_SENDER_ACCOUNT.privateKey,
-    },
     cwd,
   });
 
-  const dealId = res
-    .split("deal: https://mumbai.polygonscan.com/address/")[1]
-    ?.split("\n")[0];
+  const dealId = res.split('deal: "')[1]?.split('"')[0];
 
   assert(dealId, "dealId is expected to be defined");
   console.log("dealId:", dealId);
 
-  await fluence({
-    args: ["deal", "deposit", dealId, "1"],
-    flags: {
-      "priv-key": TEST_DEFAULT_SENDER_ACCOUNT.privateKey,
+  await setTryTimeout(
+    async function callRunDeployedServicesCallback() {
+      await fluence({
+        args: ["deal", "deposit", dealId, "10"],
+        cwd,
+      });
     },
-    cwd,
-  });
+    (error) => {
+      throw new Error(
+        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
+          error,
+        )}`,
+      );
+    },
+    RUN_DEPLOYED_SERVICES_TIMEOUT,
+  );
 
   await setTryTimeout(
     async function callRunDeployedServicesCallback() {

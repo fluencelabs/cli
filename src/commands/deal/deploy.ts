@@ -41,6 +41,7 @@ import {
   ENV_FLAG_NAME,
   DEFAULT_INITIAL_BALANCE,
   PRICE_PER_EPOCH_DEFAULT,
+  type ContractsENV,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
@@ -166,7 +167,10 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         }
 
         updatedDeals[workerName] = {
-          deal: getLinkToAddress(previouslyDeployedDeal.dealIdOriginal),
+          deal: getLinkToAddress(
+            previouslyDeployedDeal.dealIdOriginal,
+            contractsENV,
+          ),
           "old worker definition": previouslyDeployedDeal.definition,
           "new worker definition": appCID,
         };
@@ -242,7 +246,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       await workersConfig.$commit();
 
       createdDeals[workerName] = {
-        deal: getLinkToAddress(dealIdOriginal),
+        deal: getLinkToAddress(dealIdOriginal, contractsENV),
         "worker definition": appCID,
         timestamp,
       };
@@ -281,9 +285,11 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   }
 }
 
-const getLinkToAddress = (dealId: string) => {
-  return `https://mumbai.polygonscan.com/address/${dealId}`;
-};
+function getLinkToAddress(dealId: string, contractsENV: ContractsENV) {
+  return contractsENV === "local"
+    ? dealId
+    : `https://mumbai.polygonscan.com/address/${dealId}`;
+}
 
 async function upload(
   tracing: boolean,
