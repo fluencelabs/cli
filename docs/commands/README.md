@@ -81,7 +81,7 @@ ALIASES
   $ fluence air b
 ```
 
-_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/air/beautify.ts)_
+_See code: [src/commands/air/beautify.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/air/beautify.ts)_
 
 ## `fluence aqua`
 
@@ -121,7 +121,7 @@ EXAMPLES
   $ fluence aqua
 ```
 
-_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/aqua.ts)_
+_See code: [src/commands/aqua.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/aqua.ts)_
 
 ## `fluence aqua imports`
 
@@ -138,7 +138,7 @@ DESCRIPTION
   Returns a list of aqua imports that CLI produces
 ```
 
-_See code: [src/commands/aqua/imports.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/aqua/imports.ts)_
+_See code: [src/commands/aqua/imports.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/aqua/imports.ts)_
 
 ## `fluence aqua json [INPUT] [OUTPUT]`
 
@@ -166,7 +166,7 @@ DESCRIPTION
   what they translate into
 ```
 
-_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/aqua/json.ts)_
+_See code: [src/commands/aqua/json.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/aqua/json.ts)_
 
 ## `fluence aqua yml [INPUT] [OUTPUT]`
 
@@ -197,7 +197,7 @@ ALIASES
   $ fluence aqua yaml
 ```
 
-_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/aqua/yml.ts)_
+_See code: [src/commands/aqua/yml.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/aqua/yml.ts)_
 
 ## `fluence autocomplete [SHELL]`
 
@@ -254,7 +254,7 @@ EXAMPLES
   $ fluence build
 ```
 
-_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/build.ts)_
+_See code: [src/commands/build.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/build.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
@@ -278,7 +278,7 @@ DESCRIPTION
   Change app id in the deal
 ```
 
-_See code: [src/commands/deal/change-app.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/change-app.ts)_
+_See code: [src/commands/deal/change-app.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/change-app.ts)_
 
 ## `fluence deal create`
 
@@ -306,7 +306,7 @@ DESCRIPTION
   Create your deal with the specified parameters
 ```
 
-_See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/create.ts)_
+_See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/create.ts)_
 
 ## `fluence deal deploy [WORKER-NAMES]`
 
@@ -354,7 +354,7 @@ EXAMPLES
   $ fluence deal deploy
 ```
 
-_See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/deploy.ts)_
+_See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/deploy.ts)_
 
 ## `fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`
 
@@ -378,7 +378,7 @@ DESCRIPTION
   Deposit do the deal
 ```
 
-_See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/deposit.ts)_
+_See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/deposit.ts)_
 
 ## `fluence deal info [DEAL-ADDRESS]`
 
@@ -399,7 +399,7 @@ DESCRIPTION
   Get info about provider
 ```
 
-_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/info.ts)_
+_See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/info.ts)_
 
 ## `fluence deal logs [WORKER-NAMES] [SPELL-NAME]`
 
@@ -439,7 +439,7 @@ EXAMPLES
   $ fluence deal logs
 ```
 
-_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/logs.ts)_
+_See code: [src/commands/deal/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/logs.ts)_
 
 ## `fluence deal match [DEAL-ADDRESS]`
 
@@ -462,7 +462,7 @@ DESCRIPTION
   Match deal with resource owners
 ```
 
-_See code: [src/commands/deal/match.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/match.ts)_
+_See code: [src/commands/deal/match.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/match.ts)_
 
 ## `fluence deal remove-unit [DEAL-ADDRESS] [UNIT-ID]`
 
@@ -486,7 +486,7 @@ DESCRIPTION
   Remove unit from the deal
 ```
 
-_See code: [src/commands/deal/remove-unit.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/remove-unit.ts)_
+_See code: [src/commands/deal/remove-unit.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/remove-unit.ts)_
 
 ## `fluence deal stop [DEAL-ADDRESS]`
 
@@ -509,7 +509,7 @@ DESCRIPTION
   Stop the deal
 ```
 
-_See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/stop.ts)_
+_See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/stop.ts)_
 
 ## `fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`
 
@@ -533,7 +533,7 @@ DESCRIPTION
   Withdraw tokens from the deal
 ```
 
-_See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/deal/withdraw.ts)_
+_See code: [src/commands/deal/withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/deal/withdraw.ts)_
 
 ## `fluence default env [ENV]`
 
@@ -556,7 +556,7 @@ EXAMPLES
   $ fluence default env
 ```
 
-_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/default/env.ts)_
+_See code: [src/commands/default/env.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/default/env.ts)_
 
 ## `fluence default peers [ENV]`
 
@@ -579,7 +579,7 @@ EXAMPLES
   $ fluence default peers
 ```
 
-_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/default/peers.ts)_
+_See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/default/peers.ts)_
 
 ## `fluence dep install [PACKAGE-NAME | PACKAGE-NAME@VERSION]`
 
@@ -607,7 +607,7 @@ EXAMPLES
   $ fluence dep install
 ```
 
-_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/dep/install.ts)_
+_See code: [src/commands/dep/install.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/dep/install.ts)_
 
 ## `fluence dep reset`
 
@@ -630,7 +630,7 @@ EXAMPLES
   $ fluence dep reset
 ```
 
-_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/dep/reset.ts)_
+_See code: [src/commands/dep/reset.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/dep/reset.ts)_
 
 ## `fluence dep uninstall PACKAGE-NAME`
 
@@ -656,7 +656,7 @@ EXAMPLES
   $ fluence dep uninstall
 ```
 
-_See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/dep/uninstall.ts)_
+_See code: [src/commands/dep/uninstall.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/dep/uninstall.ts)_
 
 ## `fluence dep versions`
 
@@ -681,7 +681,7 @@ EXAMPLES
   $ fluence dep versions
 ```
 
-_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/dep/versions.ts)_
+_See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/dep/versions.ts)_
 
 ## `fluence help [COMMANDS]`
 
@@ -729,7 +729,7 @@ EXAMPLES
   $ fluence init
 ```
 
-_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/init.ts)_
 
 ## `fluence key default [NAME]`
 
@@ -753,7 +753,7 @@ EXAMPLES
   $ fluence key default
 ```
 
-_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/key/default.ts)_
+_See code: [src/commands/key/default.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/key/default.ts)_
 
 ## `fluence key new [NAME]`
 
@@ -778,7 +778,7 @@ EXAMPLES
   $ fluence key new
 ```
 
-_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/key/new.ts)_
+_See code: [src/commands/key/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/key/new.ts)_
 
 ## `fluence key remove [NAME]`
 
@@ -802,7 +802,7 @@ EXAMPLES
   $ fluence key remove
 ```
 
-_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/key/remove.ts)_
+_See code: [src/commands/key/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/key/remove.ts)_
 
 ## `fluence local down`
 
@@ -822,7 +822,7 @@ EXAMPLES
   $ fluence local down
 ```
 
-_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/local/down.ts)_
+_See code: [src/commands/local/down.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/local/down.ts)_
 
 ## `fluence local init`
 
@@ -843,7 +843,7 @@ EXAMPLES
   $ fluence local init
 ```
 
-_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/local/init.ts)_
+_See code: [src/commands/local/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/local/init.ts)_
 
 ## `fluence local logs`
 
@@ -863,7 +863,7 @@ EXAMPLES
   $ fluence local logs
 ```
 
-_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/local/logs.ts)_
+_See code: [src/commands/local/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/local/logs.ts)_
 
 ## `fluence local ps`
 
@@ -883,7 +883,7 @@ EXAMPLES
   $ fluence local ps
 ```
 
-_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/local/ps.ts)_
+_See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/local/ps.ts)_
 
 ## `fluence local up`
 
@@ -906,7 +906,7 @@ EXAMPLES
   $ fluence local up
 ```
 
-_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/local/up.ts)_
+_See code: [src/commands/local/up.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/local/up.ts)_
 
 ## `fluence module add [PATH | URL]`
 
@@ -932,7 +932,7 @@ EXAMPLES
   $ fluence module add
 ```
 
-_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/module/add.ts)_
+_See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/module/add.ts)_
 
 ## `fluence module new [NAME]`
 
@@ -957,7 +957,7 @@ EXAMPLES
   $ fluence module new
 ```
 
-_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/module/new.ts)_
+_See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/module/new.ts)_
 
 ## `fluence module remove [NAME | PATH | URL]`
 
@@ -981,7 +981,7 @@ EXAMPLES
   $ fluence module remove
 ```
 
-_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/module/remove.ts)_
+_See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/module/remove.ts)_
 
 ## `fluence provider add-peer`
 
@@ -1006,7 +1006,7 @@ DESCRIPTION
   Register specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/add-peer.ts)_
+_See code: [src/commands/provider/add-peer.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/add-peer.ts)_
 
 ## `fluence provider add-units`
 
@@ -1029,7 +1029,7 @@ DESCRIPTION
   Add units to specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/add-units.ts)_
+_See code: [src/commands/provider/add-units.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/add-units.ts)_
 
 ## `fluence provider gen`
 
@@ -1051,7 +1051,7 @@ EXAMPLES
   $ fluence provider gen
 ```
 
-_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/gen.ts)_
+_See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/gen.ts)_
 
 ## `fluence provider info`
 
@@ -1070,7 +1070,7 @@ DESCRIPTION
   Get info about provider
 ```
 
-_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/info.ts)_
+_See code: [src/commands/provider/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/info.ts)_
 
 ## `fluence provider init`
 
@@ -1089,7 +1089,7 @@ DESCRIPTION
   Init provider config. Creates a config file
 ```
 
-_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/init.ts)_
+_See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/init.ts)_
 
 ## `fluence provider register`
 
@@ -1111,7 +1111,7 @@ DESCRIPTION
   Register in matching contract
 ```
 
-_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/register.ts)_
+_See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/register.ts)_
 
 ## `fluence provider remove-peer`
 
@@ -1133,7 +1133,7 @@ DESCRIPTION
   Remove specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/remove-peer.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/remove-peer.ts)_
+_See code: [src/commands/provider/remove-peer.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/remove-peer.ts)_
 
 ## `fluence provider remove-units`
 
@@ -1157,7 +1157,7 @@ DESCRIPTION
   Sub units to specific nox instance as a Compute Peer
 ```
 
-_See code: [src/commands/provider/remove-units.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/remove-units.ts)_
+_See code: [src/commands/provider/remove-units.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/remove-units.ts)_
 
 ## `fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`
 
@@ -1181,7 +1181,7 @@ DESCRIPTION
   Reward info
 ```
 
-_See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/reward-info.ts)_
+_See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/reward-info.ts)_
 
 ## `fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID]`
 
@@ -1205,7 +1205,7 @@ DESCRIPTION
   Withdraw reward
 ```
 
-_See code: [src/commands/provider/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/provider/withdraw-reward.ts)_
+_See code: [src/commands/provider/withdraw-reward.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/provider/withdraw-reward.ts)_
 
 ## `fluence run`
 
@@ -1263,7 +1263,7 @@ EXAMPLES
   $ fluence run
 ```
 
-_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/run.ts)_
+_See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/run.ts)_
 
 ## `fluence service add [PATH | URL]`
 
@@ -1290,7 +1290,7 @@ EXAMPLES
   $ fluence service add
 ```
 
-_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/service/add.ts)_
+_See code: [src/commands/service/add.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/service/add.ts)_
 
 ## `fluence service new [NAME]`
 
@@ -1314,7 +1314,7 @@ EXAMPLES
   $ fluence service new
 ```
 
-_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/service/new.ts)_
+_See code: [src/commands/service/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/service/new.ts)_
 
 ## `fluence service remove [NAME | PATH | URL]`
 
@@ -1337,7 +1337,7 @@ EXAMPLES
   $ fluence service remove
 ```
 
-_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/service/remove.ts)_
+_See code: [src/commands/service/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/service/remove.ts)_
 
 ## `fluence service repl [NAME | PATH | URL]`
 
@@ -1362,7 +1362,7 @@ EXAMPLES
   $ fluence service repl
 ```
 
-_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/service/repl.ts)_
+_See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/service/repl.ts)_
 
 ## `fluence spell build [SPELL-NAMES]`
 
@@ -1387,7 +1387,7 @@ EXAMPLES
   $ fluence spell build
 ```
 
-_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/spell/build.ts)_
+_See code: [src/commands/spell/build.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/spell/build.ts)_
 
 ## `fluence spell new [NAME]`
 
@@ -1411,7 +1411,7 @@ EXAMPLES
   $ fluence spell new
 ```
 
-_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/spell/new.ts)_
+_See code: [src/commands/spell/new.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/spell/new.ts)_
 
 ## `fluence update [CHANNEL]`
 
@@ -1495,7 +1495,7 @@ EXAMPLES
   $ fluence workers deploy
 ```
 
-_See code: [src/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/workers/deploy.ts)_
+_See code: [src/commands/workers/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/workers/deploy.ts)_
 
 ## `fluence workers logs [WORKER-NAMES]`
 
@@ -1538,7 +1538,7 @@ EXAMPLES
   $ fluence workers logs
 ```
 
-_See code: [src/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/workers/logs.ts)_
+_See code: [src/commands/workers/logs.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/workers/logs.ts)_
 
 ## `fluence workers remove [WORKER-NAMES]`
 
@@ -1578,7 +1578,7 @@ EXAMPLES
   $ fluence workers remove
 ```
 
-_See code: [src/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/workers/remove.ts)_
+_See code: [src/commands/workers/remove.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/workers/remove.ts)_
 
 ## `fluence workers upload [WORKER-NAMES]`
 
@@ -1624,5 +1624,5 @@ EXAMPLES
   $ fluence workers upload
 ```
 
-_See code: [src/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.14.2/src/commands/workers/upload.ts)_
+_See code: [src/commands/workers/upload.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/workers/upload.ts)_
 <!-- commandsstop -->
