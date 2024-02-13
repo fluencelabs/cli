@@ -16,7 +16,7 @@
 
 import assert from "node:assert";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
-import { extname, join, parse } from "node:path";
+import { extname, join, parse, resolve } from "node:path";
 
 import type {
   CompileFromPathArgs,
@@ -45,6 +45,7 @@ import {
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import { splitErrorsAndResults } from "./helpers/utils.js";
+import { projectRootDir } from "./paths.js";
 import { list } from "./prompt.js";
 import type { Required } from "./typeHelpers.js";
 
@@ -304,7 +305,7 @@ export function resolveAquaConfig(
 ): ResolvedAquaConfig {
   return {
     imports,
-    filePath: compileAquaConfig.input,
+    filePath: resolve(projectRootDir, compileAquaConfig.input),
     targetType: compileAquaConfig.target,
     logLevel: compileAquaConfig.logLevel,
     noRelay: compileAquaConfig.noRelay,
