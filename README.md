@@ -54,6 +54,7 @@ To uninstall CLI you need to remove couple of directories
 rm -rf ~/.fluence
 rm -rf ~/.local/share/fluence
 ```
+You can also remove `${HOME}/.fluence/cli/bin` from `$PATH`
 
 ## Documentation
 
