@@ -59,6 +59,7 @@ import {
   getGatewayTsConfigPath,
   getGatewayPath,
   ensureAquaDir,
+  ensureDir,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -374,10 +375,13 @@ async function initTSorJSGatewayProject({
     },
   };
 
+  await ensureDir(join(getGatewaySrcPath(), "app"));
+  await ensureDir(join(getGatewayPath(), "api"));
+
   await Promise.all([
     fluenceConfig.$commit(),
     writeFile(
-      join(getGatewayPath(), "app", `index.${isJS ? "js" : "ts"}`),
+      join(getGatewayPath(), "src", "app", `index.${isJS ? "js" : "ts"}`),
       getGatewayIndexJsContent(isJS),
       FS_OPTIONS,
     ),
