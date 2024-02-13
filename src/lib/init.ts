@@ -54,7 +54,6 @@ import {
   getFrontendTsConfigPath,
   getFrontendPath,
   ensureGatewayCompiledAquaPath,
-  getGatewayServerTSorJSPath,
   getGatewayPackageJSONPath,
   getGatewaySrcPath,
   getGatewayTsConfigPath,
@@ -356,7 +355,6 @@ async function initTSorJSGatewayProject({
   fluenceConfig,
 }: InitTSorJSGatewayProjectArg): Promise<void> {
   const gatewayCompiledAquaPath = await ensureGatewayCompiledAquaPath();
-  const indexFilePath = getGatewayServerTSorJSPath(isJS);
   const packageJSONPath = getGatewayPackageJSONPath();
   const gatewaySrcPath = getGatewaySrcPath();
   const gatewayReadmePath = join(getGatewayPath(), README_MD_FILE_NAME);
@@ -378,10 +376,30 @@ async function initTSorJSGatewayProject({
 
   await Promise.all([
     fluenceConfig.$commit(),
-    writeFile(indexFilePath, getGatewayIndexJsContent(isJS), FS_OPTIONS),
+    writeFile(
+      join(getGatewayPath(), "app", `index.${isJS ? "js" : "ts"}`),
+      getGatewayIndexJsContent(isJS),
+      FS_OPTIONS,
+    ),
     writeFile(
       packageJSONPath,
       jsonStringify(getGatewayPackageJSON(isJS)),
+      FS_OPTIONS,
+    ),
+    writeFile(
+      join(getGatewayPath(), "api", `serverless.${isJS ? "js" : "ts"}`),
+      getGatewayServerless(isJS),
+      FS_OPTIONS,
+    ),
+    writeFile(
+      join(getGatewayPath(), "src", `dev.${isJS ? "js" : "ts"}`),
+      getGatewayDev(isJS),
+      FS_OPTIONS,
+    ),
+    writeFile(join(getGatewayPath(), "public", ".gitkeep"), "", FS_OPTIONS),
+    writeFile(
+      join(getGatewayPath(), "vercel.json"),
+      getGatewayVercel(),
       FS_OPTIONS,
     ),
     writeFile(gatewayReadmePath, GATEWAY_README_CONTENT, FS_OPTIONS),
@@ -539,14 +557,10 @@ function stringifyError(e${isJS ? "" : ": unknown"}) {
 }
 
 function getGatewayIndexJsContent(isJS: boolean) {
-  return `${
-    isJS
-      ? ""
-      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";\n'
-  }import { Fluence } from "@fluencelabs/js-client";
+  return `import { Fluence } from "@fluencelabs/js-client";
 import relays from "./relays.json" assert { type: "json" };
 import { ${isJS ? "" : "type Static, "}Type } from "@sinclair/typebox";
-import fastify from "fastify";
+${isJS ? "" : 'import { type FastifyInstance } from "fastify";'}
 
 import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "./compiled-aqua/main.js";
 
@@ -572,122 +586,113 @@ if (PEER_PRIVATE_KEY === DEFAULT_PEER_PRIVATE_KEY) {
 
 const PEER_PRIVATE_KEY_BYTES = new TextEncoder().encode(PEER_PRIVATE_KEY);
 
-const server = fastify({
-  logger: true,
-})${isJS ? "" : ".withTypeProvider<TypeBoxTypeProvider>()"};
-
-await server.register(import("@fastify/rate-limit"), {
-  max: 100,
-  timeWindow: "1 minute",
-});
-
-server.addHook("onReady", async () => {
-  await Fluence.connect(relays[0], {
-    keyPair: {
-      type: "Ed25519",
-      source: PEER_PRIVATE_KEY_BYTES,
-    },
+export default async function (server${isJS ? "" : ": FastifyInstance"}) {
+  await server.register(import("@fastify/rate-limit"), {
+    max: 100,
+    timeWindow: "1 minute",
   });
-});
 
-server.addHook("onRequest", async (request, reply) => {
-  if (request.headers.access_token !== ACCESS_TOKEN) {
-    await reply.status(403).send({
-      error: "Unauthorized",
-      statusCode: 403,
+  server.addHook("onReady", async () => {
+    await Fluence.connect(relays[0], {
+      keyPair: {
+        type: "Ed25519",
+        source: PEER_PRIVATE_KEY_BYTES,
+      },
     });
-  }
-});
+  });
 
-server.addHook("onClose", async () => {
-  await Fluence.disconnect();
-});
+  server.addHook("onRequest", async (request, reply) => {
+    if (request.headers.access_token !== ACCESS_TOKEN) {
+      await reply.status(403).send({
+        error: "Unauthorized",
+        statusCode: 403,
+      });
+    }
+  });
 
-const callbackBody = Type.Object({
-  name: Type.String(),
-});
+  server.addHook("onClose", async () => {
+    await Fluence.disconnect();
+  });
 
-${isJS ? "" : "type callbackBodyType = Static<typeof callbackBody>;"}
+  const callbackBody = Type.Object({
+    name: Type.String(),
+  });
 
-const callbackResponse = Type.String();
+  ${isJS ? "" : "type callbackBodyType = Static<typeof callbackBody>;"}
 
-${isJS ? "" : "type callbackResponseType = Static<typeof callbackResponse>;"}
+  const callbackResponse = Type.String();
 
-const showSubnetResponse = Type.Array(
-  Type.Object({
-    host_id: Type.Union([Type.String(), Type.Null()]),
-    services: Type.Union([Type.Array(Type.String()), Type.Null()]),
-    spells: Type.Union([Type.Array(Type.String()), Type.Null()]),
-    worker_id: Type.Union([Type.String(), Type.Null()]),
-  }),
-);
+  ${isJS ? "" : "type callbackResponseType = Static<typeof callbackResponse>;"}
 
-${
-  isJS ? "" : "type showSubnetResponseType = Static<typeof showSubnetResponse>;"
-}
-
-const runDeployedServicesResponse = Type.Array(
-  Type.Object({
-    answer: Type.Union([Type.String(), Type.Null()]),
-    worker: Type.Object({
-      host_id: Type.String(),
-      pat_id: Type.String(),
+  const showSubnetResponse = Type.Array(
+    Type.Object({
+      host_id: Type.Union([Type.String(), Type.Null()]),
+      services: Type.Union([Type.Array(Type.String()), Type.Null()]),
+      spells: Type.Union([Type.Array(Type.String()), Type.Null()]),
       worker_id: Type.Union([Type.String(), Type.Null()]),
     }),
-  }),
-);
+  );
 
-${
-  isJS
-    ? ""
-    : "type runDeployedServicesResponseType = Static<typeof runDeployedServicesResponse>;"
-}
-
-// Request and response
-server.post${
-    isJS ? "" : "<{ Body: callbackBodyType; Reply: callbackResponseType }>"
-  }(
-  "/my/callback/hello",
-  { schema: { body: callbackBody, response: { 200: callbackResponse } } },
-  async (request, reply) => {
-    const { name } = request.body;
-    const result = await helloWorld(name);
-    return reply.send(result);
-  },
-);
-
-// Fire and forget
-server.post("/my/webhook/hello", async (_request, reply) => {
-  void helloWorldRemote("Fluence");
-  return reply.send();
-});
-
-server.post${isJS ? "" : "<{ Reply: showSubnetResponseType }>"}(
-  "/my/callback/showSubnet",
-  { schema: { response: { 200: showSubnetResponse } } },
-  async (_request, reply) => {
-    const result = await showSubnet();
-    return reply.send(result);
-  },
-);
-
-server.post${isJS ? "" : "<{ Reply: runDeployedServicesResponseType }>"}(
-  "/my/callback/runDeployedServices",
-  { schema: { response: { 200: runDeployedServicesResponse } } },
-  async (_request, reply) => {
-    const result = await runDeployedServices();
-    return reply.send(result);
-  },
-);
-
-server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
-  if (err !== null) {
-    console.error(err);
-    process.exit(1);
+  ${
+    isJS
+      ? ""
+      : "type showSubnetResponseType = Static<typeof showSubnetResponse>;"
   }
 
-  console.log(\`Server listening at \${address}\`);
-});`;
+  const runDeployedServicesResponse = Type.Array(
+    Type.Object({
+      answer: Type.Union([Type.String(), Type.Null()]),
+      worker: Type.Object({
+        host_id: Type.String(),
+        pat_id: Type.String(),
+        worker_id: Type.Union([Type.String(), Type.Null()]),
+      }),
+    }),
+  );
+
+  ${
+    isJS
+      ? ""
+      : "type runDeployedServicesResponseType = Static<typeof runDeployedServicesResponse>;"
+  }
+
+  // Request and response
+  server.post${
+    isJS ? "" : "<{ Body: callbackBodyType; Reply: callbackResponseType }>"
+  }(
+    "/my/callback/hello",
+    { schema: { body: callbackBody, response: { 200: callbackResponse } } },
+    async (request, reply) => {
+      const { name } = request.body;
+      const result = await helloWorld(name);
+      return reply.send(result);
+    },
+  );
+
+  // Fire and forget
+  server.post("/my/webhook/hello", async (_request, reply) => {
+    void helloWorldRemote("Fluence");
+    return reply.send();
+  });
+
+  server.post${isJS ? "" : "<{ Reply: showSubnetResponseType }>"}(
+    "/my/callback/showSubnet",
+    { schema: { response: { 200: showSubnetResponse } } },
+    async (_request, reply) => {
+      const result = await showSubnet();
+      return reply.send(result);
+    },
+  );
+
+  server.post${isJS ? "" : "<{ Reply: runDeployedServicesResponseType }>"}(
+    "/my/callback/runDeployedServices",
+    { schema: { response: { 200: runDeployedServicesResponse } } },
+    async (_request, reply) => {
+      const result = await runDeployedServices();
+      return reply.send(result);
+    },
+  );
+};`;
 }
 
 const FRONTEND_TS_CONFIG_CONTENT = `{
@@ -723,6 +728,7 @@ const GATEWAY_TS_CONFIG_CONTENT = `{
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "outDir": "./dist",
+    "declaration": true,
     "verbatimModuleSyntax": true,
     "esModuleInterop": true,
 
@@ -800,6 +806,77 @@ function getGatewayPackageJSON(isJS: boolean) {
           },
         }),
   };
+}
+
+function getGatewayServerless(isJS: boolean) {
+  return `${
+    isJS
+      ? ""
+      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";\n'
+  }import fastify from "fastify";
+import dotenv from "dotenv";
+
+// Runtime dependencies required for this function. Vercel does import only direct listed dependencies.
+(() => [
+  import("@fluencelabs/js-client"),
+  // This import will fail in runtime
+  () => import("@fluencelabs/marine-worker"),
+  import("@fluencelabs/marine-js"),
+  // This imports will impact loading speed
+  () => import("@fluencelabs/marine-js/dist/marine-js.wasm"),
+  () => import("@fluencelabs/avm/dist/avm.wasm"),
+  import("@fluencelabs/threads"),
+  import("observable-fns"),
+  import("@fluencelabs/avm"),
+  import("@fastify/rate-limit"),
+  import("@sinclair/typebox"),
+  import("../dist/compiled-aqua/main.js"),
+  import("../dist/relays.json", { assert: { type: "json" } }),
+])();
+
+dotenv.config();
+
+const server = fastify({
+  logger: true,
+})${isJS ? "" : ".withTypeProvider<TypeBoxTypeProvider>()"};
+
+await server.register(import("../dist/app/index.js"));
+
+export default async function (req${isJS ? "" : ": Request"}, res${
+    isJS ? "" : ": Response"
+  }) {
+  await server.ready();
+  server.server.emit("request", req, res);
+}`;
+}
+
+function getGatewayDev(isJS: boolean) {
+  return `${
+    isJS
+      ? ""
+      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";\n'
+  }import fastify from "fastify";
+
+const server = fastify({
+  logger: true,
+})${isJS ? "" : ".withTypeProvider<TypeBoxTypeProvider>()"};
+
+await server.register(import("./app/index.js"));
+
+server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
+  if (err !== null) {
+    console.error(err);
+    process.exit(1);
+  }
+
+  console.log(\`Server listening at \${address}\`);
+});`;
+}
+
+function getGatewayVercel() {
+  return `{
+  "rewrites": [{ "source": "/:path*", "destination": "/api/serverless" }]
+}`;
 }
 
 const GATEWAY_README_CONTENT = `## Fluence HTTP Gateway
