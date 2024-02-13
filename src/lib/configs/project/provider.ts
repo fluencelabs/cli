@@ -54,6 +54,7 @@ import {
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
   CLI_NAME,
+  NOX_NAMES_FLAG_NAME,
 } from "../../const.js";
 import { ensureChainNetwork } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -959,16 +960,16 @@ export async function ensureComputerPeerConfigs(args: ProviderConfigArgs) {
 
 export async function resolveComputePeersByNames(
   args: ProviderConfigArgs & {
-    "nox-names"?: string | undefined;
+    [NOX_NAMES_FLAG_NAME]?: string | undefined;
   },
 ) {
   const computePeers = await ensureComputerPeerConfigs(args);
 
-  if (args["nox-names"] === undefined) {
+  if (args[NOX_NAMES_FLAG_NAME] === undefined) {
     return computePeers;
   }
 
-  const noxNames = commaSepStrToArr(args["nox-names"]);
+  const noxNames = commaSepStrToArr(args[NOX_NAMES_FLAG_NAME]);
 
   const [unknownNoxNames, validNoxNames] = splitErrorsAndResults(
     noxNames,

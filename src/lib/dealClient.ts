@@ -39,6 +39,7 @@ import {
   type ContractsENV,
   CONTRACTS_ENV_TO_CHAIN_ID,
   CLI_NAME_FULL,
+  PRIV_KEY_FLAG_NAME,
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainNetwork } from "./ensureChainNetwork.js";
@@ -51,7 +52,7 @@ const KEY_QUERY_PARAM_NAME = "symKey";
 
 export type DealClientFlags = {
   env?: string | undefined;
-  "priv-key"?: string | undefined;
+  [PRIV_KEY_FLAG_NAME]?: string | undefined;
 };
 
 let dealClientFlags: DealClientFlags = {};
@@ -88,7 +89,7 @@ export async function getDealClient() {
   const env = await ensureChainNetwork(envFromFlags);
 
   const privKey =
-    dealClientFlags["priv-key"] ??
+    dealClientFlags[PRIV_KEY_FLAG_NAME] ??
     // use default wallet key for local network
     (env === "local" ? LOCAL_NET_DEFAULT_WALLET_KEY : undefined);
 
@@ -238,7 +239,7 @@ export async function sign<T extends unknown[]>(
   ...args: T
 ) {
   if (
-    dealClientFlags["priv-key"] === undefined &&
+    dealClientFlags[PRIV_KEY_FLAG_NAME] === undefined &&
     envConfig?.fluenceEnv !== "local"
   ) {
     commandObj.logToStderr(

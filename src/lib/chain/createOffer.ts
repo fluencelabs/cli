@@ -27,7 +27,7 @@ import {
   promptForOfferName,
 } from "../configs/project/provider.js";
 import { initNewProviderArtifactsConfig } from "../configs/project/providerArtifacts.js";
-import { CURRENCY_MULTIPLIER } from "../const.js";
+import { CURRENCY_MULTIPLIER, PRIV_KEY_FLAG_NAME } from "../const.js";
 import {
   getDealClient,
   getDealExplorerClient,
@@ -40,7 +40,7 @@ import { stringifyUnknown } from "../helpers/utils.js";
 export async function createOrUpdateOffer(flags: {
   offer?: string | undefined;
   env: string | undefined;
-  "priv-key": string | undefined;
+  [PRIV_KEY_FLAG_NAME]: string | undefined;
 }) {
   const providerConfig = await ensureReadonlyProviderConfig(flags);
 

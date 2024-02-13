@@ -280,9 +280,10 @@ export const ENV_ARG = {
   [ENV_ARG_NAME]: Args.string(fluenceEnvFlagAndArg),
 };
 
+export const PRIV_KEY_FLAG_NAME = "priv-key";
 export const PRIV_KEY_FLAG = {
-  "priv-key": Flags.string({
-    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} will be used by default`,
+  [PRIV_KEY_FLAG_NAME]: Flags.string({
+    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} key will be used by default`,
     helpValue: "<private-key>",
   }),
 };
@@ -332,6 +333,14 @@ export const TRACING_FLAG = {
     description: "Compile aqua in tracing mode (for debugging purposes)",
     default: false,
   }),
+};
+
+export const NOX_NAMES_FLAG_NAME = "nox-names";
+export const NOX_NAMES_FLAG_CONFIG = {
+  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. Default: all noxes from 'computePeers' property of ${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+};
+export const NOX_NAMES_FLAG = {
+  [NOX_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
 };
 
 export const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";

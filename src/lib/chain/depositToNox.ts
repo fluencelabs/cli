@@ -16,14 +16,15 @@
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
+import { NOX_NAMES_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../const.js";
 import { getDealClient } from "../dealClient.js";
 import { input } from "../prompt.js";
 
 export async function depositToNox(flags: {
   env: string | undefined;
-  "priv-key": string | undefined;
+  [PRIV_KEY_FLAG_NAME]: string | undefined;
   amount?: string | undefined;
-  "nox-names"?: string | undefined;
+  [NOX_NAMES_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
   const { signerOrWallet } = await getDealClient();

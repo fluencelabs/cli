@@ -18,15 +18,15 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
+import { PRIV_KEY_FLAG_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
 export async function register(flags: {
   noxes?: number | undefined;
   env: string | undefined;
-  "priv-key": string | undefined;
+  [PRIV_KEY_FLAG_NAME]: string | undefined;
 }) {
   const providerConfig = await ensureReadonlyProviderConfig(flags);
-
   const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
   const { CID } = await import("ipfs-http-client");

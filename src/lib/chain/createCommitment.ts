@@ -19,6 +19,7 @@ import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
+import { NOX_NAMES_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../const.js";
 import { getDealClient, getEventValues, signBatch } from "../dealClient.js";
 import { splitErrorsAndResults, stringifyUnknown } from "../helpers/utils.js";
 
@@ -26,15 +27,15 @@ import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
 export async function createCommitments(flags: {
   env: string | undefined;
-  "priv-key": string | undefined;
-  "nox-names"?: string | undefined;
+  [PRIV_KEY_FLAG_NAME]: string | undefined;
+  [NOX_NAMES_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
-  const { dealClient, signerOrWallet } = await getDealClient();
+  const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
   const capacity = await dealClient.getCapacity();
   const precision = await core.precision();
-  const signerAddress = await signerOrWallet.getAddress();
+  const { ethers } = await import("ethers");
 
   const createCommitmentsTxReceipt = await signBatch(
     computePeers.map(async ({ peerId, capacityCommitment }) => {
@@ -49,7 +50,7 @@ export async function createCommitments(flags: {
       return capacity.createCommitment.populateTransaction(
         peerIdUint8Arr,
         ccDuration,
-        ccDelegator ?? signerAddress,
+        ccDelegator ?? ethers.ZeroAddress,
         ccRewardDelegationRate,
       );
     }),

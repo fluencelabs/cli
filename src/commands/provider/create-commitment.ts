@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/createCommitment.js";
 import {
   PRIV_KEY_FLAG,
-  NOXES_FLAG,
+  NOX_NAMES_FLAG,
   PROVIDER_CONFIG_FLAGS,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -34,11 +32,7 @@ export default class CreateCommitment extends BaseCommand<
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
-    ...NOXES_FLAG,
-    "nox-names": Flags.string({
-      description:
-        "Comma-separated names of noxes to create capacity commitment for. Default: all noxes from capacityCommitments property of the provider config",
-    }),
+    ...NOX_NAMES_FLAG,
   };
 
   async run(): Promise<void> {

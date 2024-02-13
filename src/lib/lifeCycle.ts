@@ -37,8 +37,9 @@ import { initNewUserConfig, initUserConfig } from "./configs/user/config.js";
 import {
   NODE_JS_MAJOR_VERSION,
   CLI_NAME_FULL,
-  type NO_INPUT_FLAG_NAME,
+  NO_INPUT_FLAG_NAME,
   CLI_NAME,
+  PRIV_KEY_FLAG_NAME,
 } from "./const.js";
 import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
@@ -172,7 +173,7 @@ export async function initCli<
 
   setDealClientFlags({
     env: flags.env,
-    "priv-key": flags["priv-key"],
+    [PRIV_KEY_FLAG_NAME]: flags[PRIV_KEY_FLAG_NAME],
   });
 
   return {

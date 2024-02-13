@@ -20,7 +20,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { depositToNox } from "../../lib/chain/depositToNox.js";
 import {
   PRIV_KEY_FLAG,
-  NOXES_FLAG,
+  NOX_NAMES_FLAG,
   PROVIDER_CONFIG_FLAGS,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -32,11 +32,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
-    ...NOXES_FLAG,
-    "nox-names": Flags.string({
-      description:
-        "Comma-separated names of noxes to create capacity commitment for. Default: all noxes from capacityCommitments property of the provider config",
-    }),
+    ...NOX_NAMES_FLAG,
     amount: Flags.string({
       description: "Amount of tokens to deposit to noxes",
     }),

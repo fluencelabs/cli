@@ -25,6 +25,7 @@ import { depositToNox } from "../../lib/chain/depositToNox.js";
 import { register } from "../../lib/chain/register.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
+  PRIV_KEY_FLAG_NAME,
   DEFAULT_OFFER_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
@@ -83,7 +84,9 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
-    flags["priv-key"] = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
+    flags[PRIV_KEY_FLAG_NAME] =
+      flags[PRIV_KEY_FLAG_NAME] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
+
     flags.env = "local";
 
     await depositToNox({ ...flags, amount: "100" });

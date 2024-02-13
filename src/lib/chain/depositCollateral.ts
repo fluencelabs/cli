@@ -15,14 +15,15 @@
  */
 
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
+import { NOX_NAMES_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
 import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
 export async function depositCollateralByNoxNames(flags: {
-  "nox-names": string | undefined;
+  [NOX_NAMES_FLAG_NAME]: string | undefined;
   env: string | undefined;
-  "priv-key": string | undefined;
+  [PRIV_KEY_FLAG_NAME]: string | undefined;
 }) {
   const { dealClient } = await getDealClient();
   const computePeers = await resolveComputePeersByNames(flags);
