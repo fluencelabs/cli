@@ -563,11 +563,11 @@ function stringifyError(e${isJS ? "" : ": unknown"}) {
 
 function getGatewayIndexJsContent(isJS: boolean) {
   return `import { Fluence } from "@fluencelabs/js-client";
-import relays from "./relays.json" assert { type: "json" };
+import relays from "../relays.json" assert { type: "json" };
 import { ${isJS ? "" : "type Static, "}Type } from "@sinclair/typebox";
 ${isJS ? "" : 'import { type FastifyInstance } from "fastify";'}
 
-import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "./compiled-aqua/main.js";
+import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "../compiled-aqua/main.js";
 
 const DEFAULT_ACCESS_TOKEN = "abcdefhi";
 const DEFAULT_PEER_PRIVATE_KEY = new Array(32).fill("a").join("");
