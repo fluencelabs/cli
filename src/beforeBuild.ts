@@ -165,6 +165,10 @@ async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
 
+    if (search === "tar -xzf") {
+      console.log(binFileContent);
+    }
+
     const hasSearch = binFileContent.includes(search);
     const hasInsert = binFileContent.includes(insert);
 
