@@ -360,6 +360,7 @@ async function initTSorJSGatewayProject({
   const gatewaySrcPath = getGatewaySrcPath();
   const gatewayReadmePath = join(getGatewayPath(), README_MD_FILE_NAME);
   const aquaDir = await ensureAquaDir();
+  const ext = isJS ? "js" : "ts";
 
   addRelayPathEntryToConfig(
     fluenceConfig,
@@ -371,7 +372,7 @@ async function initTSorJSGatewayProject({
     gateway: {
       input: relative(projectRootDir, aquaDir),
       output: relative(projectRootDir, gatewayCompiledAquaPath),
-      target: isJS ? "js" : "ts",
+      target: ext,
     },
   };
 
@@ -382,7 +383,7 @@ async function initTSorJSGatewayProject({
   await Promise.all([
     fluenceConfig.$commit(),
     writeFile(
-      join(getGatewayPath(), "src", "app", `index.${isJS ? "js" : "ts"}`),
+      join(getGatewayPath(), "src", "app", `index.${ext}`),
       getGatewayIndexJsContent(isJS),
       FS_OPTIONS,
     ),
@@ -392,12 +393,12 @@ async function initTSorJSGatewayProject({
       FS_OPTIONS,
     ),
     writeFile(
-      join(getGatewayPath(), "api", `serverless.${isJS ? "js" : "ts"}`),
+      join(getGatewayPath(), "api", `serverless.${ext}`),
       getGatewayServerless(isJS),
       FS_OPTIONS,
     ),
     writeFile(
-      join(getGatewayPath(), "src", `dev.${isJS ? "js" : "ts"}`),
+      join(getGatewayPath(), "src", `dev.${ext}`),
       getGatewayDev(isJS),
       FS_OPTIONS,
     ),
@@ -418,7 +419,7 @@ async function initTSorJSGatewayProject({
     compileToFiles({
       filePath: aquaDir,
       imports: await getAquaImports({ fluenceConfig }),
-      targetType: isJS ? "js" : "ts",
+      targetType: ext,
       outputPath: gatewayCompiledAquaPath,
     }),
   ]);
@@ -623,11 +624,11 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
     name: Type.String(),
   });
 
-  ${isJS ? "" : "type callbackBodyType = Static<typeof callbackBody>;"}
+  ${isJS ? "" : "type CallbackBodyType = Static<typeof callbackBody>;"}
 
   const callbackResponse = Type.String();
 
-  ${isJS ? "" : "type callbackResponseType = Static<typeof callbackResponse>;"}
+  ${isJS ? "" : "type CallbackResponseType = Static<typeof callbackResponse>;"}
 
   const showSubnetResponse = Type.Array(
     Type.Object({
@@ -641,7 +642,7 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
   ${
     isJS
       ? ""
-      : "type showSubnetResponseType = Static<typeof showSubnetResponse>;"
+      : "type ShowSubnetResponseType = Static<typeof showSubnetResponse>;"
   }
 
   const runDeployedServicesResponse = Type.Array(
@@ -658,12 +659,12 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
   ${
     isJS
       ? ""
-      : "type runDeployedServicesResponseType = Static<typeof runDeployedServicesResponse>;"
+      : "type RunDeployedServicesResponseType = Static<typeof runDeployedServicesResponse>;"
   }
 
   // Request and response
   server.post${
-    isJS ? "" : "<{ Body: callbackBodyType; Reply: callbackResponseType }>"
+    isJS ? "" : "<{ Body: CallbackBodyType; Reply: CallbackResponseType }>"
   }(
     "/my/callback/hello",
     { schema: { body: callbackBody, response: { 200: callbackResponse } } },
@@ -680,7 +681,7 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
     return reply.send();
   });
 
-  server.post${isJS ? "" : "<{ Reply: showSubnetResponseType }>"}(
+  server.post${isJS ? "" : "<{ Reply: ShowSubnetResponseType }>"}(
     "/my/callback/showSubnet",
     { schema: { response: { 200: showSubnetResponse } } },
     async (_request, reply) => {
@@ -689,7 +690,7 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
     },
   );
 
-  server.post${isJS ? "" : "<{ Reply: runDeployedServicesResponseType }>"}(
+  server.post${isJS ? "" : "<{ Reply: RunDeployedServicesResponseType }>"}(
     "/my/callback/runDeployedServices",
     { schema: { response: { 200: runDeployedServicesResponse } } },
     async (_request, reply) => {
@@ -821,24 +822,6 @@ function getGatewayServerless(isJS: boolean) {
   }import fastify from "fastify";
 import dotenv from "dotenv";
 
-// Runtime dependencies required for this function. Vercel does import only direct listed dependencies.
-(() => [
-  import("@fluencelabs/js-client"),
-  // This import will fail in runtime
-  () => import("@fluencelabs/marine-worker"),
-  import("@fluencelabs/marine-js"),
-  // This imports will impact loading speed
-  () => import("@fluencelabs/marine-js/dist/marine-js.wasm"),
-  () => import("@fluencelabs/avm/dist/avm.wasm"),
-  import("@fluencelabs/threads"),
-  import("observable-fns"),
-  import("@fluencelabs/avm"),
-  import("@fastify/rate-limit"),
-  import("@sinclair/typebox"),
-  import("../dist/compiled-aqua/main.js"),
-  import("../dist/relays.json", { assert: { type: "json" } }),
-])();
-
 dotenv.config();
 
 const server = fastify({
@@ -880,7 +863,12 @@ server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
 
 function getGatewayVercel() {
   return `{
-  "rewrites": [{ "source": "/:path*", "destination": "/api/serverless" }]
+  "rewrites": [{ "source": "/:path*", "destination": "/api/serverless" }],
+  "functions": {
+    "api/serverless.ts": {
+      "includeFiles": "{dist,node_modules}/**/*"
+    }
+  }
 }`;
 }
 
