@@ -20,7 +20,12 @@ import parse from "parse-duration";
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
 import { NOX_NAMES_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../const.js";
-import { getDealClient, getEventValues, signBatch } from "../dealClient.js";
+import {
+  getDealClient,
+  getEventValues,
+  signBatch,
+  type CallsToBatch,
+} from "../dealClient.js";
 import { splitErrorsAndResults, stringifyUnknown } from "../helpers/utils.js";
 
 import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
@@ -38,22 +43,32 @@ export async function createCommitments(flags: {
   const { ethers } = await import("ethers");
 
   const createCommitmentsTxReceipt = await signBatch(
-    computePeers.map(async ({ peerId, capacityCommitment }) => {
-      const peerIdUint8Arr = await peerIdToUint8Array(peerId);
-      const ccDuration = (parse(capacityCommitment.duration) ?? 0) / 1000;
-      const ccDelegator = capacityCommitment.delegator;
+    await Promise.all(
+      computePeers.map(
+        async ({
+          peerId,
+          capacityCommitment,
+        }): Promise<
+          CallsToBatch<Parameters<typeof capacity.createCommitment>>[number]
+        > => {
+          const peerIdUint8Arr = await peerIdToUint8Array(peerId);
+          const ccDuration = (parse(capacityCommitment.duration) ?? 0) / 1000;
+          const ccDelegator = capacityCommitment.delegator;
 
-      const ccRewardDelegationRate = Math.floor(
-        (capacityCommitment.rewardDelegationRate / 100) * Number(precision),
-      );
+          const ccRewardDelegationRate = Math.floor(
+            (capacityCommitment.rewardDelegationRate / 100) * Number(precision),
+          );
 
-      return capacity.createCommitment.populateTransaction(
-        peerIdUint8Arr,
-        ccDuration,
-        ccDelegator ?? ethers.ZeroAddress,
-        ccRewardDelegationRate,
-      );
-    }),
+          return [
+            capacity.createCommitment,
+            peerIdUint8Arr,
+            ccDuration,
+            ccDelegator ?? ethers.ZeroAddress,
+            ccRewardDelegationRate,
+          ];
+        },
+      ),
+    ),
   );
 
   if (createCommitmentsTxReceipt === undefined) {

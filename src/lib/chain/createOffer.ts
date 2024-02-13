@@ -17,7 +17,6 @@
 import assert from "assert";
 
 import { color } from "@oclif/color";
-import type { ContractTransaction } from "ethers";
 import times from "lodash-es/times.js";
 
 import { commandObj } from "../commandObj.js";
@@ -34,6 +33,7 @@ import {
   getEventValue,
   sign,
   signBatch,
+  type CallsToBatch,
 } from "../dealClient.js";
 import { stringifyUnknown } from "../helpers/utils.js";
 
@@ -136,15 +136,17 @@ export async function createOrUpdateOffer(flags: {
     const offerExplorerInfo = await dealExplorerClient.getOffer(id);
     // TODO: USE IT
     void offerExplorerInfo;
-    const populatedTxPromises: Promise<ContractTransaction>[] = [];
+
+    const populatedTxPromises: CallsToBatch<
+      Parameters<typeof market.changeMinPricePerWorkerEpoch>
+    > = [];
 
     if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
-      populatedTxPromises.push(
-        market.changeMinPricePerWorkerEpoch.populateTransaction(
-          id,
-          minPricePerWorkerEpochBigInt,
-        ),
-      );
+      populatedTxPromises.push([
+        market.changeMinPricePerWorkerEpoch,
+        id,
+        minPricePerWorkerEpochBigInt,
+      ]);
     }
 
     await signBatch(populatedTxPromises);

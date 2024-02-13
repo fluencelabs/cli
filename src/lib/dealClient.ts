@@ -247,11 +247,15 @@ export async function sign<T extends unknown[]>(
     );
   }
 
-  const debugInfo = `calling contract method: ${method.name}(${stringifyUnknown(
-    args,
-  ).slice(1, -1)})`;
+  if (method.name !== "multicall") {
+    const debugInfo = `calling contract method: ${methodCallToString([
+      method,
+      ...args,
+    ])}`;
 
-  dbg(debugInfo);
+    dbg(debugInfo);
+  }
+
   const tx = await method(...args);
 
   startSpinner(
@@ -262,15 +266,29 @@ export async function sign<T extends unknown[]>(
 
   const res = await tx.wait();
   stopSpinner();
-  assert(res !== null, `Transaction hash is not defined after ${debugInfo}`);
-  assert(res.status === 1, `Transaction failed after ${debugInfo}`);
+  assert(res !== null, `'${method.name}' transaction hash is not defined`);
+  assert(res.status === 1, `'${method.name}' transaction failed with status 1`);
   return res;
 }
 
-export async function signBatch(
-  populatedTxsPromises: Array<Promise<ethers.ContractTransaction>>,
+export type CallsToBatch<T extends Array<unknown>> = Array<
+  [
+    {
+      populateTransaction: (...args: T) => Promise<ethers.ContractTransaction>;
+      name: string;
+    },
+    ...T,
+  ]
+>;
+
+export async function signBatch<T extends Array<unknown>>(
+  callsToBatch: CallsToBatch<T>,
 ) {
-  const populatedTxs = await Promise.all(populatedTxsPromises);
+  const populatedTxs = await Promise.all(
+    callsToBatch.map(([method, ...args]) => {
+      return method.populateTransaction(...args);
+    }),
+  );
 
   const [{ to: firstAddr } = { to: undefined }, ...restPopulatedTxs] =
     populatedTxs;
@@ -295,7 +313,24 @@ export async function signBatch(
   const { Multicall__factory } = await import("@fluencelabs/deal-ts-clients");
   const { signerOrWallet } = await getDealClient();
   const { multicall } = Multicall__factory.connect(firstAddr, signerOrWallet);
+
+  dbg(
+    `${color.yellow("MULTICALL START")}:\n${callsToBatch
+      .map(([method, ...args]) => {
+        return methodCallToString([method, ...args]);
+      })
+      .join("\n")}\n${color.yellow("MULTICALL END")}`,
+  );
+
   return sign(multicall, data);
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+function methodCallToString([method, ...args]: [
+  { name: string },
+  ...unknown[],
+]) {
+  return `${method.name}(${stringifyUnknown(args).slice(1, -1)})`;
 }
 
 type Contract<T> = {
