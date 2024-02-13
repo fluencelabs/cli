@@ -56,6 +56,9 @@ rm -rf ~/.local/share/fluence
 ```
 
 You can also remove `${HOME}/.fluence/cli/bin` from `$PATH`
+e.g. like that
+```sh
+rm $(which fluence)
 
 ## Documentation
 
