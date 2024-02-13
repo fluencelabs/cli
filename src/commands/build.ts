@@ -48,14 +48,6 @@ export default class Build extends BaseCommand<typeof Build> {
 
     const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
 
-    await compileAquaFromFluenceConfig({
-      fluenceConfig,
-      imports: await getAquaImports({
-        aquaImportsFromFlags: flags.import,
-        fluenceConfig,
-      }),
-    });
-
     await prepareForDeploy({
       flags: {
         ...flags,
@@ -72,6 +64,17 @@ export default class Build extends BaseCommand<typeof Build> {
 
     const workerConfig = await initNewWorkersConfigReadonly();
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig, fluenceEnv);
-    commandObj.logToStderr(`All services and spells built successfully`);
+
+    await compileAquaFromFluenceConfig({
+      fluenceConfig,
+      imports: await getAquaImports({
+        aquaImportsFromFlags: flags.import,
+        fluenceConfig,
+      }),
+    });
+
+    commandObj.logToStderr(
+      `All services and spells built, all aqua files generated and compiled successfully`,
+    );
   }
 }
