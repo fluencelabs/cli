@@ -54,12 +54,12 @@ import {
   getFrontendTsConfigPath,
   getFrontendPath,
   ensureGatewayCompiledAquaPath,
-  getGatewayServerTSorJSPath,
   getGatewayPackageJSONPath,
   getGatewaySrcPath,
   getGatewayTsConfigPath,
   getGatewayPath,
   ensureAquaDir,
+  ensureDir,
 } from "../lib/paths.js";
 import { confirm, input, list } from "../lib/prompt.js";
 import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
@@ -356,11 +356,11 @@ async function initTSorJSGatewayProject({
   fluenceConfig,
 }: InitTSorJSGatewayProjectArg): Promise<void> {
   const gatewayCompiledAquaPath = await ensureGatewayCompiledAquaPath();
-  const indexFilePath = getGatewayServerTSorJSPath(isJS);
   const packageJSONPath = getGatewayPackageJSONPath();
   const gatewaySrcPath = getGatewaySrcPath();
   const gatewayReadmePath = join(getGatewayPath(), README_MD_FILE_NAME);
   const aquaDir = await ensureAquaDir();
+  const ext = isJS ? "js" : "ts";
 
   addRelayPathEntryToConfig(
     fluenceConfig,
@@ -372,16 +372,40 @@ async function initTSorJSGatewayProject({
     gateway: {
       input: relative(projectRootDir, aquaDir),
       output: relative(projectRootDir, gatewayCompiledAquaPath),
-      target: isJS ? "js" : "ts",
+      target: ext,
     },
   };
 
+  await ensureDir(join(getGatewaySrcPath(), "app"));
+  await ensureDir(join(getGatewayPath(), "api"));
+  await ensureDir(join(getGatewayPath(), "public"));
+
   await Promise.all([
     fluenceConfig.$commit(),
-    writeFile(indexFilePath, getGatewayIndexJsContent(isJS), FS_OPTIONS),
+    writeFile(
+      join(getGatewayPath(), "src", "app", `index.${ext}`),
+      getGatewayIndexJsContent(isJS),
+      FS_OPTIONS,
+    ),
     writeFile(
       packageJSONPath,
       jsonStringify(getGatewayPackageJSON(isJS)),
+      FS_OPTIONS,
+    ),
+    writeFile(
+      join(getGatewayPath(), "api", `serverless.${ext}`),
+      getGatewayServerless(isJS),
+      FS_OPTIONS,
+    ),
+    writeFile(
+      join(getGatewayPath(), "src", `dev.${ext}`),
+      getGatewayDev(isJS),
+      FS_OPTIONS,
+    ),
+    writeFile(join(getGatewayPath(), "public", ".gitkeep"), "", FS_OPTIONS),
+    writeFile(
+      join(getGatewayPath(), "vercel.json"),
+      getGatewayVercel(),
       FS_OPTIONS,
     ),
     writeFile(gatewayReadmePath, GATEWAY_README_CONTENT, FS_OPTIONS),
@@ -395,7 +419,7 @@ async function initTSorJSGatewayProject({
     compileToFiles({
       filePath: aquaDir,
       imports: await getAquaImports({ fluenceConfig }),
-      targetType: isJS ? "js" : "ts",
+      targetType: ext,
       outputPath: gatewayCompiledAquaPath,
     }),
   ]);
@@ -539,143 +563,142 @@ function stringifyError(e${isJS ? "" : ": unknown"}) {
 }
 
 function getGatewayIndexJsContent(isJS: boolean) {
-  return `${
-    isJS
-      ? ""
-      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";\n'
-  }import { Fluence } from "@fluencelabs/js-client";
-import relays from "./relays.json" assert { type: "json" };
+  return `import { Fluence } from "@fluencelabs/js-client";
+import relays from "../relays.json" assert { type: "json" };
 import { ${isJS ? "" : "type Static, "}Type } from "@sinclair/typebox";
-import fastify from "fastify";
+${isJS ? "" : 'import { type FastifyInstance } from "fastify";'}
 
-import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "./compiled-aqua/main.js";
+import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "../compiled-aqua/main.js";
+
+const DEFAULT_ACCESS_TOKEN = "abcdefhi";
+const DEFAULT_PEER_PRIVATE_KEY = new Array(32).fill("a").join("");
 
 // This is an authorization token for the gateway service.
-// Remember to generate the appropriate token and save it in env variables.
-const ACCESS_TOKEN = "abcdefhi";
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN ?? DEFAULT_ACCESS_TOKEN;
+if (ACCESS_TOKEN === DEFAULT_ACCESS_TOKEN) {
+  console.warn(
+    "Default access token is used. Remember to generate the appropriate token and save it in env variables.",
+  );
+}
 
 // This is the peer's private key.
-// It must be regenerated and properly hidden otherwise one could steal it and pretend to be this gateway.
-const PEER_PRIVATE_KEY = new TextEncoder().encode(
-  new Array(32).fill("a").join(""),
-);
-
-const server = fastify({
-  logger: true,
-})${isJS ? "" : ".withTypeProvider<TypeBoxTypeProvider>()"};
-
-await server.register(import("@fastify/rate-limit"), {
-  max: 100,
-  timeWindow: "1 minute",
-});
-
-server.addHook("onReady", async () => {
-  await Fluence.connect(relays[0], {
-    keyPair: {
-      type: "Ed25519",
-      source: PEER_PRIVATE_KEY,
-    },
-  });
-});
-
-server.addHook("onRequest", async (request, reply) => {
-  if (request.headers.access_token !== ACCESS_TOKEN) {
-    await reply.status(403).send({
-      error: "Unauthorized",
-      statusCode: 403,
-    });
-  }
-});
-
-server.addHook("onClose", async () => {
-  await Fluence.disconnect();
-});
-
-const callbackBody = Type.Object({
-  name: Type.String(),
-});
-
-${isJS ? "" : "type callbackBodyType = Static<typeof callbackBody>;"}
-
-const callbackResponse = Type.String();
-
-${isJS ? "" : "type callbackResponseType = Static<typeof callbackResponse>;"}
-
-const showSubnetResponse = Type.Array(
-  Type.Object({
-    host_id: Type.Union([Type.String(), Type.Null()]),
-    services: Type.Union([Type.Array(Type.String()), Type.Null()]),
-    spells: Type.Union([Type.Array(Type.String()), Type.Null()]),
-    worker_id: Type.Union([Type.String(), Type.Null()]),
-  }),
-);
-
-${
-  isJS ? "" : "type showSubnetResponseType = Static<typeof showSubnetResponse>;"
+const PEER_PRIVATE_KEY =
+  process.env.PEER_PRIVATE_KEY ?? DEFAULT_PEER_PRIVATE_KEY;
+if (PEER_PRIVATE_KEY === DEFAULT_PEER_PRIVATE_KEY) {
+  console.warn(
+    "Default peer private key is used. It must be regenerated and properly hidden otherwise one could steal it and pretend to be this gateway.",
+  );
 }
 
-const runDeployedServicesResponse = Type.Array(
-  Type.Object({
-    answer: Type.Union([Type.String(), Type.Null()]),
-    worker: Type.Object({
-      host_id: Type.String(),
-      pat_id: Type.String(),
+const PEER_PRIVATE_KEY_BYTES = new TextEncoder().encode(PEER_PRIVATE_KEY);
+
+export default async function (server${isJS ? "" : ": FastifyInstance"}) {
+  await server.register(import("@fastify/rate-limit"), {
+    max: 100,
+    timeWindow: "1 minute",
+  });
+
+  server.addHook("onReady", async () => {
+    await Fluence.connect(relays[0], {
+      keyPair: {
+        type: "Ed25519",
+        source: PEER_PRIVATE_KEY_BYTES,
+      },
+    });
+  });
+
+  server.addHook("onRequest", async (request, reply) => {
+    if (request.headers.access_token !== ACCESS_TOKEN) {
+      await reply.status(403).send({
+        error: "Unauthorized",
+        statusCode: 403,
+      });
+    }
+  });
+
+  server.addHook("onClose", async () => {
+    await Fluence.disconnect();
+  });
+
+  const callbackBody = Type.Object({
+    name: Type.String(),
+  });
+
+  ${isJS ? "" : "type CallbackBodyType = Static<typeof callbackBody>;"}
+
+  const callbackResponse = Type.String();
+
+  ${isJS ? "" : "type CallbackResponseType = Static<typeof callbackResponse>;"}
+
+  const showSubnetResponse = Type.Array(
+    Type.Object({
+      host_id: Type.Union([Type.String(), Type.Null()]),
+      services: Type.Union([Type.Array(Type.String()), Type.Null()]),
+      spells: Type.Union([Type.Array(Type.String()), Type.Null()]),
       worker_id: Type.Union([Type.String(), Type.Null()]),
     }),
-  }),
-);
+  );
 
-${
-  isJS
-    ? ""
-    : "type runDeployedServicesResponseType = Static<typeof runDeployedServicesResponse>;"
-}
-
-// Request and response
-server.post${
-    isJS ? "" : "<{ Body: callbackBodyType; Reply: callbackResponseType }>"
-  }(
-  "/my/callback/hello",
-  { schema: { body: callbackBody, response: { 200: callbackResponse } } },
-  async (request, reply) => {
-    const { name } = request.body;
-    const result = await helloWorld(name);
-    return reply.send(result);
-  },
-);
-
-// Fire and forget
-server.post("/my/webhook/hello", async (_request, reply) => {
-  void helloWorldRemote("Fluence");
-  return reply.send();
-});
-
-server.post${isJS ? "" : "<{ Reply: showSubnetResponseType }>"}(
-  "/my/callback/showSubnet",
-  { schema: { response: { 200: showSubnetResponse } } },
-  async (_request, reply) => {
-    const result = await showSubnet();
-    return reply.send(result);
-  },
-);
-
-server.post${isJS ? "" : "<{ Reply: runDeployedServicesResponseType }>"}(
-  "/my/callback/runDeployedServices",
-  { schema: { response: { 200: runDeployedServicesResponse } } },
-  async (_request, reply) => {
-    const result = await runDeployedServices();
-    return reply.send(result);
-  },
-);
-
-server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
-  if (err !== null) {
-    console.error(err);
-    process.exit(1);
+  ${
+    isJS
+      ? ""
+      : "type ShowSubnetResponseType = Static<typeof showSubnetResponse>;"
   }
 
-  console.log(\`Server listening at \${address}\`);
-});`;
+  const runDeployedServicesResponse = Type.Array(
+    Type.Object({
+      answer: Type.Union([Type.String(), Type.Null()]),
+      worker: Type.Object({
+        host_id: Type.String(),
+        pat_id: Type.String(),
+        worker_id: Type.Union([Type.String(), Type.Null()]),
+      }),
+    }),
+  );
+
+  ${
+    isJS
+      ? ""
+      : "type RunDeployedServicesResponseType = Static<typeof runDeployedServicesResponse>;"
+  }
+
+  // Request and response
+  server.post${
+    isJS ? "" : "<{ Body: CallbackBodyType; Reply: CallbackResponseType }>"
+  }(
+    "/my/callback/hello",
+    { schema: { body: callbackBody, response: { 200: callbackResponse } } },
+    async (request, reply) => {
+      const { name } = request.body;
+      const result = await helloWorld(name);
+      return reply.send(result);
+    },
+  );
+
+  // Fire and forget
+  server.post("/my/webhook/hello", async (_request, reply) => {
+    void helloWorldRemote("Fluence");
+    return reply.send();
+  });
+
+  server.post${isJS ? "" : "<{ Reply: ShowSubnetResponseType }>"}(
+    "/my/callback/showSubnet",
+    { schema: { response: { 200: showSubnetResponse } } },
+    async (_request, reply) => {
+      const result = await showSubnet();
+      return reply.send(result);
+    },
+  );
+
+  server.post${isJS ? "" : "<{ Reply: RunDeployedServicesResponseType }>"}(
+    "/my/callback/runDeployedServices",
+    { schema: { response: { 200: runDeployedServicesResponse } } },
+    async (_request, reply) => {
+      const result = await runDeployedServices();
+      return reply.send(result);
+    },
+  );
+};`;
 }
 
 const FRONTEND_TS_CONFIG_CONTENT = `{
@@ -711,6 +734,7 @@ const GATEWAY_TS_CONFIG_CONTENT = `{
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "outDir": "./dist",
+    "declaration": true,
     "verbatimModuleSyntax": true,
     "esModuleInterop": true,
 
@@ -766,8 +790,8 @@ function getGatewayPackageJSON(isJS: boolean) {
             build: "rm -rf ./dist && tsc -p tsconfig.json",
           }),
       start: isJS
-        ? "node --no-warnings src/server.js"
-        : "node --no-warnings --loader ts-node/esm src/server.ts",
+        ? "node --no-warnings src/dev.js"
+        : "node --no-warnings --loader ts-node/esm src/dev.ts",
     },
     dependencies: {
       [JS_CLIENT_NPM_DEPENDENCY]:
@@ -775,6 +799,7 @@ function getGatewayPackageJSON(isJS: boolean) {
       fastify: "4.25.2",
       "@fastify/rate-limit": "9.1.0",
       "@sinclair/typebox": "0.32.11",
+      dotenv: "16.4.2",
     },
     ...(isJS
       ? {}
@@ -790,18 +815,89 @@ function getGatewayPackageJSON(isJS: boolean) {
   };
 }
 
+function getGatewayServerless(isJS: boolean) {
+  return `${
+    isJS
+      ? ""
+      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";\n'
+  }import fastify from "fastify";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const server = fastify({
+  logger: true,
+})${isJS ? "" : ".withTypeProvider<TypeBoxTypeProvider>()"};
+
+await server.register(import("../dist/app/index.js"));
+
+export default async function (req${isJS ? "" : ": Request"}, res${
+    isJS ? "" : ": Response"
+  }) {
+  await server.ready();
+  server.server.emit("request", req, res);
+}`;
+}
+
+function getGatewayDev(isJS: boolean) {
+  return `${
+    isJS
+      ? ""
+      : 'import type { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";\n'
+  }import fastify from "fastify";
+
+const server = fastify({
+  logger: true,
+})${isJS ? "" : ".withTypeProvider<TypeBoxTypeProvider>()"};
+
+await server.register(import("./app/index.js"));
+
+server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
+  if (err !== null) {
+    console.error(err);
+    process.exit(1);
+  }
+
+  console.log(\`Server listening at \${address}\`);
+});`;
+}
+
+function getGatewayVercel() {
+  return `{
+  "rewrites": [{ "source": "/:path*", "destination": "/api/serverless" }],
+  "functions": {
+    "api/serverless.ts": {
+      "includeFiles": "{dist,node_modules}/**/*"
+    }
+  }
+}`;
+}
+
 const GATEWAY_README_CONTENT = `## Fluence HTTP Gateway
 
 Here you can find an example of simple Fluence HTTP gateway.
 The gateway allows you to map Aqua functions to http requests i.e., you can create HTTP route and handle the incoming request by executing some Aqua function.
 You can check it out and test this repo.
 
-### Start gateway
+### Start gateway locally
 
 - \`npm install\`
 - \`npm run start\`
 - \`curl -X POST http://localhost:8080/my/callback/hello -H "ACCESS_TOKEN: abcdefhi" -H 'Content-Type: application/json' -d '{"name": "Fluence" }'\`
 - After running these commands you should see: \`Hello, Fluence\`
+
+### Deploy to Vercel
+
+You can also deploy the gateway to serverless platforms like Vercel. In order to do so follow the steps:
+
+- Push the entire CLI template to public repository on Github.
+- Create new Vercel account if you don't have one
+- Add project in Vercel from your github account
+- At the configuration page:
+  - Point the root directory to \`src/gateway\`
+  - Optionally pass environment variables for ACCESS_TOKEN and PEER_PRIVATE_KEY. If not given, hardcoded values will be used.
+- Hit the deploy button, wait for the deployment.
+- Try to interact with deployed gateway via this command - \`curl -X POST https://{YOUR_DOMAIN, e.g. fluenceapp.vercel.app}/my/callback/hello -H 'ACCESS_TOKEN: abcdefhi' -H 'Content-Type: application/json' -d '{"name": "Fluence" }'\`
 
 ### Notes:
 
