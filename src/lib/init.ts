@@ -377,6 +377,7 @@ async function initTSorJSGatewayProject({
 
   await ensureDir(join(getGatewaySrcPath(), "app"));
   await ensureDir(join(getGatewayPath(), "api"));
+  await ensureDir(join(getGatewayPath(), "public"));
 
   await Promise.all([
     fluenceConfig.$commit(),
