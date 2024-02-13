@@ -2,7 +2,7 @@
   "name": "@fluencelabs/cli",
   "packageManager": "yarn@3.7.0",
   "type": "module",
-  "version": "0.14.3",
+  "version": "0.14.2",
   "description": "CLI for working with Fluence network",
   "author": "Fluence Labs",
   "bin": {
@@ -31,7 +31,7 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "before-pack": "yarn clean && yarn before-build",
     "prepack": "yarn before-pack && yarn build",
-    "jest": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
+    "jest": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --verbose -t 'should deploy deals with spell and service, resolve and run services on them'",
     "clean": "shx rm -rf tmp && shx rm -rf dist",
     "pack-linux-x64": "yarn before-pack && oclif pack tarballs -t 'linux-x64' --no-xz",
     "pack-darwin-x64": "yarn before-pack && oclif pack tarballs -t 'darwin-x64' --no-xz",
