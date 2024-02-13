@@ -296,7 +296,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Change app id in the deal
@@ -327,7 +327,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
   --target-workers=<value>                         (required) Max workers in the deal
 
 DESCRIPTION
@@ -370,7 +370,7 @@ FLAGS
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
                                                        flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 will be used by default
+                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -403,7 +403,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Deposit do the deal
@@ -458,7 +458,7 @@ FLAGS
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
                                                        flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 will be used by default
+                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -490,7 +490,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Match deal with resource owners
@@ -515,7 +515,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Remove unit from the deal
@@ -540,7 +540,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Stop the deal
@@ -566,7 +566,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Withdraw tokens from the deal
@@ -637,7 +637,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Add collateral to capacity commitment
@@ -665,7 +665,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Withdraw collateral from capacity commitment
@@ -693,7 +693,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Withdraw reward from capacity commitment
@@ -1022,7 +1022,7 @@ FLAGS
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
                                           used by default
   --timeout=<value>                       [default: 120] Timeout in seconds for attempting to register local network on
                                           local peers
@@ -1125,12 +1125,12 @@ FLAGS
   --ids=<value>                                    Comma separated capacity commitment IDs. Default: all noxes from
                                                    capacityCommitments property of the provider config
   --no-input                                       Don't interactively ask for any input from the user
-  --nox-names=<value>                              Comma-separated names of noxes to add collateral for. Default: all
-                                                   noxes from capacityCommitments property of the provider config
+  --nox-names=<value>                              Comma-separated names of noxes from provider.yaml. Default: all noxes
+                                                   from 'computePeers' property of provider.yaml
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Add collateral to capacity commitment
@@ -1147,18 +1147,16 @@ Create Capacity commitment
 
 ```
 USAGE
-  $ fluence provider create-commitment [--no-input] [--priv-key <value>] [--env <value>] [--noxes <value>] [--nox-names
-  <value>]
+  $ fluence provider create-commitment [--no-input] [--priv-key <value>] [--env <value>] [--nox-names <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
   --no-input                              Don't interactively ask for any input from the user
-  --nox-names=<value>                     Comma-separated names of noxes to create capacity commitment for. Default: all
-                                          noxes from capacityCommitments property of the provider config
-  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --nox-names=<value>                     Comma-separated names of noxes from provider.yaml. Default: all noxes from
+                                          'computePeers' property of provider.yaml
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
                                           used by default
 
 DESCRIPTION
@@ -1185,7 +1183,7 @@ FLAGS
   --offer=<offer>                         Offer from provider.yaml to use
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
                                           used by default
 
 DESCRIPTION
@@ -1203,19 +1201,17 @@ Deposit to noxes
 
 ```
 USAGE
-  $ fluence provider deposit [--no-input] [--priv-key <value>] [--env <value>] [--noxes <value>] [--nox-names <value>]
-    [--amount <value>]
+  $ fluence provider deposit [--no-input] [--priv-key <value>] [--env <value>] [--nox-names <value>] [--amount <value>]
 
 FLAGS
   --amount=<value>                        Amount of tokens to deposit to noxes
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
   --no-input                              Don't interactively ask for any input from the user
-  --nox-names=<value>                     Comma-separated names of noxes to create capacity commitment for. Default: all
-                                          noxes from capacityCommitments property of the provider config
-  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --nox-names=<value>                     Comma-separated names of noxes from provider.yaml. Default: all noxes from
+                                          'computePeers' property of provider.yaml
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
                                           used by default
 
 DESCRIPTION
@@ -1300,7 +1296,7 @@ FLAGS
   --no-input                              Don't interactively ask for any input from the user
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 will be
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
                                           used by default
 
 DESCRIPTION
@@ -1327,7 +1323,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Reward info
@@ -1353,7 +1349,7 @@ FLAGS
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
                                                    is unsecure. On local network
                                                    0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-                                                   will be used by default
+                                                   key will be used by default
 
 DESCRIPTION
   Withdraw reward
@@ -1637,7 +1633,7 @@ FLAGS
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
                                                        flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 will be used by default
+                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -1679,7 +1675,7 @@ FLAGS
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
                                                        flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 will be used by default
+                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --spell-id=<spell-id>                            [default: worker-spell] Spell id
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
@@ -1722,7 +1718,7 @@ FLAGS
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
                                                        flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 will be used by default
+                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -1769,7 +1765,7 @@ FLAGS
       --particle-id                                    Print particle ids when running Fluence js-client
       --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
                                                        flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 will be used by default
+                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
