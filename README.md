@@ -46,25 +46,19 @@ fluence update --help
 
 -   add `${HOME}/.fluence/cli/bin` to `$PATH`
 
-### Using npm
+## Uninstall CLI
 
-Prerequisites:
+To uninstall CLI you need to remove couple of directories
 
--   Linux or MacOS (there are currently some bugs on Windows)
--   [Node.js = 18.x.x](https://nodejs.org/)
+```sh
+rm -rf ~/.fluence
+rm -rf ~/.local/share/fluence
+```
 
-To install and try Fluence CLI, run:
+You can also remove `${HOME}/.fluence/cli/bin` from `$PATH` e.g. like that:
 
-```sh-session
-$ npm install -g @fluencelabs/cli
-$ fluence COMMAND
-running command...
-$ fluence
-@fluencelabs/cli/0.0.0 linux-x64 node-v18.16.0
-$ fluence --help [COMMAND]
-USAGE
-  $ fluence COMMAND
-...
+```sh
+rm $(which fluence)
 ```
 
 ## Documentation
