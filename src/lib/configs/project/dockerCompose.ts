@@ -183,7 +183,7 @@ function genNox({
         WASM_LOG: "info",
         FLUENCE_MAX_SPELL_PARTICLE_TTL: "9s",
         FLUENCE_ROOT_KEY_PAIR__PATH: `/run/secrets/${name}`,
-        RUST_LOG: "run-console=trace,aquamarine::log=debug,network=trace",
+        RUST_LOG: "run-console=trace,aquamarine::log=debug,network=trace,worker_inactive=trace",
       },
       command: [
         `--config=${configLocation}`,
