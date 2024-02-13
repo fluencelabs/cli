@@ -790,8 +790,8 @@ function getGatewayPackageJSON(isJS: boolean) {
             build: "rm -rf ./dist && tsc -p tsconfig.json",
           }),
       start: isJS
-        ? "node --no-warnings src/server.js"
-        : "node --no-warnings --loader ts-node/esm src/server.ts",
+        ? "node --no-warnings src/dev.js"
+        : "node --no-warnings --loader ts-node/esm src/dev.ts",
     },
     dependencies: {
       [JS_CLIENT_NPM_DEPENDENCY]:
@@ -799,6 +799,7 @@ function getGatewayPackageJSON(isJS: boolean) {
       fastify: "4.25.2",
       "@fastify/rate-limit": "9.1.0",
       "@sinclair/typebox": "0.32.11",
+      dotenv: "16.4.2",
     },
     ...(isJS
       ? {}
@@ -878,12 +879,25 @@ Here you can find an example of simple Fluence HTTP gateway.
 The gateway allows you to map Aqua functions to http requests i.e., you can create HTTP route and handle the incoming request by executing some Aqua function.
 You can check it out and test this repo.
 
-### Start gateway
+### Start gateway locally
 
 - \`npm install\`
 - \`npm run start\`
 - \`curl -X POST http://localhost:8080/my/callback/hello -H "ACCESS_TOKEN: abcdefhi" -H 'Content-Type: application/json' -d '{"name": "Fluence" }'\`
 - After running these commands you should see: \`Hello, Fluence\`
+
+### Deploy to Vercel
+
+You can also deploy the gateway to serverless platforms like Vercel. In order to do so follow the steps:
+
+- Push the entire CLI template to public repository on Github.
+- Create new Vercel account if you don't have one
+- Add project in Vercel from your github account
+- At the configuration page:
+  - Point the root directory to \`src/gateway\`
+  - Optionally pass environment variables for ACCESS_TOKEN and PEER_PRIVATE_KEY. If not given, hardcoded values will be used.
+- Hit the deploy button, wait for the deployment.
+- Try to interact with deployed gateway via this command - \`curl -X POST https://{YOUR_DOMAIN, e.g. fluenceapp.vercel.app}/my/callback/hello -H 'ACCESS_TOKEN: abcdefhi' -H 'Content-Type: application/json' -d '{"name": "Fluence" }'\`
 
 ### Notes:
 
