@@ -405,7 +405,7 @@ async function initTSorJSGatewayProject({
     writeFile(join(getGatewayPath(), "public", ".gitkeep"), "", FS_OPTIONS),
     writeFile(
       join(getGatewayPath(), "vercel.json"),
-      getGatewayVercel(),
+      getGatewayVercel(isJS),
       FS_OPTIONS,
     ),
     writeFile(gatewayReadmePath, GATEWAY_README_CONTENT, FS_OPTIONS),
@@ -829,7 +829,7 @@ const server = fastify({
   logger: true,
 })${isJS ? "" : ".withTypeProvider<TypeBoxTypeProvider>()"};
 
-await server.register(import("../dist/app/index.js"));
+await server.register(import("../${isJS ? "src" : "dist"}/app/index.js"));
 
 export default async function (req${isJS ? "" : ": Request"}, res${
     isJS ? "" : ": Response"
@@ -862,12 +862,12 @@ server.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
 });`;
 }
 
-function getGatewayVercel() {
+function getGatewayVercel(isJS: boolean) {
   return `{
   "rewrites": [{ "source": "/:path*", "destination": "/api/serverless" }],
   "functions": {
-    "api/serverless.ts": {
-      "includeFiles": "{dist,node_modules}/**/*"
+    "api/serverless.${isJS ? "js" : "ts"}": {
+      "includeFiles": "{${isJS ? "src" : "dist"},node_modules}/**/*"
     }
   }
 }`;
