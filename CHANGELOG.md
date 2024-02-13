@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.14.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.2...fluence-cli-v0.14.3) (2024-02-13)
+
+
+### Bug Fixes
+
+* adapt gateway template to vercel deployment ([#750](https://github.com/fluencelabs/cli/issues/750)) ([4601741](https://github.com/fluencelabs/cli/commit/4601741afcd975bd9c28b762711790aff90c8bac))
+* fix aqua compilation path resolution [fixes DXJ-711] ([#751](https://github.com/fluencelabs/cli/issues/751)) ([d44e9e3](https://github.com/fluencelabs/cli/commit/d44e9e35127fe405cc399ef44ce0e9b4f6d01c8f))
+* Fix JS environment in Vercel template ([#755](https://github.com/fluencelabs/cli/issues/755)) ([c6eb6f3](https://github.com/fluencelabs/cli/commit/c6eb6f3ac7761d79714509e4780ca83b963480e5))
+* improver README [fixes DXJ-624 DXJ-681] ([#753](https://github.com/fluencelabs/cli/issues/753)) ([2956d5d](https://github.com/fluencelabs/cli/commit/2956d5d77db8fdb82c1c8e9e6666264259379831))
+
 ## [0.14.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.1...fluence-cli-v0.14.2) (2024-02-09)
 
 
