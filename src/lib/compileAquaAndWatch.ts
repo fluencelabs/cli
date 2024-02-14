@@ -33,7 +33,6 @@ import {
   splitErrorsAndResults,
   stringifyUnknown,
 } from "./helpers/utils.js";
-import { exitCli } from "./lifeCycle.js";
 import type { Required } from "./typeHelpers.js";
 
 type CompileAquaFromFluenceConfigArgs = {
