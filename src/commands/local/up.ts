@@ -19,7 +19,7 @@ import { Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../lib/accounts.js";
 import { createCommitments } from "../../lib/chain/createCommitment.js";
-import { createOrUpdateOffer } from "../../lib/chain/createOffer.js";
+import { createOrUpdateOffers } from "../../lib/chain/createOffer.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { depositToNox } from "../../lib/chain/depositToNox.js";
 import { register } from "../../lib/chain/register.js";
@@ -93,7 +93,7 @@ export default class Up extends BaseCommand<typeof Up> {
 
     await register(flags);
 
-    await createOrUpdateOffer({
+    await createOrUpdateOffers({
       ...flags,
       offer: DEFAULT_OFFER_NAME,
     });

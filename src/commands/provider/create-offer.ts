@@ -15,7 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { createOrUpdateOffer } from "../../lib/chain/createOffer.js";
+import { createOrUpdateOffers } from "../../lib/chain/createOffer.js";
 import {
   OFFER_FLAG,
   PRIV_KEY_FLAG,
@@ -35,6 +35,6 @@ export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CreateOffer));
-    await createOrUpdateOffer(flags);
+    await createOrUpdateOffers(flags);
   }
 }
