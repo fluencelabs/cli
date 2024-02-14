@@ -23,8 +23,8 @@ jobs:
         include:
           - platform: win32-x64
             runner: windows-amd64-m-2xlarge
-          - platform: linux-x64
-            runner: linux-amd64-m-2xlarge
+          # - platform: linux-x64
+          #   runner: linux-amd64-m-2xlarge
 
     with:
       ref: ${{ github.ref }}
