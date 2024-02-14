@@ -38,6 +38,7 @@
     "pack-darwin-arm64": "yarn before-pack && oclif pack tarballs -t 'darwin-arm64' --no-xz",
     "pack-win32-x64": "yarn before-pack && oclif pack win --targets 'win32-x64'",
     "pack": "yarn before-pack && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64,win32-x64' --no-xz",
+    "pack-ci": "yarn before-pack && oclif pack tarballs -t 'linux-x64,darwin-arm64' --no-xz",
     "upload-linux-x64": "oclif upload tarballs -t 'linux-x64' --no-xz",
     "upload-darwin-x64": "oclif upload tarballs -t 'darwin-x64' --no-xz",
     "upload-darwin-arm64": "oclif upload tarballs -t 'darwin-arm64' --no-xz",

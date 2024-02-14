@@ -156,12 +156,13 @@ jobs:
           flags: --tag snapshot
 
       - name: Pack fluence-cli
-        run: yarn pack
+        run: yarn pack-ci
 
       - name: Rename archives
         run: |
-          for p in linux-x64 darwin-x64 darwin-arm64 win32-x64; do
+          for p in linux-x64 darwin-arm64; do
             mv dist/fluence-*${p}*.tar.gz fluence-cli-${p}.tar.gz
+          done
 
       - name: Upload linux-x64 to CI checks
         uses: actions/upload-artifact@v4
@@ -169,20 +170,8 @@ jobs:
           name: fcli
           path: fluence-cli-linux-x64.tar.gz
 
-      - name: Upload win32-x64 to CI checks
-        uses: actions/upload-artifact@v4
-        with:
-          name: fcli-win32-x64
-          path: fluence-cli-win32-x64.tar.gz
-
-      - name: Upload darwin-x64 to CI checks
-        uses: actions/upload-artifact@v4
-        with:
-          name: fcli-dawrin-x64
-          path: fluence-cli-darwin-x64.tar.gz
-
       - name: Upload darwin-arm64 to CI checks
         uses: actions/upload-artifact@v4
         with:
-          name: fcli-dawrin-arm64
+          name: fcli-macos
           path: fluence-cli-darwin-arm64.tar.gz
