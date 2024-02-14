@@ -1174,12 +1174,11 @@ Create an offer or update existing one
 
 ```
 USAGE
-  $ fluence provider create-offer [--no-input] [--priv-key <value>] [--env <value>] [--noxes <value>] [--offer <value>]
+  $ fluence provider create-offer [--no-input] [--priv-key <value>] [--env <value>] [--offer <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
   --no-input                              Don't interactively ask for any input from the user
-  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
   --offer=<offer>                         Offer from provider.yaml to use
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
