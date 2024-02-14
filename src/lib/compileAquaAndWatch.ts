@@ -33,7 +33,6 @@ import {
   splitErrorsAndResults,
   stringifyUnknown,
 } from "./helpers/utils.js";
-import { exitCli } from "./lifeCycle.js";
 import type { Required } from "./typeHelpers.js";
 
 type CompileAquaFromFluenceConfigArgs = {
@@ -121,8 +120,6 @@ export async function compileAquaFromFluenceConfig({
         .join("\n"),
     );
   }
-
-  await exitCli();
 }
 
 export function hasAquaToCompile(

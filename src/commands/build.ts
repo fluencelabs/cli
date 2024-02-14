@@ -63,6 +63,7 @@ export default class Build extends BaseCommand<typeof Build> {
     );
 
     const workerConfig = await initNewWorkersConfigReadonly();
+
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig, fluenceEnv);
 
     await compileAquaFromFluenceConfig({
