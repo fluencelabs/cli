@@ -19,7 +19,6 @@ import { createOrUpdateOffer } from "../../lib/chain/createOffer.js";
 import {
   OFFER_FLAG,
   PRIV_KEY_FLAG,
-  NOXES_FLAG,
   PROVIDER_CONFIG_FLAGS,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -31,7 +30,6 @@ export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
     ...PROVIDER_CONFIG_FLAGS,
-    ...NOXES_FLAG,
     ...OFFER_FLAG,
   };
 
