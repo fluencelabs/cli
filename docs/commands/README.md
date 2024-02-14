@@ -1409,7 +1409,7 @@ DESCRIPTION
   of fluence.yaml file. If --input flag is used - then content of 'compileAqua' property in fluence.yaml will be ignored
 
 EXAMPLES
-  $ fluence run
+  $ fluence run -f 'funcName("stringArg")'
 ```
 
 _See code: [src/commands/run.ts](https://github.com/fluencelabs/cli/blob/v0.14.3/src/commands/run.ts)_
