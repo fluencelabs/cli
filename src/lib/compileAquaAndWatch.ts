@@ -121,8 +121,6 @@ export async function compileAquaFromFluenceConfig({
         .join("\n"),
     );
   }
-
-  await exitCli();
 }
 
 export function hasAquaToCompile(
