@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.14.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.3...fluence-cli-v0.14.4) (2024-02-14)
+
+
+### Features
+
+* trigger build ([#757](https://github.com/fluencelabs/cli/issues/757)) ([10da9dd](https://github.com/fluencelabs/cli/commit/10da9dd2d38d2392af0d2b04239694d10c00a819))
+
+
+### Bug Fixes
+
+* change build order ([755c1c6](https://github.com/fluencelabs/cli/commit/755c1c6418bcaa26174f44d222cff5f0bb1d5e2a))
+* move exit cli ([#759](https://github.com/fluencelabs/cli/issues/759)) ([e32c927](https://github.com/fluencelabs/cli/commit/e32c927402eb90e6b7257bae591e38802c06a9ce))
+
 ## [0.14.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.2...fluence-cli-v0.14.3) (2024-02-13)
 
 
