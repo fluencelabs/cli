@@ -49,6 +49,7 @@
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
 * [`fluence provider register`](#fluence-provider-register)
 * [`fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-reward-info-deal-address-unit-id)
+* [`fluence provider update`](#fluence-provider-update)
 * [`fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-withdraw-reward-deal-address-unit-id)
 * [`fluence run`](#fluence-run)
 * [`fluence service add [PATH | URL]`](#fluence-service-add-path--url)
@@ -269,7 +270,9 @@ USAGE
   $ fluence chain info [--no-input] [--env <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -956,7 +959,9 @@ USAGE
   $ fluence local init [--no-input] [--env <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
 
 DESCRIPTION
@@ -1017,7 +1022,9 @@ USAGE
   $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
@@ -1150,7 +1157,9 @@ USAGE
   $ fluence provider create-commitment [--no-input] [--priv-key <value>] [--env <value>] [--nox-names <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
   --nox-names=<value>                     Comma-separated names of noxes from provider.yaml. Default: all noxes from
                                           'computePeers' property of provider.yaml
@@ -1170,23 +1179,25 @@ _See code: [src/commands/provider/create-commitment.ts](https://github.com/fluen
 
 ## `fluence provider create-offer`
 
-Create an offer or update existing one
+Create an offer. You have to be registered as a provider to do that
 
 ```
 USAGE
-  $ fluence provider create-offer [--no-input] [--priv-key <value>] [--env <value>] [--offer <value>]
+  $ fluence provider create-offer [--no-input] [--priv-key <value>] [--env <value>] [--offers <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
-  --offer=<offer>                         Offer from provider.yaml to use
+  --offers=<offer-1,offer-2>              Comma-separated list of offer names. If not provider all offers will be used
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
                                           0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
                                           used by default
 
 DESCRIPTION
-  Create an offer or update existing one
+  Create an offer. You have to be registered as a provider to do that
 
 ALIASES
   $ fluence provider co
@@ -1200,14 +1211,14 @@ Deposit to noxes
 
 ```
 USAGE
-  $ fluence provider deposit [--no-input] [--priv-key <value>] [--env <value>] [--nox-names <value>] [--amount <value>]
+  $ fluence provider deposit [--no-input] [--priv-key <value>] [--env <value>] [--amount <value>]
 
 FLAGS
   --amount=<value>                        Amount of tokens to deposit to noxes
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
-  --nox-names=<value>                     Comma-separated names of noxes from provider.yaml. Default: all noxes from
-                                          'computePeers' property of provider.yaml
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
                                           0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
@@ -1231,7 +1242,9 @@ USAGE
   $ fluence provider gen [--no-input] [--noxes <value>] [--env <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
 
@@ -1253,7 +1266,9 @@ USAGE
   $ fluence provider init [--no-input] [--noxes <value>] [--env <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
   --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
 
@@ -1265,33 +1280,41 @@ _See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence provider offer-info`
 
-Get info about provider
+Get info about offers
 
 ```
 USAGE
-  $ fluence provider offer-info --offer-id <value> [--no-input] [--env <value>]
+  $ fluence provider offer-info [--no-input] [--offers <value> | --ids <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                                    Comma-separated list of offer ids
   --no-input                                       Don't interactively ask for any input from the user
-  --offer-id=<value>                               (required) Offer ID
+  --offers=<offer-1,offer-2>                       Comma-separated list of offer names. If not provider all offers will
+                                                   be used
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
-  Get info about provider
+  Get info about offers
 ```
 
 _See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/offer-info.ts)_
 
 ## `fluence provider register`
 
-Register in matching contract
+Register as a provider
 
 ```
 USAGE
   $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Environment to use when generating the provider config
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
   --no-input                              Don't interactively ask for any input from the user
   --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
                                           unsecure. On local network
@@ -1299,7 +1322,7 @@ FLAGS
                                           used by default
 
 DESCRIPTION
-  Register in matching contract
+  Register as a provider
 ```
 
 _See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/register.ts)_
@@ -1329,6 +1352,30 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/reward-info.ts)_
+
+## `fluence provider update`
+
+Update provider info
+
+```
+USAGE
+  $ fluence provider update [--no-input] [--priv-key <value>] [--env <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
+                                          environment from .fluence/env.yaml, that can also be set using 'fluence
+                                          default env' command
+  --no-input                              Don't interactively ask for any input from the user
+  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
+                                          unsecure. On local network
+                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
+                                          used by default
+
+DESCRIPTION
+  Update provider info
+```
+
+_See code: [src/commands/provider/update.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/update.ts)_
 
 ## `fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID]`
 
