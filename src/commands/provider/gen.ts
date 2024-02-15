@@ -18,7 +18,7 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { ensureComputerPeerConfigs } from "../../lib/configs/project/provider.js";
 import {
-  PROVIDER_CONFIG_FLAGS,
+  CHAIN_ENV_FLAG,
   NOXES_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
@@ -35,7 +35,7 @@ export default class Gen extends BaseCommand<typeof Gen> {
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_ENV_FLAG,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Gen));

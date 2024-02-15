@@ -19,10 +19,10 @@ import { Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../lib/accounts.js";
 import { createCommitments } from "../../lib/chain/createCommitment.js";
-import { createOrUpdateOffers } from "../../lib/chain/createOffer.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { depositToNox } from "../../lib/chain/depositToNox.js";
-import { register } from "../../lib/chain/register.js";
+import { createOffers } from "../../lib/chain/offer.js";
+import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   PRIV_KEY_FLAG_NAME,
@@ -30,7 +30,7 @@ import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
   PRIV_KEY_FLAG,
-  PROVIDER_CONFIG_FLAGS,
+  CHAIN_ENV_FLAG,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -47,7 +47,7 @@ export default class Up extends BaseCommand<typeof Up> {
       default: 120,
     }),
     ...PRIV_KEY_FLAG,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_ENV_FLAG,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Up));
@@ -91,11 +91,11 @@ export default class Up extends BaseCommand<typeof Up> {
 
     await depositToNox({ ...flags, amount: "100" });
 
-    await register(flags);
+    await registerProvider(flags);
 
-    await createOrUpdateOffers({
+    await createOffers({
       ...flags,
-      offer: DEFAULT_OFFER_NAME,
+      offers: DEFAULT_OFFER_NAME,
     });
 
     const ccIds = await createCommitments(flags);

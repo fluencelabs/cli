@@ -42,7 +42,7 @@ export async function createCommitments(flags: {
   const precision = await core.precision();
   const { ethers } = await import("ethers");
 
-  const createCommitmentsTxReceipt = await signBatch(
+  const createCommitmentsTxReceipts = await signBatch(
     await Promise.all(
       computePeers.map(
         async ({
@@ -71,17 +71,19 @@ export async function createCommitments(flags: {
     ),
   );
 
-  if (createCommitmentsTxReceipt === undefined) {
+  if (createCommitmentsTxReceipts === undefined) {
     return commandObj.error(
       "The are no compute peers to create commitments for",
     );
   }
 
-  const commitmentIds = getEventValues({
-    txReceipt: createCommitmentsTxReceipt,
-    contract: capacity,
-    eventName: "CommitmentCreated",
-    value: "commitmentId",
+  const commitmentIds = createCommitmentsTxReceipts.flatMap((txReceipt) => {
+    return getEventValues({
+      txReceipt,
+      contract: capacity,
+      eventName: "CommitmentCreated",
+      value: "commitmentId",
+    });
   });
 
   const [notStringCommitmentIds, stringCommitmentIds] = splitErrorsAndResults(

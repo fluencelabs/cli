@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { registerProvider } from "../../lib/chain/providerInfo.js";
-import { PRIV_KEY_FLAG, CHAIN_ENV_FLAG } from "../../lib/const.js";
-import { initCli } from "../../lib/lifeCycle.js";
+import { commandObj } from "../commandObj.js";
+import { CLI_NAME } from "../const.js";
+import { getDealClient } from "../dealClient.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register as a provider";
-  static override flags = {
-    ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...CHAIN_ENV_FLAG,
-  };
+export async function assertProviderIsRegistered() {
+  const { dealClient, signerOrWallet } = await getDealClient();
+  const market = await dealClient.getMarket();
 
-  async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Register));
-    await registerProvider(flags);
+  const initialProviderInfo = await market.getProviderInfo(
+    signerOrWallet.address,
+  );
+
+  if (initialProviderInfo.name.length === 0) {
+    commandObj.error(
+      `You have to register as a provider first. Use '${CLI_NAME} provider register' command for that`,
+    );
   }
 }

@@ -26,6 +26,7 @@ import type {
 } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import type { ethers, LogDescription } from "ethers";
+import chunk from "lodash-es/chunk.js";
 
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { commandObj } from "./commandObj.js";
@@ -281,6 +282,8 @@ export type CallsToBatch<T extends Array<unknown>> = Array<
   ]
 >;
 
+const BATCH_SIZE = 10;
+
 export async function signBatch<T extends Array<unknown>>(
   callsToBatch: CallsToBatch<T>,
 ) {
@@ -306,9 +309,12 @@ export async function signBatch<T extends Array<unknown>>(
     throw new Error("All transactions must be to the same address");
   }
 
-  const data = populatedTxs.map(({ data }) => {
-    return data;
-  });
+  const data = chunk(
+    populatedTxs.map(({ data }) => {
+      return data;
+    }),
+    BATCH_SIZE,
+  );
 
   const { Multicall__factory } = await import("@fluencelabs/deal-ts-clients");
   const { signerOrWallet } = await getDealClient();
@@ -322,7 +328,13 @@ export async function signBatch<T extends Array<unknown>>(
       .join("\n")}\n${color.yellow("MULTICALL END")}`,
   );
 
-  return sign(multicall, data);
+  const receipts = [];
+
+  for (const d of data) {
+    receipts.push(await sign(multicall, d));
+  }
+
+  return receipts;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -372,6 +384,51 @@ export function getEventValue<T extends string, U extends Contract<T>>({
       topics: [...log.topics],
     })
     ?.args.getValue(value);
+
+  return res;
+}
+
+type GetEventValueFromReceiptsArgs<T extends string, U extends Contract<T>> = {
+  txReceipts: ethers.TransactionReceipt[];
+  contract: U;
+  eventName: T;
+  value: string;
+};
+
+export function getEventValueFromReceipts<
+  T extends string,
+  U extends Contract<T>,
+>({
+  txReceipts,
+  contract,
+  eventName,
+  value,
+}: GetEventValueFromReceiptsArgs<T, U>) {
+  const { topicHash } = contract.getEvent(eventName).fragment;
+
+  const logs = txReceipts
+    .map((txReceipt) => {
+      return txReceipt.logs.find((log) => {
+        return log.topics[0] === topicHash;
+      });
+    })
+    .filter((log): log is NonNullable<typeof log> => {
+      return log !== undefined;
+    });
+
+  assert(
+    logs.length === 0,
+    `Event '${eventName}' with hash '${topicHash}' not found in logs of the successful transaction. Try updating ${CLI_NAME_FULL} to the latest version`,
+  );
+
+  const res: unknown[] = logs.map((log): unknown => {
+    return contract.interface
+      .parseLog({
+        data: log.data,
+        topics: [...log.topics],
+      })
+      ?.args.getValue(value);
+  });
 
   return res;
 }

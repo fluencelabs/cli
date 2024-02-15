@@ -19,7 +19,7 @@ import { createCommitments } from "../../lib/chain/createCommitment.js";
 import {
   PRIV_KEY_FLAG,
   NOX_NAMES_FLAG,
-  PROVIDER_CONFIG_FLAGS,
+  CHAIN_ENV_FLAG,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -31,7 +31,7 @@ export default class CreateCommitment extends BaseCommand<
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_ENV_FLAG,
     ...NOX_NAMES_FLAG,
   };
 

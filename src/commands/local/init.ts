@@ -27,7 +27,7 @@ import {
 import {
   DOCKER_COMPOSE_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
-  PROVIDER_CONFIG_FLAGS,
+  CHAIN_ENV_FLAG,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
@@ -37,7 +37,7 @@ export default class Init extends BaseCommand<typeof Init> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_ENV_FLAG,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));

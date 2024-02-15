@@ -14,56 +14,59 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import {
+  resolveOffersFromProviderArtifactsConfig,
+  getOffersInfo,
+  offersInfoToString,
+} from "../../lib/chain/offer.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG } from "../../lib/const.js";
-import { getReadonlyDealClient } from "../../lib/dealClient.js";
+import {
+  OFFERS_FLAG_NAME,
+  OFFERS_FLAG_OBJECT,
+  ENV_FLAG,
+  PRIV_KEY_FLAG,
+} from "../../lib/const.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
-  static override description = "Get info about provider";
+  static override description = "Get info about offers";
   static override flags = {
     ...baseFlags,
-    "offer-id": Flags.string({
-      description: "Offer ID",
-      required: true,
+    [OFFERS_FLAG_NAME]: Flags.string({
+      ...OFFERS_FLAG_OBJECT,
+      exclusive: ["ids"],
+    }),
+    ids: Flags.string({
+      description: "Comma-separated list of offer ids",
+      exclusive: [OFFERS_FLAG_NAME],
     }),
     ...ENV_FLAG,
+    ...PRIV_KEY_FLAG,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(OfferInfo));
-    const { readonlyDealClient } = await getReadonlyDealClient();
-    const market = await readonlyDealClient.getMarket();
 
-    const offerId = flags["offer-id"];
+    const offers =
+      flags.ids === undefined
+        ? Object.fromEntries(
+            (await resolveOffersFromProviderArtifactsConfig(flags)).map(
+              ({ id, offerName }) => {
+                return [offerName, id] as const;
+              },
+            ),
+          )
+        : Object.fromEntries(
+            commaSepStrToArr(flags.ids).map((id, i) => {
+              return [`offer-${i}`, id] as const;
+            }),
+          );
 
-    const offerInfo = await market.getOffer(offerId);
-
-    commandObj.log(color.gray(`Offer Info:`));
-    const { ethers } = await import("ethers");
-
-    commandObj.log(color.gray(`Provider address: ${offerInfo.provider}`));
-
-    //TODO: add to units in payment token
-    commandObj.log(
-      color.gray(
-        `Min price per worker per epoch: ${ethers.formatEther(
-          offerInfo.minPricePerWorkerEpoch,
-        )}`,
-      ),
-    );
-
-    commandObj.log(color.gray(`Payment token: ${offerInfo.paymentToken}`));
-
-    commandObj.log(color.gray(`--Peers--`));
-
-    //TODO: get peers from indexer
-    commandObj.log(color.gray(`Sorry, this not implemented yet`));
-
-    commandObj.log(color.gray(`----------`));
+    const offerInfoResult = await getOffersInfo(offers);
+    commandObj.logToStderr(offersInfoToString(offerInfoResult));
   }
 }

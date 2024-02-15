@@ -409,16 +409,19 @@ export const NOXES_FLAG = {
   }),
 };
 
-export const OFFER_FLAG = {
-  offer: Flags.string({
-    description: `Offer from ${PROVIDER_CONFIG_FULL_FILE_NAME} to use`,
-    helpValue: "<offer>",
-  }),
+export const OFFERS_FLAG_NAME = "offers";
+export const OFFERS_FLAG_OBJECT = {
+  description: `Comma-separated list of offer names. If not provider all offers will be used`,
+  helpValue: "<offer-1,offer-2>",
 };
 
-export const PROVIDER_CONFIG_FLAGS = {
+export const OFFERS_FLAG = {
+  [OFFERS_FLAG_NAME]: Flags.string(OFFERS_FLAG_OBJECT),
+};
+
+export const CHAIN_ENV_FLAG = {
   [ENV_FLAG_NAME]: Flags.string({
-    description: "Environment to use when generating the provider config",
+    description: `Blockchain environment to use when running the command. By default uses the environment from ${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}, that can also be set using '${CLI_NAME} default env' command`,
     helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
   }),
 };

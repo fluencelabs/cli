@@ -15,12 +15,12 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { registerProvider } from "../../lib/chain/providerInfo.js";
+import { updateProvider } from "../../lib/chain/providerInfo.js";
 import { PRIV_KEY_FLAG, CHAIN_ENV_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register as a provider";
+export default class Update extends BaseCommand<typeof Update> {
+  static override description = "Update provider info";
   static override flags = {
     ...baseFlags,
     ...PRIV_KEY_FLAG,
@@ -28,7 +28,7 @@ export default class Register extends BaseCommand<typeof Register> {
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Register));
-    await registerProvider(flags);
+    const { flags } = await initCli(this, await this.parse(Update));
+    await updateProvider(flags);
   }
 }

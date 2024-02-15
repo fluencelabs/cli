@@ -151,13 +151,16 @@ export const LOGS_GET_ERROR_START = `Failed to get logs:`;
 
 export function splitErrorsAndResults<T, U, V>(
   array: Array<T>,
-  splitter: (v: T) => { error: NonNullable<U> } | { result: NonNullable<V> },
+  splitter: (
+    v: T,
+    i: number,
+  ) => { error: NonNullable<U> } | { result: NonNullable<V> },
 ) {
   const errors: Array<NonNullable<U>> = [];
   const results: Array<NonNullable<V>> = [];
 
-  for (const item of array) {
-    const splitted = splitter(item);
+  for (const [i, item] of Object.entries(array)) {
+    const splitted = splitter(item, Number(i));
 
     if ("error" in splitted) {
       errors.push(splitted.error);

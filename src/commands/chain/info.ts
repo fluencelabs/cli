@@ -17,7 +17,7 @@
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { LOCAL_NET_DEFAULT_ACCOUNTS } from "../../lib/accounts.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG_NAME, PROVIDER_CONFIG_FLAGS } from "../../lib/const.js";
+import { ENV_FLAG_NAME, CHAIN_ENV_FLAG } from "../../lib/const.js";
 import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
 import { jsonStringify } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -27,7 +27,7 @@ export default class Info extends BaseCommand<typeof Info> {
     "Show contract addresses for the fluence environment and accounts for the local environment";
   static override flags = {
     ...baseFlags,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_ENV_FLAG,
   };
 
   async run(): Promise<void> {

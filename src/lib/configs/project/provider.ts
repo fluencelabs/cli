@@ -329,8 +329,9 @@ const configSchemaV0 = {
   additionalProperties: false,
   properties: {
     providerName: {
-      description: "Provider name",
+      description: "Provider name. Must not be empty",
       type: "string",
+      minLength: 1,
     },
     offers: {
       description: "A map with offer names as keys and offers as values",
@@ -755,7 +756,10 @@ export type EnsureComputerPeerConfigs = Awaited<
   ReturnType<typeof ensureComputerPeerConfigs>
 >[number];
 
-export async function ensureComputerPeerConfigs(args: ProviderConfigArgs) {
+export async function ensureComputerPeerConfigs(
+  args: ProviderConfigArgs,
+  computePeerNames?: string[],
+) {
   const { ethers } = await import("ethers");
   const providerConfig = await initNewReadonlyProviderConfig(args);
 
@@ -776,8 +780,13 @@ export async function ensureComputerPeerConfigs(args: ProviderConfigArgs) {
     await initNewProviderSecretsConfig(providerConfig);
 
   const [computePeersWithoutKeys, computePeersWithKeys] = splitErrorsAndResults(
-    Object.entries(providerConfig.computePeers).map(
-      ([computePeerName, computePeer]) => {
+    Object.entries(providerConfig.computePeers)
+      .filter(([name]) => {
+        return (
+          computePeerNames === undefined || computePeerNames.includes(name)
+        );
+      })
+      .map(([computePeerName, computePeer]) => {
         return {
           computePeerName,
           computePeer,
@@ -785,8 +794,7 @@ export async function ensureComputerPeerConfigs(args: ProviderConfigArgs) {
           signingWallet:
             providerSecretsConfig.noxes[computePeerName]?.signingWallet,
         };
-      },
-    ),
+      }),
     ({ secretKey, signingWallet, computePeerName, computePeer }) => {
       if (secretKey === undefined || signingWallet === undefined) {
         return {
