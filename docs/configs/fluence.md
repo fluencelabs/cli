@@ -99,7 +99,7 @@ Worker config
 | Property                | Type     | Required | Description                                                                                                                                  |
 |-------------------------|----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | `computeUnits`          | number   | No       | Number of compute units you require. 1 compute unit = 2GB. Currently the only allowed value is 1. This will change in the future. Default: 1 |
-| `effectors`             | string[] | No       | Effector to be used in the deal                                                                                                              |
+| `effectors`             | string[] | No       | Effector CIDs to be used in the deal. Must be a valid CID                                                                                    |
 | `initialBalance`        | number   | No       | Initial balance after deploy in FLT                                                                                                          |
 | `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                                                                  |
 | `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                                                                     |
