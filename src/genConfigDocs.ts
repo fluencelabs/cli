@@ -103,5 +103,5 @@ ${configsInfo
       schema["description"],
     )}`;
   })
-  .join("\n")}`,
+  .join("\n\n")}`,
 );

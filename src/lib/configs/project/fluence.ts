@@ -316,7 +316,7 @@ const dealSchemaObj = {
     },
     effectors: {
       type: "array",
-      description: "Effector to be used in the deal",
+      description: "Effector CIDs to be used in the deal. Must be a valid CID",
       items: { type: "string" },
       nullable: true,
     },

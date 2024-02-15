@@ -162,10 +162,6 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
           dealAddress: previouslyDeployedDeal.dealIdOriginal,
         });
 
-        if (flags["auto-match"]) {
-          await match(previouslyDeployedDeal.dealIdOriginal);
-        }
-
         updatedDeals[workerName] = {
           deal: getLinkToAddress(
             previouslyDeployedDeal.dealIdOriginal,
