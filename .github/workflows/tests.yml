@@ -15,6 +15,14 @@ on:
         description: "Whether to run tests in parallel or synchronously"
         type: string
         default: "true"
+      runner:
+        description: "Which runner to use to run tests"
+        type: string
+        default: "linux-amd64-m-2xlarge"
+      platform:
+        description: "For what platform to run tests (linux-x64, darwin-x64 etc)"
+        type: string
+        default: "linux-x64"
       nox-image:
         description: "nox image tag"
         type: string
@@ -228,17 +236,8 @@ jobs:
           CARGO_REGISTRIES_FLUENCE_INDEX: "git://crates.fluence.dev/index"
           CARGO_REGISTRIES_FLUENCE_TOKEN: "${{ steps.secrets.outputs.CARGO_REGISTRIES_FLUENCE_TOKEN }}"
           NPM_CONFIG_REGISTRY: "https://npm.fluence.dev"
-        run: yarn test-linux-x64
+        run: yarn test-${{ inputs.platform }}
 
       - name: Dump container logs
         if: always()
         uses: jwalton/gh-docker-logs@v2
-
-      - name: Stop containers
-        if: always()
-        working-directory: tmp/templates/quickstart
-        run: ../../linux-x64/fluence/bin/run.js local down
-
-      - name: Cleanup
-        if: always()
-        run: rm -rf tmp ~/.fluence

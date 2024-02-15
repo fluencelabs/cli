@@ -14,6 +14,19 @@ concurrency:
 
 jobs:
   fluence-cli:
+    name: "fluence-cli (${{ matrix.platform }})"
     uses: ./.github/workflows/tests.yml
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x64
+            runner: linux-amd64-m-2xlarge
+          - platform: linux-arm64
+            runner: linux-arm64-m-2xlarge
+
     with:
       ref: ${{ github.ref }}
+      runner: ${{ matrix.runner }}
+      platform: ${{ matrix.platform }}
