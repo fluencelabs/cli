@@ -249,7 +249,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   await setTryTimeout(
     async function callRunDeployedServicesCallback() {
       await fluence({
-        args: ["deal", "deposit", dealId, "10"],
+        args: ["deal", "deposit", "10"],
         cwd,
       });
     },
