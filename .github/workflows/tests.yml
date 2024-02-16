@@ -14,7 +14,7 @@ on:
       run-tests-in-parallel:
         description: "Whether to run tests in parallel or synchronously"
         type: string
-        default: "true"
+        default: "false"
       nox-image:
         description: "nox image tag"
         type: string
