@@ -421,6 +421,19 @@ export const CHAIN_FLAGS = {
   }),
 };
 
+export const DEAL_FLAGS = {
+  deal: Flags.string({
+    description: `Comma-separated deal names of the deployed deals for the current environment. Default: all deployed deals`,
+    helpValue: "<name>",
+    exclusive: ["deal-id"],
+  }),
+  "deal-id": Flags.string({
+    description: `Comma-separated deal ids of the deployed deal`,
+    helpValue: "<name>",
+    exclusive: ["deal"],
+  }),
+};
+
 export const MARINE_BUILD_ARGS_FLAG_NAME = "marine-build-args";
 export const MARINE_BUILD_ARGS_PROPERTY = "marineBuildArgs";
 export const IPFS_ADDR_PROPERTY = "ipfsAddr";

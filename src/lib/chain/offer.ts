@@ -184,7 +184,6 @@ export async function createOffers(flags: OffersArgs) {
 
   commandObj.logToStderr(`
 Offers ${offersStr} successfully created!
-
 ${offersInfoToString(offersInfoResult)}
 `);
 }
@@ -208,8 +207,7 @@ export function offersInfoToString({
               offerName,
               offerInfo: { peerCount, minPricePerWorkerEpoch, provider },
             }) => {
-              return `
-Offer: ${offerName}
+              return `Offer: ${offerName}
 Provider: ${provider}
 Peer number: ${peerCount}
 Peers: TODO
