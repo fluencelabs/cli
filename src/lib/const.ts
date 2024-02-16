@@ -754,7 +754,7 @@ export const READMEs: Record<Template, string> = {
 export const DEFAULT_OFFER_NAME = "offer";
 
 export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
-export const DEFAULT_CC_DURATION = "5 minutes";
+export const DEFAULT_CC_DURATION = "100 minutes";
 export const DURATION_EXAMPLE =
   "in human-readable format. Example: 1 months 1 days";
 
