@@ -42,6 +42,7 @@
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider add-collateral`](#fluence-provider-add-collateral)
+* [`fluence provider cc-info`](#fluence-provider-cc-info)
 * [`fluence provider create-commitment`](#fluence-provider-create-commitment)
 * [`fluence provider create-offer`](#fluence-provider-create-offer)
 * [`fluence provider deposit`](#fluence-provider-deposit)
@@ -1177,6 +1178,28 @@ ALIASES
 ```
 
 _See code: [src/commands/provider/add-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/add-collateral.ts)_
+
+## `fluence provider cc-info`
+
+Get info about capacity commitments
+
+```
+USAGE
+  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
+
+DESCRIPTION
+  Get info about capacity commitments
+```
+
+_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/cc-info.ts)_
 
 ## `fluence provider create-commitment`
 
