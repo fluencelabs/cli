@@ -153,19 +153,38 @@ jobs:
         if: inputs.channel != 'null'
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
-      - run: ls -alh dist/
-
       - name: Rename archive
+        if: inputs.platform != 'win32-x64'
         run: mv dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
 
       - name: Upload archive to CI
+        if: inputs.platform != 'win32-x64'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}
           path: fluence-cli-${{ inputs.platform }}.tar.gz
 
+
       - name: Upload archive to release
-        if: inputs.tag != 'null'
+        if: inputs.tag != 'null' && inputs.platform != 'win32-x64'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: fluence-cli-${{ inputs.platform }}.tar.gz
+          tag_name: ${{ inputs.tag }}
+
+      - name: Rename windows installer
+        if: inputs.platform == 'win32-x64'
+        run: mv dist/fluence-*${{ inputs.platform }}*exe fluence-cli-${{ inputs.platform }}.exe
+
+      - name: Upload windows installer to CI
+        if: inputs.platform == 'win32-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.platform }}
+          path: fluence-cli-${{ inputs.platform }}.exe
+
+      - name: Upload windows installer to release
+        if: inputs.tag != 'null' && inputs.platform == 'win32-x64'
         uses: softprops/action-gh-release@v1
         with:
           files: fluence-cli-${{ inputs.platform }}.tar.gz
