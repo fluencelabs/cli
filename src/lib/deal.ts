@@ -158,6 +158,10 @@ export async function match(dealAddress: string) {
     1000 * 60 * 5, // 5 minutes
   );
 
+  if (matchedOffers.offers.length === 0) {
+    return commandObj.error(`No matched offers for deal ${dealAddress}`);
+  }
+
   dbg(`got matchedOffers: ${stringifyUnknown(matchedOffers)}`);
 
   const market = await dealClient.getMarket();

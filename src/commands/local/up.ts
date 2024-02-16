@@ -87,7 +87,7 @@ export default class Up extends BaseCommand<typeof Up> {
     await registerProvider();
 
     await createOffers({
-      ...flags,
+      force: true,
       offers: DEFAULT_OFFER_NAME,
     });
 

@@ -43,7 +43,6 @@ import {
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
-import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
@@ -204,8 +203,6 @@ async function getWalletConnectProvider() {
     throw new Error("Wallet address is not defined");
   }
 
-  stopSpinner(`\nWallet ${color.yellow(walletAddress)} connected`);
-
   const { ethers } = await import("ethers");
   return new ethers.BrowserProvider(provider).getSigner();
 }
@@ -237,25 +234,24 @@ export async function sign<T extends unknown[]>(
     dbg(debugInfo);
   }
 
-  const tx = await setTryTimeout(
-    () => {
-      return method(...args);
+  const { tx, res } = await setTryTimeout(
+    async function executingContractMethod() {
+      const tx = await method(...args);
+      const res = await tx.wait();
+      return { tx, res };
     },
     (err) => {
       throw err;
     },
-    // try for 2 minutes to execute contract method
     1000 * 60 * 2,
   );
 
-  startSpinner(
-    `Waiting for ${color.yellow(method.name)} transaction ${color.yellow(
+  commandObj.logToStderr(
+    `${color.yellow(method.name)} transaction ${color.yellow(
       tx.hash,
-    )} to be mined`,
+    )} was mined successfuly`,
   );
 
-  const res = await tx.wait();
-  stopSpinner();
   assert(res !== null, `'${method.name}' transaction hash is not defined`);
   assert(res.status === 1, `'${method.name}' transaction failed with status 1`);
   return res;

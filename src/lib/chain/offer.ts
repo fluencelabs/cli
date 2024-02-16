@@ -48,6 +48,7 @@ const OFFER_ID_PROPERTY = "offerId";
 
 export type OffersArgs = {
   [OFFERS_FLAG_NAME]: string | undefined;
+  force?: boolean | undefined;
 };
 
 export async function createOffers(flags: OffersArgs) {
@@ -63,7 +64,7 @@ export async function createOffers(flags: OffersArgs) {
     return id !== undefined;
   });
 
-  if (alreadyCreatedOffers.length > 0) {
+  if (alreadyCreatedOffers.length > 0 && flags.force !== true) {
     commandObj.error(
       `You already created the following offers: ${alreadyCreatedOffers
         .map(({ offerName }) => {

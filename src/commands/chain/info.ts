@@ -45,9 +45,7 @@ export default class Info extends BaseCommand<typeof Info> {
     commandObj.log(
       jsonStringify({
         contracts,
-        ...(chainEnv === "local"
-          ? { defaultAccounts: LOCAL_NET_DEFAULT_ACCOUNTS }
-          : {}),
+        defaultAccountsForLocalEnv: LOCAL_NET_DEFAULT_ACCOUNTS,
       }),
     );
   }
