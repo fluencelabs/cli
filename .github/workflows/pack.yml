@@ -153,6 +153,8 @@ jobs:
         if: inputs.channel != 'null'
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
+      - run: ls -alh dist/
+
       - name: Rename archive
         run: mv dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
 
