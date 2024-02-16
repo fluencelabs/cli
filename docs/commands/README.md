@@ -267,13 +267,15 @@ Show contract addresses for the fluence environment and accounts for the local e
 
 ```
 USAGE
-  $ fluence chain info [--no-input] [--env <value>]
+  $ fluence chain info [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Show contract addresses for the fluence environment and accounts for the local environment
@@ -287,7 +289,7 @@ Change app id in the deal
 
 ```
 USAGE
-  $ fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -345,7 +347,7 @@ Deploy workers according to deal in 'deals' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deal deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [--env <value>] [-k
+  $ fluence deal deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--env <value>] [--priv-key <value>] [-k
     <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
     [--tracing] [--marine-build-args <value>] [--auto-match]
 
@@ -394,7 +396,7 @@ Deposit do the deal
 
 ```
 USAGE
-  $ fluence deal deposit [DEAL-ADDRESS] [AMOUNT] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence deal deposit [DEAL-ADDRESS] [AMOUNT] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -420,7 +422,7 @@ Get info about provider
 
 ```
 USAGE
-  $ fluence deal info [DEAL-ADDRESS] [--no-input] [--env <value>]
+  $ fluence deal info [DEAL-ADDRESS] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -428,6 +430,10 @@ ARGUMENTS
 FLAGS
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Get info about provider
@@ -442,7 +448,7 @@ Get logs from deployed workers for deals listed in workers.yaml
 ```
 USAGE
   $ fluence deal logs [WORKER-NAMES] [SPELL-NAME] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
-    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--tracing]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'deals' property of workers.yaml)
@@ -459,9 +465,6 @@ FLAGS
       --no-input                                       Don't interactively ask for any input from the user
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
-      --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -482,7 +485,7 @@ Match deal with resource owners
 
 ```
 USAGE
-  $ fluence deal match [DEAL-ADDRESS] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence deal match [DEAL-ADDRESS] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -507,7 +510,7 @@ Remove unit from the deal
 
 ```
 USAGE
-  $ fluence deal remove-unit [UNIT-ID] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence deal remove-unit [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   UNIT-ID  Compute unitId
@@ -532,7 +535,7 @@ Stop the deal
 
 ```
 USAGE
-  $ fluence deal stop [DEAL-ADDRESS] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence deal stop [DEAL-ADDRESS] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -557,7 +560,7 @@ Withdraw tokens from the deal
 
 ```
 USAGE
-  $ fluence deal withdraw [DEAL-ADDRESS] [AMOUNT] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence deal withdraw [DEAL-ADDRESS] [AMOUNT] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -629,7 +632,7 @@ Add collateral to capacity commitment
 
 ```
 USAGE
-  $ fluence delegator add-collateral [IDS] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence delegator add-collateral [IDS] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
@@ -657,7 +660,7 @@ Withdraw collateral from capacity commitment
 
 ```
 USAGE
-  $ fluence delegator withdraw-collateral [IDS] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence delegator withdraw-collateral [IDS] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
@@ -685,7 +688,7 @@ Withdraw reward from capacity commitment
 
 ```
 USAGE
-  $ fluence delegator withdraw-reward [IDS] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence delegator withdraw-reward [IDS] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   IDS  Comma separated capacity commitment IDs
@@ -956,13 +959,15 @@ Init docker-compose.yaml according to provider.yaml
 
 ```
 USAGE
-  $ fluence local init [--no-input] [--env <value>]
+  $ fluence local init [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -1019,20 +1024,19 @@ Run docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>] [--env <value>]
+  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
-  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                          unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                          used by default
-  --timeout=<value>                       [default: 120] Timeout in seconds for attempting to register local network on
-                                          local peers
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --noxes=<value>                                  Number of Compute Peers to generate when a new provider.yaml is
+                                                   created
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
+  --timeout=<value>                                [default: 120] Timeout in seconds for attempting to register local
+                                                   network on local peers
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose
@@ -1124,7 +1128,7 @@ Add collateral to capacity commitment
 
 ```
 USAGE
-  $ fluence provider add-collateral [--no-input] [--priv-key <value>] [--env <value>] [--nox-names <value> | --ids
+  $ fluence provider add-collateral [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids
   <value>]
 
 FLAGS
@@ -1154,19 +1158,17 @@ Create Capacity commitment
 
 ```
 USAGE
-  $ fluence provider create-commitment [--no-input] [--priv-key <value>] [--env <value>] [--nox-names <value>]
+  $ fluence provider create-commitment [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --nox-names=<value>                     Comma-separated names of noxes from provider.yaml. Default: all noxes from
-                                          'computePeers' property of provider.yaml
-  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                          unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                          used by default
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --nox-names=<value>                              Comma-separated names of noxes from provider.yaml. Default: all noxes
+                                                   from 'computePeers' property of provider.yaml
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Create Capacity commitment
@@ -1183,18 +1185,17 @@ Create an offer. You have to be registered as a provider to do that
 
 ```
 USAGE
-  $ fluence provider create-offer [--no-input] [--priv-key <value>] [--env <value>] [--offers <value>]
+  $ fluence provider create-offer [--no-input] [--env <value>] [--priv-key <value>] [--offers <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>              Comma-separated list of offer names. If not provider all offers will be used
-  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                          unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                          used by default
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --offers=<offer-1,offer-2>                       Comma-separated list of offer names. If not provider all offers will
+                                                   be used
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Create an offer. You have to be registered as a provider to do that
@@ -1211,18 +1212,16 @@ Deposit to noxes
 
 ```
 USAGE
-  $ fluence provider deposit [--no-input] [--priv-key <value>] [--env <value>] [--amount <value>]
+  $ fluence provider deposit [--no-input] [--env <value>] [--priv-key <value>] [--amount <value>]
 
 FLAGS
-  --amount=<value>                        Amount of tokens to deposit to noxes
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                          unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                          used by default
+  --amount=<value>                                 Amount of tokens to deposit to noxes
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Deposit to noxes
@@ -1239,14 +1238,17 @@ Generate Config.toml files according to provider.yaml and secrets according to p
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [--env <value>]
+  $ fluence provider gen [--no-input] [--noxes <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --noxes=<value>                                  Number of Compute Peers to generate when a new provider.yaml is
+                                                   created
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
@@ -1263,14 +1265,17 @@ Init provider config. Creates a config file
 
 ```
 USAGE
-  $ fluence provider init [--no-input] [--noxes <value>] [--env <value>]
+  $ fluence provider init [--no-input] [--noxes <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --noxes=<value>                         Number of Compute Peers to generate when a new provider.yaml is created
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --noxes=<value>                                  Number of Compute Peers to generate when a new provider.yaml is
+                                                   created
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Init provider config. Creates a config file
@@ -1309,17 +1314,15 @@ Register as a provider
 
 ```
 USAGE
-  $ fluence provider register [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence provider register [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                          unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                          used by default
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Register as a provider
@@ -1333,7 +1336,7 @@ Reward info
 
 ```
 USAGE
-  $ fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -1359,17 +1362,15 @@ Update provider info
 
 ```
 USAGE
-  $ fluence provider update [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence provider update [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<kras | testnet | stage | local>  Blockchain environment to use when running the command. By default uses the
-                                          environment from .fluence/env.yaml, that can also be set using 'fluence
-                                          default env' command
-  --no-input                              Don't interactively ask for any input from the user
-  --priv-key=<private-key>                !WARNING! for debug purposes only. Passing private keys through flags is
-                                          unsecure. On local network
-                                          0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                          used by default
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
 
 DESCRIPTION
   Update provider info
@@ -1383,7 +1384,7 @@ Withdraw reward
 
 ```
 USAGE
-  $ fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--priv-key <value>] [--env <value>]
+  $ fluence provider withdraw-reward [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
 
 ARGUMENTS
   DEAL-ADDRESS  Deal address
@@ -1652,9 +1653,9 @@ Deploy workers to hosts, described in 'hosts' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence workers deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [-k <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--import <value>] [--no-build]
-    [--tracing] [--marine-build-args <value>]
+  $ fluence workers deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl
+    <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--import <value>] [--no-build] [--tracing]
+    [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
@@ -1677,9 +1678,6 @@ FLAGS
       --no-input                                       Don't interactively ask for any input from the user
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
-      --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -1701,8 +1699,8 @@ Get logs from deployed workers for hosts listed in workers.yaml
 ```
 USAGE
   $ fluence workers logs [WORKER-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
-    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--worker-id
-    <value>] [--host-id <value>] [--spell-id <value>] [--tracing]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--worker-id <value>] [--host-id <value>]
+    [--spell-id <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Worker names to get logs for (by default all worker names from 'hosts' property of workers.yaml)
@@ -1719,9 +1717,6 @@ FLAGS
       --no-input                                       Don't interactively ask for any input from the user
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
-      --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --spell-id=<spell-id>                            [default: worker-spell] Spell id
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
@@ -1744,8 +1739,8 @@ Remove workers from hosts, described in 'hosts' property in workers.yaml
 
 ```
 USAGE
-  $ fluence workers remove [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--priv-key <value>] [-k <value>] [--relay
-    <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--tracing]
+  $ fluence workers remove [WORKER-NAMES] [--no-input] [--off-aqua-logs] [-k <value>] [--relay <value>] [--ttl
+    <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--tracing]
 
 ARGUMENTS
   WORKER-NAMES  Comma separated names of workers to remove. Example: "worker1,worker2" (by default all workers from
@@ -1762,9 +1757,6 @@ FLAGS
       --no-input                                       Don't interactively ask for any input from the user
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
-      --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
@@ -1786,8 +1778,8 @@ Upload workers to hosts, described in 'hosts' property in fluence.yaml
 ```
 USAGE
   $ fluence workers upload [WORKER-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
-    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--priv-key <value>] [--import <value>]
-    [--no-build] [--tracing] [--marine-build-args <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--import <value>] [--no-build]
+    [--tracing] [--marine-build-args <value>]
 
 ARGUMENTS
   WORKER-NAMES  Names of workers to deploy (by default all workers from 'hosts' property in fluence.yaml are deployed)
@@ -1809,9 +1801,6 @@ FLAGS
       --no-input                                       Don't interactively ask for any input from the user
       --off-aqua-logs                                  Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                    Print particle ids when running Fluence js-client
-      --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through
-                                                       flags is unsecure. On local network 0xac0974bec39a17e36ba4a6b4d23
-                                                       8ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used by default
       --relay=<multiaddress>                           Relay for Fluence js-client to connect to
       --tracing                                        Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                             [default: 120000] Particle Time To Live since 'now'. After that,
