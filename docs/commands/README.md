@@ -16,7 +16,7 @@
 * [`fluence deal logs [WORKER-NAMES] [SPELL-NAME]`](#fluence-deal-logs-worker-names-spell-name)
 * [`fluence deal match [DEAL-ADDRESS]`](#fluence-deal-match-deal-address)
 * [`fluence deal remove-unit [UNIT-ID]`](#fluence-deal-remove-unit-unit-id)
-* [`fluence deal stop [DEAL-ADDRESS]`](#fluence-deal-stop-deal-address)
+* [`fluence deal stop`](#fluence-deal-stop)
 * [`fluence deal withdraw [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-withdraw-deal-address-amount)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
 * [`fluence default peers [ENV]`](#fluence-default-peers-env)
@@ -529,18 +529,18 @@ DESCRIPTION
 
 _See code: [src/commands/deal/remove-unit.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/deal/remove-unit.ts)_
 
-## `fluence deal stop [DEAL-ADDRESS]`
+## `fluence deal stop`
 
 Stop the deal
 
 ```
 USAGE
-  $ fluence deal stop [DEAL-ADDRESS] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
+  $ fluence deal stop [--no-input] [--env <value>] [--priv-key <value>] [--deal <value> | --deal-id <value>]
 
 FLAGS
+  --deal=<name>                                    Comma-separated deal names of the deployed deals for the current
+                                                   environment. Default: all deployed deals
+  --deal-id=<name>                                 Comma-separated deal ids of the deployed deal
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
