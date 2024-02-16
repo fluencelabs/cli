@@ -234,17 +234,20 @@ export async function sign<T extends unknown[]>(
     dbg(debugInfo);
   }
 
-  const { tx, res } = await setTryTimeout(
-    async function executingContractMethod() {
-      const tx = await method(...args);
-      const res = await tx.wait();
-      return { tx, res };
-    },
-    (err) => {
-      throw err;
-    },
-    1000 * 60 * 2,
-  );
+  const tx = await method(...args);
+  const res = await tx.wait();
+
+  // const { tx, res } = await setTryTimeout(
+  //   async function executingContractMethod() {
+  //     const tx = await method(...args);
+  //     const res = await tx.wait();
+  //     return { tx, res };
+  //   },
+  //   (err) => {
+  //     throw err;
+  //   },
+  //   1000 * 60 * 2,
+  // );
 
   commandObj.logToStderr(
     `${color.yellow(method.name)} transaction ${color.yellow(

@@ -546,3 +546,10 @@ export function assertLogsAreValid(logs: string) {
     throw new Error(`Failed to get deal logs:\n\n${logs}`);
   }
 }
+
+export async function stopAllDeals(cwd: string) {
+  await fluence({
+    args: ["deal", "stop"],
+    cwd,
+  });
+}

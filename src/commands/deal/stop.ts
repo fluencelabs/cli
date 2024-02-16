@@ -15,36 +15,100 @@
  */
 
 import { color } from "@oclif/color";
-import { Args } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
+import {
+  commaSepStrToArr,
+  splitErrorsAndResults,
+} from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Stop extends BaseCommand<typeof Stop> {
   static override description = "Stop the deal";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-  };
-
-  static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
+    deal: Flags.string({
+      description: `Comma-separated deal names of the deployed deals for the current environment. Default: all deployed deals`,
+      helpValue: "<name>",
+      exclusive: ["deal-id"],
+    }),
+    "deal-id": Flags.string({
+      description: `Comma-separated deal ids of the deployed deal`,
+      helpValue: "<name>",
+      exclusive: ["deal"],
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(Stop));
-
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
-
+    const { flags } = await initCli(this, await this.parse(Stop));
+    const dealIds = await getDealIds(flags);
     const { dealClient } = await getDealClient();
-    const deal = dealClient.getDeal(dealAddress);
-    await sign(deal.stop);
-    color.green(`Tokens were deposited to the deal ${dealAddress}`);
+
+    for (const dealId of dealIds) {
+      const deal = dealClient.getDeal(dealId);
+      await sign(deal.stop);
+      color.green(`Stopped deal ${dealId}`);
+    }
   }
+}
+
+async function getDealIds({
+  deal,
+  "deal-id": dealId,
+}: {
+  deal?: string | undefined;
+  "deal-id"?: string | undefined;
+}) {
+  if (dealId !== undefined) {
+    return commaSepStrToArr(dealId);
+  }
+
+  const workersConfig = await initNewWorkersConfigReadonly();
+  const fluenceEnv = await ensureFluenceEnv();
+
+  if (deal !== undefined) {
+    const names = commaSepStrToArr(deal);
+
+    const [invalidNames, dealIds] = splitErrorsAndResults(names, (name) => {
+      const { dealIdOriginal } =
+        workersConfig.deals?.[fluenceEnv]?.[name] ?? {};
+
+      if (dealIdOriginal === undefined) {
+        return { error: name };
+      }
+
+      return { result: dealIdOriginal };
+    });
+
+    if (invalidNames.length > 0) {
+      commandObj.error(
+        `Couldn't find deals in ${workersConfig.$getPath()} at deals.${fluenceEnv} for names: ${invalidNames.join(
+          ", ",
+        )}`,
+      );
+    }
+
+    return dealIds;
+  }
+
+  const dealIds = Object.values(workersConfig.deals?.[fluenceEnv] ?? {}).map(
+    ({ dealIdOriginal }) => {
+      return dealIdOriginal;
+    },
+  );
+
+  if (dealIds.length === 0) {
+    commandObj.error(
+      `No deals found in ${workersConfig.$getPath()} at deals.${fluenceEnv}`,
+    );
+  }
+
+  return dealIds;
 }
