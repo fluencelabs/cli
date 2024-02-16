@@ -8,6 +8,7 @@
 * [`fluence autocomplete [SHELL]`](#fluence-autocomplete-shell)
 * [`fluence build`](#fluence-build)
 * [`fluence chain info`](#fluence-chain-info)
+* [`fluence chain proof`](#fluence-chain-proof)
 * [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
@@ -282,6 +283,28 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/chain/info.ts)_
+
+## `fluence chain proof`
+
+Show contract addresses for the fluence environment and accounts for the local environment
+
+```
+USAGE
+  $ fluence chain proof [--no-input] [--env <value>] [--priv-key <value>]
+
+FLAGS
+  --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                       Don't interactively ask for any input from the user
+  --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
+
+DESCRIPTION
+  Show contract addresses for the fluence environment and accounts for the local environment
+```
+
+_See code: [src/commands/chain/proof.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/chain/proof.ts)_
 
 ## `fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`
 
