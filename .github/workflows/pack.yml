@@ -174,7 +174,7 @@ jobs:
 
       - name: Rename windows installer
         if: inputs.platform == 'win32-x64'
-        run: mv dist/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
+        run: mv dist/win32/fluence-*.exe fluence-cli-${{ inputs.platform }}.exe
 
       - name: Upload windows installer to CI
         if: inputs.platform == 'win32-x64'
