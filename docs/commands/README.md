@@ -11,8 +11,8 @@
 * [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
 * [`fluence deal deploy [WORKER-NAMES]`](#fluence-deal-deploy-worker-names)
-* [`fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`](#fluence-deal-deposit-deal-address-amount)
-* [`fluence deal info [DEAL-ADDRESS]`](#fluence-deal-info-deal-address)
+* [`fluence deal deposit [AMOUNT]`](#fluence-deal-deposit-amount)
+* [`fluence deal info`](#fluence-deal-info)
 * [`fluence deal logs [WORKER-NAMES] [SPELL-NAME]`](#fluence-deal-logs-worker-names-spell-name)
 * [`fluence deal match [DEAL-ADDRESS]`](#fluence-deal-match-deal-address)
 * [`fluence deal remove-unit [UNIT-ID]`](#fluence-deal-remove-unit-unit-id)
@@ -390,19 +390,22 @@ EXAMPLES
 
 _See code: [src/commands/deal/deploy.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/deal/deploy.ts)_
 
-## `fluence deal deposit [DEAL-ADDRESS] [AMOUNT]`
+## `fluence deal deposit [AMOUNT]`
 
 Deposit do the deal
 
 ```
 USAGE
-  $ fluence deal deposit [DEAL-ADDRESS] [AMOUNT] [--no-input] [--env <value>] [--priv-key <value>]
+  $ fluence deal deposit [AMOUNT] [--no-input] [--env <value>] [--priv-key <value>] [--deal <value> | --deal-id
+    <value>]
 
 ARGUMENTS
-  DEAL-ADDRESS  Deal address
-  AMOUNT        Amount of tokens to deposit
+  AMOUNT  Amount of tokens to deposit
 
 FLAGS
+  --deal=<name>                                    Comma-separated deal names of the deployed deals for the current
+                                                   environment. Default: all deployed deals
+  --deal-id=<name>                                 Comma-separated deal ids of the deployed deal
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
@@ -416,18 +419,18 @@ DESCRIPTION
 
 _See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/deal/deposit.ts)_
 
-## `fluence deal info [DEAL-ADDRESS]`
+## `fluence deal info`
 
 Get info about provider
 
 ```
 USAGE
-  $ fluence deal info [DEAL-ADDRESS] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
+  $ fluence deal info [--no-input] [--env <value>] [--priv-key <value>] [--deal <value> | --deal-id <value>]
 
 FLAGS
+  --deal=<name>                                    Comma-separated deal names of the deployed deals for the current
+                                                   environment. Default: all deployed deals
+  --deal-id=<name>                                 Comma-separated deal ids of the deployed deal
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
