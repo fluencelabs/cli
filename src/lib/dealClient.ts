@@ -29,21 +29,20 @@ import type { ethers, LogDescription } from "ethers";
 import chunk from "lodash-es/chunk.js";
 
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
+import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
-import { envConfig } from "./configs/globalConfigs.js";
 import {
   DEAL_CONFIG,
   CLI_CONNECTOR_URL,
   DEAL_RPC_CONFIG,
   WC_PROJECT_ID,
   WC_METADATA,
-  type ContractsENV,
   CONTRACTS_ENV_TO_CHAIN_ID,
   CLI_NAME_FULL,
   PRIV_KEY_FLAG_NAME,
 } from "./const.js";
 import { dbg } from "./dbg.js";
-import { ensureChainNetwork } from "./ensureChainNetwork.js";
+import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
@@ -51,30 +50,16 @@ const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
 const KEY_QUERY_PARAM_NAME = "symKey";
 
-export type DealClientFlags = {
-  env?: string | undefined;
-  [PRIV_KEY_FLAG_NAME]?: string | undefined;
-};
-
-let dealClientFlags: DealClientFlags = {};
-
-export function setDealClientFlags(flags: DealClientFlags) {
-  dealClientFlags = flags;
-}
-
 let provider: ethers.Provider | undefined = undefined;
 let readonlyDealClient: DealClient | undefined = undefined;
 
 export async function getReadonlyDealClient() {
-  const { env: envFromFlags } = dealClientFlags;
-  const env = await ensureChainNetwork(envFromFlags);
-
   if (provider === undefined) {
-    provider = await ensureProvider(env);
+    provider = await ensureProvider();
   }
 
   if (readonlyDealClient === undefined) {
-    readonlyDealClient = await createDealClient(provider, env);
+    readonlyDealClient = await createDealClient(provider);
   }
 
   return { readonlyDealClient, provider };
@@ -86,21 +71,20 @@ let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
 let dealClient: DealClient | undefined = undefined;
 
 export async function getDealClient() {
-  const { env: envFromFlags } = dealClientFlags;
-  const env = await ensureChainNetwork(envFromFlags);
+  const chainEnv = await ensureChainEnv();
 
   const privKey =
-    dealClientFlags[PRIV_KEY_FLAG_NAME] ??
+    chainFlags[PRIV_KEY_FLAG_NAME] ??
     // use default wallet key for local network
-    (env === "local" ? LOCAL_NET_DEFAULT_WALLET_KEY : undefined);
+    (chainEnv === "local" ? LOCAL_NET_DEFAULT_WALLET_KEY : undefined);
 
   if (signerOrWallet === undefined || dealClient === undefined) {
     signerOrWallet =
       privKey === undefined
-        ? await getWalletConnectProvider(env)
-        : await getWallet(privKey, env);
+        ? await getWalletConnectProvider()
+        : await getWallet(privKey);
 
-    dealClient = await createDealClient(signerOrWallet, env);
+    dealClient = await createDealClient(signerOrWallet);
   }
 
   return { dealClient, signerOrWallet };
@@ -109,12 +93,11 @@ export async function getDealClient() {
 let dealMatcherClient: DealMatcherClient | undefined = undefined;
 
 export async function getDealMatcherClient() {
-  const { env: envFromFlags } = dealClientFlags;
-  const env = await ensureChainNetwork(envFromFlags);
   const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
+  const chainEnv = await ensureChainEnv();
 
   if (dealMatcherClient === undefined) {
-    dealMatcherClient = new DealMatcherClient(env);
+    dealMatcherClient = new DealMatcherClient(chainEnv);
   }
 
   return dealMatcherClient;
@@ -123,12 +106,11 @@ export async function getDealMatcherClient() {
 let dealExplorerClient: DealExplorerClient | undefined = undefined;
 
 export async function getDealExplorerClient() {
-  const { env: envFromFlags } = dealClientFlags;
-  const env = await ensureChainNetwork(envFromFlags);
   const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
+  const chainEnv = await ensureChainEnv();
 
   if (dealExplorerClient === undefined) {
-    dealExplorerClient = new DealExplorerClient(env);
+    dealExplorerClient = new DealExplorerClient(chainEnv);
   }
 
   return dealExplorerClient;
@@ -136,10 +118,10 @@ export async function getDealExplorerClient() {
 
 async function createDealClient(
   signerOrProvider: ethers.Provider | ethers.Signer,
-  env: ContractsENV,
 ) {
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const client = new DealClient(signerOrProvider, env);
+  const chainEnv = await ensureChainEnv();
+  const client = new DealClient(signerOrProvider, chainEnv);
 
   await setTryTimeout(
     async function checkIfBlockChainClientIsConnected() {
@@ -156,19 +138,18 @@ async function createDealClient(
   return client;
 }
 
-export async function ensureProvider(
-  env: ContractsENV,
-): Promise<ethers.Provider> {
+export async function ensureProvider(): Promise<ethers.Provider> {
   const { ethers } = await import("ethers");
+  const chainEnv = await ensureChainEnv();
 
   if (provider === undefined) {
-    provider = new ethers.JsonRpcProvider(DEAL_CONFIG[env].url);
+    provider = new ethers.JsonRpcProvider(DEAL_CONFIG[chainEnv].url);
   }
 
   return provider;
 }
 
-async function getWalletConnectProvider(contractsENV: ContractsENV) {
+async function getWalletConnectProvider() {
   const { UniversalProvider } = await import(
     "@walletconnect/universal-provider"
   );
@@ -197,6 +178,8 @@ async function getWalletConnectProvider(contractsENV: ContractsENV) {
     );
   });
 
+  const chainEnv = await ensureChainEnv();
+
   const session = await provider.connect({
     namespaces: {
       eip155: {
@@ -207,7 +190,7 @@ async function getWalletConnectProvider(contractsENV: ContractsENV) {
           "personal_sign",
           "eth_signTypedData",
         ],
-        chains: [`eip155:${CONTRACTS_ENV_TO_CHAIN_ID[contractsENV]}`],
+        chains: [`eip155:${CONTRACTS_ENV_TO_CHAIN_ID[chainEnv]}`],
         events: ["chainChanged", "accountsChanged"],
         rpcMap: DEAL_RPC_CONFIG,
       },
@@ -227,12 +210,9 @@ async function getWalletConnectProvider(contractsENV: ContractsENV) {
   return new ethers.BrowserProvider(provider).getSigner();
 }
 
-async function getWallet(
-  privKey: string,
-  contractsENV: ContractsENV,
-): Promise<ethers.Wallet> {
+async function getWallet(privKey: string): Promise<ethers.Wallet> {
   const { ethers } = await import("ethers");
-  return new ethers.Wallet(privKey, await ensureProvider(contractsENV));
+  return new ethers.Wallet(privKey, await ensureProvider());
 }
 
 export async function sign<T extends unknown[]>(
@@ -240,8 +220,8 @@ export async function sign<T extends unknown[]>(
   ...args: T
 ) {
   if (
-    dealClientFlags[PRIV_KEY_FLAG_NAME] === undefined &&
-    envConfig?.fluenceEnv !== "local"
+    chainFlags[PRIV_KEY_FLAG_NAME] === undefined &&
+    (await ensureChainEnv()) !== "local"
   ) {
     commandObj.logToStderr(
       `Confirm ${color.yellow(method.name)} transaction in your wallet...`,
@@ -257,7 +237,16 @@ export async function sign<T extends unknown[]>(
     dbg(debugInfo);
   }
 
-  const tx = await method(...args);
+  const tx = await setTryTimeout(
+    () => {
+      return method(...args);
+    },
+    (err) => {
+      throw err;
+    },
+    // try for 2 minutes to execute contract method
+    1000 * 60 * 2,
+  );
 
   startSpinner(
     `Waiting for ${color.yellow(method.name)} transaction ${color.yellow(

@@ -16,14 +16,10 @@
 
 import { commandObj } from "../commandObj.js";
 import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
-import { PRIV_KEY_FLAG_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
-export async function registerProvider(flags: {
-  env: string | undefined;
-  [PRIV_KEY_FLAG_NAME]: string | undefined;
-}) {
-  const providerConfig = await ensureReadonlyProviderConfig(flags);
+export async function registerProvider() {
+  const providerConfig = await ensureReadonlyProviderConfig();
   const { dealClient, signerOrWallet } = await getDealClient();
   const market = await dealClient.getMarket();
 
@@ -66,11 +62,8 @@ Provider address: ${signerOrWallet.address}
 `);
 }
 
-export async function updateProvider(flags: {
-  env: string | undefined;
-  [PRIV_KEY_FLAG_NAME]: string | undefined;
-}) {
-  const providerConfig = await ensureReadonlyProviderConfig(flags);
+export async function updateProvider() {
+  const providerConfig = await ensureReadonlyProviderConfig();
   const { dealClient, signerOrWallet } = await getDealClient();
   const market = await dealClient.getMarket();
 

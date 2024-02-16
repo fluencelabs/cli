@@ -19,7 +19,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -28,8 +28,7 @@ export default class RewardInfo extends BaseCommand<typeof RewardInfo> {
   static override description = "Reward info";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   static override args = {

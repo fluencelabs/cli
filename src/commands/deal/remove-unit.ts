@@ -18,7 +18,7 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { sign, getDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -27,8 +27,7 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
   static override description = "Remove unit from the deal";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   static override args = {

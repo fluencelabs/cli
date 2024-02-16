@@ -19,11 +19,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import {
-  ENV_FLAG,
-  PRIV_KEY_FLAG,
-  DEFAULT_INITIAL_BALANCE,
-} from "../../lib/const.js";
+import { DEFAULT_INITIAL_BALANCE, CHAIN_FLAGS } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -64,8 +60,7 @@ export default class Create extends BaseCommand<typeof Create> {
     effectors: Flags.string({
       description: "Comma-separated list of effector to be used in the deal",
     }),
-    ...ENV_FLAG,
-    ...PRIV_KEY_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {

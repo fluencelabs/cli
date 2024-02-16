@@ -19,7 +19,7 @@ import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
-import { NOX_NAMES_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "../const.js";
+import { NOX_NAMES_FLAG_NAME } from "../const.js";
 import {
   getDealClient,
   getEventValues,
@@ -32,7 +32,6 @@ import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
 export async function createCommitments(flags: {
   env: string | undefined;
-  [PRIV_KEY_FLAG_NAME]: string | undefined;
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
 }) {
   const computePeers = await resolveComputePeersByNames(flags);

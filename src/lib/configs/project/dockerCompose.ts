@@ -39,7 +39,6 @@ import {
   GRAPH_NODE_CONTAINER_NAME,
   SUBGRAPH_DEPLOY_SCRIPT_NAME,
 } from "../../const.js";
-import type { ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
 import {
@@ -210,12 +209,10 @@ function genNox({
   ];
 }
 
-async function genDockerCompose(
-  args: ProviderConfigArgs,
-): Promise<LatestConfig> {
+async function genDockerCompose(): Promise<LatestConfig> {
   const configsDir = await ensureFluenceConfigsDir();
   const fluenceDir = getFluenceDir();
-  const computePeers = await ensureComputerPeerConfigs(args);
+  const computePeers = await ensureComputerPeerConfigs();
 
   const peers = await Promise.all(
     computePeers.map(async ({ name, overriddenNoxConfig }) => {
@@ -350,10 +347,8 @@ async function genDockerCompose(
   };
 }
 
-async function genDefaultDockerCompose(
-  args: ProviderConfigArgs,
-): Promise<GetDefaultConfig> {
-  const def = await genDockerCompose(args);
+async function genDefaultDockerCompose(): Promise<GetDefaultConfig> {
+  const def = await genDockerCompose();
 
   return () => {
     return yamlDiffPatch("", {}, def);
@@ -376,19 +371,17 @@ const initConfigOptions = {
   getConfigOrConfigDirPath: getFluenceDir,
 };
 
-export async function initNewDockerComposeConfig(args: ProviderConfigArgs) {
+export async function initNewDockerComposeConfig() {
   return getConfigInitFunction(
     initConfigOptions,
-    await genDefaultDockerCompose(args),
+    await genDefaultDockerCompose(),
   )();
 }
 
-export async function initNewReadonlyDockerComposeConfig(
-  args: ProviderConfigArgs,
-) {
+export async function initNewReadonlyDockerComposeConfig() {
   return getReadonlyConfigInitFunction(
     initConfigOptions,
-    await genDefaultDockerCompose(args),
+    await genDefaultDockerCompose(),
   )();
 }
 

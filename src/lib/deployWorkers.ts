@@ -755,7 +755,6 @@ export async function compileSpells(
 async function resolveWorker({
   hostsOrDeals,
   workerName,
-  fluenceConfig,
   workersFromFluenceConfig,
   serviceConfigsWithOverrides,
   moduleAbsolutePathOrURLToModuleConfigsMap,
@@ -955,7 +954,7 @@ async function resolveWorker({
     name: workerName,
     hosts: await Promise.all(
       peerIdsOrNamedNodes.map((peerIdOrNamedNode) => {
-        return resolvePeerId(peerIdOrNamedNode, fluenceConfig);
+        return resolvePeerId(peerIdOrNamedNode);
       }),
     ),
     config: {

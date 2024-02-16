@@ -30,7 +30,7 @@ import {
 } from "../../lib/multiaddres.js";
 import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
-export default class Peers extends BaseCommand<typeof Peers> {
+export default class Env extends BaseCommand<typeof Env> {
   static override description = "Switch default Fluence Environment";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
@@ -42,7 +42,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
   async run(): Promise<void> {
     const { args, maybeFluenceConfig: fluenceConfig } = await initCli(
       this,
-      await this.parse(Peers),
+      await this.parse(Env),
     );
 
     const newEnvConfig = await initNewEnvConfig();
@@ -53,7 +53,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
       fluenceEnv === "custom" &&
       fluenceConfig?.customFluenceEnv === undefined
     ) {
-      await ensureCustomAddrsAndPeerIds(fluenceConfig);
+      await ensureCustomAddrsAndPeerIds();
     }
 
     newEnvConfig.fluenceEnv = fluenceEnv;
@@ -61,7 +61,7 @@ export default class Peers extends BaseCommand<typeof Peers> {
 
     if (fluenceConfig !== null) {
       const workersConfig = await initNewWorkersConfigReadonly();
-      await updateRelaysJSON({ fluenceConfig });
+      await updateRelaysJSON();
 
       await ensureAquaFileWithWorkerInfo(
         workersConfig,

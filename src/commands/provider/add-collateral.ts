@@ -22,10 +22,9 @@ import {
   depositCollateralByNoxNames,
 } from "../../lib/chain/depositCollateral.js";
 import {
-  PRIV_KEY_FLAG,
-  ENV_FLAG,
   NOX_NAMES_FLAG_NAME,
   NOX_NAMES_FLAG_CONFIG,
+  CHAIN_FLAGS,
 } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -35,8 +34,7 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   static override aliases = ["provider:ac"];
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
     [NOX_NAMES_FLAG_NAME]: Flags.string({
       ...NOX_NAMES_FLAG_CONFIG,
       exclusive: ["ids"],

@@ -16,7 +16,7 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createOffers } from "../../lib/chain/offer.js";
-import { OFFERS_FLAG, PRIV_KEY_FLAG, CHAIN_ENV_FLAG } from "../../lib/const.js";
+import { OFFERS_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
@@ -25,8 +25,7 @@ export default class CreateOffer extends BaseCommand<typeof CreateOffer> {
   static override aliases = ["provider:co"];
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...CHAIN_ENV_FLAG,
+    ...CHAIN_FLAGS,
     ...OFFERS_FLAG,
   };
 

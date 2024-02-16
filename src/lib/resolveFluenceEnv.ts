@@ -16,6 +16,7 @@
 
 import { color } from "@oclif/color";
 
+import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
 import {
@@ -26,20 +27,23 @@ import {
 } from "./const.js";
 import { list } from "./prompt.js";
 
-export async function resolveFluenceEnv(
-  fluenceEnvFromFlagsNotValidated: string | undefined,
-): Promise<FluenceEnv> {
-  const fluenceEnvFromFlags = await ensureValidFluenceEnvFlag(
-    fluenceEnvFromFlagsNotValidated,
-  );
+let env: FluenceEnv | undefined = undefined;
 
+export async function ensureFluenceEnv(): Promise<FluenceEnv> {
+  if (env !== undefined) {
+    return env;
+  }
+
+  const fluenceEnvFromFlags = await ensureValidFluenceEnvFlag(chainFlags.env);
   const fluenceEnv = fluenceEnvFromFlags ?? envConfig?.fluenceEnv;
 
   if (fluenceEnv !== undefined) {
+    env = fluenceEnv;
     return fluenceEnv;
   }
 
   const fluenceEnvFromPrompt = await fluenceEnvPrompt();
+  env = fluenceEnvFromPrompt;
 
   if (envConfig === null) {
     return fluenceEnvFromPrompt;
@@ -67,7 +71,7 @@ export async function fluenceEnvPrompt(
   });
 }
 
-export async function ensureValidFluenceEnvFlag(
+async function ensureValidFluenceEnvFlag(
   envFlag: string | undefined,
 ): Promise<FluenceEnv | undefined> {
   if (envFlag === undefined) {

@@ -56,9 +56,8 @@ import {
   CLI_NAME,
   NOX_NAMES_FLAG_NAME,
 } from "../../const.js";
-import { ensureChainNetwork } from "../../ensureChainNetwork.js";
+import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
-import { ensureValidContractsEnv } from "../../helpers/ensureValidContractsEnv.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
 import {
   commaSepStrToArr,
@@ -77,7 +76,7 @@ import {
   ensureFluenceSecretsFilePath,
 } from "../../paths.js";
 import { list } from "../../prompt.js";
-import { envConfig, setEnvConfig } from "../globalConfigs.js";
+import { setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
   type InitializedConfig,
@@ -375,10 +374,8 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
     commandObj.logToStderr("Creating new provider config\n");
     const { yamlDiffPatch } = await import("yaml-diff-patch");
-
-    const env = await ensureChainNetwork(args.env);
-
-    setEnvConfig(await initNewEnvConfig(await ensureValidContractsEnv(env)));
+    const chainEnv = await ensureChainEnv();
+    setEnvConfig(await initNewEnvConfig(chainEnv));
 
     const userProvidedConfig: UserProvidedConfig = {
       providerName: "defaultProvider",
@@ -440,124 +437,116 @@ type LatestConfig = ConfigV0;
 export type ProviderConfig = InitializedConfig<LatestConfig>;
 export type ProviderConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
-const getValidate: (
-  args: ProviderConfigArgs,
-) => ConfigValidateFunction<LatestConfig> = (args) => {
-  return async (config) => {
-    const invalid: Array<{
-      offerName: string;
-      missingComputePeerNames: Array<string>;
-    }> = [];
+const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
+  const invalid: Array<{
+    offerName: string;
+    missingComputePeerNames: Array<string>;
+  }> = [];
 
-    if (isEmpty(config.computePeers)) {
-      return `There should be at least one computePeer defined in the config`;
-    }
+  if (isEmpty(config.computePeers)) {
+    return `There should be at least one computePeer defined in the config`;
+  }
 
-    const offers = Object.entries(config.offers);
+  const offers = Object.entries(config.offers);
 
-    if (offers.length === 0) {
-      return `There should be at least one offer defined in the config`;
-    }
+  if (offers.length === 0) {
+    return `There should be at least one offer defined in the config`;
+  }
 
-    // Checking that all computePeers referenced in offers are defined
-    for (const [offerName, { computePeers }] of offers) {
-      const missingComputePeerNames = computePeers.filter((cp) => {
-        return !(cp in config.computePeers);
-      });
-
-      if (missingComputePeerNames.length > 0) {
-        invalid.push({ offerName, missingComputePeerNames });
-      }
-    }
-
-    if (invalid.length > 0) {
-      return invalid
-        .map(({ offerName, missingComputePeerNames }) => {
-          return `Offer ${color.yellow(
-            offerName,
-          )} has computePeers missing from the config's top level computePeers property: ${color.yellow(
-            missingComputePeerNames.join(", "),
-          )}`;
-        })
-        .join("\n");
-    }
-
-    const env = await ensureChainNetwork(args.env);
-    const validateCCDuration = await ccDurationValidator(env === "local");
-
-    const capacityCommitmentErrors = (
-      await Promise.all(
-        Object.entries(config.capacityCommitments ?? {}).map(
-          async ([name, cc]) => {
-            const errors = [
-              cc.delegator === undefined
-                ? true
-                : await validateAddress(cc.delegator),
-              validateCCDuration(cc.duration),
-            ].filter((e) => {
-              return e !== true;
-            });
-
-            return errors.length === 0
-              ? true
-              : `Invalid capacity commitment for ${color.yellow(
-                  name,
-                )}:\n${errors.join("\n")}`;
-          },
-        ),
-      )
-    ).filter((e) => {
-      return e !== true;
+  // Checking that all computePeers referenced in offers are defined
+  for (const [offerName, { computePeers }] of offers) {
+    const missingComputePeerNames = computePeers.filter((cp) => {
+      return !(cp in config.computePeers);
     });
 
-    if (capacityCommitmentErrors.length > 0) {
-      return capacityCommitmentErrors.join("\n\n");
+    if (missingComputePeerNames.length > 0) {
+      invalid.push({ offerName, missingComputePeerNames });
     }
+  }
 
-    return validateEffectors(
-      Object.entries(config.offers).flatMap(([name, { effectors }]) => {
-        return (effectors ?? []).map((effector) => {
-          return {
-            effector,
-            location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > offers > ${name} > effectors > ${effector}`,
-          };
-        });
-      }),
-    );
-  };
+  if (invalid.length > 0) {
+    return invalid
+      .map(({ offerName, missingComputePeerNames }) => {
+        return `Offer ${color.yellow(
+          offerName,
+        )} has computePeers missing from the config's top level computePeers property: ${color.yellow(
+          missingComputePeerNames.join(", "),
+        )}`;
+      })
+      .join("\n");
+  }
+
+  const chainEnv = await ensureChainEnv();
+  const validateCCDuration = await ccDurationValidator(chainEnv === "local");
+
+  const capacityCommitmentErrors = (
+    await Promise.all(
+      Object.entries(config.capacityCommitments ?? {}).map(
+        async ([name, cc]) => {
+          const errors = [
+            cc.delegator === undefined
+              ? true
+              : await validateAddress(cc.delegator),
+            validateCCDuration(cc.duration),
+          ].filter((e) => {
+            return e !== true;
+          });
+
+          return errors.length === 0
+            ? true
+            : `Invalid capacity commitment for ${color.yellow(
+                name,
+              )}:\n${errors.join("\n")}`;
+        },
+      ),
+    )
+  ).filter((e) => {
+    return e !== true;
+  });
+
+  if (capacityCommitmentErrors.length > 0) {
+    return capacityCommitmentErrors.join("\n\n");
+  }
+
+  return validateEffectors(
+    Object.entries(config.offers).flatMap(([name, { effectors }]) => {
+      return (effectors ?? []).map((effector) => {
+        return {
+          effector,
+          location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > offers > ${name} > effectors > ${effector}`,
+        };
+      });
+    }),
+  );
 };
 
-function getInitConfigOptions(args: ProviderConfigArgs) {
-  return {
-    allSchemas: [configSchemaV0],
-    latestSchema: configSchemaV0,
-    migrations,
-    name: PROVIDER_CONFIG_FILE_NAME,
-    getConfigOrConfigDirPath: () => {
-      return getProviderConfigPath();
-    },
-    getSchemaDirPath: getFluenceDir,
-    validate: getValidate(args),
-  };
-}
+const initConfigOptions = {
+  allSchemas: [configSchemaV0],
+  latestSchema: configSchemaV0,
+  migrations,
+  name: PROVIDER_CONFIG_FILE_NAME,
+  getConfigOrConfigDirPath: () => {
+    return getProviderConfigPath();
+  },
+  getSchemaDirPath: getFluenceDir,
+  validate,
+};
 
 export type UserProvidedConfig = Omit<LatestConfig, "version">;
 
-export async function initNewReadonlyProviderConfig(args: ProviderConfigArgs) {
-  return getReadonlyConfigInitFunction(
-    getInitConfigOptions(args),
-    getDefault(args),
-  )();
+export async function initNewReadonlyProviderConfig(
+  args: ProviderConfigArgs = {},
+) {
+  return getReadonlyConfigInitFunction(initConfigOptions, getDefault(args))();
 }
 
-export function initReadonlyProviderConfig(args: ProviderConfigArgs) {
-  return getReadonlyConfigInitFunction(getInitConfigOptions(args))();
+export function initReadonlyProviderConfig() {
+  return getReadonlyConfigInitFunction(initConfigOptions)();
 }
 
-export async function ensureReadonlyProviderConfig(args: ProviderConfigArgs) {
-  const providerConfig = await getReadonlyConfigInitFunction(
-    getInitConfigOptions(args),
-  )();
+export async function ensureReadonlyProviderConfig() {
+  const providerConfig =
+    await getReadonlyConfigInitFunction(initConfigOptions)();
 
   if (providerConfig === null) {
     commandObj.error(
@@ -567,7 +556,7 @@ export async function ensureReadonlyProviderConfig(args: ProviderConfigArgs) {
     );
   }
 
-  return initNewReadonlyProviderConfig(args);
+  return providerConfig;
 }
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
@@ -699,8 +688,8 @@ function camelCaseKeysToSnakeCase(val: unknown): unknown {
 }
 
 async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
-  const isLocal = envConfig?.fluenceEnv === "local";
-  const env = await ensureValidContractsEnv(envConfig?.fluenceEnv);
+  const env = await ensureChainEnv();
+  const isLocal = env === "local";
   const dealConfig = DEAL_CONFIG[env];
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
 
@@ -756,12 +745,9 @@ export type EnsureComputerPeerConfigs = Awaited<
   ReturnType<typeof ensureComputerPeerConfigs>
 >[number];
 
-export async function ensureComputerPeerConfigs(
-  args: ProviderConfigArgs,
-  computePeerNames?: string[],
-) {
+export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
   const { ethers } = await import("ethers");
-  const providerConfig = await initNewReadonlyProviderConfig(args);
+  const providerConfig = await ensureReadonlyProviderConfig();
 
   const { rawConfig: providerRawNoxConfig, ...providerNoxConfig } =
     providerConfig.nox ?? {};
@@ -966,12 +952,10 @@ export async function ensureComputerPeerConfigs(
   );
 }
 
-export async function resolveComputePeersByNames(
-  args: ProviderConfigArgs & {
-    [NOX_NAMES_FLAG_NAME]?: string | undefined;
-  },
-) {
-  const computePeers = await ensureComputerPeerConfigs(args);
+export async function resolveComputePeersByNames(args: {
+  [NOX_NAMES_FLAG_NAME]?: string | undefined;
+}) {
+  const computePeers = await ensureComputerPeerConfigs();
 
   if (args[NOX_NAMES_FLAG_NAME] === undefined) {
     return computePeers;
@@ -995,7 +979,7 @@ export async function resolveComputePeersByNames(
   );
 
   if (unknownNoxNames.length > 0) {
-    const providerConfig = await initNewReadonlyProviderConfig(args);
+    const providerConfig = await ensureReadonlyProviderConfig();
 
     commandObj.error(
       `nox names: ${color.yellow(

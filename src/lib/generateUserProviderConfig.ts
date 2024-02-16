@@ -17,7 +17,6 @@
 import { color } from "@oclif/color";
 
 import { isInteractive } from "./commandObj.js";
-import { envConfig } from "./configs/globalConfigs.js";
 import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
 import {
   defaultNumberProperties,
@@ -27,6 +26,7 @@ import {
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
+import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
 import {
   ccDurationValidator,
@@ -55,7 +55,6 @@ async function promptToSetNumberProperty(
 const DEFAULT_NUMBER_OF_NOXES = 3;
 
 export type ProviderConfigArgs = {
-  env: string | undefined;
   noxes?: number | undefined;
 };
 
@@ -65,7 +64,7 @@ export async function addComputePeers(
 ) {
   let computePeersCounter = 0;
   let isAddingMoreComputePeers = true;
-  const isLocal = envConfig?.fluenceEnv === "local";
+  const isLocal = (await ensureChainEnv()) === "local";
   const validateCCDuration = await ccDurationValidator(isLocal);
   const minDuration = await getMinCCDuration(isLocal);
 

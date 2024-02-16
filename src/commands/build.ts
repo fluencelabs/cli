@@ -23,12 +23,11 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   IMPORT_FLAG,
   ENV_FLAG,
-  ENV_FLAG_NAME,
 } from "../lib/const.js";
 import { prepareForDeploy } from "../lib/deployWorkers.js";
 import { getAquaImports } from "../lib/helpers/aquaImports.js";
 import { initCli } from "../lib/lifeCycle.js";
-import { resolveFluenceEnv } from "../lib/resolveFluenceEnv.js";
+import { ensureFluenceEnv } from "../lib/resolveFluenceEnv.js";
 
 export default class Build extends BaseCommand<typeof Build> {
   static override description = `Build all application services, described in ${FLUENCE_CONFIG_FULL_FILE_NAME} and generate aqua interfaces for them`;
@@ -46,7 +45,7 @@ export default class Build extends BaseCommand<typeof Build> {
       true,
     );
 
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    const fluenceEnv = await ensureFluenceEnv();
 
     await prepareForDeploy({
       flags: {

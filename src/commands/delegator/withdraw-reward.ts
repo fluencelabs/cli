@@ -18,7 +18,7 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { withdrawReward } from "../../lib/chain/withdrawReward.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -28,8 +28,7 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   static override aliases = ["delegator:wr"];
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
   static override args = {
     IDS: Args.string({

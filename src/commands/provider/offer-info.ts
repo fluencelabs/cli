@@ -26,8 +26,7 @@ import { commandObj } from "../../lib/commandObj.js";
 import {
   OFFERS_FLAG_NAME,
   OFFERS_FLAG_OBJECT,
-  ENV_FLAG,
-  PRIV_KEY_FLAG,
+  CHAIN_FLAGS,
 } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -44,8 +43,7 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
       description: "Comma-separated list of offer ids",
       exclusive: [OFFERS_FLAG_NAME],
     }),
-    ...ENV_FLAG,
-    ...PRIV_KEY_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {

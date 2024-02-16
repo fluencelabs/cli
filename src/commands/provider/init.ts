@@ -22,7 +22,7 @@ import {
   initNewReadonlyProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
-import { CHAIN_ENV_FLAG, NOXES_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS, NOXES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Init extends BaseCommand<typeof Init> {
@@ -30,13 +30,13 @@ export default class Init extends BaseCommand<typeof Init> {
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,
-    ...CHAIN_ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Init));
 
-    let providerConfig = await initReadonlyProviderConfig(flags);
+    let providerConfig = await initReadonlyProviderConfig();
 
     if (providerConfig !== null) {
       return commandObj.error(

@@ -19,7 +19,6 @@ import { commandObj } from "../../lib/commandObj.js";
 import { ENV_ARG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveRelays } from "../../lib/multiaddres.js";
-import { resolveFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Peers extends BaseCommand<typeof Peers> {
   static override description = "Print default Fluence network peer addresses";
@@ -31,18 +30,8 @@ export default class Peers extends BaseCommand<typeof Peers> {
     ...ENV_ARG,
   };
   async run(): Promise<void> {
-    const { args, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Peers),
-    );
-
-    const fluenceEnv = await resolveFluenceEnv(args.ENV);
-
-    const relays = await resolveRelays({
-      fluenceEnv,
-      maybeFluenceConfig,
-    });
-
+    await initCli(this, await this.parse(Peers));
+    const relays = await resolveRelays();
     commandObj.log(relays.join("\n"));
   }
 }

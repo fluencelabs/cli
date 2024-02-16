@@ -21,6 +21,7 @@ import type {
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
+import { setChainFlags, type ChainFlags } from "./chainFlags.js";
 import {
   commandObj,
   isInteractive,
@@ -44,7 +45,6 @@ import {
 import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
-import { setDealClientFlags, type DealClientFlags } from "./dealClient.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
 import { updateRelaysJSON } from "./multiaddres.js";
@@ -92,7 +92,7 @@ type ParserOutputWithNoInputFlag<
 > = ParserOutput<F, F2, A> & {
   flags: {
     [NO_INPUT_FLAG_NAME]: boolean;
-  } & DealClientFlags;
+  } & ChainFlags;
 };
 
 export async function initCli<
@@ -167,20 +167,14 @@ export async function initCli<
     }
   }
 
-  await updateRelaysJSON({
-    fluenceConfig: maybeFluenceConfig,
-  });
+  await updateRelaysJSON();
 
-  setDealClientFlags({
+  setChainFlags({
     env: flags.env,
     [PRIV_KEY_FLAG_NAME]: flags[PRIV_KEY_FLAG_NAME],
   });
 
-  return {
-    args,
-    flags,
-    ...res,
-  };
+  return { args, flags, ...res };
 }
 
 function ensureCorrectCliVersion(maybeCliVersion: string | undefined): void {

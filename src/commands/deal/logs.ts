@@ -23,7 +23,6 @@ import type { Get_logs_dealParams } from "../../lib/compiled-aqua/installation-s
 import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import {
   WORKER_SPELL,
-  PRIV_KEY_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CLIENT_FLAGS,
@@ -31,7 +30,6 @@ import {
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
   type FluenceEnv,
-  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import {
   formatAquaLogsHeader,
@@ -47,7 +45,7 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveFluenceEnv } from "../../lib/resolveFluenceEnv.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
   static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
@@ -56,7 +54,6 @@ export default class Logs extends BaseCommand<typeof Logs> {
     ...baseFlags,
     ...FLUENCE_CLIENT_FLAGS,
     ...OFF_AQUA_LOGS_FLAG,
-    ...PRIV_KEY_FLAG,
     ...TRACING_FLAG,
   };
   static override args = {
@@ -68,13 +65,9 @@ export default class Logs extends BaseCommand<typeof Logs> {
     }),
   };
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Logs),
-    );
-
-    await initFluenceClient(flags, maybeFluenceConfig);
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    const { flags, args } = await initCli(this, await this.parse(Logs));
+    await initFluenceClient(flags);
+    const fluenceEnv = await ensureFluenceEnv();
 
     const dealIdWorkerNameMap = await getDealIdWorkerNameMap(
       args["WORKER-NAMES"],

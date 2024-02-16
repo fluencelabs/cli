@@ -483,8 +483,7 @@ async function fluenceRun(args: RunArgs) {
     commandObj.error(runDataErrors.join("\n"));
   }
 
-  await initFluenceClient(args, args.fluenceConfig);
-
+  await initFluenceClient(args);
   const { codomain } = functionCall.funcDef.arrow;
   const returnTypeVoid = codomain.tag === "nil" || codomain.items.length === 0;
 

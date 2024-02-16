@@ -35,8 +35,8 @@ import {
   AUTO_GENERATED,
   CLI_NAME,
   CLI_NAME_FULL,
-  CONTRACTS_ENV,
-  type ContractsENV,
+  CHAIN_ENV,
+  type ChainENV,
   CURRENCY_MULTIPLIER,
   DEFAULT_DEAL_NAME,
   DEFAULT_IPFS_ADDRESS,
@@ -247,7 +247,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   hosts?: Record<string, Host>;
   workers?: Record<string, Worker>;
   deals?: Record<string, Deal>;
-  chainNetwork?: ContractsENV;
+  chainNetwork?: ChainENV;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
@@ -473,7 +473,7 @@ const configSchemaV2Obj = {
     chainNetwork: {
       type: "string",
       description: "The network in which the transactions will be carried out",
-      enum: CONTRACTS_ENV,
+      enum: CHAIN_ENV,
       default: "testnet",
       nullable: true,
     },
@@ -523,7 +523,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = configSchemaV2Obj;
 type ConfigV3 = Omit<ConfigV2, "version" | "relays" | "chainNetwork"> & {
   version: 3;
   customFluenceEnv?: {
-    contractsEnv: ContractsENV;
+    contractsEnv: ChainENV;
     relays: Array<string>;
   };
 };
@@ -551,7 +551,7 @@ const configSchemaV3Obj = {
         contractsEnv: {
           type: "string",
           description: `Contracts environment to use for this fluence network to sign contracts on the blockchain`,
-          enum: CONTRACTS_ENV,
+          enum: CHAIN_ENV,
         },
         relays: {
           type: "array",
@@ -1129,10 +1129,7 @@ const migrations: Migrations<Config> = [
         contractsEnv: chainNetwork ?? "testnet",
         relays:
           relays === undefined || typeof relays === "string"
-            ? await resolveRelays({
-                fluenceEnv: relays ?? "kras",
-                maybeFluenceConfig: null,
-              })
+            ? await resolveRelays()
             : relays,
       };
     }

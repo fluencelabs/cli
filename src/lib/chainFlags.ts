@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { registerProvider } from "../../lib/chain/providerInfo.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { initCli } from "../../lib/lifeCycle.js";
+import { ENV_FLAG_NAME, PRIV_KEY_FLAG_NAME } from "./const.js";
 
-export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register as a provider";
-  static override flags = {
-    ...baseFlags,
-    ...CHAIN_FLAGS,
-  };
+export type ChainFlags = {
+  [ENV_FLAG_NAME]?: string | undefined;
+  [PRIV_KEY_FLAG_NAME]?: string | undefined;
+};
 
-  async run(): Promise<void> {
-    await initCli(this, await this.parse(Register));
-    await registerProvider();
-  }
+export let chainFlags: ChainFlags = {};
+
+export function setChainFlags(flags: ChainFlags) {
+  chainFlags = flags;
 }

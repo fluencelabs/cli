@@ -93,9 +93,9 @@ export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
-export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
-export type ContractsENV = (typeof CONTRACTS_ENV)[number];
-export const isContractsEnv = getIsStringUnion(CONTRACTS_ENV);
+export const CHAIN_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
+export type ChainENV = (typeof CHAIN_ENV)[number];
+export const isChainEnv = getIsStringUnion(CHAIN_ENV);
 
 export type ChainConfig = {
   url: string;
@@ -111,11 +111,11 @@ export const WC_METADATA = {
   icons: [],
 };
 
-export const FLUENCE_ENVS = [...CONTRACTS_ENV, "custom"] as const;
+export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
-export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
+export const DEAL_CONFIG: Record<ChainENV, ChainConfig> = {
   kras: {
     url: "https://polygon-mumbai.g.alchemy.com/v2/lSTLbdQejAUJ854kpjvyFXrmKocI2N-z",
     id: 80001,
@@ -141,7 +141,7 @@ export const DEAL_RPC_CONFIG = Object.fromEntries(
 );
 
 // @ts-expect-error we know that keys are ContractsEnv, not just string
-export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
+export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ChainENV, number> =
   Object.fromEntries(
     Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
       return [name, id];
@@ -280,14 +280,6 @@ export const ENV_ARG = {
   [ENV_ARG_NAME]: Args.string(fluenceEnvFlagAndArg),
 };
 
-export const PRIV_KEY_FLAG_NAME = "priv-key";
-export const PRIV_KEY_FLAG = {
-  [PRIV_KEY_FLAG_NAME]: Flags.string({
-    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} key will be used by default`,
-    helpValue: "<private-key>",
-  }),
-};
-
 export const OFF_AQUA_LOGS_FLAG = {
   "off-aqua-logs": Flags.boolean({
     default: false,
@@ -419,10 +411,13 @@ export const OFFERS_FLAG = {
   [OFFERS_FLAG_NAME]: Flags.string(OFFERS_FLAG_OBJECT),
 };
 
-export const CHAIN_ENV_FLAG = {
-  [ENV_FLAG_NAME]: Flags.string({
-    description: `Blockchain environment to use when running the command. By default uses the environment from ${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}, that can also be set using '${CLI_NAME} default env' command`,
-    helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
+export const PRIV_KEY_FLAG_NAME = "priv-key";
+
+export const CHAIN_FLAGS = {
+  ...ENV_FLAG,
+  [PRIV_KEY_FLAG_NAME]: Flags.string({
+    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} key will be used by default`,
+    helpValue: "<private-key>",
   }),
 };
 

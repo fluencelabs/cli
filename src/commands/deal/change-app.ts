@@ -17,7 +17,7 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { dealUpdate } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -26,8 +26,7 @@ export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
   static override description = "Change app id in the deal";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   static override args = {

@@ -26,13 +26,7 @@ import {
   initNewProviderArtifactsConfig,
   initReadonlyProviderArtifactsConfig,
 } from "../configs/project/providerArtifacts.js";
-import {
-  CLI_NAME,
-  CURRENCY_MULTIPLIER,
-  ENV_FLAG_NAME,
-  OFFERS_FLAG_NAME,
-  PRIV_KEY_FLAG_NAME,
-} from "../const.js";
+import { CLI_NAME, CURRENCY_MULTIPLIER, OFFERS_FLAG_NAME } from "../const.js";
 import {
   getDealClient,
   getDealExplorerClient,
@@ -54,8 +48,6 @@ const OFFER_ID_PROPERTY = "offerId";
 
 export type OffersArgs = {
   [OFFERS_FLAG_NAME]: string | undefined;
-  [ENV_FLAG_NAME]: string | undefined;
-  [PRIV_KEY_FLAG_NAME]: string | undefined;
 };
 
 export async function createOffers(flags: OffersArgs) {
@@ -289,7 +281,7 @@ export async function updateOffers(flags: OffersArgs) {
 }
 
 async function resolveOffersFromProviderConfig(flags: OffersArgs) {
-  const providerConfig = await ensureReadonlyProviderConfig(flags);
+  const providerConfig = await ensureReadonlyProviderConfig();
 
   const [notFoundOffers, offers] = splitErrorsAndResults(
     flags.offers === undefined
@@ -329,10 +321,8 @@ async function resolveOffersFromProviderConfig(flags: OffersArgs) {
         effectors,
         computePeers,
       }) => {
-        const computePeerConfigs = await ensureComputerPeerConfigs(
-          flags,
-          computePeers,
-        );
+        const computePeerConfigs =
+          await ensureComputerPeerConfigs(computePeers);
 
         const minPricePerWorkerEpochBigInt = BigInt(
           minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,

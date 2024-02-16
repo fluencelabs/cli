@@ -17,7 +17,6 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { LOCAL_NET_DEFAULT_WALLET_KEY } from "../../lib/accounts.js";
 import { createCommitments } from "../../lib/chain/createCommitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { depositToNox } from "../../lib/chain/depositToNox.js";
@@ -25,12 +24,10 @@ import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
-  PRIV_KEY_FLAG_NAME,
   DEFAULT_OFFER_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
-  PRIV_KEY_FLAG,
-  CHAIN_ENV_FLAG,
+  CHAIN_FLAGS,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -46,13 +43,12 @@ export default class Up extends BaseCommand<typeof Up> {
         "Timeout in seconds for attempting to register local network on local peers",
       default: 120,
     }),
-    ...PRIV_KEY_FLAG,
-    ...CHAIN_ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Up));
 
-    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig(flags);
+    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
     try {
       const res = await dockerCompose({
@@ -84,14 +80,11 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
-    flags[PRIV_KEY_FLAG_NAME] =
-      flags[PRIV_KEY_FLAG_NAME] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
-
     flags.env = "local";
 
     await depositToNox({ ...flags, amount: "100" });
 
-    await registerProvider(flags);
+    await registerProvider();
 
     await createOffers({
       ...flags,

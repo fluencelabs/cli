@@ -26,8 +26,6 @@ import { TARGET_WORKERS_DEFAULT } from "../../lib/configs/project/fluence.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
   LOCAL_IPFS_ADDRESS,
-  PRIV_KEY_FLAG,
-  ENV_FLAG,
   OFF_AQUA_LOGS_FLAG,
   DEAL_CONFIG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -38,21 +36,21 @@ import {
   MARINE_BUILD_ARGS_FLAG,
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
-  ENV_FLAG_NAME,
   DEFAULT_INITIAL_BALANCE,
   PRICE_PER_EPOCH_DEFAULT,
-  type ContractsENV,
+  type ChainENV,
+  CHAIN_FLAGS,
 } from "../../lib/const.js";
 import { dbg } from "../../lib/dbg.js";
 import { dealCreate, dealUpdate, match } from "../../lib/deal.js";
-import { ensureChainNetwork } from "../../lib/ensureChainNetwork.js";
+import { ensureChainEnv } from "../../lib/ensureChainNetwork.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { resolveFluenceEnv } from "../../lib/resolveFluenceEnv.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
   static override description = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -60,8 +58,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   static override flags = {
     ...baseFlags,
     ...OFF_AQUA_LOGS_FLAG,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
@@ -86,15 +83,15 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       true,
     );
 
-    const contractsENV = await ensureChainNetwork(flags.env);
-    const chainNetworkId = DEAL_CONFIG[contractsENV].id;
+    const chainEnv = await ensureChainEnv();
+    const chainNetworkId = DEAL_CONFIG[chainEnv].id;
     const workersConfig = await initNewWorkersConfig();
 
     const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
       "../../lib/deployWorkers.js"
     );
 
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    const fluenceEnv = await ensureFluenceEnv();
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],
@@ -105,7 +102,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     });
 
     dbg("start connecting to fluence network");
-    await initFluenceClient(flags, fluenceConfig);
+    await initFluenceClient(flags);
     await doRegisterIpfsClient(true);
     dbg("start running upload");
 
@@ -165,7 +162,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         updatedDeals[workerName] = {
           deal: getLinkToAddress(
             previouslyDeployedDeal.dealIdOriginal,
-            contractsENV,
+            chainEnv,
           ),
           "old worker definition": previouslyDeployedDeal.definition,
           "new worker definition": appCID,
@@ -185,7 +182,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         dealsPerEnv[workerName] = {
           timestamp: new Date().toISOString(),
           definition: appCID,
-          chainNetwork: contractsENV,
+          chainNetwork: chainEnv,
           chainNetworkId,
           dealIdOriginal: previouslyDeployedDeal.dealIdOriginal,
           dealId: previouslyDeployedDeal.dealId,
@@ -235,14 +232,14 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
         timestamp,
         dealIdOriginal,
         dealId: dealIdOriginal.slice(2).toLowerCase(),
-        chainNetwork: contractsENV,
+        chainNetwork: chainEnv,
         chainNetworkId,
       };
 
       await workersConfig.$commit();
 
       createdDeals[workerName] = {
-        deal: getLinkToAddress(dealIdOriginal, contractsENV),
+        deal: getLinkToAddress(dealIdOriginal, chainEnv),
         "worker definition": appCID,
         timestamp,
       };
@@ -281,7 +278,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
   }
 }
 
-function getLinkToAddress(dealId: string, contractsENV: ContractsENV) {
+function getLinkToAddress(dealId: string, contractsENV: ChainENV) {
   return contractsENV === "local"
     ? dealId
     : `https://mumbai.polygonscan.com/address/${dealId}`;

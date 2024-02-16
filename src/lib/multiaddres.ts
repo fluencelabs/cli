@@ -32,15 +32,14 @@ import sample from "lodash-es/sample.js";
 
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
 import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
 import {
   FLUENCE_ENVS,
   type FluenceEnv,
   type PublicFluenceEnv,
-  CONTRACTS_ENV,
+  CHAIN_ENV,
 } from "./const.js";
-import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import {
   commaSepStrToArr,
   jsonStringify,
@@ -48,7 +47,7 @@ import {
 } from "./helpers/utils.js";
 import { projectRootDir } from "./paths.js";
 import { input, list } from "./prompt.js";
-import { resolveFluenceEnv } from "./resolveFluenceEnv.js";
+import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   return multiaddrs.map((multiaddr) => {
@@ -59,8 +58,8 @@ export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   });
 }
 
-async function ensureLocalAddrsAndPeerIds(args: ProviderConfigArgs) {
-  return (await ensureComputerPeerConfigs(args)).map(
+async function ensureLocalAddrsAndPeerIds() {
+  return (await ensureComputerPeerConfigs()).map(
     ({ peerId, overriddenNoxConfig }): AddrAndPeerId => {
       return {
         multiaddr: `/ip4/127.0.0.1/tcp/${overriddenNoxConfig.websocketPort}/ws/p2p/${peerId}`,
@@ -76,9 +75,9 @@ const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
   testnet: testNet,
 };
 
-export async function ensureCustomAddrsAndPeerIds(
-  fluenceConfig: FluenceConfig | null,
-) {
+export async function ensureCustomAddrsAndPeerIds() {
+  const fluenceConfig = await initFluenceConfig();
+
   if (fluenceConfig === null) {
     commandObj.error(
       `You must init fluence project if you want to use ${color.yellow(
@@ -105,7 +104,7 @@ export async function ensureCustomAddrsAndPeerIds(
 
   const contractsEnv = await list({
     message: "Select contracts environment for your custom network",
-    options: [...CONTRACTS_ENV],
+    options: [...CHAIN_ENV],
     oneChoiceMessage: (): never => {
       throw new Error("Unreachable: only one contracts env");
     },
@@ -138,32 +137,22 @@ export async function ensureCustomAddrsAndPeerIds(
   return addrsToNodes(fluenceEnvOrCustomRelays);
 }
 
-type ResolveNodesArgs = {
-  fluenceEnv: FluenceEnv;
-  maybeFluenceConfig: FluenceConfig | null;
-  noxes?: number | undefined;
-};
+export async function resolveAddrsAndPeerIds(): Promise<AddrAndPeerId[]> {
+  const fluenceEnv = await ensureFluenceEnv();
 
-export async function resolveAddrsAndPeerIds({
-  fluenceEnv,
-  maybeFluenceConfig,
-  noxes,
-}: ResolveNodesArgs): Promise<AddrAndPeerId[]> {
   if (fluenceEnv === "custom") {
-    return ensureCustomAddrsAndPeerIds(maybeFluenceConfig);
+    return ensureCustomAddrsAndPeerIds();
   }
 
   if (fluenceEnv === "local") {
-    return ensureLocalAddrsAndPeerIds({ noxes, env: "local" });
+    return ensureLocalAddrsAndPeerIds();
   }
 
   return ADDR_MAP[fluenceEnv];
 }
 
-export async function resolveRelays(
-  args: ResolveNodesArgs,
-): Promise<Array<string>> {
-  return (await resolveAddrsAndPeerIds(args)).map((node) => {
+export async function resolveRelays(): Promise<Array<string>> {
+  return (await resolveAddrsAndPeerIds()).map((node) => {
     return node.multiaddr;
   });
 }
@@ -174,7 +163,6 @@ export async function resolveRelays(
  */
 async function getMaybeNamedAddrAndPeerId(
   maybeRelayName: string | undefined,
-  maybeFluenceConfig: FluenceConfig | null,
 ): Promise<(AddrAndPeerId & { fluenceEnv: FluenceEnv }) | undefined> {
   if (maybeRelayName === undefined) {
     return undefined;
@@ -189,11 +177,7 @@ async function getMaybeNamedAddrAndPeerId(
     return undefined;
   }
 
-  const relays = await resolveAddrsAndPeerIds({
-    fluenceEnv,
-    maybeFluenceConfig,
-  });
-
+  const relays = await resolveAddrsAndPeerIds();
   const [, indexString] = maybeRelayName.split("-");
   const parseResult = parseNamedPeer(indexString, fluenceEnv, relays.length);
 
@@ -236,8 +220,8 @@ function parseNamedPeer(
   return index;
 }
 
-async function getRandomRelayAddr(args: ResolveNodesArgs): Promise<string> {
-  const r = sample(await resolveRelays(args));
+async function getRandomRelayAddr(): Promise<string> {
+  const r = sample(await resolveRelays());
 
   assert(
     r !== undefined,
@@ -247,18 +231,8 @@ async function getRandomRelayAddr(args: ResolveNodesArgs): Promise<string> {
   return r;
 }
 
-export async function resolveRelay({
-  relayFromFlags,
-  fluenceEnvFromFlags,
-  ...args
-}: {
-  relayFromFlags: string | undefined;
-  fluenceEnvFromFlags: string | undefined;
-} & Omit<ResolveNodesArgs, "fluenceEnv">) {
-  const namedAddr = await getMaybeNamedAddrAndPeerId(
-    relayFromFlags,
-    args.maybeFluenceConfig,
-  );
+export async function resolveRelay(relayFromFlags: string | undefined) {
+  const namedAddr = await getMaybeNamedAddrAndPeerId(relayFromFlags);
 
   if (namedAddr !== undefined) {
     commandObj.logToStderr(
@@ -278,8 +252,8 @@ export async function resolveRelay({
     return relayFromFlags;
   }
 
-  const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
-  const randomRelay = await getRandomRelayAddr({ ...args, fluenceEnv });
+  const fluenceEnv = await ensureFluenceEnv();
+  const randomRelay = await getRandomRelayAddr();
 
   commandObj.logToStderr(
     `Connecting to random ${color.yellow(fluenceEnv)} relay: ${color.yellow(
@@ -290,18 +264,15 @@ export async function resolveRelay({
   return randomRelay;
 }
 
-export async function resolvePeerId(
-  peerIdOrNamedNode: string,
-  maybeFluenceConfig: FluenceConfig | null,
-) {
+export async function resolvePeerId(peerIdOrNamedNode: string) {
   return (
-    (await getMaybeNamedAddrAndPeerId(peerIdOrNamedNode, maybeFluenceConfig))
-      ?.peerId ?? peerIdOrNamedNode
+    (await getMaybeNamedAddrAndPeerId(peerIdOrNamedNode))?.peerId ??
+    peerIdOrNamedNode
   );
 }
 
-export async function getRandomPeerId(args: ResolveNodesArgs): Promise<string> {
-  return getPeerId(await getRandomRelayAddr(args));
+export async function getRandomPeerId(): Promise<string> {
+  return getPeerId(await getRandomRelayAddr());
 }
 
 export function getPeerId(addr: string): string {
@@ -316,15 +287,9 @@ export function getPeerId(addr: string): string {
   return id;
 }
 
-type UpdateRelaysJSONArgs = {
-  fluenceConfig: FluenceConfig | null;
-  noxes?: number | undefined;
-};
+export async function updateRelaysJSON() {
+  const fluenceConfig = await initFluenceConfig();
 
-export async function updateRelaysJSON({
-  fluenceConfig,
-  noxes,
-}: UpdateRelaysJSONArgs) {
   if (
     fluenceConfig?.relaysPath === undefined ||
     envConfig?.fluenceEnv === undefined
@@ -337,11 +302,7 @@ export async function updateRelaysJSON({
       ? [fluenceConfig.relaysPath]
       : fluenceConfig.relaysPath;
 
-  const relays = await resolveAddrsAndPeerIds({
-    fluenceEnv: envConfig.fluenceEnv,
-    maybeFluenceConfig: fluenceConfig,
-    noxes,
-  });
+  const relays = await resolveAddrsAndPeerIds();
 
   const [absolutePaths, relativePaths] = splitErrorsAndResults(
     relayPaths,

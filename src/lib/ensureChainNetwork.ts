@@ -18,44 +18,42 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import { initReadonlyFluenceConfig } from "./configs/project/fluence.js";
-import { type ContractsENV, CLI_NAME } from "./const.js";
-import { resolveFluenceEnv } from "./resolveFluenceEnv.js";
+import { type ChainENV, CLI_NAME, ENV_FLAG_NAME } from "./const.js";
+import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
-let env: ContractsENV | undefined = undefined;
+let env: ChainENV | undefined = undefined;
 
-function setEnv(e: ContractsENV): ContractsENV {
+function setEnv(e: ChainENV): ChainENV {
   env = e;
   commandObj.logToStderr(`Using ${color.yellow(env)} blockchain environment`);
   return env;
 }
 
-export async function ensureChainNetwork(
-  fluenceEnvFromFlags: string | undefined,
-): Promise<ContractsENV> {
+export async function ensureChainEnv(): Promise<ChainENV> {
   if (env !== undefined) {
     return env;
   }
 
-  const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
+  const fluenceEnv = await ensureFluenceEnv();
 
   if (fluenceEnv !== "custom") {
     return setEnv(fluenceEnv);
   }
 
-  const maybeFluenceConfig = await initReadonlyFluenceConfig();
+  const fluenceConfig = await initReadonlyFluenceConfig();
 
-  if (maybeFluenceConfig === null) {
+  if (fluenceConfig === null) {
     commandObj.error(
-      "Fluence project is required to use custom env. Please make sure you're in the project directory or specify the environment using --env flag",
+      `Fluence project is required to use custom env. Please make sure you're in the project directory or specify the environment using --${ENV_FLAG_NAME} flag`,
     );
   }
 
-  const customContractsEnv = maybeFluenceConfig.customFluenceEnv?.contractsEnv;
+  const customContractsEnv = fluenceConfig.customFluenceEnv?.contractsEnv;
 
   if (customContractsEnv === undefined) {
     commandObj.error(
       `${color.yellow("customFluenceEnv")} is not defined in ${color.yellow(
-        maybeFluenceConfig.$getPath(),
+        fluenceConfig.$getPath(),
       )}. Please make sure it's there or choose some other fluence environment using ${color.yellow(
         `${CLI_NAME} default env`,
       )}`,

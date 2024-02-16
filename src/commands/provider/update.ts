@@ -16,19 +16,18 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { updateProvider } from "../../lib/chain/providerInfo.js";
-import { PRIV_KEY_FLAG, CHAIN_ENV_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Update extends BaseCommand<typeof Update> {
   static override description = "Update provider info";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...CHAIN_ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Update));
-    await updateProvider(flags);
+    await initCli(this, await this.parse(Update));
+    await updateProvider();
   }
 }
