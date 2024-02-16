@@ -287,6 +287,8 @@ async function genDockerCompose(): Promise<LatestConfig> {
         image: versions[CHAIN_DEPLOY_SCRIPT_NAME],
         environment: {
           CHAIN_RPC_URL: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+          MAX_FAILED_RATIO: "9999",
+          IS_MOCKED_RANDOMX: "true",
         },
         depends_on: [CHAIN_RPC_CONTAINER_NAME],
       },

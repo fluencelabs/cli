@@ -16,8 +16,9 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
-import { sign, getDealClient } from "../../lib/dealClient.js";
+import { getDealClient, signBatch } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { resolveAddrsAndPeerIds } from "../../lib/multiaddres.js";
 
 export default class Info extends BaseCommand<typeof Info> {
   hidden = true;
@@ -32,6 +33,25 @@ export default class Info extends BaseCommand<typeof Info> {
     await initCli(this, await this.parse(Info));
     const { dealClient } = await getDealClient();
     const capacity = await dealClient.getCapacity();
-    await sign(capacity.submitProof, "", "", "");
+    const market = await dealClient.getMarket();
+
+    const computeUnitIds = (
+      await Promise.all(
+        (await resolveAddrsAndPeerIds()).map(({ peerId }) => {
+          return market.getComputeUnitIds(peerId);
+        }),
+      )
+    ).flat();
+
+    const localUnitNonce =
+      "0x0000000000000000000000000000000000000000000000000000000000000000"; // random byte32 string
+
+    const difficulty = await capacity.difficulty();
+
+    await signBatch(
+      computeUnitIds.map((unitId) => {
+        return [capacity.submitProof, unitId, localUnitNonce, difficulty];
+      }),
+    );
   }
 }
