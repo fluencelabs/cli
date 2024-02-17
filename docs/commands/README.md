@@ -287,7 +287,7 @@ _See code: [src/commands/chain/info.ts](https://github.com/fluencelabs/cli/blob/
 
 ## `fluence chain proof`
 
-Show contract addresses for the fluence environment and accounts for the local environment
+Send garbage proof for testing purposes
 
 ```
 USAGE
@@ -302,7 +302,7 @@ FLAGS
                                                    key will be used by default
 
 DESCRIPTION
-  Show contract addresses for the fluence environment and accounts for the local environment
+  Send garbage proof for testing purposes
 ```
 
 _See code: [src/commands/chain/proof.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/chain/proof.ts)_
@@ -445,7 +445,7 @@ _See code: [src/commands/deal/deposit.ts](https://github.com/fluencelabs/cli/blo
 
 ## `fluence deal info`
 
-Get info about provider
+Get info about the deal
 
 ```
 USAGE
@@ -463,7 +463,7 @@ FLAGS
                                                    key will be used by default
 
 DESCRIPTION
-  Get info about provider
+  Get info about the deal
 ```
 
 _See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/deal/info.ts)_
@@ -1310,7 +1310,7 @@ _See code: [src/commands/provider/gen.ts](https://github.com/fluencelabs/cli/blo
 
 ## `fluence provider init`
 
-Init provider config. Creates a config file
+Init provider config. Creates a provider.yaml file
 
 ```
 USAGE
@@ -1327,7 +1327,7 @@ FLAGS
                                                    key will be used by default
 
 DESCRIPTION
-  Init provider config. Creates a config file
+  Init provider config. Creates a provider.yaml file
 ```
 
 _See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/init.ts)_
