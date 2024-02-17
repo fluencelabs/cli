@@ -20,17 +20,16 @@ import { getDealClient, signBatch } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { resolveAddrsAndPeerIds } from "../../lib/multiaddres.js";
 
-export default class Info extends BaseCommand<typeof Info> {
+export default class Proof extends BaseCommand<typeof Proof> {
   hidden = true;
-  static override description =
-    "Show contract addresses for the fluence environment and accounts for the local environment";
+  static override description = "Send garbage proof for testing purposes";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Info));
+    await initCli(this, await this.parse(Proof));
     const { dealClient } = await getDealClient();
     const capacity = await dealClient.getCapacity();
     const market = await dealClient.getMarket();

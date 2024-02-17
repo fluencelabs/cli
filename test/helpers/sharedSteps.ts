@@ -246,25 +246,14 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   assert(dealId, "dealId is expected to be defined");
   console.log("dealId:", dealId);
 
-  await setTryTimeout(
-    async function callRunDeployedServicesCallback() {
-      await fluence({
-        args: ["deal", "deposit", "10"],
-        cwd,
-      });
-    },
-    (error) => {
-      throw new Error(
-        `${RUN_DEPLOYED_SERVICES_FUNCTION_CALL} didn't run successfully in ${RUN_DEPLOYED_SERVICES_TIMEOUT}ms, error: ${stringifyUnknown(
-          error,
-        )}`,
-      );
-    },
-    RUN_DEPLOYED_SERVICES_TIMEOUT,
-  );
+  await fluence({
+    args: ["deal", "deposit", "10"],
+    cwd,
+  });
 
   await setTryTimeout(
-    async function callRunDeployedServicesCallback() {
+    "run deployed services",
+    () => {
       return callRunDeployedServices(cwd);
     },
     (error) => {
@@ -375,22 +364,21 @@ export async function createModuleAndAddToService(
 }
 
 async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
-  async function checkConfig() {
-    const config = await initReadonlyFluenceConfigWithPath(cwd);
-
-    assert(config !== null, `config is expected to exist at ${cwd}`);
-
-    assert(
-      config.services !== undefined &&
-        Object.prototype.hasOwnProperty.call(config.services, serviceName),
-      `${serviceName} is expected to be in services property of ${config.$getPath()} after ${serviceName} is added to it`,
-    );
-
-    return config;
-  }
-
   return setTryTimeout(
-    checkConfig,
+    "get updated fluence config",
+    async () => {
+      const config = await initReadonlyFluenceConfigWithPath(cwd);
+
+      assert(config !== null, `config is expected to exist at ${cwd}`);
+
+      assert(
+        config.services !== undefined &&
+          Object.prototype.hasOwnProperty.call(config.services, serviceName),
+        `${serviceName} is expected to be in services property of ${config.$getPath()} after ${serviceName} is added to it`,
+      );
+
+      return config;
+    },
     (error) => {
       throw new Error(
         `Config is expected to be updated after ${serviceName} is added to it, error: ${stringifyUnknown(
@@ -407,7 +395,8 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
   answer: string,
 ) {
   await setTryTimeout(
-    async function checkIfRunDeployedServicesReturnsExpected() {
+    "check if runDeployedServices returns expected result",
+    async () => {
       const expected = (await getMultiaddrs(cwd)).map(({ peerId }) => {
         return {
           answer,
@@ -446,9 +435,9 @@ export async function waitUntilShowSubnetReturnsExpected(
   spells: string[],
 ) {
   await setTryTimeout(
-    async function checkIfShowSubnetReturnsExpected() {
+    "check if showSubnet returns expected result",
+    async () => {
       const showSubnetResult = await runAquaFunction(cwd, "showSubnet");
-
       const subnet = JSON.parse(showSubnetResult);
 
       if (!validateWorkerServices(subnet)) {
@@ -493,7 +482,8 @@ export async function waitUntilAquaScriptReturnsExpected(
   answer: string,
 ) {
   await setTryTimeout(
-    async function checkIfAquaScriptReturnsExpected() {
+    "check if aqua script returns expected result",
+    async () => {
       const result = await runAquaFunction(cwd, functionName, [spellName], {
         i: aquaFileName,
       });

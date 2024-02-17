@@ -149,7 +149,8 @@ export async function match(dealAddress: string) {
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
 
   const matchedOffers = await setTryTimeout(
-    function getMatchedOffersByDealId() {
+    "get matched offers by deal id",
+    () => {
       return dealMatcherClient.getMatchedOffersByDealId(dealAddress);
     },
     (err) => {

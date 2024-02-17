@@ -177,7 +177,8 @@ describe("integration tests", () => {
       });
 
       await setTryTimeout(
-        async function checkIfRunDeployedWorkerServicesReturnsExpected() {
+        'check that "runDeployedWorkers" aqua function returns expected results',
+        async () => {
           const result = await fluence({
             args: ["run"],
             flags: {

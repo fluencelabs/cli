@@ -123,7 +123,8 @@ async function createDealClient(
   const client = new DealClient(signerOrProvider, chainEnv);
 
   await setTryTimeout(
-    async function checkIfBlockChainClientIsConnected() {
+    "check if blockchain client is connected",
+    async () => {
       const core = await client.getCore();
       // By calling this method we ensure that the blockchain client is connected
       await core.minDealDepositedEpoches();
@@ -234,20 +235,21 @@ export async function sign<T extends unknown[]>(
     dbg(debugInfo);
   }
 
-  const tx = await method(...args);
-  const res = await tx.wait();
+  // const tx = await method(...args);
+  // const res = await tx.wait();
 
-  // const { tx, res } = await setTryTimeout(
-  //   async function executingContractMethod() {
-  //     const tx = await method(...args);
-  //     const res = await tx.wait();
-  //     return { tx, res };
-  //   },
-  //   (err) => {
-  //     throw err;
-  //   },
-  //   1000 * 60 * 2,
-  // );
+  const { tx, res } = await setTryTimeout(
+    `execute ${color.yellow(method.name)} blockchain method`,
+    async function executingContractMethod() {
+      const tx = await method(...args);
+      const res = await tx.wait();
+      return { tx, res };
+    },
+    (err) => {
+      throw err;
+    },
+    1000 * 60 * 3,
+  );
 
   commandObj.logToStderr(
     `${color.yellow(method.name)} transaction ${color.yellow(

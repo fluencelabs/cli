@@ -173,11 +173,13 @@ export function splitErrorsAndResults<T, U, V>(
 }
 
 export async function setTryTimeout<T, U>(
+  message: string,
   callbackToTry: () => T | Promise<T>,
   errorHandler: (error: unknown) => U,
   msToTryFor: number,
   msBetweenTries = 1000,
 ): Promise<T | U> {
+  const yellowMessage = color.yellow(message);
   let isTimeoutRunning = true;
 
   const timeout = setTimeout(() => {
@@ -188,15 +190,11 @@ export async function setTryTimeout<T, U>(
   let attemptCounter = 1;
   let isTrying = true;
 
-  const functionName = color.yellow(
-    callbackToTry.name === "" ? "anonymous function" : callbackToTry.name,
-  );
-
   while (isTrying) {
     isTrying = isTimeoutRunning;
 
     try {
-      dbg(`Trying to execute ${functionName}`);
+      dbg(`Trying to ${yellowMessage}`);
       const res = await callbackToTry();
       clearTimeout(timeout);
       isTrying = false;
@@ -207,12 +205,10 @@ export async function setTryTimeout<T, U>(
 
       if (errorString === previousErrorString) {
         dbg(
-          `Attempt #${attemptCounter} to execute ${functionName} failed with the same error`,
+          `Attempt #${attemptCounter} to ${yellowMessage} failed with the same error`,
         );
       } else {
-        dbg(
-          `Failed to execute ${functionName}. Reason: ${stringifyUnknown(e)}`,
-        );
+        dbg(`Failed to ${yellowMessage}. Reason: ${stringifyUnknown(e)}`);
       }
 
       error = e;

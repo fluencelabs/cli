@@ -23,7 +23,9 @@ import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
+export default class WithdrawCollateral extends BaseCommand<
+  typeof WithdrawCollateral
+> {
   static override description = "Withdraw collateral from capacity commitment";
   static override aliases = ["delegator:wc"];
   static override flags = {
@@ -37,7 +39,7 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(AddCollateral));
+    const { args } = await initCli(this, await this.parse(WithdrawCollateral));
 
     await withdrawCollateral(
       commaSepStrToArr(

@@ -22,11 +22,15 @@ import {
   initNewReadonlyProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
-import { CHAIN_FLAGS, NOXES_FLAG } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  NOXES_FLAG,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Init extends BaseCommand<typeof Init> {
-  static override description = "Init provider config. Creates a config file";
+  static override description = `Init provider config. Creates a ${PROVIDER_CONFIG_FULL_FILE_NAME} file`;
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,

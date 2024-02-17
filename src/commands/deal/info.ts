@@ -24,7 +24,7 @@ import { getDealIds } from "../../lib/getDealIds.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Info extends BaseCommand<typeof Info> {
-  static override description = "Get info about provider";
+  static override description = "Get info about the deal";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
