@@ -86,13 +86,13 @@ A map with deployment names as keys and deployments as values
 
 ### Properties
 
-| Property         | Type                      | Required | Description   |
-|------------------|---------------------------|----------|---------------|
-| `deploymentName` | [object](#deploymentname) | No       | Worker config |
+| Property         | Type                      | Required | Description       |
+|------------------|---------------------------|----------|-------------------|
+| `deploymentName` | [object](#deploymentname) | No       | Deployment config |
 
 ### deploymentName
 
-Worker config
+Deployment config
 
 #### Properties
 
@@ -114,13 +114,13 @@ A map of objects with worker names as keys, each object defines a list of peer I
 
 ### Properties
 
-| Property     | Type                  | Required | Description   |
-|--------------|-----------------------|----------|---------------|
-| `workerName` | [object](#workername) | No       | Worker config |
+| Property     | Type                  | Required | Description       |
+|--------------|-----------------------|----------|-------------------|
+| `workerName` | [object](#workername) | No       | Deployment config |
 
 ### workerName
 
-Worker config
+Deployment config
 
 #### Properties
 
