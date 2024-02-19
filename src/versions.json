@@ -1,5 +1,5 @@
 {
-  "nox": "docker.fluence.dev/distro:compute-unit-matched_578_3",
+  "nox": "fluencelabs/nox:0.20.0",
   "chain-rpc": "docker.fluence.dev/chain-rpc:main-d95d05b-219-1",
   "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:main-d95d05b-219-1",
   "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script-image:main-d95d05b-219-1",
