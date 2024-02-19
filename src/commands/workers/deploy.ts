@@ -39,6 +39,7 @@ import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
+  static override hidden = true;
   static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {

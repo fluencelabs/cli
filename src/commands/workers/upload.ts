@@ -38,6 +38,7 @@ import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
 import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Upload extends BaseCommand<typeof Upload> {
+  static override hidden = true;
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {

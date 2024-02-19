@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import { BaseCommand } from "../../baseCommand.js";
+import { BaseCommand } from "../baseCommand.js";
 import {
   DEPLOY_ARGS,
   DEPLOY_DESCRIPTION,
   DEPLOY_EXAMPLES,
   DEPLOY_FLAGS,
   deployImpl,
-} from "../../lib/deploy.js";
+} from "../lib/deploy.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override hidden = true;
   static override description = DEPLOY_DESCRIPTION;
   static override examples = DEPLOY_EXAMPLES;
   static override flags = DEPLOY_FLAGS;

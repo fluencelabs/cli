@@ -37,6 +37,7 @@ import { initCli } from "../../lib/lifeCycle.js";
 import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
+  static override hidden = true;
   static override description = `Remove workers from hosts, described in 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
