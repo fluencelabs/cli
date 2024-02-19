@@ -915,7 +915,7 @@ function getDefault(): string {
 # You can use \`fluence init\` command to generate a template for new Fluence project
 
 # config version
-version: 6
+version: 8
 
 # A map of deployment names as keys and deployments as values
 deployments:
