@@ -32,7 +32,7 @@ import {
 } from "../../src/lib/configs/project/fluence.js";
 import { initServiceConfig } from "../../src/lib/configs/project/service.js";
 import {
-  DEFAULT_DEAL_NAME,
+  DEFAULT_DEPLOYMENT_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
@@ -153,13 +153,17 @@ export async function updateFluenceConfigForTest(cwd: string) {
   const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].targetWorkers = 3;
+
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
+    MY_SERVICE_NAME,
+  ];
+
   await fluenceConfig.$commit();
   return fluenceConfig;
 }
@@ -276,9 +280,9 @@ export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
   const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
   fluenceConfig.spells = {
@@ -287,7 +291,7 @@ export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
     },
   };
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [spellName];
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].spells = [spellName];
   await fluenceConfig.$commit();
 }
 
@@ -321,14 +325,15 @@ export async function createServiceAndAddToDeal(
   };
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
-  const currentServices = fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? [];
+  const currentServices =
+    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services ?? [];
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
     ...currentServices,
     serviceName,
   ];

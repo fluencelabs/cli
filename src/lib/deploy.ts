@@ -51,7 +51,7 @@ import { initCli } from "./lifeCycle.js";
 import { doRegisterIpfsClient } from "./localServices/ipfs.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
-export const DEPLOY_DESCRIPTION = `Deploy workers according to deal in 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
+export const DEPLOY_DESCRIPTION = `Deploy according to 'deployments' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
 export const DEPLOY_EXAMPLES = ["<%= config.bin %> <%= command.id %>"];
 
 export const DEPLOY_FLAGS = {
@@ -72,8 +72,8 @@ export const DEPLOY_FLAGS = {
 };
 
 export const DEPLOY_ARGS = {
-  "WORKER-NAMES": Args.string({
-    description: `Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from 'deals' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
+  "DEPLOYMENT-NAMES": Args.string({
+    description: `Comma separated names of deployments to deploy. Example: "deployment1,deployment2" (by default all deployments from 'deployments' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
   }),
 };
 
@@ -95,7 +95,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   const fluenceEnv = await ensureFluenceEnv();
 
   const uploadArg = await prepareForDeploy({
-    workerNames: args["WORKER-NAMES"],
+    workerNames: args["DEPLOYMENT-NAMES"],
     workersConfig,
     fluenceConfig,
     fluenceEnv,
@@ -129,11 +129,11 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   > = {};
 
   for (const { name: workerName, definition: appCID } of uploadResult.workers) {
-    const deal = fluenceConfig.deals?.[workerName];
+    const deal = fluenceConfig.deployments?.[workerName];
 
     assert(
       deal !== undefined,
-      "Unreachable. All worker names are checked in prepareForDeploy. Then they are passed to upload aqua function which returns them back without modification",
+      "Unreachable. All deployment names are checked in prepareForDeploy. Then they are passed to upload aqua function which returns them back without modification",
     );
 
     const {
@@ -149,7 +149,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 
     if (previouslyDeployedDeal !== undefined) {
       commandObj.logToStderr(
-        `\nUpdating deal for worker ${color.yellow(workerName)}\n`,
+        `\nUpdating deal for ${color.yellow(workerName)}\n`,
       );
 
       await dealUpdate({
@@ -188,11 +188,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       continue;
     }
 
-    dbg("start deal creation");
-
-    commandObj.logToStderr(
-      `\nCreating deal for worker ${color.yellow(workerName)}\n`,
-    );
+    commandObj.logToStderr(`\nDeploying ${color.yellow(workerName)}\n`);
 
     const dealIdOriginal = await dealCreate({
       appCID,
