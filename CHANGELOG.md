@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.4...fluence-cli-v0.15.0) (2024-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* add capacity commitment ([#654](https://github.com/fluencelabs/cli/issues/654))
+
+### Features
+
+* add capacity commitment ([#654](https://github.com/fluencelabs/cli/issues/654)) ([6b7211a](https://github.com/fluencelabs/cli/commit/6b7211a000ff4710567d1036913b6f8d9af553cc))
+* rename deals to deployments ([#764](https://github.com/fluencelabs/cli/issues/764)) ([ed7188a](https://github.com/fluencelabs/cli/commit/ed7188ad2516f3b80e60419fc91fe24ccd3b05d8))
+
 ## [0.14.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.3...fluence-cli-v0.14.4) (2024-02-14)
 
 
