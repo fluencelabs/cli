@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.0...fluence-cli-v0.15.1) (2024-02-19)
+
+
+### Bug Fixes
+
+* **deps:** use nox 0.20.0 ([#766](https://github.com/fluencelabs/cli/issues/766)) ([c75a1f2](https://github.com/fluencelabs/cli/commit/c75a1f26d1fa25d1a0221697fc298d6969644eb0))
+
 ## [0.15.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.4...fluence-cli-v0.15.0) (2024-02-19)
 
 
