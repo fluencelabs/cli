@@ -27,7 +27,7 @@
 * [`fluence dep reset`](#fluence-dep-reset)
 * [`fluence dep uninstall PACKAGE-NAME`](#fluence-dep-uninstall-package-name)
 * [`fluence dep versions`](#fluence-dep-versions)
-* [`fluence deploy [WORKER-NAMES]`](#fluence-deploy-worker-names)
+* [`fluence deploy [DEPLOYMENT-NAMES]`](#fluence-deploy-deployment-names)
 * [`fluence help [COMMANDS]`](#fluence-help-commands)
 * [`fluence init [PATH]`](#fluence-init-path)
 * [`fluence key default [NAME]`](#fluence-key-default-name)
@@ -786,19 +786,19 @@ EXAMPLES
 
 _See code: [src/commands/dep/versions.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/dep/versions.ts)_
 
-## `fluence deploy [WORKER-NAMES]`
+## `fluence deploy [DEPLOYMENT-NAMES]`
 
-Deploy workers according to deal in 'deals' property in fluence.yaml
+Deploy according to 'deployments' property in fluence.yaml
 
 ```
 USAGE
-  $ fluence deploy [WORKER-NAMES] [--no-input] [--off-aqua-logs] [--env <value>] [--priv-key <value>] [-k
-    <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>] [--no-build]
-    [--tracing] [--marine-build-args <value>] [--auto-match]
+  $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <value>] [--priv-key <value>]
+    [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
+    [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match]
 
 ARGUMENTS
-  WORKER-NAMES  Comma separated names of workers to deploy. Example: "worker1,worker2" (by default all workers from
-                'deals' property in fluence.yaml are deployed)
+  DEPLOYMENT-NAMES  Comma separated names of deployments to deploy. Example: "deployment1,deployment2" (by default all
+                    deployments from 'deployments' property in fluence.yaml are deployed)
 
 FLAGS
   -k, --sk=<name>                                      Name of the secret key for js-client inside CLI to use. If not
@@ -827,7 +827,7 @@ FLAGS
                                                        particle is expired and not processed.
 
 DESCRIPTION
-  Deploy workers according to deal in 'deals' property in fluence.yaml
+  Deploy according to 'deployments' property in fluence.yaml
 
 EXAMPLES
   $ fluence deploy
