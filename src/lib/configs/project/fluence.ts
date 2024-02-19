@@ -330,7 +330,7 @@ const validateDealSchema = ajv.compile(dealSchema);
 
 const workerConfigSchemaObj = {
   type: "object",
-  description: "Worker config",
+  description: "Deployment config",
   properties: {
     services: {
       description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
