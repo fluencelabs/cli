@@ -45,7 +45,7 @@
 * [`fluence provider cc-info`](#fluence-provider-cc-info)
 * [`fluence provider create-commitment`](#fluence-provider-create-commitment)
 * [`fluence provider create-offer`](#fluence-provider-create-offer)
-* [`fluence provider deposit`](#fluence-provider-deposit)
+* [`fluence provider distribute-tokens`](#fluence-provider-distribute-tokens)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
@@ -1255,16 +1255,16 @@ ALIASES
 
 _See code: [src/commands/provider/create-offer.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/create-offer.ts)_
 
-## `fluence provider deposit`
+## `fluence provider distribute-tokens`
 
-Deposit to noxes
+Distribute tokens to noxes
 
 ```
 USAGE
-  $ fluence provider deposit [--no-input] [--env <value>] [--priv-key <value>] [--amount <value>]
+  $ fluence provider distribute-tokens [--no-input] [--env <value>] [--priv-key <value>] [--amount <value>]
 
 FLAGS
-  --amount=<value>                                 Amount of tokens to deposit to noxes
+  --amount=<value>                                 Amount of tokens to distribute to noxes
   --env=<kras | testnet | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                       Don't interactively ask for any input from the user
   --priv-key=<private-key>                         !WARNING! for debug purposes only. Passing private keys through flags
@@ -1273,13 +1273,13 @@ FLAGS
                                                    key will be used by default
 
 DESCRIPTION
-  Deposit to noxes
+  Distribute tokens to noxes
 
 ALIASES
   $ fluence provider d
 ```
 
-_See code: [src/commands/provider/deposit.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/deposit.ts)_
+_See code: [src/commands/provider/distribute-tokens.ts](https://github.com/fluencelabs/cli/blob/v0.14.4/src/commands/provider/distribute-tokens.ts)_
 
 ## `fluence provider gen`
 
