@@ -61,6 +61,18 @@ export const validateBatch = (
   return errors.length === 0 ? true : errors.join("\n");
 };
 
+export const validateBatchAsync = async (
+  ...args: Array<Promise<ValidationResult> | ValidationResult>
+): Promise<ValidationResult> => {
+  const errors = (await Promise.all(args)).filter(
+    (result): result is string => {
+      return typeof result === "string";
+    },
+  );
+
+  return errors.length === 0 ? true : errors.join("\n");
+};
+
 export const isExactVersion = async (version: string): Promise<boolean> => {
   const semver = await import("semver");
   return semver.clean(version) === version;

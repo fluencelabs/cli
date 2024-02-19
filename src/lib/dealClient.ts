@@ -69,6 +69,10 @@ let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
 
 let dealClient: DealClient | undefined = undefined;
 
+// only needed for 'proof' command so it's possible to use multiple wallets during one command execution
+// normally each command will use only one wallet
+let dealClientPrivKey: string | undefined = undefined;
+
 export async function getDealClient() {
   const chainEnv = await ensureChainEnv();
 
@@ -77,7 +81,13 @@ export async function getDealClient() {
     // use default wallet key for local network
     (chainEnv === "local" ? LOCAL_NET_DEFAULT_WALLET_KEY : undefined);
 
-  if (signerOrWallet === undefined || dealClient === undefined) {
+  if (
+    signerOrWallet === undefined ||
+    dealClient === undefined ||
+    dealClientPrivKey !== privKey
+  ) {
+    dealClientPrivKey = privKey;
+
     signerOrWallet =
       privKey === undefined
         ? await getWalletConnectProvider()
@@ -251,14 +261,15 @@ export async function sign<T extends unknown[]>(
     1000 * 60 * 3,
   );
 
+  assert(res !== null, `'${method.name}' transaction hash is not defined`);
+  assert(res.status === 1, `'${method.name}' transaction failed with status 1`);
+
   commandObj.logToStderr(
     `${color.yellow(method.name)} transaction ${color.yellow(
       tx.hash,
     )} was mined successfuly`,
   );
 
-  assert(res !== null, `'${method.name}' transaction hash is not defined`);
-  assert(res.status === 1, `'${method.name}' transaction failed with status 1`);
   return res;
 }
 

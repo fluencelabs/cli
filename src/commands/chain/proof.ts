@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import { randomBytes } from "node:crypto";
+
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { peerIdToUint8Array } from "../../lib/chain/peerIdToUint8Array.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { getDealClient, signBatch } from "../../lib/dealClient.js";
+import { setChainFlags, chainFlags } from "../../lib/chainFlags.js";
+import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
+import { CHAIN_FLAGS, PRIV_KEY_FLAG_NAME } from "../../lib/const.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveAddrsAndPeerIds } from "../../lib/multiaddres.js";
 
 export default class Proof extends BaseCommand<typeof Proof> {
   hidden = true;
@@ -31,27 +34,47 @@ export default class Proof extends BaseCommand<typeof Proof> {
 
   async run(): Promise<void> {
     await initCli(this, await this.parse(Proof));
-    const { dealClient } = await getDealClient();
-    const capacity = await dealClient.getCapacity();
-    const market = await dealClient.getMarket();
 
-    const computeUnitIds = (
-      await Promise.all(
-        (await resolveAddrsAndPeerIds()).map(async ({ peerId }) => {
-          return market.getComputeUnitIds(await peerIdToUint8Array(peerId));
-        }),
-      )
-    ).flat();
-
-    const localUnitNonce =
-      "0x0000000000000000000000000000000000000000000000000000000000000000"; // random byte32 string
-
-    const difficulty = await capacity.difficulty();
-
-    await signBatch(
-      computeUnitIds.map((unitId) => {
-        return [capacity.submitProof, unitId, localUnitNonce, difficulty];
-      }),
+    const computeUnitIds = (await resolveComputePeersByNames()).map(
+      ({ peerId, walletKey }) => {
+        return {
+          peerId,
+          walletKey,
+        };
+      },
     );
+
+    for (const { peerId, walletKey } of computeUnitIds) {
+      setChainFlags({
+        ...chainFlags,
+        [PRIV_KEY_FLAG_NAME]: walletKey,
+      });
+
+      const { dealClient } = await getDealClient();
+      const capacity = await dealClient.getCapacity();
+      const difficulty = await capacity.difficulty();
+      const market = await dealClient.getMarket();
+
+      const unitIds = await market.getComputeUnitIds(
+        await peerIdToUint8Array(peerId),
+      );
+
+      for (const unitId of unitIds) {
+        const localUnitNonce = randomBytes(32).toString("hex");
+
+        await sign(
+          capacity.submitProof,
+          unitId,
+          `0x${localUnitNonce}`,
+          difficulty,
+        );
+      }
+
+      // await signBatch(
+      //   unitIds.map((unitId) => {
+      //     return [capacity.submitProof, unitId, localUnitNonce, difficulty];
+      //   }),
+      // );
+    }
   }
 }

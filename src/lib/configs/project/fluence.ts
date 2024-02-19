@@ -63,7 +63,7 @@ import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   validateEffectors,
   validateVersionsIsExact,
-  validateBatch,
+  validateBatchAsync,
 } from "../../helpers/validations.js";
 import { writeSecretKey } from "../../keyPairs.js";
 import { resolveRelays } from "../../multiaddres.js";
@@ -1419,8 +1419,8 @@ function validateCompileAquaPathsAreRelative(config: LatestConfig) {
 }
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  return validateBatch(
-    await validateEffectors(
+  return validateBatchAsync(
+    validateEffectors(
       Object.entries(config.deals ?? {}).flatMap(([name, { effectors }]) => {
         return (effectors ?? []).map((effector) => {
           return {
@@ -1433,8 +1433,8 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     validateCompileAquaPathsAreRelative(config),
     checkDuplicatesAndPresence(config, "services"),
     checkDuplicatesAndPresence(config, "spells"),
-    await validateVersionsIsExact("marineVersion", config.marineVersion),
-    await validateVersionsIsExact("mreplVersion", config.mreplVersion),
+    validateVersionsIsExact("marineVersion", config.marineVersion),
+    validateVersionsIsExact("mreplVersion", config.mreplVersion),
   );
 };
 

@@ -67,7 +67,11 @@ import {
   ccDurationValidator,
   validateAddress,
 } from "../../helpers/validateCapacityCommitment.js";
-import { validateEffectors } from "../../helpers/validations.js";
+import {
+  type ValidationResult,
+  validateEffectors,
+} from "../../helpers/validations.js";
+import { validateBatchAsync } from "../../helpers/validations.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import {
   ensureFluenceConfigsDir,
@@ -438,44 +442,62 @@ export type ProviderConfig = InitializedConfig<LatestConfig>;
 export type ProviderConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  const invalid: Array<{
-    offerName: string;
-    missingComputePeerNames: Array<string>;
-  }> = [];
+  return validateBatchAsync(
+    validateEffectors(
+      Object.entries(config.offers).flatMap(([name, { effectors }]) => {
+        return (effectors ?? []).map((effector) => {
+          return {
+            effector,
+            location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > offers > ${name} > effectors > ${effector}`,
+          };
+        });
+      }),
+    ),
+    validateCC(config),
+    validateMissingComputePeers(config),
+    validateNoDuplicateNoxNamesInOffers(config),
+  );
+};
 
-  if (isEmpty(config.computePeers)) {
-    return `There should be at least one computePeer defined in the config`;
-  }
+function validateNoDuplicateNoxNamesInOffers(
+  config: LatestConfig,
+): ValidationResult {
+  const noxNamesInOffers: Record<string, string[]> = {};
 
-  const offers = Object.entries(config.offers);
+  Object.entries(config.offers).forEach(([offerName, { computePeers }]) => {
+    computePeers.forEach((noxName) => {
+      const arr = noxNamesInOffers[noxName];
 
-  if (offers.length === 0) {
-    return `There should be at least one offer defined in the config`;
-  }
-
-  // Checking that all computePeers referenced in offers are defined
-  for (const [offerName, { computePeers }] of offers) {
-    const missingComputePeerNames = computePeers.filter((cp) => {
-      return !(cp in config.computePeers);
+      if (arr === undefined) {
+        noxNamesInOffers[noxName] = [offerName];
+      } else {
+        arr.push(offerName);
+      }
     });
+  });
 
-    if (missingComputePeerNames.length > 0) {
-      invalid.push({ offerName, missingComputePeerNames });
-    }
-  }
+  const duplicateNoxNames = Object.entries(noxNamesInOffers).filter(
+    ([, offerNames]) => {
+      return offerNames.length > 1;
+    },
+  );
 
-  if (invalid.length > 0) {
-    return invalid
-      .map(({ offerName, missingComputePeerNames }) => {
-        return `Offer ${color.yellow(
-          offerName,
-        )} has computePeers missing from the config's top level computePeers property: ${color.yellow(
-          missingComputePeerNames.join(", "),
+  if (duplicateNoxNames.length > 0) {
+    return duplicateNoxNames
+      .map(([noxName, offerNames]) => {
+        return `Nox ${color.yellow(
+          noxName,
+        )} is present in multiple offers: ${color.yellow(
+          offerNames.join(", "),
         )}`;
       })
       .join("\n");
   }
 
+  return true;
+}
+
+async function validateCC(config: LatestConfig): Promise<ValidationResult> {
   const chainEnv = await ensureChainEnv();
   const validateCCDuration = await ccDurationValidator(chainEnv === "local");
 
@@ -508,17 +530,53 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     return capacityCommitmentErrors.join("\n\n");
   }
 
-  return validateEffectors(
-    Object.entries(config.offers).flatMap(([name, { effectors }]) => {
-      return (effectors ?? []).map((effector) => {
-        return {
-          effector,
-          location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > offers > ${name} > effectors > ${effector}`,
-        };
+  return true;
+}
+
+function validateMissingComputePeers(config: LatestConfig): ValidationResult {
+  const missingComputePeerNamesInOffer: Array<{
+    offerName: string;
+    missingComputePeerNames: Array<string>;
+  }> = [];
+
+  if (isEmpty(config.computePeers)) {
+    return `There should be at least one computePeer defined in the config`;
+  }
+
+  const offers = Object.entries(config.offers);
+
+  if (offers.length === 0) {
+    return `There should be at least one offer defined in the config`;
+  }
+
+  // Checking that all computePeers referenced in offers are defined
+  for (const [offerName, { computePeers }] of offers) {
+    const missingComputePeerNames = computePeers.filter((cp) => {
+      return !(cp in config.computePeers);
+    });
+
+    if (missingComputePeerNames.length > 0) {
+      missingComputePeerNamesInOffer.push({
+        offerName,
+        missingComputePeerNames,
       });
-    }),
-  );
-};
+    }
+  }
+
+  if (missingComputePeerNamesInOffer.length > 0) {
+    return missingComputePeerNamesInOffer
+      .map(({ offerName, missingComputePeerNames }) => {
+        return `Offer ${color.yellow(
+          offerName,
+        )} has computePeers missing from the config's top level computePeers property: ${color.yellow(
+          missingComputePeerNames.join(", "),
+        )}`;
+      })
+      .join("\n");
+  }
+
+  return true;
+}
 
 const initConfigOptions = {
   allSchemas: [configSchemaV0],
@@ -952,9 +1010,11 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
   );
 }
 
-export async function resolveComputePeersByNames(args: {
-  [NOX_NAMES_FLAG_NAME]?: string | undefined;
-}) {
+export async function resolveComputePeersByNames(
+  args: {
+    [NOX_NAMES_FLAG_NAME]?: string | undefined;
+  } = {},
+) {
   const computePeers = await ensureComputerPeerConfigs();
 
   if (args[NOX_NAMES_FLAG_NAME] === undefined) {

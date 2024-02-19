@@ -28,7 +28,7 @@ import {
   U32_MAX,
 } from "../../const.js";
 import { ensureSpellAbsolutePath } from "../../helpers/downloadFile.js";
-import { validateBatch } from "../../helpers/validations.js";
+import { validateBatchAsync } from "../../helpers/validations.js";
 import { getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
@@ -192,7 +192,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
   config,
   configPath,
 ) => {
-  return validateBatch(
+  return validateBatchAsync(
     config.clock?.startTimestamp !== undefined &&
       config.clock.startDelaySec !== undefined
       ? `You can't specify both 'startTimestamp' and 'startDelaySec' properties`
@@ -240,8 +240,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (
         return `Invalid 'startTimestamp' value. It must be an ISO timestamp`;
       }
     })(),
-
-    await (async () => {
+    (async () => {
       try {
         await access(resolve(dirname(configPath), config.aquaFilePath));
         return true;
