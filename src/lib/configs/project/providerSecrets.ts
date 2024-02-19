@@ -21,11 +21,11 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FILE_NAME,
-  LOCAL_NET_WALLET_KEYS,
 } from "../../const.js";
-import { getSecretKeyOrReturnExisting } from "../../keyPairs.js";
+import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureProviderSecretsConfigPath, getFluenceDir } from "../../paths.js";
 import {
+  getConfigInitFunction,
   getReadonlyConfigInitFunction,
   type InitializedConfig,
   type InitializedReadonlyConfig,
@@ -111,25 +111,37 @@ export function initReadonlyProviderSecretsConfig() {
 export async function initNewReadonlyProviderSecretsConfig(
   providerConfig: ProviderConfigReadonly,
 ) {
+  return getReadonlyConfigInitFunction(getInitConfigOptions(), () => {
+    return getDefault(providerConfig);
+  })();
+}
+
+export async function initNewProviderSecretsConfig(
+  providerConfig: ProviderConfigReadonly,
+) {
+  return getConfigInitFunction(getInitConfigOptions(), () => {
+    return getDefault(providerConfig);
+  })();
+}
+
+async function getDefault(providerConfig: ProviderConfigReadonly) {
+  const { ethers } = await import("ethers");
+
   const noxes: Record<string, SecretsConfig> = Object.fromEntries(
     await Promise.all(
-      Object.keys(providerConfig.computePeers).map(async (name, i) => {
+      Object.keys(providerConfig.computePeers).map(async (name) => {
         return [
           name,
           {
-            networkKey: (await getSecretKeyOrReturnExisting(name)).secretKey,
-            signingWallet:
-              // because we use length we can be sure it's never undefined
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length] as string,
+            networkKey: (await genSecretKeyOrReturnExisting(name)).secretKey,
+            signingWallet: ethers.Wallet.createRandom().privateKey,
           },
         ] as const;
       }),
     ),
   );
 
-  return getReadonlyConfigInitFunction(getInitConfigOptions(), () => {
-    return `
+  return `
 version: 0
 ${yamlDiffPatch(
   "",
@@ -139,7 +151,6 @@ ${yamlDiffPatch(
   },
 )}
 `;
-  })();
 }
 
 export const providerSecretsSchema: JSONSchemaType<LatestConfig> =

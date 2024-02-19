@@ -25,15 +25,15 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   WORKERS_CONFIG_FILE_NAME,
   CLI_NAME,
-  type ContractsENV,
-  CONTRACTS_ENV,
+  type ChainENV,
+  CHAIN_ENV,
   DEFAULT_DEAL_NAME,
   DEFAULT_WORKER_NAME,
   type FluenceEnv,
   FLUENCE_ENVS,
 } from "../../const.js";
-import { fluenceEnvPrompt } from "../../multiaddres.js";
 import { getFluenceDir } from "../../paths.js";
+import { fluenceEnvPrompt } from "../../resolveFluenceEnv.js";
 import {
   getReadonlyConfigInitFunction,
   getConfigInitFunction,
@@ -69,7 +69,7 @@ const workerInfoSchema = {
 export type Deal = WorkerInfo & {
   dealId: string;
   dealIdOriginal: string;
-  chainNetwork: ContractsENV;
+  chainNetwork: ChainENV;
   chainNetworkId: number;
 };
 
@@ -157,7 +157,7 @@ const dealSchema: JSONSchemaType<Deal> = {
     },
     chainNetwork: {
       type: "string",
-      enum: CONTRACTS_ENV,
+      enum: CHAIN_ENV,
       description:
         "Blockchain network name that was used when deploying workers",
     },

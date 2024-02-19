@@ -14,13 +14,21 @@ on:
       run-tests-in-parallel:
         description: "Whether to run tests in parallel or synchronously"
         type: string
-        default: "true"
+        default: "false"
       nox-image:
         description: "nox image tag"
         type: string
         default: "null"
-      chain-image:
-        description: "chain image tag"
+      chain-rpc-image:
+        description: "chain-rpc image tag"
+        type: string
+        default: "null"
+      chain-deploy-script-image:
+        description: "chain-deploy-script image tag"
+        type: string
+        default: "null"
+      subgraph-deploy-script-image:
+        description: "subgraph-deploy-script image tag"
         type: string
         default: "null"
       marine-version:
@@ -47,8 +55,8 @@ on:
         description: "aqua snapshots"
         type: string
         default: "null"
-      deal-aurora-version:
-        description: "deal-aurora version"
+      deal-ts-clients-version:
+        description: "deal-ts-clients version"
         type: string
         default: "null"
       spell-version:
@@ -121,22 +129,31 @@ jobs:
           echo "nox image used for tests is $nox"
           echo "NOX_IMAGE=${nox}" >> $GITHUB_ENV
 
-      - name: Set chain image
+      - name: Set deal images
         run: |
-          # set chain image
-          case ${{ inputs.chain-image }} in
-          # if nox image is not passed from e2e read from versions.json
+          # set deal images
+          case ${{ inputs.chain-rpc-image }} in
           'null')
-            chain="$(jq .chain src/versions.json -r)"
+            chain_rpc="$(jq '.["chain-rpc"]' src/versions.json -r)"
+            chain_deploy_script="$(jq '.["chain-deploy-script"]' src/versions.json -r)"
+            subgraph_deploy_script="$(jq '.["subgraph-deploy-script"]' src/versions.json -r)"
           ;;
-          # else set chain image to snapshot passed from e2e
+          # else set deal images to snapshots passed from e2e
           *)
-            chain=${{ inputs.chain-image }}
+            chain_rpc=${{ inputs.chain-rpc-image }}
+            chain_deploy_script=${{ inputs.chain-deploy-script-image }}
+            subgraph_deploy_script=${{ inputs.subgraph-deploy-script-image }}
           ;;
           esac
 
-          echo "chain image used for tests is $chain"
-          echo "CHAIN_IMAGE=${chain}" >> $GITHUB_ENV
+          echo "chain-rpc image used for tests is $chain_rpc"
+          echo "CHAIN_RPC_IMAGE=${chain_rpc}" >> $GITHUB_ENV
+
+          echo "chain-deploy-script image used for tests is $chain_deploy_script"
+          echo "CHAIN_DEPLOY_SCRIPT_IMAGE=${chain_deploy_script}" >> $GITHUB_ENV
+
+          echo "subgraph-deploy-script image used for tests is $subgraph_deploy_script"
+          echo "SUBGRAPH_DEPLOY_SCRIPT_IMAGE=${subgraph_deploy_script}" >> $GITHUB_ENV
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -152,7 +169,7 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Setup Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: dsherret/rust-toolchain-file@v1
 
       - name: Setup node with self-hosted npm registry
         uses: actions/setup-node@v4
@@ -185,12 +202,12 @@ jobs:
           version: "${{ fromJson(inputs.aqua-snapshots)['aqua-api'] }}"
           package-manager: yarn
 
-      - name: Set deal-aurora version
-        if: inputs.deal-aurora-version != 'null'
+      - name: Set deal-ts-clients version
+        if: inputs.deal-ts-clients-version != 'null'
         uses: fluencelabs/github-actions/npm-set-dependency@main
         with:
-          package: "@fluencelabs/deal-aurora"
-          version: "${{ inputs.deal-aurora-version }}"
+          package: "@fluencelabs/deal-ts-clients"
+          version: "${{ inputs.deal-ts-clients-version }}"
           package-manager: yarn
 
       - name: Set installation-spell version
@@ -208,7 +225,9 @@ jobs:
           versions: |
             {
               "nox": "${{ env.NOX_IMAGE }}",
-              "chain": "${{ env.CHAIN_IMAGE }}",
+              "chain-rpc": "${{ env.CHAIN_RPC_IMAGE }}",
+              "chain-deploy-script": "${{ env.CHAIN_DEPLOY_SCRIPT_IMAGE }}",
+              "subgraph-deploy-script": "${{ env.SUBGRAPH_DEPLOY_SCRIPT_IMAGE }}",
               "npm": {
                 "@fluencelabs/spell": "${{ inputs.spell-version == 'null' && 'null' || inputs.spell-version }}"
               },

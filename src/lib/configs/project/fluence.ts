@@ -35,11 +35,9 @@ import {
   AUTO_GENERATED,
   CLI_NAME,
   CLI_NAME_FULL,
-  COLLATERAL_DEFAULT,
-  CONTRACTS_ENV,
-  type ContractsENV,
+  CHAIN_ENV,
+  type ChainENV,
   CURRENCY_MULTIPLIER,
-  CURRENCY_MULTIPLIER_TEXT,
   DEFAULT_DEAL_NAME,
   DEFAULT_IPFS_ADDRESS,
   DEFAULT_MARINE_BUILD_ARGS,
@@ -55,6 +53,7 @@ import {
   MARINE_BUILD_ARGS_PROPERTY,
   PRICE_PER_EPOCH_DEFAULT,
   TOP_LEVEL_SCHEMA_ID,
+  DEFAULT_INITIAL_BALANCE,
   aquaLogLevelsString,
   AQUA_LOG_LEVELS,
   type AquaLogLevel,
@@ -62,8 +61,9 @@ import {
 import { COMPILE_AQUA_PROPERTY_NAME } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
+  validateEffectors,
   validateVersionsIsExact,
-  validateBatch,
+  validateBatchAsync,
 } from "../../helpers/validations.js";
 import { writeSecretKey } from "../../keyPairs.js";
 import { resolveRelays } from "../../multiaddres.js";
@@ -224,7 +224,8 @@ type Deal = {
   targetWorkers?: number;
   maxWorkersPerProvider?: number;
   pricePerWorkerEpoch?: number;
-  collateralPerWorker?: number;
+  initialBalance?: number;
+  effectors?: string[];
 };
 
 type Worker = {
@@ -246,7 +247,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   hosts?: Record<string, Host>;
   workers?: Record<string, Worker>;
   deals?: Record<string, Deal>;
-  chainNetwork?: ContractsENV;
+  chainNetwork?: ChainENV;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
@@ -302,17 +303,22 @@ const dealSchemaObj = {
     },
     pricePerWorkerEpoch: {
       type: "number",
-      description: `Price per worker epoch in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
+      description: `Price per worker epoch in FLT`,
       default: PRICE_PER_EPOCH_DEFAULT,
       nullable: true,
       minimum: 1 / CURRENCY_MULTIPLIER,
     },
-    collateralPerWorker: {
+    initialBalance: {
       type: "number",
-      description: `Collateral per worker in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
-      default: COLLATERAL_DEFAULT,
+      description: `Initial balance after deploy in FLT`,
+      default: DEFAULT_INITIAL_BALANCE,
       nullable: true,
-      minimum: 1 / CURRENCY_MULTIPLIER,
+    },
+    effectors: {
+      type: "array",
+      description: "Effector CIDs to be used in the deal. Must be a valid CID",
+      items: { type: "string" },
+      nullable: true,
     },
   },
   required: [],
@@ -467,7 +473,7 @@ const configSchemaV2Obj = {
     chainNetwork: {
       type: "string",
       description: "The network in which the transactions will be carried out",
-      enum: CONTRACTS_ENV,
+      enum: CHAIN_ENV,
       default: "testnet",
       nullable: true,
     },
@@ -517,7 +523,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = configSchemaV2Obj;
 type ConfigV3 = Omit<ConfigV2, "version" | "relays" | "chainNetwork"> & {
   version: 3;
   customFluenceEnv?: {
-    contractsEnv: ContractsENV;
+    contractsEnv: ChainENV;
     relays: Array<string>;
   };
 };
@@ -545,7 +551,7 @@ const configSchemaV3Obj = {
         contractsEnv: {
           type: "string",
           description: `Contracts environment to use for this fluence network to sign contracts on the blockchain`,
-          enum: CONTRACTS_ENV,
+          enum: CHAIN_ENV,
         },
         relays: {
           type: "array",
@@ -882,8 +888,8 @@ version: 6
 deals:
   ${DEFAULT_DEAL_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
-    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FL
-    collateralPerWorker: ${COLLATERAL_DEFAULT} # collateral per worker in FL
+    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FLT
+    initialBalance: ${DEFAULT_INITIAL_BALANCE} # initial balance  after deploy in FLT
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 
@@ -1123,10 +1129,7 @@ const migrations: Migrations<Config> = [
         contractsEnv: chainNetwork ?? "testnet",
         relays:
           relays === undefined || typeof relays === "string"
-            ? await resolveRelays({
-                fluenceEnv: relays ?? "kras",
-                maybeFluenceConfig: null,
-              })
+            ? await resolveRelays()
             : relays,
       };
     }
@@ -1416,12 +1419,22 @@ function validateCompileAquaPathsAreRelative(config: LatestConfig) {
 }
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  return validateBatch(
+  return validateBatchAsync(
+    validateEffectors(
+      Object.entries(config.deals ?? {}).flatMap(([name, { effectors }]) => {
+        return (effectors ?? []).map((effector) => {
+          return {
+            effector,
+            location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deals > ${name} > effectors > ${effector}`,
+          };
+        });
+      }),
+    ),
     validateCompileAquaPathsAreRelative(config),
     checkDuplicatesAndPresence(config, "services"),
     checkDuplicatesAndPresence(config, "spells"),
-    await validateVersionsIsExact("marineVersion", config.marineVersion),
-    await validateVersionsIsExact("mreplVersion", config.mreplVersion),
+    validateVersionsIsExact("marineVersion", config.marineVersion),
+    validateVersionsIsExact("mreplVersion", config.mreplVersion),
   );
 };
 

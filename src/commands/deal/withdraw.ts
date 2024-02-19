@@ -18,22 +18,16 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
 
 export default class Withdraw extends BaseCommand<typeof Withdraw> {
   static override description = "Withdraw tokens from the deal";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   static override args = {
@@ -46,13 +40,7 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Withdraw),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const privKey = flags["priv-key"];
+    const { args } = await initCli(this, await this.parse(Withdraw));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -61,23 +49,9 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
       args["AMOUNT"] ??
       (await input({ message: "Enter amount of tokens to deposit" }));
 
-    const signer = await getSigner(network, privKey);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
+    const { dealClient } = await getDealClient();
     const deal = dealClient.getDeal(dealAddress);
-
-    promptConfirmTx(privKey);
-
-    const tx = await deal.withdraw(amount);
-
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    await waitTx(tx);
-
+    await sign(deal.withdraw, amount);
     color.green(`Tokens were deposited to the deal ${dealAddress}`);
   }
 }

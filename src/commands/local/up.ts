@@ -17,20 +17,20 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
+import { createCommitments } from "../../lib/chain/createCommitment.js";
+import { depositCollateral } from "../../lib/chain/depositCollateral.js";
+import { distributeToNox } from "../../lib/chain/distributeToNox.js";
+import { createOffers } from "../../lib/chain/offer.js";
+import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import {
   DEFAULT_OFFER_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
-  LOCAL_NET_DEFAULT_WALLET_KEY,
   NOXES_FLAG,
-  PRIV_KEY_FLAG,
+  CHAIN_FLAGS,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
-import { setTryTimeout, stringifyUnknown } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { addPeer } from "../provider/add-peer.js";
-import { register } from "../provider/register.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
@@ -43,18 +43,19 @@ export default class Up extends BaseCommand<typeof Up> {
         "Timeout in seconds for attempting to register local network on local peers",
       default: 120,
     }),
-    ...PRIV_KEY_FLAG,
+    ...CHAIN_FLAGS,
   };
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Up));
 
-    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig({
-      noxes: flags.noxes,
-    });
+    const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
     try {
       const res = await dockerCompose({
-        args: ["restart"],
+        args: ["down"],
+        flags: {
+          v: true,
+        },
         printOutput: true,
         options: {
           cwd: dockerComposeConfig.$getDirPath(),
@@ -62,13 +63,15 @@ export default class Up extends BaseCommand<typeof Up> {
       });
 
       if (res.trim() === "") {
-        throw new Error("docker-compose restart failed");
+        throw new Error("docker-compose down failed");
       }
     } catch {
       await dockerCompose({
-        args: ["up", "-d"],
+        args: ["up"],
         flags: {
           "quiet-pull": true,
+          d: true,
+          build: true,
         },
         printOutput: true,
         options: {
@@ -77,33 +80,18 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
-    const env = "local";
-    const privKey = flags["priv-key"] ?? LOCAL_NET_DEFAULT_WALLET_KEY;
+    flags.env = "local";
 
-    await setTryTimeout(
-      async () => {
-        await register({
-          ...flags,
-          "priv-key": privKey,
-          env,
-          offer: DEFAULT_OFFER_NAME,
-        });
-      },
-      (error) => {
-        commandObj.error(
-          `Wasn't able to register local network on local peers in ${
-            flags.timeout
-          } seconds: ${stringifyUnknown(error)}`,
-        );
-      },
-      flags.timeout * 1000,
-      10000,
-    );
+    await distributeToNox({ ...flags, amount: "100" });
 
-    await addPeer({
-      ...flags,
-      env,
-      "priv-key": privKey,
+    await registerProvider();
+
+    await createOffers({
+      force: true,
+      offers: DEFAULT_OFFER_NAME,
     });
+
+    const ccIds = await createCommitments(flags);
+    await depositCollateral(ccIds);
   }
 }

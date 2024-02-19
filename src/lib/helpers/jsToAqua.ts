@@ -404,8 +404,10 @@ export const jsToAquaImpl = ({
         nestingLevel,
       )})`,
       typeDefs: `${
-        keyDataTypes.length === 0 ? "" : `${keyDataTypes.join("\n\n")}\n\n`
-      }data ${type}:\n${keyTypes.join("\n")}`,
+        keyDataTypes.length === 0
+          ? ""
+          : `${keyDataTypes.sort().join("\n\n")}\n\n`
+      }data ${type}:\n${keyTypes.sort().join("\n")}`,
     };
   }
 

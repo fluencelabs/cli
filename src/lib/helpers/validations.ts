@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { splitErrorsAndResults, stringifyUnknown } from "./utils.js";
+
 export type ValidationResult = string | true;
 
 export const validateUnique = <T>(
@@ -59,6 +61,18 @@ export const validateBatch = (
   return errors.length === 0 ? true : errors.join("\n");
 };
 
+export const validateBatchAsync = async (
+  ...args: Array<Promise<ValidationResult> | ValidationResult>
+): Promise<ValidationResult> => {
+  const errors = (await Promise.all(args)).filter(
+    (result): result is string => {
+      return typeof result === "string";
+    },
+  );
+
+  return errors.length === 0 ? true : errors.join("\n");
+};
+
 export const isExactVersion = async (version: string): Promise<boolean> => {
   const semver = await import("semver");
   return semver.clean(version) === version;
@@ -75,12 +89,66 @@ export async function validateVersionsIsExact(
   return `${dependency} version must have exact version. Found: ${version}`;
 }
 
-export const validatePositiveNumberOrEmpty = (
+export function validatePositiveNumberOrEmpty(
   input: unknown,
-): ValidationResult => {
+): ValidationResult {
   if (input === "" || Number(input) > 0) {
     return true;
   }
 
   return "Must be a positive number";
-};
+}
+
+export function lessThenValidator(lessThen: number) {
+  return function validateLessThen(input: unknown): ValidationResult {
+    if (input === "" || Number(input) < lessThen) {
+      return true;
+    }
+
+    return `Must be less then ${lessThen}`;
+  };
+}
+
+export function greaterThenValidator(greaterThen: number) {
+  return function validateGreaterThen(input: unknown): ValidationResult {
+    if (input === "" || Number(input) > greaterThen) {
+      return true;
+    }
+
+    return `Must be greater then ${greaterThen}`;
+  };
+}
+
+export function validatePercent(input: unknown): ValidationResult {
+  return validateBatch(
+    validatePositiveNumberOrEmpty(input),
+    lessThenValidator(100)(input),
+  );
+}
+
+export async function validateEffectors(
+  effectors: Array<{
+    effector: string;
+    location: string;
+  }>,
+): Promise<ValidationResult> {
+  const { CID } = await import("ipfs-http-client");
+
+  const [errors] = splitErrorsAndResults(
+    effectors,
+    ({ location, effector }) => {
+      try {
+        CID.parse(effector);
+        return { result: true };
+      } catch (e) {
+        return { error: `${location}:\n${stringifyUnknown(e)}` };
+      }
+    },
+  );
+
+  if (errors.length > 0) {
+    return `Invalid effectors:\n\n${errors.join("\n\n")}`;
+  }
+
+  return true;
+}

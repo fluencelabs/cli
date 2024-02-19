@@ -16,9 +16,9 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import { ensureComputerPeerConfigs } from "../../lib/configs/project/provider.js";
 import {
-  PROVIDER_CONFIG_FLAGS,
+  CHAIN_FLAGS,
   NOXES_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
@@ -35,11 +35,11 @@ export default class Gen extends BaseCommand<typeof Gen> {
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_FLAGS,
   };
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Gen));
-    await initNewReadonlyProviderConfig(flags);
+    await initCli(this, await this.parse(Gen));
+    await ensureComputerPeerConfigs();
 
     commandObj.logToStderr(
       `Config.toml files for nox are generated at:\n${await ensureFluenceConfigsDir()}\n\nsecrets are generated at:\n${getFluenceSecretsDir()}`,

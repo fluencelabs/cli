@@ -23,13 +23,10 @@ import { commandObj } from "../../lib/commandObj.js";
 import type { RemoveArgWorkers } from "../../lib/compiled-aqua/installation-spell/deploy.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
-  PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CLIENT_FLAGS,
   TRACING_FLAG,
   WORKERS_CONFIG_FULL_FILE_NAME,
-  ENV_FLAG,
-  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import {
@@ -37,18 +34,17 @@ import {
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Remove extends BaseCommand<typeof Remove> {
+  static override hidden = true;
   static override description = `Remove workers from hosts, described in 'hosts' property in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
     ...OFF_AQUA_LOGS_FLAG,
-    ...PRIV_KEY_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...TRACING_FLAG,
-    ...ENV_FLAG,
   };
   static override args = {
     "WORKER-NAMES": Args.string({
@@ -68,10 +64,10 @@ export default class Remove extends BaseCommand<typeof Remove> {
       "../../lib/deployWorkers.js"
     );
 
-    await initFluenceClient(flags, fluenceConfig);
+    await initFluenceClient(flags);
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = Fluence.getClient().getRelayPeerId();
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    const fluenceEnv = await ensureFluenceEnv();
 
     const deployedWorkersForEnv =
       workersConfig.hosts?.[fluenceEnv] ??

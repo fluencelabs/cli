@@ -22,7 +22,6 @@ import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import {
-  PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
@@ -30,7 +29,6 @@ import {
   NO_BUILD_FLAG,
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
-  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import {
   disconnectFluenceClient,
@@ -38,15 +36,15 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Deploy extends BaseCommand<typeof Deploy> {
+  static override hidden = true;
   static override description = `Deploy workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
     ...OFF_AQUA_LOGS_FLAG,
-    ...PRIV_KEY_FLAG,
     ...FLUENCE_CLIENT_FLAGS,
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
@@ -71,12 +69,12 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
       "../../lib/deployWorkers.js"
     );
 
-    await initFluenceClient(flags, fluenceConfig);
+    await initFluenceClient(flags);
     await doRegisterIpfsClient(true);
     const { Fluence } = await import("@fluencelabs/js-client");
     const relayId = Fluence.getClient().getRelayPeerId();
     const initPeerId = Fluence.getClient().getPeerId();
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    const fluenceEnv = await ensureFluenceEnv();
 
     const uploadDeployArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],

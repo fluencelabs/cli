@@ -19,10 +19,10 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { DEFAULT_INITIAL_BALANCE, CHAIN_FLAGS } from "../../lib/const.js";
 import { dealCreate } from "../../lib/deal.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Create extends BaseCommand<typeof Create> {
   static override description =
@@ -53,26 +53,31 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Price per worker epoch",
       required: true,
     }),
-    ...ENV_FLAG,
-    ...PRIV_KEY_FLAG,
+    "initial-balance": Flags.string({
+      description: "Initial balance",
+      required: false,
+    }),
+    effectors: Flags.string({
+      description: "Comma-separated list of effector to be used in the deal",
+    }),
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Create),
-    );
+    const { flags } = await initCli(this, await this.parse(Create));
 
     const dealAddress = await dealCreate({
       appCID: flags["app-cid"],
-      collateralPerWorker: Number(flags["collateral-per-worker"]),
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],
       pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
-      effectors: [],
-      privKey: flags["priv-key"],
-      chainNetwork: await ensureChainNetwork(flags.env, maybeFluenceConfig),
+      effectors:
+        flags.effectors === undefined ? [] : commaSepStrToArr(flags.effectors),
+      initialBalance:
+        flags["initial-balance"] === undefined
+          ? DEFAULT_INITIAL_BALANCE
+          : Number(flags["initial-balance"]),
     });
 
     commandObj.logToStderr(

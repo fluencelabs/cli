@@ -20,7 +20,6 @@ import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Upload_deployArgConfig } from "../../lib/compiled-aqua/installation-spell/cli.js";
 import {
-  PRIV_KEY_FLAG,
   OFF_AQUA_LOGS_FLAG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
@@ -28,7 +27,6 @@ import {
   NO_BUILD_FLAG,
   TRACING_FLAG,
   MARINE_BUILD_ARGS_FLAG,
-  ENV_FLAG_NAME,
 } from "../../lib/const.js";
 import { jsonStringify } from "../../lib/helpers/utils.js";
 import {
@@ -37,16 +35,16 @@ import {
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { doRegisterIpfsClient } from "../../lib/localServices/ipfs.js";
-import { resolveFluenceEnv } from "../../lib/multiaddres.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Upload extends BaseCommand<typeof Upload> {
+  static override hidden = true;
   static override description = `Upload workers to hosts, described in 'hosts' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
     ...FLUENCE_CLIENT_FLAGS,
     ...OFF_AQUA_LOGS_FLAG,
-    ...PRIV_KEY_FLAG,
     ...IMPORT_FLAG,
     ...NO_BUILD_FLAG,
     ...TRACING_FLAG,
@@ -64,13 +62,13 @@ export default class Upload extends BaseCommand<typeof Upload> {
       true,
     );
 
-    await initFluenceClient(flags, fluenceConfig);
+    await initFluenceClient(flags);
     await doRegisterIpfsClient(true);
     const { Fluence } = await import("@fluencelabs/js-client");
     const initPeerId = Fluence.getClient().getPeerId();
 
     const { prepareForDeploy } = await import("../../lib/deployWorkers.js");
-    const fluenceEnv = await resolveFluenceEnv(flags[ENV_FLAG_NAME]);
+    const fluenceEnv = await ensureFluenceEnv();
 
     const uploadArg = await prepareForDeploy({
       workerNames: args["WORKER-NAMES"],

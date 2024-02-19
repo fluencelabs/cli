@@ -22,15 +22,19 @@ import {
   initNewReadonlyProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
-import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  NOXES_FLAG,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Init extends BaseCommand<typeof Init> {
-  static override description = "Init provider config. Creates a config file";
+  static override description = `Init provider config. Creates a ${PROVIDER_CONFIG_FULL_FILE_NAME} file`;
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
@@ -49,9 +53,7 @@ export default class Init extends BaseCommand<typeof Init> {
     providerConfig = await initNewReadonlyProviderConfig(flags);
 
     commandObj.logToStderr(
-      `Successfully created provider config at ${color.yellow(
-        providerConfig.$getPath(),
-      )}`,
+      `Provider config is at ${color.yellow(providerConfig.$getPath())}`,
     );
   }
 }

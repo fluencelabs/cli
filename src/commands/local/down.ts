@@ -39,6 +39,9 @@ export default class Down extends BaseCommand<typeof Down> {
 
     await dockerCompose({
       args: ["down"],
+      flags: {
+        v: true,
+      },
       printOutput: true,
       options: {
         cwd: dockerComposeConfig.$getDirPath(),

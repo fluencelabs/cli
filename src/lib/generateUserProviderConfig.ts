@@ -22,9 +22,21 @@ import {
   defaultNumberProperties,
   type NumberProperty,
   numberProperties,
+  DEFAULT_CC_REWARD_DELEGATION_RATE,
+  DURATION_EXAMPLE,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
+import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
-import { validatePositiveNumberOrEmpty } from "./helpers/validations.js";
+import {
+  ccDurationValidator,
+  getMinCCDuration,
+  validateAddress,
+} from "./helpers/validateCapacityCommitment.js";
+import {
+  validatePercent,
+  validatePositiveNumberOrEmpty,
+} from "./helpers/validations.js";
 import { checkboxes, confirm, input } from "./prompt.js";
 
 async function promptToSetNumberProperty(
@@ -43,7 +55,6 @@ async function promptToSetNumberProperty(
 const DEFAULT_NUMBER_OF_NOXES = 3;
 
 export type ProviderConfigArgs = {
-  env: string | undefined;
   noxes?: number | undefined;
 };
 
@@ -53,6 +64,9 @@ export async function addComputePeers(
 ) {
   let computePeersCounter = 0;
   let isAddingMoreComputePeers = true;
+  const isLocal = (await ensureChainEnv()) === "local";
+  const validateCCDuration = await ccDurationValidator(isLocal);
+  const minDuration = await getMinCCDuration(isLocal);
 
   do {
     const defaultName = `nox-${computePeersCounter}`;
@@ -70,14 +84,43 @@ export async function addComputePeers(
       computePeersCounter = computePeersCounter + 1;
     }
 
-    const slotsStr = await input({
-      message: `Enter number of workers for ${color.yellow(name)}`,
-      default: "1",
+    const computeUnitsString = await input({
+      message: `Enter number of compute units for ${color.yellow(name)}`,
+      default: `${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX}`,
       validate: validatePositiveNumberOrEmpty,
     });
 
+    const capacityCommitmentDuration = await input({
+      message: `Enter capacity commitment duration ${DURATION_EXAMPLE}`,
+      default: `${minDuration} sec`,
+      validate: validateCCDuration,
+    });
+
+    const capacityCommitmentDelegator = await input({
+      // default: anybody can activate capacity commitment
+      // optional
+      message: `Enter capacity commitment delegator address`,
+      validate: validateAddress,
+    });
+
+    const capacityCommitmentRewardDelegationRate = await input({
+      message: `Enter capacity commitment reward delegation rate (in %)`,
+      default: `${DEFAULT_CC_REWARD_DELEGATION_RATE}`,
+      validate: validatePercent,
+    });
+
+    if (!("capacityCommitments" in userProvidedConfig)) {
+      userProvidedConfig.capacityCommitments = {};
+    }
+
+    userProvidedConfig.capacityCommitments[name] = {
+      duration: capacityCommitmentDuration,
+      delegator: capacityCommitmentDelegator,
+      rewardDelegationRate: Number(capacityCommitmentRewardDelegationRate),
+    };
+
     userProvidedConfig.computePeers[name] = {
-      computeUnits: Number(slotsStr),
+      computeUnits: Number(computeUnitsString),
     };
 
     if (numberOfNoxes !== undefined) {

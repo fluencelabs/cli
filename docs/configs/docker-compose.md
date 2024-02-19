@@ -10,6 +10,7 @@ Defines a multi-containers based application.
 | `version`  | string              | **Yes**  |             |
 | `include`  | string[]            | No       |             |
 | `secrets`  | [object](#secrets)  | No       |             |
+| `volumes`  | [object](#volumes)  | No       |             |
 
 ## secrets
 
@@ -40,6 +41,11 @@ Defines a multi-containers based application.
 | `volumes`     | string[]               | No       |             |
 
 #### environment
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+
+## volumes
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

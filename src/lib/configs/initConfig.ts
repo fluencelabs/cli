@@ -544,25 +544,16 @@ export function getConfigInitFunction<
       return previouslyInitializedConfig as InitializedConfig<LatestConfig>;
     }
 
-    let maybeInitializedReadonlyConfig: InitializedReadonlyConfig<LatestConfig> | null;
+    const initializedReadonlyConfig =
+      getDefaultConfig === undefined
+        ? await getReadonlyConfigInitFunction(options)()
+        : await getReadonlyConfigInitFunction(options, getDefaultConfig)();
 
-    if (getDefaultConfig === undefined) {
-      maybeInitializedReadonlyConfig =
-        await getReadonlyConfigInitFunction(options)();
-    } else {
-      maybeInitializedReadonlyConfig = await getReadonlyConfigInitFunction(
-        options,
-        getDefaultConfig,
-      )();
-    }
-
-    if (maybeInitializedReadonlyConfig === null) {
+    if (initializedReadonlyConfig === null) {
       return null;
     }
 
-    const initializedReadonlyConfig = maybeInitializedReadonlyConfig;
     configPath = initializedReadonlyConfig.$getPath();
-
     let configString = initializedReadonlyConfig.$getConfigString();
 
     const config = {

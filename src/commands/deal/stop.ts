@@ -15,62 +15,30 @@
  */
 
 import { color } from "@oclif/color";
-import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { DEAL_FLAGS, CHAIN_FLAGS } from "../../lib/const.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
+import { getDealIds } from "../../lib/getDealIds.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
 
 export default class Stop extends BaseCommand<typeof Stop> {
   static override description = "Stop the deal";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
-  };
-
-  static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
-    }),
+    ...CHAIN_FLAGS,
+    ...DEAL_FLAGS,
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Stop),
-    );
+    const { flags } = await initCli(this, await this.parse(Stop));
+    const dealIds = await getDealIds(flags);
+    const { dealClient } = await getDealClient();
 
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const privKey = flags["priv-key"];
-
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
-
-    const signer = await getSigner(network, privKey);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
-    const deal = dealClient.getDeal(dealAddress);
-
-    promptConfirmTx(privKey);
-
-    const tx = await deal.stop();
-
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    await waitTx(tx);
-
-    color.green(`Tokens were deposited to the deal ${dealAddress}`);
+    for (const dealId of dealIds) {
+      const deal = dealClient.getDeal(dealId);
+      await sign(deal.stop);
+      color.green(`Stopped deal ${dealId}`);
+    }
   }
 }

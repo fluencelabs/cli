@@ -69,7 +69,10 @@ import { compileToFiles } from "./aqua.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
 import { initNewEnvConfig } from "./configs/project/env.js";
-import { initNewReadonlyProviderConfig } from "./configs/project/provider.js";
+import {
+  ensureComputerPeerConfigs,
+  initNewReadonlyProviderConfig,
+} from "./configs/project/provider.js";
 import { initNewReadonlyServiceConfig } from "./configs/project/service.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
 import {
@@ -82,9 +85,10 @@ import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import { jsonStringify } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
-import { updateRelaysJSON, resolveFluenceEnv } from "./multiaddres.js";
+import { updateRelaysJSON } from "./multiaddres.js";
 import { copyDefaultDependencies } from "./npm.js";
 import { getFrontendIndexTSorJSPath, ensureAquaMainPath } from "./paths.js";
+import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 const selectTemplate = (): Promise<Template> => {
   return list({
@@ -124,8 +128,7 @@ export const ensureTemplate = ({
 type InitArg = {
   maybeProjectPath?: string | undefined;
   template?: Template | undefined;
-  env?: string | undefined;
-} & Omit<ProviderConfigArgs, "env" | "name">;
+} & ProviderConfigArgs;
 
 export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   const projectPath =
@@ -161,7 +164,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
 
   const fluenceConfig = await initNewFluenceConfig();
   await copyDefaultDependencies();
-  const fluenceEnv = await resolveFluenceEnv(options.env);
+  const fluenceEnv = await ensureFluenceEnv();
 
   if (envConfig === null) {
     setEnvConfig(await initNewEnvConfig(fluenceEnv));
@@ -171,10 +174,8 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   }
 
   if (fluenceEnv === "local") {
-    await initNewReadonlyProviderConfig({
-      env: "local",
-      noxes: options.noxes,
-    });
+    await initNewReadonlyProviderConfig(options);
+    await ensureComputerPeerConfigs();
   }
 
   await writeFile(
@@ -261,10 +262,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
     });
   }
 
-  await updateRelaysJSON({
-    fluenceConfig,
-    noxes: options.noxes,
-  });
+  await updateRelaysJSON();
 
   commandObj.logToStderr(
     color.magentaBright(
