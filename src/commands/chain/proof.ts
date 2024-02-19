@@ -21,7 +21,7 @@ import { peerIdToUint8Array } from "../../lib/chain/peerIdToUint8Array.js";
 import { setChainFlags, chainFlags } from "../../lib/chainFlags.js";
 import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
 import { CHAIN_FLAGS, PRIV_KEY_FLAG_NAME } from "../../lib/const.js";
-import { getDealClient, sign } from "../../lib/dealClient.js";
+import { getDealClient, signBatch } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Proof extends BaseCommand<typeof Proof> {
@@ -59,22 +59,24 @@ export default class Proof extends BaseCommand<typeof Proof> {
         await peerIdToUint8Array(peerId),
       );
 
-      for (const unitId of unitIds) {
-        const localUnitNonce = randomBytes(32).toString("hex");
+      // for (const unitId of unitIds) {
+      //   const localUnitNonce = `0x${randomBytes(32).toString("hex")}`;
 
-        await sign(
-          capacity.submitProof,
-          unitId,
-          `0x${localUnitNonce}`,
-          difficulty,
-        );
-      }
+      //   await sign(
+      //     capacity.submitProof,
+      //     unitId,
+      //     localUnitNonce,
+      //     difficulty,
+      //   );
+      // }
 
-      // await signBatch(
-      //   unitIds.map((unitId) => {
-      //     return [capacity.submitProof, unitId, localUnitNonce, difficulty];
-      //   }),
-      // );
+      const localUnitNonce = `0x${randomBytes(32).toString("hex")}`;
+
+      await signBatch(
+        unitIds.map((unitId) => {
+          return [capacity.submitProof, unitId, localUnitNonce, difficulty];
+        }),
+      );
     }
   }
 }
