@@ -41,8 +41,8 @@ import {
   HTTP_PORT_START,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
-  CHAIN_RPC_CONTAINER_NAME,
-  CHAIN_RPC_PORT,
+  IPC_CONTAINER_NAME,
+  IPC_PORT,
   LOCAL_IPFS_ADDRESS,
   TOML_EXT,
   IPFS_CONTAINER_NAME,
@@ -768,7 +768,7 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
           ? NOX_IPFS_MULTIADDR
           : "http://ipfs.fluence.dev",
         networkApiEndpoint: isLocal
-          ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
+          ? `http://${IPC_CONTAINER_NAME}:${IPC_PORT}`
           : "http://mumbai-polygon.ru:8545",
         networkId: dealConfig.id,
         startBlock: "earliest",

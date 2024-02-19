@@ -22,7 +22,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { versions } from "../../../versions.js";
 import {
-  CHAIN_DEPLOY_SCRIPT_NAME,
+  IPC_DEPLOY_SCRIPT_NAME,
   GRAPH_NODE_PORT,
   POSTGRES_CONTAINER_NAME,
   DOCKER_COMPOSE_FILE_NAME,
@@ -30,14 +30,18 @@ import {
   TOP_LEVEL_SCHEMA_ID,
   IPFS_PORT,
   IPFS_CONTAINER_NAME,
-  CHAIN_RPC_PORT,
-  CHAIN_RPC_CONTAINER_NAME,
+  IPC_PORT,
+  IPC_CONTAINER_NAME,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
   PROVIDER_CONFIG_FULL_FILE_NAME,
   CONFIGS_DIR_NAME,
   GRAPH_NODE_CONTAINER_NAME,
   SUBGRAPH_DEPLOY_SCRIPT_NAME,
+  COMETBFT_CONTAINER_NAME,
+  COMETBFT_PORT,
+  IPC_ETH_CONTAINER_NAME,
+  IPC_ETH_PORT,
 } from "../../const.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
@@ -58,9 +62,10 @@ type Service = {
   pull_policy?: string;
   environment?: Record<string, string | number>;
   volumes?: string[];
-  command?: string[];
-  depends_on?: string[];
+  command?: string[] | string;
+  depends_on?: string[] | Record<string, { condition: string }>;
   secrets?: string[];
+  healthcheck?: Record<string, string | number>;
 };
 
 const serviceSchema: JSONSchemaType<Service> = {
@@ -85,19 +90,53 @@ const serviceSchema: JSONSchemaType<Service> = {
       nullable: true,
     },
     command: {
-      type: "array",
-      items: { type: "string" },
+      type: ["array", "string"],
       nullable: true,
+      oneOf: [
+        {
+          type: "array",
+          items: { type: "string" },
+          nullable: true,
+        },
+        {
+          type: "string",
+          nullable: true,
+        },
+      ],
     },
     depends_on: {
-      type: "array",
-      items: { type: "string" },
+      type: ["array", "object"],
+      oneOf: [
+        {
+          type: "array",
+          items: { type: "string" },
+          nullable: true,
+        },
+        {
+          type: "object",
+          additionalProperties: {
+            type: "object",
+            properties: {
+              condition: { type: "string" },
+            },
+            required: ["condition"],
+          },
+          nullable: true,
+          required: [],
+        },
+      ],
       nullable: true,
     },
     secrets: {
       type: "array",
       items: { type: "string" },
       nullable: true,
+    },
+    healthcheck: {
+      type: "object",
+      additionalProperties: { type: ["string", "number"] },
+      nullable: true,
+      required: [],
     },
   },
   required: [],
@@ -197,8 +236,8 @@ function genNox({
       ],
       depends_on: [
         IPFS_CONTAINER_NAME,
-        CHAIN_RPC_CONTAINER_NAME,
-        CHAIN_DEPLOY_SCRIPT_NAME,
+        IPC_ETH_CONTAINER_NAME,
+        IPC_DEPLOY_SCRIPT_NAME,
       ],
       volumes: [
         `./${CONFIGS_DIR_NAME}/${configTomlName}:${configLocation}`,
@@ -251,6 +290,8 @@ async function genDockerCompose(): Promise<LatestConfig> {
           return [name, null] as const;
         }),
       ),
+      [IPC_CONTAINER_NAME]: null,
+      [COMETBFT_CONTAINER_NAME]: null,
     },
     secrets: Object.fromEntries(
       peers.map(({ name, relativeSecretFilePath: file }) => {
@@ -279,18 +320,45 @@ async function genDockerCompose(): Promise<LatestConfig> {
         },
         volumes: [`${POSTGRES_CONTAINER_NAME}:/var/lib/postgresql/data`],
       },
-      [CHAIN_RPC_CONTAINER_NAME]: {
-        image: versions[CHAIN_RPC_CONTAINER_NAME],
-        ports: [`${CHAIN_RPC_PORT}:${CHAIN_RPC_PORT}`],
-      },
-      [CHAIN_DEPLOY_SCRIPT_NAME]: {
-        image: versions[CHAIN_DEPLOY_SCRIPT_NAME],
+      [IPC_CONTAINER_NAME]: {
+        image: versions[IPC_CONTAINER_NAME],
+        ports: [`${IPC_PORT}:${IPC_PORT}`],
+        volumes: [`${IPC_CONTAINER_NAME}:/fendermint/data`],
         environment: {
-          CHAIN_RPC_URL: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
-          MAX_FAILED_RATIO: "9999",
-          IS_MOCKED_RANDOMX: "true",
+          TENDERMINT_RPC_URL: `http://${COMETBFT_CONTAINER_NAME}:${COMETBFT_PORT}`,
         },
-        depends_on: [CHAIN_RPC_CONTAINER_NAME],
+      },
+      [COMETBFT_CONTAINER_NAME]: {
+        image: versions[COMETBFT_CONTAINER_NAME],
+        environment: {
+          CMT_PROXY_APP: `tcp://ipc:${IPC_PORT}`,
+        },
+        ports: [`${COMETBFT_PORT}:${COMETBFT_PORT}`],
+        volumes: [`${COMETBFT_CONTAINER_NAME}:/cometbft/data`],
+        healthcheck: {
+          test: `curl --fail http://localhost:${COMETBFT_PORT} || exit 1`,
+          interval: "8s",
+          timeout: "10s",
+          retries: 20,
+        },
+        depends_on: [IPC_CONTAINER_NAME],
+      },
+      [IPC_ETH_CONTAINER_NAME]: {
+        image: versions[IPC_CONTAINER_NAME],
+        environment: {
+          TENDERMINT_RPC_URL: `http://${COMETBFT_CONTAINER_NAME}:${COMETBFT_PORT}`,
+          TENDERMINT_WS_URL: `ws://${COMETBFT_CONTAINER_NAME}:${COMETBFT_PORT}/websocket`,
+        },
+        command: "eth run",
+        ports: [`${IPC_ETH_PORT}:${IPC_ETH_PORT}`],
+        depends_on: {
+          [COMETBFT_CONTAINER_NAME]: { condition: "service_healthy" },
+        },
+      },
+      [IPC_DEPLOY_SCRIPT_NAME]: {
+        image: versions[IPC_DEPLOY_SCRIPT_NAME],
+        command: ["deploy-to-ipc"],
+        depends_on: [IPC_ETH_CONTAINER_NAME],
       },
       [GRAPH_NODE_CONTAINER_NAME]: {
         image: "graphprotocol/graph-node:v0.33.0",
@@ -304,7 +372,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
         depends_on: [
           IPFS_CONTAINER_NAME,
           POSTGRES_CONTAINER_NAME,
-          CHAIN_RPC_CONTAINER_NAME,
+          IPC_ETH_CONTAINER_NAME,
         ],
         environment: {
           postgres_host: "postgres",
@@ -312,7 +380,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
           postgres_pass: "let-me-in",
           postgres_db: "graph-node",
           ipfs: `${IPFS_CONTAINER_NAME}:${IPFS_PORT}`,
-          ethereum: `local:http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+          ethereum: `local:http://${IPC_ETH_CONTAINER_NAME}:${IPC_ETH_PORT}`,
           GRAPH_LOG: "info",
           ETHEREUM_REORG_THRESHOLD: 1,
           ETHEREUM_ANCESTOR_COUNT: 1,
