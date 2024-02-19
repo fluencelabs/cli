@@ -19,7 +19,7 @@ import { Flags } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/createCommitment.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
-import { depositToNox } from "../../lib/chain/depositToNox.js";
+import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
@@ -82,7 +82,7 @@ export default class Up extends BaseCommand<typeof Up> {
 
     flags.env = "local";
 
-    await depositToNox({ ...flags, amount: "100" });
+    await distributeToNox({ ...flags, amount: "100" });
 
     await registerProvider();
 

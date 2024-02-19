@@ -17,23 +17,23 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { depositToNox } from "../../lib/chain/depositToNox.js";
+import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
   static override aliases = ["provider:d"];
-  static override description = "Deposit to noxes";
+  static override description = "Distribute tokens to noxes";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
     amount: Flags.string({
-      description: "Amount of tokens to deposit to noxes",
+      description: "Amount of tokens to distribute to noxes",
     }),
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(Deposit));
-    await depositToNox(flags);
+    await distributeToNox(flags);
   }
 }

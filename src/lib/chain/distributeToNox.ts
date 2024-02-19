@@ -20,7 +20,7 @@ import { NOX_NAMES_FLAG_NAME } from "../const.js";
 import { getDealClient } from "../dealClient.js";
 import { input } from "../prompt.js";
 
-export async function depositToNox(flags: {
+export async function distributeToNox(flags: {
   amount?: string | undefined;
   [NOX_NAMES_FLAG_NAME]?: string | undefined;
 }) {
