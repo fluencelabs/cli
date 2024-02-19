@@ -16,6 +16,7 @@
 
 import { commandObj } from "../commandObj.js";
 import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
+import { CLI_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
 export async function registerProvider() {
@@ -29,7 +30,7 @@ export async function registerProvider() {
 
   if (initialProviderInfo.name.length > 0) {
     commandObj.error(
-      `Provider is already registered with name: ${initialProviderInfo.name}`,
+      `Provider is already registered with name: ${initialProviderInfo.name}. If you want to update the provider info, use '${CLI_NAME} provider update' command`,
     );
   }
 
@@ -72,7 +73,9 @@ export async function updateProvider() {
   );
 
   if (initialProviderInfo.name.length === 0) {
-    commandObj.error(`Provider is not registered yet. Please register first.`);
+    commandObj.error(
+      `Provider is not registered yet. Please use '${CLI_NAME} provider register' command to register a new provider first`,
+    );
   }
 
   const { CID } = await import("ipfs-http-client");
