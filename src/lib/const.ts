@@ -254,7 +254,7 @@ export const FS_OPTIONS = {
 export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
-export const DEFAULT_DEAL_NAME = "dealName";
+export const DEFAULT_DEPLOYMENT_NAME = "myDeployment";
 export const DEFAULT_WORKER_NAME = "workerName";
 
 export const NO_INPUT_FLAG_NAME = "no-input";
@@ -547,7 +547,7 @@ export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNC
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
--- with worker '${DEFAULT_DEAL_NAME}' which has service 'MyService' with method 'greeting'
+-- with worker '${DEFAULT_DEPLOYMENT_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices, showSubnet
 
@@ -557,7 +557,7 @@ data Answer:
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}() -> []Answer:
     deals <- Deals.get()
-    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEPLOYMENT_NAME}!.dealIdOriginal
     answers: *Answer
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
@@ -582,7 +582,7 @@ data WorkerServices:
 
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
-    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEPLOYMENT_NAME}!.dealIdOriginal
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
     if subnet.success == false:

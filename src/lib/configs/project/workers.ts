@@ -27,7 +27,7 @@ import {
   CLI_NAME,
   type ChainENV,
   CHAIN_ENV,
-  DEFAULT_DEAL_NAME,
+  DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_WORKER_NAME,
   type FluenceEnv,
   FLUENCE_ENVS,
@@ -340,7 +340,7 @@ version: 0
 # deals:
 # # A map of created deals
 #   ${FLUENCE_ENVS[0]}:
-#     ${DEFAULT_DEAL_NAME}:
+#     ${DEFAULT_DEPLOYMENT_NAME}:
 #       # worker CID
 #       definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
 #       # ISO timestamp of the time when the worker was deployed
