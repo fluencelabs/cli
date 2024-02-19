@@ -15,6 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { peerIdToUint8Array } from "../../lib/chain/peerIdToUint8Array.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { getDealClient, signBatch } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -36,8 +37,8 @@ export default class Proof extends BaseCommand<typeof Proof> {
 
     const computeUnitIds = (
       await Promise.all(
-        (await resolveAddrsAndPeerIds()).map(({ peerId }) => {
-          return market.getComputeUnitIds(peerId);
+        (await resolveAddrsAndPeerIds()).map(async ({ peerId }) => {
+          return market.getComputeUnitIds(await peerIdToUint8Array(peerId));
         }),
       )
     ).flat();
