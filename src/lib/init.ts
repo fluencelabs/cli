@@ -561,7 +561,7 @@ function stringifyError(e${isJS ? "" : ": unknown"}) {
 }
 
 function getGatewayIndexJsContent(isJS: boolean) {
-  return `import { Fluence } from "@fluencelabs/js-client";
+  return `import { Fluence, KeyPair } from "@fluencelabs/js-client";
 import relays from "../relays.json" assert { type: "json" };
 import { ${isJS ? "" : "type Static, "}Type } from "@sinclair/typebox";
 ${isJS ? "" : 'import { type FastifyInstance } from "fastify";'}
@@ -569,7 +569,10 @@ ${isJS ? "" : 'import { type FastifyInstance } from "fastify";'}
 import { helloWorld, helloWorldRemote, showSubnet, runDeployedServices } from "../compiled-aqua/main.js";
 
 const DEFAULT_ACCESS_TOKEN = "abcdefhi";
-const DEFAULT_PEER_PRIVATE_KEY = new Array(32).fill("a").join("");
+
+const DEFAULT_PEER_PRIVATE_KEY = Buffer.from(
+  (await KeyPair.randomEd25519()).toEd25519PrivateKey(),
+).toString("base64");
 
 // This is an authorization token for the gateway service.
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN ?? DEFAULT_ACCESS_TOKEN;
@@ -588,7 +591,9 @@ if (PEER_PRIVATE_KEY === DEFAULT_PEER_PRIVATE_KEY) {
   );
 }
 
-const PEER_PRIVATE_KEY_BYTES = new TextEncoder().encode(PEER_PRIVATE_KEY);
+const PEER_PRIVATE_KEY_BYTES = new Uint8Array(
+  Buffer.from(PEER_PRIVATE_KEY, "base64"),
+);
 
 export default async function (server${isJS ? "" : ": FastifyInstance"}) {
   await server.register(import("@fastify/rate-limit"), {
@@ -605,8 +610,24 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
     });
   });
 
-  server.addHook("onRequest", async (request, reply) => {
-    if (request.headers.access_token !== ACCESS_TOKEN) {
+  ${
+    isJS
+      ? ""
+      : `interface AuthQuery {
+    Querystring: {
+      access_token: string | undefined
+    },
+    Headers: {
+      access_token: string | undefined
+    }
+  }`
+  }
+
+  server.addHook${
+    isJS ? "" : "<AuthQuery>"
+  }("onRequest", async (request, reply) => {
+    const header = request.query.access_token ?? request.headers.access_token;
+    if (header !== ACCESS_TOKEN) {
       await reply.status(403).send({
         error: "Unauthorized",
         statusCode: 403,
@@ -628,21 +649,6 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
 
   ${isJS ? "" : "type CallbackResponseType = Static<typeof callbackResponse>;"}
 
-  const showSubnetResponse = Type.Array(
-    Type.Object({
-      host_id: Type.Union([Type.String(), Type.Null()]),
-      services: Type.Union([Type.Array(Type.String()), Type.Null()]),
-      spells: Type.Union([Type.Array(Type.String()), Type.Null()]),
-      worker_id: Type.Union([Type.String(), Type.Null()]),
-    }),
-  );
-
-  ${
-    isJS
-      ? ""
-      : "type ShowSubnetResponseType = Static<typeof showSubnetResponse>;"
-  }
-
   const runDeployedServicesResponse = Type.Array(
     Type.Object({
       answer: Type.Union([Type.String(), Type.Null()]),
@@ -661,7 +667,7 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
   }
 
   // Request and response
-  server.post${
+  server.get${
     isJS ? "" : "<{ Body: CallbackBodyType; Reply: CallbackResponseType }>"
   }(
     "/my/callback/hello",
@@ -674,14 +680,14 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
   );
 
   // Fire and forget
-  server.post("/my/webhook/hello", async (_request, reply) => {
+  server.get("/my/webhook/hello", async (_request, reply) => {
     void helloWorldRemote("Fluence");
     return reply.send();
   });
 
-  server.post${isJS ? "" : "<{ Reply: ShowSubnetResponseType }>"}(
+  // No validation schema for simplicity
+  server.post(
     "/my/callback/showSubnet",
-    { schema: { response: { 200: showSubnetResponse } } },
     async (_request, reply) => {
       const result = await showSubnet();
       return reply.send(result);
@@ -889,13 +895,22 @@ You can check it out and test this repo.
 You can also deploy the gateway to serverless platforms like Vercel. In order to do so follow the steps:
 
 - Push the entire CLI template to public repository on Github.
-- Create new Vercel account if you don't have one
-- Add project in Vercel from your github account
+- Create a new Vercel account if you don't have one
+- Add project in Vercel from your GitHub account
 - At the configuration page:
   - Point the root directory to \`src/gateway\`
-  - Optionally pass environment variables for ACCESS_TOKEN and PEER_PRIVATE_KEY. If not given, hardcoded values will be used.
+  - Optionally pass environment variables for ACCESS_TOKEN and PEER_PRIVATE_KEY. If not given, hardcoded values will be used. Look at **generating secrets** section below for details.
 - Hit the deploy button, wait for the deployment.
 - Try to interact with deployed gateway via this command - \`curl -X POST https://{YOUR_DOMAIN, e.g. fluenceapp.vercel.app}/my/callback/hello -H 'ACCESS_TOKEN: abcdefhi' -H 'Content-Type: application/json' -d '{"name": "Fluence" }'\`
+
+### Generating secrets
+
+Make sure to obtain secured access key and peer private key to make your gateway properly safe.
+
+As an access key, you can use any randomly generated string that is long enough and contains lowercase and uppercase letters and numbers.
+
+You can generate private key for peer by the following command - \`fluence key new --no-input gateway\`.
+After this, copy the private key from CLI's file located at \`<your-cli-project>/.fluence/secrets/gateway.txt\` and put it to environment variable.
 
 ### Notes:
 
