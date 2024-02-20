@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.1...fluence-cli-v0.15.2) (2024-02-20)
+
+
+### Bug Fixes
+
+* **deps:** use public image chain-rpc 0.5.2 ([#769](https://github.com/fluencelabs/cli/issues/769)) ([e4800fe](https://github.com/fluencelabs/cli/commit/e4800feee19aad344789a515a3bd76898726f1ad))
+
 ## [0.15.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.0...fluence-cli-v0.15.1) (2024-02-19)
 
 
