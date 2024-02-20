@@ -138,9 +138,9 @@ export function getProviderConfigPath(): string {
   return join(projectRootDir, PROVIDER_CONFIG_FULL_FILE_NAME);
 }
 
-const getAquaDir = (cwd?: string): string => {
+export function getAquaDir(cwd?: string): string {
   return join(getSrcPath(cwd), AQUA_DIR_NAME);
-};
+}
 
 export async function ensureAquaDir(): Promise<string> {
   return ensureDir(getAquaDir());

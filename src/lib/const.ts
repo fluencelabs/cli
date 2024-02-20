@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { join } from "node:path";
+
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 import type {
@@ -687,6 +689,15 @@ func spell():
 
 const QUICKSTART_README = `# Fluence Quickstart Template
 
+## Content
+
+- Default Marine service - \`${join(SRC_DIR_NAME, SERVICES_DIR_NAME)}\`.
+- Basic aqua functions - \`${join(SRC_DIR_NAME, AQUA_DIR_NAME)}\`.
+- Fluence HTTP Gateway for proxying Aqua execution - \`${join(
+  SRC_DIR_NAME,
+  GATEWAY_DIR_NAME,
+)}\`.
+
 ## Usage
 
 \`\`\`sh
@@ -717,6 +728,17 @@ fluence run -f 'runDeployedServices()'
 function getTsOrJsReadme(isJS: boolean) {
   const jsOrTsString = isJS ? "JavaScript" : "TypeScript";
   return `# Fluence ${jsOrTsString} Template
+
+## Content
+
+- Default Marine service - \`${join(SRC_DIR_NAME, SERVICES_DIR_NAME)}\`.
+- Basic aqua functions - \`${join(SRC_DIR_NAME, AQUA_DIR_NAME)}\`.
+- Fluence HTTP Gateway for proxying Aqua execution - \`${join(
+    SRC_DIR_NAME,
+    GATEWAY_DIR_NAME,
+  )}\`.
+- Fluence frontend template - \`${join(SRC_DIR_NAME, FRONTEND_DIR_NAME)}\`.
+
 ## Usage
 
 \`\`\`sh
