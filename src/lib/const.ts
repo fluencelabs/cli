@@ -30,6 +30,7 @@ import xbytes from "xbytes";
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
+import { getAquaDir } from "./paths.js";
 
 export const CLI_NAME = "fluence";
 export const CLI_NAME_FULL = "Fluence CLI";
@@ -687,6 +688,7 @@ func spell():
 `;
 }
 
+// TODO: use relative(pathToFluenceProject, pathToAquaFolder). Won't work rn, need to refactor things.
 const TEMPLATE_CONTENT_BASE = `- Default Marine service - \`${join(
   SRC_DIR_NAME,
   SERVICES_DIR_NAME,
