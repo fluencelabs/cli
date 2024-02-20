@@ -30,7 +30,6 @@ import xbytes from "xbytes";
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
-import { getAquaDir } from "./paths.js";
 
 export const CLI_NAME = "fluence";
 export const CLI_NAME_FULL = "Fluence CLI";
