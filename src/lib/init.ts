@@ -587,7 +587,7 @@ const PEER_PRIVATE_KEY =
   process.env.PEER_PRIVATE_KEY ?? DEFAULT_PEER_PRIVATE_KEY;
 if (PEER_PRIVATE_KEY === DEFAULT_PEER_PRIVATE_KEY) {
   console.warn(
-    "Default peer private key is used. It must be regenerated and properly hidden otherwise one could steal it and pretend to be this gateway.",
+    "Randomly generated peer private key is used.",
   );
 }
 
@@ -667,7 +667,7 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
   }
 
   // Request and response
-  server.get${
+  server.post${
     isJS ? "" : "<{ Body: CallbackBodyType; Reply: CallbackResponseType }>"
   }(
     "/my/callback/hello",
@@ -686,7 +686,7 @@ export default async function (server${isJS ? "" : ": FastifyInstance"}) {
   });
 
   // No validation schema for simplicity
-  server.post(
+  server.get(
     "/my/callback/showSubnet",
     async (_request, reply) => {
       const result = await showSubnet();
