@@ -1,5 +1,5 @@
 {
-  "nox": "fluencelabs/nox:0.20.0",
+  "nox": "fluencelabs/nox:0.20.1",
   "chain-rpc": "docker.fluence.dev/chain-deploy-script:release-please-4fb3667-1873-1-amd64",
   "chain-deploy-script": "fluencelabs/chain-deploy-script:0.5.2",
   "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.5.2",
