@@ -109,10 +109,6 @@ export async function addComputePeers(
       validate: validatePercent,
     });
 
-    if (!("capacityCommitments" in userProvidedConfig)) {
-      userProvidedConfig.capacityCommitments = {};
-    }
-
     userProvidedConfig.capacityCommitments[name] = {
       duration: capacityCommitmentDuration,
       delegator: capacityCommitmentDelegator,
