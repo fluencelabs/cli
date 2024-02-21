@@ -256,7 +256,7 @@ modules:
   facade:
     # Either path to the module directory or
     # URL to the tar.gz archive which contains the content of the module directory
-    get: "${relativePathToFacade}"
+    get: '${relativePathToFacade}'
 
     # You can override module configuration here:
 
