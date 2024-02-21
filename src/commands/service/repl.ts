@@ -142,13 +142,12 @@ Call ${facadeModuleConfig.name} service functions in repl like this:
 
 ${color.yellow(
   `call ${facadeModuleConfig.name} <function_name> [<arg1>, <arg2>]`,
-)}${SEPARATOR}}`);
+)}${SEPARATOR}`);
 
     await haltCountly();
 
     spawn(mreplPath, [fluenceTmpConfigTomlPath], {
       stdio: "inherit",
-      detached: true,
     });
   }
 }

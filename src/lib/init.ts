@@ -16,7 +16,8 @@
 
 import { existsSync } from "node:fs";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
+import { sep as posixSep } from "node:path/posix";
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
@@ -49,10 +50,10 @@ import {
   projectRootDir,
   getFrontendPackageJSONPath,
   getFrontendSrcPath,
-  getFrontendCompiledAquaPath,
   getIndexHTMLPath,
   getFrontendTsConfigPath,
   getFrontendPath,
+  getFrontendCompiledAquaPath,
   ensureGatewayCompiledAquaPath,
   getGatewayPackageJSONPath,
   getGatewaySrcPath,
@@ -293,6 +294,10 @@ type InitTSorJSProjectArg = {
   fluenceConfig: FluenceConfig;
 };
 
+const convertPathToModuleImport = (path: string) => {
+  return path.split(sep).join(posixSep);
+};
+
 async function initTSorJSProject({
   isJS,
   fluenceConfig,
@@ -437,9 +442,8 @@ function getIndexHTMLContent(isJS: boolean) {
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/${relative(
-      getFrontendPath(),
-      getFrontendIndexTSorJSPath(isJS),
+    <script type="module" src="/${convertPathToModuleImport(
+      relative(getFrontendPath(), getFrontendIndexTSorJSPath(isJS)),
     )}"></script>
   </body>
 </html>
@@ -454,9 +458,11 @@ import {
   helloWorldRemote,
   runDeployedServices,
   showSubnet,
-} from "./${relative(
-    getFrontendSrcPath(),
-    join(getFrontendCompiledAquaPath(), "main.js"),
+} from "./${convertPathToModuleImport(
+    relative(
+      getFrontendSrcPath(),
+      join(getFrontendCompiledAquaPath(), "main.js"),
+    ),
   )}";
 
 const appEl =
