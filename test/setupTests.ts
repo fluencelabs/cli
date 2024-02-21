@@ -35,6 +35,8 @@ import {
   pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
 } from "./helpers/paths.js";
 
+import core from "@actions/core";
+
 /**
  * IMPORTANT: this file is executed before all tests,
  * so it must not export anything that can be imported in tests
@@ -140,11 +142,11 @@ async function setupLocalEnvironment() {
   }
 }
 
-console.log("\nSetting up tests...");
+core.startGroup("create templates and run 'fluence local up' command");
 
 await setupCli();
 await setupSecretKeys();
 await setupTemplates();
 await setupLocalEnvironment();
 
-console.log("\nTests are ready to run!");
+core.endGroup();
