@@ -695,7 +695,7 @@ __metadata:
     ts-unused-exports: 10.0.1
     tslib: 2.6.2
     typescript: 5.3.3
-    undici: 6.3.0
+    undici: 6.6.1
     xbytes: 1.8.0
     yaml: 2.3.4
     yaml-diff-patch: 2.0.0
@@ -15764,12 +15764,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.3.0":
-  version: 6.3.0
-  resolution: "undici@npm:6.3.0"
+"undici@npm:6.6.1":
+  version: 6.6.1
+  resolution: "undici@npm:6.6.1"
   dependencies:
     "@fastify/busboy": ^2.0.0
-  checksum: 4b058786dae05495facad110404591bafad17c1b77bc8e16e466196f538630d0563f5af8e136ce1edc9ffc7ef3fb9ec236b3c568e9a0c52c009c837aee912623
+  checksum: 54d59f442ca6e9b89350daa9e3945039d98682a30ab6c57e983e0d920d6632040ec5777a2f00a0ac1b9e781309616c6e41ec59a776c09dcfebffa43f22c77f1e
   languageName: node
   linkType: hard
 
