@@ -70,8 +70,19 @@ export async function lockAndProcessFile(
   }
 }
 
-export function wrappedTest(...args: Parameters<(typeof test)["concurrent"]>) {
-  core.startGroup(args[0]);
-  test(...args);
-  core.endGroup();
+export function wrappedTest(
+  ...[name, fn, ...rest]: Parameters<(typeof test)["concurrent"]>
+) {
+  test(
+    name,
+    // @ts-expect-error fix later
+    async (...args) => {
+      core.startGroup(name);
+      // @ts-expect-error fix later
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      await fn(...args);
+      core.endGroup();
+    },
+    ...rest,
+  );
 }
