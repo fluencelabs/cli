@@ -1,6 +1,6 @@
 {
   "nox": "fluencelabs/nox:0.20.0",
-  "chain-rpc": "fluencelabs/chain-rpc:0.5.2-1",
+  "chain-rpc": "docker.fluence.dev/chain-deploy-script:release-please-4fb3667-1873-1-amd64",
   "chain-deploy-script": "fluencelabs/chain-deploy-script:0.5.2",
   "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.5.2",
   "rust-toolchain": "nightly-2023-08-27-x86_64",
