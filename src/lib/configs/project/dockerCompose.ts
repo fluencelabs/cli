@@ -235,11 +235,13 @@ async function genDockerCompose(): Promise<LatestConfig> {
           "8030:8030",
           "8040:8040",
         ],
-        depends_on: [
-          IPFS_CONTAINER_NAME,
-          POSTGRES_CONTAINER_NAME,
-          CHAIN_RPC_CONTAINER_NAME,
-        ],
+        depends_on: {
+          [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },
+          [CHAIN_RPC_CONTAINER_NAME]: { condition: "service_healthy" },
+          [CHAIN_DEPLOY_SCRIPT_NAME]: {
+            condition: "service_completed_successfully",
+          },
+        },
         environment: {
           postgres_host: "postgres",
           postgres_user: "graph-node",
