@@ -17,18 +17,16 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { ENV_FLAG, PRIV_KEY_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { match } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { ensureChainNetwork } from "../../lib/provider.js";
 
 export default class Match extends BaseCommand<typeof Match> {
   static override description = "Match deal with resource owners";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   static override args = {
@@ -38,15 +36,10 @@ export default class Match extends BaseCommand<typeof Match> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Match),
+    const { args } = await initCli(this, await this.parse(Match));
+
+    await match(
+      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" })),
     );
-
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    await match(network, flags["priv-key"], dealAddress);
   }
 }

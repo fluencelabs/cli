@@ -16,25 +16,19 @@
 
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
-import { ethers } from "ethers";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
 
 export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   static override description = "Withdraw reward";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   static override args = {
@@ -47,13 +41,7 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(WithdrawReward),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const privKey = flags["priv-key"];
+    const { args } = await initCli(this, await this.parse(WithdrawReward));
 
     const dealAddress =
       args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
@@ -61,28 +49,15 @@ export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
     const unitId =
       args["UNIT-ID"] ?? (await input({ message: "Enter unit CID" }));
 
-    const signer = await getSigner(network, privKey);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
+    const { dealClient } = await getDealClient();
     const deal = dealClient.getDeal(dealAddress);
-
-    promptConfirmTx(privKey);
-
     const rewardAmount = await deal.getRewardAmount(unitId);
+    await sign(deal.withdrawRewards, unitId);
+    const { ethers } = await import("ethers");
 
-    const tx = await deal.withdrawRewards(unitId);
-
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    await waitTx(tx);
-
-    color.green(
-      `Reward ${ethers.formatEther(
-        rewardAmount,
+    commandObj.logToStderr(
+      `Reward ${color.yellow(
+        ethers.formatEther(rewardAmount),
       )} was withdrawn from the deal ${dealAddress}`,
     );
   }

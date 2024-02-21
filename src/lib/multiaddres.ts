@@ -31,93 +31,22 @@ import sample from "lodash-es/sample.js";
 
 import { commandObj } from "./commandObj.js";
 import { envConfig } from "./configs/globalConfigs.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
-import { initNewReadonlyProviderConfig } from "./configs/project/provider.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
+import { ensureComputerPeerConfigs } from "./configs/project/provider.js";
 import {
-  ENV_FLAG_NAME,
   FLUENCE_ENVS,
-  isFluenceEnv,
   type FluenceEnv,
-  CONTRACTS_ENV,
   type PublicFluenceEnv,
-  WEB_SOCKET_PORT_START,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+  CHAIN_ENV,
 } from "./const.js";
-import type { ProviderConfigArgs } from "./generateUserProviderConfig.js";
 import {
   commaSepStrToArr,
   jsonStringify,
   splitErrorsAndResults,
 } from "./helpers/utils.js";
-import {
-  base64ToUint8Array,
-  getSecretKeyOrReturnExisting,
-} from "./keyPairs.js";
 import { projectRootDir } from "./paths.js";
 import { input, list } from "./prompt.js";
-
-export async function fluenceEnvPrompt(
-  message = "Select Fluence Environment to use by default with this project",
-  defaultVal: FluenceEnv = "kras",
-): Promise<FluenceEnv> {
-  return list({
-    message,
-    options: [...FLUENCE_ENVS],
-    oneChoiceMessage() {
-      throw new Error("Unreachable. There are multiple envs");
-    },
-    onNoChoices() {
-      throw new Error("Unreachable. There are multiple envs");
-    },
-    default: defaultVal,
-  });
-}
-
-async function ensureValidFluenceEnvFlag(
-  envFlag: string | undefined,
-): Promise<FluenceEnv | undefined> {
-  if (envFlag === undefined) {
-    return undefined;
-  }
-
-  if (!isFluenceEnv(envFlag)) {
-    commandObj.warn(
-      `Invalid flag: ${color.yellow(`--${ENV_FLAG_NAME} ${envFlag}`)}`,
-    );
-
-    return fluenceEnvPrompt();
-  }
-
-  return envFlag;
-}
-
-export async function ensureValidFluenceEnv(envFlag: string | undefined) {
-  return (await ensureValidFluenceEnvFlag(envFlag)) ?? fluenceEnvPrompt();
-}
-
-export async function resolveFluenceEnv(
-  fluenceEnvFromFlagsNotValidated: string | undefined,
-): Promise<FluenceEnv> {
-  const fluenceEnvFromFlags = await ensureValidFluenceEnvFlag(
-    fluenceEnvFromFlagsNotValidated,
-  );
-
-  const fluenceEnv = fluenceEnvFromFlags ?? envConfig?.fluenceEnv;
-
-  if (fluenceEnv !== undefined) {
-    return fluenceEnv;
-  }
-
-  const fluenceEnvFromPrompt = await fluenceEnvPrompt();
-
-  if (envConfig === null) {
-    return fluenceEnvFromPrompt;
-  }
-
-  envConfig.fluenceEnv = fluenceEnvFromPrompt;
-  await envConfig.$commit();
-  return fluenceEnvFromPrompt;
-}
+import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   return multiaddrs.map((multiaddr) => {
@@ -128,17 +57,11 @@ export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   });
 }
 
-export async function getPeerIdFromSecretKey(secretKey: string) {
-  const { KeyPair } = await import("@fluencelabs/js-client");
-  const keyPair = await KeyPair.fromEd25519SK(base64ToUint8Array(secretKey));
-  return keyPair.getPeerId();
-}
-
-async function ensureLocalAddrsAndPeerIds(args: ProviderConfigArgs) {
-  return (await getResolvedProviderConfig(args)).map(
-    ({ peerId, webSocketPort }): AddrAndPeerId => {
+async function ensureLocalAddrsAndPeerIds() {
+  return (await ensureComputerPeerConfigs()).map(
+    ({ peerId, overriddenNoxConfig }): AddrAndPeerId => {
       return {
-        multiaddr: `/ip4/127.0.0.1/tcp/${webSocketPort}/ws/p2p/${peerId}`,
+        multiaddr: `/ip4/127.0.0.1/tcp/${overriddenNoxConfig.websocketPort}/ws/p2p/${peerId}`,
         peerId,
       };
     },
@@ -151,9 +74,9 @@ const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
   testnet: testNet,
 };
 
-export async function ensureCustomAddrsAndPeerIds(
-  fluenceConfig: FluenceConfig | null,
-) {
+export async function ensureCustomAddrsAndPeerIds() {
+  const fluenceConfig = await initFluenceConfig();
+
   if (fluenceConfig === null) {
     commandObj.error(
       `You must init fluence project if you want to use ${color.yellow(
@@ -180,7 +103,7 @@ export async function ensureCustomAddrsAndPeerIds(
 
   const contractsEnv = await list({
     message: "Select contracts environment for your custom network",
-    options: [...CONTRACTS_ENV],
+    options: [...CHAIN_ENV],
     oneChoiceMessage: (): never => {
       throw new Error("Unreachable: only one contracts env");
     },
@@ -213,32 +136,22 @@ export async function ensureCustomAddrsAndPeerIds(
   return addrsToNodes(fluenceEnvOrCustomRelays);
 }
 
-type ResolveNodesArgs = {
-  fluenceEnv: FluenceEnv;
-  maybeFluenceConfig: FluenceConfig | null;
-  noxes?: number | undefined;
-};
+export async function resolveAddrsAndPeerIds(): Promise<AddrAndPeerId[]> {
+  const fluenceEnv = await ensureFluenceEnv();
 
-export async function resolveAddrsAndPeerIds({
-  fluenceEnv,
-  maybeFluenceConfig,
-  noxes,
-}: ResolveNodesArgs): Promise<AddrAndPeerId[]> {
   if (fluenceEnv === "custom") {
-    return ensureCustomAddrsAndPeerIds(maybeFluenceConfig);
+    return ensureCustomAddrsAndPeerIds();
   }
 
   if (fluenceEnv === "local") {
-    return ensureLocalAddrsAndPeerIds({ noxes, env: "local" });
+    return ensureLocalAddrsAndPeerIds();
   }
 
   return ADDR_MAP[fluenceEnv];
 }
 
-export async function resolveRelays(
-  args: ResolveNodesArgs,
-): Promise<Array<string>> {
-  return (await resolveAddrsAndPeerIds(args)).map((node) => {
+export async function resolveRelays(): Promise<Array<string>> {
+  return (await resolveAddrsAndPeerIds()).map((node) => {
     return node.multiaddr;
   });
 }
@@ -249,7 +162,6 @@ export async function resolveRelays(
  */
 async function getMaybeNamedAddrAndPeerId(
   maybeRelayName: string | undefined,
-  maybeFluenceConfig: FluenceConfig | null,
 ): Promise<(AddrAndPeerId & { fluenceEnv: FluenceEnv }) | undefined> {
   if (maybeRelayName === undefined) {
     return undefined;
@@ -264,11 +176,7 @@ async function getMaybeNamedAddrAndPeerId(
     return undefined;
   }
 
-  const relays = await resolveAddrsAndPeerIds({
-    fluenceEnv,
-    maybeFluenceConfig,
-  });
-
+  const relays = await resolveAddrsAndPeerIds();
   const [, indexString] = maybeRelayName.split("-");
   const parseResult = parseNamedPeer(indexString, fluenceEnv, relays.length);
 
@@ -311,8 +219,8 @@ function parseNamedPeer(
   return index;
 }
 
-async function getRandomRelayAddr(args: ResolveNodesArgs): Promise<string> {
-  const r = sample(await resolveRelays(args));
+async function getRandomRelayAddr(): Promise<string> {
+  const r = sample(await resolveRelays());
 
   assert(
     r !== undefined,
@@ -322,18 +230,8 @@ async function getRandomRelayAddr(args: ResolveNodesArgs): Promise<string> {
   return r;
 }
 
-export async function resolveRelay({
-  relayFromFlags,
-  fluenceEnvFromFlags,
-  ...args
-}: {
-  relayFromFlags: string | undefined;
-  fluenceEnvFromFlags: string | undefined;
-} & Omit<ResolveNodesArgs, "fluenceEnv">) {
-  const namedAddr = await getMaybeNamedAddrAndPeerId(
-    relayFromFlags,
-    args.maybeFluenceConfig,
-  );
+export async function resolveRelay(relayFromFlags: string | undefined) {
+  const namedAddr = await getMaybeNamedAddrAndPeerId(relayFromFlags);
 
   if (namedAddr !== undefined) {
     commandObj.logToStderr(
@@ -353,8 +251,8 @@ export async function resolveRelay({
     return relayFromFlags;
   }
 
-  const fluenceEnv = await resolveFluenceEnv(fluenceEnvFromFlags);
-  const randomRelay = await getRandomRelayAddr({ ...args, fluenceEnv });
+  const fluenceEnv = await ensureFluenceEnv();
+  const randomRelay = await getRandomRelayAddr();
 
   commandObj.logToStderr(
     `Connecting to random ${color.yellow(fluenceEnv)} relay: ${color.yellow(
@@ -365,18 +263,15 @@ export async function resolveRelay({
   return randomRelay;
 }
 
-export async function resolvePeerId(
-  peerIdOrNamedNode: string,
-  maybeFluenceConfig: FluenceConfig | null,
-) {
+export async function resolvePeerId(peerIdOrNamedNode: string) {
   return (
-    (await getMaybeNamedAddrAndPeerId(peerIdOrNamedNode, maybeFluenceConfig))
-      ?.peerId ?? peerIdOrNamedNode
+    (await getMaybeNamedAddrAndPeerId(peerIdOrNamedNode))?.peerId ??
+    peerIdOrNamedNode
   );
 }
 
-export async function getRandomPeerId(args: ResolveNodesArgs): Promise<string> {
-  return getPeerId(await getRandomRelayAddr(args));
+export async function getRandomPeerId(): Promise<string> {
+  return getPeerId(await getRandomRelayAddr());
 }
 
 export function getPeerId(addr: string): string {
@@ -391,15 +286,9 @@ export function getPeerId(addr: string): string {
   return id;
 }
 
-type UpdateRelaysJSONArgs = {
-  fluenceConfig: FluenceConfig | null;
-  noxes?: number | undefined;
-};
+export async function updateRelaysJSON() {
+  const fluenceConfig = await initFluenceConfig();
 
-export async function updateRelaysJSON({
-  fluenceConfig,
-  noxes,
-}: UpdateRelaysJSONArgs) {
   if (
     fluenceConfig?.relaysPath === undefined ||
     envConfig?.fluenceEnv === undefined
@@ -412,11 +301,7 @@ export async function updateRelaysJSON({
       ? [fluenceConfig.relaysPath]
       : fluenceConfig.relaysPath;
 
-  const relays = await resolveAddrsAndPeerIds({
-    fluenceEnv: envConfig.fluenceEnv,
-    maybeFluenceConfig: fluenceConfig,
-    noxes,
-  });
+  const relays = await resolveAddrsAndPeerIds();
 
   const [absolutePaths, relativePaths] = splitErrorsAndResults(
     relayPaths,
@@ -440,39 +325,6 @@ export async function updateRelaysJSON({
       const relaysDir = resolve(projectRootDir, relativePath);
       await mkdir(relaysDir, { recursive: true });
       return writeFile(join(relaysDir, "relays.json"), jsonStringify(relays));
-    }),
-  );
-}
-
-type ResolvedProviderConfig = {
-  name: string;
-  webSocketPort: number;
-  peerId: string;
-  computeUnits: number;
-};
-
-export async function getResolvedProviderConfig(
-  args: ProviderConfigArgs,
-): Promise<ResolvedProviderConfig[]> {
-  const providerConfig = await initNewReadonlyProviderConfig(args);
-  return Promise.all(
-    Object.entries(providerConfig.computePeers).map(async ([name, peer], i) => {
-      const {
-        nox: { websocketPort: webSocketPortFromConfig } = {},
-        computeUnits = DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-      } = peer;
-
-      const webSocketPort =
-        webSocketPortFromConfig ?? WEB_SOCKET_PORT_START + i;
-
-      const { secretKey } = await getSecretKeyOrReturnExisting(name);
-
-      return {
-        name,
-        webSocketPort,
-        peerId: await getPeerIdFromSecretKey(secretKey),
-        computeUnits,
-      };
     }),
   );
 }

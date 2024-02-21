@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { join } from "node:path";
+
 import { color } from "@oclif/color";
 import { Args, Flags } from "@oclif/core";
 import type {
@@ -25,6 +27,7 @@ import camelCase from "lodash-es/camelCase.js";
 import upperFirst from "lodash-es/upperFirst.js";
 import xbytes from "xbytes";
 
+import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
 import { aquaComment } from "./helpers/utils.js";
 import { getIsStringUnion } from "./typeHelpers.js";
 
@@ -38,21 +41,17 @@ export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
-export const numberProperties = [
-  "minPricePerWorkerEpoch",
-  "maxCollateralPerWorker",
-] as const;
+export const numberProperties = ["minPricePerWorkerEpoch"] as const;
 
 export type NumberProperty = (typeof numberProperties)[number];
 
 const CURRENCY_MULTIPLIER_POWER = 18;
-export const CURRENCY_MULTIPLIER_TEXT = `This number is multiplied by 10^${CURRENCY_MULTIPLIER_POWER}`;
 export const CURRENCY_MULTIPLIER = 10 ** CURRENCY_MULTIPLIER_POWER;
 export const COLLATERAL_DEFAULT = 1;
 export const PRICE_PER_EPOCH_DEFAULT = 0.00001;
+export const DEFAULT_INITIAL_BALANCE = 0.001;
 
 export const defaultNumberProperties: Record<NumberProperty, number> = {
-  maxCollateralPerWorker: COLLATERAL_DEFAULT,
   minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
 };
 
@@ -96,9 +95,9 @@ export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
-export const CONTRACTS_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
-export type ContractsENV = (typeof CONTRACTS_ENV)[number];
-export const isContractsEnv = getIsStringUnion(CONTRACTS_ENV);
+export const CHAIN_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
+export type ChainENV = (typeof CHAIN_ENV)[number];
+export const isChainEnv = getIsStringUnion(CHAIN_ENV);
 
 export type ChainConfig = {
   url: string;
@@ -114,11 +113,11 @@ export const WC_METADATA = {
   icons: [],
 };
 
-export const FLUENCE_ENVS = [...CONTRACTS_ENV, "custom"] as const;
+export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
-export const DEAL_CONFIG: Record<ContractsENV, ChainConfig> = {
+export const DEAL_CONFIG: Record<ChainENV, ChainConfig> = {
   kras: {
     url: "https://polygon-mumbai.g.alchemy.com/v2/lSTLbdQejAUJ854kpjvyFXrmKocI2N-z",
     id: 80001,
@@ -144,7 +143,7 @@ export const DEAL_RPC_CONFIG = Object.fromEntries(
 );
 
 // @ts-expect-error we know that keys are ContractsEnv, not just string
-export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
+export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ChainENV, number> =
   Object.fromEntries(
     Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
       return [name, id];
@@ -153,9 +152,14 @@ export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ContractsENV, number> =
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = 5001;
+export const GRAPH_NODE_CONTAINER_NAME = "graph-node";
+export const GRAPH_NODE_PORT = 8020;
+export const POSTGRES_CONTAINER_NAME = "postgres";
 export const LOCAL_IPFS_ADDRESS = `/ip4/127.0.0.1/tcp/${IPFS_PORT}`;
-export const CHAIN_CONTAINER_NAME = "chain";
-export const CHAIN_PORT = 8545;
+export const CHAIN_RPC_CONTAINER_NAME = "chain-rpc";
+export const CHAIN_RPC_PORT = 8545;
+export const CHAIN_DEPLOY_SCRIPT_NAME = "chain-deploy-script";
+export const SUBGRAPH_DEPLOY_SCRIPT_NAME = "subgraph-deploy-script";
 export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
@@ -194,6 +198,7 @@ export const CONFIGS_DIR_NAME = "configs";
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;
 export const PROVIDER_SECRETS_CONFIG_FILE_NAME = `provider-secrets`;
+export const PROVIDER_ARTIFACTS_CONFIG_FILE_NAME = `provider-artifacts`;
 export const WORKERS_CONFIG_FILE_NAME = `workers`;
 export const PROJECT_SECRETS_CONFIG_FILE_NAME = `project-secrets`;
 export const USER_SECRETS_CONFIG_FILE_NAME = `user-secrets`;
@@ -207,6 +212,7 @@ export const DOCKER_COMPOSE_FILE_NAME = `docker-compose`;
 export const FLUENCE_CONFIG_FULL_FILE_NAME = `${FLUENCE_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROVIDER_CONFIG_FULL_FILE_NAME = `${PROVIDER_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME = `${PROVIDER_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
+export const PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME = `${PROVIDER_ARTIFACTS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const WORKERS_CONFIG_FULL_FILE_NAME = `${WORKERS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const PROJECT_SECRETS_FULL_CONFIG_FILE_NAME = `${PROJECT_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
 export const USER_SECRETS_CONFIG_FULL_FILE_NAME = `${USER_SECRETS_CONFIG_FILE_NAME}.${YAML_EXT}`;
@@ -250,7 +256,7 @@ export const FS_OPTIONS = {
 export const TOP_LEVEL_SCHEMA_ID = "https://fluence.dev/schemas";
 
 export const AUTO_GENERATED = "auto-generated";
-export const DEFAULT_DEAL_NAME = "dealName";
+export const DEFAULT_DEPLOYMENT_NAME = "myDeployment";
 export const DEFAULT_WORKER_NAME = "workerName";
 
 export const NO_INPUT_FLAG_NAME = "no-input";
@@ -274,14 +280,6 @@ export const ENV_FLAG = {
 export const ENV_ARG_NAME = "ENV";
 export const ENV_ARG = {
   [ENV_ARG_NAME]: Args.string(fluenceEnvFlagAndArg),
-};
-
-export const PRIV_KEY_FLAG = {
-  "priv-key": Flags.string({
-    description:
-      "!WARNING! for debug purposes only. Passing private keys through flags is unsecure",
-    helpValue: "<private-key>",
-  }),
 };
 
 export const OFF_AQUA_LOGS_FLAG = {
@@ -329,6 +327,14 @@ export const TRACING_FLAG = {
     description: "Compile aqua in tracing mode (for debugging purposes)",
     default: false,
   }),
+};
+
+export const NOX_NAMES_FLAG_NAME = "nox-names";
+export const NOX_NAMES_FLAG_CONFIG = {
+  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. Default: all noxes from 'computePeers' property of ${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+};
+export const NOX_NAMES_FLAG = {
+  [NOX_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
 };
 
 export const LOG_LEVEL_COMPILER_FLAG_NAME = "log-level-compiler";
@@ -397,17 +403,36 @@ export const NOXES_FLAG = {
   }),
 };
 
-export const OFFER_FLAG = {
-  offer: Flags.string({
-    description: `Offer from ${PROVIDER_CONFIG_FULL_FILE_NAME} to use`,
-    helpValue: "<offer>",
+export const OFFERS_FLAG_NAME = "offers";
+export const OFFERS_FLAG_OBJECT = {
+  description: `Comma-separated list of offer names. If not provider all offers will be used`,
+  helpValue: "<offer-1,offer-2>",
+};
+
+export const OFFERS_FLAG = {
+  [OFFERS_FLAG_NAME]: Flags.string(OFFERS_FLAG_OBJECT),
+};
+
+export const PRIV_KEY_FLAG_NAME = "priv-key";
+
+export const CHAIN_FLAGS = {
+  ...ENV_FLAG,
+  [PRIV_KEY_FLAG_NAME]: Flags.string({
+    description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} key will be used by default`,
+    helpValue: "<private-key>",
   }),
 };
 
-export const PROVIDER_CONFIG_FLAGS = {
-  [ENV_FLAG_NAME]: Flags.string({
-    description: "Environment to use when generating the provider config",
-    helpValue: `<${CONTRACTS_ENV.join(" | ")}>`,
+export const DEAL_FLAGS = {
+  deal: Flags.string({
+    description: `Comma-separated deal names of the deployed deals for the current environment. Default: all deployed deals`,
+    helpValue: "<name>",
+    exclusive: ["deal-id"],
+  }),
+  "deal-id": Flags.string({
+    description: `Comma-separated deal ids of the deployed deal`,
+    helpValue: "<name>",
+    exclusive: ["deal"],
   }),
 };
 
@@ -490,7 +515,7 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
-${COMPILED_AQUA_DIR_NAME}/
+${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}/
 **/node_modules
 **/target/
 .repl_history
@@ -524,7 +549,7 @@ export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNC
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
 -- example of running services deployed using \`${CLI_NAME} deal deploy\`
--- with worker '${DEFAULT_DEAL_NAME}' which has service 'MyService' with method 'greeting'
+-- with worker '${DEFAULT_DEPLOYMENT_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices, showSubnet
 
@@ -534,7 +559,7 @@ data Answer:
 
 func ${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}() -> []Answer:
     deals <- Deals.get()
-    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEPLOYMENT_NAME}!.dealIdOriginal
     answers: *Answer
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
@@ -559,7 +584,7 @@ data WorkerServices:
 
 func showSubnet() -> []WorkerServices:
     deals <- Deals.get()
-    dealId = deals.${DEFAULT_DEAL_NAME}!.dealIdOriginal
+    dealId = deals.${DEFAULT_DEPLOYMENT_NAME}!.dealIdOriginal
     on HOST_PEER_ID:
         subnet <- Subnet.resolve(dealId)
     if subnet.success == false:
@@ -662,7 +687,27 @@ func spell():
 `;
 }
 
+// TODO: use relative(pathToFluenceProject, pathToAquaFolder). Won't work rn, need to refactor things.
+const TEMPLATE_CONTENT_BASE = `- Default Marine service - \`${join(
+  SRC_DIR_NAME,
+  SERVICES_DIR_NAME,
+)}\`.
+- Basic aqua functions - \`${join(SRC_DIR_NAME, AQUA_DIR_NAME)}\`.
+- Fluence HTTP Gateway for proxying Aqua execution - \`${join(
+  SRC_DIR_NAME,
+  GATEWAY_DIR_NAME,
+)}\`.`;
+
+const TEMPLATE_CONTENT_FRONTEND = `- Fluence frontend template - \`${join(
+  SRC_DIR_NAME,
+  FRONTEND_DIR_NAME,
+)}\`.`;
+
 const QUICKSTART_README = `# Fluence Quickstart Template
+
+## Content
+
+${TEMPLATE_CONTENT_BASE}
 
 ## Usage
 
@@ -694,6 +739,12 @@ fluence run -f 'runDeployedServices()'
 function getTsOrJsReadme(isJS: boolean) {
   const jsOrTsString = isJS ? "JavaScript" : "TypeScript";
   return `# Fluence ${jsOrTsString} Template
+
+## Content
+
+${TEMPLATE_CONTENT_BASE}
+${TEMPLATE_CONTENT_FRONTEND}
+
 ## Usage
 
 \`\`\`sh
@@ -728,31 +779,11 @@ export const READMEs: Record<Template, string> = {
   js: getTsOrJsReadme(true),
 };
 
-export const LOCAL_NET_DEFAULT_WALLET_KEY =
-  "0x3cc23e0227bd17ea5d6ea9d42b5eaa53ad41b1974de4755c79fe236d361a6fd5";
-
-export const LOCAL_NET_WALLET_KEYS = [
-  LOCAL_NET_DEFAULT_WALLET_KEY,
-  "0x089162470bcfc93192b95bff0a1860d063266875c782af9d882fcca125323b41",
-  "0xdacd4b197ee7e9efdd5db1921c6c558d88e2c8b69902b8bafc812fb226a6b5e0",
-  "0xa22813cba71d9795475e88d8d84fd3ef6e9ed4e3d5f3c34462ae1645cd1f7f16",
-  "0xf96cde07b5743540fbad99faaabc7ac3158d5665f1eed0ec7ad913622b121903",
-  "0xfeb277a2fb0e226a729174c44bcc7dcb94dcfef7d4c1eb77e60e83a176f812cd",
-  "0xfdc4ba94809c7930fe4676b7d845cbf8fa5c1beae8744d959530e5073004cf3f",
-  "0xc9b5b488586bf92ed1fe35a985b48b92392087e86da2011896c289e0010fc6bf",
-  "0xe6776a7310afaffed6aeca2b54b1547d72dbfc9268ed05850584ddce53cf87a1",
-  "0xb454e1649f031838a3b63b2fb693635266e048754f23cae6d9718250e3fb8905",
-  "0xb8849e63d7c25960af6eaff78fd82fe916b2c20cf569aaf4fa259c15faedd146",
-  "0x53513db9b03255c58b5f535e6d9e15bb3bfed583839094126b9a42ce2aa7469c",
-  "0x66486a3148467413a10cc8891b657bf092d307e066a08b833b892913607aede0",
-  "0x5918ecc0f743222dee4ae4f2be17965e785435af6223ad3bdff80354d893f0c2",
-  "0xb76b8ce771bfccf0167c3b2a51993e7687a4d8cbfb9ced61a98f601a772bda08",
-  "0xcb448613322f0ae09bb111e6bfd5be93480f1ec521b062a614f9af025c8f1852",
-  "0x147840cb64e7c4ae02917144897c37b521b859ac643bf55ec83444c11c3a8a30",
-  "0x1a1bf9026a097f33ce1a51f5aa0c4102e4a1432c757d922200ef37df168ae504",
-  "0xbb3457514f768615c8bc4061c7e47f817c8a570c5c3537479639d4fad052a98a",
-  "0xfbd9e512cc1b62db1ca689737c110afa9a3799e1bc04bf12c1c34ac39e0e2dd5",
-];
-
 export const DEFAULT_OFFER_NAME = "offer";
+
+export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
+export const DEFAULT_CC_DURATION = "100 minutes";
+export const DURATION_EXAMPLE =
+  "in human-readable format. Example: 1 months 1 days";
+
 export const WORKER_SPELL = "worker-spell";

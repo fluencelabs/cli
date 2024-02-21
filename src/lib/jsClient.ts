@@ -17,29 +17,19 @@
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
-import type { FluenceConfig } from "./configs/project/fluence.js";
-import { ENV_FLAG_NAME, type FluenceClientFlags } from "./const.js";
+import { type FluenceClientFlags } from "./const.js";
 import { stringifyUnknown } from "./helpers/utils.js";
 import { base64ToUint8Array, getExistingSecretKey } from "./keyPairs.js";
 import { resolveRelay } from "./multiaddres.js";
 
-export const initFluenceClient = async (
-  {
-    relay: relayFromFlags,
-    sk: secretKeyName,
-    ["dial-timeout"]: dialTimeoutMs,
-    ttl,
-    "particle-id": printParticleId,
-    [ENV_FLAG_NAME]: fluenceEnvFromFlags,
-  }: FluenceClientFlags,
-  maybeFluenceConfig: FluenceConfig | null,
-): Promise<void> => {
-  const relay = await resolveRelay({
-    maybeFluenceConfig,
-    relayFromFlags,
-    fluenceEnvFromFlags,
-  });
-
+export const initFluenceClient = async ({
+  relay: relayFromFlags,
+  sk: secretKeyName,
+  ["dial-timeout"]: dialTimeoutMs,
+  ttl,
+  "particle-id": printParticleId,
+}: FluenceClientFlags): Promise<void> => {
+  const relay = await resolveRelay(relayFromFlags);
   const secretKey = await getExistingSecretKey(secretKeyName);
 
   try {

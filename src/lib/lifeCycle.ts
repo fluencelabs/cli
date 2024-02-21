@@ -21,6 +21,7 @@ import type {
   ParserOutput,
 } from "@oclif/core/lib/interfaces/parser.js";
 
+import { setChainFlags, type ChainFlags } from "./chainFlags.js";
 import {
   commandObj,
   isInteractive,
@@ -37,8 +38,9 @@ import { initNewUserConfig, initUserConfig } from "./configs/user/config.js";
 import {
   NODE_JS_MAJOR_VERSION,
   CLI_NAME_FULL,
-  type NO_INPUT_FLAG_NAME,
+  NO_INPUT_FLAG_NAME,
   CLI_NAME,
+  PRIV_KEY_FLAG_NAME,
 } from "./const.js";
 import { haltCountly, initCountly } from "./countly.js";
 import "./setupEnvironment.js";
@@ -90,7 +92,7 @@ type ParserOutputWithNoInputFlag<
 > = ParserOutput<F, F2, A> & {
   flags: {
     [NO_INPUT_FLAG_NAME]: boolean;
-  };
+  } & ChainFlags;
 };
 
 export async function initCli<
@@ -165,15 +167,14 @@ export async function initCli<
     }
   }
 
-  await updateRelaysJSON({
-    fluenceConfig: maybeFluenceConfig,
+  await updateRelaysJSON();
+
+  setChainFlags({
+    env: flags.env,
+    [PRIV_KEY_FLAG_NAME]: flags[PRIV_KEY_FLAG_NAME],
   });
 
-  return {
-    args,
-    flags,
-    ...res,
-  };
+  return { args, flags, ...res };
 }
 
 function ensureCorrectCliVersion(maybeCliVersion: string | undefined): void {

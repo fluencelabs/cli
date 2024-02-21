@@ -1,5 +1,79 @@
 # Changelog
 
+## [0.15.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.1...fluence-cli-v0.15.2) (2024-02-20)
+
+
+### Bug Fixes
+
+* **deps:** use public image chain-rpc 0.5.2 ([#769](https://github.com/fluencelabs/cli/issues/769)) ([e4800fe](https://github.com/fluencelabs/cli/commit/e4800feee19aad344789a515a3bd76898726f1ad))
+
+## [0.15.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.0...fluence-cli-v0.15.1) (2024-02-19)
+
+
+### Bug Fixes
+
+* **deps:** use nox 0.20.0 ([#766](https://github.com/fluencelabs/cli/issues/766)) ([c75a1f2](https://github.com/fluencelabs/cli/commit/c75a1f26d1fa25d1a0221697fc298d6969644eb0))
+
+## [0.15.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.4...fluence-cli-v0.15.0) (2024-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* add capacity commitment ([#654](https://github.com/fluencelabs/cli/issues/654))
+
+### Features
+
+* add capacity commitment ([#654](https://github.com/fluencelabs/cli/issues/654)) ([6b7211a](https://github.com/fluencelabs/cli/commit/6b7211a000ff4710567d1036913b6f8d9af553cc))
+* rename deals to deployments ([#764](https://github.com/fluencelabs/cli/issues/764)) ([ed7188a](https://github.com/fluencelabs/cli/commit/ed7188ad2516f3b80e60419fc91fe24ccd3b05d8))
+
+## [0.14.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.3...fluence-cli-v0.14.4) (2024-02-14)
+
+
+### Features
+
+* trigger build ([#757](https://github.com/fluencelabs/cli/issues/757)) ([10da9dd](https://github.com/fluencelabs/cli/commit/10da9dd2d38d2392af0d2b04239694d10c00a819))
+
+
+### Bug Fixes
+
+* change build order ([755c1c6](https://github.com/fluencelabs/cli/commit/755c1c6418bcaa26174f44d222cff5f0bb1d5e2a))
+* move exit cli ([#759](https://github.com/fluencelabs/cli/issues/759)) ([e32c927](https://github.com/fluencelabs/cli/commit/e32c927402eb90e6b7257bae591e38802c06a9ce))
+
+## [0.14.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.2...fluence-cli-v0.14.3) (2024-02-13)
+
+
+### Bug Fixes
+
+* adapt gateway template to vercel deployment ([#750](https://github.com/fluencelabs/cli/issues/750)) ([4601741](https://github.com/fluencelabs/cli/commit/4601741afcd975bd9c28b762711790aff90c8bac))
+* fix aqua compilation path resolution [fixes DXJ-711] ([#751](https://github.com/fluencelabs/cli/issues/751)) ([d44e9e3](https://github.com/fluencelabs/cli/commit/d44e9e35127fe405cc399ef44ce0e9b4f6d01c8f))
+* Fix JS environment in Vercel template ([#755](https://github.com/fluencelabs/cli/issues/755)) ([c6eb6f3](https://github.com/fluencelabs/cli/commit/c6eb6f3ac7761d79714509e4780ca83b963480e5))
+* improver README [fixes DXJ-624 DXJ-681] ([#753](https://github.com/fluencelabs/cli/issues/753)) ([2956d5d](https://github.com/fluencelabs/cli/commit/2956d5d77db8fdb82c1c8e9e6666264259379831))
+
+## [0.14.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.1...fluence-cli-v0.14.2) (2024-02-09)
+
+
+### Bug Fixes
+
+* Adopt new serialization API from JS client ([#747](https://github.com/fluencelabs/cli/issues/747)) ([baff9d5](https://github.com/fluencelabs/cli/commit/baff9d5b9d2449161cec88ed66a4a701cb222cf2))
+* **deps:** update dependency @fluencelabs/js-client to v0.8.3 ([#749](https://github.com/fluencelabs/cli/issues/749)) ([40fa9ef](https://github.com/fluencelabs/cli/commit/40fa9effdb33fa1be48c54a533fa964816942795))
+
+## [0.14.1](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.14.0...fluence-cli-v0.14.1) (2024-02-05)
+
+
+### Features
+
+* add default env for provider ([#744](https://github.com/fluencelabs/cli/issues/744)) ([cbf69fc](https://github.com/fluencelabs/cli/commit/cbf69fc0478f27731817f1bb951e3a5357ad222a))
+* support multiple aqua configs [fixes DXJ-641] ([#743](https://github.com/fluencelabs/cli/issues/743)) ([f7213f8](https://github.com/fluencelabs/cli/commit/f7213f893e11dc0df8328740ff8fcc746157c249))
+* update aqua to 0.14.0 ([#739](https://github.com/fluencelabs/cli/issues/739)) ([7f81e7e](https://github.com/fluencelabs/cli/commit/7f81e7eecf57f04c3126dee66456a81c160640bb))
+* use npm-aqua-compiler 0.0.3 ([#741](https://github.com/fluencelabs/cli/issues/741)) ([c2ee892](https://github.com/fluencelabs/cli/commit/c2ee89282c3ac762459af3c123997945778109d7))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/js-client to v0.8.0 ([#742](https://github.com/fluencelabs/cli/issues/742)) ([deeb9ca](https://github.com/fluencelabs/cli/commit/deeb9caf61f6364976f3e370c854f8d1a86323ac))
+* Improve gateway template readme content  ([#746](https://github.com/fluencelabs/cli/issues/746)) ([671dab8](https://github.com/fluencelabs/cli/commit/671dab83286cd8a2e5222ec86e25a326eeca9ad2))
+* **test:** Add `aqua` header to spell file ([#737](https://github.com/fluencelabs/cli/issues/737)) ([8c23c19](https://github.com/fluencelabs/cli/commit/8c23c19b24c83c75ee77af9d44b046113e102d88))
+
 ## [0.14.0](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.13.5...fluence-cli-v0.14.0) (2024-01-26)
 
 

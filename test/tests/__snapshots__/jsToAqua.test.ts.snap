@@ -3,14 +3,14 @@
 exports[`Conversion from js to aqua Expect custom type to work 1`] = `
 "aqua SomeModule declares *
 
-data Nested:
-    a: u64
-
 data InsideArrayE:
     s: u64
 
 data InsideArray:
     e: InsideArrayE
+
+data Nested:
+    a: u64
 
 data SomeModule:
     a: u64

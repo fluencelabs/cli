@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { rm } from "fs/promises";
-
 import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -24,16 +22,19 @@ import {
   initNewReadonlyProviderConfig,
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
-import { PROVIDER_CONFIG_FLAGS, NOXES_FLAG } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  NOXES_FLAG,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+} from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { confirm } from "../../lib/prompt.js";
 
 export default class Init extends BaseCommand<typeof Init> {
-  static override description = "Init provider config. Creates a config file";
+  static override description = `Init provider config. Creates a ${PROVIDER_CONFIG_FULL_FILE_NAME} file`;
   static override flags = {
     ...baseFlags,
     ...NOXES_FLAG,
-    ...PROVIDER_CONFIG_FLAGS,
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
@@ -42,30 +43,17 @@ export default class Init extends BaseCommand<typeof Init> {
     let providerConfig = await initReadonlyProviderConfig();
 
     if (providerConfig !== null) {
-      const isOverwriting = await confirm({
-        message: `Provider config already exists at ${color.yellow(
+      return commandObj.error(
+        `Provider config already exists at ${color.yellow(
           providerConfig.$getPath(),
-        )}. Do you want to overwrite it?`,
-        default: false,
-      });
-
-      if (!isOverwriting) {
-        return commandObj.error(
-          `Provider config already exists at ${color.yellow(
-            providerConfig.$getPath(),
-          )}. Aborting.`,
-        );
-      }
-
-      await rm(providerConfig.$getPath(), { force: true });
+        )}. If you want to init a new provider config, please do it in another directory`,
+      );
     }
 
     providerConfig = await initNewReadonlyProviderConfig(flags);
 
     commandObj.logToStderr(
-      `Successfully created provider config at ${color.yellow(
-        providerConfig.$getPath(),
-      )}`,
+      `Provider config is at ${color.yellow(providerConfig.$getPath())}`,
     );
   }
 }

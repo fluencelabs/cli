@@ -55,6 +55,7 @@ import {
   GATEWAY_DIR_NAME,
   SERVER_JS_FILE_NAME,
   SERVER_TS_FILE_NAME,
+  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -137,9 +138,9 @@ export function getProviderConfigPath(): string {
   return join(projectRootDir, PROVIDER_CONFIG_FULL_FILE_NAME);
 }
 
-const getAquaDir = (cwd?: string): string => {
+export function getAquaDir(cwd?: string): string {
   return join(getSrcPath(cwd), AQUA_DIR_NAME);
-};
+}
 
 export async function ensureAquaDir(): Promise<string> {
   return ensureDir(getAquaDir());
@@ -205,6 +206,13 @@ const ensureFluenceDir = async (): Promise<string> => {
 
 export async function ensureProviderSecretsConfigPath(): Promise<string> {
   return join(await ensureFluenceDir(), PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME);
+}
+
+export async function ensureProviderArtifactsConfigPath(): Promise<string> {
+  return join(
+    await ensureFluenceDir(),
+    PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  );
 }
 
 export const getFluenceAquaDir = (cwd?: string): string => {

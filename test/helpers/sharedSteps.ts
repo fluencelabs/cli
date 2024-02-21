@@ -32,7 +32,7 @@ import {
 } from "../../src/lib/configs/project/fluence.js";
 import { initServiceConfig } from "../../src/lib/configs/project/service.js";
 import {
-  DEFAULT_DEAL_NAME,
+  DEFAULT_DEPLOYMENT_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FS_OPTIONS,
   RUN_DEPLOYED_SERVICES_FUNCTION_CALL,
@@ -58,7 +58,6 @@ import {
   MY_SERVICE_NAME,
   RUN_DEPLOYED_SERVICES_TIMEOUT,
 } from "./constants.js";
-import { TEST_DEFAULT_SENDER_ACCOUNT } from "./localNetAccounts.js";
 import {
   getInitializedTemplatePath,
   getMainRsPath,
@@ -154,13 +153,17 @@ export async function updateFluenceConfigForTest(cwd: string) {
   const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].targetWorkers = 3;
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [MY_SERVICE_NAME];
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].targetWorkers = 3;
+
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
+    MY_SERVICE_NAME,
+  ];
+
   await fluenceConfig.$commit();
   return fluenceConfig;
 }
@@ -239,29 +242,22 @@ export async function callRunDeployedServices(cwd: string) {
 export async function deployDealAndWaitUntilDeployed(cwd: string) {
   const res = await fluence({
     args: ["deal", "deploy"],
-    flags: {
-      "priv-key": TEST_DEFAULT_SENDER_ACCOUNT.privateKey,
-    },
     cwd,
   });
 
-  const dealId = res
-    .split("deal: https://mumbai.polygonscan.com/address/")[1]
-    ?.split("\n")[0];
+  const dealId = res.split('deal: "')[1]?.split('"')[0];
 
   assert(dealId, "dealId is expected to be defined");
   console.log("dealId:", dealId);
 
   await fluence({
-    args: ["deal", "deposit", dealId, "1"],
-    flags: {
-      "priv-key": TEST_DEFAULT_SENDER_ACCOUNT.privateKey,
-    },
+    args: ["deal", "deposit", "10"],
     cwd,
   });
 
   await setTryTimeout(
-    async () => {
+    "run deployed services",
+    () => {
       return callRunDeployedServices(cwd);
     },
     (error) => {
@@ -284,9 +280,9 @@ export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
   const fluenceConfig = await getFluenceConfig(cwd);
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
   fluenceConfig.spells = {
@@ -295,7 +291,7 @@ export async function createSpellAndAddToDeal(cwd: string, spellName: string) {
     },
   };
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].spells = [spellName];
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].spells = [spellName];
   await fluenceConfig.$commit();
 }
 
@@ -329,14 +325,15 @@ export async function createServiceAndAddToDeal(
   };
 
   assert(
-    fluenceConfig.deals !== undefined &&
-      fluenceConfig.deals[DEFAULT_DEAL_NAME] !== undefined,
-    `${DEFAULT_DEAL_NAME} is expected to be in deals property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
+    fluenceConfig.deployments !== undefined &&
+      fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME] !== undefined,
+    `${DEFAULT_DEPLOYMENT_NAME} is expected to be in deployments property of ${fluenceConfig.$getPath()} by default when the project is initialized`,
   );
 
-  const currentServices = fluenceConfig.deals[DEFAULT_DEAL_NAME].services ?? [];
+  const currentServices =
+    fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services ?? [];
 
-  fluenceConfig.deals[DEFAULT_DEAL_NAME].services = [
+  fluenceConfig.deployments[DEFAULT_DEPLOYMENT_NAME].services = [
     ...currentServices,
     serviceName,
   ];
@@ -372,22 +369,21 @@ export async function createModuleAndAddToService(
 }
 
 async function waitUntilFluenceConfigUpdated(cwd: string, serviceName: string) {
-  const checkConfig = async () => {
-    const config = await initReadonlyFluenceConfigWithPath(cwd);
+  return setTryTimeout(
+    "get updated fluence config",
+    async () => {
+      const config = await initReadonlyFluenceConfigWithPath(cwd);
 
-    assert(config !== null, `config is expected to exist at ${cwd}`);
+      assert(config !== null, `config is expected to exist at ${cwd}`);
 
-    assert(
-      config.services !== undefined &&
-        Object.prototype.hasOwnProperty.call(config.services, serviceName),
-      `${serviceName} is expected to be in services property of ${config.$getPath()} after ${serviceName} is added to it`,
-    );
+      assert(
+        config.services !== undefined &&
+          Object.prototype.hasOwnProperty.call(config.services, serviceName),
+        `${serviceName} is expected to be in services property of ${config.$getPath()} after ${serviceName} is added to it`,
+      );
 
-    return config;
-  };
-
-  return await setTryTimeout(
-    checkConfig,
+      return config;
+    },
     (error) => {
       throw new Error(
         `Config is expected to be updated after ${serviceName} is added to it, error: ${stringifyUnknown(
@@ -404,6 +400,7 @@ export async function waitUntilRunDeployedServicesReturnsExpected(
   answer: string,
 ) {
   await setTryTimeout(
+    "check if runDeployedServices returns expected result",
     async () => {
       const expected = (await getMultiaddrs(cwd)).map(({ peerId }) => {
         return {
@@ -443,9 +440,9 @@ export async function waitUntilShowSubnetReturnsExpected(
   spells: string[],
 ) {
   await setTryTimeout(
+    "check if showSubnet returns expected result",
     async () => {
       const showSubnetResult = await runAquaFunction(cwd, "showSubnet");
-
       const subnet = JSON.parse(showSubnetResult);
 
       if (!validateWorkerServices(subnet)) {
@@ -490,6 +487,7 @@ export async function waitUntilAquaScriptReturnsExpected(
   answer: string,
 ) {
   await setTryTimeout(
+    "check if aqua script returns expected result",
     async () => {
       const result = await runAquaFunction(cwd, functionName, [spellName], {
         i: aquaFileName,
@@ -542,4 +540,11 @@ export function assertLogsAreValid(logs: string) {
   if (logs.includes(LOGS_GET_ERROR_START)) {
     throw new Error(`Failed to get deal logs:\n\n${logs}`);
   }
+}
+
+export async function stopAllDeals(cwd: string) {
+  await fluence({
+    args: ["deal", "stop"],
+    cwd,
+  });
 }

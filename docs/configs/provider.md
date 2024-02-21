@@ -4,13 +4,36 @@ Defines config used for provider set up
 
 ## Properties
 
-| Property       | Type                    | Required | Description                                                                                                                              |
-|----------------|-------------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `computePeers` | [object](#computepeers) | **Yes**  | A map with compute peer names as keys and compute peers as values                                                                        |
-| `env`          | string                  | **Yes**  | Defines the the environment for which you intend to generate nox configuration Possible values are: `kras`, `testnet`, `stage`, `local`. |
-| `offers`       | [object](#offers)       | **Yes**  | A map with offer names as keys and offers as values                                                                                      |
-| `version`      | number                  | **Yes**  | Config version                                                                                                                           |
-| `nox`          | [object](#nox)          | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config                                          |
+| Property              | Type                           | Required | Description                                                                                     |
+|-----------------------|--------------------------------|----------|-------------------------------------------------------------------------------------------------|
+| `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peers as values                               |
+| `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offers as values                                             |
+| `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                                                |
+| `version`             | number                         | **Yes**  | Config version                                                                                  |
+| `capacityCommitments` | [object](#capacitycommitments) | No       | A map with nox names as keys and capacity commitments as values                                 |
+| `nox`                 | [object](#nox)                 | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
+
+## capacityCommitments
+
+A map with nox names as keys and capacity commitments as values
+
+### Properties
+
+| Property  | Type               | Required | Description                   |
+|-----------|--------------------|----------|-------------------------------|
+| `noxName` | [object](#noxname) | No       | Defines a capacity commitment |
+
+### noxName
+
+Defines a capacity commitment
+
+#### Properties
+
+| Property               | Type   | Required | Description                                                                   |
+|------------------------|--------|----------|-------------------------------------------------------------------------------|
+| `duration`             | string | **Yes**  | Duration of the commitment in human-readable format. Example: 1 months 1 days |
+| `rewardDelegationRate` | number | **Yes**  | Reward delegation rate in percent                                             |
+| `delegator`            | string | No       | Delegator address                                                             |
 
 ## computePeers
 
@@ -30,7 +53,7 @@ Defines a compute peer
 
 | Property       | Type           | Required | Description                                                                                     |
 |----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
-| `computeUnits` | number         | No       | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
+| `computeUnits` | number         | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
 | `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 #### nox
@@ -157,10 +180,9 @@ Defines a provider offer
 
 #### Properties
 
-| Property                 | Type     | Required | Description                                                        |
-|--------------------------|----------|----------|--------------------------------------------------------------------|
-| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer                      |
-| `maxCollateralPerWorker` | number   | **Yes**  | Max collateral per worker. This number is multiplied by 10^18      |
-| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch. This number is multiplied by 10^18 |
-| `effectors`              | string[] | No       |                                                                    |
+| Property                 | Type     | Required | Description                                   |
+|--------------------------|----------|----------|-----------------------------------------------|
+| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
+| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch in FLT         |
+| `effectors`              | string[] | No       |                                               |
 

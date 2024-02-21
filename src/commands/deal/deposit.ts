@@ -14,49 +14,32 @@
  * limitations under the License.
  */
 
-import { ERC20__factory } from "@fluencelabs/deal-aurora";
 import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { PRIV_KEY_FLAG, ENV_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS, DEAL_FLAGS } from "../../lib/const.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
+import { getDealIds } from "../../lib/getDealIds.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
   static override description = "Deposit do the deal";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...ENV_FLAG,
+    ...CHAIN_FLAGS,
+    ...DEAL_FLAGS,
   };
 
   static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
-    }),
     AMOUNT: Args.string({
       description: "Amount of tokens to deposit",
     }),
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig, args } = await initCli(
-      this,
-      await this.parse(Deposit),
-    );
-
-    const network = await ensureChainNetwork(flags.env, maybeFluenceConfig);
-    const privKey = flags["priv-key"];
-
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
+    const { flags, args } = await initCli(this, await this.parse(Deposit));
 
     const { ethers } = await import("ethers");
 
@@ -65,35 +48,25 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
         (await input({ message: "Enter amount of tokens to deposit" })),
     );
 
-    const signer = await getSigner(network, privKey);
-    const { DealClient } = await import("@fluencelabs/deal-aurora");
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const dealClient = new DealClient(network, signer);
-    const deal = dealClient.getDeal(dealAddress);
+    const dealIds = await getDealIds(flags);
 
-    promptConfirmTx(privKey);
-
-    const approveTx = await ERC20__factory.connect(
-      await deal.paymentToken(),
-      // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      signer,
-    ).approve(await deal.getAddress(), amount);
-
-    await approveTx.wait();
-
-    promptConfirmTx(privKey);
-
-    const tx = await deal.deposit(amount);
-
-    // TODO: remove when @fluencelabs/deal-aurora is migrated to ESModules
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    await waitTx(tx);
-
-    color.green(`Tokens were deposited to the deal ${dealAddress}`);
+    for (const dealId of dealIds) {
+      await depositToDeal(dealId, amount);
+    }
   }
+}
+
+async function depositToDeal(dealAddress: string, amount: bigint) {
+  const { dealClient, signerOrWallet } = await getDealClient();
+  const deal = dealClient.getDeal(dealAddress);
+  const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
+
+  await sign(
+    ERC20__factory.connect(await deal.paymentToken(), signerOrWallet).approve,
+    await deal.getAddress(),
+    amount,
+  );
+
+  await sign(deal.deposit, amount);
+  color.green(`Tokens were deposited to the deal ${dealAddress}`);
 }

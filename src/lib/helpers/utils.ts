@@ -16,7 +16,10 @@
 
 import { AssertionError } from "node:assert";
 
+import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
+
+import { dbg } from "../dbg.js";
 
 export function commaSepStrToArr(commaSepStr: string) {
   return commaSepStr.split(",").map((s) => {
@@ -42,11 +45,22 @@ function comment(commentToken: string) {
 export const jsComment = comment("//");
 export const aquaComment = comment("--");
 
-export function jsonStringify(
-  unknown: unknown,
-  replacer: Parameters<typeof JSON.stringify>[1] = null,
-): string {
-  return JSON.stringify(unknown, replacer, 2);
+export function jsonStringify(unknown: unknown): string {
+  return JSON.stringify(
+    unknown,
+    (_key, value: unknown) => {
+      if (value instanceof Uint8Array) {
+        return `Uint8Array<${JSON.stringify([...value])}>`;
+      }
+
+      if (typeof value === "bigint") {
+        return value.toString();
+      }
+
+      return value;
+    },
+    2,
+  );
 }
 
 export function stringifyUnknown(unknown: unknown): string {
@@ -72,7 +86,7 @@ export function stringifyUnknown(unknown: unknown): string {
 
       return `${errorMessage}${
         otherErrorProperties.length > 0
-          ? `\n${jsonStringify(unknown, otherErrorProperties)}`
+          ? `\n${JSON.stringify(unknown, otherErrorProperties, 2)}`
           : ""
       }`;
     }
@@ -137,13 +151,16 @@ export const LOGS_GET_ERROR_START = `Failed to get logs:`;
 
 export function splitErrorsAndResults<T, U, V>(
   array: Array<T>,
-  splitter: (v: T) => { error: NonNullable<U> } | { result: NonNullable<V> },
+  splitter: (
+    v: T,
+    i: number,
+  ) => { error: NonNullable<U> } | { result: NonNullable<V> },
 ) {
   const errors: Array<NonNullable<U>> = [];
   const results: Array<NonNullable<V>> = [];
 
-  for (const item of array) {
-    const splitted = splitter(item);
+  for (const [i, item] of Object.entries(array)) {
+    const splitted = splitter(item, Number(i));
 
     if ("error" in splitted) {
       errors.push(splitted.error);
@@ -156,11 +173,13 @@ export function splitErrorsAndResults<T, U, V>(
 }
 
 export async function setTryTimeout<T, U>(
+  message: string,
   callbackToTry: () => T | Promise<T>,
   errorHandler: (error: unknown) => U,
   msToTryFor: number,
   msBetweenTries = 1000,
 ): Promise<T | U> {
+  const yellowMessage = color.yellow(message);
   let isTimeoutRunning = true;
 
   const timeout = setTimeout(() => {
@@ -168,18 +187,32 @@ export async function setTryTimeout<T, U>(
   }, msToTryFor);
 
   let error: unknown;
+  let attemptCounter = 1;
   let isTrying = true;
 
   while (isTrying) {
     isTrying = isTimeoutRunning;
 
     try {
+      dbg(`Trying to ${yellowMessage}`);
       const res = await callbackToTry();
       clearTimeout(timeout);
       isTrying = false;
       return res;
     } catch (e) {
+      const errorString = stringifyUnknown(e);
+      const previousErrorString = stringifyUnknown(error);
+
+      if (errorString === previousErrorString) {
+        dbg(
+          `Attempt #${attemptCounter} to ${yellowMessage} failed with the same error`,
+        );
+      } else {
+        dbg(`Failed to ${yellowMessage}. Reason: ${stringifyUnknown(e)}`);
+      }
+
       error = e;
+      attemptCounter++;
     }
 
     await new Promise((resolve) => {

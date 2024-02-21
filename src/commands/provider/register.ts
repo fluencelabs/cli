@@ -14,132 +14,20 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { commandObj } from "../../lib/commandObj.js";
-import type { FluenceConfig } from "../../lib/configs/project/fluence.js";
-import {
-  initNewReadonlyProviderConfig,
-  type Offer,
-  type ProviderConfigReadonly,
-} from "../../lib/configs/project/provider.js";
-import {
-  OFFER_FLAG,
-  PRIV_KEY_FLAG,
-  NOXES_FLAG,
-  PROVIDER_CONFIG_FLAGS,
-  CURRENCY_MULTIPLIER,
-} from "../../lib/const.js";
-import { dbg } from "../../lib/dbg.js";
+import { registerProvider } from "../../lib/chain/providerInfo.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { list, type Choices } from "../../lib/prompt.js";
-import {
-  ensureChainNetwork,
-  getSigner,
-  promptConfirmTx,
-  waitTx,
-} from "../../lib/provider.js";
 
 export default class Register extends BaseCommand<typeof Register> {
-  static override description = "Register in matching contract";
+  static override description = "Register as a provider";
   static override flags = {
     ...baseFlags,
-    ...PRIV_KEY_FLAG,
-    ...PROVIDER_CONFIG_FLAGS,
-    ...NOXES_FLAG,
-    ...OFFER_FLAG,
+    ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
-    const { flags, maybeFluenceConfig } = await initCli(
-      this,
-      await this.parse(Register),
-    );
-
-    await register(flags, maybeFluenceConfig);
+    await initCli(this, await this.parse(Register));
+    await registerProvider();
   }
-}
-
-export async function register(
-  flags: {
-    offer?: string | undefined;
-    noxes?: number | undefined;
-    env: string | undefined;
-    "priv-key": string | undefined;
-  },
-  maybeFluenceConfig?: FluenceConfig | null,
-) {
-  const providerConfig = await initNewReadonlyProviderConfig(flags);
-
-  let offer =
-    flags.offer === undefined ? undefined : providerConfig.offers[flags.offer];
-
-  if (offer === undefined) {
-    if (flags.offer !== undefined) {
-      commandObj.warn(`Offer ${color.yellow(flags.offer)} not found`);
-    }
-
-    offer = await promptForOffer(providerConfig.offers);
-  }
-
-  const network = await ensureChainNetwork(
-    flags.env,
-    maybeFluenceConfig ?? null,
-  );
-
-  const signer = await getSigner(network, flags["priv-key"]);
-  const { DealClient } = await import("@fluencelabs/deal-aurora");
-  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-  const dealClient = new DealClient(network, signer);
-  const globalContracts = dealClient.getGlobalContracts();
-  const matcher = await globalContracts.getMatcher();
-  const flt = await globalContracts.getFLT();
-
-  const minPricePerWorkerEpochBigInt = BigInt(
-    offer.minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
-  );
-
-  dbg(`minPricePerWorkerEpoch: ${minPricePerWorkerEpochBigInt}`);
-
-  const maxCollateralPerWorkerBigInt = BigInt(
-    offer.maxCollateralPerWorker * CURRENCY_MULTIPLIER,
-  );
-
-  dbg(`maxCollateralPerWorker: ${maxCollateralPerWorkerBigInt}`);
-
-  const tx = await matcher.registerComputeProvider(
-    minPricePerWorkerEpochBigInt,
-    maxCollateralPerWorkerBigInt,
-    await flt.getAddress(),
-    [],
-  );
-
-  promptConfirmTx(flags["priv-key"]);
-  // @ts-expect-error remove when @fluencelabs/deal-aurora is migrated to ESModules
-  await waitTx(tx);
-
-  commandObj.log(color.green(`Successfully joined to matching contract`));
-}
-
-function promptForOffer(offers: ProviderConfigReadonly["offers"]) {
-  const options: Choices<Offer> = Object.entries(offers).map(
-    ([name, offer]) => {
-      return {
-        name,
-        value: offer,
-      };
-    },
-  );
-
-  return list({
-    message: "Select offer",
-    options,
-    oneChoiceMessage(choice) {
-      return `Select offer ${color.yellow(choice)}`;
-    },
-    onNoChoices() {
-      commandObj.error("No offers found");
-    },
-  });
 }

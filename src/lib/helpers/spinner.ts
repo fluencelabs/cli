@@ -18,13 +18,10 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 
-const SPINNER = color.yellow("#");
+export function startSpinner(message: string) {
+  commandObj.logToStderr(`${color.yellow("#")} ${message}...`);
+}
 
-export const startSpinner = (message: string) => {
-  commandObj.logToStderr(`${SPINNER} ${message}...`);
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const stopSpinner = (_message?: string) => {
-  // Not used currently
-};
+export function stopSpinner(message: string | undefined = "done") {
+  commandObj.logToStderr(message);
+}

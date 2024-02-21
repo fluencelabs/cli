@@ -64,13 +64,16 @@ import { input } from "../lib/prompt.js";
 // performance.mark("whole-start");
 
 const FUNC_FLAG_NAME = "func";
+const FUNC_SHORT_FLAG_NAME = "f";
 // const ON_FLAG_NAME = "on";
 const DATA_FLAG_NAME = "data";
 const FUNC_CALL_EXAMPLE = 'funcName("stringArg")';
 
 export default class Run extends BaseCommand<typeof Run> {
   static override description = `Run the first aqua function CLI is able to find and compile among all aqua files specified in '${COMPILE_AQUA_PROPERTY_NAME}' property of ${FLUENCE_CONFIG_FULL_FILE_NAME} file${INPUT_FLAG_EXPLANATION}`;
-  static override examples = ["<%= config.bin %> <%= command.id %>"];
+  static override examples = [
+    `<%= config.bin %> <%= command.id %> -${FUNC_SHORT_FLAG_NAME} '${FUNC_CALL_EXAMPLE}'`,
+  ];
   static override flags = {
     ...baseFlags,
     data: Flags.string({
@@ -94,7 +97,7 @@ export default class Run extends BaseCommand<typeof Run> {
     //   helpValue: "<peer_id>",
     // }),
     [FUNC_FLAG_NAME]: Flags.string({
-      char: "f",
+      char: FUNC_SHORT_FLAG_NAME,
       description: `Function call. Example: ${FUNC_CALL_EXAMPLE}`,
       helpValue: "<function-call>",
     }),
@@ -480,8 +483,7 @@ async function fluenceRun(args: RunArgs) {
     commandObj.error(runDataErrors.join("\n"));
   }
 
-  await initFluenceClient(args, args.fluenceConfig);
-
+  await initFluenceClient(args);
   const { codomain } = functionCall.funcDef.arrow;
   const returnTypeVoid = codomain.tag === "nil" || codomain.items.length === 0;
 
@@ -505,5 +507,7 @@ async function fluenceRun(args: RunArgs) {
       ? schema.arrow.codomain.items[0]
       : undefined) ?? schema.arrow.codomain;
 
-  return aqua2js(result, returnSchema);
+  return aqua2js(result, returnSchema, {
+    path: [`${functionCall.funcDef.functionName}ReturnValue`],
+  });
 }

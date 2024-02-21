@@ -25,9 +25,9 @@ import {
   initReadonlyDockerComposeConfig,
 } from "../../lib/configs/project/dockerCompose.js";
 import {
-  NOXES_FLAG,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  CHAIN_FLAGS,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
@@ -37,11 +37,10 @@ export default class Init extends BaseCommand<typeof Init> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
-    ...NOXES_FLAG,
+    ...CHAIN_FLAGS,
   };
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Init));
-
+    await initCli(this, await this.parse(Init));
     const existingDockerCompose = await initReadonlyDockerComposeConfig();
 
     if (existingDockerCompose !== null) {
@@ -61,9 +60,7 @@ export default class Init extends BaseCommand<typeof Init> {
       await rm(existingDockerCompose.$getPath());
     }
 
-    const dockerCompose = await initNewReadonlyDockerComposeConfig({
-      noxes: flags.noxes,
-    });
+    const dockerCompose = await initNewReadonlyDockerComposeConfig();
 
     commandObj.logToStderr(`Created new config at ${dockerCompose.$getPath()}`);
   }

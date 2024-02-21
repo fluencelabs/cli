@@ -105,6 +105,7 @@ export default class Aqua extends Command {
         watch: flags.watch,
       });
 
+      await exitCli();
       return;
     }
 

@@ -12,8 +12,8 @@ Defines Fluence Project, most importantly - what exactly you want to deploy and 
 | `cliVersion`           | string                      | No       | The version of the Fluence CLI that is compatible with this project. Set this to enforce a particular set of versions of all fluence components                                                                                                                                                                                                                                                                                      |
 | `compileAqua`          | [object](#compileaqua)      | No       | A map of aqua files to compile                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `customFluenceEnv`     | [object](#customfluenceenv) | No       | Custom Fluence environment to use when connecting to Fluence network                                                                                                                                                                                                                                                                                                                                                                 |
-| `deals`                | [object](#deals)            | No       | A map of objects with worker names as keys, each object defines a deal                                                                                                                                                                                                                                                                                                                                                               |
 | `defaultSecretKeyName` | string                      | No       | Secret key with this name will be used by default by js-client inside CLI to run Aqua code                                                                                                                                                                                                                                                                                                                                           |
+| `deployments`          | [object](#deployments)      | No       | A map with deployment names as keys and deployments as values                                                                                                                                                                                                                                                                                                                                                                        |
 | `hosts`                | [object](#hosts)            | No       | A map of objects with worker names as keys, each object defines a list of peer IDs to host the worker on. Intended to be used by providers to deploy directly without using the blockchain                                                                                                                                                                                                                                           |
 | `ipfsAddr`             | string                      | No       | IPFS multiaddress to use when uploading workers with 'deal deploy'. Default: /dns4/ipfs.fluence.dev/tcp/5001 or /ip4/127.0.0.1/tcp/5001 if using local local env (for 'workers deploy' IPFS address provided by relay that you are connected to is used)                                                                                                                                                                             |
 | `marineBuildArgs`      | string                      | No       | Space separated `cargo build` flags and args to pass to marine build. Can be overridden using --marine-build-args flag Default: --release                                                                                                                                                                                                                                                                                            |
@@ -80,29 +80,30 @@ Custom Fluence environment to use when connecting to Fluence network
 | `contractsEnv` | string   | **Yes**  | Contracts environment to use for this fluence network to sign contracts on the blockchain Possible values are: `kras`, `testnet`, `stage`, `local`. |
 | `relays`       | string[] | **Yes**  | List of custom relay multiaddresses to use when connecting to Fluence network                                                                       |
 
-## deals
+## deployments
 
-A map of objects with worker names as keys, each object defines a deal
+A map with deployment names as keys and deployments as values
 
 ### Properties
 
-| Property   | Type                | Required | Description   |
-|------------|---------------------|----------|---------------|
-| `dealName` | [object](#dealname) | No       | Worker config |
+| Property         | Type                      | Required | Description       |
+|------------------|---------------------------|----------|-------------------|
+| `deploymentName` | [object](#deploymentname) | No       | Deployment config |
 
-### dealName
+### deploymentName
 
-Worker config
+Deployment config
 
 #### Properties
 
 | Property                | Type     | Required | Description                                                                                                                                  |
 |-------------------------|----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `collateralPerWorker`   | number   | No       | Collateral per worker in FL. This number is multiplied by 10^18                                                                              |
 | `computeUnits`          | number   | No       | Number of compute units you require. 1 compute unit = 2GB. Currently the only allowed value is 1. This will change in the future. Default: 1 |
+| `effectors`             | string[] | No       | Effector CIDs to be used in the deal. Must be a valid CID                                                                                    |
+| `initialBalance`        | number   | No       | Initial balance after deploy in FLT                                                                                                          |
 | `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                                                                  |
 | `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                                                                     |
-| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FL. This number is multiplied by 10^18                                                                             |
+| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FLT                                                                                                                |
 | `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                            |
 | `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                |
 | `targetWorkers`         | number   | No       | Max workers in the deal                                                                                                                      |
@@ -113,13 +114,13 @@ A map of objects with worker names as keys, each object defines a list of peer I
 
 ### Properties
 
-| Property     | Type                  | Required | Description   |
-|--------------|-----------------------|----------|---------------|
-| `workerName` | [object](#workername) | No       | Worker config |
+| Property     | Type                  | Required | Description       |
+|--------------|-----------------------|----------|-------------------|
+| `workerName` | [object](#workername) | No       | Deployment config |
 
 ### workerName
 
-Worker config
+Deployment config
 
 #### Properties
 

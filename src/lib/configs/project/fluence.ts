@@ -35,12 +35,10 @@ import {
   AUTO_GENERATED,
   CLI_NAME,
   CLI_NAME_FULL,
-  COLLATERAL_DEFAULT,
-  CONTRACTS_ENV,
-  type ContractsENV,
+  CHAIN_ENV,
+  type ChainENV,
   CURRENCY_MULTIPLIER,
-  CURRENCY_MULTIPLIER_TEXT,
-  DEFAULT_DEAL_NAME,
+  DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_IPFS_ADDRESS,
   DEFAULT_MARINE_BUILD_ARGS,
   DOT_FLUENCE_DIR_NAME,
@@ -55,6 +53,7 @@ import {
   MARINE_BUILD_ARGS_PROPERTY,
   PRICE_PER_EPOCH_DEFAULT,
   TOP_LEVEL_SCHEMA_ID,
+  DEFAULT_INITIAL_BALANCE,
   aquaLogLevelsString,
   AQUA_LOG_LEVELS,
   type AquaLogLevel,
@@ -62,8 +61,9 @@ import {
 import { COMPILE_AQUA_PROPERTY_NAME } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
+  validateEffectors,
   validateVersionsIsExact,
-  validateBatch,
+  validateBatchAsync,
 } from "../../helpers/validations.js";
 import { writeSecretKey } from "../../keyPairs.js";
 import { resolveRelays } from "../../multiaddres.js";
@@ -224,7 +224,8 @@ type Deal = {
   targetWorkers?: number;
   maxWorkersPerProvider?: number;
   pricePerWorkerEpoch?: number;
-  collateralPerWorker?: number;
+  initialBalance?: number;
+  effectors?: string[];
 };
 
 type Worker = {
@@ -246,7 +247,7 @@ type ConfigV2 = Omit<ConfigV1, "version"> & {
   hosts?: Record<string, Host>;
   workers?: Record<string, Worker>;
   deals?: Record<string, Deal>;
-  chainNetwork?: ContractsENV;
+  chainNetwork?: ChainENV;
   spells?: Record<string, FluenceConfigSpell>;
   aquaImports?: Array<string>;
   cliVersion?: string;
@@ -302,17 +303,22 @@ const dealSchemaObj = {
     },
     pricePerWorkerEpoch: {
       type: "number",
-      description: `Price per worker epoch in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
+      description: `Price per worker epoch in FLT`,
       default: PRICE_PER_EPOCH_DEFAULT,
       nullable: true,
       minimum: 1 / CURRENCY_MULTIPLIER,
     },
-    collateralPerWorker: {
+    initialBalance: {
       type: "number",
-      description: `Collateral per worker in FL. ${CURRENCY_MULTIPLIER_TEXT}`,
-      default: COLLATERAL_DEFAULT,
+      description: `Initial balance after deploy in FLT`,
+      default: DEFAULT_INITIAL_BALANCE,
       nullable: true,
-      minimum: 1 / CURRENCY_MULTIPLIER,
+    },
+    effectors: {
+      type: "array",
+      description: "Effector CIDs to be used in the deal. Must be a valid CID",
+      items: { type: "string" },
+      nullable: true,
     },
   },
   required: [],
@@ -324,7 +330,7 @@ const validateDealSchema = ajv.compile(dealSchema);
 
 const workerConfigSchemaObj = {
   type: "object",
-  description: "Worker config",
+  description: "Deployment config",
   properties: {
     services: {
       description: `An array of service names to include in this worker. Service names must be listed in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
@@ -467,7 +473,7 @@ const configSchemaV2Obj = {
     chainNetwork: {
       type: "string",
       description: "The network in which the transactions will be carried out",
-      enum: CONTRACTS_ENV,
+      enum: CHAIN_ENV,
       default: "testnet",
       nullable: true,
     },
@@ -517,7 +523,7 @@ const configSchemaV2: JSONSchemaType<ConfigV2> = configSchemaV2Obj;
 type ConfigV3 = Omit<ConfigV2, "version" | "relays" | "chainNetwork"> & {
   version: 3;
   customFluenceEnv?: {
-    contractsEnv: ContractsENV;
+    contractsEnv: ChainENV;
     relays: Array<string>;
   };
 };
@@ -545,7 +551,7 @@ const configSchemaV3Obj = {
         contractsEnv: {
           type: "string",
           description: `Contracts environment to use for this fluence network to sign contracts on the blockchain`,
-          enum: CONTRACTS_ENV,
+          enum: CHAIN_ENV,
         },
         relays: {
           type: "array",
@@ -845,9 +851,6 @@ const compileAquaConfigSchema = {
 
 const configSchemaV7Obj = {
   ...configSchemaV6Obj,
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
-  title: FLUENCE_CONFIG_FULL_FILE_NAME,
-  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV6ObjPropertiesWithoutAqua,
     version: { type: "number", const: 7 },
@@ -866,6 +869,42 @@ const configSchemaV7Obj = {
 
 const configSchemaV7: JSONSchemaType<ConfigV7> = configSchemaV7Obj;
 
+const configSchemaV7ObjPropertiesWithoutDeals: Omit<
+  typeof configSchemaV7Obj.properties,
+  "deals"
+> &
+  Mutable<Partial<Pick<typeof configSchemaV7Obj.properties, "deals">>> = {
+  ...configSchemaV7Obj.properties,
+};
+
+delete configSchemaV7ObjPropertiesWithoutDeals.deals;
+
+type ConfigV8 = Omit<ConfigV7, "deals" | "version"> & {
+  version: 8;
+  deployments?: ConfigV7["deals"];
+};
+
+const configSchemaV8Obj = {
+  ...configSchemaV7Obj,
+  $id: `${TOP_LEVEL_SCHEMA_ID}/${FLUENCE_CONFIG_FULL_FILE_NAME}`,
+  title: FLUENCE_CONFIG_FULL_FILE_NAME,
+  description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
+  properties: {
+    ...configSchemaV7ObjPropertiesWithoutDeals,
+    version: { type: "number", const: 8 },
+    deployments: {
+      ...configSchemaV7Obj.properties.deals,
+      description:
+        "A map with deployment names as keys and deployments as values",
+      properties: {
+        deploymentName: configSchemaV7Obj.properties.deals.properties.dealName,
+      },
+    },
+  },
+} as const satisfies JSONSchemaType<ConfigV8>;
+
+const configSchemaV8: JSONSchemaType<ConfigV8> = configSchemaV8Obj;
+
 const getConfigOrConfigDirPath = () => {
   return projectRootDir;
 };
@@ -876,14 +915,14 @@ function getDefault(): string {
 # You can use \`fluence init\` command to generate a template for new Fluence project
 
 # config version
-version: 6
+version: 8
 
-# A map with worker names as keys and deals as values
-deals:
-  ${DEFAULT_DEAL_NAME}:
+# A map of deployment names as keys and deployments as values
+deployments:
+  ${DEFAULT_DEPLOYMENT_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
-    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FL
-    collateralPerWorker: ${COLLATERAL_DEFAULT} # collateral per worker in FL
+    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FLT
+    initialBalance: ${DEFAULT_INITIAL_BALANCE} # initial balance  after deploy in FLT
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 
@@ -1037,7 +1076,7 @@ ${yamlDiffPatch(
 # # If you want to deploy your services to specific peerIds. Intended to be used by providers to deploy directly without using the blockchain
 # hosts:
 #   # worker name
-#   ${DEFAULT_DEAL_NAME}:
+#   ${DEFAULT_DEPLOYMENT_NAME}:
 #     peerIds: []
 #     services: [] # list of service names to be deployed to this worker
 #     spells: [] # list of spell names to be deployed to this worker
@@ -1059,6 +1098,7 @@ const validateConfigSchemaV3 = ajv.compile(configSchemaV3);
 const validateConfigSchemaV4 = ajv.compile(configSchemaV4);
 const validateConfigSchemaV5 = ajv.compile(configSchemaV5);
 const validateConfigSchemaV6 = ajv.compile(configSchemaV6);
+const validateConfigSchemaV7 = ajv.compile(configSchemaV7);
 
 const migrations: Migrations<Config> = [
   async (config: Config): Promise<ConfigV1> => {
@@ -1123,10 +1163,7 @@ const migrations: Migrations<Config> = [
         contractsEnv: chainNetwork ?? "testnet",
         relays:
           relays === undefined || typeof relays === "string"
-            ? await resolveRelays({
-                fluenceEnv: relays ?? "kras",
-                maybeFluenceConfig: null,
-              })
+            ? await resolveRelays()
             : relays,
       };
     }
@@ -1261,6 +1298,21 @@ const migrations: Migrations<Config> = [
 
     return res;
   },
+  async (config: Config): Promise<ConfigV8> => {
+    if (!validateConfigSchemaV7(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV7.errors,
+        )}`,
+      );
+    }
+
+    return {
+      ...config,
+      version: 8,
+      deployments: config.deals,
+    };
+  },
 ];
 
 type Config =
@@ -1271,8 +1323,9 @@ type Config =
   | ConfigV4
   | ConfigV5
   | ConfigV6
-  | ConfigV7;
-type LatestConfig = ConfigV7;
+  | ConfigV7
+  | ConfigV8;
+type LatestConfig = ConfigV8;
 export type FluenceConfig = InitializedConfig<LatestConfig>;
 export type FluenceConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 export type FluenceConfigWithServices = FluenceConfig & {
@@ -1286,7 +1339,10 @@ export function isFluenceConfigWithServices(
 }
 
 const checkDuplicatesAndPresence = (
-  fluenceConfig: Pick<FluenceConfig, "spells" | "services" | "hosts" | "deals">,
+  fluenceConfig: Pick<
+    FluenceConfig,
+    "spells" | "services" | "hosts" | "deployments"
+  >,
   servicesOrSpells: "services" | "spells",
 ) => {
   const servicesOrSpellsSet = new Set(
@@ -1313,7 +1369,7 @@ const checkDuplicatesAndPresence = (
     return hostsValidity;
   }
 
-  return Object.entries(fluenceConfig.deals ?? {}).reduce<string | true>(
+  return Object.entries(fluenceConfig.deployments ?? {}).reduce<string | true>(
     (acc, [workerName, workerConfig]) => {
       return checkDuplicatesAndPresenceImplementation({
         workerConfig,
@@ -1416,12 +1472,24 @@ function validateCompileAquaPathsAreRelative(config: LatestConfig) {
 }
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
-  return validateBatch(
+  return validateBatchAsync(
+    validateEffectors(
+      Object.entries(config.deployments ?? {}).flatMap(
+        ([name, { effectors }]) => {
+          return (effectors ?? []).map((effector) => {
+            return {
+              effector,
+              location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deals > ${name} > effectors > ${effector}`,
+            };
+          });
+        },
+      ),
+    ),
     validateCompileAquaPathsAreRelative(config),
     checkDuplicatesAndPresence(config, "services"),
     checkDuplicatesAndPresence(config, "spells"),
-    await validateVersionsIsExact("marineVersion", config.marineVersion),
-    await validateVersionsIsExact("mreplVersion", config.mreplVersion),
+    validateVersionsIsExact("marineVersion", config.marineVersion),
+    validateVersionsIsExact("mreplVersion", config.mreplVersion),
   );
 };
 
@@ -1435,8 +1503,9 @@ const initConfigOptions: InitConfigOptions<Config, LatestConfig> = {
     configSchemaV5,
     configSchemaV6,
     configSchemaV7,
+    configSchemaV8,
   ],
-  latestSchema: configSchemaV7,
+  latestSchema: configSchemaV8,
   migrations,
   name: FLUENCE_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath,
@@ -1474,4 +1543,4 @@ export const initFluenceConfig = getConfigInitFunction(initConfigOptions);
 export const initReadonlyFluenceConfig =
   getReadonlyConfigInitFunction(initConfigOptions);
 
-export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV7;
+export const fluenceSchema: JSONSchemaType<LatestConfig> = configSchemaV8;

@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-import assert from "assert";
-
 import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { envConfig } from "../../lib/configs/globalConfigs.js";
+import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
+import { initNewEnvConfig } from "../../lib/configs/project/env.js";
 import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import { ENV_ARG } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import {
-  ensureValidFluenceEnv,
   ensureCustomAddrsAndPeerIds,
   updateRelaysJSON,
 } from "../../lib/multiaddres.js";
+import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
-export default class Peers extends BaseCommand<typeof Peers> {
-  static override description =
-    "Switch default Fluence Environment used in the current Fluence project";
+export default class Env extends BaseCommand<typeof Env> {
+  static override description = "Switch default Fluence Environment";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -42,32 +40,35 @@ export default class Peers extends BaseCommand<typeof Peers> {
     ...ENV_ARG,
   };
   async run(): Promise<void> {
-    const { args, fluenceConfig } = await initCli(
+    const { args, maybeFluenceConfig: fluenceConfig } = await initCli(
       this,
-      await this.parse(Peers),
-      true,
+      await this.parse(Env),
     );
 
-    assert(envConfig !== null, "this command requires fluence project");
+    const newEnvConfig = await initNewEnvConfig();
+    setEnvConfig(newEnvConfig);
     const fluenceEnv = await ensureValidFluenceEnv(args.ENV);
 
     if (
       fluenceEnv === "custom" &&
-      fluenceConfig.customFluenceEnv === undefined
+      fluenceConfig?.customFluenceEnv === undefined
     ) {
-      await ensureCustomAddrsAndPeerIds(fluenceConfig);
+      await ensureCustomAddrsAndPeerIds();
     }
 
-    envConfig.fluenceEnv = fluenceEnv;
-    await envConfig.$commit();
-    await updateRelaysJSON({ fluenceConfig });
-    const workersConfig = await initNewWorkersConfigReadonly();
+    newEnvConfig.fluenceEnv = fluenceEnv;
+    await newEnvConfig.$commit();
 
-    await ensureAquaFileWithWorkerInfo(
-      workersConfig,
-      fluenceConfig,
-      fluenceEnv,
-    );
+    if (fluenceConfig !== null) {
+      const workersConfig = await initNewWorkersConfigReadonly();
+      await updateRelaysJSON();
+
+      await ensureAquaFileWithWorkerInfo(
+        workersConfig,
+        fluenceConfig,
+        fluenceEnv,
+      );
+    }
 
     commandObj.log(
       `Successfully set default fluence environment to ${color.yellow(
