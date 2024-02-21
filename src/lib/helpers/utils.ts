@@ -178,6 +178,7 @@ export async function setTryTimeout<T, U>(
   errorHandler: (error: unknown) => U,
   msToTryFor: number,
   msBetweenTries = 1000,
+  failCondition?: (error: unknown) => boolean,
 ): Promise<T | U> {
   const yellowMessage = color.yellow(message);
   let isTimeoutRunning = true;
@@ -200,6 +201,11 @@ export async function setTryTimeout<T, U>(
       isTrying = false;
       return res;
     } catch (e) {
+      if (failCondition !== undefined && failCondition(e)) {
+        clearTimeout(timeout);
+        return errorHandler(e);
+      }
+
       const errorString = stringifyUnknown(e);
       const previousErrorString = stringifyUnknown(error);
 
