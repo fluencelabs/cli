@@ -74,7 +74,7 @@
     "@oclif/plugin-help": "6.0.11",
     "@oclif/plugin-not-found": "3.0.8",
     "@oclif/plugin-update": "4.1.7",
-    "@walletconnect/universal-provider": "2.4.7",
+    "@walletconnect/universal-provider": "2.11.1",
     "ajv": "8.12.0",
     "chokidar": "3.5.3",
     "countly-sdk-nodejs": "22.6.0",
