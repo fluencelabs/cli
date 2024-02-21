@@ -77,7 +77,7 @@ export default class Deploy extends BaseCommand<typeof Deploy> {
     const fluenceEnv = await ensureFluenceEnv();
 
     const uploadDeployArg = await prepareForDeploy({
-      workerNames: args["WORKER-NAMES"],
+      deploymentNamesString: args["WORKER-NAMES"],
       fluenceConfig,
       workersConfig,
       fluenceEnv,

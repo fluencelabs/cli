@@ -17,7 +17,7 @@
 import assert from "node:assert";
 
 import { color } from "@oclif/color";
-import { Args, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
 import { baseFlags } from "../baseCommand.js";
 import type Deploy from "../commands/deploy.js";
@@ -42,6 +42,7 @@ import {
   PRICE_PER_EPOCH_DEFAULT,
   CHAIN_FLAGS,
   type ChainENV,
+  DEPLOYMENT_NAMES_ARG_NAME,
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
@@ -71,12 +72,6 @@ export const DEPLOY_FLAGS = {
   }),
 };
 
-export const DEPLOY_ARGS = {
-  "DEPLOYMENT-NAMES": Args.string({
-    description: `Comma separated names of deployments to deploy. Example: "deployment1,deployment2" (by default all deployments from 'deployments' property in ${FLUENCE_CONFIG_FULL_FILE_NAME} are deployed)`,
-  }),
-};
-
 export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   const { flags, fluenceConfig, args } = await initCli(
     this,
@@ -95,7 +90,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   const fluenceEnv = await ensureFluenceEnv();
 
   const uploadArg = await prepareForDeploy({
-    workerNames: args["DEPLOYMENT-NAMES"],
+    deploymentNamesString: args[DEPLOYMENT_NAMES_ARG_NAME],
     workersConfig,
     fluenceConfig,
     fluenceEnv,

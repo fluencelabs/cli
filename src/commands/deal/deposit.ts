@@ -18,9 +18,14 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { CHAIN_FLAGS, DEAL_FLAGS } from "../../lib/const.js";
+import { commandObj } from "../../lib/commandObj.js";
+import {
+  CHAIN_FLAGS,
+  DEAL_IDS_FLAG,
+  DEPLOYMENT_NAMES,
+} from "../../lib/const.js";
+import { getDeals } from "../../lib/deal.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
-import { getDealIds } from "../../lib/getDealIds.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
@@ -29,44 +34,47 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    ...DEAL_FLAGS,
+    ...DEAL_IDS_FLAG,
   };
 
   static override args = {
+    ...DEPLOYMENT_NAMES,
     AMOUNT: Args.string({
       description: "Amount of tokens to deposit",
     }),
   };
 
   async run(): Promise<void> {
-    const { flags, args } = await initCli(this, await this.parse(Deposit));
+    const flagsAndArgs = await initCli(this, await this.parse(Deposit));
 
     const { ethers } = await import("ethers");
 
-    const amount = ethers.parseEther(
-      args["AMOUNT"] ??
-        (await input({ message: "Enter amount of tokens to deposit" })),
-    );
+    const amount =
+      flagsAndArgs.args["AMOUNT"] ??
+      (await input({ message: "Enter amount of tokens to deposit" }));
 
-    const dealIds = await getDealIds(flags);
+    const parsedAmount = ethers.parseEther(amount);
+    const deals = await getDeals(flagsAndArgs);
 
-    for (const dealId of dealIds) {
-      await depositToDeal(dealId, amount);
+    for (const { dealName, dealId } of deals) {
+      const { dealClient, signerOrWallet } = await getDealClient();
+      const deal = dealClient.getDeal(dealId);
+      const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
+
+      await sign(
+        ERC20__factory.connect(await deal.paymentToken(), signerOrWallet)
+          .approve,
+        await deal.getAddress(),
+        parsedAmount,
+      );
+
+      await sign(deal.deposit, parsedAmount);
+
+      commandObj.log(
+        `${color.yellow(
+          amount,
+        )} tokens were deposited to the deal ${color.yellow(dealName)}`,
+      );
     }
   }
-}
-
-async function depositToDeal(dealAddress: string, amount: bigint) {
-  const { dealClient, signerOrWallet } = await getDealClient();
-  const deal = dealClient.getDeal(dealAddress);
-  const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
-
-  await sign(
-    ERC20__factory.connect(await deal.paymentToken(), signerOrWallet).approve,
-    await deal.getAddress(),
-    amount,
-  );
-
-  await sign(deal.deposit, amount);
-  color.green(`Tokens were deposited to the deal ${dealAddress}`);
 }

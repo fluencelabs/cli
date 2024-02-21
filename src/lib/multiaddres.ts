@@ -71,8 +71,8 @@ async function ensureLocalAddrsAndPeerIds() {
 
 const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
   kras: krasnodar,
+  dar: testNet,
   stage,
-  testnet: testNet,
 };
 
 export async function ensureCustomAddrsAndPeerIds() {

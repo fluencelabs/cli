@@ -14,46 +14,38 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import {
-  depositCollateral,
-  depositCollateralByNoxNames,
-} from "../../lib/chain/depositCollateral.js";
-import {
-  NOX_NAMES_FLAG_NAME,
-  NOX_NAMES_FLAG_CONFIG,
-  CHAIN_FLAGS,
-} from "../../lib/const.js";
+import { depositCollateral } from "../../lib/chain/depositCollateral.js";
+import { CHAIN_FLAGS } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { input } from "../../lib/prompt.js";
 
 export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
+  static override aliases = ["delegator:ca"];
   static override description = "Add collateral to capacity commitment";
-  static override aliases = ["provider:ac"];
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    [NOX_NAMES_FLAG_NAME]: Flags.string({
-      ...NOX_NAMES_FLAG_CONFIG,
-      exclusive: ["ids"],
-    }),
-    ids: Flags.string({
-      description:
-        "Comma separated capacity commitment IDs. Default: all noxes from capacityCommitments property of the provider config",
-      exclusive: [NOX_NAMES_FLAG_NAME],
+  };
+  static override args = {
+    IDS: Args.string({
+      description: "Comma separated capacity commitment IDs",
     }),
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(AddCollateral));
+    const { args } = await initCli(this, await this.parse(AddCollateral));
 
-    if (flags.ids !== undefined) {
-      await depositCollateral(commaSepStrToArr(flags.ids));
-      return;
-    }
-
-    await depositCollateralByNoxNames(flags);
+    await depositCollateral(
+      commaSepStrToArr(
+        args.IDS ??
+          (await input({
+            message: "Enter comma-separated capacity commitment IDs",
+          })),
+      ),
+    );
   }
 }

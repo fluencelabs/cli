@@ -902,7 +902,7 @@ You can also deploy the gateway to serverless platforms like Vercel. In order to
 Gateway contains four routes corresponding to Aqua functions: \`helloWorld\`, \`helloWorldRemote\`, \`showSubnet\` and \`runDeployedServices\`.
 
 You can run \`helloWorld\` and \`helloWorldRemote\` right away.
-To run \`showSubnet\` and \`runDeployedServices\` successfully, it is required to do \`fluence deal deploy\` then compile Aqua and restart the server.
+To run \`showSubnet\` and \`runDeployedServices\` successfully, it is required to do \`fluence deploy\` then compile Aqua and restart the server.
 
 > Remember to replace hardcoded token and peer private key. You can achieve that by placing these credentials in env variables, for example.
 `;

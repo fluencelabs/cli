@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
 import { NOX_NAMES_FLAG_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
@@ -45,6 +46,14 @@ export async function depositCollateralByNoxNames(flags: {
     .map((e) => {
       return e.args.commitmentId;
     });
+
+  if (commitmentIds.length === 0) {
+    return commandObj.error(
+      `Wasn't able to find any commitments for the given peers. Was searching for: ${PeerIdHexes.join(
+        ", ",
+      )}`,
+    );
+  }
 
   await depositCollateral(commitmentIds);
 }

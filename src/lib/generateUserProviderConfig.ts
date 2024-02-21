@@ -171,7 +171,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
             return true;
           },
           oneChoiceMessage(choice) {
-            return `Selected ${color.yellow(choice)}`;
+            return `Do you want to select ${color.yellow(choice)} compute peer`;
           },
           onNoChoices() {
             throw new Error("No compute peers selected");

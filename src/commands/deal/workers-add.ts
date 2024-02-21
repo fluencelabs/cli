@@ -14,38 +14,33 @@
  * limitations under the License.
  */
 
-import { Args } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { depositCollateral } from "../../lib/chain/depositCollateral.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
+import {
+  CHAIN_FLAGS,
+  DEAL_IDS_FLAG,
+  DEPLOYMENT_NAMES,
+} from "../../lib/const.js";
+import { match, getDeals } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
-export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
-  static override description = "Add collateral to capacity commitment";
-  static override aliases = ["delegator:ac"];
+export default class Match extends BaseCommand<typeof Match> {
+  static override description = "Add missing workers to the deal";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
+    ...DEAL_IDS_FLAG,
   };
+
   static override args = {
-    IDS: Args.string({
-      description: "Comma separated capacity commitment IDs",
-    }),
+    ...DEPLOYMENT_NAMES,
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(AddCollateral));
+    const flagsAndArgs = await initCli(this, await this.parse(Match));
+    const deals = await getDeals(flagsAndArgs);
 
-    await depositCollateral(
-      commaSepStrToArr(
-        args.IDS ??
-          (await input({
-            message: "Enter comma-separated capacity commitment IDs",
-          })),
-      ),
-    );
+    for (const { dealId } of deals) {
+      await match(dealId);
+    }
   }
 }

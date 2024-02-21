@@ -248,18 +248,28 @@ export async function sign<T extends unknown[]>(
   // const tx = await method(...args);
   // const res = await tx.wait();
 
-  const { tx, res } = await setTryTimeout(
-    `execute ${color.yellow(method.name)} blockchain method`,
-    async function executingContractMethod() {
-      const tx = await method(...args);
-      const res = await tx.wait();
-      return { tx, res };
-    },
-    (err) => {
-      throw err;
-    },
-    1000 * 60 * 3,
-  );
+  type TxType = Awaited<ReturnType<typeof method>>;
+  let tx: TxType;
+  let res: Awaited<ReturnType<TxType["wait"]>>;
+
+  // at this moment there is this unknown bug that prevents some of the txs from running from the first try
+  if (process.env.CI === "true") {
+    ({ tx, res } = await setTryTimeout(
+      `execute ${color.yellow(method.name)} blockchain method`,
+      async function executingContractMethod() {
+        const tx = await method(...args);
+        const res = await tx.wait();
+        return { tx, res };
+      },
+      (err) => {
+        throw err;
+      },
+      1000 * 60 * 3,
+    ));
+  } else {
+    tx = await method(...args);
+    res = await tx.wait();
+  }
 
   assert(res !== null, `'${method.name}' transaction hash is not defined`);
   assert(res.status === 1, `'${method.name}' transaction failed with status 1`);

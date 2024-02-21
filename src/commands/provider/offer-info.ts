@@ -32,6 +32,7 @@ import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
+  static override aliases = ["provider:oi"];
   static override description = "Get info about offers";
   static override flags = {
     ...baseFlags,
