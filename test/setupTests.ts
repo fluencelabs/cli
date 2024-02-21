@@ -18,6 +18,8 @@ import { cp } from "fs/promises";
 import { access } from "node:fs/promises";
 import { join } from "path";
 
+import core from "@actions/core";
+
 import {
   DOT_FLUENCE_DIR_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
@@ -34,8 +36,6 @@ import {
   getInitializedTemplatePath,
   pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
 } from "./helpers/paths.js";
-
-import core from "@actions/core";
 
 /**
  * IMPORTANT: this file is executed before all tests,
