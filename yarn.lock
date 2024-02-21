@@ -681,7 +681,7 @@ __metadata:
     multiformats: 13.0.1
     node_modules-path: 2.0.7
     npm: 10.3.0
-    npm-check-updates: 16.14.12
+    npm-check-updates: 16.14.15
     oclif: 4.1.0
     parse-duration: ^1.1.0
     platform: 1.3.6
@@ -12025,9 +12025,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-check-updates@npm:16.14.12":
-  version: 16.14.12
-  resolution: "npm-check-updates@npm:16.14.12"
+"npm-check-updates@npm:16.14.15":
+  version: 16.14.15
+  resolution: "npm-check-updates@npm:16.14.15"
   dependencies:
     chalk: ^5.3.0
     cli-table3: ^0.6.3
@@ -12064,7 +12064,7 @@ __metadata:
   bin:
     ncu: build/src/bin/cli.js
     npm-check-updates: build/src/bin/cli.js
-  checksum: 09f7edc55c64c5f6e6185635fb2509ffa589f0d24d582bede45597f5ba29bef8efc38827b573c5181ca95638da8aff6f3f590f113e7bb5c06a46398ba386394f
+  checksum: e2ad24ee9e29224619b279211139acc56da39f4b4120d0480f2736127d2a89fd628df787a34881951c7f2fbd368afca3a676b33b643f56a8837687c12e49068a
   languageName: node
   linkType: hard
 
