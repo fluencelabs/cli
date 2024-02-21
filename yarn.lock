@@ -640,7 +640,7 @@ __metadata:
     "@oclif/core": 3.18.1
     "@oclif/plugin-autocomplete": 3.0.5
     "@oclif/plugin-help": 6.0.11
-    "@oclif/plugin-not-found": 3.0.8
+    "@oclif/plugin-not-found": 3.0.11
     "@oclif/plugin-update": 4.1.7
     "@total-typescript/ts-reset": 0.5.1
     "@tsconfig/node18-strictest-esm": 1.0.1
@@ -2310,6 +2310,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^3.19.3":
+  version: 3.19.4
+  resolution: "@oclif/core@npm:3.19.4"
+  dependencies:
+    "@types/cli-progress": ^3.11.5
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.12.0
+    color: ^4.2.3
+    debug: ^4.3.4
+    ejs: ^3.1.9
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.3
+    slice-ansi: ^4.0.0
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    widest-line: ^3.1.0
+    wordwrap: ^1.0.0
+    wrap-ansi: ^7.0.0
+  checksum: 45383b9353512c6251cd70461cdd320d640f82bb37a86bc34d17c31b3724208cb83195d80665f3d42d1690a3d4cd57c00ddafeb4b0c3dbb8e1fbb9c0c48d44a5
+  languageName: node
+  linkType: hard
+
 "@oclif/plugin-autocomplete@npm:3.0.5":
   version: 3.0.5
   resolution: "@oclif/plugin-autocomplete@npm:3.0.5"
@@ -2340,14 +2375,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-not-found@npm:3.0.8":
-  version: 3.0.8
-  resolution: "@oclif/plugin-not-found@npm:3.0.8"
+"@oclif/plugin-not-found@npm:3.0.11":
+  version: 3.0.11
+  resolution: "@oclif/plugin-not-found@npm:3.0.11"
   dependencies:
-    "@oclif/core": ^3.16.0
+    "@oclif/core": ^3.19.3
     chalk: ^5.3.0
     fast-levenshtein: ^3.0.0
-  checksum: d25465510cadf182c1d2bda1a43c688d6eeaaa20cb07b5271318b015b66e5b19c42453f2a77841af383976cd3142f594be01a3f9ad2eb5f338a1fe4e782fa40c
+  checksum: 231da9cf790e91497b11e73e9c5c22afa60361a5dbeee4bd7c9726f89ad38f59d1a5f3616b9cb3f4aaff3520ca8aa8806e514d0c92392dbf3f323df5886bf2b8
   languageName: node
   linkType: hard
 
