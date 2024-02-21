@@ -80,20 +80,9 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
 }
 
 function ccStatusToString(status: bigint) {
-  switch (status) {
-    case 0n:
-      return "Active";
-    case 1n:
-      return "WaitDelegation";
-    case 2n:
-      return "WaitStart";
-    case 3n:
-      return "Inactive";
-    case 4n:
-      return "Failed";
-    case 5n:
-      return "Removed";
-    default:
-      return "Unknown";
-  }
+  return (
+    ["Active", "WaitDelegation", "WaitStart", "Inactive", "Failed", "Removed"][
+      Number(status)
+    ] ?? "Unknown"
+  );
 }
