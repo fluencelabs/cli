@@ -209,7 +209,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
         image: versions[CHAIN_RPC_CONTAINER_NAME],
         ports: [`${CHAIN_RPC_PORT}:${CHAIN_RPC_PORT}`],
         environment: {
-          LOCAL_CHAIN_BLOCK_MINING_INTERVAL: 1
+          LOCAL_CHAIN_BLOCK_MINING_INTERVAL: 1,
         },
         healthcheck: {
           test: `curl -s -X POST 'http://localhost:${CHAIN_RPC_PORT}' -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' | jq -e '.result != null'`,
