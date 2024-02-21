@@ -72,7 +72,7 @@
     "@oclif/core": "3.18.1",
     "@oclif/plugin-autocomplete": "3.0.5",
     "@oclif/plugin-help": "6.0.11",
-    "@oclif/plugin-not-found": "3.0.8",
+    "@oclif/plugin-not-found": "3.0.11",
     "@oclif/plugin-update": "4.1.7",
     "@walletconnect/universal-provider": "2.4.7",
     "ajv": "8.12.0",
