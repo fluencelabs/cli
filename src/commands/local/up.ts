@@ -22,15 +22,24 @@ import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import { initNewEnvConfig } from "../../lib/configs/project/env.js";
+import {
+  initNewReadonlyProviderConfig,
+  initReadonlyProviderConfig,
+} from "../../lib/configs/project/provider.js";
 import {
   DEFAULT_OFFER_NAME,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
-  CHAIN_FLAGS,
+  PRIV_KEY_FLAG,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { confirm } from "../../lib/prompt.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
@@ -43,11 +52,31 @@ export default class Up extends BaseCommand<typeof Up> {
         "Timeout in seconds for attempting to register local network on local peers",
       default: 120,
     }),
-    ...CHAIN_FLAGS,
+    ...PRIV_KEY_FLAG,
   };
+
   async run(): Promise<void> {
+    const env = "local";
+    const envConfig = await initNewEnvConfig(env);
+    envConfig.fluenceEnv = env;
+    await envConfig.$commit();
+    setEnvConfig(envConfig);
+
     const { flags } = await initCli(this, await this.parse(Up));
 
+    const providerConfig = await initReadonlyProviderConfig();
+
+    if (
+      providerConfig === null &&
+      !(await confirm({
+        message: `${PROVIDER_CONFIG_FULL_FILE_NAME} not found. But it is required for local environment. Do you want to create a new one?`,
+      }))
+    ) {
+      commandObj.logToStderr("Aborting.");
+      return;
+    }
+
+    await initNewReadonlyProviderConfig(flags);
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
     try {
@@ -80,8 +109,6 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
-    flags.env = "local";
-
     await distributeToNox({ ...flags, amount: "100" });
 
     await registerProvider();
@@ -91,7 +118,7 @@ export default class Up extends BaseCommand<typeof Up> {
       offers: DEFAULT_OFFER_NAME,
     });
 
-    const ccIds = await createCommitments(flags);
+    const ccIds = await createCommitments({ ...flags, env });
     await depositCollateral(ccIds);
   }
 }

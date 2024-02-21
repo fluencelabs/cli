@@ -92,7 +92,7 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
     {
       kras: krasnodar,
       stage: stage,
-      testnet: testNet,
+      dar: testNet,
       local,
     }[fluenceEnv],
     ["peerId"],
@@ -241,7 +241,7 @@ export async function callRunDeployedServices(cwd: string) {
 
 export async function deployDealAndWaitUntilDeployed(cwd: string) {
   const res = await fluence({
-    args: ["deal", "deploy"],
+    args: ["deploy", DEFAULT_DEPLOYMENT_NAME],
     cwd,
   });
 
@@ -251,7 +251,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   console.log("dealId:", dealId);
 
   await fluence({
-    args: ["deal", "deposit", "10"],
+    args: ["deal", "deposit", DEFAULT_DEPLOYMENT_NAME, "10"],
     cwd,
   });
 
@@ -542,9 +542,9 @@ export function assertLogsAreValid(logs: string) {
   }
 }
 
-export async function stopAllDeals(cwd: string) {
+export async function stopDefaultDeal(cwd: string) {
   await fluence({
-    args: ["deal", "stop"],
+    args: ["deal", "stop", DEFAULT_DEPLOYMENT_NAME],
     cwd,
   });
 }

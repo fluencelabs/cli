@@ -17,9 +17,14 @@
 import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { DEAL_FLAGS, CHAIN_FLAGS } from "../../lib/const.js";
+import { commandObj } from "../../lib/commandObj.js";
+import {
+  DEAL_IDS_FLAG,
+  CHAIN_FLAGS,
+  DEPLOYMENT_NAMES,
+} from "../../lib/const.js";
+import { getDeals, removeDealFromWorkersConfig } from "../../lib/deal.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
-import { getDealIds } from "../../lib/getDealIds.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Stop extends BaseCommand<typeof Stop> {
@@ -27,18 +32,23 @@ export default class Stop extends BaseCommand<typeof Stop> {
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    ...DEAL_FLAGS,
+    ...DEAL_IDS_FLAG,
+  };
+
+  static override args = {
+    ...DEPLOYMENT_NAMES,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Stop));
-    const dealIds = await getDealIds(flags);
+    const flagsAndArgs = await initCli(this, await this.parse(Stop), true);
+    const deals = await getDeals(flagsAndArgs);
     const { dealClient } = await getDealClient();
 
-    for (const dealId of dealIds) {
+    for (const { dealId, dealName } of deals) {
       const deal = dealClient.getDeal(dealId);
       await sign(deal.stop);
-      color.green(`Stopped deal ${dealId}`);
+      await removeDealFromWorkersConfig(dealName);
+      commandObj.logToStderr(`Stopped deal: ${color.yellow(dealName)}`);
     }
   }
 }

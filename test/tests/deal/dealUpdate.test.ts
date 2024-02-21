@@ -17,6 +17,7 @@
 import { cp } from "fs/promises";
 import { join } from "node:path";
 
+import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";
 import {
   MY_SERVICE_NAME,
@@ -40,9 +41,10 @@ import {
   waitUntilRunDeployedServicesReturnsExpected,
   waitUntilShowSubnetReturnsExpected,
 } from "../../helpers/sharedSteps.js";
+import { wrappedTest } from "../../helpers/utils.js";
 
 describe("Deal update tests", () => {
-  test.concurrent("should update deal after new spell is created", async () => {
+  wrappedTest("should update deal after new spell is created", async () => {
     const cwd = join("tmp", "shouldUpdateDealsAfterNewSpellIsCreated");
     await initializeTemplate(cwd, "quickstart");
 
@@ -60,74 +62,77 @@ describe("Deal update tests", () => {
       [NEW_SPELL_NAME],
     );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+    const logs = await fluence({
+      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+      cwd,
+    });
 
     assertLogsAreValid(logs);
   });
 
-  test.concurrent(
-    "should update deal after new service is created",
-    async () => {
-      const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
-      await initializeTemplate(cwd, "quickstart");
+  wrappedTest("should update deal after new service is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealsAfterNewServiceIsCreated");
+    await initializeTemplate(cwd, "quickstart");
 
-      await updateFluenceConfigForTest(cwd);
+    await updateFluenceConfigForTest(cwd);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
+    await createServiceAndAddToDeal(cwd, NEW_SERVICE_2_NAME);
 
-      await build(cwd);
+    await build(cwd);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await waitUntilShowSubnetReturnsExpected(
-        cwd,
-        [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
-        [],
-      );
+    await waitUntilShowSubnetReturnsExpected(
+      cwd,
+      [MY_SERVICE_NAME, NEW_SERVICE_2_NAME],
+      [],
+    );
 
-      const logs = await fluence({ args: ["deal", "logs"], cwd });
+    const logs = await fluence({
+      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+      cwd,
+    });
 
-      assertLogsAreValid(logs);
-    },
-  );
+    assertLogsAreValid(logs);
+  });
 
-  test.concurrent(
-    "should update deal after new module is created",
-    async () => {
-      const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
-      await initializeTemplate(cwd, "quickstart");
+  wrappedTest("should update deal after new module is created", async () => {
+    const cwd = join("tmp", "shouldUpdateDealAfterNewModuleIsCreated");
+    await initializeTemplate(cwd, "quickstart");
 
-      await updateFluenceConfigForTest(cwd);
+    await updateFluenceConfigForTest(cwd);
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await createModuleAndAddToService(cwd, NEW_MODULE_NAME, MY_SERVICE_NAME);
+    await createModuleAndAddToService(cwd, NEW_MODULE_NAME, MY_SERVICE_NAME);
 
-      await updateMainRs(cwd, NEW_MODULE_NAME, NEW_MODULE_CONTENT);
+    await updateMainRs(cwd, NEW_MODULE_NAME, NEW_MODULE_CONTENT);
 
-      await updateMainRs(
-        cwd,
-        MY_SERVICE_NAME,
-        FACADE_MODULE_CONTENT,
-        MY_SERVICE_NAME,
-      );
+    await updateMainRs(
+      cwd,
+      MY_SERVICE_NAME,
+      FACADE_MODULE_CONTENT,
+      MY_SERVICE_NAME,
+    );
 
-      await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd);
 
-      await waitUntilRunDeployedServicesReturnsExpected(
-        cwd,
-        `Hey, fluence! I'm The New Module.`,
-      );
+    await waitUntilRunDeployedServicesReturnsExpected(
+      cwd,
+      `Hey, fluence! I'm The New Module.`,
+    );
 
-      const logs = await fluence({ args: ["deal", "logs"], cwd });
+    const logs = await fluence({
+      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+      cwd,
+    });
 
-      assertLogsAreValid(logs);
-    },
-  );
+    assertLogsAreValid(logs);
+  });
 
-  test.concurrent("should update deal after changing a service", async () => {
+  wrappedTest("should update deal after changing a service", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingAService");
     await initializeTemplate(cwd, "quickstart");
 
@@ -149,12 +154,15 @@ describe("Deal update tests", () => {
       `Hey, fluence! I've been updated.`,
     );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+    const logs = await fluence({
+      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+      cwd,
+    });
 
     assertLogsAreValid(logs);
   });
 
-  test.concurrent("should update deal after changing a spell", async () => {
+  wrappedTest("should update deal after changing a spell", async () => {
     const cwd = join("tmp", "shouldUpdateDealAfterChangingASpell");
     await initializeTemplate(cwd, "quickstart");
 
@@ -181,7 +189,10 @@ describe("Deal update tests", () => {
       SPELL_MESSAGE,
     );
 
-    const logs = await fluence({ args: ["deal", "logs"], cwd });
+    const logs = await fluence({
+      args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+      cwd,
+    });
 
     assertLogsAreValid(logs);
   });

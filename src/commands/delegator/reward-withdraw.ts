@@ -17,17 +17,15 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawCollateral } from "../../lib/chain/withdrawCollateral.js";
+import { withdrawReward } from "../../lib/chain/withdrawReward.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class WithdrawCollateral extends BaseCommand<
-  typeof WithdrawCollateral
-> {
-  static override description = "Withdraw collateral from capacity commitment";
-  static override aliases = ["delegator:wc"];
+export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
+  static override aliases = ["delegator:rw"];
+  static override description = "Withdraw reward from capacity commitment";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
@@ -39,9 +37,9 @@ export default class WithdrawCollateral extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(WithdrawCollateral));
+    const { args } = await initCli(this, await this.parse(WithdrawReward));
 
-    await withdrawCollateral(
+    await withdrawReward(
       commaSepStrToArr(
         args.IDS ??
           (await input({

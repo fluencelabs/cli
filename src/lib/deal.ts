@@ -21,7 +21,15 @@ import assert from "node:assert";
 import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
-import { CURRENCY_MULTIPLIER } from "./const.js";
+import {
+  initNewWorkersConfig,
+  initNewWorkersConfigReadonly,
+} from "./configs/project/workers.js";
+import {
+  CURRENCY_MULTIPLIER,
+  DEAL_IDS_FLAG_NAME,
+  DEPLOYMENT_NAMES_ARG_NAME,
+} from "./const.js";
 import { dbg } from "./dbg.js";
 import {
   sign,
@@ -30,7 +38,15 @@ import {
   getEventValue,
   getEventValues,
 } from "./dealClient.js";
-import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
+import {
+  commaSepStrToArr,
+  removeProperties,
+  setTryTimeout,
+  splitErrorsAndResults,
+  stringifyUnknown,
+} from "./helpers/utils.js";
+import { checkboxes, input } from "./prompt.js";
+import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 type DealCreateArg = {
   appCID: string;
@@ -188,4 +204,153 @@ export async function match(dealAddress: string) {
       dealAddress,
     )}`,
   );
+}
+
+export type DealNameAndId = {
+  dealName: string;
+  dealId: string;
+};
+
+export async function getDeals({
+  args: { [DEPLOYMENT_NAMES_ARG_NAME]: deploymentNames },
+  flags: { [DEAL_IDS_FLAG_NAME]: dealIds },
+}: {
+  args: {
+    [DEPLOYMENT_NAMES_ARG_NAME]: string | undefined;
+  };
+  flags: {
+    [DEAL_IDS_FLAG_NAME]: string | undefined;
+  };
+}): Promise<DealNameAndId[]> {
+  const dealNamesAndIds: DealNameAndId[] = [];
+
+  if (dealIds !== undefined) {
+    dealNamesAndIds.push(
+      ...commaSepStrToArr(dealIds).map((dealId) => {
+        return { dealName: dealId, dealId };
+      }),
+    );
+  }
+
+  const workersConfig = await initNewWorkersConfigReadonly();
+  const fluenceEnv = await ensureFluenceEnv();
+
+  if (deploymentNames !== undefined) {
+    const names = commaSepStrToArr(deploymentNames);
+
+    const [invalidNames, dealNamesAndIdsFromWorkerConfig] =
+      splitErrorsAndResults(names, (dealName) => {
+        const { dealIdOriginal: dealId } =
+          workersConfig.deals?.[fluenceEnv]?.[dealName] ?? {};
+
+        if (dealId === undefined) {
+          return { error: dealName };
+        }
+
+        return { result: { dealName, dealId } };
+      });
+
+    if (invalidNames.length > 0) {
+      commandObj.error(
+        `Couldn't deployments: ${color.yellow(
+          invalidNames.join(", "),
+        )} at ${workersConfig.$getPath()} in ${color.yellow(
+          `deals.${fluenceEnv}`,
+        )} property`,
+      );
+    }
+
+    dealNamesAndIds.push(...dealNamesAndIdsFromWorkerConfig);
+  }
+
+  if (dealNamesAndIds.length === 0) {
+    try {
+      dealNamesAndIds.push(
+        ...(await checkboxes<DealNameAndId, never>({
+          message: `Select one or more deployments that you did on ${color.yellow(
+            fluenceEnv,
+          )} environment`,
+          options: Object.entries(workersConfig.deals?.[fluenceEnv] ?? {}).map(
+            ([dealName, { dealIdOriginal: dealId }]) => {
+              return { name: dealName, value: { dealName, dealId } };
+            },
+          ),
+          validate: (choices: string[]) => {
+            if (choices.length === 0) {
+              return "Please select at least one deployment";
+            }
+
+            return true;
+          },
+          oneChoiceMessage(choice) {
+            return `There is currently only one deployment that you did on ${color.yellow(
+              fluenceEnv,
+            )} environment: ${color.yellow(choice)}. Do you want to select it`;
+          },
+          onNoChoices() {
+            throw new Error(NO_DEPLOYMENTS_FOUND_ERROR_MESSAGE);
+          },
+          flagName: DEAL_IDS_FLAG_NAME,
+          argName: DEPLOYMENT_NAMES_ARG_NAME,
+        })),
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        !error.message.includes(NO_DEPLOYMENTS_FOUND_ERROR_MESSAGE)
+      ) {
+        throw error;
+      }
+
+      commandObj.warn(
+        `No deployments found for ${color.yellow(
+          fluenceEnv,
+        )} environment at ${workersConfig.$getPath()}`,
+      );
+
+      dealNamesAndIds.push(
+        ...commaSepStrToArr(
+          await input({
+            message: "Enter comma-separated list of deal ids",
+            validate: (val: string) => {
+              return commaSepStrToArr(val).length === 0
+                ? "Please enter at least one deal id"
+                : true;
+            },
+          }),
+        ).map((dealId) => {
+          return { dealName: dealId, dealId };
+        }),
+      );
+    }
+  }
+
+  return dealNamesAndIds;
+}
+
+const NO_DEPLOYMENTS_FOUND_ERROR_MESSAGE =
+  'No deployments found for "fluenceEnv"';
+
+export async function removeDealFromWorkersConfig(dealName: string) {
+  const fluenceEnv = await ensureFluenceEnv();
+
+  const workersConfig = await initNewWorkersConfig();
+  const deals = workersConfig.deals;
+  const dealsPerEnv = deals?.[fluenceEnv];
+
+  if (
+    deals !== undefined &&
+    dealsPerEnv !== undefined &&
+    dealName in dealsPerEnv
+  ) {
+    deals[fluenceEnv] = removeProperties(dealsPerEnv, ([k]) => {
+      return k === dealName;
+    });
+
+    await workersConfig.$commit();
+
+    commandObj.logToStderr(
+      `Removed deal ${color.yellow(dealName)} from ${workersConfig.$getPath()}`,
+    );
+  }
 }

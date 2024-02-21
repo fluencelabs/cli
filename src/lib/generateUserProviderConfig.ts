@@ -109,10 +109,6 @@ export async function addComputePeers(
       validate: validatePercent,
     });
 
-    if (!("capacityCommitments" in userProvidedConfig)) {
-      userProvidedConfig.capacityCommitments = {};
-    }
-
     userProvidedConfig.capacityCommitments[name] = {
       duration: capacityCommitmentDuration,
       delegator: capacityCommitmentDelegator,
@@ -171,7 +167,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
             return true;
           },
           oneChoiceMessage(choice) {
-            return `Selected ${color.yellow(choice)}`;
+            return `Do you want to select ${color.yellow(choice)} compute peer`;
           },
           onNoChoices() {
             throw new Error("No compute peers selected");

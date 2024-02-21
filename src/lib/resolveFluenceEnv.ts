@@ -56,7 +56,7 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
 
 export async function fluenceEnvPrompt(
   message = "Select Fluence Environment to use by default with this project",
-  defaultVal: FluenceEnv = "kras",
+  defaultVal: FluenceEnv = "dar",
 ): Promise<FluenceEnv> {
   return list({
     message,
@@ -68,6 +68,7 @@ export async function fluenceEnvPrompt(
       throw new Error("Unreachable. There are multiple envs");
     },
     default: defaultVal,
+    flagName: ENV_FLAG_NAME,
   });
 }
 

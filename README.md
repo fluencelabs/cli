@@ -19,7 +19,7 @@ To download and install `fluence` use our `install.sh` script
 curl -qsL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | bash
 ```
 
-To select `fluence` version compatible with certain network (`stage`, `testnet`,
+To select `fluence` version compatible with certain network (`dar`, `stage`,
 `kras`) run:
 
 ```shell

@@ -42,6 +42,7 @@ import {
 } from "../helpers/utils.js";
 
 import { assertProviderIsRegistered } from "./isProviderRegistered.js";
+import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
@@ -252,7 +253,7 @@ export async function updateOffers(flags: OffersArgs) {
         })
         .join(
           ", ",
-        )}. You can create them if you want using '${CLI_NAME} provider create-offer' command`,
+        )}. You can create them if you want using '${CLI_NAME} provider offer-create' command`,
     );
   }
 
@@ -305,10 +306,8 @@ async function resolveOffersFromProviderConfig(flags: OffersArgs) {
     );
   }
 
-  const [{ digest, CID }, { base58btc }, { ethers }] = await Promise.all([
+  const [{ CID }, { ethers }] = await Promise.all([
     import("multiformats"),
-    // eslint-disable-next-line import/extensions
-    import("multiformats/bases/base58"),
     import("ethers"),
   ]);
 
@@ -327,18 +326,18 @@ async function resolveOffersFromProviderConfig(flags: OffersArgs) {
           minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
         );
 
-        const computePeersToRegister = computePeerConfigs.map(
-          ({ computeUnits, walletAddress, peerId }) => {
-            return {
-              peerId: digest
-                .decode(base58btc.decode("z" + peerId))
-                .bytes.subarray(6),
-              unitIds: times(computeUnits).map(() => {
-                return ethers.randomBytes(32);
-              }),
-              owner: walletAddress,
-            };
-          },
+        const computePeersToRegister = await Promise.all(
+          computePeerConfigs.map(
+            async ({ computeUnits, walletAddress, peerId }) => {
+              return {
+                peerId: await peerIdToUint8Array(peerId),
+                unitIds: times(computeUnits).map(() => {
+                  return ethers.randomBytes(32);
+                }),
+                owner: walletAddress,
+              };
+            },
+          ),
         );
 
         const effectorPrefixesAndHash = (effectors ?? []).map((effector) => {

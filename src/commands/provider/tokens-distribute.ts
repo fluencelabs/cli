@@ -14,38 +14,26 @@
  * limitations under the License.
  */
 
-import { Args } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawReward } from "../../lib/chain/withdrawReward.js";
+import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
-export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
-  static override description = "Withdraw reward from capacity commitment";
-  static override aliases = ["delegator:wr"];
+export default class Deposit extends BaseCommand<typeof Deposit> {
+  static override aliases = ["provider:td"];
+  static override description = "Distribute tokens to noxes";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-  };
-  static override args = {
-    IDS: Args.string({
-      description: "Comma separated capacity commitment IDs",
+    amount: Flags.string({
+      description: "Amount of tokens to distribute to noxes",
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(WithdrawReward));
-
-    await withdrawReward(
-      commaSepStrToArr(
-        args.IDS ??
-          (await input({
-            message: "Enter comma-separated capacity commitment IDs",
-          })),
-      ),
-    );
+    const { flags } = await initCli(this, await this.parse(Deposit));
+    await distributeToNox(flags);
   }
 }

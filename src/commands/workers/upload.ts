@@ -71,7 +71,7 @@ export default class Upload extends BaseCommand<typeof Upload> {
     const fluenceEnv = await ensureFluenceEnv();
 
     const uploadArg = await prepareForDeploy({
-      workerNames: args["WORKER-NAMES"],
+      deploymentNamesString: args["WORKER-NAMES"],
       fluenceConfig,
       fluenceEnv,
       initPeerId,

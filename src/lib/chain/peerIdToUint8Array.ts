@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+const PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
+const BASE_58_PREFIX = "z";
+
 export async function peerIdToUint8Array(peerId: string) {
   const [{ digest }, { base58btc }] = await Promise.all([
     import("multiformats"),
@@ -21,5 +24,18 @@ export async function peerIdToUint8Array(peerId: string) {
     import("multiformats/bases/base58"),
   ]);
 
-  return digest.decode(base58btc.decode("z" + peerId)).bytes.subarray(6);
+  return digest
+    .decode(base58btc.decode(BASE_58_PREFIX + peerId))
+    .bytes.subarray(PREFIX.length);
+}
+
+export async function peerIdHexStringToBase58String(peerIdHex: string) {
+  const [{ base58btc }] = await Promise.all([
+    // eslint-disable-next-line import/extensions
+    import("multiformats/bases/base58"),
+  ]);
+
+  return base58btc
+    .encode(Buffer.concat([PREFIX, Buffer.from(peerIdHex.slice(2), "hex")]))
+    .slice(BASE_58_PREFIX.length);
 }

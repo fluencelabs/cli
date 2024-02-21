@@ -38,7 +38,7 @@ Defines user project preferences
 
 ## [docker-compose.yaml](./docker-compose.md)
 
-Defines a multi-containers based application.
+The Compose file is a YAML file defining a multi-containers based application.
 
 ## [provider-artifacts.yaml](./provider-artifacts.md)
 

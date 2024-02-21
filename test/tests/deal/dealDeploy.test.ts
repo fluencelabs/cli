@@ -18,6 +18,7 @@ import assert from "node:assert";
 import { join, relative } from "node:path";
 
 import { initServiceConfig } from "../../../src/lib/configs/project/service.js";
+import { DEFAULT_DEPLOYMENT_NAME } from "../../../src/lib/const.js";
 import { fluence } from "../../helpers/commonWithSetupTests.js";
 import { MY_SERVICE_NAME, NEW_SPELL_NAME } from "../../helpers/constants.js";
 import { getServiceDirPath } from "../../helpers/paths.js";
@@ -29,9 +30,10 @@ import {
   updateFluenceConfigForTest,
   waitUntilShowSubnetReturnsExpected,
 } from "../../helpers/sharedSteps.js";
+import { wrappedTest } from "../../helpers/utils.js";
 
-describe("Deal deploy tests", () => {
-  test.concurrent(
+describe("fluence deploy tests", () => {
+  wrappedTest(
     "should deploy deals with spell and service, resolve and run services on them",
     async () => {
       const cwd = join("tmp", "shouldDeployDealsAndRunCodeOnThem");
@@ -62,7 +64,10 @@ describe("Deal deploy tests", () => {
         [NEW_SPELL_NAME],
       );
 
-      const logs = await fluence({ args: ["deal", "logs"], cwd });
+      const logs = await fluence({
+        args: ["deal", "logs", DEFAULT_DEPLOYMENT_NAME],
+        cwd,
+      });
 
       assertLogsAreValid(logs);
     },

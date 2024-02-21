@@ -18,6 +18,8 @@ import { cp } from "fs/promises";
 import { access } from "node:fs/promises";
 import { join } from "path";
 
+import core from "@actions/core";
+
 import {
   DOT_FLUENCE_DIR_NAME,
   PROVIDER_SECRETS_CONFIG_FULL_FILE_NAME,
@@ -140,11 +142,11 @@ async function setupLocalEnvironment() {
   }
 }
 
-console.log("\nSetting up tests...");
+core.startGroup("create templates and run 'fluence local up' command");
 
 await setupCli();
 await setupSecretKeys();
 await setupTemplates();
 await setupLocalEnvironment();
 
-console.log("\nTests are ready to run!");
+core.endGroup();

@@ -18,33 +18,48 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
-import { sign, getDealClient } from "../../lib/dealClient.js";
+import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
-  static override description = "Remove unit from the deal";
+export default class WithdrawReward extends BaseCommand<typeof WithdrawReward> {
+  static override aliases = ["provider:rw"];
+  static override description = "Withdraw reward";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
   };
 
   static override args = {
+    "DEAL-ADDRESS": Args.string({
+      description: "Deal address",
+    }),
     "UNIT-ID": Args.string({
-      description: "Compute unitId",
+      description: "Compute unit CID",
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(RemoveUnit));
+    const { args } = await initCli(this, await this.parse(WithdrawReward));
+
+    const dealAddress =
+      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
 
     const unitId =
-      args["UNIT-ID"] ?? (await input({ message: "Enter compute unit CID" }));
+      args["UNIT-ID"] ?? (await input({ message: "Enter unit CID" }));
 
     const { dealClient } = await getDealClient();
-    const market = await dealClient.getMarket();
-    await sign(market.returnComputeUnitFromDeal, unitId);
-    color.green(`Unit ${unitId} was removed from the deal`);
+    const deal = dealClient.getDeal(dealAddress);
+    const rewardAmount = await deal.getRewardAmount(unitId);
+    await sign(deal.withdrawRewards, unitId);
+    const { ethers } = await import("ethers");
+
+    commandObj.logToStderr(
+      `Reward ${color.yellow(
+        ethers.formatEther(rewardAmount),
+      )} was withdrawn from the deal ${dealAddress}`,
+    );
   }
 }

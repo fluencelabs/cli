@@ -18,7 +18,13 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
+import { commandObj } from "../../lib/commandObj.js";
+import {
+  CHAIN_FLAGS,
+  DEAL_IDS_FLAG,
+  DEPLOYMENT_NAMES,
+} from "../../lib/const.js";
+import { getDeals } from "../../lib/deal.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -28,30 +34,37 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
+    ...DEAL_IDS_FLAG,
   };
 
   static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
-    }),
+    ...DEPLOYMENT_NAMES,
     AMOUNT: Args.string({
       description: "Amount of tokens to deposit",
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(Withdraw));
-
-    const dealAddress =
-      args["DEAL-ADDRESS"] ?? (await input({ message: "Enter deal address" }));
+    const flagsAndArgs = await initCli(this, await this.parse(Withdraw));
+    const deals = await getDeals(flagsAndArgs);
+    const { ethers } = await import("ethers");
 
     const amount =
-      args["AMOUNT"] ??
-      (await input({ message: "Enter amount of tokens to deposit" }));
+      flagsAndArgs.args["AMOUNT"] ??
+      (await input({ message: "Enter amount of tokens to withdraw" }));
 
+    const parsedAmount = ethers.parseEther(amount);
     const { dealClient } = await getDealClient();
-    const deal = dealClient.getDeal(dealAddress);
-    await sign(deal.withdraw, amount);
-    color.green(`Tokens were deposited to the deal ${dealAddress}`);
+
+    for (const { dealId, dealName } of deals) {
+      const deal = dealClient.getDeal(dealId);
+      await sign(deal.withdraw, parsedAmount);
+
+      commandObj.logToStderr(
+        `${color.yellow(
+          amount,
+        )} tokens were withdrawn from the deal ${color.yellow(dealName)}`,
+      );
+    }
   }
 }

@@ -26,8 +26,6 @@ import {
   GRAPH_NODE_PORT,
   POSTGRES_CONTAINER_NAME,
   DOCKER_COMPOSE_FILE_NAME,
-  DOCKER_COMPOSE_FULL_FILE_NAME,
-  TOP_LEVEL_SCHEMA_ID,
   IPFS_PORT,
   IPFS_CONTAINER_NAME,
   CHAIN_RPC_PORT,
@@ -50,6 +48,7 @@ import {
   type Migrations,
 } from "../initConfig.js";
 
+import schema from "./compose.schema.json" assert { type: "json" };
 import { ensureComputerPeerConfigs, getConfigTomlName } from "./provider.js";
 
 type Service = {
@@ -59,48 +58,9 @@ type Service = {
   environment?: Record<string, string | number>;
   volumes?: string[];
   command?: string[];
-  depends_on?: string[];
+  depends_on?: string[] | Record<string, Record<string, string>>;
   secrets?: string[];
-};
-
-const serviceSchema: JSONSchemaType<Service> = {
-  type: "object",
-  properties: {
-    image: { type: "string", nullable: true },
-    ports: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    pull_policy: { type: "string", nullable: true },
-    environment: {
-      type: "object",
-      additionalProperties: { type: ["string", "number"] },
-      required: [],
-      nullable: true,
-    },
-    volumes: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    command: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    depends_on: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    secrets: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-  },
-  required: [],
+  healthcheck?: Record<string, string | number>;
 };
 
 type ConfigV0 = {
@@ -111,50 +71,8 @@ type ConfigV0 = {
   secrets?: Record<string, { file?: string }>;
 };
 
-const configSchemaV0: JSONSchemaType<ConfigV0> = {
-  $id: `${TOP_LEVEL_SCHEMA_ID}/${DOCKER_COMPOSE_FULL_FILE_NAME}`,
-  title: DOCKER_COMPOSE_FULL_FILE_NAME,
-  type: "object",
-  description: "Defines a multi-containers based application.",
-  properties: {
-    version: { type: "string", const: "3" },
-    volumes: {
-      type: "object",
-      nullable: true,
-      additionalProperties: {
-        type: "null",
-        nullable: true,
-      },
-      required: [],
-    },
-    services: {
-      type: "object",
-      additionalProperties: serviceSchema,
-      properties: {
-        service: serviceSchema,
-      },
-      required: [],
-    },
-    include: {
-      type: "array",
-      items: { type: "string" },
-      nullable: true,
-    },
-    secrets: {
-      type: "object",
-      nullable: true,
-      additionalProperties: {
-        type: "object",
-        properties: {
-          file: { type: "string", nullable: true },
-        },
-        required: [],
-      },
-      required: [],
-    },
-  },
-  required: ["version", "services"],
-};
+// @ts-expect-error - this schema is from official github and it's valid
+const configSchemaV0: JSONSchemaType<ConfigV0> = schema;
 
 type GenNoxImageArgs = {
   name: string;
@@ -195,11 +113,13 @@ function genNox({
           ? "--local"
           : `--bootstraps=/dns/${bootstrapName}/tcp/${bootstrapTcpPort}`,
       ],
-      depends_on: [
-        IPFS_CONTAINER_NAME,
-        CHAIN_RPC_CONTAINER_NAME,
-        CHAIN_DEPLOY_SCRIPT_NAME,
-      ],
+      depends_on: {
+        [IPFS_CONTAINER_NAME]: { condition: "service_healthy" },
+        [CHAIN_RPC_CONTAINER_NAME]: { condition: "service_healthy" },
+        [CHAIN_DEPLOY_SCRIPT_NAME]: {
+          condition: "service_completed_successfully",
+        },
+      },
       volumes: [
         `./${CONFIGS_DIR_NAME}/${configTomlName}:${configLocation}`,
         `${name}:/.fluence`,
@@ -265,6 +185,12 @@ async function genDockerCompose(): Promise<LatestConfig> {
           IPFS_PROFILE: "server",
         },
         volumes: [`${IPFS_CONTAINER_NAME}:/data/ipfs`],
+        healthcheck: {
+          test: "ipfs id || exit 1",
+          interval: "8s",
+          timeout: "10s",
+          retries: 20,
+        },
       },
       [POSTGRES_CONTAINER_NAME]: {
         image: "postgres:14",
@@ -282,6 +208,12 @@ async function genDockerCompose(): Promise<LatestConfig> {
       [CHAIN_RPC_CONTAINER_NAME]: {
         image: versions[CHAIN_RPC_CONTAINER_NAME],
         ports: [`${CHAIN_RPC_PORT}:${CHAIN_RPC_PORT}`],
+        healthcheck: {
+          test: `curl -s -X POST 'http://localhost:${CHAIN_RPC_PORT}' -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' | jq -e '.result != null'`,
+          interval: "8s",
+          timeout: "10s",
+          retries: 20,
+        },
       },
       [CHAIN_DEPLOY_SCRIPT_NAME]: {
         image: versions[CHAIN_DEPLOY_SCRIPT_NAME],
@@ -290,7 +222,9 @@ async function genDockerCompose(): Promise<LatestConfig> {
           MAX_FAILED_RATIO: "9999",
           IS_MOCKED_RANDOMX: "true",
         },
-        depends_on: [CHAIN_RPC_CONTAINER_NAME],
+        depends_on: {
+          [CHAIN_RPC_CONTAINER_NAME]: { condition: "service_healthy" },
+        },
       },
       [GRAPH_NODE_CONTAINER_NAME]: {
         image: "graphprotocol/graph-node:v0.33.0",

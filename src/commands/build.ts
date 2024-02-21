@@ -55,6 +55,9 @@ export default class Build extends BaseCommand<typeof Build> {
       fluenceConfig,
       fluenceEnv,
       isBuildCheck: true,
+      deploymentNamesString: Object.keys(fluenceConfig.deployments ?? {}).join(
+        ",",
+      ),
     });
 
     const { ensureAquaFileWithWorkerInfo } = await import(

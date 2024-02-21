@@ -62,6 +62,7 @@ import {
   COMPUTE_UNIT_MEMORY,
   MIN_MEMORY_PER_MODULE,
   MIN_MEMORY_PER_MODULE_STR,
+  DEPLOYMENT_NAMES_ARG_NAME,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -113,7 +114,7 @@ const handlePreviouslyDeployedWorkers = async (
 
   const confirmedWorkersNamesToDeploy = isInteractive
     ? await checkboxes({
-        message: `There are workers that were deployed previously. Please select the ones you want to redeploy.`,
+        message: `There are workers that were deployed previously. Please select the ones you want to update.`,
         options: previouslyDeployedWorkersNamesToBeDeployed,
         oneChoiceMessage(workerName) {
           return `Do you want to redeploy worker ${color.yellow(workerName)}`;
@@ -158,7 +159,7 @@ type PrepareForDeployArg = {
    * and so no error happens if some worker doesn't have any services or spells
    */
   isBuildCheck?: boolean;
-  workerNames?: string | undefined;
+  deploymentNamesString?: string | undefined;
   initPeerId?: string;
   workersConfig?: WorkersConfigReadonly;
 };
@@ -172,7 +173,7 @@ export async function prepareForDeploy({
   },
   fluenceEnv,
   isBuildCheck = false,
-  workerNames: workerNamesString,
+  deploymentNamesString,
   initPeerId,
   workersConfig: maybeWorkersConfig,
 }: PrepareForDeployArg): Promise<Upload_deployArgConfig> {
@@ -197,22 +198,10 @@ export async function prepareForDeploy({
     dealsOrHostsString
   ];
 
-  const workerNamesSet = hostsOrDeals.map(([workerName]) => {
-    return workerName;
-  });
-
-  const workersToDeploy =
-    workerNamesString === undefined
-      ? workerNamesSet
-      : commaSepStrToArr(workerNamesString);
-
-  if (workersToDeploy.length === 0) {
-    return commandObj.error(
-      `${color.yellow(
-        deploymentsOrHostsString,
-      )} property in ${fluenceConfig.$getPath()} must contain at least one deployment`,
-    );
-  }
+  const workersToDeploy = await getDeploymentNames(
+    deploymentNamesString,
+    fluenceConfig,
+  );
 
   const { services: servicesFromFluenceConfig = {} } = fluenceConfig;
 
@@ -229,7 +218,7 @@ export async function prepareForDeploy({
 
     assert(
       workerConfig !== undefined,
-      `Unreachable. workerNamesNotFoundInWorkersConfig was empty but error still happened. Looking for ${deploymentName} in ${JSON.stringify(
+      `Unreachable. deployment names are validated in getDeploymentNames. Looking for ${deploymentName} in ${JSON.stringify(
         workersFromFluenceConfig,
       )}`,
     );
@@ -544,9 +533,64 @@ const validateWasmExist = async (
   }
 };
 
+async function getDeploymentNames(
+  deploymentNames: string | undefined,
+  fluenceConfig: FluenceConfigReadonly,
+): Promise<string[]> {
+  if (deploymentNames !== undefined) {
+    const names = commaSepStrToArr(deploymentNames);
+
+    const [invalidNames, validDeploymentNames] = splitErrorsAndResults(
+      names,
+      (deploymentName) => {
+        const deployment = fluenceConfig.deployments?.[deploymentName];
+
+        if (deployment === undefined) {
+          return { error: deploymentName };
+        }
+
+        return { result: deploymentName };
+      },
+    );
+
+    if (invalidNames.length > 0) {
+      commandObj.error(
+        `Couldn't find deployments in ${fluenceConfig.$getPath()} deployments property: ${color.yellow(
+          invalidNames.join(", "),
+        )}`,
+      );
+    }
+
+    return validDeploymentNames;
+  }
+
+  return checkboxes<string, never>({
+    message: `Select one or more deployments from ${fluenceConfig.$getPath()}`,
+    options: Object.keys(fluenceConfig.deployments ?? {}),
+    validate: (choices: string[]) => {
+      if (choices.length === 0) {
+        return "Please select at least one deployment";
+      }
+
+      return true;
+    },
+    oneChoiceMessage(choice) {
+      return `One deployment found at ${fluenceConfig.$getPath()}: ${color.yellow(
+        choice,
+      )}. Do you want to select it`;
+    },
+    onNoChoices() {
+      commandObj.error(
+        `You must have at least one deployment in 'deployments' property at ${fluenceConfig.$getPath()}`,
+      );
+    },
+    argName: DEPLOYMENT_NAMES_ARG_NAME,
+  });
+}
+
 const emptyDeal: Deal = {
   dealId: "",
-  chainNetwork: "testnet",
+  chainNetwork: "dar",
   chainNetworkId: 0,
   dealIdOriginal: "",
   definition: "",

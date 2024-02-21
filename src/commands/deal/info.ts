@@ -17,10 +17,19 @@
 import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { peerIdHexStringToBase58String } from "../../lib/chain/peerIdToUint8Array.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CHAIN_FLAGS, DEAL_FLAGS } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  DEAL_IDS_FLAG,
+  DEPLOYMENT_NAMES,
+} from "../../lib/const.js";
+import {
+  type DealNameAndId,
+  getDeals,
+  removeDealFromWorkersConfig,
+} from "../../lib/deal.js";
 import { getDealClient } from "../../lib/dealClient.js";
-import { getDealIds } from "../../lib/getDealIds.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Info extends BaseCommand<typeof Info> {
@@ -28,27 +37,30 @@ export default class Info extends BaseCommand<typeof Info> {
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    ...DEAL_FLAGS,
+    ...DEAL_IDS_FLAG,
+  };
+
+  static override args = {
+    ...DEPLOYMENT_NAMES,
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(Info));
+    const flagsAndArgs = await initCli(this, await this.parse(Info));
+    const deals = await getDeals(flagsAndArgs);
 
-    const dealIds = await getDealIds(flags);
-
-    for (const dealId of dealIds) {
-      await printDealInfo(dealId);
+    for (const deal of deals) {
+      await printDealInfo(deal);
     }
   }
 }
 
-async function printDealInfo(dealAddress: string) {
+async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   const { dealClient } = await getDealClient();
-  const deal = dealClient.getDeal(dealAddress);
-
-  commandObj.log(color.gray(`Deal info:`));
-
+  const deal = dealClient.getDeal(dealId);
+  commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
+
+  commandObj.log(color.gray(`Deal ID: ${dealId}`));
 
   //TODO: change to enum
   switch (status) {
@@ -60,11 +72,15 @@ async function printDealInfo(dealAddress: string) {
       break;
     case 2n:
       commandObj.log(color.gray(`Status: Ended`));
-      break;
+      await removeDealFromWorkersConfig(dealName);
+      return;
   }
 
-  commandObj.log(color.gray(`Balance: ${await deal.getFreeBalance()}`));
   const { ethers } = await import("ethers");
+
+  commandObj.log(
+    color.gray(`Balance: ${ethers.formatEther(await deal.getFreeBalance())}`),
+  );
 
   commandObj.log(
     color.gray(
@@ -103,7 +119,13 @@ async function printDealInfo(dealAddress: string) {
         commandObj.log(color.gray(`Worker Id: ${unit.workerId}`));
       }
 
-      commandObj.log(color.gray(`Peer Id: ${unit.peerId}`));
+      commandObj.log(color.gray(`Peer Id Hex: ${unit.peerId}`));
+
+      commandObj.log(
+        color.gray(
+          `Peer Id base58: ${await peerIdHexStringToBase58String(unit.peerId)}`,
+        ),
+      );
     }
   }
 }

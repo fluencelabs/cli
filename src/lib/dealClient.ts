@@ -245,9 +245,6 @@ export async function sign<T extends unknown[]>(
     dbg(debugInfo);
   }
 
-  // const tx = await method(...args);
-  // const res = await tx.wait();
-
   const { tx, res } = await setTryTimeout(
     `execute ${color.yellow(method.name)} blockchain method`,
     async function executingContractMethod() {
@@ -259,6 +256,11 @@ export async function sign<T extends unknown[]>(
       throw err;
     },
     1000 * 60 * 3,
+    1000,
+    (err: unknown) => {
+      // only retry data=null errors
+      return !(err instanceof Error && err.message.includes("data=null"));
+    },
   );
 
   assert(res !== null, `'${method.name}' transaction hash is not defined`);

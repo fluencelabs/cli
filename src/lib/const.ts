@@ -91,7 +91,7 @@ export const U32_MAX = 4_294_967_295;
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
-export const PUBLIC_FLUENCE_ENV = ["kras", "testnet", "stage"] as const;
+export const PUBLIC_FLUENCE_ENV = ["dar", "stage", "kras"] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
@@ -119,16 +119,16 @@ export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
 export const DEAL_CONFIG: Record<ChainENV, ChainConfig> = {
   kras: {
-    url: "https://polygon-mumbai.g.alchemy.com/v2/lSTLbdQejAUJ854kpjvyFXrmKocI2N-z",
-    id: 80001,
+    url: "https://ipc-kras.fluence.dev",
+    id: 0,
   },
-  testnet: {
-    url: "https://polygon-mumbai.g.alchemy.com/v2/_Tc--Ia76JVzBPdr8IbBWDTCPf-DVQpS",
-    id: 80001,
+  dar: {
+    url: "https://ipc-dar.fluence.dev",
+    id: 0,
   },
   stage: {
-    url: "https://polygon-mumbai.g.alchemy.com/v2/_nxv_qsNy3ZWBipXy41imOXj4j6aNfCc",
-    id: 80001,
+    url: "https://ipc-stage.fluence.dev",
+    id: 3521768853336688,
   },
   local: {
     url: "http://127.0.0.1:8545",
@@ -415,24 +415,32 @@ export const OFFERS_FLAG = {
 
 export const PRIV_KEY_FLAG_NAME = "priv-key";
 
-export const CHAIN_FLAGS = {
-  ...ENV_FLAG,
+export const PRIV_KEY_FLAG = {
   [PRIV_KEY_FLAG_NAME]: Flags.string({
     description: `!WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local network ${LOCAL_NET_DEFAULT_WALLET_KEY} key will be used by default`,
     helpValue: "<private-key>",
   }),
 };
 
-export const DEAL_FLAGS = {
-  deal: Flags.string({
-    description: `Comma-separated deal names of the deployed deals for the current environment. Default: all deployed deals`,
-    helpValue: "<name>",
-    exclusive: ["deal-id"],
-  }),
-  "deal-id": Flags.string({
+export const CHAIN_FLAGS = {
+  ...ENV_FLAG,
+  ...PRIV_KEY_FLAG,
+};
+
+export const DEAL_IDS_FLAG_NAME = "deal-ids";
+
+export const DEAL_IDS_FLAG = {
+  [DEAL_IDS_FLAG_NAME]: Flags.string({
     description: `Comma-separated deal ids of the deployed deal`,
     helpValue: "<name>",
-    exclusive: ["deal"],
+  }),
+};
+
+export const DEPLOYMENT_NAMES_ARG_NAME = "DEPLOYMENT-NAMES";
+
+export const DEPLOYMENT_NAMES = {
+  [DEPLOYMENT_NAMES_ARG_NAME]: Args.string({
+    description: `Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments will be used)`,
   }),
 };
 
@@ -548,7 +556,7 @@ export const RUN_DEPLOYED_SERVICES_FUNCTION_NAME = "runDeployedServices";
 export const RUN_DEPLOYED_SERVICES_FUNCTION_CALL = `${RUN_DEPLOYED_SERVICES_FUNCTION_NAME}()`;
 
 const RUN_DEPLOYED_SERVICE_AQUA = `
--- example of running services deployed using \`${CLI_NAME} deal deploy\`
+-- example of running services deployed using \`${CLI_NAME} deploy\`
 -- with worker '${DEFAULT_DEPLOYMENT_NAME}' which has service 'MyService' with method 'greeting'
 
 export runDeployedServices, showSubnet
@@ -713,7 +721,7 @@ ${TEMPLATE_CONTENT_BASE}
 
 \`\`\`sh
 # You can deploy right away with an example worker that contains an example service
-fluence deal deploy
+fluence deploy
 
 # Run the deployed code
 fluence run -f 'runDeployedServices()'
@@ -729,7 +737,7 @@ const MINIMAL_README = `# Fluence Minimal Template
 fluence service new myService
 
 # Deploy the default worker
-fluence deal deploy
+fluence deploy
 
 # Uncomment \`runDeployedServices\` aqua function in \`src/aqua/main.aqua\` and run it
 fluence run -f 'runDeployedServices()'
@@ -760,7 +768,7 @@ npm run dev
 # You can also deploy deal and run the deployed code
 
 # Deploy the default worker
-fluence deal deploy
+fluence deploy
 
 # Compile aqua to ${jsOrTsString} so it contains info about deployed services
 fluence aqua
@@ -779,7 +787,7 @@ export const READMEs: Record<Template, string> = {
   js: getTsOrJsReadme(true),
 };
 
-export const DEFAULT_OFFER_NAME = "offer";
+export const DEFAULT_OFFER_NAME = "defaultOffer";
 
 export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
 export const DEFAULT_CC_DURATION = "100 minutes";

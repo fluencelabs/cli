@@ -235,7 +235,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       required: [],
       properties: {
         custom: mapOfDealsSchema,
-        testnet: mapOfDealsSchema,
+        dar: mapOfDealsSchema,
         kras: mapOfDealsSchema,
         local: mapOfDealsSchema,
         stage: mapOfDealsSchema,
@@ -250,7 +250,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       required: [],
       properties: {
         custom: mapOfHostsSchema,
-        testnet: mapOfHostsSchema,
+        dar: mapOfHostsSchema,
         kras: mapOfHostsSchema,
         local: mapOfHostsSchema,
         stage: mapOfHostsSchema,
@@ -350,7 +350,7 @@ version: 0
 #       # original deal ID that you get after signing the contract
 #       dealIdOriginal: "0x799C4BEB18Ae084D57a90582c2Cb8Bb19098139E"
 #       # network name that was used when deploying worker
-#       chainNetwork: testnet
+#       chainNetwork: dar
 #       # network ID that was used when deploying worker
 #       chainNetworkId: 1313161555
 

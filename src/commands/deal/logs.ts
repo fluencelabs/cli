@@ -20,7 +20,6 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import type { Get_logs_dealParams } from "../../lib/compiled-aqua/installation-spell/cli.js";
-import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.js";
 import {
   WORKER_SPELL,
   WORKERS_CONFIG_FULL_FILE_NAME,
@@ -29,8 +28,10 @@ import {
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
-  type FluenceEnv,
+  DEPLOYMENT_NAMES,
+  DEAL_IDS_FLAG,
 } from "../../lib/const.js";
+import { getDeals } from "../../lib/deal.js";
 import {
   formatAquaLogsHeader,
   formatAquaLogs,
@@ -38,14 +39,12 @@ import {
 import {
   LOGS_RESOLVE_SUBNET_ERROR_START,
   stringifyUnknown,
-  commaSepStrToArr,
 } from "../../lib/helpers/utils.js";
 import {
   disconnectFluenceClient,
   initFluenceClient,
 } from "../../lib/jsClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Logs extends BaseCommand<typeof Logs> {
   static override description = `Get logs from deployed workers for deals listed in ${WORKERS_CONFIG_FULL_FILE_NAME}`;
@@ -55,11 +54,10 @@ export default class Logs extends BaseCommand<typeof Logs> {
     ...FLUENCE_CLIENT_FLAGS,
     ...OFF_AQUA_LOGS_FLAG,
     ...TRACING_FLAG,
+    ...DEAL_IDS_FLAG,
   };
   static override args = {
-    "WORKER-NAMES": Args.string({
-      description: `Worker names to get logs for (by default all worker names from 'deals' property of ${WORKERS_CONFIG_FULL_FILE_NAME})`,
-    }),
+    ...DEPLOYMENT_NAMES,
     "SPELL-NAME": Args.string({
       description: `Spell name to get logs for (Default: ${WORKER_SPELL})`,
     }),
@@ -67,13 +65,8 @@ export default class Logs extends BaseCommand<typeof Logs> {
   async run(): Promise<void> {
     const { flags, args } = await initCli(this, await this.parse(Logs));
     await initFluenceClient(flags);
-    const fluenceEnv = await ensureFluenceEnv();
 
-    const dealIdWorkerNameMap = await getDealIdWorkerNameMap(
-      args["WORKER-NAMES"],
-      args["SPELL-NAME"],
-      fluenceEnv,
-    );
+    const dealIdWorkerNameMap = await getDealIdWorkerNameMap({ args, flags });
 
     let logs;
 
@@ -123,62 +116,25 @@ export default class Logs extends BaseCommand<typeof Logs> {
 }
 
 async function getDealIdWorkerNameMap(
-  maybeWorkerNamesString: string | undefined,
-  spellName: string | undefined,
-  fluenceEnv: FluenceEnv,
+  argsAndFlags: Parameters<typeof getDeals>[0] & {
+    args: { "SPELL-NAME": string | undefined };
+  },
 ): Promise<
   Record<string, { deal_id: string; spell_name: string; worker_name: string }>
 > {
-  const workersConfig = await initNewWorkersConfigReadonly();
-
-  const deals =
-    workersConfig.deals?.[fluenceEnv] ??
-    commandObj.error(
-      `No deployed workers found at ${color.yellow(
-        `deals.${fluenceEnv}`,
-      )} in ${color.yellow(workersConfig.$getPath())}`,
-    );
-
-  const workerNamesSet = Object.keys(deals);
-
-  const workersToGetLogsFor =
-    maybeWorkerNamesString === undefined
-      ? workerNamesSet
-      : commaSepStrToArr(maybeWorkerNamesString);
-
-  const workerNamesNotFoundInWorkersConfig = workersToGetLogsFor.filter(
-    (workerName) => {
-      return !workerNamesSet.includes(workerName);
-    },
-  );
-
-  if (workerNamesNotFoundInWorkersConfig.length !== 0) {
-    commandObj.error(
-      `Wasn't able to find workers ${workerNamesNotFoundInWorkersConfig
-        .map((workerName) => {
-          return color.yellow(workerName);
-        })
-        .join(", ")} in ${color.yellow(
-        workersConfig.$getPath(),
-      )} please check the spelling and try again`,
-    );
-  }
+  const workersToGetLogsFor = await getDeals(argsAndFlags);
 
   return Object.fromEntries(
-    Object.entries(deals)
-      .filter(([name]) => {
-        return workersToGetLogsFor.includes(name);
-      })
-      .map(([name, deal]) => {
-        return [
-          deal.dealIdOriginal,
-          {
-            deal_id: deal.dealIdOriginal,
-            spell_name: spellName ?? WORKER_SPELL,
-            worker_name: name,
-          },
-        ] as const;
-      }),
+    workersToGetLogsFor.map(({ dealId, dealName }) => {
+      return [
+        dealId,
+        {
+          deal_id: dealId,
+          spell_name: argsAndFlags.args["SPELL-NAME"] ?? WORKER_SPELL,
+          worker_name: dealName,
+        },
+      ] as const;
+    }),
   );
 }
 

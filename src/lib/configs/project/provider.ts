@@ -285,7 +285,7 @@ type ConfigV0 = {
   providerName: string;
   offers: Record<string, Offer>;
   computePeers: Record<string, ComputePeer>;
-  capacityCommitments?: Record<string, CapacityCommitment>;
+  capacityCommitments: Record<string, CapacityCommitment>;
   nox?: NoxConfigYAML;
   version: 0;
 };
@@ -365,11 +365,16 @@ const configSchemaV0 = {
         noxName: capacityCommitmentSchema,
       },
       required: [],
-      nullable: true,
     },
     version: { type: "number", const: 0, description: "Config version" },
   },
-  required: ["version", "computePeers", "offers", "providerName"],
+  required: [
+    "version",
+    "computePeers",
+    "offers",
+    "providerName",
+    "capacityCommitments",
+  ],
 } as const satisfies JSONSchemaType<ConfigV0>;
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
@@ -385,6 +390,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       providerName: "defaultProvider",
       computePeers: {},
       offers: {},
+      capacityCommitments: {},
     };
 
     // For now we remove interactive mode cause it's too complex and unnecessary
@@ -503,24 +509,22 @@ async function validateCC(config: LatestConfig): Promise<ValidationResult> {
 
   const capacityCommitmentErrors = (
     await Promise.all(
-      Object.entries(config.capacityCommitments ?? {}).map(
-        async ([name, cc]) => {
-          const errors = [
-            cc.delegator === undefined
-              ? true
-              : await validateAddress(cc.delegator),
-            validateCCDuration(cc.duration),
-          ].filter((e) => {
-            return e !== true;
-          });
-
-          return errors.length === 0
+      Object.entries(config.capacityCommitments).map(async ([name, cc]) => {
+        const errors = [
+          cc.delegator === undefined
             ? true
-            : `Invalid capacity commitment for ${color.yellow(
-                name,
-              )}:\n${errors.join("\n")}`;
-        },
-      ),
+            : await validateAddress(cc.delegator),
+          validateCCDuration(cc.duration),
+        ].filter((e) => {
+          return e !== true;
+        });
+
+        return errors.length === 0
+          ? true
+          : `Invalid capacity commitment for ${color.yellow(
+              name,
+            )}:\n${errors.join("\n")}`;
+      }),
     )
   ).filter((e) => {
     return e !== true;
@@ -895,7 +899,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
     computePeersWithKeys,
     (c) => {
       const capacityCommitment =
-        providerConfig.capacityCommitments?.[c.computePeerName];
+        providerConfig.capacityCommitments[c.computePeerName];
 
       if (capacityCommitment === undefined) {
         return {
@@ -909,7 +913,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
 
   if (noCCError.length > 0) {
     commandObj.error(
-      `Missing capacity commitment for compute peers at ${providerConfig.$getPath()}:\n\nd${noCCError
+      `Missing capacity commitment for compute peers at ${providerConfig.$getPath()}:\n\n${noCCError
         .map((n) => {
           return `capacityCommitments.${n}`;
         })
