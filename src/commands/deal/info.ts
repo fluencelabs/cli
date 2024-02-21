@@ -60,6 +60,8 @@ async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
 
+  commandObj.log(color.gray(`Deal ID: ${dealId}`));
+
   //TODO: change to enum
   switch (status) {
     case 0n:
