@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.15.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.4...fluence-cli-v0.15.5) (2024-02-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/deal-ts-clients to v0.6.1 ([#779](https://github.com/fluencelabs/cli/issues/779)) ([6ad43c5](https://github.com/fluencelabs/cli/commit/6ad43c566b9a5ab7c2b403ccba4f333253d22220))
+
+## [0.15.4](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.3...fluence-cli-v0.15.4) (2024-02-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/deal-ts-clients to v0.6.0 ([#777](https://github.com/fluencelabs/cli/issues/777)) ([018383e](https://github.com/fluencelabs/cli/commit/018383e06a12c00c32a059970b5cf4100de6d237))
+
+## [0.15.3](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.2...fluence-cli-v0.15.3) (2024-02-21)
+
+
+### Features
+
+* Intro CLI for Windows [fixes FLU-610] ([#688](https://github.com/fluencelabs/cli/issues/688)) ([de53da8](https://github.com/fluencelabs/cli/commit/de53da889a38ca6c6767fdca0a189a3fb70c75ee))
+* up dev and provider ux ([#772](https://github.com/fluencelabs/cli/issues/772)) ([76764ad](https://github.com/fluencelabs/cli/commit/76764addd4464b1e225cb1de5ce5e1c9a70144be))
+
+
+### Bug Fixes
+
+* Add template structure to README [fixes DXJ-714] ([#768](https://github.com/fluencelabs/cli/issues/768)) ([31e5f3a](https://github.com/fluencelabs/cli/commit/31e5f3aec8e784085a92da4999064a3522129e6a))
+* **deps:** nox 0.20.1, enable debug logs for Decider ([#774](https://github.com/fluencelabs/cli/issues/774)) ([91c7f13](https://github.com/fluencelabs/cli/commit/91c7f13bedaf93572e223809c7121d62479bc369))
+
 ## [0.15.2](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.1...fluence-cli-v0.15.2) (2024-02-20)
 
 

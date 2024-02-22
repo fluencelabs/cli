@@ -227,7 +227,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
         },
       },
       [GRAPH_NODE_CONTAINER_NAME]: {
-        image: "graphprotocol/graph-node:v0.33.0",
+        image: "fluencelabs/graph-node:v0.34.1",
         ports: [
           "8000:8000",
           "8001:8001",
