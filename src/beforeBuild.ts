@@ -200,9 +200,10 @@ await patchOclif(
 );
 
 // Turn off update on windows
-
+const updateCommandString =
+  "const { args, flags } = await this.parse(UpdateCommand);";
 await patchOclif(
   UPDATE_COMMAND_FILE_PATH,
-  "const { args, flags } = await this.parse(UpdateCommand);",
-  `if (this.config.platform === '${WINDOWS_PLATFORM}') this.error('You cannot use 'update' command on Windows. You can find newer releases here - https://github.com/fluencelabs/cli/releases. Remember to uninstall older CLI before updating, otherwise you could encounter hard to debug issues.'); const { args, flags } = await this.parse(UpdateCommand);`,
+  updateCommandString,
+  `if (this.config.platform === '${WINDOWS_PLATFORM}') this.error('You cannot use 'update' command on Windows. You can find newer releases here - https://github.com/fluencelabs/cli/releases. Remember to uninstall older CLI before updating, otherwise you could encounter hard to debug issues.'); ${updateCommandString}`,
 );
