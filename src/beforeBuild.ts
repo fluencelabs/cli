@@ -169,7 +169,7 @@ const PROMOTE_COMMAND_FILE_PATH = join(
   "promote.js",
 );
 
-const WINDOWS_TARGET = "win32-x64";
+const WINDOWS_PLATFORM = "win32";
 
 async function patchOclif(fileName: string, search: string, insert: string) {
   try {
@@ -217,5 +217,5 @@ await patchOclif(
 await patchOclif(
   PROMOTE_COMMAND_FILE_PATH,
   "promoteGzTarballs(target)",
-  `...(target === '${WINDOWS_TARGET}' ? [] : [promoteGzTarballs(target)])`,
+  `...(target.platform === '${WINDOWS_PLATFORM}' ? [] : [promoteGzTarballs(target)])`,
 );
