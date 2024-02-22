@@ -161,12 +161,13 @@ const TARBALL_BUILD_COMMAND_PATH = join(
   "build.js",
 );
 
-const PROMOTE_COMMAND_FILE_PATH = join(
+const UPDATE_COMMAND_FILE_PATH = join(
   NODE_MODULES_DIR_NAME,
-  "oclif",
-  "lib",
+  "@oclif",
+  "plugin-update",
+  "dist",
   "commands",
-  "promote.js",
+  "update.js",
 );
 
 const WINDOWS_PLATFORM = "win32";
@@ -213,9 +214,10 @@ await patchOclif(
   "tar --force-local -xzf",
 );
 
-// Don't build tarballs when packing for Windows
+// Turn off update on windows
+
 await patchOclif(
-  PROMOTE_COMMAND_FILE_PATH,
-  "promoteGzTarballs(target)",
-  `...(target.platform === '${WINDOWS_PLATFORM}' ? [] : [promoteGzTarballs(target)])`,
+  UPDATE_COMMAND_FILE_PATH,
+  "const { args, flags } = await this.parse(UpdateCommand);",
+  `if (this.config.platform === '${WINDOWS_PLATFORM}') this.error('You cannot use 'update' command on Windows. You can find newer releases here - https://github.com/fluencelabs/cli/releases. Remember to uninstall older CLI before updating, otherwise you could encounter hard to debug issues.'); const { args, flags } = await this.parse(UpdateCommand);`,
 );
