@@ -17,7 +17,7 @@
 import { randomBytes } from "node:crypto";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { peerIdToUint8Array } from "../../lib/chain/peerIdToUint8Array.js";
+import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
 import { setChainFlags, chainFlags } from "../../lib/chainFlags.js";
 import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
 import { CHAIN_FLAGS, PRIV_KEY_FLAG_NAME } from "../../lib/const.js";

@@ -15,7 +15,7 @@
  */
 
 import { color } from "@oclif/color";
-import { Args } from "@oclif/core";
+import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
@@ -28,7 +28,7 @@ import {
   TTL_FLAG_NAME,
   DIAL_TIMEOUT_FLAG_NAME,
   TRACING_FLAG,
-  DEPLOYMENT_NAMES,
+  DEPLOYMENT_NAMES_ARG,
   DEAL_IDS_FLAG,
 } from "../../lib/const.js";
 import { getDeals } from "../../lib/deal.js";
@@ -55,12 +55,14 @@ export default class Logs extends BaseCommand<typeof Logs> {
     ...OFF_AQUA_LOGS_FLAG,
     ...TRACING_FLAG,
     ...DEAL_IDS_FLAG,
+    spell: Flags.string({
+      description: `Spell name to get logs for`,
+      helpValue: "<spell-name>",
+      default: WORKER_SPELL,
+    }),
   };
   static override args = {
-    ...DEPLOYMENT_NAMES,
-    "SPELL-NAME": Args.string({
-      description: `Spell name to get logs for (Default: ${WORKER_SPELL})`,
-    }),
+    ...DEPLOYMENT_NAMES_ARG,
   };
   async run(): Promise<void> {
     const { flags, args } = await initCli(this, await this.parse(Logs));
@@ -117,7 +119,7 @@ export default class Logs extends BaseCommand<typeof Logs> {
 
 async function getDealIdWorkerNameMap(
   argsAndFlags: Parameters<typeof getDeals>[0] & {
-    args: { "SPELL-NAME": string | undefined };
+    flags: { spell: string };
   },
 ): Promise<
   Record<string, { deal_id: string; spell_name: string; worker_name: string }>
@@ -130,7 +132,7 @@ async function getDealIdWorkerNameMap(
         dealId,
         {
           deal_id: dealId,
-          spell_name: argsAndFlags.args["SPELL-NAME"] ?? WORKER_SPELL,
+          spell_name: argsAndFlags.flags.spell,
           worker_name: dealName,
         },
       ] as const;

@@ -61,7 +61,7 @@ import {
 import { COMPILE_AQUA_PROPERTY_NAME } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
-  validateEffectors,
+  validateCIDs,
   validateVersionsIsExact,
   validateBatchAsync,
 } from "../../helpers/validations.js";
@@ -1473,13 +1473,13 @@ function validateCompileAquaPathsAreRelative(config: LatestConfig) {
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatchAsync(
-    validateEffectors(
+    validateCIDs(
       Object.entries(config.deployments ?? {}).flatMap(
         ([name, { effectors }]) => {
-          return (effectors ?? []).map((effector) => {
+          return (effectors ?? []).map((cid) => {
             return {
-              effector,
-              location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deals > ${name} > effectors > ${effector}`,
+              cid,
+              location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deals > ${name} > effectors > ${cid}`,
             };
           });
         },

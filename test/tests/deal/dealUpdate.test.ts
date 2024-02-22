@@ -54,7 +54,7 @@ describe("Deal update tests", () => {
 
     await createSpellAndAddToDeal(cwd, NEW_SPELL_NAME);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd, true);
 
     await waitUntilShowSubnetReturnsExpected(
       cwd,
@@ -82,7 +82,7 @@ describe("Deal update tests", () => {
 
     await build(cwd);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd, true);
 
     await waitUntilShowSubnetReturnsExpected(
       cwd,
@@ -117,7 +117,7 @@ describe("Deal update tests", () => {
       MY_SERVICE_NAME,
     );
 
-    await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd, true);
 
     await waitUntilRunDeployedServicesReturnsExpected(
       cwd,
@@ -147,7 +147,7 @@ describe("Deal update tests", () => {
       MY_SERVICE_NAME,
     );
 
-    await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd, true);
 
     await waitUntilRunDeployedServicesReturnsExpected(
       cwd,
@@ -179,7 +179,7 @@ describe("Deal update tests", () => {
 
     await updateSpellAqua(cwd, NEW_SPELL_NAME, UPDATED_SPELL_CONTENT);
 
-    await deployDealAndWaitUntilDeployed(cwd);
+    await deployDealAndWaitUntilDeployed(cwd, true);
 
     await waitUntilAquaScriptReturnsExpected(
       cwd,

@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-import { BaseCommand } from "../baseCommand.js";
-import { DEPLOYMENT_NAMES_ARG } from "../lib/const.js";
-import {
-  DEPLOY_DESCRIPTION,
-  DEPLOY_EXAMPLES,
-  DEPLOY_FLAGS,
-  deployImpl,
-} from "../lib/deploy.js";
+import { ensureDealTsClientEnv } from "../ensureChainNetwork.js";
 
-export default class Deploy extends BaseCommand<typeof Deploy> {
-  static override description = DEPLOY_DESCRIPTION;
-  static override examples = DEPLOY_EXAMPLES;
-  static override flags = DEPLOY_FLAGS;
-  static override args = DEPLOYMENT_NAMES_ARG;
-  async run(): Promise<void> {
-    await deployImpl.bind(this)(Deploy);
-  }
+export async function getChainId(): Promise<number> {
+  const chainEnv = await ensureDealTsClientEnv();
+  const { DealClient } = await import("@fluencelabs/deal-ts-clients");
+  const { chainId } = await DealClient.getContractAddresses(chainEnv);
+  return chainId;
 }

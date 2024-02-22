@@ -15,32 +15,21 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import {
-  CHAIN_FLAGS,
-  DEAL_IDS_FLAG,
-  DEPLOYMENT_NAMES_ARG,
-} from "../../lib/const.js";
-import { match, getDeals } from "../../lib/deal.js";
+import { commandObj } from "../../lib/commandObj.js";
+import { CHAIN_FLAGS, NOX_NAMES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Match extends BaseCommand<typeof Match> {
-  static override description = "Add missing workers to the deal";
+export default class DealsList extends BaseCommand<typeof DealsList> {
+  static override aliases = ["provider:dl"];
+  static override description = "List deals";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-    ...DEAL_IDS_FLAG,
-  };
-
-  static override args = {
-    ...DEPLOYMENT_NAMES_ARG,
+    ...NOX_NAMES_FLAG,
   };
 
   async run(): Promise<void> {
-    const flagsAndArgs = await initCli(this, await this.parse(Match));
-    const deals = await getDeals(flagsAndArgs);
-
-    for (const { dealId } of deals) {
-      await match(dealId);
-    }
+    await initCli(this, await this.parse(DealsList));
+    commandObj.error(`Not implemented yet`);
   }
 }

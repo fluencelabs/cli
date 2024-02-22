@@ -151,7 +151,7 @@ export async function compileAquaAndWatch(
         : ` to ${color.yellow(compileArgs.outputPath)}`;
 
     commandObj.logToStderr(
-      `Successfully compiled${aquaConfigName}${from}${to}. If you don't files or functions you expect to see, make sure you exported things you require from your aqua files`,
+      `Successfully compiled${aquaConfigName}${from}${to}. If you don't see files or functions you expect to see, make sure you exported things you require from your aqua files`,
     );
   }
 

@@ -18,7 +18,7 @@ import { color } from "@oclif/color";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { peerIdToUint8Array } from "../../lib/chain/peerIdToUint8Array.js";
+import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
 import { CHAIN_FLAGS, NOX_NAMES_FLAG } from "../../lib/const.js";

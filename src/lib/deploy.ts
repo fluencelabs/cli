@@ -22,6 +22,7 @@ import { Flags } from "@oclif/core";
 import { baseFlags } from "../baseCommand.js";
 import type Deploy from "../commands/deploy.js";
 
+import { getChainId } from "./chain/chainId.js";
 import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { TARGET_WORKERS_DEFAULT } from "./configs/project/fluence.js";
@@ -29,7 +30,6 @@ import { initNewWorkersConfig } from "./configs/project/workers.js";
 import {
   LOCAL_IPFS_ADDRESS,
   OFF_AQUA_LOGS_FLAG,
-  DEAL_CONFIG,
   FLUENCE_CONFIG_FULL_FILE_NAME,
   FLUENCE_CLIENT_FLAGS,
   IMPORT_FLAG,
@@ -70,6 +70,11 @@ export const DEPLOY_FLAGS = {
     allowNo: true,
     default: true,
   }),
+  update: Flags.boolean({
+    char: "u",
+    description: "Update your previous deployment deployment",
+    default: false,
+  }),
 };
 
 export async function deployImpl(this: Deploy, cl: typeof Deploy) {
@@ -80,7 +85,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   );
 
   const chainEnv = await ensureChainEnv();
-  const chainNetworkId = DEAL_CONFIG[chainEnv].id;
+  const chainNetworkId = await getChainId();
   const workersConfig = await initNewWorkersConfig();
 
   const { ensureAquaFileWithWorkerInfo, prepareForDeploy } = await import(
@@ -143,6 +148,18 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       workersConfig.deals?.[fluenceEnv]?.[workerName];
 
     if (previouslyDeployedDeal !== undefined) {
+      if (!flags.update) {
+        commandObj.logToStderr(
+          `\n${color.yellow(
+            workerName,
+          )} is already deployed. You can use ${color.yellow(
+            "--update",
+          )} flag to update what you deployed previously\n`,
+        );
+
+        continue;
+      }
+
       commandObj.logToStderr(
         `\nUpdating deal for ${color.yellow(workerName)}\n`,
       );
@@ -179,6 +196,16 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       };
 
       await workersConfig.$commit();
+
+      continue;
+    }
+
+    if (flags.update) {
+      commandObj.logToStderr(
+        `\nSkipping ${color.yellow(
+          workerName,
+        )} update because it is not yet deployed. You can deploy it if you remove --update flag\n`,
+      );
 
       continue;
     }

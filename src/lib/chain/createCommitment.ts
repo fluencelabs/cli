@@ -28,7 +28,7 @@ import {
 } from "../dealClient.js";
 import { splitErrorsAndResults, stringifyUnknown } from "../helpers/utils.js";
 
-import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
+import { peerIdToUint8Array } from "./conversions.js";
 
 export async function createCommitments(flags: {
   env: string | undefined;

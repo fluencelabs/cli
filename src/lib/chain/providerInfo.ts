@@ -19,6 +19,11 @@ import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
 import { CLI_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
+import { cidStringToCIDV1Struct } from "./conversions.js";
+
+const CURRENTLY_UNUSED_CID =
+  "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
+
 export async function registerProvider() {
   const providerConfig = await ensureReadonlyProviderConfig();
   const { dealClient, signerOrWallet } = await getDealClient();
@@ -34,17 +39,11 @@ export async function registerProvider() {
     );
   }
 
-  const { CID } = await import("ipfs-http-client");
-
-  const cid = CID.parse(
-    // this is currently unused, it's just a random but valid CID
-    "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
-  ).bytes;
-
-  await sign(market.setProviderInfo, providerConfig.providerName, {
-    prefixes: cid.slice(0, 4),
-    hash: cid.slice(4),
-  });
+  await sign(
+    market.setProviderInfo,
+    providerConfig.providerName,
+    await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
+  );
 
   const providerInfo = await market.getProviderInfo(signerOrWallet.address);
 
@@ -78,17 +77,11 @@ export async function updateProvider() {
     );
   }
 
-  const { CID } = await import("ipfs-http-client");
-
-  const cid = CID.parse(
-    // this is currently unused, it's just a random but valid CID
-    "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
-  ).bytes;
-
-  await sign(market.setProviderInfo, providerConfig.providerName, {
-    prefixes: cid.slice(0, 4),
-    hash: cid.slice(4),
-  });
+  await sign(
+    market.setProviderInfo,
+    providerConfig.providerName,
+    await cidStringToCIDV1Struct(CURRENTLY_UNUSED_CID),
+  );
 
   const providerInfo = await market.getProviderInfo(signerOrWallet.address);
 

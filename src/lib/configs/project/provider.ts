@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from "assert";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
@@ -28,7 +27,7 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
-import { LOCAL_NET_WALLET_KEYS } from "../../accounts.js";
+import { getChainId } from "../../chain/chainId.js";
 import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
@@ -48,19 +47,21 @@ import {
   IPFS_CONTAINER_NAME,
   IPFS_PORT,
   defaultNumberProperties,
-  DEAL_CONFIG,
   DEFAULT_CC_DURATION,
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
   CLI_NAME,
   NOX_NAMES_FLAG_NAME,
+  ALL_FLAG_VALUE,
+  CHAIN_URLS,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
 import { getPeerIdFromSecretKey } from "../../helpers/getPeerIdFromSecretKey.js";
 import {
   commaSepStrToArr,
+  jsonStringify,
   splitErrorsAndResults,
 } from "../../helpers/utils.js";
 import {
@@ -69,7 +70,7 @@ import {
 } from "../../helpers/validateCapacityCommitment.js";
 import {
   type ValidationResult,
-  validateEffectors,
+  validateCIDs,
 } from "../../helpers/validations.js";
 import { validateBatchAsync } from "../../helpers/validations.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
@@ -79,7 +80,7 @@ import {
   getFluenceDir,
   ensureFluenceSecretsFilePath,
 } from "../../paths.js";
-import { list } from "../../prompt.js";
+import { checkboxes, list } from "../../prompt.js";
 import { setEnvConfig } from "../globalConfigs.js";
 import {
   getReadonlyConfigInitFunction,
@@ -91,7 +92,6 @@ import {
 
 import { initNewEnvConfig } from "./env.js";
 import { initNewProviderSecretsConfig } from "./providerSecrets.js";
-import { type ProviderSecretesConfigReadonly } from "./providerSecrets.js";
 
 export type CapacityCommitment = {
   duration: string;
@@ -131,6 +131,11 @@ export type Offer = {
   effectors?: Array<string>;
 };
 
+type Effector = {
+  wasmCID: string;
+  allowedBinaries: Record<string, string>;
+};
+
 type NoxConfigYAML = {
   tcpPort?: number;
   websocketPort?: number;
@@ -152,14 +157,33 @@ type NoxConfigYAML = {
       walletKey?: string;
     };
   };
+  effectors?: Record<string, Effector>;
   rawConfig?: string;
 };
 
-const commonNoxConfig: NoxConfigYAML = {
-  aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
-};
-
 const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
+
+const effectorSchema = {
+  type: "object",
+  description: "Effector configuration",
+  additionalProperties: false,
+  properties: {
+    wasmCID: {
+      type: "string",
+      description: `Wasm CID of the effector`,
+    },
+    allowedBinaries: {
+      type: "object",
+      description: `Allowed binaries`,
+      additionalProperties: { type: "string" },
+      properties: {
+        curl: { type: "string" },
+      },
+      required: [],
+    },
+  },
+  required: ["wasmCID", "allowedBinaries"],
+} as const satisfies JSONSchemaType<Effector>;
 
 const noxConfigYAMLSchema = {
   type: "object",
@@ -262,6 +286,16 @@ const noxConfigYAMLSchema = {
           },
           required: [],
         },
+      },
+      required: [],
+    },
+    effectors: {
+      nullable: true,
+      type: "object",
+      description: "Effectors to allow on the nox",
+      additionalProperties: effectorSchema,
+      properties: {
+        effectorName: effectorSchema,
       },
       required: [],
     },
@@ -379,6 +413,9 @@ const configSchemaV0 = {
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
+const DEFAULT_EFFECTOR =
+  "bafkreigkoxnkeyunbelr5qhqbt5nspaew7uysd2trdds346rrogfz3zvuq";
+
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
     commandObj.logToStderr("Creating new provider config\n");
@@ -388,6 +425,16 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
 
     const userProvidedConfig: UserProvidedConfig = {
       providerName: "defaultProvider",
+      nox: {
+        effectors: {
+          curl: {
+            wasmCID: DEFAULT_EFFECTOR,
+            allowedBinaries: {
+              curl: "/usr/bin/curl",
+            },
+          },
+        },
+      },
       computePeers: {},
       offers: {},
       capacityCommitments: {},
@@ -421,6 +468,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       [DEFAULT_OFFER_NAME]: {
         ...defaultNumberProperties,
         computePeers: Object.keys(userProvidedConfig.computePeers),
+        effectors: [DEFAULT_EFFECTOR],
       },
     };
 
@@ -449,21 +497,107 @@ export type ProviderConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatchAsync(
-    validateEffectors(
+    validateCIDs(
       Object.entries(config.offers).flatMap(([name, { effectors }]) => {
-        return (effectors ?? []).map((effector) => {
+        return (effectors ?? []).map((cid) => {
           return {
-            effector,
-            location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > offers > ${name} > effectors > ${effector}`,
+            cid,
+            location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > offers > ${name} > effectors`,
           };
         });
       }),
     ),
+    validateCIDs(
+      Object.entries(config.nox?.effectors ?? {}).map(
+        ([effectorName, { wasmCID: cid }]) => {
+          return {
+            cid,
+            location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > nox > effectors > ${effectorName} > wasmCID`,
+          };
+        },
+      ),
+    ),
+    validateCIDs(
+      Object.entries(config.computePeers).flatMap(
+        ([computePeerName, { nox }]) => {
+          return Object.entries(nox?.effectors ?? {}).map(
+            ([effectorName, { wasmCID: cid }]) => {
+              return {
+                cid,
+                location: `${PROVIDER_CONFIG_FULL_FILE_NAME} > computePeers > ${computePeerName} > nox > effectors > ${effectorName} > wasmCID`,
+              };
+            },
+          );
+        },
+      ),
+    ),
+    validateEffectors(config),
     validateCC(config),
     validateMissingComputePeers(config),
     validateNoDuplicateNoxNamesInOffers(config),
   );
 };
+
+export async function validateEffectors(
+  providerConfig: LatestConfig,
+): Promise<ValidationResult> {
+  const errors = (
+    await Promise.all(
+      Object.entries(providerConfig.offers).flatMap(
+        ([offerName, { effectors = [], computePeers: computePeerNames }]) => {
+          const offerEffectorsString = jsonStringify([...effectors].sort());
+
+          return computePeerNames.map(async (computePeerName) => {
+            const computePeer = providerConfig.computePeers[computePeerName];
+
+            if (computePeer === undefined) {
+              return true;
+            }
+
+            const noxConfig = await resolveNoxConfigYAML(
+              providerConfig.nox,
+              computePeer.nox,
+            );
+
+            const computePeerEffectorsString = jsonStringify(
+              [
+                ...Object.values(noxConfig.effectors ?? {}).map(
+                  ({ wasmCID }) => {
+                    return wasmCID;
+                  },
+                ),
+              ].sort(),
+            );
+
+            if (computePeerEffectorsString !== offerEffectorsString) {
+              return `Offer ${color.yellow(
+                offerName,
+              )} contains computePeer ${color.yellow(
+                computePeerName,
+              )}, that has effectors ${color.yellow(
+                computePeerEffectorsString,
+              )} which doesn't match effectors that are specified in the offer ${color.yellow(
+                offerEffectorsString,
+              )}`;
+            }
+
+            return true;
+          });
+        },
+      ),
+    )
+  ).filter((result): result is string => {
+    return typeof result === "string";
+  });
+
+  if (errors.length > 0) {
+    return `Each offer must contain computePeers with matching effectors. Found not matching ones:\n\n${errors.join(
+      "\n\n",
+    )}`;
+  }
+
+  return true;
+}
 
 function validateNoDuplicateNoxNamesInOffers(
   config: LatestConfig,
@@ -623,96 +757,6 @@ export async function ensureReadonlyProviderConfig() {
 
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 
-export async function ensureConfigToml(
-  providerConfig: ProviderConfigReadonly,
-  providerSecretsConfig?: ProviderSecretesConfigReadonly | null,
-) {
-  const { rawConfig: providerRawNoxConfig, ...providerNoxConfig } =
-    providerConfig.nox ?? {};
-
-  const baseNoxConfig = mergeNoxConfigYAML(
-    await getDefaultNoxConfigYAML(),
-    providerNoxConfig,
-  );
-
-  const configsDir = await ensureFluenceConfigsDir();
-  const { stringify } = await import("@iarna/toml");
-
-  const computePeers = Object.entries(providerConfig.computePeers);
-
-  const parsedProviderRawConfig =
-    providerRawNoxConfig === undefined
-      ? undefined
-      : parse(providerRawNoxConfig);
-
-  await Promise.all(
-    computePeers.map(async ([computePeerName, computePeerConfig], i) => {
-      const { rawConfig: computePeerRawNoxConfig, ...computePeerNoxConfig } =
-        computePeerConfig.nox ?? {};
-
-      let overriddenNoxConfig = mergeNoxConfigYAML(
-        baseNoxConfig,
-        computePeerNoxConfig,
-      );
-
-      if (overriddenNoxConfig.tcpPort === undefined) {
-        overriddenNoxConfig.tcpPort = TCP_PORT_START + i;
-      }
-
-      if (overriddenNoxConfig.websocketPort === undefined) {
-        overriddenNoxConfig.websocketPort = WEB_SOCKET_PORT_START + i;
-      }
-
-      if (overriddenNoxConfig.httpPort === undefined) {
-        overriddenNoxConfig.httpPort = HTTP_PORT_START + i;
-      }
-
-      if (
-        overriddenNoxConfig.systemServices?.decider?.walletKey === undefined
-      ) {
-        const walletKey =
-          providerSecretsConfig?.noxes[computePeerName]?.signingWallet ??
-          LOCAL_NET_WALLET_KEYS[i % LOCAL_NET_WALLET_KEYS.length];
-
-        assert(walletKey !== undefined, "Unreachable");
-
-        overriddenNoxConfig.systemServices = {
-          ...overriddenNoxConfig.systemServices,
-          decider: {
-            ...overriddenNoxConfig.systemServices?.decider,
-            walletKey,
-          },
-        };
-      }
-
-      if (parsedProviderRawConfig !== undefined) {
-        overriddenNoxConfig = mergeNoxConfigYAML(
-          overriddenNoxConfig,
-          parsedProviderRawConfig,
-        );
-      }
-
-      const parsedComputePeerRawConfig =
-        computePeerRawNoxConfig === undefined
-          ? undefined
-          : parse(computePeerRawNoxConfig);
-
-      if (parsedComputePeerRawConfig !== undefined) {
-        overriddenNoxConfig = mergeNoxConfigYAML(
-          overriddenNoxConfig,
-          parsedComputePeerRawConfig,
-        );
-      }
-
-      return writeFile(
-        join(configsDir, getConfigTomlName(computePeerName)),
-        stringify(configYAMLToConfigToml(overriddenNoxConfig)),
-        FS_OPTIONS,
-      );
-    }),
-  );
-}
-
 function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
   return mergeWith(cloneDeep(a), b, (objValue, srcValue) => {
     if (Array.isArray(objValue) && Array.isArray(srcValue)) {
@@ -721,6 +765,57 @@ function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
 
     return undefined;
   });
+}
+
+function mergeNoxConfigYAMLWithRawConfig(a: NoxConfigYAML, b: NoxConfigYAML) {
+  const { rawConfig: rawConfigB, ...configB } = b;
+  let config = mergeNoxConfigYAML(a, configB);
+
+  const parsedRawConfigB =
+    rawConfigB === undefined ? undefined : parse(rawConfigB);
+
+  if (parsedRawConfigB !== undefined) {
+    config = mergeNoxConfigYAML(config, parsedRawConfigB);
+  }
+
+  return config;
+}
+
+async function resolveNoxConfigYAML(
+  globalNoxConfig: NoxConfigYAML | undefined = {},
+  computePeerNoxConfig: NoxConfigYAML | undefined = {},
+  { i = 0, signingWallet = "" }: { i?: number; signingWallet?: string } = {},
+) {
+  let config = mergeNoxConfigYAMLWithRawConfig(
+    await getDefaultNoxConfigYAML(),
+    globalNoxConfig,
+  );
+
+  config = mergeNoxConfigYAMLWithRawConfig(config, computePeerNoxConfig);
+
+  if (config.tcpPort === undefined) {
+    config.tcpPort = TCP_PORT_START + i;
+  }
+
+  if (config.websocketPort === undefined) {
+    config.websocketPort = WEB_SOCKET_PORT_START + i;
+  }
+
+  if (config.httpPort === undefined) {
+    config.httpPort = HTTP_PORT_START + i;
+  }
+
+  if (config.systemServices?.decider?.walletKey === undefined) {
+    config.systemServices = {
+      ...config.systemServices,
+      decider: {
+        ...config.systemServices?.decider,
+        walletKey: signingWallet,
+      },
+    };
+  }
+
+  return config;
 }
 
 function configYAMLToConfigToml(config: NoxConfigYAML) {
@@ -752,10 +847,11 @@ function camelCaseKeysToSnakeCase(val: unknown): unknown {
 async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
   const env = await ensureChainEnv();
   const isLocal = env === "local";
-  const dealConfig = DEAL_CONFIG[env];
+  const networkId = await getChainId();
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
 
-  return mergeNoxConfigYAML(commonNoxConfig, {
+  return {
+    aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
     systemServices: {
       enable: ["aqua-ipfs", "decider"],
       aquaIpfs: {
@@ -773,13 +869,13 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
           : "http://ipfs.fluence.dev",
         networkApiEndpoint: isLocal
           ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
-          : "http://mumbai-polygon.ru:8545",
-        networkId: dealConfig.id,
+          : CHAIN_URLS[env],
+        networkId,
         startBlock: "earliest",
         matcherAddress: (await DealClient.getContractAddresses(env)).market,
       },
     },
-  });
+  };
 }
 
 function getConfigName(noxName: string) {
@@ -803,26 +899,13 @@ export function promptForOfferName(offers: ProviderConfigReadonly["offers"]) {
   });
 }
 
-export type EnsureComputerPeerConfigs = Awaited<
+export type EnsureComputerPeerConfig = Awaited<
   ReturnType<typeof ensureComputerPeerConfigs>
 >[number];
 
 export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
   const { ethers } = await import("ethers");
   const providerConfig = await ensureReadonlyProviderConfig();
-
-  const { rawConfig: providerRawNoxConfig, ...providerNoxConfig } =
-    providerConfig.nox ?? {};
-
-  const baseNoxConfig = mergeNoxConfigYAML(
-    await getDefaultNoxConfigYAML(),
-    providerNoxConfig,
-  );
-
-  const parsedProviderRawConfig =
-    providerRawNoxConfig === undefined
-      ? undefined
-      : parse(providerRawNoxConfig);
 
   const providerSecretsConfig =
     await initNewProviderSecretsConfig(providerConfig);
@@ -936,56 +1019,11 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         },
         i,
       ) => {
-        const { rawConfig: computePeerRawNoxConfig, ...computePeerNoxConfig } =
-          computePeer.nox ?? {};
-
-        let overriddenNoxConfig = mergeNoxConfigYAML(
-          baseNoxConfig,
-          computePeerNoxConfig,
+        const overriddenNoxConfig = await resolveNoxConfigYAML(
+          providerConfig.nox,
+          computePeer.nox,
+          { i, signingWallet },
         );
-
-        if (overriddenNoxConfig.tcpPort === undefined) {
-          overriddenNoxConfig.tcpPort = TCP_PORT_START + i;
-        }
-
-        if (overriddenNoxConfig.websocketPort === undefined) {
-          overriddenNoxConfig.websocketPort = WEB_SOCKET_PORT_START + i;
-        }
-
-        if (overriddenNoxConfig.httpPort === undefined) {
-          overriddenNoxConfig.httpPort = HTTP_PORT_START + i;
-        }
-
-        if (
-          overriddenNoxConfig.systemServices?.decider?.walletKey === undefined
-        ) {
-          overriddenNoxConfig.systemServices = {
-            ...overriddenNoxConfig.systemServices,
-            decider: {
-              ...overriddenNoxConfig.systemServices?.decider,
-              walletKey: signingWallet,
-            },
-          };
-        }
-
-        if (parsedProviderRawConfig !== undefined) {
-          overriddenNoxConfig = mergeNoxConfigYAML(
-            overriddenNoxConfig,
-            parsedProviderRawConfig,
-          );
-        }
-
-        const parsedComputePeerRawConfig =
-          computePeerRawNoxConfig === undefined
-            ? undefined
-            : parse(computePeerRawNoxConfig);
-
-        if (parsedComputePeerRawConfig !== undefined) {
-          overriddenNoxConfig = mergeNoxConfigYAML(
-            overriddenNoxConfig,
-            parsedComputePeerRawConfig,
-          );
-        }
 
         await writeFile(
           await ensureFluenceSecretsFilePath(computePeerName),
@@ -1015,17 +1053,49 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
 }
 
 export async function resolveComputePeersByNames(
-  args: {
+  flags: {
     [NOX_NAMES_FLAG_NAME]?: string | undefined;
   } = {},
 ) {
   const computePeers = await ensureComputerPeerConfigs();
 
-  if (args[NOX_NAMES_FLAG_NAME] === undefined) {
+  if (flags[NOX_NAMES_FLAG_NAME] === ALL_FLAG_VALUE) {
     return computePeers;
   }
 
-  const noxNames = commaSepStrToArr(args[NOX_NAMES_FLAG_NAME]);
+  const providerConfig = await ensureReadonlyProviderConfig();
+
+  if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
+    return checkboxes<EnsureComputerPeerConfig, never>({
+      message: `Select one or more nox names from ${providerConfig.$getPath()}`,
+      options: computePeers.map((computePeer) => {
+        return {
+          name: computePeer.name,
+          value: computePeer,
+        };
+      }),
+      validate: (choices: string[]) => {
+        if (choices.length === 0) {
+          return "Please select at least one deployment";
+        }
+
+        return true;
+      },
+      oneChoiceMessage(choice) {
+        return `One nox found at ${providerConfig.$getPath()}: ${color.yellow(
+          choice,
+        )}. Do you want to select it`;
+      },
+      onNoChoices() {
+        commandObj.error(
+          `You must have at least one nox specified in ${providerConfig.$getPath()}`,
+        );
+      },
+      flagName: NOX_NAMES_FLAG_NAME,
+    });
+  }
+
+  const noxNames = commaSepStrToArr(flags[NOX_NAMES_FLAG_NAME]);
 
   const [unknownNoxNames, validNoxNames] = splitErrorsAndResults(
     noxNames,
@@ -1043,8 +1113,6 @@ export async function resolveComputePeersByNames(
   );
 
   if (unknownNoxNames.length > 0) {
-    const providerConfig = await ensureReadonlyProviderConfig();
-
     commandObj.error(
       `nox names: ${color.yellow(
         unknownNoxNames.join(", "),
@@ -1058,3 +1126,7 @@ export async function resolveComputePeersByNames(
     return validNoxNames.includes(name);
   });
 }
+
+export type ResolvedComputePeer = Awaited<
+  ReturnType<typeof resolveComputePeersByNames>
+>[number];

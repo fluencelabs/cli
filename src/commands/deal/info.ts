@@ -17,18 +17,14 @@
 import { color } from "@oclif/color";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { peerIdHexStringToBase58String } from "../../lib/chain/peerIdToUint8Array.js";
+import { peerIdHexStringToBase58String } from "../../lib/chain/conversions.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
-  DEPLOYMENT_NAMES,
+  DEPLOYMENT_NAMES_ARG,
 } from "../../lib/const.js";
-import {
-  type DealNameAndId,
-  getDeals,
-  removeDealFromWorkersConfig,
-} from "../../lib/deal.js";
+import { type DealNameAndId, getDeals } from "../../lib/deal.js";
 import { getDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -41,7 +37,7 @@ export default class Info extends BaseCommand<typeof Info> {
   };
 
   static override args = {
-    ...DEPLOYMENT_NAMES,
+    ...DEPLOYMENT_NAMES_ARG,
   };
 
   async run(): Promise<void> {
@@ -59,72 +55,58 @@ async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   const deal = dealClient.getDeal(dealId);
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
-
-  commandObj.log(color.gray(`Deal ID: ${dealId}`));
+  commandObj.log(`Deal ID: ${dealId}`);
 
   //TODO: change to enum
   switch (status) {
     case 0n:
-      commandObj.log(color.gray(`Status: Inactive`));
+      commandObj.log(`Status: Inactive`);
       break;
     case 1n:
-      commandObj.log(color.gray(`Status: Active`));
+      commandObj.log(`Status: Active`);
       break;
     case 2n:
-      commandObj.log(color.gray(`Status: Ended`));
-      await removeDealFromWorkersConfig(dealName);
-      return;
+      commandObj.log(`Status: Ended`);
+      break;
   }
 
   const { ethers } = await import("ethers");
 
-  commandObj.log(
-    color.gray(`Balance: ${ethers.formatEther(await deal.getFreeBalance())}`),
-  );
+  commandObj.log(`Balance: ${ethers.formatEther(await deal.getFreeBalance())}`);
 
   commandObj.log(
-    color.gray(
-      `Price per worker per epoch: ${ethers.formatEther(
-        await deal.pricePerWorkerEpoch(),
-      )}`,
-    ),
+    `Price per worker per epoch: ${ethers.formatEther(
+      await deal.pricePerWorkerEpoch(),
+    )}`,
   );
 
-  commandObj.log(color.gray(`Payment token: ${await deal.paymentToken()}`));
-
-  commandObj.log(color.gray(`Min workers: ${await deal.minWorkers()}`));
-
-  commandObj.log(color.gray(`Target worker: ${await deal.targetWorkers()}`));
+  commandObj.log(`Payment token: ${await deal.paymentToken()}`);
+  commandObj.log(`Min workers: ${await deal.minWorkers()}`);
+  commandObj.log(`Target worker: ${await deal.targetWorkers()}`);
 
   const currentComputeUnitCount = await deal["getComputeUnitCount()"]();
 
-  commandObj.log(
-    color.gray(`Current compute units: ${currentComputeUnitCount}`),
-  );
-
-  commandObj.log(color.gray(`--Compute Units--`));
+  commandObj.log(`Current compute units: ${currentComputeUnitCount}`);
 
   if (currentComputeUnitCount === 0n) {
-    commandObj.log(color.gray(`No compute units`));
+    commandObj.log(`No compute units`);
   } else {
     const computeUnits = await deal.getComputeUnits();
 
     for (const unit of computeUnits) {
-      commandObj.log(color.gray(`\nCompute unit: ${unit.id}`));
-      commandObj.log(color.gray(`Provider: ${unit.provider}`));
+      commandObj.log(`\nCompute unit: ${unit.id}`);
+      commandObj.log(`Provider: ${unit.provider}`);
 
       if (unit.workerId === ethers.ZeroHash) {
-        commandObj.log(color.gray(`Worker Id: None`));
+        commandObj.log(`Worker Id: None`);
       } else {
-        commandObj.log(color.gray(`Worker Id: ${unit.workerId}`));
+        commandObj.log(`Worker Id: ${unit.workerId}`);
       }
 
-      commandObj.log(color.gray(`Peer Id Hex: ${unit.peerId}`));
+      commandObj.log(`Peer Id Hex: ${unit.peerId}`);
 
       commandObj.log(
-        color.gray(
-          `Peer Id base58: ${await peerIdHexStringToBase58String(unit.peerId)}`,
-        ),
+        `Peer Id base58: ${await peerIdHexStringToBase58String(unit.peerId)}`,
       );
     }
   }

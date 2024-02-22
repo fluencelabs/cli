@@ -29,20 +29,19 @@ import type { ethers, LogDescription } from "ethers";
 import chunk from "lodash-es/chunk.js";
 
 import { LOCAL_NET_DEFAULT_WALLET_KEY } from "./accounts.js";
+import { getChainId } from "./chain/chainId.js";
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
 import {
-  DEAL_CONFIG,
+  CHAIN_URLS,
   CLI_CONNECTOR_URL,
-  DEAL_RPC_CONFIG,
   WC_PROJECT_ID,
   WC_METADATA,
-  CONTRACTS_ENV_TO_CHAIN_ID,
   CLI_NAME_FULL,
   PRIV_KEY_FLAG_NAME,
 } from "./const.js";
 import { dbg } from "./dbg.js";
-import { ensureChainEnv } from "./ensureChainNetwork.js";
+import { ensureDealTsClientEnv, ensureChainEnv } from "./ensureChainNetwork.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
@@ -103,10 +102,10 @@ let dealMatcherClient: DealMatcherClient | undefined = undefined;
 
 export async function getDealMatcherClient() {
   const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
-  const chainEnv = await ensureChainEnv();
+  const env = await ensureDealTsClientEnv();
 
   if (dealMatcherClient === undefined) {
-    dealMatcherClient = new DealMatcherClient(chainEnv);
+    dealMatcherClient = new DealMatcherClient(env);
   }
 
   return dealMatcherClient;
@@ -116,10 +115,14 @@ let dealExplorerClient: DealExplorerClient | undefined = undefined;
 
 export async function getDealExplorerClient() {
   const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
-  const chainEnv = await ensureChainEnv();
+  const env = await ensureDealTsClientEnv();
 
   if (dealExplorerClient === undefined) {
-    dealExplorerClient = new DealExplorerClient(chainEnv);
+    dealExplorerClient = new DealExplorerClient(
+      env,
+      undefined,
+      signerOrWallet ?? (await getDealClient()).signerOrWallet,
+    );
   }
 
   return dealExplorerClient;
@@ -129,7 +132,7 @@ async function createDealClient(
   signerOrProvider: ethers.Provider | ethers.Signer,
 ) {
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const chainEnv = await ensureChainEnv();
+  const chainEnv = await ensureDealTsClientEnv();
   const client = new DealClient(signerOrProvider, chainEnv);
 
   await setTryTimeout(
@@ -153,7 +156,7 @@ export async function ensureProvider(): Promise<ethers.Provider> {
   const chainEnv = await ensureChainEnv();
 
   if (provider === undefined) {
-    provider = new ethers.JsonRpcProvider(DEAL_CONFIG[chainEnv].url);
+    provider = new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]);
   }
 
   return provider;
@@ -189,6 +192,7 @@ async function getWalletConnectProvider() {
   });
 
   const chainEnv = await ensureChainEnv();
+  const chainId = await getChainId();
 
   const session = await provider.connect({
     namespaces: {
@@ -200,9 +204,9 @@ async function getWalletConnectProvider() {
           "personal_sign",
           "eth_signTypedData",
         ],
-        chains: [`eip155:${CONTRACTS_ENV_TO_CHAIN_ID[chainEnv]}`],
+        chains: [`eip155:${chainId}`],
         events: ["chainChanged", "accountsChanged"],
-        rpcMap: DEAL_RPC_CONFIG,
+        rpcMap: { [chainId]: CHAIN_URLS[chainEnv] },
       },
     },
   });
