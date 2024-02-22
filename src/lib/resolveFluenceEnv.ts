@@ -18,7 +18,10 @@ import { color } from "@oclif/color";
 
 import { chainFlags } from "./chainFlags.js";
 import { commandObj } from "./commandObj.js";
-import { envConfig } from "./configs/globalConfigs.js";
+import { envConfig, setEnvConfig } from "./configs/globalConfigs.js";
+import { initNewEnvConfig } from "./configs/project/env.js";
+import { initFluenceConfig } from "./configs/project/fluence.js";
+import { initReadonlyProviderConfig } from "./configs/project/provider.js";
 import {
   ENV_FLAG_NAME,
   FLUENCE_ENVS,
@@ -28,6 +31,7 @@ import {
 import { list } from "./prompt.js";
 
 let env: FluenceEnv | undefined = undefined;
+let envPromptPromise: Promise<FluenceEnv> | undefined = undefined;
 
 export async function ensureFluenceEnv(): Promise<FluenceEnv> {
   if (env !== undefined) {
@@ -42,16 +46,25 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
     return fluenceEnv;
   }
 
-  const fluenceEnvFromPrompt = await fluenceEnvPrompt();
-  env = fluenceEnvFromPrompt;
-
-  if (envConfig === null) {
-    return fluenceEnvFromPrompt;
+  if (envPromptPromise !== undefined) {
+    return await envPromptPromise;
   }
 
-  envConfig.fluenceEnv = fluenceEnvFromPrompt;
-  await envConfig.$commit();
-  return fluenceEnvFromPrompt;
+  envPromptPromise = fluenceEnvPrompt();
+  env = await envPromptPromise;
+
+  if (
+    envConfig !== null ||
+    (await initFluenceConfig()) !== null ||
+    (await initReadonlyProviderConfig()) !== null
+  ) {
+    const envConfig = await initNewEnvConfig(env);
+    setEnvConfig(envConfig);
+    envConfig.fluenceEnv = env;
+    await envConfig.$commit();
+  }
+
+  return env;
 }
 
 export async function fluenceEnvPrompt(
