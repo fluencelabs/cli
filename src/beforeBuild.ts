@@ -161,6 +161,16 @@ const TARBALL_BUILD_COMMAND_PATH = join(
   "build.js",
 );
 
+const PROMOTE_COMMAND_FILE_PATH = join(
+  NODE_MODULES_DIR_NAME,
+  "oclif",
+  "lib",
+  "commands",
+  "promote.js",
+);
+
+const WINDOWS_TARGET = "win32-x64";
+
 async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
@@ -201,4 +211,11 @@ await patchOclif(
   TARBALL_BUILD_COMMAND_PATH,
   "tar -xzf",
   "tar --force-local -xzf",
+);
+
+// Don't build tarballs when packing for Windows
+await patchOclif(
+  PROMOTE_COMMAND_FILE_PATH,
+  "promoteGzTarballs(target)",
+  `...(target === '${WINDOWS_TARGET}' ? [] : [promoteGzTarballs(target)])`,
 );
