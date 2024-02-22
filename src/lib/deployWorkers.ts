@@ -243,52 +243,6 @@ export async function prepareForDeploy({
     };
   });
 
-  const spellsToCompile = isBuildCheck
-    ? Object.keys(fluenceConfig.spells ?? {})
-    : [
-        ...new Set(
-          workerConfigs.flatMap(({ workerConfig }) => {
-            return workerConfig.spells ?? [];
-          }),
-        ),
-      ];
-
-  const spellConfigs = (
-    await compileSpells(fluenceConfig, aquaImportsFromFlags, spellsToCompile)
-  ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
-    const { script } = functions[spellConfig.function] ?? {};
-
-    if (script === undefined) {
-      commandObj.error(
-        `Failed to find spell function ${color.yellow(
-          spellConfig.function,
-        )} in aqua file at ${color.yellow(spellAquaFilePath)}`,
-      );
-    }
-
-    return {
-      name,
-      config: {
-        blockchain: { end_block: 0, start_block: 0 },
-        connections: { connect: false, disconnect: false },
-        clock:
-          spellConfig.clock?.periodSec === undefined
-            ? {
-                start_sec: 0,
-                end_sec: 0,
-                period_sec: 0,
-              }
-            : {
-                start_sec: resolveStartSec(spellConfig),
-                end_sec: resolveEndSec(spellConfig),
-                period_sec: spellConfig.clock.periodSec,
-              },
-      },
-      script,
-      init_args: spellConfig.initArgs ?? {},
-    };
-  });
-
   const serviceNames = isBuildCheck
     ? Object.keys(fluenceConfig.services ?? {})
     : [
@@ -445,6 +399,52 @@ export async function prepareForDeploy({
       marineCli,
     );
   }
+
+  const spellsToCompile = isBuildCheck
+    ? Object.keys(fluenceConfig.spells ?? {})
+    : [
+        ...new Set(
+          workerConfigs.flatMap(({ workerConfig }) => {
+            return workerConfig.spells ?? [];
+          }),
+        ),
+      ];
+
+  const spellConfigs = (
+    await compileSpells(fluenceConfig, aquaImportsFromFlags, spellsToCompile)
+  ).map(({ functions, name, spellConfig, spellAquaFilePath }) => {
+    const { script } = functions[spellConfig.function] ?? {};
+
+    if (script === undefined) {
+      commandObj.error(
+        `Failed to find spell function ${color.yellow(
+          spellConfig.function,
+        )} in aqua file at ${color.yellow(spellAquaFilePath)}`,
+      );
+    }
+
+    return {
+      name,
+      config: {
+        blockchain: { end_block: 0, start_block: 0 },
+        connections: { connect: false, disconnect: false },
+        clock:
+          spellConfig.clock?.periodSec === undefined
+            ? {
+                start_sec: 0,
+                end_sec: 0,
+                period_sec: 0,
+              }
+            : {
+                start_sec: resolveStartSec(spellConfig),
+                end_sec: resolveEndSec(spellConfig),
+                period_sec: spellConfig.clock.periodSec,
+              },
+      },
+      script,
+      init_args: spellConfig.initArgs ?? {},
+    };
+  });
 
   const workers: Upload_deployArgConfig["workers"] = await Promise.all(
     hostsOrDeals
