@@ -150,12 +150,8 @@ jobs:
         run: yarn upload-${{ inputs.platform }}
 
       - name: Promote fluence-cli
-        if: inputs.platform != 'win32-x64'
+        if: inputs.channel != 'null' && inputs.platform != 'win32-x64'
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
-
-      - name: Promote fluence-cli windows
-        if: inputs.platform == 'win32-x64'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --win --indexes
 
       - name: Rename archive
         if: inputs.platform != 'win32-x64'
