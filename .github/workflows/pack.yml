@@ -153,10 +153,6 @@ jobs:
         if: inputs.platform != 'win32-x64'
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --no-xz --indexes
 
-      - name: Promote fluence-cli windows
-        if: inputs.platform == 'win32-x64'
-        run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel ${{ inputs.channel }} --win --indexes
-
       - name: Rename archive
         if: inputs.platform != 'win32-x64'
         run: mv dist/fluence-*${{ inputs.platform }}*.tar.gz fluence-cli-${{ inputs.platform }}.tar.gz
@@ -194,5 +190,5 @@ jobs:
           tag_name: ${{ inputs.tag }}
 
       - name: Promote fluence-cli to unstable
-        if: inputs.tag != 'null'
+        if: inputs.tag != 'null' ?? inputs.platform != 'win32-x64'
         run: yarn oclif promote -t ${{ inputs.platform }} --version "$(jq .[] -r .github/release-please/manifest.json)" --sha "$(git rev-parse --short HEAD)" --channel unstable --no-xz --indexes
