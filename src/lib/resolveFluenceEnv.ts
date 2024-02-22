@@ -47,7 +47,7 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
   }
 
   if (envPromptPromise !== undefined) {
-    return await envPromptPromise;
+    return envPromptPromise;
   }
 
   envPromptPromise = fluenceEnvPrompt();
