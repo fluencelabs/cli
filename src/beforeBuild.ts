@@ -153,15 +153,6 @@ const WIN_BIN_FILE_PATH = join(
   "win.js",
 );
 
-const UPDATE_COMMAND_FILE_PATH = join(
-  NODE_MODULES_DIR_NAME,
-  "@oclif",
-  "plugin-update",
-  "dist",
-  "commands",
-  "update.js",
-);
-
 async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
@@ -197,11 +188,9 @@ await patchOclif(
   "setlocal enableextensions\nset NODE_NO_WARNINGS=1",
 );
 
-// Turn off update on windows
-const updateCommandString =
-  "const { args, flags } = await this.parse(UpdateCommand);";
+// Pack tar.gz for Windows. We need it to perform update
 await patchOclif(
-  UPDATE_COMMAND_FILE_PATH,
-  updateCommandString,
-  `if (this.config.windows) this.error('You cannot use 'update' command on Windows. You can find newer releases here - https://github.com/fluencelabs/cli/releases. Make sure to uninstall your current version of Fluence CLI before installing a new one, otherwise you could encounter hard to debug issues.'); ${updateCommandString}`,
+  WIN_BIN_FILE_PATH,
+  "await Tarballs.build(buildConfig, { pack: false, parallel: true, platform: 'win32', tarball: flags.tarball });",
+  "await Tarballs.build(buildConfig, { pack: true, parallel: true, platform: 'win32', tarball: flags.tarball });",
 );
