@@ -194,3 +194,10 @@ await patchOclif(
   "await Tarballs.build(buildConfig, { pack: false, parallel: true, platform: 'win32', tarball: flags.tarball });",
   "await Tarballs.build(buildConfig, { pack: true, parallel: true, platform: 'win32', tarball: flags.tarball });",
 );
+
+// Set correct redirection command on Windows
+await patchOclif(
+  WIN_BIN_FILE_PATH,
+  '"%~dp0\\\\..\\\\client\\\\bin\\\\node.exe" "%~dp0\\\\..\\\\client\\\\${additionalCLI ? `${additionalCLI}\\\\bin\\\\run` : \'bin\\\\run\'}" %*',
+  '"%~dp0\\\\..\\\\client\\\\bin\\\\fluence.cmd" %*',
+);
