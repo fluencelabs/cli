@@ -820,7 +820,7 @@ FLAGS
                                                    specified, will use the default key for the project. If there is no
                                                    fluence project or there is no default key, will use user's default
                                                    key
-  -u, --update                                     Update your previous deployment deployment
+  -u, --update                                     Update your previous deployment
       --[no-]auto-match                            Toggle automatic matching. Auto-matching is turned on by default
       --dial-timeout=<milliseconds>                [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
@@ -1185,7 +1185,7 @@ ALIASES
   $ fluence provider ca
 ```
 
-_See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/cc-activate.ts)_
+_See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-activate.ts)_
 
 ## `fluence provider cc-create`
 
@@ -1212,7 +1212,7 @@ ALIASES
   $ fluence provider cc
 ```
 
-_See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/cc-create.ts)_
+_See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-create.ts)_
 
 ## `fluence provider cc-info`
 
@@ -1239,7 +1239,7 @@ ALIASES
   $ fluence provider ci
 ```
 
-_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/cc-info.ts)_
+_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-info.ts)_
 
 ## `fluence provider cc-withdraw-collateral`
 
@@ -1266,7 +1266,7 @@ ALIASES
   $ fluence provider cwc
 ```
 
-_See code: [src/commands/provider/cc-withdraw-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/cc-withdraw-collateral.ts)_
+_See code: [src/commands/provider/cc-withdraw-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-withdraw-collateral.ts)_
 
 ## `fluence provider cc-withdraw-rewards`
 
@@ -1293,7 +1293,7 @@ ALIASES
   $ fluence provider cwr
 ```
 
-_See code: [src/commands/provider/cc-withdraw-rewards.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/cc-withdraw-rewards.ts)_
+_See code: [src/commands/provider/cc-withdraw-rewards.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-withdraw-rewards.ts)_
 
 ## `fluence provider deal-exit [DEAL-IDS]`
 
@@ -1321,7 +1321,7 @@ ALIASES
   $ fluence provider de
 ```
 
-_See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/deal-exit.ts)_
+_See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/deal-exit.ts)_
 
 ## `fluence provider deal-list`
 
@@ -1348,7 +1348,7 @@ ALIASES
   $ fluence provider dl
 ```
 
-_See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/deal-list.ts)_
+_See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/deal-list.ts)_
 
 ## `fluence provider deal-withdraw [DEAL-IDS]`
 
@@ -1376,7 +1376,7 @@ ALIASES
   $ fluence provider dw
 ```
 
-_See code: [src/commands/provider/deal-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/deal-withdraw.ts)_
+_See code: [src/commands/provider/deal-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/deal-withdraw.ts)_
 
 ## `fluence provider gen`
 
@@ -1509,7 +1509,7 @@ ALIASES
   $ fluence provider ou
 ```
 
-_See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/offer-update.ts)_
+_See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/offer-update.ts)_
 
 ## `fluence provider register`
 
@@ -1590,7 +1590,7 @@ ALIASES
   $ fluence provider sw
 ```
 
-_See code: [src/commands/provider/signing-wallets.ts](https://github.com/fluencelabs/cli/blob/v0.15.5/src/commands/provider/signing-wallets.ts)_
+_See code: [src/commands/provider/signing-wallets.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/signing-wallets.ts)_
 
 ## `fluence provider tokens-distribute`
 
