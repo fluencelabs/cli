@@ -44,14 +44,17 @@ import {
   signBatch,
 } from "../dealClient.js";
 import {
-  jsonStringify,
   commaSepStrToArr,
   splitErrorsAndResults,
   stringifyUnknown,
 } from "../helpers/utils.js";
 import { checkboxes } from "../prompt.js";
 
-import { cidStringToCIDV1Struct, peerIdToUint8Array } from "./conversions.js";
+import {
+  cidStringToCIDV1Struct,
+  peerIdHexStringToBase58String,
+  peerIdToUint8Array,
+} from "./conversions.js";
 import { assertProviderIsRegistered } from "./isProviderRegistered.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
@@ -201,13 +204,14 @@ ${
     ? "No offers where created!"
     : `Offers ${color.yellow(offersStr)} successfully created!`
 }
-${offersInfoToString([offerInfoErrors, offersInfo])}
+${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
 }
 
-export function offersInfoToString([offersInfoErrors, offersInfo]: Awaited<
-  ReturnType<typeof getOffersInfo>
->) {
+export async function offersInfoToString([
+  offersInfoErrors,
+  offersInfos,
+]: Awaited<ReturnType<typeof getOffersInfo>>) {
   const offerInfoErrorsStr =
     offersInfoErrors.length > 0
       ? `${color.red(
@@ -216,33 +220,93 @@ export function offersInfoToString([offersInfoErrors, offersInfo]: Awaited<
       : "";
 
   const offersInfoStr =
-    offersInfo.length > 0
-      ? `${color.green("Got offers info from chain:")}\n\n${offersInfo
-          .map(({ offerId, offerName, offerInfo, offerExplorerInfo }) => {
-            return `Offer: ${color.yellow(offerName)}\n${yamlDiffPatch(
-              "",
-              {},
-              JSON.parse(
-                // this is needed to convert all BigInts to string
-                jsonStringify(
-                  offerExplorerInfo ??
-                    (offerInfo === undefined
-                      ? undefined
-                      : {
-                          providerId: offerInfo.provider,
-                          minPricePerWorkerEpoch:
-                            offerInfo.minPricePerWorkerEpoch,
-                          peerCount: offerInfo.peerCount,
-                          paymentToken: offerInfo.paymentToken,
-                        }) ?? { offerId },
-                ),
-              ),
-            )}`;
-          })
-          .join("\n\n")}`
+    offersInfos.length > 0
+      ? `${color.green("Got offers info from chain:")}\n\n${(
+          await Promise.all(
+            offersInfos.map(async (offerInfo) => {
+              return `Offer: ${color.yellow(
+                offerInfo.offerName,
+              )}\n${yamlDiffPatch("", {}, await resolveOfferInfo(offerInfo))}`;
+            }),
+          )
+        ).join("\n\n")}`
       : "";
 
   return [offerInfoErrorsStr, offersInfoStr].join("\n\n");
+}
+
+async function resolveOfferInfo({
+  offerId,
+  offerInfo,
+  offerExplorerInfo,
+}: Awaited<ReturnType<typeof getOfferInfo>>) {
+  // id: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  // createdAt: 1708673387
+  // totalComputeUnits: 96
+  // freeComputeUnits: 96
+  // paymentToken:
+  //   address: "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+  //   symbol: tUSD
+  //   decimals: "6"
+  // pricePerEpoch: "10000000.000"
+  // effectors:
+  //   - cid: "\x01U\x12 �uڢb�\t\x17\x1e��\f��<\x04��\x0fS��-�ы�\\�5�"
+  //     description: Unknown
+  // providerId: "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+  // peers:
+  //   - id: "0x738583bc1535587ca380c6965fc0ecf9b88f5ead1a27a020c88d920b9a428a92"
+  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  //     computeUnits: []
+  //   - id: "0xbf2e8114e269532b249e2e30a8959348841abd6f4352242a862d1ca2b19fa7e9"
+  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  //     computeUnits: []
+  //   - id: "0xc5b8e674bc9646e998c913e95004c839993e3a9d2e6dabb159c3656e21906efd"
+  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  //     computeUnits: []
+  // updatedAt: 1708673387
+  const { ethers } = await import("ethers");
+
+  if (offerExplorerInfo !== undefined) {
+    return {
+      "Provider ID": offerExplorerInfo.providerId,
+      "Offer ID": offerExplorerInfo.id,
+      "Price Per Epoch":
+        offerInfo === undefined
+          ? ethers.formatEther(
+              // No idea why explorer returns pricePerEpoch with such a weird number of decimal places
+              BigInt(Number(offerExplorerInfo.pricePerEpoch) * 10 ** 6),
+            )
+          : ethers.formatEther(offerInfo.minPricePerWorkerEpoch),
+      "Created at": new Date(offerExplorerInfo.createdAt * 1000).toISOString(),
+      "Updated at": new Date(offerExplorerInfo.updatedAt * 1000).toISOString(),
+      "Total compute units": offerExplorerInfo.totalComputeUnits,
+      "Free compute units": offerExplorerInfo.freeComputeUnits,
+      // TODO: cid currently return garbage
+      // Effectors: offerExplorerInfo.effectors.map(({ cid }) => {
+      //   return { cid };
+      // }),
+      Peers: await Promise.all(
+        offerExplorerInfo.peers.map(async ({ id }) => {
+          return {
+            "Hex ID": id,
+            "Peer ID": await peerIdHexStringToBase58String(id),
+            // "Compute Units": "TODO: currently returns empty for some reason"
+          };
+        }),
+      ),
+    };
+  }
+
+  if (offerInfo !== undefined) {
+    return {
+      "Provider ID": offerInfo.provider,
+      "Offer ID": offerId,
+      "Price Per Epoch": ethers.formatEther(offerInfo.minPricePerWorkerEpoch),
+      "Peer Count": offerInfo.peerCount.toString(),
+    };
+  }
+
+  return { offerId };
 }
 
 export async function updateOffers(flags: OffersArgs) {
@@ -400,7 +464,7 @@ async function resolveOffersFromProviderConfig(
 
   if (notFoundOffers.length > 0) {
     commandObj.error(
-      `Offer${notFoundOffers.length === 1 ? "" : "s"} ${color.yellow(
+      `Offers: ${color.yellow(
         notFoundOffers.join(", "),
       )} are not found in the 'offers' section of ${providerConfig.$getPath()}`,
     );
@@ -567,7 +631,7 @@ export async function resolveOffersFromProviderArtifactsConfig(
 
   if (notFoundOffers.length > 0) {
     commandObj.error(
-      `Offer${notFoundOffers.length === 1 ? "" : "s"} ${color.yellow(
+      `Offers: ${color.yellow(
         notFoundOffers.join(", "),
       )} are not found in 'offers' section of ${providerArtifactsConfig.$getPath()}`,
     );

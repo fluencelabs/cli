@@ -38,6 +38,6 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
 
     const offers = await resolveOffersFromProviderArtifactsConfig(flags);
     const offerInfoResult = await getOffersInfo(offers);
-    commandObj.logToStderr(offersInfoToString(offerInfoResult));
+    commandObj.logToStderr(await offersInfoToString(offerInfoResult));
   }
 }

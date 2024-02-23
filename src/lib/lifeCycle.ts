@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { access } from "fs/promises";
+
 import { color } from "@oclif/color";
 import type {
   ArgOutput,
@@ -52,6 +54,7 @@ import {
   projectRootDir,
   recursivelyFindProjectRootDir,
   setProjectRootDir,
+  getProviderConfigPath,
 } from "./paths.js";
 import { confirm } from "./prompt.js";
 
@@ -160,10 +163,16 @@ export async function initCli<
   if (requiresFluenceProject) {
     setEnvConfig(await initNewEnvConfig());
   } else {
-    const envConfig = await initEnvConfig();
+    try {
+      // ensure env config also when provider.yaml exists
+      await access(getProviderConfigPath());
+      setEnvConfig(await initNewEnvConfig());
+    } catch {
+      const envConfig = await initEnvConfig();
 
-    if (envConfig !== null) {
-      setEnvConfig(envConfig);
+      if (envConfig !== null) {
+        setEnvConfig(envConfig);
+      }
     }
   }
 
