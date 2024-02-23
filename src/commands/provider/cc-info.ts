@@ -41,6 +41,7 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
     const capacity = await dealClient.getCapacity();
 
     const computePeers = await resolveComputePeersByNames(flags);
+    const { ethers } = await import("ethers");
 
     const infos = await Promise.all(
       computePeers.map(async ({ peerId, name }) => {
@@ -58,10 +59,14 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
             Status: ccStatusToString(commitment.status),
             "Start epoch": commitment.startEpoch.toString(),
             "End epoch": commitment.endEpoch.toString(),
-            "Reward delegator rate": commitment.rewardDelegatorRate.toString(),
-            "Collateral per unit": commitment.collateralPerUnit.toString(),
+            "Reward delegator rate": `${
+              Number(commitment.rewardDelegatorRate) / 10 ** 5
+            }%`,
+            "Collateral per unit": ethers.formatEther(
+              commitment.collateralPerUnit,
+            ),
             Delegator: commitment.delegator.toString(),
-            "Existed unit count": commitment.exitedUnitCount.toString(),
+            "Exited unit count": commitment.exitedUnitCount.toString(),
             "Failed epoch": commitment.failedEpoch.toString(),
             "Unit count": commitment.unitCount.toString(),
             "Total compute unit fail count":

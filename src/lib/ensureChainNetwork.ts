@@ -18,12 +18,7 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "./commandObj.js";
 import { initReadonlyFluenceConfig } from "./configs/project/fluence.js";
-import {
-  type ChainENV,
-  CLI_NAME,
-  ENV_FLAG_NAME,
-  chainEnvToDealTsClientEnv,
-} from "./const.js";
+import { type ChainENV, CLI_NAME, ENV_FLAG_NAME } from "./const.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 let env: ChainENV | undefined = undefined;
@@ -69,8 +64,4 @@ export async function ensureChainEnv(): Promise<ChainENV> {
   }
 
   return setEnv(customContractsEnv);
-}
-
-export async function ensureDealTsClientEnv() {
-  return chainEnvToDealTsClientEnv(await ensureChainEnv());
 }

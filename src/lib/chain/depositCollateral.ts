@@ -20,6 +20,7 @@ import type {
   TypedEventLog,
 } from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.js";
 import { color } from "@oclif/color";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
 import {
@@ -29,7 +30,7 @@ import {
 import { NOX_NAMES_FLAG_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
-import { peerIdToUint8Array } from "./conversions.js";
+import { peerIdHexStringToBase58String } from "./conversions.js";
 
 type ComputePeerWithCommitmentCreatedEvent = ResolvedComputePeer & {
   event: TypedEventLog<
@@ -39,7 +40,6 @@ type ComputePeerWithCommitmentCreatedEvent = ResolvedComputePeer & {
       CommitmentCreatedEvent.OutputObject
     >
   >;
-  peerIdHex: string;
 };
 
 export async function depositCollateralByNoxNames(flags: {
@@ -48,29 +48,33 @@ export async function depositCollateralByNoxNames(flags: {
   const { dealClient } = await getDealClient();
   const computePeers = await resolveComputePeersByNames(flags);
   const capacity = await dealClient.getCapacity();
-  const { ethers } = await import("ethers");
 
-  const computePeersWithPeerIdHexes = await Promise.all(
-    computePeers.map(async (computePeer) => {
+  const commitmentCreatedEvents = await Promise.all(
+    (await capacity.queryFilter(capacity.filters.CommitmentCreated)).map(
+      async (event) => {
+        return {
+          event,
+          peerId: await peerIdHexStringToBase58String(event.args.peerId),
+        };
+      },
+    ),
+  );
+
+  if (commitmentCreatedEvents.length === 0) {
+    return commandObj.error(
+      `capacity.queryFilter(capacity.filters.CommitmentCreated) didn't return any CommitmentCreated events`,
+    );
+  }
+
+  const computePeersWithCommitmentCreatedEvents = computePeers
+    .map((computePeer) => {
+      const { event } =
+        commitmentCreatedEvents.find(({ peerId }) => {
+          return peerId === computePeer.peerId;
+        }) ?? {};
+
       return {
         ...computePeer,
-        peerIdHex: ethers.hexlify(await peerIdToUint8Array(computePeer.peerId)),
-      };
-    }),
-  );
-
-  const commitmentCreatedEvents = await capacity.queryFilter(
-    capacity.filters.CommitmentCreated,
-  );
-
-  const computePeersWithCommitmentCreatedEvents = computePeersWithPeerIdHexes
-    .map((computePeerWithPeerIdHexes) => {
-      const event = commitmentCreatedEvents.find((e) => {
-        return e.args.peerId === computePeerWithPeerIdHexes.peerIdHex;
-      });
-
-      return {
-        ...computePeerWithPeerIdHexes,
         event,
       };
     })
@@ -78,27 +82,42 @@ export async function depositCollateralByNoxNames(flags: {
       return c.event !== undefined;
     });
 
-  const commitmentIds = computePeersWithCommitmentCreatedEvents.map((c) => {
-    return c.event.args.commitmentId;
-  });
-
-  if (commitmentIds.length === 0) {
+  if (computePeersWithCommitmentCreatedEvents.length === 0) {
     return commandObj.error(
-      `Wasn't able to find any commitments for the given peers. Was searching for: ${computePeersWithPeerIdHexes
-        .map((c) => {
-          return c.name;
+      `Wasn't able to find any commitments for the given peers. Was searching for peers: ${computePeersWithCommitmentCreatedEvents
+        .map(({ name, peerId }) => {
+          return `${color.yellow(name)}: ${peerId}`;
         })
-        .join(", ")}`,
+        .join(
+          "\n",
+        )}\n\nGot events with the following peerIds: ${commitmentCreatedEvents
+        .map(({ peerId, event }) => {
+          return yamlDiffPatch(
+            "",
+            {},
+            {
+              "Peer ID": peerId,
+              "Peer ID hex": event.args.peerId,
+            },
+          );
+        })
+        .join("\n")}`,
     );
   }
 
   commandObj.log(
-    `Found created commitments for the following peers: ${computePeersWithCommitmentCreatedEvents
-      .map((c) => {
-        return c.name;
-      })
-      .join(", ")}`,
+    `Found created commitments for the following peers: ${color.yellow(
+      computePeersWithCommitmentCreatedEvents
+        .map(({ name }) => {
+          return name;
+        })
+        .join(", "),
+    )}`,
   );
+
+  const commitmentIds = computePeersWithCommitmentCreatedEvents.map((c) => {
+    return c.event.args.commitmentId;
+  });
 
   await depositCollateral(
     commitmentIds,

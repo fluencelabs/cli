@@ -99,10 +99,6 @@ export const CHAIN_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ChainENV = (typeof CHAIN_ENV)[number];
 export const isChainEnv = getIsStringUnion(CHAIN_ENV);
 
-export function chainEnvToDealTsClientEnv(chainEnv: ChainENV) {
-  return chainEnv === "dar" ? "testnet" : chainEnv;
-}
-
 export type ChainConfig = {
   url: string;
   id: number;

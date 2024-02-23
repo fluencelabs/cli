@@ -72,7 +72,7 @@ export const DEPLOY_FLAGS = {
   }),
   update: Flags.boolean({
     char: "u",
-    description: "Update your previous deployment deployment",
+    description: "Update your previous deployment",
     default: false,
   }),
 };
@@ -286,10 +286,16 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   await disconnectFluenceClient();
 }
 
+const blockScoutUrls: Record<Exclude<ChainENV, "local">, string> = {
+  dar: "https://blockscout-dar.fluence.dev/tx/",
+  kras: "https://blockscout-kras.fluence.dev/tx/",
+  stage: "https://blockscout-stage.fluence.dev/tx/",
+};
+
 function getLinkToAddress(dealId: string, contractsENV: ChainENV) {
   return contractsENV === "local"
     ? dealId
-    : `https://mumbai.polygonscan.com/address/${dealId}`;
+    : `${blockScoutUrls[contractsENV]}${dealId}`;
 }
 
 async function upload(

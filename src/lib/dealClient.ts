@@ -41,7 +41,7 @@ import {
   PRIV_KEY_FLAG_NAME,
 } from "./const.js";
 import { dbg } from "./dbg.js";
-import { ensureDealTsClientEnv, ensureChainEnv } from "./ensureChainNetwork.js";
+import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { setTryTimeout, stringifyUnknown } from "./helpers/utils.js";
 
 const WC_QUERY_PARAM_NAME = "wc";
@@ -102,7 +102,7 @@ let dealMatcherClient: DealMatcherClient | undefined = undefined;
 
 export async function getDealMatcherClient() {
   const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
-  const env = await ensureDealTsClientEnv();
+  const env = await ensureChainEnv();
 
   if (dealMatcherClient === undefined) {
     dealMatcherClient = new DealMatcherClient(env);
@@ -115,7 +115,7 @@ let dealExplorerClient: DealExplorerClient | undefined = undefined;
 
 export async function getDealExplorerClient() {
   const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
-  const env = await ensureDealTsClientEnv();
+  const env = await ensureChainEnv();
 
   if (dealExplorerClient === undefined) {
     dealExplorerClient = new DealExplorerClient(
@@ -132,7 +132,7 @@ async function createDealClient(
   signerOrProvider: ethers.Provider | ethers.Signer,
 ) {
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const chainEnv = await ensureDealTsClientEnv();
+  const chainEnv = await ensureChainEnv();
   const client = new DealClient(signerOrProvider, chainEnv);
 
   await setTryTimeout(
