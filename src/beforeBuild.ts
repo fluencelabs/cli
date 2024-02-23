@@ -162,8 +162,6 @@ const UPDATE_COMMAND_FILE_PATH = join(
   "update.js",
 );
 
-const WINDOWS_PLATFORM = "win32";
-
 async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
