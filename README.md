@@ -13,11 +13,19 @@ installation, storage of keys and ids, etc.
 
 ### Using install script
 
+**Linux | macOS**
+
 To download and install `fluence` use our `install.sh` script
 
 ```shell
 curl -qsL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | bash
 ```
+
+**Windows**
+
+To download and install `fluence` use Windows `.exe` installer from the [release](https://github.com/fluencelabs/cli/releases) page.
+
+**Updates**
 
 To select `fluence` version compatible with certain network (`dar`, `stage`,
 `kras`) run:
@@ -34,7 +42,7 @@ For more information run:
 fluence update --help
 ```
 
-### Installing manually
+### Installing manually (Not supported on Windows)
 
 -   download fluence archive for your platfrom from
     [latest release](https://github.com/fluencelabs/cli/releases/latest).
