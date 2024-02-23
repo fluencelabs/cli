@@ -351,7 +351,7 @@ export async function updateOffers(flags: OffersArgs) {
   } of offersToUpdate) {
     if (offerInfo === undefined || offerExplorerInfo === undefined) {
       commandObj.warn(
-        `Can't find offer info for offer with id ${offerId} in chain. Please check if the offer exists in chain and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`,
+        `Can't find offer info for offer with id ${offerId} in chain. Please check whether the offer exists in chain and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`,
       );
 
       continue;
