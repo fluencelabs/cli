@@ -37,7 +37,6 @@ import {
   CLI_NAME_FULL,
   CHAIN_ENV,
   type ChainENV,
-  CURRENCY_MULTIPLIER,
   DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_IPFS_ADDRESS,
   DEFAULT_MARINE_BUILD_ARGS,
@@ -306,7 +305,7 @@ const dealSchemaObj = {
       description: `Price per worker epoch in FLT`,
       default: PRICE_PER_EPOCH_DEFAULT,
       nullable: true,
-      minimum: 1 / CURRENCY_MULTIPLIER,
+      minimum: 0, // TODO 1 / CURRENCY_MULTIPLIER,
     },
     initialBalance: {
       type: "number",

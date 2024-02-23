@@ -17,6 +17,7 @@
 import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
+import { CURRENCY_MULTIPLIER } from "../const.js";
 import { getDeals } from "../deal.js";
 import { getDealClient, sign } from "../dealClient.js";
 
@@ -31,8 +32,7 @@ export async function depositToDeal(
   },
   amount: string,
 ) {
-  const { ethers } = await import("ethers");
-  const parsedAmount = ethers.parseEther(amount);
+  const parsedAmount = BigInt(Number(amount) * CURRENCY_MULTIPLIER);
   const deals = await getDeals(flagsAndArgs);
   const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
   const { dealClient, signerOrWallet } = await getDealClient();
