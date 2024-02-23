@@ -153,14 +153,6 @@ const WIN_BIN_FILE_PATH = join(
   "win.js",
 );
 
-const TARBALL_BUILD_COMMAND_PATH = join(
-  NODE_MODULES_DIR_NAME,
-  "oclif",
-  "lib",
-  "tarballs",
-  "build.js",
-);
-
 async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
@@ -194,13 +186,6 @@ await patchOclif(
   WIN_BIN_FILE_PATH,
   "setlocal enableextensions",
   "setlocal enableextensions\nset NODE_NO_WARNINGS=1",
-);
-
-// Packing replacement to fix build on Windows
-await patchOclif(
-  TARBALL_BUILD_COMMAND_PATH,
-  "tar -xzf",
-  "tar --force-local -xzf",
 );
 
 // Pack tar.gz for Windows. We need it to perform update
