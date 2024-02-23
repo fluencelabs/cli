@@ -20,6 +20,7 @@ import { CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Register extends BaseCommand<typeof Register> {
+  static override aliases = ["provider:r"];
   static override description = "Register as a provider";
   static override flags = {
     ...baseFlags,

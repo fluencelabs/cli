@@ -24,8 +24,11 @@ import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 let env: ChainENV | undefined = undefined;
 
 function setEnv(e: ChainENV): ChainENV {
+  if (env !== e) {
+    commandObj.logToStderr(`Using ${color.yellow(e)} blockchain environment`);
+  }
+
   env = e;
-  commandObj.logToStderr(`Using ${color.yellow(env)} blockchain environment`);
   return env;
 }
 

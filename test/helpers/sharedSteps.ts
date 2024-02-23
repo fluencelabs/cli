@@ -239,9 +239,13 @@ export async function callRunDeployedServices(cwd: string) {
   return runDeployedServicesResult;
 }
 
-export async function deployDealAndWaitUntilDeployed(cwd: string) {
+export async function deployDealAndWaitUntilDeployed(
+  cwd: string,
+  update = false,
+) {
   const res = await fluence({
     args: ["deploy", DEFAULT_DEPLOYMENT_NAME],
+    flags: { update },
     cwd,
   });
 
@@ -251,7 +255,7 @@ export async function deployDealAndWaitUntilDeployed(cwd: string) {
   console.log("dealId:", dealId);
 
   await fluence({
-    args: ["deal", "deposit", DEFAULT_DEPLOYMENT_NAME, "10"],
+    args: ["deal", "deposit", "10", DEFAULT_DEPLOYMENT_NAME],
     cwd,
   });
 

@@ -65,11 +65,43 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+
+##### effectors
+
+Effectors to allow on the nox
+
+###### Properties
+
+| Property       | Type                    | Required | Description            |
+|----------------|-------------------------|----------|------------------------|
+| `effectorName` | [object](#effectorname) | No       | Effector configuration |
+
+###### effectorName
+
+Effector configuration
+
+**Properties**
+
+| Property          | Type                       | Required | Description              |
+|-------------------|----------------------------|----------|--------------------------|
+| `allowedBinaries` | [object](#allowedbinaries) | **Yes**  | Allowed binaries         |
+| `wasmCID`         | string                     | **Yes**  | Wasm CID of the effector |
+
+**allowedBinaries**
+
+Allowed binaries
+
+**Properties**
+
+| Property | Type   | Required | Description |
+|----------|--------|----------|-------------|
+| `curl`   | string | No       |             |
 
 ##### systemServices
 
@@ -119,11 +151,43 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+
+### effectors
+
+Effectors to allow on the nox
+
+#### Properties
+
+| Property       | Type                    | Required | Description            |
+|----------------|-------------------------|----------|------------------------|
+| `effectorName` | [object](#effectorname) | No       | Effector configuration |
+
+#### effectorName
+
+Effector configuration
+
+##### Properties
+
+| Property          | Type                       | Required | Description              |
+|-------------------|----------------------------|----------|--------------------------|
+| `allowedBinaries` | [object](#allowedbinaries) | **Yes**  | Allowed binaries         |
+| `wasmCID`         | string                     | **Yes**  | Wasm CID of the effector |
+
+##### allowedBinaries
+
+Allowed binaries
+
+###### Properties
+
+| Property | Type   | Required | Description |
+|----------|--------|----------|-------------|
+| `curl`   | string | No       |             |
 
 ### systemServices
 

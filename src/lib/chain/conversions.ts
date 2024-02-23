@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { CIDV1Struct } from "@fluencelabs/deal-ts-clients/dist/typechain-types/Config.js";
+
 const PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
 const BASE_58_PREFIX = "z";
 
@@ -38,4 +40,16 @@ export async function peerIdHexStringToBase58String(peerIdHex: string) {
   return base58btc
     .encode(Buffer.concat([PREFIX, Buffer.from(peerIdHex.slice(2), "hex")]))
     .slice(BASE_58_PREFIX.length);
+}
+
+export async function cidStringToCIDV1Struct(
+  cidString: string,
+): Promise<CIDV1Struct> {
+  const { CID } = await import("ipfs-http-client");
+  const id = CID.parse(cidString).bytes;
+
+  return {
+    prefixes: id.slice(0, 4),
+    hash: id.slice(4),
+  };
 }

@@ -18,36 +18,44 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { CHAIN_FLAGS } from "../../lib/const.js";
-import { dealUpdate } from "../../lib/deal.js";
+import { getDealClient, signBatch } from "../../lib/dealClient.js";
+import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class ChangeApp extends BaseCommand<typeof ChangeApp> {
-  hidden = true;
-  static override description = "Change app id in the deal";
+export default class DealExit extends BaseCommand<typeof DealExit> {
+  static override aliases = ["provider:de"];
+  static override description = "Exit from deal";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
   };
 
   static override args = {
-    "DEAL-ADDRESS": Args.string({
-      description: "Deal address",
-    }),
-    "NEW-APP-CID": Args.string({
-      description: "New app CID for the deal",
+    "DEAL-IDS": Args.string({
+      description: "Comma-separated deal ids",
     }),
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(ChangeApp));
+    const { args } = await initCli(this, await this.parse(DealExit));
+    const { dealClient } = await getDealClient();
 
-    await dealUpdate({
-      dealAddress:
-        args["DEAL-ADDRESS"] ??
-        (await input({ message: "Enter deal address" })),
-      appCID:
-        args["NEW-APP-CID"] ?? (await input({ message: "Enter new app CID" })),
-    });
+    const deals = await Promise.all(
+      commaSepStrToArr(
+        args["DEAL-IDS"] ??
+          (await input({
+            message: "Enter comma-separated deal ids",
+          })),
+      ).map((id) => {
+        return dealClient.getDeal(id);
+      }),
+    );
+
+    await signBatch(
+      deals.map((deal) => {
+        return [deal.stop];
+      }),
+    );
   }
 }

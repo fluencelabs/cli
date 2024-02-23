@@ -16,6 +16,7 @@
 
 import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
+import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
 import {
@@ -26,29 +27,41 @@ import {
   initNewProviderArtifactsConfig,
   initReadonlyProviderArtifactsConfig,
 } from "../configs/project/providerArtifacts.js";
-import { CLI_NAME, CURRENCY_MULTIPLIER, OFFERS_FLAG_NAME } from "../const.js";
+import {
+  ALL_FLAG_VALUE,
+  CLI_NAME,
+  CURRENCY_MULTIPLIER,
+  DOT_FLUENCE_DIR_NAME,
+  OFFER_FLAG_NAME,
+  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  OFFER_IDS_FLAG_NAME,
+} from "../const.js";
 import {
   getDealClient,
   getDealExplorerClient,
-  signBatch,
-  type CallsToBatch,
   sign,
   getEventValue,
+  signBatch,
 } from "../dealClient.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
   stringifyUnknown,
 } from "../helpers/utils.js";
+import { checkboxes } from "../prompt.js";
 
+import {
+  cidStringToCIDV1Struct,
+  peerIdHexStringToBase58String,
+  peerIdToUint8Array,
+} from "./conversions.js";
 import { assertProviderIsRegistered } from "./isProviderRegistered.js";
-import { peerIdToUint8Array } from "./peerIdToUint8Array.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
 
 export type OffersArgs = {
-  [OFFERS_FLAG_NAME]: string | undefined;
+  [OFFER_FLAG_NAME]: string | undefined;
   force?: boolean | undefined;
 };
 
@@ -118,6 +131,7 @@ export async function createOffers(flags: OffersArgs) {
       computePeersToRegister,
       effectorPrefixesAndHash,
       minPricePerWorkerEpochBigInt,
+      offerName,
     } = offer;
 
     const txReceipt = await sign(
@@ -128,48 +142,49 @@ export async function createOffers(flags: OffersArgs) {
       computePeersToRegister,
     );
 
-    registerMarketOfferTxReceipts.push(txReceipt);
+    registerMarketOfferTxReceipts.push({ offerName, txReceipt });
   }
 
   const notValidatedOfferIds = registerMarketOfferTxReceipts.map(
-    (txReceipt) => {
-      return getEventValue({
-        contract: market,
-        eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
-        txReceipt,
-        value: OFFER_ID_PROPERTY,
-      });
+    ({ offerName, txReceipt }) => {
+      return {
+        offerName,
+        offerId: getEventValue({
+          contract: market,
+          eventName: MARKET_OFFER_REGISTERED_EVENT_NAME,
+          txReceipt,
+          value: OFFER_ID_PROPERTY,
+        }),
+      };
     },
   );
 
-  const [invalidOfferIds, offerIds] = splitErrorsAndResults(
+  const [offerIdErrors, offerIds] = splitErrorsAndResults(
     notValidatedOfferIds,
-    (id) => {
-      if (typeof id === "string") {
-        return { result: id };
+    ({ offerId, offerName }) => {
+      if (typeof offerId === "string") {
+        return { result: { offerId, offerName } };
       }
 
-      return { error: stringifyUnknown(id) };
+      return {
+        error: `for ${color.yellow(
+          offerName,
+        )} instead of offer id got: ${stringifyUnknown(offerId)}`,
+      };
     },
   );
 
-  if (invalidOfferIds.length > 0) {
+  if (offerIdErrors.length > 0) {
     commandObj.error(
-      `Got invalid offerIds when getting ${OFFER_ID_PROPERTY} property from event ${MARKET_OFFER_REGISTERED_EVENT_NAME}: ${invalidOfferIds.join(
+      `When getting ${OFFER_ID_PROPERTY} property from event ${MARKET_OFFER_REGISTERED_EVENT_NAME}:\n\n${offerIdErrors.join(
         ", ",
       )}`,
     );
   }
 
-  const offersInfoResult = await getOffersInfo(
-    Object.fromEntries(
-      offerIds.map((offferId, i) => {
-        return [offers[i]?.offerName ?? `unknown-offer-${i}`, offferId];
-      }),
-    ),
-  );
+  const [offerInfoErrors, offersInfo] = await getOffersInfo(offerIds);
 
-  offersInfoResult.offersInfo.forEach(({ offerName, offerId }) => {
+  offersInfo.forEach(({ offerName, offerId }) => {
     providerArtifactsConfig.offers[offerName] = {
       id: offerId,
     };
@@ -177,22 +192,26 @@ export async function createOffers(flags: OffersArgs) {
 
   await providerArtifactsConfig.$commit();
 
-  const offersStr = offersInfoResult.offersInfo
-    .map(({ offerId }) => {
-      return offerId;
+  const offersStr = offersInfo
+    .map(({ offerName }) => {
+      return offerName;
     })
     .join(", ");
 
   commandObj.logToStderr(`
-Offers ${offersStr} successfully created!
-${offersInfoToString(offersInfoResult)}
+${
+  offersStr.length === 0
+    ? "No offers where created!"
+    : `Offers ${color.yellow(offersStr)} successfully created!`
+}
+${await offersInfoToString([offerInfoErrors, offersInfo])}
 `);
 }
 
-export function offersInfoToString({
-  offersInfo,
+export async function offersInfoToString([
   offersInfoErrors,
-}: Awaited<ReturnType<typeof getOffersInfo>>) {
+  offersInfos,
+]: Awaited<ReturnType<typeof getOffersInfo>>) {
   const offerInfoErrorsStr =
     offersInfoErrors.length > 0
       ? `${color.red(
@@ -201,28 +220,93 @@ export function offersInfoToString({
       : "";
 
   const offersInfoStr =
-    offersInfo.length > 0
-      ? `${color.green("Got offers info from chain:")}\n\n${offersInfo
-          .map(
-            ({
-              offerName,
-              offerInfo: { peerCount, minPricePerWorkerEpoch, provider },
-            }) => {
-              return `Offer: ${offerName}
-Provider: ${provider}
-Peer number: ${peerCount}
-Peers: TODO
-
-minPricePerWorkerEpoch: ${minPricePerWorkerEpoch}
-
-effectors: TODO
-`;
-            },
+    offersInfos.length > 0
+      ? `${color.green("Got offers info from chain:")}\n\n${(
+          await Promise.all(
+            offersInfos.map(async (offerInfo) => {
+              return `Offer: ${color.yellow(
+                offerInfo.offerName,
+              )}\n${yamlDiffPatch("", {}, await resolveOfferInfo(offerInfo))}`;
+            }),
           )
-          .join("\n\n")}`
+        ).join("\n\n")}`
       : "";
 
   return [offerInfoErrorsStr, offersInfoStr].join("\n\n");
+}
+
+async function resolveOfferInfo({
+  offerId,
+  offerInfo,
+  offerExplorerInfo,
+}: Awaited<ReturnType<typeof getOfferInfo>>) {
+  // id: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  // createdAt: 1708673387
+  // totalComputeUnits: 96
+  // freeComputeUnits: 96
+  // paymentToken:
+  //   address: "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+  //   symbol: tUSD
+  //   decimals: "6"
+  // pricePerEpoch: "10000000.000"
+  // effectors:
+  //   - cid: "\x01U\x12 �uڢb�\t\x17\x1e��\f��<\x04��\x0fS��-�ы�\\�5�"
+  //     description: Unknown
+  // providerId: "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+  // peers:
+  //   - id: "0x738583bc1535587ca380c6965fc0ecf9b88f5ead1a27a020c88d920b9a428a92"
+  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  //     computeUnits: []
+  //   - id: "0xbf2e8114e269532b249e2e30a8959348841abd6f4352242a862d1ca2b19fa7e9"
+  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  //     computeUnits: []
+  //   - id: "0xc5b8e674bc9646e998c913e95004c839993e3a9d2e6dabb159c3656e21906efd"
+  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
+  //     computeUnits: []
+  // updatedAt: 1708673387
+  const { ethers } = await import("ethers");
+
+  if (offerExplorerInfo !== undefined) {
+    return {
+      "Provider ID": offerExplorerInfo.providerId,
+      "Offer ID": offerExplorerInfo.id,
+      "Price Per Epoch":
+        offerInfo === undefined
+          ? ethers.formatEther(
+              // No idea why explorer returns pricePerEpoch with such a weird number of decimal places
+              BigInt(Number(offerExplorerInfo.pricePerEpoch) * 10 ** 6),
+            )
+          : ethers.formatEther(offerInfo.minPricePerWorkerEpoch),
+      "Created at": new Date(offerExplorerInfo.createdAt * 1000).toISOString(),
+      "Updated at": new Date(offerExplorerInfo.updatedAt * 1000).toISOString(),
+      "Total compute units": offerExplorerInfo.totalComputeUnits,
+      "Free compute units": offerExplorerInfo.freeComputeUnits,
+      // TODO: cid currently return garbage
+      // Effectors: offerExplorerInfo.effectors.map(({ cid }) => {
+      //   return { cid };
+      // }),
+      Peers: await Promise.all(
+        offerExplorerInfo.peers.map(async ({ id }) => {
+          return {
+            "Hex ID": id,
+            "Peer ID": await peerIdHexStringToBase58String(id),
+            // "Compute Units": "TODO: currently returns empty for some reason"
+          };
+        }),
+      ),
+    };
+  }
+
+  if (offerInfo !== undefined) {
+    return {
+      "Provider ID": offerInfo.provider,
+      "Offer ID": offerId,
+      "Price Per Epoch": ethers.formatEther(offerInfo.minPricePerWorkerEpoch),
+      "Peer Count": offerInfo.peerCount.toString(),
+    };
+  }
+
+  return { offerId };
 }
 
 export async function updateOffers(flags: OffersArgs) {
@@ -230,18 +314,17 @@ export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
   const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
-  const providerArtifactsConfig = await initNewProviderArtifactsConfig();
 
   const [notCreatedOffers, offersToUpdate] = splitErrorsAndResults(
     offers,
     (offer) => {
-      const { id } = providerArtifactsConfig.offers[offer.offerName] ?? {};
+      const offerId = offer.offerId;
 
-      if (id === undefined) {
+      if (offerId === undefined) {
         return { error: offer };
       }
 
-      return { result: { ...offer, id } };
+      return { result: { ...offer, offerId } };
     },
   );
 
@@ -257,68 +340,153 @@ export async function updateOffers(flags: OffersArgs) {
     );
   }
 
-  for (const { minPricePerWorkerEpochBigInt, id } of offersToUpdate) {
-    const offerInfo = await market.getOffer(id);
-    const dealExplorerClient = await getDealExplorerClient();
-    const offerExplorerInfo = await dealExplorerClient.getOffer(id);
-    // TODO: USE IT
-    void offerExplorerInfo;
+  for (const {
+    minPricePerWorkerEpochBigInt,
+    offerId,
+    effectors,
+    offerInfo: { offerInfo, offerExplorerInfo } = {
+      offerInfo: undefined,
+      offerExplorerInfo: undefined,
+    },
+  } of offersToUpdate) {
+    if (offerInfo === undefined || offerExplorerInfo === undefined) {
+      commandObj.warn(
+        `Can't find offer info for offer with id ${offerId} in chain. Please check whether the offer exists in chain and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`,
+      );
 
-    const populatedTxPromises: CallsToBatch<
-      Parameters<typeof market.changeMinPricePerWorkerEpoch>
-    > = [];
+      continue;
+    }
+
+    const populatedTxPromises = [];
 
     if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
       populatedTxPromises.push([
         market.changeMinPricePerWorkerEpoch,
-        id,
+        offerId,
         minPricePerWorkerEpochBigInt,
       ]);
     }
 
+    const removedEffectors = offerExplorerInfo.effectors.filter((effector) => {
+      return effectors === undefined ? true : !effectors.includes(effector.cid);
+    });
+
+    if (removedEffectors.length > 0) {
+      populatedTxPromises.push([
+        market.removeEffector,
+        offerId,
+        await Promise.all(
+          removedEffectors.map(({ cid }) => {
+            return cidStringToCIDV1Struct(cid);
+          }),
+        ),
+      ]);
+    }
+
+    const addedEffectors = (effectors ?? []).filter((effector) => {
+      return !offerExplorerInfo.effectors.some(({ cid }) => {
+        return cid === effector;
+      });
+    });
+
+    if (addedEffectors.length > 0) {
+      populatedTxPromises.push([
+        market.addEffector,
+        offerId,
+        await Promise.all(
+          addedEffectors.map((effector) => {
+            return cidStringToCIDV1Struct(effector);
+          }),
+        ),
+      ]);
+    }
+
+    // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
     await signBatch(populatedTxPromises);
   }
 }
 
-async function resolveOffersFromProviderConfig(flags: OffersArgs) {
+async function resolveOffersFromProviderConfig(
+  flags: OffersArgs,
+): Promise<EnsureOfferConfig[]> {
+  const allOffers = await ensureOfferConfigs();
+
+  if (flags[OFFER_FLAG_NAME] === ALL_FLAG_VALUE) {
+    return allOffers;
+  }
+
   const providerConfig = await ensureReadonlyProviderConfig();
 
+  if (flags[OFFER_FLAG_NAME] === undefined) {
+    return checkboxes<EnsureOfferConfig, never>({
+      message: `Select one or more offer names from ${providerConfig.$getPath()}`,
+      options: allOffers.map((offer) => {
+        return {
+          name: offer.offerName,
+          value: offer,
+        };
+      }),
+      validate: (choices: string[]) => {
+        if (choices.length === 0) {
+          return "Please select at least one offer name";
+        }
+
+        return true;
+      },
+      oneChoiceMessage(choice) {
+        return `One offer found at ${providerConfig.$getPath()}: ${color.yellow(
+          choice,
+        )}. Do you want to select it`;
+      },
+      onNoChoices() {
+        commandObj.error(
+          `You must have at least one offer specified in ${providerConfig.$getPath()}`,
+        );
+      },
+      flagName: OFFER_FLAG_NAME,
+    });
+  }
+
   const [notFoundOffers, offers] = splitErrorsAndResults(
-    flags.offers === undefined
-      ? Object.keys(providerConfig.offers)
-      : commaSepStrToArr(flags.offers),
+    commaSepStrToArr(flags[OFFER_FLAG_NAME]),
     (offerName) => {
-      const offer = providerConfig.offers[offerName];
+      const offer = allOffers.find((o) => {
+        return o.offerName === offerName;
+      });
 
       if (offer === undefined) {
         return { error: offerName };
       }
 
-      return { result: { offerName, ...offer } };
+      return { result: offer };
     },
   );
 
   if (notFoundOffers.length > 0) {
     commandObj.error(
-      `Offers not found in ${providerConfig.$getPath()} 'offer' property: ${notFoundOffers.join(
-        ", ",
-      )}`,
+      `Offers: ${color.yellow(
+        notFoundOffers.join(", "),
+      )} are not found in the 'offers' section of ${providerConfig.$getPath()}`,
     );
   }
 
-  const [{ CID }, { ethers }] = await Promise.all([
-    import("multiformats"),
-    import("ethers"),
-  ]);
+  return offers;
+}
+
+type EnsureOfferConfig = Awaited<ReturnType<typeof ensureOfferConfigs>>[number];
+
+async function ensureOfferConfigs() {
+  const providerConfig = await ensureReadonlyProviderConfig();
+  const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
+
+  const { ethers } = await import("ethers");
 
   return Promise.all(
-    offers.map(
-      async ({
-        minPricePerWorkerEpoch,
+    Object.entries(providerConfig.offers).map(
+      async ([
         offerName,
-        effectors,
-        computePeers,
-      }) => {
+        { minPricePerWorkerEpoch, effectors, computePeers },
+      ]) => {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
 
@@ -340,14 +508,18 @@ async function resolveOffersFromProviderConfig(flags: OffersArgs) {
           ),
         );
 
-        const effectorPrefixesAndHash = (effectors ?? []).map((effector) => {
-          const bytesCid = CID.parse(effector).bytes;
+        const effectorPrefixesAndHash = await Promise.all(
+          (effectors ?? []).map((effector) => {
+            return cidStringToCIDV1Struct(effector);
+          }),
+        );
 
-          return {
-            prefixes: bytesCid.slice(0, 4),
-            hash: bytesCid.slice(4),
-          };
-        });
+        const offerId = providerArtifactsConfig?.offers[offerName]?.id;
+
+        const offerInfo =
+          offerId === undefined
+            ? undefined
+            : await getOfferInfo({ offerId, offerName });
 
         return {
           offerName,
@@ -355,57 +527,157 @@ async function resolveOffersFromProviderConfig(flags: OffersArgs) {
           effectorPrefixesAndHash,
           effectors,
           computePeersToRegister,
-          computePeers,
+          offerId,
+          offerInfo,
         };
       },
     ),
   );
 }
 
+type OfferFromProviderArtifacts = {
+  offerName: string;
+  offerId: string;
+};
+
+type OfferArtifactsArgs = OffersArgs & {
+  [OFFER_IDS_FLAG_NAME]: string | undefined;
+};
+
 export async function resolveOffersFromProviderArtifactsConfig(
-  flags: OffersArgs,
-) {
+  flags: OfferArtifactsArgs,
+): Promise<OfferFromProviderArtifacts[]> {
+  if (
+    flags[OFFER_FLAG_NAME] !== undefined &&
+    flags[OFFER_IDS_FLAG_NAME] !== undefined
+  ) {
+    commandObj.error(
+      `You can't use both ${color.yellow(
+        `--${OFFER_FLAG_NAME}`,
+      )} and ${color.yellow(
+        `--${OFFER_IDS_FLAG_NAME}`,
+      )} flags at the same time. Please pick one of them`,
+    );
+  }
+
+  if (flags[OFFER_IDS_FLAG_NAME] !== undefined) {
+    return commaSepStrToArr(flags[OFFER_IDS_FLAG_NAME]).map((offerId, i) => {
+      return { offerName: `#${i}`, offerId };
+    });
+  }
+
   const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
 
   if (providerArtifactsConfig === null) {
-    return [];
+    commandObj.error(
+      `Wasn't able to find ${PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME} in ${DOT_FLUENCE_DIR_NAME} which means you probably didn't create any offers yet. Please run '${CLI_NAME} provider offer-create' command first`,
+    );
   }
 
-  const [notFoundOffers, offers] = splitErrorsAndResults(
-    flags.offers === undefined
-      ? Object.keys(providerArtifactsConfig.offers)
-      : commaSepStrToArr(flags.offers),
+  const allOffers: OfferFromProviderArtifacts[] = Object.entries(
+    providerArtifactsConfig.offers,
+  ).map(([offerName, { id }]) => {
+    return { offerName, offerId: id };
+  });
+
+  if (flags[OFFER_FLAG_NAME] === ALL_FLAG_VALUE) {
+    return allOffers;
+  }
+
+  if (flags[OFFER_FLAG_NAME] === undefined) {
+    return checkboxes<OfferFromProviderArtifacts, never>({
+      message: `Select one or more offer names from ${providerArtifactsConfig.$getPath()}`,
+      options: allOffers.map((offer) => {
+        return {
+          name: offer.offerName,
+          value: offer,
+        };
+      }),
+      validate: (choices: string[]) => {
+        if (choices.length === 0) {
+          return "Please select at least one offer name";
+        }
+
+        return true;
+      },
+      oneChoiceMessage(choice) {
+        return `One offer found at ${providerArtifactsConfig.$getPath()}: ${color.yellow(
+          choice,
+        )}. Do you want to select it`;
+      },
+      onNoChoices() {
+        commandObj.error(
+          `You must have at least one offer specified in ${providerArtifactsConfig.$getPath()}`,
+        );
+      },
+      flagName: OFFER_FLAG_NAME,
+    });
+  }
+
+  const [notFoundOffers, foundOffers] = splitErrorsAndResults(
+    commaSepStrToArr(flags[OFFER_FLAG_NAME]),
     (offerName) => {
-      const offer = providerArtifactsConfig.offers[offerName];
+      const offer = allOffers.find((o) => {
+        return o.offerName === offerName;
+      });
 
       if (offer === undefined) {
         return { error: offerName };
       }
 
-      return { result: { offerName, ...offer } };
+      return { result: offer };
     },
   );
 
   if (notFoundOffers.length > 0) {
     commandObj.error(
-      `Offers not found in ${providerArtifactsConfig.$getPath()} 'offer' property: ${notFoundOffers.join(
-        ", ",
-      )}`,
+      `Offers: ${color.yellow(
+        notFoundOffers.join(", "),
+      )} are not found in 'offers' section of ${providerArtifactsConfig.$getPath()}`,
     );
   }
 
-  return offers;
+  return foundOffers;
 }
 
-export async function getOffersInfo(offers: Record<string, string>) {
+export async function getOfferInfo(
+  {
+    offerId,
+    offerName,
+  }: {
+    offerId: string;
+    offerName: string;
+  },
+  isAllowedToFail = false,
+) {
   const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
+  const dealExplorerClient = await getDealExplorerClient();
 
-  const offerEntries = Object.entries(offers);
+  let offerInfo = undefined;
 
+  try {
+    offerInfo = await market.getOffer(offerId);
+  } catch (e) {
+    if (isAllowedToFail) {
+      throw e;
+    }
+  }
+
+  let offerExplorerInfo = undefined;
+
+  try {
+    offerExplorerInfo =
+      (await dealExplorerClient.getOffer(offerId)) ?? undefined;
+  } catch {}
+
+  return { offerName, offerId, offerInfo, offerExplorerInfo };
+}
+
+export async function getOffersInfo(offers: OfferFromProviderArtifacts[]) {
   const getOfferResults = await Promise.allSettled(
-    offerEntries.map(async ([offerName, offerId]) => {
-      return { offerName, offerId, offerInfo: await market.getOffer(offerId) };
+    offers.map((args) => {
+      return getOfferInfo(args, true);
     }),
   );
 
@@ -417,11 +689,7 @@ export async function getOffersInfo(offers: Record<string, string>) {
       }
 
       const error = stringifyUnknown(getOfferResult.reason);
-
-      const [
-        offerName = `unknown-offer-${i}`,
-        offerId = `unknown-offer-id-${i}`,
-      ] = offerEntries[i] ?? [];
+      const { offerId: offerId, offerName } = offers[i] ?? {};
 
       return {
         error: error.includes("Offer doesn't exist")
@@ -435,5 +703,5 @@ export async function getOffersInfo(offers: Record<string, string>) {
     },
   );
 
-  return { offersInfoErrors, offersInfo };
+  return [offersInfoErrors, offersInfo] as const;
 }

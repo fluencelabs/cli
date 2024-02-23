@@ -18,7 +18,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
+import { CHAIN_FLAGS, NOX_NAMES_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
@@ -27,6 +27,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
+    ...NOX_NAMES_FLAG,
     amount: Flags.string({
       description: "Amount of tokens to distribute to noxes",
     }),

@@ -15,32 +15,21 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import {
-  CHAIN_FLAGS,
-  DEAL_IDS_FLAG,
-  DEPLOYMENT_NAMES_ARG,
-} from "../../lib/const.js";
-import { match, getDeals } from "../../lib/deal.js";
+import { updateOffers } from "../../lib/chain/offer.js";
+import { CHAIN_FLAGS, OFFER_FLAG } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class Match extends BaseCommand<typeof Match> {
-  static override description = "Add missing workers to the deal";
+export default class OfferUpdate extends BaseCommand<typeof OfferUpdate> {
+  static override aliases = ["provider:ou"];
+  static override description = "Update offers";
   static override flags = {
     ...baseFlags,
+    ...OFFER_FLAG,
     ...CHAIN_FLAGS,
-    ...DEAL_IDS_FLAG,
-  };
-
-  static override args = {
-    ...DEPLOYMENT_NAMES_ARG,
   };
 
   async run(): Promise<void> {
-    const flagsAndArgs = await initCli(this, await this.parse(Match));
-    const deals = await getDeals(flagsAndArgs);
-
-    for (const { dealId } of deals) {
-      await match(dealId);
-    }
+    const { flags } = await initCli(this, await this.parse(OfferUpdate));
+    await updateOffers(flags);
   }
 }

@@ -126,17 +126,17 @@ export function validatePercent(input: unknown): ValidationResult {
   );
 }
 
-export async function validateEffectors(
-  effectors: Array<{
-    effector: string;
+export async function validateCIDs(
+  CIDs: Array<{
+    cid: string;
     location: string;
   }>,
 ): Promise<ValidationResult> {
   const { CID } = await import("ipfs-http-client");
 
   const [errors] = splitErrorsAndResults(
-    effectors,
-    ({ location, effector }) => {
+    CIDs,
+    ({ location, cid: effector }) => {
       try {
         CID.parse(effector);
         return { result: true };
@@ -147,7 +147,7 @@ export async function validateEffectors(
   );
 
   if (errors.length > 0) {
-    return `Invalid effectors:\n\n${errors.join("\n\n")}`;
+    return `Invalid CIDs:\n\n${errors.join("\n\n")}`;
   }
 
   return true;

@@ -30,7 +30,8 @@ import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
-  static override description = "Add collateral to capacity commitment";
+  static override description =
+    "Add collateral to capacity commitment to activate it";
   static override aliases = ["provider:ca"];
   static override flags = {
     ...baseFlags,

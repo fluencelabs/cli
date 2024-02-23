@@ -87,7 +87,7 @@ const prompt = async <T, U extends Answers>({
       ? ""
       : `\n${flagNameAndArgName.join(
           " or\n",
-        )} and make you are using it correctly.`;
+        )} and make sure you are using it correctly.`;
 
   if (!isInteractive) {
     if (question.default !== undefined) {

@@ -117,38 +117,12 @@ export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
-export const DEAL_CONFIG: Record<ChainENV, ChainConfig> = {
-  kras: {
-    url: "https://ipc-kras.fluence.dev",
-    id: 0,
-  },
-  dar: {
-    url: "https://ipc-dar.fluence.dev",
-    id: 0,
-  },
-  stage: {
-    url: "https://ipc-stage.fluence.dev",
-    id: 3521768853336688,
-  },
-  local: {
-    url: "http://127.0.0.1:8545",
-    id: 31_337,
-  },
+export const CHAIN_URLS: Record<ChainENV, string> = {
+  kras: "https://ipc-kras.fluence.dev",
+  dar: "https://ipc-dar.fluence.dev",
+  stage: "https://ipc-stage.fluence.dev",
+  local: "http://127.0.0.1:8545",
 };
-
-export const DEAL_RPC_CONFIG = Object.fromEntries(
-  Object.values(DEAL_CONFIG).map(({ id, url }) => {
-    return [id, url];
-  }),
-);
-
-// @ts-expect-error we know that keys are ContractsEnv, not just string
-export const CONTRACTS_ENV_TO_CHAIN_ID: Record<ChainENV, number> =
-  Object.fromEntries(
-    Object.entries(DEAL_CONFIG).map(([name, { id }]) => {
-      return [name, id];
-    }),
-  );
 
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = 5001;
@@ -329,9 +303,12 @@ export const TRACING_FLAG = {
   }),
 };
 
+export const ALL_FLAG_VALUE = "all";
+
 export const NOX_NAMES_FLAG_NAME = "nox-names";
 export const NOX_NAMES_FLAG_CONFIG = {
-  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. Default: all noxes from 'computePeers' property of ${PROVIDER_CONFIG_FULL_FILE_NAME}`,
+  description: `Comma-separated names of noxes from ${PROVIDER_CONFIG_FULL_FILE_NAME}. To use all of your noxes: --${NOX_NAMES_FLAG_NAME} ${ALL_FLAG_VALUE}`,
+  helpValue: "<nox-1,nox-2>",
 };
 export const NOX_NAMES_FLAG = {
   [NOX_NAMES_FLAG_NAME]: Flags.string(NOX_NAMES_FLAG_CONFIG),
@@ -403,14 +380,28 @@ export const NOXES_FLAG = {
   }),
 };
 
-export const OFFERS_FLAG_NAME = "offers";
-export const OFFERS_FLAG_OBJECT = {
-  description: `Comma-separated list of offer names. If not provider all offers will be used`,
+export const OFFER_FLAG_NAME = "offer";
+export const OFFER_IDS_FLAG_NAME = "offer-ids";
+
+const OFFER_FLAG_OBJECT = {
+  description: `Comma-separated list of offer names. Can't be used together with --${OFFER_IDS_FLAG_NAME}. To use all of your offers: --${OFFER_FLAG_NAME} ${ALL_FLAG_VALUE}`,
   helpValue: "<offer-1,offer-2>",
 };
 
-export const OFFERS_FLAG = {
-  [OFFERS_FLAG_NAME]: Flags.string(OFFERS_FLAG_OBJECT),
+export const OFFER_FLAG = {
+  [OFFER_FLAG_NAME]: Flags.string(OFFER_FLAG_OBJECT),
+};
+
+export const OFFER_FLAGS = {
+  [OFFER_FLAG_NAME]: Flags.string({
+    ...OFFER_FLAG_OBJECT,
+    exclusive: [OFFER_IDS_FLAG_NAME],
+  }),
+  [OFFER_IDS_FLAG_NAME]: Flags.string({
+    description: `Comma-separated list of offer ids. Can't be used together with --${OFFER_FLAG_NAME} flag`,
+    helpValue: "<id-1,id-2>",
+    exclusive: [OFFER_FLAG_NAME],
+  }),
 };
 
 export const PRIV_KEY_FLAG_NAME = "priv-key";
@@ -428,19 +419,19 @@ export const CHAIN_FLAGS = {
 };
 
 export const DEAL_IDS_FLAG_NAME = "deal-ids";
+export const DEPLOYMENT_NAMES_ARG_NAME = "DEPLOYMENT-NAMES";
 
 export const DEAL_IDS_FLAG = {
   [DEAL_IDS_FLAG_NAME]: Flags.string({
-    description: `Comma-separated deal ids of the deployed deal`,
-    helpValue: "<name>",
+    description: `Comma-separated deal ids of the deployed deal. Can't be used together with ${DEPLOYMENT_NAMES_ARG_NAME} arg`,
+    helpValue: "<id-1,id-2>",
   }),
 };
 
-export const DEPLOYMENT_NAMES_ARG_NAME = "DEPLOYMENT-NAMES";
-
-export const DEPLOYMENT_NAMES = {
+export const DEPLOYMENT_NAMES_ARG = {
   [DEPLOYMENT_NAMES_ARG_NAME]: Args.string({
-    description: `Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments will be used)`,
+    description: `Comma separated names of deployments. Can't be used together with --${DEAL_IDS_FLAG_NAME} flag`,
+    helpValue: "<name-1,name-2>",
   }),
 };
 

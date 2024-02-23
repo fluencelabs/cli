@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { Flags } from "@oclif/core";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import {
   resolveOffersFromProviderArtifactsConfig,
@@ -23,12 +21,7 @@ import {
   offersInfoToString,
 } from "../../lib/chain/offer.js";
 import { commandObj } from "../../lib/commandObj.js";
-import {
-  OFFERS_FLAG_NAME,
-  OFFERS_FLAG_OBJECT,
-  CHAIN_FLAGS,
-} from "../../lib/const.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
+import { CHAIN_FLAGS, OFFER_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
@@ -36,36 +29,15 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
   static override description = "Get info about offers";
   static override flags = {
     ...baseFlags,
-    [OFFERS_FLAG_NAME]: Flags.string({
-      ...OFFERS_FLAG_OBJECT,
-      exclusive: ["ids"],
-    }),
-    ids: Flags.string({
-      description: "Comma-separated list of offer ids",
-      exclusive: [OFFERS_FLAG_NAME],
-    }),
+    ...OFFER_FLAGS,
     ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(OfferInfo));
 
-    const offers =
-      flags.ids === undefined
-        ? Object.fromEntries(
-            (await resolveOffersFromProviderArtifactsConfig(flags)).map(
-              ({ id, offerName }) => {
-                return [offerName, id] as const;
-              },
-            ),
-          )
-        : Object.fromEntries(
-            commaSepStrToArr(flags.ids).map((id, i) => {
-              return [`offer-${i}`, id] as const;
-            }),
-          );
-
+    const offers = await resolveOffersFromProviderArtifactsConfig(flags);
     const offerInfoResult = await getOffersInfo(offers);
-    commandObj.logToStderr(offersInfoToString(offerInfoResult));
+    commandObj.logToStderr(await offersInfoToString(offerInfoResult));
   }
 }

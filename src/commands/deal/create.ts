@@ -25,6 +25,7 @@ import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Create extends BaseCommand<typeof Create> {
+  hidden = true;
   static override description =
     "Create your deal with the specified parameters";
   static override flags = {

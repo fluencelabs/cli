@@ -22,7 +22,7 @@ import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
-  DEPLOYMENT_NAMES,
+  DEPLOYMENT_NAMES_ARG,
 } from "../../lib/const.js";
 import { getDeals } from "../../lib/deal.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
@@ -38,10 +38,10 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
   };
 
   static override args = {
-    ...DEPLOYMENT_NAMES,
     AMOUNT: Args.string({
       description: "Amount of tokens to deposit",
     }),
+    ...DEPLOYMENT_NAMES_ARG,
   };
 
   async run(): Promise<void> {

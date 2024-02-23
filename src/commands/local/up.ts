@@ -18,7 +18,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/createCommitment.js";
-import { depositCollateral } from "../../lib/chain/depositCollateral.js";
+import { depositCollateralByNoxNames } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
@@ -31,18 +31,20 @@ import {
   initReadonlyProviderConfig,
 } from "../../lib/configs/project/provider.js";
 import {
-  DEFAULT_OFFER_NAME,
+  ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
   NOXES_FLAG,
+  NOX_NAMES_FLAG_NAME,
   PRIV_KEY_FLAG,
   PROVIDER_CONFIG_FULL_FILE_NAME,
+  type FluenceEnv,
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { confirm } from "../../lib/prompt.js";
 
 export default class Up extends BaseCommand<typeof Up> {
-  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose`;
+  static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using the first offer from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} file.`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
@@ -56,7 +58,7 @@ export default class Up extends BaseCommand<typeof Up> {
   };
 
   async run(): Promise<void> {
-    const env = "local";
+    const env: FluenceEnv = "local";
     const envConfig = await initNewEnvConfig(env);
     envConfig.fluenceEnv = env;
     await envConfig.$commit();
@@ -64,7 +66,7 @@ export default class Up extends BaseCommand<typeof Up> {
 
     const { flags } = await initCli(this, await this.parse(Up));
 
-    const providerConfig = await initReadonlyProviderConfig();
+    let providerConfig = await initReadonlyProviderConfig();
 
     if (
       providerConfig === null &&
@@ -76,7 +78,7 @@ export default class Up extends BaseCommand<typeof Up> {
       return;
     }
 
-    await initNewReadonlyProviderConfig(flags);
+    providerConfig = await initNewReadonlyProviderConfig(flags);
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
     try {
@@ -109,16 +111,19 @@ export default class Up extends BaseCommand<typeof Up> {
       });
     }
 
-    await distributeToNox({ ...flags, amount: "100" });
+    const allNoxNames = {
+      [NOX_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,
+    };
 
+    await distributeToNox({ ...flags, ...allNoxNames, amount: "100" });
     await registerProvider();
 
     await createOffers({
       force: true,
-      offers: DEFAULT_OFFER_NAME,
+      offer: Object.keys(providerConfig.offers)[0],
     });
 
-    const ccIds = await createCommitments({ ...flags, env });
-    await depositCollateral(ccIds);
+    await createCommitments({ ...flags, ...allNoxNames, env });
+    await depositCollateralByNoxNames(allNoxNames);
   }
 }

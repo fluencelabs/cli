@@ -11,11 +11,11 @@
 * [`fluence chain proof`](#fluence-chain-proof)
 * [`fluence deal change-app [DEAL-ADDRESS] [NEW-APP-CID]`](#fluence-deal-change-app-deal-address-new-app-cid)
 * [`fluence deal create`](#fluence-deal-create)
-* [`fluence deal deposit [DEPLOYMENT-NAMES] [AMOUNT]`](#fluence-deal-deposit-deployment-names-amount)
+* [`fluence deal deposit [AMOUNT] [DEPLOYMENT-NAMES]`](#fluence-deal-deposit-amount-deployment-names)
 * [`fluence deal info [DEPLOYMENT-NAMES]`](#fluence-deal-info-deployment-names)
-* [`fluence deal logs [DEPLOYMENT-NAMES] [SPELL-NAME]`](#fluence-deal-logs-deployment-names-spell-name)
+* [`fluence deal logs [DEPLOYMENT-NAMES]`](#fluence-deal-logs-deployment-names)
 * [`fluence deal stop [DEPLOYMENT-NAMES]`](#fluence-deal-stop-deployment-names)
-* [`fluence deal withdraw [DEPLOYMENT-NAMES] [AMOUNT]`](#fluence-deal-withdraw-deployment-names-amount)
+* [`fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES]`](#fluence-deal-withdraw-amount-deployment-names)
 * [`fluence deal workers-add [DEPLOYMENT-NAMES]`](#fluence-deal-workers-add-deployment-names)
 * [`fluence deal workers-remove [UNIT-IDS]`](#fluence-deal-workers-remove-unit-ids)
 * [`fluence default env [ENV]`](#fluence-default-env-env)
@@ -41,16 +41,22 @@
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
-* [`fluence provider collateral-add`](#fluence-provider-collateral-add)
-* [`fluence provider commitment-create`](#fluence-provider-commitment-create)
-* [`fluence provider commitment-info`](#fluence-provider-commitment-info)
+* [`fluence provider cc-activate`](#fluence-provider-cc-activate)
+* [`fluence provider cc-create`](#fluence-provider-cc-create)
+* [`fluence provider cc-info`](#fluence-provider-cc-info)
+* [`fluence provider cc-withdraw-collateral`](#fluence-provider-cc-withdraw-collateral)
+* [`fluence provider cc-withdraw-rewards`](#fluence-provider-cc-withdraw-rewards)
+* [`fluence provider deal-exit [DEAL-IDS]`](#fluence-provider-deal-exit-deal-ids)
+* [`fluence provider deal-list`](#fluence-provider-deal-list)
+* [`fluence provider deal-withdraw [DEAL-IDS]`](#fluence-provider-deal-withdraw-deal-ids)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-create`](#fluence-provider-offer-create)
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
+* [`fluence provider offer-update`](#fluence-provider-offer-update)
 * [`fluence provider register`](#fluence-provider-register)
 * [`fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-reward-info-deal-address-unit-id)
-* [`fluence provider reward-withdraw [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-reward-withdraw-deal-address-unit-id)
+* [`fluence provider signing-wallets`](#fluence-provider-signing-wallets)
 * [`fluence provider tokens-distribute`](#fluence-provider-tokens-distribute)
 * [`fluence provider update`](#fluence-provider-update)
 * [`fluence run`](#fluence-run)
@@ -359,22 +365,22 @@ DESCRIPTION
 
 _See code: [src/commands/deal/create.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/deal/create.ts)_
 
-## `fluence deal deposit [DEPLOYMENT-NAMES] [AMOUNT]`
+## `fluence deal deposit [AMOUNT] [DEPLOYMENT-NAMES]`
 
 Deposit do the deal
 
 ```
 USAGE
-  $ fluence deal deposit [DEPLOYMENT-NAMES] [AMOUNT] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids
+  $ fluence deal deposit [AMOUNT] [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids
     <value>]
 
 ARGUMENTS
-  DEPLOYMENT-NAMES  Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments
-                    will be used)
   AMOUNT            Amount of tokens to deposit
+  DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<name>                            Comma-separated deal ids of the deployed deal
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -397,11 +403,11 @@ USAGE
   $ fluence deal info [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
 
 ARGUMENTS
-  DEPLOYMENT-NAMES  Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments
-                    will be used)
+  DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<name>                            Comma-separated deal ids of the deployed deal
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -415,26 +421,26 @@ DESCRIPTION
 
 _See code: [src/commands/deal/info.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/deal/info.ts)_
 
-## `fluence deal logs [DEPLOYMENT-NAMES] [SPELL-NAME]`
+## `fluence deal logs [DEPLOYMENT-NAMES]`
 
 Get logs from deployed workers for deals listed in workers.yaml
 
 ```
 USAGE
-  $ fluence deal logs [DEPLOYMENT-NAMES] [SPELL-NAME] [--no-input] [-k <value>] [--relay <value>] [--ttl
-    <value>] [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--tracing] [--deal-ids <value>]
+  $ fluence deal logs [DEPLOYMENT-NAMES] [--no-input] [-k <value>] [--relay <value>] [--ttl <value>]
+    [--dial-timeout <value>] [--particle-id] [--env <value>] [--off-aqua-logs] [--tracing] [--deal-ids <value>] [--spell
+    <value>]
 
 ARGUMENTS
-  DEPLOYMENT-NAMES  Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments
-                    will be used)
-  SPELL-NAME        Spell name to get logs for (Default: worker-spell)
+  DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
   -k, --sk=<name>                                  Name of the secret key for js-client inside CLI to use. If not
                                                    specified, will use the default key for the project. If there is no
                                                    fluence project or there is no default key, will use user's default
                                                    key
-      --deal-ids=<name>                            Comma-separated deal ids of the deployed deal
+      --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                                   with DEPLOYMENT-NAMES arg
       --dial-timeout=<milliseconds>                [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
@@ -442,6 +448,7 @@ FLAGS
       --off-aqua-logs                              Turns off logs from Console.print in aqua and from IPFS service
       --particle-id                                Print particle ids when running Fluence js-client
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
+      --spell=<spell-name>                         [default: worker-spell] Spell name to get logs for
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
       --ttl=<milliseconds>                         [default: 120000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
@@ -464,11 +471,11 @@ USAGE
   $ fluence deal stop [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
 
 ARGUMENTS
-  DEPLOYMENT-NAMES  Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments
-                    will be used)
+  DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<name>                            Comma-separated deal ids of the deployed deal
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -482,22 +489,22 @@ DESCRIPTION
 
 _See code: [src/commands/deal/stop.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/deal/stop.ts)_
 
-## `fluence deal withdraw [DEPLOYMENT-NAMES] [AMOUNT]`
+## `fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES]`
 
 Withdraw tokens from the deal
 
 ```
 USAGE
-  $ fluence deal withdraw [DEPLOYMENT-NAMES] [AMOUNT] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids
+  $ fluence deal withdraw [AMOUNT] [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids
     <value>]
 
 ARGUMENTS
-  DEPLOYMENT-NAMES  Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments
-                    will be used)
   AMOUNT            Amount of tokens to deposit
+  DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<name>                            Comma-separated deal ids of the deployed deal
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -520,11 +527,11 @@ USAGE
   $ fluence deal workers-add [DEPLOYMENT-NAMES] [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
 
 ARGUMENTS
-  DEPLOYMENT-NAMES  Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments
-                    will be used)
+  DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<name>                            Comma-separated deal ids of the deployed deal
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -803,17 +810,17 @@ Deploy according to 'deployments' property in fluence.yaml
 USAGE
   $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <value>] [--priv-key <value>]
     [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
-    [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match]
+    [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match] [-u]
 
 ARGUMENTS
-  DEPLOYMENT-NAMES  Comma separated names of deployments. Example: "deployment1,deployment2" (by default all deployments
-                    will be used)
+  DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
   -k, --sk=<name>                                  Name of the secret key for js-client inside CLI to use. If not
                                                    specified, will use the default key for the project. If there is no
                                                    fluence project or there is no default key, will use user's default
                                                    key
+  -u, --update                                     Update your previous deployment
       --[no-]auto-match                            Toggle automatic matching. Auto-matching is turned on by default
       --dial-timeout=<milliseconds>                [default: 60000] Timeout for Fluence js-client to connect to relay
                                                    peer
@@ -1052,7 +1059,7 @@ _See code: [src/commands/local/ps.ts](https://github.com/fluencelabs/cli/blob/v0
 
 ## `fluence local up`
 
-Run docker-compose.yaml using docker compose
+Run docker-compose.yaml using docker compose and set up provider using the first offer from the 'offers' section in provider.yaml file.
 
 ```
 USAGE
@@ -1067,7 +1074,8 @@ FLAGS
   --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local peers
 
 DESCRIPTION
-  Run docker-compose.yaml using docker compose
+  Run docker-compose.yaml using docker compose and set up provider using the first offer from the 'offers' section in
+  provider.yaml file.
 
 EXAMPLES
   $ fluence local up
@@ -1150,49 +1158,48 @@ EXAMPLES
 
 _See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/module/remove.ts)_
 
-## `fluence provider collateral-add`
+## `fluence provider cc-activate`
 
-Add collateral to capacity commitment
+Add collateral to capacity commitment to activate it
 
 ```
 USAGE
-  $ fluence provider collateral-add [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids
-  <value>]
+  $ fluence provider cc-activate [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
 
 FLAGS
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --ids=<value>                                Comma separated capacity commitment IDs. Default: all noxes from
                                                capacityCommitments property of the provider config
   --no-input                                   Don't interactively ask for any input from the user
-  --nox-names=<value>                          Comma-separated names of noxes from provider.yaml. Default: all noxes
-                                               from 'computePeers' property of provider.yaml
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
                                                will be used by default
 
 DESCRIPTION
-  Add collateral to capacity commitment
+  Add collateral to capacity commitment to activate it
 
 ALIASES
   $ fluence provider ca
 ```
 
-_See code: [src/commands/provider/collateral-add.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/collateral-add.ts)_
+_See code: [src/commands/provider/cc-activate.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-activate.ts)_
 
-## `fluence provider commitment-create`
+## `fluence provider cc-create`
 
 Create Capacity commitment
 
 ```
 USAGE
-  $ fluence provider commitment-create [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
+  $ fluence provider cc-create [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
 
 FLAGS
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --nox-names=<value>                          Comma-separated names of noxes from provider.yaml. Default: all noxes
-                                               from 'computePeers' property of provider.yaml
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1205,21 +1212,21 @@ ALIASES
   $ fluence provider cc
 ```
 
-_See code: [src/commands/provider/commitment-create.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/commitment-create.ts)_
+_See code: [src/commands/provider/cc-create.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-create.ts)_
 
-## `fluence provider commitment-info`
+## `fluence provider cc-info`
 
 Get info about capacity commitments
 
 ```
 USAGE
-  $ fluence provider commitment-info [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider cc-info [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --nox-names=<value>                          Comma-separated names of noxes from provider.yaml. Default: all noxes
-                                               from 'computePeers' property of provider.yaml
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1232,7 +1239,144 @@ ALIASES
   $ fluence provider ci
 ```
 
-_See code: [src/commands/provider/commitment-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/commitment-info.ts)_
+_See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-info.ts)_
+
+## `fluence provider cc-withdraw-collateral`
+
+Withdraw collateral from capacity commitments
+
+```
+USAGE
+  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
+
+FLAGS
+  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Withdraw collateral from capacity commitments
+
+ALIASES
+  $ fluence provider cwc
+```
+
+_See code: [src/commands/provider/cc-withdraw-collateral.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-withdraw-collateral.ts)_
+
+## `fluence provider cc-withdraw-rewards`
+
+Withdraw rewards from capacity commitments
+
+```
+USAGE
+  $ fluence provider cc-withdraw-rewards [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
+
+FLAGS
+  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Withdraw rewards from capacity commitments
+
+ALIASES
+  $ fluence provider cwr
+```
+
+_See code: [src/commands/provider/cc-withdraw-rewards.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-withdraw-rewards.ts)_
+
+## `fluence provider deal-exit [DEAL-IDS]`
+
+Exit from deal
+
+```
+USAGE
+  $ fluence provider deal-exit [DEAL-IDS] [--no-input] [--env <value>] [--priv-key <value>]
+
+ARGUMENTS
+  DEAL-IDS  Comma-separated deal ids
+
+FLAGS
+  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Exit from deal
+
+ALIASES
+  $ fluence provider de
+```
+
+_See code: [src/commands/provider/deal-exit.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/deal-exit.ts)_
+
+## `fluence provider deal-list`
+
+List deals
+
+```
+USAGE
+  $ fluence provider deal-list [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
+
+FLAGS
+  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  List deals
+
+ALIASES
+  $ fluence provider dl
+```
+
+_See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/deal-list.ts)_
+
+## `fluence provider deal-withdraw [DEAL-IDS]`
+
+Withdraw rewards from deals
+
+```
+USAGE
+  $ fluence provider deal-withdraw [DEAL-IDS] [--no-input] [--env <value>] [--priv-key <value>]
+
+ARGUMENTS
+  DEAL-IDS  Deal ids
+
+FLAGS
+  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Withdraw rewards from deals
+
+ALIASES
+  $ fluence provider dw
+```
+
+_See code: [src/commands/provider/deal-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/deal-withdraw.ts)_
 
 ## `fluence provider gen`
 
@@ -1285,24 +1429,24 @@ _See code: [src/commands/provider/init.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence provider offer-create`
 
-Create an offer. You have to be registered as a provider to do that
+Create offers. You have to be registered as a provider to do that
 
 ```
 USAGE
-  $ fluence provider offer-create [--no-input] [--env <value>] [--priv-key <value>] [--offers <value>]
+  $ fluence provider offer-create [--no-input] [--env <value>] [--priv-key <value>] [--offer <value>]
 
 FLAGS
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. If not provider all offers will be
-                                               used
+  --offer=<offer-1,offer-2>                    Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offer all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
                                                will be used by default
 
 DESCRIPTION
-  Create an offer. You have to be registered as a provider to do that
+  Create offers. You have to be registered as a provider to do that
 
 ALIASES
   $ fluence provider oc
@@ -1316,14 +1460,16 @@ Get info about offers
 
 ```
 USAGE
-  $ fluence provider offer-info [--no-input] [--offers <value> | --ids <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider offer-info [--no-input] [--offer <value> | --offer-ids <value>] [--env <value>] [--priv-key
+  <value>]
 
 FLAGS
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma-separated list of offer ids
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. If not provider all offers will be
-                                               used
+  --offer=<offer-1,offer-2>                    Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offer all
+  --offer-ids=<id-1,id-2>                      Comma-separated list of offer ids. Can't be used together with --offer
+                                               flag
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1337,6 +1483,33 @@ ALIASES
 ```
 
 _See code: [src/commands/provider/offer-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/offer-info.ts)_
+
+## `fluence provider offer-update`
+
+Update offers
+
+```
+USAGE
+  $ fluence provider offer-update [--no-input] [--offer <value>] [--env <value>] [--priv-key <value>]
+
+FLAGS
+  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --offer=<offer-1,offer-2>                    Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offer all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Update offers
+
+ALIASES
+  $ fluence provider ou
+```
+
+_See code: [src/commands/provider/offer-update.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/offer-update.ts)_
 
 ## `fluence provider register`
 
@@ -1356,6 +1529,9 @@ FLAGS
 
 DESCRIPTION
   Register as a provider
+
+ALIASES
+  $ fluence provider r
 ```
 
 _See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/register.ts)_
@@ -1389,34 +1565,32 @@ ALIASES
 
 _See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/reward-info.ts)_
 
-## `fluence provider reward-withdraw [DEAL-ADDRESS] [UNIT-ID]`
+## `fluence provider signing-wallets`
 
-Withdraw reward
+Print nox signing wallets
 
 ```
 USAGE
-  $ fluence provider reward-withdraw [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
-  UNIT-ID       Compute unit CID
+  $ fluence provider signing-wallets [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
 
 FLAGS
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
                                                will be used by default
 
 DESCRIPTION
-  Withdraw reward
+  Print nox signing wallets
 
 ALIASES
-  $ fluence provider rw
+  $ fluence provider sw
 ```
 
-_See code: [src/commands/provider/reward-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/reward-withdraw.ts)_
+_See code: [src/commands/provider/signing-wallets.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/signing-wallets.ts)_
 
 ## `fluence provider tokens-distribute`
 
@@ -1424,12 +1598,15 @@ Distribute tokens to noxes
 
 ```
 USAGE
-  $ fluence provider tokens-distribute [--no-input] [--env <value>] [--priv-key <value>] [--amount <value>]
+  $ fluence provider tokens-distribute [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>] [--amount
+  <value>]
 
 FLAGS
   --amount=<value>                             Amount of tokens to distribute to noxes
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1462,6 +1639,9 @@ FLAGS
 
 DESCRIPTION
   Update provider info
+
+ALIASES
+  $ fluence provider u
 ```
 
 _See code: [src/commands/provider/update.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/update.ts)_

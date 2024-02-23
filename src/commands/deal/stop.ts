@@ -21,9 +21,9 @@ import { commandObj } from "../../lib/commandObj.js";
 import {
   DEAL_IDS_FLAG,
   CHAIN_FLAGS,
-  DEPLOYMENT_NAMES,
+  DEPLOYMENT_NAMES_ARG,
 } from "../../lib/const.js";
-import { getDeals, removeDealFromWorkersConfig } from "../../lib/deal.js";
+import { getDeals } from "../../lib/deal.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -36,7 +36,7 @@ export default class Stop extends BaseCommand<typeof Stop> {
   };
 
   static override args = {
-    ...DEPLOYMENT_NAMES,
+    ...DEPLOYMENT_NAMES_ARG,
   };
 
   async run(): Promise<void> {
@@ -47,7 +47,6 @@ export default class Stop extends BaseCommand<typeof Stop> {
     for (const { dealId, dealName } of deals) {
       const deal = dealClient.getDeal(dealId);
       await sign(deal.stop);
-      await removeDealFromWorkersConfig(dealName);
       commandObj.logToStderr(`Stopped deal: ${color.yellow(dealName)}`);
     }
   }

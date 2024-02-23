@@ -28,6 +28,8 @@ import {
 import { list } from "./prompt.js";
 
 let env: FluenceEnv | undefined = undefined;
+// this is needed so you never see env prompt multiple times
+let envPromptPromise: Promise<FluenceEnv> | undefined = undefined;
 
 export async function ensureFluenceEnv(): Promise<FluenceEnv> {
   if (env !== undefined) {
@@ -42,16 +44,19 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
     return fluenceEnv;
   }
 
-  const fluenceEnvFromPrompt = await fluenceEnvPrompt();
-  env = fluenceEnvFromPrompt;
-
-  if (envConfig === null) {
-    return fluenceEnvFromPrompt;
+  if (envPromptPromise !== undefined) {
+    return envPromptPromise;
   }
 
-  envConfig.fluenceEnv = fluenceEnvFromPrompt;
-  await envConfig.$commit();
-  return fluenceEnvFromPrompt;
+  envPromptPromise = fluenceEnvPrompt();
+  env = await envPromptPromise;
+
+  if (envConfig !== null) {
+    envConfig.fluenceEnv = env;
+    await envConfig.$commit();
+  }
+
+  return env;
 }
 
 export async function fluenceEnvPrompt(
