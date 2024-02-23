@@ -22,14 +22,10 @@ import { depositCollateralByNoxNames } from "../../lib/chain/depositCollateral.j
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
-import {
-  initNewReadonlyProviderConfig,
-  initReadonlyProviderConfig,
-} from "../../lib/configs/project/provider.js";
+import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import {
   ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
@@ -41,7 +37,6 @@ import {
 } from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { confirm } from "../../lib/prompt.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using the first offer from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} file.`;
@@ -65,20 +60,7 @@ export default class Up extends BaseCommand<typeof Up> {
     setEnvConfig(envConfig);
 
     const { flags } = await initCli(this, await this.parse(Up));
-
-    let providerConfig = await initReadonlyProviderConfig();
-
-    if (
-      providerConfig === null &&
-      !(await confirm({
-        message: `${PROVIDER_CONFIG_FULL_FILE_NAME} not found. But it is required for local environment. Do you want to create a new one?`,
-      }))
-    ) {
-      commandObj.logToStderr("Aborting.");
-      return;
-    }
-
-    providerConfig = await initNewReadonlyProviderConfig(flags);
+    const providerConfig = await initNewReadonlyProviderConfig({});
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
     try {
