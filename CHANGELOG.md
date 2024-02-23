@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.7](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.6...fluence-cli-v0.15.7) (2024-02-23)
+
+
+### Features
+
+* provider ux updates and dev ux fixes ([#790](https://github.com/fluencelabs/cli/issues/790)) ([4bf42e2](https://github.com/fluencelabs/cli/commit/4bf42e2b7378dabf2f3cab995c70284d01fce3bc))
+
+
+### Bug Fixes
+
+* Doc for Windows installation ([#798](https://github.com/fluencelabs/cli/issues/798)) ([aed0f7d](https://github.com/fluencelabs/cli/commit/aed0f7daa54985cf7f5ff6f442998d1af033ccc1))
+* Redirect command on Windows ([#796](https://github.com/fluencelabs/cli/issues/796)) ([733bc9d](https://github.com/fluencelabs/cli/commit/733bc9d3020581424dbacf5453bc921a76f491a4))
+
 ## [0.15.6](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.5...fluence-cli-v0.15.6) (2024-02-23)
 
 
