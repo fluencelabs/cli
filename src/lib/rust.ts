@@ -226,6 +226,8 @@ async function installCargoDependency({
   dependencyDirPath,
   dependencyTmpDirPath,
 }: InstallCargoDependencyArg) {
+  await ensureRust();
+
   await execPromise({
     command: CARGO,
     args: [
