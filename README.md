@@ -9,11 +9,13 @@ cycle of applications written on [Fluence](https://fluence.network). It provides
 project scaffolding, compilation, service deployment, dependency management and
 installation, storage of keys and ids, etc.
 
-## Installation and Usage
+## CLI installation
 
-### Using install script
+### Windows
 
-**Linux | macOS**
+To download and install `fluence` use Windows `.exe` installer from the [release](https://github.com/fluencelabs/cli/releases) page.
+
+### Linux and macOS
 
 To download and install `fluence` use our `install.sh` script
 
@@ -21,11 +23,19 @@ To download and install `fluence` use our `install.sh` script
 curl -qsL https://raw.githubusercontent.com/fluencelabs/cli/main/install.sh | bash
 ```
 
-**Windows**
+**Installing manually**
 
-To download and install `fluence` use Windows `.exe` installer from the [release](https://github.com/fluencelabs/cli/releases) page.
+-   download fluence archive for your platfrom from
+    [latest release](https://github.com/fluencelabs/cli/releases/latest).
+-   extract archive contents to default fluence user directory
 
-**Updates**
+    ```shell
+    tar --strip-components=1 -xzf <archive> -C "${HOME}/.fluence/cli"
+    ```
+
+-   add `${HOME}/.fluence/cli/bin` to `$PATH`
+
+### Update
 
 To select `fluence` version compatible with certain network (`dar`, `stage`,
 `kras`) run:
@@ -42,19 +52,13 @@ For more information run:
 fluence update --help
 ```
 
-### Installing manually (Not supported on Windows)
-
--   download fluence archive for your platfrom from
-    [latest release](https://github.com/fluencelabs/cli/releases/latest).
--   extract archive contents to default fluence user directory
-
-    ```shell
-    tar --strip-components=1 -xzf <archive> -C "${HOME}/.fluence/cli"
-    ```
-
--   add `${HOME}/.fluence/cli/bin` to `$PATH`
-
 ## Uninstall CLI
+
+**Windows**
+
+Go to installation directory and run `Uninstall.exe` binary.
+
+**Linux and macOS**
 
 To uninstall CLI you need to remove couple of directories
 
