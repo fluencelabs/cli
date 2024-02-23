@@ -141,7 +141,8 @@
     "commands": "./dist/commands",
     "update": {
       "s3": {
-        "bucket": "fcli-binaries"
+        "bucket": "fcli-binaries",
+        "xz": false
       }
     },
     "nsisCustomization": "./nsis/custom-installer.nsi",
