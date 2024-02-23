@@ -1267,7 +1267,7 @@ ALIASES
   $ fluence provider cu
 ```
 
-_See code: [src/commands/provider/cc-update.ts](https://github.com/fluencelabs/cli/blob/v0.15.6/src/commands/provider/cc-update.ts)_
+_See code: [src/commands/provider/cc-update.ts](https://github.com/fluencelabs/cli/blob/v0.15.7/src/commands/provider/cc-update.ts)_
 
 ## `fluence provider cc-withdraw-collateral`
 
