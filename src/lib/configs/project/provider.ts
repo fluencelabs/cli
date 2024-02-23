@@ -158,6 +158,14 @@ type NoxConfigYAML = {
   };
   effectors?: Record<string, Effector>;
   rawConfig?: string;
+  chainConfig?: {
+    httpEndpoint?: string;
+    coreContractAddress?: string;
+    ccContractAddress?: string;
+    marketContractAddress?: string;
+    networkId?: number;
+    walletKey?: string;
+  };
 };
 
 const NOX_IPFS_MULTIADDR = `/dns4/${IPFS_CONTAINER_NAME}/tcp/${IPFS_PORT}`;
@@ -295,6 +303,45 @@ const noxConfigYAMLSchema = {
       additionalProperties: effectorSchema,
       properties: {
         effectorName: effectorSchema,
+      },
+      required: [],
+    },
+    chainConfig: {
+      nullable: true,
+      type: "object",
+      description: "Chain config",
+      additionalProperties: false,
+      properties: {
+        httpEndpoint: {
+          nullable: true,
+          type: "string",
+          description: `HTTP endpoint of the chain. Same as decider`,
+        },
+        coreContractAddress: {
+          nullable: true,
+          type: "string",
+          description: `Core contract address`,
+        },
+        ccContractAddress: {
+          nullable: true,
+          type: "string",
+          description: `Capacity commitment contract address`,
+        },
+        marketContractAddress: {
+          nullable: true,
+          type: "string",
+          description: `Market contract address`,
+        },
+        networkId: {
+          nullable: true,
+          type: "number",
+          description: `Network ID`,
+        },
+        walletKey: {
+          nullable: true,
+          type: "string",
+          description: `Wallet key`,
+        },
       },
       required: [],
     },
@@ -802,6 +849,13 @@ async function resolveNoxConfigYAML(
     };
   }
 
+  if (config.chainConfig?.walletKey === undefined) {
+    config.chainConfig = {
+      ...config.chainConfig,
+      walletKey: signingWallet,
+    };
+  }
+
   return config;
 }
 
@@ -836,6 +890,7 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
   const isLocal = env === "local";
   const networkId = await getChainId();
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
+  const contractAddresses = await DealClient.getContractAddresses(env);
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
@@ -859,8 +914,17 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
           : CHAIN_URLS[env],
         networkId,
         startBlock: "earliest",
-        matcherAddress: (await DealClient.getContractAddresses(env)).market,
+        matcherAddress: contractAddresses.market,
       },
+    },
+    chainConfig: {
+      httpEndpoint: isLocal
+        ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
+        : CHAIN_URLS[env],
+      coreContractAddress: contractAddresses.core,
+      ccContractAddress: contractAddresses.capacity,
+      marketContractAddress: contractAddresses.market,
+      networkId,
     },
   };
 }

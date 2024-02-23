@@ -65,12 +65,28 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `chainConfig`    | [object](#chainconfig)    | No       | Chain config                                                                                                      |
 | `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+
+##### chainConfig
+
+Chain config
+
+###### Properties
+
+| Property                | Type   | Required | Description                                 |
+|-------------------------|--------|----------|---------------------------------------------|
+| `ccContractAddress`     | string | No       | Capacity commitment contract address        |
+| `coreContractAddress`   | string | No       | Core contract address                       |
+| `httpEndpoint`          | string | No       | HTTP endpoint of the chain. Same as decider |
+| `marketContractAddress` | string | No       | Market contract address                     |
+| `networkId`             | number | No       | Network ID                                  |
+| `walletKey`             | string | No       | Wallet key                                  |
 
 ##### effectors
 
@@ -151,12 +167,28 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `chainConfig`    | [object](#chainconfig)    | No       | Chain config                                                                                                      |
 | `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
 | `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
 | `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
 | `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+
+### chainConfig
+
+Chain config
+
+#### Properties
+
+| Property                | Type   | Required | Description                                 |
+|-------------------------|--------|----------|---------------------------------------------|
+| `ccContractAddress`     | string | No       | Capacity commitment contract address        |
+| `coreContractAddress`   | string | No       | Core contract address                       |
+| `httpEndpoint`          | string | No       | HTTP endpoint of the chain. Same as decider |
+| `marketContractAddress` | string | No       | Market contract address                     |
+| `networkId`             | number | No       | Network ID                                  |
+| `walletKey`             | string | No       | Wallet key                                  |
 
 ### effectors
 

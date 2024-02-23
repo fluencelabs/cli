@@ -176,13 +176,12 @@ export async function initCli<
     }
   }
 
-  await updateRelaysJSON();
-
   setChainFlags({
     env: flags.env,
     [PRIV_KEY_FLAG_NAME]: flags[PRIV_KEY_FLAG_NAME],
   });
 
+  await updateRelaysJSON();
   return { args, flags, ...res };
 }
 
