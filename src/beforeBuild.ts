@@ -153,24 +153,6 @@ const WIN_BIN_FILE_PATH = join(
   "win.js",
 );
 
-const TARBALL_BUILD_COMMAND_PATH = join(
-  NODE_MODULES_DIR_NAME,
-  "oclif",
-  "lib",
-  "tarballs",
-  "build.js",
-);
-
-const PROMOTE_COMMAND_FILE_PATH = join(
-  NODE_MODULES_DIR_NAME,
-  "oclif",
-  "lib",
-  "commands",
-  "promote.js",
-);
-
-const WINDOWS_PLATFORM = "win32";
-
 async function patchOclif(fileName: string, search: string, insert: string) {
   try {
     const binFileContent = await readFile(fileName, FS_OPTIONS);
@@ -206,16 +188,9 @@ await patchOclif(
   "setlocal enableextensions\nset NODE_NO_WARNINGS=1",
 );
 
-// Packing replacement to fix build on Windows
+// Pack tar.gz for Windows. We need it to perform update
 await patchOclif(
-  TARBALL_BUILD_COMMAND_PATH,
-  "tar -xzf",
-  "tar --force-local -xzf",
-);
-
-// Don't build tarballs when packing for Windows
-await patchOclif(
-  PROMOTE_COMMAND_FILE_PATH,
-  "promoteGzTarballs(target)",
-  `...(target.platform === '${WINDOWS_PLATFORM}' ? [] : [promoteGzTarballs(target)])`,
+  WIN_BIN_FILE_PATH,
+  "await Tarballs.build(buildConfig, { pack: false, parallel: true, platform: 'win32', tarball: flags.tarball });",
+  "await Tarballs.build(buildConfig, { pack: true, parallel: true, platform: 'win32', tarball: flags.tarball });",
 );
