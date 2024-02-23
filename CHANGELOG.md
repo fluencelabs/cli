@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.15.6](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.5...fluence-cli-v0.15.6) (2024-02-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/js-client to v0.8.4 ([#793](https://github.com/fluencelabs/cli/issues/793)) ([2a50b77](https://github.com/fluencelabs/cli/commit/2a50b77a2c80559e4efd5883a65a43c37b91681c))
+* enable update on Windows ([#789](https://github.com/fluencelabs/cli/issues/789)) ([7235d82](https://github.com/fluencelabs/cli/commit/7235d8248d1fce3011bdee0488ce9bfad39b88b4))
+* Redeploy stage contracts and update graph-node url ([#784](https://github.com/fluencelabs/cli/issues/784)) ([1253d44](https://github.com/fluencelabs/cli/commit/1253d44d84a33e37a4df3a226d1608ed3f32d257))
+* upload tar on Window ([#792](https://github.com/fluencelabs/cli/issues/792)) ([672386e](https://github.com/fluencelabs/cli/commit/672386e87da06ccd5e06df528b7d70febc14b871))
+
 ## [0.15.5](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.4...fluence-cli-v0.15.5) (2024-02-21)
 
 
