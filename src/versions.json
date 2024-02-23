@@ -1,5 +1,5 @@
 {
-  "nox": "fluencelabs/nox:0.20.1",
+  "nox": "fluencelabs/nox:0.20.2",
   "chain-rpc": "fluencelabs/chain-rpc:0.6.5",
   "chain-deploy-script": "fluencelabs/chain-deploy-script:0.6.5",
   "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.6.5",
