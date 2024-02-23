@@ -15,6 +15,7 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { printDealInfo } from "../../lib/chain/printDealInfo.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
@@ -22,7 +23,6 @@ import {
 } from "../../lib/const.js";
 import { getDeals } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { printDealInfo } from "../../lib/chain/printDealInfo.js";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about the deal";

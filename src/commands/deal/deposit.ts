@@ -17,6 +17,7 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { depositToDeal } from "../../lib/chain/depositToDeal.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
@@ -24,7 +25,6 @@ import {
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
-import { depositToDeal } from "../../lib/chain/depositToDeal.js";
 
 export default class Deposit extends BaseCommand<typeof Deposit> {
   static override description = "Deposit do the deal";
