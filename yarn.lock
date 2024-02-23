@@ -611,13 +611,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/avm@npm:0.59.0":
-  version: 0.59.0
-  resolution: "@fluencelabs/avm@npm:0.59.0"
+"@fluencelabs/avm@npm:0.62.0":
+  version: 0.62.0
+  resolution: "@fluencelabs/avm@npm:0.62.0"
   dependencies:
     msgpack-lite: ^0.1.26
     multicodec: ^3.2.1
-  checksum: d98def5f81dcdac557a38d5808c1a97b3fe260be48eed50c42b2adaaab12b5e3a4c504be4ad83df7ee16bb562fd50d95a463980a0f68aa6a947190fd9cd68ec6
+  checksum: 12b166d252728b8c64d6d4a4bf796e4d9a69842f918edbe8898557774629542510cf5d2e1d287af471e6d963a633df366e45c489140dccd7b0b1de858ea89511
   languageName: node
   linkType: hard
 
@@ -631,7 +631,7 @@ __metadata:
     "@fluencelabs/aqua-to-js": 0.3.5
     "@fluencelabs/deal-ts-clients": 0.6.5
     "@fluencelabs/fluence-network-environment": 1.1.2
-    "@fluencelabs/js-client": 0.8.4
+    "@fluencelabs/js-client": 0.9.0
     "@fluencelabs/npm-aqua-compiler": 0.0.3
     "@iarna/toml": 2.2.5
     "@mswjs/interceptors": 0.25.14
@@ -727,35 +727,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluencelabs/interfaces@npm:0.11.0":
-  version: 0.11.0
-  resolution: "@fluencelabs/interfaces@npm:0.11.0"
-  checksum: c26985b13099c2df7f4c390893842c20739c67b50a076eb5135a5f1c61a3fe5d6aa43e2815109faad3c1bf503039c627d7953990d68be62ef062cbd8c4a1a8c2
+"@fluencelabs/interfaces@npm:0.12.0":
+  version: 0.12.0
+  resolution: "@fluencelabs/interfaces@npm:0.12.0"
+  checksum: 3eff9979f906a20f55d4a8ad826dc5cbd0d558ab194e36eb39caa71b8f196947894b2719e46396531205abcddcb5c629cef6a49a3ebd2cc548ac005778f6f58f
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client-isomorphic@npm:0.5.0":
-  version: 0.5.0
-  resolution: "@fluencelabs/js-client-isomorphic@npm:0.5.0"
+"@fluencelabs/js-client-isomorphic@npm:0.6.0":
+  version: 0.6.0
+  resolution: "@fluencelabs/js-client-isomorphic@npm:0.6.0"
   dependencies:
-    "@fluencelabs/avm": 0.59.0
-    "@fluencelabs/marine-js": 0.8.0
-    "@fluencelabs/marine-worker": 0.5.1
+    "@fluencelabs/avm": 0.62.0
+    "@fluencelabs/marine-js": 0.13.0
+    "@fluencelabs/marine-worker": 0.6.0
     "@fluencelabs/threads": ^2.0.0
-  checksum: bb16910b592c67b73641d837d3122628a633162f919c95cafa9b2e6a55236cc72c3b1a52fba4591b7236d4d4be77ba064bcf71d53952cd5167ccdf66f6868d7a
+  checksum: d1c98c500aed55dbdf9d2cbabe46b83e070fe2bd6f10a20324d16a102fd9f7b57afb386392261a4a8f588e8194e8dbe5086ea1be50a872fc277b5b00cb1d9378
   languageName: node
   linkType: hard
 
-"@fluencelabs/js-client@npm:0.8.4":
-  version: 0.8.4
-  resolution: "@fluencelabs/js-client@npm:0.8.4"
+"@fluencelabs/js-client@npm:0.9.0":
+  version: 0.9.0
+  resolution: "@fluencelabs/js-client@npm:0.9.0"
   dependencies:
     "@chainsafe/libp2p-noise": 14.0.0
     "@chainsafe/libp2p-yamux": 6.0.1
-    "@fluencelabs/avm": 0.59.0
-    "@fluencelabs/interfaces": 0.11.0
-    "@fluencelabs/js-client-isomorphic": 0.5.0
-    "@fluencelabs/marine-worker": 0.5.1
+    "@fluencelabs/avm": 0.62.0
+    "@fluencelabs/interfaces": 0.12.0
+    "@fluencelabs/js-client-isomorphic": 0.6.0
+    "@fluencelabs/marine-worker": 0.6.0
     "@fluencelabs/threads": ^2.0.0
     "@libp2p/crypto": 4.0.1
     "@libp2p/identify": 1.0.11
@@ -779,29 +779,29 @@ __metadata:
     uint8arrays: 4.0.3
     uuid: 8.3.2
     zod: 3.22.4
-  checksum: b6cbbb318c2b3d4c9f2758a9ba1f21ce384e8c4b1e35725210bf7d8eac0575672e7ab615c6140636ce99918d0d5b13b2e143756482a571f5f1e5c1c047472a3a
+  checksum: d2e067ab270687d2a1fcc03b9d361c193f39375e6507fbecc949080b04c4c26de64942115c9d1c648c72abda4e1d099ce5be6e4f3303ecc145fbf24d0f5f44e8
   languageName: node
   linkType: hard
 
-"@fluencelabs/marine-js@npm:0.8.0":
-  version: 0.8.0
-  resolution: "@fluencelabs/marine-js@npm:0.8.0"
+"@fluencelabs/marine-js@npm:0.13.0":
+  version: 0.13.0
+  resolution: "@fluencelabs/marine-js@npm:0.13.0"
   dependencies:
     "@wasmer/wasi": 0.12.0
     "@wasmer/wasmfs": 0.12.0
     default-import: 1.1.5
-  checksum: dcda6d37b6c58c583e16342556ed86f8fbea72e9e87f4531e20c60aa4fc4decfe733e2d8da93c89c35e0a0b658b16d4207807f5d5167331a48c470cbfea21b34
+  checksum: 0f0ea5bcdfc50ffeafc6477710f3058154b0e9197cb6e4d76ad256e107a4a6278453484c3ab4a623e80754fff336501ce5103bc9bbef9f63888556d4f7904497
   languageName: node
   linkType: hard
 
-"@fluencelabs/marine-worker@npm:0.5.1":
-  version: 0.5.1
-  resolution: "@fluencelabs/marine-worker@npm:0.5.1"
+"@fluencelabs/marine-worker@npm:0.6.0":
+  version: 0.6.0
+  resolution: "@fluencelabs/marine-worker@npm:0.6.0"
   dependencies:
-    "@fluencelabs/marine-js": 0.8.0
+    "@fluencelabs/marine-js": 0.13.0
     "@fluencelabs/threads": ^2.0.0
     observable-fns: 0.6.1
-  checksum: 959fdb48a65365ca32efa3afedf6dcd54c4094885e9d53ffe36cc5ea7530c1979908b24452d9f82f2c67d92ae0087d24ad9039f7d0cea3c67524ef3fc6b8b8f8
+  checksum: 71be845262f5636dd627b8359c19dfe96d402db38ec4c1acc67e3bd79490b90990f201798dcee2f8088abe9adb39cbeddbdcf6c37c771c701f569b7b4170c7e6
   languageName: node
   linkType: hard
 
