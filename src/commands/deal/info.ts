@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-import { color } from "@oclif/color";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { peerIdHexStringToBase58String } from "../../lib/chain/conversions.js";
-import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
   DEPLOYMENT_NAMES_ARG,
 } from "../../lib/const.js";
-import { type DealNameAndId, getDeals } from "../../lib/deal.js";
-import { getDealClient } from "../../lib/dealClient.js";
+import { getDeals } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { printDealInfo } from "../../lib/chain/printDealInfo.js";
 
 export default class Info extends BaseCommand<typeof Info> {
   static override description = "Get info about the deal";
@@ -46,68 +42,6 @@ export default class Info extends BaseCommand<typeof Info> {
 
     for (const deal of deals) {
       await printDealInfo(deal);
-    }
-  }
-}
-
-async function printDealInfo({ dealId, dealName }: DealNameAndId) {
-  const { dealClient } = await getDealClient();
-  const deal = dealClient.getDeal(dealId);
-  commandObj.log(`\n${color.yellow(dealName)} info:`);
-  const status = await deal.getStatus();
-  commandObj.log(`Deal ID: ${dealId}`);
-
-  //TODO: change to enum
-  switch (status) {
-    case 0n:
-      commandObj.log(`Status: Inactive`);
-      break;
-    case 1n:
-      commandObj.log(`Status: Active`);
-      break;
-    case 2n:
-      commandObj.log(`Status: Ended`);
-      break;
-  }
-
-  const { ethers } = await import("ethers");
-
-  commandObj.log(`Balance: ${ethers.formatEther(await deal.getFreeBalance())}`);
-
-  commandObj.log(
-    `Price per worker per epoch: ${ethers.formatEther(
-      await deal.pricePerWorkerEpoch(),
-    )}`,
-  );
-
-  commandObj.log(`Payment token: ${await deal.paymentToken()}`);
-  commandObj.log(`Min workers: ${await deal.minWorkers()}`);
-  commandObj.log(`Target worker: ${await deal.targetWorkers()}`);
-
-  const currentComputeUnitCount = await deal["getComputeUnitCount()"]();
-
-  commandObj.log(`Current compute units: ${currentComputeUnitCount}`);
-
-  if (currentComputeUnitCount === 0n) {
-    commandObj.log(`No compute units`);
-  } else {
-    const computeUnits = await deal.getComputeUnits();
-
-    for (const unit of computeUnits) {
-      commandObj.log(`\nCompute unit: ${unit.id}`);
-      commandObj.log(`Provider: ${unit.provider}`);
-
-      if (unit.workerId === ethers.ZeroHash) {
-        commandObj.log(`Worker Id: None`);
-      } else {
-        commandObj.log(`Worker Id: ${unit.workerId}`);
-      }
-
-      commandObj.log(`Peer Id Hex: ${unit.peerId}`);
-
-      commandObj.log(
-        `Peer Id base58: ${await peerIdHexStringToBase58String(unit.peerId)}`,
-      );
     }
   }
 }

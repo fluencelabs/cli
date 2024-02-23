@@ -112,3 +112,7 @@ export async function createCommitments(flags: {
 
   return stringCommitmentIds;
 }
+
+export function updateCommitment() {
+  commandObj.error("Not implemented");
+}

@@ -15,15 +15,15 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { createCommitments } from "../../lib/chain/commitment.js";
+import { updateCommitment } from "../../lib/chain/commitment.js";
 import { NOX_NAMES_FLAG, CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class CreateCommitment extends BaseCommand<
-  typeof CreateCommitment
+export default class UpdateCommitment extends BaseCommand<
+  typeof UpdateCommitment
 > {
-  static override aliases = ["provider:cc"];
-  static override description = "Create Capacity commitment";
+  static override aliases = ["provider:cu"];
+  static override description = "Update Capacity commitment";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
@@ -31,7 +31,7 @@ export default class CreateCommitment extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(CreateCommitment));
-    await createCommitments(flags);
+    await initCli(this, await this.parse(UpdateCommitment));
+    updateCommitment();
   }
 }

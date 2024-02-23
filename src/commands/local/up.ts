@@ -17,7 +17,7 @@
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { createCommitments } from "../../lib/chain/createCommitment.js";
+import { createCommitments } from "../../lib/chain/commitment.js";
 import { depositCollateralByNoxNames } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
