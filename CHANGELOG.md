@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.8](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.7...fluence-cli-v0.15.8) (2024-02-23)
+
+
+### Features
+
+* add chain config ([#801](https://github.com/fluencelabs/cli/issues/801)) ([84434df](https://github.com/fluencelabs/cli/commit/84434df85d59150277776bb5aca45e268402742e))
+* up @fluencelabs/deal-ts-clients v0.6.5 ([5163ef1](https://github.com/fluencelabs/cli/commit/5163ef18ca57056c571bab45c4dd1bced8d1f1ad))
+
+
+### Bug Fixes
+
+* developer ux and other fixes ([#799](https://github.com/fluencelabs/cli/issues/799)) ([b2aaf51](https://github.com/fluencelabs/cli/commit/b2aaf5102a2d460c93fb8f3d6d8269c17cd83c79))
+
 ## [0.15.7](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.6...fluence-cli-v0.15.7) (2024-02-23)
 
 
