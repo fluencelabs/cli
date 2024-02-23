@@ -200,6 +200,7 @@ await patchOclif(
 // Turn off update on windows
 const updateCommandString =
   "const { args, flags } = await this.parse(UpdateCommand);";
+
 await patchOclif(
   UPDATE_COMMAND_FILE_PATH,
   updateCommandString,
