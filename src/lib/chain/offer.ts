@@ -20,8 +20,8 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
 import {
-  ensureReadonlyProviderConfig,
   ensureComputerPeerConfigs,
+  initNewReadonlyProviderConfig,
 } from "../configs/project/provider.js";
 import {
   initNewProviderArtifactsConfig,
@@ -415,7 +415,7 @@ async function resolveOffersFromProviderConfig(
     return allOffers;
   }
 
-  const providerConfig = await ensureReadonlyProviderConfig();
+  const providerConfig = await initNewReadonlyProviderConfig();
 
   if (flags[OFFER_FLAG_NAME] === undefined) {
     return checkboxes<EnsureOfferConfig, never>({
@@ -476,7 +476,7 @@ async function resolveOffersFromProviderConfig(
 type EnsureOfferConfig = Awaited<ReturnType<typeof ensureOfferConfigs>>[number];
 
 async function ensureOfferConfigs() {
-  const providerConfig = await ensureReadonlyProviderConfig();
+  const providerConfig = await initNewReadonlyProviderConfig();
   const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
 
   const { ethers } = await import("ethers");

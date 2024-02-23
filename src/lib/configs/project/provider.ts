@@ -51,7 +51,6 @@ import {
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-  CLI_NAME,
   NOX_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
   CHAIN_URLS,
@@ -418,7 +417,10 @@ const DEFAULT_EFFECTOR =
 
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
-    commandObj.logToStderr("Creating new provider config\n");
+    commandObj.logToStderr(
+      `Creating new ${color.yellow(PROVIDER_CONFIG_FULL_FILE_NAME)} config!\n`,
+    );
+
     const { yamlDiffPatch } = await import("yaml-diff-patch");
     const chainEnv = await ensureChainEnv();
     setEnvConfig(await initNewEnvConfig(chainEnv));
@@ -740,21 +742,6 @@ export function initReadonlyProviderConfig() {
   return getReadonlyConfigInitFunction(initConfigOptions)();
 }
 
-export async function ensureReadonlyProviderConfig() {
-  const providerConfig =
-    await getReadonlyConfigInitFunction(initConfigOptions)();
-
-  if (providerConfig === null) {
-    commandObj.error(
-      `You need to run ${color.yellow(
-        `${CLI_NAME} provider init`,
-      )} first to create a provider config`,
-    );
-  }
-
-  return providerConfig;
-}
-
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
 
 function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
@@ -905,7 +892,7 @@ export type EnsureComputerPeerConfig = Awaited<
 
 export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
   const { ethers } = await import("ethers");
-  const providerConfig = await ensureReadonlyProviderConfig();
+  const providerConfig = await initNewReadonlyProviderConfig();
 
   const providerSecretsConfig =
     await initNewProviderSecretsConfig(providerConfig);
@@ -1063,7 +1050,7 @@ export async function resolveComputePeersByNames(
     return computePeers;
   }
 
-  const providerConfig = await ensureReadonlyProviderConfig();
+  const providerConfig = await initNewReadonlyProviderConfig();
 
   if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
     return checkboxes<EnsureComputerPeerConfig, never>({

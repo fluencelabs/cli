@@ -93,7 +93,7 @@ import {
   overridableSpellProperties,
 } from "./spell.js";
 
-export const TARGET_WORKERS_DEFAULT = 1;
+export const TARGET_WORKERS_DEFAULT = 3;
 
 type ServiceV0 = { name: string; count?: number };
 

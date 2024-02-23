@@ -254,11 +254,6 @@ export async function deployDealAndWaitUntilDeployed(
   assert(dealId, "dealId is expected to be defined");
   console.log("dealId:", dealId);
 
-  await fluence({
-    args: ["deal", "deposit", "10", DEFAULT_DEPLOYMENT_NAME],
-    cwd,
-  });
-
   await setTryTimeout(
     "run deployed services",
     () => {

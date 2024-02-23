@@ -23,6 +23,8 @@ import { baseFlags } from "../baseCommand.js";
 import type Deploy from "../commands/deploy.js";
 
 import { getChainId } from "./chain/chainId.js";
+import { depositToDeal } from "./chain/depositToDeal.js";
+import { printDealInfo } from "./chain/printDealInfo.js";
 import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import { TARGET_WORKERS_DEFAULT } from "./configs/project/fluence.js";
@@ -43,6 +45,7 @@ import {
   CHAIN_FLAGS,
   type ChainENV,
   DEPLOYMENT_NAMES_ARG_NAME,
+  DEAL_IDS_FLAG_NAME,
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
@@ -212,6 +215,8 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 
     commandObj.logToStderr(`\nDeploying ${color.yellow(workerName)}\n`);
 
+    const initialBalance = deal.initialBalance ?? DEFAULT_INITIAL_BALANCE;
+
     const dealIdOriginal = await dealCreate({
       appCID,
       minWorkers,
@@ -220,7 +225,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       pricePerWorkerEpoch,
       effectors,
       workerName,
-      initialBalance: deal.initialBalance ?? DEFAULT_INITIAL_BALANCE,
+      initialBalance,
     });
 
     if (flags["auto-match"]) {
@@ -256,6 +261,17 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       "worker definition": appCID,
       timestamp,
     };
+
+    // remove this after initial balance is implemented
+    await depositToDeal(
+      {
+        flags: { [DEAL_IDS_FLAG_NAME]: dealIdOriginal },
+        args: { [DEPLOYMENT_NAMES_ARG_NAME]: undefined },
+      },
+      initialBalance.toString(),
+    );
+
+    await printDealInfo({ dealId: dealIdOriginal, dealName: workerName });
   }
 
   dbg("start creating aqua files with worker info");
