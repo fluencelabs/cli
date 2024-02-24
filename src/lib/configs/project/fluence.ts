@@ -50,7 +50,7 @@ import {
   LOCAL_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  DEFAULT_PRICE_PER_EPOCH,
+  DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
   TOP_LEVEL_SCHEMA_ID,
   DEFAULT_INITIAL_BALANCE,
   aquaLogLevelsString,
@@ -304,7 +304,7 @@ const dealSchemaObj = {
     pricePerWorkerEpoch: {
       type: "string",
       description: `Price per worker epoch in ${PT_SYMBOL}`,
-      default: DEFAULT_PRICE_PER_EPOCH,
+      default: DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
       nullable: true,
     },
     initialBalance: {
@@ -920,7 +920,7 @@ version: 8
 deployments:
   ${DEFAULT_DEPLOYMENT_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
-    pricePerWorkerEpoch: "${DEFAULT_PRICE_PER_EPOCH}" # price per worker epoch in ${PT_SYMBOL}
+    pricePerWorkerEpoch: "${DEFAULT_PRICE_PER_EPOCH_DEVELOPER}" # price per worker epoch in ${PT_SYMBOL}
     initialBalance: "${DEFAULT_INITIAL_BALANCE}" # initial balance  after deploy in ${PT_SYMBOL}
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker

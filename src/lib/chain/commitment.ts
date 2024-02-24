@@ -15,7 +15,6 @@
  */
 
 import { color } from "@oclif/color";
-import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
@@ -40,6 +39,7 @@ export async function createCommitments(flags: {
   const capacity = await dealClient.getCapacity();
   const precision = await core.precision();
   const { ethers } = await import("ethers");
+  // const epochDuration = await core.epochDuration();
 
   const createCommitmentsTxReceipts = await signBatch(
     await Promise.all(
@@ -51,7 +51,10 @@ export async function createCommitments(flags: {
           CallsToBatch<Parameters<typeof capacity.createCommitment>>[number]
         > => {
           const peerIdUint8Arr = await peerIdToUint8Array(peerId);
-          const ccDuration = (parse(capacityCommitment.duration) ?? 0) / 1000;
+          // const durationInSec = BigInt(
+          // (parse(capacityCommitment.duration) ?? 0) / 1000,
+          // );
+          const durationEpoch = BigInt("100000000000000000000000"); //  durationInSec / epochDuration;
           const ccDelegator = capacityCommitment.delegator;
 
           const ccRewardDelegationRate = Math.floor(
@@ -61,7 +64,7 @@ export async function createCommitments(flags: {
           return [
             capacity.createCommitment,
             peerIdUint8Arr,
-            ccDuration,
+            durationEpoch,
             ccDelegator ?? ethers.ZeroAddress,
             ccRewardDelegationRate,
           ];

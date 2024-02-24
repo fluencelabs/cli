@@ -47,11 +47,12 @@ export const currencyProperties = ["minPricePerWorkerEpoch"] as const;
 export type CurrencyProperty = (typeof currencyProperties)[number];
 
 export const COLLATERAL_DEFAULT = 1;
-export const DEFAULT_PRICE_PER_EPOCH = "0.00001";
-export const DEFAULT_INITIAL_BALANCE = "0.00010";
+export const DEFAULT_PRICE_PER_EPOCH_PROVIDER = "0.00001";
+export const DEFAULT_PRICE_PER_EPOCH_DEVELOPER = "0.0001";
+export const DEFAULT_INITIAL_BALANCE = "0.001";
 
 export const defaultNumberProperties: Record<CurrencyProperty, string> = {
-  minPricePerWorkerEpoch: DEFAULT_PRICE_PER_EPOCH,
+  minPricePerWorkerEpoch: DEFAULT_PRICE_PER_EPOCH_PROVIDER,
 };
 
 export const MIN_MEMORY_PER_MODULE_STR = "2 MiB";
@@ -775,7 +776,7 @@ export const READMEs: Record<Template, string> = {
 export const DEFAULT_OFFER_NAME = "defaultOffer";
 
 export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
-export const DEFAULT_CC_DURATION = "100 minutes";
+export const DEFAULT_CC_DURATION = "100 days";
 export const DURATION_EXAMPLE =
   "in human-readable format. Example: 1 months 1 days";
 
