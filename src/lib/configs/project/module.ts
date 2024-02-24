@@ -123,7 +123,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FULL_FILE_NAME}`,
   title: MODULE_CONFIG_FULL_FILE_NAME,
-  description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`${CLI_NAME} module new\` command to generate a template for new module`,
+  description: `!IMPORTANT: All the properties in this config (except for "name") are relevant only for providers who provide effector modules. If you are not a provider - properties in this config will be ignored when you deploy your code. But they will still have effect when running using 'fluence service repl' command. This config defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`${CLI_NAME} module new\` command to generate a template for new module`,
   properties: {
     name: {
       type: "string",

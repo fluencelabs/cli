@@ -57,8 +57,9 @@ import {
   AQUA_LOG_LEVELS,
   type AquaLogLevel,
   PT_SYMBOL,
+  COMPILE_AQUA_PROPERTY_NAME,
+  DEFAULT_CURL_EFFECTOR_CID,
 } from "../../const.js";
-import { COMPILE_AQUA_PROPERTY_NAME } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   validateCIDs,
@@ -924,6 +925,8 @@ deployments:
     initialBalance: "${DEFAULT_INITIAL_BALANCE}" # initial balance  after deploy in ${PT_SYMBOL}
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
+    effectors:
+      - "${DEFAULT_CURL_EFFECTOR_CID}"
 
 ${yamlDiffPatch(
   "",
@@ -1478,7 +1481,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
           return (effectors ?? []).map((cid) => {
             return {
               cid,
-              location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deals > ${name} > effectors > ${cid}`,
+              location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deployments > ${name} > effectors > ${cid}`,
             };
           });
         },

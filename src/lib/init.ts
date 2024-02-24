@@ -344,7 +344,7 @@ async function initTSorJSProject({
         fluenceConfig: fluenceConfig,
       }),
       targetType: isJS ? "js" : "ts",
-      outputPath: frontendCompiledAquaPath,
+      outputPathAbsolute: frontendCompiledAquaPath,
     }),
   ]);
 }
@@ -423,7 +423,7 @@ async function initTSorJSGatewayProject({
       filePath: aquaDir,
       imports: await getAquaImports({ fluenceConfig }),
       targetType: ext,
-      outputPath: gatewayCompiledAquaPath,
+      outputPathAbsolute: gatewayCompiledAquaPath,
     }),
   ]);
 }

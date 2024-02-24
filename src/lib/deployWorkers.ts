@@ -77,7 +77,6 @@ import {
   makeOptional,
   type CustomTypes,
 } from "./helpers/jsToAqua.js";
-import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
@@ -887,9 +886,7 @@ async function resolveWorker({
 
         return {
           wasm: getModuleWasmPath(overriddenModuleConfig),
-          config: JSON.stringify(
-            moduleToJSONModuleConfig(overriddenModuleConfig),
-          ),
+          name: overriddenModuleConfig.name,
         };
       });
 
