@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.9](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.8...fluence-cli-v0.15.9) (2024-02-24)
+
+
+### Features
+
+* fix decimals ([#808](https://github.com/fluencelabs/cli/issues/808)) ([162909f](https://github.com/fluencelabs/cli/commit/162909f444d320ae797ff80038d6bd23040f1182))
+
+
+### Bug Fixes
+
+* ensure rust ([#804](https://github.com/fluencelabs/cli/issues/804)) ([e5cb09b](https://github.com/fluencelabs/cli/commit/e5cb09b535a474721eb715261b511658f75e8e6b))
+
 ## [0.15.8](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.7...fluence-cli-v0.15.8) (2024-02-23)
 
 
