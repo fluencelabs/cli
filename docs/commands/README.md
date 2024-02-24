@@ -49,6 +49,7 @@
 * [`fluence provider cc-withdraw-rewards`](#fluence-provider-cc-withdraw-rewards)
 * [`fluence provider deal-exit [DEAL-IDS]`](#fluence-provider-deal-exit-deal-ids)
 * [`fluence provider deal-list`](#fluence-provider-deal-list)
+* [`fluence provider deal-reward-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-deal-reward-info-deal-address-unit-id)
 * [`fluence provider deal-withdraw [DEAL-IDS]`](#fluence-provider-deal-withdraw-deal-ids)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
@@ -56,7 +57,6 @@
 * [`fluence provider offer-info`](#fluence-provider-offer-info)
 * [`fluence provider offer-update`](#fluence-provider-offer-update)
 * [`fluence provider register`](#fluence-provider-register)
-* [`fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-reward-info-deal-address-unit-id)
 * [`fluence provider signing-wallets`](#fluence-provider-signing-wallets)
 * [`fluence provider tokens-distribute`](#fluence-provider-tokens-distribute)
 * [`fluence provider update`](#fluence-provider-update)
@@ -376,7 +376,7 @@ USAGE
     <value>]
 
 ARGUMENTS
-  AMOUNT            Amount of tokens to deposit
+  AMOUNT            Amount of USDC tokens to deposit
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
@@ -500,7 +500,7 @@ USAGE
     <value>]
 
 ARGUMENTS
-  AMOUNT            Amount of tokens to deposit
+  AMOUNT            Amount of USDC tokens to withdraw
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
@@ -619,7 +619,7 @@ _See code: [src/commands/default/peers.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence delegator collateral-add [IDS]`
 
-Add collateral to capacity commitment
+Add FLT collateral to capacity commitment
 
 ```
 USAGE
@@ -637,7 +637,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Add collateral to capacity commitment
+  Add FLT collateral to capacity commitment
 
 ALIASES
   $ fluence delegator ca
@@ -647,7 +647,7 @@ _See code: [src/commands/delegator/collateral-add.ts](https://github.com/fluence
 
 ## `fluence delegator collateral-withdraw [IDS]`
 
-Withdraw collateral from capacity commitment
+Withdraw FLT collateral from capacity commitment
 
 ```
 USAGE
@@ -665,7 +665,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Withdraw collateral from capacity commitment
+  Withdraw FLT collateral from capacity commitment
 
 ALIASES
   $ fluence delegator cw
@@ -675,7 +675,7 @@ _See code: [src/commands/delegator/collateral-withdraw.ts](https://github.com/fl
 
 ## `fluence delegator reward-withdraw [IDS]`
 
-Withdraw reward from capacity commitment
+Withdraw FLT rewards from capacity commitment
 
 ```
 USAGE
@@ -693,7 +693,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Withdraw reward from capacity commitment
+  Withdraw FLT rewards from capacity commitment
 
 ALIASES
   $ fluence delegator rw
@@ -1161,7 +1161,7 @@ _See code: [src/commands/module/remove.ts](https://github.com/fluencelabs/cli/bl
 
 ## `fluence provider cc-activate`
 
-Add collateral to capacity commitment to activate it
+Add FLT collateral to capacity commitment to activate it
 
 ```
 USAGE
@@ -1180,7 +1180,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Add collateral to capacity commitment to activate it
+  Add FLT collateral to capacity commitment to activate it
 
 ALIASES
   $ fluence provider ca
@@ -1271,7 +1271,7 @@ _See code: [src/commands/provider/cc-update.ts](https://github.com/fluencelabs/c
 
 ## `fluence provider cc-withdraw-collateral`
 
-Withdraw collateral from capacity commitments
+Withdraw FLT collateral from capacity commitments
 
 ```
 USAGE
@@ -1288,7 +1288,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Withdraw collateral from capacity commitments
+  Withdraw FLT collateral from capacity commitments
 
 ALIASES
   $ fluence provider cwc
@@ -1298,7 +1298,7 @@ _See code: [src/commands/provider/cc-withdraw-collateral.ts](https://github.com/
 
 ## `fluence provider cc-withdraw-rewards`
 
-Withdraw rewards from capacity commitments
+Withdraw FLT rewards from capacity commitments
 
 ```
 USAGE
@@ -1315,7 +1315,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Withdraw rewards from capacity commitments
+  Withdraw FLT rewards from capacity commitments
 
 ALIASES
   $ fluence provider cwr
@@ -1378,9 +1378,38 @@ ALIASES
 
 _See code: [src/commands/provider/deal-list.ts](https://github.com/fluencelabs/cli/blob/v0.15.8/src/commands/provider/deal-list.ts)_
 
+## `fluence provider deal-reward-info [DEAL-ADDRESS] [UNIT-ID]`
+
+Deal reward info
+
+```
+USAGE
+  $ fluence provider deal-reward-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
+
+ARGUMENTS
+  DEAL-ADDRESS  Deal address
+  UNIT-ID       Compute unit ID
+
+FLAGS
+  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+
+DESCRIPTION
+  Deal reward info
+
+ALIASES
+  $ fluence provider dri
+```
+
+_See code: [src/commands/provider/deal-reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.8/src/commands/provider/deal-reward-info.ts)_
+
 ## `fluence provider deal-withdraw [DEAL-IDS]`
 
-Withdraw rewards from deals
+Withdraw USDC rewards from deals
 
 ```
 USAGE
@@ -1398,7 +1427,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Withdraw rewards from deals
+  Withdraw USDC rewards from deals
 
 ALIASES
   $ fluence provider dw
@@ -1564,35 +1593,6 @@ ALIASES
 
 _See code: [src/commands/provider/register.ts](https://github.com/fluencelabs/cli/blob/v0.15.8/src/commands/provider/register.ts)_
 
-## `fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID]`
-
-Reward info
-
-```
-USAGE
-  $ fluence provider reward-info [DEAL-ADDRESS] [UNIT-ID] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-ADDRESS  Deal address
-  UNIT-ID       Compute unit ID
-
-FLAGS
-  --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
-  --no-input                                   Don't interactively ask for any input from the user
-  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
-                                               unsecure. On local network
-                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
-                                               will be used by default
-
-DESCRIPTION
-  Reward info
-
-ALIASES
-  $ fluence provider ri
-```
-
-_See code: [src/commands/provider/reward-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.8/src/commands/provider/reward-info.ts)_
-
 ## `fluence provider signing-wallets`
 
 Print nox signing wallets
@@ -1622,7 +1622,7 @@ _See code: [src/commands/provider/signing-wallets.ts](https://github.com/fluence
 
 ## `fluence provider tokens-distribute`
 
-Distribute tokens to noxes
+Distribute FLT tokens to noxes
 
 ```
 USAGE
@@ -1630,7 +1630,7 @@ USAGE
   <value>]
 
 FLAGS
-  --amount=<value>                             Amount of tokens to distribute to noxes
+  --amount=<value>                             Amount of FLT tokens to distribute to noxes
   --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
@@ -1641,7 +1641,7 @@ FLAGS
                                                will be used by default
 
 DESCRIPTION
-  Distribute tokens to noxes
+  Distribute FLT tokens to noxes
 
 ALIASES
   $ fluence provider td
