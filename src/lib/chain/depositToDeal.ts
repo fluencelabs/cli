@@ -20,6 +20,8 @@ import { commandObj } from "../commandObj.js";
 import { getDeals } from "../deal.js";
 import { getDealClient, sign } from "../dealClient.js";
 
+import { ptFormatWithSymbol, ptParse } from "./currencies.js";
+
 export async function depositToDeal(
   flagsAndArgs: {
     args: {
@@ -31,8 +33,7 @@ export async function depositToDeal(
   },
   amount: string,
 ) {
-  const { ethers } = await import("ethers");
-  const parsedAmount = ethers.parseEther(amount);
+  const parsedAmount = await ptParse(amount);
   const deals = await getDeals(flagsAndArgs);
   const { ERC20__factory } = await import("@fluencelabs/deal-ts-clients");
   const { dealClient, signerOrWallet } = await getDealClient();
@@ -49,9 +50,9 @@ export async function depositToDeal(
     await sign(deal.deposit, parsedAmount);
 
     commandObj.log(
-      `${color.yellow(amount)} tokens were deposited to the deal ${color.yellow(
-        dealName,
-      )}`,
+      `${color.yellow(
+        await ptFormatWithSymbol(parsedAmount),
+      )} tokens were deposited to the deal ${color.yellow(dealName)}`,
     );
   }
 }

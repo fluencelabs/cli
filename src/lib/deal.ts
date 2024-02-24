@@ -21,13 +21,10 @@ import assert from "node:assert";
 import { color } from "@oclif/color";
 
 import { cidStringToCIDV1Struct } from "./chain/conversions.js";
+import { ptFormatWithSymbol, ptParse } from "./chain/currencies.js";
 import { commandObj } from "./commandObj.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
-import {
-  CURRENCY_MULTIPLIER,
-  DEAL_IDS_FLAG_NAME,
-  DEPLOYMENT_NAMES_ARG_NAME,
-} from "./const.js";
+import { DEAL_IDS_FLAG_NAME, DEPLOYMENT_NAMES_ARG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import {
   sign,
@@ -50,9 +47,9 @@ type DealCreateArg = {
   minWorkers: number;
   targetWorkers: number;
   maxWorkersPerProvider: number;
-  pricePerWorkerEpoch: number;
+  pricePerWorkerEpoch: string;
   effectors: string[];
-  initialBalance: number;
+  initialBalance: string;
   workerName?: string;
 };
 
@@ -71,16 +68,12 @@ export async function dealCreate({
   const market = await dealClient.getMarket();
   const usdc = await dealClient.getUSDC();
 
-  const pricePerWorkerEpochBigInt = BigInt(
-    pricePerWorkerEpoch * CURRENCY_MULTIPLIER,
-  );
-
+  const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
+  const initialBalanceBigInt = await ptParse(initialBalance);
   const minDealDepositedEpochs = await core.minDealDepositedEpoches();
 
   const minInitialBalanceBigInt =
     BigInt(targetWorkers) * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
-
-  const initialBalanceBigInt = BigInt(initialBalance * CURRENCY_MULTIPLIER);
 
   if (initialBalanceBigInt < minInitialBalanceBigInt) {
     commandObj.error(
@@ -89,7 +82,7 @@ export async function dealCreate({
       }initialBalance ${color.yellow(
         initialBalance,
       )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${minDealDepositedEpochs} = ${color.yellow(
-        Number(minInitialBalanceBigInt) / CURRENCY_MULTIPLIER,
+        await ptFormatWithSymbol(minInitialBalanceBigInt),
       )}. Please, increase initialBalance or decrease targetWorkers or pricePerWorkerEpoch`,
     );
   }
@@ -143,8 +136,12 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
 export async function match(dealAddress: string) {
   const { dealClient } = await getDealClient();
   const dealMatcherClient = await getDealMatcherClient();
-
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
+  const core = await dealClient.getCore();
+
+  dbg(
+    `initTimestamp: ${await core.initTimestamp()} Current epoch: ${await core.currentEpoch()}`,
+  );
 
   const matchedOffers = await setTryTimeout(
     "get matched offers by deal id",

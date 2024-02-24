@@ -31,6 +31,7 @@ import { NOX_NAMES_FLAG_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
 import { peerIdHexStringToBase58String } from "./conversions.js";
+import { fltFormatWithSymbol } from "./currencies.js";
 
 type ComputePeerWithCommitmentCreatedEvent = ResolvedComputePeer & {
   event: TypedEventLog<
@@ -129,6 +130,7 @@ export async function depositCollateral(
   commitmentIds: string[],
   computePeersWithCommitmentCreatedEvents?: ComputePeerWithCommitmentCreatedEvent[],
 ) {
+  const isProvider = computePeersWithCommitmentCreatedEvents !== undefined;
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
 
@@ -188,24 +190,27 @@ export async function depositCollateral(
     value: collateralToApproveCommitment,
   });
 
-  const { ethers } = await import("ethers");
-
   commandObj.logToStderr(
     `${color.yellow(
       commitmentIds.length,
     )} capacity commitments have been successfully activated by adding collateral!
-ATTENTION: Capacity proofs are expected to be sent in next epochs!
+${
+  isProvider
+    ? "ATTENTION: Capacity proofs are expected to be sent in next epochs!"
+    : ""
+}
 Deposited ${color.yellow(
-      ethers.formatEther(collateralToApproveCommitment),
+      await fltFormatWithSymbol(collateralToApproveCommitment),
     )} collateral in total
 
-${computePeersWithCollateral
-  .map((c) => {
-    return `Capacity commitment${
-      "name" in c ? ` for ${color.yellow(c.name)}` : ""
-    } successfully activated!
+${(
+  await Promise.all(
+    computePeersWithCollateral.map(async (c) => {
+      return `Capacity commitment${
+        "name" in c ? ` for ${color.yellow(c.name)}` : ""
+      } successfully activated!
 Commitment ID: ${color.yellow(c.event.args.commitmentId)}
-Collateral: ${color.yellow(ethers.formatEther(c.collateral))}
+Collateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}
 ${
   "computeUnits" in c
     ? `Peer ID: ${color.yellow(c.peerId)}
@@ -213,8 +218,9 @@ Number of compute units: ${color.yellow(c.computeUnits)}
 `
     : ""
 }`;
-  })
-  .join("\n\n")}`,
+    }),
+  )
+).join("\n\n")}`,
   );
 }
 

@@ -279,6 +279,6 @@ Defines a provider offer
 | Property                 | Type     | Required | Description                                   |
 |--------------------------|----------|----------|-----------------------------------------------|
 | `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
-| `minPricePerWorkerEpoch` | number   | **Yes**  | Minimum price per worker epoch in FLT         |
+| `minPricePerWorkerEpoch` | string   | **Yes**  | Minimum price per worker epoch in USDC        |
 | `effectors`              | string[] | No       |                                               |
 

@@ -36,23 +36,23 @@ export const CLI_NAME_FULL = "Fluence CLI";
 const GITHUB_REPO_NAME = "https://github.com/fluencelabs/cli";
 export const NODE_JS_MAJOR_VERSION = 18;
 export const DEFAULT_IPFS_ADDRESS = "/dns4/ipfs.fluence.dev/tcp/5001";
+export const FLT_SYMBOL = "FLT";
+export const PT_SYMBOL = "USDC";
 
 export const RUST_WASM32_WASI_TARGET = "wasm32-wasi";
 
 export const DEFAULT_MARINE_BUILD_ARGS = `--release`;
 
-export const numberProperties = ["minPricePerWorkerEpoch"] as const;
+export const currencyProperties = ["minPricePerWorkerEpoch"] as const;
+export type CurrencyProperty = (typeof currencyProperties)[number];
 
-export type NumberProperty = (typeof numberProperties)[number];
-
-const CURRENCY_MULTIPLIER_POWER = 18;
-export const CURRENCY_MULTIPLIER = 10 ** CURRENCY_MULTIPLIER_POWER;
 export const COLLATERAL_DEFAULT = 1;
-export const PRICE_PER_EPOCH_DEFAULT = 0.00001;
-export const DEFAULT_INITIAL_BALANCE = 10;
+export const DEFAULT_PRICE_PER_EPOCH_PROVIDER = "0.00001";
+export const DEFAULT_PRICE_PER_EPOCH_DEVELOPER = "0.0001";
+export const DEFAULT_INITIAL_BALANCE = "1";
 
-export const defaultNumberProperties: Record<NumberProperty, number> = {
-  minPricePerWorkerEpoch: PRICE_PER_EPOCH_DEFAULT,
+export const defaultNumberProperties: Record<CurrencyProperty, string> = {
+  minPricePerWorkerEpoch: DEFAULT_PRICE_PER_EPOCH_PROVIDER,
 };
 
 export const MIN_MEMORY_PER_MODULE_STR = "2 MiB";
@@ -495,11 +495,6 @@ export const MODULE_TYPE_COMPILED = "compiled";
 export const MODULE_TYPES = [MODULE_TYPE_RUST, MODULE_TYPE_COMPILED] as const;
 export type ModuleType = (typeof MODULE_TYPES)[number];
 
-export const TOKENS = ["FakeUSD", "FLT"] as const;
-export const TOKENS_STRING = TOKENS.join(", ");
-export type Token = (typeof TOKENS)[number];
-export const isToken = getIsStringUnion(TOKENS);
-
 export const TEMPLATES = ["quickstart", "minimal", "ts", "js"] as const;
 export type Template = (typeof TEMPLATES)[number];
 export const isTemplate = getIsStringUnion(TEMPLATES);
@@ -781,7 +776,7 @@ export const READMEs: Record<Template, string> = {
 export const DEFAULT_OFFER_NAME = "defaultOffer";
 
 export const DEFAULT_CC_REWARD_DELEGATION_RATE = 7;
-export const DEFAULT_CC_DURATION = "100 minutes";
+export const DEFAULT_CC_DURATION = "100 days";
 export const DURATION_EXAMPLE =
   "in human-readable format. Example: 1 months 1 days";
 

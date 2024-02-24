@@ -97,7 +97,7 @@ export default class Up extends BaseCommand<typeof Up> {
       [NOX_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,
     };
 
-    await distributeToNox({ ...flags, ...allNoxNames, amount: "100" });
+    await distributeToNox({ ...flags, ...allNoxNames, amount: "10" });
     await registerProvider();
 
     await createOffers({

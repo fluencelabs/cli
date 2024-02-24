@@ -72,13 +72,13 @@ export default class Create extends BaseCommand<typeof Create> {
       minWorkers: flags["min-workers"],
       targetWorkers: flags["target-workers"],
       maxWorkersPerProvider: flags["max-workers-per-provider"],
-      pricePerWorkerEpoch: Number(flags["price-per-worker-epoch"]),
+      pricePerWorkerEpoch: flags["price-per-worker-epoch"],
       effectors:
         flags.effectors === undefined ? [] : commaSepStrToArr(flags.effectors),
       initialBalance:
         flags["initial-balance"] === undefined
           ? DEFAULT_INITIAL_BALANCE
-          : Number(flags["initial-balance"]),
+          : flags["initial-balance"],
     });
 
     commandObj.logToStderr(

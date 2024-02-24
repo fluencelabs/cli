@@ -20,6 +20,7 @@ import parse from "parse-duration";
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
 import { NOX_NAMES_FLAG_NAME } from "../const.js";
+import { dbg } from "../dbg.js";
 import {
   getDealClient,
   getEventValues,
@@ -40,6 +41,7 @@ export async function createCommitments(flags: {
   const capacity = await dealClient.getCapacity();
   const precision = await core.precision();
   const { ethers } = await import("ethers");
+  const epochDuration = await core.epochDuration();
 
   const createCommitmentsTxReceipts = await signBatch(
     await Promise.all(
@@ -51,7 +53,18 @@ export async function createCommitments(flags: {
           CallsToBatch<Parameters<typeof capacity.createCommitment>>[number]
         > => {
           const peerIdUint8Arr = await peerIdToUint8Array(peerId);
-          const ccDuration = (parse(capacityCommitment.duration) ?? 0) / 1000;
+
+          const durationInSec = BigInt(
+            (parse(capacityCommitment.duration) ?? 0) / 1000,
+          );
+
+          dbg(
+            `initTimestamp: ${await core.initTimestamp()} Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
+          );
+
+          dbg(`Duration in seconds: ${durationInSec.toString()}`);
+          const durationEpoch = durationInSec / epochDuration;
+          dbg(`Duration in epochs: ${durationEpoch.toString()}`);
           const ccDelegator = capacityCommitment.delegator;
 
           const ccRewardDelegationRate = Math.floor(
@@ -61,7 +74,7 @@ export async function createCommitments(flags: {
           return [
             capacity.createCommitment,
             peerIdUint8Arr,
-            ccDuration,
+            durationEpoch,
             ccDelegator ?? ethers.ZeroAddress,
             ccRewardDelegationRate,
           ];

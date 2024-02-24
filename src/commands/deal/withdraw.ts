@@ -18,11 +18,13 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { ptFormatWithSymbol, ptParse } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
   DEPLOYMENT_NAMES_ARG,
+  PT_SYMBOL,
 } from "../../lib/const.js";
 import { getDeals } from "../../lib/deal.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
@@ -39,31 +41,36 @@ export default class Withdraw extends BaseCommand<typeof Withdraw> {
 
   static override args = {
     AMOUNT: Args.string({
-      description: "Amount of tokens to deposit",
+      description: `Amount of ${PT_SYMBOL} tokens to withdraw`,
     }),
     ...DEPLOYMENT_NAMES_ARG,
   };
 
   async run(): Promise<void> {
     const flagsAndArgs = await initCli(this, await this.parse(Withdraw));
+    const { dealClient } = await getDealClient();
     const deals = await getDeals(flagsAndArgs);
-    const { ethers } = await import("ethers");
 
     const amount =
       flagsAndArgs.args["AMOUNT"] ??
-      (await input({ message: "Enter amount of tokens to withdraw" }));
+      (await input({
+        message: `Enter amount of ${PT_SYMBOL} tokens to withdraw`,
+      }));
 
-    const parsedAmount = ethers.parseEther(amount);
-    const { dealClient } = await getDealClient();
+    const parsedAmount = await ptParse(amount);
+
+    const formattedAmount = color.yellow(
+      await ptFormatWithSymbol(parsedAmount),
+    );
 
     for (const { dealId, dealName } of deals) {
       const deal = dealClient.getDeal(dealId);
       await sign(deal.withdraw, parsedAmount);
 
       commandObj.logToStderr(
-        `${color.yellow(
-          amount,
-        )} tokens were withdrawn from the deal ${color.yellow(dealName)}`,
+        `${formattedAmount} tokens were withdrawn from the deal ${color.yellow(
+          dealName,
+        )}`,
       );
     }
   }

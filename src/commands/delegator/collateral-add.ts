@@ -18,14 +18,14 @@ import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
+import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
 export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   static override aliases = ["delegator:ca"];
-  static override description = "Add collateral to capacity commitment";
+  static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment`;
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,

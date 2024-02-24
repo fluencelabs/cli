@@ -100,10 +100,10 @@ Deployment config
 |-------------------------|----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | `computeUnits`          | number   | No       | Number of compute units you require. 1 compute unit = 2GB. Currently the only allowed value is 1. This will change in the future. Default: 1 |
 | `effectors`             | string[] | No       | Effector CIDs to be used in the deal. Must be a valid CID                                                                                    |
-| `initialBalance`        | number   | No       | Initial balance after deploy in FLT                                                                                                          |
+| `initialBalance`        | string   | No       | Initial balance after deploy in USDC                                                                                                         |
 | `maxWorkersPerProvider` | number   | No       | Max workers per provider. Matches target workers by default                                                                                  |
 | `minWorkers`            | number   | No       | Required workers to activate the deal. Matches target workers by default                                                                     |
-| `pricePerWorkerEpoch`   | number   | No       | Price per worker epoch in FLT                                                                                                                |
+| `pricePerWorkerEpoch`   | string   | No       | Price per worker epoch in USDC                                                                                                               |
 | `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                            |
 | `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                |
 | `targetWorkers`         | number   | No       | Max workers in the deal                                                                                                                      |
