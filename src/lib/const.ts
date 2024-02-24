@@ -463,12 +463,12 @@ export const FLUENCE_CLIENT_FLAGS = {
   [TTL_FLAG_NAME]: Flags.integer({
     description:
       "Particle Time To Live since 'now'. After that, particle is expired and not processed.",
-    default: 120_000,
+    default: 15_000,
     helpValue: "<milliseconds>",
   }),
   [DIAL_TIMEOUT_FLAG_NAME]: Flags.integer({
     description: "Timeout for Fluence js-client to connect to relay peer",
-    default: 60000,
+    default: 15_000,
     helpValue: "<milliseconds>",
   }),
   "particle-id": Flags.boolean({

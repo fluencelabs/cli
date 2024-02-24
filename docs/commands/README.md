@@ -442,7 +442,7 @@ FLAGS
                                                    key
       --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
                                                    with DEPLOYMENT-NAMES arg
-      --dial-timeout=<milliseconds>                [default: 60000] Timeout for Fluence js-client to connect to relay
+      --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
       --no-input                                   Don't interactively ask for any input from the user
@@ -451,7 +451,7 @@ FLAGS
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --spell=<spell-name>                         [default: worker-spell] Spell name to get logs for
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 120000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
@@ -823,7 +823,7 @@ FLAGS
                                                    key
   -u, --update                                     Update your previous deployment
       --[no-]auto-match                            Toggle automatic matching. Auto-matching is turned on by default
-      --dial-timeout=<milliseconds>                [default: 60000] Timeout for Fluence js-client to connect to relay
+      --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
       --import=<path>...                           Path to a directory to import aqua files from. May be used several
@@ -841,7 +841,7 @@ FLAGS
                                                    key will be used by default
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 120000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
@@ -1702,7 +1702,7 @@ FLAGS
                                                    can call a function using these argument names like this: -f
                                                    'myFunc(argumentName)'. Arguments in this flag can be overridden
                                                    using --data flag
-      --dial-timeout=<milliseconds>                [default: 60000] Timeout for Fluence js-client to connect to relay
+      --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | stage | kras | local | custom>  Fluence Environment to use when running the command
       --import=<path>...                           Path to a directory to import aqua files from. May be used several
@@ -1719,7 +1719,7 @@ FLAGS
       --quiet                                      Print only execution result. Overrides all --log-level-* flags
       --relay=<multiaddress>                       Relay for Fluence js-client to connect to
       --tracing                                    Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                         [default: 120000] Particle Time To Live since 'now'. After that,
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
                                                    particle is expired and not processed.
 
 DESCRIPTION
