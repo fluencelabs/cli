@@ -273,7 +273,7 @@ export async function sign<T extends unknown[]>(
   commandObj.logToStderr(
     `${color.yellow(method.name)} transaction ${color.yellow(
       tx.hash,
-    )} was mined successfuly`,
+    )} was mined successfully`,
   );
 
   return res;
