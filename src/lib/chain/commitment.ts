@@ -15,10 +15,12 @@
  */
 
 import { color } from "@oclif/color";
+import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
 import { NOX_NAMES_FLAG_NAME } from "../const.js";
+import { dbg } from "../dbg.js";
 import {
   getDealClient,
   getEventValues,
@@ -28,8 +30,6 @@ import {
 import { splitErrorsAndResults, stringifyUnknown } from "../helpers/utils.js";
 
 import { peerIdToUint8Array } from "./conversions.js";
-import parse from "parse-duration";
-import { dbg } from "../dbg.js";
 
 export async function createCommitments(flags: {
   env: string | undefined;
@@ -53,12 +53,15 @@ export async function createCommitments(flags: {
           CallsToBatch<Parameters<typeof capacity.createCommitment>>[number]
         > => {
           const peerIdUint8Arr = await peerIdToUint8Array(peerId);
+
           const durationInSec = BigInt(
             (parse(capacityCommitment.duration) ?? 0) / 1000,
           );
+
           dbg(
             `Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
           );
+
           dbg(`Duration in seconds: ${durationInSec.toString()}`);
           const durationEpoch = durationInSec / epochDuration;
           dbg(`Duration in epochs: ${durationEpoch.toString()}`);
