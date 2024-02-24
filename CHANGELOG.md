@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.10](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.9...fluence-cli-v0.15.10) (2024-02-24)
+
+
+### Features
+
+* decrease ttl, fix typo ([#809](https://github.com/fluencelabs/cli/issues/809)) ([7f80dcf](https://github.com/fluencelabs/cli/commit/7f80dcf33547125edbed6740292b2bc6c224960c))
+
+
+### Bug Fixes
+
+* Hotfix deals ([#812](https://github.com/fluencelabs/cli/issues/812)) ([4c9f6c1](https://github.com/fluencelabs/cli/commit/4c9f6c1e936890f111f4f908ba2787610da75811))
+
 ## [0.15.9](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.8...fluence-cli-v0.15.9) (2024-02-24)
 
 
