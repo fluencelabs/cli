@@ -28,6 +28,8 @@ import {
 import { splitErrorsAndResults, stringifyUnknown } from "../helpers/utils.js";
 
 import { peerIdToUint8Array } from "./conversions.js";
+import parse from "parse-duration";
+import { dbg } from "../dbg.js";
 
 export async function createCommitments(flags: {
   env: string | undefined;
@@ -39,7 +41,7 @@ export async function createCommitments(flags: {
   const capacity = await dealClient.getCapacity();
   const precision = await core.precision();
   const { ethers } = await import("ethers");
-  // const epochDuration = await core.epochDuration();
+  const epochDuration = await core.epochDuration();
 
   const createCommitmentsTxReceipts = await signBatch(
     await Promise.all(
@@ -51,10 +53,15 @@ export async function createCommitments(flags: {
           CallsToBatch<Parameters<typeof capacity.createCommitment>>[number]
         > => {
           const peerIdUint8Arr = await peerIdToUint8Array(peerId);
-          // const durationInSec = BigInt(
-          // (parse(capacityCommitment.duration) ?? 0) / 1000,
-          // );
-          const durationEpoch = BigInt("100000000000000000000000"); //  durationInSec / epochDuration;
+          const durationInSec = BigInt(
+            (parse(capacityCommitment.duration) ?? 0) / 1000,
+          );
+          dbg(
+            `Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
+          );
+          dbg(`Duration in seconds: ${durationInSec.toString()}`);
+          const durationEpoch = durationInSec / epochDuration;
+          dbg(`Duration in epochs: ${durationEpoch.toString()}`);
           const ccDelegator = capacityCommitment.delegator;
 
           const ccRewardDelegationRate = Math.floor(
