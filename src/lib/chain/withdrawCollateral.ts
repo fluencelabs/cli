@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-import { getDealClient, sign } from "../dealClient.js";
+import { commandObj } from "../commandObj.js";
 
 export async function withdrawCollateral(commitmentIds: string[]) {
-  const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
+  commandObj.log(
+    await Promise.resolve(`commitmentIds: ${commitmentIds.join(", ")}`),
+  );
 
-  for (const commitmentId of commitmentIds) {
-    await sign(capacity.removeCommitment, commitmentId);
-  }
+  commandObj.error("Not implemented");
+  // TODO: Elshan says it's more complicated than this
+  // const { dealClient } = await getDealClient();
+  // const capacity = await dealClient.getCapacity();
+
+  // await signBatch(
+  //   commitmentIds.map((commitmentId) => {
+  //     return [capacity.removeCommitment, commitmentId];
+  //   }),
+  // );
 }

@@ -99,3 +99,18 @@ Provider name: ${providerInfo.name}
 Provider address: ${signerOrWallet.address}
 `);
 }
+
+export async function assertProviderIsRegistered() {
+  const { dealClient, signerOrWallet } = await getDealClient();
+  const market = await dealClient.getMarket();
+
+  const initialProviderInfo = await market.getProviderInfo(
+    signerOrWallet.address,
+  );
+
+  if (initialProviderInfo.name.length === 0) {
+    commandObj.error(
+      `You have to register as a provider first. Use '${CLI_NAME} provider register' command for that`,
+    );
+  }
+}

@@ -41,7 +41,7 @@ import {
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
   DEFAULT_INITIAL_BALANCE,
-  PRICE_PER_EPOCH_DEFAULT,
+  DEFAULT_PRICE_PER_EPOCH,
   CHAIN_FLAGS,
   type ChainENV,
   DEPLOYMENT_NAMES_ARG_NAME,
@@ -143,7 +143,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       targetWorkers = TARGET_WORKERS_DEFAULT,
       minWorkers = targetWorkers,
       effectors = [],
-      pricePerWorkerEpoch = PRICE_PER_EPOCH_DEFAULT,
+      pricePerWorkerEpoch = DEFAULT_PRICE_PER_EPOCH,
       maxWorkersPerProvider = targetWorkers,
     } = deal;
 
@@ -199,7 +199,6 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       };
 
       await workersConfig.$commit();
-
       continue;
     }
 

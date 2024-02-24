@@ -18,8 +18,9 @@ import { color } from "@oclif/color";
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CHAIN_FLAGS } from "../../lib/const.js";
+import { CHAIN_FLAGS, PT_SYMBOL } from "../../lib/const.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -27,7 +28,7 @@ import { input } from "../../lib/prompt.js";
 
 export default class DealWithdraw extends BaseCommand<typeof DealWithdraw> {
   static override aliases = ["provider:dw"];
-  static override description = "Withdraw rewards from deals";
+  static override description = `Withdraw ${PT_SYMBOL} rewards from deals`;
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
@@ -71,11 +72,9 @@ export default class DealWithdraw extends BaseCommand<typeof DealWithdraw> {
         await sign(deal.withdrawRewards, id);
       }
 
-      const { ethers } = await import("ethers");
-
       commandObj.logToStderr(
         `Reward ${color.yellow(
-          ethers.formatEther(rewardSum),
+          await ptFormatWithSymbol(rewardSum),
         )} was withdrawn from the deal: ${dealId}`,
       );
     }

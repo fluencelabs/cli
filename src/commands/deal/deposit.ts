@@ -22,6 +22,7 @@ import {
   CHAIN_FLAGS,
   DEAL_IDS_FLAG,
   DEPLOYMENT_NAMES_ARG,
+  PT_SYMBOL,
 } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
@@ -36,7 +37,7 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
 
   static override args = {
     AMOUNT: Args.string({
-      description: "Amount of tokens to deposit",
+      description: `Amount of ${PT_SYMBOL} tokens to deposit`,
     }),
     ...DEPLOYMENT_NAMES_ARG,
   };
@@ -46,7 +47,9 @@ export default class Deposit extends BaseCommand<typeof Deposit> {
 
     const amount =
       flagsAndArgs.args["AMOUNT"] ??
-      (await input({ message: "Enter amount of tokens to deposit" }));
+      (await input({
+        message: `Enter amount of ${PT_SYMBOL} tokens to deposit`,
+      }));
 
     await depositToDeal(flagsAndArgs, amount);
   }

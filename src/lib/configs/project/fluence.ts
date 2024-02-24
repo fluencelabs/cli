@@ -37,7 +37,6 @@ import {
   CLI_NAME_FULL,
   CHAIN_ENV,
   type ChainENV,
-  CURRENCY_MULTIPLIER,
   DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_IPFS_ADDRESS,
   DEFAULT_MARINE_BUILD_ARGS,
@@ -51,12 +50,13 @@ import {
   LOCAL_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  PRICE_PER_EPOCH_DEFAULT,
+  DEFAULT_PRICE_PER_EPOCH,
   TOP_LEVEL_SCHEMA_ID,
   DEFAULT_INITIAL_BALANCE,
   aquaLogLevelsString,
   AQUA_LOG_LEVELS,
   type AquaLogLevel,
+  PT_SYMBOL,
 } from "../../const.js";
 import { COMPILE_AQUA_PROPERTY_NAME } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
@@ -223,8 +223,8 @@ type Deal = {
   minWorkers?: number;
   targetWorkers?: number;
   maxWorkersPerProvider?: number;
-  pricePerWorkerEpoch?: number;
-  initialBalance?: number;
+  pricePerWorkerEpoch?: string;
+  initialBalance?: string;
   effectors?: string[];
 };
 
@@ -302,15 +302,14 @@ const dealSchemaObj = {
       minimum: 1,
     },
     pricePerWorkerEpoch: {
-      type: "number",
-      description: `Price per worker epoch in FLT`,
-      default: PRICE_PER_EPOCH_DEFAULT,
+      type: "string",
+      description: `Price per worker epoch in ${PT_SYMBOL}`,
+      default: DEFAULT_PRICE_PER_EPOCH,
       nullable: true,
-      minimum: 1 / CURRENCY_MULTIPLIER,
     },
     initialBalance: {
-      type: "number",
-      description: `Initial balance after deploy in FLT`,
+      type: "string",
+      description: `Initial balance after deploy in ${PT_SYMBOL}`,
       default: DEFAULT_INITIAL_BALANCE,
       nullable: true,
     },
@@ -921,8 +920,8 @@ version: 8
 deployments:
   ${DEFAULT_DEPLOYMENT_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
-    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FLT
-    initialBalance: ${DEFAULT_INITIAL_BALANCE} # initial balance  after deploy in FLT
+    pricePerWorkerEpoch: "${DEFAULT_PRICE_PER_EPOCH}" # price per worker epoch in ${PT_SYMBOL}
+    initialBalance: "${DEFAULT_INITIAL_BALANCE}" # initial balance  after deploy in ${PT_SYMBOL}
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 

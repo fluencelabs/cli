@@ -54,6 +54,7 @@ import {
   NOX_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
   CHAIN_URLS,
+  PT_SYMBOL,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -125,7 +126,7 @@ const capacityCommitmentSchema = {
 } as const satisfies JSONSchemaType<CapacityCommitment>;
 
 export type Offer = {
-  minPricePerWorkerEpoch: number;
+  minPricePerWorkerEpoch: string;
   computePeers: Array<string>;
   effectors?: Array<string>;
 };
@@ -376,8 +377,8 @@ const offerSchema = {
   additionalProperties: false,
   properties: {
     minPricePerWorkerEpoch: {
-      type: "number",
-      description: `Minimum price per worker epoch in FLT`,
+      type: "string",
+      description: `Minimum price per worker epoch in ${PT_SYMBOL}`,
     },
     computePeers: {
       description: "Number of Compute Units for this Compute Peer",

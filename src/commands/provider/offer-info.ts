@@ -35,7 +35,6 @@ export default class OfferInfo extends BaseCommand<typeof OfferInfo> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(OfferInfo));
-
     const offers = await resolveOffersFromProviderArtifactsConfig(flags);
     const offerInfoResult = await getOffersInfo(offers);
     commandObj.logToStderr(await offersInfoToString(offerInfoResult));

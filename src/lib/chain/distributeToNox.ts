@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+import { color } from "@oclif/color";
+
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
-import { NOX_NAMES_FLAG_NAME } from "../const.js";
+import { NOX_NAMES_FLAG_NAME, FLT_SYMBOL } from "../const.js";
 import { getDealClient } from "../dealClient.js";
 import { input } from "../prompt.js";
+
+import { fltFormatWithSymbol, fltParse } from "./currencies.js";
 
 export async function distributeToNox(flags: {
   amount?: string | undefined;
@@ -26,24 +30,28 @@ export async function distributeToNox(flags: {
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
   const { signerOrWallet } = await getDealClient();
-  const { parseEther } = await import("ethers");
 
   const amount =
     flags.amount ??
     (await input({
-      message: "Enter the amount of tokens to deposit to noxes",
+      message: `Enter the amount of ${FLT_SYMBOL} tokens to distribute to noxes`,
     }));
+
+  const parsedAmount = await fltParse(amount);
+  const formattedAmount = color.yellow(await fltFormatWithSymbol(parsedAmount));
 
   for (const computePeer of computePeers) {
     const s = await signerOrWallet.sendTransaction({
       to: computePeer.walletAddress,
-      value: parseEther(amount),
+      value: parsedAmount,
     });
 
     const tx = await s.wait();
 
     commandObj.logToStderr(
-      `Successfully deposited ${flags.amount} to ${computePeer.name} with tx hash: ${tx?.hash}`,
+      `Successfully distributed ${formattedAmount} to ${color.yellow(
+        computePeer.name,
+      )} with tx hash: ${color.yellow(tx?.hash)}`,
     );
   }
 }

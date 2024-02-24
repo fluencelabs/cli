@@ -20,8 +20,8 @@ import { isInteractive } from "./commandObj.js";
 import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
 import {
   defaultNumberProperties,
-  type NumberProperty,
-  numberProperties,
+  type CurrencyProperty,
+  currencyProperties,
   DEFAULT_CC_REWARD_DELEGATION_RATE,
   DURATION_EXAMPLE,
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
@@ -41,15 +41,14 @@ import { checkboxes, confirm, input } from "./prompt.js";
 
 async function promptToSetNumberProperty(
   offer: Offer,
-  property: NumberProperty,
+  property: CurrencyProperty,
 ) {
   const propertyStr = await input({
     message: `Enter ${color.yellow(property)}`,
-    validate: validatePositiveNumberOrEmpty,
-    default: `${defaultNumberProperties[property]}`,
+    default: defaultNumberProperties[property],
   });
 
-  offer[property] = Number(propertyStr);
+  offer[property] = propertyStr;
 }
 
 const DEFAULT_NUMBER_OF_NOXES = 3;
@@ -189,7 +188,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
       ...(effectors.length > 0 ? { effectors } : {}),
     };
 
-    for (const numberProperty of numberProperties) {
+    for (const numberProperty of currencyProperties) {
       await promptToSetNumberProperty(offer, numberProperty);
     }
 
