@@ -59,7 +59,7 @@ export async function createCommitments(flags: {
           );
 
           dbg(
-            `Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
+            `initTimestamp: ${await core.initTimestamp()} Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
           );
 
           dbg(`Duration in seconds: ${durationInSec.toString()}`);

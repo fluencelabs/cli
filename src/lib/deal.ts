@@ -138,7 +138,9 @@ export async function match(dealAddress: string) {
   const dealMatcherClient = await getDealMatcherClient();
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
   const core = await dealClient.getCore();
-  dbg(`Current epoch: ${await core.currentEpoch()}`);
+  dbg(
+    `initTimestamp: ${await core.initTimestamp()} Current epoch: ${await core.currentEpoch()}`,
+  );
 
   const matchedOffers = await setTryTimeout(
     "get matched offers by deal id",
