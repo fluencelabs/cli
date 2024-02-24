@@ -49,7 +49,7 @@ export type CurrencyProperty = (typeof currencyProperties)[number];
 export const COLLATERAL_DEFAULT = 1;
 export const DEFAULT_PRICE_PER_EPOCH_PROVIDER = "0.00001";
 export const DEFAULT_PRICE_PER_EPOCH_DEVELOPER = "0.0001";
-export const DEFAULT_INITIAL_BALANCE = "0.001";
+export const DEFAULT_INITIAL_BALANCE = "1";
 
 export const defaultNumberProperties: Record<CurrencyProperty, string> = {
   minPricePerWorkerEpoch: DEFAULT_PRICE_PER_EPOCH_PROVIDER,
