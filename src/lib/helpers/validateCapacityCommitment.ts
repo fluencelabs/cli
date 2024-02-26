@@ -17,29 +17,33 @@
 import { color } from "@oclif/color";
 import parseDuration from "parse-duration";
 
-import { DEFAULT_CC_DURATION } from "../const.js";
+import { dbg } from "../dbg.js";
 import { getReadonlyDealClient } from "../dealClient.js";
 
+import { stringifyUnknown } from "./utils.js";
 import type { ValidationResult } from "./validations.js";
 
-export async function getMinCCDuration(isLocal: boolean): Promise<bigint> {
-  let minDuration: bigint = BigInt(
-    (parseDuration(DEFAULT_CC_DURATION) ?? 0) / 1000,
-  );
+export async function getMinCCDuration(): Promise<bigint> {
+  let minDuration: bigint = 0n;
 
-  if (!isLocal) {
-    try {
-      const { readonlyDealClient } = await getReadonlyDealClient();
-      const capacity = await readonlyDealClient.getCapacity();
-      minDuration = await capacity.minDuration();
-    } catch {}
+  try {
+    const { readonlyDealClient } = await getReadonlyDealClient();
+    const capacity = await readonlyDealClient.getCapacity();
+    minDuration = await capacity.minDuration();
+    dbg(`Got min CC duration: ${minDuration}`);
+  } catch (e) {
+    dbg(
+      `Failed to get min CC duration. Using default: ${minDuration}. Error: ${stringifyUnknown(
+        e,
+      )}`,
+    );
   }
 
   return minDuration;
 }
 
-export async function ccDurationValidator(isLocal: boolean) {
-  const minDuration = await getMinCCDuration(isLocal);
+export async function ccDurationValidator() {
+  const minDuration = await getMinCCDuration();
 
   return function validateCCDuration(input: string): ValidationResult {
     const parsed = parseDuration(input);

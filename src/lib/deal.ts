@@ -50,6 +50,8 @@ type DealCreateArg = {
   pricePerWorkerEpoch: string;
   effectors: string[];
   initialBalance: string;
+  whitelist: string[] | undefined;
+  blacklist: string[] | undefined;
   workerName?: string;
 };
 
@@ -61,6 +63,8 @@ export async function dealCreate({
   pricePerWorkerEpoch,
   effectors,
   initialBalance,
+  whitelist,
+  blacklist,
   workerName,
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
@@ -102,13 +106,12 @@ export async function dealCreate({
         return cidStringToCIDV1Struct(cid);
       }),
     ),
-    // TODO: provider access type
-    // 0 - no access list
-    // 1 - white list
-    // 2 - black list
-    0,
-    // TODO: provider access list
-    [],
+    whitelist !== undefined ? 1 : blacklist !== undefined ? 2 : 0,
+    whitelist !== undefined
+      ? whitelist
+      : blacklist !== undefined
+        ? blacklist
+        : [],
   );
 
   const dealId = getEventValue({

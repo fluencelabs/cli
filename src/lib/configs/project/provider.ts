@@ -688,8 +688,7 @@ function validateNoDuplicateNoxNamesInOffers(
 }
 
 async function validateCC(config: LatestConfig): Promise<ValidationResult> {
-  const chainEnv = await ensureChainEnv();
-  const validateCCDuration = await ccDurationValidator(chainEnv === "local");
+  const validateCCDuration = await ccDurationValidator();
 
   const capacityCommitmentErrors = (
     await Promise.all(

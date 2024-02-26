@@ -225,6 +225,8 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       effectors,
       workerName,
       initialBalance,
+      whitelist: deal.whitelist,
+      blacklist: deal.blacklist,
     });
 
     if (flags["auto-match"]) {
