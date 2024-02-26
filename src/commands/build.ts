@@ -16,7 +16,6 @@
 
 import { BaseCommand, baseFlags } from "../baseCommand.js";
 import { commandObj } from "../lib/commandObj.js";
-import { compileAquaFromFluenceConfig } from "../lib/compileAquaAndWatch.js";
 import { initNewWorkersConfigReadonly } from "../lib/configs/project/workers.js";
 import {
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -25,7 +24,6 @@ import {
   ENV_FLAG,
 } from "../lib/const.js";
 import { prepareForDeploy } from "../lib/deployWorkers.js";
-import { getAquaImports } from "../lib/helpers/aquaImports.js";
 import { initCli } from "../lib/lifeCycle.js";
 import { ensureFluenceEnv } from "../lib/resolveFluenceEnv.js";
 
@@ -65,16 +63,7 @@ export default class Build extends BaseCommand<typeof Build> {
     );
 
     const workerConfig = await initNewWorkersConfigReadonly();
-
     await ensureAquaFileWithWorkerInfo(workerConfig, fluenceConfig, fluenceEnv);
-
-    await compileAquaFromFluenceConfig({
-      fluenceConfig,
-      imports: await getAquaImports({
-        aquaImportsFromFlags: flags.import,
-        fluenceConfig,
-      }),
-    });
 
     commandObj.logToStderr(
       `All services and spells built, all aqua files generated and compiled successfully`,

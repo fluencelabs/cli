@@ -20,7 +20,7 @@ import { cwd } from "node:process";
 
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 
-import type { FluenceConfig } from "../configs/project/fluence.js";
+import type { FluenceConfigReadonly } from "../configs/project/fluence.js";
 import { PACKAGE_JSON_FILE_NAME } from "../const.js";
 import { builtInAquaDependenciesDirPath } from "../npm.js";
 import {
@@ -32,7 +32,7 @@ import {
 import { recursivelyFindFile } from "./recursivelyFindFile.js";
 
 type GetAquaImportsArg = {
-  fluenceConfig: FluenceConfig | null;
+  fluenceConfig: FluenceConfigReadonly | null;
   aquaImportsFromFlags?: string[] | undefined;
 };
 
