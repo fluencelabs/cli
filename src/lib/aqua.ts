@@ -91,12 +91,12 @@ const writeFileAndMakeSureDirExists = async (
 };
 
 export type CompileToFilesArgs = CompileFromPathArgs & {
-  outputPath: string | undefined;
+  outputPathAbsolute: string | undefined;
   dry?: boolean;
 };
 
 export async function compileToFiles({
-  outputPath,
+  outputPathAbsolute,
   targetType,
   dry = false,
   ...compileArgs
@@ -140,11 +140,11 @@ export async function compileToFiles({
   }
 
   assert(
-    typeof outputPath === "string",
-    `outputPath type is "${typeof outputPath}", but it should be of type "string", because it's not dry run`,
+    typeof outputPathAbsolute === "string",
+    `Unreachable. outputPath type is "${typeof outputPathAbsolute}", but it should have been of type "string", because it's not dry run`,
   );
 
-  await mkdir(outputPath, { recursive: true });
+  await mkdir(outputPathAbsolute, { recursive: true });
 
   const inputDirPath = isInputPathADirectory
     ? compileArgs.filePath
@@ -158,7 +158,11 @@ export async function compileToFiles({
         const parsedPath = parse(aquaFilePath);
         const fileNameWithoutExt = parsedPath.name;
         const dirPath = parsedPath.dir;
-        const finalOutputDirPath = dirPath.replace(inputDirPath, outputPath);
+
+        const finalOutputDirPath = dirPath.replace(
+          inputDirPath,
+          outputPathAbsolute,
+        );
 
         if (targetType === "ts") {
           return [

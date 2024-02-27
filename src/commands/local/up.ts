@@ -26,6 +26,7 @@ import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
 import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
 import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import { DOCKER_COMPOSE_FLAGS } from "../../lib/const.js";
 import {
   ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
@@ -50,6 +51,20 @@ export default class Up extends BaseCommand<typeof Up> {
       default: 120,
     }),
     ...PRIV_KEY_FLAG,
+    "quiet-pull": Flags.boolean({
+      description: "Pull without printing progress information",
+      default: true,
+    }),
+    detach: Flags.boolean({
+      char: "d",
+      description: "Detached mode: Run containers in the background",
+      default: true,
+    }),
+    build: Flags.boolean({
+      description: "Build images before starting containers",
+      default: true,
+    }),
+    ...DOCKER_COMPOSE_FLAGS,
   };
 
   async run(): Promise<void> {
@@ -63,35 +78,21 @@ export default class Up extends BaseCommand<typeof Up> {
     const providerConfig = await initNewReadonlyProviderConfig({});
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
-    try {
-      const res = await dockerCompose({
-        args: ["down"],
-        flags: {
-          v: true,
-        },
-        printOutput: true,
-        options: {
-          cwd: dockerComposeConfig.$getDirPath(),
-        },
-      });
-
-      if (res.trim() === "") {
-        throw new Error("docker-compose down failed");
-      }
-    } catch {
-      await dockerCompose({
-        args: ["up"],
-        flags: {
-          "quiet-pull": true,
-          d: true,
-          build: true,
-        },
-        printOutput: true,
-        options: {
-          cwd: dockerComposeConfig.$getDirPath(),
-        },
-      });
-    }
+    await dockerCompose({
+      args: [
+        "up",
+        ...(flags.flags === undefined ? [] : flags.flags.split(" ")),
+      ],
+      flags: {
+        "quiet-pull": flags["quiet-pull"],
+        d: flags.detach,
+        build: flags.build,
+      },
+      printOutput: true,
+      options: {
+        cwd: dockerComposeConfig.$getDirPath(),
+      },
+    });
 
     const allNoxNames = {
       [NOX_NAMES_FLAG_NAME]: ALL_FLAG_VALUE,

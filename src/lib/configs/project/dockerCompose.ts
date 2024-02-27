@@ -23,26 +23,26 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import { versions } from "../../../versions.js";
 import {
   CHAIN_DEPLOY_SCRIPT_NAME,
-  GRAPH_NODE_PORT,
-  POSTGRES_CONTAINER_NAME,
-  DOCKER_COMPOSE_FILE_NAME,
-  IPFS_PORT,
-  IPFS_CONTAINER_NAME,
-  CHAIN_RPC_PORT,
   CHAIN_RPC_CONTAINER_NAME,
+  CHAIN_RPC_PORT,
+  CONFIGS_DIR_NAME,
+  DOCKER_COMPOSE_FILE_NAME,
+  GRAPH_NODE_CONTAINER_NAME,
+  GRAPH_NODE_PORT,
+  IPFS_CONTAINER_NAME,
+  IPFS_PORT,
+  POSTGRES_CONTAINER_NAME,
+  PROVIDER_CONFIG_FULL_FILE_NAME,
+  SUBGRAPH_DEPLOY_SCRIPT_NAME,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
-  PROVIDER_CONFIG_FULL_FILE_NAME,
-  CONFIGS_DIR_NAME,
-  GRAPH_NODE_CONTAINER_NAME,
-  SUBGRAPH_DEPLOY_SCRIPT_NAME,
 } from "../../const.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
 import { ensureFluenceConfigsDir, getFluenceDir } from "../../paths.js";
 import {
   getConfigInitFunction,
-  getReadonlyConfigInitFunction,
   type GetDefaultConfig,
+  getReadonlyConfigInitFunction,
   type InitializedConfig,
   type InitializedReadonlyConfig,
   type Migrations,
@@ -125,6 +125,12 @@ function genNox({
         `${name}:/.fluence`,
       ],
       secrets: [name],
+      healthcheck: {
+        test: "curl -o /dev/null --silent -Iw '%{http_code}' | grep 200",
+        interval: "5s",
+        timeout: "2s",
+        retries: 10,
+      },
     },
   ];
 }
@@ -164,6 +170,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
   return {
     version: "3",
     volumes: {
+      "chain-rpc": null,
       [IPFS_CONTAINER_NAME]: null,
       [POSTGRES_CONTAINER_NAME]: null,
       ...Object.fromEntries(
@@ -208,6 +215,10 @@ async function genDockerCompose(): Promise<LatestConfig> {
       [CHAIN_RPC_CONTAINER_NAME]: {
         image: versions[CHAIN_RPC_CONTAINER_NAME],
         ports: [`${CHAIN_RPC_PORT}:${CHAIN_RPC_PORT}`],
+        volumes: [`chain-rpc:/data`],
+        environment: {
+          LOCAL_CHAIN_BLOCK_MINING_INTERVAL: 1,
+        },
         healthcheck: {
           test: `curl -s -X POST 'http://localhost:${CHAIN_RPC_PORT}' -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0", "method":"eth_chainId", "params":[], "id":1}' | jq -e '.result != null'`,
           interval: "8s",

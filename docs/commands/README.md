@@ -981,10 +981,13 @@ Stop currently running docker-compose.yaml using docker compose
 
 ```
 USAGE
-  $ fluence local down [--no-input]
+  $ fluence local down [--no-input] [-v] [--flags <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  -v, --volumes             Remove named volumes declared in the "volumes" section of the Compose file and anonymous
+                            volumes attached to containers
+      --flags=<--flag arg>  Space separated flags to pass to `docker compose`
+      --no-input            Don't interactively ask for any input from the user
 
 DESCRIPTION
   Stop currently running docker-compose.yaml using docker compose
@@ -1026,10 +1029,11 @@ Display docker-compose.yaml logs
 
 ```
 USAGE
-  $ fluence local logs [--no-input]
+  $ fluence local logs [--no-input] [--flags <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --flags=<--flag arg>  Space separated flags to pass to `docker compose`
+  --no-input            Don't interactively ask for any input from the user
 
 DESCRIPTION
   Display docker-compose.yaml logs
@@ -1046,10 +1050,11 @@ List containers using docker compose
 
 ```
 USAGE
-  $ fluence local ps [--no-input]
+  $ fluence local ps [--no-input] [--flags <value>]
 
 FLAGS
-  --no-input  Don't interactively ask for any input from the user
+  --flags=<--flag arg>  Space separated flags to pass to `docker compose`
+  --no-input            Don't interactively ask for any input from the user
 
 DESCRIPTION
   List containers using docker compose
@@ -1066,15 +1071,21 @@ Run docker-compose.yaml using docker compose and set up provider using the first
 
 ```
 USAGE
-  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>]
+  $ fluence local up [--no-input] [--noxes <value>] [--timeout <value>] [--priv-key <value>] [--quiet-pull]
+    [-d] [--build] [--flags <value>]
 
 FLAGS
-  --no-input                Don't interactively ask for any input from the user
-  --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
-  --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On local
-                            network 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be used
-                            by default
-  --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local peers
+  -d, --detach                  Detached mode: Run containers in the background
+      --build                   Build images before starting containers
+      --flags=<--flag arg>      Space separated flags to pass to `docker compose`
+      --no-input                Don't interactively ask for any input from the user
+      --noxes=<value>           Number of Compute Peers to generate when a new provider.yaml is created
+      --priv-key=<private-key>  !WARNING! for debug purposes only. Passing private keys through flags is unsecure. On
+                                local network 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                will be used by default
+      --quiet-pull              Pull without printing progress information
+      --timeout=<value>         [default: 120] Timeout in seconds for attempting to register local network on local
+                                peers
 
 DESCRIPTION
   Run docker-compose.yaml using docker compose and set up provider using the first offer from the 'offers' section in

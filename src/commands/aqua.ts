@@ -125,7 +125,7 @@ async function compileAquaFromFlags({
   air: boolean;
   watch: boolean;
 }) {
-  const inputFlag = await resolveAbsoluteAquaPath({
+  const filePath = await resolveAbsoluteAquaPathFromCwd({
     maybePathFromFlags: input,
     inputArg: {
       message: `Enter path to an aqua file or an input directory that contains your aqua files`,
@@ -134,9 +134,9 @@ async function compileAquaFromFlags({
     },
   });
 
-  const outputFlag = flags.dry
+  const outputPathAbsolute = flags.dry
     ? undefined
-    : await resolveAbsoluteAquaPath({
+    : await resolveAbsoluteAquaPathFromCwd({
         maybePathFromFlags: output,
         inputArg: {
           message:
@@ -148,9 +148,9 @@ async function compileAquaFromFlags({
   const targetType = resolveTargetType(flags);
 
   await compileAquaAndWatch({
-    filePath: inputFlag,
+    filePath,
     targetType,
-    outputPath: outputFlag,
+    outputPathAbsolute,
     ...flags,
   });
 
@@ -184,7 +184,7 @@ type ResolveAbsoluteAquaPathArg = {
   inputArg: InputArg;
 };
 
-async function resolveAbsoluteAquaPath({
+async function resolveAbsoluteAquaPathFromCwd({
   maybePathFromFlags,
   inputArg,
 }: ResolveAbsoluteAquaPathArg) {

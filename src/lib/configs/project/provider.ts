@@ -55,6 +55,7 @@ import {
   ALL_FLAG_VALUE,
   CHAIN_URLS,
   PT_SYMBOL,
+  DEFAULT_CURL_EFFECTOR_CID,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -460,9 +461,6 @@ const configSchemaV0 = {
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
-const DEFAULT_EFFECTOR =
-  "bafkreigkoxnkeyunbelr5qhqbt5nspaew7uysd2trdds346rrogfz3zvuq";
-
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
     commandObj.logToStderr(
@@ -478,7 +476,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       nox: {
         effectors: {
           curl: {
-            wasmCID: DEFAULT_EFFECTOR,
+            wasmCID: DEFAULT_CURL_EFFECTOR_CID,
             allowedBinaries: {
               curl: "/usr/bin/curl",
             },
@@ -518,7 +516,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       [DEFAULT_OFFER_NAME]: {
         ...defaultNumberProperties,
         computePeers: Object.keys(userProvidedConfig.computePeers),
-        effectors: [DEFAULT_EFFECTOR],
+        effectors: [DEFAULT_CURL_EFFECTOR_CID],
       },
     };
 
