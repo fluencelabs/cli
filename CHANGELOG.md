@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.11](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.10...fluence-cli-v0.15.11) (2024-02-27)
+
+
+### Features
+
+* compile all aqua from fluence.yaml each time new aqua is generated ([#813](https://github.com/fluencelabs/cli/issues/813)) ([1e6be90](https://github.com/fluencelabs/cli/commit/1e6be9038f2baaec6a880d338fa36e2c86303fc3))
+* up spell v0.7.6, nox v0.21.2; fix aqua from fluence.yaml compilation ([#811](https://github.com/fluencelabs/cli/issues/811)) ([d5445f5](https://github.com/fluencelabs/cli/commit/d5445f57a7e008998e976a02ce0798b99cfa9cea))
+
+
+### Bug Fixes
+
+* Add healthcheck to nox, persistence to chain-rpc container and set block mining time to 1 ([#816](https://github.com/fluencelabs/cli/issues/816)) ([9e41ec4](https://github.com/fluencelabs/cli/commit/9e41ec4053997d73f58e30ef3fd8f844735d84aa))
+
 ## [0.15.10](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.9...fluence-cli-v0.15.10) (2024-02-24)
 
 
