@@ -64,7 +64,7 @@ export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 
 export const DEFAULT_CURL_EFFECTOR_CID =
-  "bafkreigkoxnkeyunbelr5qhqbt5nspaew7uysd2trdds346rrogfz3zvuq";
+  "bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce";
 
 const byteUnits = [
   "kB",
