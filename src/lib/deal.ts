@@ -91,9 +91,13 @@ export async function dealCreate({
     );
   }
 
-  await sign(usdc.approve, await market.getAddress(), initialBalanceBigInt);
-
   const dealFactory = await dealClient.getDealFactory();
+
+  await sign(
+    usdc.approve,
+    await dealFactory.getAddress(),
+    initialBalanceBigInt,
+  );
 
   const deployDealTxReceipt = await sign(
     dealFactory.deployDeal,
