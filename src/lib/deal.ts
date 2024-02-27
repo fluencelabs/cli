@@ -69,7 +69,6 @@ export async function dealCreate({
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
-  const market = await dealClient.getMarket();
   const usdc = await dealClient.getUSDC();
 
   const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
