@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { resolve } from "node:path";
+
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 import { color } from "@oclif/color";
 
@@ -34,6 +36,7 @@ import {
   splitErrorsAndResults,
   stringifyUnknown,
 } from "./helpers/utils.js";
+import { projectRootDir } from "./paths.js";
 import type { Required } from "./typeHelpers.js";
 
 type CompileAquaFromFluenceConfigArgs = {
@@ -93,7 +96,7 @@ export async function compileAquaFromFluenceConfig({
         return compileAquaAndWatch(
           {
             ...resolveAquaConfig(aquaConfig, imports),
-            outputPath: aquaConfig.output,
+            outputPathAbsolute: resolve(projectRootDir, aquaConfig.output),
             watch,
             dry,
           },
@@ -157,9 +160,9 @@ export async function compileAquaAndWatch(
     const from = ` from ${color.yellow(compileArgs.filePath)}`;
 
     const to =
-      compileArgs.outputPath === undefined || compileArgs.dry
+      compileArgs.outputPathAbsolute === undefined || compileArgs.dry
         ? ""
-        : ` to ${color.yellow(compileArgs.outputPath)}`;
+        : ` to ${color.yellow(compileArgs.outputPathAbsolute)}`;
 
     commandObj.logToStderr(
       `Successfully compiled${aquaConfigName}${from}${to}. If you don't see files or functions you expect to see, make sure you exported things you require from your aqua files`,

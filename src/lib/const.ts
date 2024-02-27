@@ -63,6 +63,9 @@ export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 
+export const DEFAULT_CURL_EFFECTOR_CID =
+  "bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce";
+
 const byteUnits = [
   "kB",
   "KB",
