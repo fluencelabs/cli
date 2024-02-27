@@ -446,6 +446,13 @@ export const MARINE_BUILD_ARGS_FLAG = {
   }),
 };
 
+export const DOCKER_COMPOSE_FLAGS = {
+  flags: Flags.string({
+    description: "Space separated flags to pass to `docker compose`",
+    helpValue: "<--flag arg>",
+  }),
+};
+
 export const TTL_FLAG_NAME = "ttl";
 export const DIAL_TIMEOUT_FLAG_NAME = "dial-timeout";
 
