@@ -227,6 +227,8 @@ type Deal = {
   pricePerWorkerEpoch?: string;
   initialBalance?: string;
   effectors?: string[];
+  whitelist?: string[];
+  blacklist?: string[];
 };
 
 type Worker = {
@@ -317,6 +319,20 @@ const dealSchemaObj = {
     effectors: {
       type: "array",
       description: "Effector CIDs to be used in the deal. Must be a valid CID",
+      items: { type: "string" },
+      nullable: true,
+    },
+    whitelist: {
+      type: "array",
+      description:
+        "Whitelist of providers to deploy to. Can't be used together with blacklist",
+      items: { type: "string" },
+      nullable: true,
+    },
+    blacklist: {
+      type: "array",
+      description:
+        "Blacklist of providers to deploy to. Can't be used together with whitelist",
       items: { type: "string" },
       nullable: true,
     },
@@ -1473,8 +1489,35 @@ function validateCompileAquaPathsAreRelative(config: LatestConfig) {
   return absolutePathErrors.length === 0 ? true : absolutePathErrors.join("\n");
 }
 
+function validateNotBothBlacklistAndWhitelist(
+  config: LatestConfig,
+): string | true {
+  const errors = Object.entries(config.deployments ?? {})
+    .map(([deploymentName, { blacklist, whitelist }]) => {
+      if (blacklist !== undefined && whitelist !== undefined) {
+        return `Both ${color.yellow("blacklist")} and ${color.yellow(
+          "whitelist",
+        )} are set for deployment ${color.yellow(
+          deploymentName,
+        )}. Only one of them should be set`;
+      }
+
+      return true;
+    })
+    .filter((error): error is string => {
+      return error !== true;
+    });
+
+  if (errors.length !== 0) {
+    return errors.join("\n");
+  }
+
+  return true;
+}
+
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatchAsync(
+    validateNotBothBlacklistAndWhitelist(config),
     validateCIDs(
       Object.entries(config.deployments ?? {}).flatMap(
         ([name, { effectors }]) => {

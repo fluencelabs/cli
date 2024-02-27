@@ -61,6 +61,14 @@ export default class Create extends BaseCommand<typeof Create> {
     effectors: Flags.string({
       description: "Comma-separated list of effector to be used in the deal",
     }),
+    whitelist: Flags.string({
+      description: "Comma-separated list of whitelisted providers",
+      exclusive: ["blacklist"],
+    }),
+    blacklist: Flags.string({
+      description: "Comma-separated list of blacklisted providers",
+      exclusive: ["whitelist"],
+    }),
     ...CHAIN_FLAGS,
   };
 
@@ -79,6 +87,14 @@ export default class Create extends BaseCommand<typeof Create> {
         flags["initial-balance"] === undefined
           ? DEFAULT_INITIAL_BALANCE
           : flags["initial-balance"],
+      whitelist:
+        flags.whitelist === undefined
+          ? undefined
+          : commaSepStrToArr(flags.whitelist),
+      blacklist:
+        flags.blacklist === undefined
+          ? undefined
+          : commaSepStrToArr(flags.blacklist),
     });
 
     commandObj.logToStderr(

@@ -342,7 +342,7 @@ Create your deal with the specified parameters
 USAGE
   $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
     <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [--initial-balance <value>]
-    [--effectors <value>] [--env <value>] [--priv-key <value>]
+    [--effectors <value>] [--whitelist <value> | --blacklist <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --app-cid=<value>                     (required) CID of the application that will be deployed
