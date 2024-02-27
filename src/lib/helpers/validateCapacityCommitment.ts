@@ -17,17 +17,15 @@
 import { color } from "@oclif/color";
 import parseDuration from "parse-duration";
 
-import { DEFAULT_CC_DURATION } from "../const.js";
 import { getReadonlyDealClient } from "../dealClient.js";
+import { ensureChainEnv } from "../ensureChainNetwork.js";
 
 import type { ValidationResult } from "./validations.js";
 
-export async function getMinCCDuration(isLocal: boolean): Promise<bigint> {
-  let minDuration: bigint = BigInt(
-    (parseDuration(DEFAULT_CC_DURATION) ?? 0) / 1000,
-  );
+export async function getMinCCDuration(): Promise<bigint> {
+  let minDuration: bigint = 0n;
 
-  if (!isLocal) {
+  if ((await ensureChainEnv()) !== "local") {
     try {
       const { readonlyDealClient } = await getReadonlyDealClient();
       const capacity = await readonlyDealClient.getCapacity();
@@ -38,8 +36,8 @@ export async function getMinCCDuration(isLocal: boolean): Promise<bigint> {
   return minDuration;
 }
 
-export async function ccDurationValidator(isLocal: boolean) {
-  const minDuration = await getMinCCDuration(isLocal);
+export async function ccDurationValidator() {
+  const minDuration = await getMinCCDuration();
 
   return function validateCCDuration(input: string): ValidationResult {
     const parsed = parseDuration(input);

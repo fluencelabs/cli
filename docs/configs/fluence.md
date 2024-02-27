@@ -98,6 +98,7 @@ Deployment config
 
 | Property                | Type     | Required | Description                                                                                                                                  |
 |-------------------------|----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `blacklist`             | string[] | No       | Blacklist of providers to deploy to. Can't be used together with whitelist                                                                   |
 | `computeUnits`          | number   | No       | Number of compute units you require. 1 compute unit = 2GB. Currently the only allowed value is 1. This will change in the future. Default: 1 |
 | `effectors`             | string[] | No       | Effector CIDs to be used in the deal. Must be a valid CID                                                                                    |
 | `initialBalance`        | string   | No       | Initial balance after deploy in USDC                                                                                                         |
@@ -107,6 +108,7 @@ Deployment config
 | `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                            |
 | `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                |
 | `targetWorkers`         | number   | No       | Max workers in the deal                                                                                                                      |
+| `whitelist`             | string[] | No       | Whitelist of providers to deploy to. Can't be used together with blacklist                                                                   |
 
 ## hosts
 
