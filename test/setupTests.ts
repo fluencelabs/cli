@@ -129,6 +129,7 @@ async function setupLocalEnvironment() {
           await fluence({
             cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
             args: ["local", "down"],
+            flags: { v: true },
           });
         }
       } catch {}

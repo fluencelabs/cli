@@ -17,7 +17,10 @@
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
-import { DOCKER_COMPOSE_FULL_FILE_NAME } from "../../lib/const.js";
+import {
+  DOCKER_COMPOSE_FULL_FILE_NAME,
+  DOCKER_COMPOSE_FLAGS,
+} from "../../lib/const.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -26,9 +29,10 @@ export default class Logs extends BaseCommand<typeof Logs> {
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
+    ...DOCKER_COMPOSE_FLAGS,
   };
   async run(): Promise<void> {
-    await initCli(this, await this.parse(Logs));
+    const { flags } = await initCli(this, await this.parse(Logs));
     const dockerComposeConfig = await initReadonlyDockerComposeConfig();
 
     if (dockerComposeConfig === null) {
@@ -38,7 +42,10 @@ export default class Logs extends BaseCommand<typeof Logs> {
     }
 
     const logs = await dockerCompose({
-      args: ["logs"],
+      args: [
+        "logs",
+        ...(flags.flags === undefined ? [] : flags.flags.split(" ")),
+      ],
       options: {
         cwd: dockerComposeConfig.$getDirPath(),
       },
