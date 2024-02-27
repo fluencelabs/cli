@@ -25,6 +25,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
+import { compileAquaFromFluenceConfigWithDefaults } from "./compileAquaAndWatch.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import {
@@ -610,11 +611,11 @@ const emptyHosts: Host = {
   dummyDealId: "",
 };
 
-export const ensureAquaFileWithWorkerInfo = async (
+export async function ensureAquaFileWithWorkerInfo(
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly,
   fluenceEnv: FluenceEnv,
-) => {
+) {
   const dealWorkers = Object.fromEntries(
     Object.entries({
       ...fluenceConfig.deployments,
@@ -669,7 +670,9 @@ export const ensureAquaFileWithWorkerInfo = async (
     }),
     FS_OPTIONS,
   );
-};
+
+  await compileAquaFromFluenceConfigWithDefaults(fluenceConfig);
+}
 
 type ResolveWorkerArgs = {
   fluenceConfig: FluenceConfig;

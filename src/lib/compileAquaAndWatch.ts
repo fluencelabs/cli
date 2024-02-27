@@ -26,10 +26,11 @@ import {
 } from "./aqua.js";
 import { commandObj } from "./commandObj.js";
 import {
-  type FluenceConfig,
+  type FluenceConfigReadonly,
   type CompileAqua,
 } from "./configs/project/fluence.js";
 import { COMPILE_AQUA_PROPERTY_NAME } from "./const.js";
+import { getAquaImports } from "./helpers/aquaImports.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
@@ -39,7 +40,7 @@ import { projectRootDir } from "./paths.js";
 import type { Required } from "./typeHelpers.js";
 
 type CompileAquaFromFluenceConfigArgs = {
-  fluenceConfig: FluenceConfig;
+  fluenceConfig: FluenceConfigReadonly;
   imports: GatherImportsResult;
   names?: string | undefined;
   dry?: boolean | undefined;
@@ -125,9 +126,19 @@ export async function compileAquaFromFluenceConfig({
   }
 }
 
+export async function compileAquaFromFluenceConfigWithDefaults(
+  fluenceConfig: FluenceConfigReadonly,
+  aquaImportsFromFlags?: string[] | undefined,
+) {
+  await compileAquaFromFluenceConfig({
+    fluenceConfig,
+    imports: await getAquaImports({ aquaImportsFromFlags, fluenceConfig }),
+  });
+}
+
 export function hasAquaToCompile(
-  maybeFluenceConfig: FluenceConfig | null,
-): maybeFluenceConfig is FluenceConfig & {
+  maybeFluenceConfig: FluenceConfigReadonly | null,
+): maybeFluenceConfig is FluenceConfigReadonly & {
   [COMPILE_AQUA_PROPERTY_NAME]: CompileAqua;
 } {
   return (
