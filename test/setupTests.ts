@@ -118,25 +118,9 @@ const initFirstTime = async (template: Template) => {
 
 async function setupLocalEnvironment() {
   if (fluenceEnv === "local") {
-    if (process.env.CI !== "true") {
-      try {
-        const localPsResult = await fluence({
-          cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-          args: ["local", "ps"],
-        });
-
-        if (localPsResult.includes("fluence")) {
-          await fluence({
-            cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
-            args: ["local", "down"],
-            flags: { v: true },
-          });
-        }
-      } catch {}
-    }
-
     await fluence({
       args: ["local", "up"],
+      flags: { r: true },
       cwd: pathToTheTemplateWhereLocalEnvironmentIsSpunUp,
       timeout: 1000 * 60 * 8, // 8 minutes
     });
