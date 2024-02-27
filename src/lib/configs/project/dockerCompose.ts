@@ -125,6 +125,12 @@ function genNox({
         `${name}:/.fluence`,
       ],
       secrets: [name],
+      healthcheck: {
+        test: "curl http://127.0.0.1:18080/health",
+        interval: "5s",
+        timeout: "2s",
+        retries: 10,
+      },
     },
   ];
 }
