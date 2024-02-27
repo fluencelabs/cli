@@ -17,15 +17,12 @@
 import { color } from "@oclif/color";
 import parseDuration from "parse-duration";
 
-import { DEFAULT_CC_DURATION } from "../const.js";
 import { getReadonlyDealClient } from "../dealClient.js";
 
 import type { ValidationResult } from "./validations.js";
 
 export async function getMinCCDuration(isLocal: boolean): Promise<bigint> {
-  let minDuration: bigint = BigInt(
-    (parseDuration(DEFAULT_CC_DURATION) ?? 0) / 1000,
-  );
+  let minDuration: bigint = 0n;
 
   if (!isLocal) {
     try {

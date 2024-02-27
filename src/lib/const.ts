@@ -91,7 +91,11 @@ export const U32_MAX = 4_294_967_295;
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
-export const PUBLIC_FLUENCE_ENV = ["dar", "stage", "kras"] as const;
+export const PUBLIC_FLUENCE_ENV = [
+  "dar",
+  "stage",
+  // "kras"
+] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
 
@@ -118,7 +122,7 @@ export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
 export const CHAIN_URLS: Record<ChainENV, string> = {
-  kras: "https://ipc-kras.fluence.dev",
+  // kras: "https://ipc-kras.fluence.dev",
   dar: "https://ipc-dar.fluence.dev",
   stage: "https://ipc-stage.fluence.dev",
   local: "http://127.0.0.1:8545",

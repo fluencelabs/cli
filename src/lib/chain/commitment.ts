@@ -43,45 +43,78 @@ export async function createCommitments(flags: {
   const { ethers } = await import("ethers");
   const epochDuration = await core.epochDuration();
 
-  const createCommitmentsTxReceipts = await signBatch(
-    await Promise.all(
-      computePeers.map(
-        async ({
-          peerId,
-          capacityCommitment,
-        }): Promise<
-          CallsToBatch<Parameters<typeof capacity.createCommitment>>[number]
-        > => {
-          const peerIdUint8Arr = await peerIdToUint8Array(peerId);
+  const [createCommitmentsTxsErrors, createCommitmentsTxs] =
+    splitErrorsAndResults(
+      await Promise.allSettled(
+        computePeers.map(
+          async ({
+            peerId,
+            capacityCommitment,
+            name,
+          }): Promise<
+            CallsToBatch<Parameters<typeof capacity.createCommitment>>[number]
+          > => {
+            const peerIdUint8Arr = await peerIdToUint8Array(peerId);
 
-          const durationInSec = BigInt(
-            (parse(capacityCommitment.duration) ?? 0) / 1000,
-          );
+            const durationInSec = BigInt(
+              (parse(capacityCommitment.duration) ?? 0) / 1000,
+            );
 
-          dbg(
-            `initTimestamp: ${await core.initTimestamp()} Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
-          );
+            dbg(
+              `initTimestamp: ${await core.initTimestamp()} Epoch duration: ${epochDuration.toString()}. Current epoch: ${await core.currentEpoch()}`,
+            );
 
-          dbg(`Duration in seconds: ${durationInSec.toString()}`);
-          const durationEpoch = durationInSec / epochDuration;
-          dbg(`Duration in epochs: ${durationEpoch.toString()}`);
-          const ccDelegator = capacityCommitment.delegator;
+            dbg(`Duration in seconds: ${durationInSec.toString()}`);
+            const durationEpoch = durationInSec / epochDuration;
+            dbg(`Duration in epochs: ${durationEpoch.toString()}`);
+            const ccDelegator = capacityCommitment.delegator;
 
-          const ccRewardDelegationRate = Math.floor(
-            (capacityCommitment.rewardDelegationRate / 100) * Number(precision),
-          );
+            const minDuration = await capacity.minDuration();
 
-          return [
-            capacity.createCommitment,
-            peerIdUint8Arr,
-            durationEpoch,
-            ccDelegator ?? ethers.ZeroAddress,
-            ccRewardDelegationRate,
-          ];
-        },
+            if (durationEpoch < minDuration) {
+              return commandObj.error(
+                `Duration for ${color.yellow(
+                  name,
+                )} must be at least ${color.yellow(
+                  minDuration * epochDuration,
+                )} seconds. Got: ${color.yellow(durationInSec)} seconds`,
+              );
+            }
+
+            const ccRewardDelegationRate = Math.floor(
+              (capacityCommitment.rewardDelegationRate / 100) *
+                Number(precision),
+            );
+
+            return [
+              capacity.createCommitment,
+              peerIdUint8Arr,
+              durationEpoch,
+              ccDelegator ?? ethers.ZeroAddress,
+              ccRewardDelegationRate,
+            ];
+          },
+        ),
       ),
-    ),
-  );
+      (res) => {
+        if (res.status === "fulfilled") {
+          return { result: res.value };
+        }
+
+        const error: unknown = res.reason;
+        return { error: stringifyUnknown(error) };
+      },
+    );
+
+  if (createCommitmentsTxsErrors.length > 0) {
+    return commandObj.error(
+      `Failed to create commitments for some of the compute peers:\n${createCommitmentsTxsErrors.join(
+        "\n",
+      )}`,
+    );
+  }
+
+  const createCommitmentsTxReceipts = await signBatch(createCommitmentsTxs);
 
   if (createCommitmentsTxReceipts === undefined) {
     return commandObj.error(
