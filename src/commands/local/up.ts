@@ -76,7 +76,7 @@ export default class Up extends BaseCommand<typeof Up> {
     ...DOCKER_COMPOSE_FLAGS,
     reset: Flags.boolean({
       description:
-        "Reset docker-compose.yaml to default, remove volumes, remove previous local deployments",
+        "Resets docker-compose.yaml to default, removes volumes and previous local deployments",
       allowNo: true,
       default: false,
       char: "r",
