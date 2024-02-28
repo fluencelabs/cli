@@ -24,6 +24,7 @@ import { match, getDeals } from "../../lib/deal.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Match extends BaseCommand<typeof Match> {
+  static override aliases = ["deal:wa"];
   static override description = "Add missing workers to the deal";
   static override flags = {
     ...baseFlags,

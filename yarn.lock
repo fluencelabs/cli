@@ -629,7 +629,7 @@ __metadata:
     "@fluencelabs/air-beautify-wasm": 0.3.6
     "@fluencelabs/aqua-api": 0.14.2
     "@fluencelabs/aqua-to-js": 0.3.5
-    "@fluencelabs/deal-ts-clients": 0.6.8-korotkin-CHAIN-369-move-DealFactory-out-of-Market-8c643db-2255-1.0
+    "@fluencelabs/deal-ts-clients": 0.7.0
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.8.4
     "@fluencelabs/npm-aqua-compiler": 0.0.3
@@ -704,9 +704,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-ts-clients@npm:0.6.8-korotkin-CHAIN-369-move-DealFactory-out-of-Market-8c643db-2255-1.0":
-  version: 0.6.8-korotkin-CHAIN-369-move-DealFactory-out-of-Market-8c643db-2255-1.0
-  resolution: "@fluencelabs/deal-ts-clients@npm:0.6.8-korotkin-CHAIN-369-move-DealFactory-out-of-Market-8c643db-2255-1.0"
+"@fluencelabs/deal-ts-clients@npm:0.7.0":
+  version: 0.7.0
+  resolution: "@fluencelabs/deal-ts-clients@npm:0.7.0"
   dependencies:
     "@graphql-typed-document-node/core": ^3.2.0
     debug: ^4.3.4
@@ -716,7 +716,7 @@ __metadata:
     graphql-request: ^6.1.0
     graphql-scalars: ^1.22.4
     graphql-tag: ^2.12.6
-  checksum: 3bb6108ad336462921ec3ec0d7c2da2757f4f0a31b55ba8323e9fd09e9364ece3dff10c889e6e7e5ee1496f37db120bd25e2168ae9371824fdc85899c8977800
+  checksum: 24bcf0c8a717f928f03526d0261d5ae6d99c5f7b4e72e3bcdf73ebd040a2dd7c8c9529b98489b2574dabdbbb591b1ad4836c2ff4a0ac464a97bd82d535b6453c
   languageName: node
   linkType: hard
 
