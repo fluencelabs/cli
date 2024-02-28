@@ -542,6 +542,9 @@ FLAGS
 
 DESCRIPTION
   Add missing workers to the deal
+
+ALIASES
+  $ fluence deal wa
 ```
 
 _See code: [src/commands/deal/workers-add.ts](https://github.com/fluencelabs/cli/blob/v0.15.11/src/commands/deal/workers-add.ts)_
@@ -567,6 +570,9 @@ FLAGS
 
 DESCRIPTION
   Remove unit from the deal
+
+ALIASES
+  $ fluence deal wr
 ```
 
 _See code: [src/commands/deal/workers-remove.ts](https://github.com/fluencelabs/cli/blob/v0.15.11/src/commands/deal/workers-remove.ts)_
