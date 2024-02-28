@@ -1075,7 +1075,7 @@ USAGE
 
 FLAGS
   -d, --detach                  Detached mode: Run containers in the background
-  -r, --[no-]reset              Reset docker-compose.yaml to default, remove volumes, remove previous local deployments
+  -r, --[no-]reset              Resets docker-compose.yaml to default, removes volumes and previous local deployments
       --build                   Build images before starting containers
       --flags=<--flag arg>      Space separated flags to pass to `docker compose`
       --no-input                Don't interactively ask for any input from the user
