@@ -43,8 +43,10 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
 } from "../../lib/const.js";
+import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using the first offer from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} file.`;
@@ -88,7 +90,11 @@ export default class Up extends BaseCommand<typeof Up> {
     await envConfig.$commit();
     setEnvConfig(envConfig);
 
-    const { flags } = await initCli(this, await this.parse(Up));
+    const { flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Up),
+    );
+
     const providerConfig = await initNewReadonlyProviderConfig({});
 
     if (flags.reset) {
@@ -116,6 +122,16 @@ export default class Up extends BaseCommand<typeof Up> {
       if (workersConfig.deals !== undefined) {
         delete workersConfig.deals.local;
         await workersConfig.$commit();
+
+        if (maybeFluenceConfig !== null) {
+          const fluenceEnv = await ensureFluenceEnv();
+
+          await ensureAquaFileWithWorkerInfo(
+            workersConfig,
+            maybeFluenceConfig,
+            fluenceEnv,
+          );
+        }
       }
     }
 
