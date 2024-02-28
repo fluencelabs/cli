@@ -71,7 +71,7 @@ on:
 env:
   CI: true
   FORCE_COLOR: true
-  DEBUG: "fcli:debug"
+  DEBUG: "fcli:*,deal-ts-clients:*"
 
 jobs:
   tests:
