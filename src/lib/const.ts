@@ -371,7 +371,7 @@ export const COMMON_AQUA_COMPILATION_FLAGS = {
   }),
   ...TRACING_FLAG,
   "no-empty-response": Flags.boolean({
-    default: false,
+    default: true,
     description:
       "Do not generate response call if there are no returned values",
   }),
