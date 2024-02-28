@@ -19,7 +19,6 @@ import assert from "node:assert";
 import { isAbsolute, join, resolve } from "node:path";
 
 import {
-  krasnodar,
   stage,
   testNet,
   type Node as AddrAndPeerId,
@@ -69,7 +68,7 @@ async function ensureLocalAddrsAndPeerIds() {
 }
 
 const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
-  kras: krasnodar,
+  // kras: krasnodar,
   dar: testNet,
   stage,
 };

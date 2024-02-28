@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import { rm } from "node:fs/promises";
+import { join } from "node:path";
+
 import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -23,9 +26,13 @@ import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
 import { setEnvConfig } from "../../lib/configs/globalConfigs.js";
-import { initNewReadonlyDockerComposeConfig } from "../../lib/configs/project/dockerCompose.js";
+import {
+  initNewReadonlyDockerComposeConfig,
+  dockerComposeDirPath,
+} from "../../lib/configs/project/dockerCompose.js";
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
 import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
+import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
 import { DOCKER_COMPOSE_FLAGS } from "../../lib/const.js";
 import {
   ALL_FLAG_VALUE,
@@ -36,8 +43,10 @@ import {
   PROVIDER_CONFIG_FULL_FILE_NAME,
   type FluenceEnv,
 } from "../../lib/const.js";
+import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { dockerCompose } from "../../lib/dockerCompose.js";
 import { initCli } from "../../lib/lifeCycle.js";
+import { ensureFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Up extends BaseCommand<typeof Up> {
   static override description = `Run ${DOCKER_COMPOSE_FULL_FILE_NAME} using docker compose and set up provider using the first offer from the 'offers' section in ${PROVIDER_CONFIG_FULL_FILE_NAME} file.`;
@@ -65,6 +74,13 @@ export default class Up extends BaseCommand<typeof Up> {
       default: true,
     }),
     ...DOCKER_COMPOSE_FLAGS,
+    reset: Flags.boolean({
+      description:
+        "Resets docker-compose.yaml to default, removes volumes and previous local deployments",
+      allowNo: true,
+      default: false,
+      char: "r",
+    }),
   };
 
   async run(): Promise<void> {
@@ -74,8 +90,51 @@ export default class Up extends BaseCommand<typeof Up> {
     await envConfig.$commit();
     setEnvConfig(envConfig);
 
-    const { flags } = await initCli(this, await this.parse(Up));
+    const { flags, maybeFluenceConfig } = await initCli(
+      this,
+      await this.parse(Up),
+    );
+
     const providerConfig = await initNewReadonlyProviderConfig({});
+
+    if (flags.reset) {
+      const dirPath = dockerComposeDirPath();
+
+      try {
+        await dockerCompose({
+          args: ["down"],
+          flags: {
+            v: true,
+          },
+          printOutput: true,
+          options: {
+            cwd: dirPath,
+          },
+        });
+      } catch {}
+
+      try {
+        await rm(join(dirPath, DOCKER_COMPOSE_FULL_FILE_NAME));
+      } catch {}
+
+      const workersConfig = await initNewWorkersConfig();
+
+      if (workersConfig.deals !== undefined) {
+        delete workersConfig.deals.local;
+        await workersConfig.$commit();
+
+        if (maybeFluenceConfig !== null) {
+          const fluenceEnv = await ensureFluenceEnv();
+
+          await ensureAquaFileWithWorkerInfo(
+            workersConfig,
+            maybeFluenceConfig,
+            fluenceEnv,
+          );
+        }
+      }
+    }
+
     const dockerComposeConfig = await initNewReadonlyDockerComposeConfig();
 
     await dockerCompose({

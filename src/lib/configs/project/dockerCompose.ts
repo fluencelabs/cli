@@ -232,6 +232,7 @@ async function genDockerCompose(): Promise<LatestConfig> {
           CHAIN_RPC_URL: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
           MAX_FAILED_RATIO: "9999",
           IS_MOCKED_RANDOMX: "true",
+          MIN_DURATION: 0,
         },
         depends_on: {
           [CHAIN_RPC_CONTAINER_NAME]: { condition: "service_healthy" },
@@ -312,12 +313,16 @@ export type DockerComposeConfig = InitializedConfig<LatestConfig>;
 export type DockerComposeConfigReadonly =
   InitializedReadonlyConfig<LatestConfig>;
 
+export function dockerComposeDirPath() {
+  return getFluenceDir();
+}
+
 const initConfigOptions = {
   allSchemas: [configSchemaV0],
   latestSchema: configSchemaV0,
   migrations,
   name: DOCKER_COMPOSE_FILE_NAME,
-  getConfigOrConfigDirPath: getFluenceDir,
+  getConfigOrConfigDirPath: dockerComposeDirPath,
 };
 
 export async function initNewDockerComposeConfig() {

@@ -18,14 +18,14 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { type DealNameAndId } from "../deal.js";
-import { getDealClient } from "../dealClient.js";
+import { getReadonlyDealClient } from "../dealClient.js";
 
 import { peerIdHexStringToBase58String } from "./conversions.js";
 import { ptFormatWithSymbol } from "./currencies.js";
 
 export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
-  const { dealClient } = await getDealClient();
-  const deal = dealClient.getDeal(dealId);
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const deal = readonlyDealClient.getDeal(dealId);
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
   commandObj.log(`Deal ID: ${dealId}`);

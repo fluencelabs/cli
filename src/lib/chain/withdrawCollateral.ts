@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
+import { color } from "@oclif/color";
+
 import { commandObj } from "../commandObj.js";
+import { getDealClient, sign } from "../dealClient.js";
+
+import { peerIdHexStringToBase58String } from "./conversions.js";
 
 export async function withdrawCollateral(commitmentIds: string[]) {
-  commandObj.log(
-    await Promise.resolve(`commitmentIds: ${commitmentIds.join(", ")}`),
-  );
+  const { dealClient } = await getDealClient();
+  const capacity = await dealClient.getCapacity();
+  const market = await dealClient.getMarket();
 
-  commandObj.error("Not implemented");
-  // TODO: Elshan says it's more complicated than this
-  // const { dealClient } = await getDealClient();
-  // const capacity = await dealClient.getCapacity();
+  for (const commitmentId of commitmentIds) {
+    const commitment = await capacity.getCommitment(commitmentId);
+    const unitIds = await market.getComputeUnitIds(commitment.peerId);
+    await sign(capacity.removeCUFromCC, commitmentId, [...unitIds]);
+    await sign(capacity.finishCommitment, commitmentId);
 
-  // await signBatch(
-  //   commitmentIds.map((commitmentId) => {
-  //     return [capacity.removeCommitment, commitmentId];
-  //   }),
-  // );
+    commandObj.logToStderr(
+      `Collateral for commitment ${color.yellow(
+        commitmentId,
+      )} withdrawn. Peer ID: ${color.yellow(
+        await peerIdHexStringToBase58String(commitment.peerId),
+      )}`,
+    );
+  }
 }

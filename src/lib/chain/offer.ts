@@ -42,6 +42,7 @@ import {
   sign,
   getEventValue,
   signBatch,
+  getReadonlyDealClient,
 } from "../dealClient.js";
 import {
   commaSepStrToArr,
@@ -624,8 +625,8 @@ export async function getOfferInfo(
   },
   isAllowedToFail = false,
 ) {
-  const { dealClient } = await getDealClient();
-  const market = await dealClient.getMarket();
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const market = await readonlyDealClient.getMarket();
   const dealExplorerClient = await getDealExplorerClient();
 
   let offerInfo = undefined;

@@ -34,15 +34,7 @@ export default class Proof extends BaseCommand<typeof Proof> {
 
   async run(): Promise<void> {
     await initCli(this, await this.parse(Proof));
-
-    const computeUnitIds = (await resolveComputePeersByNames()).map(
-      ({ peerId, walletKey }) => {
-        return {
-          peerId,
-          walletKey,
-        };
-      },
-    );
+    const computeUnitIds = await resolveComputePeersByNames();
 
     for (const { peerId, walletKey } of computeUnitIds) {
       setChainFlags({

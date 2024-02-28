@@ -69,7 +69,6 @@ export async function dealCreate({
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
-  const market = await dealClient.getMarket();
   const usdc = await dealClient.getUSDC();
 
   const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
@@ -91,12 +90,19 @@ export async function dealCreate({
     );
   }
 
-  await sign(usdc.approve, await market.getAddress(), initialBalanceBigInt);
+  const dealFactory = await dealClient.getDealFactory();
+
+  await sign(
+    usdc.approve,
+    await dealFactory.getAddress(),
+    initialBalanceBigInt,
+  );
 
   const deployDealTxReceipt = await sign(
-    market.deployDeal,
+    dealFactory.deployDeal,
     await cidStringToCIDV1Struct(appCID),
     await usdc.getAddress(),
+    initialBalanceBigInt,
     minWorkers,
     targetWorkers,
     maxWorkersPerProvider,
@@ -115,7 +121,7 @@ export async function dealCreate({
   );
 
   const dealId = getEventValue({
-    contract: market,
+    contract: dealFactory,
     txReceipt: deployDealTxReceipt,
     eventName: "DealCreated",
     value: "deal",

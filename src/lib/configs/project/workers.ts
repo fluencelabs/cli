@@ -236,7 +236,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       properties: {
         custom: mapOfDealsSchema,
         dar: mapOfDealsSchema,
-        kras: mapOfDealsSchema,
+        // kras: mapOfDealsSchema,
         local: mapOfDealsSchema,
         stage: mapOfDealsSchema,
       },
@@ -251,7 +251,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       properties: {
         custom: mapOfHostsSchema,
         dar: mapOfHostsSchema,
-        kras: mapOfHostsSchema,
+        // kras: mapOfHostsSchema,
         local: mapOfHostsSchema,
         stage: mapOfHostsSchema,
       },
