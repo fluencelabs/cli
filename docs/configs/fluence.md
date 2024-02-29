@@ -105,7 +105,7 @@ Deployment config
 | `maxWorkersPerProvider` | integer  | No       | Max workers per provider. Matches target workers by default                                                                                  |
 | `minWorkers`            | integer  | No       | Required workers to activate the deal. Matches target workers by default                                                                     |
 | `pricePerWorkerEpoch`   | string   | No       | Price per worker epoch in USDC                                                                                                               |
-| `protocolVersion`       | integer  | No       | Protocol version. Default: 0                                                                                                                 |
+| `protocolVersion`       | integer  | No       | Protocol version. Default: 1                                                                                                                 |
 | `services`              | string[] | No       | An array of service names to include in this worker. Service names must be listed in fluence.yaml                                            |
 | `spells`                | string[] | No       | An array of spell names to include in this worker. Spell names must be listed in fluence.yaml                                                |
 | `targetWorkers`         | integer  | No       | Max workers in the deal                                                                                                                      |
