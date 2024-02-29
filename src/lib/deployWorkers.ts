@@ -55,6 +55,7 @@ import type {
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
 import {
+  MODULE_TYPE_RUST,
   FS_OPTIONS,
   HOSTS_FILE_NAME,
   DEALS_FILE_NAME,
@@ -64,6 +65,7 @@ import {
   MIN_MEMORY_PER_MODULE,
   MIN_MEMORY_PER_MODULE_STR,
   DEPLOYMENT_NAMES_ARG_NAME,
+  MODULE_CONFIG_FULL_FILE_NAME,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -511,16 +513,20 @@ const validateWasmExist = async (
             };
           });
         })
-        .map(async ({ wasm, service, worker }) => {
+        .map(async ({ wasm, name, service, worker }) => {
           try {
             await access(wasm);
             return true;
           } catch (e) {
-            return `wasm at ${color.yellow(wasm)} for service ${color.yellow(
-              service,
-            )} in deployment ${color.yellow(
+            return `wasm file not found at ${color.yellow(
+              wasm,
+            )}\nfor deployment: ${color.yellow(
               worker,
-            )} does not exist. Make sure you have built it`;
+            )}\nservice: ${color.yellow(service)}\nmodule ${color.yellow(
+              name,
+            )}\nIf you expect CLI to compile the code of this module, please add ${color.yellow(
+              `type: ${MODULE_TYPE_RUST}`,
+            )} to the ${MODULE_CONFIG_FULL_FILE_NAME}`;
           }
         }),
     )
