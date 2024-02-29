@@ -131,7 +131,8 @@ export type Offer = {
   minPricePerWorkerEpoch: string;
   computePeers: Array<string>;
   effectors?: Array<string>;
-  protocolVersion?: number;
+  minProtocolVersion?: number;
+  maxProtocolVersion?: number;
 };
 
 type Effector = {
@@ -390,9 +391,16 @@ const offerSchema = {
       uniqueItems: true,
     },
     effectors: { type: "array", items: { type: "string" }, nullable: true },
-    protocolVersion: {
+    minProtocolVersion: {
       type: "integer",
-      description: `Protocol version. Default: ${versions.protocolVersion}`,
+      description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${versions.protocolVersion}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
+    },
+    maxProtocolVersion: {
+      type: "integer",
+      description: `Max protocol version. Must be more then or equal to minProtocolVersion. Default: ${versions.protocolVersion}`,
       nullable: true,
       default: versions.protocolVersion,
       minimum: 1,

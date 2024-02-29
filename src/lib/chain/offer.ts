@@ -18,6 +18,7 @@ import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { versions } from "../../versions.js";
 import { commandObj } from "../commandObj.js";
 import {
   ensureComputerPeerConfigs,
@@ -134,7 +135,8 @@ export async function createOffers(flags: OffersArgs) {
       effectorPrefixesAndHash,
       minPricePerWorkerEpochBigInt,
       offerName,
-      // protocolVersion,
+      minProtocolVersion,
+      maxProtocolVersion,
     } = offer;
 
     const txReceipt = await sign(
@@ -143,7 +145,8 @@ export async function createOffers(flags: OffersArgs) {
       usdcAddress,
       effectorPrefixesAndHash,
       computePeersToRegister,
-      // protocolVersion ?? versions.protocolVersion,
+      minProtocolVersion ?? versions.protocolVersion,
+      maxProtocolVersion ?? versions.protocolVersion,
     );
 
     registerMarketOfferTxReceipts.push({ offerName, txReceipt });
@@ -462,7 +465,13 @@ async function ensureOfferConfigs() {
     Object.entries(providerConfig.offers).map(
       async ([
         offerName,
-        { minPricePerWorkerEpoch, effectors, computePeers, protocolVersion },
+        {
+          minPricePerWorkerEpoch,
+          effectors,
+          computePeers,
+          minProtocolVersion,
+          maxProtocolVersion,
+        },
       ]) => {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
@@ -506,7 +515,8 @@ async function ensureOfferConfigs() {
           computePeersToRegister,
           offerId,
           offerInfo,
-          protocolVersion,
+          minProtocolVersion,
+          maxProtocolVersion,
         };
       },
     ),

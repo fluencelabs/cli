@@ -629,7 +629,7 @@ __metadata:
     "@fluencelabs/air-beautify-wasm": 0.3.6
     "@fluencelabs/aqua-api": 0.14.2
     "@fluencelabs/aqua-to-js": 0.3.5
-    "@fluencelabs/deal-ts-clients": 0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-8f37d97-2294-1.0
+    "@fluencelabs/deal-ts-clients": 0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-bc9269c-2311-1.0
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.8.4
     "@fluencelabs/npm-aqua-compiler": 0.0.3
@@ -704,9 +704,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-ts-clients@npm:0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-8f37d97-2294-1.0":
-  version: 0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-8f37d97-2294-1.0
-  resolution: "@fluencelabs/deal-ts-clients@npm:0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-8f37d97-2294-1.0"
+"@fluencelabs/deal-ts-clients@npm:0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-bc9269c-2311-1.0":
+  version: 0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-bc9269c-2311-1.0
+  resolution: "@fluencelabs/deal-ts-clients@npm:0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-bc9269c-2311-1.0"
   dependencies:
     "@graphql-typed-document-node/core": ^3.2.0
     debug: ^4.3.4
@@ -716,7 +716,7 @@ __metadata:
     graphql-request: ^6.1.0
     graphql-scalars: ^1.22.4
     graphql-tag: ^2.12.6
-  checksum: 78e5544079714190f21f1a7304ddde0534ccf388e19357a6085675989698fbf6b9681bceea20730c7fa722e0717217fbc218a86c495c311d1201dbc59bf00d18
+  checksum: fed2de0172faafcf1e50bbd74c95330054b7f9812c8109e31635b102ab3d94870a13e7930c1133f1315cb186215d659633b0c252b55c6962f6e0d4869799ac19
   languageName: node
   linkType: hard
 

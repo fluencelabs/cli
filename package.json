@@ -61,7 +61,7 @@
     "@fluencelabs/air-beautify-wasm": "0.3.6",
     "@fluencelabs/aqua-api": "0.14.2",
     "@fluencelabs/aqua-to-js": "0.3.5",
-    "@fluencelabs/deal-ts-clients": "0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-8f37d97-2294-1.0",
+    "@fluencelabs/deal-ts-clients": "0.7.1-korotkin-CHAIN-328-minMaxProtocolVersion-bc9269c-2311-1.0",
     "@fluencelabs/fluence-network-environment": "1.1.2",
     "@fluencelabs/js-client": "0.8.4",
     "@fluencelabs/npm-aqua-compiler": "0.0.3",
