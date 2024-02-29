@@ -48,28 +48,28 @@ const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
 const KEY_QUERY_PARAM_NAME = "symKey";
 
-let provider: Promise<ethers.Provider> | undefined = undefined;
-let readonlyDealClient: Promise<DealClient> | undefined = undefined;
+let provider: ethers.Provider | undefined = undefined;
+let readonlyDealClient: DealClient | undefined = undefined;
 
 export async function getReadonlyDealClient() {
   if (provider === undefined) {
-    provider = ensureProvider();
+    provider = await ensureProvider();
   }
 
   if (readonlyDealClient === undefined) {
-    readonlyDealClient = createDealClient(await provider);
+    readonlyDealClient = await createDealClient(provider);
   }
 
   return {
-    readonlyDealClient: await readonlyDealClient,
-    provider: await provider,
+    readonlyDealClient,
+    provider,
   };
 }
 
-let signerOrWallet: Promise<ethers.JsonRpcSigner | ethers.Wallet> | undefined =
+let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
   undefined;
 
-let dealClient: Promise<DealClient> | undefined = undefined;
+let dealClient: DealClient | undefined = undefined;
 
 // only needed for 'proof' command so it's possible to use multiple wallets during one command execution
 // normally, each command will use only one wallet
@@ -90,13 +90,14 @@ export async function getDealClient() {
   ) {
     dealClientPrivKey = privKey;
 
-    signerOrWallet =
-      privKey === undefined ? getWalletConnectProvider() : getWallet(privKey);
+    signerOrWallet = await (privKey === undefined
+      ? getWalletConnectProvider()
+      : getWallet(privKey));
 
-    dealClient = createDealClient(await signerOrWallet);
+    dealClient = await createDealClient(signerOrWallet);
   }
 
-  return { dealClient: await dealClient, signerOrWallet: await signerOrWallet };
+  return { dealClient, signerOrWallet };
 }
 
 let dealMatcherClient: DealMatcherClient | undefined = undefined;
@@ -122,7 +123,7 @@ export async function getDealExplorerClient() {
     dealExplorerClient = new DealExplorerClient(
       env,
       undefined,
-      (await signerOrWallet) ?? (await getDealClient()).signerOrWallet,
+      signerOrWallet ?? (await getDealClient()).signerOrWallet,
     );
   }
 
