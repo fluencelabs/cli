@@ -158,9 +158,7 @@ export async function ensureProvider(): Promise<ethers.Provider> {
   const chainEnv = await ensureChainEnv();
 
   if (provider === undefined) {
-    provider = Promise.resolve(
-      new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]),
-    );
+    provider = new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]);
   }
 
   return provider;
