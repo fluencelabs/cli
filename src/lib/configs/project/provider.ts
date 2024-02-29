@@ -27,6 +27,7 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
+import { versions } from "../../../versions.js";
 import { getChainId } from "../../chain/chainId.js";
 import { commandObj } from "../../commandObj.js";
 import {
@@ -130,6 +131,7 @@ export type Offer = {
   minPricePerWorkerEpoch: string;
   computePeers: Array<string>;
   effectors?: Array<string>;
+  protocolVersion?: number;
 };
 
 type Effector = {
@@ -201,22 +203,22 @@ const noxConfigYAMLSchema = {
   properties: {
     tcpPort: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
     },
     websocketPort: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
     },
     httpPort: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
     },
     aquavmPoolSize: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
     },
     systemServices: {
@@ -259,7 +261,7 @@ const noxConfigYAMLSchema = {
           properties: {
             deciderPeriodSec: {
               nullable: true,
-              type: "number",
+              type: "integer",
               description: `Decider period in seconds`,
             },
             workerIpfsMultiaddr: {
@@ -274,7 +276,7 @@ const noxConfigYAMLSchema = {
             },
             networkId: {
               nullable: true,
-              type: "number",
+              type: "integer",
               description: `Network ID`,
             },
             startBlock: {
@@ -336,7 +338,7 @@ const noxConfigYAMLSchema = {
         },
         networkId: {
           nullable: true,
-          type: "number",
+          type: "integer",
           description: `Network ID`,
         },
         walletKey: {
@@ -388,6 +390,13 @@ const offerSchema = {
       uniqueItems: true,
     },
     effectors: { type: "array", items: { type: "string" }, nullable: true },
+    protocolVersion: {
+      type: "integer",
+      description: `Protocol version. Default: ${versions.protocolVersion}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
+    },
   },
   required: ["minPricePerWorkerEpoch", "computePeers"],
 } as const satisfies JSONSchemaType<Offer>;
@@ -398,7 +407,7 @@ const computePeerSchema = {
   additionalProperties: false,
   properties: {
     computeUnits: {
-      type: "number",
+      type: "integer",
       description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     nox: noxConfigYAMLSchema,
@@ -448,7 +457,7 @@ const configSchemaV0 = {
       },
       required: [],
     },
-    version: { type: "number", const: 0, description: "Config version" },
+    version: { type: "integer", const: 0, description: "Config version" },
   },
   required: [
     "version",

@@ -225,6 +225,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       initialBalance,
       whitelist: deal.whitelist,
       blacklist: deal.blacklist,
+      protocolVersion: deal.protocolVersion,
     });
 
     if (flags["auto-match"]) {

@@ -78,7 +78,7 @@ export default class Up extends BaseCommand<typeof Up> {
       description:
         "Resets docker-compose.yaml to default, removes volumes and previous local deployments",
       allowNo: true,
-      default: false,
+      default: true,
       char: "r",
     }),
   };

@@ -20,6 +20,8 @@ import assert from "node:assert";
 
 import { color } from "@oclif/color";
 
+import { versions } from "../versions.js";
+
 import { cidStringToCIDV1Struct } from "./chain/conversions.js";
 import { ptFormatWithSymbol, ptParse } from "./chain/currencies.js";
 import { commandObj } from "./commandObj.js";
@@ -52,6 +54,7 @@ type DealCreateArg = {
   initialBalance: string;
   whitelist: string[] | undefined;
   blacklist: string[] | undefined;
+  protocolVersion: number | undefined;
   workerName?: string;
 };
 
@@ -65,6 +68,7 @@ export async function dealCreate({
   initialBalance,
   whitelist,
   blacklist,
+  protocolVersion,
   workerName,
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
@@ -118,6 +122,7 @@ export async function dealCreate({
       : blacklist !== undefined
         ? blacklist
         : [],
+    protocolVersion ?? versions.protocolVersion,
   );
 
   const dealId = getEventValue({

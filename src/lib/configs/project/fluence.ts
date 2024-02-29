@@ -106,7 +106,7 @@ type ConfigV0 = {
 const configSchemaV0Obj = {
   type: "object",
   properties: {
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
     services: {
       title: "Services",
       type: "array",
@@ -114,7 +114,7 @@ const configSchemaV0Obj = {
         type: "object",
         properties: {
           name: { type: "string" },
-          count: { type: "number", nullable: true, minimum: 1 },
+          count: { type: "integer", nullable: true, minimum: 1 },
         },
         required: ["name"],
       },
@@ -206,7 +206,7 @@ const configSchemaV1Obj = {
       ],
       nullable: true,
     },
-    version: { type: "number", const: 1 },
+    version: { type: "integer", const: 1 },
   },
   required: ["version"],
 } as const;
@@ -229,6 +229,7 @@ type Deal = {
   effectors?: string[];
   whitelist?: string[];
   blacklist?: string[];
+  protocolVersion?: number;
 };
 
 type Worker = {
@@ -276,7 +277,7 @@ const dealSchemaObj = {
   type: "object",
   properties: {
     computeUnits: {
-      type: "number",
+      type: "integer",
       minimum: 1,
       maximum: 1,
       default: 1,
@@ -284,21 +285,21 @@ const dealSchemaObj = {
       nullable: true,
     },
     targetWorkers: {
-      type: "number",
+      type: "integer",
       description: "Max workers in the deal",
       default: TARGET_WORKERS_DEFAULT,
       nullable: true,
       minimum: 1,
     },
     minWorkers: {
-      type: "number",
+      type: "integer",
       description:
         "Required workers to activate the deal. Matches target workers by default",
       nullable: true,
       minimum: 1,
     },
     maxWorkersPerProvider: {
-      type: "number",
+      type: "integer",
       description:
         "Max workers per provider. Matches target workers by default",
       nullable: true,
@@ -335,6 +336,13 @@ const dealSchemaObj = {
         "Blacklist of providers to deploy to. Can't be used together with whitelist",
       items: { type: "string" },
       nullable: true,
+    },
+    protocolVersion: {
+      type: "integer",
+      description: `Protocol version. Default: ${versions.protocolVersion}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
     },
   },
   required: [],
@@ -395,7 +403,7 @@ const configSchemaV2Obj = {
   ...configSchemaV1Obj,
   properties: {
     ...configSchemaV1Obj.properties,
-    version: { type: "number", const: 2 },
+    version: { type: "integer", const: 2 },
     dependencies: {
       type: "object",
       title: "Dependencies",
@@ -558,7 +566,7 @@ const configSchemaV3Obj = {
       delete properties.chainNetwork;
       return properties;
     })(),
-    version: { type: "number", const: 3 },
+    version: { type: "integer", const: 3 },
     customFluenceEnv: {
       type: "object",
       description: `Custom Fluence environment to use when connecting to Fluence network`,
@@ -596,7 +604,7 @@ const configSchemaV4Obj = {
   ...configSchemaV3Obj,
   properties: {
     ...configSchemaV3Obj.properties,
-    version: { type: "number", const: 4 },
+    version: { type: "integer", const: 4 },
     defaultSecretKeyName: {
       description:
         "Secret key with this name will be used by default by js-client inside CLI to run Aqua code",
@@ -642,7 +650,7 @@ const configSchemaV5Obj = {
   ...configSchemaV4Obj,
   properties: {
     ...configSchemaV4ObjPropertiesWithoutWorkers,
-    version: { type: "number", const: 5 },
+    version: { type: "integer", const: 5 },
     deals: {
       description:
         "A map of objects with worker names as keys, each object defines a deal",
@@ -721,7 +729,7 @@ const configSchemaV6Obj = {
   ...configSchemaV5Obj,
   properties: {
     ...configSchemaV5ObjPropertiesWithoutDependencies,
-    version: { type: "number", const: 6 },
+    version: { type: "integer", const: 6 },
     aquaDependencies: {
       description: "A map of npm aqua dependency versions",
       type: "object",
@@ -869,7 +877,7 @@ const configSchemaV7Obj = {
   ...configSchemaV6Obj,
   properties: {
     ...configSchemaV6ObjPropertiesWithoutAqua,
-    version: { type: "number", const: 7 },
+    version: { type: "integer", const: 7 },
     [COMPILE_AQUA_PROPERTY_NAME]: {
       type: "object",
       description: "A map of aqua files to compile",
@@ -907,7 +915,7 @@ const configSchemaV8Obj = {
   description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV7ObjPropertiesWithoutDeals,
-    version: { type: "number", const: 8 },
+    version: { type: "integer", const: 8 },
     deployments: {
       ...configSchemaV7Obj.properties.deals,
       description:

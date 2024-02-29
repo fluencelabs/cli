@@ -162,7 +162,7 @@ const dealSchema: JSONSchemaType<Deal> = {
         "Blockchain network name that was used when deploying workers",
     },
     chainNetworkId: {
-      type: "number",
+      type: "integer",
       description: "Blockchain network id that was used when deploying workers",
     },
   },
@@ -201,7 +201,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   additionalProperties: false,
   properties: {
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
     deals: mapOfDealsSchema,
     hosts: mapOfHostsSchema,
   },
@@ -225,7 +225,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
   additionalProperties: false,
   required: ["version"],
   properties: {
-    version: { type: "number", const: 1, description: "Config version" },
+    version: { type: "integer", const: 1, description: "Config version" },
     deals: {
       type: "object",
       description:

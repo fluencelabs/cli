@@ -23,6 +23,7 @@ import sum from "lodash-es/sum.js";
 import xbytes from "xbytes";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { importAquaCompiler } from "./aqua.js";
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { compileAquaFromFluenceConfigWithDefaults } from "./compileAquaAndWatch.js";
@@ -766,7 +767,7 @@ export async function compileSpells(
         spellConfig.aquaFilePath,
       );
 
-      const { compileFromPath } = await import("@fluencelabs/aqua-api");
+      const { compileFromPath } = await importAquaCompiler();
 
       // TODO: consider how to compile spells with aqua compilation args
       const { errors, functions } = await compileFromPath({

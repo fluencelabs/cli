@@ -129,7 +129,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       required: [FACADE_MODULE_NAME],
     },
     ...overridableServiceProperties.properties,
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
   },
   required: [
     "version",

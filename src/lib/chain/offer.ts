@@ -134,6 +134,7 @@ export async function createOffers(flags: OffersArgs) {
       effectorPrefixesAndHash,
       minPricePerWorkerEpochBigInt,
       offerName,
+      // protocolVersion,
     } = offer;
 
     const txReceipt = await sign(
@@ -142,6 +143,7 @@ export async function createOffers(flags: OffersArgs) {
       usdcAddress,
       effectorPrefixesAndHash,
       computePeersToRegister,
+      // protocolVersion ?? versions.protocolVersion,
     );
 
     registerMarketOfferTxReceipts.push({ offerName, txReceipt });
@@ -460,7 +462,7 @@ async function ensureOfferConfigs() {
     Object.entries(providerConfig.offers).map(
       async ([
         offerName,
-        { minPricePerWorkerEpoch, effectors, computePeers },
+        { minPricePerWorkerEpoch, effectors, computePeers, protocolVersion },
       ]) => {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
@@ -504,6 +506,7 @@ async function ensureOfferConfigs() {
           computePeersToRegister,
           offerId,
           offerInfo,
+          protocolVersion,
         };
       },
     ),
