@@ -276,10 +276,11 @@ Defines a provider offer
 
 #### Properties
 
-| Property                 | Type     | Required | Description                                   |
-|--------------------------|----------|----------|-----------------------------------------------|
-| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
-| `minPricePerWorkerEpoch` | string   | **Yes**  | Minimum price per worker epoch in USDC        |
-| `effectors`              | string[] | No       |                                               |
-| `protocolVersion`        | integer  | No       | Protocol version. Default: 0                  |
+| Property                 | Type     | Required | Description                                                                        |
+|--------------------------|----------|----------|------------------------------------------------------------------------------------|
+| `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer                                      |
+| `minPricePerWorkerEpoch` | string   | **Yes**  | Minimum price per worker epoch in USDC                                             |
+| `effectors`              | string[] | No       |                                                                                    |
+| `maxProtocolVersion`     | integer  | No       | Max protocol version. Must be more then or equal to minProtocolVersion. Default: 0 |
+| `minProtocolVersion`     | integer  | No       | Min protocol version. Must be less then or equal to maxProtocolVersion. Default: 0 |
 
