@@ -293,9 +293,9 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 }
 
 const blockScoutUrls: Record<Exclude<ChainENV, "local">, string> = {
-  dar: "https://blockscout-dar.fluence.dev/tx/",
-  // kras: "https://blockscout-kras.fluence.dev/tx/",
-  stage: "https://blockscout-stage.fluence.dev/tx/",
+  dar: "https://blockscout-dar.fluence.dev/address/",
+  // kras: "https://blockscout-kras.fluence.dev/address/",
+  stage: "https://blockscout-stage.fluence.dev/address/",
 };
 
 function getLinkToAddress(dealId: string, contractsENV: ChainENV) {
