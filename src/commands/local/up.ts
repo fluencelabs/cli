@@ -99,6 +99,7 @@ export default class Up extends BaseCommand<typeof Up> {
 
     if (flags.reset) {
       const dirPath = dockerComposeDirPath();
+      await initNewReadonlyDockerComposeConfig();
 
       try {
         await dockerCompose({

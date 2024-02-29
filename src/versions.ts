@@ -23,7 +23,9 @@ import versionsJSON from "./versions.json" assert { type: "json" };
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const versions = override(versionsJSON, "FCLI_V") as typeof versionsJSON;
 
-interface RecToOverride extends Record<string, string | RecToOverride> {}
+type AllowedValues = string | number | boolean;
+
+interface RecToOverride extends Record<string, AllowedValues | RecToOverride> {}
 
 /**
  * Override versions using env variables
@@ -32,11 +34,11 @@ interface RecToOverride extends Record<string, string | RecToOverride> {}
  * @returns Overridden record
  */
 function override(rec: RecToOverride, prefix: string): RecToOverride {
-  return Object.fromEntries<string | RecToOverride>(
+  return Object.fromEntries<AllowedValues | RecToOverride>(
     Object.entries(rec).map(([name, version]) => {
       const envVarName = `${prefix}_${snakeCase(name).toUpperCase()}`;
 
-      if (typeof version === "string") {
+      if (typeof version !== "object") {
         const versionFromEnv = process.env[envVarName];
 
         const overriddenVersion =
