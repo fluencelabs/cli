@@ -1,5 +1,5 @@
 {
-  "protocolVersion": 0,
+  "protocolVersion": 1,
   "nox": "fluencelabs/nox:0.21.2",
   "chain-rpc": "docker.fluence.dev/chain-rpc:korotkin-CHAIN-328-minMaxProtocolVersion-bc9269c-2311-1",
   "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:korotkin-CHAIN-328-minMaxProtocolVersion-bc9269c-2311-1",
