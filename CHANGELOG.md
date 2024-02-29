@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.13](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.12...fluence-cli-v0.15.13) (2024-02-29)
+
+
+### Bug Fixes
+
+* promise chaining ([#823](https://github.com/fluencelabs/cli/issues/823)) ([30d343e](https://github.com/fluencelabs/cli/commit/30d343e56accf680b7af69cbd4623279f0ea78e3))
+
 ## [0.15.12](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.11...fluence-cli-v0.15.12) (2024-02-29)
 
 
