@@ -72,7 +72,7 @@ let signerOrWallet: Promise<ethers.JsonRpcSigner | ethers.Wallet> | undefined =
 let dealClient: Promise<DealClient> | undefined = undefined;
 
 // only needed for 'proof' command so it's possible to use multiple wallets during one command execution
-// normally each command will use only one wallet
+// normally, each command will use only one wallet
 let dealClientPrivKey: string | undefined = undefined;
 
 export async function getDealClient() {
