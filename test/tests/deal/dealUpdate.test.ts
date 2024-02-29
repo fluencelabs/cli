@@ -226,7 +226,7 @@ pub fn greeting(name: String) -> String {
 }
 
 #[marine]
-#[link(wasm_import_module = "${NEW_MODULE_NAME}")]
+#[module_import("${NEW_MODULE_NAME}")]
 extern "C" {
     fn newModuleGreeting(name: String) -> String;
 }`;

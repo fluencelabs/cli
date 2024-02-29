@@ -48,25 +48,28 @@ const WC_QUERY_PARAM_NAME = "wc";
 const RELAY_QUERY_PARAM_NAME = "relay-protocol";
 const KEY_QUERY_PARAM_NAME = "symKey";
 
-let provider: ethers.Provider | undefined = undefined;
-let readonlyDealClient: DealClient | undefined = undefined;
+let provider: Promise<ethers.Provider> | undefined = undefined;
+let readonlyDealClient: Promise<DealClient> | undefined = undefined;
 
 export async function getReadonlyDealClient() {
   if (provider === undefined) {
-    provider = await ensureProvider();
+    provider = ensureProvider();
   }
 
   if (readonlyDealClient === undefined) {
-    readonlyDealClient = await createDealClient(provider);
+    readonlyDealClient = createDealClient(await provider);
   }
 
-  return { readonlyDealClient, provider };
+  return {
+    readonlyDealClient: await readonlyDealClient,
+    provider: await provider,
+  };
 }
 
-let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
+let signerOrWallet: Promise<ethers.JsonRpcSigner | ethers.Wallet> | undefined =
   undefined;
 
-let dealClient: DealClient | undefined = undefined;
+let dealClient: Promise<DealClient> | undefined = undefined;
 
 // only needed for 'proof' command so it's possible to use multiple wallets during one command execution
 // normally each command will use only one wallet
@@ -88,14 +91,12 @@ export async function getDealClient() {
     dealClientPrivKey = privKey;
 
     signerOrWallet =
-      privKey === undefined
-        ? await getWalletConnectProvider()
-        : await getWallet(privKey);
+      privKey === undefined ? getWalletConnectProvider() : getWallet(privKey);
 
-    dealClient = await createDealClient(signerOrWallet);
+    dealClient = createDealClient(await signerOrWallet);
   }
 
-  return { dealClient, signerOrWallet };
+  return { dealClient: await dealClient, signerOrWallet: await signerOrWallet };
 }
 
 let dealMatcherClient: DealMatcherClient | undefined = undefined;
@@ -121,7 +122,7 @@ export async function getDealExplorerClient() {
     dealExplorerClient = new DealExplorerClient(
       env,
       undefined,
-      signerOrWallet ?? (await getDealClient()).signerOrWallet,
+      (await signerOrWallet) ?? (await getDealClient()).signerOrWallet,
     );
   }
 
@@ -156,7 +157,9 @@ export async function ensureProvider(): Promise<ethers.Provider> {
   const chainEnv = await ensureChainEnv();
 
   if (provider === undefined) {
-    provider = new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]);
+    provider = Promise.resolve(
+      new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]),
+    );
   }
 
   return provider;
