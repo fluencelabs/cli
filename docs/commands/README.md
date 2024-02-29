@@ -342,7 +342,8 @@ Create your deal with the specified parameters
 USAGE
   $ fluence deal create --app-cid <value> --collateral-per-worker <value> --min-workers <value> --target-workers
     <value> --max-workers-per-provider <value> --price-per-worker-epoch <value> [--no-input] [--initial-balance <value>]
-    [--effectors <value>] [--whitelist <value> | --blacklist <value>] [--env <value>] [--priv-key <value>]
+    [--effectors <value>] [--whitelist <value> | --blacklist <value>] [--protocol-version <value>] [--env <value>]
+    [--priv-key <value>]
 
 FLAGS
   --app-cid=<value>                     (required) CID of the application that will be deployed
@@ -359,6 +360,7 @@ FLAGS
                                         unsecure. On local network
                                         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
                                         used by default
+  --protocol-version=<value>            Protocol version
   --target-workers=<value>              (required) Max workers in the deal
   --whitelist=<value>                   Comma-separated list of whitelisted providers
 

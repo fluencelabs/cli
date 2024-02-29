@@ -10,7 +10,7 @@ Defines config used for provider set up
 | `computePeers`        | [object](#computepeers)        | **Yes**  | A map with compute peer names as keys and compute peers as values                               |
 | `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offers as values                                             |
 | `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                                                |
-| `version`             | number                         | **Yes**  | Config version                                                                                  |
+| `version`             | integer                        | **Yes**  | Config version                                                                                  |
 | `nox`                 | [object](#nox)                 | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 ## capacityCommitments
@@ -53,7 +53,7 @@ Defines a compute peer
 
 | Property       | Type           | Required | Description                                                                                     |
 |----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
-| `computeUnits` | number         | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
+| `computeUnits` | integer        | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
 | `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 #### nox
@@ -64,14 +64,14 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `aquavmPoolSize` | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
 | `chainConfig`    | [object](#chainconfig)    | No       | Chain config                                                                                                      |
 | `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
+| `httpPort`       | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| `tcpPort`        | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `websocketPort`  | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ##### chainConfig
 
@@ -79,14 +79,14 @@ Chain config
 
 ###### Properties
 
-| Property                | Type   | Required | Description                                 |
-|-------------------------|--------|----------|---------------------------------------------|
-| `ccContractAddress`     | string | No       | Capacity commitment contract address        |
-| `coreContractAddress`   | string | No       | Core contract address                       |
-| `httpEndpoint`          | string | No       | HTTP endpoint of the chain. Same as decider |
-| `marketContractAddress` | string | No       | Market contract address                     |
-| `networkId`             | number | No       | Network ID                                  |
-| `walletKey`             | string | No       | Wallet key                                  |
+| Property                | Type    | Required | Description                                 |
+|-------------------------|---------|----------|---------------------------------------------|
+| `ccContractAddress`     | string  | No       | Capacity commitment contract address        |
+| `coreContractAddress`   | string  | No       | Core contract address                       |
+| `httpEndpoint`          | string  | No       | HTTP endpoint of the chain. Same as decider |
+| `marketContractAddress` | string  | No       | Market contract address                     |
+| `networkId`             | integer | No       | Network ID                                  |
+| `walletKey`             | string  | No       | Wallet key                                  |
 
 ##### effectors
 
@@ -148,15 +148,15 @@ Decider service configuration
 
 **Properties**
 
-| Property              | Type   | Required | Description                      |
-|-----------------------|--------|----------|----------------------------------|
-| `deciderPeriodSec`    | number | No       | Decider period in seconds        |
-| `matcherAddress`      | string | No       | Matcher address                  |
-| `networkApiEndpoint`  | string | No       | Network API endpoint             |
-| `networkId`           | number | No       | Network ID                       |
-| `startBlock`          | string | No       | Start block                      |
-| `walletKey`           | string | No       | Wallet key                       |
-| `workerIpfsMultiaddr` | string | No       | Multiaddress of worker IPFS node |
+| Property              | Type    | Required | Description                      |
+|-----------------------|---------|----------|----------------------------------|
+| `deciderPeriodSec`    | integer | No       | Decider period in seconds        |
+| `matcherAddress`      | string  | No       | Matcher address                  |
+| `networkApiEndpoint`  | string  | No       | Network API endpoint             |
+| `networkId`           | integer | No       | Network ID                       |
+| `startBlock`          | string  | No       | Start block                      |
+| `walletKey`           | string  | No       | Wallet key                       |
+| `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node |
 
 ## nox
 
@@ -166,14 +166,14 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 | Property         | Type                      | Required | Description                                                                                                       |
 |------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize` | number                    | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `aquavmPoolSize` | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
 | `chainConfig`    | [object](#chainconfig)    | No       | Chain config                                                                                                      |
 | `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `httpPort`       | number                    | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
+| `httpPort`       | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
 | `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
 | `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`        | number                    | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `websocketPort`  | number                    | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| `tcpPort`        | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `websocketPort`  | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
 ### chainConfig
 
@@ -181,14 +181,14 @@ Chain config
 
 #### Properties
 
-| Property                | Type   | Required | Description                                 |
-|-------------------------|--------|----------|---------------------------------------------|
-| `ccContractAddress`     | string | No       | Capacity commitment contract address        |
-| `coreContractAddress`   | string | No       | Core contract address                       |
-| `httpEndpoint`          | string | No       | HTTP endpoint of the chain. Same as decider |
-| `marketContractAddress` | string | No       | Market contract address                     |
-| `networkId`             | number | No       | Network ID                                  |
-| `walletKey`             | string | No       | Wallet key                                  |
+| Property                | Type    | Required | Description                                 |
+|-------------------------|---------|----------|---------------------------------------------|
+| `ccContractAddress`     | string  | No       | Capacity commitment contract address        |
+| `coreContractAddress`   | string  | No       | Core contract address                       |
+| `httpEndpoint`          | string  | No       | HTTP endpoint of the chain. Same as decider |
+| `marketContractAddress` | string  | No       | Market contract address                     |
+| `networkId`             | integer | No       | Network ID                                  |
+| `walletKey`             | string  | No       | Wallet key                                  |
 
 ### effectors
 
@@ -250,15 +250,15 @@ Decider service configuration
 
 ##### Properties
 
-| Property              | Type   | Required | Description                      |
-|-----------------------|--------|----------|----------------------------------|
-| `deciderPeriodSec`    | number | No       | Decider period in seconds        |
-| `matcherAddress`      | string | No       | Matcher address                  |
-| `networkApiEndpoint`  | string | No       | Network API endpoint             |
-| `networkId`           | number | No       | Network ID                       |
-| `startBlock`          | string | No       | Start block                      |
-| `walletKey`           | string | No       | Wallet key                       |
-| `workerIpfsMultiaddr` | string | No       | Multiaddress of worker IPFS node |
+| Property              | Type    | Required | Description                      |
+|-----------------------|---------|----------|----------------------------------|
+| `deciderPeriodSec`    | integer | No       | Decider period in seconds        |
+| `matcherAddress`      | string  | No       | Matcher address                  |
+| `networkApiEndpoint`  | string  | No       | Network API endpoint             |
+| `networkId`           | integer | No       | Network ID                       |
+| `startBlock`          | string  | No       | Start block                      |
+| `walletKey`           | string  | No       | Wallet key                       |
+| `workerIpfsMultiaddr` | string  | No       | Multiaddress of worker IPFS node |
 
 ## offers
 
@@ -281,4 +281,5 @@ Defines a provider offer
 | `computePeers`           | string[] | **Yes**  | Number of Compute Units for this Compute Peer |
 | `minPricePerWorkerEpoch` | string   | **Yes**  | Minimum price per worker epoch in USDC        |
 | `effectors`              | string[] | No       |                                               |
+| `protocolVersion`        | integer  | No       | Protocol version. Default: 0                  |
 

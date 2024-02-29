@@ -6,7 +6,7 @@ A result of app deployment. This file is created automatically after successful 
 
 | Property  | Type             | Required | Description                                                                                        |
 |-----------|------------------|----------|----------------------------------------------------------------------------------------------------|
-| `version` | number           | **Yes**  | Config version                                                                                     |
+| `version` | integer          | **Yes**  | Config version                                                                                     |
 | `deals`   | [object](#deals) | No       | Info about deals created when deploying workers that is stored by environment that you deployed to |
 | `hosts`   | [object](#hosts) | No       | Info about directly deployed workers that is stored by environment that you deployed to            |
 
@@ -39,14 +39,14 @@ Contains data related to your deployment, including, most importantly, deal id, 
 
 ##### Properties
 
-| Property         | Type   | Required | Description                                                                                                                                                                             |
-|------------------|--------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `chainNetworkId` | number | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
-| `chainNetwork`   | string | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
-| `dealIdOriginal` | string | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
-| `dealId`         | string | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
-| `definition`     | string | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
-| `timestamp`      | string | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
+| Property         | Type    | Required | Description                                                                                                                                                                             |
+|------------------|---------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `chainNetworkId` | integer | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
+| `chainNetwork`   | string  | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
+| `dealIdOriginal` | string  | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
+| `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
+| `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
+| `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 
 ### dar
 
@@ -64,14 +64,14 @@ Contains data related to your deployment, including, most importantly, deal id, 
 
 ##### Properties
 
-| Property         | Type   | Required | Description                                                                                                                                                                             |
-|------------------|--------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `chainNetworkId` | number | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
-| `chainNetwork`   | string | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
-| `dealIdOriginal` | string | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
-| `dealId`         | string | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
-| `definition`     | string | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
-| `timestamp`      | string | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
+| Property         | Type    | Required | Description                                                                                                                                                                             |
+|------------------|---------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `chainNetworkId` | integer | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
+| `chainNetwork`   | string  | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
+| `dealIdOriginal` | string  | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
+| `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
+| `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
+| `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 
 ### local
 
@@ -89,14 +89,14 @@ Contains data related to your deployment, including, most importantly, deal id, 
 
 ##### Properties
 
-| Property         | Type   | Required | Description                                                                                                                                                                             |
-|------------------|--------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `chainNetworkId` | number | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
-| `chainNetwork`   | string | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
-| `dealIdOriginal` | string | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
-| `dealId`         | string | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
-| `definition`     | string | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
-| `timestamp`      | string | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
+| Property         | Type    | Required | Description                                                                                                                                                                             |
+|------------------|---------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `chainNetworkId` | integer | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
+| `chainNetwork`   | string  | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
+| `dealIdOriginal` | string  | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
+| `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
+| `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
+| `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 
 ### stage
 
@@ -114,14 +114,14 @@ Contains data related to your deployment, including, most importantly, deal id, 
 
 ##### Properties
 
-| Property         | Type   | Required | Description                                                                                                                                                                             |
-|------------------|--------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `chainNetworkId` | number | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
-| `chainNetwork`   | string | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
-| `dealIdOriginal` | string | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
-| `dealId`         | string | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
-| `definition`     | string | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
-| `timestamp`      | string | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
+| Property         | Type    | Required | Description                                                                                                                                                                             |
+|------------------|---------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `chainNetworkId` | integer | **Yes**  | Blockchain network id that was used when deploying workers                                                                                                                              |
+| `chainNetwork`   | string  | **Yes**  | Blockchain network name that was used when deploying workers Possible values are: `dar`, `stage`, `local`.                                                                              |
+| `dealIdOriginal` | string  | **Yes**  | Blockchain transaction id that you get when deploy workers. Can be used in aqua to get worker and host ids. Check out example in the aqua generated in the default template             |
+| `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
+| `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
+| `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 
 ## hosts
 
