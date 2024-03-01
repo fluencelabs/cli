@@ -27,6 +27,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
+import { validateProtocolVersion } from "../../chain/chainValidators.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
   MAX_HEAP_SIZE_DESCRIPTION,
@@ -1523,6 +1524,43 @@ function validateNotBothBlacklistAndWhitelist(
   return true;
 }
 
+async function validateProtocolVersions(config: LatestConfig) {
+  const errors = (
+    await Promise.all(
+      Object.entries(config.deployments ?? {})
+        .map(([deployment, { protocolVersion }]) => {
+          return {
+            deployment,
+            protocolVersion,
+          };
+        })
+        .filter((v): v is { deployment: string; protocolVersion: number } => {
+          return v.protocolVersion !== undefined;
+        })
+        .map(async ({ deployment, protocolVersion }) => {
+          return {
+            validity: await validateProtocolVersion(protocolVersion),
+            deployment,
+          };
+        }),
+    )
+  ).filter((v): v is { validity: string; deployment: string } => {
+    return v.validity !== true;
+  });
+
+  if (errors.length !== 0) {
+    return errors
+      .map(({ deployment, validity }) => {
+        return `Deployment ${color.yellow(
+          deployment,
+        )} has invalid protocol version: ${color.yellow(validity)}`;
+      })
+      .join("\n");
+  }
+
+  return true;
+}
+
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatchAsync(
     validateNotBothBlacklistAndWhitelist(config),
@@ -1543,6 +1581,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     checkDuplicatesAndPresence(config, "spells"),
     validateVersionsIsExact("marineVersion", config.marineVersion),
     validateVersionsIsExact("mreplVersion", config.mreplVersion),
+    validateProtocolVersions(config),
   );
 };
 

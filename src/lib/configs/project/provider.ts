@@ -29,6 +29,11 @@ import times from "lodash-es/times.js";
 
 import { versions } from "../../../versions.js";
 import { getChainId } from "../../chain/chainId.js";
+import {
+  ccDurationValidator,
+  validateAddress,
+  validateProtocolVersion,
+} from "../../chain/chainValidators.js";
 import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
@@ -66,10 +71,6 @@ import {
   jsonStringify,
   splitErrorsAndResults,
 } from "../../helpers/utils.js";
-import {
-  ccDurationValidator,
-  validateAddress,
-} from "../../helpers/validateCapacityCommitment.js";
 import {
   type ValidationResult,
   validateCIDs,
@@ -600,8 +601,64 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     validateCC(config),
     validateMissingComputePeers(config),
     validateNoDuplicateNoxNamesInOffers(config),
+    validateProtocolVersions(config),
   );
 };
+
+async function validateProtocolVersions(providerConfig: LatestConfig) {
+  const errors = (
+    await Promise.all(
+      Object.entries(providerConfig.offers).flatMap(
+        ([
+          offer,
+          {
+            maxProtocolVersion = versions.protocolVersion,
+            minProtocolVersion = versions.protocolVersion,
+          },
+        ]) => {
+          return [
+            Promise.resolve({
+              offer,
+              property: "minProtocolVersion or maxProtocolVersion",
+              validity:
+                minProtocolVersion > maxProtocolVersion
+                  ? `minProtocolVersion must be less than or equal to maxProtocolVersion. Got: minProtocolVersion=${color.yellow(
+                      minProtocolVersion,
+                    )} maxProtocolVersion=${color.yellow(maxProtocolVersion)}`
+                  : true,
+            }),
+            ...(
+              [
+                ["minProtocolVersion", minProtocolVersion],
+                ["maxProtocolVersion", maxProtocolVersion],
+              ] as const
+            ).map(async ([property, v]) => {
+              return {
+                offer,
+                property,
+                validity: await validateProtocolVersion(v),
+              };
+            }),
+          ];
+        },
+      ),
+    )
+  ).filter(({ validity }) => {
+    return validity !== true;
+  });
+
+  if (errors.length > 0) {
+    return errors
+      .map(({ offer, property, validity }) => {
+        return `Offer ${color.yellow(offer)} has invalid ${color.yellow(
+          property,
+        )} property: ${validity}`;
+      })
+      .join("\n");
+  }
+
+  return true;
+}
 
 export async function validateEffectors(
   providerConfig: LatestConfig,
