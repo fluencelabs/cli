@@ -69,12 +69,13 @@ export async function validateAddress(
 }
 
 async function getProtocolVersions() {
-  const { readonlyDealClient } = await getReadonlyDealClient();
-  const core = await readonlyDealClient.getCore();
   let minProtocolVersion = BigInt(versions.protocolVersion);
   let maxProtocolVersion = minProtocolVersion;
 
   if ((await ensureChainEnv()) !== "local") {
+    const { readonlyDealClient } = await getReadonlyDealClient();
+    const core = await readonlyDealClient.getCore();
+
     [minProtocolVersion, maxProtocolVersion] = await Promise.all([
       core.minProtocolVersion(),
       core.maxProtocolVersion(),
