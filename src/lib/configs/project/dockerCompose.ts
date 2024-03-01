@@ -126,7 +126,7 @@ function genNox({
       ],
       secrets: [name],
       healthcheck: {
-        test: "curl -o /dev/null --silent -Iw '%{http_code}' | grep 200",
+        test: "curl -f http://localhost:18080/health",
         interval: "5s",
         timeout: "2s",
         retries: 10,
