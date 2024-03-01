@@ -96,7 +96,7 @@ let hasLoggedCompilerVersion = false;
 
 export async function importAquaCompiler() {
   if (!hasLoggedCompilerVersion) {
-    commandObj.log(
+    commandObj.logToStderr(
       color.blue(
         `Using aqua compiler version: ${CLIPackageJSON.dependencies["@fluencelabs/aqua-api"]}`,
       ),
