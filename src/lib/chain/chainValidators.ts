@@ -17,6 +17,7 @@
 import { color } from "@oclif/color";
 import parseDuration from "parse-duration";
 
+import { versions } from "../../versions.js";
 import { getReadonlyDealClient } from "../dealClient.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
 import type { ValidationResult } from "../helpers/validations.js";
@@ -70,11 +71,15 @@ export async function validateAddress(
 async function getProtocolVersions() {
   const { readonlyDealClient } = await getReadonlyDealClient();
   const core = await readonlyDealClient.getCore();
+  let minProtocolVersion = BigInt(versions.protocolVersion);
+  let maxProtocolVersion = minProtocolVersion;
 
-  const [minProtocolVersion, maxProtocolVersion] = await Promise.all([
-    core.minProtocolVersion(),
-    core.maxProtocolVersion(),
-  ]);
+  if ((await ensureChainEnv()) !== "local") {
+    [minProtocolVersion, maxProtocolVersion] = await Promise.all([
+      core.minProtocolVersion(),
+      core.maxProtocolVersion(),
+    ]);
+  }
 
   return { minProtocolVersion, maxProtocolVersion };
 }
