@@ -40,21 +40,25 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(DealExit));
     const { dealClient } = await getDealClient();
+    const market = await dealClient.getMarket();
 
-    const deals = await Promise.all(
-      commaSepStrToArr(
-        args["DEAL-IDS"] ??
-          (await input({
-            message: "Enter comma-separated deal ids",
-          })),
-      ).map((id) => {
-        return dealClient.getDeal(id);
-      }),
-    );
+    const computeUnits = (
+      await Promise.all(
+        commaSepStrToArr(
+          args["DEAL-IDS"] ??
+            (await input({
+              message: "Enter comma-separated deal ids",
+            })),
+        ).map(async (id) => {
+          const deal = dealClient.getDeal(id);
+          return deal.getComputeUnits();
+        }),
+      )
+    ).flat();
 
     await signBatch(
-      deals.map((deal) => {
-        return [deal.stop];
+      computeUnits.map((computeUnit) => {
+        return [market.returnComputeUnitFromDeal, computeUnit.id];
       }),
     );
   }
