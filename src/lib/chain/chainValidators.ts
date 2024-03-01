@@ -17,10 +17,10 @@
 import { color } from "@oclif/color";
 import parseDuration from "parse-duration";
 
+import { versions } from "../../versions.js";
 import { getReadonlyDealClient } from "../dealClient.js";
 import { ensureChainEnv } from "../ensureChainNetwork.js";
-
-import type { ValidationResult } from "./validations.js";
+import type { ValidationResult } from "../helpers/validations.js";
 
 export async function getMinCCDuration(): Promise<bigint> {
   let minDuration: bigint = 0n;
@@ -66,4 +66,51 @@ export async function validateAddress(
   }
 
   return `Must be a valid address. Got: ${color.yellow(String(input))}`;
+}
+
+async function getProtocolVersions() {
+  let minProtocolVersion = BigInt(versions.protocolVersion);
+  let maxProtocolVersion = minProtocolVersion;
+
+  if ((await ensureChainEnv()) !== "local") {
+    const { readonlyDealClient } = await getReadonlyDealClient();
+    const core = await readonlyDealClient.getCore();
+
+    [minProtocolVersion, maxProtocolVersion] = await Promise.all([
+      core.minProtocolVersion(),
+      core.maxProtocolVersion(),
+    ]);
+  }
+
+  return { minProtocolVersion, maxProtocolVersion };
+}
+
+let protocolVersions: undefined | ReturnType<typeof getProtocolVersions>;
+
+export async function validateProtocolVersion(
+  protocolVersion: number,
+): Promise<ValidationResult> {
+  protocolVersions =
+    protocolVersions === undefined ? getProtocolVersions() : protocolVersions;
+
+  const { minProtocolVersion, maxProtocolVersion } = await protocolVersions;
+
+  if (
+    protocolVersion < minProtocolVersion ||
+    protocolVersion > maxProtocolVersion
+  ) {
+    if (minProtocolVersion === maxProtocolVersion) {
+      return `Protocol version must be equal to ${color.yellow(
+        `${minProtocolVersion}`,
+      )}. Got: ${color.yellow(protocolVersion)}`;
+    }
+
+    return `Protocol version must be ${color.yellow(
+      `>=${minProtocolVersion}`,
+    )} and ${color.yellow(`<=${maxProtocolVersion}`)}. Got: ${color.yellow(
+      protocolVersion,
+    )}`;
+  }
+
+  return true;
 }

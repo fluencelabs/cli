@@ -66,7 +66,7 @@ const overridableModulePropertiesV0 = {
     description: "Set true to allow module to use the Marine SDK logger",
   },
   loggingMask: {
-    type: "number",
+    type: "integer",
     nullable: true,
     description:
       "manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map",
@@ -137,7 +137,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description: `Module type "${MODULE_TYPE_COMPILED}" is for the precompiled modules. Module type "${MODULE_TYPE_RUST}" is for the source code written in rust which can be compiled into a Marine module`,
     },
     ...overridableModulePropertiesV0,
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
   },
   additionalProperties: false,
   required: ["version", "name"],

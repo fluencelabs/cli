@@ -16,6 +16,11 @@
 
 import { color } from "@oclif/color";
 
+import {
+  ccDurationValidator,
+  getMinCCDuration,
+  validateAddress,
+} from "./chain/chainValidators.js";
 import { isInteractive } from "./commandObj.js";
 import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
 import {
@@ -27,11 +32,6 @@ import {
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
 } from "./const.js";
 import { commaSepStrToArr } from "./helpers/utils.js";
-import {
-  ccDurationValidator,
-  getMinCCDuration,
-  validateAddress,
-} from "./helpers/validateCapacityCommitment.js";
 import {
   validatePercent,
   validatePositiveNumberOrEmpty,

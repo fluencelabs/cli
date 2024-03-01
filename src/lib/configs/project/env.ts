@@ -52,7 +52,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       enum: [...FLUENCE_ENVS],
       nullable: true,
     },
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
   },
   required: ["version"],
   additionalProperties: false,

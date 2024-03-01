@@ -43,7 +43,7 @@ export function getModuleDirPath(
     return join(getSrcPath(cwd), "modules", moduleName);
   }
 
-  return join(getServiceDirPath(cwd, serviceName), "modules", moduleName);
+  return join(getServiceDirPath(cwd, serviceName), moduleName);
 }
 
 export function getMainRsPath(

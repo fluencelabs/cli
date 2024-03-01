@@ -105,6 +105,7 @@ function genNox({
       },
       command: [
         `--config=${configLocation}`,
+        "--dev-mode",
         "--external-maddrs",
         `/dns4/${name}/tcp/${tcpPort}`,
         `/dns4/${name}/tcp/${webSocketPort}/ws`,

@@ -25,6 +25,8 @@ import type {
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 import { color } from "@oclif/color";
 
+import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
+
 import { commandObj } from "./commandObj.js";
 import type {
   CompileAquaConfig,
@@ -90,6 +92,22 @@ const writeFileAndMakeSureDirExists = async (
   await writeFile(filePath, data, FS_OPTIONS);
 };
 
+let hasLoggedCompilerVersion = false;
+
+export async function importAquaCompiler() {
+  if (!hasLoggedCompilerVersion) {
+    commandObj.logToStderr(
+      color.blue(
+        `Using aqua compiler version: ${CLIPackageJSON.dependencies["@fluencelabs/aqua-api"]}`,
+      ),
+    );
+
+    hasLoggedCompilerVersion = true;
+  }
+
+  return import("@fluencelabs/aqua-api");
+}
+
 export type CompileToFilesArgs = CompileFromPathArgs & {
   outputPathAbsolute: string | undefined;
   dry?: boolean;
@@ -105,7 +123,7 @@ export async function compileToFiles({
     await stat(compileArgs.filePath)
   ).isDirectory();
 
-  const { compileFromPath } = await import("@fluencelabs/aqua-api");
+  const { compileFromPath } = await importAquaCompiler();
 
   const [resultsWithErrors, compilationResultsWithFilePaths] =
     await compileDirOrFile(compileFromPath, compileArgs);
@@ -208,7 +226,7 @@ export async function compileToFiles({
 }
 
 export async function compileFunctionCall(args: CompileFuncCallFromPathArgs) {
-  const { compileAquaCallFromPath } = await import("@fluencelabs/aqua-api");
+  const { compileAquaCallFromPath } = await importAquaCompiler();
   return compileDirOrFile(compileAquaCallFromPath, args);
 }
 

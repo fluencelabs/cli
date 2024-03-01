@@ -63,7 +63,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       nullable: true,
       description: `Key pair with this name will be used for the deployment by default. You can override it with flags or by using keyPair properties in ${FLUENCE_CONFIG_FULL_FILE_NAME}`,
     },
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
   },
   required: ["version", "keyPairs"],
 };

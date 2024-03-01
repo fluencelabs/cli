@@ -69,6 +69,9 @@ export default class Create extends BaseCommand<typeof Create> {
       description: "Comma-separated list of blacklisted providers",
       exclusive: ["whitelist"],
     }),
+    "protocol-version": Flags.integer({
+      description: "Protocol version",
+    }),
     ...CHAIN_FLAGS,
   };
 
@@ -95,6 +98,7 @@ export default class Create extends BaseCommand<typeof Create> {
         flags.blacklist === undefined
           ? undefined
           : commaSepStrToArr(flags.blacklist),
+      protocolVersion: flags["protocol-version"],
     });
 
     commandObj.logToStderr(
