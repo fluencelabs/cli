@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.14](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.13...fluence-cli-v0.15.14) (2024-03-01)
+
+
+### Features
+
+* up deal-ts-clients, log aqua version, remove modules dir nesting by default ([#822](https://github.com/fluencelabs/cli/issues/822)) ([08911d0](https://github.com/fluencelabs/cli/commit/08911d082eb22d375a88257f86ccf69ab21ce904))
+
+
+### Bug Fixes
+
+* Fix nox healthcheck ([#825](https://github.com/fluencelabs/cli/issues/825)) ([da162f8](https://github.com/fluencelabs/cli/commit/da162f806c98cb1d0014e812e3a3e585d5ffaa10))
+
 ## [0.15.13](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.12...fluence-cli-v0.15.13) (2024-02-29)
 
 
