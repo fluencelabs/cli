@@ -59,7 +59,6 @@ import {
   type AquaLogLevel,
   PT_SYMBOL,
   COMPILE_AQUA_PROPERTY_NAME,
-  DEFAULT_CURL_EFFECTOR_CID,
 } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
@@ -950,8 +949,6 @@ deployments:
     initialBalance: "${DEFAULT_INITIAL_BALANCE}" # initial balance  after deploy in ${PT_SYMBOL}
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
-    effectors:
-      - "${DEFAULT_CURL_EFFECTOR_CID}"
 
 ${yamlDiffPatch(
   "",
