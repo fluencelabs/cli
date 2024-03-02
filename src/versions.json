@@ -1,9 +1,9 @@
 {
   "protocolVersion": 1,
   "nox": "fluencelabs/nox:0.21.3",
-  "chain-rpc": "fluencelabs/chain-rpc:0.7.1",
-  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.7.1",
-  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.7.1",
+  "chain-rpc": "fluencelabs/chain-rpc:0.7.2",
+  "chain-deploy-script": "fluencelabs/chain-deploy-script:0.7.2",
+  "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.7.2",
   "rust-toolchain": "nightly-2023-08-27-x86_64",
   "npm": {
     "@fluencelabs/aqua-lib": "0.9.1",
