@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.15](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.14...fluence-cli-v0.15.15) (2024-03-02)
+
+
+### Features
+
+* update deal-ts-clients; change defaults ([#827](https://github.com/fluencelabs/cli/issues/827)) ([e3e8371](https://github.com/fluencelabs/cli/commit/e3e83711e18ed1956a2d907c02918f6b20843f9e))
+
 ## [0.15.14](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.13...fluence-cli-v0.15.14) (2024-03-01)
 
 
