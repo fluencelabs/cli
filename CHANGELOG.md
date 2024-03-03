@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.17](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.16...fluence-cli-v0.15.17) (2024-03-03)
+
+
+### Features
+
+* bump nox to 0.21.4 ([#831](https://github.com/fluencelabs/cli/issues/831)) ([dd02203](https://github.com/fluencelabs/cli/commit/dd0220338348569e127a09c346b4fc2732cb883d))
+
 ## [0.15.16](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.15...fluence-cli-v0.15.16) (2024-03-03)
 
 
