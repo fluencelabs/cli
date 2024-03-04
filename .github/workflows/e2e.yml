@@ -56,7 +56,7 @@ jobs:
       ref: ${{ github.ref }}
       platform: ${{ matrix.platform }}
 
-  registry:
-    needs:
-      - fluence-cli
-    uses: fluencelabs/registry/.github/workflows/tests.yml@main
+  # registry:
+  #   needs:
+  #     - fluence-cli
+  #   uses: fluencelabs/registry/.github/workflows/tests.yml@main

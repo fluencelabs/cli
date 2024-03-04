@@ -66,7 +66,7 @@ const overridableModulePropertiesV0 = {
     description: "Set true to allow module to use the Marine SDK logger",
   },
   loggingMask: {
-    type: "number",
+    type: "integer",
     nullable: true,
     description:
       "manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map",
@@ -123,7 +123,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
   type: "object",
   $id: `${TOP_LEVEL_SCHEMA_ID}/${MODULE_CONFIG_FULL_FILE_NAME}`,
   title: MODULE_CONFIG_FULL_FILE_NAME,
-  description: `Defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`${CLI_NAME} module new\` command to generate a template for new module`,
+  description: `!IMPORTANT: All the properties in this config (except for "name") are relevant only for providers who provide effector modules. If you are not a provider - properties in this config will be ignored when you deploy your code. But they will still have effect when running using 'fluence service repl' command. This config defines [Marine Module](https://fluence.dev/docs/build/concepts/#modules). You can use \`${CLI_NAME} module new\` command to generate a template for new module`,
   properties: {
     name: {
       type: "string",
@@ -137,7 +137,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       description: `Module type "${MODULE_TYPE_COMPILED}" is for the precompiled modules. Module type "${MODULE_TYPE_RUST}" is for the source code written in rust which can be compiled into a Marine module`,
     },
     ...overridableModulePropertiesV0,
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
   },
   additionalProperties: false,
   required: ["version", "name"],

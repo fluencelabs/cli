@@ -23,7 +23,6 @@ import { baseFlags } from "../baseCommand.js";
 import type Deploy from "../commands/deploy.js";
 
 import { getChainId } from "./chain/chainId.js";
-import { depositToDeal } from "./chain/depositToDeal.js";
 import { printDealInfo } from "./chain/printDealInfo.js";
 import { commandObj } from "./commandObj.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
@@ -41,11 +40,10 @@ import {
   DEFAULT_IPFS_ADDRESS,
   IPFS_ADDR_PROPERTY,
   DEFAULT_INITIAL_BALANCE,
-  PRICE_PER_EPOCH_DEFAULT,
+  DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
   CHAIN_FLAGS,
   type ChainENV,
   DEPLOYMENT_NAMES_ARG_NAME,
-  DEAL_IDS_FLAG_NAME,
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
@@ -143,7 +141,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       targetWorkers = TARGET_WORKERS_DEFAULT,
       minWorkers = targetWorkers,
       effectors = [],
-      pricePerWorkerEpoch = PRICE_PER_EPOCH_DEFAULT,
+      pricePerWorkerEpoch = DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
       maxWorkersPerProvider = targetWorkers,
     } = deal;
 
@@ -199,7 +197,6 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       };
 
       await workersConfig.$commit();
-
       continue;
     }
 
@@ -226,6 +223,9 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       effectors,
       workerName,
       initialBalance,
+      whitelist: deal.whitelist,
+      blacklist: deal.blacklist,
+      protocolVersion: deal.protocolVersion,
     });
 
     if (flags["auto-match"]) {
@@ -262,15 +262,6 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
       timestamp,
     };
 
-    // remove this after initial balance is implemented
-    await depositToDeal(
-      {
-        flags: { [DEAL_IDS_FLAG_NAME]: dealIdOriginal },
-        args: { [DEPLOYMENT_NAMES_ARG_NAME]: undefined },
-      },
-      initialBalance.toString(),
-    );
-
     await printDealInfo({ dealId: dealIdOriginal, dealName: workerName });
   }
 
@@ -303,9 +294,9 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 }
 
 const blockScoutUrls: Record<Exclude<ChainENV, "local">, string> = {
-  dar: "https://blockscout-dar.fluence.dev/tx/",
-  kras: "https://blockscout-kras.fluence.dev/tx/",
-  stage: "https://blockscout-stage.fluence.dev/tx/",
+  dar: "https://blockscout-dar.fluence.dev/address/",
+  // kras: "https://blockscout-kras.fluence.dev/address/",
+  stage: "https://blockscout-stage.fluence.dev/address/",
 };
 
 function getLinkToAddress(dealId: string, contractsENV: ChainENV) {

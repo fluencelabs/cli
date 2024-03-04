@@ -27,7 +27,13 @@ import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
+import { versions } from "../../../versions.js";
 import { getChainId } from "../../chain/chainId.js";
+import {
+  ccDurationValidator,
+  validateAddress,
+  validateProtocolVersion,
+} from "../../chain/chainValidators.js";
 import { commandObj } from "../../commandObj.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
@@ -54,6 +60,8 @@ import {
   NOX_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
   CHAIN_URLS,
+  PT_SYMBOL,
+  DEFAULT_CURL_EFFECTOR_CID,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -63,10 +71,6 @@ import {
   jsonStringify,
   splitErrorsAndResults,
 } from "../../helpers/utils.js";
-import {
-  ccDurationValidator,
-  validateAddress,
-} from "../../helpers/validateCapacityCommitment.js";
 import {
   type ValidationResult,
   validateCIDs,
@@ -125,9 +129,11 @@ const capacityCommitmentSchema = {
 } as const satisfies JSONSchemaType<CapacityCommitment>;
 
 export type Offer = {
-  minPricePerWorkerEpoch: number;
+  minPricePerWorkerEpoch: string;
   computePeers: Array<string>;
   effectors?: Array<string>;
+  minProtocolVersion?: number;
+  maxProtocolVersion?: number;
 };
 
 type Effector = {
@@ -199,22 +205,22 @@ const noxConfigYAMLSchema = {
   properties: {
     tcpPort: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
     },
     websocketPort: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
     },
     httpPort: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
     },
     aquavmPoolSize: {
       nullable: true,
-      type: "number",
+      type: "integer",
       description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
     },
     systemServices: {
@@ -257,7 +263,7 @@ const noxConfigYAMLSchema = {
           properties: {
             deciderPeriodSec: {
               nullable: true,
-              type: "number",
+              type: "integer",
               description: `Decider period in seconds`,
             },
             workerIpfsMultiaddr: {
@@ -272,7 +278,7 @@ const noxConfigYAMLSchema = {
             },
             networkId: {
               nullable: true,
-              type: "number",
+              type: "integer",
               description: `Network ID`,
             },
             startBlock: {
@@ -334,7 +340,7 @@ const noxConfigYAMLSchema = {
         },
         networkId: {
           nullable: true,
-          type: "number",
+          type: "integer",
           description: `Network ID`,
         },
         walletKey: {
@@ -376,8 +382,8 @@ const offerSchema = {
   additionalProperties: false,
   properties: {
     minPricePerWorkerEpoch: {
-      type: "number",
-      description: `Minimum price per worker epoch in FLT`,
+      type: "string",
+      description: `Minimum price per worker epoch in ${PT_SYMBOL}`,
     },
     computePeers: {
       description: "Number of Compute Units for this Compute Peer",
@@ -386,6 +392,20 @@ const offerSchema = {
       uniqueItems: true,
     },
     effectors: { type: "array", items: { type: "string" }, nullable: true },
+    minProtocolVersion: {
+      type: "integer",
+      description: `Min protocol version. Must be less then or equal to maxProtocolVersion. Default: ${versions.protocolVersion}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
+    },
+    maxProtocolVersion: {
+      type: "integer",
+      description: `Max protocol version. Must be more then or equal to minProtocolVersion. Default: ${versions.protocolVersion}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
+    },
   },
   required: ["minPricePerWorkerEpoch", "computePeers"],
 } as const satisfies JSONSchemaType<Offer>;
@@ -396,7 +416,7 @@ const computePeerSchema = {
   additionalProperties: false,
   properties: {
     computeUnits: {
-      type: "number",
+      type: "integer",
       description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
     nox: noxConfigYAMLSchema,
@@ -446,7 +466,7 @@ const configSchemaV0 = {
       },
       required: [],
     },
-    version: { type: "number", const: 0, description: "Config version" },
+    version: { type: "integer", const: 0, description: "Config version" },
   },
   required: [
     "version",
@@ -458,9 +478,6 @@ const configSchemaV0 = {
 } as const satisfies JSONSchemaType<ConfigV0>;
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
-
-const DEFAULT_EFFECTOR =
-  "bafkreigkoxnkeyunbelr5qhqbt5nspaew7uysd2trdds346rrogfz3zvuq";
 
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
@@ -477,7 +494,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       nox: {
         effectors: {
           curl: {
-            wasmCID: DEFAULT_EFFECTOR,
+            wasmCID: DEFAULT_CURL_EFFECTOR_CID,
             allowedBinaries: {
               curl: "/usr/bin/curl",
             },
@@ -517,7 +534,7 @@ function getDefault(args: Omit<ProviderConfigArgs, "name">) {
       [DEFAULT_OFFER_NAME]: {
         ...defaultNumberProperties,
         computePeers: Object.keys(userProvidedConfig.computePeers),
-        effectors: [DEFAULT_EFFECTOR],
+        effectors: [DEFAULT_CURL_EFFECTOR_CID],
       },
     };
 
@@ -584,8 +601,64 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     validateCC(config),
     validateMissingComputePeers(config),
     validateNoDuplicateNoxNamesInOffers(config),
+    validateProtocolVersions(config),
   );
 };
+
+async function validateProtocolVersions(providerConfig: LatestConfig) {
+  const errors = (
+    await Promise.all(
+      Object.entries(providerConfig.offers).flatMap(
+        ([
+          offer,
+          {
+            maxProtocolVersion = versions.protocolVersion,
+            minProtocolVersion = versions.protocolVersion,
+          },
+        ]) => {
+          return [
+            Promise.resolve({
+              offer,
+              property: "minProtocolVersion or maxProtocolVersion",
+              validity:
+                minProtocolVersion > maxProtocolVersion
+                  ? `minProtocolVersion must be less than or equal to maxProtocolVersion. Got: minProtocolVersion=${color.yellow(
+                      minProtocolVersion,
+                    )} maxProtocolVersion=${color.yellow(maxProtocolVersion)}`
+                  : true,
+            }),
+            ...(
+              [
+                ["minProtocolVersion", minProtocolVersion],
+                ["maxProtocolVersion", maxProtocolVersion],
+              ] as const
+            ).map(async ([property, v]) => {
+              return {
+                offer,
+                property,
+                validity: await validateProtocolVersion(v),
+              };
+            }),
+          ];
+        },
+      ),
+    )
+  ).filter(({ validity }) => {
+    return validity !== true;
+  });
+
+  if (errors.length > 0) {
+    return errors
+      .map(({ offer, property, validity }) => {
+        return `Offer ${color.yellow(offer)} has invalid ${color.yellow(
+          property,
+        )} property: ${validity}`;
+      })
+      .join("\n");
+  }
+
+  return true;
+}
 
 export async function validateEffectors(
   providerConfig: LatestConfig,
@@ -687,8 +760,7 @@ function validateNoDuplicateNoxNamesInOffers(
 }
 
 async function validateCC(config: LatestConfig): Promise<ValidationResult> {
-  const chainEnv = await ensureChainEnv();
-  const validateCCDuration = await ccDurationValidator(chainEnv === "local");
+  const validateCCDuration = await ccDurationValidator();
 
   const capacityCommitmentErrors = (
     await Promise.all(

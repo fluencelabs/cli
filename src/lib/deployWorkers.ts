@@ -23,8 +23,10 @@ import sum from "lodash-es/sum.js";
 import xbytes from "xbytes";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { importAquaCompiler } from "./aqua.js";
 import { buildModules } from "./build.js";
 import { commandObj, isInteractive } from "./commandObj.js";
+import { compileAquaFromFluenceConfigWithDefaults } from "./compileAquaAndWatch.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
 import type { InitializedReadonlyConfig } from "./configs/initConfig.js";
 import {
@@ -54,6 +56,7 @@ import type {
   WorkersConfigReadonly,
 } from "./configs/project/workers.js";
 import {
+  MODULE_TYPE_RUST,
   FS_OPTIONS,
   HOSTS_FILE_NAME,
   DEALS_FILE_NAME,
@@ -63,6 +66,7 @@ import {
   MIN_MEMORY_PER_MODULE,
   MIN_MEMORY_PER_MODULE_STR,
   DEPLOYMENT_NAMES_ARG_NAME,
+  MODULE_CONFIG_FULL_FILE_NAME,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -77,7 +81,6 @@ import {
   makeOptional,
   type CustomTypes,
 } from "./helpers/jsToAqua.js";
-import { moduleToJSONModuleConfig } from "./helpers/moduleToJSONModuleConfig.js";
 import { commaSepStrToArr, splitErrorsAndResults } from "./helpers/utils.js";
 import { initMarineCli } from "./marineCli.js";
 import { resolvePeerId } from "./multiaddres.js";
@@ -511,16 +514,20 @@ const validateWasmExist = async (
             };
           });
         })
-        .map(async ({ wasm, service, worker }) => {
+        .map(async ({ wasm, name, service, worker }) => {
           try {
             await access(wasm);
             return true;
           } catch (e) {
-            return `wasm at ${color.yellow(wasm)} for service ${color.yellow(
-              service,
-            )} in deployment ${color.yellow(
+            return `wasm file not found at ${color.yellow(
+              wasm,
+            )}\nfor deployment: ${color.yellow(
               worker,
-            )} does not exist. Make sure you have built it`;
+            )}\nservice: ${color.yellow(service)}\nmodule ${color.yellow(
+              name,
+            )}\nIf you expect CLI to compile the code of this module, please add ${color.yellow(
+              `type: ${MODULE_TYPE_RUST}`,
+            )} to the ${MODULE_CONFIG_FULL_FILE_NAME}`;
           }
         }),
     )
@@ -611,11 +618,11 @@ const emptyHosts: Host = {
   dummyDealId: "",
 };
 
-export const ensureAquaFileWithWorkerInfo = async (
+export async function ensureAquaFileWithWorkerInfo(
   workersConfig: WorkersConfigReadonly,
   fluenceConfig: FluenceConfigReadonly,
   fluenceEnv: FluenceEnv,
-) => {
+) {
   const dealWorkers = Object.fromEntries(
     Object.entries({
       ...fluenceConfig.deployments,
@@ -670,7 +677,9 @@ export const ensureAquaFileWithWorkerInfo = async (
     }),
     FS_OPTIONS,
   );
-};
+
+  await compileAquaFromFluenceConfigWithDefaults(fluenceConfig);
+}
 
 type ResolveWorkerArgs = {
   fluenceConfig: FluenceConfig;
@@ -758,7 +767,7 @@ export async function compileSpells(
         spellConfig.aquaFilePath,
       );
 
-      const { compileFromPath } = await import("@fluencelabs/aqua-api");
+      const { compileFromPath } = await importAquaCompiler();
 
       // TODO: consider how to compile spells with aqua compilation args
       const { errors, functions } = await compileFromPath({
@@ -887,9 +896,7 @@ async function resolveWorker({
 
         return {
           wasm: getModuleWasmPath(overriddenModuleConfig),
-          config: JSON.stringify(
-            moduleToJSONModuleConfig(overriddenModuleConfig),
-          ),
+          name: overriddenModuleConfig.name,
         };
       });
 

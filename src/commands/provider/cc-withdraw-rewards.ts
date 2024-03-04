@@ -16,16 +16,17 @@
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
+import { withdrawCollateralRewards } from "../../lib/chain/withdrawCollateralRewards.js";
 import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
-import { CHAIN_FLAGS, NOX_NAMES_FLAG } from "../../lib/const.js";
-import { getDealClient, signBatch } from "../../lib/dealClient.js";
+import { CHAIN_FLAGS, NOX_NAMES_FLAG, FLT_SYMBOL } from "../../lib/const.js";
+import { getDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCWithdrawRewards extends BaseCommand<
   typeof CCWithdrawRewards
 > {
   static override aliases = ["provider:cwr"];
-  static override description = "Withdraw rewards from capacity commitments";
+  static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitments`;
   static override flags = {
     ...baseFlags,
     ...NOX_NAMES_FLAG,
@@ -36,17 +37,16 @@ export default class CCWithdrawRewards extends BaseCommand<
     const { flags } = await initCli(this, await this.parse(CCWithdrawRewards));
     const computePeers = await resolveComputePeersByNames(flags);
     const { dealClient } = await getDealClient();
-    const capacity = await dealClient.getCapacity();
     const market = await dealClient.getMarket();
 
-    await signBatch(
+    await withdrawCollateralRewards(
       await Promise.all(
         computePeers.map(async ({ peerId }) => {
           const peer = await market.getComputePeer(
             await peerIdToUint8Array(peerId),
           );
 
-          return [capacity.withdrawReward, peer.commitmentId];
+          return peer.commitmentId;
         }),
       ),
     );

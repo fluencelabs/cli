@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { resolve } from "node:path";
+
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 import { color } from "@oclif/color";
 
@@ -24,19 +26,21 @@ import {
 } from "./aqua.js";
 import { commandObj } from "./commandObj.js";
 import {
-  type FluenceConfig,
+  type FluenceConfigReadonly,
   type CompileAqua,
 } from "./configs/project/fluence.js";
 import { COMPILE_AQUA_PROPERTY_NAME } from "./const.js";
+import { getAquaImports } from "./helpers/aquaImports.js";
 import {
   commaSepStrToArr,
   splitErrorsAndResults,
   stringifyUnknown,
 } from "./helpers/utils.js";
+import { projectRootDir } from "./paths.js";
 import type { Required } from "./typeHelpers.js";
 
 type CompileAquaFromFluenceConfigArgs = {
-  fluenceConfig: FluenceConfig;
+  fluenceConfig: FluenceConfigReadonly;
   imports: GatherImportsResult;
   names?: string | undefined;
   dry?: boolean | undefined;
@@ -92,7 +96,7 @@ export async function compileAquaFromFluenceConfig({
         return compileAquaAndWatch(
           {
             ...resolveAquaConfig(aquaConfig, imports),
-            outputPath: aquaConfig.output,
+            outputPathAbsolute: resolve(projectRootDir, aquaConfig.output),
             watch,
             dry,
           },
@@ -122,9 +126,19 @@ export async function compileAquaFromFluenceConfig({
   }
 }
 
+export async function compileAquaFromFluenceConfigWithDefaults(
+  fluenceConfig: FluenceConfigReadonly,
+  aquaImportsFromFlags?: string[] | undefined,
+) {
+  await compileAquaFromFluenceConfig({
+    fluenceConfig,
+    imports: await getAquaImports({ aquaImportsFromFlags, fluenceConfig }),
+  });
+}
+
 export function hasAquaToCompile(
-  maybeFluenceConfig: FluenceConfig | null,
-): maybeFluenceConfig is FluenceConfig & {
+  maybeFluenceConfig: FluenceConfigReadonly | null,
+): maybeFluenceConfig is FluenceConfigReadonly & {
   [COMPILE_AQUA_PROPERTY_NAME]: CompileAqua;
 } {
   return (
@@ -146,9 +160,9 @@ export async function compileAquaAndWatch(
     const from = ` from ${color.yellow(compileArgs.filePath)}`;
 
     const to =
-      compileArgs.outputPath === undefined || compileArgs.dry
+      compileArgs.outputPathAbsolute === undefined || compileArgs.dry
         ? ""
-        : ` to ${color.yellow(compileArgs.outputPath)}`;
+        : ` to ${color.yellow(compileArgs.outputPathAbsolute)}`;
 
     commandObj.logToStderr(
       `Successfully compiled${aquaConfigName}${from}${to}. If you don't see files or functions you expect to see, make sure you exported things you require from your aqua files`,

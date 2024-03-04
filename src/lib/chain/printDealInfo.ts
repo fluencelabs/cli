@@ -18,13 +18,14 @@ import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
 import { type DealNameAndId } from "../deal.js";
-import { getDealClient } from "../dealClient.js";
+import { getReadonlyDealClient } from "../dealClient.js";
 
 import { peerIdHexStringToBase58String } from "./conversions.js";
+import { ptFormatWithSymbol } from "./currencies.js";
 
 export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
-  const { dealClient } = await getDealClient();
-  const deal = dealClient.getDeal(dealId);
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const deal = readonlyDealClient.getDeal(dealId);
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
   commandObj.log(`Deal ID: ${dealId}`);
@@ -44,17 +45,19 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
 
   const { ethers } = await import("ethers");
 
-  commandObj.log(`Balance: ${ethers.formatEther(await deal.getFreeBalance())}`);
+  commandObj.log(
+    `Balance: ${await ptFormatWithSymbol(await deal.getFreeBalance())}`,
+  );
 
   commandObj.log(
-    `Price per worker per epoch: ${ethers.formatEther(
+    `Price per worker per epoch: ${await ptFormatWithSymbol(
       await deal.pricePerWorkerEpoch(),
     )}`,
   );
 
   commandObj.log(`Payment token: ${await deal.paymentToken()}`);
   commandObj.log(`Min workers: ${await deal.minWorkers()}`);
-  commandObj.log(`Target worker: ${await deal.targetWorkers()}`);
+  commandObj.log(`Target workers: ${await deal.targetWorkers()}`);
 
   const currentComputeUnitCount = await deal["getComputeUnitCount()"]();
 

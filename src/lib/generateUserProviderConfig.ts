@@ -16,23 +16,22 @@
 
 import { color } from "@oclif/color";
 
-import { isInteractive } from "./commandObj.js";
-import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
-import {
-  defaultNumberProperties,
-  type NumberProperty,
-  numberProperties,
-  DEFAULT_CC_REWARD_DELEGATION_RATE,
-  DURATION_EXAMPLE,
-  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
-} from "./const.js";
-import { ensureChainEnv } from "./ensureChainNetwork.js";
-import { commaSepStrToArr } from "./helpers/utils.js";
 import {
   ccDurationValidator,
   getMinCCDuration,
   validateAddress,
-} from "./helpers/validateCapacityCommitment.js";
+} from "./chain/chainValidators.js";
+import { isInteractive } from "./commandObj.js";
+import type { UserProvidedConfig, Offer } from "./configs/project/provider.js";
+import {
+  defaultNumberProperties,
+  type CurrencyProperty,
+  currencyProperties,
+  DEFAULT_CC_REWARD_DELEGATION_RATE,
+  DURATION_EXAMPLE,
+  DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
+} from "./const.js";
+import { commaSepStrToArr } from "./helpers/utils.js";
 import {
   validatePercent,
   validatePositiveNumberOrEmpty,
@@ -41,15 +40,14 @@ import { checkboxes, confirm, input } from "./prompt.js";
 
 async function promptToSetNumberProperty(
   offer: Offer,
-  property: NumberProperty,
+  property: CurrencyProperty,
 ) {
   const propertyStr = await input({
     message: `Enter ${color.yellow(property)}`,
-    validate: validatePositiveNumberOrEmpty,
-    default: `${defaultNumberProperties[property]}`,
+    default: defaultNumberProperties[property],
   });
 
-  offer[property] = Number(propertyStr);
+  offer[property] = propertyStr;
 }
 
 const DEFAULT_NUMBER_OF_NOXES = 3;
@@ -64,9 +62,8 @@ export async function addComputePeers(
 ) {
   let computePeersCounter = 0;
   let isAddingMoreComputePeers = true;
-  const isLocal = (await ensureChainEnv()) === "local";
-  const validateCCDuration = await ccDurationValidator(isLocal);
-  const minDuration = await getMinCCDuration(isLocal);
+  const minDuration = await getMinCCDuration();
+  const validateCCDuration = await ccDurationValidator();
 
   do {
     const defaultName = `nox-${computePeersCounter}`;
@@ -189,7 +186,7 @@ export async function addOffers(userProvidedConfig: UserProvidedConfig) {
       ...(effectors.length > 0 ? { effectors } : {}),
     };
 
-    for (const numberProperty of numberProperties) {
+    for (const numberProperty of currencyProperties) {
       await promptToSetNumberProperty(offer, numberProperty);
     }
 

@@ -19,6 +19,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
+import { fltFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
 import { CHAIN_FLAGS, NOX_NAMES_FLAG } from "../../lib/const.js";
@@ -41,7 +42,6 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
     const capacity = await dealClient.getCapacity();
 
     const computePeers = await resolveComputePeersByNames(flags);
-    const { ethers } = await import("ethers");
 
     const infos = await Promise.all(
       computePeers.map(async ({ peerId, name }) => {
@@ -62,7 +62,7 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
             "Reward delegator rate": `${
               Number(commitment.rewardDelegatorRate) / 10 ** 5
             }%`,
-            "Collateral per unit": ethers.formatEther(
+            "Collateral per unit": await fltFormatWithSymbol(
               commitment.collateralPerUnit,
             ),
             Delegator: commitment.delegator.toString(),

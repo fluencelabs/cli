@@ -25,6 +25,8 @@ import type {
 import type { GatherImportsResult } from "@fluencelabs/npm-aqua-compiler";
 import { color } from "@oclif/color";
 
+import CLIPackageJSON from "../versions/cli.package.json" assert { type: "json" };
+
 import { commandObj } from "./commandObj.js";
 import type {
   CompileAquaConfig,
@@ -90,13 +92,29 @@ const writeFileAndMakeSureDirExists = async (
   await writeFile(filePath, data, FS_OPTIONS);
 };
 
+let hasLoggedCompilerVersion = false;
+
+export async function importAquaCompiler() {
+  if (!hasLoggedCompilerVersion) {
+    commandObj.logToStderr(
+      color.blue(
+        `Using aqua compiler version: ${CLIPackageJSON.dependencies["@fluencelabs/aqua-api"]}`,
+      ),
+    );
+
+    hasLoggedCompilerVersion = true;
+  }
+
+  return import("@fluencelabs/aqua-api");
+}
+
 export type CompileToFilesArgs = CompileFromPathArgs & {
-  outputPath: string | undefined;
+  outputPathAbsolute: string | undefined;
   dry?: boolean;
 };
 
 export async function compileToFiles({
-  outputPath,
+  outputPathAbsolute,
   targetType,
   dry = false,
   ...compileArgs
@@ -105,7 +123,7 @@ export async function compileToFiles({
     await stat(compileArgs.filePath)
   ).isDirectory();
 
-  const { compileFromPath } = await import("@fluencelabs/aqua-api");
+  const { compileFromPath } = await importAquaCompiler();
 
   const [resultsWithErrors, compilationResultsWithFilePaths] =
     await compileDirOrFile(compileFromPath, compileArgs);
@@ -140,11 +158,11 @@ export async function compileToFiles({
   }
 
   assert(
-    typeof outputPath === "string",
-    `outputPath type is "${typeof outputPath}", but it should be of type "string", because it's not dry run`,
+    typeof outputPathAbsolute === "string",
+    `Unreachable. outputPath type is "${typeof outputPathAbsolute}", but it should have been of type "string", because it's not dry run`,
   );
 
-  await mkdir(outputPath, { recursive: true });
+  await mkdir(outputPathAbsolute, { recursive: true });
 
   const inputDirPath = isInputPathADirectory
     ? compileArgs.filePath
@@ -158,7 +176,11 @@ export async function compileToFiles({
         const parsedPath = parse(aquaFilePath);
         const fileNameWithoutExt = parsedPath.name;
         const dirPath = parsedPath.dir;
-        const finalOutputDirPath = dirPath.replace(inputDirPath, outputPath);
+
+        const finalOutputDirPath = dirPath.replace(
+          inputDirPath,
+          outputPathAbsolute,
+        );
 
         if (targetType === "ts") {
           return [
@@ -204,7 +226,7 @@ export async function compileToFiles({
 }
 
 export async function compileFunctionCall(args: CompileFuncCallFromPathArgs) {
-  const { compileAquaCallFromPath } = await import("@fluencelabs/aqua-api");
+  const { compileAquaCallFromPath } = await importAquaCompiler();
   return compileDirOrFile(compileAquaCallFromPath, args);
 }
 

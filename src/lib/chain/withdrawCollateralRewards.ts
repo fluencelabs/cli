@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import { getDealClient, sign } from "../dealClient.js";
+import { getDealClient, signBatch } from "../dealClient.js";
 
-export async function withdrawReward(commitmentIds: string[]) {
+export async function withdrawCollateralRewards(commitmentIds: string[]) {
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
 
-  for (const commitmentId of commitmentIds) {
-    await sign(capacity.withdrawReward, commitmentId);
-  }
+  // TODO: add logs here
+  await signBatch(
+    commitmentIds.map((commitmentId) => {
+      return [capacity.withdrawReward, commitmentId];
+    }),
+  );
 }

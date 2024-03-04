@@ -18,6 +18,7 @@ import { color } from "@oclif/color";
 import times from "lodash-es/times.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
+import { versions } from "../../versions.js";
 import { commandObj } from "../commandObj.js";
 import {
   ensureComputerPeerConfigs,
@@ -30,7 +31,7 @@ import {
 import {
   ALL_FLAG_VALUE,
   CLI_NAME,
-  CURRENCY_MULTIPLIER,
+  PT_SYMBOL,
   DOT_FLUENCE_DIR_NAME,
   OFFER_FLAG_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
@@ -42,6 +43,7 @@ import {
   sign,
   getEventValue,
   signBatch,
+  getReadonlyDealClient,
 } from "../dealClient.js";
 import {
   commaSepStrToArr,
@@ -55,7 +57,8 @@ import {
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
 } from "./conversions.js";
-import { assertProviderIsRegistered } from "./isProviderRegistered.js";
+import { ptFormatWithSymbol, ptParse } from "./currencies.js";
+import { assertProviderIsRegistered } from "./providerInfo.js";
 
 const MARKET_OFFER_REGISTERED_EVENT_NAME = "MarketOfferRegistered";
 const OFFER_ID_PROPERTY = "offerId";
@@ -132,6 +135,8 @@ export async function createOffers(flags: OffersArgs) {
       effectorPrefixesAndHash,
       minPricePerWorkerEpochBigInt,
       offerName,
+      minProtocolVersion,
+      maxProtocolVersion,
     } = offer;
 
     const txReceipt = await sign(
@@ -140,6 +145,8 @@ export async function createOffers(flags: OffersArgs) {
       usdcAddress,
       effectorPrefixesAndHash,
       computePeersToRegister,
+      minProtocolVersion ?? versions.protocolVersion,
+      maxProtocolVersion ?? versions.protocolVersion,
     );
 
     registerMarketOfferTxReceipts.push({ offerName, txReceipt });
@@ -240,43 +247,14 @@ async function resolveOfferInfo({
   offerInfo,
   offerExplorerInfo,
 }: Awaited<ReturnType<typeof getOfferInfo>>) {
-  // id: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
-  // createdAt: 1708673387
-  // totalComputeUnits: 96
-  // freeComputeUnits: 96
-  // paymentToken:
-  //   address: "0x5fbdb2315678afecb367f032d93f642f64180aa3"
-  //   symbol: tUSD
-  //   decimals: "6"
-  // pricePerEpoch: "10000000.000"
-  // effectors:
-  //   - cid: "\x01U\x12 �uڢb�\t\x17\x1e��\f��<\x04��\x0fS��-�ы�\\�5�"
-  //     description: Unknown
-  // providerId: "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-  // peers:
-  //   - id: "0x738583bc1535587ca380c6965fc0ecf9b88f5ead1a27a020c88d920b9a428a92"
-  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
-  //     computeUnits: []
-  //   - id: "0xbf2e8114e269532b249e2e30a8959348841abd6f4352242a862d1ca2b19fa7e9"
-  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
-  //     computeUnits: []
-  //   - id: "0xc5b8e674bc9646e998c913e95004c839993e3a9d2e6dabb159c3656e21906efd"
-  //     offerId: "0x4c72a25323d7bf488e6b7be526afed08290e6e1d7cda8261455e95e2cb4f617e"
-  //     computeUnits: []
-  // updatedAt: 1708673387
-  const { ethers } = await import("ethers");
-
   if (offerExplorerInfo !== undefined) {
     return {
       "Provider ID": offerExplorerInfo.providerId,
       "Offer ID": offerExplorerInfo.id,
       "Price Per Epoch":
         offerInfo === undefined
-          ? ethers.formatEther(
-              // No idea why explorer returns pricePerEpoch with such a weird number of decimal places
-              BigInt(Number(offerExplorerInfo.pricePerEpoch) * 10 ** 6),
-            )
-          : ethers.formatEther(offerInfo.minPricePerWorkerEpoch),
+          ? `${offerExplorerInfo.pricePerEpoch} ${PT_SYMBOL}`
+          : await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
       "Created at": new Date(offerExplorerInfo.createdAt * 1000).toISOString(),
       "Updated at": new Date(offerExplorerInfo.updatedAt * 1000).toISOString(),
       "Total compute units": offerExplorerInfo.totalComputeUnits,
@@ -301,7 +279,9 @@ async function resolveOfferInfo({
     return {
       "Provider ID": offerInfo.provider,
       "Offer ID": offerId,
-      "Price Per Epoch": ethers.formatEther(offerInfo.minPricePerWorkerEpoch),
+      "Price Per Epoch": await ptFormatWithSymbol(
+        offerInfo.minPricePerWorkerEpoch,
+      ),
       "Peer Count": offerInfo.peerCount.toString(),
     };
   }
@@ -485,13 +465,19 @@ async function ensureOfferConfigs() {
     Object.entries(providerConfig.offers).map(
       async ([
         offerName,
-        { minPricePerWorkerEpoch, effectors, computePeers },
+        {
+          minPricePerWorkerEpoch,
+          effectors,
+          computePeers,
+          minProtocolVersion,
+          maxProtocolVersion,
+        },
       ]) => {
         const computePeerConfigs =
           await ensureComputerPeerConfigs(computePeers);
 
-        const minPricePerWorkerEpochBigInt = BigInt(
-          minPricePerWorkerEpoch * CURRENCY_MULTIPLIER,
+        const minPricePerWorkerEpochBigInt = await ptParse(
+          minPricePerWorkerEpoch,
         );
 
         const computePeersToRegister = await Promise.all(
@@ -529,6 +515,8 @@ async function ensureOfferConfigs() {
           computePeersToRegister,
           offerId,
           offerInfo,
+          minProtocolVersion,
+          maxProtocolVersion,
         };
       },
     ),
@@ -650,8 +638,8 @@ export async function getOfferInfo(
   },
   isAllowedToFail = false,
 ) {
-  const { dealClient } = await getDealClient();
-  const market = await dealClient.getMarket();
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const market = await readonlyDealClient.getMarket();
   const dealExplorerClient = await getDealExplorerClient();
 
   let offerInfo = undefined;

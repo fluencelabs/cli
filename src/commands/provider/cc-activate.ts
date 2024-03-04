@@ -25,13 +25,13 @@ import {
   NOX_NAMES_FLAG_NAME,
   NOX_NAMES_FLAG_CONFIG,
   CHAIN_FLAGS,
+  FLT_SYMBOL,
 } from "../../lib/const.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
-  static override description =
-    "Add collateral to capacity commitment to activate it";
+  static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment to activate it`;
   static override aliases = ["provider:ca"];
   static override flags = {
     ...baseFlags,

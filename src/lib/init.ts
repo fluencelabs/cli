@@ -245,7 +245,7 @@ export async function init(options: InitArg = {}): Promise<FluenceConfig> {
   async function quickstart() {
     const serviceName = "myService";
     const absoluteServicePath = join(await ensureServicesDir(), serviceName);
-    const pathToModuleDir = join(absoluteServicePath, "modules", serviceName);
+    const pathToModuleDir = join(absoluteServicePath, serviceName);
     await generateNewModule(pathToModuleDir);
 
     await initNewReadonlyServiceConfig(
@@ -344,7 +344,7 @@ async function initTSorJSProject({
         fluenceConfig: fluenceConfig,
       }),
       targetType: isJS ? "js" : "ts",
-      outputPath: frontendCompiledAquaPath,
+      outputPathAbsolute: frontendCompiledAquaPath,
     }),
   ]);
 }
@@ -423,7 +423,7 @@ async function initTSorJSGatewayProject({
       filePath: aquaDir,
       imports: await getAquaImports({ fluenceConfig }),
       targetType: ext,
-      outputPath: gatewayCompiledAquaPath,
+      outputPathAbsolute: gatewayCompiledAquaPath,
     }),
   ]);
 }

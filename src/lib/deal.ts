@@ -20,14 +20,13 @@ import assert from "node:assert";
 
 import { color } from "@oclif/color";
 
+import { versions } from "../versions.js";
+
 import { cidStringToCIDV1Struct } from "./chain/conversions.js";
+import { ptFormatWithSymbol, ptParse } from "./chain/currencies.js";
 import { commandObj } from "./commandObj.js";
 import { initNewWorkersConfigReadonly } from "./configs/project/workers.js";
-import {
-  CURRENCY_MULTIPLIER,
-  DEAL_IDS_FLAG_NAME,
-  DEPLOYMENT_NAMES_ARG_NAME,
-} from "./const.js";
+import { DEAL_IDS_FLAG_NAME, DEPLOYMENT_NAMES_ARG_NAME } from "./const.js";
 import { dbg } from "./dbg.js";
 import {
   sign,
@@ -50,9 +49,12 @@ type DealCreateArg = {
   minWorkers: number;
   targetWorkers: number;
   maxWorkersPerProvider: number;
-  pricePerWorkerEpoch: number;
+  pricePerWorkerEpoch: string;
   effectors: string[];
-  initialBalance: number;
+  initialBalance: string;
+  whitelist: string[] | undefined;
+  blacklist: string[] | undefined;
+  protocolVersion: number | undefined;
   workerName?: string;
 };
 
@@ -64,23 +66,21 @@ export async function dealCreate({
   pricePerWorkerEpoch,
   effectors,
   initialBalance,
+  whitelist,
+  blacklist,
+  protocolVersion,
   workerName,
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
   const core = await dealClient.getCore();
-  const market = await dealClient.getMarket();
   const usdc = await dealClient.getUSDC();
 
-  const pricePerWorkerEpochBigInt = BigInt(
-    pricePerWorkerEpoch * CURRENCY_MULTIPLIER,
-  );
-
+  const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
+  const initialBalanceBigInt = await ptParse(initialBalance);
   const minDealDepositedEpochs = await core.minDealDepositedEpoches();
 
   const minInitialBalanceBigInt =
     BigInt(targetWorkers) * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
-
-  const initialBalanceBigInt = BigInt(initialBalance * CURRENCY_MULTIPLIER);
 
   if (initialBalanceBigInt < minInitialBalanceBigInt) {
     commandObj.error(
@@ -89,17 +89,24 @@ export async function dealCreate({
       }initialBalance ${color.yellow(
         initialBalance,
       )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${minDealDepositedEpochs} = ${color.yellow(
-        Number(minInitialBalanceBigInt) / CURRENCY_MULTIPLIER,
+        await ptFormatWithSymbol(minInitialBalanceBigInt),
       )}. Please, increase initialBalance or decrease targetWorkers or pricePerWorkerEpoch`,
     );
   }
 
-  await sign(usdc.approve, await market.getAddress(), initialBalanceBigInt);
+  const dealFactory = await dealClient.getDealFactory();
+
+  await sign(
+    usdc.approve,
+    await dealFactory.getAddress(),
+    initialBalanceBigInt,
+  );
 
   const deployDealTxReceipt = await sign(
-    market.deployDeal,
+    dealFactory.deployDeal,
     await cidStringToCIDV1Struct(appCID),
     await usdc.getAddress(),
+    initialBalanceBigInt,
     minWorkers,
     targetWorkers,
     maxWorkersPerProvider,
@@ -109,17 +116,17 @@ export async function dealCreate({
         return cidStringToCIDV1Struct(cid);
       }),
     ),
-    // TODO: provider access type
-    // 0 - no access list
-    // 1 - white list
-    // 2 - black list
-    0,
-    // TODO: provider access list
-    [],
+    whitelist !== undefined ? 1 : blacklist !== undefined ? 2 : 0,
+    whitelist !== undefined
+      ? whitelist
+      : blacklist !== undefined
+        ? blacklist
+        : [],
+    protocolVersion ?? versions.protocolVersion,
   );
 
   const dealId = getEventValue({
-    contract: market,
+    contract: dealFactory,
     txReceipt: deployDealTxReceipt,
     eventName: "DealCreated",
     value: "deal",
@@ -143,8 +150,12 @@ export async function dealUpdate({ dealAddress, appCID }: DealUpdateArg) {
 export async function match(dealAddress: string) {
   const { dealClient } = await getDealClient();
   const dealMatcherClient = await getDealMatcherClient();
-
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
+  const core = await dealClient.getCore();
+
+  dbg(
+    `initTimestamp: ${await core.initTimestamp()} Current epoch: ${await core.currentEpoch()}`,
+  );
 
   const matchedOffers = await setTryTimeout(
     "get matched offers by deal id",

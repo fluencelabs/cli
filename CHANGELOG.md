@@ -1,5 +1,91 @@
 # Changelog
 
+## [0.15.17](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.16...fluence-cli-v0.15.17) (2024-03-03)
+
+
+### Features
+
+* bump nox to 0.21.4 ([#831](https://github.com/fluencelabs/cli/issues/831)) ([dd02203](https://github.com/fluencelabs/cli/commit/dd0220338348569e127a09c346b4fc2732cb883d))
+
+## [0.15.16](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.15...fluence-cli-v0.15.16) (2024-03-03)
+
+
+### Features
+
+* bump deal-ts-clients to 0.7.3 ([#829](https://github.com/fluencelabs/cli/issues/829)) ([216b52c](https://github.com/fluencelabs/cli/commit/216b52c73dd6e16df2e39b836e6661db1be79bf0))
+
+## [0.15.15](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.14...fluence-cli-v0.15.15) (2024-03-02)
+
+
+### Features
+
+* update deal-ts-clients; change defaults ([#827](https://github.com/fluencelabs/cli/issues/827)) ([e3e8371](https://github.com/fluencelabs/cli/commit/e3e83711e18ed1956a2d907c02918f6b20843f9e))
+
+## [0.15.14](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.13...fluence-cli-v0.15.14) (2024-03-01)
+
+
+### Features
+
+* up deal-ts-clients, log aqua version, remove modules dir nesting by default ([#822](https://github.com/fluencelabs/cli/issues/822)) ([08911d0](https://github.com/fluencelabs/cli/commit/08911d082eb22d375a88257f86ccf69ab21ce904))
+
+
+### Bug Fixes
+
+* Fix nox healthcheck ([#825](https://github.com/fluencelabs/cli/issues/825)) ([da162f8](https://github.com/fluencelabs/cli/commit/da162f806c98cb1d0014e812e3a3e585d5ffaa10))
+
+## [0.15.13](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.12...fluence-cli-v0.15.13) (2024-02-29)
+
+
+### Bug Fixes
+
+* promise chaining ([#823](https://github.com/fluencelabs/cli/issues/823)) ([30d343e](https://github.com/fluencelabs/cli/commit/30d343e56accf680b7af69cbd4623279f0ea78e3))
+
+## [0.15.12](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.11...fluence-cli-v0.15.12) (2024-02-29)
+
+
+### Features
+
+* add white and black list [fixes DXJ-623] ([#815](https://github.com/fluencelabs/cli/issues/815)) ([3da88ec](https://github.com/fluencelabs/cli/commit/3da88ec0e67f196a65c73ff8b46f82769f88cab1))
+* up marine 0.19.7, mrepl 0.30.0, marine-rs-sdk 0.14.0, marine-rs… ([#821](https://github.com/fluencelabs/cli/issues/821)) ([e45ba05](https://github.com/fluencelabs/cli/commit/e45ba05c2af39022e8ea6a88328ecb924e03e8a1))
+* update deal-ts-clients ([#817](https://github.com/fluencelabs/cli/issues/817)) ([788e38f](https://github.com/fluencelabs/cli/commit/788e38f6b56110e6fa07a6fc87b313a84b5c773d))
+
+## [0.15.11](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.10...fluence-cli-v0.15.11) (2024-02-27)
+
+
+### Features
+
+* compile all aqua from fluence.yaml each time new aqua is generated ([#813](https://github.com/fluencelabs/cli/issues/813)) ([1e6be90](https://github.com/fluencelabs/cli/commit/1e6be9038f2baaec6a880d338fa36e2c86303fc3))
+* up spell v0.7.6, nox v0.21.2; fix aqua from fluence.yaml compilation ([#811](https://github.com/fluencelabs/cli/issues/811)) ([d5445f5](https://github.com/fluencelabs/cli/commit/d5445f57a7e008998e976a02ce0798b99cfa9cea))
+
+
+### Bug Fixes
+
+* Add healthcheck to nox, persistence to chain-rpc container and set block mining time to 1 ([#816](https://github.com/fluencelabs/cli/issues/816)) ([9e41ec4](https://github.com/fluencelabs/cli/commit/9e41ec4053997d73f58e30ef3fd8f844735d84aa))
+
+## [0.15.10](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.9...fluence-cli-v0.15.10) (2024-02-24)
+
+
+### Features
+
+* decrease ttl, fix typo ([#809](https://github.com/fluencelabs/cli/issues/809)) ([7f80dcf](https://github.com/fluencelabs/cli/commit/7f80dcf33547125edbed6740292b2bc6c224960c))
+
+
+### Bug Fixes
+
+* Hotfix deals ([#812](https://github.com/fluencelabs/cli/issues/812)) ([4c9f6c1](https://github.com/fluencelabs/cli/commit/4c9f6c1e936890f111f4f908ba2787610da75811))
+
+## [0.15.9](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.8...fluence-cli-v0.15.9) (2024-02-24)
+
+
+### Features
+
+* fix decimals ([#808](https://github.com/fluencelabs/cli/issues/808)) ([162909f](https://github.com/fluencelabs/cli/commit/162909f444d320ae797ff80038d6bd23040f1182))
+
+
+### Bug Fixes
+
+* ensure rust ([#804](https://github.com/fluencelabs/cli/issues/804)) ([e5cb09b](https://github.com/fluencelabs/cli/commit/e5cb09b535a474721eb715261b511658f75e8e6b))
+
 ## [0.15.8](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.7...fluence-cli-v0.15.8) (2024-02-23)
 
 

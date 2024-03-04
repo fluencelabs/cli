@@ -27,6 +27,7 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 import CLIPackageJSON from "../../../versions/cli.package.json" assert { type: "json" };
 import { versions } from "../../../versions.js";
 import { ajv, validationErrorToString } from "../../ajvInstance.js";
+import { validateProtocolVersion } from "../../chain/chainValidators.js";
 import {
   COMPUTE_UNIT_MEMORY_STR,
   MAX_HEAP_SIZE_DESCRIPTION,
@@ -37,7 +38,6 @@ import {
   CLI_NAME_FULL,
   CHAIN_ENV,
   type ChainENV,
-  CURRENCY_MULTIPLIER,
   DEFAULT_DEPLOYMENT_NAME,
   DEFAULT_IPFS_ADDRESS,
   DEFAULT_MARINE_BUILD_ARGS,
@@ -51,14 +51,15 @@ import {
   LOCAL_IPFS_ADDRESS,
   MARINE_BUILD_ARGS_FLAG_NAME,
   MARINE_BUILD_ARGS_PROPERTY,
-  PRICE_PER_EPOCH_DEFAULT,
+  DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
   TOP_LEVEL_SCHEMA_ID,
   DEFAULT_INITIAL_BALANCE,
   aquaLogLevelsString,
   AQUA_LOG_LEVELS,
   type AquaLogLevel,
+  PT_SYMBOL,
+  COMPILE_AQUA_PROPERTY_NAME,
 } from "../../const.js";
-import { COMPILE_AQUA_PROPERTY_NAME } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
   validateCIDs,
@@ -105,7 +106,7 @@ type ConfigV0 = {
 const configSchemaV0Obj = {
   type: "object",
   properties: {
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
     services: {
       title: "Services",
       type: "array",
@@ -113,7 +114,7 @@ const configSchemaV0Obj = {
         type: "object",
         properties: {
           name: { type: "string" },
-          count: { type: "number", nullable: true, minimum: 1 },
+          count: { type: "integer", nullable: true, minimum: 1 },
         },
         required: ["name"],
       },
@@ -205,7 +206,7 @@ const configSchemaV1Obj = {
       ],
       nullable: true,
     },
-    version: { type: "number", const: 1 },
+    version: { type: "integer", const: 1 },
   },
   required: ["version"],
 } as const;
@@ -223,9 +224,12 @@ type Deal = {
   minWorkers?: number;
   targetWorkers?: number;
   maxWorkersPerProvider?: number;
-  pricePerWorkerEpoch?: number;
-  initialBalance?: number;
+  pricePerWorkerEpoch?: string;
+  initialBalance?: string;
   effectors?: string[];
+  whitelist?: string[];
+  blacklist?: string[];
+  protocolVersion?: number;
 };
 
 type Worker = {
@@ -273,7 +277,7 @@ const dealSchemaObj = {
   type: "object",
   properties: {
     computeUnits: {
-      type: "number",
+      type: "integer",
       minimum: 1,
       maximum: 1,
       default: 1,
@@ -281,36 +285,35 @@ const dealSchemaObj = {
       nullable: true,
     },
     targetWorkers: {
-      type: "number",
+      type: "integer",
       description: "Max workers in the deal",
       default: TARGET_WORKERS_DEFAULT,
       nullable: true,
       minimum: 1,
     },
     minWorkers: {
-      type: "number",
+      type: "integer",
       description:
         "Required workers to activate the deal. Matches target workers by default",
       nullable: true,
       minimum: 1,
     },
     maxWorkersPerProvider: {
-      type: "number",
+      type: "integer",
       description:
         "Max workers per provider. Matches target workers by default",
       nullable: true,
       minimum: 1,
     },
     pricePerWorkerEpoch: {
-      type: "number",
-      description: `Price per worker epoch in FLT`,
-      default: PRICE_PER_EPOCH_DEFAULT,
+      type: "string",
+      description: `Price per worker epoch in ${PT_SYMBOL}`,
+      default: DEFAULT_PRICE_PER_EPOCH_DEVELOPER,
       nullable: true,
-      minimum: 1 / CURRENCY_MULTIPLIER,
     },
     initialBalance: {
-      type: "number",
-      description: `Initial balance after deploy in FLT`,
+      type: "string",
+      description: `Initial balance after deploy in ${PT_SYMBOL}`,
       default: DEFAULT_INITIAL_BALANCE,
       nullable: true,
     },
@@ -319,6 +322,27 @@ const dealSchemaObj = {
       description: "Effector CIDs to be used in the deal. Must be a valid CID",
       items: { type: "string" },
       nullable: true,
+    },
+    whitelist: {
+      type: "array",
+      description:
+        "Whitelist of providers to deploy to. Can't be used together with blacklist",
+      items: { type: "string" },
+      nullable: true,
+    },
+    blacklist: {
+      type: "array",
+      description:
+        "Blacklist of providers to deploy to. Can't be used together with whitelist",
+      items: { type: "string" },
+      nullable: true,
+    },
+    protocolVersion: {
+      type: "integer",
+      description: `Protocol version. Default: ${versions.protocolVersion}`,
+      nullable: true,
+      default: versions.protocolVersion,
+      minimum: 1,
     },
   },
   required: [],
@@ -379,7 +403,7 @@ const configSchemaV2Obj = {
   ...configSchemaV1Obj,
   properties: {
     ...configSchemaV1Obj.properties,
-    version: { type: "number", const: 2 },
+    version: { type: "integer", const: 2 },
     dependencies: {
       type: "object",
       title: "Dependencies",
@@ -542,7 +566,7 @@ const configSchemaV3Obj = {
       delete properties.chainNetwork;
       return properties;
     })(),
-    version: { type: "number", const: 3 },
+    version: { type: "integer", const: 3 },
     customFluenceEnv: {
       type: "object",
       description: `Custom Fluence environment to use when connecting to Fluence network`,
@@ -580,7 +604,7 @@ const configSchemaV4Obj = {
   ...configSchemaV3Obj,
   properties: {
     ...configSchemaV3Obj.properties,
-    version: { type: "number", const: 4 },
+    version: { type: "integer", const: 4 },
     defaultSecretKeyName: {
       description:
         "Secret key with this name will be used by default by js-client inside CLI to run Aqua code",
@@ -626,7 +650,7 @@ const configSchemaV5Obj = {
   ...configSchemaV4Obj,
   properties: {
     ...configSchemaV4ObjPropertiesWithoutWorkers,
-    version: { type: "number", const: 5 },
+    version: { type: "integer", const: 5 },
     deals: {
       description:
         "A map of objects with worker names as keys, each object defines a deal",
@@ -705,7 +729,7 @@ const configSchemaV6Obj = {
   ...configSchemaV5Obj,
   properties: {
     ...configSchemaV5ObjPropertiesWithoutDependencies,
-    version: { type: "number", const: 6 },
+    version: { type: "integer", const: 6 },
     aquaDependencies: {
       description: "A map of npm aqua dependency versions",
       type: "object",
@@ -853,7 +877,7 @@ const configSchemaV7Obj = {
   ...configSchemaV6Obj,
   properties: {
     ...configSchemaV6ObjPropertiesWithoutAqua,
-    version: { type: "number", const: 7 },
+    version: { type: "integer", const: 7 },
     [COMPILE_AQUA_PROPERTY_NAME]: {
       type: "object",
       description: "A map of aqua files to compile",
@@ -891,7 +915,7 @@ const configSchemaV8Obj = {
   description: `Defines Fluence Project, most importantly - what exactly you want to deploy and how. You can use \`${CLI_NAME} init\` command to generate a template for new Fluence project`,
   properties: {
     ...configSchemaV7ObjPropertiesWithoutDeals,
-    version: { type: "number", const: 8 },
+    version: { type: "integer", const: 8 },
     deployments: {
       ...configSchemaV7Obj.properties.deals,
       description:
@@ -921,8 +945,8 @@ version: 8
 deployments:
   ${DEFAULT_DEPLOYMENT_NAME}:
     targetWorkers: ${TARGET_WORKERS_DEFAULT} # max amount of workers in the deal
-    pricePerWorkerEpoch: ${PRICE_PER_EPOCH_DEFAULT} # price per worker epoch in FLT
-    initialBalance: ${DEFAULT_INITIAL_BALANCE} # initial balance  after deploy in FLT
+    pricePerWorkerEpoch: "${DEFAULT_PRICE_PER_EPOCH_DEVELOPER}" # price per worker epoch in ${PT_SYMBOL}
+    initialBalance: "${DEFAULT_INITIAL_BALANCE}" # initial balance  after deploy in ${PT_SYMBOL}
     services: [] # list of service names to be deployed to this worker
     spells: [] # list of spell names to be deployed to this worker
 
@@ -1471,15 +1495,79 @@ function validateCompileAquaPathsAreRelative(config: LatestConfig) {
   return absolutePathErrors.length === 0 ? true : absolutePathErrors.join("\n");
 }
 
+function validateNotBothBlacklistAndWhitelist(
+  config: LatestConfig,
+): string | true {
+  const errors = Object.entries(config.deployments ?? {})
+    .map(([deploymentName, { blacklist, whitelist }]) => {
+      if (blacklist !== undefined && whitelist !== undefined) {
+        return `Both ${color.yellow("blacklist")} and ${color.yellow(
+          "whitelist",
+        )} are set for deployment ${color.yellow(
+          deploymentName,
+        )}. Only one of them should be set`;
+      }
+
+      return true;
+    })
+    .filter((error): error is string => {
+      return error !== true;
+    });
+
+  if (errors.length !== 0) {
+    return errors.join("\n");
+  }
+
+  return true;
+}
+
+async function validateProtocolVersions(config: LatestConfig) {
+  const errors = (
+    await Promise.all(
+      Object.entries(config.deployments ?? {})
+        .map(([deployment, { protocolVersion }]) => {
+          return {
+            deployment,
+            protocolVersion,
+          };
+        })
+        .filter((v): v is { deployment: string; protocolVersion: number } => {
+          return v.protocolVersion !== undefined;
+        })
+        .map(async ({ deployment, protocolVersion }) => {
+          return {
+            validity: await validateProtocolVersion(protocolVersion),
+            deployment,
+          };
+        }),
+    )
+  ).filter((v): v is { validity: string; deployment: string } => {
+    return v.validity !== true;
+  });
+
+  if (errors.length !== 0) {
+    return errors
+      .map(({ deployment, validity }) => {
+        return `Deployment ${color.yellow(
+          deployment,
+        )} has invalid protocol version: ${color.yellow(validity)}`;
+      })
+      .join("\n");
+  }
+
+  return true;
+}
+
 const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
   return validateBatchAsync(
+    validateNotBothBlacklistAndWhitelist(config),
     validateCIDs(
       Object.entries(config.deployments ?? {}).flatMap(
         ([name, { effectors }]) => {
           return (effectors ?? []).map((cid) => {
             return {
               cid,
-              location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deals > ${name} > effectors > ${cid}`,
+              location: `${FLUENCE_CONFIG_FULL_FILE_NAME} > deployments > ${name} > effectors > ${cid}`,
             };
           });
         },
@@ -1490,6 +1578,7 @@ const validate: ConfigValidateFunction<LatestConfig> = async (config) => {
     checkDuplicatesAndPresence(config, "spells"),
     validateVersionsIsExact("marineVersion", config.marineVersion),
     validateVersionsIsExact("mreplVersion", config.mreplVersion),
+    validateProtocolVersions(config),
   );
 };
 

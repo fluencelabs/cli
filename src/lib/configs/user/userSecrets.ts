@@ -57,7 +57,7 @@ const configSchemaV0: JSONSchemaType<ConfigV0> = {
       type: "array",
       items: configKeyPairSchema,
     },
-    version: { type: "number", const: 0 },
+    version: { type: "integer", const: 0 },
   },
   required: ["version", "keyPairs", "defaultKeyPairName"],
 };

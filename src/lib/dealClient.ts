@@ -60,7 +60,10 @@ export async function getReadonlyDealClient() {
     readonlyDealClient = await createDealClient(provider);
   }
 
-  return { readonlyDealClient, provider };
+  return {
+    readonlyDealClient,
+    provider,
+  };
 }
 
 let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
@@ -69,7 +72,7 @@ let signerOrWallet: ethers.JsonRpcSigner | ethers.Wallet | undefined =
 let dealClient: DealClient | undefined = undefined;
 
 // only needed for 'proof' command so it's possible to use multiple wallets during one command execution
-// normally each command will use only one wallet
+// normally, each command will use only one wallet
 let dealClientPrivKey: string | undefined = undefined;
 
 export async function getDealClient() {
@@ -87,10 +90,9 @@ export async function getDealClient() {
   ) {
     dealClientPrivKey = privKey;
 
-    signerOrWallet =
-      privKey === undefined
-        ? await getWalletConnectProvider()
-        : await getWallet(privKey);
+    signerOrWallet = await (privKey === undefined
+      ? getWalletConnectProvider()
+      : getWallet(privKey));
 
     dealClient = await createDealClient(signerOrWallet);
   }
@@ -273,7 +275,7 @@ export async function sign<T extends unknown[]>(
   commandObj.logToStderr(
     `${color.yellow(method.name)} transaction ${color.yellow(
       tx.hash,
-    )} was mined successfuly`,
+    )} was mined successfully`,
   );
 
   return res;

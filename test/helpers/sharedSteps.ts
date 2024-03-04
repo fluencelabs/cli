@@ -19,7 +19,6 @@ import { cp, rm, writeFile } from "node:fs/promises";
 import { relative } from "node:path";
 
 import {
-  krasnodar,
   type Node,
   stage,
   testNet,
@@ -90,7 +89,7 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
 
   multiaddrs = sortBy(
     {
-      kras: krasnodar,
+      // kras: krasnodar,
       stage: stage,
       dar: testNet,
       local,

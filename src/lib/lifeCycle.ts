@@ -151,15 +151,6 @@ export async function initCli<
 
   await ensureUserConfig();
 
-  const res = requiresFluenceProject
-    ? { fluenceConfig: await ensureFluenceProject() }
-    : { maybeFluenceConfig: await initFluenceConfig() };
-
-  const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
-
-  await initCountly({ maybeFluenceConfig });
-  ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
-
   if (requiresFluenceProject) {
     setEnvConfig(await initNewEnvConfig());
   } else {
@@ -181,6 +172,13 @@ export async function initCli<
     [PRIV_KEY_FLAG_NAME]: flags[PRIV_KEY_FLAG_NAME],
   });
 
+  const res = requiresFluenceProject
+    ? { fluenceConfig: await ensureFluenceProject() }
+    : { maybeFluenceConfig: await initFluenceConfig() };
+
+  const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
+  await initCountly({ maybeFluenceConfig });
+  ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
   await updateRelaysJSON();
   return { args, flags, ...res };
 }
