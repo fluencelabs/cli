@@ -44,7 +44,6 @@
 * [`fluence provider cc-activate`](#fluence-provider-cc-activate)
 * [`fluence provider cc-create`](#fluence-provider-cc-create)
 * [`fluence provider cc-info`](#fluence-provider-cc-info)
-* [`fluence provider cc-update`](#fluence-provider-cc-update)
 * [`fluence provider cc-withdraw-collateral`](#fluence-provider-cc-withdraw-collateral)
 * [`fluence provider cc-withdraw-rewards`](#fluence-provider-cc-withdraw-rewards)
 * [`fluence provider deal-exit [DEAL-IDS]`](#fluence-provider-deal-exit-deal-ids)
@@ -1257,33 +1256,6 @@ ALIASES
 
 _See code: [src/commands/provider/cc-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.17/src/commands/provider/cc-info.ts)_
 
-## `fluence provider cc-update`
-
-Update Capacity commitment
-
-```
-USAGE
-  $ fluence provider cc-update [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
-
-FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
-
-DESCRIPTION
-  Update Capacity commitment
-
-ALIASES
-  $ fluence provider cu
-```
-
-_See code: [src/commands/provider/cc-update.ts](https://github.com/fluencelabs/cli/blob/v0.15.17/src/commands/provider/cc-update.ts)_
-
 ## `fluence provider cc-withdraw-collateral`
 
 Withdraw FLT collateral from capacity commitments
@@ -1456,12 +1428,11 @@ Generate Config.toml files according to provider.yaml and secrets according to p
 
 ```
 USAGE
-  $ fluence provider gen [--no-input] [--noxes <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider gen [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                            Don't interactively ask for any input from the user
-  --noxes=<value>                       Number of Compute Peers to generate when a new provider.yaml is created
   --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
                                         unsecure. On local network
                                         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
@@ -1843,7 +1814,7 @@ _See code: [src/commands/service/repl.ts](https://github.com/fluencelabs/cli/blo
 
 ## `fluence spell build [SPELL-NAMES]`
 
-Compile spells aqua
+Check spells aqua is able to compile without any errors
 
 ```
 USAGE
@@ -1858,7 +1829,7 @@ FLAGS
   --no-input          Don't interactively ask for any input from the user
 
 DESCRIPTION
-  Compile spells aqua
+  Check spells aqua is able to compile without any errors
 
 EXAMPLES
   $ fluence spell build
