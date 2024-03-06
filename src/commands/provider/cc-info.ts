@@ -15,6 +15,8 @@
  */
 
 import { color } from "@oclif/color";
+import isUndefined from "lodash-es/isUndefined.js";
+import omitBy from "lodash-es/omitBy.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
@@ -84,31 +86,34 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
           commitmentId = peer.commitmentId;
         } catch {}
 
-        return {
-          Nox: name,
-          PeerId: peerId,
-          "PeerId Hex": commitment.peerId,
-          "Capacity commitment ID": commitmentId,
-          Status:
-            commitmentId === undefined
-              ? `NotCreated (you can create it using '${CLI_NAME} provider cc-create' command)`
-              : ccStatusToString(commitment.status) ??
-                `WaitDelegation (you can activate it using '${CLI_NAME} provider cc-activate' command)`,
-          "Start epoch": commitment.startEpoch?.toString(),
-          "End epoch": commitment.endEpoch?.toString(),
-          "Reward delegator rate": rewardDelegationRateToString(
-            commitment.rewardDelegatorRate,
-          ),
-          Delegator:
-            commitment.delegator === ethers.ZeroAddress.toString()
-              ? "Anyone can activate capacity commitment"
-              : commitment.delegator,
-          "Total CU": commitment.unitCount?.toString(),
-          "Failed epoch": commitment.failedEpoch?.toString(),
-          "Total CU Fail Count": commitment.totalCUFailCount?.toString(),
-          "Collateral per unit": commitment.collateralPerUnit?.toString(),
-          "Exited unit count": commitment.exitedUnitCount?.toString(),
-        };
+        return omitBy(
+          {
+            Nox: name,
+            PeerId: peerId,
+            "PeerId Hex": commitment.peerId,
+            "Capacity commitment ID": commitmentId,
+            Status:
+              commitmentId === undefined
+                ? `NotCreated (you can create it using '${CLI_NAME} provider cc-create' command)`
+                : ccStatusToString(commitment.status) ??
+                  `WaitDelegation (you can activate it using '${CLI_NAME} provider cc-activate' command)`,
+            "Start epoch": commitment.startEpoch?.toString(),
+            "End epoch": commitment.endEpoch?.toString(),
+            "Reward delegator rate": rewardDelegationRateToString(
+              commitment.rewardDelegatorRate,
+            ),
+            Delegator:
+              commitment.delegator === ethers.ZeroAddress.toString()
+                ? "Anyone can activate capacity commitment"
+                : commitment.delegator,
+            "Total CU": commitment.unitCount?.toString(),
+            "Failed epoch": commitment.failedEpoch?.toString(),
+            "Total CU Fail Count": commitment.totalCUFailCount?.toString(),
+            "Collateral per unit": commitment.collateralPerUnit?.toString(),
+            "Exited unit count": commitment.exitedUnitCount?.toString(),
+          },
+          isUndefined,
+        );
       }),
     );
 
