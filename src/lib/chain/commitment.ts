@@ -19,7 +19,7 @@ import parse from "parse-duration";
 
 import { commandObj } from "../commandObj.js";
 import { resolveComputePeersByNames } from "../configs/project/provider.js";
-import { NOX_NAMES_FLAG_NAME } from "../const.js";
+import { CLI_NAME, NOX_NAMES_FLAG_NAME } from "../const.js";
 import { dbg } from "../dbg.js";
 import {
   getDealClient,
@@ -114,7 +114,25 @@ export async function createCommitments(flags: {
     );
   }
 
-  const createCommitmentsTxReceipts = await signBatch(createCommitmentsTxs);
+  let createCommitmentsTxReceipts;
+
+  try {
+    createCommitmentsTxReceipts = await signBatch(createCommitmentsTxs);
+  } catch (e) {
+    const errorString = stringifyUnknown(e);
+
+    if (errorString.includes("Peer doesn't exist")) {
+      return commandObj.error(
+        `\n\nNot able to find peers on chain. Make sure you used '${CLI_NAME} provider offer-create' command to create offers that contain the peers you selected right now:\n\n${computePeers
+          .map(({ name, peerId }) => {
+            return `Name: ${name}\nPeerId: ${peerId}`;
+          })
+          .join("\n\n")}`,
+      );
+    }
+
+    throw e;
+  }
 
   if (createCommitmentsTxReceipts === undefined) {
     return commandObj.error(
@@ -157,8 +175,4 @@ export async function createCommitments(flags: {
   );
 
   return stringCommitmentIds;
-}
-
-export function updateCommitment() {
-  commandObj.error("Not implemented");
 }
