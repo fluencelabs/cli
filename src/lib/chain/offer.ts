@@ -323,7 +323,7 @@ export async function updateOffers(flags: OffersArgs) {
   for (const {
     minPricePerWorkerEpochBigInt,
     offerId,
-    effectors,
+    // effectors,
     offerInfo: { offerInfo, offerExplorerInfo } = {
       offerInfo: undefined,
       offerExplorerInfo: undefined,
@@ -347,39 +347,41 @@ export async function updateOffers(flags: OffersArgs) {
       ]);
     }
 
-    const removedEffectors = offerExplorerInfo.effectors.filter((effector) => {
-      return effectors === undefined ? true : !effectors.includes(effector.cid);
-    });
+    // TODO: Effectors update won't work until the explorer starts to return correct CIDs
 
-    if (removedEffectors.length > 0) {
-      populatedTxPromises.push([
-        market.removeEffector,
-        offerId,
-        await Promise.all(
-          removedEffectors.map(({ cid }) => {
-            return cidStringToCIDV1Struct(cid);
-          }),
-        ),
-      ]);
-    }
+    // const removedEffectors = offerExplorerInfo.effectors.filter((effector) => {
+    //   return effectors === undefined ? true : !effectors.includes(effector.cid);
+    // });
 
-    const addedEffectors = (effectors ?? []).filter((effector) => {
-      return !offerExplorerInfo.effectors.some(({ cid }) => {
-        return cid === effector;
-      });
-    });
+    // if (removedEffectors.length > 0) {
+    //   populatedTxPromises.push([
+    //     market.removeEffector,
+    //     offerId,
+    //     await Promise.all(
+    //       removedEffectors.map(({ cid }) => {
+    //         return cidStringToCIDV1Struct(cid);
+    //       }),
+    //     ),
+    //   ]);
+    // }
 
-    if (addedEffectors.length > 0) {
-      populatedTxPromises.push([
-        market.addEffector,
-        offerId,
-        await Promise.all(
-          addedEffectors.map((effector) => {
-            return cidStringToCIDV1Struct(effector);
-          }),
-        ),
-      ]);
-    }
+    // const addedEffectors = (effectors ?? []).filter((effector) => {
+    //   return !offerExplorerInfo.effectors.some(({ cid }) => {
+    //     return cid === effector;
+    //   });
+    // });
+
+    // if (addedEffectors.length > 0) {
+    //   populatedTxPromises.push([
+    //     market.addEffector,
+    //     offerId,
+    //     await Promise.all(
+    //       addedEffectors.map((effector) => {
+    //         return cidStringToCIDV1Struct(effector);
+    //       }),
+    //     ),
+    //   ]);
+    // }
 
     // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
     await signBatch(populatedTxPromises);

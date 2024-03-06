@@ -25,7 +25,8 @@ import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class Build extends BaseCommand<typeof Build> {
-  static override description = "Compile spells aqua";
+  static override description =
+    "Check spells aqua is able to compile without any errors";
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,

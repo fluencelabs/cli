@@ -45,7 +45,9 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
           (await input({
             message: "Enter comma-separated capacity commitment IDs",
           })),
-      ),
+      ).map((commitmentId) => {
+        return { commitmentId };
+      }),
     );
   }
 }

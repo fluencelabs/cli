@@ -19,11 +19,11 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
-import { fltFormatWithSymbol } from "../../lib/chain/currencies.js";
+import { getComputePeersWithCommitmentCreatedEvents } from "../../lib/chain/depositCollateral.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
-import { CHAIN_FLAGS, NOX_NAMES_FLAG } from "../../lib/const.js";
-import { getDealClient } from "../../lib/dealClient.js";
+import { CHAIN_FLAGS, CLI_NAME, NOX_NAMES_FLAG } from "../../lib/const.js";
+import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCInfo extends BaseCommand<typeof CCInfo> {
@@ -37,57 +37,103 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCInfo));
-    const { dealClient } = await getDealClient();
-    const market = await dealClient.getMarket();
-    const capacity = await dealClient.getCapacity();
+    const { readonlyDealClient } = await getReadonlyDealClient();
+    const market = await readonlyDealClient.getMarket();
+    const capacity = await readonlyDealClient.getCapacity();
 
     const computePeers = await resolveComputePeersByNames(flags);
 
+    const computePeersWithCommitmentCreatedEvents =
+      await getComputePeersWithCommitmentCreatedEvents(computePeers);
+
+    const { ethers } = await import("ethers");
+
     const infos = await Promise.all(
       computePeers.map(async ({ peerId, name }) => {
-        const peer = await market.getComputePeer(
-          await peerIdToUint8Array(peerId),
-        );
+        const { event } =
+          computePeersWithCommitmentCreatedEvents.find((c) => {
+            return c.name === name;
+          }) ?? {};
 
-        const commitment = await capacity.getCommitment(peer.commitmentId);
+        let commitmentId = event?.args.commitmentId;
+
+        let commitment: Partial<
+          Awaited<ReturnType<(typeof capacity)["getCommitment"]>>
+        > =
+          event === undefined
+            ? {}
+            : {
+                peerId: event.args.peerId,
+                rewardDelegatorRate: event.args.rewardDelegationRate,
+                collateralPerUnit: event.args.fltCollateralPerUnit,
+                delegator: event.args.delegator,
+              };
+
+        try {
+          const peer = await market.getComputePeer(
+            await peerIdToUint8Array(peerId),
+          );
+
+          commitment = await capacity.getCommitment(
+            peer.commitmentId === ethers.ZeroAddress.toString() &&
+              commitmentId !== undefined
+              ? commitmentId
+              : peer.commitmentId,
+          );
+
+          commitmentId = peer.commitmentId;
+        } catch {}
 
         return {
-          name,
-          info: {
-            "Peer id": peerId,
-            "Peer id Hex": commitment.peerId,
-            Status: ccStatusToString(commitment.status),
-            "Start epoch": commitment.startEpoch.toString(),
-            "End epoch": commitment.endEpoch.toString(),
-            "Reward delegator rate": `${
-              Number(commitment.rewardDelegatorRate) / 10 ** 5
-            }%`,
-            "Collateral per unit": await fltFormatWithSymbol(
-              commitment.collateralPerUnit,
-            ),
-            Delegator: commitment.delegator.toString(),
-            "Exited unit count": commitment.exitedUnitCount.toString(),
-            "Failed epoch": commitment.failedEpoch.toString(),
-            "Unit count": commitment.unitCount.toString(),
-            "Total compute unit fail count":
-              commitment.totalCUFailCount.toString(),
-          },
+          Nox: name,
+          PeerId: peerId,
+          "PeerId Hex": commitment.peerId,
+          "Capacity commitment ID": commitmentId,
+          Status:
+            commitmentId === undefined
+              ? `NotCreated (you can create it using '${CLI_NAME} provider cc-create' command)`
+              : ccStatusToString(commitment.status) ??
+                `WaitDelegation (you can activate it using '${CLI_NAME} provider cc-activate' command)`,
+          "Start epoch": commitment.startEpoch?.toString(),
+          "End epoch": commitment.endEpoch?.toString(),
+          "Reward delegator rate": rewardDelegationRateToString(
+            commitment.rewardDelegatorRate,
+          ),
+          Delegator:
+            commitment.delegator === ethers.ZeroAddress.toString()
+              ? "Anyone can activate capacity commitment"
+              : commitment.delegator,
+          "Total CU": commitment.unitCount?.toString(),
+          "Failed epoch": commitment.failedEpoch?.toString(),
+          "Total CU Fail Count": commitment.totalCUFailCount?.toString(),
+          "Collateral per unit": commitment.collateralPerUnit?.toString(),
+          "Exited unit count": commitment.exitedUnitCount?.toString(),
         };
       }),
     );
 
-    for (const { name, info } of infos) {
-      // TODO: complete this command implementation
-      commandObj.logToStderr(color.yellow(name));
-      commandObj.logToStderr(yamlDiffPatch("", {}, info));
+    for (const { Nox, ...restInfo } of infos) {
+      commandObj.logToStderr(color.yellow(`Nox: ${Nox}`));
+      commandObj.logToStderr(yamlDiffPatch("", {}, restInfo));
     }
   }
 }
 
-function ccStatusToString(status: bigint) {
-  return (
-    ["Active", "WaitDelegation", "WaitStart", "Inactive", "Failed", "Removed"][
-      Number(status)
-    ] ?? "Unknown"
-  );
+function ccStatusToString(status: bigint | undefined) {
+  return [
+    "Active",
+    "WaitDelegation",
+    "WaitStart",
+    "Inactive",
+    "Failed",
+    "Removed",
+  ][Number(status)];
+}
+
+function rewardDelegationRateToString(rewardDelegatorRate: bigint | undefined) {
+  if (rewardDelegatorRate === undefined) {
+    return undefined;
+  }
+
+  return `${Number(rewardDelegatorRate) / 10 ** 5}%`;
 }

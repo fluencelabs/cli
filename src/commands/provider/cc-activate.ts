@@ -51,7 +51,12 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
     const { flags } = await initCli(this, await this.parse(AddCollateral));
 
     if (flags.ids !== undefined) {
-      await depositCollateral(commaSepStrToArr(flags.ids));
+      await depositCollateral(
+        commaSepStrToArr(flags.ids).map((commitmentId) => {
+          return { commitmentId };
+        }),
+      );
+
       return;
     }
 

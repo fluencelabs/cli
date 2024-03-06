@@ -33,7 +33,10 @@ import {
 import { initNewEnvConfig } from "../../lib/configs/project/env.js";
 import { initNewReadonlyProviderConfig } from "../../lib/configs/project/provider.js";
 import { initNewWorkersConfig } from "../../lib/configs/project/workers.js";
-import { DOCKER_COMPOSE_FLAGS } from "../../lib/const.js";
+import {
+  DOCKER_COMPOSE_FLAGS,
+  PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+} from "../../lib/const.js";
 import {
   ALL_FLAG_VALUE,
   DOCKER_COMPOSE_FULL_FILE_NAME,
@@ -116,6 +119,10 @@ export default class Up extends BaseCommand<typeof Up> {
 
       try {
         await rm(join(dirPath, DOCKER_COMPOSE_FULL_FILE_NAME));
+      } catch {}
+
+      try {
+        await rm(join(dirPath, PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME));
       } catch {}
 
       const workersConfig = await initNewWorkersConfig();

@@ -20,7 +20,6 @@ import type {
   TypedEventLog,
 } from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.js";
 import { color } from "@oclif/color";
-import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
 import {
@@ -43,11 +42,46 @@ type ComputePeerWithCommitmentCreatedEvent = ResolvedComputePeer & {
   >;
 };
 
-export async function depositCollateralByNoxNames(flags: {
-  [NOX_NAMES_FLAG_NAME]: string | undefined;
-}) {
+export async function getComputePeersWithCommitmentCreatedEvents(
+  computePeers: ResolvedComputePeer[],
+) {
   const { dealClient } = await getDealClient();
-  const computePeers = await resolveComputePeersByNames(flags);
+
+  // TODO: replace with this after Elshan's fix
+
+  // const market = await dealClient.getMarket();
+
+  // const [errors, computePeersWithChainInfo] = splitErrorsAndResults(
+  //   await Promise.allSettled(
+  //     computePeers.map(async (computePeer) => {
+  //       const chainInfo = await market.getComputePeer(
+  //         await peerIdToUint8Array(computePeer.peerId),
+  //       );
+
+  //       return {
+  //         ...computePeer,
+  //         commitmentId: chainInfo.commitmentId,
+  //         offerId: chainInfo.offerId,
+  //         owner: chainInfo.owner,
+  //         unitCount: chainInfo.unitCount,
+  //       };
+  //     }),
+  //   ),
+  //   (res) => {
+  //     if (res.status === "fulfilled") {
+  //       return { result: res.value };
+  //     }
+
+  //     return { error: stringifyUnknown(res.reason) };
+  //   },
+  // );
+
+  // if (errors.length > 0) {
+  //   commandObj.error(
+  //     `Failed to get commitment IDs for noxes: ${errors.join("\n")}`,
+  //   );
+  // }
+
   const capacity = await dealClient.getCapacity();
 
   const commitmentCreatedEvents = await Promise.all(
@@ -60,12 +94,6 @@ export async function depositCollateralByNoxNames(flags: {
       },
     ),
   );
-
-  if (commitmentCreatedEvents.length === 0) {
-    return commandObj.error(
-      `capacity.queryFilter(capacity.filters.CommitmentCreated) didn't return any CommitmentCreated events`,
-    );
-  }
 
   const computePeersWithCommitmentCreatedEvents = computePeers
     .map((computePeer) => {
@@ -83,28 +111,16 @@ export async function depositCollateralByNoxNames(flags: {
       return c.event !== undefined;
     });
 
-  if (computePeersWithCommitmentCreatedEvents.length === 0) {
-    return commandObj.error(
-      `Wasn't able to find any commitments for the given peers. Was searching for peers: ${computePeersWithCommitmentCreatedEvents
-        .map(({ name, peerId }) => {
-          return `${color.yellow(name)}: ${peerId}`;
-        })
-        .join(
-          "\n",
-        )}\n\nGot events with the following peerIds: ${commitmentCreatedEvents
-        .map(({ peerId, event }) => {
-          return yamlDiffPatch(
-            "",
-            {},
-            {
-              "Peer ID": peerId,
-              "Peer ID hex": event.args.peerId,
-            },
-          );
-        })
-        .join("\n")}`,
-    );
-  }
+  return computePeersWithCommitmentCreatedEvents;
+}
+
+export async function depositCollateralByNoxNames(flags: {
+  [NOX_NAMES_FLAG_NAME]: string | undefined;
+}) {
+  const computePeers = await resolveComputePeersByNames(flags);
+
+  const computePeersWithCommitmentCreatedEvents =
+    await getComputePeersWithCommitmentCreatedEvents(computePeers);
 
   commandObj.log(
     `Found created commitments for the following peers: ${color.yellow(
@@ -116,67 +132,43 @@ export async function depositCollateralByNoxNames(flags: {
     )}`,
   );
 
-  const commitmentIds = computePeersWithCommitmentCreatedEvents.map((c) => {
-    return c.event.args.commitmentId;
-  });
-
-  await depositCollateral(
-    commitmentIds,
-    computePeersWithCommitmentCreatedEvents,
+  const commitmentIds = computePeersWithCommitmentCreatedEvents.map(
+    ({ event, ...rest }) => {
+      return { commitmentId: event.args.commitmentId, event, ...rest };
+    },
   );
+
+  await depositCollateral(commitmentIds);
 }
 
 export async function depositCollateral(
-  commitmentIds: string[],
-  computePeersWithCommitmentCreatedEvents?: ComputePeerWithCommitmentCreatedEvent[],
+  commitmentIds: (
+    | { commitmentId: string }
+    | ({ commitmentId: string } & ComputePeerWithCommitmentCreatedEvent)
+  )[],
+  // | (Awaited<
+  //     ReturnType<
+  //       Awaited<ReturnType<DealClient["getMarket"]>>["getComputePeer"]
+  //     >
+  //   > &
+  //     ResolvedComputePeer)
 ) {
-  const isProvider = computePeersWithCommitmentCreatedEvents !== undefined;
+  const [firstCommitmentId] = commitmentIds;
+
+  const isProvider =
+    firstCommitmentId !== undefined && "peerId" in firstCommitmentId;
+
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
 
-  // let collateralToApproveCommitments = 0n;
-
-  // for (const commitmentId of commitmentIds) {
-  //   const collateralToApproveCommitment = await getCollateral(commitmentId);
-
-  //   collateralToApproveCommitments =
-  //     collateralToApproveCommitments + collateralToApproveCommitment;
-  // }
-
-  // await sign(
-  //   flt.approve,
-  //   await capacity.getAddress(),
-  //   collateralToApproveCommitments,
-  // )
-
-  const computePeersWithCollateral: (
-    | (ComputePeerWithCommitmentCreatedEvent & { collateral: bigint })
-    | {
-        collateral: bigint;
-        event: {
-          args: {
-            commitmentId: string;
-          };
-        };
-      }
-  )[] = await Promise.all(
-    computePeersWithCommitmentCreatedEvents === undefined
-      ? commitmentIds.map(async (commitmentId) => {
-          return {
-            collateral: await getCollateral(commitmentId),
-            event: {
-              args: {
-                commitmentId,
-              },
-            },
-          };
-        })
-      : computePeersWithCommitmentCreatedEvents.map(async (c) => {
-          return {
-            ...c,
-            collateral: await getCollateral(c.event.args.commitmentId),
-          };
-        }),
+  const computePeersWithCollateral = await Promise.all(
+    commitmentIds.map(async ({ commitmentId, ...rest }) => {
+      return {
+        ...rest,
+        commitmentId,
+        collateral: await getCollateral(commitmentId),
+      };
+    }),
   );
 
   const collateralToApproveCommitment = computePeersWithCollateral.reduce(
@@ -186,9 +178,15 @@ export async function depositCollateral(
     0n,
   );
 
-  await sign(capacity.depositCollateral, commitmentIds, {
-    value: collateralToApproveCommitment,
-  });
+  await sign(
+    capacity.depositCollateral,
+    commitmentIds.map(({ commitmentId }) => {
+      return commitmentId;
+    }),
+    {
+      value: collateralToApproveCommitment,
+    },
+  );
 
   commandObj.logToStderr(
     `${color.yellow(
@@ -209,7 +207,7 @@ ${(
       return `Capacity commitment${
         "name" in c ? ` for ${color.yellow(c.name)}` : ""
       } successfully activated!
-Commitment ID: ${color.yellow(c.event.args.commitmentId)}
+Commitment ID: ${color.yellow(c.commitmentId)}
 Collateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}
 ${
   "computeUnits" in c

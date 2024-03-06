@@ -287,7 +287,15 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
   }
 
   commandObj.log(
-    `\n\n${color.yellow("Success!")}${createdDealsText}${updatedDealsText}`,
+    `\n\n${color.yellow(
+      "Success!",
+    )}${createdDealsText}${updatedDealsText}\n\nUse ${color.yellow(
+      "fluence deal info",
+    )} command to get info about your deals\nUse ${color.yellow(
+      "fluence deal deposit",
+    )} command to top up your deals\nUse ${color.yellow(
+      "fluence deal --help",
+    )} to see all the commands related to deals`,
   );
 
   await disconnectFluenceClient();
