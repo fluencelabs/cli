@@ -1591,10 +1591,11 @@ function noxConfigYAMLToConfigToml(
   ccpConfig: LatestCCPConfigYAML,
 ) {
   const chainConfig = {
-    ...chain,
-    marketContractAddress: marketContract,
-    ccContractAddress: ccContract,
+    httpEndpoint: chain.httpEndpoint,
     coreContractAddress: coreContract,
+    ccContractAddress: ccContract,
+    marketContractAddress: marketContract,
+    networkId: chain.networkId,
     walletKey: walletPrivateKey,
   };
 
