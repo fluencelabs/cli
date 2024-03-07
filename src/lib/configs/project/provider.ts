@@ -1604,9 +1604,6 @@ function noxConfigYAMLToConfigToml(
   return camelCaseKeysToSnakeCase({
     ...config,
     ...(listenIp === undefined ? {} : { listenConfig: { listenIp } }),
-    ...(config.httpPort === undefined
-      ? {}
-      : { httpConfig: { httpPort: config.httpPort } }),
     chainConfig,
     chainListenerConfig: {
       wsEndpoint: chain.wsEndpoint,
