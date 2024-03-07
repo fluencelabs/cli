@@ -124,11 +124,16 @@ export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
-export const CHAIN_URLS: Record<ChainENV, string> = {
+export const CHAIN_URLS: Record<Exclude<ChainENV, "local">, string> = {
   // kras: "https://ipc-kras.fluence.dev",
   dar: "https://ipc-dar.fluence.dev",
   stage: "https://ipc-stage.fluence.dev",
-  local: "http://127.0.0.1:8545",
+};
+
+export const WS_CHAIN_URLS: Record<Exclude<ChainENV, "local">, string> = {
+  // kras: "wss://ipc-kras.fluence.dev",
+  dar: "wss://ipc-dar.fluence.dev",
+  stage: "wss://ipc-stage.fluence.dev",
 };
 
 export const IPFS_CONTAINER_NAME = "ipfs";
@@ -175,6 +180,7 @@ export const BIN_DIR_NAME = "bin";
 export const COUNTLY_DIR_NAME = "countly";
 export const SECRETS_DIR_NAME = "secrets";
 export const CONFIGS_DIR_NAME = "configs";
+export const CCP_CONFIGS_DIR_NAME = "ccp-configs";
 
 export const FLUENCE_CONFIG_FILE_NAME = `fluence`;
 export const PROVIDER_CONFIG_FILE_NAME = `provider`;

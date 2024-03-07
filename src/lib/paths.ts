@@ -56,6 +56,7 @@ import {
   SERVER_JS_FILE_NAME,
   SERVER_TS_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
+  CCP_CONFIGS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -255,6 +256,10 @@ export const ensureFluenceSecretsFilePath = async (
 
 export async function ensureFluenceConfigsDir(): Promise<string> {
   return ensureDir(join(getFluenceDir(), CONFIGS_DIR_NAME));
+}
+
+export async function ensureFluenceCCPConfigsDir(): Promise<string> {
+  return ensureDir(join(getFluenceDir(), CCP_CONFIGS_DIR_NAME));
 }
 
 export async function getSecretsPathForReading(isUser: boolean) {

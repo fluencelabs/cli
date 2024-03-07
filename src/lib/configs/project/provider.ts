@@ -20,14 +20,17 @@ import { join } from "path";
 import { type JsonMap, parse } from "@iarna/toml";
 import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
+import { isUndefined, mapValues, omitBy } from "lodash-es";
 import cloneDeep from "lodash-es/cloneDeep.js";
 import isEmpty from "lodash-es/isEmpty.js";
+import kebabCase from "lodash-es/kebabCase.js";
 import mapKeys from "lodash-es/mapKeys.js";
 import mergeWith from "lodash-es/mergeWith.js";
 import snakeCase from "lodash-es/snakeCase.js";
 import times from "lodash-es/times.js";
 
 import { versions } from "../../../versions.js";
+import { ajv, validationErrorToString } from "../../ajvInstance.js";
 import { getChainId } from "../../chain/chainId.js";
 import {
   ccDurationValidator,
@@ -60,6 +63,7 @@ import {
   NOX_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
   CHAIN_URLS,
+  WS_CHAIN_URLS,
   PT_SYMBOL,
   DEFAULT_CURL_EFFECTOR_CID,
 } from "../../const.js";
@@ -82,6 +86,7 @@ import {
   getProviderConfigPath,
   getFluenceDir,
   ensureFluenceSecretsFilePath,
+  ensureFluenceCCPConfigsDir,
 } from "../../paths.js";
 import { checkboxes, list } from "../../prompt.js";
 import { setEnvConfig } from "../globalConfigs.js";
@@ -141,7 +146,7 @@ type Effector = {
   allowedBinaries: Record<string, string>;
 };
 
-type NoxConfigYAML = {
+type NoxConfigYAMLV0 = {
   tcpPort?: number;
   websocketPort?: number;
   httpPort?: number;
@@ -198,7 +203,7 @@ const effectorSchema = {
   required: ["wasmCID", "allowedBinaries"],
 } as const satisfies JSONSchemaType<Effector>;
 
-const noxConfigYAMLSchema = {
+const noxConfigYAMLSchemaV0 = {
   type: "object",
   description:
     "Configuration to pass to the nox compute peer. Config.toml files are generated from this config",
@@ -360,19 +365,454 @@ const noxConfigYAMLSchema = {
   required: [],
   nullable: true,
   additionalProperties: false,
-} as const satisfies JSONSchemaType<NoxConfigYAML>;
+} as const satisfies JSONSchemaType<NoxConfigYAMLV0>;
 
-type ComputePeer = {
+type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
+  chain?: Omit<
+    NonNullable<NoxConfigYAMLV0["chainConfig"]>,
+    | "coreContractAddress"
+    | "ccContractAddress"
+    | "marketContractAddress"
+    | "walletKey"
+  > & {
+    // new. goes to chain_listener_config
+    wsEndpoint?: string;
+    // new. goes to decider
+    dealSyncStartBlock?: string;
+    // renamed
+    marketContract?: string;
+    ccContract?: string;
+    coreContract?: string;
+    walletPrivateKey?: string;
+  };
+  ccp?: {
+    // # NOX TOML: chain_listener_config.ccp_endpoint
+    // http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port}
+    ccpEndpoint?: string;
+    // # NOX TOML: chain_listener_config.proof_poll_period
+    // # Optional "60 seconds"
+    proofPollPeriod?: string;
+  };
+  ipfs?: {
+    // # TOML: system_services.aqua_ipfs.external_api_multiaddr
+    // # Required
+    externalApiMultiaddr?: string;
+    // # TOML: system_services.aqua_ipfs.local_api_multiaddr
+    // # Optional
+    localApiMultiaddr?: string;
+  };
+  // # these would
+  // cpusRange = "1-32" # It's actually possible to do complex things like "1,3-6,7-20,32", Nox will parse
+  // systemCpuCount = 1 # That's how much cores to allocate for the Nox itself. 0 is forbidden, cuz don't be greedy!
+  cpusRange?: string;
+  systemCpuCount?: number;
+  // # this would go to listen_config.listen_ip in Nox's Config.toml
+  // listenIp = "1.2.3.4"
+  // # would go to global external_multiaddresses in TOML
+  // externalMultiaddresses = ["/dns4/who.is.it.org/tcp/9999/ws", "/ip4/10.9.8.7/tcp/3210"]
+  listenIp?: string;
+  externalMultiaddresses?: Array<string>;
+  // # prometheus metrics will be available at {listen_id}:{httpPort}/metrics
+  // metrics:
+  //   # TOML: metrics_config.metrics_enabled
+  //   enabled = true
+  //   # TOML: metrics_config.metrics_timer_resolution
+  //   timer_resolution = "1 minute"
+  //   # TOML: tokio_metrics_enabled
+  //   tokio_metrics_enabled = true
+  //   # TOML: tokio_metrics_poll_histogram_enabled
+  //   tokio_detailed_metrics_enabled = true # could be expensive performance-wise
+  metrics?: {
+    enabled?: boolean;
+    timerResolution?: string;
+    tokioMetricsEnabled?: boolean;
+    tokioDetailedMetricsEnabled?: boolean;
+  };
+};
+
+const noxConfigYAMLSchemaV1 = {
+  type: "object",
+  description:
+    "Configuration to pass to the nox compute peer. Config.toml files are generated from this config",
+  properties: {
+    tcpPort: {
+      nullable: true,
+      type: "integer",
+      description: `Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from ${TCP_PORT_START}`,
+    },
+    websocketPort: {
+      nullable: true,
+      type: "integer",
+      description: `Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from ${WEB_SOCKET_PORT_START}`,
+    },
+    httpPort: {
+      nullable: true,
+      type: "integer",
+      description: `Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from ${HTTP_PORT_START}`,
+    },
+    aquavmPoolSize: {
+      nullable: true,
+      type: "integer",
+      description: `Number of aquavm instances to run. Default: ${DEFAULT_AQUAVM_POOL_SIZE}`,
+    },
+    systemServices: {
+      nullable: true,
+      type: "object",
+      description:
+        "System services to run by default. aquaIpfs and decider are enabled by default",
+      additionalProperties: false,
+      properties: {
+        enable: {
+          nullable: true,
+          type: "array",
+          items: { type: "string" },
+          description: `List of system services to enable`,
+        },
+        aquaIpfs: {
+          type: "object",
+          description: "Aqua IPFS service configuration",
+          additionalProperties: false,
+          nullable: true,
+          properties: {
+            externalApiMultiaddr: {
+              nullable: true,
+              type: "string",
+              description: `Multiaddress of external IPFS API`,
+            },
+            localApiMultiaddr: {
+              nullable: true,
+              type: "string",
+              description: `Multiaddress of local IPFS API`,
+            },
+          },
+          required: [],
+        },
+        decider: {
+          type: "object",
+          description: "Decider service configuration",
+          additionalProperties: false,
+          nullable: true,
+          properties: {
+            deciderPeriodSec: {
+              nullable: true,
+              type: "integer",
+              description: `Decider period in seconds`,
+            },
+            workerIpfsMultiaddr: {
+              nullable: true,
+              type: "string",
+              description: `Multiaddress of worker IPFS node`,
+            },
+            networkApiEndpoint: {
+              nullable: true,
+              type: "string",
+              description: `Network API endpoint`,
+            },
+            networkId: {
+              nullable: true,
+              type: "integer",
+              description: `Network ID`,
+            },
+            startBlock: {
+              nullable: true,
+              type: "string",
+              description: `Start block`,
+            },
+            matcherAddress: {
+              nullable: true,
+              type: "string",
+              description: `Matcher address`,
+            },
+            walletKey: {
+              nullable: true,
+              type: "string",
+              description: `Wallet key`,
+            },
+          },
+          required: [],
+        },
+      },
+      required: [],
+    },
+    effectors: {
+      nullable: true,
+      type: "object",
+      description: "Effectors to allow on the nox",
+      additionalProperties: effectorSchema,
+      properties: {
+        effectorName: effectorSchema,
+      },
+      required: [],
+    },
+    chain: {
+      nullable: true,
+      type: "object",
+      description: "Chain config",
+      additionalProperties: false,
+      properties: {
+        dealSyncStartBlock: {
+          nullable: true,
+          type: "string",
+          description: `Start block`,
+        },
+        wsEndpoint: {
+          nullable: true,
+          type: "string",
+          description: `WebSocket endpoint of the chain`,
+        },
+        httpEndpoint: {
+          nullable: true,
+          type: "string",
+          description: `HTTP endpoint of the chain`,
+        },
+        coreContract: {
+          nullable: true,
+          type: "string",
+          description: `Core contract address`,
+        },
+        ccContract: {
+          nullable: true,
+          type: "string",
+          description: `Capacity commitment contract address`,
+        },
+        marketContract: {
+          nullable: true,
+          type: "string",
+          description: `Market contract address`,
+        },
+        networkId: {
+          nullable: true,
+          type: "integer",
+          description: `Network ID`,
+        },
+        walletPrivateKey: {
+          nullable: true,
+          type: "string",
+          description: `Nox wallet private key. Is generated by default`,
+        },
+      },
+      required: [],
+    },
+    ccp: {
+      nullable: true,
+      type: "object",
+      description: "For advanced users. CCP config",
+      additionalProperties: false,
+      properties: {
+        ccpEndpoint: {
+          nullable: true,
+          type: "string",
+          description: `CCP endpoint. Default comes from top-level ccp config: http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port}`,
+        },
+        proofPollPeriod: {
+          nullable: true,
+          type: "string",
+          description: `Proof poll period`,
+        },
+      },
+      required: [],
+    },
+    ipfs: {
+      nullable: true,
+      type: "object",
+      description: "IPFS config",
+      additionalProperties: false,
+      properties: {
+        externalApiMultiaddr: {
+          nullable: true,
+          type: "string",
+          description: `Multiaddress of external IPFS API`,
+        },
+        localApiMultiaddr: {
+          nullable: true,
+          type: "string",
+          description: `Multiaddress of local IPFS API`,
+        },
+      },
+      required: [],
+    },
+    cpusRange: {
+      nullable: true,
+      type: "string",
+      description: `Range of CPU cores to use. Default: 1-32`,
+    },
+    systemCpuCount: {
+      nullable: true,
+      type: "integer",
+      minimum: 1,
+      description: `Number of CPU cores to allocate for the Nox itself. Default: 1`,
+    },
+    listenIp: {
+      nullable: true,
+      type: "string",
+      description: `IP to listen on`,
+    },
+    externalMultiaddresses: {
+      nullable: true,
+      type: "array",
+      items: { type: "string" },
+      description: `List of external multiaddresses`,
+    },
+    metrics: {
+      nullable: true,
+      type: "object",
+      description: "Metrics configuration",
+      additionalProperties: false,
+      properties: {
+        enabled: {
+          nullable: true,
+          type: "boolean",
+          description: `Metrics enabled`,
+        },
+        timerResolution: {
+          nullable: true,
+          type: "string",
+          description: `Timer resolution`,
+        },
+        tokioMetricsEnabled: {
+          nullable: true,
+          type: "boolean",
+          description: `Tokio metrics enabled`,
+        },
+        tokioDetailedMetricsEnabled: {
+          nullable: true,
+          type: "boolean",
+          description: `Tokio detailed metrics enabled`,
+        },
+      },
+      required: [],
+    },
+    rawConfig: {
+      nullable: true,
+      type: "string",
+      description: `Raw TOML config string to parse and merge with the rest of the config. Has the highest priority`,
+    },
+  },
+  required: [],
+  nullable: true,
+  additionalProperties: false,
+} as const satisfies JSONSchemaType<NoxConfigYAMLV1>;
+
+type CCPConfigYAMLV1 = {
+  rpcEndpoint?: {
+    host?: string;
+    port?: number;
+  };
+  prometheusEndpoint?: {
+    host?: string;
+    port?: number;
+  };
+  logs?: {
+    reportHashrate?: boolean;
+    logLevel?: string;
+  };
+  statePath?: string;
+  rawConfig?: string;
+};
+
+const DEFAULT_RPC_ENDPOINT_HOST = "0.0.0.0";
+const DEFAULT_RPC_ENDPOINT_PORT = 9389;
+const DEFAULT_PROMETHEUS_ENDPOINT_HOST = "0.0.0.0";
+const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
+const DEFAULT_REPORT_HASHRATE = false;
+const DEFAULT_LOG_LEVEL = "info";
+const DEFAULT_STATE_PATH = "/fluence/data";
+
+const ccpConfigYAMLSchemaV1 = {
+  type: "object",
+  description: "Configuration to pass to the Capacity Commitment Prover",
+  properties: {
+    rpcEndpoint: {
+      type: "object",
+      description: "RPC endpoint configuration",
+      additionalProperties: false,
+      nullable: true,
+      properties: {
+        host: {
+          nullable: true,
+          type: "string",
+          description: `RPC host. Default: ${DEFAULT_RPC_ENDPOINT_HOST}`,
+          default: DEFAULT_RPC_ENDPOINT_HOST,
+        },
+        port: {
+          nullable: true,
+          type: "integer",
+          description: `RPC port. Default: ${DEFAULT_RPC_ENDPOINT_PORT}`,
+          default: DEFAULT_RPC_ENDPOINT_PORT,
+        },
+      },
+      required: [],
+    },
+    prometheusEndpoint: {
+      type: "object",
+      description: "Prometheus endpoint configuration",
+      additionalProperties: false,
+      nullable: true,
+      properties: {
+        host: {
+          nullable: true,
+          type: "string",
+          description: `Prometheus host. Default: ${DEFAULT_PROMETHEUS_ENDPOINT_HOST}`,
+          default: DEFAULT_PROMETHEUS_ENDPOINT_HOST,
+        },
+        port: {
+          nullable: true,
+          type: "integer",
+          description: `Prometheus port. Default: ${DEFAULT_PROMETHEUS_ENDPOINT_PORT}`,
+          default: DEFAULT_PROMETHEUS_ENDPOINT_PORT,
+        },
+      },
+      required: [],
+    },
+    logs: {
+      type: "object",
+      description: "Logs configuration",
+      additionalProperties: false,
+      nullable: true,
+      properties: {
+        reportHashrate: {
+          nullable: true,
+          type: "boolean",
+          description: `Report hashrate. Default: ${DEFAULT_REPORT_HASHRATE}`,
+          default: DEFAULT_REPORT_HASHRATE,
+        },
+        logLevel: {
+          nullable: true,
+          type: "string",
+          description: `Log level. Default: ${DEFAULT_LOG_LEVEL}`,
+          default: DEFAULT_LOG_LEVEL,
+        },
+      },
+      required: [],
+    },
+    statePath: {
+      nullable: true,
+      type: "string",
+      description: `Path to the state file. Default: ${DEFAULT_STATE_PATH}`,
+      default: DEFAULT_STATE_PATH,
+    },
+    rawConfig: {
+      nullable: true,
+      type: "string",
+      description: `Raw TOML config string to parse and merge with the rest of the config. Has the highest priority`,
+    },
+  },
+  required: [],
+  nullable: true,
+  additionalProperties: false,
+} as const satisfies JSONSchemaType<CCPConfigYAMLV1>;
+
+type ComputePeerV0 = {
   computeUnits: number;
-  nox?: NoxConfigYAML;
+  nox?: NoxConfigYAMLV0;
 };
 
 type ConfigV0 = {
   providerName: string;
   offers: Record<string, Offer>;
-  computePeers: Record<string, ComputePeer>;
+  computePeers: Record<string, ComputePeerV0>;
   capacityCommitments: Record<string, CapacityCommitment>;
-  nox?: NoxConfigYAML;
+  nox?: NoxConfigYAMLV0;
   version: 0;
 };
 
@@ -410,7 +850,7 @@ const offerSchema = {
   required: ["minPricePerWorkerEpoch", "computePeers"],
 } as const satisfies JSONSchemaType<Offer>;
 
-const computePeerSchema = {
+const computePeerSchemaV0 = {
   type: "object",
   description: "Defines a compute peer",
   additionalProperties: false,
@@ -419,12 +859,89 @@ const computePeerSchema = {
       type: "integer",
       description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
     },
-    nox: noxConfigYAMLSchema,
+    nox: noxConfigYAMLSchemaV0,
   },
   required: ["computeUnits"],
-} as const satisfies JSONSchemaType<ComputePeer>;
+} as const satisfies JSONSchemaType<ComputePeerV0>;
 
 const configSchemaV0 = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    providerName: {
+      description: "Provider name. Must not be empty",
+      type: "string",
+      minLength: 1,
+    },
+    offers: {
+      description: "A map with offer names as keys and offers as values",
+      type: "object",
+      additionalProperties: offerSchema,
+      properties: {
+        Offer: offerSchema,
+      },
+      required: [],
+    },
+    computePeers: {
+      description:
+        "A map with compute peer names as keys and compute peers as values",
+      type: "object",
+      additionalProperties: computePeerSchemaV0,
+      properties: {
+        ComputePeer: computePeerSchemaV0,
+      },
+      required: [],
+    },
+    nox: noxConfigYAMLSchemaV0,
+    capacityCommitments: {
+      description:
+        "A map with nox names as keys and capacity commitments as values",
+      type: "object",
+      additionalProperties: capacityCommitmentSchema,
+      properties: {
+        noxName: capacityCommitmentSchema,
+      },
+      required: [],
+    },
+    version: { type: "integer", const: 0, description: "Config version" },
+  },
+  required: [
+    "version",
+    "computePeers",
+    "offers",
+    "providerName",
+    "capacityCommitments",
+  ],
+} as const satisfies JSONSchemaType<ConfigV0>;
+
+type ComputePeerV1 = Omit<ComputePeerV0, "nox"> & {
+  nox?: NoxConfigYAMLV1;
+  ccp?: CCPConfigYAMLV1;
+};
+
+const computePeerSchemaV1 = {
+  type: "object",
+  description: "Defines a compute peer",
+  additionalProperties: false,
+  properties: {
+    computeUnits: {
+      type: "integer",
+      description: `How many compute units should nox have. Default: ${DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX} (each compute unit requires ${COMPUTE_UNIT_MEMORY_STR} of RAM)`,
+    },
+    nox: noxConfigYAMLSchemaV1,
+    ccp: ccpConfigYAMLSchemaV1,
+  },
+  required: ["computeUnits"],
+} as const satisfies JSONSchemaType<ComputePeerV1>;
+
+type ConfigV1 = Omit<ConfigV0, "version" | "nox" | "computePeers"> & {
+  version: 1;
+  nox?: NoxConfigYAMLV1;
+  computePeers: Record<string, ComputePeerV1>;
+  ccp?: CCPConfigYAMLV1;
+};
+
+const configSchemaV1 = {
   $id: `${TOP_LEVEL_SCHEMA_ID}/${PROVIDER_CONFIG_FULL_FILE_NAME}`,
   title: PROVIDER_CONFIG_FULL_FILE_NAME,
   description: `Defines config used for provider set up`,
@@ -449,13 +966,14 @@ const configSchemaV0 = {
       description:
         "A map with compute peer names as keys and compute peers as values",
       type: "object",
-      additionalProperties: computePeerSchema,
+      additionalProperties: computePeerSchemaV1,
       properties: {
-        ComputePeer: computePeerSchema,
+        ComputePeer: computePeerSchemaV1,
       },
       required: [],
     },
-    nox: noxConfigYAMLSchema,
+    nox: noxConfigYAMLSchemaV1,
+    ccp: ccpConfigYAMLSchemaV1,
     capacityCommitments: {
       description:
         "A map with nox names as keys and capacity commitments as values",
@@ -466,7 +984,7 @@ const configSchemaV0 = {
       },
       required: [],
     },
-    version: { type: "integer", const: 0, description: "Config version" },
+    version: { type: "integer", const: 1, description: "Config version" },
   },
   required: [
     "version",
@@ -475,7 +993,7 @@ const configSchemaV0 = {
     "providerName",
     "capacityCommitments",
   ],
-} as const satisfies JSONSchemaType<ConfigV0>;
+} as const satisfies JSONSchemaType<ConfigV1>;
 
 const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
@@ -554,10 +1072,91 @@ ${yamlDiffPatch("", {}, userProvidedConfig)}
   };
 }
 
-const migrations: Migrations<Config> = [];
+const validateConfigSchemaV0 = ajv.compile(configSchemaV0);
 
-type Config = ConfigV0;
-type LatestConfig = ConfigV0;
+const migrations: Migrations<Config> = [
+  async (config: Config): Promise<ConfigV1> => {
+    if (!validateConfigSchemaV0(config)) {
+      throw new Error(
+        `Migration error. Errors: ${await validationErrorToString(
+          validateConfigSchemaV0.errors,
+        )}`,
+      );
+    }
+
+    const { nox, computePeers, ...restConfig } = config;
+
+    const newConfig: Omit<ConfigV1, "computePeers"> = {
+      ...restConfig,
+      version: 1,
+    };
+
+    if (nox !== undefined) {
+      newConfig.nox = migrateNoxConfigYAMLV0ToV1(nox);
+    }
+
+    return {
+      ...newConfig,
+      computePeers: migrateComputePeersV0ToV1(computePeers),
+    };
+  },
+];
+
+function migrateComputePeersV0ToV1(
+  computePeers: ConfigV0["computePeers"],
+): ConfigV1["computePeers"] {
+  return mapValues(computePeers, ({ nox, ...computePeer }) => {
+    if (nox === undefined) {
+      return computePeer;
+    }
+
+    return {
+      ...computePeer,
+      nox: migrateNoxConfigYAMLV0ToV1(nox),
+    };
+  });
+}
+
+function migrateNoxConfigYAMLV0ToV1(nox: NoxConfigYAMLV0) {
+  const { chainConfig, ...restNox } = nox;
+
+  if (chainConfig !== undefined) {
+    return {
+      ...restNox,
+      chain: migrateChainConfigV0ToV1(chainConfig),
+    };
+  }
+
+  return restNox;
+}
+
+function migrateChainConfigV0ToV1(
+  chainConfig: NonNullable<NoxConfigYAMLV0["chainConfig"]>,
+) {
+  const {
+    coreContractAddress,
+    ccContractAddress,
+    marketContractAddress,
+    walletKey,
+    ...restChainConfig
+  } = chainConfig;
+
+  return omitBy(
+    {
+      ...restChainConfig,
+      coreContract: coreContractAddress,
+      ccContract: ccContractAddress,
+      marketContract: marketContractAddress,
+      walletPrivateKey: walletKey,
+    },
+    isUndefined,
+  );
+}
+
+type Config = ConfigV0 | ConfigV1;
+type LatestConfig = ConfigV1;
+type LatestCCPConfigYAML = CCPConfigYAMLV1;
+type LatestNoxConfigYAML = NoxConfigYAMLV1;
 export type ProviderConfig = InitializedConfig<LatestConfig>;
 export type ProviderConfigReadonly = InitializedReadonlyConfig<LatestConfig>;
 
@@ -838,8 +1437,8 @@ function validateMissingComputePeers(config: LatestConfig): ValidationResult {
 }
 
 const initConfigOptions = {
-  allSchemas: [configSchemaV0],
-  latestSchema: configSchemaV0,
+  allSchemas: [configSchemaV0, configSchemaV1],
+  latestSchema: configSchemaV1,
   migrations,
   name: PROVIDER_CONFIG_FILE_NAME,
   getConfigOrConfigDirPath: () => {
@@ -861,9 +1460,9 @@ export function initReadonlyProviderConfig() {
   return getReadonlyConfigInitFunction(initConfigOptions)();
 }
 
-export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV0;
+export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV1;
 
-function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
+function mergeConfigYAML<T>(a: T, b: Record<string, unknown>) {
   return mergeWith(cloneDeep(a), b, (objValue, srcValue) => {
     if (Array.isArray(objValue) && Array.isArray(srcValue)) {
       return srcValue;
@@ -873,31 +1472,35 @@ function mergeNoxConfigYAML(a: NoxConfigYAML, b: NoxConfigYAML) {
   });
 }
 
-function mergeNoxConfigYAMLWithRawConfig(a: NoxConfigYAML, b: NoxConfigYAML) {
+function mergeConfigYAMLWithRawConfig<
+  T extends { rawConfig?: string | undefined } & Record<string, unknown>,
+>(a: T, b: T) {
   const { rawConfig: rawConfigB, ...configB } = b;
-  let config = mergeNoxConfigYAML(a, configB);
+  let config = mergeConfigYAML(a, configB);
 
   const parsedRawConfigB =
     rawConfigB === undefined ? undefined : parse(rawConfigB);
 
   if (parsedRawConfigB !== undefined) {
-    config = mergeNoxConfigYAML(config, parsedRawConfigB);
+    config = mergeConfigYAML(config, parsedRawConfigB);
   }
 
   return config;
 }
 
 async function resolveNoxConfigYAML(
-  globalNoxConfig: NoxConfigYAML | undefined = {},
-  computePeerNoxConfig: NoxConfigYAML | undefined = {},
+  globalNoxConfig: LatestNoxConfigYAML | undefined = {},
+  computePeerNoxConfig: LatestNoxConfigYAML | undefined = {},
   { i = 0, signingWallet = "" }: { i?: number; signingWallet?: string } = {},
 ) {
-  let config = mergeNoxConfigYAMLWithRawConfig(
+  const env = await ensureChainEnv();
+
+  let config = mergeConfigYAMLWithRawConfig(
     await getDefaultNoxConfigYAML(),
     globalNoxConfig,
   );
 
-  config = mergeNoxConfigYAMLWithRawConfig(config, computePeerNoxConfig);
+  config = mergeConfigYAMLWithRawConfig(config, computePeerNoxConfig);
 
   if (config.tcpPort === undefined) {
     config.tcpPort = TCP_PORT_START + i;
@@ -911,53 +1514,193 @@ async function resolveNoxConfigYAML(
     config.httpPort = HTTP_PORT_START + i;
   }
 
-  if (config.systemServices?.decider?.walletKey === undefined) {
-    config.systemServices = {
-      ...config.systemServices,
-      decider: {
-        ...config.systemServices?.decider,
-        walletKey: signingWallet,
-      },
+  if (config.chain?.walletPrivateKey === undefined) {
+    config.chain = {
+      ...config.chain,
+      walletPrivateKey: signingWallet,
     };
   }
 
-  if (config.chainConfig?.walletKey === undefined) {
-    config.chainConfig = {
-      ...config.chainConfig,
-      walletKey: signingWallet,
-    };
-  }
+  config.systemServices = {
+    ...config.systemServices,
+    decider: {
+      ...config.systemServices?.decider,
+      walletKey:
+        config.systemServices?.decider?.walletKey ??
+        config.chain.walletPrivateKey ??
+        signingWallet,
+      startBlock:
+        config.systemServices?.decider?.startBlock ??
+        config.chain.dealSyncStartBlock ??
+        DEFAULT_START_BLOCK,
+      networkId:
+        config.systemServices?.decider?.networkId ??
+        config.chain.networkId ??
+        (await getChainId()),
+    },
+  };
+
+  let ipfs: undefined | LatestNoxConfigYAML["ipfs"];
+  // eslint-disable-next-line prefer-const
+  ({ ipfs, ...config } = config);
+
+  config.systemServices = {
+    ...config.systemServices,
+    aquaIpfs: {
+      ...config.systemServices?.aquaIpfs,
+      externalApiMultiaddr:
+        config.systemServices?.aquaIpfs?.externalApiMultiaddr ??
+        ipfs?.externalApiMultiaddr ??
+        getDefaultExternalApiMultiaddr(env),
+      localApiMultiaddr:
+        config.systemServices?.aquaIpfs?.localApiMultiaddr ??
+        ipfs?.localApiMultiaddr ??
+        getDefaultLocalApiMultiaddr(env),
+    },
+  };
 
   return config;
 }
 
-function configYAMLToConfigToml(config: NoxConfigYAML) {
+function resolveCCPConfigYAML(
+  globalCCPConfig: LatestCCPConfigYAML | undefined = {},
+  computePeerCCPConfig: LatestCCPConfigYAML | undefined = {},
+) {
+  const config = mergeConfigYAMLWithRawConfig(
+    getDefaultCCPConfigYAML(),
+    globalCCPConfig,
+  );
+
+  return mergeConfigYAMLWithRawConfig(config, computePeerCCPConfig);
+}
+
+function noxConfigYAMLToConfigToml(
+  {
+    chain: {
+      marketContract,
+      ccContract,
+      coreContract,
+      walletPrivateKey,
+      ...chain
+    } = {},
+    ccp,
+    listenIp,
+    metrics,
+    ...config
+  }: LatestNoxConfigYAML,
+  ccpConfig: LatestCCPConfigYAML,
+) {
+  const chainConfig = {
+    ...chain,
+    marketContractAddress: marketContract,
+    ccContractAddress: ccContract,
+    coreContractAddress: coreContract,
+    walletKey: walletPrivateKey,
+  };
+
   // Would be too hard to properly type this
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return camelCaseKeysToSnakeCase(config) as JsonMap;
+  return camelCaseKeysToSnakeCase({
+    ...config,
+    ...(listenIp === undefined ? {} : { listenConfig: { listenIp } }),
+    ...(config.httpPort === undefined
+      ? {}
+      : { httpConfig: { httpPort: config.httpPort } }),
+    chainConfig,
+    chainListenerConfig: {
+      wsEndpoint: chain.wsEndpoint,
+      ccpEndpoint:
+        ccp?.ccpEndpoint ??
+        `http://${ccpConfig.rpcEndpoint?.host ?? DEFAULT_RPC_ENDPOINT_HOST}:${
+          ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT
+        }`,
+      proofPollPeriod: ccp?.proofPollPeriod,
+    },
+    ...(metrics === undefined
+      ? {}
+      : {
+          ...(metrics.enabled === undefined &&
+          metrics.timerResolution === undefined
+            ? {}
+            : {
+                ...(metrics.enabled === undefined
+                  ? {}
+                  : { metricsEnabled: metrics.enabled }),
+                ...(metrics.timerResolution === undefined
+                  ? {}
+                  : { metricsTimerResolution: metrics.timerResolution }),
+              }),
+          ...(metrics.tokioMetricsEnabled === undefined &&
+          metrics.tokioDetailedMetricsEnabled === undefined
+            ? {}
+            : {
+                ...(metrics.tokioMetricsEnabled === undefined
+                  ? {}
+                  : { tokioMetricsEnabled: metrics.tokioMetricsEnabled }),
+                ...(metrics.tokioDetailedMetricsEnabled === undefined
+                  ? {}
+                  : {
+                      tokioMetricsPollHistogramEnabled:
+                        metrics.tokioDetailedMetricsEnabled,
+                    }),
+              }),
+        }),
+  }) as JsonMap;
+}
+
+function ccpConfigYAMLToConfigToml(config: LatestCCPConfigYAML) {
+  // Would be too hard to properly type this
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return camelCaseKeysToKebabCase(config) as JsonMap;
+}
+
+function camelCaseToDifferentCase(caseFn: (str: string) => string) {
+  const camelCaseToDifferentCaseImpl = (val: unknown): unknown => {
+    if (typeof val === "object" && val !== null) {
+      if (Array.isArray(val)) {
+        return val.map(camelCaseToDifferentCaseImpl);
+      }
+
+      const objWithSnakeCaseKeys = mapKeys(val, (_, key) => {
+        return caseFn(key);
+      });
+
+      return Object.fromEntries(
+        Object.entries(objWithSnakeCaseKeys).map(([key, value]) => {
+          return [key, camelCaseToDifferentCaseImpl(value)];
+        }),
+      );
+    }
+
+    return val;
+  };
+
+  return camelCaseToDifferentCaseImpl;
 }
 
 function camelCaseKeysToSnakeCase(val: unknown): unknown {
-  if (typeof val === "object" && val !== null) {
-    if (Array.isArray(val)) {
-      return val.map(camelCaseKeysToSnakeCase);
-    }
-
-    const objWithSnakeCaseKeys = mapKeys(val, (_, key) => {
-      return snakeCase(key);
-    });
-
-    return Object.fromEntries(
-      Object.entries(objWithSnakeCaseKeys).map(([key, value]) => {
-        return [key, camelCaseKeysToSnakeCase(value)];
-      }),
-    );
-  }
-
-  return val;
+  return camelCaseToDifferentCase(snakeCase)(val);
 }
 
-async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
+function camelCaseKeysToKebabCase(val: unknown): unknown {
+  return camelCaseToDifferentCase(kebabCase)(val);
+}
+
+function getDefaultExternalApiMultiaddr(env: string) {
+  return env === "local"
+    ? LOCAL_IPFS_ADDRESS
+    : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`;
+}
+
+function getDefaultLocalApiMultiaddr(env: string) {
+  return env === "local"
+    ? NOX_IPFS_MULTIADDR
+    : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`;
+}
+
+const DEFAULT_START_BLOCK = "earliest";
+
+async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const isLocal = env === "local";
   const networkId = await getChainId();
@@ -966,16 +1709,12 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
+    ipfs: {
+      externalApiMultiaddr: getDefaultExternalApiMultiaddr(env),
+      localApiMultiaddr: getDefaultLocalApiMultiaddr(env),
+    },
     systemServices: {
       enable: ["aqua-ipfs", "decider"],
-      aquaIpfs: {
-        externalApiMultiaddr: isLocal
-          ? LOCAL_IPFS_ADDRESS
-          : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`,
-        localApiMultiaddr: isLocal
-          ? NOX_IPFS_MULTIADDR
-          : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`,
-      },
       decider: {
         deciderPeriodSec: 10,
         workerIpfsMultiaddr: isLocal
@@ -984,29 +1723,49 @@ async function getDefaultNoxConfigYAML(): Promise<NoxConfigYAML> {
         networkApiEndpoint: isLocal
           ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
           : CHAIN_URLS[env],
-        networkId,
-        startBlock: "earliest",
         matcherAddress: contractAddresses.market,
       },
     },
-    chainConfig: {
+    chain: {
       httpEndpoint: isLocal
         ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
         : CHAIN_URLS[env],
-      coreContractAddress: contractAddresses.core,
-      ccContractAddress: contractAddresses.capacity,
-      marketContractAddress: contractAddresses.market,
+      wsEndpoint: isLocal
+        ? `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
+        : WS_CHAIN_URLS[env],
+      coreContract: contractAddresses.core,
+      ccContract: contractAddresses.capacity,
+      marketContract: contractAddresses.market,
       networkId,
+      dealSyncStartBlock: DEFAULT_START_BLOCK,
     },
   };
 }
 
-function getConfigName(noxName: string) {
-  return `${noxName}_Config`;
+function getDefaultCCPConfigYAML(): LatestCCPConfigYAML {
+  return {
+    rpcEndpoint: {
+      host: DEFAULT_RPC_ENDPOINT_HOST,
+      port: DEFAULT_RPC_ENDPOINT_PORT,
+    },
+    prometheusEndpoint: {
+      host: DEFAULT_PROMETHEUS_ENDPOINT_HOST,
+      port: DEFAULT_PROMETHEUS_ENDPOINT_PORT,
+    },
+    logs: {
+      reportHashrate: DEFAULT_REPORT_HASHRATE,
+      logLevel: DEFAULT_LOG_LEVEL,
+    },
+    statePath: DEFAULT_STATE_PATH,
+  };
 }
 
 export function getConfigTomlName(noxName: string) {
-  return `${getConfigName(noxName)}.${TOML_EXT}`;
+  return `${noxName}_Config.${TOML_EXT}`;
+}
+
+export function getCCPConfigTomlName(noxName: string) {
+  return `${noxName}_CCP_Config.${TOML_EXT}`;
 }
 
 export function promptForOfferName(offers: ProviderConfigReadonly["offers"]) {
@@ -1129,6 +1888,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
 
   const { stringify } = await import("@iarna/toml");
   const configsDir = await ensureFluenceConfigsDir();
+  const ccpConfigsDir = await ensureFluenceCCPConfigsDir();
 
   return Promise.all(
     computePeersWithCC.map(
@@ -1142,6 +1902,23 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         },
         i,
       ) => {
+        await writeFile(
+          await ensureFluenceSecretsFilePath(computePeerName),
+          secretKey,
+          FS_OPTIONS,
+        );
+
+        const overridenCCPConfig = resolveCCPConfigYAML(
+          providerConfig.ccp,
+          computePeer.ccp,
+        );
+
+        await writeFile(
+          join(ccpConfigsDir, getCCPConfigTomlName(computePeerName)),
+          stringify(ccpConfigYAMLToConfigToml(overridenCCPConfig)),
+          FS_OPTIONS,
+        );
+
         const overriddenNoxConfig = await resolveNoxConfigYAML(
           providerConfig.nox,
           computePeer.nox,
@@ -1149,14 +1926,10 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         );
 
         await writeFile(
-          await ensureFluenceSecretsFilePath(computePeerName),
-          secretKey,
-          FS_OPTIONS,
-        );
-
-        await writeFile(
           join(configsDir, getConfigTomlName(computePeerName)),
-          stringify(configYAMLToConfigToml(overriddenNoxConfig)),
+          stringify(
+            noxConfigYAMLToConfigToml(overriddenNoxConfig, overridenCCPConfig),
+          ),
           FS_OPTIONS,
         );
 
