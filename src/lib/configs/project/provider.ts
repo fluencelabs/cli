@@ -154,6 +154,7 @@ type NoxConfigYAMLV0 = {
     aquaIpfs?: {
       externalApiMultiaddr?: string;
       localApiMultiaddr?: string;
+      ipfsBinaryPath?: string;
     };
     decider?: {
       deciderPeriodSec?: number;
@@ -254,6 +255,11 @@ const noxConfigYAMLSchemaV0 = {
               nullable: true,
               type: "string",
               description: `Multiaddress of local IPFS API`,
+            },
+            ipfsBinaryPath: {
+              nullable: true,
+              type: "string",
+              description: `Path to the IPFS binary`,
             },
           },
           required: [],
@@ -398,6 +404,7 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
     // # TOML: system_services.aqua_ipfs.local_api_multiaddr
     // # Optional
     localApiMultiaddr?: string;
+    ipfsBinaryPath?: string;
   };
   // # these would
   // cpusRange = "1-32" # It's actually possible to do complex things like "1,3-6,7-20,32", Nox will parse
@@ -430,6 +437,7 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
 
 const DEFAULT_TIMER_RESOLUTION = "1 minute";
 const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
+const DEFAULT_IPFS_BINARY_PATH = "/usr/bin/ipfs";
 
 const noxConfigYAMLSchemaV1 = {
   type: "object",
@@ -484,6 +492,11 @@ const noxConfigYAMLSchemaV1 = {
               nullable: true,
               type: "string",
               description: `Multiaddress of local IPFS API`,
+            },
+            ipfsBinaryPath: {
+              nullable: true,
+              type: "string",
+              description: `Path to the IPFS binary. Default: ${DEFAULT_IPFS_BINARY_PATH}`,
             },
           },
           required: [],
@@ -629,6 +642,11 @@ const noxConfigYAMLSchemaV1 = {
           nullable: true,
           type: "string",
           description: `Multiaddress of local IPFS API`,
+        },
+        ipfsBinaryPath: {
+          nullable: true,
+          type: "string",
+          description: `Path to the IPFS binary. Default: ${DEFAULT_IPFS_BINARY_PATH}`,
         },
       },
       required: [],
@@ -1579,6 +1597,10 @@ async function resolveNoxConfigYAML(
         config.systemServices?.aquaIpfs?.localApiMultiaddr ??
         ipfs?.localApiMultiaddr ??
         getDefaultLocalApiMultiaddr(env),
+      ipfsBinaryPath:
+        config.systemServices?.aquaIpfs?.ipfsBinaryPath ??
+        ipfs?.ipfsBinaryPath ??
+        DEFAULT_IPFS_BINARY_PATH,
     },
   };
 
@@ -1732,6 +1754,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
     ipfs: {
       externalApiMultiaddr: getDefaultExternalApiMultiaddr(env),
       localApiMultiaddr: getDefaultLocalApiMultiaddr(env),
+      ipfsBinaryPath: DEFAULT_IPFS_BINARY_PATH,
     },
     systemServices: {
       enable: ["aqua-ipfs", "decider"],
