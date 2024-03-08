@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.18](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.17...fluence-cli-v0.15.18) (2024-03-07)
+
+
+### Features
+
+* up deal-ts-clients 0.8.0 ([#834](https://github.com/fluencelabs/cli/issues/834)) ([c4a334b](https://github.com/fluencelabs/cli/commit/c4a334b0e481dec488e30bd70301b5dab0522df0))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fluencelabs/deal-ts-clients to v0.9.0 ([#836](https://github.com/fluencelabs/cli/issues/836)) ([4d5ed15](https://github.com/fluencelabs/cli/commit/4d5ed15a1f54d818ac01a4fd71dcfba4dda7a9ed))
+* **deps:** update dependency @fluencelabs/js-client to v0.9.0 ([#805](https://github.com/fluencelabs/cli/issues/805)) ([a977f71](https://github.com/fluencelabs/cli/commit/a977f71c2790b7f6e21a820eab89a9a790aefd10))
+
 ## [0.15.17](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.16...fluence-cli-v0.15.17) (2024-03-03)
 
 
