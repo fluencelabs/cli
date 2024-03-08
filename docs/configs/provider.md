@@ -11,6 +11,7 @@ Defines config used for provider set up
 | `offers`              | [object](#offers)              | **Yes**  | A map with offer names as keys and offers as values                                             |
 | `providerName`        | string                         | **Yes**  | Provider name. Must not be empty                                                                |
 | `version`             | integer                        | **Yes**  | Config version                                                                                  |
+| `ccp`                 | [object](#ccp)                 | No       | Configuration to pass to the Capacity Commitment Prover                                         |
 | `nox`                 | [object](#nox)                 | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
 
 ## capacityCommitments
@@ -35,6 +36,53 @@ Defines a capacity commitment
 | `rewardDelegationRate` | number | **Yes**  | Reward delegation rate in percent                                             |
 | `delegator`            | string | No       | Delegator address                                                             |
 
+## ccp
+
+Configuration to pass to the Capacity Commitment Prover
+
+### Properties
+
+| Property             | Type                          | Required | Description                                                                                     |
+|----------------------|-------------------------------|----------|-------------------------------------------------------------------------------------------------|
+| `logs`               | [object](#logs)               | No       | Logs configuration                                                                              |
+| `prometheusEndpoint` | [object](#prometheusendpoint) | No       | Prometheus endpoint configuration                                                               |
+| `rawConfig`          | string                        | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority |
+| `rpcEndpoint`        | [object](#rpcendpoint)        | No       | RPC endpoint configuration                                                                      |
+| `statePath`          | string                        | No       | Path to the state file. Default: /fluence/data                                                  |
+
+### logs
+
+Logs configuration
+
+#### Properties
+
+| Property         | Type    | Required | Description                     |
+|------------------|---------|----------|---------------------------------|
+| `logLevel`       | string  | No       | Log level. Default: info        |
+| `reportHashrate` | boolean | No       | Report hashrate. Default: false |
+
+### prometheusEndpoint
+
+Prometheus endpoint configuration
+
+#### Properties
+
+| Property | Type    | Required | Description                       |
+|----------|---------|----------|-----------------------------------|
+| `host`   | string  | No       | Prometheus host. Default: 0.0.0.0 |
+| `port`   | integer | No       | Prometheus port. Default: 9384    |
+
+### rpcEndpoint
+
+RPC endpoint configuration
+
+#### Properties
+
+| Property | Type    | Required | Description                |
+|----------|---------|----------|----------------------------|
+| `host`   | string  | No       | RPC host. Default: 0.0.0.0 |
+| `port`   | integer | No       | RPC port. Default: 9389    |
+
 ## computePeers
 
 A map with compute peer names as keys and compute peers as values
@@ -54,7 +102,55 @@ Defines a compute peer
 | Property       | Type           | Required | Description                                                                                     |
 |----------------|----------------|----------|-------------------------------------------------------------------------------------------------|
 | `computeUnits` | integer        | **Yes**  | How many compute units should nox have. Default: 32 (each compute unit requires 2GB of RAM)     |
+| `ccp`          | [object](#ccp) | No       | Configuration to pass to the Capacity Commitment Prover                                         |
 | `nox`          | [object](#nox) | No       | Configuration to pass to the nox compute peer. Config.toml files are generated from this config |
+
+#### ccp
+
+Configuration to pass to the Capacity Commitment Prover
+
+##### Properties
+
+| Property             | Type                          | Required | Description                                                                                     |
+|----------------------|-------------------------------|----------|-------------------------------------------------------------------------------------------------|
+| `logs`               | [object](#logs)               | No       | Logs configuration                                                                              |
+| `prometheusEndpoint` | [object](#prometheusendpoint) | No       | Prometheus endpoint configuration                                                               |
+| `rawConfig`          | string                        | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority |
+| `rpcEndpoint`        | [object](#rpcendpoint)        | No       | RPC endpoint configuration                                                                      |
+| `statePath`          | string                        | No       | Path to the state file. Default: /fluence/data                                                  |
+
+##### logs
+
+Logs configuration
+
+###### Properties
+
+| Property         | Type    | Required | Description                     |
+|------------------|---------|----------|---------------------------------|
+| `logLevel`       | string  | No       | Log level. Default: info        |
+| `reportHashrate` | boolean | No       | Report hashrate. Default: false |
+
+##### prometheusEndpoint
+
+Prometheus endpoint configuration
+
+###### Properties
+
+| Property | Type    | Required | Description                       |
+|----------|---------|----------|-----------------------------------|
+| `host`   | string  | No       | Prometheus host. Default: 0.0.0.0 |
+| `port`   | integer | No       | Prometheus port. Default: 9384    |
+
+##### rpcEndpoint
+
+RPC endpoint configuration
+
+###### Properties
+
+| Property | Type    | Required | Description                |
+|----------|---------|----------|----------------------------|
+| `host`   | string  | No       | RPC host. Default: 0.0.0.0 |
+| `port`   | integer | No       | RPC port. Default: 9389    |
 
 #### nox
 
@@ -62,31 +158,51 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 ##### Properties
 
-| Property         | Type                      | Required | Description                                                                                                       |
-|------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize` | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
-| `chainConfig`    | [object](#chainconfig)    | No       | Chain config                                                                                                      |
-| `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `httpPort`       | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
-| `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
-| `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`        | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `websocketPort`  | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| Property                 | Type                      | Required | Description                                                                                                       |
+|--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
+| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
+| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |
+| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
+| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                   |
+| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
+| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                       |
+| `listenIp`               | string                    | No       | IP to listen on                                                                                                   |
+| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                             |
+| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
+| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
+| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
+| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
-##### chainConfig
+##### ccp
+
+For advanced users. CCP config
+
+###### Properties
+
+| Property          | Type   | Required | Description                                                                                                 |
+|-------------------|--------|----------|-------------------------------------------------------------------------------------------------------------|
+| `ccpEndpoint`     | string | No       | CCP endpoint. Default comes from top-level ccp config: http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port} |
+| `proofPollPeriod` | string | No       | Proof poll period                                                                                           |
+
+##### chain
 
 Chain config
 
 ###### Properties
 
-| Property                | Type    | Required | Description                                 |
-|-------------------------|---------|----------|---------------------------------------------|
-| `ccContractAddress`     | string  | No       | Capacity commitment contract address        |
-| `coreContractAddress`   | string  | No       | Core contract address                       |
-| `httpEndpoint`          | string  | No       | HTTP endpoint of the chain. Same as decider |
-| `marketContractAddress` | string  | No       | Market contract address                     |
-| `networkId`             | integer | No       | Network ID                                  |
-| `walletKey`             | string  | No       | Wallet key                                  |
+| Property             | Type    | Required | Description                                     |
+|----------------------|---------|----------|-------------------------------------------------|
+| `ccContract`         | string  | No       | Capacity commitment contract address            |
+| `coreContract`       | string  | No       | Core contract address                           |
+| `dealSyncStartBlock` | string  | No       | Start block                                     |
+| `httpEndpoint`       | string  | No       | HTTP endpoint of the chain                      |
+| `marketContract`     | string  | No       | Market contract address                         |
+| `networkId`          | integer | No       | Network ID                                      |
+| `walletPrivateKey`   | string  | No       | Nox wallet private key. Is generated by default |
+| `wsEndpoint`         | string  | No       | WebSocket endpoint of the chain                 |
 
 ##### effectors
 
@@ -118,6 +234,30 @@ Allowed binaries
 | Property | Type   | Required | Description |
 |----------|--------|----------|-------------|
 | `curl`   | string | No       |             |
+
+##### ipfs
+
+IPFS config
+
+###### Properties
+
+| Property               | Type   | Required | Description                       |
+|------------------------|--------|----------|-----------------------------------|
+| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API |
+| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
+
+##### metrics
+
+Metrics configuration
+
+###### Properties
+
+| Property                      | Type    | Required | Description                    |
+|-------------------------------|---------|----------|--------------------------------|
+| `enabled`                     | boolean | No       | Metrics enabled                |
+| `timerResolution`             | string  | No       | Timer resolution               |
+| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled |
+| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled          |
 
 ##### systemServices
 
@@ -164,31 +304,51 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 
 ### Properties
 
-| Property         | Type                      | Required | Description                                                                                                       |
-|------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `aquavmPoolSize` | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
-| `chainConfig`    | [object](#chainconfig)    | No       | Chain config                                                                                                      |
-| `effectors`      | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
-| `httpPort`       | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
-| `rawConfig`      | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
-| `systemServices` | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
-| `tcpPort`        | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
-| `websocketPort`  | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
+| Property                 | Type                      | Required | Description                                                                                                       |
+|--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
+| `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
+| `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |
+| `effectors`              | [object](#effectors)      | No       | Effectors to allow on the nox                                                                                     |
+| `externalMultiaddresses` | string[]                  | No       | List of external multiaddresses                                                                                   |
+| `httpPort`               | integer                   | No       | Both host and container HTTP port to use. Default: for each nox a unique port is assigned starting from 18080     |
+| `ipfs`                   | [object](#ipfs)           | No       | IPFS config                                                                                                       |
+| `listenIp`               | string                    | No       | IP to listen on                                                                                                   |
+| `metrics`                | [object](#metrics)        | No       | Metrics configuration                                                                                             |
+| `rawConfig`              | string                    | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority                   |
+| `systemCpuCount`         | integer                   | No       | Number of CPU cores to allocate for the Nox itself. Default: 1                                                    |
+| `systemServices`         | [object](#systemservices) | No       | System services to run by default. aquaIpfs and decider are enabled by default                                    |
+| `tcpPort`                | integer                   | No       | Both host and container TCP port to use. Default: for each nox a unique port is assigned starting from 7771       |
+| `websocketPort`          | integer                   | No       | Both host and container WebSocket port to use. Default: for each nox a unique port is assigned starting from 9991 |
 
-### chainConfig
+### ccp
+
+For advanced users. CCP config
+
+#### Properties
+
+| Property          | Type   | Required | Description                                                                                                 |
+|-------------------|--------|----------|-------------------------------------------------------------------------------------------------------------|
+| `ccpEndpoint`     | string | No       | CCP endpoint. Default comes from top-level ccp config: http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port} |
+| `proofPollPeriod` | string | No       | Proof poll period                                                                                           |
+
+### chain
 
 Chain config
 
 #### Properties
 
-| Property                | Type    | Required | Description                                 |
-|-------------------------|---------|----------|---------------------------------------------|
-| `ccContractAddress`     | string  | No       | Capacity commitment contract address        |
-| `coreContractAddress`   | string  | No       | Core contract address                       |
-| `httpEndpoint`          | string  | No       | HTTP endpoint of the chain. Same as decider |
-| `marketContractAddress` | string  | No       | Market contract address                     |
-| `networkId`             | integer | No       | Network ID                                  |
-| `walletKey`             | string  | No       | Wallet key                                  |
+| Property             | Type    | Required | Description                                     |
+|----------------------|---------|----------|-------------------------------------------------|
+| `ccContract`         | string  | No       | Capacity commitment contract address            |
+| `coreContract`       | string  | No       | Core contract address                           |
+| `dealSyncStartBlock` | string  | No       | Start block                                     |
+| `httpEndpoint`       | string  | No       | HTTP endpoint of the chain                      |
+| `marketContract`     | string  | No       | Market contract address                         |
+| `networkId`          | integer | No       | Network ID                                      |
+| `walletPrivateKey`   | string  | No       | Nox wallet private key. Is generated by default |
+| `wsEndpoint`         | string  | No       | WebSocket endpoint of the chain                 |
 
 ### effectors
 
@@ -220,6 +380,30 @@ Allowed binaries
 | Property | Type   | Required | Description |
 |----------|--------|----------|-------------|
 | `curl`   | string | No       |             |
+
+### ipfs
+
+IPFS config
+
+#### Properties
+
+| Property               | Type   | Required | Description                       |
+|------------------------|--------|----------|-----------------------------------|
+| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API |
+| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
+
+### metrics
+
+Metrics configuration
+
+#### Properties
+
+| Property                      | Type    | Required | Description                    |
+|-------------------------------|---------|----------|--------------------------------|
+| `enabled`                     | boolean | No       | Metrics enabled                |
+| `timerResolution`             | string  | No       | Timer resolution               |
+| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled |
+| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled          |
 
 ### systemServices
 
