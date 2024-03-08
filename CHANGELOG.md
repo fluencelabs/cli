@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.19](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.18...fluence-cli-v0.15.19) (2024-03-08)
+
+
+### Features
+
+* add ccp-configs and improve provider config [fixes DXJ-749] ([#835](https://github.com/fluencelabs/cli/issues/835)) ([0b36a3b](https://github.com/fluencelabs/cli/commit/0b36a3b31b8e4a311a744334ef3e3ca0003127dc))
+
+
+### Bug Fixes
+
+* **versions.json:** nox 0.22.1, chain 0.9.0 ([e0fff68](https://github.com/fluencelabs/cli/commit/e0fff68a9da702ab3067a5872c76d66ed695ba23))
+* **versions.json:** nox 0.22.2, chain 0.9.0 ([#837](https://github.com/fluencelabs/cli/issues/837)) ([e0fff68](https://github.com/fluencelabs/cli/commit/e0fff68a9da702ab3067a5872c76d66ed695ba23))
+
 ## [0.15.18](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.17...fluence-cli-v0.15.18) (2024-03-07)
 
 
