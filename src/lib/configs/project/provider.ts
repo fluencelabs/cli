@@ -429,6 +429,7 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
 };
 
 const DEFAULT_TIMER_RESOLUTION = "1 minute";
+const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
 
 const noxConfigYAMLSchemaV1 = {
   type: "object",
@@ -607,7 +608,8 @@ const noxConfigYAMLSchemaV1 = {
         proofPollPeriod: {
           nullable: true,
           type: "string",
-          description: `Proof poll period`,
+          description: `Proof poll period. Default: ${DEFAULT_PROOF_POLL_PERIOD}`,
+          default: DEFAULT_PROOF_POLL_PERIOD,
         },
       },
       required: [],
@@ -720,7 +722,6 @@ const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
 const DEFAULT_REPORT_HASHRATE = false;
 const DEFAULT_LOG_LEVEL = "info";
 const DEFAULT_STATE_PATH = "/fluence/data";
-const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
 
 const ccpConfigYAMLSchemaV1 = {
   type: "object",
@@ -1609,15 +1610,15 @@ function noxConfigYAMLToConfigToml(
     ...config,
     ...(listenIp === undefined ? {} : { listenConfig: { listenIp } }),
     chainConfig,
-    chainListenerConfig: {
-      wsEndpoint: chain.wsEndpoint,
-      ccpEndpoint:
-        ccp?.ccpEndpoint ??
-        `http://${ccpConfig.rpcEndpoint?.host ?? DEFAULT_RPC_ENDPOINT_HOST}:${
-          ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT
-        }`,
-      proofPollPeriod: ccp?.proofPollPeriod,
-    },
+    // chainListenerConfig: {
+    //   wsEndpoint: chain.wsEndpoint,
+    //   ccpEndpoint:
+    //     ccp?.ccpEndpoint ??
+    //     `http://${ccpConfig.rpcEndpoint?.host ?? DEFAULT_RPC_ENDPOINT_HOST}:${
+    //       ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT
+    //     }`,
+    //   proofPollPeriod: ccp?.proofPollPeriod,
+    // },
     ...(metrics === undefined
       ? {}
       : {
