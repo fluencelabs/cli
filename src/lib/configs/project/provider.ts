@@ -1768,7 +1768,7 @@ export function getConfigTomlName(noxName: string) {
 }
 
 export function getCCPConfigTomlName(noxName: string) {
-  return `${noxName}_CCP_Config.${TOML_EXT}`;
+  return `${noxName}_Config.${TOML_EXT}`;
 }
 
 export function promptForOfferName(offers: ProviderConfigReadonly["offers"]) {
