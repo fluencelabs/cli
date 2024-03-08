@@ -62,10 +62,10 @@ import {
   DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX,
   NOX_NAMES_FLAG_NAME,
   ALL_FLAG_VALUE,
-  CHAIN_URLS,
   WS_CHAIN_URLS,
   PT_SYMBOL,
   DEFAULT_CURL_EFFECTOR_CID,
+  CHAIN_URLS_FOR_CONTAINERS,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -1718,16 +1718,12 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
         workerIpfsMultiaddr: isLocal
           ? NOX_IPFS_MULTIADDR
           : "http://ipfs.fluence.dev",
-        networkApiEndpoint: isLocal
-          ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
-          : CHAIN_URLS[env],
+        networkApiEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
         matcherAddress: contractAddresses.market,
       },
     },
     chain: {
-      httpEndpoint: isLocal
-        ? `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
-        : CHAIN_URLS[env],
+      httpEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
       wsEndpoint: isLocal
         ? `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
         : WS_CHAIN_URLS[env],

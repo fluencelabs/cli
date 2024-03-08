@@ -124,18 +124,6 @@ export const FLUENCE_ENVS = [...CHAIN_ENV, "custom"] as const;
 export type FluenceEnv = (typeof FLUENCE_ENVS)[number];
 export const isFluenceEnv = getIsStringUnion(FLUENCE_ENVS);
 
-export const CHAIN_URLS: Record<Exclude<ChainENV, "local">, string> = {
-  // kras: "https://ipc-kras.fluence.dev",
-  dar: "https://ipc-dar.fluence.dev",
-  stage: "https://ipc-stage.fluence.dev",
-};
-
-export const WS_CHAIN_URLS: Record<Exclude<ChainENV, "local">, string> = {
-  // kras: "wss://ipc-kras.fluence.dev",
-  dar: "wss://ipc-dar.fluence.dev",
-  stage: "wss://ipc-stage.fluence.dev",
-};
-
 export const IPFS_CONTAINER_NAME = "ipfs";
 export const IPFS_PORT = 5001;
 export const GRAPH_NODE_CONTAINER_NAME = "graph-node";
@@ -150,6 +138,28 @@ export const TCP_PORT_START = 7771;
 export const WEB_SOCKET_PORT_START = 9991;
 export const HTTP_PORT_START = 18080;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
+
+const CHAIN_URLS_WITHOUT_LOCAL: Record<Exclude<ChainENV, "local">, string> = {
+  // kras: "https://ipc-kras.fluence.dev",
+  dar: "https://ipc-dar.fluence.dev",
+  stage: "https://ipc-stage.fluence.dev",
+};
+
+export const CHAIN_URLS: Record<ChainENV, string> = {
+  ...CHAIN_URLS_WITHOUT_LOCAL,
+  local: `http://127.0.0.1:${CHAIN_RPC_PORT}`,
+};
+
+export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
+  ...CHAIN_URLS_WITHOUT_LOCAL,
+  local: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
+};
+
+export const WS_CHAIN_URLS: Record<Exclude<ChainENV, "local">, string> = {
+  // kras: "wss://ipc-kras.fluence.dev",
+  dar: "wss://ipc-dar.fluence.dev",
+  stage: "wss://ipc-stage.fluence.dev",
+};
 
 export const AQUA_EXT = "aqua";
 export const TS_EXT = "ts";
