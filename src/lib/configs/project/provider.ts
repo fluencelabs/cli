@@ -64,6 +64,7 @@ import {
   PT_SYMBOL,
   DEFAULT_CURL_EFFECTOR_CID,
   CHAIN_URLS_FOR_CONTAINERS,
+  type ChainENV,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -1628,12 +1629,13 @@ function noxConfigYAMLToConfigToml(
       walletPrivateKey,
       ...chain
     } = {},
-    // ccp,
+    ccp,
     listenIp,
     metrics,
     ...config
   }: LatestNoxConfigYAML,
-  // ccpConfig: LatestCCPConfigYAML,
+  ccpConfig: LatestCCPConfigYAML,
+  env: ChainENV,
 ) {
   const chainConfig = {
     httpEndpoint: chain.httpEndpoint,
@@ -1650,15 +1652,19 @@ function noxConfigYAMLToConfigToml(
     ...config,
     ...(listenIp === undefined ? {} : { listenConfig: { listenIp } }),
     chainConfig,
-    // chainListenerConfig: {
-    //   wsEndpoint: chain.wsEndpoint,
-    //   ccpEndpoint:
-    //     ccp?.ccpEndpoint ??
-    //     `http://${ccpConfig.rpcEndpoint?.host ?? DEFAULT_RPC_ENDPOINT_HOST}:${
-    //       ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT
-    //     }`,
-    //   proofPollPeriod: ccp?.proofPollPeriod,
-    // },
+    ...(env === "local"
+      ? {}
+      : {
+          chainListenerConfig: {
+            wsEndpoint: chain.wsEndpoint,
+            ccpEndpoint:
+              ccp?.ccpEndpoint ??
+              `http://${
+                ccpConfig.rpcEndpoint?.host ?? DEFAULT_RPC_ENDPOINT_HOST
+              }:${ccpConfig.rpcEndpoint?.port ?? DEFAULT_RPC_ENDPOINT_PORT}`,
+            proofPollPeriod: ccp?.proofPollPeriod,
+          },
+        }),
     ...(metrics === undefined
       ? {}
       : {
@@ -1775,9 +1781,9 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       networkId,
       dealSyncStartBlock: DEFAULT_START_BLOCK,
     },
-    // ccp: {
-    //   proofPollPeriod: DEFAULT_PROOF_POLL_PERIOD,
-    // },
+    ccp: {
+      proofPollPeriod: DEFAULT_PROOF_POLL_PERIOD,
+    },
     // metrics: {
     //   enabled: true,
     //   timerResolution: DEFAULT_TIMER_RESOLUTION,
@@ -1936,6 +1942,7 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
   const { stringify } = await import("@iarna/toml");
   const configsDir = await ensureFluenceConfigsDir();
   const ccpConfigsDir = await ensureFluenceCCPConfigsDir();
+  const env = await ensureChainEnv();
 
   return Promise.all(
     computePeersWithCC.map(
@@ -1977,7 +1984,8 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
           stringify(
             noxConfigYAMLToConfigToml(
               overriddenNoxConfig,
-              //overridenCCPConfig
+              overridenCCPConfig,
+              env,
             ),
           ),
           FS_OPTIONS,
