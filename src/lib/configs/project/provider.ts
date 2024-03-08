@@ -702,6 +702,7 @@ type CCPConfigYAMLV1 = {
   rpcEndpoint?: {
     host?: string;
     port?: number;
+    utilityThreadIds?: Array<number>;
   };
   prometheusEndpoint?: {
     host?: string;
@@ -711,7 +712,9 @@ type CCPConfigYAMLV1 = {
     reportHashrate?: boolean;
     logLevel?: string;
   };
-  statePath?: string;
+  state?: {
+    path?: string;
+  };
   rawConfig?: string;
 };
 
@@ -722,6 +725,7 @@ const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
 const DEFAULT_REPORT_HASHRATE = false;
 const DEFAULT_LOG_LEVEL = "info";
 const DEFAULT_STATE_PATH = "/fluence/data";
+const DEFAULT_UTILITY_THREAD_IDS = [1];
 
 const ccpConfigYAMLSchemaV1 = {
   type: "object",
@@ -744,6 +748,12 @@ const ccpConfigYAMLSchemaV1 = {
           type: "integer",
           description: `RPC port. Default: ${DEFAULT_RPC_ENDPOINT_PORT}`,
           default: DEFAULT_RPC_ENDPOINT_PORT,
+        },
+        utilityThreadIds: {
+          nullable: true,
+          type: "array",
+          items: { type: "integer" },
+          description: `Utility thread IDs`,
         },
       },
       required: [],
@@ -790,11 +800,19 @@ const ccpConfigYAMLSchemaV1 = {
       },
       required: [],
     },
-    statePath: {
+    state: {
+      type: "object",
+      description: "State configuration",
+      additionalProperties: false,
       nullable: true,
-      type: "string",
-      description: `Path to the state file. Default: ${DEFAULT_STATE_PATH}`,
-      default: DEFAULT_STATE_PATH,
+      properties: {
+        path: {
+          nullable: true,
+          type: "string",
+          description: `Path to the state file. Default: ${DEFAULT_STATE_PATH}`,
+          default: DEFAULT_STATE_PATH,
+        },
+      },
     },
     rawConfig: {
       nullable: true,
@@ -1734,9 +1752,9 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       networkId,
       dealSyncStartBlock: DEFAULT_START_BLOCK,
     },
-    ccp: {
-      proofPollPeriod: DEFAULT_PROOF_POLL_PERIOD,
-    },
+    // ccp: {
+    //   proofPollPeriod: DEFAULT_PROOF_POLL_PERIOD,
+    // },
     // metrics: {
     //   enabled: true,
     //   timerResolution: DEFAULT_TIMER_RESOLUTION,
@@ -1750,6 +1768,7 @@ function getDefaultCCPConfigYAML(): LatestCCPConfigYAML {
     rpcEndpoint: {
       host: DEFAULT_RPC_ENDPOINT_HOST,
       port: DEFAULT_RPC_ENDPOINT_PORT,
+      utilityThreadIds: DEFAULT_UTILITY_THREAD_IDS,
     },
     prometheusEndpoint: {
       host: DEFAULT_PROMETHEUS_ENDPOINT_HOST,
@@ -1759,7 +1778,9 @@ function getDefaultCCPConfigYAML(): LatestCCPConfigYAML {
       reportHashrate: DEFAULT_REPORT_HASHRATE,
       logLevel: DEFAULT_LOG_LEVEL,
     },
-    statePath: DEFAULT_STATE_PATH,
+    state: {
+      path: DEFAULT_STATE_PATH,
+    },
   };
 }
 
