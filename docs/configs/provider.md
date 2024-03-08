@@ -252,12 +252,12 @@ Metrics configuration
 
 ###### Properties
 
-| Property                      | Type    | Required | Description                    |
-|-------------------------------|---------|----------|--------------------------------|
-| `enabled`                     | boolean | No       | Metrics enabled                |
-| `timerResolution`             | string  | No       | Timer resolution               |
-| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled |
-| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled          |
+| Property                      | Type    | Required | Description                          |
+|-------------------------------|---------|----------|--------------------------------------|
+| `enabled`                     | boolean | No       | Metrics enabled. Default: true       |
+| `timerResolution`             | string  | No       | Timer resolution. Default: 1 minute  |
+| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled       |
+| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled. Default: true |
 
 ##### systemServices
 
@@ -398,12 +398,12 @@ Metrics configuration
 
 #### Properties
 
-| Property                      | Type    | Required | Description                    |
-|-------------------------------|---------|----------|--------------------------------|
-| `enabled`                     | boolean | No       | Metrics enabled                |
-| `timerResolution`             | string  | No       | Timer resolution               |
-| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled |
-| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled          |
+| Property                      | Type    | Required | Description                          |
+|-------------------------------|---------|----------|--------------------------------------|
+| `enabled`                     | boolean | No       | Metrics enabled. Default: true       |
+| `timerResolution`             | string  | No       | Timer resolution. Default: 1 minute  |
+| `tokioDetailedMetricsEnabled` | boolean | No       | Tokio detailed metrics enabled       |
+| `tokioMetricsEnabled`         | boolean | No       | Tokio metrics enabled. Default: true |
 
 ### systemServices
 
