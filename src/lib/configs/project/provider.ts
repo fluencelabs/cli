@@ -1588,12 +1588,12 @@ function noxConfigYAMLToConfigToml(
       walletPrivateKey,
       ...chain
     } = {},
-    ccp,
+    // ccp,
     listenIp,
     metrics,
     ...config
   }: LatestNoxConfigYAML,
-  ccpConfig: LatestCCPConfigYAML,
+  // ccpConfig: LatestCCPConfigYAML,
 ) {
   const chainConfig = {
     httpEndpoint: chain.httpEndpoint,
@@ -1931,7 +1931,10 @@ export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
         await writeFile(
           join(configsDir, getConfigTomlName(computePeerName)),
           stringify(
-            noxConfigYAMLToConfigToml(overriddenNoxConfig, overridenCCPConfig),
+            noxConfigYAMLToConfigToml(
+              overriddenNoxConfig,
+              //overridenCCPConfig
+            ),
           ),
           FS_OPTIONS,
         );
