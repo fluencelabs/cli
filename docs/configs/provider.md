@@ -263,10 +263,11 @@ IPFS config
 
 ###### Properties
 
-| Property               | Type   | Required | Description                       |
-|------------------------|--------|----------|-----------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
+| Property               | Type   | Required | Description                                     |
+|------------------------|--------|----------|-------------------------------------------------|
+| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
+| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
+| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
 
 ##### metrics
 
@@ -299,10 +300,11 @@ Aqua IPFS service configuration
 
 **Properties**
 
-| Property               | Type   | Required | Description                       |
-|------------------------|--------|----------|-----------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
+| Property               | Type   | Required | Description                                     |
+|------------------------|--------|----------|-------------------------------------------------|
+| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
+| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
+| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
 
 ###### decider
 
@@ -409,10 +411,11 @@ IPFS config
 
 #### Properties
 
-| Property               | Type   | Required | Description                       |
-|------------------------|--------|----------|-----------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
+| Property               | Type   | Required | Description                                     |
+|------------------------|--------|----------|-------------------------------------------------|
+| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
+| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
+| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
 
 ### metrics
 
@@ -445,10 +448,11 @@ Aqua IPFS service configuration
 
 ##### Properties
 
-| Property               | Type   | Required | Description                       |
-|------------------------|--------|----------|-----------------------------------|
-| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API |
-| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API    |
+| Property               | Type   | Required | Description                                     |
+|------------------------|--------|----------|-------------------------------------------------|
+| `externalApiMultiaddr` | string | No       | Multiaddress of external IPFS API               |
+| `ipfsBinaryPath`       | string | No       | Path to the IPFS binary. Default: /usr/bin/ipfs |
+| `localApiMultiaddr`    | string | No       | Multiaddress of local IPFS API                  |
 
 #### decider
 
