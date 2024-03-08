@@ -185,7 +185,7 @@ For advanced users. CCP config
 | Property          | Type   | Required | Description                                                                                                 |
 |-------------------|--------|----------|-------------------------------------------------------------------------------------------------------------|
 | `ccpEndpoint`     | string | No       | CCP endpoint. Default comes from top-level ccp config: http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port} |
-| `proofPollPeriod` | string | No       | Proof poll period                                                                                           |
+| `proofPollPeriod` | string | No       | Proof poll period. Default: 60 seconds                                                                      |
 
 ##### chain
 
@@ -331,7 +331,7 @@ For advanced users. CCP config
 | Property          | Type   | Required | Description                                                                                                 |
 |-------------------|--------|----------|-------------------------------------------------------------------------------------------------------------|
 | `ccpEndpoint`     | string | No       | CCP endpoint. Default comes from top-level ccp config: http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port} |
-| `proofPollPeriod` | string | No       | Proof poll period                                                                                           |
+| `proofPollPeriod` | string | No       | Proof poll period. Default: 60 seconds                                                                      |
 
 ### chain
 
