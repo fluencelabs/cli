@@ -49,8 +49,6 @@ import {
   HTTP_PORT_START,
   TCP_PORT_START,
   WEB_SOCKET_PORT_START,
-  CHAIN_RPC_CONTAINER_NAME,
-  CHAIN_RPC_PORT,
   LOCAL_IPFS_ADDRESS,
   TOML_EXT,
   IPFS_CONTAINER_NAME,
@@ -1700,7 +1698,6 @@ const DEFAULT_START_BLOCK = "earliest";
 
 async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
-  const isLocal = env === "local";
   const networkId = await getChainId();
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
   const contractAddresses = await DealClient.getContractAddresses(env);
@@ -1715,18 +1712,15 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       enable: ["aqua-ipfs", "decider"],
       decider: {
         deciderPeriodSec: 10,
-        workerIpfsMultiaddr: isLocal
-          ? NOX_IPFS_MULTIADDR
-          : "http://ipfs.fluence.dev",
+        workerIpfsMultiaddr:
+          env === "local" ? NOX_IPFS_MULTIADDR : "http://ipfs.fluence.dev",
         networkApiEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
         matcherAddress: contractAddresses.market,
       },
     },
     chain: {
       httpEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
-      wsEndpoint: isLocal
-        ? `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`
-        : WS_CHAIN_URLS[env],
+      wsEndpoint: WS_CHAIN_URLS[env],
       coreContract: contractAddresses.core,
       ccContract: contractAddresses.capacity,
       marketContract: contractAddresses.market,

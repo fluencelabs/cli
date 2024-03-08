@@ -155,10 +155,11 @@ export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
   local: `http://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
 };
 
-export const WS_CHAIN_URLS: Record<Exclude<ChainENV, "local">, string> = {
+export const WS_CHAIN_URLS: Record<ChainENV, string> = {
   // kras: "wss://ipc-kras.fluence.dev",
   dar: "wss://ipc-dar.fluence.dev",
   stage: "wss://ipc-stage.fluence.dev",
+  local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,
 };
 
 export const AQUA_EXT = "aqua";
