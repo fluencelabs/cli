@@ -48,7 +48,7 @@ Configuration to pass to the Capacity Commitment Prover
 | `prometheusEndpoint` | [object](#prometheusendpoint) | No       | Prometheus endpoint configuration                                                               |
 | `rawConfig`          | string                        | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority |
 | `rpcEndpoint`        | [object](#rpcendpoint)        | No       | RPC endpoint configuration                                                                      |
-| `statePath`          | string                        | No       | Path to the state file. Default: /fluence/data                                                  |
+| `state`              | [object](#state)              | No       | State configuration                                                                             |
 
 ### logs
 
@@ -78,10 +78,21 @@ RPC endpoint configuration
 
 #### Properties
 
-| Property | Type    | Required | Description                |
-|----------|---------|----------|----------------------------|
-| `host`   | string  | No       | RPC host. Default: 0.0.0.0 |
-| `port`   | integer | No       | RPC port. Default: 9389    |
+| Property           | Type      | Required | Description                |
+|--------------------|-----------|----------|----------------------------|
+| `host`             | string    | No       | RPC host. Default: 0.0.0.0 |
+| `port`             | integer   | No       | RPC port. Default: 9389    |
+| `utilityThreadIds` | integer[] | No       | Utility thread IDs         |
+
+### state
+
+State configuration
+
+#### Properties
+
+| Property | Type   | Required | Description                                    |
+|----------|--------|----------|------------------------------------------------|
+| `path`   | string | No       | Path to the state file. Default: /fluence/data |
 
 ## computePeers
 
@@ -117,7 +128,7 @@ Configuration to pass to the Capacity Commitment Prover
 | `prometheusEndpoint` | [object](#prometheusendpoint) | No       | Prometheus endpoint configuration                                                               |
 | `rawConfig`          | string                        | No       | Raw TOML config string to parse and merge with the rest of the config. Has the highest priority |
 | `rpcEndpoint`        | [object](#rpcendpoint)        | No       | RPC endpoint configuration                                                                      |
-| `statePath`          | string                        | No       | Path to the state file. Default: /fluence/data                                                  |
+| `state`              | [object](#state)              | No       | State configuration                                                                             |
 
 ##### logs
 
@@ -147,10 +158,21 @@ RPC endpoint configuration
 
 ###### Properties
 
-| Property | Type    | Required | Description                |
-|----------|---------|----------|----------------------------|
-| `host`   | string  | No       | RPC host. Default: 0.0.0.0 |
-| `port`   | integer | No       | RPC port. Default: 9389    |
+| Property           | Type      | Required | Description                |
+|--------------------|-----------|----------|----------------------------|
+| `host`             | string    | No       | RPC host. Default: 0.0.0.0 |
+| `port`             | integer   | No       | RPC port. Default: 9389    |
+| `utilityThreadIds` | integer[] | No       | Utility thread IDs         |
+
+##### state
+
+State configuration
+
+###### Properties
+
+| Property | Type   | Required | Description                                    |
+|----------|--------|----------|------------------------------------------------|
+| `path`   | string | No       | Path to the state file. Default: /fluence/data |
 
 #### nox
 
