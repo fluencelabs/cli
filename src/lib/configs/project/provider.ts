@@ -428,6 +428,8 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
   };
 };
 
+const DEFAULT_TIMER_RESOLUTION = "1 minute";
+
 const noxConfigYAMLSchemaV1 = {
   type: "object",
   description:
@@ -660,17 +662,20 @@ const noxConfigYAMLSchemaV1 = {
         enabled: {
           nullable: true,
           type: "boolean",
-          description: `Metrics enabled`,
+          description: `Metrics enabled. Default: true`,
+          default: true,
         },
         timerResolution: {
           nullable: true,
           type: "string",
-          description: `Timer resolution`,
+          description: `Timer resolution. Default: ${DEFAULT_TIMER_RESOLUTION}`,
+          default: DEFAULT_TIMER_RESOLUTION,
         },
         tokioMetricsEnabled: {
           nullable: true,
           type: "boolean",
-          description: `Tokio metrics enabled`,
+          description: `Tokio metrics enabled. Default: true`,
+          default: true,
         },
         tokioDetailedMetricsEnabled: {
           nullable: true,
@@ -715,6 +720,7 @@ const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
 const DEFAULT_REPORT_HASHRATE = false;
 const DEFAULT_LOG_LEVEL = "info";
 const DEFAULT_STATE_PATH = "/fluence/data";
+const DEFAULT_PROOF_POLL_PERIOD = "60 seconds";
 
 const ccpConfigYAMLSchemaV1 = {
   type: "object",
@@ -1727,6 +1733,14 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       networkId,
       dealSyncStartBlock: DEFAULT_START_BLOCK,
     },
+    ccp: {
+      proofPollPeriod: DEFAULT_PROOF_POLL_PERIOD,
+    },
+    // metrics: {
+    //   enabled: true,
+    //   timerResolution: DEFAULT_TIMER_RESOLUTION,
+    //   tokioMetricsEnabled: true,
+    // },
   };
 }
 
