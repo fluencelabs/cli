@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.20](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.19...fluence-cli-v0.15.20) (2024-03-09)
+
+
+### Features
+
+* add cc-remove and other provider and developer improvements [fixes DXJ-752] ([#840](https://github.com/fluencelabs/cli/issues/840)) ([c1b8157](https://github.com/fluencelabs/cli/commit/c1b8157024faa18082be1c2d28d954891a67e7ab))
+* bump deal-ts-clients to 0.10.0 ([#841](https://github.com/fluencelabs/cli/issues/841)) ([4bd26b8](https://github.com/fluencelabs/cli/commit/4bd26b884a8bd55ff10af96d2a87a2c8ef2847a7))
+
 ## [0.15.19](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.18...fluence-cli-v0.15.19) (2024-03-08)
 
 
