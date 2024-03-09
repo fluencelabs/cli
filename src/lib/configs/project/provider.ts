@@ -381,54 +381,26 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
     | "marketContractAddress"
     | "walletKey"
   > & {
-    // new. goes to chain_listener_config
     wsEndpoint?: string;
-    // new. goes to decider
     dealSyncStartBlock?: string;
-    // renamed
     marketContract?: string;
     ccContract?: string;
     coreContract?: string;
     walletPrivateKey?: string;
   };
   ccp?: {
-    // # NOX TOML: chain_listener_config.ccp_endpoint
-    // http://{ccp.rpcEndpoint.host}:{ccp.rpcEndpoint.port}
     ccpEndpoint?: string;
-    // # NOX TOML: chain_listener_config.proof_poll_period
-    // # Optional "60 seconds"
     proofPollPeriod?: string;
   };
   ipfs?: {
-    // # TOML: system_services.aqua_ipfs.external_api_multiaddr
-    // # Required
     externalApiMultiaddr?: string;
-    // # TOML: system_services.aqua_ipfs.local_api_multiaddr
-    // # Optional
     localApiMultiaddr?: string;
     ipfsBinaryPath?: string;
   };
-  // # these would
-  // cpusRange = "1-32" # It's actually possible to do complex things like "1,3-6,7-20,32", Nox will parse
-  // systemCpuCount = 1 # That's how much cores to allocate for the Nox itself. 0 is forbidden, cuz don't be greedy!
   cpusRange?: string;
   systemCpuCount?: number;
-  // # this would go to listen_config.listen_ip in Nox's Config.toml
-  // listenIp = "1.2.3.4"
-  // # would go to global external_multiaddresses in TOML
-  // externalMultiaddresses = ["/dns4/who.is.it.org/tcp/9999/ws", "/ip4/10.9.8.7/tcp/3210"]
   listenIp?: string;
   externalMultiaddresses?: Array<string>;
-  // # prometheus metrics will be available at {listen_id}:{httpPort}/metrics
-  // metrics:
-  //   # TOML: metrics_config.metrics_enabled
-  //   enabled = true
-  //   # TOML: metrics_config.metrics_timer_resolution
-  //   timer_resolution = "1 minute"
-  //   # TOML: tokio_metrics_enabled
-  //   tokio_metrics_enabled = true
-  //   # TOML: tokio_metrics_poll_histogram_enabled
-  //   tokio_detailed_metrics_enabled = true # could be expensive performance-wise
   metrics?: {
     enabled?: boolean;
     timerResolution?: string;
@@ -1673,16 +1645,7 @@ function noxConfigYAMLToConfigToml(
             proofPollPeriod: ccp?.proofPollPeriod,
           },
         }),
-    tokioMetricsEnabled: metrics?.tokioMetricsEnabled,
-    tokioDetailedMetricsEnabled: metrics?.tokioDetailedMetricsEnabled,
-    ...(metrics?.enabled !== undefined || metrics?.timerResolution !== undefined
-      ? {
-          metricsConfig: {
-            metricsEnabled: metrics.enabled,
-            metricsTimerResolution: metrics.timerResolution,
-          },
-        }
-      : {}),
+    ...metrics,
   }) as JsonMap;
 }
 

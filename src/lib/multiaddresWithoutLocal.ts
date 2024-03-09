@@ -40,7 +40,7 @@ export function getPeerId(addr: string): string {
   return id;
 }
 
-function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
+export function addrsToNodes(multiaddrs: string[]): AddrAndPeerId[] {
   return multiaddrs.map((multiaddr) => {
     return {
       peerId: getPeerId(multiaddr),

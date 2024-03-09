@@ -45,7 +45,7 @@ import {
   setTryTimeout,
   stringifyUnknown,
 } from "../../src/lib/helpers/utils.js";
-import { addrsToNodes } from "../../src/lib/multiaddres.js";
+import { addrsToNodes } from "../../src/lib/multiaddresWithoutLocal.js";
 import { getAquaMainPath } from "../../src/lib/paths.js";
 import { validateDeployedServicesAnswerSchema } from "../validators/deployedServicesAnswerValidator.js";
 import { validateSpellLogs } from "../validators/spellLogsValidator.js";
