@@ -166,7 +166,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
         ? !(await confirm({
             message: `You previously deployed ${color.yellow(
               workerName,
-            )}, but this deal is already ended. Do you want to create a new deal and overwrite an old one? (at ${workersConfig.$getPath()})\nYou will not be able to withdraw money from the old deal after that`,
+            )}, but this deal is already ended. Do you want to create a new deal and overwrite the old one? (at ${workersConfig.$getPath()})\nPlease keep this deal id ${deal.id} to withdraw the money from it after state overwrite`,
             default: true,
           }))
         : true;
