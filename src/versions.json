@@ -1,6 +1,6 @@
 {
   "protocolVersion": 1,
-  "nox": "fluencelabs/nox:0.22.2  ",
+  "nox": "fluencelabs/nox:0.22.2",
   "chain-rpc": "fluencelabs/chain-rpc:0.10.0",
   "chain-deploy-script": "fluencelabs/chain-deploy-script:0.10.0",
   "subgraph-deploy-script": "fluencelabs/subgraph-deploy-script:0.10.0",
