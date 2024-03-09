@@ -183,6 +183,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | Property                 | Type                      | Required | Description                                                                                                       |
 |--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                              |
 | `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
 | `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
 | `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |
@@ -331,6 +332,7 @@ Configuration to pass to the nox compute peer. Config.toml files are generated f
 | Property                 | Type                      | Required | Description                                                                                                       |
 |--------------------------|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
 | `aquavmPoolSize`         | integer                   | No       | Number of aquavm instances to run. Default: 2                                                                     |
+| `bootstrapNodes`         | string[]                  | No       | List of bootstrap nodes. Default: all addresses for the selected env                                              |
 | `ccp`                    | [object](#ccp)            | No       | For advanced users. CCP config                                                                                    |
 | `chain`                  | [object](#chain)          | No       | Chain config                                                                                                      |
 | `cpusRange`              | string                    | No       | Range of CPU cores to use. Default: 1-32                                                                          |

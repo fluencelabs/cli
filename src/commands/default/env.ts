@@ -24,10 +24,8 @@ import { initNewWorkersConfigReadonly } from "../../lib/configs/project/workers.
 import { ENV_ARG } from "../../lib/const.js";
 import { ensureAquaFileWithWorkerInfo } from "../../lib/deployWorkers.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import {
-  ensureCustomAddrsAndPeerIds,
-  updateRelaysJSON,
-} from "../../lib/multiaddres.js";
+import { updateRelaysJSON } from "../../lib/multiaddres.js";
+import { ensureCustomAddrsAndPeerIds } from "../../lib/multiaddresWithoutLocal.js";
 import { ensureValidFluenceEnv } from "../../lib/resolveFluenceEnv.js";
 
 export default class Env extends BaseCommand<typeof Env> {

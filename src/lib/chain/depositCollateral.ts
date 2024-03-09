@@ -14,164 +14,35 @@
  * limitations under the License.
  */
 
-import type { CommitmentCreatedEvent } from "@fluencelabs/deal-ts-clients/dist/typechain-types/Capacity.js";
-import type {
-  TypedContractEvent,
-  TypedEventLog,
-} from "@fluencelabs/deal-ts-clients/dist/typechain-types/common.js";
 import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
-import {
-  type ResolvedComputePeer,
-  resolveComputePeersByNames,
-} from "../configs/project/provider.js";
-import { NOX_NAMES_FLAG_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
-import { peerIdHexStringToBase58String } from "./conversions.js";
+import { getCommitments, type CCFlags } from "./commitment.js";
 import { fltFormatWithSymbol } from "./currencies.js";
 
-type ComputePeerWithCommitmentCreatedEvent = ResolvedComputePeer & {
-  event: TypedEventLog<
-    TypedContractEvent<
-      CommitmentCreatedEvent.InputTuple,
-      CommitmentCreatedEvent.OutputTuple,
-      CommitmentCreatedEvent.OutputObject
-    >
-  >;
-};
-
-export async function getComputePeersWithCommitmentCreatedEvents(
-  computePeers: ResolvedComputePeer[],
-) {
-  const { dealClient } = await getDealClient();
-
-  // TODO: replace with this after Elshan's fix
-
-  // const market = await dealClient.getMarket();
-
-  // const [errors, computePeersWithChainInfo] = splitErrorsAndResults(
-  //   await Promise.allSettled(
-  //     computePeers.map(async (computePeer) => {
-  //       const chainInfo = await market.getComputePeer(
-  //         await peerIdToUint8Array(computePeer.peerId),
-  //       );
-
-  //       return {
-  //         ...computePeer,
-  //         commitmentId: chainInfo.commitmentId,
-  //         offerId: chainInfo.offerId,
-  //         owner: chainInfo.owner,
-  //         unitCount: chainInfo.unitCount,
-  //       };
-  //     }),
-  //   ),
-  //   (res) => {
-  //     if (res.status === "fulfilled") {
-  //       return { result: res.value };
-  //     }
-
-  //     return { error: stringifyUnknown(res.reason) };
-  //   },
-  // );
-
-  // if (errors.length > 0) {
-  //   commandObj.error(
-  //     `Failed to get commitment IDs for noxes: ${errors.join("\n")}`,
-  //   );
-  // }
-
-  const capacity = await dealClient.getCapacity();
-
-  const commitmentCreatedEvents = await Promise.all(
-    (await capacity.queryFilter(capacity.filters.CommitmentCreated)).map(
-      async (event) => {
-        return {
-          event,
-          peerId: await peerIdHexStringToBase58String(event.args.peerId),
-        };
-      },
-    ),
-  );
-
-  const computePeersWithCommitmentCreatedEvents = computePeers
-    .map((computePeer) => {
-      const { event } =
-        commitmentCreatedEvents.find(({ peerId }) => {
-          return peerId === computePeer.peerId;
-        }) ?? {};
-
-      return {
-        ...computePeer,
-        event,
-      };
-    })
-    .filter((c): c is ComputePeerWithCommitmentCreatedEvent => {
-      return c.event !== undefined;
-    });
-
-  return computePeersWithCommitmentCreatedEvents;
-}
-
-export async function depositCollateralByNoxNames(flags: {
-  [NOX_NAMES_FLAG_NAME]: string | undefined;
-}) {
-  const computePeers = await resolveComputePeersByNames(flags);
-
-  const computePeersWithCommitmentCreatedEvents =
-    await getComputePeersWithCommitmentCreatedEvents(computePeers);
-
-  commandObj.log(
-    `Found created commitments for the following peers: ${color.yellow(
-      computePeersWithCommitmentCreatedEvents
-        .map(({ name }) => {
-          return name;
-        })
-        .join(", "),
-    )}`,
-  );
-
-  const commitmentIds = computePeersWithCommitmentCreatedEvents.map(
-    ({ event, ...rest }) => {
-      return { commitmentId: event.args.commitmentId, event, ...rest };
-    },
-  );
-
-  await depositCollateral(commitmentIds);
-}
-
-export async function depositCollateral(
-  commitmentIds: (
-    | { commitmentId: string }
-    | ({ commitmentId: string } & ComputePeerWithCommitmentCreatedEvent)
-  )[],
-  // | (Awaited<
-  //     ReturnType<
-  //       Awaited<ReturnType<DealClient["getMarket"]>>["getComputePeer"]
-  //     >
-  //   > &
-  //     ResolvedComputePeer)
-) {
-  const [firstCommitmentId] = commitmentIds;
+export async function depositCollateral(flags: CCFlags) {
+  const commitments = await getCommitments(flags);
+  const [firstCommitment] = commitments;
 
   const isProvider =
-    firstCommitmentId !== undefined && "peerId" in firstCommitmentId;
+    firstCommitment !== undefined &&
+    "providerConfigComputePeer" in firstCommitment;
 
   const { dealClient } = await getDealClient();
   const capacity = await dealClient.getCapacity();
 
-  const computePeersWithCollateral = await Promise.all(
-    commitmentIds.map(async ({ commitmentId, ...rest }) => {
+  const commitmentsWithCollateral = await Promise.all(
+    commitments.map(async (commitment) => {
       return {
-        ...rest,
-        commitmentId,
-        collateral: await getCollateral(commitmentId),
+        ...commitment,
+        collateral: await getCollateral(commitment.commitmentId),
       };
     }),
   );
 
-  const collateralToApproveCommitment = computePeersWithCollateral.reduce(
+  const collateralToApproveCommitment = commitmentsWithCollateral.reduce(
     (acc, c) => {
       return acc + c.collateral;
     },
@@ -180,7 +51,7 @@ export async function depositCollateral(
 
   await sign(
     capacity.depositCollateral,
-    commitmentIds.map(({ commitmentId }) => {
+    commitments.map(({ commitmentId }) => {
       return commitmentId;
     }),
     {
@@ -190,7 +61,7 @@ export async function depositCollateral(
 
   commandObj.logToStderr(
     `${color.yellow(
-      commitmentIds.length,
+      commitments.length,
     )} capacity commitments have been successfully activated by adding collateral!
 ${
   isProvider
@@ -203,16 +74,20 @@ Deposited ${color.yellow(
 
 ${(
   await Promise.all(
-    computePeersWithCollateral.map(async (c) => {
+    commitmentsWithCollateral.map(async (c) => {
       return `Capacity commitment${
-        "name" in c ? ` for ${color.yellow(c.name)}` : ""
+        "providerConfigComputePeer" in c
+          ? ` for ${color.yellow(c.providerConfigComputePeer.name)}`
+          : ""
       } successfully activated!
 Commitment ID: ${color.yellow(c.commitmentId)}
 Collateral: ${color.yellow(await fltFormatWithSymbol(c.collateral))}
 ${
-  "computeUnits" in c
-    ? `Peer ID: ${color.yellow(c.peerId)}
-Number of compute units: ${color.yellow(c.computeUnits)}
+  "providerConfigComputePeer" in c
+    ? `Peer ID: ${color.yellow(c.providerConfigComputePeer.peerId)}
+Number of compute units: ${color.yellow(
+        c.providerConfigComputePeer.computeUnits,
+      )}
 `
     : ""
 }`;
