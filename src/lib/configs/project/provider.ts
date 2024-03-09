@@ -1645,7 +1645,10 @@ function noxConfigYAMLToConfigToml(
             proofPollPeriod: ccp?.proofPollPeriod,
           },
         }),
-    ...metrics,
+    tokioMetricsEnabled: metrics?.tokioMetricsEnabled,
+    tokioDetailedMetricsEnabled: metrics?.tokioDetailedMetricsEnabled,
+    metricsEnabled: metrics?.enabled,
+    metricsTimerResolution: metrics?.timerResolution,
   }) as JsonMap;
 }
 
