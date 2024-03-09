@@ -47,10 +47,12 @@ import {
 } from "./const.js";
 import { dbg } from "./dbg.js";
 import { dealCreate, dealUpdate, match } from "./deal.js";
+import { getReadonlyDealClient } from "./dealClient.js";
 import { ensureChainEnv } from "./ensureChainNetwork.js";
 import { disconnectFluenceClient, initFluenceClient } from "./jsClient.js";
 import { initCli } from "./lifeCycle.js";
 import { doRegisterIpfsClient } from "./localServices/ipfs.js";
+import { confirm } from "./prompt.js";
 import { ensureFluenceEnv } from "./resolveFluenceEnv.js";
 
 export const DEPLOY_DESCRIPTION = `Deploy according to 'deployments' property in ${FLUENCE_CONFIG_FULL_FILE_NAME}`;
@@ -129,6 +131,8 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
     }
   > = {};
 
+  const { readonlyDealClient } = await getReadonlyDealClient();
+
   for (const { name: workerName, definition: appCID } of uploadResult.workers) {
     const deal = fluenceConfig.deployments?.[workerName];
 
@@ -148,7 +152,32 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
     const previouslyDeployedDeal =
       workersConfig.deals?.[fluenceEnv]?.[workerName];
 
+    let isDealUpdate = previouslyDeployedDeal !== undefined;
+
     if (previouslyDeployedDeal !== undefined) {
+      const deal = readonlyDealClient.getDeal(
+        previouslyDeployedDeal.dealIdOriginal,
+      );
+
+      const status = await deal.getStatus();
+      const isDealEnded = status === 2n;
+
+      isDealUpdate = isDealEnded
+        ? !(await confirm({
+            message: `You previously deployed ${color.yellow(
+              workerName,
+            )}, but this deal is already ended. Do you want to create a new deal and overwrite an old one? (at ${workersConfig.$getPath()})\nYou will not be able to withdraw money from the old deal after that`,
+            default: true,
+          }))
+        : true;
+    }
+
+    if (isDealUpdate) {
+      assert(
+        previouslyDeployedDeal !== undefined,
+        "Unreachable. isDealUpdate can be true only if previouslyDeployedDeal !== undefined",
+      );
+
       if (!flags.update) {
         commandObj.logToStderr(
           `\n${color.yellow(

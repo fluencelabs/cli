@@ -21,7 +21,7 @@ import { Flags } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { createCommitments } from "../../lib/chain/commitment.js";
-import { depositCollateralByNoxNames } from "../../lib/chain/depositCollateral.js";
+import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { distributeToNox } from "../../lib/chain/distributeToNox.js";
 import { createOffers } from "../../lib/chain/offer.js";
 import { registerProvider } from "../../lib/chain/providerInfo.js";
@@ -174,6 +174,6 @@ export default class Up extends BaseCommand<typeof Up> {
     });
 
     await createCommitments({ ...flags, ...allNoxNames, env });
-    await depositCollateralByNoxNames(allNoxNames);
+    await depositCollateral(allNoxNames);
   }
 }

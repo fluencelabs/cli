@@ -80,6 +80,7 @@ import {
 } from "../../helpers/validations.js";
 import { validateBatchAsync } from "../../helpers/validations.js";
 import { genSecretKeyOrReturnExisting } from "../../keyPairs.js";
+import { resolveRelaysWithoutLocal } from "../../multiaddresWithoutLocal.js";
 import {
   ensureFluenceConfigsDir,
   getProviderConfigPath,
@@ -434,6 +435,7 @@ type NoxConfigYAMLV1 = Omit<NoxConfigYAMLV0, "chainConfig"> & {
     tokioMetricsEnabled?: boolean;
     tokioDetailedMetricsEnabled?: boolean;
   };
+  bootstrapNodes?: Array<string>;
 };
 
 const DEFAULT_TIMER_RESOLUTION = "1 minute";
@@ -705,6 +707,12 @@ const noxConfigYAMLSchemaV1 = {
         },
       },
       required: [],
+    },
+    bootstrapNodes: {
+      nullable: true,
+      type: "array",
+      items: { type: "string" },
+      description: `List of bootstrap nodes. Default: all addresses for the selected env`,
     },
     rawConfig: {
       nullable: true,
@@ -1665,35 +1673,16 @@ function noxConfigYAMLToConfigToml(
             proofPollPeriod: ccp?.proofPollPeriod,
           },
         }),
-    ...(metrics === undefined
-      ? {}
-      : {
-          ...(metrics.enabled === undefined &&
-          metrics.timerResolution === undefined
-            ? {}
-            : {
-                ...(metrics.enabled === undefined
-                  ? {}
-                  : { metricsEnabled: metrics.enabled }),
-                ...(metrics.timerResolution === undefined
-                  ? {}
-                  : { metricsTimerResolution: metrics.timerResolution }),
-              }),
-          ...(metrics.tokioMetricsEnabled === undefined &&
-          metrics.tokioDetailedMetricsEnabled === undefined
-            ? {}
-            : {
-                ...(metrics.tokioMetricsEnabled === undefined
-                  ? {}
-                  : { tokioMetricsEnabled: metrics.tokioMetricsEnabled }),
-                ...(metrics.tokioDetailedMetricsEnabled === undefined
-                  ? {}
-                  : {
-                      tokioMetricsPollHistogramEnabled:
-                        metrics.tokioDetailedMetricsEnabled,
-                    }),
-              }),
-        }),
+    tokioMetricsEnabled: metrics?.tokioMetricsEnabled,
+    tokioDetailedMetricsEnabled: metrics?.tokioDetailedMetricsEnabled,
+    ...(metrics?.enabled !== undefined || metrics?.timerResolution !== undefined
+      ? {
+          metricsConfig: {
+            metricsEnabled: metrics.enabled,
+            metricsTimerResolution: metrics.timerResolution,
+          },
+        }
+      : {}),
   }) as JsonMap;
 }
 
@@ -1784,11 +1773,14 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
     ccp: {
       proofPollPeriod: DEFAULT_PROOF_POLL_PERIOD,
     },
-    // metrics: {
-    //   enabled: true,
-    //   timerResolution: DEFAULT_TIMER_RESOLUTION,
-    //   tokioMetricsEnabled: true,
-    // },
+    ...(env === "local"
+      ? {}
+      : { bootstrapNodes: await resolveRelaysWithoutLocal(env) }),
+    metrics: {
+      enabled: true,
+      timerResolution: DEFAULT_TIMER_RESOLUTION,
+      tokioMetricsEnabled: true,
+    },
   };
 }
 

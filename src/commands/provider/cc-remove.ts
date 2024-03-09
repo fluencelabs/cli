@@ -15,13 +15,16 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { depositCollateral } from "../../lib/chain/depositCollateral.js";
-import { CC_FLAGS, CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
+import { removeCommitments } from "../../lib/chain/commitment.js";
+import { CC_FLAGS, CHAIN_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
-  static override description = `Add ${FLT_SYMBOL} collateral to capacity commitment to activate it`;
-  static override aliases = ["provider:ca"];
+export default class RemoveCommitment extends BaseCommand<
+  typeof RemoveCommitment
+> {
+  static override aliases = ["provider:cr"];
+  static override description =
+    "Remove Capacity commitment. You can remove it only BEFORE you activated it by depositing collateral";
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
@@ -29,7 +32,7 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(AddCollateral));
-    await depositCollateral(flags);
+    const { flags } = await initCli(this, await this.parse(RemoveCommitment));
+    await removeCommitments(flags);
   }
 }

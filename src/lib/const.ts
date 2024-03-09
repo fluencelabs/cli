@@ -509,6 +509,17 @@ export const FLUENCE_CLIENT_FLAGS = {
   ...ENV_FLAG,
 } as const;
 
+export const CC_FLAGS = {
+  [NOX_NAMES_FLAG_NAME]: Flags.string({
+    ...NOX_NAMES_FLAG_CONFIG,
+    exclusive: ["ids"],
+  }),
+  ids: Flags.string({
+    description: "Comma separated capacity commitment IDs",
+    exclusive: [NOX_NAMES_FLAG_NAME],
+  }),
+};
+
 export type FluenceClientFlags = FromFlagsDef<typeof FLUENCE_CLIENT_FLAGS>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

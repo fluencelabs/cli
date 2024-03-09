@@ -19,9 +19,7 @@ import { Args } from "@oclif/core";
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { depositCollateral } from "../../lib/chain/depositCollateral.js";
 import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
 export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
   static override aliases = ["delegator:ca"];
@@ -38,16 +36,6 @@ export default class AddCollateral extends BaseCommand<typeof AddCollateral> {
 
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(AddCollateral));
-
-    await depositCollateral(
-      commaSepStrToArr(
-        args.IDS ??
-          (await input({
-            message: "Enter comma-separated capacity commitment IDs",
-          })),
-      ).map((commitmentId) => {
-        return { commitmentId };
-      }),
-    );
+    await depositCollateral({ ids: args.IDS });
   }
 }

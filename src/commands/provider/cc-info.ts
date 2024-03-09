@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+import type { ICapacity } from "@fluencelabs/deal-ts-clients";
 import { color } from "@oclif/color";
 import isUndefined from "lodash-es/isUndefined.js";
 import omitBy from "lodash-es/omitBy.js";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
-import { getComputePeersWithCommitmentCreatedEvents } from "../../lib/chain/depositCollateral.js";
+import {
+  ccStatusToString,
+  getCommitments,
+} from "../../lib/chain/commitment.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
-import { CHAIN_FLAGS, CLI_NAME, NOX_NAMES_FLAG } from "../../lib/const.js";
+import { CHAIN_FLAGS, CC_FLAGS } from "../../lib/const.js";
 import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
@@ -33,70 +35,46 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
   static override description = "Get info about capacity commitments";
   static override flags = {
     ...baseFlags,
-    ...NOX_NAMES_FLAG,
     ...CHAIN_FLAGS,
+    ...CC_FLAGS,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCInfo));
     const { readonlyDealClient } = await getReadonlyDealClient();
-    const market = await readonlyDealClient.getMarket();
     const capacity = await readonlyDealClient.getCapacity();
-
-    const computePeers = await resolveComputePeersByNames(flags);
-
-    const computePeersWithCommitmentCreatedEvents =
-      await getComputePeersWithCommitmentCreatedEvents(computePeers);
-
+    const commitments = await getCommitments(flags);
     const { ethers } = await import("ethers");
 
     const infos = await Promise.all(
-      computePeers.map(async ({ peerId, name }) => {
-        const { event } =
-          computePeersWithCommitmentCreatedEvents.find((c) => {
-            return c.name === name;
-          }) ?? {};
-
-        let commitmentId = event?.args.commitmentId;
-
-        let commitment: Partial<
-          Awaited<ReturnType<(typeof capacity)["getCommitment"]>>
-        > =
-          event === undefined
-            ? {}
-            : {
-                peerId: event.args.peerId,
-                rewardDelegatorRate: event.args.rewardDelegationRate,
-                collateralPerUnit: event.args.fltCollateralPerUnit,
-                delegator: event.args.delegator,
-              };
+      commitments.map(async (c) => {
+        let commitment: Partial<ICapacity.CommitmentViewStructOutput> =
+          "commitmentCreatedEvent" in c
+            ? {
+                peerId: c.commitmentCreatedEvent.args.peerId,
+                rewardDelegatorRate:
+                  c.commitmentCreatedEvent.args.rewardDelegationRate,
+                collateralPerUnit:
+                  c.commitmentCreatedEvent.args.fltCollateralPerUnit,
+                delegator: c.commitmentCreatedEvent.args.delegator,
+              }
+            : {};
 
         try {
-          const peer = await market.getComputePeer(
-            await peerIdToUint8Array(peerId),
-          );
-
-          commitment = await capacity.getCommitment(
-            peer.commitmentId === ethers.ZeroAddress.toString() &&
-              commitmentId !== undefined
-              ? commitmentId
-              : peer.commitmentId,
-          );
-
-          commitmentId = peer.commitmentId;
+          commitment = await capacity.getCommitment(c.commitmentId);
         } catch {}
 
         return omitBy(
           {
-            Nox: name,
-            PeerId: peerId,
+            ...("providerConfigComputePeer" in c
+              ? {
+                  Nox: c.providerConfigComputePeer.name,
+                  PeerId: c.providerConfigComputePeer.peerId,
+                }
+              : {}),
             "PeerId Hex": commitment.peerId,
-            "Capacity commitment ID": commitmentId,
-            Status:
-              commitmentId === undefined
-                ? `NotCreated (you can create it using '${CLI_NAME} provider cc-create' command)`
-                : ccStatusToString(commitment.status) ??
-                  `WaitDelegation (you can activate it using '${CLI_NAME} provider cc-activate' command)`,
+            "Capacity commitment ID": c.commitmentId,
+            Status: ccStatusToString(commitment.status),
             "Start epoch": commitment.startEpoch?.toString(),
             "End epoch": commitment.endEpoch?.toString(),
             "Reward delegator rate": rewardDelegationRateToString(
@@ -122,17 +100,6 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
       commandObj.logToStderr(yamlDiffPatch("", {}, restInfo));
     }
   }
-}
-
-function ccStatusToString(status: bigint | undefined) {
-  return [
-    "Active",
-    "WaitDelegation",
-    "WaitStart",
-    "Inactive",
-    "Failed",
-    "Removed",
-  ][Number(status)];
 }
 
 function rewardDelegationRateToString(rewardDelegatorRate: bigint | undefined) {

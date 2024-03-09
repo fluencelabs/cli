@@ -69,8 +69,8 @@ export type OffersArgs = {
 };
 
 export async function createOffers(flags: OffersArgs) {
-  await assertProviderIsRegistered();
   const offers = await resolveOffersFromProviderConfig(flags);
+  await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
   const usdc = await dealClient.getUSDC();
@@ -290,8 +290,8 @@ async function resolveOfferInfo({
 }
 
 export async function updateOffers(flags: OffersArgs) {
-  await assertProviderIsRegistered();
   const offers = await resolveOffersFromProviderConfig(flags);
+  await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
   const market = await dealClient.getMarket();
 
