@@ -90,9 +90,9 @@ State configuration
 
 #### Properties
 
-| Property | Type   | Required | Description                                    |
-|----------|--------|----------|------------------------------------------------|
-| `path`   | string | No       | Path to the state file. Default: /fluence/data |
+| Property | Type   | Required | Description                              |
+|----------|--------|----------|------------------------------------------|
+| `path`   | string | No       | Path to the state file. Default: ./state |
 
 ## computePeers
 
@@ -170,9 +170,9 @@ State configuration
 
 ###### Properties
 
-| Property | Type   | Required | Description                                    |
-|----------|--------|----------|------------------------------------------------|
-| `path`   | string | No       | Path to the state file. Default: /fluence/data |
+| Property | Type   | Required | Description                              |
+|----------|--------|----------|------------------------------------------|
+| `path`   | string | No       | Path to the state file. Default: ./state |
 
 #### nox
 
