@@ -723,7 +723,7 @@ const DEFAULT_PROMETHEUS_ENDPOINT_HOST = "0.0.0.0";
 const DEFAULT_PROMETHEUS_ENDPOINT_PORT = 9384;
 const DEFAULT_REPORT_HASHRATE = false;
 const DEFAULT_LOG_LEVEL = "info";
-const DEFAULT_STATE_PATH = "/fluence/data";
+const DEFAULT_STATE_PATH = "./state";
 const DEFAULT_UTILITY_THREAD_IDS = [1];
 
 const ccpConfigYAMLSchemaV1 = {
