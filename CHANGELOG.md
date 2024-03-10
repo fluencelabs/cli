@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.21](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.20...fluence-cli-v0.15.21) (2024-03-10)
+
+
+### Bug Fixes
+
+* **ccp-config:** use "./state" as default state path ([#845](https://github.com/fluencelabs/cli/issues/845)) ([ea4a180](https://github.com/fluencelabs/cli/commit/ea4a180c415fe4682f16c185b8f46fa4f0e87087))
+* **ci:** dump anvil state at the end ([#843](https://github.com/fluencelabs/cli/issues/843)) ([9a4d679](https://github.com/fluencelabs/cli/commit/9a4d6797ad8f0f693e4d7efe266f70f82319d77b))
+
 ## [0.15.20](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.19...fluence-cli-v0.15.20) (2024-03-09)
 
 
