@@ -15,26 +15,13 @@
  */
 
 import crypto from "node:crypto";
-import {
-  access,
-  copyFile,
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { access, mkdir, rm, writeFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 
 import { color } from "@oclif/color";
 
-import { buildModules } from "../buildModules.js";
 import { commandObj } from "../commandObj.js";
 import { getConfigPath } from "../configs/initConfig.js";
-import type { FluenceConfigReadonly } from "../configs/project/fluence.js";
-import {
-  type ModuleConfigReadonly,
-  initNewModuleConfig,
-} from "../configs/project/module.js";
 import {
   MODULE_CONFIG_FULL_FILE_NAME,
   MODULE_TYPE_RUST,
@@ -42,9 +29,7 @@ import {
   SPELL_CONFIG_FULL_FILE_NAME,
   WASM_EXT,
 } from "../const.js";
-import type { MarineCLI } from "../marineCli.js";
 import {
-  ensureFluenceTmpModulePath,
   ensureFluenceModulesDir,
   ensureFluenceServicesDir,
   ensureFluenceSpellsDir,
@@ -253,72 +238,3 @@ export const getServiceAbsolutePath = ensureOrGetConfigAbsolutePath(
   getServicePathFromUrl,
   SERVICE_CONFIG_FULL_FILE_NAME,
 );
-
-export async function packModule(
-  moduleConfig: ModuleConfigReadonly,
-  marineCli: MarineCLI,
-  marineBuildArgs: string | undefined,
-  maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
-  destination: string,
-) {
-  await buildModules(
-    [moduleConfig],
-    marineCli,
-    marineBuildArgs,
-    maybeFluenceConfig,
-  );
-
-  const wasmPath = getModuleWasmPath(moduleConfig);
-  const tmpModuleDirPath = await ensureFluenceTmpModulePath();
-
-  const tmpModuleConfigDirPath = join(
-    tmpModuleDirPath,
-    MODULE_CONFIG_FULL_FILE_NAME,
-  );
-
-  await copyFile(moduleConfig.$getPath(), tmpModuleConfigDirPath);
-
-  const tmpWasmPath = join(
-    tmpModuleDirPath,
-    `${moduleConfig.name}.${WASM_EXT}`,
-  );
-
-  await copyFile(wasmPath, tmpWasmPath);
-
-  const moduleToPackConfig = await initNewModuleConfig(
-    tmpModuleConfigDirPath,
-    moduleConfig.name,
-  );
-
-  delete moduleToPackConfig.type;
-
-  // eslint-disable-next-line import/extensions
-  const { CID } = await import("multiformats/cid");
-  // eslint-disable-next-line import/extensions
-  const raw = await import("multiformats/codecs/raw");
-  // eslint-disable-next-line import/extensions
-  const { sha256 } = await import("multiformats/hashes/sha2");
-  const bytes = raw.encode(await readFile(tmpWasmPath));
-  const hash = await sha256.digest(bytes);
-
-  const cid = CID.createV1(raw.code, hash);
-
-  moduleToPackConfig.cid = cid.toString();
-  await moduleToPackConfig.$commit();
-
-  const tar = (await import("tar")).default;
-
-  await mkdir(destination, { recursive: true });
-
-  await tar.c(
-    {
-      file: join(destination, `${moduleConfig.name}.tar.gz`),
-      gzip: true,
-      cwd: tmpModuleDirPath,
-    },
-    [
-      relative(tmpModuleDirPath, tmpModuleConfigDirPath),
-      relative(tmpModuleDirPath, tmpWasmPath),
-    ],
-  );
-}

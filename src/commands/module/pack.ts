@@ -27,7 +27,7 @@ import {
   MARINE_BUILD_ARGS_FLAG_NAME,
   MODULE_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { packModule } from "../../lib/helpers/downloadFile.js";
+import { packModule } from "../../lib/helpers/packModule.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { input } from "../../lib/prompt.js";
