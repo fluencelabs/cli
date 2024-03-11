@@ -629,7 +629,7 @@ __metadata:
     "@fluencelabs/air-beautify-wasm": 0.3.6
     "@fluencelabs/aqua-api": 0.14.2
     "@fluencelabs/aqua-to-js": 0.3.5
-    "@fluencelabs/deal-ts-clients": 0.10.0
+    "@fluencelabs/deal-ts-clients": 0.10.1
     "@fluencelabs/fluence-network-environment": 1.1.2
     "@fluencelabs/js-client": 0.9.0
     "@fluencelabs/npm-aqua-compiler": 0.0.3
@@ -704,9 +704,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fluencelabs/deal-ts-clients@npm:0.10.0":
-  version: 0.10.0
-  resolution: "@fluencelabs/deal-ts-clients@npm:0.10.0"
+"@fluencelabs/deal-ts-clients@npm:0.10.1":
+  version: 0.10.1
+  resolution: "@fluencelabs/deal-ts-clients@npm:0.10.1"
   dependencies:
     "@graphql-typed-document-node/core": ^3.2.0
     debug: ^4.3.4
@@ -716,7 +716,7 @@ __metadata:
     graphql-request: ^6.1.0
     graphql-scalars: ^1.22.4
     graphql-tag: ^2.12.6
-  checksum: e875ad824352d824e3cda7579011c0ce113bf26d635c6ad543c3023d00a8c1ae155199523c7d49c5a08bc9923f233cb9a60356841a51e00a8a090aa762f28245
+  checksum: 96de4011984e87c026757ef6a3f3544ad094c996f83769b6c266f60a0ccb8a44c7c9d709b5a7e44c644e7e2407c8c90f7ad215c76acda7bebd459c2eccb92e18
   languageName: node
   linkType: hard
 
