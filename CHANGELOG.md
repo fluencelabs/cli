@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.22](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.21...fluence-cli-v0.15.22) (2024-03-11)
+
+
+### Features
+
+* update deal-ts-clients to 0.10.1; nox to 0.23.2 ([#846](https://github.com/fluencelabs/cli/issues/846)) ([d942bbc](https://github.com/fluencelabs/cli/commit/d942bbccc5b71dcbaff92ebb8a52560943c51a97))
+
 ## [0.15.21](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.20...fluence-cli-v0.15.21) (2024-03-10)
 
 
