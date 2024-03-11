@@ -369,7 +369,7 @@ export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
 };
 
 export const ensureFluenceTmpModulePath = async (): Promise<string> => {
-  return join(await ensureFluenceTmpDir(), "module");
+  return ensureDir(join(await ensureFluenceTmpDir(), "module"));
 };
 
 export async function ensureFluenceAquaDependenciesPath(): Promise<string> {
