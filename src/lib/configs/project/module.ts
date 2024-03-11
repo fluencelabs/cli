@@ -36,6 +36,7 @@ import {
   type InitializedReadonlyConfig,
   type Migrations,
   type GetDefaultConfig,
+  getConfigInitFunction,
 } from "../initConfig.js";
 
 export type OverridableModuleProperties = {
@@ -45,6 +46,7 @@ export type OverridableModuleProperties = {
   volumes?: Record<string, string>;
   envs?: Record<string, string>;
   mountedBinaries?: Record<string, string>;
+  cid?: string;
 };
 
 export type ConfigV0 = {
@@ -116,6 +118,11 @@ const overridableModulePropertiesV0 = {
     required: [],
     description:
       "A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl",
+  },
+  cid: {
+    description: "CID of the module when it was packed",
+    type: "string",
+    nullable: true,
   },
 } as const;
 
@@ -222,6 +229,16 @@ export const initNewReadonlyModuleConfig = (
   name: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
+    getInitConfigOptions(configPath),
+    getDefault(name),
+  )();
+};
+
+export const initNewModuleConfig = (
+  configPath: string,
+  name: string,
+): Promise<InitializedConfig<LatestConfig>> => {
+  return getConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(name),
   )();

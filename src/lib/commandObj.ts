@@ -25,6 +25,10 @@ export let commandObj: CommandObj =
       // eslint-disable-next-line no-console
       console.log(msg);
     },
+    logToStderr(msg: string) {
+      // eslint-disable-next-line no-console
+      console.error(msg);
+    },
     error(msg: string): never {
       throw new CLIError(msg);
     },

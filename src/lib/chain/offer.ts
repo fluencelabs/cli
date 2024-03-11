@@ -22,7 +22,7 @@ import { versions } from "../../versions.js";
 import { commandObj } from "../commandObj.js";
 import {
   ensureComputerPeerConfigs,
-  initNewReadonlyProviderConfig,
+  ensureReadonlyProviderConfig,
 } from "../configs/project/provider.js";
 import {
   initNewProviderArtifactsConfig,
@@ -56,6 +56,7 @@ import {
   cidStringToCIDV1Struct,
   peerIdHexStringToBase58String,
   peerIdToUint8Array,
+  cidHexStringToBase32,
 } from "./conversions.js";
 import { ptFormatWithSymbol, ptParse } from "./currencies.js";
 import { assertProviderIsRegistered } from "./providerInfo.js";
@@ -259,10 +260,11 @@ async function resolveOfferInfo({
       "Updated at": new Date(offerExplorerInfo.updatedAt * 1000).toISOString(),
       "Total compute units": offerExplorerInfo.totalComputeUnits,
       "Free compute units": offerExplorerInfo.freeComputeUnits,
-      // TODO: cid currently return garbage
-      // Effectors: offerExplorerInfo.effectors.map(({ cid }) => {
-      //   return { cid };
-      // }),
+      Effectors: await Promise.all(
+        offerExplorerInfo.effectors.map(({ cid }) => {
+          return cidHexStringToBase32(cid);
+        }),
+      ),
       Peers: await Promise.all(
         offerExplorerInfo.peers.map(async ({ id }) => {
           return {
@@ -288,6 +290,8 @@ async function resolveOfferInfo({
 
   return { offerId };
 }
+
+const COMMON_WARN_MSG = `. Please check whether the offer exists and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`;
 
 export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
@@ -323,68 +327,122 @@ export async function updateOffers(flags: OffersArgs) {
   for (const {
     minPricePerWorkerEpochBigInt,
     offerId,
-    // effectors,
+    effectors,
+    offerName,
     offerInfo: { offerInfo, offerExplorerInfo } = {
       offerInfo: undefined,
       offerExplorerInfo: undefined,
     },
   } of offersToUpdate) {
-    if (offerInfo === undefined || offerExplorerInfo === undefined) {
+    if (offerInfo === undefined) {
       commandObj.warn(
-        `Can't find offer info for offer with id ${offerId} in chain. Please check whether the offer exists in chain and try again. If the offer doesn't exist you can create it using '${CLI_NAME} provider offer-create' command`,
+        `Can't find offer ${color.yellow(
+          offerName,
+        )} info on chain${COMMON_WARN_MSG}`,
       );
 
       continue;
     }
 
-    const populatedTxPromises = [];
+    if (offerExplorerInfo === undefined) {
+      commandObj.warn(
+        `Can't find offer ${color.yellow(
+          offerName,
+        )} info using explorer${COMMON_WARN_MSG}`,
+      );
 
-    if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
-      populatedTxPromises.push([
-        market.changeMinPricePerWorkerEpoch,
-        offerId,
-        minPricePerWorkerEpochBigInt,
-      ]);
+      continue;
     }
 
-    // TODO: Effectors update won't work until the explorer starts to return correct CIDs
+    const populatedTxs = [];
 
-    // const removedEffectors = offerExplorerInfo.effectors.filter((effector) => {
-    //   return effectors === undefined ? true : !effectors.includes(effector.cid);
-    // });
+    if (offerInfo.minPricePerWorkerEpoch !== minPricePerWorkerEpochBigInt) {
+      populatedTxs.push({
+        description: `changing minPricePerWorker from ${color.yellow(
+          await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
+        )} to ${color.yellow(
+          await ptFormatWithSymbol(minPricePerWorkerEpochBigInt),
+        )}`,
+        tx: [
+          market.changeMinPricePerWorkerEpoch,
+          offerId,
+          minPricePerWorkerEpochBigInt,
+        ],
+      });
+    }
 
-    // if (removedEffectors.length > 0) {
-    //   populatedTxPromises.push([
-    //     market.removeEffector,
-    //     offerId,
-    //     await Promise.all(
-    //       removedEffectors.map(({ cid }) => {
-    //         return cidStringToCIDV1Struct(cid);
-    //       }),
-    //     ),
-    //   ]);
-    // }
+    const offerClientInfoEffectors = await Promise.all(
+      offerExplorerInfo.effectors.map(({ cid }) => {
+        return cidHexStringToBase32(cid);
+      }),
+    );
 
-    // const addedEffectors = (effectors ?? []).filter((effector) => {
-    //   return !offerExplorerInfo.effectors.some(({ cid }) => {
-    //     return cid === effector;
-    //   });
-    // });
+    const removedEffectors = offerClientInfoEffectors.filter((cid) => {
+      return effectors === undefined ? true : !effectors.includes(cid);
+    });
 
-    // if (addedEffectors.length > 0) {
-    //   populatedTxPromises.push([
-    //     market.addEffector,
-    //     offerId,
-    //     await Promise.all(
-    //       addedEffectors.map((effector) => {
-    //         return cidStringToCIDV1Struct(effector);
-    //       }),
-    //     ),
-    //   ]);
-    // }
+    if (removedEffectors.length > 0) {
+      populatedTxs.push({
+        description: `Removing effectors: ${removedEffectors.join(", ")}`,
+        tx: [
+          market.removeEffector,
+          offerId,
+          await Promise.all(
+            removedEffectors.map((cid) => {
+              return cidStringToCIDV1Struct(cid);
+            }),
+          ),
+        ],
+      });
+    }
 
-    // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
-    await signBatch(populatedTxPromises);
+    const addedEffectors = (effectors ?? []).filter((effector) => {
+      return !offerClientInfoEffectors.some((cid) => {
+        return cid === effector;
+      });
+    });
+
+    if (addedEffectors.length > 0) {
+      populatedTxs.push({
+        description: `Adding effectors: ${addedEffectors.join(", ")}`,
+        tx: [
+          market.addEffector,
+          offerId,
+          await Promise.all(
+            addedEffectors.map((effector) => {
+              return cidStringToCIDV1Struct(effector);
+            }),
+          ),
+        ],
+      });
+    }
+
+    if (populatedTxs.length === 0) {
+      commandObj.logToStderr(
+        `\nNo changes found for offer ${color.yellow(
+          offerName,
+        )}. Skipping update`,
+      );
+
+      continue;
+    }
+
+    commandObj.logToStderr(
+      `\nUpdating offer ${color.yellow(offerName)} with id ${color.yellow(
+        offerId,
+      )}:\n${populatedTxs
+        .map(({ description }) => {
+          return description;
+        })
+        .join("\n")}\n`,
+    );
+
+    await signBatch(
+      // @ts-expect-error TODO: don't know at this moment how to fix this error. Will solve later
+      populatedTxs.map(({ tx }) => {
+        return tx;
+      }),
+    );
   }
 }
 
@@ -397,7 +455,7 @@ async function resolveOffersFromProviderConfig(
     return allOffers;
   }
 
-  const providerConfig = await initNewReadonlyProviderConfig();
+  const providerConfig = await ensureReadonlyProviderConfig();
 
   if (flags[OFFER_FLAG_NAME] === undefined) {
     return checkboxes<EnsureOfferConfig, never>({
@@ -458,7 +516,7 @@ async function resolveOffersFromProviderConfig(
 type EnsureOfferConfig = Awaited<ReturnType<typeof ensureOfferConfigs>>[number];
 
 async function ensureOfferConfigs() {
-  const providerConfig = await initNewReadonlyProviderConfig();
+  const providerConfig = await ensureReadonlyProviderConfig();
   const providerArtifactsConfig = await initReadonlyProviderArtifactsConfig();
 
   const { ethers } = await import("ethers");

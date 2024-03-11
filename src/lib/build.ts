@@ -15,11 +15,8 @@
  */
 
 import assert from "node:assert";
-import { access, readFile, writeFile } from "node:fs/promises";
-import { relative } from "node:path";
 
 import { color } from "@oclif/color";
-import type { JSONSchemaType } from "ajv";
 
 import type {
   FluenceConfigReadonly,
@@ -36,11 +33,8 @@ import {
   type ServiceConfigReadonly,
 } from "../lib/configs/project/service.js";
 import {
-  FS_OPTIONS,
   MODULE_CONFIG_FULL_FILE_NAME,
-  MODULE_TYPE_RUST,
   SERVICE_CONFIG_FULL_FILE_NAME,
-  DEFAULT_MARINE_BUILD_ARGS,
 } from "../lib/const.js";
 import {
   getUrlOrAbsolutePath,
@@ -49,11 +43,11 @@ import {
 } from "../lib/helpers/downloadFile.js";
 import type { MarineCLI } from "../lib/marineCli.js";
 
-import { ajv, validationErrorToString } from "./ajvInstance.js";
+import { buildModules } from "./buildModules.js";
 import { commandObj } from "./commandObj.js";
 import { updateAquaServiceInterfaceFile } from "./helpers/generateServiceInterface.js";
 import { startSpinner, stopSpinner } from "./helpers/spinner.js";
-import { getCargoTomlPath, projectRootDir } from "./paths.js";
+import { projectRootDir } from "./paths.js";
 
 type ModuleNameAndConfigDefinedInService = {
   moduleName: string;
@@ -244,93 +238,6 @@ export const build = async ({
   return serviceInfoWithModuleConfigs;
 };
 
-type CargoWorkspaceToml = {
-  workspace?: {
-    members?: string[];
-  };
-};
-
-const cargoWorkspaceTomlSchema: JSONSchemaType<CargoWorkspaceToml> = {
-  type: "object",
-  properties: {
-    workspace: {
-      type: "object",
-      properties: {
-        members: {
-          type: "array",
-          items: {
-            type: "string",
-          },
-          nullable: true,
-        },
-      },
-      required: [],
-      nullable: true,
-    },
-  },
-  required: [],
-};
-
-const validateCargoWorkspaceToml = ajv.compile(cargoWorkspaceTomlSchema);
-
-const updateWorkspaceCargoToml = async (
-  moduleAbsolutePaths: string[],
-): Promise<void> => {
-  const cargoTomlPath = getCargoTomlPath();
-  let cargoTomlFileContent: string;
-
-  try {
-    cargoTomlFileContent = await readFile(cargoTomlPath, FS_OPTIONS);
-  } catch {
-    cargoTomlFileContent = `[workspace]
-members = []
-`;
-  }
-
-  const { parse } = await import("@iarna/toml");
-  const parsedConfig: unknown = parse(cargoTomlFileContent);
-
-  if (!validateCargoWorkspaceToml(parsedConfig)) {
-    return commandObj.error(
-      `Cargo.toml at ${cargoTomlPath} is not valid. Please fix it manually. ${await validationErrorToString(
-        validateCargoWorkspaceToml.errors,
-      )}`,
-    );
-  }
-
-  const oldCargoWorkspaceMembers = parsedConfig.workspace?.members ?? [];
-
-  const cargoWorkspaceMembersExistance = await Promise.allSettled(
-    oldCargoWorkspaceMembers.map((member) => {
-      return access(member);
-    }),
-  );
-
-  const existingCargoWorkspaceMembers = oldCargoWorkspaceMembers.filter(
-    (_, i) => {
-      return cargoWorkspaceMembersExistance[i]?.status === "fulfilled";
-    },
-  );
-
-  const newConfig = {
-    ...parsedConfig,
-    workspace: {
-      ...(parsedConfig.workspace ?? {}),
-      members: [
-        ...new Set([
-          ...existingCargoWorkspaceMembers,
-          ...moduleAbsolutePaths.map((moduleAbsolutePath) => {
-            return relative(projectRootDir, moduleAbsolutePath);
-          }),
-        ]),
-      ],
-    },
-  };
-
-  const stringifyToTOML = (await import("@iarna/toml/stringify.js")).default;
-  await writeFile(cargoTomlPath, stringifyToTOML(newConfig), FS_OPTIONS);
-};
-
 const resolveSingleServiceModuleConfigs = (
   serviceConfig: ServiceConfigReadonly,
   overridesFromFluenceYAMLMap: OverrideModules | undefined,
@@ -399,42 +306,6 @@ export const resolveSingleServiceModuleConfigsAndBuild = async (
   );
 
   return { moduleConfigs, facadeModuleConfig };
-};
-
-export const buildModules = async (
-  modulesConfigs: ModuleConfigReadonly[],
-  marineCli: MarineCLI,
-  marineBuildArgs: string | undefined,
-  maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
-): Promise<void> => {
-  const rustModuleConfigs = modulesConfigs.filter(({ type }) => {
-    return type === MODULE_TYPE_RUST;
-  });
-
-  await updateWorkspaceCargoToml(
-    rustModuleConfigs.map((moduleConfig) => {
-      return moduleConfig.$getDirPath();
-    }),
-  );
-
-  if (rustModuleConfigs.length === 0) {
-    return;
-  }
-
-  const pFlagsForEachModule = rustModuleConfigs.flatMap(({ name }) => {
-    return ["-p", name];
-  });
-
-  const marineBuildArgsToUse = (
-    marineBuildArgs ??
-    maybeFluenceConfig?.marineBuildArgs ??
-    DEFAULT_MARINE_BUILD_ARGS
-  ).split(" ");
-
-  await marineCli({
-    args: ["build", ...pFlagsForEachModule, ...marineBuildArgsToUse],
-    cwd: projectRootDir,
-  });
 };
 
 type GetModuleNamesAndConfigsDefinedInServicesArg = {

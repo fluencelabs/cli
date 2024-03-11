@@ -49,7 +49,6 @@ import "./setupEnvironment.js";
 import { dbg } from "./dbg.js";
 import { ensureFluenceProject } from "./helpers/ensureFluenceProject.js";
 import { getIsInteractive } from "./helpers/getIsInteractive.js";
-import { updateRelaysJSON } from "./multiaddres.js";
 import {
   projectRootDir,
   recursivelyFindProjectRootDir,
@@ -179,7 +178,6 @@ export async function initCli<
   const maybeFluenceConfig = res.fluenceConfig ?? res.maybeFluenceConfig;
   await initCountly({ maybeFluenceConfig });
   ensureCorrectCliVersion(maybeFluenceConfig?.cliVersion);
-  await updateRelaysJSON();
   return { args, flags, ...res };
 }
 

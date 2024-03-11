@@ -98,7 +98,7 @@ export default class Up extends BaseCommand<typeof Up> {
       await this.parse(Up),
     );
 
-    const providerConfig = await initNewReadonlyProviderConfig({});
+    const providerConfig = await initNewReadonlyProviderConfig();
 
     if (flags.reset) {
       const dirPath = dockerComposeDirPath();
