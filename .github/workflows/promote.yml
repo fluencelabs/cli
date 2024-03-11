@@ -6,7 +6,7 @@ on:
       channel:
         description: "Promote version to channel"
         type: string
-        default: "null"
+        required: true
 
 env:
   CI: true
