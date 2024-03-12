@@ -1319,10 +1319,12 @@ Withdraw FLT collateral from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value> | --ids <value>] [--env <value>]
+  [--priv-key <value>]
 
 FLAGS
   --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                         Comma separated capacity commitment IDs
   --no-input                            Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
                                         --nox-names all
