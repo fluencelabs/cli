@@ -17,11 +17,9 @@
 import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { withdrawCollateral } from "../../lib/chain/withdrawCollateral.js";
+import { withdrawCollateral } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, FLT_SYMBOL } from "../../lib/const.js";
-import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
-import { input } from "../../lib/prompt.js";
 
 export default class WithdrawCollateral extends BaseCommand<
   typeof WithdrawCollateral
@@ -40,14 +38,6 @@ export default class WithdrawCollateral extends BaseCommand<
 
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(WithdrawCollateral));
-
-    await withdrawCollateral(
-      commaSepStrToArr(
-        args.IDS ??
-          (await input({
-            message: "Enter comma-separated capacity commitment IDs",
-          })),
-      ),
-    );
+    await withdrawCollateral({ ids: args.IDS });
   }
 }

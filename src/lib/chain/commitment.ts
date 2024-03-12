@@ -20,17 +20,24 @@ import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { commandObj } from "../commandObj.js";
 import {
+  initReadonlyProviderConfig,
   resolveComputePeersByNames,
   type ResolvedComputePeer,
 } from "../configs/project/provider.js";
 import { CLI_NAME, NOX_NAMES_FLAG_NAME } from "../const.js";
 import { dbg } from "../dbg.js";
-import { getDealClient, getEventValues, signBatch } from "../dealClient.js";
+import {
+  getDealClient,
+  getEventValues,
+  signBatch,
+  sign,
+} from "../dealClient.js";
 import {
   splitErrorsAndResults,
   stringifyUnknown,
   commaSepStrToArr,
 } from "../helpers/utils.js";
+import { input } from "../prompt.js";
 
 import {
   peerIdHexStringToBase58String,
@@ -66,16 +73,29 @@ export async function getComputePeersWithCC(
       computePeers.map(async (computePeer) => {
         const peerIdUint8Array = await peerIdToUint8Array(computePeer.peerId);
 
+        const commitmentCreatedEvent =
+          commitmentCreatedEvents[computePeer.peerId];
+
+        const marketGetComputePeerRes = await (async () => {
+          try {
+            return await market.getComputePeer(peerIdUint8Array);
+          } catch {
+            return undefined;
+          }
+        })();
+
         return {
           providerConfigComputePeer: computePeer,
-          commitmentCreatedEvent: commitmentCreatedEvents[computePeer.peerId],
-          marketGetComputePeerRes: await (async () => {
-            try {
-              return await market.getComputePeer(peerIdUint8Array);
-            } catch {
-              return undefined;
-            }
-          })(),
+          ...(commitmentCreatedEvent === undefined
+            ? {}
+            : {
+                commitmentCreatedEvent,
+              }),
+          ...(marketGetComputePeerRes === undefined
+            ? {}
+            : {
+                marketGetComputePeerRes,
+              }),
         };
       }),
     )
@@ -131,6 +151,19 @@ export async function getCommitments(
 ): Promise<{ commitmentId: string }[] | ComputePeersWithCC> {
   if (flags.ids !== undefined) {
     return commaSepStrToArr(flags.ids).map((commitmentId) => {
+      return { commitmentId };
+    });
+  }
+
+  if (
+    flags[NOX_NAMES_FLAG_NAME] === undefined &&
+    (await initReadonlyProviderConfig()) === null
+  ) {
+    return commaSepStrToArr(
+      await input({
+        message: "Enter comma-separated list of Capacity Commitment IDs",
+      }),
+    ).map((commitmentId) => {
       return { commitmentId };
     });
   }
@@ -349,6 +382,38 @@ export async function removeCommitments(flags: CCFlags) {
         return stringifyBasicCommitmentInfo(commitment);
       })
       .join("\n")}`,
+  );
+}
+
+export async function withdrawCollateral(flags: CCFlags) {
+  const commitments = await getCommitments(flags);
+  const { dealClient } = await getDealClient();
+  const capacity = await dealClient.getCapacity();
+  const market = await dealClient.getMarket();
+
+  for (const commitment of commitments) {
+    const { commitmentId } = commitment;
+    const commitmentInfo = await capacity.getCommitment(commitmentId);
+    const unitIds = await market.getComputeUnitIds(commitmentInfo.peerId);
+    await sign(capacity.removeCUFromCC, commitmentId, [...unitIds]);
+    await sign(capacity.finishCommitment, commitmentId);
+
+    commandObj.logToStderr(
+      `Collateral withdrawn for:\n${stringifyBasicCommitmentInfo(commitment)}`,
+    );
+  }
+}
+
+export async function withdrawCollateralRewards(flags: CCFlags) {
+  const commitments = await getCommitments(flags);
+  const { dealClient } = await getDealClient();
+  const capacity = await dealClient.getCapacity();
+
+  // TODO: add logs here
+  await signBatch(
+    commitments.map(({ commitmentId }) => {
+      return [capacity.withdrawReward, commitmentId];
+    }),
   );
 }
 
