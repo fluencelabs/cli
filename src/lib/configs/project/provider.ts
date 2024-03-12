@@ -65,6 +65,7 @@ import {
   DEFAULT_CURL_EFFECTOR_CID,
   CHAIN_URLS_FOR_CONTAINERS,
   type ChainENV,
+  CLI_NAME,
 } from "../../const.js";
 import { ensureChainEnv } from "../../ensureChainNetwork.js";
 import { type ProviderConfigArgs } from "../../generateUserProviderConfig.js";
@@ -1021,10 +1022,6 @@ const DEFAULT_NUMBER_OF_LOCAL_NET_NOXES = 3;
 
 function getDefault(args: Omit<ProviderConfigArgs, "name">) {
   return async () => {
-    commandObj.logToStderr(
-      `Creating new ${color.yellow(PROVIDER_CONFIG_FULL_FILE_NAME)} config!\n`,
-    );
-
     const { yamlDiffPatch } = await import("yaml-diff-patch");
     const chainEnv = await ensureChainEnv();
     setEnvConfig(await initNewEnvConfig(chainEnv));
@@ -1482,6 +1479,18 @@ export function initReadonlyProviderConfig() {
   return getReadonlyConfigInitFunction(initConfigOptions)();
 }
 
+export async function ensureReadonlyProviderConfig() {
+  const providerConfig = await initReadonlyProviderConfig();
+
+  if (providerConfig === null) {
+    commandObj.error(
+      `Please init ${PROVIDER_CONFIG_FULL_FILE_NAME} using '${CLI_NAME} provider init' in order to continue`,
+    );
+  }
+
+  return providerConfig;
+}
+
 export const providerSchema: JSONSchemaType<LatestConfig> = configSchemaV1;
 
 function mergeConfigYAML<T>(a: T, b: Record<string, unknown>) {
@@ -1765,9 +1774,6 @@ function getDefaultCCPConfigYAML(): LatestCCPConfigYAML {
       reportHashrate: DEFAULT_REPORT_HASHRATE,
       logLevel: DEFAULT_LOG_LEVEL,
     },
-    state: {
-      path: DEFAULT_STATE_PATH,
-    },
   };
 }
 
@@ -1798,7 +1804,7 @@ export type EnsureComputerPeerConfig = Awaited<
 
 export async function ensureComputerPeerConfigs(computePeerNames?: string[]) {
   const { ethers } = await import("ethers");
-  const providerConfig = await initNewReadonlyProviderConfig();
+  const providerConfig = await ensureReadonlyProviderConfig();
 
   const providerSecretsConfig =
     await initNewProviderSecretsConfig(providerConfig);
@@ -1975,7 +1981,7 @@ export async function resolveComputePeersByNames(
     return computePeers;
   }
 
-  const providerConfig = await initNewReadonlyProviderConfig();
+  const providerConfig = await ensureReadonlyProviderConfig();
 
   if (flags[NOX_NAMES_FLAG_NAME] === undefined) {
     return checkboxes<EnsureComputerPeerConfig, never>({

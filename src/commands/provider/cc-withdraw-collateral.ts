@@ -15,11 +15,8 @@
  */
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
-import { peerIdToUint8Array } from "../../lib/chain/conversions.js";
-import { withdrawCollateral } from "../../lib/chain/withdrawCollateral.js";
-import { resolveComputePeersByNames } from "../../lib/configs/project/provider.js";
-import { CHAIN_FLAGS, FLT_SYMBOL, NOX_NAMES_FLAG } from "../../lib/const.js";
-import { getDealClient } from "../../lib/dealClient.js";
+import { withdrawCollateral } from "../../lib/chain/commitment.js";
+import { CHAIN_FLAGS, FLT_SYMBOL, CC_FLAGS } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCWithdrawRewards extends BaseCommand<
@@ -29,26 +26,12 @@ export default class CCWithdrawRewards extends BaseCommand<
   static override description = `Withdraw ${FLT_SYMBOL} collateral from capacity commitments`;
   static override flags = {
     ...baseFlags,
-    ...NOX_NAMES_FLAG,
+    ...CC_FLAGS,
     ...CHAIN_FLAGS,
   };
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCWithdrawRewards));
-    const computePeers = await resolveComputePeersByNames(flags);
-    const { dealClient } = await getDealClient();
-    const market = await dealClient.getMarket();
-
-    await withdrawCollateral(
-      await Promise.all(
-        computePeers.map(async ({ peerId }) => {
-          const peer = await market.getComputePeer(
-            await peerIdToUint8Array(peerId),
-          );
-
-          return peer.commitmentId;
-        }),
-      ),
-    );
+    await withdrawCollateral(flags);
   }
 }

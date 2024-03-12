@@ -15,7 +15,7 @@
  */
 
 import { commandObj } from "../commandObj.js";
-import { initNewReadonlyProviderConfig } from "../configs/project/provider.js";
+import { ensureReadonlyProviderConfig } from "../configs/project/provider.js";
 import { CLI_NAME } from "../const.js";
 import { getDealClient, sign } from "../dealClient.js";
 
@@ -25,7 +25,7 @@ const CURRENTLY_UNUSED_CID =
   "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
 
 export async function registerProvider() {
-  const providerConfig = await initNewReadonlyProviderConfig();
+  const providerConfig = await ensureReadonlyProviderConfig();
   const { dealClient, signerOrWallet } = await getDealClient();
   const market = await dealClient.getMarket();
 
@@ -63,7 +63,7 @@ Provider address: ${signerOrWallet.address}
 }
 
 export async function updateProvider() {
-  const providerConfig = await initNewReadonlyProviderConfig();
+  const providerConfig = await ensureReadonlyProviderConfig();
   const { dealClient, signerOrWallet } = await getDealClient();
   const market = await dealClient.getMarket();
 

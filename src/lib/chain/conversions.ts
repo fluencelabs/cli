@@ -42,6 +42,8 @@ export async function peerIdHexStringToBase58String(peerIdHex: string) {
     .slice(BASE_58_PREFIX.length);
 }
 
+const CID_PREFIX_LENGTH = 4;
+
 export async function cidStringToCIDV1Struct(
   cidString: string,
 ): Promise<CIDV1Struct> {
@@ -49,7 +51,16 @@ export async function cidStringToCIDV1Struct(
   const id = CID.parse(cidString).bytes;
 
   return {
-    prefixes: id.slice(0, 4),
-    hash: id.slice(4),
+    prefixes: id.slice(0, CID_PREFIX_LENGTH),
+    hash: id.slice(CID_PREFIX_LENGTH),
   };
+}
+
+export async function cidHexStringToBase32(cidHex: string): Promise<string> {
+  // eslint-disable-next-line import/extensions
+  const { base32 } = await import("multiformats/bases/base32");
+
+  return base32.encode(
+    new Uint8Array(Buffer.from(cidHex.slice(2).split("0x").join(""), "hex")),
+  );
 }

@@ -24,7 +24,7 @@ import xbytes from "xbytes";
 import { yamlDiffPatch } from "yaml-diff-patch";
 
 import { importAquaCompiler } from "./aqua.js";
-import { buildModules } from "./build.js";
+import { buildModules } from "./buildModules.js";
 import { commandObj, isInteractive } from "./commandObj.js";
 import { compileAquaFromFluenceConfigWithDefaults } from "./compileAquaAndWatch.js";
 import type { Upload_deployArgConfig } from "./compiled-aqua/installation-spell/cli.js";
@@ -185,14 +185,7 @@ export async function prepareForDeploy({
   const dealsOrHostsString = isDealDeploy ? "deals" : "hosts";
 
   const hostsOrDeals = Object.entries(
-    fluenceConfig[deploymentsOrHostsString] ??
-      commandObj.error(
-        `You must have a ${color.yellow(
-          deploymentsOrHostsString,
-        )} property in ${color.yellow(
-          fluenceConfig.$getPath(),
-        )} that contains a record with at least one deployment`,
-      ),
+    fluenceConfig[deploymentsOrHostsString] ?? {},
   );
 
   assertIsArrayWithHostsOrDeals(hostsOrDeals);
@@ -470,10 +463,6 @@ export async function prepareForDeploy({
       }),
   );
 
-  if (workers.length === 0) {
-    commandObj.error(`You must select at least one deployment`);
-  }
-
   await validateWasmExist(workers);
 
   const { deal_install_script } = await import(
@@ -545,7 +534,8 @@ async function getDeploymentNames(
   fluenceConfig: FluenceConfigReadonly,
 ): Promise<string[]> {
   if (deploymentNames !== undefined) {
-    const names = commaSepStrToArr(deploymentNames);
+    const names =
+      deploymentNames === "" ? [] : commaSepStrToArr(deploymentNames);
 
     const [invalidNames, validDeploymentNames] = splitErrorsAndResults(
       names,

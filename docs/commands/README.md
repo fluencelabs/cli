@@ -40,6 +40,7 @@
 * [`fluence local up`](#fluence-local-up)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
+* [`fluence module pack [PATH]`](#fluence-module-pack-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
 * [`fluence provider cc-activate`](#fluence-provider-cc-activate)
 * [`fluence provider cc-create`](#fluence-provider-cc-create)
@@ -1150,6 +1151,33 @@ EXAMPLES
 
 _See code: [src/commands/module/new.ts](https://github.com/fluencelabs/cli/blob/v0.15.22/src/commands/module/new.ts)_
 
+## `fluence module pack [PATH]`
+
+Pack module into tar.gz archive
+
+```
+USAGE
+  $ fluence module pack [PATH] [--no-input] [--marine-build-args <value>] [-d <value>]
+
+ARGUMENTS
+  PATH  Path to a module
+
+FLAGS
+  -d, --destination=<value>             Path to a directory where you want archive to be saved. Default: current
+                                        directory
+      --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                        'marineBuildArgs' property in fluence.yaml. Default: --release
+      --no-input                        Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Pack module into tar.gz archive
+
+EXAMPLES
+  $ fluence module pack
+```
+
+_See code: [src/commands/module/pack.ts](https://github.com/fluencelabs/cli/blob/v0.15.22/src/commands/module/pack.ts)_
+
 ## `fluence module remove [NAME | PATH | URL]`
 
 Remove module from service.yaml
@@ -1291,10 +1319,12 @@ Withdraw FLT collateral from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value> | --ids <value>] [--env <value>]
+  [--priv-key <value>]
 
 FLAGS
   --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                         Comma separated capacity commitment IDs
   --no-input                            Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
                                         --nox-names all

@@ -103,10 +103,9 @@ export async function getDealClient() {
 let dealMatcherClient: DealMatcherClient | undefined = undefined;
 
 export async function getDealMatcherClient() {
-  const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
-  const env = await ensureChainEnv();
-
   if (dealMatcherClient === undefined) {
+    const { DealMatcherClient } = await import("@fluencelabs/deal-ts-clients");
+    const env = await ensureChainEnv();
     dealMatcherClient = new DealMatcherClient(env);
   }
 
@@ -116,10 +115,10 @@ export async function getDealMatcherClient() {
 let dealExplorerClient: DealExplorerClient | undefined = undefined;
 
 export async function getDealExplorerClient() {
-  const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
-  const env = await ensureChainEnv();
-
   if (dealExplorerClient === undefined) {
+    const { DealExplorerClient } = await import("@fluencelabs/deal-ts-clients");
+    const env = await ensureChainEnv();
+
     dealExplorerClient = new DealExplorerClient(
       env,
       undefined,
@@ -129,6 +128,22 @@ export async function getDealExplorerClient() {
 
   return dealExplorerClient;
 }
+
+// No need for that for now cause dealExplorerClient returns everything that is currently needed
+// let dealCliClient: DealCliClient | undefined = undefined;
+
+// export async function getDealCliClient() {
+//   if (dealCliClient === undefined) {
+//     const { DealCliClient } = await import(
+//       "@fluencelabs/deal-ts-clients/dist/dealCliClient/index.js"
+//     );
+
+//     const env = await ensureChainEnv();
+//     dealCliClient = new DealCliClient(env);
+//   }
+
+//   return dealCliClient;
+// }
 
 async function createDealClient(
   signerOrProvider: ethers.Provider | ethers.Signer,
@@ -154,10 +169,9 @@ async function createDealClient(
 }
 
 export async function ensureProvider(): Promise<ethers.Provider> {
-  const { ethers } = await import("ethers");
-  const chainEnv = await ensureChainEnv();
-
   if (provider === undefined) {
+    const { ethers } = await import("ethers");
+    const chainEnv = await ensureChainEnv();
     provider = new ethers.JsonRpcProvider(CHAIN_URLS[chainEnv]);
   }
 

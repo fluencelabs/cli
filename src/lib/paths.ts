@@ -360,12 +360,16 @@ export const ensureFluenceSpellsDir = async (): Promise<string> => {
   return ensureDir(join(await ensureFluenceDir(), SPELLS_DIR_NAME));
 };
 
-const ensureFluenceTmpDir = async (): Promise<string> => {
+export const ensureFluenceTmpDir = async (): Promise<string> => {
   return ensureDir(join(await ensureFluenceDir(), TMP_DIR_NAME));
 };
 
 export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
   return join(await ensureFluenceTmpDir(), CONFIG_TOML);
+};
+
+export const ensureFluenceTmpModulePath = async (): Promise<string> => {
+  return ensureDir(join(await ensureFluenceTmpDir(), "module"));
 };
 
 export async function ensureFluenceAquaDependenciesPath(): Promise<string> {

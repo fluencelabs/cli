@@ -36,6 +36,7 @@ import {
   type InitializedReadonlyConfig,
   type Migrations,
   type GetDefaultConfig,
+  getConfigInitFunction,
 } from "../initConfig.js";
 
 export type OverridableModuleProperties = {
@@ -51,6 +52,8 @@ export type ConfigV0 = {
   version: 0;
   name: string;
   type?: ModuleType;
+  cid?: string;
+  rustBindingCrate?: string;
 } & OverridableModuleProperties;
 
 const overridableModulePropertiesV0 = {
@@ -116,6 +119,17 @@ const overridableModulePropertiesV0 = {
     required: [],
     description:
       "A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl",
+  },
+  cid: {
+    description: "CID of the module when it was packed",
+    type: "string",
+    nullable: true,
+  },
+  rustBindingCrate: {
+    description:
+      "Name of the interface crate that should be used with this module",
+    type: "string",
+    nullable: true,
   },
 } as const;
 
@@ -203,9 +217,6 @@ name: ${name}
 # # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
 # loggingMask: 1
 #
-# # ${MAX_HEAP_SIZE_DESCRIPTION}
-# maxHeapSize: 1KiB
-#
 # # A map of binary executable files that module is allowed to call
 # mountedBinaries:
 #   curl: "/usr/bin/curl"
@@ -222,6 +233,16 @@ export const initNewReadonlyModuleConfig = (
   name: string,
 ): Promise<InitializedReadonlyConfig<LatestConfig> | null> => {
   return getReadonlyConfigInitFunction(
+    getInitConfigOptions(configPath),
+    getDefault(name),
+  )();
+};
+
+export const initNewModuleConfig = (
+  configPath: string,
+  name: string,
+): Promise<InitializedConfig<LatestConfig>> => {
+  return getConfigInitFunction(
     getInitConfigOptions(configPath),
     getDefault(name),
   )();
