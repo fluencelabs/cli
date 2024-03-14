@@ -23,8 +23,6 @@ import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { color } from "@oclif/color";
 import { CLIError } from "@oclif/core/lib/errors/index.js";
 
-import { jsonStringify } from "./lib/helpers/utils.js";
-
 const COUNTLY_REPORT_TIMEOUT = 3000;
 
 /**
@@ -242,4 +240,29 @@ export function setUpProcessWarningListener() {
       process.stderr.write(`Warning: ${String(warning)}\n`);
     }
   });
+}
+
+/**
+ * @param {unknown} unknown
+ */
+function jsonStringify(unknown) {
+  return JSON.stringify(
+    unknown,
+    /**
+     * @param {string} _key
+     * @param {unknown} value
+     */
+    (_key, value) => {
+      if (value instanceof Uint8Array) {
+        return `Uint8Array<${JSON.stringify([...value])}>`;
+      }
+
+      if (typeof value === "bigint") {
+        return value.toString();
+      }
+
+      return value;
+    },
+    2,
+  );
 }

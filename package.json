@@ -51,7 +51,7 @@
     "check": "yarn before-build && yarn build && yarn lint-fix && yarn prettier && yarn circular",
     "circular": "madge --circular ./dist",
     "on-each-commit": "yarn check && yarn gen-config-docs && cd docs/commands && oclif readme --no-aliases",
-    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && node --loader ts-node/esm --no-warnings ./src/genConfigDocs.ts",
+    "gen-config-docs": "shx rm -rf schemas && shx rm -rf docs/configs && tsx ./src/genConfigDocs.ts",
     "unused-exports": "ts-unused-exports tsconfig.json",
     "up-deps": "npm-check-updates -u",
     "oclif-pack": "yarn before-pack && oclif pack tarballs -t 'linux-x64,darwin-x64,darwin-arm64' --no-xz",
@@ -132,6 +132,7 @@
     "ts-prune": "0.10.3",
     "ts-unused-exports": "10.0.1",
     "tslib": "2.6.2",
+    "tsx": "^4.7.1",
     "typescript": "5.3.3",
     "undici": "6.3.0"
   },
