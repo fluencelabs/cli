@@ -63,13 +63,6 @@ export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 
-/**
- * Number of bytes in a chunk
- * If it's less than then - raw codec will be used
- * If it's more - dag-pb codec will be used
- */
-export const IPFS_CHUNK_SIZE = 262144;
-
 export const DEFAULT_CURL_EFFECTOR_CID =
   "bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce";
 
@@ -252,6 +245,7 @@ export const INDEX_HTML_FILE_NAME = `index.html`;
 export const SERVER_TS_FILE_NAME = `server.${TS_EXT}`;
 export const SERVER_JS_FILE_NAME = `server.${JS_EXT}`;
 
+export const SERVICE_CONFIG_TOML_POSTFIX = `_Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
 export const README_MD_FILE_NAME = `README.md`;
@@ -552,8 +546,6 @@ export const isTemplate = getIsStringUnion(TEMPLATES);
 
 export const PACKAGE_NAME = "PACKAGE-NAME";
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME@VERSION`;
-
-export const SERVICE_CONFIG_TOML_POSTFIX = "_Config.toml";
 
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store

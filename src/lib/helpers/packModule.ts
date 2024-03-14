@@ -71,6 +71,8 @@ export async function packModule(
   );
 
   delete moduleToPackConfig.type;
+  // Have to disable this cause ipfs lib types look like any with "nodenext" moduleResolution
+  /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
   const ipfsClient = await createIPFSClient(DEFAULT_IPFS_ADDRESS);
 
   const { cid } = await ipfsClient.add(await readFile(tmpWasmPath), {
@@ -79,6 +81,7 @@ export async function packModule(
   });
 
   moduleToPackConfig.cid = cid.toString();
+  /* eslint-enable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
   await moduleToPackConfig.$commit();
 
   const tar = (await import("tar")).default;
