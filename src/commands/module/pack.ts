@@ -45,6 +45,10 @@ export default class Pack extends BaseCommand<typeof Pack> {
         "Path to a directory where you want archive to be saved. Default: current directory",
       char: "d",
     }),
+    "binding-crate": Flags.string({
+      description: "Path to a directory with rust binding crate",
+      char: "b",
+    }),
   };
   static override args = {
     [PATH]: Args.string({
@@ -75,17 +79,19 @@ export default class Pack extends BaseCommand<typeof Pack> {
 
     const marineCli = await initMarineCli();
 
-    await packModule(
+    await packModule({
       moduleConfig,
       marineCli,
-      flags[MARINE_BUILD_ARGS_FLAG_NAME],
+      marineBuildArgs: flags[MARINE_BUILD_ARGS_FLAG_NAME],
+      bindingCrate: flags["binding-crate"],
       maybeFluenceConfig,
-      flags.destination ??
+      destination:
+        flags.destination ??
         (await input({
           message:
             "Enter path to a directory where you want archive to be saved. Default: current directory",
           default: cwd(),
         })),
-    );
+    });
   }
 }
