@@ -171,46 +171,41 @@ Overrides for the module config
 
 ###### Properties
 
-| Property           | Type                       | Required | Description                                                                                                                                                                                                                                                                      |
-|--------------------|----------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `cid`              | string                     | No       | CID of the module when it was packed                                                                                                                                                                                                                                             |
-| `envs`             | [object](#envs)            | No       | environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl                   |
-| `loggerEnabled`    | boolean                    | No       | Set true to allow module to use the Marine SDK logger                                                                                                                                                                                                                            |
-| `loggingMask`      | integer                    | No       | manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map                                                                                                                                       |
-| `maxHeapSize`      | string                     | No       | DEPRECATED. Use `totalMemoryLimit` service property instead. Max size of the heap that a module can allocate in format: [number][whitespace?][B] where ? is an optional field and B is one of the following: kB, KB, kiB, KiB, KIB, mB, MB, miB, MiB, MIB, gB, GB, giB, GiB, GIB |
-| `mountedBinaries`  | [object](#mountedbinaries) | No       | A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl                                                                                                                                                                                    |
-| `rustBindingCrate` | string                     | No       | Name of the interface crate that should be used with this module                                                                                                                                                                                                                 |
-| `volumes`          | [object](#volumes)         | No       | A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file                                                                                                                               |
+| Property  | Type               | Required | Description                                                                                                                                                                     |
+|-----------|--------------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `effects` | [object](#effects) | No       | Effects configuration. Only providers can allow and control effector modules by changing the nox configuration. Properties in this config are ignored when you deploy your code |
+| `repl`    | [object](#repl)    | No       | REPL configuration. Properties in this config are ignored when you deploy your code                                                                                             |
 
-###### envs
+###### effects
 
-environment variables accessible by a particular module with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME). Please note that Marine adds three additional environment variables. Module environment variables could be examined with repl
+Effects configuration. Only providers can allow and control effector modules by changing the nox configuration. Properties in this config are ignored when you deploy your code
 
 **Properties**
 
-| Property                    | Type   | Required | Description                |
-|-----------------------------|--------|----------|----------------------------|
-| `Environment_variable_name` | string | No       | Environment variable value |
+| Property   | Type                | Required | Description                                                                                   |
+|------------|---------------------|----------|-----------------------------------------------------------------------------------------------|
+| `binaries` | [object](#binaries) | No       | A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl |
 
-###### mountedBinaries
+**binaries**
 
 A map of binary executable files that module is allowed to call. Example: curl: /usr/bin/curl
 
 **Properties**
 
-| Property              | Type   | Required | Description              |
-|-----------------------|--------|----------|--------------------------|
-| `Mounted_binary_name` | string | No       | Path to a mounted binary |
+| Property      | Type   | Required | Description      |
+|---------------|--------|----------|------------------|
+| `binary-name` | string | No       | Path to a binary |
 
-###### volumes
+###### repl
 
-A map of accessible files and their aliases. Aliases should be used in Marine module development because it's hard to know the full path to a file
+REPL configuration. Properties in this config are ignored when you deploy your code
 
 **Properties**
 
-| Property | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| `Alias`  | string | No       | path        |
+| Property        | Type    | Required | Description                                                                                                                                              |
+|-----------------|---------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `loggerEnabled` | boolean | No       | Set true to allow module to use the Marine SDK logger                                                                                                    |
+| `loggingMask`   | number  | No       | manages the logging targets, that are described in detail here: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map |
 
 ## spells
 
