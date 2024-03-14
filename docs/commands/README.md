@@ -1183,12 +1183,13 @@ Pack module into tar.gz archive
 
 ```
 USAGE
-  $ fluence module pack [PATH] [--no-input] [--marine-build-args <value>] [-d <value>]
+  $ fluence module pack [PATH] [--no-input] [--marine-build-args <value>] [-d <value>] [-b <value>]
 
 ARGUMENTS
   PATH  Path to a module
 
 FLAGS
+  -b, --binding-crate=<value>           Path to a directory with rust binding crate
   -d, --destination=<value>             Path to a directory where you want archive to be saved. Default: current
                                         directory
       --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
