@@ -86,7 +86,7 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
                 : commitment.delegator,
             "Total CU": commitment.unitCount?.toString(),
             "Failed epoch": commitment.failedEpoch?.toString(),
-            "Total CU Fail Count": commitment.totalCUFailCount?.toString(),
+            "Total CU Fail Count": commitment.totalFailCount?.toString(),
             "Collateral per unit": commitment.collateralPerUnit?.toString(),
             "Exited unit count": commitment.exitedUnitCount?.toString(),
           },
