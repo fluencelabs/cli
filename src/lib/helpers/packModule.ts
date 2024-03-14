@@ -23,7 +23,12 @@ import {
   type ModuleConfigReadonly,
   initNewModuleConfig,
 } from "../configs/project/module.js";
-import { MODULE_CONFIG_FULL_FILE_NAME, WASM_EXT } from "../const.js";
+import {
+  DEFAULT_IPFS_ADDRESS,
+  MODULE_CONFIG_FULL_FILE_NAME,
+  WASM_EXT,
+} from "../const.js";
+import { createIPFSClient } from "../localServices/ipfs.js";
 import type { MarineCLI } from "../marineCli.js";
 import { ensureFluenceTmpModulePath } from "../paths.js";
 
@@ -66,17 +71,12 @@ export async function packModule(
   );
 
   delete moduleToPackConfig.type;
+  const ipfsClient = await createIPFSClient(DEFAULT_IPFS_ADDRESS);
 
-  // eslint-disable-next-line import/extensions
-  const { CID } = await import("multiformats/cid");
-  // eslint-disable-next-line import/extensions
-  const raw = await import("multiformats/codecs/raw");
-  // eslint-disable-next-line import/extensions
-  const { sha256 } = await import("multiformats/hashes/sha2");
-  const bytes = raw.encode(await readFile(tmpWasmPath));
-  const hash = await sha256.digest(bytes);
-
-  const cid = CID.createV1(raw.code, hash);
+  const { cid } = await ipfsClient.add(await readFile(tmpWasmPath), {
+    cidVersion: 1,
+    onlyHash: true,
+  });
 
   moduleToPackConfig.cid = cid.toString();
   await moduleToPackConfig.$commit();

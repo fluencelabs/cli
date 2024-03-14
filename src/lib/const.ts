@@ -63,6 +63,13 @@ export const MIN_MEMORY_PER_MODULE = xbytes.parseSize(
 export const COMPUTE_UNIT_MEMORY_STR = "2GB";
 export const COMPUTE_UNIT_MEMORY = xbytes.parseSize(COMPUTE_UNIT_MEMORY_STR);
 
+/**
+ * Number of bytes in a chunk
+ * If it's less than then - raw codec will be used
+ * If it's more - dag-pb codec will be used
+ */
+export const IPFS_CHUNK_SIZE = 262144;
+
 export const DEFAULT_CURL_EFFECTOR_CID =
   "bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce";
 
@@ -173,6 +180,9 @@ export const TOML_EXT = "toml";
 
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
+export const SERVICE_CONFIGS_DIR_NAME = "service-configs";
+export const MODULE_VOLUMES_DIR_NAME = "volumes";
+export const MODULE_VOLUMES_SERVICES_DIR_NAME = "services";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const FRONTEND_DIR_NAME = "frontend";
@@ -242,7 +252,6 @@ export const INDEX_HTML_FILE_NAME = `index.html`;
 export const SERVER_TS_FILE_NAME = `server.${TS_EXT}`;
 export const SERVER_JS_FILE_NAME = `server.${JS_EXT}`;
 
-export const CONFIG_TOML = `Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
 export const README_MD_FILE_NAME = `README.md`;
@@ -544,12 +553,15 @@ export const isTemplate = getIsStringUnion(TEMPLATES);
 export const PACKAGE_NAME = "PACKAGE-NAME";
 export const PACKAGE_NAME_AND_VERSION_ARG_NAME = `${PACKAGE_NAME} | PACKAGE-NAME@VERSION`;
 
+export const SERVICE_CONFIG_TOML_POSTFIX = "_Config.toml";
+
 export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 .DS_Store
 /${DOT_FLUENCE_DIR_NAME}/${SECRETS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${SERVICE_CONFIGS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
 ${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}/
 **/node_modules

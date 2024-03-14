@@ -143,7 +143,7 @@ const overrideModulesSchema: JSONSchemaType<OverridableModuleProperties> = {
   title: "Module overrides",
   description: "Overrides for the module config",
   properties: {
-    ...overridableModuleProperties,
+    ...overridableModuleProperties.properties,
   },
   required: [],
   nullable: true,
