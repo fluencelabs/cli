@@ -39,6 +39,7 @@
 * [`fluence local ps`](#fluence-local-ps)
 * [`fluence local up`](#fluence-local-up)
 * [`fluence module add [PATH | URL]`](#fluence-module-add-path--url)
+* [`fluence module build [PATH]`](#fluence-module-build-path)
 * [`fluence module new [NAME]`](#fluence-module-new-name)
 * [`fluence module pack [PATH]`](#fluence-module-pack-path)
 * [`fluence module remove [NAME | PATH | URL]`](#fluence-module-remove-name--path--url)
@@ -1125,6 +1126,31 @@ EXAMPLES
 ```
 
 _See code: [src/commands/module/add.ts](https://github.com/fluencelabs/cli/blob/v0.15.22/src/commands/module/add.ts)_
+
+## `fluence module build [PATH]`
+
+Build module
+
+```
+USAGE
+  $ fluence module build [PATH] [--no-input] [--marine-build-args <value>]
+
+ARGUMENTS
+  PATH  Path to a module
+
+FLAGS
+  --marine-build-args=<--flag arg>  Space separated `cargo build` flags and args to pass to marine build. Overrides
+                                    'marineBuildArgs' property in fluence.yaml. Default: --release
+  --no-input                        Don't interactively ask for any input from the user
+
+DESCRIPTION
+  Build module
+
+EXAMPLES
+  $ fluence module build
+```
+
+_See code: [src/commands/module/build.ts](https://github.com/fluencelabs/cli/blob/v0.15.22/src/commands/module/build.ts)_
 
 ## `fluence module new [NAME]`
 
