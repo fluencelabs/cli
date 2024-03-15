@@ -234,7 +234,10 @@ type ConfigV1 = {
   name: string;
   type?: ModuleType;
   cid?: string;
-  rustBindingCrate?: string;
+  rustBindingCrate?: {
+    name: string;
+    version: string;
+  };
   effects?: Effects;
   repl?: Repl;
 };
@@ -263,9 +266,14 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       nullable: true,
     },
     rustBindingCrate: {
-      description: "Interface crate that can be used with this module",
-      type: "string",
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        version: { type: "string" },
+      },
       nullable: true,
+      required: ["name", "version"],
+      description: "Interface crate that can be used with this module",
     },
     ...overridableModulePropertiesV1.properties,
   },

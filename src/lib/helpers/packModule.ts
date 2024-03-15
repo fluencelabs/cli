@@ -167,9 +167,8 @@ async function resolveBindingCrate(bindingCrate: string | undefined) {
     );
   }
 
-  const {
-    package: { name, version },
-  } = parsedBindingCrate;
-
-  return `${name}@${version}`;
+  return {
+    name: parsedBindingCrate.package.name,
+    version: parsedBindingCrate.package.version,
+  };
 }
