@@ -53,7 +53,7 @@ export default class RemoveUnit extends BaseCommand<typeof RemoveUnit> {
     );
 
     const { dealClient } = await getDealClient();
-    const market = await dealClient.getMarket();
+    const market = dealClient.getMarket();
 
     for (const unitId of unitIds) {
       await sign(market.returnComputeUnitFromDeal, unitId);

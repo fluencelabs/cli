@@ -73,8 +73,8 @@ export async function createOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
   await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
-  const market = await dealClient.getMarket();
-  const usdc = await dealClient.getUSDC();
+  const market = dealClient.getMarket();
+  const usdc = dealClient.getUSDC();
   const providerArtifactsConfig = await initNewProviderArtifactsConfig();
 
   const alreadyCreatedOffers = offers.filter(({ offerName }) => {
@@ -297,7 +297,7 @@ export async function updateOffers(flags: OffersArgs) {
   const offers = await resolveOffersFromProviderConfig(flags);
   await assertProviderIsRegistered();
   const { dealClient } = await getDealClient();
-  const market = await dealClient.getMarket();
+  const market = dealClient.getMarket();
 
   const [notCreatedOffers, offersToUpdate] = splitErrorsAndResults(
     offers,
@@ -699,7 +699,7 @@ export async function getOfferInfo(
   isAllowedToFail = false,
 ) {
   const { readonlyDealClient } = await getReadonlyDealClient();
-  const market = await readonlyDealClient.getMarket();
+  const market = readonlyDealClient.getMarket();
   const dealExplorerClient = await getDealExplorerClient();
 
   let offerInfo = undefined;

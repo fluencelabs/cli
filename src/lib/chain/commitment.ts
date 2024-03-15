@@ -52,8 +52,8 @@ export async function getComputePeersWithCC(
   computePeers: ResolvedComputePeer[],
 ) {
   const { dealClient } = await getDealClient();
-  const market = await dealClient.getMarket();
-  const capacity = await dealClient.getCapacity();
+  const market = dealClient.getMarket();
+  const capacity = dealClient.getCapacity();
 
   const commitmentCreatedEvents = Object.fromEntries(
     await Promise.all(
@@ -177,8 +177,8 @@ export async function createCommitments(flags: {
 }) {
   const computePeers = await resolveComputePeersByNames(flags);
   const { dealClient } = await getDealClient();
-  const core = await dealClient.getCore();
-  const capacity = await dealClient.getCapacity();
+  const core = dealClient.getCore();
+  const capacity = dealClient.getCapacity();
   const precision = await core.precision();
   const { ethers } = await import("ethers");
   const epochDuration = await core.epochDuration();
@@ -320,7 +320,7 @@ export async function createCommitments(flags: {
 export async function removeCommitments(flags: CCFlags) {
   const commitments = await getCommitments(flags);
   const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
+  const capacity = dealClient.getCapacity();
 
   const [commitmentInfoErrors, commitmentInfo] = splitErrorsAndResults(
     await Promise.all(
@@ -388,8 +388,8 @@ export async function removeCommitments(flags: CCFlags) {
 export async function withdrawCollateral(flags: CCFlags) {
   const commitments = await getCommitments(flags);
   const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
-  const market = await dealClient.getMarket();
+  const capacity = dealClient.getCapacity();
+  const market = dealClient.getMarket();
 
   for (const commitment of commitments) {
     const { commitmentId } = commitment;
@@ -407,7 +407,7 @@ export async function withdrawCollateral(flags: CCFlags) {
 export async function withdrawCollateralRewards(flags: CCFlags) {
   const commitments = await getCommitments(flags);
   const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
+  const capacity = dealClient.getCapacity();
 
   // TODO: add logs here
   await signBatch(

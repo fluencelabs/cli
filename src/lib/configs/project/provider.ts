@@ -1717,7 +1717,7 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   const env = await ensureChainEnv();
   const networkId = await getChainId();
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const contractAddresses = await DealClient.getContractAddresses(env);
+  const contractAddresses = DealClient.getContractAddresses(env);
 
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,

@@ -42,7 +42,7 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCInfo));
     const { readonlyDealClient } = await getReadonlyDealClient();
-    const capacity = await readonlyDealClient.getCapacity();
+    const capacity = readonlyDealClient.getCapacity();
     const commitments = await getCommitments(flags);
     const { ethers } = await import("ethers");
 

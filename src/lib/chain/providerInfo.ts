@@ -27,7 +27,7 @@ const CURRENTLY_UNUSED_CID =
 export async function registerProvider() {
   const providerConfig = await ensureReadonlyProviderConfig();
   const { dealClient, signerOrWallet } = await getDealClient();
-  const market = await dealClient.getMarket();
+  const market = dealClient.getMarket();
 
   const initialProviderInfo = await market.getProviderInfo(
     signerOrWallet.address,
@@ -65,7 +65,7 @@ Provider address: ${signerOrWallet.address}
 export async function updateProvider() {
   const providerConfig = await ensureReadonlyProviderConfig();
   const { dealClient, signerOrWallet } = await getDealClient();
-  const market = await dealClient.getMarket();
+  const market = dealClient.getMarket();
 
   const initialProviderInfo = await market.getProviderInfo(
     signerOrWallet.address,
@@ -102,7 +102,7 @@ Provider address: ${signerOrWallet.address}
 
 export async function assertProviderIsRegistered() {
   const { dealClient, signerOrWallet } = await getDealClient();
-  const market = await dealClient.getMarket();
+  const market = dealClient.getMarket();
 
   const initialProviderInfo = await market.getProviderInfo(
     signerOrWallet.address,
