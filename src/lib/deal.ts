@@ -72,8 +72,8 @@ export async function dealCreate({
   workerName,
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
-  const core = await dealClient.getCore();
-  const usdc = await dealClient.getUSDC();
+  const core = dealClient.getCore();
+  const usdc = dealClient.getUSDC();
 
   const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
   const initialBalanceBigInt = await ptParse(initialBalance);
@@ -94,7 +94,7 @@ export async function dealCreate({
     );
   }
 
-  const dealFactory = await dealClient.getDealFactory();
+  const dealFactory = dealClient.getDealFactory();
 
   await sign(
     usdc.approve,
@@ -151,7 +151,7 @@ export async function match(dealAddress: string) {
   const { dealClient } = await getDealClient();
   const dealMatcherClient = await getDealMatcherClient();
   dbg(`running getMatchedOffersByDealId with dealAddress: ${dealAddress}`);
-  const core = await dealClient.getCore();
+  const core = dealClient.getCore();
 
   dbg(
     `initTimestamp: ${await core.initTimestamp()} Current epoch: ${await core.currentEpoch()}`,
@@ -174,7 +174,7 @@ export async function match(dealAddress: string) {
 
   dbg(`got matchedOffers: ${stringifyUnknown(matchedOffers)}`);
 
-  const market = await dealClient.getMarket();
+  const market = dealClient.getMarket();
 
   const matchDealTxReceipt = await sign(
     market.matchDeal,
