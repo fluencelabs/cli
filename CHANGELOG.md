@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.24](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.23...fluence-cli-v0.15.24) (2024-03-15)
+
+
+### Features
+
+* bump deal-ts-clients 0.11.2 ([#857](https://github.com/fluencelabs/cli/issues/857)) ([3b77735](https://github.com/fluencelabs/cli/commit/3b777359707bffdc4ca8630fd46646d8b1948331))
+
 ## [0.15.23](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.22...fluence-cli-v0.15.23) (2024-03-15)
 
 
