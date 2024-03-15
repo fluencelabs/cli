@@ -19,6 +19,6 @@ import { ensureChainEnv } from "../ensureChainNetwork.js";
 export async function getChainId(): Promise<number> {
   const chainEnv = await ensureChainEnv();
   const { DealClient } = await import("@fluencelabs/deal-ts-clients");
-  const { chainId } = await DealClient.getContractAddresses(chainEnv);
+  const { chainId } = DealClient.getContractAddresses(chainEnv);
   return chainId;
 }

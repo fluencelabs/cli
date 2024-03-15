@@ -53,7 +53,7 @@ export async function getPtDecimals() {
     ptDecimalsPromise = (async () => {
       const { ethers } = await import("ethers");
       const { dealClient, signerOrWallet } = await getDealClient();
-      const usdc = await dealClient.getUSDC();
+      const usdc = dealClient.getUSDC();
 
       const decimalsRaw = await signerOrWallet.call({
         to: await usdc.getAddress(),

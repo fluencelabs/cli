@@ -31,7 +31,7 @@ export async function depositCollateral(flags: CCFlags) {
     "providerConfigComputePeer" in firstCommitment;
 
   const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
+  const capacity = dealClient.getCapacity();
 
   const commitmentsWithCollateral = await Promise.all(
     commitments.map(async (commitment) => {
@@ -99,7 +99,7 @@ Number of compute units: ${color.yellow(
 
 async function getCollateral(commitmentId: string) {
   const { dealClient } = await getDealClient();
-  const capacity = await dealClient.getCapacity();
+  const capacity = dealClient.getCapacity();
   const commitment = await capacity.getCommitment(commitmentId);
   return commitment.collateralPerUnit * commitment.unitCount;
 }

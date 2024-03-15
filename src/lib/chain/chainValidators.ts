@@ -28,7 +28,7 @@ export async function getMinCCDuration(): Promise<bigint> {
   if ((await ensureChainEnv()) !== "local") {
     try {
       const { readonlyDealClient } = await getReadonlyDealClient();
-      const capacity = await readonlyDealClient.getCapacity();
+      const capacity = readonlyDealClient.getCapacity();
       minDuration = await capacity.minDuration();
     } catch {}
   }
@@ -74,7 +74,7 @@ async function getProtocolVersions() {
 
   if ((await ensureChainEnv()) !== "local") {
     const { readonlyDealClient } = await getReadonlyDealClient();
-    const core = await readonlyDealClient.getCore();
+    const core = readonlyDealClient.getCore();
 
     [minProtocolVersion, maxProtocolVersion] = await Promise.all([
       core.minProtocolVersion(),

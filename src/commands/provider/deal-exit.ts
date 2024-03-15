@@ -40,7 +40,7 @@ export default class DealExit extends BaseCommand<typeof DealExit> {
   async run(): Promise<void> {
     const { args } = await initCli(this, await this.parse(DealExit));
     const { dealClient } = await getDealClient();
-    const market = await dealClient.getMarket();
+    const market = dealClient.getMarket();
 
     const computeUnits = (
       await Promise.all(

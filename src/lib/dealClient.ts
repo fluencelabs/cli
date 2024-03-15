@@ -155,7 +155,7 @@ async function createDealClient(
   await setTryTimeout(
     "check if blockchain client is connected",
     async () => {
-      const core = await client.getCore();
+      const core = client.getCore();
       // By calling this method we ensure that the blockchain client is connected
       await core.minDealDepositedEpochs();
     },
