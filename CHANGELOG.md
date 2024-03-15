@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.23](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.22...fluence-cli-v0.15.23) (2024-03-15)
+
+
+### Features
+
+* add ability for provider to update effectors and add module pack command ([#849](https://github.com/fluencelabs/cli/issues/849)) ([bc862a4](https://github.com/fluencelabs/cli/commit/bc862a485b0ddc5f3d557bdf7a6f7dbcbed424e4))
+* bump nox 0.23.4; bump deal-ts-clients 0.11.1 ([#856](https://github.com/fluencelabs/cli/issues/856)) ([07eed08](https://github.com/fluencelabs/cli/commit/07eed08cc3f51c6e6685308f7fd315ede0cdcf51))
+* up deal-ts-clients to v0.11 ([#854](https://github.com/fluencelabs/cli/issues/854)) ([e05e8e2](https://github.com/fluencelabs/cli/commit/e05e8e233627a5999b34443913c038754266c37e))
+
 ## [0.15.22](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.21...fluence-cli-v0.15.22) (2024-03-11)
 
 
