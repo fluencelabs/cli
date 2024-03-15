@@ -77,7 +77,7 @@ export async function dealCreate({
 
   const pricePerWorkerEpochBigInt = await ptParse(pricePerWorkerEpoch);
   const initialBalanceBigInt = await ptParse(initialBalance);
-  const minDealDepositedEpochs = await core.minDealDepositedEpoches();
+  const minDealDepositedEpochs = await core.minDealDepositedEpochs();
 
   const minInitialBalanceBigInt =
     BigInt(targetWorkers) * pricePerWorkerEpochBigInt * minDealDepositedEpochs;
