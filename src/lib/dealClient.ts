@@ -157,7 +157,7 @@ async function createDealClient(
     async () => {
       const core = await client.getCore();
       // By calling this method we ensure that the blockchain client is connected
-      await core.minDealDepositedEpoches();
+      await core.minDealDepositedEpochs();
     },
     (err) => {
       throw new Error(stringifyUnknown(err));
