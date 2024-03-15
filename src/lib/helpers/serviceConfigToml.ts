@@ -22,7 +22,11 @@ import type {
   ServiceConfigReadonly,
   OverridableServiceProperties,
 } from "../configs/project/service.js";
-import { FS_OPTIONS, SERVICE_CONFIG_TOML_POSTFIX } from "../const.js";
+import {
+  COMPUTE_UNIT_MEMORY_STR,
+  FS_OPTIONS,
+  SERVICE_CONFIG_TOML_POSTFIX,
+} from "../const.js";
 import {
   ensureFluenceServiceConfigsDir,
   ensureFluenceTmpVolumesModuleDir,
@@ -84,8 +88,8 @@ async function createServiceConfigToml(
   return {
     total_memory_limit:
       totalMemoryLimit === undefined
-        ? // TODO: replace Infinity with calculated memory limit
-          "Infinity"
+        ? // TODO: replace COMPUTE_UNIT_MEMORY_STR with calculated memory limit
+          COMPUTE_UNIT_MEMORY_STR
         : totalMemoryLimit,
     module: await createModuleConfigsToml(serviceName, allServiceModuleConfigs),
   };

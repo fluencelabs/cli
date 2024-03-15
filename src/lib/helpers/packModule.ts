@@ -98,6 +98,8 @@ export async function packModule({
   });
 
   moduleToPackConfig.cid = cid.toString();
+  /* eslint-enable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
+
   const resolvedBindingCrate = await resolveBindingCrate(bindingCrate);
 
   if (resolvedBindingCrate !== undefined) {
