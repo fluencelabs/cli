@@ -43,9 +43,9 @@ export default class Proof extends BaseCommand<typeof Proof> {
       });
 
       const { dealClient } = await getDealClient();
-      const capacity = await dealClient.getCapacity();
+      const capacity = dealClient.getCapacity();
       const difficulty = await capacity.difficulty();
-      const market = await dealClient.getMarket();
+      const market = dealClient.getMarket();
 
       const unitIds = await market.getComputeUnitIds(
         await peerIdToUint8Array(peerId),
