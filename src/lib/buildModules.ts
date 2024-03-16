@@ -34,15 +34,38 @@ import { projectRootDir, getCargoTomlPath } from "./paths.js";
 type CargoWorkspaceToml = {
   workspace?: {
     members?: string[];
-    dependencies?: Record<
-      string,
-      {
-        version?: string;
-        package?: string;
-      }
-    >;
+    dependencies?: Record<string, Dependency>;
   };
 };
+
+type Dependency =
+  | string
+  | {
+      version: string;
+      package?: string;
+    };
+
+const dependencySchema = {
+  type: ["string", "object"],
+  oneOf: [
+    {
+      type: "string",
+    },
+    {
+      type: "object",
+      properties: {
+        version: {
+          type: "string",
+        },
+        package: {
+          type: "string",
+          nullable: true,
+        },
+      },
+      required: [],
+    },
+  ],
+} as const satisfies JSONSchemaType<Dependency>;
 
 const cargoWorkspaceTomlSchema: JSONSchemaType<CargoWorkspaceToml> = {
   type: "object",
@@ -59,20 +82,9 @@ const cargoWorkspaceTomlSchema: JSONSchemaType<CargoWorkspaceToml> = {
         },
         dependencies: {
           type: "object",
-          additionalProperties: {
-            type: "object",
-            properties: {
-              version: {
-                type: "string",
-                nullable: true,
-              },
-              package: {
-                type: "string",
-                nullable: true,
-              },
-            },
-            required: [],
-            nullable: true,
+          additionalProperties: dependencySchema,
+          properties: {
+            dependencyName: dependencySchema,
           },
           required: [],
           nullable: true,
@@ -145,12 +157,11 @@ members = []
 
   const prevPackageVersionsMap = Object.entries(
     parsedConfig.workspace?.dependencies ?? {},
-  ).reduce<Record<string, string[]>>((acc, [name, { version, package: p }]) => {
-    if (version === undefined) {
-      return acc;
-    }
+  ).reduce<Record<string, string[]>>((acc, [name, strOrObj]) => {
+    const packageName =
+      typeof strOrObj === "string" ? name : strOrObj.package ?? name;
 
-    const packageName = p ?? name;
+    const version = typeof strOrObj === "string" ? strOrObj : strOrObj.version;
     acc[packageName] = [...(acc[packageName] ?? []), version];
     return acc;
   }, {});
