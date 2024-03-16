@@ -1150,7 +1150,7 @@ EXAMPLES
   $ fluence module build
 ```
 
-_See code: [src/commands/module/build.ts](https://github.com/fluencelabs/cli/blob/v0.15.22/src/commands/module/build.ts)_
+_See code: [src/commands/module/build.ts](https://github.com/fluencelabs/cli/blob/v0.15.24/src/commands/module/build.ts)_
 
 ## `fluence module new [NAME]`
 
