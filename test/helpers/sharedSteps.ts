@@ -22,7 +22,7 @@ import {
   type Node,
   stage,
   testNet,
-  krasnodar,
+  kras,
 } from "@fluencelabs/fluence-network-environment";
 import sortBy from "lodash-es/sortBy.js";
 
@@ -90,8 +90,8 @@ export async function getMultiaddrs(cwd: string): Promise<Node[]> {
 
   multiaddrs = sortBy(
     {
-      kras: krasnodar,
-      stage: stage,
+      kras,
+      stage,
       dar: testNet,
       local,
     }[fluenceEnv],

@@ -18,7 +18,7 @@ import {
   type Node as AddrAndPeerId,
   stage,
   testNet,
-  krasnodar,
+  kras,
 } from "@fluencelabs/fluence-network-environment";
 import { multiaddr } from "@multiformats/multiaddr";
 import { color } from "@oclif/color";
@@ -113,7 +113,7 @@ export async function ensureCustomAddrsAndPeerIds() {
 }
 
 const ADDR_MAP: Record<PublicFluenceEnv, Array<AddrAndPeerId>> = {
-  kras: krasnodar,
+  kras,
   dar: testNet,
   stage,
 };
