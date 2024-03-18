@@ -94,10 +94,10 @@ export const U32_MAX = 4_294_967_295;
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
-export const DEFAULT_PUBLIC_FLUENCE_ENV = "kras";
+export const DEFAULT_PUBLIC_FLUENCE_ENV = "dar";
 export const PUBLIC_FLUENCE_ENV = [
   DEFAULT_PUBLIC_FLUENCE_ENV,
-  "dar",
+  "kras",
   "stage",
 ] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
