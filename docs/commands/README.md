@@ -251,11 +251,11 @@ USAGE
   $ fluence build [--no-input] [--marine--args <value>] [--import <value>] [--env <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --import=<path>...                    Path to a directory to import aqua files from. May be used several times
-  --marine-build-args=<--flag arg>      Space separated `cargo build` flags and args to pass to marine build. Overrides
-                                        'marineBuildArgs' property in fluence.yaml. Default: --release
-  --no-input                            Don't interactively ask for any input from the user
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --import=<path>...                           Path to a directory to import aqua files from. May be used several times
+  --marine-build-args=<--flag arg>             Space separated `cargo build` flags and args to pass to marine build.
+                                               Overrides 'marineBuildArgs' property in fluence.yaml. Default: --release
+  --no-input                                   Don't interactively ask for any input from the user
 
 DESCRIPTION
   Build all application services, described in fluence.yaml and generate aqua interfaces for them
@@ -275,12 +275,12 @@ USAGE
   $ fluence chain info [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Show contract addresses for the fluence environment and accounts for the local environment
@@ -297,12 +297,12 @@ USAGE
   $ fluence chain proof [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Send garbage proof for testing purposes
@@ -323,12 +323,12 @@ ARGUMENTS
   NEW-APP-CID   New app CID for the deal
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Change app id in the deal
@@ -348,23 +348,23 @@ USAGE
     [--priv-key <value>]
 
 FLAGS
-  --app-cid=<value>                     (required) CID of the application that will be deployed
-  --blacklist=<value>                   Comma-separated list of blacklisted providers
-  --collateral-per-worker=<value>       (required) Collateral per worker
-  --effectors=<value>                   Comma-separated list of effector to be used in the deal
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --initial-balance=<value>             Initial balance
-  --max-workers-per-provider=<value>    (required) Max workers per provider
-  --min-workers=<value>                 (required) Required workers to activate the deal
-  --no-input                            Don't interactively ask for any input from the user
-  --price-per-worker-epoch=<value>      (required) Price per worker epoch
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
-  --protocol-version=<value>            Protocol version
-  --target-workers=<value>              (required) Max workers in the deal
-  --whitelist=<value>                   Comma-separated list of whitelisted providers
+  --app-cid=<value>                            (required) CID of the application that will be deployed
+  --blacklist=<value>                          Comma-separated list of blacklisted providers
+  --collateral-per-worker=<value>              (required) Collateral per worker
+  --effectors=<value>                          Comma-separated list of effector to be used in the deal
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --initial-balance=<value>                    Initial balance
+  --max-workers-per-provider=<value>           (required) Max workers per provider
+  --min-workers=<value>                        (required) Required workers to activate the deal
+  --no-input                                   Don't interactively ask for any input from the user
+  --price-per-worker-epoch=<value>             (required) Price per worker epoch
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
+  --protocol-version=<value>                   Protocol version
+  --target-workers=<value>                     (required) Max workers in the deal
+  --whitelist=<value>                          Comma-separated list of whitelisted providers
 
 DESCRIPTION
   Create your deal with the specified parameters
@@ -386,14 +386,14 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                Comma-separated deal ids of the deployed deal. Can't be used together with
-                                        DEPLOYMENT-NAMES arg
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Deposit do the deal
@@ -413,14 +413,14 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                Comma-separated deal ids of the deployed deal. Can't be used together with
-                                        DEPLOYMENT-NAMES arg
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Get info about the deal
@@ -442,21 +442,23 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  -k, --sk=<name>                           Name of the secret key for js-client inside CLI to use. If not specified,
-                                            will use the default key for the project. If there is no fluence project or
-                                            there is no default key, will use user's default key
-      --deal-ids=<id-1,id-2>                Comma-separated deal ids of the deployed deal. Can't be used together with
-                                            DEPLOYMENT-NAMES arg
-      --dial-timeout=<milliseconds>         [default: 15000] Timeout for Fluence js-client to connect to relay peer
-      --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-      --no-input                            Don't interactively ask for any input from the user
-      --off-aqua-logs                       Turns off logs from Console.print in aqua and from IPFS service
-      --particle-id                         Print particle ids when running Fluence js-client
-      --relay=<multiaddress>                Relay for Fluence js-client to connect to
-      --spell=<spell-name>                  [default: worker-spell] Spell name to get logs for
-      --tracing                             Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                  [default: 15000] Particle Time To Live since 'now'. After that, particle is
-                                            expired and not processed.
+  -k, --sk=<name>                                  Name of the secret key for js-client inside CLI to use. If not
+                                                   specified, will use the default key for the project. If there is no
+                                                   fluence project or there is no default key, will use user's default
+                                                   key
+      --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                                   with DEPLOYMENT-NAMES arg
+      --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+      --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+      --no-input                                   Don't interactively ask for any input from the user
+      --off-aqua-logs                              Turns off logs from Console.print in aqua and from IPFS service
+      --particle-id                                Print particle ids when running Fluence js-client
+      --relay=<multiaddress>                       Relay for Fluence js-client to connect to
+      --spell=<spell-name>                         [default: worker-spell] Spell name to get logs for
+      --tracing                                    Compile aqua in tracing mode (for debugging purposes)
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Get logs from deployed workers for deals listed in workers.yaml
@@ -479,14 +481,14 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                Comma-separated deal ids of the deployed deal. Can't be used together with
-                                        DEPLOYMENT-NAMES arg
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Stop the deal
@@ -508,14 +510,14 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                Comma-separated deal ids of the deployed deal. Can't be used together with
-                                        DEPLOYMENT-NAMES arg
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Withdraw tokens from the deal
@@ -535,14 +537,14 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                Comma-separated deal ids of the deployed deal. Can't be used together with
-                                        DEPLOYMENT-NAMES arg
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
+                                               with DEPLOYMENT-NAMES arg
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Add missing workers to the deal
@@ -565,12 +567,12 @@ ARGUMENTS
   UNIT-IDS  Comma-separated compute unit ids. You can get them using 'fluence deal info' command
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Remove unit from the deal
@@ -639,12 +641,12 @@ ARGUMENTS
   IDS  Comma separated capacity commitment IDs
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Add FLT collateral to capacity commitment
@@ -667,12 +669,12 @@ ARGUMENTS
   IDS  Comma separated capacity commitment IDs
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Withdraw FLT collateral from capacity commitment
@@ -695,12 +697,12 @@ ARGUMENTS
   IDS  Comma separated capacity commitment IDs
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Withdraw FLT rewards from capacity commitment
@@ -827,28 +829,32 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  -k, --sk=<name>                           Name of the secret key for js-client inside CLI to use. If not specified,
-                                            will use the default key for the project. If there is no fluence project or
-                                            there is no default key, will use user's default key
-  -u, --update                              Update your previous deployment
-      --[no-]auto-match                     Toggle automatic matching. Auto-matching is turned on by default
-      --dial-timeout=<milliseconds>         [default: 15000] Timeout for Fluence js-client to connect to relay peer
-      --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-      --import=<path>...                    Path to a directory to import aqua files from. May be used several times
-      --marine-build-args=<--flag arg>      Space separated `cargo build` flags and args to pass to marine build.
-                                            Overrides 'marineBuildArgs' property in fluence.yaml. Default: --release
-      --no-build                            Don't build the project before running the command
-      --no-input                            Don't interactively ask for any input from the user
-      --off-aqua-logs                       Turns off logs from Console.print in aqua and from IPFS service
-      --particle-id                         Print particle ids when running Fluence js-client
-      --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                            unsecure. On local network
-                                            0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will
-                                            be used by default
-      --relay=<multiaddress>                Relay for Fluence js-client to connect to
-      --tracing                             Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                  [default: 15000] Particle Time To Live since 'now'. After that, particle is
-                                            expired and not processed.
+  -k, --sk=<name>                                  Name of the secret key for js-client inside CLI to use. If not
+                                                   specified, will use the default key for the project. If there is no
+                                                   fluence project or there is no default key, will use user's default
+                                                   key
+  -u, --update                                     Update your previous deployment
+      --[no-]auto-match                            Toggle automatic matching. Auto-matching is turned on by default
+      --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+      --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+      --import=<path>...                           Path to a directory to import aqua files from. May be used several
+                                                   times
+      --marine-build-args=<--flag arg>             Space separated `cargo build` flags and args to pass to marine build.
+                                                   Overrides 'marineBuildArgs' property in fluence.yaml. Default:
+                                                   --release
+      --no-build                                   Don't build the project before running the command
+      --no-input                                   Don't interactively ask for any input from the user
+      --off-aqua-logs                              Turns off logs from Console.print in aqua and from IPFS service
+      --particle-id                                Print particle ids when running Fluence js-client
+      --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags
+                                                   is unsecure. On local network
+                                                   0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+                                                   key will be used by default
+      --relay=<multiaddress>                       Relay for Fluence js-client to connect to
+      --tracing                                    Compile aqua in tracing mode (for debugging purposes)
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Deploy according to 'deployments' property in fluence.yaml
@@ -891,10 +897,11 @@ ARGUMENTS
   PATH  Project path
 
 FLAGS
-  -t, --template=<value>                    Template to use for the project. One of: quickstart, minimal, ts, js
-      --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-      --no-input                            Don't interactively ask for any input from the user
-      --noxes=<value>                       Number of Compute Peers to generate when a new provider.yaml is created
+  -t, --template=<value>                           Template to use for the project. One of: quickstart, minimal, ts, js
+      --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+      --no-input                                   Don't interactively ask for any input from the user
+      --noxes=<value>                              Number of Compute Peers to generate when a new provider.yaml is
+                                                   created
 
 DESCRIPTION
   Initialize fluence project
@@ -1010,12 +1017,12 @@ USAGE
   $ fluence local init [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Init docker-compose.yaml according to provider.yaml
@@ -1238,15 +1245,15 @@ USAGE
   $ fluence provider cc-activate [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                         Comma separated capacity commitment IDs
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                                Comma separated capacity commitment IDs
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Add FLT collateral to capacity commitment to activate it
@@ -1266,14 +1273,14 @@ USAGE
   $ fluence provider cc-create [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Create Capacity commitment
@@ -1293,15 +1300,15 @@ USAGE
   $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                         Comma separated capacity commitment IDs
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                                Comma separated capacity commitment IDs
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Get info about capacity commitments
@@ -1321,15 +1328,15 @@ USAGE
   $ fluence provider cc-remove [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                         Comma separated capacity commitment IDs
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                                Comma separated capacity commitment IDs
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Remove Capacity commitment. You can remove it only BEFORE you activated it by depositing collateral
@@ -1350,15 +1357,15 @@ USAGE
   [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                         Comma separated capacity commitment IDs
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<value>                                Comma separated capacity commitment IDs
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Withdraw FLT collateral from capacity commitments
@@ -1378,14 +1385,14 @@ USAGE
   $ fluence provider cc-withdraw-rewards [--no-input] [--nox-names <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Withdraw FLT rewards from capacity commitments
@@ -1408,12 +1415,12 @@ ARGUMENTS
   DEAL-IDS  Comma-separated deal ids
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Exit from deal
@@ -1433,14 +1440,14 @@ USAGE
   $ fluence provider deal-list [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   List deals
@@ -1464,12 +1471,12 @@ ARGUMENTS
   UNIT-ID       Compute unit ID
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Deal reward info
@@ -1492,12 +1499,12 @@ ARGUMENTS
   DEAL-IDS  Deal ids
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Withdraw USDC rewards from deals
@@ -1517,12 +1524,12 @@ USAGE
   $ fluence provider gen [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Generate Config.toml files according to provider.yaml and secrets according to provider-secrets.yaml
@@ -1542,13 +1549,13 @@ USAGE
   $ fluence provider init [--no-input] [--noxes <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --noxes=<value>                       Number of Compute Peers to generate when a new provider.yaml is created
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --noxes=<value>                              Number of Compute Peers to generate when a new provider.yaml is created
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Init provider config. Creates a provider.yaml file
@@ -1565,14 +1572,14 @@ USAGE
   $ fluence provider offer-create [--no-input] [--env <value>] [--priv-key <value>] [--offer <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --offer=<offer-1,offer-2>             Comma-separated list of offer names. Can't be used together with --offer-ids. To
-                                        use all of your offers: --offer all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --offer=<offer-1,offer-2>                    Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offer all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Create offers. You have to be registered as a provider to do that
@@ -1593,15 +1600,16 @@ USAGE
   <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --offer=<offer-1,offer-2>             Comma-separated list of offer names. Can't be used together with --offer-ids. To
-                                        use all of your offers: --offer all
-  --offer-ids=<id-1,id-2>               Comma-separated list of offer ids. Can't be used together with --offer flag
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --offer=<offer-1,offer-2>                    Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offer all
+  --offer-ids=<id-1,id-2>                      Comma-separated list of offer ids. Can't be used together with --offer
+                                               flag
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Get info about offers
@@ -1621,14 +1629,14 @@ USAGE
   $ fluence provider offer-update [--no-input] [--offer <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --offer=<offer-1,offer-2>             Comma-separated list of offer names. Can't be used together with --offer-ids. To
-                                        use all of your offers: --offer all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --offer=<offer-1,offer-2>                    Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offer all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Update offers
@@ -1648,12 +1656,12 @@ USAGE
   $ fluence provider register [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Register as a provider
@@ -1673,14 +1681,14 @@ USAGE
   $ fluence provider signing-wallets [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Print nox signing wallets
@@ -1701,15 +1709,15 @@ USAGE
   <value>]
 
 FLAGS
-  --amount=<value>                      Amount of FLT tokens to distribute to noxes
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --nox-names=<nox-1,nox-2>             Comma-separated names of noxes from provider.yaml. To use all of your noxes:
-                                        --nox-names all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --amount=<value>                             Amount of FLT tokens to distribute to noxes
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
+                                               noxes: --nox-names all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Distribute FLT tokens to noxes
@@ -1729,12 +1737,12 @@ USAGE
   $ fluence provider update [--no-input] [--env <value>] [--priv-key <value>]
 
 FLAGS
-  --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+  --no-input                                   Don't interactively ask for any input from the user
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Update provider info
@@ -1757,37 +1765,41 @@ USAGE
     [--tracing] [--no-empty-response]
 
 FLAGS
-  -b, --print-beautified-air                Prints beautified AIR code instead of function execution
-  -f, --func=<function-call>                Function call. Example: funcName("stringArg")
-  -i, --input=<path>                        Path to an aqua file or a directory that contains your aqua files
-  -k, --sk=<name>                           Name of the secret key for js-client inside CLI to use. If not specified,
-                                            will use the default key for the project. If there is no fluence project or
-                                            there is no default key, will use user's default key
-      --const=<NAME=value>...               Constants to be passed to the compiler
-      --data=<json>                         JSON in { [argumentName]: argumentValue } format. You can call a function
-                                            using these argument names like this: -f 'myFunc(argumentName)'. Arguments
-                                            in this flag override arguments in the --data-path flag
-      --data-path=<path>                    Path to a JSON file in { [argumentName]: argumentValue } format. You can
-                                            call a function using these argument names like this: -f
-                                            'myFunc(argumentName)'. Arguments in this flag can be overridden using
-                                            --data flag
-      --dial-timeout=<milliseconds>         [default: 15000] Timeout for Fluence js-client to connect to relay peer
-      --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
-      --import=<path>...                    Path to a directory to import aqua files from. May be used several times
-      --log-level-compiler=<level>          Set log level for the compiler. Must be one of: all, trace, debug, info,
-                                            warn, error, off
-      --no-empty-response                   Do not generate response call if there are no returned values
-      --no-input                            Don't interactively ask for any input from the user
-      --no-relay                            Do not generate a pass through the relay node
-      --no-xor                              Do not generate a wrapper that catches and displays errors
-      --off-aqua-logs                       Turns off logs from Console.print in aqua and from IPFS service
-      --particle-id                         Print particle ids when running Fluence js-client
-      --print-air                           Prints generated AIR code instead of function execution
-      --quiet                               Print only execution result. Overrides all --log-level-* flags
-      --relay=<multiaddress>                Relay for Fluence js-client to connect to
-      --tracing                             Compile aqua in tracing mode (for debugging purposes)
-      --ttl=<milliseconds>                  [default: 15000] Particle Time To Live since 'now'. After that, particle is
-                                            expired and not processed.
+  -b, --print-beautified-air                       Prints beautified AIR code instead of function execution
+  -f, --func=<function-call>                       Function call. Example: funcName("stringArg")
+  -i, --input=<path>                               Path to an aqua file or a directory that contains your aqua files
+  -k, --sk=<name>                                  Name of the secret key for js-client inside CLI to use. If not
+                                                   specified, will use the default key for the project. If there is no
+                                                   fluence project or there is no default key, will use user's default
+                                                   key
+      --const=<NAME=value>...                      Constants to be passed to the compiler
+      --data=<json>                                JSON in { [argumentName]: argumentValue } format. You can call a
+                                                   function using these argument names like this: -f
+                                                   'myFunc(argumentName)'. Arguments in this flag override arguments in
+                                                   the --data-path flag
+      --data-path=<path>                           Path to a JSON file in { [argumentName]: argumentValue } format. You
+                                                   can call a function using these argument names like this: -f
+                                                   'myFunc(argumentName)'. Arguments in this flag can be overridden
+                                                   using --data flag
+      --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
+                                                   peer
+      --env=<kras | dar | stage | local | custom>  Fluence Environment to use when running the command
+      --import=<path>...                           Path to a directory to import aqua files from. May be used several
+                                                   times
+      --log-level-compiler=<level>                 Set log level for the compiler. Must be one of: all, trace, debug,
+                                                   info, warn, error, off
+      --no-empty-response                          Do not generate response call if there are no returned values
+      --no-input                                   Don't interactively ask for any input from the user
+      --no-relay                                   Do not generate a pass through the relay node
+      --no-xor                                     Do not generate a wrapper that catches and displays errors
+      --off-aqua-logs                              Turns off logs from Console.print in aqua and from IPFS service
+      --particle-id                                Print particle ids when running Fluence js-client
+      --print-air                                  Prints generated AIR code instead of function execution
+      --quiet                                      Print only execution result. Overrides all --log-level-* flags
+      --relay=<multiaddress>                       Relay for Fluence js-client to connect to
+      --tracing                                    Compile aqua in tracing mode (for debugging purposes)
+      --ttl=<milliseconds>                         [default: 15000] Particle Time To Live since 'now'. After that,
+                                                   particle is expired and not processed.
 
 DESCRIPTION
   Run the first aqua function CLI is able to find and compile among all aqua files specified in 'compileAqua' property
