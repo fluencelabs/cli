@@ -47,7 +47,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
-| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `kras`, `dar`, `stage`, `local`.                                                          |
+| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
 
 ### dar
 
@@ -72,7 +72,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
-| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `kras`, `dar`, `stage`, `local`.                                                          |
+| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
 
 ### kras
 
@@ -97,7 +97,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
-| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `kras`, `dar`, `stage`, `local`.                                                          |
+| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
 
 ### local
 
@@ -122,7 +122,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
-| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `kras`, `dar`, `stage`, `local`.                                                          |
+| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
 
 ### stage
 
@@ -147,7 +147,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `dealId`         | string  | **Yes**  | Lowercased version of dealIdOriginal without 0x prefix. Currently unused. Was previously used to resolve workers in aqua                                                                |
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
-| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `kras`, `dar`, `stage`, `local`.                                                          |
+| `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
 
 ## hosts
 
