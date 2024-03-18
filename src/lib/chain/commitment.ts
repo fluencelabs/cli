@@ -210,7 +210,7 @@ export async function createCommitments(flags: {
           dbg(`Duration in epochs: ${durationEpoch.toString()}`);
           const ccDelegator = capacityCommitment.delegator;
 
-          const minDuration = await capacity.minDuration();
+          const minDuration = await core.minDuration();
 
           if (durationEpoch < minDuration) {
             return {
