@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.15.25](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.24...fluence-cli-v0.15.25) (2024-03-18)
+
+
+### Features
+
+* add default fee, up nox, small adjustments in logs, rename offer flag ([#861](https://github.com/fluencelabs/cli/issues/861)) ([9c56555](https://github.com/fluencelabs/cli/commit/9c56555e60f218622b5a3d2f284ba50196731457))
+* add kras env back + bump deal-ts-clients 0.12.0 ([#860](https://github.com/fluencelabs/cli/issues/860)) ([6ba7a12](https://github.com/fluencelabs/cli/commit/6ba7a1252d155351aa8292821945426e1d29aa76))
+* new modules, gen Config.tomls for services, some refactoring, fix CID ([#855](https://github.com/fluencelabs/cli/issues/855)) ([899a844](https://github.com/fluencelabs/cli/commit/899a844b66988548c5d53a9fc783c66bb9039a2b))
+* support deal-ts-clients v0.12.0 ([#862](https://github.com/fluencelabs/cli/issues/862)) ([83f6069](https://github.com/fluencelabs/cli/commit/83f6069980138f9a57d74f69469ce53babdecbba))
+
 ## [0.15.24](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.23...fluence-cli-v0.15.24) (2024-03-15)
 
 
