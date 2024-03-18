@@ -1758,7 +1758,6 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       marketContract: contractAddresses.market,
       networkId,
       dealSyncStartBlock: DEFAULT_START_BLOCK,
-      defaultBaseFee: 0,
       defaultPriorityFee: 0,
     },
     ccp: {
