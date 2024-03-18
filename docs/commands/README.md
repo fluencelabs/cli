@@ -1573,13 +1573,13 @@ USAGE
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>            Comma-separated list of offer names. Can't be used together with --ids. To use
-                                        all of your offers: --offers all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --no-input                                   Don't interactively ask for any input from the user
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
+                                               To use all of your offers: --offers all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Create offers. You have to be registered as a provider to do that
@@ -1600,14 +1600,15 @@ USAGE
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<id-1,id-2>                     Comma-separated list of offer ids. Can't be used together with --offers flag
-  --no-input                            Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>            Comma-separated list of offer names. Can't be used together with --ids. To use
-                                        all of your offers: --offers all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --ids=<id-1,id-2>                            Comma-separated list of offer ids. Can't be used together with --offers
+                                               flag
+  --no-input                                   Don't interactively ask for any input from the user
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
+                                               To use all of your offers: --offers all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Get info about offers
@@ -1628,13 +1629,13 @@ USAGE
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --no-input                            Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>            Comma-separated list of offer names. Can't be used together with --ids. To use
-                                        all of your offers: --offers all
-  --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
-                                        unsecure. On local network
-                                        0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
-                                        used by default
+  --no-input                                   Don't interactively ask for any input from the user
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
+                                               To use all of your offers: --offers all
+  --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
+                                               unsecure. On local network
+                                               0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
+                                               will be used by default
 
 DESCRIPTION
   Update offers
