@@ -22,7 +22,6 @@ import type { JSONSchemaType } from "ajv";
 import { commandObj } from "../../commandObj.js";
 import {
   MIN_MEMORY_PER_MODULE_STR,
-  MAX_HEAP_SIZE_DESCRIPTION,
   BYTES_PATTERN,
   CLI_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
@@ -67,7 +66,7 @@ const moduleSchemaForService: JSONSchemaType<ServiceModuleV0> = {
       description:
         "Either path to the module directory or URL to the tar.gz archive which contains the content of the module directory",
     },
-    ...overridableModuleProperties,
+    ...overridableModuleProperties.properties,
   },
   required: ["get"],
   additionalProperties: false,
@@ -101,7 +100,7 @@ export const overridableServiceProperties = {
       type: "string",
       pattern: BYTES_PATTERN,
       nullable: true,
-      description: `Memory limit for all service modules. If you specify this property please make sure it's at least \`${MIN_MEMORY_PER_MODULE_STR} * numberOfModulesInTheService\`. In repl default is: Infinity. When deploying service as part of the worker default is: computeUnits * ${COMPUTE_UNIT_MEMORY_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
+      description: `Memory limit for all service modules. If you specify this property please make sure it's at least \`${MIN_MEMORY_PER_MODULE_STR} * numberOfModulesInTheService\`. In repl default is the entire compute unit memory: ${COMPUTE_UNIT_MEMORY_STR}. When deploying service as part of the worker default is: computeUnits * ${COMPUTE_UNIT_MEMORY_STR} / (amount of services in the worker). Format: ${BYTES_FORMAT}`,
     },
   },
   required: [],
@@ -257,32 +256,6 @@ modules:
     # Either path to the module directory or
     # URL to the tar.gz archive which contains the content of the module directory
     get: '${relativePathToFacade}'
-
-    # You can override module configuration here:
-
-#     # environment variables accessible by a particular module
-#     # with standard Rust env API like this: std::env::var(IPFS_ADDR_ENV_NAME)
-#     # Module environment variables could be examined with repl
-#     envs:
-#       ENV_VARIABLE: "env variable string value"
-#
-#     # Set true to allow module to use the Marine SDK logger
-#     loggerEnabled: true
-#
-#     # manages the logging targets, described in detail: https://fluence.dev/docs/marine-book/marine-rust-sdk/developing/logging#using-target-map
-#     loggingMask: 1
-#
-#     # ${MAX_HEAP_SIZE_DESCRIPTION}
-#     maxHeapSize: 1KiB
-#
-#     # A map of binary executable files that module is allowed to call
-#     mountedBinaries:
-#       curl: "/usr/bin/curl"
-#
-#     # A map of accessible files and their aliases.
-#     # Aliases should be used in Marine module development because it's hard to know the full path to a file
-#     volumes:
-#       alias: "some/alias/path"
 `;
   };
 };

@@ -15,7 +15,6 @@
  */
 
 import { spawn } from "node:child_process";
-import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { cwd } from "node:process";
 
@@ -28,15 +27,10 @@ import {
   initReadonlyFluenceConfig,
   type FluenceConfig,
 } from "../../lib/configs/project/fluence.js";
-import type { ModuleConfigReadonly } from "../../lib/configs/project/module.js";
-import {
-  initReadonlyServiceConfig,
-  type ServiceConfigReadonly,
-} from "../../lib/configs/project/service.js";
+import { initReadonlyServiceConfig } from "../../lib/configs/project/service.js";
 import {
   BIN_DIR_NAME,
   FLUENCE_CONFIG_FULL_FILE_NAME,
-  FS_OPTIONS,
   MARINE_BUILD_ARGS_FLAG,
   NO_INPUT_FLAG,
   SEPARATOR,
@@ -47,10 +41,7 @@ import { updateAquaServiceInterfaceFile } from "../../lib/helpers/generateServic
 import { startSpinner, stopSpinner } from "../../lib/helpers/spinner.js";
 import { exitCli, initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
-import {
-  ensureFluenceTmpConfigTomlPath,
-  projectRootDir,
-} from "../../lib/paths.js";
+import { projectRootDir } from "../../lib/paths.js";
 import { input, list } from "../../lib/prompt.js";
 import { ensureMarineOrMreplDependency } from "../../lib/rust.js";
 
@@ -85,18 +76,21 @@ export default class REPL extends Command {
       args[NAME_OR_PATH_OR_URL] ??
       (await promptForNamePathOrUrl(maybeFluenceConfig));
 
-    const serviceConfig = await ensureServiceConfig(nameOrPathOrUrl);
+    const { serviceName, serviceConfig } =
+      await ensureServiceConfig(nameOrPathOrUrl);
+
     const marineCli = await initMarineCli();
 
     startSpinner("Making sure service and modules are downloaded and built");
 
-    const { moduleConfigs, facadeModuleConfig } =
-      await resolveSingleServiceModuleConfigsAndBuild(
+    const { facadeModuleConfig, fluenceServiceConfigTomlPath } =
+      await resolveSingleServiceModuleConfigsAndBuild({
+        serviceName,
         serviceConfig,
-        maybeFluenceConfig,
+        fluenceConfig: maybeFluenceConfig,
         marineCli,
-        flags["marine-build-args"],
-      );
+        marineBuildArgs: flags["marine-build-args"],
+      });
 
     const isServiceListedInFluenceConfig =
       maybeFluenceConfig?.services?.[nameOrPathOrUrl] !== undefined;
@@ -111,21 +105,6 @@ export default class REPL extends Command {
 
     stopSpinner();
 
-    const fluenceTmpConfigTomlPath = await ensureFluenceTmpConfigTomlPath();
-    const stringifyToTOML = (await import("@iarna/toml/stringify.js")).default;
-
-    await writeFile(
-      fluenceTmpConfigTomlPath,
-      stringifyToTOML({
-        total_memory_limit:
-          typeof serviceConfig.totalMemoryLimit === "string"
-            ? serviceConfig.totalMemoryLimit
-            : "Infinity",
-        module: ensureModuleConfigsForToml(moduleConfigs),
-      }),
-      FS_OPTIONS,
-    );
-
     if (!isInteractive) {
       await exitCli();
       return;
@@ -134,7 +113,8 @@ export default class REPL extends Command {
     const mreplDirPath = await ensureMarineOrMreplDependency({ name: "mrepl" });
     const mreplPath = join(mreplDirPath, BIN_DIR_NAME, "mrepl");
 
-    commandObj.logToStderr(`${SEPARATOR}Execute ${color.yellow(
+    commandObj.logToStderr(`Service config for repl was generated at: ${fluenceServiceConfigTomlPath}
+${SEPARATOR}Execute ${color.yellow(
       "help",
     )} inside repl to see available commands.
 Current service <module_name> is: ${color.yellow(facadeModuleConfig.name)}
@@ -146,90 +126,39 @@ ${color.yellow(
 
     await haltCountly();
 
-    spawn(mreplPath, [fluenceTmpConfigTomlPath], {
+    spawn(mreplPath, [fluenceServiceConfigTomlPath], {
       stdio: "inherit",
     });
   }
 }
 
-const ensureServiceConfig = async (
-  nameOrPathOrUrl: string,
-): Promise<ServiceConfigReadonly> => {
+async function ensureServiceConfig(nameOrPathOrUrl: string) {
   const fluenceConfig = await initReadonlyFluenceConfig();
 
-  const serviceOrServiceDirPathOrUrl =
-    fluenceConfig?.services?.[nameOrPathOrUrl]?.get ?? nameOrPathOrUrl;
+  const serviceConfigFromFluenceYAML =
+    fluenceConfig?.services?.[nameOrPathOrUrl];
 
-  const readonlyServiceConfig = await initReadonlyServiceConfig(
-    serviceOrServiceDirPathOrUrl,
-    typeof fluenceConfig?.services?.[nameOrPathOrUrl]?.get === "string"
-      ? projectRootDir
-      : cwd(),
+  const servicePathOrUrl = serviceConfigFromFluenceYAML?.get ?? nameOrPathOrUrl;
+  const isServiceFromFluenceYAML = serviceConfigFromFluenceYAML !== undefined;
+
+  const serviceConfig = await initReadonlyServiceConfig(
+    servicePathOrUrl,
+    isServiceFromFluenceYAML ? projectRootDir : cwd(),
   );
 
-  if (readonlyServiceConfig === null) {
+  if (serviceConfig === null) {
     stopSpinner(color.red("error"));
     return commandObj.error(
-      `No service config found at ${color.yellow(
-        serviceOrServiceDirPathOrUrl,
-      )}`,
+      `No service config found at ${color.yellow(servicePathOrUrl)}`,
     );
   }
 
-  return readonlyServiceConfig;
-};
+  const serviceName = isServiceFromFluenceYAML
+    ? nameOrPathOrUrl
+    : serviceConfig.name;
 
-type TomlModuleConfig = {
-  name: string;
-  load_from?: string;
-  logger_enabled?: boolean;
-  logging_mask?: number;
-  wasi?: {
-    mapped_dirs?: Record<string, string>;
-    envs?: Record<string, string>;
-  };
-  mounted_binaries?: Record<string, string>;
-};
-
-const ensureModuleConfigsForToml = (
-  moduleConfigs: Array<ModuleConfigReadonly>,
-) => {
-  return moduleConfigs.map((moduleConfig) => {
-    const { name, envs, loggerEnabled, volumes, mountedBinaries, loggingMask } =
-      moduleConfig;
-
-    const load_from = getModuleWasmPath(moduleConfig);
-
-    const tomlModuleConfig: TomlModuleConfig = {
-      name,
-      load_from,
-    };
-
-    if (loggerEnabled === true) {
-      tomlModuleConfig.logger_enabled = true;
-    }
-
-    if (typeof loggingMask === "number") {
-      tomlModuleConfig.logging_mask = loggingMask;
-    }
-
-    if (volumes !== undefined) {
-      tomlModuleConfig.wasi = {
-        mapped_dirs: volumes,
-      };
-    }
-
-    if (envs !== undefined) {
-      tomlModuleConfig.wasi = { envs };
-    }
-
-    if (mountedBinaries !== undefined) {
-      tomlModuleConfig.mounted_binaries = mountedBinaries;
-    }
-
-    return tomlModuleConfig;
-  });
-};
+  return { serviceName, serviceConfig };
+}
 
 const ENTER_PATH_OR_URL_MSG =
   "Enter path to a service or url to .tar.gz archive";

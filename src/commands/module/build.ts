@@ -17,9 +17,10 @@
 import { cwd } from "node:process";
 
 import { color } from "@oclif/color";
-import { Args, Flags } from "@oclif/core";
+import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
+import { buildModules } from "../../lib/buildModules.js";
 import { commandObj } from "../../lib/commandObj.js";
 import { initReadonlyModuleConfig } from "../../lib/configs/project/module.js";
 import {
@@ -27,28 +28,18 @@ import {
   MARINE_BUILD_ARGS_FLAG_NAME,
   MODULE_CONFIG_FULL_FILE_NAME,
 } from "../../lib/const.js";
-import { packModule } from "../../lib/helpers/packModule.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { initMarineCli } from "../../lib/marineCli.js";
 import { input } from "../../lib/prompt.js";
 
 const PATH = "PATH";
 
-export default class Pack extends BaseCommand<typeof Pack> {
-  static override description = `Pack module into tar.gz archive`;
+export default class Build extends BaseCommand<typeof Build> {
+  static override description = `Build module`;
   static override examples = ["<%= config.bin %> <%= command.id %>"];
   static override flags = {
     ...baseFlags,
     ...MARINE_BUILD_ARGS_FLAG,
-    destination: Flags.string({
-      description:
-        "Path to a directory where you want archive to be saved. Default: current directory",
-      char: "d",
-    }),
-    "binding-crate": Flags.string({
-      description: "Path to a directory with rust binding crate",
-      char: "b",
-    }),
   };
   static override args = {
     [PATH]: Args.string({
@@ -58,7 +49,7 @@ export default class Pack extends BaseCommand<typeof Pack> {
   async run(): Promise<void> {
     const { args, flags, maybeFluenceConfig } = await initCli(
       this,
-      await this.parse(Pack),
+      await this.parse(Build),
     );
 
     const modulePath =
@@ -79,19 +70,11 @@ export default class Pack extends BaseCommand<typeof Pack> {
 
     const marineCli = await initMarineCli();
 
-    await packModule({
-      moduleConfig,
+    await buildModules(
+      [moduleConfig],
       marineCli,
-      marineBuildArgs: flags[MARINE_BUILD_ARGS_FLAG_NAME],
-      bindingCrate: flags["binding-crate"],
+      flags[MARINE_BUILD_ARGS_FLAG_NAME],
       maybeFluenceConfig,
-      destination:
-        flags.destination ??
-        (await input({
-          message:
-            "Enter path to a directory where you want archive to be saved. Default: current directory",
-          default: cwd(),
-        })),
-    });
+    );
   }
 }

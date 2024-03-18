@@ -17,25 +17,47 @@
 import { copyFile, mkdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 
+import { parse } from "@iarna/toml";
+import type { JSONSchemaType } from "ajv";
+
+import { ajv, validationErrorToString } from "../ajvInstance.js";
 import { buildModules } from "../buildModules.js";
+import { commandObj } from "../commandObj.js";
 import type { FluenceConfigReadonly } from "../configs/project/fluence.js";
 import {
   type ModuleConfigReadonly,
   initNewModuleConfig,
 } from "../configs/project/module.js";
-import { MODULE_CONFIG_FULL_FILE_NAME, WASM_EXT } from "../const.js";
+import {
+  CARGO_TOML,
+  DEFAULT_IPFS_ADDRESS,
+  FS_OPTIONS,
+  MODULE_CONFIG_FULL_FILE_NAME,
+  WASM_EXT,
+} from "../const.js";
+import { createIPFSClient } from "../localServices/ipfs.js";
 import type { MarineCLI } from "../marineCli.js";
 import { ensureFluenceTmpModulePath } from "../paths.js";
 
 import { getModuleWasmPath } from "./downloadFile.js";
 
-export async function packModule(
-  moduleConfig: ModuleConfigReadonly,
-  marineCli: MarineCLI,
-  marineBuildArgs: string | undefined,
-  maybeFluenceConfig: FluenceConfigReadonly | undefined | null,
-  destination: string,
-) {
+type PackModuleArgs = {
+  moduleConfig: ModuleConfigReadonly;
+  marineCli: MarineCLI;
+  marineBuildArgs: string | undefined;
+  maybeFluenceConfig: FluenceConfigReadonly | undefined | null;
+  destination: string;
+  bindingCrate: string | undefined;
+};
+
+export async function packModule({
+  moduleConfig,
+  marineCli,
+  marineBuildArgs,
+  maybeFluenceConfig,
+  destination,
+  bindingCrate,
+}: PackModuleArgs) {
   await buildModules(
     [moduleConfig],
     marineCli,
@@ -66,19 +88,24 @@ export async function packModule(
   );
 
   delete moduleToPackConfig.type;
+  // Have to disable this cause ipfs lib types look like any with "nodenext" moduleResolution
+  /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
+  const ipfsClient = await createIPFSClient(DEFAULT_IPFS_ADDRESS);
 
-  // eslint-disable-next-line import/extensions
-  const { CID } = await import("multiformats/cid");
-  // eslint-disable-next-line import/extensions
-  const raw = await import("multiformats/codecs/raw");
-  // eslint-disable-next-line import/extensions
-  const { sha256 } = await import("multiformats/hashes/sha2");
-  const bytes = raw.encode(await readFile(tmpWasmPath));
-  const hash = await sha256.digest(bytes);
-
-  const cid = CID.createV1(raw.code, hash);
+  const { cid } = await ipfsClient.add(await readFile(tmpWasmPath), {
+    cidVersion: 1,
+    onlyHash: true,
+  });
 
   moduleToPackConfig.cid = cid.toString();
+  /* eslint-enable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment,  @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions  */
+
+  const resolvedBindingCrate = await resolveBindingCrate(bindingCrate);
+
+  if (resolvedBindingCrate !== undefined) {
+    moduleToPackConfig.rustBindingCrate = resolvedBindingCrate;
+  }
+
   await moduleToPackConfig.$commit();
 
   const tar = (await import("tar")).default;
@@ -96,4 +123,54 @@ export async function packModule(
       relative(tmpModuleDirPath, tmpWasmPath),
     ],
   );
+}
+
+type ConfigToml = {
+  package: {
+    name: string;
+    version: string;
+  };
+};
+
+const configTomlSchema: JSONSchemaType<ConfigToml> = {
+  type: "object",
+  properties: {
+    package: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        version: { type: "string" },
+      },
+      required: ["name", "version"],
+    },
+  },
+  required: ["package"],
+};
+
+const validateConfigToml = ajv.compile(configTomlSchema);
+
+async function resolveBindingCrate(bindingCrate: string | undefined) {
+  if (bindingCrate === undefined) {
+    return undefined;
+  }
+
+  const bindingCrateFileContent = await readFile(
+    join(bindingCrate, CARGO_TOML),
+    FS_OPTIONS,
+  );
+
+  const parsedBindingCrate: unknown = parse(bindingCrateFileContent);
+
+  if (!validateConfigToml(parsedBindingCrate)) {
+    return commandObj.error(
+      `Invalid binding crate ${CARGO_TOML} file. Errors: ${await validationErrorToString(
+        validateConfigToml.errors,
+      )}`,
+    );
+  }
+
+  return {
+    name: parsedBindingCrate.package.name,
+    version: parsedBindingCrate.package.version,
+  };
 }

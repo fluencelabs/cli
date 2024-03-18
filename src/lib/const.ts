@@ -173,6 +173,9 @@ export const TOML_EXT = "toml";
 
 export const DOT_FLUENCE_DIR_NAME = ".fluence";
 export const AQUA_DEPENDENCIES_DIR_NAME = "aqua-dependencies";
+export const SERVICE_CONFIGS_DIR_NAME = "service-configs";
+export const MODULE_VOLUMES_DIR_NAME = "volumes";
+export const MODULE_VOLUMES_SERVICES_DIR_NAME = "services";
 export const SCHEMAS_DIR_NAME = "schemas";
 export const SRC_DIR_NAME = "src";
 export const FRONTEND_DIR_NAME = "frontend";
@@ -242,7 +245,7 @@ export const INDEX_HTML_FILE_NAME = `index.html`;
 export const SERVER_TS_FILE_NAME = `server.${TS_EXT}`;
 export const SERVER_JS_FILE_NAME = `server.${JS_EXT}`;
 
-export const CONFIG_TOML = `Config.${TOML_EXT}`;
+export const SERVICE_CONFIG_TOML_POSTFIX = `_Config.${TOML_EXT}`;
 export const CARGO_TOML = `Cargo.${TOML_EXT}`;
 
 export const README_MD_FILE_NAME = `README.md`;
@@ -550,6 +553,7 @@ export const RECOMMENDED_GITIGNORE_CONTENT = `.idea
 /${DOT_FLUENCE_DIR_NAME}/${ENV_CONFIG_FULL_FILE_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${SCHEMAS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${TMP_DIR_NAME}
+/${DOT_FLUENCE_DIR_NAME}/${SERVICE_CONFIGS_DIR_NAME}
 /${DOT_FLUENCE_DIR_NAME}/${AQUA_DEPENDENCIES_DIR_NAME}/${PACKAGE_JSON_FILE_NAME}
 ${SRC_DIR_NAME}/${FRONTEND_DIR_NAME}/${SRC_DIR_NAME}/${COMPILED_AQUA_DIR_NAME}/
 **/node_modules

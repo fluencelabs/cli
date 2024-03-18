@@ -23,7 +23,8 @@ import {
   AQUA_DIR_NAME,
   AQUA_SERVICES_FILE_NAME,
   CARGO_DIR_NAME,
-  CONFIG_TOML,
+  MODULE_VOLUMES_DIR_NAME,
+  MODULE_VOLUMES_SERVICES_DIR_NAME,
   CARGO_TOML,
   COUNTLY_DIR_NAME,
   MAIN_AQUA_FILE_NAME,
@@ -57,6 +58,7 @@ import {
   SERVER_TS_FILE_NAME,
   PROVIDER_ARTIFACTS_CONFIG_FULL_FILE_NAME,
   CCP_CONFIGS_DIR_NAME,
+  SERVICE_CONFIGS_DIR_NAME,
 } from "./const.js";
 import { recursivelyFindFile } from "./helpers/recursivelyFindFile.js";
 import { stringifyUnknown } from "./helpers/utils.js";
@@ -364,8 +366,49 @@ export const ensureFluenceTmpDir = async (): Promise<string> => {
   return ensureDir(join(await ensureFluenceDir(), TMP_DIR_NAME));
 };
 
-export const ensureFluenceTmpConfigTomlPath = async (): Promise<string> => {
-  return join(await ensureFluenceTmpDir(), CONFIG_TOML);
+export const ensureFluenceTmpVolumesParticlesDir =
+  async (): Promise<string> => {
+    return ensureDir(
+      join(await ensureFluenceTmpDir(), MODULE_VOLUMES_DIR_NAME, "particles"),
+    );
+  };
+
+export const ensureFluenceTmpVolumesServiceDir = async (
+  serviceName: string,
+  mappedDirPath: string,
+): Promise<string> => {
+  return ensureDir(
+    join(
+      await ensureFluenceTmpDir(),
+      MODULE_VOLUMES_DIR_NAME,
+      MODULE_VOLUMES_SERVICES_DIR_NAME,
+      serviceName,
+      "service",
+      mappedDirPath,
+    ),
+  );
+};
+
+export const ensureFluenceTmpVolumesModuleDir = async (
+  serviceName: string,
+  moduleName: string,
+  mappedDirPath: string,
+): Promise<string> => {
+  return ensureDir(
+    join(
+      await ensureFluenceTmpDir(),
+      MODULE_VOLUMES_DIR_NAME,
+      MODULE_VOLUMES_SERVICES_DIR_NAME,
+      serviceName,
+      "modules",
+      moduleName,
+      mappedDirPath,
+    ),
+  );
+};
+
+export const ensureFluenceServiceConfigsDir = async (): Promise<string> => {
+  return ensureDir(join(await ensureFluenceDir(), SERVICE_CONFIGS_DIR_NAME));
 };
 
 export const ensureFluenceTmpModulePath = async (): Promise<string> => {

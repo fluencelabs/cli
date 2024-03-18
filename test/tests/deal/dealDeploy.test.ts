@@ -50,7 +50,6 @@ describe("fluence deploy tests", () => {
         `quickstart template is expected to create a service at ${pathToNewServiceDir} by default`,
       );
 
-      newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
       await updateFluenceConfigForTest(cwd);

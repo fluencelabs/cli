@@ -17,6 +17,7 @@
 import { access, readFile, writeFile } from "node:fs/promises";
 import { relative } from "node:path";
 
+import { color } from "@oclif/color";
 import type { JSONSchemaType } from "ajv";
 
 import type { FluenceConfigReadonly } from "../lib/configs/project/fluence.js";
@@ -27,13 +28,44 @@ import type { MarineCLI } from "../lib/marineCli.js";
 import { ajv, validationErrorToString } from "./ajvInstance.js";
 import { commandObj } from "./commandObj.js";
 import { FS_OPTIONS } from "./const.js";
+import { splitErrorsAndResults } from "./helpers/utils.js";
 import { projectRootDir, getCargoTomlPath } from "./paths.js";
 
 type CargoWorkspaceToml = {
   workspace?: {
     members?: string[];
+    dependencies?: Record<string, Dependency>;
   };
 };
+
+type Dependency =
+  | string
+  | {
+      version: string;
+      package?: string;
+    };
+
+const dependencySchema = {
+  type: ["string", "object"],
+  oneOf: [
+    {
+      type: "string",
+    },
+    {
+      type: "object",
+      properties: {
+        version: {
+          type: "string",
+        },
+        package: {
+          type: "string",
+          nullable: true,
+        },
+      },
+      required: [],
+    },
+  ],
+} as const satisfies JSONSchemaType<Dependency>;
 
 const cargoWorkspaceTomlSchema: JSONSchemaType<CargoWorkspaceToml> = {
   type: "object",
@@ -48,6 +80,15 @@ const cargoWorkspaceTomlSchema: JSONSchemaType<CargoWorkspaceToml> = {
           },
           nullable: true,
         },
+        dependencies: {
+          type: "object",
+          additionalProperties: dependencySchema,
+          properties: {
+            dependencyName: dependencySchema,
+          },
+          required: [],
+          nullable: true,
+        },
       },
       required: [],
       nullable: true,
@@ -60,6 +101,7 @@ const validateCargoWorkspaceToml = ajv.compile(cargoWorkspaceTomlSchema);
 
 async function updateWorkspaceCargoToml(
   moduleAbsolutePaths: string[],
+  moduleConfigs: ModuleConfigReadonly[],
 ): Promise<void> {
   const cargoTomlPath = getCargoTomlPath();
   let cargoTomlFileContent: string;
@@ -97,20 +139,122 @@ members = []
     },
   );
 
-  const newConfig = {
-    ...parsedConfig,
-    workspace: {
-      ...(parsedConfig.workspace ?? {}),
-      members: [
-        ...new Set([
-          ...existingCargoWorkspaceMembers,
-          ...moduleAbsolutePaths.map((moduleAbsolutePath) => {
-            return relative(projectRootDir, moduleAbsolutePath);
-          }),
-        ]),
-      ],
+  const packageVersionsMap = moduleConfigs.reduce<Record<string, string[]>>(
+    (acc, { rustBindingCrate }) => {
+      if (rustBindingCrate === undefined) {
+        return acc;
+      }
+
+      acc[rustBindingCrate.name] = [
+        ...(acc[rustBindingCrate.name] ?? []),
+        rustBindingCrate.version,
+      ];
+
+      return acc;
     },
+    {},
+  );
+
+  const prevPackageVersionsMap = Object.entries(
+    parsedConfig.workspace?.dependencies ?? {},
+  ).reduce<Record<string, string[]>>((acc, [name, strOrObj]) => {
+    const packageName =
+      typeof strOrObj === "string" ? name : strOrObj.package ?? name;
+
+    const version = typeof strOrObj === "string" ? strOrObj : strOrObj.version;
+    acc[packageName] = [...(acc[packageName] ?? []), version];
+    return acc;
+  }, {});
+
+  const [packagesWithDifferentVersions, packagesWithSingleVersion] =
+    splitErrorsAndResults(
+      Object.entries(packageVersionsMap)
+        .map(([name, versions]) => {
+          return {
+            name,
+            versions: [...new Set(versions)].filter((v) => {
+              const prevPackageVersions = prevPackageVersionsMap[name];
+
+              return (
+                prevPackageVersions === undefined ||
+                !prevPackageVersions.includes(v)
+              );
+            }),
+          };
+        })
+        .filter(
+          (
+            packageAndVersions,
+          ): packageAndVersions is {
+            name: string;
+            versions: [string, ...string[]];
+          } => {
+            return packageAndVersions.versions.length >= 1;
+          },
+        ),
+      ({ name, versions }) => {
+        const [version, ...restVersions] = versions;
+
+        if (restVersions.length === 0) {
+          return { result: { name, version } };
+        }
+
+        return { error: { name, versions } };
+      },
+    );
+
+  if (packagesWithDifferentVersions.length > 0) {
+    commandObj.logToStderr(
+      `\n${color.yellow(
+        "WARNING:",
+      )} The following modules require different versions of rustBindingCrates. They will not be automatically added to the workspace at ${color.yellow(
+        cargoTomlPath,
+      )}. But you can add them manually. For example like this:\n\n${color.yellow(
+        packagesWithDifferentVersions
+          .map(({ name, versions }) => {
+            return versions
+              .map((version, i) => {
+                return `[workspace.dependencies.${name}_${i}]\npackage = "${name}"\nversion = "${version}"`;
+              })
+              .join("\n");
+          })
+          .join("\n\n"),
+      )}\n`,
+    );
+  }
+
+  const members = [
+    ...new Set([
+      ...existingCargoWorkspaceMembers,
+      ...moduleAbsolutePaths.map((moduleAbsolutePath) => {
+        return relative(projectRootDir, moduleAbsolutePath);
+      }),
+    ]),
+  ];
+
+  const dependencies = {
+    ...parsedConfig.workspace?.dependencies,
+    ...Object.fromEntries(
+      packagesWithSingleVersion.map(({ name, version }) => {
+        return [name, { version }] as const;
+      }),
+    ),
   };
+
+  const workspace = {
+    ...(parsedConfig.workspace ?? {}),
+    ...(members.length > 0 ? { members } : {}),
+    ...(Object.keys(dependencies).length > 0 ? { dependencies } : {}),
+  };
+
+  const newConfig: CargoWorkspaceToml = {
+    ...parsedConfig,
+    ...(Object.entries(workspace).length > 0 ? { workspace } : {}),
+  };
+
+  if (Object.entries(newConfig).length === 0) {
+    return;
+  }
 
   const stringifyToTOML = (await import("@iarna/toml/stringify.js")).default;
   await writeFile(cargoTomlPath, stringifyToTOML(newConfig), FS_OPTIONS);
@@ -130,6 +274,7 @@ export async function buildModules(
     rustModuleConfigs.map((moduleConfig) => {
       return moduleConfig.$getDirPath();
     }),
+    modulesConfigs,
   );
 
   if (rustModuleConfigs.length === 0) {

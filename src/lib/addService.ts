@@ -189,12 +189,13 @@ export async function addService({
     }
   }
 
-  await resolveSingleServiceModuleConfigsAndBuild(
+  await resolveSingleServiceModuleConfigsAndBuild({
+    serviceName,
     serviceConfig,
     fluenceConfig,
     marineCli,
     marineBuildArgs,
-  );
+  });
 
   await updateAquaServiceInterfaceFile(
     {

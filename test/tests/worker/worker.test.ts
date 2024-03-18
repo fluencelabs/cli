@@ -118,7 +118,6 @@ describe("integration tests", () => {
 
       const newServiceConfig = await getServiceConfig(cwd, NEW_SERVICE_NAME);
 
-      newServiceConfig.modules.facade.envs = { A: "B" };
       await newServiceConfig.$commit();
 
       // update first service module source code so it contains a struct
