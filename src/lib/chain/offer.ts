@@ -252,25 +252,27 @@ async function resolveOfferInfo({
     return {
       "Provider ID": offerExplorerInfo.providerId,
       "Offer ID": offerExplorerInfo.id,
+      "Created At": new Date(offerExplorerInfo.createdAt * 1000).toISOString(),
+      "Last Updated At": new Date(
+        offerExplorerInfo.updatedAt * 1000,
+      ).toISOString(),
       "Price Per Epoch":
         offerInfo === undefined
           ? `${offerExplorerInfo.pricePerEpoch} ${PT_SYMBOL}`
           : await ptFormatWithSymbol(offerInfo.minPricePerWorkerEpoch),
-      "Created at": new Date(offerExplorerInfo.createdAt * 1000).toISOString(),
-      "Updated at": new Date(offerExplorerInfo.updatedAt * 1000).toISOString(),
-      "Total compute units": offerExplorerInfo.totalComputeUnits,
-      "Free compute units": offerExplorerInfo.freeComputeUnits,
       Effectors: await Promise.all(
         offerExplorerInfo.effectors.map(({ cid }) => {
           return cidHexStringToBase32(cid);
         }),
       ),
+      "Total compute units": offerExplorerInfo.totalComputeUnits,
+      "Free compute units": offerExplorerInfo.freeComputeUnits,
       Peers: await Promise.all(
-        offerExplorerInfo.peers.map(async ({ id }) => {
+        offerExplorerInfo.peers.map(async ({ id, computeUnits }) => {
           return {
             "Hex ID": id,
             "Peer ID": await peerIdHexStringToBase58String(id),
-            // "Compute Units": "TODO: currently returns empty for some reason"
+            "CU Count": computeUnits.length,
           };
         }),
       ),

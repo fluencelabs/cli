@@ -221,6 +221,8 @@ Chain config
 | `ccContract`         | string  | No       | Capacity commitment contract address            |
 | `coreContract`       | string  | No       | Core contract address                           |
 | `dealSyncStartBlock` | string  | No       | Start block                                     |
+| `defaultBaseFee`     | number  | No       | Default base fee                                |
+| `defaultPriorityFee` | number  | No       | Default priority fee                            |
 | `httpEndpoint`       | string  | No       | HTTP endpoint of the chain                      |
 | `marketContract`     | string  | No       | Market contract address                         |
 | `networkId`          | integer | No       | Network ID                                      |
@@ -370,6 +372,8 @@ Chain config
 | `ccContract`         | string  | No       | Capacity commitment contract address            |
 | `coreContract`       | string  | No       | Core contract address                           |
 | `dealSyncStartBlock` | string  | No       | Start block                                     |
+| `defaultBaseFee`     | number  | No       | Default base fee                                |
+| `defaultPriorityFee` | number  | No       | Default priority fee                            |
 | `httpEndpoint`       | string  | No       | HTTP endpoint of the chain                      |
 | `marketContract`     | string  | No       | Market contract address                         |
 | `networkId`          | integer | No       | Network ID                                      |

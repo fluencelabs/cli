@@ -1562,13 +1562,13 @@ Create offers. You have to be registered as a provider to do that
 
 ```
 USAGE
-  $ fluence provider offer-create [--no-input] [--env <value>] [--priv-key <value>] [--offer <value>]
+  $ fluence provider offer-create [--no-input] [--env <value>] [--priv-key <value>] [--offers <value>]
 
 FLAGS
   --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                            Don't interactively ask for any input from the user
-  --offer=<offer-1,offer-2>             Comma-separated list of offer names. Can't be used together with --offer-ids. To
-                                        use all of your offers: --offer all
+  --offers=<offer-1,offer-2>            Comma-separated list of offer names. Can't be used together with --ids. To use
+                                        all of your offers: --offers all
   --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
                                         unsecure. On local network
                                         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
@@ -1589,15 +1589,14 @@ Get info about offers
 
 ```
 USAGE
-  $ fluence provider offer-info [--no-input] [--offer <value> | --offer-ids <value>] [--env <value>] [--priv-key
-  <value>]
+  $ fluence provider offer-info [--no-input] [--offers <value> | --ids <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
+  --ids=<id-1,id-2>                     Comma-separated list of offer ids. Can't be used together with --offers flag
   --no-input                            Don't interactively ask for any input from the user
-  --offer=<offer-1,offer-2>             Comma-separated list of offer names. Can't be used together with --offer-ids. To
-                                        use all of your offers: --offer all
-  --offer-ids=<id-1,id-2>               Comma-separated list of offer ids. Can't be used together with --offer flag
+  --offers=<offer-1,offer-2>            Comma-separated list of offer names. Can't be used together with --ids. To use
+                                        all of your offers: --offers all
   --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
                                         unsecure. On local network
                                         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be
@@ -1618,13 +1617,13 @@ Update offers
 
 ```
 USAGE
-  $ fluence provider offer-update [--no-input] [--offer <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider offer-update [--no-input] [--offers <value>] [--env <value>] [--priv-key <value>]
 
 FLAGS
   --env=<dar | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                            Don't interactively ask for any input from the user
-  --offer=<offer-1,offer-2>             Comma-separated list of offer names. Can't be used together with --offer-ids. To
-                                        use all of your offers: --offer all
+  --offers=<offer-1,offer-2>            Comma-separated list of offer names. Can't be used together with --ids. To use
+                                        all of your offers: --offers all
   --priv-key=<private-key>              !WARNING! for debug purposes only. Passing private keys through flags is
                                         unsecure. On local network
                                         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key will be

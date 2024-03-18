@@ -170,7 +170,7 @@ export default class Up extends BaseCommand<typeof Up> {
 
     await createOffers({
       force: true,
-      offer: Object.keys(providerConfig.offers)[0],
+      offers: Object.keys(providerConfig.offers)[0],
     });
 
     await createCommitments({ ...flags, ...allNoxNames, env });

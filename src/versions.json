@@ -1,6 +1,6 @@
 {
   "protocolVersion": 1,
-  "nox": "fluencelabs/nox:0.23.4",
+  "nox": "fluencelabs/nox:0.23.5",
   "chain-rpc": "docker.fluence.dev/chain-rpc:audit-fixes-7b556c1-3135-1",
   "chain-deploy-script": "docker.fluence.dev/chain-deploy-script:audit-fixes-7b556c1-3135-1",
   "subgraph-deploy-script": "docker.fluence.dev/subgraph-deploy-script:audit-fixes-7b556c1-3135-1",
