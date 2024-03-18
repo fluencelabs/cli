@@ -331,7 +331,7 @@ export async function deployImpl(this: Deploy, cl: typeof Deploy) {
 }
 
 const blockScoutUrls: Record<Exclude<ChainENV, "local">, string> = {
-  kras: "https://blockscout-kras.fluence.dev/address/",
+  kras: "https://blockscout.kras.fluence.dev/address/",
   dar: "https://blockscout-dar.fluence.dev/address/",
   stage: "https://blockscout-stage.fluence.dev/address/",
 };
