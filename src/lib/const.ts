@@ -94,10 +94,11 @@ export const U32_MAX = 4_294_967_295;
 
 export const DEFAULT_NUMBER_OF_COMPUTE_UNITS_ON_NOX = 32;
 
+export const DEFAULT_PUBLIC_FLUENCE_ENV = "dar";
 export const PUBLIC_FLUENCE_ENV = [
-  "dar",
+  DEFAULT_PUBLIC_FLUENCE_ENV,
+  "kras",
   "stage",
-  // "kras"
 ] as const;
 export type PublicFluenceEnv = (typeof PUBLIC_FLUENCE_ENV)[number];
 export const isPublicFluenceEnv = getIsStringUnion(PUBLIC_FLUENCE_ENV);
@@ -140,7 +141,7 @@ export const HTTP_PORT_START = 18080;
 export const DEFAULT_AQUAVM_POOL_SIZE = 2;
 
 const CHAIN_URLS_WITHOUT_LOCAL: Record<Exclude<ChainENV, "local">, string> = {
-  // kras: "https://ipc-kras.fluence.dev",
+  kras: "https://ipc-kras.fluence.dev",
   dar: "https://ipc-dar.fluence.dev",
   stage: "https://ipc-stage.fluence.dev",
 };
@@ -156,7 +157,7 @@ export const CHAIN_URLS_FOR_CONTAINERS: Record<ChainENV, string> = {
 };
 
 export const WS_CHAIN_URLS: Record<ChainENV, string> = {
-  // kras: "wss://ipc-kras.fluence.dev",
+  kras: "wss://ipc.kras.fluence.dev",
   dar: "wss://ipc-dar.fluence.dev",
   stage: "wss://ipc-stage.fluence.dev",
   local: `wss://${CHAIN_RPC_CONTAINER_NAME}:${CHAIN_RPC_PORT}`,

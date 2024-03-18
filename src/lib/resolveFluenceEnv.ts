@@ -24,6 +24,7 @@ import {
   FLUENCE_ENVS,
   isFluenceEnv,
   type FluenceEnv,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "./const.js";
 import { list } from "./prompt.js";
 
@@ -61,7 +62,7 @@ export async function ensureFluenceEnv(): Promise<FluenceEnv> {
 
 export async function fluenceEnvPrompt(
   message = "Select Fluence Environment to use by default with this project",
-  defaultVal: FluenceEnv = "dar",
+  defaultVal: FluenceEnv = DEFAULT_PUBLIC_FLUENCE_ENV,
 ): Promise<FluenceEnv> {
   return list({
     message,
