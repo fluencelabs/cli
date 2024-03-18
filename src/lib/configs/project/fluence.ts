@@ -59,6 +59,7 @@ import {
   type AquaLogLevel,
   PT_SYMBOL,
   COMPILE_AQUA_PROPERTY_NAME,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import { splitErrorsAndResults } from "../../helpers/utils.js";
 import {
@@ -498,7 +499,7 @@ const configSchemaV2Obj = {
       type: "string",
       description: "The network in which the transactions will be carried out",
       enum: CHAIN_ENV,
-      default: "dar",
+      default: DEFAULT_PUBLIC_FLUENCE_ENV,
       nullable: true,
     },
     spells: {

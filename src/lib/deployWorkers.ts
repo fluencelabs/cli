@@ -69,6 +69,7 @@ import {
   MIN_MEMORY_PER_MODULE_STR,
   DEPLOYMENT_NAMES_ARG_NAME,
   MODULE_CONFIG_FULL_FILE_NAME,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "./const.js";
 import { getAquaImports } from "./helpers/aquaImports.js";
 import {
@@ -589,7 +590,7 @@ async function getDeploymentNames(
 
 const emptyDeal: Deal = {
   dealId: "",
-  chainNetwork: "dar",
+  chainNetwork: DEFAULT_PUBLIC_FLUENCE_ENV,
   chainNetworkId: 0,
   dealIdOriginal: "",
   definition: "",

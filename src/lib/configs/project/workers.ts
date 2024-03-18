@@ -31,6 +31,7 @@ import {
   DEFAULT_WORKER_NAME,
   type FluenceEnv,
   FLUENCE_ENVS,
+  DEFAULT_PUBLIC_FLUENCE_ENV,
 } from "../../const.js";
 import { getFluenceDir } from "../../paths.js";
 import { fluenceEnvPrompt } from "../../resolveFluenceEnv.js";
@@ -69,8 +70,8 @@ const workerInfoSchema = {
 export type Deal = WorkerInfo & {
   dealId: string;
   dealIdOriginal: string;
-  chainNetwork: ChainENV;
   chainNetworkId: number;
+  chainNetwork?: ChainENV;
 };
 
 export type Host = WorkerInfo & {
@@ -159,7 +160,8 @@ const dealSchema: JSONSchemaType<Deal> = {
       type: "string",
       enum: CHAIN_ENV,
       description:
-        "Blockchain network name that was used when deploying workers",
+        "DEPRECATED. Blockchain network name that was used when deploying workers",
+      nullable: true,
     },
     chainNetworkId: {
       type: "integer",
@@ -170,7 +172,6 @@ const dealSchema: JSONSchemaType<Deal> = {
     ...workerInfoSchema.required,
     "dealId",
     "dealIdOriginal",
-    "chainNetwork",
     "chainNetworkId",
   ],
 } as const;
@@ -236,7 +237,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       properties: {
         custom: mapOfDealsSchema,
         dar: mapOfDealsSchema,
-        // kras: mapOfDealsSchema,
+        kras: mapOfDealsSchema,
         local: mapOfDealsSchema,
         stage: mapOfDealsSchema,
       },
@@ -251,7 +252,7 @@ const configSchemaV1: JSONSchemaType<ConfigV1> = {
       properties: {
         custom: mapOfHostsSchema,
         dar: mapOfHostsSchema,
-        // kras: mapOfHostsSchema,
+        kras: mapOfHostsSchema,
         local: mapOfHostsSchema,
         stage: mapOfHostsSchema,
       },
@@ -285,7 +286,7 @@ const migrations: Migrations<Config> = [
 
       if (dealsForEnv === undefined) {
         dealsForEnv = {};
-        deals[deal.chainNetwork] = dealsForEnv;
+        deals[deal.chainNetwork ?? DEFAULT_PUBLIC_FLUENCE_ENV] = dealsForEnv;
       }
 
       dealsForEnv[workerName] = deal;
@@ -339,7 +340,7 @@ version: 0
 
 # deals:
 # # A map of created deals
-#   ${FLUENCE_ENVS[0]}:
+#   ${DEFAULT_PUBLIC_FLUENCE_ENV}:
 #     ${DEFAULT_DEPLOYMENT_NAME}:
 #       # worker CID
 #       definition: bafkreigvy3k4racm6i6vvavtr5mdkllmfi2lfkmdk72gnzwk7zdnhajw4y
@@ -349,8 +350,6 @@ version: 0
 #       dealId: 799c4beb18ae084d57a90582c2cb8bb19098139e
 #       # original deal ID that you get after signing the contract
 #       dealIdOriginal: "0x799C4BEB18Ae084D57a90582c2Cb8Bb19098139E"
-#       # network name that was used when deploying worker
-#       chainNetwork: dar
 #       # network ID that was used when deploying worker
 #       chainNetworkId: 1313161555
 
