@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.27](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.26...fluence-cli-v0.15.27) (2024-03-19)
+
+
+### Bug Fixes
+
+* **provider:** fix default worker_ipfs_multiaddr ([#866](https://github.com/fluencelabs/cli/issues/866)) ([a256ae2](https://github.com/fluencelabs/cli/commit/a256ae2f1958f12666ca83c4f0dd7d4df41ac33b))
+
 ## [0.15.26](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.25...fluence-cli-v0.15.26) (2024-03-19)
 
 
