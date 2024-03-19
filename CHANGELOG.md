@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.26](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.25...fluence-cli-v0.15.26) (2024-03-19)
+
+
+### Features
+
+* fix chain url, bump deal 0.12.2; nox 0.23.6 ([#863](https://github.com/fluencelabs/cli/issues/863)) ([61a2df6](https://github.com/fluencelabs/cli/commit/61a2df68091c60544d94db2c20c7c7dc0493c1d1))
+
+
+### Bug Fixes
+
+* set public images ([#865](https://github.com/fluencelabs/cli/issues/865)) ([afef746](https://github.com/fluencelabs/cli/commit/afef7461a41fefbcc43ee8f5f20fedea845b243d))
+
 ## [0.15.25](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.24...fluence-cli-v0.15.25) (2024-03-18)
 
 
