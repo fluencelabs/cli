@@ -1745,7 +1745,9 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       decider: {
         deciderPeriodSec: 10,
         workerIpfsMultiaddr:
-          env === "local" ? NOX_IPFS_MULTIADDR : "http://ipfs.fluence.dev",
+          env === "local"
+            ? NOX_IPFS_MULTIADDR
+            : "/dns4/ipfs.fluence.dev/tcp/5001",
         networkApiEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
         matcherAddress: contractAddresses.market,
       },
