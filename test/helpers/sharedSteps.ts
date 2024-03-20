@@ -249,10 +249,10 @@ export async function deployDealAndWaitUntilDeployed(
     cwd,
   });
 
-  const dealId = res.split('deal: "')[1]?.split('"')[0];
+  const dealId = res.split('DealID: "')[1]?.split('"')[0];
 
   assert(dealId, "dealId is expected to be defined");
-  console.log("dealId:", dealId);
+  console.log("DealID:", dealId);
 
   await setTryTimeout(
     "run deployed services",
