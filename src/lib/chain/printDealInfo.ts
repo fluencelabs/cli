@@ -17,8 +17,10 @@
 import { color } from "@oclif/color";
 
 import { commandObj } from "../commandObj.js";
+import { type ChainENV } from "../const.js";
 import { type DealNameAndId } from "../deal.js";
 import { getReadonlyDealClient } from "../dealClient.js";
+import { ensureChainEnv } from "../ensureChainNetwork.js";
 
 import { peerIdHexStringToBase58String } from "./conversions.js";
 import { ptFormatWithSymbol } from "./currencies.js";
@@ -28,7 +30,7 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
   const deal = readonlyDealClient.getDeal(dealId);
   commandObj.log(`\n${color.yellow(dealName)} info:`);
   const status = await deal.getStatus();
-  commandObj.log(`Deal ID: ${dealId}`);
+  commandObj.log(`Deal: ${await getLinkToAddress(dealId)}`);
 
   //TODO: change to enum
   switch (status) {
@@ -85,4 +87,15 @@ export async function printDealInfo({ dealId, dealName }: DealNameAndId) {
       );
     }
   }
+}
+
+const blockScoutUrls: Record<Exclude<ChainENV, "local">, string> = {
+  kras: "https://blockscout.kras.fluence.dev/address/",
+  dar: "https://blockscout-dar.fluence.dev/address/",
+  stage: "https://blockscout-stage.fluence.dev/address/",
+};
+
+async function getLinkToAddress(dealId: string) {
+  const chainEnv = await ensureChainEnv();
+  return chainEnv === "local" ? dealId : `${blockScoutUrls[chainEnv]}${dealId}`;
 }

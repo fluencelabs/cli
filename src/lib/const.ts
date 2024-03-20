@@ -107,11 +107,6 @@ export const CHAIN_ENV = [...PUBLIC_FLUENCE_ENV, "local"] as const;
 export type ChainENV = (typeof CHAIN_ENV)[number];
 export const isChainEnv = getIsStringUnion(CHAIN_ENV);
 
-export type ChainConfig = {
-  url: string;
-  id: number;
-};
-
 export const CLI_CONNECTOR_URL = "https://cli-connector.fluence.dev";
 export const WC_PROJECT_ID = "70c1c5ed2a23e7383313de1044ddce7e";
 export const WC_METADATA = {
@@ -409,7 +404,7 @@ export const NOXES_FLAG = {
 };
 
 export const OFFER_FLAG_NAME = "offers";
-export const OFFER_IDS_FLAG_NAME = "ids";
+export const OFFER_IDS_FLAG_NAME = "offer-ids";
 
 const OFFER_FLAG_OBJECT = {
   description: `Comma-separated list of offer names. Can't be used together with --${OFFER_IDS_FLAG_NAME}. To use all of your offers: --${OFFER_FLAG_NAME} ${ALL_FLAG_VALUE}`,
@@ -513,12 +508,14 @@ export const FLUENCE_CLIENT_FLAGS = {
   ...ENV_FLAG,
 } as const;
 
+const CC_IDS_FLAG_NAME = "cc-ids";
+
 export const CC_FLAGS = {
   [NOX_NAMES_FLAG_NAME]: Flags.string({
     ...NOX_NAMES_FLAG_CONFIG,
-    exclusive: ["ids"],
+    exclusive: [CC_IDS_FLAG_NAME],
   }),
-  ids: Flags.string({
+  [CC_IDS_FLAG_NAME]: Flags.string({
     description: "Comma separated capacity commitment IDs",
     exclusive: [NOX_NAMES_FLAG_NAME],
   }),

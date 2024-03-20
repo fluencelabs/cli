@@ -72,6 +72,7 @@ export type Deal = WorkerInfo & {
   dealIdOriginal: string;
   chainNetworkId: number;
   chainNetwork?: ChainENV;
+  matched?: boolean;
 };
 
 export type Host = WorkerInfo & {
@@ -166,6 +167,11 @@ const dealSchema: JSONSchemaType<Deal> = {
     chainNetworkId: {
       type: "integer",
       description: "Blockchain network id that was used when deploying workers",
+    },
+    matched: {
+      type: "boolean",
+      description: "Is deal matched",
+      nullable: true,
     },
   },
   required: [

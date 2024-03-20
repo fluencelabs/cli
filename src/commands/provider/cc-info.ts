@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICapacity } from "@fluencelabs/deal-ts-clients";
-import { color } from "@oclif/color";
-import isUndefined from "lodash-es/isUndefined.js";
-import omitBy from "lodash-es/omitBy.js";
-import { yamlDiffPatch } from "yaml-diff-patch";
-
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import {
-  ccStatusToString,
-  getCommitments,
+  getCommitmentsInfo,
+  printCommitmentsInfo,
 } from "../../lib/chain/commitment.js";
-import { commandObj } from "../../lib/commandObj.js";
 import { CHAIN_FLAGS, CC_FLAGS } from "../../lib/const.js";
-import { getReadonlyDealClient } from "../../lib/dealClient.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
 export default class CCInfo extends BaseCommand<typeof CCInfo> {
@@ -41,71 +33,7 @@ export default class CCInfo extends BaseCommand<typeof CCInfo> {
 
   async run(): Promise<void> {
     const { flags } = await initCli(this, await this.parse(CCInfo));
-    const { readonlyDealClient } = await getReadonlyDealClient();
-    const capacity = readonlyDealClient.getCapacity();
-    const commitments = await getCommitments(flags);
-    const { ethers } = await import("ethers");
-
-    const infos = await Promise.all(
-      commitments.map(async (c) => {
-        let commitment: Partial<ICapacity.CommitmentViewStructOutput> =
-          "commitmentCreatedEvent" in c
-            ? {
-                peerId: c.commitmentCreatedEvent.args.peerId,
-                rewardDelegatorRate:
-                  c.commitmentCreatedEvent.args.rewardDelegationRate,
-                collateralPerUnit:
-                  c.commitmentCreatedEvent.args.fltCollateralPerUnit,
-                delegator: c.commitmentCreatedEvent.args.delegator,
-              }
-            : {};
-
-        try {
-          commitment = await capacity.getCommitment(c.commitmentId);
-        } catch {}
-
-        return omitBy(
-          {
-            ...("providerConfigComputePeer" in c
-              ? {
-                  Nox: c.providerConfigComputePeer.name,
-                  PeerId: c.providerConfigComputePeer.peerId,
-                }
-              : {}),
-            "PeerId Hex": commitment.peerId,
-            "Capacity commitment ID": c.commitmentId,
-            Status: ccStatusToString(commitment.status),
-            "Start epoch": commitment.startEpoch?.toString(),
-            "End epoch": commitment.endEpoch?.toString(),
-            "Reward delegator rate": rewardDelegationRateToString(
-              commitment.rewardDelegatorRate,
-            ),
-            Delegator:
-              commitment.delegator === ethers.ZeroAddress.toString()
-                ? "Anyone can activate capacity commitment"
-                : commitment.delegator,
-            "Total CU": commitment.unitCount?.toString(),
-            "Failed epoch": commitment.failedEpoch?.toString(),
-            "Total CU Fail Count": commitment.totalFailCount?.toString(),
-            "Collateral per unit": commitment.collateralPerUnit?.toString(),
-            "Exited unit count": commitment.exitedUnitCount?.toString(),
-          },
-          isUndefined,
-        );
-      }),
-    );
-
-    for (const { Nox, ...restInfo } of infos) {
-      commandObj.logToStderr(color.yellow(`Nox: ${Nox}`));
-      commandObj.logToStderr(yamlDiffPatch("", {}, restInfo));
-    }
+    const infos = await getCommitmentsInfo(flags);
+    printCommitmentsInfo(infos);
   }
-}
-
-function rewardDelegationRateToString(rewardDelegatorRate: bigint | undefined) {
-  if (rewardDelegatorRate === undefined) {
-    return undefined;
-  }
-
-  return `${Number(rewardDelegatorRate) / 10 ** 5}%`;
 }

@@ -55,7 +55,7 @@ type DealCreateArg = {
   whitelist: string[] | undefined;
   blacklist: string[] | undefined;
   protocolVersion: number | undefined;
-  workerName?: string;
+  deploymentName?: string;
 };
 
 export async function dealCreate({
@@ -69,7 +69,7 @@ export async function dealCreate({
   whitelist,
   blacklist,
   protocolVersion,
-  workerName,
+  deploymentName,
 }: DealCreateArg) {
   const { dealClient } = await getDealClient();
   const core = dealClient.getCore();
@@ -85,7 +85,7 @@ export async function dealCreate({
   if (initialBalanceBigInt < minInitialBalanceBigInt) {
     commandObj.error(
       `${
-        workerName === undefined ? "" : `${color.yellow(workerName)} :`
+        deploymentName === undefined ? "" : `${color.yellow(deploymentName)} :`
       }initialBalance ${color.yellow(
         initialBalance,
       )} is less than minimum initialBalance = targetWorkers * pricePerWorkerEpoch * ${minDealDepositedEpochs} = ${color.yellow(
@@ -165,7 +165,7 @@ export async function match(dealAddress: string) {
     (err) => {
       commandObj.error(stringifyUnknown(err));
     },
-    1000 * 60 * 5, // 5 minutes
+    1000 * 60 * 2, // 2 minutes
   );
 
   if (matchedOffers.offers.length === 0) {
