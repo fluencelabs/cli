@@ -1594,11 +1594,11 @@ async function resolveNoxConfigYAML(
       externalApiMultiaddr:
         config.systemServices?.aquaIpfs?.externalApiMultiaddr ??
         ipfs?.externalApiMultiaddr ??
-        getDefaultExternalApiMultiaddr(env),
+        EXTERNAL_API_MULTIADDRS[env],
       localApiMultiaddr:
         config.systemServices?.aquaIpfs?.localApiMultiaddr ??
         ipfs?.localApiMultiaddr ??
-        getDefaultLocalApiMultiaddr(env),
+        LOCAL_API_MULTIADDRS[env],
       ipfsBinaryPath:
         config.systemServices?.aquaIpfs?.ipfsBinaryPath ??
         ipfs?.ipfsBinaryPath ??
@@ -1713,17 +1713,17 @@ function camelCaseKeysToKebabCase(val: unknown): unknown {
   return camelCaseToDifferentCase(kebabCase)(val);
 }
 
-function getDefaultExternalApiMultiaddr(env: string) {
-  return env === "local"
-    ? LOCAL_IPFS_ADDRESS
-    : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`;
-}
+const EXTERNAL_API_MULTIADDRS: Record<ChainENV, string> = {
+  kras: "/dns4/kras.ipfs.fluence.dev/tcp/5020",
+  dar: "/dns4/dar-ipfs.fluence.dev/tcp/5020",
+  stage: "/dns4/stage-ipfs.fluence.dev/tcp/5020",
+  local: LOCAL_IPFS_ADDRESS,
+};
 
-function getDefaultLocalApiMultiaddr(env: string) {
-  return env === "local"
-    ? NOX_IPFS_MULTIADDR
-    : `/dns4/${env}-ipfs.fluence.dev/tcp/5020`;
-}
+const LOCAL_API_MULTIADDRS: Record<ChainENV, string> = {
+  ...EXTERNAL_API_MULTIADDRS,
+  local: NOX_IPFS_MULTIADDR,
+};
 
 const DEFAULT_START_BLOCK = "earliest";
 
@@ -1736,8 +1736,8 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
   return {
     aquavmPoolSize: DEFAULT_AQUAVM_POOL_SIZE,
     ipfs: {
-      externalApiMultiaddr: getDefaultExternalApiMultiaddr(env),
-      localApiMultiaddr: getDefaultLocalApiMultiaddr(env),
+      externalApiMultiaddr: EXTERNAL_API_MULTIADDRS[env],
+      localApiMultiaddr: LOCAL_API_MULTIADDRS[env],
       ipfsBinaryPath: DEFAULT_IPFS_BINARY_PATH,
     },
     systemServices: {
@@ -1745,7 +1745,9 @@ async function getDefaultNoxConfigYAML(): Promise<LatestNoxConfigYAML> {
       decider: {
         deciderPeriodSec: 10,
         workerIpfsMultiaddr:
-          env === "local" ? NOX_IPFS_MULTIADDR : "http://ipfs.fluence.dev",
+          env === "local"
+            ? NOX_IPFS_MULTIADDR
+            : "/dns4/ipfs.fluence.dev/tcp/5001",
         networkApiEndpoint: CHAIN_URLS_FOR_CONTAINERS[env],
         matcherAddress: contractAddresses.market,
       },
