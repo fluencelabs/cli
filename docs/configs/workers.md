@@ -48,6 +48,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 | `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
+| `matched`        | boolean | No       | Is deal matched                                                                                                                                                                         |
 
 ### dar
 
@@ -73,6 +74,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 | `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
+| `matched`        | boolean | No       | Is deal matched                                                                                                                                                                         |
 
 ### kras
 
@@ -98,6 +100,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 | `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
+| `matched`        | boolean | No       | Is deal matched                                                                                                                                                                         |
 
 ### local
 
@@ -123,6 +126,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 | `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
+| `matched`        | boolean | No       | Is deal matched                                                                                                                                                                         |
 
 ### stage
 
@@ -148,6 +152,7 @@ Contains data related to your deployment, including, most importantly, deal id, 
 | `definition`     | string  | **Yes**  | CID of uploaded to IPFS App Definition, which contains the data about everything that you are trying to deploy, including spells, service and module configs and CIDs for service wasms |
 | `timestamp`      | string  | **Yes**  | ISO timestamp of the time when the worker was deployed                                                                                                                                  |
 | `chainNetwork`   | string  | No       | DEPRECATED. Blockchain network name that was used when deploying workers Possible values are: `dar`, `kras`, `stage`, `local`.                                                          |
+| `matched`        | boolean | No       | Is deal matched                                                                                                                                                                         |
 
 ## hosts
 

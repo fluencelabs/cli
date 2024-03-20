@@ -823,7 +823,7 @@ Deploy according to 'deployments' property in fluence.yaml
 USAGE
   $ fluence deploy [DEPLOYMENT-NAMES] [--no-input] [--off-aqua-logs] [--env <value>] [--priv-key <value>]
     [-k <value>] [--relay <value>] [--ttl <value>] [--dial-timeout <value>] [--particle-id] [--import <value>]
-    [--no-build] [--tracing] [--marine-build-args <value>] [--auto-match] [-u]
+    [--no-build] [--tracing] [--marine-build-args <value>] [-u]
 
 ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
@@ -834,7 +834,6 @@ FLAGS
                                                    fluence project or there is no default key, will use user's default
                                                    key
   -u, --update                                     Update your previous deployment
-      --[no-]auto-match                            Toggle automatic matching. Auto-matching is turned on by default
       --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -1242,11 +1241,12 @@ Add FLT collateral to capacity commitment to activate it
 
 ```
 USAGE
-  $ fluence provider cc-activate [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
+  $ fluence provider cc-activate [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
+  <value>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
@@ -1297,11 +1297,11 @@ Get info about capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
+  $ fluence provider cc-info [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids <value>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
@@ -1325,11 +1325,12 @@ Remove Capacity commitment. You can remove it only BEFORE you activated it by de
 
 ```
 USAGE
-  $ fluence provider cc-remove [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --ids <value>]
+  $ fluence provider cc-remove [--no-input] [--env <value>] [--priv-key <value>] [--nox-names <value> | --cc-ids
+  <value>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
@@ -1353,12 +1354,12 @@ Withdraw FLT collateral from capacity commitments
 
 ```
 USAGE
-  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value> | --ids <value>] [--env <value>]
+  $ fluence provider cc-withdraw-collateral [--no-input] [--nox-names <value> | --cc-ids <value>] [--env <value>]
   [--priv-key <value>]
 
 FLAGS
+  --cc-ids=<value>                             Comma separated capacity commitment IDs
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<value>                                Comma separated capacity commitment IDs
   --no-input                                   Don't interactively ask for any input from the user
   --nox-names=<nox-1,nox-2>                    Comma-separated names of noxes from provider.yaml. To use all of your
                                                noxes: --nox-names all
@@ -1574,8 +1575,8 @@ USAGE
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
-                                               To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offers all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1596,15 +1597,16 @@ Get info about offers
 
 ```
 USAGE
-  $ fluence provider offer-info [--no-input] [--offers <value> | --ids <value>] [--env <value>] [--priv-key <value>]
+  $ fluence provider offer-info [--no-input] [--offers <value> | --offer-ids <value>] [--env <value>] [--priv-key
+  <value>]
 
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
-  --ids=<id-1,id-2>                            Comma-separated list of offer ids. Can't be used together with --offers
-                                               flag
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
-                                               To use all of your offers: --offers all
+  --offer-ids=<id-1,id-2>                      Comma-separated list of offer ids. Can't be used together with --offers
+                                               flag
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offers all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
@@ -1630,8 +1632,8 @@ USAGE
 FLAGS
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
-  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with --ids.
-                                               To use all of your offers: --offers all
+  --offers=<offer-1,offer-2>                   Comma-separated list of offer names. Can't be used together with
+                                               --offer-ids. To use all of your offers: --offers all
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
                                                unsecure. On local network
                                                0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 key
