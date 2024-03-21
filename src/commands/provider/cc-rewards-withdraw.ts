@@ -19,10 +19,10 @@ import { withdrawCollateralRewards } from "../../lib/chain/commitment.js";
 import { CHAIN_FLAGS, NOX_NAMES_FLAG, FLT_SYMBOL } from "../../lib/const.js";
 import { initCli } from "../../lib/lifeCycle.js";
 
-export default class CCWithdrawRewards extends BaseCommand<
-  typeof CCWithdrawRewards
+export default class CCRewardsWithdraw extends BaseCommand<
+  typeof CCRewardsWithdraw
 > {
-  static override aliases = ["provider:cwr"];
+  static override aliases = ["provider:crw"];
   static override description = `Withdraw ${FLT_SYMBOL} rewards from capacity commitments`;
   static override flags = {
     ...baseFlags,
@@ -31,7 +31,7 @@ export default class CCWithdrawRewards extends BaseCommand<
   };
 
   async run(): Promise<void> {
-    const { flags } = await initCli(this, await this.parse(CCWithdrawRewards));
+    const { flags } = await initCli(this, await this.parse(CCRewardsWithdraw));
     await withdrawCollateralRewards(flags);
   }
 }
