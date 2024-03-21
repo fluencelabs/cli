@@ -452,10 +452,10 @@ export function ccStatusToString(status: bigint | undefined) {
   return (
     (
       [
+        "Inactive",
         "Active",
         "WaitDelegation",
         "WaitStart",
-        "Inactive",
         "Failed",
         "Removed",
       ] as const
