@@ -26,8 +26,10 @@ import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
 import { input } from "../../lib/prompt.js";
 
-export default class DealWithdraw extends BaseCommand<typeof DealWithdraw> {
-  static override aliases = ["provider:dw"];
+export default class DealRewardsWithdraw extends BaseCommand<
+  typeof DealRewardsWithdraw
+> {
+  static override aliases = ["provider:drw"];
   static override description = `Withdraw ${PT_SYMBOL} rewards from deals`;
   static override flags = {
     ...baseFlags,
@@ -41,7 +43,7 @@ export default class DealWithdraw extends BaseCommand<typeof DealWithdraw> {
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(DealWithdraw));
+    const { args } = await initCli(this, await this.parse(DealRewardsWithdraw));
 
     const dealIds = commaSepStrToArr(
       args["DEAL-IDS"] ??
