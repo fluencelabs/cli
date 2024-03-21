@@ -446,7 +446,7 @@ export const DEPLOYMENT_NAMES_ARG_NAME = "DEPLOYMENT-NAMES";
 
 export const DEAL_IDS_FLAG = {
   [DEAL_IDS_FLAG_NAME]: Flags.string({
-    description: `Comma-separated deal ids of the deployed deal. Can't be used together with ${DEPLOYMENT_NAMES_ARG_NAME} arg`,
+    description: `Comma-separated deal ids`,
     helpValue: "<id-1,id-2>",
   }),
 };

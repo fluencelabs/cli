@@ -15,12 +15,16 @@
  */
 
 import { color } from "@oclif/color";
-import { Args } from "@oclif/core";
 
 import { BaseCommand, baseFlags } from "../../baseCommand.js";
 import { ptFormatWithSymbol } from "../../lib/chain/currencies.js";
 import { commandObj } from "../../lib/commandObj.js";
-import { CHAIN_FLAGS, PT_SYMBOL } from "../../lib/const.js";
+import {
+  CHAIN_FLAGS,
+  DEAL_IDS_FLAG,
+  DEAL_IDS_FLAG_NAME,
+  PT_SYMBOL,
+} from "../../lib/const.js";
 import { getDealClient, sign } from "../../lib/dealClient.js";
 import { commaSepStrToArr } from "../../lib/helpers/utils.js";
 import { initCli } from "../../lib/lifeCycle.js";
@@ -34,19 +38,17 @@ export default class DealRewardsWithdraw extends BaseCommand<
   static override flags = {
     ...baseFlags,
     ...CHAIN_FLAGS,
-  };
-
-  static override args = {
-    "DEAL-IDS": Args.string({
-      description: "Deal ids",
-    }),
+    ...DEAL_IDS_FLAG,
   };
 
   async run(): Promise<void> {
-    const { args } = await initCli(this, await this.parse(DealRewardsWithdraw));
+    const { flags } = await initCli(
+      this,
+      await this.parse(DealRewardsWithdraw),
+    );
 
     const dealIds = commaSepStrToArr(
-      args["DEAL-IDS"] ??
+      flags[DEAL_IDS_FLAG_NAME] ??
         (await input({ message: "Enter comma-separated deal ids" })),
     );
 
