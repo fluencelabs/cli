@@ -49,10 +49,10 @@
 * [`fluence provider cc-info`](#fluence-provider-cc-info)
 * [`fluence provider cc-remove`](#fluence-provider-cc-remove)
 * [`fluence provider cc-rewards-withdraw`](#fluence-provider-cc-rewards-withdraw)
-* [`fluence provider deal-exit [DEAL-IDS]`](#fluence-provider-deal-exit-deal-ids)
+* [`fluence provider deal-exit`](#fluence-provider-deal-exit)
 * [`fluence provider deal-list`](#fluence-provider-deal-list)
 * [`fluence provider deal-rewards-info [DEAL-ADDRESS] [UNIT-ID]`](#fluence-provider-deal-rewards-info-deal-address-unit-id)
-* [`fluence provider deal-rewards-withdraw [DEAL-IDS]`](#fluence-provider-deal-rewards-withdraw-deal-ids)
+* [`fluence provider deal-rewards-withdraw`](#fluence-provider-deal-rewards-withdraw)
 * [`fluence provider gen`](#fluence-provider-gen)
 * [`fluence provider init`](#fluence-provider-init)
 * [`fluence provider offer-create`](#fluence-provider-offer-create)
@@ -386,8 +386,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -413,8 +412,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -446,8 +444,7 @@ FLAGS
                                                    specified, will use the default key for the project. If there is no
                                                    fluence project or there is no default key, will use user's default
                                                    key
-      --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                                   with DEPLOYMENT-NAMES arg
+      --deal-ids=<id-1,id-2>                       Comma-separated deal ids
       --dial-timeout=<milliseconds>                [default: 15000] Timeout for Fluence js-client to connect to relay
                                                    peer
       --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
@@ -481,8 +478,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -510,8 +506,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -537,8 +532,7 @@ ARGUMENTS
   DEPLOYMENT-NAMES  Comma separated names of deployments. Can't be used together with --deal-ids flag
 
 FLAGS
-  --deal-ids=<id-1,id-2>                       Comma-separated deal ids of the deployed deal. Can't be used together
-                                               with DEPLOYMENT-NAMES arg
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -1404,18 +1398,16 @@ ALIASES
 
 _See code: [src/commands/provider/cc-rewards-withdraw.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/cc-rewards-withdraw.ts)_
 
-## `fluence provider deal-exit [DEAL-IDS]`
+## `fluence provider deal-exit`
 
 Exit from deal
 
 ```
 USAGE
-  $ fluence provider deal-exit [DEAL-IDS] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-IDS  Comma-separated deal ids
+  $ fluence provider deal-exit [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
 
 FLAGS
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
@@ -1488,18 +1480,16 @@ ALIASES
 
 _See code: [src/commands/provider/deal-rewards-info.ts](https://github.com/fluencelabs/cli/blob/v0.15.28/src/commands/provider/deal-rewards-info.ts)_
 
-## `fluence provider deal-rewards-withdraw [DEAL-IDS]`
+## `fluence provider deal-rewards-withdraw`
 
 Withdraw USDC rewards from deals
 
 ```
 USAGE
-  $ fluence provider deal-rewards-withdraw [DEAL-IDS] [--no-input] [--env <value>] [--priv-key <value>]
-
-ARGUMENTS
-  DEAL-IDS  Deal ids
+  $ fluence provider deal-rewards-withdraw [--no-input] [--env <value>] [--priv-key <value>] [--deal-ids <value>]
 
 FLAGS
+  --deal-ids=<id-1,id-2>                       Comma-separated deal ids
   --env=<dar | kras | stage | local | custom>  Fluence Environment to use when running the command
   --no-input                                   Don't interactively ask for any input from the user
   --priv-key=<private-key>                     !WARNING! for debug purposes only. Passing private keys through flags is
