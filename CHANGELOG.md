@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.15.28](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.27...fluence-cli-v0.15.28) (2024-03-20)
+
+
+### Features
+
+* bump deal-ts-clients 0.13.0 ([#872](https://github.com/fluencelabs/cli/issues/872)) ([739a5bd](https://github.com/fluencelabs/cli/commit/739a5bd0679c1c77767d2403876e8889cca472de))
+
+
+### Bug Fixes
+
+* change kras ipfs addr ([#869](https://github.com/fluencelabs/cli/issues/869)) ([2e82fcb](https://github.com/fluencelabs/cli/commit/2e82fcb2ef9d8a563d7772816a9212b2efd10be4))
+* **ipfs:** /dns4/ipfs.kras.fluence.dev/tcp/5020 ([#871](https://github.com/fluencelabs/cli/issues/871)) ([f4d351c](https://github.com/fluencelabs/cli/commit/f4d351c5061af5b42aa6b5d3d3f4b60b1e36cc21))
+
+## [0.15.27](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.26...fluence-cli-v0.15.27) (2024-03-19)
+
+
+### Bug Fixes
+
+* **provider:** fix default worker_ipfs_multiaddr ([#866](https://github.com/fluencelabs/cli/issues/866)) ([a256ae2](https://github.com/fluencelabs/cli/commit/a256ae2f1958f12666ca83c4f0dd7d4df41ac33b))
+
+## [0.15.26](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.25...fluence-cli-v0.15.26) (2024-03-19)
+
+
+### Features
+
+* fix chain url, bump deal 0.12.2; nox 0.23.6 ([#863](https://github.com/fluencelabs/cli/issues/863)) ([61a2df6](https://github.com/fluencelabs/cli/commit/61a2df68091c60544d94db2c20c7c7dc0493c1d1))
+
+
+### Bug Fixes
+
+* set public images ([#865](https://github.com/fluencelabs/cli/issues/865)) ([afef746](https://github.com/fluencelabs/cli/commit/afef7461a41fefbcc43ee8f5f20fedea845b243d))
+
 ## [0.15.25](https://github.com/fluencelabs/cli/compare/fluence-cli-v0.15.24...fluence-cli-v0.15.25) (2024-03-18)
 
 
