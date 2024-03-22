@@ -48,6 +48,8 @@ import {
   peerIdToUint8Array,
 } from "./conversions.js";
 
+const HUNDRED_PERCENT = 100
+
 export type ComputePeersWithCC = Awaited<
   ReturnType<typeof getComputePeersWithCC>
 >;
@@ -227,7 +229,7 @@ export async function createCommitments(flags: {
           }
 
           const ccRewardDelegationRate = Math.floor(
-            (capacityCommitment.rewardDelegationRate / 100) * Number(precision),
+            (capacityCommitment.rewardDelegationRate / HUNDRED_PERCENT) * Number(precision),
           );
 
           return {
@@ -499,7 +501,7 @@ export async function getCommitmentsInfo(flags: CCFlags) {
         Status: ccStatusToString(commitment.status),
         "Start epoch": commitment.startEpoch?.toString(),
         "End epoch": commitment.endEpoch?.toString(),
-        "Reward delegator rate": rewardDelegationRateToString(
+        "Reward delegator rate": await rewardDelegationRateToString(
           commitment.rewardDelegatorRate,
         ),
         Delegator:
@@ -516,12 +518,15 @@ export async function getCommitmentsInfo(flags: CCFlags) {
   );
 }
 
-function rewardDelegationRateToString(rewardDelegatorRate: bigint | undefined) {
+async function rewardDelegationRateToString(rewardDelegatorRate: bigint | undefined) {
   if (rewardDelegatorRate === undefined) {
     return undefined;
   }
 
-  return `${Number(rewardDelegatorRate) / 10 ** 5}%`;
+  const { readonlyDealClient } = await getReadonlyDealClient();
+  const core = readonlyDealClient.getCore()
+  const precision = await core.precision();
+  return `${Number(rewardDelegatorRate) * HUNDRED_PERCENT / Number(precision)}%`;
 }
 
 export function printCommitmentsInfo(
