@@ -252,7 +252,7 @@ async function resolveSingleServiceModuleConfigs(
   serviceConfig: ServiceConfigReadonly,
   overridesFromFluenceYAMLMap: OverrideModules | undefined,
 ) {
-  const { [FACADE_MODULE_NAME]: facadeModule, ...restModuleConfigs } =
+  const { [FACADE_MODULE_NAME]: facadeModule, ...restModules } =
     serviceConfig.modules;
 
   const serviceConfigDirPath = serviceConfig.$getDirPath();
@@ -264,7 +264,7 @@ async function resolveSingleServiceModuleConfigs(
       overridesFromFluenceYAMLMap,
       serviceConfigDirPath,
     ),
-    ...Object.entries(restModuleConfigs).map(async ([name, moduleConfig]) => {
+    ...Object.entries(restModules).map(async ([name, moduleConfig]) => {
       return overrideModuleConfig(
         name,
         moduleConfig,
@@ -274,8 +274,12 @@ async function resolveSingleServiceModuleConfigs(
     }),
   ]);
 
-  const [facadeModuleConfig] = allModuleConfigs;
-  return { facadeModuleConfig, allModuleConfigs };
+  const [facadeModuleConfig, ...restModuleConfigs] = allModuleConfigs;
+
+  return {
+    facadeModuleConfig,
+    allModuleConfigs: [...restModuleConfigs, facadeModuleConfig],
+  };
 }
 
 async function overrideModuleConfig(
