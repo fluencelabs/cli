@@ -48,7 +48,7 @@ import {
   peerIdToUint8Array,
 } from "./conversions.js";
 
-const HUNDRED_PERCENT = 100
+const HUNDRED_PERCENT = 100;
 
 export type ComputePeersWithCC = Awaited<
   ReturnType<typeof getComputePeersWithCC>
@@ -229,7 +229,8 @@ export async function createCommitments(flags: {
           }
 
           const ccRewardDelegationRate = Math.floor(
-            (capacityCommitment.rewardDelegationRate / HUNDRED_PERCENT) * Number(precision),
+            (capacityCommitment.rewardDelegationRate / HUNDRED_PERCENT) *
+              Number(precision),
           );
 
           return {
@@ -518,15 +519,19 @@ export async function getCommitmentsInfo(flags: CCFlags) {
   );
 }
 
-async function rewardDelegationRateToString(rewardDelegatorRate: bigint | undefined) {
+async function rewardDelegationRateToString(
+  rewardDelegatorRate: bigint | undefined,
+) {
   if (rewardDelegatorRate === undefined) {
     return undefined;
   }
 
   const { readonlyDealClient } = await getReadonlyDealClient();
-  const core = readonlyDealClient.getCore()
+  const core = readonlyDealClient.getCore();
   const precision = await core.precision();
-  return `${Number(rewardDelegatorRate) * HUNDRED_PERCENT / Number(precision)}%`;
+  return `${
+    (Number(rewardDelegatorRate) * HUNDRED_PERCENT) / Number(precision)
+  }%`;
 }
 
 export function printCommitmentsInfo(
